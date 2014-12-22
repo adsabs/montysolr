@@ -195,6 +195,11 @@ define([
       },
 
       showOrcidActions: function(){
+        var $icon = this.$('.mini-orcid-icon');
+        $icon.removeClass('green');
+        $icon.removeClass('gray');
+
+
         var $orcidActions = this.$('.orcid-actions');
         $orcidActions.removeClass('hidden');
         $orcidActions.removeClass('orcid-wait');
@@ -209,9 +214,11 @@ define([
         if (OrcidModel.isWorkInCollection(this.model.attributes)){
           $update.removeClass('hidden');
           $delete.removeClass('hidden');
+          $icon.addClass('green');
         }
         else {
           $insert.removeClass('hidden');
+          $icon.addClass('gray');
         }
       },
 

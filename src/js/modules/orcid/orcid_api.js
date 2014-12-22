@@ -196,8 +196,9 @@ define([
         return adsExtIdentifiers;
       },
       isWorkFromAds: function(orcidWork) {
+        var result = this.getAdsIds(orcidWork);
 
-        return this.getAdsIds(orcidWork).length > 0;
+        return result != undefined && result.length > 0;
       },
 
       formatOrcidWork: function(adsWork, putCode){
@@ -227,9 +228,9 @@ define([
           },
 
           "short-description": adsWork.abstract,
-          "publication-date": {
-            "year": adsWork.year
-          },
+          //"publication-date": {
+          //  "year": adsWork.pubdate.split(' ')[1]
+          //},
 
           "work-external-identifiers": [
             {
@@ -256,6 +257,11 @@ define([
 
         };
 
+        if (adsWork.pubdate && adsWork.pubdate.length > 0 && adsWork.pubdate.indexOf(' ') > 0){
+          result['publication-date'] = {
+            "year" : adsWork.pubdate.split(' ')[1]
+          }
+        }
 
         if (putCode){
           result["$"] = {"put-code": putCode};
