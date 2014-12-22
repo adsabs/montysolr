@@ -113,7 +113,7 @@ define([
       },
       isOrcidItemAdsItem: function (orcidItem) {
         return orcidItem.workExternalIdentifiers.filter(function (e) {
-            return e.type == 'other-id' && e.id.startsWith('ads:');
+            return e.type == 'other-id' && e.id.indexOf('ads:') == 0  ;
           }).length > 0;
       }
     });
