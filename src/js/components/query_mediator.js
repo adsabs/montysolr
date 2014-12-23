@@ -188,19 +188,23 @@ define(['underscore',
 
         // execute the first search (if it succeeds, fire the rest)
         var requestKey = this._getCacheKey(data.request);
-        cycle.inprogress[data.key.getId()] = data;
+        var firstReqKey = data.key.getId();
+        cycle.inprogress[firstReqKey] = data;
 
         this._executeRequest(data.request, data.key)
           .done(function(response, textStatus, jqXHR) {
+            cycle.done[firstReqKey] = data;
+            delete cycle.inprogress[firstReqKey];
 
             var numFound = undefined;
-            if (response && response['response'] && response['response']['numFound']) {
-              numFound: response['response']['numFound'];
+            if (response.response && response.response.numFound) {
+              numFound = response.response.numFound;
             }
 
             ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
               code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED,
               query: cycle.query,
+              request: data.request,
               numFound: numFound,
               cycle: cycle,
               response: response // this is a raw response (and it is save to send, cause it was already copied by the first 'done' callback
@@ -212,7 +216,27 @@ define(['underscore',
                 data = cycle.waiting[k];
                 delete cycle.waiting[k];
                 cycle.inprogress[k] = data;
-                self._executeRequest.call(self, data.request, data.key);
+                var psk = k;
+                self._executeRequest.call(self, data.request, data.key)
+                  .done(function() {
+                    cycle.done[psk] = cycle.inprogress[psk];
+                    delete cycle.inprogress[psk];
+                  })
+                  .fail(function() {
+                    cycle.failed[psk] = cycle.inprogress[psk];
+                    delete cycle.inprogress[psk];
+                  })
+                  .always(function() {
+                    if (cycle.finished) return;
+                    
+                    if (_.isEmpty(cycle.inprogress)) {
+                      ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+                        code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
+                        cycle: cycle
+                      }));
+                      cycle.finished = true;
+                    }
+                  })
               });
             };
 
@@ -231,7 +255,9 @@ define(['underscore',
             ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
               code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
               cycle: cycle,
-              request: this.request}));
+              request: this.request,
+              error: {jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown}
+            }));
           });
 
         return true; // means that the process can be monitored
@@ -256,7 +282,10 @@ define(['underscore',
           return;
         }
 
-        if (this.__searchCycle.waiting && _.isEmpty(this.__searchCycle.waiting)) {
+        if (this.__searchCycle.inprogress && _.isEmpty(this.__searchCycle.inprogress)) {
+
+          if (this.__searchCycle.finished) return; // it was already signalled
+
           ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
             code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
             cycle: this.__searchCycle
@@ -265,8 +294,11 @@ define(['underscore',
         }
 
         var lenToDo = _.keys(this.__searchCycle.waiting).length;
-        var lenDone = _.keys(this.__searchCycle.inprogress).length; // TODO: this is not exactly correct
-        var total = lenToDo + lenDone;
+        var lenDone = _.keys(this.__searchCycle.done).length;
+        var lenInProgress = _.keys(this.__searchCycle.inprogress).length;
+        var lenFailed = _.keys(this.__searchCycle.failed).length;
+
+        var total = lenToDo + lenDone + lenInProgress + lenFailed;
 
         ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
           code: ApiFeedback.CODES.SEARCH_CYCLE_PROGRESS,
@@ -516,7 +548,7 @@ define(['underscore',
       },
 
       reset: function() {
-        this.__searchCycle = {waiting:{}, inprogress: {}}; //reset the datastruct
+        this.__searchCycle = {waiting:{}, inprogress: {}, done:{}, failed:{}}; //reset the datastruct
         if (this._cache) {
           this._cache.invalidateAll();
         }

@@ -117,7 +117,13 @@ define([], function() {
     CUSTOM_EVENT : '[PubSub]-Custom-Event',
 
 
-    ARIA_ANNOUNCEMENT : "[PubSub]-Aria-Announcement"
+    ARIA_ANNOUNCEMENT : "[PubSub]-Aria-Announcement",
+
+    /**
+     * A message/action that should be displayed to the user (on prominent)
+     * place
+     */
+    ALERT: "[Alert]-Message"
 
 
 };

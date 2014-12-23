@@ -40,7 +40,7 @@ define([
     initialize: function(options) {
       this._cache = this._getNewCache(options.cache);
       this.debug = options.debug || false;
-      this._handlers = {}; // TODO: expose api to register handlers
+      this._handlers = {};
       this.app = null; // reference to the main application
     },
 
@@ -59,6 +59,10 @@ define([
      *    present
      */
     activate: function(beehive, app) {
+
+      if (!app)
+        throw new Error('This controller absolutely needs access to the app');
+
       this.setBeeHive(beehive);
       var pubsub = beehive.Services.get('PubSub');
       this.pubSubKey = pubsub.getPubSubKey();
