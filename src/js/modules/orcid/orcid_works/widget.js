@@ -6,11 +6,9 @@ define([
     'js/widgets/base/base_widget',
     'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/orcid_work_template',
-    'hbs!./templates/orcid_works_template',
-    'js/modules/orcid/orcid_model_notifier/orcid_model'
-
+    'hbs!./templates/orcid_works_template'
   ],
-  function (_, $, Backbone, Marionette, BaseWidget, OrcidApiConstants, OrcidWorkTemplate, OrcidWorksTemplate, OrcidModel) {
+  function (_, $, Backbone, Marionette, BaseWidget, OrcidApiConstants, OrcidWorkTemplate, OrcidWorksTemplate) {
 
     var OrcidWorkModel = Backbone.Model.extend({
       defaults: function () {
@@ -74,7 +72,7 @@ define([
         //$insert.addClass('hidden');
         $delete.addClass('hidden');
 
-        if (OrcidModel.isOrcidItemAdsItem(this.model.attributes)) {
+        if (this.model.attributes.isFromAds){
           $update.removeClass('hidden');
           $delete.removeClass('hidden');
           $icon.addClass('green');
@@ -206,12 +204,6 @@ define([
 
         this.listenTo(this, "all", this.onAllInternalEvents);
 
-        //OrcidModel.on('change:orcidProfile',
-        //  _.bind(function(){
-        //    this.children.call('showOrcidActions');
-        //  }, this));
-
-
         return Marionette.CompositeView.prototype.constructor.apply(this, arguments);
 
       },
@@ -242,8 +234,7 @@ define([
         $('button[name=cancelBulkInsert]').removeClass('hidden');
         $('button[name=finishBulkInsert]').removeClass('hidden');
 
-        OrcidModel.set('isInBulkInsertMode', true);
-
+        this.trigger('setBulkInsertMode');
       },
 
       finishBulkInsertClick: function () {
@@ -252,7 +243,7 @@ define([
 
         $('button[name=doBulkInsert]').removeClass('hidden');
 
-        OrcidModel.triggerBulkInsert();
+        this.trigger('triggerBulkInsert');
       },
 
       cancelBulkInsertClick: function () {
@@ -260,7 +251,7 @@ define([
         $('button[name=finishBulkInsert]').addClass('hidden');
         $('button[name=doBulkInsert]').removeClass('hidden');
 
-        OrcidModel.cancelBulkInsert();
+        this.trigger('cancelBulkInsert');
       },
 
       stateChanged: function (state) {
@@ -289,6 +280,7 @@ define([
 
     var OrcidWorks = BaseWidget.extend({
       activate: function (beehive) {
+        this.orcidModelNotifier = beehive.Services.get('OrcidModelNotifier');
         this.pubSub = beehive.Services.get('PubSub');
         this.pubSubKey = this.pubSub.getPubSubKey();
 
@@ -337,6 +329,8 @@ define([
 
         var works = [];
 
+        var that = this;
+
         _.each(orcidWorks, function (work) {
 
           var publicationData = work['publication-date'] != undefined ? work['publication-date']['year'] : "";
@@ -379,6 +373,9 @@ define([
               addExternalIdentifier(workIdentifierNode);
             }
           }
+
+          item.isFromAds = that.orcidModelNotifier.isOrcidItemAdsItem(item);
+
         });
 
         this.view.collection = new OrcidWorksCollection(works);
@@ -395,6 +392,12 @@ define([
             msgType: OrcidApiConstants.Events.OrcidAction,
             data: arg2
           });
+        } else if (ev == 'setBulkInsertMode'){
+          this.orcidModelNotifier.model.set('isInBulkInsertMode', true);
+        } else if (ev == 'triggerBulkInsert'){
+          this.orcidModelNotifier.triggerBulkInsert();
+        } else if (ev == 'cancelBulkInsert'){
+          this.orcidModelNotifier.cancelBulkInsert();
         }
       }
     });

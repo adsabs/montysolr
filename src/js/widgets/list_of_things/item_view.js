@@ -4,8 +4,7 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
-    'hbs!./templates/item-template',
-    'js/modules/orcid/orcid_model_notifier/orcid_model'
+    'hbs!./templates/item-template'
   ],
 
   function (Marionette,
@@ -13,8 +12,7 @@ define([
             ApiRequest,
             ApiQuery,
             BaseWidget,
-            ItemTemplate,
-            OrcidModel
+            ItemTemplate
     ) {
 
     var ItemView = Marionette.ItemView.extend({
@@ -28,24 +26,12 @@ define([
           _.defaults(options, _.pick(this, ['model', 'collectionEvents', 'modelEvents']));
         }
 
-        this.listenTo(this, "item:rendered", this.onItemRendered);
-
         _.bindAll(this, 'resetToggle');
-
-        OrcidModel.on('change:isInBulkInsertMode', this.resetToggle);
 
         return Marionette.ItemView.prototype.constructor.apply(this, arguments);
       },
 
-      onItemRendered: function(ev, arg1, arg2) {
-        if (OrcidModel.get('actionsVisible')){
-          this.showOrcidActions();
-        }
-      },
-
       render: function () {
-
-        this.model.set('orcidActionsVisible', OrcidModel.get('actionsVisible'));
 
         if (this.model.get('visible')) {
           return Marionette.ItemView.prototype.render.apply(this, arguments);
@@ -79,14 +65,11 @@ define([
 
       toggleSelect: function () {
 
-        if (OrcidModel.get('isInBulkInsertMode')) {
-          if (this.model.get('chosen')) {
-            OrcidModel.removeFromBulkWorks(this.model.attributes);
-          }
-          else {
-            OrcidModel.addToBulkWorks(this.model.attributes);
-          }
-        }
+        this.trigger('toggleSelect',
+          {
+            selected: !this.model.get('chosen'),
+            data : this.model.attributes }
+        );
 
         this.$el.toggleClass("chosen");
         this.model.set('chosen', this.model.get('chosen') ? false : true);
@@ -194,7 +177,7 @@ define([
         this.removeActiveQuickLinkState($c)
       },
 
-      showOrcidActions: function(){
+      showOrcidActions: function(isWorkInCollection){
         var $icon = this.$('.mini-orcid-icon');
         $icon.removeClass('green');
         $icon.removeClass('gray');
@@ -211,7 +194,7 @@ define([
         $insert.addClass('hidden');
         $delete.addClass('hidden');
 
-        if (OrcidModel.isWorkInCollection(this.model.attributes)){
+        if (isWorkInCollection(this.model.attributes)){
           $update.removeClass('hidden');
           $delete.removeClass('hidden');
           $icon.addClass('green');

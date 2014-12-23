@@ -9,7 +9,8 @@ define([
     'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/mixins/link_generator_mixin',
-    'js/modules/orcid/orcid_model_notifier/orcid_model'
+    //'js/modules/orcid/orcid_model_notifier/orcid_model'
+    'js/modules/orcid/orcid_model_notifier/module'
 
   ],
   function (_,
@@ -22,7 +23,7 @@ define([
             OrcidApiConstants,
 			      PubSubEvents,
             LinkGeneratorMixin,
-            OrcidModel
+            OrcidModelNotifier
   ) {
     function addXmlHeadersToOrcidMessage(message) {
       var messageCopy = $.extend(true, {}, message);
@@ -91,6 +92,9 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
+
+        this.orcidModelNotifier = this.getBeeHive().getService('OrcidModelNotifier');
+
         this.pubSub = this.getBeeHive().getService('PubSub').getHardenedInstance();
         this.pubSubKey = this.pubSub.getPubSubKey();
 
@@ -321,7 +325,7 @@ define([
         else if (data.actionType == 'delete') {
 
           if (data.modelType == 'adsData') {
-            var adsIdsWithPutCodeList = OrcidModel.get('adsIdsWithPutCodeList');
+            var adsIdsWithPutCodeList = this.orcidModelNotifier.getAdsIdsWithPutCodeList();
             var formattedAdsId = "ads:" + data.model.id;
 
             // find putcode

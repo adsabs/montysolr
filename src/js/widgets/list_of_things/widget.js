@@ -295,9 +295,6 @@ define([
           }, this);
 
         }
-        else if (ev == 'itemview:OrcidAction'){
-          this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.OrcidAction, data: arg2});
-        }
       },
 
       reset: function() {

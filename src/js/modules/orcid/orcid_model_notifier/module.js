@@ -1,0 +1,109 @@
+define([
+    'underscore',
+    'marionette',
+    'backbone',
+    'js/components/generic_module',
+    'js/modules/orcid/orcid_api_constants',
+    './orcid_model'
+  ],
+
+  function (_,
+            Marionette,
+            Backbone,
+            GenericModule,
+            OrcidApiConstants,
+            OrcidModel) {
+    var OrcidNotifierModule = GenericModule.extend({
+      activate: function (beehive) {
+        this.pubsub = beehive.Services.get('PubSub').getHardenedInstance();
+
+        this.pubSubKey = this.pubsub.getPubSubKey();
+
+        _.bindAll(this, 'routeOrcidPubSub', 'isOrcidItemAdsItem', 'isWorkInCollection', 'getAdsIdsWithPutCodeList',
+          'bulkInsert', 'cancelBulkInsert', 'triggerBulkInsert', 'addToBulkWorks', 'removeFromBulkWorks');
+
+        this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, this.routeOrcidPubSub);
+      },
+
+      initialize: function (options) {
+        this.model = new OrcidModel();
+
+        _.bindAll(this, 'bulkInsert');
+      },
+
+      bulkInsert: function (adsWorks) {
+        this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT,
+          {
+            msgType: OrcidApiConstants.Events.OrcidAction,
+            data: {
+              actionType: 'bulkInsert', model: adsWorks
+            }
+          });
+      },
+      cancelBulkInsert: function () {
+        this.model.set('isInBulkInsertMode', false);
+        this.model.set('bulkInsertWorks', []);
+      },
+      triggerBulkInsert: function () {
+        this.bulkInsert(this.model.attributes.bulkInsertWorks);
+        this.model.set('isInBulkInsertMode', false);
+        this.model.set('bulkInsertWorks', []);
+      },
+      addToBulkWorks: function (adsWork) {
+        if (this.isWorkInCollection(adsWork)) {
+          return;
+        }
+
+        this.model.attributes.bulkInsertWorks.push(adsWork);
+      },
+      removeFromBulkWorks: function (adsWork) {
+        var toRemove =
+          this.model.attributes.bulkInsertWorks.filter(function (item) {
+            return item.id == adsWork.id;
+          })[0];
+
+        this.model.attributes.bulkInsertWorks.splice(toRemove, 1);
+      },
+      routeOrcidPubSub: function (msg) {
+        switch (msg.msgType) {
+          case OrcidApiConstants.Events.LoginSuccess:
+
+            this.model.set('actionsVisible', true);
+
+            break;
+          case OrcidApiConstants.Events.SignOut:
+            this.model.set('actionsVisible', false);
+            break;
+
+          case OrcidApiConstants.Events.UserProfileRefreshed:
+            this.model.set('orcidProfile', msg.data);
+            break;
+        }
+      },
+      getAdsIdsWithPutCodeList: function () {
+        return this.model.get('adsIdsWithPutCodeList');
+      },
+      isWorkInCollection: function (adsItem) {
+        var adsIdsWithPutCode = this.model.get('adsIdsWithPutCodeList');
+        var formattedAdsId = "ads:" + adsItem.id;
+
+        return adsIdsWithPutCode
+            .filter(function (e) {
+              return e.adsId == formattedAdsId;
+            })
+            .length > 0;
+      },
+      isOrcidItemAdsItem: function (orcidItem) {
+        return orcidItem.workExternalIdentifiers.filter(function (e) {
+            return e.type == 'other-id' && e.id.indexOf('ads:') == 0;
+          }).length > 0;
+      },
+
+      getHardenedInstance: function () {
+        return this;
+      }
+
+    });
+
+    return OrcidNotifierModule;
+  });
