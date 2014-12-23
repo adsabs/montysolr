@@ -6999,21 +6999,6 @@ define([
       expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "__fq_fq=AND&__fq_fq=author%3A(%22testName1%22+OR+%22testName2%22)&fq=(author%3A(%22testName1%22+OR+%22testName2%22))&q=original+search");
     });
 
-    it("should show a loading view while it waits for data from pubsub", function(){
-
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
-
-      var minsub = new MinimalPubsub({verbose: false});
-      networkWidget.activate(minsub.beehive.getHardenedInstance());
-      networkWidget.pubsub.publish = sinon.stub();
-
-      networkWidget.startWidgetLoad();
-      expect(networkWidget.view.$(".s-loading").length).to.eql(1);
-      networkWidget.processResponse(new JsonResponse(testDataEmpty));
-      expect(networkWidget.view.$(".s-loading").length).to.eql(0);
-    });
-
 
     it("has a method to completely remove the graphView", function(){
       var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});

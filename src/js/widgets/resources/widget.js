@@ -1,4 +1,5 @@
-define(['underscore',
+define([
+  'underscore',
   'jquery',
   'backbone',
   'marionette',
@@ -6,7 +7,16 @@ define(['underscore',
   'js/widgets/base/base_widget',
   'hbs!./templates/resources_template',
   'js/mixins/link_generator_mixin'
-], function(_, $, Backbone, Marionette, ApiQuery, BaseWidget, ResourcesTemplate, LinkGenerator){
+], function(
+  _,
+  $,
+  Backbone,
+  Marionette,
+  ApiQuery,
+  BaseWidget,
+  ResourcesTemplate,
+  LinkGenerator
+  ){
 
 
   var ResourcesModel = Backbone.Model.extend({
@@ -27,7 +37,6 @@ define(['underscore',
       this.model = new ResourcesModel();
       this.view = new ResourcesView({model : this.model});
       this._bibcode = options.bibcode || undefined;
-      this.showLoad = true;
     },
 
     activate: function (beehive) {

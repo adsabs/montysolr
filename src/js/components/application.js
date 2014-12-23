@@ -480,13 +480,14 @@ define([
 
     triggerMethod: function(objects, msg, funcName, options) {
       var self = this;
-      _.each(objects, function(el) {
+      var rets = _.map(objects, function(el) {
         var obj = el[1];
         if (funcName in obj) {
           if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + '.' + funcName + '()')};
           obj[funcName].call(obj, options);
         }
       });
+      return rets;
     }
 
 

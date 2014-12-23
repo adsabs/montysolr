@@ -202,6 +202,7 @@ define(['underscore',
               code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED,
               query: cycle.query,
               numFound: numFound,
+              cycle: cycle,
               response: response // this is a raw response (and it is save to send, cause it was already copied by the first 'done' callback
             }));
 
@@ -227,7 +228,9 @@ define(['underscore',
           })
           .fail(function(jqXHR, textStatus, errorThrown) {
             self.__searchCycle.error = true;
-            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
+            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+              code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
+              cycle: cycle,
               request: this.request}));
           });
 
@@ -246,12 +249,18 @@ define(['underscore',
 
         if (this.__searchCycle.monitor > 100) {
           console.warn('Stopping monitoring of queries, it is running too long');
-          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_STOP_MONITORING}));
+          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+            code: ApiFeedback.CODES.SEARCH_CYCLE_STOP_MONITORING,
+            cycle: this.__searchCycle
+          }));
           return;
         }
 
         if (this.__searchCycle.waiting && _.isEmpty(this.__searchCycle.waiting)) {
-          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED}));
+          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+            code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
+            cycle: this.__searchCycle
+          }));
           return;
         }
 
@@ -263,7 +272,8 @@ define(['underscore',
           code: ApiFeedback.CODES.SEARCH_CYCLE_PROGRESS,
           msg: (lenToDo / total),
           total: total,
-          todo: lenToDo
+          todo: lenToDo,
+          cycle: this.__searchCycle
         }));
 
         setTimeout(function() {

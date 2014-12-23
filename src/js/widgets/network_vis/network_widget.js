@@ -1094,27 +1094,17 @@ define([
 
       //fetch data
       onShow: function () {
-
         var request = new ApiRequest({
-
           target: Marionette.getOption(this, "endpoint"),
           query: this.getCurrentQuery()
         });
-
-        this.startWidgetLoad();
-
         this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
-
       },
 
       processResponse: function (data) {
-
         data = data.toJSON();
-
         //to force change even if the data is the same
-
         this.model.set("data", {},  {silent : true});
-
         this.model.set({data : data});
       },
 
@@ -1122,7 +1112,6 @@ define([
       broadcastFilteredQuery: function (names) {
 
         var updater = new ApiQueryUpdater("fq");
-
         if (!names.length) {
           return
 
@@ -1133,49 +1122,21 @@ define([
         }, this);
 
         names = "author:(" + names.join(" OR ") + ")";
-
-        newQuery = this.getCurrentQuery().clone();
-
+        var newQuery = this.getCurrentQuery().clone();
         newQuery.unlock();
 
         updater.updateQuery(newQuery, "fq", "limit", names);
-
         this.resetWidget();
-
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
-
       },
 
       broadcastClose: function () {
-
         this.resetWidget();
-
         this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
-
-      },
-
-      startWidgetLoad: function () {
-
-        if (!this.callbacksAdded) {
-
-          var removeLoadingView = function () {
-            this.view.$(".s-loading").remove();
-          };
-
-          this.listenTo(this.model, "change:fullData", removeLoadingView);
-
-          this.callbacksAdded = true;
-
-        }
-
-        if (this.view.$el.find(".s-loading").length === 0) {
-          this.view.$el.empty().append(this.loadingTemplate());
-        }
-
       }
 
-    })
+    });
 
     return NetworkWidget
 
-  })
+  });

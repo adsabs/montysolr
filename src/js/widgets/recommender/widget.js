@@ -36,7 +36,6 @@ define([
     initialize : function(){
       this.collection = new Backbone.Collection();
       this.view = new RecommenderView({collection : this.collection});
-      this.showLoad = true;
     },
 
     activate: function (beehive) {

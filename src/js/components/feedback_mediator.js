@@ -17,7 +17,8 @@ define([
     'js/components/api_response',
     'js/components/api_query_updater',
     'js/components/api_feedback',
-    'js/components/pubsub_key'
+    'js/components/pubsub_key',
+    'js/mixins/feedback_handling'
   ],
   function(
     _,
@@ -29,7 +30,8 @@ define([
     ApiResponse,
     ApiQueryUpdater,
     ApiFeedback,
-    PubSubKey
+    PubSubKey,
+    FeedbackHandlingMixin
     ) {
 
 
@@ -168,6 +170,13 @@ define([
       }
     },
 
+    /**
+     * This is a default feedback handling; it executes only IFF
+     * it was not handled by specific handlers.
+     *
+     * @param apiFeedback
+     * @param entry
+     */
     handleFeedback: function(apiFeedback, entry) {
       var c = ApiFeedback.CODES;
 
@@ -191,5 +200,7 @@ define([
   });
 
   _.extend(ErrorMediator.prototype, Mixins.BeeHive);
+  _.extend(ErrorMediator.prototype, FeedbackHandlingMixin);
+
   return ErrorMediator;
 });

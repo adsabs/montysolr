@@ -74,6 +74,21 @@ define(['marionette', 'backbone',
         expect(widget.render).to.be.instanceof(Function);
       });
 
+      it("should show a loading view while it waits for data from pubsub", function(){
+
+        var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
+        $("#test").append(networkWidget.view.el);
+
+        var minsub = new MinimalPubsub({verbose: false});
+        networkWidget.activate(minsub.beehive.getHardenedInstance());
+        networkWidget.pubsub.publish = sinon.stub();
+
+        networkWidget.startWidgetLoad();
+        expect(networkWidget.view.$(".s-loading").length).to.eql(1);
+        networkWidget.processResponse(new JsonResponse(testDataEmpty));
+        expect(networkWidget.view.$(".s-loading").length).to.eql(0);
+      });
+
 
     })
 

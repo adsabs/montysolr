@@ -53,4 +53,4 @@ define(['underscore'], function(_) {
   };
 
   return Mixin;
-})
+});
