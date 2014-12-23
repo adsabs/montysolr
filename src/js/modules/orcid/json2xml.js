@@ -26,57 +26,54 @@ define([
         opts = settings;
       }
 
-      var result = [];
-      result.push(opts.header ? '<?xml version="1.0" encoding="UTF-8"?>' : '');
+      var result = opts.header ? ['<?xml version="1.0" encoding="UTF-8"?>'] : [];
 
       opts.header = false;
-      type = json.constructor.name;
+      var type = json.constructor.name;
 
-      if(type==='Array'){
+      if (type === 'Array') {
 
         result = [];
         json.forEach(function(node){
-          result.push(_toArrayOfXmls(node, opts));
+          var item = _toArrayOfXmls(node, opts);
+          result.push(item);
         });
-      } else if(type ==='Object' && typeof json === "object") {
+      }
+      else if (type === 'Object' && typeof json === "object") {
 
-        Object.keys(json).forEach(function(key){
-          if(key!==opts.attributes_key){
-            var node = json[key],
-              attributes = [];
+        Object.keys(json).forEach(function(key) {
+          if(key !== opts.attributes_key) {
+            var node = json[key];
+            var attributes = _getAttributes(node, opts);
 
-            if(opts.attributes_key && node[opts.attributes_key]){
-              Object.keys(node[opts.attributes_key]).forEach(function(k){
-                attributes.push([' ',
-                                k,
-                                '="',
-                                node[opts.attributes_key][k],
-                                '"'])
-              });
-            }
             var inner = _toArrayOfXmls(node,opts);
 
-            if(inner){
+            if (inner){
               if (key == "_") {
                 result.push(node);
               }
               else {
                 var next = _toArrayOfXmls(node, opts);
 
-                next = node.constructor.name === "Array" ? next : [next];
+                if (node.constructor.name !== "Array") {
+                  next = [next];
+                  node = [node];
+                }
 
-                next.forEach(function(item) {
-                 result.push(["<",
-                              key,
-                              attributes,
-                              ">",
-                              item,
-                              "</",
-                              key,
-                              ">"]);
-                });
+                for (var i = 0; i < node.length; i++) {
+                  var item = next[i];
+                  result.push(["<",
+                    key,
+                    _getAttributes(node[i], opts),
+                    ">",
+                    item,
+                    "</",
+                    key,
+                    ">"]);
+                }
               }
-            } else {
+            }
+            else {
               result.push(
                 ["<",
                   key,
@@ -85,11 +82,28 @@ define([
             }
           }
         });
-      } else {
+      }
+      else {
         result.push(json.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
       }
 
       return result;
+    };
+
+    var _getAttributes = function(node, opts) {
+      var attributes = [];
+
+      if(opts.attributes_key && node[opts.attributes_key]){
+        Object.keys(node[opts.attributes_key]).forEach(function(k){
+          attributes.push([' ',
+            k,
+            '="',
+            node[opts.attributes_key][k],
+            '"'])
+        });
+      }
+
+      return attributes;
     };
 
     var getHardenedInstance = function () {

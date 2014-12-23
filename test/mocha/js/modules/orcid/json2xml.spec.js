@@ -122,23 +122,42 @@ define([
                 "$": {},
                 "orcid-works": {
                   "$": {},
-                  "orcid-work": {
-                    "$": {
-                      "put-code": "454227",
-                      "visibility": "public"
+                  "orcid-work": [
+                    {
+                      "$": {
+                        "put-code": "454227",
+                        "visibility": "public"
+                      },
+                      "work-title": {
+                        "$": {},
+                        "title": "Testing publiction"
+                      },
+                      "work-type": "test",
+                      "work-source": {
+                        "$": {},
+                        "uri": "http://sandbox.orcid.org/0000-0001-7016-4666",
+                        "path": "0000-0001-7016-4666",
+                        "host": "sandbox.orcid.org"
+                      }
                     },
-                    "work-title": {
-                      "$": {},
-                      "title": "Testing publiction"
-                    },
-                    "work-type": "test",
-                    "work-source": {
-                      "$": {},
-                      "uri": "http://sandbox.orcid.org/0000-0001-7016-4666",
-                      "path": "0000-0001-7016-4666",
-                      "host": "sandbox.orcid.org"
+                    {
+                      "$": {
+                        "put-code": "99999",
+                        "visibility": "public"
+                      },
+                      "work-title": {
+                        "$": {},
+                        "title": "Testing publiction 2"
+                      },
+                      "work-type": "test",
+                      "work-source": {
+                        "$": {},
+                        "uri": "http://sandbox.orcid.org/0000-0001-7016-4666",
+                        "path": "0000-0001-7016-4666",
+                        "host": "sandbox.orcid.org"
+                      }
                     }
-                  }
+                  ]
                 }
               }
             }
