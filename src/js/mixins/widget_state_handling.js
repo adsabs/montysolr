@@ -16,6 +16,13 @@ define([
   LoadingTemplate
   ) {
 
+  /**
+   * This function tries hard to grab the topmost container (view)
+   * of the widget (just using some probable locations)
+   *
+   * @param widget
+   * @returns {*}
+   */
   var getView = function(widget) {
     if (widget.view && widget.view.itemContainerView)
       return widget.view.itemContainerView;
@@ -74,9 +81,9 @@ define([
 
   handlers[WidgetStates.IDLE] = {
     set: function(state) {
-      this.getStateHandler({state: WidgetStates.WAITING}).revert.apply(this, state);
+      this._getStateHandler({state: WidgetStates.WAITING}).revert.apply(this, state);
     },
-    reset: function() {
+    revert: function() {
       //pass
     }
   };
@@ -96,24 +103,24 @@ define([
       if (newState.state == WidgetStates.RESET) {
         if (this._states.length > 0) {
           var self = this;
-          for (var i=this._states.length; i>0; i--) {
+          for (var i=this._states.length-1; i>=0; i--) {
             var state = this._states[i];
-            this.getStateHandler(state).revert.call(this, state);
+            this._getStateHandler(state).revert.call(this, state);
           }
-          this._states = [];
-          return;
         }
+        this._states = [];
+        return;
       }
 
-      var stateHandler = this.getStateHandler(newState);
+      var stateHandler = this._getStateHandler(newState);
       if (!stateHandler) {
         throw new Error("This is unknown/unhandled widget state: ", newState);
       }
       stateHandler.set.call(this, newState);
-      this.saveNewState(newState);
+      this._saveNewState(newState);
     },
 
-    getStateHandler: function(newState) {
+    _getStateHandler: function(newState) {
       return this.widgetStateHandlers[newState.state];
     },
 
@@ -123,14 +130,11 @@ define([
      *
      * @param newState
      */
-    saveNewState: function(newState) {
+    _saveNewState: function(newState) {
       var s = _.object(_.filter(_.pairs(newState), function(p) {return !_.isObject(p[1]) && !_.isArray(p[1])}));
       this._states.push(s);
-    },
-
-    getApp: function() {
-      return this.app;
     }
+
 
   };
 

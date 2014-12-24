@@ -3,12 +3,11 @@ define([],
   ) {
 
   var States = {
-    IDLE: 0,
+    RESET: 0,
     WAITING: 1,
     ERRORED: 2,
     ENABLED: 3,
-    DISABLED: 4,
-    RESET: 5
+    DISABLED: 4
   };
 
   return States;

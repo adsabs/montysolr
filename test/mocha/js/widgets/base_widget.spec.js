@@ -1,18 +1,27 @@
-define(['marionette', 'backbone',
+define([
+    'marionette',
+    'backbone',
     'js/widgets/base/base_widget',
     'js/components/api_response',
     'js/components/api_request',
     'js/components/api_query',
-    'js/bugutils/minimal_pubsub'
+    'js/bugutils/minimal_pubsub',
+    'js/widgets/widget_states',
+    'js/widgets/base/item_view'
   ],
-  function(Marionette, Backbone,
-           BaseWidget,
-           ApiResponse,
-           ApiRequest,
-           ApiQuery,
-           MinimalPubSub) {
+  function(
+    Marionette,
+    Backbone,
+    BaseWidget,
+    ApiResponse,
+    ApiRequest,
+    ApiQuery,
+    MinimalPubSub,
+    WidgetStates,
+    ItemView
+    ) {
 
-    describe("Base Widget (UI Widget)", function() {
+    describe("Base Widget (base_widget.spec.js)", function() {
 
       var minsub;
       beforeEach(function() {
@@ -74,19 +83,35 @@ define(['marionette', 'backbone',
         expect(widget.render).to.be.instanceof(Function);
       });
 
-      it("should show a loading view while it waits for data from pubsub", function(){
+      it("has methods to indicate change in the widget state", function(){
 
-        var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-        $("#test").append(networkWidget.view.el);
+        var widget = new BaseWidget({view: new ItemView()});
 
-        var minsub = new MinimalPubsub({verbose: false});
-        networkWidget.activate(minsub.beehive.getHardenedInstance());
-        networkWidget.pubsub.publish = sinon.stub();
+        expect(widget.changeState).to.be.Function;
+        expect(widget.widgetStateHandlers).to.be.defined;
 
-        networkWidget.startWidgetLoad();
-        expect(networkWidget.view.$(".s-loading").length).to.eql(1);
-        networkWidget.processResponse(new JsonResponse(testDataEmpty));
-        expect(networkWidget.view.$(".s-loading").length).to.eql(0);
+        var $w = widget.render().$el;
+
+        $("#test").append($w);
+
+        widget.changeState({state: WidgetStates.WAITING});
+        expect($w.find(".s-loading").length).to.eql(1);
+
+        widget.changeState({state: WidgetStates.RESET});
+        expect($w.find(".s-loading").length).to.eql(0);
+
+        expect(widget._states.length).to.be.eql(0);
+
+        widget.widgetStateHandlers[WidgetStates.ERRORED].revert = sinon.spy();
+        widget.changeState({state: WidgetStates.ERRORED});
+        expect($w.hasClass("s-error")).to.be.true;
+
+
+        widget.changeState({state: WidgetStates.RESET});
+
+        expect(widget.widgetStateHandlers[WidgetStates.ERRORED].revert.called).to.be.true;
+        expect(widget._states.length).to.be.eql(0);
+
       });
 
 

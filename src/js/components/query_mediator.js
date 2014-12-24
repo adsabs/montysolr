@@ -39,7 +39,7 @@ define(['underscore',
         this.failedRequestsCache = this._getNewCache();
         this.maxRetries = options.maxRetries || 3;
         this.recoveryDelayInMs = _.isNumber(options.recoveryDelayInMs) ? options.recoveryDelayInMs : 700;
-        this.__searchCycle = {waiting:{}, inprogress: {}};
+        this.__searchCycle = {waiting:{}, inprogress: {}, done: {}, failed: {}};
         this.shortDelayInMs = _.isNumber(options.shortDelayInMs) ? options.shortDelayInMs : 10;
         this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 100;
         this.monitoringDelayInMs = _.isNumber(options.monitoringDelayInMs) ? options.monitoringDelayInMs : 200;
