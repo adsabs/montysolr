@@ -17,9 +17,11 @@ define([
   };
 
   Alerts.TYPE = {
-      ERROR: -1,
-      INFO: 0,
-      WARNING: 1
+      ERROR: "error",
+      INFO: "info",
+      WARNING: "warning",
+      SUCCESS: "success",
+      DANGER: "danger"
     };
 
   Alerts.ACTION = {

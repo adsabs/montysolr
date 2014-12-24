@@ -74,6 +74,12 @@ define([
         this.collection = options.view.collection;
       }
 
+      // our way of listening to views/models
+      if (this.view)
+        Marionette.bindEntityEvents(this, this.view, Marionette.getOption(this, "viewEvents"));
+      if (this.model)
+        Marionette.bindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
+
     },
 
     /**

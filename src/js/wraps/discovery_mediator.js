@@ -134,6 +134,7 @@ define([
             events: {
               'click #query-assistant': {
                 action: Alerts.ACTION.TRIGGER_FEEDBACK,
+                type: Alerts.TYPE.ERROR,
                 arguments: {
                   code: ApiFeedback.CODES.QUERY_ASSISTANT,
                   query: apiQuery.clone()

@@ -18,8 +18,8 @@
                         <input type="number" class="show-slider-data-first" readonly="true"></input> to
                         <input type="number" class="show-slider-data-second"></input>
                     </div>
-{{#if maxExport}}You can export maximum of&nbsp;{{maxExport}}.{{/if}}
-{{#if numFound}}The query returns {{numFound}} results.{{/if}}
+                    {{#if maxExport}}You can export maximum of&nbsp;{{maxExport}}.{{/if}}
+                    {{#if numFound}}The query returns {{numFound}} results.{{/if}}
                 </div>
             </div>
             <div class="modal-footer">
@@ -32,5 +32,5 @@
 
 <!-- Exports -->
 {{#if exports}}
-    <pre id="exportData">{{exports}}</pre>
+<pre id="exportData">{{exports}}</pre>
 {{/if}}
