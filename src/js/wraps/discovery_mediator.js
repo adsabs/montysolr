@@ -40,30 +40,28 @@ define([
       if (feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
 
-        var msg = 'Your query returned 0 results: <span id="query-assistant">you can use this tool to build a new query.</span>';
+        var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
 
         //TODO: in the future, we can look inside the query and decide whether they would like to expand it by
         // a) searching fulltext (if there is any unfielded query)
         // b) modifying phrases and/or operators
         var newQuery = q.clone();
 
-        this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({
-          code: ApiFeedback.CODES.ALERT,
+        this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
+          type: Alerts.TYPE.DANGER,
           msg: msg,
           events: {
-            'click #query-assistant': {
+            'click a#query-assistant': {
               action: Alerts.ACTION.TRIGGER_FEEDBACK,
               arguments: {
                 code: ApiFeedback.CODES.QUERY_ASSISTANT,
-                query: apiQuery.clone()
+                query: newQuery
               }
             },
             'click #new-query': {
               action: Alerts.ACTION.CALL_PUBSUB,
-              arguments: [
-                this.pubsub.START_SEARCH,
-                newQuery
-              ]
+              signal: this.pubsub.START_SEARCH,
+              arguments: newQuery
             }
           }
         }))
@@ -128,7 +126,7 @@ define([
         if (target.indexOf('/search') > -1 && xhr.status == 400) { // wrong query
           var apiQuery = apiRequest.getApiQuery();
 
-          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({
+          this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
             code: ApiFeedback.CODES.ALERT,
             msg: 'There is a problem with your query: <span id="query-assistant">you can use this tool to fix it.</span>',
             events: {

@@ -3,10 +3,11 @@ define([
     'backbone',
     'js/components/api_query',
     'js/mixins/dependon',
-    'hbs!404'
+    'hbs!404',
+    'js/components/api_feedback'
 
   ],
-  function ($, Backbone, ApiQuery, Dependon, ErrorTemplate) {
+  function ($, Backbone, ApiQuery, Dependon, ErrorTemplate, ApiFeedback) {
 
     "use strict";
 
@@ -30,7 +31,7 @@ define([
         "": "index",
         "search/(:query)": 'search',
         'abs/:bibcode(/)(:subView)': 'view',
-        "(:query)": 'index',
+        //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
 
@@ -49,8 +50,19 @@ define([
         if (query) {
           var q= new ApiQuery().load(query);
           this.pubsub.publish(this.pubsub.START_SEARCH, q);
+
+          // must wait with nagivation until the query is there
+          var self = this;
+          this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(function(feedback) {
+            if (feedback.code == ApiFeedback.CODES.SEARCH_CYCLE_STARTED) {
+              self.pubsub.publish(self.pubsub.NAVIGATE, 'results-page');
+              self.pubsub.unsubscribe(self.pubsub.FEEDBACK);
+            }
+          }));
         }
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'results-page');
+        else {
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+        }
       },
 
       view: function (bibcode, subPage) {
@@ -61,7 +73,6 @@ define([
             return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page', bibcode);
           }
           else {
-
             var navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
             return this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, bibcode);
           }

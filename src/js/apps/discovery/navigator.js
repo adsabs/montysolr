@@ -8,14 +8,16 @@ define([
     'backbone',
     'underscore',
     'js/components/navigator',
-    'js/components/api_feedback'
+    'js/components/api_feedback',
+    'js/components/api_query_updater'
   ],
   function (
     $,
     Backbone,
     _,
     Navigator,
-    ApiFeedback
+    ApiFeedback,
+    ApiQueryUpdater
     ) {
 
     "use strict";
@@ -36,6 +38,8 @@ define([
         var self = this;
         var pubsub = this.pubsub;
         var self = this;
+        var queryUpdater = new ApiQueryUpdater('navigator');
+
         pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {
           self.navigate('results-page')
         });
@@ -49,17 +53,23 @@ define([
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
           'VisualizationDropdown', 'MetricsDropdown', 'SearchWidget',
-          'Sort'
+          'Sort', 'AlertsWidget'
+        ];
+
+        var detailsPageAlwaysVisible = [
+          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'AlertsWidget'
         ];
 
         this.set('index-page', function() {
           app.getObject('MasterPageManager').show('LandingPage');
-          this.route = '#/' + app.getWidget('SearchWidget').getCurrentQuery().url();
+          var q = app.getWidget('SearchWidget').getCurrentQuery();
+          this.route = '#/' + queryUpdater.clean(q).url();
         });
         this.set('results-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',
             searchPageAlwaysVisible);
-          this.route = '#search/' + app.getWidget('SearchWidget').getCurrentQuery().url();
+          var q = app.getWidget('SearchWidget').getCurrentQuery();
+          this.route = '#/' + queryUpdater.clean(q).url();
         });
         this.set('export-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',
@@ -86,25 +96,26 @@ define([
         this.set('abstract-page', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowAbstract");
           app.getObject('MasterPageManager').show('DetailsPage',
-            ['TOCWidget', 'ShowAbstract', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
+            ['ShowAbstract'].concat(detailsPageAlwaysVisible)
+          );
           //this.route = '#abs/' + app.getWidget('ShowAbstract').getCurrentQuery().url();
         });
         this.set('ShowAbstract', function(){self.get('abstract-page').execute()});
         this.set('ShowCitations', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowCitations");
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCitations', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['ShowCitations'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowReferences', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowReferences");
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowReferences', 'SearchWidget', 'ShowResources', 'ShowRecommender']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['ShowReferences'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowCoreads', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowCoreads");
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowCoreads', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['ShowCoreads'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowTableOfContents', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowTableOfContents");
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowTableOfContents', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
+          app.getObject('MasterPageManager').show('DetailsPage', ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowSimilar', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowSimilar").set("isActive", true);

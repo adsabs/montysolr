@@ -228,7 +228,7 @@ define(['underscore',
                   })
                   .always(function() {
                     if (cycle.finished) return;
-                    
+
                     if (_.isEmpty(cycle.inprogress)) {
                       ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
                         code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
