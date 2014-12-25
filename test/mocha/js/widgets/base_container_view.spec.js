@@ -12,7 +12,7 @@ define([
             BaseItemView
     ) {
 
-    describe("Widget Base Container View (UI)", function () {
+    describe("Widget Base Container View (base_container_view.spec.js)", function () {
 
       var wModel = Backbone.Model.extend({
         defaults: function () {
@@ -105,29 +105,6 @@ define([
         expect($v.find('.facet-options').hasClass('hide')).to.be.false;
       });
 
-      it("has methods to indicate different states", function() {
-        var view = new BaseContainerView();
-        sinon.spy(view, "handleError");
-        sinon.spy(view, "handleWaiting");
-        sinon.spy(view, "revertState");
-        var $v = $(view.render().el);
-
-
-        view.handleSanity({error: {msg: 'foo'}});
-        expect(view.handleError.called).to.be.true;
-        expect($v.find('.widget-name').hasClass('error')).to.be.true;
-
-        view.handleSanity({waiting: 500});
-        expect(view.handleWaiting.called).to.be.true;
-        expect($v.find('.widget-body').hasClass('waiting')).to.be.true;
-        expect($v.find('.widget-name').hasClass('error')).to.be.true;
-
-        view.handleSanity({ok: true});
-        expect(view.revertState.callCount).to.be.equal(2);
-        expect($v.find('.widget-body').hasClass('waiting')).to.be.false;
-        expect($v.find('.widget-name').hasClass('error')).to.be.false;
-
-      });
 
       it("accepts other collectionviews and plays nicely with them", function() {
         var c = new Backbone.Collection(null, {model: wModel});

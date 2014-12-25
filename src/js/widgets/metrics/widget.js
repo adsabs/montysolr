@@ -451,8 +451,6 @@ define([
           options : options
         });
 
-        this.startWidgetLoad();
-
         // let container view know how many bibcodes we have
         this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
                               "rows":  parseInt(response.get("responseHeader.params.rows"))});

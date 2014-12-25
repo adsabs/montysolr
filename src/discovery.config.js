@@ -36,7 +36,8 @@ require.config({
           User: 'js/components/user',
           DynamicConfig: 'discovery.vars',
           HistoryManager: 'js/components/history_manager',
-          MasterPageManager: 'js/page_managers/master'
+          MasterPageManager: 'js/page_managers/master',
+          AppStorage: 'js/components/app_storage'
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'
@@ -47,6 +48,7 @@ require.config({
         SearchPage: 'js/wraps/results_page_manager',
         DetailsPage: 'js/wraps/details_page_manager',
 
+        AlertsWidget: 'js/widgets/alerts/widget',
         SearchWidget: 'js/widgets/search_bar/search_bar_widget',
         Results: 'js/widgets/results/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',

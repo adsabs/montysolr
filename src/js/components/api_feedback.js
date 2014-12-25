@@ -34,7 +34,10 @@ define([
       SEARCH_CYCLE_FAILED_TO_START: -3,
       SEARCH_CYCLE_PROGRESS: -4,
       SEARCH_CYCLE_STOP_MONITORING: -5,
-      SEARCH_CYCLE_FINISHED: -6
+      SEARCH_CYCLE_FINISHED: -6,
+      QUERY_ASSISTANT: -7,
+      ALERT: -8,
+      CANNOT_ROUTE: -9
     };
 
     var _codes = {};

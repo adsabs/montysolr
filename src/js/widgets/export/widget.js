@@ -60,9 +60,15 @@ define([
 
       render: function() {
         // this seems to be necessary (at least when the actions happen too fast ... like in unittests)
-        if (this.$el && this.$el.find('#exportModal').length) {
-          this.$el.find('#exportModal').modal('hideModal');
+        if (this.$el && this.$el.find('#exportModal.modal').length) {
+          var self = this;
+          var args = arguments;
+          this.$el.find('#exportModal.modal').modal('hide').one('hidden.bs.modal', function() {
+            Marionette.ItemView.prototype.render.apply(self, args);
+          });
+          return;
         }
+
         Marionette.ItemView.prototype.render.apply(this, arguments);
       },
 

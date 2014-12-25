@@ -119,6 +119,9 @@ define([
                 $wcontainer.append(widget.el ? widget.el : widget.view.el);
                 self.widgets[widgetName].triggerMethod('show');
               }
+              else {
+                console.warn('Cannot insert widget: ' + widgetName + ' (no selector [data-widget="' + widgetName + '"])');
+              }
             }
             else {
               console.error("Cannot show widget: " + widgetName + "(because, frankly... there is no such widget there!)");

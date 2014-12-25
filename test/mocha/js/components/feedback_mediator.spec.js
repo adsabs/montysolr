@@ -44,7 +44,7 @@ define([
     it("listens to FEEDBACK", function() {
       var fm = new FeedbackMediator();
       sinon.spy(fm, 'receiveFeedback');
-      fm.activate(minsub.beehive);
+      fm.activate(minsub.beehive, {});
 
       minsub.publish(minsub.FEEDBACK, new ApiFeedback({code: 0, msg: 'foo'}));
 

@@ -4,6 +4,7 @@ define([], function() {
       '/page_managers/all_tests.spec.js',
 
       '/widgets/abstract_widget.spec.js',
+      '/widgets/alerts_widget.spec.js',
       '/widgets/api_query_widget.spec.js',
       '/widgets/api_request_widget.spec.js',
       '/widgets/api_response_widget.spec.js',

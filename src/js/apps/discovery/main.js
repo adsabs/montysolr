@@ -24,7 +24,7 @@ define(["config", 'module'], function(config, module) {
       ) {
 
       // at the beginning, we don't know anything about ourselves...
-      var debug = window.location.search.indexOf('debug') > -1 ? true : false;
+      var debug = window.location.href.indexOf('debug=true') > -1 ? true : false;
 
       // app object will load everything
       var app = new (Application.extend(DiscoveryBootstrap))({'debug': debug});

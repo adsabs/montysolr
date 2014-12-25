@@ -22,13 +22,19 @@ define([
     // {tabs: [{title : (title for tab) , widget: (actual widget), id : (unique id)}, {default : true/false} (a tab widget has only one default tab)]}
 
     /**
-     * Activates all widgets (our children)
+     * Activates all widgets (our children)  - we return them so that application
+     * can correctly register them
+     *
      * @param beehive (hardened version)
      */
     activate: function(beehive) {
+      var children = [];
+      var hardenedBee;
       _.each(this.widgets, function (w) {
-        w.activate(beehive.getHardenedInstance());
+        w.activate(hardenedBee = beehive.getHardenedInstance());
+        children.push({name: w.title, object: w, beehive: hardenedBee})
       });
+      return children;
     },
 
     initialize: function (options) {

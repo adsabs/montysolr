@@ -496,6 +496,33 @@ define([
         done();
       });
 
+      it("sends CYCLE signals when job starts and is done", function(done) {
+        var x = createTestQM();
+        var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
+
+        beehive.addObject('RuntimeConfig', {pskToExecuteFirst: key2.getId()});
+        qm.__searchCycle.waiting[key1.getId()] = {key: key1, request: req1};
+        qm.__searchCycle.waiting[key2.getId()] = {key: key2, request: req2};
+        qm.startExecutingQueries();
+        expect(qm.__searchCycle.running).to.be.true;
+        expect(qm.__searchCycle.inprogress[key2.getId()]).to.be.defined;
+
+        this.server.respond();
+        expect(qm.__searchCycle.done[key2.getId()]).to.be.defined;
+        expect(qm.__searchCycle.inprogress[key1.getId()]).to.be.defined;
+        expect(_.keys(qm.__searchCycle.waiting).length).to.be.eql(0);
+
+        expect(pubSpy.lastCall.args[1]).to.be.instanceOf(ApiFeedback);
+        expect(pubSpy.lastCall.args[1].code).to.be.eql(ApiFeedback.CODES.SEARCH_CYCLE_STARTED);
+        var self = this;
+        setTimeout(function() {
+          self.server.respond();
+          expect(pubSpy.lastCall.args[1]).to.be.instanceOf(ApiFeedback);
+          expect(pubSpy.lastCall.args[1].code).to.be.eql(ApiFeedback.CODES.SEARCH_CYCLE_FINISHED);
+          done();
+        }, 50);
+
+      });
 
       it("knows to recover from certain errors", function(done) {
 

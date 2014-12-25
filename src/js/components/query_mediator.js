@@ -39,7 +39,7 @@ define(['underscore',
         this.failedRequestsCache = this._getNewCache();
         this.maxRetries = options.maxRetries || 3;
         this.recoveryDelayInMs = _.isNumber(options.recoveryDelayInMs) ? options.recoveryDelayInMs : 700;
-        this.__searchCycle = {waiting:{}, inprogress: {}};
+        this.__searchCycle = {waiting:{}, inprogress: {}, done: {}, failed: {}};
         this.shortDelayInMs = _.isNumber(options.shortDelayInMs) ? options.shortDelayInMs : 10;
         this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 100;
         this.monitoringDelayInMs = _.isNumber(options.monitoringDelayInMs) ? options.monitoringDelayInMs : 200;
@@ -189,20 +189,25 @@ define(['underscore',
 
         // execute the first search (if it succeeds, fire the rest)
         var requestKey = this._getCacheKey(data.request);
-        cycle.inprogress[data.key.getId()] = data;
+        var firstReqKey = data.key.getId();
+        cycle.inprogress[firstReqKey] = data;
 
         this._executeRequest(data.request, data.key)
           .done(function(response, textStatus, jqXHR) {
+            cycle.done[firstReqKey] = data;
+            delete cycle.inprogress[firstReqKey];
 
             var numFound = undefined;
-            if (response && response['response'] && response['response']['numFound']) {
-              numFound: response['response']['numFound'];
+            if (response.response && response.response.numFound) {
+              numFound = response.response.numFound;
             }
 
             ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
               code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED,
               query: cycle.query,
+              request: data.request,
               numFound: numFound,
+              cycle: cycle,
               response: response // this is a raw response (and it is save to send, cause it was already copied by the first 'done' callback
             }));
 
@@ -212,7 +217,27 @@ define(['underscore',
                 data = cycle.waiting[k];
                 delete cycle.waiting[k];
                 cycle.inprogress[k] = data;
-                self._executeRequest.call(self, data.request, data.key);
+                var psk = k;
+                self._executeRequest.call(self, data.request, data.key)
+                  .done(function() {
+                    cycle.done[psk] = cycle.inprogress[psk];
+                    delete cycle.inprogress[psk];
+                  })
+                  .fail(function() {
+                    cycle.failed[psk] = cycle.inprogress[psk];
+                    delete cycle.inprogress[psk];
+                  })
+                  .always(function() {
+                    if (cycle.finished) return;
+
+                    if (_.isEmpty(cycle.inprogress)) {
+                      ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+                        code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
+                        cycle: cycle
+                      }));
+                      cycle.finished = true;
+                    }
+                  })
               });
             };
 
@@ -228,8 +253,12 @@ define(['underscore',
           })
           .fail(function(jqXHR, textStatus, errorThrown) {
             self.__searchCycle.error = true;
-            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
-              request: this.request}));
+            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+              code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
+              cycle: cycle,
+              request: this.request,
+              error: {jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown}
+            }));
           });
 
         return true; // means that the process can be monitored
@@ -247,24 +276,37 @@ define(['underscore',
 
         if (this.__searchCycle.monitor > 100) {
           console.warn('Stopping monitoring of queries, it is running too long');
-          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_STOP_MONITORING}));
+          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+            code: ApiFeedback.CODES.SEARCH_CYCLE_STOP_MONITORING,
+            cycle: this.__searchCycle
+          }));
           return;
         }
 
-        if (this.__searchCycle.waiting && _.isEmpty(this.__searchCycle.waiting)) {
-          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED}));
+        if (this.__searchCycle.inprogress && _.isEmpty(this.__searchCycle.inprogress)) {
+
+          if (this.__searchCycle.finished) return; // it was already signalled
+
+          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+            code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
+            cycle: this.__searchCycle
+          }));
           return;
         }
 
         var lenToDo = _.keys(this.__searchCycle.waiting).length;
-        var lenDone = _.keys(this.__searchCycle.inprogress).length; // TODO: this is not exactly correct
-        var total = lenToDo + lenDone;
+        var lenDone = _.keys(this.__searchCycle.done).length;
+        var lenInProgress = _.keys(this.__searchCycle.inprogress).length;
+        var lenFailed = _.keys(this.__searchCycle.failed).length;
+
+        var total = lenToDo + lenDone + lenInProgress + lenFailed;
 
         ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
           code: ApiFeedback.CODES.SEARCH_CYCLE_PROGRESS,
           msg: (lenToDo / total),
           total: total,
-          todo: lenToDo
+          todo: lenToDo,
+          cycle: this.__searchCycle
         }));
 
         setTimeout(function() {
@@ -507,7 +549,7 @@ define(['underscore',
       },
 
       reset: function() {
-        this.__searchCycle = {waiting:{}, inprogress: {}}; //reset the datastruct
+        this.__searchCycle = {waiting:{}, inprogress: {}, done:{}, failed:{}}; //reset the datastruct
         if (this._cache) {
           this._cache.invalidateAll();
         }

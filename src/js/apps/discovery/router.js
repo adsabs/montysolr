@@ -3,10 +3,11 @@ define([
     'backbone',
     'js/components/api_query',
     'js/mixins/dependon',
-    'hbs!404'
+    'hbs!404',
+    'js/components/api_feedback'
 
   ],
-  function ($, Backbone, ApiQuery, Dependon, ErrorTemplate) {
+  function ($, Backbone, ApiQuery, Dependon, ErrorTemplate, ApiFeedback) {
 
     "use strict";
 
@@ -28,29 +29,35 @@ define([
 
       routes: {
         "": "index",
+        'index/(:query)': 'index',
         "search/(:query)": 'search',
         'abs/:bibcode(/)(:subView)': 'view',
-        "(:query)": 'index',
+        //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
 
 
       index: function (query) {
-        //XXX:rca - hack, to remove!
-        if (query) {
-          if (query.indexOf('citations-facet') > -1 || query.indexOf('reads-facet') > -1 || query.indexOf('year-facet') > -1) {
-            return;
-          }
-        }
         this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
       },
 
       search: function (query) {
         if (query) {
-          var q= new ApiQuery().load(query);
-          this.pubsub.publish(this.pubsub.START_SEARCH, q);
+          try {
+            var q= new ApiQuery().load(query);
+            this.pubsub.publish(this.pubsub.START_SEARCH, q);
+          }
+          catch (e) {
+            console.error('Error parsing query from a string: ', query, e);
+            this.pubsub.publish(this.pubsub.BIG_FIRE, new ApiFeedback({
+              code: ApiFeedback.CODES.CANNOT_ROUTE,
+              reason: 'Cannot parse query',
+              query: query}));
+          }
         }
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'results-page');
+        else {
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+        }
       },
 
       view: function (bibcode, subPage) {
@@ -61,7 +68,6 @@ define([
             return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page', bibcode);
           }
           else {
-
             var navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
             return this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, bibcode);
           }

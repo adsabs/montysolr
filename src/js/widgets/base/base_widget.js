@@ -1,7 +1,18 @@
-define(['backbone', 'marionette',
-  'js/components/api_query', 'js/components/api_request',
-  'js/mixins/widget_mixin_method', 'hbs!./templates/loading-template'
-], function (Backbone, Marionette, ApiQuery, ApiRequest, WidgetMixin, loadingTemplate) {
+define([
+  'backbone',
+  'marionette',
+  'js/components/api_query',
+  'js/components/api_request',
+  'js/mixins/widget_mixin_method',
+  'js/mixins/widget_state_handling'
+], function (
+  Backbone,
+  Marionette,
+  ApiQuery,
+  ApiRequest,
+  WidgetMixin,
+  WidgetStateMixin
+  ) {
 
   /**
    * Default PubSub based widget; the main functionality is inside
@@ -39,8 +50,6 @@ define(['backbone', 'marionette',
    *
    *  defaultQueryArguments: this is a list of parameters added to each query
    *
-   *  showLoad = true will automatically fade out the widget while it waits for a response
-   *
    */
 
 
@@ -64,6 +73,12 @@ define(['backbone', 'marionette',
         this.view = options.view;
         this.collection = options.view.collection;
       }
+
+      // our way of listening to views/models
+      if (this.view)
+        Marionette.bindEntityEvents(this, this.view, Marionette.getOption(this, "viewEvents"));
+      if (this.model)
+        Marionette.bindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
 
     },
 
@@ -113,9 +128,6 @@ define(['backbone', 'marionette',
         if (req) {
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
         }
-      }
-      if (this.showLoad === true){
-        this.startWidgetLoad()
       }
 
     },
@@ -231,41 +243,6 @@ define(['backbone', 'marionette',
       return this.view;
     },
 
-    loadingTemplate : loadingTemplate,
-
-    callbacksAdded : false,
-
-    //generic loading overlay,
-    //might have to override this function
-    //if widget isnt simple view or collection view
-
-    startWidgetLoad : function(){
-
-      if (this.view){
-        //composite view needs to explicitly remove the loading view
-        //the first time, need to add event listeners to the collection
-        if (this.view.itemViewContainer && !this.callbacksAdded) {
-
-          var removeLoadingView = function () {
-            this.view.$el.find(".s-loading").remove();
-          };
-
-          this.listenTo(this.collection, "reset", removeLoadingView);
-          this.listenTo(this.collection, "add", removeLoadingView);
-          //need to manually have collection trigger this if necessary
-          this.listenTo(this.collection, "noneFound", removeLoadingView);
-
-          this.callbacksAdded = true;
-
-        }
-
-        if (this.view.$el.find(".s-loading").length === 0){
-          this.view.$el.append(this.loadingTemplate());
-        }
-      }
-    },
-
-
 
     /**
      * A standard method, called by widgets when they want to
@@ -281,6 +258,8 @@ define(['backbone', 'marionette',
     }
 
   }, {mixin: WidgetMixin});
+
+  _.extend(BaseWidget.prototype, WidgetStateMixin);
 
   return BaseWidget
 

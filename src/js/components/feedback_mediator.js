@@ -17,7 +17,8 @@ define([
     'js/components/api_response',
     'js/components/api_query_updater',
     'js/components/api_feedback',
-    'js/components/pubsub_key'
+    'js/components/pubsub_key',
+    'js/mixins/feedback_handling'
   ],
   function(
     _,
@@ -29,7 +30,8 @@ define([
     ApiResponse,
     ApiQueryUpdater,
     ApiFeedback,
-    PubSubKey
+    PubSubKey,
+    FeedbackHandlingMixin
     ) {
 
 
@@ -38,7 +40,7 @@ define([
     initialize: function(options) {
       this._cache = this._getNewCache(options.cache);
       this.debug = options.debug || false;
-      this._handlers = {}; // TODO: expose api to register handlers
+      this._handlers = {};
       this.app = null; // reference to the main application
     },
 
@@ -57,6 +59,10 @@ define([
      *    present
      */
     activate: function(beehive, app) {
+
+      if (!app)
+        throw new Error('This controller absolutely needs access to the app');
+
       this.setBeeHive(beehive);
       var pubsub = beehive.Services.get('PubSub');
       this.pubSubKey = pubsub.getPubSubKey();
@@ -168,6 +174,13 @@ define([
       }
     },
 
+    /**
+     * This is a default feedback handling; it executes only IFF
+     * it was not handled by specific handlers.
+     *
+     * @param apiFeedback
+     * @param entry
+     */
     handleFeedback: function(apiFeedback, entry) {
       var c = ApiFeedback.CODES;
 
@@ -191,5 +204,7 @@ define([
   });
 
   _.extend(ErrorMediator.prototype, Mixins.BeeHive);
+  _.extend(ErrorMediator.prototype, FeedbackHandlingMixin);
+
   return ErrorMediator;
 });

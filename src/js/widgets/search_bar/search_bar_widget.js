@@ -290,6 +290,13 @@ define([
 
       navigate: function (newQuery) {
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+      },
+
+      openQueryAssistant: function(queryString) {
+        if (queryString) {
+          this.view.setFormVal(queryString);
+        }
+        this.view.onShowForm();
       }
     });
     return SearchBarWidget;
