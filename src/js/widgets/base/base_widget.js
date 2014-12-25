@@ -93,6 +93,9 @@ define(['backbone', 'marionette',
      * @param apiQuery
      */
     dispatchNewQuery: function(apiQuery) {
+      // remove the arguments that are useful only to this widget
+      _.each(this.defaultQueryArguments, function(v,k) {apiQuery.unset(k)});
+
       this.pubsub.publish(this.pubsub.START_SEARCH, apiQuery);
     },
 
