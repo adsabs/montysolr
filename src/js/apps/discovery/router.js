@@ -29,6 +29,7 @@ define([
 
       routes: {
         "": "index",
+        'index/(:query)': 'index',
         "search/(:query)": 'search',
         'abs/:bibcode(/)(:subView)': 'view',
         //"(:query)": 'index',
@@ -37,28 +38,22 @@ define([
 
 
       index: function (query) {
-        //XXX:rca - hack, to remove!
-        if (query) {
-          if (query.indexOf('citations-facet') > -1 || query.indexOf('reads-facet') > -1 || query.indexOf('year-facet') > -1) {
-            return;
-          }
-        }
         this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
       },
 
       search: function (query) {
         if (query) {
-          var q= new ApiQuery().load(query);
-          this.pubsub.publish(this.pubsub.START_SEARCH, q);
-
-          // must wait with nagivation until the query is there
-          var self = this;
-          this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(function(feedback) {
-            if (feedback.code == ApiFeedback.CODES.SEARCH_CYCLE_STARTED) {
-              self.pubsub.publish(self.pubsub.NAVIGATE, 'results-page');
-              self.pubsub.unsubscribe(self.pubsub.FEEDBACK);
-            }
-          }));
+          try {
+            var q= new ApiQuery().load(query);
+            this.pubsub.publish(this.pubsub.START_SEARCH, q);
+          }
+          catch (e) {
+            console.error('Error parsing query from a string: ', query, e);
+            this.pubsub.publish(this.pubsub.BIG_FIRE, new ApiFeedback({
+              code: ApiFeedback.CODES.CANNOT_ROUTE,
+              reason: 'Cannot parse query',
+              query: query}));
+          }
         }
         else {
           this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');

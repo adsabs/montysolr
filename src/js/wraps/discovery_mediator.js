@@ -37,6 +37,15 @@ define([
 
       var app = this.getApp();
 
+      if (feedback.query) {
+        app.getObject('AppStorage').setCurrentQuery(feedback.query);
+      }
+      else {
+        app.getObject('AppStorage').setCurrentQuery(null);
+      }
+
+      app.getService('Navigator').navigate('results-page');
+
       if (feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
 
@@ -94,6 +103,7 @@ define([
           self.changeWidgetsState(self.getWidgets([key]), {state: WidgetStates.IDLE});
         })
       });
+
     };
 
 

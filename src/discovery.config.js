@@ -36,7 +36,8 @@ require.config({
           User: 'js/components/user',
           DynamicConfig: 'discovery.vars',
           HistoryManager: 'js/components/history_manager',
-          MasterPageManager: 'js/page_managers/master'
+          MasterPageManager: 'js/page_managers/master',
+          AppStorage: 'js/components/app_storage'
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'

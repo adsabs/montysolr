@@ -260,14 +260,12 @@ define(['js/widgets/tabs/tabs_widget',
 
       });
 
-      var graphTabWidget = new TabsWidget({tabs: [
+      return new TabsWidget({tabs: [
         {title: "Years", widget: yearGraphWidget, id: "year-facet", default: true},
         {title: "Citations", widget: citationGraphWidget, id: "citations-facet"},
         {title: "Reads", widget: readsGraphWidget, id: "reads-facet"}
       ]
       });
-
-      return graphTabWidget;
     }
 
   });

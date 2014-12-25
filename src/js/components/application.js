@@ -338,6 +338,7 @@ define([
       beehive.activate(beehive);
 
       // controllers receive application itself and elevated beehive object
+      // all of the must succeed; we don't catch errors
       _.each(this.getAllControllers(), function(el) {
         if (self.debug) {console.log('application: controllers: ' + el[0] + '.activate(beehive, app)')};
         var plugin = el[1];
@@ -348,33 +349,86 @@ define([
 
       // modules receive elevated beehive object
       _.each(this.getAllModules(), function(el) {
-        if (self.debug) {console.log('application: modules: ' + el[0] + '.activate(beehive)')};
-        var plugin = el[1];
-        if ('activate' in plugin) {
-          plugin.activate(beehive);
+        try {
+          if (self.debug) {
+            console.log('application: modules: ' + el[0] + '.activate(beehive)');
+          }
+          var plugin = el[1];
+          if ('activate' in plugin) {
+            plugin.activate(beehive);
+          }
+        }
+        catch (e) {
+          console.error('Error activating:' +el[0]);
+          console.error(e);
         }
       });
 
       // all the rest receive hardened beehive
       var hardenedBee;
       _.each(this.getAllPlugins(), function(el) {
-        if (self.debug) {console.log('application: plugins: ' + el[0] + '.activate(beehive)')};
-        var plugin = el[1];
-        if ('activate' in plugin) {
-          plugin.activate(hardenedBee = beehive.getHardenedInstance());
-          self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'plugin:' + el[0];
+        if (self.debug) {console.log('application: plugins: ' + el[0] + '.activate(beehive)')}
+        try {
+          var plugin = el[1];
+          if ('activate' in plugin) {
+            var children = plugin.activate(hardenedBee = beehive.getHardenedInstance());
+            self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'plugin:' + el[0];
+            if (children) {
+              self._registerBarbarianChildren('plugin', el[0], children);
+            }
+          }
+        }
+        catch (e) {
+          console.error('Error activating:' +el[0]);
+          console.error(e);
         }
       });
       _.each(this.getAllWidgets(), function(el) {
-        if (self.debug) {console.log('application: widget: ' + el[0] + '.activate(beehive)')};
-        var plugin = el[1];
-        if ('activate' in plugin) {
-          plugin.activate(hardenedBee = beehive.getHardenedInstance());
-          self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'widget:'+ el[0];
+        if (self.debug) {console.log('application: widget: ' + el[0] + '.activate(beehive)')}
+        try {
+          var plugin = el[1];
+          var children;
+          if ('activate' in plugin) {
+            children = plugin.activate(hardenedBee = beehive.getHardenedInstance());
+            self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'widget:' + el[0];
+            if (children) {
+              self._registerBarbarianChildren('widget', el[0], children);
+            }
+          }
+        }
+        catch (e) {
+          console.error('Error activating:' +el[0]);
+          console.error(e);
         }
       });
 
       this.__activated = true;
+    },
+
+    /**
+     * I think the analogy is getting over-stretched; it is true that the author of this application
+     * loves history, and you could find many analogies...but let me hope that I would never treat
+     * humans in the same way I name variable names and methods :_)
+     *
+     * @param key
+     * @param children
+     * @private
+     */
+    _registerBarbarianChildren: function(category, prefix, children) {
+      _.each(children, function(child, key) {
+        var name = prefix + '-' + (child.name || key);
+        if (this.debug)
+          console.log('adding child object to registry: ' + name);
+        this.__barbarianRegistry[child.beehive.getService('PubSub').getCurrentPubSubKey().getId()] = category + ':' + name;
+        if (category == 'widget') {
+          if (this.hasWidget(name)) throw new Error('There already exists a widget with name: ' + name);
+          this.__widgets.add(name, child.object);
+        }
+        else {
+          if (this.hasPlugin(name)) throw new Error('There already exists a plugin with name: ' + name);
+          this.__plugins.add(name, child.object);
+        }
+      }, this);
     },
 
     getPluginOrWidgetName: function(psk) {

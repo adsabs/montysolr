@@ -36,7 +36,8 @@ define([
       SEARCH_CYCLE_STOP_MONITORING: -5,
       SEARCH_CYCLE_FINISHED: -6,
       QUERY_ASSISTANT: -7,
-      ALERT: -8
+      ALERT: -8,
+      CANNOT_ROUTE: -9
     };
 
     var _codes = {};

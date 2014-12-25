@@ -29,9 +29,15 @@ define([
       var widgets = _.map(pubsubKeys, function(psk) {
         var n = app.getPluginOrWidgetName(psk);
         if (n && n.indexOf('widget:') > -1) {
-          var w = app.getPluginOrWidgetByPubSubKey(psk);
-          if (w)
-            return [psk, w];
+          try {
+            var w = app.getPluginOrWidgetByPubSubKey(psk);
+            if (w)
+              return [psk, w];
+          }
+          catch (e) {
+            if (e.message && e.message.indexOf('Cant find barbarian with ID') > -1) return;
+            throw e;
+          }
         }
       });
       return _.filter(widgets);

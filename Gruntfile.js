@@ -390,8 +390,8 @@ module.exports = function(grunt) {
             "widgets/dropdown-menu/widget.js":78,
             "widgets/list_of_things/paginated_view.js":78,
             "wraps/paper_network.js": 74, // some tests don't run properly in phantomjs,
-            "wraps/discovery_mediator.js": 20, // these two guys are complex to test (but i'll do it)
-            "mixins/feedback_handling.js": 21
+            "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i'll do it)
+            "mixins/feedback_handling.js": 0
 
           }
         }

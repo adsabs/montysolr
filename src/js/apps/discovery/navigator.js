@@ -40,10 +40,6 @@ define([
         var self = this;
         var queryUpdater = new ApiQueryUpdater('navigator');
 
-        pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, function() {
-          self.navigate('results-page')
-        });
-
         var publishFeedback = function(data) {
           self.pubsub.publish(self.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data))
         };
@@ -62,14 +58,14 @@ define([
 
         this.set('index-page', function() {
           app.getObject('MasterPageManager').show('LandingPage');
-          var q = app.getWidget('SearchWidget').getCurrentQuery();
-          this.route = '#/' + queryUpdater.clean(q).url();
+          var q = app.getObject('AppStorage').getCurrentQuery();
+          this.route = '#index/' + queryUpdater.clean(q).url();
         });
         this.set('results-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',
             searchPageAlwaysVisible);
-          var q = app.getWidget('SearchWidget').getCurrentQuery();
-          this.route = '#/' + queryUpdater.clean(q).url();
+          var q = app.getObject('AppStorage').getCurrentQuery();
+          this.route = '#search/' + queryUpdater.clean(q).url();
         });
         this.set('export-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',
