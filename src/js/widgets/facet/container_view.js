@@ -61,15 +61,18 @@ define(['backbone', 'marionette',
 
       itemViewContainer:".widget-body",
 
-      events: function () {
-        var addEvents;
-        addEvents = {
-          "click .dropdown-toggle": "enableLogic",
-          "click .dropdown-menu .close": "closeLogic",
-          "click .logic-container input": "onLogic"
-        };
-        return _.extend(_.clone(ContainerView.prototype.events), addEvents);
+      events: {
+
+        "click .widget-name > h5": "toggleWidget",
+        "click .widget-options.top": "onClickOptions",
+        "click .widget-options.bottom": "onClickOptions",
+        "click .widget-name .main-caret" : "toggleWidget",
+        "click .dropdown-toggle": "enableLogic",
+        "click .dropdown-menu .close": "closeLogic",
+        "click .logic-container input": "onLogic"
+
       },
+
 
       itemViewOptions: function (model, index) {
 //       merging in options from factory stage
@@ -104,12 +107,15 @@ define(['backbone', 'marionette',
         if (this.logicOptions) {
           this.refreshLogicTooltip();
           this.closeLogic();
-
         }
       },
 
+      getNumHidden: function() {
+        return this.$(".widget-body:first").children('.item-view.hide').length;
+      },
+
       onShowMore: function() {
-        this.trigger('fetchMore', this.$(".widget-body:first").children('.item-view.hide').length);
+        this.trigger('fetchMore', this.getNumHidden());
       },
 
       displayMore: function(howMany) {
@@ -128,22 +134,19 @@ define(['backbone', 'marionette',
 
       disableShowMore: function(text) {
         var $sm = this._getShowMore();
-        $sm.text('');
+        $sm.addClass('hide');
       },
 
       enableShowMore: function(text) {
         var $sm = this._getShowMore();
-        $sm.text('show more');
+        $sm.removeClass('hide');
+        //$sm.text('show more');
       },
 
       _getShowMore: function() {
         var $o = this.$('.widget-options.bottom:first');
-        //console.log($o.html())
         var $sm = $o.find("button[wtarget=ShowMore]");
-        //console.log($sm)
         if (!$sm.length) {
-        //  console.log("show more", $sm)
-
           $sm = $('<button class="btn btn-xs btn-link" wtarget="ShowMore">show more</button>');
           $o.append($sm);
         }
@@ -152,13 +155,10 @@ define(['backbone', 'marionette',
 
 
       closeLogic: function (e) {
-
         if (e){
           e.stopPropagation();
         }
-
         this.$(".logic-dropdown").addClass("hide").removeClass("open");
-
       },
 
 

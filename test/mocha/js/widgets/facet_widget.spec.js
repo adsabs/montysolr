@@ -82,7 +82,7 @@ define([
 
         $w = $(w.render().el);
         expect($w.find('h5').text().trim()).to.be.equal('Facet Title');
-        expect($w.find('.widget-body').text().trim()).to.be.equal('No content to display.');
+        expect($w.find('.widget-body').text().indexOf('No content to display.') > -1).to.be.true;
         done();
       });
 

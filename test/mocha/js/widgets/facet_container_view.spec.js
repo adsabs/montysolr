@@ -86,7 +86,7 @@ define([
           expect($v.find('.item-view').filter('.hide').length).to.be.equal(0);
 
           view.disableShowMore("foo");
-          expect($v.find('button[wtarget="ShowMore"]').text()).to.be.equal('');
+          expect($v.find('button[wtarget="ShowMore"]').hasClass('hide')).to.be.equal(true);
 
           done();
         });

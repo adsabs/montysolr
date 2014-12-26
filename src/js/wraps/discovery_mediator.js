@@ -75,6 +75,11 @@ define([
           }
         }))
       }
+      else {
+        this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
+          type: Alerts.TYPE.INFO,
+          msg: null}));
+      }
 
       // too many results, draw their attention to the search form
       if (feedback.numFound > 1000) {
