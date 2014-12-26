@@ -9,7 +9,8 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
         "facet": "true",
         "facet.mincount": "1",
         "fl": "id",
-        "facet.query": 'property:refereed'
+        "facet.query": 'property:refereed',
+        'facet.limit': 5
       },
       // this is optimization, we'll execute only one query (we don't even facet on
       // other values). There is a possibility is is OK (but could also be wrong;

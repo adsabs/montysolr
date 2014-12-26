@@ -67,8 +67,28 @@ define(['backbone',
        */
       processFacetResponse: function (apiResponse, data) {
 
+        var info = this.registerResponse(apiResponse, data);
+        var facets = this.extractFacets(apiResponse);
+
+        // no data for us
+        if (!facets) {
+          console.warn('No facet data for:', this.facetField);
+          return;
+        }
+
+        var facetCollection = this.processFacets(apiResponse, facets);
+        this.updateCollectionAndView(info, facetCollection);
+
+      },
+
+      registerResponse: function(apiResponse, data) {
         var query = apiResponse.getApiQuery();
         var paginator = this.findPaginator(query).paginator;
+
+        var facetLimit = -1;
+        if (apiResponse.has('responseHeader.params["facet.limit"]')) {
+          facetLimit = parseInt(apiResponse.get('responseHeader.params["facet.limit"]'));
+        }
 
         paginator.setMaxNum(this.maxDisplayNum || 100); // even if not good for facets; it is important that maxNum be > -1
         //console.log('setting maxNum    ', paginator.maxNum, query.url());
@@ -89,9 +109,16 @@ define(['backbone',
         else {
           this.setCurrentQuery(query);
         }
+        return {query: query, paginator: paginator, view: view,
+          collection: coll, maxDisplayNum: view.maxDisplayNum,
+          numFound: apiResponse.get('response.numFound'),
+          facetLimit: facetLimit
+        };
+      },
 
-
+      extractFacets: function(apiResponse) {
         var facets;
+        var query = apiResponse.getApiQuery();
         var extractor = this.getExtractorChain();
 
         if (extractor) {
@@ -106,21 +133,17 @@ define(['backbone',
           var facetPath = "facet_counts.facet_fields." + fField;
           facets = apiResponse.get(facetPath);
         }
+        return facets;
+      },
 
-        // no data for us
-        if (!facets) {
-          console.warn('No facet data for:', this.facetField);
-          //coll.reset();
-          return;
-        }
-
+      processFacets: function(apiResponse, facets) {
         var facetsCol = [];
         var l = facets.length;
         var fValue, fNum;
+        var numFound = apiResponse.get('response.numFound');
         var preprocessorChain = this.getPreprocessorChain();
 
         for (var i=0; i<l; i=i+2) {
-
           fValue = facets[i];
           fNum = facets[i+1];
 
@@ -128,41 +151,61 @@ define(['backbone',
           if (preprocessorChain) {
             modifiedValue = preprocessorChain.call(this, fValue);
           }
-
           var d = {
-            total : apiResponse.toJSON().response.numFound,
+            total : numFound,
             title: modifiedValue,
             value: fValue,
             count: fNum,
             modified: modifiedValue,
             children: []
           };
-
           facetsCol.push(d)
+        }
+        return facetsCol;
+      },
 
-        };
+      updateCollectionAndView: function(info, facetCollection) {
+        var collection = info.collection;
+        var view = info.view;
+        var paginator = info.paginator;
 
 
         if (paginator.getCycle() <= 1) {
-          coll.reset(facetsCol.slice(0, view.maxDisplayNum));
+          collection.reset(facetCollection.slice(0, view.maxDisplayNum));
         }
         else {
-          var a = view.maxDisplayNum - coll.length;
-          if (a > 0)
-            coll.add(facetsCol.slice(0, a));
+          var a = view.maxDisplayNum - collection.length;
+          if (a > 0) {
+            collection.add(facetCollection.slice(0, a));
+          }
         }
-
 
         // for the first level display only (nested levels are triggered through toggleChildren)
         //if (paginator.getCycle() <= 1 && this.view === view) {
         //  view.displayMore(this.view.displayNum);
         //}
 
-        if (facetsCol.length > 0) { // we got a full batch (so we'll assume there is more)
-          view.enableShowMore();
+        // with facets, it is hard to decide whether there is more data waiting to be fetched
+        if (facetCollection.length < view.displayNum) {
+          view.disableShowMore();
         }
         else {
-          view.disableShowMore();
+          // this assumes facets are exclusive, ie their counts sum up to the total
+          //if (info.numFound > 0) {
+          //  // count the number of all facets we already have
+          //  var total = 0;
+          //  collection.each(function(model) {
+          //    total += model.attributes.count;
+          //  });
+          //  if (total < info.numFound) {
+          //    view.enableShowMore();
+          //  }
+          //  else {
+          //    view.disableShowMore();
+          //  }
+          //}
+
+          view.enableShowMore();
         }
       },
 
