@@ -11,8 +11,8 @@ define([
 
   var links = [
     {href : '/results/author-network' , description : 'Author Network' , navEvent: 'show-author-network'},
-    {href : '/results/paper-network' , description : 'Paper Network' , navEvent: 'show-paper-network'}
-
+    {href : '/results/paper-network' , description : 'Paper Network' , navEvent: 'show-paper-network'},
+    {href : '/results/wordcloud' , description : 'Word Cloud', navEvent: 'show-wordcloud'}
 
   ];
 

@@ -68,6 +68,12 @@ define([
             ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
 
         });
+        this.set('show-wordcloud', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+          app.getObject('MasterPageManager').show('SearchPage',
+            ['WordCloud'].concat(searchPageAlwaysVisible.slice(1)));
+
+        });
         this.set('show-paper-network', function() {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',

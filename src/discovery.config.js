@@ -56,6 +56,7 @@ require.config({
         VisualizationDropdown : 'js/wraps/visualization_dropdown',
         AuthorNetwork : 'js/wraps/author_network',
         PaperNetwork : 'js/wraps/paper_network',
+        WordCloud : 'js/widgets/wordcloud/widget',
 
         MetricsDropdown : 'js/wraps/metrics_dropdown',
         Metrics :  'js/widgets/metrics/widget',
