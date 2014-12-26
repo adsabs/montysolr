@@ -12,6 +12,7 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       access_token: null,
       refresh_token: null,
       expires_in: null,
+      defaultTimeoutInMs: 60000,
 
       done: function( data, textStatus, jqXHR ) {
         // TODO: check the status responses
@@ -48,7 +49,7 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
       u = u.substring(0, this.url.length-2) + u.substring(this.url.length-2, u.length).replace('//', '/');
 
       if (!u) {
-        throw Error("Sorry, dude, you can't use api without url");
+        throw Error("Sorry, you can't use api without url");
       }
 
       var opts = {
@@ -59,7 +60,8 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
         contentType: 'application/x-www-form-urlencoded',
         cache: false,
         headers: {"X-BB-Api-Client-Version": this.clientVersion},
-        context: {request: request, api: self }
+        context: {request: request, api: self },
+        timeout: this.defaultTimeoutInMs
       };
 
       if (this.access_token) {
