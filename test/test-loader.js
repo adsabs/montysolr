@@ -12,7 +12,7 @@ define([
     ){
     "use strict";
 
-    /*globals mocha, expect, chai */
+    /*globals mocha, expect, chai,bbbTest */
     chai.Assertion.includeStack = true;
 
     mocha.setup('bdd');
@@ -21,6 +21,9 @@ define([
     window.expect = chai.expect;
     window.assert = chai.assert;
     window.should = chai.should;
+    if (!window.bbbTest) {
+      throw new Error('You should set window.bbbTest before you call test-loader');
+    }
 
     if (window.mochaPhantomJS) {
       var stringify = JSON.stringify;
@@ -83,25 +86,41 @@ define([
     var suites = _.map(args, function(m) {return '../test/mocha/' + m});
     var testBase = '../../test/mocha/js/';
 
-    console.log('About to load testsuite(s): ' + JSON.stringify(suites));
-    console.log('window.location=' + window.location + ' (testBase=' + testBase + ')');
 
-    require(suites, function() { // load the test suites
 
-      var tests = [];
-      _.each(arguments, function (suite) {
-        tests = tests.concat(suite);
-      });
-      tests = _.map(tests, function(t) {return testBase + t});
+    $.ajax({
+      type: "GET",
+      url: "/api/v1/search",
+      data: "q=*:*",
+      dataType: "json",
+      success: function(data) {
+        if (data.responseHeader) {
+          window.bbbTest.serverReady = true;
+          console.log('We seem to have access to the api, setting serverReady=true');
+        }
+      }
+    }).always(function() {
+      console.log('About to load testsuite(s): ' + JSON.stringify(suites));
+      console.log('window.location=' + window.location + ' (testBase=' + testBase + ')');
 
-      require(tests, function() {
-        console.log('tests are loaded');
+      require(suites, function() { // load the test suites
 
-        $('document').ready(function() {
-          // Run test on command line or in browser
-          (window.mochaPhantomJS || mocha).run();
+        var tests = [];
+        _.each(arguments, function (suite) {
+          tests = tests.concat(suite);
         });
+        tests = _.map(tests, function(t) {return testBase + t});
 
-      })
+        require(tests, function() {
+          console.log('tests are loaded');
+          $('document').ready(function () {
+            // Run test on command line or in browser
+            (window.mochaPhantomJS || mocha).run();
+          });
+
+        })
+      });
     });
+
+
   });
