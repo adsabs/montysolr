@@ -6,26 +6,9 @@ define(['underscore',
             MinimalPubsub) {
 
 
-    describe("UI QueryBuilder - using live server", function () {
+    describe("UI QueryBuilder - using live server (query_builder/plugin.testcases.spec.js)", function () {
 
-      var liveServerReady;
-      var isApiAvailable = function () {
-        liveServerReady = false;
-        $.ajax({
-          type: "GET",
-          url: "/api/1/qtree",
-          data: "q=*:*",
-          dataType: "json",
-          async: false,
-          success: function (data) {
-            if (data.responseHeader)
-              liveServerReady = true;
-          }
-        });
-        return liveServerReady;
-      };
-
-      this.pending = !isApiAvailable();
+      this.pending = !window.bbbTest.serverReady;
 
       var minsub, queryBuilder;
       beforeEach(function(done) {

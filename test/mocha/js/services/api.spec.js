@@ -2,11 +2,26 @@
  * Created by rchyla on 3/28/14.
  */
 
-define(['jquery', 'underscore',
-  'js/services/api', 'js/components/api_request', 'js/components/api_query', 'js/components/api_response'], function($, _, Api, ApiRequest, ApiQuery, ApiResponse) {
-  describe("Api Service (API)", function() {
-    beforeEach(function() {
+define([
+  'jquery',
+  'underscore',
+  'js/services/api',
+  'js/components/api_request',
+  'js/components/api_query',
+  'js/components/api_response'
+], function(
+  $,
+  _,
+  Api,
+  ApiRequest,
+  ApiQuery,
+  ApiResponse
+  ) {
+
+  describe("Api Service (api.spec.js)", function() {
+    beforeEach(function(done) {
       this.server = sinon.fakeServer.create();
+      this.server.autoRespond = false;
       this.server.respondWith(/\/api\/1\/search.*/,
         [200, { "Content-Type": "application/json" }, validResponse]);
       this.server.respondWith(/\/api\/1\/parseerror.*/,
@@ -14,11 +29,13 @@ define(['jquery', 'underscore',
       this.server.respondWith(/\/api\/1\/error.*/,
         [500, { "Content-Type": "application/json" }, validResponse.substring(2)]);
       //sinon.stub($, 'ajax').yieldsTo('done', apiResponseOK);
+      done();
     });
 
-    afterEach(function() {
+    afterEach(function(done) {
       this.server.restore();
       //$.ajax.restore();
+      done();
     });
 
     it('should return API object', function(done) {
@@ -40,45 +57,48 @@ define(['jquery', 'underscore',
       done();
     });
 
-    it("should look at the ApiRequest to check whether to send a get (with url data) or post request (with json data)", function(){
+    it("should look at the ApiRequest to check whether to send a get (with url data) or post request (with json data)", function(done){
 
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
 
       var q = new ApiQuery({q: 'foo'});
 
       api.request(new ApiRequest({target: 'search', query: q}));
+      this.server.respond();
 
       expect(this.server.requests[0].method).to.eql("GET");
       expect(this.server.requests[0].requestHeaders["Content-Type"]).to.eql("application/x-www-form-urlencoded");
 
       var q = new ApiQuery({q: 'foo'});
-
       api.request(new ApiRequest({target: 'search', query: q, options : {method : "POST", contentType: 'application/json' }}));
+      this.server.respond();
 
       expect(this.server.requests[1].method).to.eql("POST");
       expect(this.server.requests[1].url).to.eql("/api/1/search");
       expect(this.server.requests[1].requestHeaders["Content-Type"]).to.eql('application/json;charset=utf-8');
       expect(this.server.requests[1].requestBody).to.eql("{\"q\":[\"foo\"]}");
-
+      done();
 
     });
 
-    it("should call appropriate callback upon arrival of data", function() {
+    it("should call appropriate callback upon arrival of data", function(done) {
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
       sinon.stub(api, 'trigger');
       var q = new ApiQuery({q: 'foo'});
 
       expect(api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}))).to.be.OK;
       this.server.respond();
+
       expect(api.trigger.calledOnce).to.be.true;
       var a = api.trigger.firstCall.args;
       expect(a[0]).to.be.equal('api-response');
       expect(a[1]).to.be.instanceof(ApiResponse);
       expect(a[1].getApiQuery()).to.be.instanceof(ApiQuery);
       expect(a[1].getApiQuery()).to.eql(q);
+      done();
     });
 
-    it("should call error handlers on failed request", function() {
+    it("should call error handlers on failed request", function(done) {
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
       sinon.stub(api, 'trigger');
       var q = new ApiQuery({q: 'foo'});
@@ -93,6 +113,7 @@ define(['jquery', 'underscore',
       expect(a[2].status).to.be.eql(500); //jqXHR
       expect(a[3]).to.be.OK; //textStatus
       expect(a[4]).to.be.equal('Internal Server Error'); //errorThrown
+      done();
     });
 
     it("should call error handlers when response is not valid", function() {
@@ -213,42 +234,33 @@ define(['jquery', 'underscore',
 
   });
 
-  describe("API Service - using live server (API)", function() {
 
-    var isApiAvailable = function() {
-      liveServerReady = false;
-      $.ajax({
-        type: "GET",
-        url: "/api/1/search",
-        data: "q=*:*",
-        dataType: "json",
-        async: false,
-        success: function(data) {
-          if (data.responseHeader)
-            liveServerReady = true;
-        }
-      });
-      return liveServerReady;
-    };
+  describe("API Service - using live server (api.spec.js)", function() {
 
-    this.pending = !isApiAvailable();
+    this.pending = !window.bbbTest.serverReady;
 
     it("should retrieve data from server using GET and POST (default)", function(done) {
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
       var q = new ApiQuery({q: 'foo'});
       var spy = sinon.spy();
 
-      var f = function() {expect(arguments[0].response.numFound).to.be.gt(1)};
+      var f = function() {
+        console.log('received', arguments);
+        expect(arguments[0].response.numFound).to.be.defined;
+      };
 
-      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f, type: "GET"});
+      var defers = [];
 
-      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f, type: "POST"});
+      defers.push(api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f, type: "GET"}));
+      defers.push(api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f, type: "POST"}));
+      defers.push(api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f}))
+      defers.push(api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'})).done(f));
 
-      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'}), {done: f});
+      $.when(defers).then(function() {
+        done();
+      });
 
-      api.request(new ApiRequest({target: 'search', query: q, sender: 'woo'})).done(f);
-
-      done();
     });
   });
+
 });
