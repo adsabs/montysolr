@@ -82,7 +82,7 @@ define([
     };
 
 
-    var args = getUrlParam('bbbSuite', ['core-suite']);
+    var args = getUrlParam('bbbSuite', ['discovery-suite']);
     var suites = _.map(args, function(m) {return '../test/mocha/' + m});
     var testBase = '../../test/mocha/js/';
 
