@@ -413,7 +413,7 @@ module.exports = function(grunt) {
           log : true,
           logErrors: true,
           moduleThreshold : 80,
-          modulePattern : "../../src/js/(.*)",
+          modulePattern : "../../js/(.*)",
           customModuleThreshold: {
             "widgets/facet/graph-facet/h_index_graph.js":2,
             "widgets/facet/graph-facet/year_graph.js":2,
