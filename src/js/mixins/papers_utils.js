@@ -131,7 +131,7 @@ define([
       }
       //if details/highlights
       data.details = data.details? data.details.highlights : undefined;
-      data.pubdate = data.pubdate ? this.formatDate(data.pubdate) : undefined;
+      data.formattedDate = data.pubdate ? this.formatDate(data.pubdate) : undefined;
       data.shortAbstract = data.abstract? this.shortenAbstract(data.abstract) : undefined;
 
       data.num_citations = data["[citations]"] ? data["[citations]"]["num_citations"] : undefined;

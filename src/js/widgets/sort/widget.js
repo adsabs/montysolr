@@ -22,7 +22,7 @@ define(['marionette',
       defaults: function () {
         return {
           sortOptions : [{value: "score", title: "Relevancy", default: true },
-          {value: "pubdate", title: "Publication Date" },
+          {value: "date", title: "Publication Date" },
           {value: "citation_count", title: "Citation Count" },
           {value: "read_count", title: "Popularity" }],
 

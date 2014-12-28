@@ -283,7 +283,7 @@ define([
             query.set("sort", "first_author asc")
           }
           if (!operator) {
-            query.set("sort", "pubdate desc");
+            query.set("sort", "date desc");
           }
         }
       },

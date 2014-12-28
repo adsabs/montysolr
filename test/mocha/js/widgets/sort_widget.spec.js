@@ -136,15 +136,15 @@ define([
 
         // simulate the click (works in phantomjs)
         $("input[value=score]").attr('checked', false);
-        $("input[value=pubdate]").attr('checked', true);
+        $("input[value=date]").attr('checked', true);
         $("input[value=desc]").attr('checked', false);
         $("input[value=asc]").attr('checked', true);
-        w.view.$("input[value=pubdate]").click();
+        w.view.$("input[value=date]").click();
         w.view.$("input[value=asc]").click();
 
         w.view.$("button.choose-sort").click();
 
-        expect(pubSubStub.lastCall.args[1].get("sort")[0]).to.eql("pubdate asc");
+        expect(pubSubStub.lastCall.args[1].get("sort")[0]).to.eql("date asc");
 
       })
 

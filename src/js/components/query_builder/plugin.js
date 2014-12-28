@@ -229,8 +229,8 @@ define([
                     values: {
                       'citation_count desc': 'Pick first n most cited',
                       'citation_count asc': 'Pick first n least cited',
-                      'pubdate desc': 'Pick first n newest',
-                      'pubdate asc': 'Pick first n oldest',
+                      'date desc': 'Pick first n newest',
+                      'date asc': 'Pick first n oldest',
                       'relevance': 'Pick first n most relevant'
                     }
                   }

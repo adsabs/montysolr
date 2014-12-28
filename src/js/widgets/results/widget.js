@@ -38,7 +38,7 @@ define([
       defaultQueryArguments: {
           hl     : "true",
           "hl.fl": "title,abstract,body",
-          fl     : 'title,abstract,bibcode,author,keyword,id,links_data,ids_data,[citations],pub,aff,email,volume,date,pubdate',
+          fl     : 'title,abstract,bibcode,author,keyword,id,links_data,ids_data,[citations],pub,aff,email,volume,pubdate',
           rows : 25,
           start : 0
       },
@@ -145,7 +145,7 @@ define([
             d.num_citations = 0;
           }
 
-          d.formattedDate = d.pubdate ? self.formatDate(d.pubdate, {format: 'mm/yy', missing: {day: 'mm/yy', month: '__/yy'}}) : undefined;
+          d.formattedDate = d.pubdate ? self.formatDate(d.pubdate, {format: 'yy/mm', missing: {day: 'yy/mm', month: 'yy'}}) : undefined;
 
           d.details.shortAbstract = d.abstract? self.shortenAbstract(d.abstract) : undefined;
 
