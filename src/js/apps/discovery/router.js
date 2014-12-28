@@ -3,7 +3,7 @@ define([
     'backbone',
     'js/components/api_query',
     'js/mixins/dependon',
-    'hbs!404',
+    'hbs!./404',
     'js/components/api_feedback'
 
   ],

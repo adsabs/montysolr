@@ -4,7 +4,7 @@
     <title>Mocha Tests</title>
 
     <link rel="stylesheet" href="../../bower_components/mocha/mocha.css"/>
-    <link rel="stylesheet" href="../../src/styles/css/styles.css"/>
+    <link rel="stylesheet" href="../../styles/css/styles.css"/>
 </head>
 <body>
 <div id="mocha"></div>
@@ -25,12 +25,12 @@
 
     <!-- Now start our application
          When we point to our application, we are using the same configuration -->
-    <script data-main="../../src/discovery.config" src="../../src/libs/requirejs/require.js"></script>
+    <script data-main="../../discovery.config" src="../../libs/requirejs/require.js"></script>
 
     <!-- Activate coverage support -->
     <script type="text/javascript"
             src="../../node_modules/blanket/dist/qunit/blanket.js"
-            data-cover-only="../../src/js"
+            data-cover-only="../../js"
             ></script>
     <script type="text/javascript" src="../../node_modules/grunt-blanket-mocha/support/mocha-blanket.js"></script>
 

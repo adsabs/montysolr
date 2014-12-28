@@ -9,11 +9,11 @@ module.exports = function(grunt) {
 
     // Wipe out previous builds and test reporting.
     clean: {
-      dist: {
-        src: ['dist/', 'test/reports']
+      release: {
+        src: ['dist/']
       },
       bower: {
-        src: ['./bower_components']
+        src: ['./bower_components', 'test/reports']
       }
     },
 
@@ -60,46 +60,79 @@ module.exports = function(grunt) {
       //this has to go into css folder
       move_jqueryuicss : {
         cmd : 'cp -r bower_components/jqueryui/themes/smoothness/ src/styles/css/'
+      },
+      latest_commit: {
+        cmd: 'git rev-parse --short=7 --verify HEAD | cat > git-latest-commit'
+      },
+      latest_tag: {
+        cmd: 'git describe --abbrev=0 | cat > git-latest-release-tag'
+      },
+      git_describe: {
+        cmd: 'git describe | cat > git-describe'
       }
     },
 
-    // This task uses James Burke's excellent r.js AMD builder to take all
-    // modules and concatenate them into a single file.
+    // Task to minify modules/css; it should run only after files were
+    // copied over to the 'dist' folder
     requirejs: {
-
-      baseUrl: 'src/js', // this is needed just for the 'stupid' list task
-
-      options: {
-        //baseUrl: 'src/js',
-        //mainConfigFile: 'src/js/config.js',
-        dir: 'dist/js',
-        baseUrl: 'src/js'
-        //appDir:'src/js'
-      },
-
+      baseUrl: 'dist/js', // this is needed just for the 'stupid' list task
       release: {
         options: {
-          generateSourceMaps: true,
-
+          baseUrl: 'dist/js',
+          allowSourceOverwrites: true,
+          keepBuildDir: true,
+          generateSourceMaps: false,
+          removeCombined: true,
           optimize: 'uglify2',
-
-          // Since we bootstrap with nested `require` calls this option allows
-          // R.js to find them.
           findNestedDependencies: true,
-
-          // Include a minimal AMD implementation shim.
-          name: '../libs/almond/almond',
-
-          // Wrap everything in an IIFE.
           wrap: true,
-
-          // Do not preserve any license comments when working with source
-          // maps.  These options are incompatible.
-          preserveLicenseComments: false
+          preserveLicenseComments: false,
+          dir: 'dist/js',
+          uglify2: {
+            output: {
+              beautify: false
+            },
+            warnings: true,
+            mangle: false
+          }
+        }
+      },
+      release_css: {
+        options: {
+          keepBuildDir: true,
+          allowSourceOverwrites: true,
+          baseUrl: 'dist/styles/css',
+          removeCombined: true,
+          dir: 'dist/styles/css',
+          optimizeCss: "standard"
         }
       }
     },
 
+    // add md5 checksums to the distribution files
+    'hash_require': {
+      /* find js/css files, and add hash (md5 checksum) to them
+       */
+      js: {
+        options: {
+          mapping: 'dist/jsmap.json',
+          destBasePath: 'dist/',
+          srcBasePath: 'dist/',
+          flatten:false
+        },
+        src: ['dist/js/**/*.js']
+      },
+      css: {
+        options: {
+          mapping: 'dist/cssmap.json',
+          destBasePath: 'dist/',
+          srcBasePath: 'dist/',
+          flatten:false
+        },
+        src: ['dist/styles/css/styles.css']
+      }
+
+    },
 
     // Minfiy the distribution CSS. This is of limited value to us, for two
     // reasons: 1) css imports are not working 2) the task doesn't seem to
@@ -149,9 +182,8 @@ module.exports = function(grunt) {
       },
       dev: {
         HOMEDIR: 'src'
-        //DEBUG: 'express:*'
       },
-      prod: {
+      release: {
         HOMEDIR: 'dist'
       }
     },
@@ -168,7 +200,7 @@ module.exports = function(grunt) {
           script: 'server.js'
         }
       },
-      prod: {
+      release: {
         options: {
           port: '<%= local.port_production || 5000 %>',
           script: 'server.js'
@@ -191,6 +223,11 @@ module.exports = function(grunt) {
       server: {
         files: ['./Gruntfile', './src/js/**/*.js', './src/*.js', './src/*.html', './server.js', './src/styles/css/*.css'],
         tasks: ['env:dev', 'express:dev']
+      },
+
+      release: {
+        files: ['./dist/*'],
+        tasks: ['env:release', 'express:release']
       },
 
       local_testing: {
@@ -278,7 +315,7 @@ module.exports = function(grunt) {
     },
 
     // copy files from src into the distribution folder (but remove
-    // src top level)
+    // 'src' top level)
     copy: {
       release: {
         files: [{
@@ -294,6 +331,27 @@ module.exports = function(grunt) {
       discovery_vars: {
           src: 'src/discovery.vars.js.default',
           dest: 'src/discovery.vars.js'
+      },
+      keep_original: {
+        files: [{
+          expand: true,
+          src: ['./dist/index.html', 'dist/discovery.config.js'],
+          dest: 'dist/',
+          rename: function(dest, src) {
+            var x = src.split('.');
+            return x.slice(0, x.length-1).join('.') + '.original.' + x[x.length-1];
+          }
+        }]
+      },
+      foo: {
+        files: [{
+          src: ['./src/js/components/**/*.js'],
+          dest: 'dist/',
+          expand: true,
+          rename: function(dest, src) {
+            return dest + src.replace('/src/', '/');
+          }
+        }]
       }
     },
 
@@ -326,7 +384,7 @@ module.exports = function(grunt) {
         banner: "/*! <%= pkg.name %> <%= grunt.template.today('yyyy-mm-dd') %> */\n"
       },
       build: {
-        src: 'src/js/**/*.js',
+        src: 'dist/js/**/*.js',
         dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
@@ -334,7 +392,7 @@ module.exports = function(grunt) {
     less: {
       development: {
         options : {
-           compress: true,
+          compress: true,
           yuicompress: true,
           optimization: 2
         },
@@ -355,7 +413,7 @@ module.exports = function(grunt) {
           log : true,
           logErrors: true,
           moduleThreshold : 80,
-          modulePattern : "../../src/js/(.*)",
+          modulePattern : "../../js/(.*)",
           customModuleThreshold: {
             "widgets/facet/graph-facet/h_index_graph.js":2,
             "widgets/facet/graph-facet/year_graph.js":2,
@@ -461,6 +519,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-concurrent');
   grunt.loadNpmTasks('grunt-mocha');
   grunt.loadNpmTasks("grunt-blanket-mocha");
+  grunt.loadNpmTasks('grunt-hash-required');
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
@@ -473,34 +532,123 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.registerTask('assemble', 'Prepares release for distribution', function() {
+    var chalk = require('chalk');
+    var src = 'dist/discovery.config.original.js';
+    var jsMap = grunt.file.readJSON('dist/jsmap.json');
+    var cssMap = grunt.file.readJSON('dist/cssmap.json');
+    var config = grunt.file.read(src);
+    var gitDescribe = grunt.file.read('git-describe').trim();
 
-  // When running the default Grunt command, just lint the code.
-  grunt.registerTask('default', [
-    'env:dev',
-    'clean:dist',
-    'jshint',
-    'copy',
-    'processhtml',
-    'requirejs',
-    'compress'
-    //'cssmin',
-  ]);
+    // find out what version of bbb we are going to assemble
+    var tagInfo = gitDescribe.split('-');
+    var version;
+    if (tagInfo.length == 1) {
+      version = tagInfo[0]; // the latest tag is also the latest commit (we'll use tagname v1.x.x)
+    }
+    else {
+      version = tagInfo[2]; // use commit number instead of a tag
+    }
+
+
+    // test there is 'paths:' only once
+    var regex = /['"]*paths['"]*\s*:[ \n]*{/;
+    var m = regex.exec(config);
+    if (m.length !== 1) {
+      throw new Error('I cant find paths section, and refuse to continue for fear of breaking somehting');
+    }
+
+    // modify the jsMap, remove .js
+    var newMap = {};
+    for (var name in jsMap) {
+      newMap[name.replace('.js', '')] = jsMap[name].replace('.js', '');
+    }
+
+    //now the tricky part, read the values from the discovery.config and collect config['paths']
+    var paths = {};
+    var window = {};
+    var oldc = require.config; // just to be sure...
+    require.config = function(c) {
+      paths = c.paths;
+    };
+    console.log('Going to eval ' + tgt + '...');
+    eval(config);
+    require.config = oldc;
+
+    // for these guys, we'll do manual update
+    paths['config'] = paths['config'] + '.' + version;
+    paths['main'] = newMap['js/apps/discovery/main'];
+    paths['router'] = newMap['js/apps/discovery/router'];
+
+    // merge the two definition together (overwriting old defs if necessary)
+    for (var k in newMap) {
+      paths[k] = newMap[k];
+    }
+
+    // and replace the string
+    var firstPart = config.substring(0, m.index);
+    var lastPart = config.substring(m.index + m[0].length, config.length);
+    var newConfig = firstPart + 'paths: ' + JSON.stringify(paths, null, '  ') + ',\n' + m[0].replace('paths', 'oldpaths') + lastPart;
+
+    //console.log(paths);
+
+    var tgt = src.replace('original.js', version + '.js');
+    grunt.file.write(tgt, newConfig);
+    console.log(chalk.green('Updated: ' + tgt + ' section paths, with bust cache hashes'));
+
+    // now update the html
+    var indexHtml = grunt.file.read('dist/index.original.html');
+
+    // first the js path
+    var newHtml = indexHtml.replace('discovery.config', 'discovery.config.' + version);
+    // then also the css
+    for (var css in cssMap) {
+      newHtml = newHtml.replace(css, cssMap[css]);
+    }
+
+    grunt.file.write('dist/index.' + version + '.html', newHtml);
+    grunt.file.write('dist/index.html', newHtml);
+
+    console.log(chalk.green(
+    "=====================================================================\n" +
+    "OK, done! Your release is ready for deployment. But I recommend that\n"  +
+    "you test it, first make sure the development web server is not running\n" +
+    "then execute: grunt test:release\n" +
+    "\n" +
+    "Also make sure that you deploy correct values with dist/discovery.vars.js\n" +
+    "=====================================================================\n"))
+
+  });
+
+
+  // When running the default Grunt command, just setup the environment
+  grunt.registerTask('default', ['setup' ]);
 
   // starts a web server (automatically reloading)
   grunt.registerTask('server', ['env:dev',  "less", 'express:dev', 'concurrent:serverTasks']);
+  grunt.registerTask('server:release', ['env:release',  'express:release', 'watch:release']);
 
   // runs tests in a web server (automatically reloading)
   grunt.registerTask('test:web', ['env:dev', 'watch:web_testing']);
   grunt.registerTask('test:once', ['env:dev', 'express:dev', 'mocha_phantomjs:web_testing']);
   grunt.registerTask('test:sandbox', ['env:dev', 'watch:sandbox_testing']);
+  grunt.registerTask('test:release', ['env:release', 'express:dev', 'mocha_phantomjs:web_testing']);
 
   // runs tests (only once)
   grunt.registerTask('test', ['env:dev', 'express:dev', 'mocha_phantomjs:full_testing']);
 
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
-
   grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_jqueryuicss']);
   grunt.registerTask('coverage', ['env:dev', 'express:dev', 'blanket_mocha:full']);
+
+  grunt.registerTask('release',
+    [ 'setup',
+      'clean:release', 'copy:release',
+      'requirejs:release', 'requirejs:release_css',
+      'hash_require:js', 'hash_require:css',
+      'exec:git_describe', 'copy:keep_original',
+      'assemble'
+  ]);
 
 };

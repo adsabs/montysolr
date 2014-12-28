@@ -1,14 +1,10 @@
 // Main config file for the Discovery application
-
-
 require.config({
 
 
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
-  deps: window.bbbTest
-    ? [ window.bbbTest.testLoader ? window.bbbTest.testLoader : '../test/test-loader' ]
-    : [ 'js/apps/discovery/main'],
+  deps: window.bbbTest ? [window.bbbTest.testLoader ? window.bbbTest.testLoader : '../test/test-loader' ] : [ 'js/apps/discovery/main'],
 
   waitSeconds: 15,
 
