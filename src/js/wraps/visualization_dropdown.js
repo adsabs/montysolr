@@ -10,10 +10,9 @@ define([
   //config
 
   var links = [
+    {href : '/results/metrics' , description : 'Citation Metrics' , navEvent: 'show-metrics'},
     {href : '/results/author-network' , description : 'Author Network' , navEvent: 'show-author-network'},
     {href : '/results/paper-network' , description : 'Paper Network' , navEvent: 'show-paper-network'}
-
-
   ];
 
   var btnType = "btn-primary-faded";
