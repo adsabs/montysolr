@@ -9467,7 +9467,18 @@ define([
       paperNetwork.processResponse(new JsonResponse(testDataBig));
 
       $("#test").append(paperNetwork.view.el);
-      $("input[value=total_reads]").click();
+
+      var originalPath = d3.select("#vis-group-4").attr("d");
+
+      var fakeE = {};
+      fakeE.target =  $("input[value=total_reads]").get(0);
+
+      paperNetwork.view.graphView.toggleHeightSetting(fakeE);
+
+      //need to figure out how to compare path sizes
+
+      expect(originalPath).to.not.eql(d3.select("#vis-group-4").attr("d"));
+
 
     });
 

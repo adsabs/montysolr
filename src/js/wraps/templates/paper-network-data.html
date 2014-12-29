@@ -19,8 +19,11 @@
 <p>This group consists of <b>{{summaryData.paperCount}}</b> papers, which have been cited, in total, <b>{{summaryData.size}}</b>
     times.</p>
 
-
-<p>The <b>most cited </b> papers of this group are : </p>
+{{#unless noCitations}}
+<p>The <b>most cited </b> papers of this group include : </p>
+{{else}}
+<p>A few papers from this group : </p>
+{{/unless}}
 <ul class="list-unstyled">
     {{#each topNodes}}
 
