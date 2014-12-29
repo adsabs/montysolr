@@ -19,20 +19,20 @@
     'error_pages': {
       404: '404.html'
     }
-  }
+  };
 
   if (location.hash && location.hash.strip().length > 1) {
     location.pathname = config.root + config.error_pages['404']
   };
 
-  var path = location.pathname
+  var path = location.pathname;
   if ( location.pathname.indexOf(config.root) > -1) {
     path = path.replace(config.root,'');
   };
 
   function findApplicationRoute() {
     for (var i=0; i<config.routes.length; i++) {
-      var route = config.routes[i]
+      var route = config.routes[i];
       if (path.indexOf(route) > -1) {
         return config.root + '#' + path
       }
