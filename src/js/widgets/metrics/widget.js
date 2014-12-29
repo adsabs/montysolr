@@ -14,7 +14,8 @@ define([
   'hbs!./templates/citations_table',
   'hbs!./templates/indices_table',
   'hbs!./templates/reads_table',
-  'bootstrap'
+  'bootstrap',
+  'js/components/api_feedback'
 ], function (
   Marionette,
   nvd3,
@@ -30,7 +31,9 @@ define([
   PaperTableTemplate,
   CitationsTableTemplate,
   IndicesTableTemplate,
-  ReadsTableTemplate
+  ReadsTableTemplate,
+  bs,
+  ApiFeedback
   ) {
 
   var TableModel = Backbone.Model.extend({
@@ -417,7 +420,8 @@ define([
       this.childViews = {};
       //empty the container view
       _.each(this.view.regions, function(v,k){
-        this.view[k].currentView.close();
+        if (this.view[k].currentView)
+          this.view[k].currentView.close();
       }, this);
     },
 
@@ -464,6 +468,16 @@ define([
 
         //how is the json response formed? need to figure out why attributes is there
         response = response.attributes ? response.attributes : response;
+
+        // for now, metrics api returns errors as 200 messages, so we have to detect it
+        if (response.msg && response.msg.indexOf('Unable to get results') > -1) {
+          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please retry later.',
+            modal: true
+          }));
+          return;
+        }
 
         this.createTableViews(response);
 
@@ -631,6 +645,7 @@ define([
 
     //fetch data
     onShow : function(){
+      this.resetWidget();
       this.dispatchRequest(this.getCurrentQuery());
     }
 

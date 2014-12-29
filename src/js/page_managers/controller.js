@@ -117,7 +117,13 @@ define([
                   return; // skip widgets that are there only for debugging
                 }
                 $wcontainer.append(widget.el ? widget.el : widget.view.el);
-                self.widgets[widgetName].triggerMethod('show');
+                try {
+                  self.widgets[widgetName].triggerMethod('show');
+                }
+                catch (e) {
+                  console.error('Error when displaying widget: ' + widgetName, e.message, e.stack);
+                }
+
               }
               else {
                 console.warn('Cannot insert widget: ' + widgetName + ' (no selector [data-widget="' + widgetName + '"])');

@@ -48,7 +48,7 @@ define([
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
-          'VisualizationDropdown', 'MetricsDropdown', 'SearchWidget',
+          'VisualizationDropdown', 'SearchWidget',
           'Sort', 'AlertsWidget'
         ];
 
@@ -76,7 +76,6 @@ define([
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
             ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
-
         });
         this.set('show-paper-network', function() {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
@@ -89,6 +88,8 @@ define([
             ['Metrics'].concat(searchPageAlwaysVisible.slice(1)));
         });
         this.set("visualization-closed", this.get("results-page"));
+
+
         this.set('abstract-page', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowAbstract");
           app.getObject('MasterPageManager').show('DetailsPage',
