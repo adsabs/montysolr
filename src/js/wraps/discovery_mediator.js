@@ -73,7 +73,8 @@ define([
               arguments: newQuery
             }
           }
-        }))
+        }));
+        return; // do not bother with the rest
       }
       else {
         this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({

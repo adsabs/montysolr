@@ -106,23 +106,28 @@ define([
         this.set('ShowAbstract', function(){self.get('abstract-page').execute()});
         this.set('ShowCitations', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowCitations");
-          app.getObject('MasterPageManager').show('DetailsPage', ['ShowCitations'].concat(detailsPageAlwaysVisible));
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowCitations'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowReferences', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowReferences");
-          app.getObject('MasterPageManager').show('DetailsPage', ['ShowReferences'].concat(detailsPageAlwaysVisible));
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowReferences'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowCoreads', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowCoreads");
-          app.getObject('MasterPageManager').show('DetailsPage', ['ShowCoreads'].concat(detailsPageAlwaysVisible));
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowCoreads'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowTableOfContents', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowTableOfContents");
-          app.getObject('MasterPageManager').show('DetailsPage', ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowSimilar', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowSimilar").set("isActive", true);
-          app.getObject('MasterPageManager').show('DetailsPage', ['TOCWidget', 'ShowSimilar', 'SearchWidget', 'ShowResources',  'ShowRecommender']);
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowSimilar'].concat(detailsPageAlwaysVisible));
         });
         this.set('abstract-page:bibtex', function() { app.getObject('MasterPageManager').show('DetailsPage')});
         this.set('abstract-page:endnote', function() { app.getObject('MasterPageManager').show('DetailsPage')});
