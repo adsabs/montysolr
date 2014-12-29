@@ -274,7 +274,7 @@ define([
 
       var graphData  =this.model.get("summaryGraph");
 
-      // get sizes of each group for the outer radius scale
+      // get sizes of each group (average over total papers) for the outer radius scale
       var sizes = [];
       _.each(graphData.nodes, function (n) {
 
@@ -312,14 +312,16 @@ define([
           return i * fontScale(size);
         })
         .selectAll("text")
+        .attr("y", function (d, i, j) {
+          var size = graphData.nodes[j][val]/graphData.nodes[j].paperCount;
+          return i * fontScale(size);
+        })
         .attr("font-size", function (d, i, j) {
           var size = graphData.nodes[j][val]/graphData.nodes[j].paperCount;
           return fontScale(size) + "px";
         })
 
-
     };
-
 
     options.showDetailGraphView = function () {
 
@@ -347,7 +349,7 @@ define([
       //make a copy
       summaryData = $.extend({}, summaryData);
 
-      summaryData.processedTopCommonReferences = []
+      summaryData.processedTopCommonReferences = [];
 
       _.each(summaryData.topCommonReferences, function (v, k) {
 
@@ -367,6 +369,14 @@ define([
       }).reverse().slice(0, 5);
 
       var detailModel = new Backbone.Model();
+
+      //if there are no citations for any paper, let the template know
+
+      if (topNodes[0].citation_count === 0){
+
+        detailModel.set("noCitations", true);
+
+      }
 
       detailModel.set("summaryData", summaryData);
 
