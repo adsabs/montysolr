@@ -1,9 +1,11 @@
 define([
   "js/wraps/paper_network",
-  "js/components/json_response"
+  "js/components/json_response",
+  'js/components/api_query'
 ], function(
   PaperNetwork,
-  JsonResponse
+  JsonResponse,
+  ApiQuery
   ){
 
   describe("Paper Network UI Widget (paper_network_widget.spec.js)", function(){
@@ -9513,6 +9515,16 @@ define([
       paperNetwork.view.$("button.update-all").click();
       expect(paperNetwork.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
       expect(paperNetwork.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql('Click on a node in the detail view to add it to this list. You can then filter your current search to include only the selected items.');
+
+      // check we can select papers and send them to query
+      paperNetwork.pubsub = {publish: sinon.spy()};
+      paperNetwork.setCurrentQuery(new ApiQuery({'q': 'foo'}));
+      paperNetwork.view.$('.add-all').click();
+      expect(paperNetwork.view.$('.selected-items-container .dropdown-toggle').text().trim()).to.eql('Currently selected papers (26)');
+      paperNetwork.view.$('button.filter-search').click();
+      expect(paperNetwork.pubsub.publish.lastCall.args[1].get('fq')).to.eql(
+        ["(bibcode:(2014arXiv1406.4542H OR 2009arad.workE..32A OR 2006JEPub...9....2H OR 2007ASPC..377...69A OR 2012opsa.book..253H OR 2006AAS...20917302H OR 2007ASPC..377...36E OR 2009JInfo...3....1H OR 2012LPI....43.1022H OR 2007ASPC..377...93E OR 2011ApSSP...1...23K OR 2007ASPC..377..106H OR 2000A&AS..143..111G OR 2010ARIST..44....3K OR 2007LePub..20...16H OR 2003LPI....34.1949E OR 1998ASPC..145..395A OR 2007BASI...35..717E OR 2004tivo.conf..267E OR 2009ASPC..411..384H OR 2009astro2010P..28K OR 2000A&AS..143...41K OR 2006ASPC..351..653K OR 2005IPM....41.1395K OR 2000A&AS..143...85A OR 2006ASPC..351..715A))"]
+      );
     })
 
   });

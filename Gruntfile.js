@@ -447,7 +447,7 @@ module.exports = function(grunt) {
             "components/transition.js":77,
             "widgets/dropdown-menu/widget.js":78,
             "widgets/list_of_things/paginated_view.js":78,
-            "wraps/paper_network.js": 74, // some tests don't run properly in phantomjs,
+            "wraps/paper_network.js": 77, // some tests don't run properly in phantomjs,
 
             "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i've already started)
             "mixins/feedback_handling.js": 1,
@@ -615,7 +615,7 @@ module.exports = function(grunt) {
     "=====================================================================\n" +
     "OK, done! Your release is ready for deployment. But I recommend that\n"  +
     "you test it, first make sure the development web server is not running\n" +
-    "then execute: grunt test:release\n" +
+    "then execute: grunt test:release (or 'grunt server:release' and look)\n" +
     "\n" +
     "Also make sure that you deploy correct values with dist/discovery.vars.js\n" +
     "=====================================================================\n"))
