@@ -13,371 +13,1587 @@ define([
 
     var w, fakeWordCloudData;
 
+    //for query "author:kurtz,m"
+
     fakeWordCloudData = {
-      'GRB': {'idf': 4.6855964764314496e-05, 'total_occurences': 437},
-      'HST': {'idf': 3.6708024374128185e-05, 'total_occurences': 24},
-      'II': {'idf': 5.997648921622724e-06, 'total_occurences': 27},
-      'IR': {'idf': 1.0991426687183997e-05, 'total_occurences': 16},
-      'LCO': {'idf': 0.018518518518518517, 'total_occurences': 17},
-      'NEAR': {'idf': 0.0014367816091954023, 'total_occurences': 25},
-      'NGC': {'idf': 2.709733362237156e-05, 'total_occurences': 35},
-      'NIR': {'idf': 0.0002891008962127783, 'total_occurences': 16},
-      'PSN': {'idf': 0.0013812154696132596, 'total_occurences': 15},
-      'RA': {'idf': 6.151574803149606e-05, 'total_occurences': 15},
-      'SN': {'idf': 3.50495951771757e-05, 'total_occurences': 62},
-      'STARRS': {'idf': 0.0030303030303030303, 'total_occurences': 15},
-      'TOO': {'idf': 0.0013568521031207597, 'total_occurences': 15},
-      'UT': {'idf': 3.094059405940594e-05, 'total_occurences': 31},
-      'XRT': {'idf': 0.0003485535029627048, 'total_occurences': 18},
-      'absorption': {'idf': 3.323274888005636e-06, 'total_occurences': 40},
-      'activity': {'idf': 4.59166337597458e-06, 'total_occurences': 42},
-      'additional': {'idf': 0.00021654395842355997, 'total_occurences': 41},
-      'address': {'idf': 1.4526016094825833e-05, 'total_occurences': 17},
-      'afterglow': {'idf': 0.00012169891687963977, 'total_occurences': 166},
-      'age': {'idf': 9.611595428725214e-06, 'total_occurences': 30},
-      'allow': {'idf': 5.637137461597001e-06, 'total_occurences': 41},
-      'analysis': {'idf': 1.0673281254836331e-06, 'total_occurences': 25},
-      'angle': {'idf': 4.3236325431174254e-06, 'total_occurences': 21},
-      'appears': {'idf': 6.572720580502681e-06, 'total_occurences': 30},
-      'approach': {'idf': 2.0491593323838894e-06, 'total_occurences': 22},
-      'approximately': {'idf': 5.116398055768738e-06, 'total_occurences': 21},
-      'array': {'idf': 7.107270026510117e-06, 'total_occurences': 30},
-      'associated': {'idf': 2.172486758693206e-06, 'total_occurences': 67},
-      'astronomy': {'idf': 2.182214948172395e-05, 'total_occurences': 23},
-      'astrophysics': {'idf': 2.308242734805992e-05, 'total_occurences': 17},
-      'band': {'idf': 2.856620503679327e-06, 'total_occurences': 23},
-      'based': {'idf': 8.137385100122386e-07, 'total_occurences': 29},
-      'beginning': {'idf': 2.3578788521845746e-05, 'total_occurences': 15},
-      'berger': {'idf': 0.0008103727714748784, 'total_occurences': 20},
-      'binary': {'idf': 7.5815011372251705e-06, 'total_occurences': 24},
-      'blue': {'idf': 1.583857326132062e-05, 'total_occurences': 16},
-      'break': {'idf': 1.5914950504503932e-05, 'total_occurences': 19},
-      'bright': {'idf': 1.500487658489009e-05, 'total_occurences': 45},
-      'broad': {'idf': 2.3276022593259263e-05, 'total_occurences': 15},
-      'broadband': {'idf': 2.1555905240240565e-05, 'total_occurences': 16},
-      'bursts': {'idf': 6.093288243000335e-05, 'total_occurences': 182},
-      'candidate': {'idf': 0.00021263023601956197, 'total_occurences': 23},
-      'case': {'idf': 1.8406037180195105e-06, 'total_occurences': 17},
-      'central': {'idf': 2.1675047685104907e-05, 'total_occurences': 19},
-      'chandra': {'idf': 4.1727519298977675e-05, 'total_occurences': 17},
-      'characterize': {'idf': 1.0584922835912526e-05, 'total_occurences': 26},
-      'circumburst': {'idf': 0.002173913043478261, 'total_occurences': 19},
-      'classes': {'idf': 5.547727096208683e-06, 'total_occurences': 26},
-      'clear': {'idf': 8.394050297149381e-06, 'total_occurences': 16},
-      'cluster': {'idf': 1.76541204717181e-05, 'total_occurences': 23},
-      'colors': {'idf': 4.5733101618951796e-05, 'total_occurences': 19},
-      'combined': {'idf': 5.8290683982885856e-06, 'total_occurences': 40},
-      'compact': {'idf': 8.777858729141614e-06, 'total_occurences': 19},
-      'compared': {'idf': 9.055838298951334e-06, 'total_occurences': 51},
-      'comparison': {'idf': 3.079083172194647e-06, 'total_occurences': 26},
-      'complete': {'idf': 5.1099142556387905e-06, 'total_occurences': 15},
-      'conclude': {'idf': 1.260096523393692e-05, 'total_occurences': 22},
-      'confirmation': {'idf': 0.0015503875968992248, 'total_occurences': 43},
-      'consistent': {'idf': 2.562768610184955e-06, 'total_occurences': 38},
-      'constrain': {'idf': 1.849317601804934e-05, 'total_occurences': 31},
-      'constraints': {'idf': 2.327584200358448e-05, 'total_occurences': 30},
-      'continue': {'idf': 3.607243344636029e-05, 'total_occurences': 29},
-      'contribution': {'idf': 5.617030837499298e-06, 'total_occurences': 16},
-      'correlation': {'idf': 8.898538859919202e-06, 'total_occurences': 22},
-      'corresponding': {'idf': 3.04700616409347e-06, 'total_occurences': 15},
-      'cosmic': {'idf': 1.0035827905623074e-05, 'total_occurences': 23},
-      'cosmological': {'idf': 0.0005861664712778429, 'total_occurences': 28},
-      'counterparts': {'idf': 4.190763557120107e-05, 'total_occurences': 28},
-      'current': {'idf': 9.372334742307657e-06, 'total_occurences': 34},
-      'curves': {'idf': 7.676953784738215e-06, 'total_occurences': 41},
-      'data': {'idf': 6.741429115558206e-07, 'total_occurences': 58},
-      'date': {'idf': 1.7451093310995933e-05, 'total_occurences': 31},
-      'days': {'idf': 8.99911808642753e-06, 'total_occurences': 52},
-      'death': {'idf': 0.0005099439061703213, 'total_occurences': 18},
-      'decade': {'idf': 2.8133352088901393e-05, 'total_occurences': 15},
-      'deep': {'idf': 5.775072477159589e-06, 'total_occurences': 26},
-      'demonstrated': {'idf': 1.7125340366139776e-05, 'total_occurences': 16},
-      'density': {'idf': 1.3833191082018374e-06, 'total_occurences': 52},
-      'derived': {'idf': 6.766037199672524e-06, 'total_occurences': 25},
-      'detailed': {'idf': 7.081902198930633e-06, 'total_occurences': 29},
-      'detected': {'idf': 4.689727620619794e-06, 'total_occurences': 150},
-      'determine': {'idf': 2.0272502985126065e-06, 'total_occurences': 45},
-      'different': {'idf': 9.330133719476467e-07, 'total_occurences': 38},
-      'direct': {'idf': 2.2974245870379304e-05, 'total_occurences': 15},
-      'discovered': {'idf': 1.3235741797149022e-05, 'total_occurences': 20},
-      'discovery': {'idf': 1.5598190609889253e-05, 'total_occurences': 53},
-      'discuss': {'idf': 3.4037570670506104e-06, 'total_occurences': 25},
-      'distance': {'idf': 1.156336725254394e-05, 'total_occurences': 16},
-      'distant': {'idf': 3.176115610608226e-05, 'total_occurences': 16},
-      'distinguish': {'idf': 2.56160663968441e-05, 'total_occurences': 19},
-      'distribution': {'idf': 1.6417557592792035e-06, 'total_occurences': 29},
-      'dominated': {'idf': 9.04216360890834e-06, 'total_occurences': 17},
-      'during': {'idf': 1.2942085461767138e-06, 'total_occurences': 23},
-      'dust': {'idf': 1.0088883059756454e-05, 'total_occurences': 15},
-      'dwarf': {'idf': 4.1511000415110007e-05, 'total_occurences': 40},
-      'early': {'idf': 5.01474334543558e-06, 'total_occurences': 35},
-      'effects': {'idf': 1.3726892492350689e-06, 'total_occurences': 23},
-      'ejecta': {'idf': 6.893223960846487e-05, 'total_occurences': 29},
-      'emission': {'idf': 2.42844584322925e-06, 'total_occurences': 96},
-      'end': {'idf': 6.151612645254953e-06, 'total_occurences': 19},
-      'energetic': {'idf': 1.7136785824450765e-05, 'total_occurences': 24},
-      'energy': {'idf': 8.216683812146888e-07, 'total_occurences': 68},
-      'engine': {'idf': 4.773953310736621e-05, 'total_occurences': 15},
-      'environments': {'idf': 5.545204507142223e-06, 'total_occurences': 52},
-      'epoch': {'idf': 8.08865162177465e-05, 'total_occurences': 25},
-      'erg': {'idf': 7.266913741733885e-05, 'total_occurences': 37},
-      'error': {'idf': 4.819044865307696e-05, 'total_occurences': 15},
-      'estimated': {'idf': 4.498769586518087e-06, 'total_occurences': 37},
-      'even': {'idf': 2.942569863964995e-06, 'total_occurences': 21},
-      'events': {'idf': 4.845195988177722e-06, 'total_occurences': 86},
-      'evidence': {'idf': 3.3637981317465176e-06, 'total_occurences': 51},
-      'evolution': {'idf': 2.781703069887508e-06, 'total_occurences': 37},
-      'exhibit': {'idf': 6.005897791631382e-06, 'total_occurences': 35},
-      'existing': {'idf': 5.0091416835725195e-06, 'total_occurences': 26},
-      'expected': {'idf': 3.893899038985717e-06, 'total_occurences': 32},
-      'explained': {'idf': 6.325390751013644e-06, 'total_occurences': 22},
-      'exploring': {'idf': 1.1621285546607165e-05, 'total_occurences': 23},
-      'explosion': {'idf': 4.3605284960537216e-05, 'total_occurences': 69},
-      'extended': {'idf': 4.7420783581027895e-06, 'total_occurences': 27},
-      'extreme': {'idf': 1.3300171572213281e-05, 'total_occurences': 24},
-      'facilities': {'idf': 3.513086246267346e-05, 'total_occurences': 24},
-      'factor': {'idf': 3.472258391580468e-06, 'total_occurences': 25},
-      'features': {'idf': 2.9082871642746007e-06, 'total_occurences': 24},
-      'few': {'idf': 4.052684903748733e-06, 'total_occurences': 22},
-      'field': {'idf': 8.167005461276552e-07, 'total_occurences': 48},
-      'find': {'idf': 2.2387742263355965e-06, 'total_occurences': 72},
-      'first': {'idf': 1.2693254804396944e-05, 'total_occurences': 69},
-      'fit': {'idf': 9.507149376331e-06, 'total_occurences': 28},
-      'flares': {'idf': 3.772161448509996e-05, 'total_occurences': 21},
-      'flux': {'idf': 3.5859645348107507e-06, 'total_occurences': 39},
-      'follow-up': {'idf': 6.855419208884623e-05, 'total_occurences': 31},
-      'following': {'idf': 4.5077533357374685e-06, 'total_occurences': 17},
-      'formation': {'idf': 2.076981232397584e-06, 'total_occurences': 42},
-      'forming': {'idf': 1.006248805079544e-05, 'total_occurences': 17},
-      'fraction': {'idf': 6.371212314279161e-06, 'total_occurences': 33},
-      'frequency': {'idf': 1.9897092238940203e-06, 'total_occurences': 17},
-      'fully': {'idf': 7.044734061289187e-06, 'total_occurences': 18},
-      'galactic': {'idf': 8.657783780507866e-06, 'total_occurences': 17},
-      'galaxy': {'idf': 7.208090360620761e-06, 'total_occurences': 172},
-      'gamma': {'idf': 1.1912136084242627e-05, 'total_occurences': 28},
-      'gamma-ray': {'idf': 3.2772916461835936e-05, 'total_occurences': 131},
-      'gemini': {'idf': 0.00017667844522968197, 'total_occurences': 49},
-      'generally': {'idf': 6.583408493913639e-06, 'total_occurences': 30},
-      'ghz': {'idf': 1.3365410318096765e-05, 'total_occurences': 22},
-      'halpha': {'idf': 3.4627237785241874e-05, 'total_occurences': 22},
-      'high': {'idf': 6.496788637376544e-07, 'total_occurences': 49},
-      'high-redshift': {'idf': 0.00012377769525931428, 'total_occurences': 20},
-      'highest': {'idf': 1.0300146262076921e-05, 'total_occurences': 24},
-      'host': {'idf': 1.3893713094824592e-05, 'total_occurences': 137},
-      'hubble': {'idf': 2.7694693696687715e-05, 'total_occurences': 20},
-      'ibc': {'idf': 0.00425531914893617, 'total_occurences': 18},
-      'identification': {'idf': 1.1792174712860546e-05, 'total_occurences': 22},
-      'identify': {'idf': 7.481278101550869e-06, 'total_occurences': 47},
-      'imaging': {'idf': 1.0295798284720005e-05, 'total_occurences': 72},
-      'implications': {'idf': 1.804760959410926e-05, 'total_occurences': 20},
-      'important': {'idf': 1.910099267858951e-06, 'total_occurences': 19},
-      'including': {'idf': 2.230479954676647e-06, 'total_occurences': 29},
-      'increase': {'idf': 2.4791257610916086e-06, 'total_occurences': 15},
-      'indicating': {'idf': 9.646271233854553e-06, 'total_occurences': 68},
-      'inferred': {'idf': 1.547269070091289e-05, 'total_occurences': 35},
-      'interpret': {'idf': 8.094413235984523e-06, 'total_occurences': 17},
-      'jet': {'idf': 2.4219525781685195e-05, 'total_occurences': 35},
-      'keck': {'idf': 0.0005078720162519045, 'total_occurences': 17},
-      'kinetic': {'idf': 8.098083993327179e-06, 'total_occurences': 15},
-      'known': {'idf': 2.4791441994223595e-06, 'total_occurences': 30},
-      'lack': {'idf': 1.3805099603793642e-05, 'total_occurences': 25},
-      'large': {'idf': 1.0271475086537178e-06, 'total_occurences': 57},
-      'larger': {'idf': 3.4893539810039567e-06, 'total_occurences': 18},
-      'late-time': {'idf': 0.001652892561983471, 'total_occurences': 18},
-      'leading': {'idf': 4.737966748949356e-06, 'total_occurences': 17},
-      'level': {'idf': 2.068603155033532e-06, 'total_occurences': 18},
-      'light': {'idf': 6.720610769106697e-06, 'total_occurences': 63},
-      'likely': {'idf': 6.278843437038897e-06, 'total_occurences': 26},
-      'limit': {'idf': 3.58512888538343e-05, 'total_occurences': 68},
-      'lines': {'idf': 2.6457756223525707e-06, 'total_occurences': 41},
-      'local': {'idf': 9.62213861652891e-06, 'total_occurences': 45},
-      'located': {'idf': 0.0004149377593360996, 'total_occurences': 27},
-      'long': {'idf': 2.142548003788025e-06, 'total_occurences': 23},
-      'long-duration': {'idf': 0.00031436655139893113, 'total_occurences': 26},
-      'low': {'idf': 9.672124646604745e-07, 'total_occurences': 34},
-      'lower': {'idf': 5.804841237592152e-05, 'total_occurences': 21},
-      'luminosity': {'idf': 4.485310607759587e-05, 'total_occurences': 71},
-      'luminous': {'idf': 0.0001547029702970297, 'total_occurences': 29},
-      'mag': {'idf': 3.0627871362940275e-05, 'total_occurences': 53},
-      'magellan': {'idf': 0.000774593338497289, 'total_occurences': 28},
-      'magnetic': {'idf': 1.437016982666701e-06, 'total_occurences': 19},
-      'magnitude': {'idf': 3.6070741939090947e-06, 'total_occurences': 42},
-      'many': {'idf': 2.3158816213950408e-06, 'total_occurences': 22},
-      'mass': {'idf': 6.89684900211216e-06, 'total_occurences': 49},
-      'massive': {'idf': 1.0130070100085092e-05, 'total_occurences': 54},
-      'maximum': {'idf': 3.0931597864482485e-06, 'total_occurences': 17},
-      'measure': {'idf': 4.321763971182478e-06, 'total_occurences': 73},
-      'mechanism': {'idf': 5.140595280933532e-06, 'total_occurences': 31},
-      'medium': {'idf': 4.977031001926111e-06, 'total_occurences': 37},
-      'mergers': {'idf': 7.536930961712391e-05, 'total_occurences': 23},
-      'metallicity': {'idf': 0.00019727756954034326, 'total_occurences': 35},
-      'model': {'idf': 1.649095553543659e-06, 'total_occurences': 84},
-      'months': {'idf': 2.0127609041321982e-05, 'total_occurences': 17},
-      'more': {'idf': 1.1034994173523077e-06, 'total_occurences': 35},
-      'most': {'idf': 1.5216207086491965e-06, 'total_occurences': 47},
-      'multiwavelength': {'idf': 6.384065372829418e-05, 'total_occurences': 17},
-      'narrow': {'idf': 8.877604467210569e-06, 'total_occurences': 21},
-      'nature': {'idf': 4.082382478414403e-06, 'total_occurences': 38},
-      'near-infrared': {'idf': 3.1425788001634144e-05, 'total_occurences': 22},
-      'nearby': {'idf': 1.5948708952010335e-05, 'total_occurences': 24},
-      'new': {'idf': 1.0417838673517437e-06, 'total_occurences': 41},
-      'normal': {'idf': 4.252749402488709e-06, 'total_occurences': 17},
-      'object': {'idf': 6.48643038762908e-06, 'total_occurences': 51},
-      'observations': {'idf': 8.641809940673975e-07, 'total_occurences': 366},
-      'observatory': {'idf': 5.8878944889307586e-05, 'total_occurences': 35},
-      'occur': {'idf': 5.307461228995722e-06, 'total_occurences': 21},
-      'offset': {'idf': 3.0450669914738125e-05, 'total_occurences': 16},
-      'one': {'idf': 7.968159235694166e-07, 'total_occurences': 30},
-      'opening': {'idf': 3.464283239797686e-05, 'total_occurences': 28},
-      'opportunity': {'idf': 2.355268736162796e-05, 'total_occurences': 21},
-      'optical': {'idf': 1.5711289346960258e-06, 'total_occurences': 154},
-      'order': {'idf': 1.178439275024158e-05, 'total_occurences': 27},
-      'origin': {'idf': 5.2968907251443404e-05, 'total_occurences': 41},
-      'outflow': {'idf': 3.558845510516389e-05, 'total_occurences': 15},
-      'over': {'idf': 1.2905323962347426e-06, 'total_occurences': 33},
-      'pan-starrs': {'idf': 0.006802721088435374, 'total_occurences': 24},
-      'parameters': {'idf': 1.5852910356547807e-06, 'total_occurences': 22},
-      'past': {'idf': 8.076500613814046e-06, 'total_occurences': 18},
-      'peak': {'idf': 4.370648473113956e-06, 'total_occurences': 30},
-      'period': {'idf': 3.4346320822113536e-06, 'total_occurences': 24},
-      'photometric': {'idf': 1.8834519908087542e-05, 'total_occurences': 25},
-      'photometry': {'idf': 2.1190032208848956e-05, 'total_occurences': 17},
-      'physics': {'idf': 5.125497813975182e-06, 'total_occurences': 40},
-      'place': {'idf': 5.127679212388473e-05, 'total_occurences': 27},
-      'point': {'idf': 6.500724830818636e-06, 'total_occurences': 16},
-      'population': {'idf': 1.7064555212368388e-05, 'total_occurences': 51},
-      'position': {'idf': 5.304083083157415e-06, 'total_occurences': 47},
-      'potential': {'idf': 1.8172071343552094e-06, 'total_occurences': 16},
-      'powered': {'idf': 2.2911764503719725e-06, 'total_occurences': 21},
-      'predicted': {'idf': 5.415885876452811e-06, 'total_occurences': 27},
-      'present': {'idf': 9.514856496934313e-07, 'total_occurences': 93},
-      'previous': {'idf': 3.1353466439249525e-06, 'total_occurences': 24},
-      'previously': {'idf': 3.9521161605981925e-06, 'total_occurences': 16},
-      'probe': {'idf': 3.171783811215428e-05, 'total_occurences': 38},
-      'process': {'idf': 1.5978014252388713e-05, 'total_occurences': 16},
-      'produce': {'idf': 5.436200748021223e-06, 'total_occurences': 29},
-      'progenitor': {'idf': 0.0005521811154058532, 'total_occurences': 88},
-      'program': {'idf': 6.183450612779956e-06, 'total_occurences': 27},
-      'prompt': {'idf': 8.457374830852504e-05, 'total_occurences': 17},
-      'properties': {'idf': 1.1774984751394746e-06, 'total_occurences': 53},
-      'propose': {'idf': 5.135711167603934e-06, 'total_occurences': 50},
-      'provide': {'idf': 2.1521204843131937e-06, 'total_occurences': 83},
-      'radio': {'idf': 1.2309661853588882e-05, 'total_occurences': 132},
-      'range': {'idf': 1.1313330610591767e-06, 'total_occurences': 69},
-      'rapid': {'idf': 3.6477712117895966e-05, 'total_occurences': 28},
-      'rate': {'idf': 3.961933740620122e-06, 'total_occurences': 51},
-      'ratio': {'idf': 2.752417310502949e-06, 'total_occurences': 18},
-      'recent': {'idf': 2.278184560287598e-06, 'total_occurences': 42},
-      'redshift': {'idf': 1.5993858358390378e-05, 'total_occurences': 161},
-      'regions': {'idf': 1.647902549634825e-06, 'total_occurences': 20},
-      'reionization': {'idf': 0.00021172983273343214, 'total_occurences': 27},
-      'relation': {'idf': 5.145753466951399e-06, 'total_occurences': 29},
-      'relative': {'idf': 4.70962789230023e-06, 'total_occurences': 25},
-      'relativistic': {'idf': 9.455817691834902e-06, 'total_occurences': 24},
-      'release': {'idf': 1.5222090297439645e-05, 'total_occurences': 19},
-      'remain': {'idf': 9.856489512695158e-06, 'total_occurences': 34},
-      'report': {'idf': 3.123057848400526e-06, 'total_occurences': 62},
-      'represent': {'idf': 1.3688879154574824e-05, 'total_occurences': 15},
-      'request': {'idf': 0.00012330456226880394, 'total_occurences': 15},
-      'required': {'idf': 4.375620791199751e-06, 'total_occurences': 36},
-      'respectively': {'idf': 2.978725939341225e-06, 'total_occurences': 24},
-      'results': {'idf': 1.9188296674092536e-06, 'total_occurences': 78},
-      'reveal': {'idf': 7.294956996228507e-06, 'total_occurences': 43},
-      'rotation': {'idf': 6.7581723198778124e-06, 'total_occurences': 15},
-      'rule': {'idf': 1.8581834398691837e-05, 'total_occurences': 16},
-      'sample': {'idf': 3.352610845696086e-06, 'total_occurences': 50},
-      'scale': {'idf': 2.177022399383467e-06, 'total_occurences': 15},
-      'science': {'idf': 7.110403230967228e-06, 'total_occurences': 16},
-      'search': {'idf': 4.466080121477379e-05, 'total_occurences': 27},
-      'seen': {'idf': 6.7498245045628815e-06, 'total_occurences': 16},
-      'set': {'idf': 2.6335887914461036e-06, 'total_occurences': 21},
-      'several': {'idf': 1.7022232738179336e-06, 'total_occurences': 33},
-      'shock': {'idf': 2.4456455281371517e-05, 'total_occurences': 17},
-      'short': {'idf': 2.139266231682533e-05, 'total_occurences': 21},
-      'short-duration': {'idf': 0.0005797101449275362, 'total_occurences': 21},
-      'sigma': {'idf': 0.00034638032559750607, 'total_occurences': 18},
-      'significant': {'idf': 2.2501237568066244e-06, 'total_occurences': 28},
-      'significantly': {'idf': 3.626341746446185e-06, 'total_occurences': 18},
-      'similar': {'idf': 2.1792142189369357e-06, 'total_occurences': 54},
-      'sky': {'idf': 1.3933010087499304e-05, 'total_occurences': 15},
-      'small': {'idf': 1.5218059575659627e-06, 'total_occurences': 16},
-      'sne': {'idf': 0.00014126289023873428, 'total_occurences': 26},
-      'source': {'idf': 3.5803667011575327e-06, 'total_occurences': 61},
-      'space': {'idf': 1.7326007897194399e-06, 'total_occurences': 30},
-      'spectra': {'idf': 2.2368612363132054e-06, 'total_occurences': 32},
-      'spectral': {'idf': 2.863270255489605e-06, 'total_occurences': 25},
-      'spectroscopic': {'idf': 9.33663227673778e-06, 'total_occurences': 40},
-      'spectroscopy': {'idf': 3.501756130699546e-06, 'total_occurences': 60},
-      'spectrum': {'idf': 2.65093074178344e-06, 'total_occurences': 41},
-      'spitzer': {'idf': 0.0001235712079085573, 'total_occurences': 16},
-      'standard': {'idf': 3.4420564221888724e-06, 'total_occurences': 22},
-      'star': {'idf': 4.610504573620537e-06, 'total_occurences': 120},
-      'star-forming': {'idf': 0.00020161290322580645, 'total_occurences': 40},
-      'stellar': {'idf': 6.998586285570314e-06, 'total_occurences': 45},
-      'strong': {'idf': 2.3674242424242424e-05, 'total_occurences': 30},
-      'structure': {'idf': 1.0907349699447978e-06, 'total_occurences': 19},
-      'study': {'idf': 2.702359430018349e-06, 'total_occurences': 87},
-      'supernova': {'idf': 7.8125e-05, 'total_occurences': 117},
-      'support': {'idf': 5.768775923436806e-06, 'total_occurences': 17},
-      'survey': {'idf': 1.9151951583866395e-05, 'total_occurences': 49},
-      'swift': {'idf': 8.692628650904033e-05, 'total_occurences': 32},
-      'systematic': {'idf': 1.997722596240286e-05, 'total_occurences': 15},
-      'systems': {'idf': 8.739944693629978e-07, 'total_occurences': 36},
-      'telescope': {'idf': 6.145072880564363e-06, 'total_occurences': 70},
-      'test': {'idf': 3.6040451803103805e-06, 'total_occurences': 17},
-      'theoretical': {'idf': 2.520891891551231e-06, 'total_occurences': 16},
-      'three': {'idf': 1.265564865894419e-06, 'total_occurences': 34},
-      'through': {'idf': 1.4497207837770445e-06, 'total_occurences': 28},
-      'time': {'idf': 3.453861589950644e-06, 'total_occurences': 78},
-      'total': {'idf': 2.6782294760579678e-06, 'total_occurences': 20},
-      'transient': {'idf': 1.0028581457152886e-05, 'total_occurences': 53},
-      'two': {'idf': 5.383275777143149e-07, 'total_occurences': 57},
-      'type': {'idf': 1.7535922336907155e-06, 'total_occurences': 57},
-      'typical': {'idf': 6.035257977102231e-06, 'total_occurences': 27},
-      'uncertainty': {'idf': 1.2774165527636907e-05, 'total_occurences': 16},
-      'underlying': {'idf': 9.941543722909294e-06, 'total_occurences': 21},
-      'understanding': {'idf': 4.375754817706054e-06, 'total_occurences': 20},
-      'unique': {'idf': 6.934572310252765e-06, 'total_occurences': 32},
-      'universe': {'idf': 1.2829230117900625e-05, 'total_occurences': 51},
-      'unprecedented': {'idf': 4.3393360815795186e-05, 'total_occurences': 15},
-      'unusually': {'idf': 5.912262031453234e-05, 'total_occurences': 30},
-      'upper': {'idf': 2.8440601803134153e-05, 'total_occurences': 18},
-      'use': {'idf': 1.4182948691764812e-06, 'total_occurences': 31},
-      'value': {'idf': 2.399658288659695e-06, 'total_occurences': 15},
-      'variable': {'idf': 7.357972731353058e-06, 'total_occurences': 30},
-      'velocity': {'idf': 8.694896095991653e-06, 'total_occurences': 29},
-      'wave': {'idf': 1.966382721001754e-06, 'total_occurences': 22},
-      'wavelengths': {'idf': 4.5582591096808305e-06, 'total_occurences': 19},
-      'weeks': {'idf': 6.070908207867897e-05, 'total_occurences': 16},
-      'well': {'idf': 9.006469346931902e-07, 'total_occurences': 41},
-      'wide': {'idf': 3.76876373243285e-06, 'total_occurences': 36},
-      'x-ray': {'idf': 2.6988950723573768e-06, 'total_occurences': 63},
-      'years': {'idf': 3.6110599544284236e-06, 'total_occurences': 23},
-      'yield': {'idf': 6.692634086923931e-06, 'total_occurences': 15}
+      "AAS": {
+        "idf": 0.0006326327944081641,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "ADS": {
+        "idf": 0.0005928086116725534,
+        "record_count": 23,
+        "total_occurrences": 52
+      },
+      "IRAF": {
+        "idf": 0.002330016583747927,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "NASA": {
+        "idf": 6.221267937003598e-05,
+        "record_count": 23,
+        "total_occurrences": 26
+      },
+      "NCC5": {
+        "idf": 0.008695652173913044,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "NCC5189": {
+        "idf": 0.023809523809523808,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "ability": {
+        "idf": 3.247253114732661e-05,
+        "record_count": 6,
+        "total_occurrences": 8
+      },
+      "abstract": {
+        "idf": 9.644397059711254e-05,
+        "record_count": 14,
+        "total_occurrences": 24
+      },
+      "access": {
+        "idf": 0.00012216919497490906,
+        "record_count": 19,
+        "total_occurrences": 29
+      },
+      "accurate": {
+        "idf": 5.569907670455529e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "achieve": {
+        "idf": 1.4267198874761415e-05,
+        "record_count": 5,
+        "total_occurrences": 7
+      },
+      "addition": {
+        "idf": 1.869308837039255e-05,
+        "record_count": 5,
+        "total_occurrences": 7
+      },
+      "adopted": {
+        "idf": 3.013008540796951e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "age": {
+        "idf": 9.563635402850705e-06,
+        "record_count": 5,
+        "total_occurrences": 8
+      },
+      "allow": {
+        "idf": 4.155800375459664e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "analysis": {
+        "idf": 1.7239918129097277e-06,
+        "record_count": 8,
+        "total_occurrences": 14
+      },
+      "analyzing": {
+        "idf": 1.0995499577259426e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "announces": {
+        "idf": 0.0015658912841304841,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "appear": {
+        "idf": 8.50087985830534e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "apply": {
+        "idf": 1.1724133852208092e-05,
+        "record_count": 4,
+        "total_occurrences": 5
+      },
+      "archive": {
+        "idf": 0.00038849602584228974,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "articles": {
+        "idf": 8.812387823775668e-05,
+        "record_count": 18,
+        "total_occurrences": 44
+      },
+      "arxiv": {
+        "idf": 7.432733759476735e-05,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "aspect": {
+        "idf": 1.227697995691991e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "assess": {
+        "idf": 2.189342446889828e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "associated": {
+        "idf": 1.6879773811030932e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "astronomical": {
+        "idf": 7.439428295119037e-05,
+        "record_count": 20,
+        "total_occurrences": 35
+      },
+      "astronomy": {
+        "idf": 2.3631301184159526e-05,
+        "record_count": 23,
+        "total_occurrences": 32
+      },
+      "astrophysics": {
+        "idf": 5.4919040353399144e-05,
+        "record_count": 24,
+        "total_occurrences": 30
+      },
+      "authors": {
+        "idf": 3.347659618959714e-05,
+        "record_count": 8,
+        "total_occurrences": 15
+      },
+      "automatic": {
+        "idf": 5.0533124463085555e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "automation": {
+        "idf": 0.00030374272554526,
+        "record_count": 6,
+        "total_occurrences": 8
+      },
+      "based": {
+        "idf": 6.316353291325373e-07,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "basis": {
+        "idf": 2.973137700872616e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "bibliographic": {
+        "idf": 0.0010080645161290322,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "bibliometric": {
+        "idf": 0.007148956029677713,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "building": {
+        "idf": 4.123035087208658e-05,
+        "record_count": 5,
+        "total_occurrences": 9
+      },
+      "built": {
+        "idf": 1.068284761986155e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "capable": {
+        "idf": 1.2433761059187136e-05,
+        "record_count": 6,
+        "total_occurrences": 6
+      },
+      "center": {
+        "idf": 1.1767571844136518e-05,
+        "record_count": 8,
+        "total_occurrences": 10
+      },
+      "central": {
+        "idf": 3.349354411937099e-06,
+        "record_count": 4,
+        "total_occurrences": 5
+      },
+      "certain": {
+        "idf": 3.081470182973875e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "change": {
+        "idf": 5.914138641977365e-06,
+        "record_count": 8,
+        "total_occurrences": 15
+      },
+      "citations": {
+        "idf": 0.0005238106808743789,
+        "record_count": 12,
+        "total_occurrences": 27
+      },
+      "cited": {
+        "idf": 0.0014636472494790925,
+        "record_count": 8,
+        "total_occurrences": 22
+      },
+      "classification": {
+        "idf": 3.5637831691281136e-05,
+        "record_count": 11,
+        "total_occurrences": 12
+      },
+      "classifying": {
+        "idf": 7.529329800070575e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "cluster": {
+        "idf": 9.550316177443126e-06,
+        "record_count": 6,
+        "total_occurrences": 12
+      },
+      "collaboration": {
+        "idf": 0.0001822160159848221,
+        "record_count": 8,
+        "total_occurrences": 12
+      },
+      "collection": {
+        "idf": 5.3186016547298297e-05,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "combined": {
+        "idf": 1.1323507021316612e-05,
+        "record_count": 7,
+        "total_occurrences": 8
+      },
+      "comments": {
+        "idf": 6.99640370079741e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "compare": {
+        "idf": 3.934807829897711e-06,
+        "record_count": 10,
+        "total_occurrences": 13
+      },
+      "complex": {
+        "idf": 2.226635909402638e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "component": {
+        "idf": 2.9284158044498837e-06,
+        "record_count": 8,
+        "total_occurrences": 9
+      },
+      "computer": {
+        "idf": 8.271420905856358e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "concerning": {
+        "idf": 1.1075055652154654e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "contents": {
+        "idf": 1.4214866314354812e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "continue": {
+        "idf": 4.427958272099596e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "correspond": {
+        "idf": 8.490634361122552e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "covering": {
+        "idf": 1.8546430273233145e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "create": {
+        "idf": 1.6046120259922448e-05,
+        "record_count": 6,
+        "total_occurrences": 8
+      },
+      "cross-correlation": {
+        "idf": 5.95699052838506e-05,
+        "record_count": 4,
+        "total_occurrences": 6
+      },
+      "current": {
+        "idf": 4.02980246249853e-06,
+        "record_count": 16,
+        "total_occurrences": 25
+      },
+      "custom": {
+        "idf": 0.0012333306998225672,
+        "record_count": 3,
+        "total_occurrences": 5
+      },
+      "data": {
+        "idf": 1.9479929264569927e-06,
+        "record_count": 36,
+        "total_occurrences": 49
+      },
+      "database": {
+        "idf": 4.3669855795944735e-05,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "decomposition": {
+        "idf": 5.738749158139869e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "deep": {
+        "idf": 4.618127072384524e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "demonstrate": {
+        "idf": 2.757041677839324e-06,
+        "record_count": 7,
+        "total_occurrences": 9
+      },
+      "describe": {
+        "idf": 2.8792197616577523e-06,
+        "record_count": 7,
+        "total_occurrences": 7
+      },
+      "detail": {
+        "idf": 0.0011209723958260256,
+        "record_count": 8,
+        "total_occurrences": 8
+      },
+      "determine": {
+        "idf": 7.775453460438545e-06,
+        "record_count": 5,
+        "total_occurrences": 8
+      },
+      "develop": {
+        "idf": 6.461589091164084e-06,
+        "record_count": 19,
+        "total_occurrences": 30
+      },
+      "different": {
+        "idf": 2.3168497730185505e-06,
+        "record_count": 9,
+        "total_occurrences": 16
+      },
+      "difficult": {
+        "idf": 8.155609020103576e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "digital": {
+        "idf": 1.7308276750582426e-05,
+        "record_count": 8,
+        "total_occurrences": 9
+      },
+      "direct": {
+        "idf": 3.448789439584518e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "disciplines": {
+        "idf": 0.00014358976259661193,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "discovery": {
+        "idf": 3.151434763840919e-05,
+        "record_count": 6,
+        "total_occurrences": 8
+      },
+      "discuss": {
+        "idf": 5.983233761092861e-06,
+        "record_count": 16,
+        "total_occurrences": 23
+      },
+      "distributed": {
+        "idf": 1.558985388175292e-05,
+        "record_count": 6,
+        "total_occurrences": 6
+      },
+      "dominant": {
+        "idf": 6.333563452805452e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "e-mail": {
+        "idf": 0.0003489183531053733,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "e-print": {
+        "idf": 0.10308886971527179,
+        "record_count": 3,
+        "total_occurrences": 11
+      },
+      "early": {
+        "idf": 4.080733226146074e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "earth": {
+        "idf": 3.6316622844608434e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "edu": {
+        "idf": 0.0001260716086737267,
+        "record_count": 7,
+        "total_occurrences": 8
+      },
+      "effect": {
+        "idf": 2.7947711015247345e-05,
+        "record_count": 9,
+        "total_occurrences": 9
+      },
+      "efficient": {
+        "idf": 4.394574908699395e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "electronic": {
+        "idf": 4.3525750183112705e-06,
+        "record_count": 7,
+        "total_occurrences": 11
+      },
+      "entire": {
+        "idf": 1.3852699100885736e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "environment": {
+        "idf": 1.2036284385073316e-05,
+        "record_count": 6,
+        "total_occurrences": 6
+      },
+      "era": {
+        "idf": 9.245636693448725e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "error": {
+        "idf": 1.0667649332124732e-05,
+        "record_count": 7,
+        "total_occurrences": 13
+      },
+      "essentially": {
+        "idf": 1.0978997178397725e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "estimator": {
+        "idf": 4.8142648192760264e-05,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "examine": {
+        "idf": 1.7123622933220518e-05,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "examples": {
+        "idf": 4.355078308825651e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "exists": {
+        "idf": 7.1302351916180946e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "exponentials": {
+        "idf": 0.00024261789907476593,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "extended": {
+        "idf": 3.6112946852576117e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "factor": {
+        "idf": 2.6664106912403074e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "far": {
+        "idf": 4.16345733497096e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "field": {
+        "idf": 1.315195324782691e-06,
+        "record_count": 5,
+        "total_occurrences": 7
+      },
+      "find": {
+        "idf": 8.887169738777426e-05,
+        "record_count": 8,
+        "total_occurrences": 9
+      },
+      "first": {
+        "idf": 8.400685831991324e-07,
+        "record_count": 11,
+        "total_occurrences": 14
+      },
+      "fitting": {
+        "idf": 1.3587372111891358e-05,
+        "record_count": 5,
+        "total_occurrences": 9
+      },
+      "follows": {
+        "idf": 8.236252190853968e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "form": {
+        "idf": 2.597096486473177e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "format": {
+        "idf": 0.00033258919970932085,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "four": {
+        "idf": 2.401675408765154e-06,
+        "record_count": 7,
+        "total_occurrences": 8
+      },
+      "free": {
+        "idf": 2.103867961246752e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "fully": {
+        "idf": 2.9624150336583216e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "function": {
+        "idf": 2.0520805959790547e-06,
+        "record_count": 8,
+        "total_occurrences": 17
+      },
+      "funded": {
+        "idf": 0.00012864475933914234,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "future": {
+        "idf": 1.0322759658204568e-05,
+        "record_count": 8,
+        "total_occurrences": 8
+      },
+      "galaxies": {
+        "idf": 6.750788632459004e-06,
+        "record_count": 10,
+        "total_occurrences": 21
+      },
+      "general": {
+        "idf": 2.4090594165650427e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "generation": {
+        "idf": 2.6924165516062924e-05,
+        "record_count": 4,
+        "total_occurrences": 6
+      },
+      "goal": {
+        "idf": 2.062150865158078e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "grant": {
+        "idf": 4.462492748449283e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "harvard": {
+        "idf": 0.00015629884338855892,
+        "record_count": 7,
+        "total_occurrences": 9
+      },
+      "heart": {
+        "idf": 6.650262685376072e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "heavily": {
+        "idf": 3.268828451882845e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "high": {
+        "idf": 1.3543998706626272e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "higher": {
+        "idf": 1.5041303419189094e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "historical": {
+        "idf": 4.33068705271435e-05,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "history": {
+        "idf": 2.017128288516673e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "html": {
+        "idf": 0.0001383891502906172,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "human": {
+        "idf": 1.9048833393652633e-05,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "images": {
+        "idf": 1.4522110251156589e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "impact": {
+        "idf": 7.772744826089757e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "implements": {
+        "idf": 8.982978371370069e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "important": {
+        "idf": 1.5273144923817552e-06,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "improved": {
+        "idf": 9.047263891080596e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "include": {
+        "idf": 4.114799809551995e-06,
+        "record_count": 10,
+        "total_occurrences": 17
+      },
+      "increase": {
+        "idf": 1.3556392053955957e-05,
+        "record_count": 9,
+        "total_occurrences": 13
+      },
+      "index": {
+        "idf": 0.00024194327192804128,
+        "record_count": 7,
+        "total_occurrences": 12
+      },
+      "individual": {
+        "idf": 1.4820949095346555e-05,
+        "record_count": 7,
+        "total_occurrences": 13
+      },
+      "information": {
+        "idf": 9.62008489760045e-06,
+        "record_count": 18,
+        "total_occurrences": 24
+      },
+      "intelligent": {
+        "idf": 0.00016726545004858829,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "interact": {
+        "idf": 1.50692158011014e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "interesting": {
+        "idf": 6.4133173173571736e-06,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "international": {
+        "idf": 1.055934464727285e-05,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "introduce": {
+        "idf": 6.5652654773334714e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "investigate": {
+        "idf": 1.0363340530735209e-05,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "issues": {
+        "idf": 1.1711602242781915e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "journals": {
+        "idf": 0.0001471129610692253,
+        "record_count": 17,
+        "total_occurrences": 34
+      },
+      "knowledge": {
+        "idf": 7.853187185207428e-05,
+        "record_count": 6,
+        "total_occurrences": 6
+      },
+      "known": {
+        "idf": 1.891528411702508e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "large": {
+        "idf": 1.5670525794243826e-06,
+        "record_count": 8,
+        "total_occurrences": 12
+      },
+      "last": {
+        "idf": 5.810136363900461e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "less": {
+        "idf": 2.2690606769515624e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "level": {
+        "idf": 2.0744960415975916e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "library": {
+        "idf": 0.00019808551940228079,
+        "record_count": 5,
+        "total_occurrences": 8
+      },
+      "line": {
+        "idf": 3.5006235840165133e-06,
+        "record_count": 5,
+        "total_occurrences": 10
+      },
+      "links": {
+        "idf": 1.9513412542063005e-05,
+        "record_count": 4,
+        "total_occurrences": 8
+      },
+      "lists": {
+        "idf": 0.0001253420116645479,
+        "record_count": 10,
+        "total_occurrences": 23
+      },
+      "literature": {
+        "idf": 3.09691305183552e-05,
+        "record_count": 16,
+        "total_occurrences": 28
+      },
+      "logs": {
+        "idf": 0.00017975912277548087,
+        "record_count": 3,
+        "total_occurrences": 5
+      },
+      "long": {
+        "idf": 1.69849360602082e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "machines": {
+        "idf": 5.164796910784366e-05,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "main": {
+        "idf": 2.2871571551424443e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "major": {
+        "idf": 1.0172109879869033e-05,
+        "record_count": 6,
+        "total_occurrences": 8
+      },
+      "many": {
+        "idf": 1.82471096578302e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "map": {
+        "idf": 2.0677872826393333e-05,
+        "record_count": 3,
+        "total_occurrences": 10
+      },
+      "mean": {
+        "idf": 2.6486462614082084e-06,
+        "record_count": 9,
+        "total_occurrences": 14
+      },
+      "measure": {
+        "idf": 7.211700194797735e-06,
+        "record_count": 10,
+        "total_occurrences": 24
+      },
+      "methodology": {
+        "idf": 2.5989579722775106e-05,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "methods": {
+        "idf": 1.9784654860549285e-06,
+        "record_count": 16,
+        "total_occurrences": 34
+      },
+      "model": {
+        "idf": 9.74906020568687e-07,
+        "record_count": 9,
+        "total_occurrences": 11
+      },
+      "modern": {
+        "idf": 1.2558238832586118e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "month": {
+        "idf": 3.635509735329652e-05,
+        "record_count": 6,
+        "total_occurrences": 12
+      },
+      "more": {
+        "idf": 6.458042993652879e-06,
+        "record_count": 11,
+        "total_occurrences": 19
+      },
+      "most": {
+        "idf": 1.192382583106085e-06,
+        "record_count": 8,
+        "total_occurrences": 15
+      },
+      "name": {
+        "idf": 0.0001294728295540219,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "nature": {
+        "idf": 3.526851106275036e-06,
+        "record_count": 6,
+        "total_occurrences": 6
+      },
+      "ncc5-189": {
+        "idf": 0.023809523809523808,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "nearly": {
+        "idf": 3.5645528349046472e-06,
+        "record_count": 12,
+        "total_occurrences": 13
+      },
+      "necessary": {
+        "idf": 4.834350964211299e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "network": {
+        "idf": 5.628653779261094e-06,
+        "record_count": 4,
+        "total_occurrences": 5
+      },
+      "new": {
+        "idf": 9.451857280420114e-07,
+        "record_count": 19,
+        "total_occurrences": 29
+      },
+      "normal": {
+        "idf": 2.2092681970047618e-05,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "normative": {
+        "idf": 0.0005376344086021505,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "number": {
+        "idf": 1.1718150360274533e-06,
+        "record_count": 7,
+        "total_occurrences": 21
+      },
+      "object": {
+        "idf": 2.0555002068374608e-05,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "observations": {
+        "idf": 1.4423169862573016e-05,
+        "record_count": 10,
+        "total_occurrences": 12
+      },
+      "obtain": {
+        "idf": 1.6522856685123575e-05,
+        "record_count": 7,
+        "total_occurrences": 12
+      },
+      "on-line": {
+        "idf": 2.8010039275063888e-05,
+        "record_count": 7,
+        "total_occurrences": 9
+      },
+      "one": {
+        "idf": 6.164365406321064e-07,
+        "record_count": 9,
+        "total_occurrences": 9
+      },
+      "open": {
+        "idf": 1.8053809445773997e-05,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "operates": {
+        "idf": 3.565427735866811e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "optical": {
+        "idf": 1.3005321777671423e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "order": {
+        "idf": 4.367844243354917e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "organism": {
+        "idf": 8.717740883089108e-05,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "over": {
+        "idf": 1.0103183816316036e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "page": {
+        "idf": 0.002022624930749678,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "papers": {
+        "idf": 2.7093620399782362e-05,
+        "record_count": 12,
+        "total_occurrences": 19
+      },
+      "parameters": {
+        "idf": 1.5072989077974346e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "particular": {
+        "idf": 2.793249287347041e-06,
+        "record_count": 4,
+        "total_occurrences": 5
+      },
+      "past": {
+        "idf": 6.7411791670599024e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "pattern": {
+        "idf": 5.4445719885845476e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "per": {
+        "idf": 4.404413222048492e-06,
+        "record_count": 7,
+        "total_occurrences": 12
+      },
+      "permit": {
+        "idf": 3.7826174991440744e-05,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "photographic": {
+        "idf": 5.9049654984760985e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "photometric": {
+        "idf": 2.914477981989933e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "physics": {
+        "idf": 6.619980143193781e-06,
+        "record_count": 7,
+        "total_occurrences": 14
+      },
+      "policy": {
+        "idf": 6.579738957155608e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "powerful": {
+        "idf": 1.2576243476073698e-05,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "present": {
+        "idf": 2.745028612815438e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "previous": {
+        "idf": 2.585217392343991e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "problems": {
+        "idf": 3.3493667427265962e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "procedure": {
+        "idf": 1.010061872052617e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "process": {
+        "idf": 2.341443564350511e-06,
+        "record_count": 3,
+        "total_occurrences": 6
+      },
+      "productivity": {
+        "idf": 3.031022366118067e-05,
+        "record_count": 3,
+        "total_occurrences": 7
+      },
+      "program": {
+        "idf": 1.971090710896563e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "progress": {
+        "idf": 1.970720648402135e-05,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "project": {
+        "idf": 7.36084325820366e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "properly": {
+        "idf": 2.3111234371027756e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "provide": {
+        "idf": 1.7237959003942336e-05,
+        "record_count": 17,
+        "total_occurrences": 22
+      },
+      "publication": {
+        "idf": 6.352457589568647e-05,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "published": {
+        "idf": 0.00036760500731061356,
+        "record_count": 6,
+        "total_occurrences": 8
+      },
+      "queries": {
+        "idf": 0.00016025641025641026,
+        "record_count": 4,
+        "total_occurrences": 6
+      },
+      "radial": {
+        "idf": 4.067024564828372e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "ranking": {
+        "idf": 0.00012972591812983176,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "rate": {
+        "idf": 1.5392050929218116e-06,
+        "record_count": 5,
+        "total_occurrences": 10
+      },
+      "reached": {
+        "idf": 1.2731814471831398e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "readership": {
+        "idf": 0.013187954309449636,
+        "record_count": 6,
+        "total_occurrences": 11
+      },
+      "reads": {
+        "idf": 0.03186228245191909,
+        "record_count": 10,
+        "total_occurrences": 31
+      },
+      "recent": {
+        "idf": 1.8893640525740915e-06,
+        "record_count": 9,
+        "total_occurrences": 12
+      },
+      "recognition": {
+        "idf": 2.8114896209174827e-05,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "redshift": {
+        "idf": 9.111535077411884e-05,
+        "record_count": 7,
+        "total_occurrences": 16
+      },
+      "reduce": {
+        "idf": 6.443091395251442e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "reduction": {
+        "idf": 1.6822054473443903e-05,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "reference": {
+        "idf": 1.2305997170393443e-05,
+        "record_count": 4,
+        "total_occurrences": 6
+      },
+      "regular": {
+        "idf": 4.252580112484158e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "relative": {
+        "idf": 3.540329432325968e-05,
+        "record_count": 8,
+        "total_occurrences": 8
+      },
+      "release": {
+        "idf": 1.653047044401525e-05,
+        "record_count": 5,
+        "total_occurrences": 9
+      },
+      "relevant": {
+        "idf": 0.0006355650248230412,
+        "record_count": 3,
+        "total_occurrences": 6
+      },
+      "report": {
+        "idf": 1.0927552669557002e-05,
+        "record_count": 6,
+        "total_occurrences": 6
+      },
+      "research": {
+        "idf": 8.518912367013913e-06,
+        "record_count": 15,
+        "total_occurrences": 29
+      },
+      "results": {
+        "idf": 1.1311417546117498e-06,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "retrieval": {
+        "idf": 6.096072264514432e-05,
+        "record_count": 7,
+        "total_occurrences": 7
+      },
+      "review": {
+        "idf": 8.369521257777636e-06,
+        "record_count": 6,
+        "total_occurrences": 9
+      },
+      "sample": {
+        "idf": 2.5514499890287646e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "scale": {
+        "idf": 3.2054181895022178e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "scholarly": {
+        "idf": 0.0023029150085224254,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "science": {
+        "idf": 7.995306806706416e-06,
+        "record_count": 4,
+        "total_occurrences": 8
+      },
+      "scientific": {
+        "idf": 9.90148027130056e-06,
+        "record_count": 7,
+        "total_occurrences": 10
+      },
+      "search": {
+        "idf": 1.218862511705757e-05,
+        "record_count": 11,
+        "total_occurrences": 12
+      },
+      "second": {
+        "idf": 8.60347525183236e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "service": {
+        "idf": 4.121286315286631e-05,
+        "record_count": 17,
+        "total_occurrences": 22
+      },
+      "set": {
+        "idf": 1.0016543623831611e-05,
+        "record_count": 8,
+        "total_occurrences": 10
+      },
+      "several": {
+        "idf": 1.3673829930372858e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "significantly": {
+        "idf": 2.5528785133095338e-05,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "similarities": {
+        "idf": 1.6694712466560283e-05,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "simple": {
+        "idf": 1.7425731532209722e-06,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "singular": {
+        "idf": 1.878428131339695e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "small": {
+        "idf": 1.191606798355106e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "smithsonian/nasa": {
+        "idf": 0.15131578947368418,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "sophisticated": {
+        "idf": 0.00017883763523298408,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "specific": {
+        "idf": 2.794318591439884e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "spectra": {
+        "idf": 2.53398409596637e-06,
+        "record_count": 7,
+        "total_occurrences": 20
+      },
+      "spectral": {
+        "idf": 6.320443363535223e-06,
+        "record_count": 6,
+        "total_occurrences": 9
+      },
+      "standard": {
+        "idf": 9.372420297895787e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "stars": {
+        "idf": 3.622689629688666e-06,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "statistics": {
+        "idf": 9.214393634697866e-06,
+        "record_count": 9,
+        "total_occurrences": 11
+      },
+      "status": {
+        "idf": 1.5157486282474912e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "structure": {
+        "idf": 1.3350869731679599e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "study": {
+        "idf": 1.1055790463742904e-06,
+        "record_count": 4,
+        "total_occurrences": 5
+      },
+      "subject": {
+        "idf": 3.00918646536296e-05,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "substantially": {
+        "idf": 1.3203586093983125e-05,
+        "record_count": 10,
+        "total_occurrences": 10
+      },
+      "sum": {
+        "idf": 3.6204271817897584e-05,
+        "record_count": 4,
+        "total_occurrences": 6
+      },
+      "surveys": {
+        "idf": 2.1688697208611512e-05,
+        "record_count": 9,
+        "total_occurrences": 15
+      },
+      "syntactic": {
+        "idf": 0.0005002501250625312,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "synthetic": {
+        "idf": 1.2622278321236984e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "system": {
+        "idf": 1.5869086612577421e-06,
+        "record_count": 31,
+        "total_occurrences": 49
+      },
+      "systematic": {
+        "idf": 3.535250984156843e-05,
+        "record_count": 5,
+        "total_occurrences": 5
+      },
+      "technical": {
+        "idf": 2.6004561726726803e-05,
+        "record_count": 10,
+        "total_occurrences": 11
+      },
+      "techniques": {
+        "idf": 3.655413511709254e-06,
+        "record_count": 12,
+        "total_occurrences": 18
+      },
+      "technologies": {
+        "idf": 1.573662681144755e-05,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "ten": {
+        "idf": 1.7346053772766696e-05,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "term": {
+        "idf": 2.6232625120276932e-06,
+        "record_count": 5,
+        "total_occurrences": 9
+      },
+      "test": {
+        "idf": 2.5241642833810174e-05,
+        "record_count": 4,
+        "total_occurrences": 6
+      },
+      "text": {
+        "idf": 6.542855723918062e-05,
+        "record_count": 6,
+        "total_occurrences": 9
+      },
+      "theory": {
+        "idf": 1.0423300663234622e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "three": {
+        "idf": 9.910950113232605e-07,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "through": {
+        "idf": 2.6776183974916867e-06,
+        "record_count": 6,
+        "total_occurrences": 7
+      },
+      "time": {
+        "idf": 2.3110055287044414e-06,
+        "record_count": 14,
+        "total_occurrences": 19
+      },
+      "tool": {
+        "idf": 7.910667134174434e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "total": {
+        "idf": 2.062115028900542e-06,
+        "record_count": 3,
+        "total_occurrences": 6
+      },
+      "true": {
+        "idf": 1.1414482695644234e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "two": {
+        "idf": 4.3985751764881984e-07,
+        "record_count": 9,
+        "total_occurrences": 10
+      },
+      "type": {
+        "idf": 1.6685219850250307e-06,
+        "record_count": 6,
+        "total_occurrences": 6
+      },
+      "under": {
+        "idf": 2.7365981753258345e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "unique": {
+        "idf": 5.575752168967594e-06,
+        "record_count": 5,
+        "total_occurrences": 9
+      },
+      "universe": {
+        "idf": 9.897014798455852e-06,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "usage": {
+        "idf": 0.00021966271050192522,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "use": {
+        "idf": 2.1975817277539333e-06,
+        "record_count": 22,
+        "total_occurrences": 34
+      },
+      "users": {
+        "idf": 2.17187869552088e-05,
+        "record_count": 8,
+        "total_occurrences": 15
+      },
+      "value": {
+        "idf": 1.8003420649923483e-06,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "velocities": {
+        "idf": 4.023654628263188e-05,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "view": {
+        "idf": 6.116582053948253e-06,
+        "record_count": 3,
+        "total_occurrences": 4
+      },
+      "ways": {
+        "idf": 1.4964907292399323e-05,
+        "record_count": 4,
+        "total_occurrences": 4
+      },
+      "well": {
+        "idf": 6.970166294227448e-07,
+        "record_count": 5,
+        "total_occurrences": 6
+      },
+      "whole": {
+        "idf": 7.025135936380368e-06,
+        "record_count": 4,
+        "total_occurrences": 7
+      },
+      "work": {
+        "idf": 6.254869158898443e-06,
+        "record_count": 8,
+        "total_occurrences": 8
+      },
+      "world": {
+        "idf": 8.737210907534097e-06,
+        "record_count": 3,
+        "total_occurrences": 3
+      },
+      "worldwide": {
+        "idf": 0.00015922944696245749,
+        "record_count": 4,
+        "total_occurrences": 5
+      },
+      "years": {
+        "idf": 0.000284762155690129,
+        "record_count": 9,
+        "total_occurrences": 17
+      }
     };
 
 
-
     describe("WordCloud Widget (Visualization Widget)", function(){
-
-      beforeEach(function(){
-        w = new WordCloud();
-
-        $("#test").append(w.render().el);
-
-        w.model.set("tfidfData", fakeWordCloudData);
-
-
-      });
 
       afterEach(function(){
         $("#test").empty()
       });
 
 
-      it("should request wordcloud data from pubsub");
+      it("should request wordcloud data from pubsub", function(){
+
+        w = new WordCloud();
+        $("#test").append(w.render().el);
+
+        w.model.set("tfidfData", fakeWordCloudData);
+      });
 
       it("should consist of a controller, a word cloud view, and a list view, (the views have corresponding models)", function(){
+
+        w = new WordCloud();
+        $("#test").append(w.render().el);
+        w.model.set("tfidfData", fakeWordCloudData);
 
         expect(w).to.be.instanceof(BaseWidget);
         expect(w.view).to.be.instanceof(Backbone.View);
@@ -390,47 +1606,65 @@ define([
 
       it("should have a buildWCDict function on the word cloud model that listens for slider changes and re-processes keyword dict", function(){
 
-        //resetting slider, recomputing processedWordList
-
-        w.model.set("currentSliderVal", 1);
-
-        var processed = w.model.get("processedWordList");
-
-        expect(_.findWhere(processed, {text: "reionization"}).origSize).to.eql(1.324118996861761);
-
-        expect(_.findWhere(processed, {text: "reionization"}).size).to.eql(20);
+        w = new WordCloud();
+        $("#test").append(w.render().el);
+        w.model.set("tfidfData", fakeWordCloudData);
 
         //resetting slider, recomputing processedWordList
-
         w.model.set("currentSliderVal", 5);
+        var processed = w.model.get("processedWordList");
+        expect(_.findWhere(processed, {text: "abstract"}).origSize).to.eql(2.7685459940652817);
+        expect(_.findWhere(processed, {text: "abstract"}).size).to.eql(47);
 
+        //this more rare word is not shown in the frequency word cloud
+        expect(_.findWhere(processed, {text: "e-print"})).to.be.undefined;
+
+        //resetting slider, recomputing processedWordList
+        w.model.set("currentSliderVal", 1);
         var processed = w.model.get("processedWordList");
 
-        expect(_.findWhere(processed, {text: "reionization"})).to.eql(undefined);
+        //since we are looking at rarer words, the size of the word "abstract" has shrunk
+        expect(_.findWhere(processed, {text: "abstract"}).origSize).to.eql(0.07704642165507428);
+        expect(_.findWhere(processed, {text: "e-print"}).size).to.eql(67);
 
-        expect(_.findWhere(processed, {text: "imaging"}).size).to.eql(18);
-
-        expect(_.findWhere(processed, {text: "imaging"}).origSize).to.eql(1.937015350530147);
-
+        //eprint is a rare word, so it is larger in this word cloud version
+        expect(_.findWhere(processed, {text: "e-print"}).origSize).to.eql(82.35484784432593);
 
       });
 
-      it("should have a draw function on the word cloud view that takes care of the word cloud rendering", function(){
+      it("should have a draw function on the word cloud view that takes care of the word cloud rendering", function(done){
 
-        expect(w.view.draw).to.be.instanceof(Function);
+        w = new WordCloud();
+        $("#test").append(w.render().el);
 
-        //how to best test the layout? leave this for later
+        //this change triggers the data processing step, which in turn triggers the cloud layout
+        w.model.set("tfidfData", fakeWordCloudData);
 
+        setTimeout(function(){
+
+          //word cloud has 50 words
+          expect(d3.selectAll(".s-wordcloud-text")[0].length).to.eql(50);
+
+          //in this particular cloud, smithsonian/nasa is one of the dominant words
+          expect(d3.selectAll(".s-wordcloud-text").filter(function(d){return d.text == "smithsonian/nasa"}).style("font-size")).to.eql('70px');
+
+          //"iraf", meanwhile, should be smaller
+          expect(d3.selectAll(".s-wordcloud-text").filter(function(d){return d.text == "IRAF"}).style("font-size")).to.eql('31px');
+          done();
+
+        }, 1500);
       });
 
       it("should have a list view that listens for click events on word cloud words and adds/removes the word from the list", function(){
 
-        w.listView.model.trigger("selected", "optical");
+        w = new WordCloud();
+        $("#test").append(w.render().el);
 
+        w.model.set("tfidfData", fakeWordCloudData);
+        w.listView.model.trigger("selected", "optical");
         expect(w.listView.model.get("selectedWords")[0]).to.eql("optical");
 
         w.listView.model.trigger("unselected", "optical");
-
         expect(w.listView.model.get("selectedWords")[0]).to.eql(undefined)
 
       });
@@ -438,23 +1672,21 @@ define([
 
       it("should have a submit button that emits a start_search with the new filter", function(){
 
-        w.pubsub = {publish : function(){}};
+        w = new WordCloud();
+        $("#test").append(w.render().el);
 
+        w.model.set("tfidfData", fakeWordCloudData);
+        w.pubsub = {publish : function(){}};
         var pubsubStub = sinon.stub(w.pubsub, "publish");
 
         //for testing
         w.getCurrentQuery = function(){return new ApiQuery()};
-
         w.listView.model.set("selectedWords",["fakeA", "fakeB"]);
 
         //clicking submit button
-
         $(".apply-vis-facet").click();
-
-        expect(pubsubStub.args[0][1].get("q")).to.eql(["undefined AND (fakeA OR fakeB)"])
-
+        expect(pubsubStub.args[0][1].get("q")).to.eql(["undefined AND (\"fakeA\" OR \"fakeB\")"])
       })
-
     })
 
 });

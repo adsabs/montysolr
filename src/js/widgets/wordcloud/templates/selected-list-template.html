@@ -1,11 +1,11 @@
-<p> Selected Terms: </p>
+<h5> Selected Terms: </h5>
 <ul class="vis-select-list s-vis-select-list">
 
     {{#if selectedWords}}
 
     {{#each selectedWords}}
 
-        <li>{{this}} <i class="x-remove"></i></li>
+        <li><span class="selected-word">{{this}}</span> <i class="close">&times;</i></li>
 
     {{/each}}
 

@@ -10,12 +10,20 @@ WordCloud
 
 */
 
+
+// for the slider
+.s-wordcloud-tick-container {
+
+  margin-top:-5px;
+  font-size:8px;
+}
+
 .s-wordcloud-text {
 
   fill: #00006B;
   font-weight: 400;
   text-anchor: middle;
-  .lh-transition(fill 1s);
+  .lh-transition(all 1s);
 
   &:hover {
     cursor: pointer;
@@ -23,18 +31,50 @@ WordCloud
   }
 }
 
+.s-vis-select-list .close {
+  line-height: 0;
+  margin-top: 8px;
+
+}
+
 .s-wordcloud-container {
 
-  width: 80%;
-  height: 80%;
-
   .selected {
-    fill: darkorange !important;
+    fill: @brand-warning !important;
   }
+}
+
+
+.s-wordcloud-slider-labels {
+  font-size: .8em;
+}
+
+.s-wordcloud-help-container {
+  padding-bottom: 20px;
+  .clearfix;
+}
+
+.s-wordcloud-widget {
+
+  margin-top: 30px;
+  font-weight: 300;
+}
+
+
+.s-vis-item-format {
+
+  background: @gray-lightest;
+  padding: 15px 5px;
+  .lh-box-shadow(2px 2px 2px @default-box-shadow-color);
+  margin-bottom: 20px;
+
 }
 
 .s-vis-select-list {
   list-style: none;
+  padding-left: 0px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 /*

@@ -3,19 +3,29 @@ define([
   'backbone',
   'marionette',
   'd3',
+  'js/components/api_request',
   'js/widgets/base/base_widget',
   'hbs!./templates/wordcloud-template',
   'hbs!./templates/selected-list-template',
   'jquery-ui',
+  'bootstrap',
   'd3-cloud'
 
   ], function ($,
   Backbone,
   Marionette,
   d3,
+  ApiRequest,
   BaseWidget,
   WordCloudTemplate,
   SelectedListTemplate) {
+
+
+  var helpText = "<p>This word cloud allows you to view interesting words from the titles and abstracts of your search results.</p>"+
+    "<p> Move the slider towards <strong> Frequent</strong> to view a word cloud that is simply composed of the words that appeared most"+
+    " frequently in your results. (This word cloud is likely to feature generic terms like 'observations' prominently.) </p> <p>Move the slider towards" +
+    " <strong>Unique</strong> to see a word cloud that shows words that appeared in your results but which appear very rarely in the rest of the ADS corpus.</p>" +
+    "<p>To facet your ADS search, select words from the word cloud and click the 'Apply Filter to Search' button.</p>";
 
 
   var ListModel = Backbone.Model.extend({
@@ -38,6 +48,12 @@ define([
       this.trigger("userChange:selectedWords", word)
     },
 
+    reset : function(){
+
+      this.set("selectedWords", []);
+
+    },
+
     defaults: {
 
       selectedWords: []
@@ -54,7 +70,6 @@ define([
 
           this.listenTo(this.model, "userChange:selectedWords", this.render);
 
-
         },
 
         template: SelectedListTemplate,
@@ -62,30 +77,38 @@ define([
         render : function(){
           this.$el.html(this.template(this.model.toJSON()));
 
-          return this
+          return this;
 
         },
 
        events : {
-         "click .x-remove" : "removeWord",
+         "click .close" : "removeWord",
          "click .apply-vis-facet" :  "submitFacet"
        },
 
         removeWord :function(e){
 
-          var word = $(e.target).parent().text();
+          var word = $(e.target).parent().find(".selected-word").text();
           this.model.remove(word)
         },
 
         submitFacet : function(){
 
-          this.trigger("submitFacet");
+         //only trigger event if there is at least one word selected
+
+          if (this.model.get("selectedWords").length){
+
+            this.trigger("submitFacet");
+
+          }
 
         }
 
       });
 
-      var WordCloudView = Marionette.View.extend({
+      var WordCloudView = Marionette.ItemView.extend({
+
+        className: "s-wordcloud-widget",
 
         initialize: function (options) {
 
@@ -93,7 +116,7 @@ define([
 
           this.listView = options.listView;
 
-          this.listenTo(this.model, "change:processedWordList", this.onRender);
+          this.listenTo(this.model, "change:processedWordList", this.onProcessedWordChange);
           this.listenTo(this.listView.model, "userChange:selectedWords", this.toggleHighlight);
 
         },
@@ -101,30 +124,40 @@ define([
         toggleHighlight : function(word){
 
           var w = word.trim();
-          this.$("text").filter(function(){
+          d3.selectAll(this.$("text")).filter(function(){
             if (this.textContent.trim() == w) {
-              $(this).toggleClass("selected");
+              var d3This =  d3.select(this);
+             d3This.classed("selected", !d3This.classed("selected"));
             }
           });
         },
 
         template: WordCloudTemplate,
 
-        render: function () {
+        render: function() {
 
-          this.$el.html(WordCloudTemplate());
+          this.$el.html(WordCloudTemplate({helpText : helpText}));
 
           this.listView.setElement(this.$(".selected-word-list")).render();
 
-          this.trigger("render");
+          //add popover listener
+
+          this.$(".icon-help").popover({trigger: "hover", placement: "right", html: true});
 
           return this
         },
 
-        onRender: function () {
+        onProcessedWordChange: function () {
 
           //prevents word cloud from drawing if no information
           if (this.model.get("processedWordList").length > 0){
+
+            //remove loading view if it's there
+            if (this.$(".s-loading").length){
+
+              this.render();
+
+            }
 
             this.buildSlider();
             this.buildCloudLayout();
@@ -135,11 +168,8 @@ define([
 
         buildCloudLayout : function(){
 
-          this.model.get("renderVals").width = this.$("svg").width() ;
-          this.model.get("renderVals").height = this.$("svg").height() ;
-
           d3.layout.cloud()
-            .size([this.model.get("renderVals").width, this.model.get("renderVals").height])
+            .size([1000, 600])
             .words(this.model.get("processedWordList"))
             .padding(3)
             .rotate(function() { return 0})
@@ -168,13 +198,17 @@ define([
 
         draw: function () {
 
+          var that = this;
+
           var renderVals = this.model.get("renderVals");
-          var height = renderVals.height;
-          var width = renderVals.width;
+          var height = 600;
+          var width = 1000;
 
           var svg = d3.select(this.$("#wordcloud-svg")[0]);
 
           var words = this.model.get("processedWordList");
+
+          //set up code, only runs the first time
 
           if (!this.$("#words-group").length){
            var g = svg
@@ -185,7 +219,29 @@ define([
               .attr("transform", function()
               {
                 return "translate(" + width/2 + " " + height/2 + ")"
-              })
+              });
+
+
+            //using event delegation for click events
+            //this seems to reduce time spent rendering
+            svg[0][0].addEventListener("click", function(e){
+
+              var classList = e.target.classList;
+
+              //only interested in wordcloud text elements
+
+              if (!classList.contains("s-wordcloud-text")){
+                return
+              }
+              if (!classList.contains("selected")){
+                that.listView.model.trigger("selected", e.target.textContent);
+              }
+              else {
+                that.listView.model.trigger("unselected", e.target.textContent);
+              }
+
+            })
+
           }
           else {
             g = d3.select(this.$("#wordcloud-svg")[0]).select("#words-group")
@@ -196,13 +252,25 @@ define([
             return d.text;
           });
 
+          var selectedWords = this.listView.model.get("selectedWords");
 
           //enter selection
           text.enter()
             .append("text")
             .classed("s-wordcloud-text", true)
             .text(function(d) { return d.text; })
-            .style("fill", function(d, i) {return  renderVals.fill(d.origSize);})
+            .style("fill", function(d, i) {
+
+              return  renderVals.fill(d.origSize);
+            })
+
+            //has this element been selected?
+            .classed("selected", function(d,i){
+              if (_.contains(selectedWords, d.text)){
+
+                return true
+              }
+            })
             .attr("transform", function(d, i) {
               //split into 4 groups to come from 4 diff directions
               if (i < 15) {
@@ -226,34 +294,20 @@ define([
           text
             .exit()
             .style("opacity", 0)
-            //getting weird memory leaks because d3 remove just detaches dom tree???
             .remove();
 
           var that = this;
 
-
           // update selection
           text
-            .transition()
-            .duration(1000)
             .style("font-size", function(d) {return d.size})
             .style("fill", function(d, i) {return renderVals.fill(d.origSize);})
+            .transition()
+            .duration(1000)
             .attr("transform", function(d)
             {
               return "translate(" + [d.x, d.y] + ")";
-            })
-
-
-          text
-            .on("click", function(d){
-                if (!this.classList.contains("selected")){
-                  that.listView.model.trigger("selected", this.textContent);
-                }
-                else {
-                  that.listView.model.trigger("unselected", this.textContent);
-                }
-            })
-
+            });
         }
 
       });
@@ -276,18 +330,16 @@ define([
           renderVals : {
           fill : undefined,
           glowScale : undefined,
-          width : undefined,
-          height: undefined,
           blur : undefined
 
           },
           //is this the right place to put this?
-          colorRange: ["#80E6FF", "#7575FF", "#47008F"],
+          colorRange: ["#80E6FF", "#7575FF", "#7575FF", "#47008F"],
           sliderRange: {'1':[1,0], '2':[.75, .25], '3':[.5,.5], '4':[.25,.75], '5':[0,1]}
         },
 
         reset: function () {
-          this.set(this.defaults)
+          this.set(this.defaults, {silent : true});
         },
 
         buildWCDict: function () {
@@ -301,7 +353,7 @@ define([
           numWords = _.size(dict);
 
           meanTF = _.reduce(_.map(_.values(dict), function (x) {
-              return x['total_occurences']
+              return x['total_occurrences']
             }), function (m, n) {
               return m + n
             }, 0) / numWords;
@@ -323,7 +375,7 @@ define([
 
           wordDict = _.map(dict, function (val, key) {
 
-            freq = val['total_occurences'] / meanTF;
+            freq = val['total_occurrences'] / meanTF;
             idf = val['idf'] / meanIDF
 
             modifiedVal = sliderRange[currentSliderVal][0] * idf + sliderRange[currentSliderVal][1] * freq;
@@ -334,7 +386,7 @@ define([
           // sort to get 50 top candidates
           wordDict = _.last(_.sortBy(wordDict, function (l) {
             return l[1]
-          }), 50)
+          }), 50);
 
           wordDict = _.object(wordDict);
           min = _.min(_.values(wordDict));
@@ -342,40 +394,71 @@ define([
 
           wordList = [];
 
-          renderVals = {}
+          renderVals = {};
 
-          renderVals.fill = d3.scale.log();
-          renderVals.fill.domain([0, .25, 0.5, 0.75, 1].map(renderVals.fill.invert));
-          renderVals.fill.range(this.get("colorRange")).clamp(true);
+          renderVals.fill = d3.scale.log().domain([min, max]);
+          renderVals.fill.domain([0, .25, 0.5, 0.75, 1].map(renderVals.fill.invert))
+            .range(this.get("colorRange")).clamp(true);
 
-          renderVals.glowScale = d3.scale.log().domain([min, max]).range([1.5, 4]);
-
-          var pixelScale = d3.scale.log().domain([min, max]).range([15, 40]);
+          var pixelScale = d3.scale.log().domain([min, max]).range([30, 70]);
 
           for (var entry in wordDict) {
             wordList.push({text: entry, size: pixelScale(wordDict[entry]), select: false, origSize: wordDict[entry]})
           }
 
-          this.set("renderVals", renderVals)
-
+          this.set("renderVals", renderVals);
           this.set("processedWordList", wordList);
 
         }
 
       });
 
-      var WordCloudWidget = BaseWidget.extend({
+
+  var WordCloudWidget = BaseWidget.extend({
 
         initialize: function (options) {
           options = options || {};
           this.listView = new ListView();
           this.model = new WordCloudModel();
           this.view = new WordCloudView({model: this.model, listView : this.listView});
-          this.on("all", this.onAllInternalEvents)
-          this.listenTo(this.listView, "all", this.onAllInternalEvents)
+
+          this.on("all", this.onAllInternalEvents);
+          this.listenTo(this.listView, "all", this.onAllInternalEvents);
         },
 
-        activate: function (pubsub) {
+        activate: function (beehive) {
+
+          _.bindAll(this, "setCurrentQuery", "processResponse");
+
+          this.pubsub = beehive.Services.get('PubSub');
+
+          //custom dispatchRequest function goes here
+          this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
+
+          //custom handleResponse function goes here
+          this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+        },
+
+        //fetch data
+        onShow: function () {
+
+          var request = new ApiRequest({
+
+            target: Marionette.getOption(this, "endpoint") || "services/vis/word-cloud",
+            query: this.getCurrentQuery()
+          });
+
+          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+
+        },
+
+        processResponse: function (data) {
+
+          data = data.toJSON();
+
+          this.model.set("tfidfData", data);
+
         },
 
         close : function(){
@@ -385,19 +468,28 @@ define([
           Marionette.Controller.prototype.close.apply(this, arguments);
         },
 
-        dispatchRequest: function () {
-          this.model.restoreDefaults();
+        setCurrentQuery: function () {
+          //make sure to reset the model's processed word list
+          this.listView.model.reset();
+
+          //resetting model
+          this.model.reset();
+
+          BaseWidget.prototype.setCurrentQuery.apply(this, arguments);
         },
 
-        processResponse : function() {
-        },
-
-        onAllInternalEvents : function(ev, arg1, arg2) {
+        onAllInternalEvents : function(ev) {
           if (ev === "submitFacet"){
-            var filterList = this.listView.model.get("selectedWords");
-            var q = this.getCurrentQuery().clone();
-            var newQ =  q.get("q") + " AND (" + filterList.join(" OR ") + ")"
+            var filterList, q, newQ;
+
+            filterList = this.listView.model.get("selectedWords");
+            q = this.getCurrentQuery();
+            q = q.clone();
+            q.unlock();
+
+            newQ =  q.get("q") + " AND (\"" + filterList.join("\" OR \"") + "\")";
             q.set("q", newQ);
+
             this.pubsub.publish(this.pubsub.START_SEARCH, q);
           }
         }
