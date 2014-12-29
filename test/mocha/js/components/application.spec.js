@@ -1,4 +1,9 @@
-define(['js/components/application', 'module'], function(Application, module) {
+define([
+  'js/components/application',
+  'module'
+], function(
+  Application,
+  module) {
   describe("Application Scaffolding (application.spec.js)", function () {
 
     var config = null;

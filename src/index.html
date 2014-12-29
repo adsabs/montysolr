@@ -39,10 +39,20 @@
 
     <!-- this is where bbb discovery gets inserted -->
     <div id="body-template-container">
+        <noscript>
+            <p></p>
+            <p>Ah, welcome hardcode user. Your client does not speak javascript,
+            please follow this link to access non-javascript version of this
+            website:
+            <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a></p>
+            <p>Btw: you are missing lots of fun. That other website of ours
+                is seryiousli dump.</p>
+        </noscript>
+
         <div style="width:60%; margin:0 auto;font-family: courier;margin-top:10%;">
             <div id="loader">
                 <span id="loadee"></span>
-                <span id="pacman"><img src="styles/img/pacman.gif" /></span>
+                <span id="pacman"></span>
             </div>
         </div>
     </div>
@@ -56,18 +66,21 @@
 <!-- start the discovery application -->
 <script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
 <script>
-    var i = 0;
-    var barSize = 60;
     var food = [
         'Please stand by, Bumblebee is comiiiiinng to get you!!!',
-        'This message is you typical annoying "stand by, please"...',
-        'Hold you breath, 95% of you (+/- 2.57854%) can do long enough for Bumblebee to load...',
-        'Wait! Stop all your film downloads! Bumblebee is here'
+        'This message is your typical annoying "stand by, please"...',
+        'Hold you breath, 95% of you (+/- 2.57854%) can manage long enough for Bumblebee to load...',
+        'Wait! Stop all your film downloads! Bumblebee needs bandwidth!'
     ];
     var eat = function(msg) {
         var el = document.getElementById("loadee");
-        if (msg) el.textContent = msg;
-
+        if (!el) return;
+        if (msg) {
+            el.textContent = msg;
+            var x = document.createElement('img');
+            x.src = "styles/img/pacman.gif";
+            document.getElementById('pacman').appendChild(x);
+        }
         var img = document.getElementById('pacman').getElementsByTagName('img')[0];
         var loader = document.getElementById("loader");
         var t = el.textContent;
@@ -81,6 +94,7 @@
     };
     var selfDestruct = function(counter) {
         var el = document.getElementById("loadee");
+        if (!el) return;
         if (counter < 0)
             location.reload();
         el.textContent = "Thousand Sad Pandas, we have run out of delaying tactics....ehm, cough... " +

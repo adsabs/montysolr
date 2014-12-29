@@ -409,7 +409,7 @@ module.exports = function(grunt) {
             'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=discovery-suite'
           ],
           threshold : 0,
-          globalThreshold : 76,
+          globalThreshold : 75,
           log : true,
           logErrors: true,
           moduleThreshold : 80,
@@ -448,8 +448,10 @@ module.exports = function(grunt) {
             "widgets/dropdown-menu/widget.js":78,
             "widgets/list_of_things/paginated_view.js":78,
             "wraps/paper_network.js": 74, // some tests don't run properly in phantomjs,
-            "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i'll do it)
-            "mixins/feedback_handling.js": 1
+
+            "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i've already started)
+            "mixins/feedback_handling.js": 1,
+            "mixins/discovery_bootstrap.js": 1
 
           }
         }

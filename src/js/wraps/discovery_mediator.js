@@ -128,14 +128,46 @@ define([
 
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START] = function(feedback) {
       var apiRequest = feedback.request;
-      var xhr = feedback.jqXHR;
+      var xhr = feedback.error.jqXHR;
+
       var app = this.getApp();
       var alerts = app.getWidget('Alerts');
+      var self = this;
 
       if (!alerts)
         console.warn('There is no widget Alerts, that can handle the user feedback!');
 
       if (xhr && apiRequest) {
+        switch(xhr.status) {
+          case 401: // unauthorized
+             // check the Api is working
+             app.getApiAccess({reconnect: true})
+               .done(function() {
+                 // the access_token was refreshed, test the query
+                 var api = app.getService('Api');
+                 api.request(apiRequest, {done: function() {
+                   // we've recovered - restart the search cycle
+                   self.pubsub.publish(self.pubSubKey, self.pubsub.START_SEARCH, apiRequest.get('query'));
+                 }, fail: function() {
+                   self.pubsub.publish(self.pubSubKey, self.pubsub.ALERT, new ApiFeedback({
+                     code: ApiFeedback.CODES.ALERT,
+                     msg: "I'm sorry, you don't have access rights to get data from: " + apiRequest.get('target'),
+                     modal: true
+                   }));
+                 }});
+               })
+               .fail(function() {
+                 self.pubsub.publish(self.pubSubKey, self.pubsub.ALERT, new ApiFeedback({
+                   code: ApiFeedback.CODES.ALERT,
+                   msg: 'There is a problem with our API, it does not respond to queries. (in near future, we\'ll be able to send feedback automatically)</span>',
+                   modal: true
+                 }));
+               });
+              return;
+            break;
+        }
+
+
         var target = apiRequest.get('target');
 
         if (target.indexOf('/search') > -1 && xhr.status == 400) { // wrong query
@@ -158,18 +190,6 @@ define([
         }
       }
 
-      /*
-      // check the Api is working
-      app.checkApiAccess({reconnect: true, apiTarget: apiRequest.get('target'), url: xhr.url})
-        .done(function(report) {
-          if (report.actionTaken == 'none') { // means api was working
-
-          }
-        })
-        .fail(function() {
-
-        });
-        */
     };
 
     handlers[ApiFeedback.CODES.QUERY_ASSISTANT] = function(feedback) {

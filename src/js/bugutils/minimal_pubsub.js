@@ -64,7 +64,7 @@ define(['underscore', 'backbone',
       this.pubsub.debug = true;
       this.beehive.addService('PubSub', this.pubsub);
       var self = this;
-      this.beehive.addService('Api', {
+      this.beehive.addService('Api', options.Api || {
         request: function(req, context) {
           self.requestCounter += 1;
           var response = self.request.apply(self, arguments);
@@ -118,6 +118,11 @@ define(['underscore', 'backbone',
       var args = _.toArray(arguments);
       args.unshift(this.key);
       this.pubsub.subscribe.apply(this.pubsub, args);
+    },
+    subscribeOnce: function(signal, callback) {
+      var args = _.toArray(arguments);
+      args.unshift(this.key);
+      this.pubsub.subscribeOnce.apply(this.pubsub, args);
     },
     on: function() {
       this.pubsub.on.apply(this.pubsub, arguments);

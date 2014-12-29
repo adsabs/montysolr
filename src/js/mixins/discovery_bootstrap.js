@@ -227,6 +227,46 @@ define([
       });
 
 
+    },
+
+    /**
+     * After bootstrap receives all data, this routine should decide what to do with
+     * them
+     */
+    onBootstrap: function(data) {
+      // set the API key
+      if (data.access_token) {
+        var api = this.getBeeHive().getService('Api');
+        if (api.access_token) {
+          console.warn('Redefining access_token: ' + api.access_token);
+        }
+        api.access_token = data.token_type + ':' + data.access_token;
+        api.refresh_token = data.refresh_token;
+        api.expires_in = data.expires_in;
+      }
+    },
+
+    getApiAccess: function(options) {
+      var api = this.getBeeHive().getService('Api');
+      var redirect_uri = location.origin + location.pathname;
+      var self = this;
+      var defer = $.Deferred();
+      api.request(new ApiRequest({
+          query: new ApiQuery({redirect_uri: redirect_uri}),
+          target: '/bumblebee/bootstrap'}),
+         {
+          done: function (data) {
+            if (options.reconnect) {
+              self.onBootstrap(data);
+            }
+            defer.resolve(data);
+          },
+          fail: function () {
+            defer.reject(arguments);
+          },
+          type: 'GET'
+        });
+      return defer;
     }
 
 
