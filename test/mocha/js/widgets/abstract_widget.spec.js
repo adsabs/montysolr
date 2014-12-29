@@ -57,7 +57,8 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect(spy.callCount).to.eql(1);
         expect(aw._docs['foo'].hasAffiliation).to.equal(2);
         expect(aw._docs['foo'].hasMoreAuthors).to.equal(0);
-        expect(aw._docs['foo'].pubdate).to.equal("1981");
+        expect(aw._docs['foo'].pubdate).to.equal("1981-00-00");
+        expect(aw._docs['foo'].formattedDate).to.equal("1981");
         expect(aw._docs['foo'].pub).to.equal("IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics");
         expect(aw._docs['foo'].authorAff[0]).to.eql(["Lieske, J. H.", "Heidelberg, Universität, Heidelberg, Germany", "%22Lieske%2C%20J.%20H.%22"]);
         expect(aw._docs['foo'].authorAff[1]).to.eql(["Standish, E. M.", "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA", "%22Standish%2C%20E.%20M.%22"]);

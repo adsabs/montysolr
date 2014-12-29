@@ -44,13 +44,7 @@ define(["config", 'module'], function(config, module) {
         app.bootstrap().done(function (data) {
 
 
-          // set the API key
-          if (data.access_token) {
-            var api = app.getBeeHive().getService('Api');
-            api.access_token = data.token_type + ':' + data.access_token;
-            api.refresh_token = data.refresh_token;
-            api.expires_in = data.expires_in;
-          }
+          app.onBootstrap(data);
 
           app.start(Router);
 

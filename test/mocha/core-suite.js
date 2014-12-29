@@ -19,6 +19,8 @@ define([], function() {
       '/components/feedback_mediator.spec.js',
       '/components/history_manager.spec.js',
 
+      '/components/discovery_mediator.spec.js',
+
       '/services/backbone.events.spec.js',
       '/services/pubsub.spec.js',
       '/services/api.spec.js',
@@ -26,7 +28,9 @@ define([], function() {
       '/mixins/dependon.spec.js',
       '/mixins/link_generator_mixin.spec.js',
       '/mixins/add_stable_index_to_collection.spec.js',
-      '/mixins/page-manager-mixin.spec.js'
+      '/mixins/page-manager-mixin.spec.js',
+      '/mixins/papers_utils.spec.js'
+
   ];
   return tests;
 });

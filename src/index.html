@@ -2,14 +2,14 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>Bumblebee discovery</title>
+    <title>Bumblebee discovery</title>
 
-  <link rel="stylesheet" href="./styles/css/jquery-ui.min.css" />
-  <link rel="stylesheet" href="./styles/css/styles.css" />
+    <link rel="stylesheet" href="./styles/css/jquery-ui.min.css" />
+    <link rel="stylesheet" href="./styles/css/styles.css" />
 
 <body>
 <div class="fixed-search s-fixed-search"></div>
@@ -31,21 +31,82 @@
 
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        </div><!-- /.navbar-collapse -->
+                </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->
         </nav>
 
     </div>
-    <div id="body-template-container"></div>
-        <div class="row">
-            <div class="col-md-12" id="bottom"></div>
+
+    <!-- this is where bbb discovery gets inserted -->
+    <div id="body-template-container">
+        <noscript>
+            <p></p>
+            <p>Ah, welcome hardcode user. Your client does not speak javascript,
+            please follow this link to access non-javascript version of this
+            website:
+            <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a></p>
+            <p>Btw: you are missing lots of fun. That other website of ours
+                is seryiousli dump.</p>
+        </noscript>
+
+        <div style="width:60%; margin:0 auto;font-family: courier;margin-top:10%;">
+            <div id="loader">
+                <span id="loadee"></span>
+                <span id="pacman"></span>
+            </div>
         </div>
-  </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" id="bottom"></div>
+    </div>
+</div>
 
 <span id="aria-announcement-container" aria-live="assertive"></span>
 
+<!-- start the discovery application -->
+<script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
+<script>
+    var food = [
+        'Please stand by, Bumblebee is comiiiiinng to get you!!!',
+        'This message is your typical annoying "stand by, please"...',
+        'Hold you breath, 95% of you (+/- 2.57854%) can manage long enough for Bumblebee to load...',
+        'Wait! Stop all your film downloads! Bumblebee needs bandwidth!'
+    ];
+    var eat = function(msg) {
+        var el = document.getElementById("loadee");
+        if (!el) return;
+        if (msg) {
+            el.textContent = msg;
+            var x = document.createElement('img');
+            x.src = "styles/img/pacman.gif";
+            document.getElementById('pacman').appendChild(x);
+        }
+        var img = document.getElementById('pacman').getElementsByTagName('img')[0];
+        var loader = document.getElementById("loader");
+        var t = el.textContent;
 
-    <script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
+        if (!t.length) {
+            selfDestruct(5);
+            return;
+        }
+        el.textContent = t.substring(0, t.length - 1).trim();
+        setTimeout(function() {eat()}, 500);
+    };
+    var selfDestruct = function(counter) {
+        var el = document.getElementById("loadee");
+        if (!el) return;
+        if (counter < 0)
+            location.reload();
+        el.textContent = "Thousand Sad Pandas, we have run out of delaying tactics....ehm, cough... " +
+                "nice weather outside, isn't it? (This application will self-destruct in: " + counter + "s.)"
+        setTimeout(function() {selfDestruct(counter-1)}, 1000);
+    };
+    function getRandomInt (min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    eat(food[getRandomInt(0, food.length-1)]);
+
+</script>
 
 
 </body>

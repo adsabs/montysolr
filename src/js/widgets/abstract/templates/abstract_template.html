@@ -52,18 +52,19 @@
     <dt>Publication</dt>
     <dd>
         <div id="article-publication">{{pub_raw}}</div>
-        {{#if pubdate}}
+        {{#if formattedDate}}
         <div>
-            <em>Pub Date:</em> {{pubdate}}
+            <dt>Pub Date:</dt> {{formattedDate}}
         </div>
         {{/if}}
 
         {{#if doi}}
         <div>
-            <em>DOI:</em> <a href="{{doi.href}}" target="_blank">{{doi.doi}}</a>
+            <dt>DOI:</dt> <a href="{{doi.href}}" target="_blank">{{doi.doi}}</a>
         </div>
         {{/if}}
     </dd>
+    <br/>
     {{/if}}
 
 

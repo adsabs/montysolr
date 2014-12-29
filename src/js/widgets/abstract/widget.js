@@ -69,7 +69,7 @@ define([
           authorAff = authorAff.slice(0, maxAuthors);
         }
 
-        doc.pubdate = PapersUtils.formatDate(doc.pubdate);
+        var formattedDate = doc.pubdate ? PapersUtils.formatDate(doc.pubdate, {format: 'MM d yy', missing: {day: 'MM yy', month: 'yy'}}) : undefined;
 
         title = $.isArray(doc.title)? doc.title[0] : undefined;
 
@@ -82,6 +82,7 @@ define([
           hasMoreAuthors: authorAffExtra.length,
           pub: doc.pub,
           pubdate: doc.pubdate,
+          formattedDate: formattedDate,
           keyword: doc.keyword,
           bibcode: doc.bibcode,
           pub_raw: doc.pub_raw,
