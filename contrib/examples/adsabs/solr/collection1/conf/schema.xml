@@ -451,11 +451,11 @@
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="text.kill_sens" enablePositionIncrements="false" 
+					words="ads_text.kill_sens" enablePositionIncrements="false" 
 					luceneMatchVersion="4.3"/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="text.kill" enablePositionIncrements="false" 
+					words="ads_text.kill" enablePositionIncrements="false" 
 					luceneMatchVersion="4.3"/>
 
 
@@ -539,11 +539,11 @@
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="text.kill_sens" enablePositionIncrements="false" 
+					words="ads_text.kill_sens" enablePositionIncrements="false" 
 					luceneMatchVersion="4.3"/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="text.kill" enablePositionIncrements="false" 
+					words="ads_text.kill" enablePositionIncrements="false" 
 					luceneMatchVersion="4.3"/>
 
 
@@ -613,11 +613,11 @@
         
         <!-- remove stop words - first the case sensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="false"
-          words="text.kill_sens" enablePositionIncrements="false" 
+          words="ads_text.kill_sens" enablePositionIncrements="false" 
           luceneMatchVersion="4.3"/>
         <!-- remove stop words - then case insensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="true"
-          words="text.kill" enablePositionIncrements="false" 
+          words="ads_text.kill" enablePositionIncrements="false" 
           luceneMatchVersion="4.3"/>
 
 
@@ -1132,6 +1132,9 @@
 		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
 			multiValued="true" omitNorms="true"/>
 
+		<field name="orcid" type="normalized_text_ascii" indexed="true" stored="true"
+		       omitNorms="true"/>
+
     <!-- 
     @api.doc
     
@@ -1350,9 +1353,44 @@
 		<field name="classic_factor" type="int" indexed="true" stored="true" 
 		  omitNorms="true" omitTermFreqAndPositions="true"/>
 		  
+    <!-- 
+    @api.doc
+    * simbid
+    
+      An array of integer values corresponding to the ids of associated objects
+      in the SIMBAD database
+
+    * simbtype
+
+      An array of object types corresponding to the associated objects in the SIMBAD database
+
+    * simbad_object_facet_hier
+
+      The hierarchical facets consisting of object_type/object_id as above
+
+     -->
 		<field name="simbid" type="int" indexed="true" stored="true" multiValued="true"
 		  omitNorms="true" omitTermFreqAndPositions="true"/>
 		  
+		<field name="simbtype" type="normalized_text_ascii" indexed="true" stored="true" multiValued="true"
+		  omitNorms="true"/>
+      
+		<field name="simbad_object_facet_hier" type="string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+	  
+    <!--
+    @api.doc
+
+    * citation_count
+
+      The number of citations associated with this record
+
+    * read_count
+
+      the number of recent readers who accessed this record (computed as len(reader))
+
+     -->
+
 		<field name="citation_count" type="int" indexed="true" stored="true" 
 		  omitNorms="true" omitTermFreqAndPositions="true"/>
 		  
