@@ -205,6 +205,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"links_data\": [\"{whatever: here there MAST}\","
 														+ "\"{\\\"foo\\\": [\\\"bar\\\", \\\"baz\\\"], \\\"one\\\": {\\\"two\\\": \\\"three\\\"}}\"]" +
 				", \"ids_data\": [\"{whatever: here there MAST}\"]" +
+				", \"simbid\": [9000000, 1]" +
+				", \"simbtype\": [\"Galaxy\", \"HII Region\"]" +
+				", \"orcid\": [\"1111-2222-3333-4444\", \"-\", \"0000-0002-4110-3511\"]" +
+				", \"simbad_object_facet_hier\": [\"0/HII Region\", \"1/HII Region/9000000\"]" +
 			"}" +
 		"}}";
 		updateJ(json, null);
@@ -310,6 +314,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "doi:\"doi:žščřďťň:123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ?123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='0']");
+		
 		
 		
 		/*
@@ -438,6 +443,26 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         );
 				
 
+		/*
+     * orcid, added 30/12/14; they must correspond to the author array
+     */
+    assertQ(req("q", "orcid:1111-2222-3333-4444"), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+    assertQ(req("q", "orcid:1111*"), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+    assert h.query(req("q", "recid:100"))
+    .contains("<arr name=\"orcid\">" +
+      "<str>1111-2222-3333-4444</str>" +
+      "<str>-</str>" +
+      "<str>0000-0002-4110-3511</str></arr>"
+      );
+    
+    
+		
 		/*
 		 * page
 		 */
@@ -829,11 +854,39 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
 		);
-		assertQ(req("q", "simbid:[0 TO 9000000]"), 
+		assertQ(req("q", "simbid:[0 TO 9000001]"), 
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
 		);
 		
+		
+		/*
+		 * simbtype - simbad object types, added 30/12/14
+		 */
+		assertQ(req("q", "simbtype:HII"), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		assertQ(req("q", "simbtype:hii"), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		assertQ(req("q", "simbtype:\"HiI Region\""), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		
+		/*
+		 * simbad_object_facet_hier, added 30/12/14
+		 */
+		assertQ(req("q", "simbad_object_facet_hier:\"0/HII Region\""), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		assertQ(req("q", "simbad_object_facet_hier:\"1/HII Region/9000000\""), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
 		
 		/*
 		 * citations - added 10/12/13
@@ -893,6 +946,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/arr[@name='links_data']/str[contains(text(),'{\"foo\": [\"bar\", \"baz\"], \"one\": {\"two\": \"three\"}}')]"
 				);
 
+		
+		
 
 		/*
 		 * 2nd order queries

@@ -1133,7 +1133,7 @@
 			multiValued="true" omitNorms="true"/>
 
 		<field name="orcid" type="normalized_text_ascii" indexed="true" stored="true"
-		       omitNorms="true"/>
+		  multiValued="true" omitNorms="true"/>
 
     <!-- 
     @api.doc
@@ -1362,7 +1362,8 @@
 
     * simbtype
 
-      An array of object types corresponding to the associated objects in the SIMBAD database
+      An array of object types (as recorded in the SIMBAD database). This list will
+      just contain unique values.
 
     * simbad_object_facet_hier
 
