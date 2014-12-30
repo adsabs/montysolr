@@ -141,6 +141,7 @@ define([
       if (xhr && apiRequest) {
         switch(xhr.status) {
           case 401: // unauthorized
+          case 404: // for some unknow reason (yet) - 401 comes marked as 404
              // check the Api is working
              app.getApiAccess({reconnect: true})
                .done(function() {
@@ -148,6 +149,7 @@ define([
                  var api = app.getService('Api');
                  api.request(apiRequest, {done: function() {
                    // we've recovered - restart the search cycle
+                   app.getController('QueryMediator').resetFailures();
                    self.pubsub.publish(self.pubSubKey, self.pubsub.START_SEARCH, apiRequest.get('query'));
                  }, fail: function() {
                    self.pubsub.publish(self.pubSubKey, self.pubsub.ALERT, new ApiFeedback({

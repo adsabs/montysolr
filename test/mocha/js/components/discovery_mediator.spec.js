@@ -98,6 +98,12 @@ define([
           defer.resolve({});
           return defer;
         },
+        getController: function(name) {
+          if (name == 'QueryMediator')
+            return {
+              resetFailures: function() {}
+            }
+        },
         getService: function(name) {
           if (name == 'Api') {
             return {

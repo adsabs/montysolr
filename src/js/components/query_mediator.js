@@ -360,7 +360,8 @@ define(['underscore',
         if (maxTry >= this.maxRetries) {
           this.onApiRequestFailure.apply({request:apiRequest, key: senderKey, requestKey:requestKey, qm: this},
             [{status: ApiFeedback.CODES.TOO_MANY_FAILURES}, 'Error', 'This request has reached maximum number of failures (wait before retrying)']);
-          return;
+          var d = $.Deferred();
+          return d.reject();
         }
 
 
@@ -553,6 +554,10 @@ define(['underscore',
         if (this._cache) {
           this._cache.invalidateAll();
         }
+      },
+
+      resetFailures: function() {
+        this.failedRequestsCache.invalidateAll();
       }
 
     });
