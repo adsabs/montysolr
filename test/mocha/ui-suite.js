@@ -40,7 +40,8 @@ define([], function() {
     //TBD 24/09/14 '/widgets/similar_widget.spec.js',
       '/widgets/tabs_widget.spec.js',
       '/widgets/wordcloud_widget.spec.js',
-      '/widgets/year_graph_facet_widget.spec.js'
+      '/widgets/year_graph_facet_widget.spec.js',
+      '/widgets/hello_world_widget.spec.js'
 
   ];
   return tests;
