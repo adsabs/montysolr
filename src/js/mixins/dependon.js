@@ -49,6 +49,18 @@ define(['underscore'], function(_) {
         }
         return false;
       }
+    },
+
+    App: {
+      setApp: function(app) {
+        this.app = app;
+      },
+      getApp: function() {
+        return this.app;
+      },
+      hasApp: function() {
+        return this.app ? true : false;
+      }
     }
   };
 

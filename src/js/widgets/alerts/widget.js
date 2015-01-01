@@ -1,4 +1,8 @@
-
+/**
+ * This widget is capable of displaying messages to the user, however it does not
+ * listen on the PubSub. It is invoked/controlled by alerts_mediator. That is the
+ * controller which decides what to do.
+ */
 
 define([
     'js/widgets/base/base_widget',
@@ -126,11 +130,14 @@ define([
       },
 
       activate: function (beehive) {
-        this.pubsub = beehive.Services.get('PubSub');
-        this.pubsub.subscribe(this.pubsub.ALERT, _.bind(this.alert, this));
+        this.pubsub = beehive.getService('PubSub');
       },
 
       alert: function(feedback) {
+        var defer = $.Deferred();
+        if (feedback.events) {
+
+        }
         this.model.set({
           events: feedback.events,
           msg: feedback.msg,
@@ -148,15 +155,26 @@ define([
         var events = this.model.get('events');
         if (events[evtName]) {
           var data = events[evtName];
-          switch(data.action) {
-            case Alerts.ACTION.TRIGGER_FEEDBACK:
-              this.pubsub.publish(this.pubsub.FEEDBACK, new ApiFeedback(data.arguments));
-              break;
-            case Alerts.ACTION.CALL_PUBSUB:
-              this.pubsub.publish(data.signal, data.arguments);
-              break;
-            default:
-              throw new Exception('Unknow action type:' + data);
+
+          if (typeof data == 'function') {
+            return data(evtName);
+          }
+
+          if (data.resolve) {
+            return data.resolve(evtName);
+          }
+
+          if (_.isNumber(data)) {
+            switch (data.action) {
+              case Alerts.ACTION.TRIGGER_FEEDBACK:
+                this.pubsub.publish(this.pubsub.FEEDBACK, new ApiFeedback(data.arguments));
+                break;
+              case Alerts.ACTION.CALL_PUBSUB:
+                this.pubsub.publish(data.signal, data.arguments);
+                break;
+              default:
+                throw new Exception('Unknow action type:' + data);
+            }
           }
         }
       }

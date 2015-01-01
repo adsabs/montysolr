@@ -49,43 +49,37 @@ define([
       if (feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
 
-        var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
-
         //TODO: in the future, we can look inside the query and decide whether they would like to expand it by
         // a) searching fulltext (if there is any unfielded query)
         // b) modifying phrases and/or operators
-        var newQuery = q.clone();
 
-        this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
-          type: Alerts.TYPE.DANGER,
-          msg: msg,
-          events: {
-            'click a#query-assistant': {
-              action: Alerts.ACTION.TRIGGER_FEEDBACK,
-              arguments: {
-                code: ApiFeedback.CODES.QUERY_ASSISTANT,
-                query: newQuery
-              }
-            },
-            'click #new-query': {
-              action: Alerts.ACTION.CALL_PUBSUB,
-              signal: this.pubsub.START_SEARCH,
-              arguments: newQuery
+        var newQuery = q.clone();
+        var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
+        this.getAlerter().alert(new ApiFeedback({
+            type: Alerts.TYPE.DANGER,
+            msg: msg,
+            events: {
+              'click a#query-assistant': 'query-assistant'
             }
+        }))
+        .done(function(name) {
+          if (name == 'query-assistant') {
+            var app = self.getApp();
+            var search = app.getWidget('SearchWidget');
+            var q = newQuery.query.get('q').join(' ');
+            if (q)
+              search.openQueryAssistant(q);
           }
-        }));
+        });
         return; // do not bother with the rest
       }
-      else {
-        this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
-          type: Alerts.TYPE.INFO,
-          msg: null}));
-      }
 
-      // too many results, draw their attention to the search form
+
+      // too many results
       if (feedback.numFound > 1000) {
         var search = app.getWidget('SearchWidget');
         if (search && search.view && search.view.highlightFields)
+          // make the search form pulsate little bit
           search.view.highlightFields();
       }
 
@@ -132,11 +126,9 @@ define([
       var xhr = feedback.error.jqXHR;
 
       var app = this.getApp();
-      var alerts = app.getWidget('Alerts');
+      var alerts = self.getAlerter();
       var self = this;
 
-      if (!alerts)
-        console.warn('There is no widget Alerts, that can handle the user feedback!');
 
       if (xhr && apiRequest) {
         switch(xhr.status) {
@@ -152,17 +144,16 @@ define([
                    app.getController('QueryMediator').resetFailures();
                    self.pubsub.publish(self.pubSubKey, self.pubsub.START_SEARCH, apiRequest.get('query'));
                  }, fail: function() {
-                   self.pubsub.publish(self.pubSubKey, self.pubsub.ALERT, new ApiFeedback({
-                     code: ApiFeedback.CODES.ALERT,
-                     msg: "I'm sorry, you don't have access rights to get data from: " + apiRequest.get('target'),
+                   alerts.alert(new ApiFeedback({
+                     msg: "I'm sorry, you don't have access rights to query: " + apiRequest.get('target'),
                      modal: true
                    }));
                  }});
                })
                .fail(function() {
-                 self.pubsub.publish(self.pubSubKey, self.pubsub.ALERT, new ApiFeedback({
+                 alerts.alert(new ApiFeedback({
                    code: ApiFeedback.CODES.ALERT,
-                   msg: 'There is a problem with our API, it does not respond to queries. (in near future, we\'ll be able to send feedback automatically)</span>',
+                   msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...',
                    modal: true
                  }));
                });
@@ -176,20 +167,21 @@ define([
         if (target.indexOf('/search') > -1 && xhr.status == 400) { // wrong query
           var apiQuery = apiRequest.getApiQuery();
 
-          this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
-            code: ApiFeedback.CODES.ALERT,
-            msg: 'There is a problem with your query: <span id="query-assistant">you can use this tool to fix it.</span>',
+          alerts.alert(new ApiFeedback({
+            msg: 'Your query seems to be syntactically challenged, <span id="query-assistant">please use this tool to fix it.</span>',
             events: {
-              'click #query-assistant': {
-                action: Alerts.ACTION.TRIGGER_FEEDBACK,
-                type: Alerts.TYPE.ERROR,
-                arguments: {
-                  code: ApiFeedback.CODES.QUERY_ASSISTANT,
-                  query: apiQuery.clone()
-                }
-              }
+              'click a#query-assistant': 'query-assistant'
             }
           }))
+          .done(function(name) {
+            if (name == 'query-assistant') {
+              var app = self.getApp();
+              var search = app.getWidget('SearchWidget');
+              var q = apiQuery.query.get('q').join(' ');
+              if (q)
+                search.openQueryAssistant(q);
+            }
+          });
         }
       }
 
@@ -206,7 +198,14 @@ define([
     };
 
     return function() {
-      var mediator = new FeedbackMediator();
+      var mediator = new (FeedbackMediator.extend({
+        getAlerter: function() {
+          return this.getBeeHive().getController('Alerts');
+        },
+        createFeedback: function(options) {
+          return new ApiFeedback(options);
+        }
+      }))();
       _.each(_.pairs(handlers), function(pair) {
         mediator.addFeedbackHandler(pair[0], pair[1]);
       });

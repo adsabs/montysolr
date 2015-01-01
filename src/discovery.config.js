@@ -21,7 +21,8 @@ require.config({
       core: {
         controllers: {
           FeedbackMediator: 'js/wraps/discovery_mediator',
-          QueryMediator: 'js/components/query_mediator'
+          QueryMediator: 'js/components/query_mediator',
+          Diagnostics: 'js/bugutils/diagnostics'
         },
         services: {
           'Api': 'js/services/api',
@@ -130,6 +131,8 @@ require.config({
     'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
     'nvd3' :  'libs/nvd3/nv.d3',
 
+    // only for diagnostics/debugging
+    'sprintf': 'libs/sprintf/sprintf',
     // only for testing (won't get loaded otherwise)
     'chai': '../bower_components/chai/chai',
     'sinon': '../bower_components/sinon/index'

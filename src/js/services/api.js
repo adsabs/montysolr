@@ -1,8 +1,23 @@
 
 
-define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/api_request', 'js/mixins/dependon',
-    'js/components/api_response', 'js/components/api_query'],
-  function(_, $, GenericModule, ApiRequest, Mixin, ApiResponse, ApiQuery) {
+define([
+    'underscore',
+    'jquery',
+    'js/components/generic_module',
+    'js/components/api_request',
+    'js/mixins/dependon',
+    'js/components/api_response',
+    'js/components/api_query'
+  ],
+  function(
+    _,
+    $,
+    GenericModule,
+    ApiRequest,
+    Mixin,
+    ApiResponse,
+    ApiQuery
+    ) {
 
     var Api = GenericModule.extend({
       url: '/api/1/',
@@ -61,7 +76,8 @@ define(['underscore', 'jquery', 'js/components/generic_module', 'js/components/a
         cache: false,
         headers: {"X-BB-Api-Client-Version": this.clientVersion},
         context: {request: request, api: self },
-        timeout: this.defaultTimeoutInMs
+        timeout: this.defaultTimeoutInMs,
+        cache: true // do not generate _ parameters (let browser cache responses)
       };
 
       if (this.access_token) {
