@@ -8,7 +8,8 @@ define(
         LoginCancelled: 'Orcid-Login-Cancelled',
         SignOut: 'Orcid-Sign-Out',
         OrcidAction: 'Orcid-Action',
-        UserProfileRefreshed: 'Orcid-User-Profile-Refreshed'
+        UserProfileRefreshed: 'Orcid-User-Profile-Refreshed',
+        IsBulkInsertMode: 'Orcid-is-Bulk-Insert-Mode'
 
       }
     };

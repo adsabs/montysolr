@@ -393,7 +393,7 @@ define([
             data: arg2
           });
         } else if (ev == 'setBulkInsertMode'){
-          this.orcidModelNotifier.model.set('isInBulkInsertMode', true);
+          this.orcidModelNotifier.startBulkInsert();
         } else if (ev == 'triggerBulkInsert'){
           this.orcidModelNotifier.triggerBulkInsert();
         } else if (ev == 'cancelBulkInsert'){

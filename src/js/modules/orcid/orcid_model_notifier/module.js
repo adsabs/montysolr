@@ -44,9 +44,18 @@ define([
         this.model.set('isInBulkInsertMode', false);
         this.model.set('bulkInsertWorks', []);
       },
+      startBulkInsert: function(){
+        this.model.set('isInBulkInsertMode', true);
+
+        this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.IsBulkInsertMode, data: true});
+      },
       triggerBulkInsert: function () {
         this.bulkInsert(this.model.attributes.bulkInsertWorks);
         this.model.set('isInBulkInsertMode', false);
+
+        this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.IsBulkInsertMode, data: false});
+
+
         this.model.set('bulkInsertWorks', []);
       },
       addToBulkWorks: function (adsWork) {

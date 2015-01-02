@@ -18,27 +18,6 @@ define([
 
         var that = this;
 
-        this.orcidModelNotifier.model.on('change:isInBulkInsertMode',
-          function(){
-            that.view.children.call('resetToggle');
-          }
-        );
-
-        this.orcidModelNotifier.model.on('change:orcidProfile',
-          function(){
-            that.view.children.call('showOrcidActions', that.orcidModelNotifier.isWorkInCollection);
-          });
-
-        this.orcidModelNotifier.model.on('change:actionsVisible',
-          function(e){
-            if(e.get('actionsVisible')){
-              that.view.children.call('showOrcidActions', that.orcidModelNotifier.isWorkInCollection);
-            } else{
-              that.view.children.call('hideOrcidActions');
-            }
-          }
-        );
-
         this.listenTo(this.view, 'composite:collection:rendered',
           function() {
             if (that.orcidModelNotifier.model.get('actionsVisible'))
@@ -64,7 +43,21 @@ define([
 
 
       routeOrcidPubSub: function (msg) {
+        switch (msg.msgType) {
+          case OrcidApiConstants.Events.IsBulkInsertMode:
+            this.view.children.call('resetToggle');
+            break;
+          case OrcidApiConstants.Events.UserProfileRefreshed:
+            this.view.children.call('showOrcidActions', this.orcidModelNotifier.isWorkInCollection);
+          case OrcidApiConstants.Events.LoginSuccess:
 
+            this.view.children.call('showOrcidActions', this.orcidModelNotifier.isWorkInCollection);
+
+            break;
+          case OrcidApiConstants.Events.SignOut:
+            this.view.children.call('hideOrcidActions');
+            break;
+        }
       }
     };
 
