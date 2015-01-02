@@ -1,6 +1,15 @@
 <div class="row s-top-row">
 
-    <div class="col-sm-12">{{workTitle}}
+    <div class="col-sm-12">
+        {{workTitle}}
+        <ul>
+            {{#each shownContributors}}
+                <li class="article-author">{{this}}</li>
+            {{/each}}
+            {{#if extraContributors}}
+                <li><em>and {{extraContributors}} more</em></li>
+            {{/if}}
+        </ul>
 
         <div class="letter-icon s-letter-icon orcid-actions">
             <button class="btn-link active-link s-active-link">

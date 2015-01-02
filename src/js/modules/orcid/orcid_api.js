@@ -214,16 +214,16 @@ define([
 
           _.each(adsAuthors, function(author){
             result.push({
-              "contributor": {
-                "credit-name": author,
-                "contributor-attributes": {
-                  "contributor-role": "author"
-                }
+              "credit-name": author,
+              "contributor-attributes": {
+                "contributor-role": "author"
               }
             });
           });
 
-          return result;
+          return {
+            contributor: result
+          };
         };
 
         var result =

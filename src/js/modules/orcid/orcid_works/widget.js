@@ -23,7 +23,9 @@ define([
           workTitle: undefined,
           workType: undefined,
           workSourceUri: undefined,
-          workSourceHost: undefined
+          workSourceHost: undefined,
+          shownContributors: [],
+          extraContributors: 0
         };
 
         var result = {
@@ -337,6 +339,30 @@ define([
           var workTitle = work['work-title'] != undefined ? work['work-title']['title'] : "";
           var workSourceUri = work['work-source'] != undefined ? work['work-source']['uri'] : "";
           var workSourceHost = work['work-source'] != undefined ? work['work-source']['host'] : "";
+          var contributors = "";
+
+          if (work['work-contributors']) {
+            if (work['work-contributors']['contributor']) {
+              var contributors = work['work-contributors']['contributor'];
+              contributors = Array.isArray(contributors) ? contributors : [contributors];
+              contributors = contributors.map(function(item) {
+                return item["credit-name"]._;
+              });
+
+              var maxContributors = 3;
+
+              var extraContributors = 0;
+              var shownContributors = "";
+              if (contributors.length > maxContributors) {
+                extraContributors = contributors.length - maxContributors;
+                shownContributors = contributors.slice(0, maxContributors);
+              }
+              else {
+                shownContributors = contributors;
+              }
+
+            }
+          }
 
           var item = {
             putCode: work['$']['put-code'],
@@ -345,7 +371,9 @@ define([
             workTitle: workTitle,
             workType: work['work-type'],
             workSourceUri: workSourceUri,
-            workSourceHost: workSourceHost
+            workSourceHost: workSourceHost,
+            shownContributors: shownContributors,
+            extraContributors: extraContributors
           };
 
           works.push(item);
