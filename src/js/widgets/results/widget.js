@@ -51,9 +51,10 @@ define([
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
-        this.activateResultsExtension(beehive); // also current this is passed
-
-
+        if (this.activateResultsExtension)
+        {
+          this.activateResultsExtension(beehive);
+        } // also current this is passed
       },
 
       onDisplayDocuments: function(apiQuery) {
