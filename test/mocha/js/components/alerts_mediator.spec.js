@@ -55,6 +55,8 @@ define([
 
     it("extends GenericModule", function () {
       expect(new AlertsMediator()).to.be.instanceof(GenericModule);
+      var m = new AlertsMediator();
+      expect(function() {m.activate(minsub.beehive, {getWidget: function() {}})}).to.throw.Error;
     });
 
     it("works with pubsub and alone", function(done) {
@@ -67,10 +69,53 @@ define([
       expect(m.onAlert.called).to.be.true;
       expect(m.alert.called).to.be.true;
 
+      // it resets itself on new search
+      expect(x.widget.model.get('msg')).to.not.eql(null);
+      minsub.publish(minsub.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED}));
+      expect(x.widget.model.get('msg')).to.eql(null);
+
       done();
     });
 
+    it("fails when message cannot be displayed", function() {
+      var x = _getM();
+      x.app.getWidget = function() {};
+      var promise = x.m.alert(new ApiFeedback({msg: 'foo'}));
+      expect(promise.state()).to.be.eql('rejected');
+    });
 
+    it("accepts different payload for events", function() {
+      var x = _getM();
+      var $w = x.widget.render().$el;
+      $('#test').append($w);
+
+      var promise;
+
+      var spy = sinon.spy();
+      promise = x.m.onAlert(new ApiFeedback({
+        msg: 'this is <a href="foo">html</a> message',
+        events: {
+          'click #alertBox a': spy
+        }
+      }));
+      $w.find('#alertBox a').click();
+      expect(promise.state()).to.eql('resolved');
+      expect(spy.called).to.be.true;
+
+      sinon.spy(x.m.pubsub, 'publish');
+      promise = x.m.onAlert(new ApiFeedback({
+        msg: 'this is <a href="foo">html</a> message',
+        events: {
+          'click #alertBox a': {
+            action: Alerts.ACTION.TRIGGER_FEEDBACK,
+            arguments: {code: 0}
+          }
+        }
+      }));
+      $w.find('#alertBox a').click();
+      expect(x.m.pubsub.publish.called).to.be.true;
+
+    });
 
   })
 

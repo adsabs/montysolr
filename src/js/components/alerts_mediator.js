@@ -25,7 +25,7 @@ define([
     Alerts
     ) {
 
-    var Alerts = GenericModule.extend({
+    var AlertsMediator = GenericModule.extend({
       initialize: function(options) {
         _.extend(this, _.pick(options, ['debug', 'widgetName']));
       },
@@ -43,7 +43,7 @@ define([
         this.setPubSub(beehive);
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.ALERT, _.bind(this.onAlert, this));
-        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.onStartSearch, this));
+        pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.onStartSearch, this));
 
         var widget = this.getWidget();
         if (!widget) {
@@ -51,16 +51,20 @@ define([
         }
       },
 
-      onStartSearch: function() {
+      onStartSearch: function(apiFeedback) {
         // reset the widget
-        this.alert(new ApiFeedback({
-            type: Alerts.TYPE.INFO,
-            msg: null}));
+        switch(apiFeedback.code) {
+          case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
+            this.alert(new ApiFeedback({
+              type: Alerts.TYPE.INFO,
+              msg: null}));
+            break;
+        }
       },
 
       onAlert: function(apiFeedback, psk) {
         var self = this;
-        this.alert(apiFeedback)
+        var promise = this.alert(apiFeedback)
           .done(function(result) {
 
             if (_.isFunction(result)) {
@@ -74,16 +78,17 @@ define([
             if (_.isObject(result) && result.action) {
               switch (result.action) {
                 case Alerts.ACTION.TRIGGER_FEEDBACK:
-                  this.pubsub.publish(this.pubsub.FEEDBACK, new ApiFeedback(result.arguments));
+                  self.pubsub.publish(self.pubsub.FEEDBACK, new ApiFeedback(result.arguments));
                   break;
                 case Alerts.ACTION.CALL_PUBSUB:
-                  this.pubsub.publish(result.signal, result.arguments);
+                  self.pubsub.publish(result.signal, result.arguments);
                   break;
                 default:
                   throw new Exception('Unknow action type:' + result);
               }
             }
-          })
+          });
+        return promise;
       },
 
       getWidget: function() {
@@ -94,9 +99,9 @@ define([
         var w = this.getWidget();
         if (!w) {
           console.warn('"AlertsWidget" has disappered, we cant display messages to the user');
-          var defer = $.Deferred().promise();
-          defer.fail(null);
-          return defer;
+          var defer = $.Deferred();
+          defer.reject('AlertsWidget has disappeared');
+          return defer.promise();
         }
         // return promise
         return w.alert(apiFeedback);
@@ -108,8 +113,8 @@ define([
       }
     });
 
-    _.extend(Alerts.prototype, Dependon.BeeHive, Dependon.App, Dependon.PubSub);
-    _.extend(Alerts.prototype, Hardened);
+    _.extend(AlertsMediator.prototype, Dependon.BeeHive, Dependon.App, Dependon.PubSub);
+    _.extend(AlertsMediator.prototype, Hardened);
 
-    return Alerts;
+    return AlertsMediator;
   });

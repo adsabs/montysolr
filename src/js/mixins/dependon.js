@@ -38,13 +38,13 @@ define(['underscore'], function(_) {
      */
     PubSub: {
       setPubSub: function(beehive) {
-        this.PubSub = beehive.getService('PubSub').getHardenedInstance();
+        this.pubsub = beehive.getService('PubSub').getHardenedInstance();
       },
       getPubSub: function() {
-        return this.PubSub;
+        return this.pubsub;
       },
       hasPubSub: function() {
-        if (this.PubSub) {
+        if (this.pubsub) {
           return true;
         }
         return false;
