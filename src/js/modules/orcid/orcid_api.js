@@ -37,20 +37,6 @@ define([
       return messageCopy;
     }
 
-//    // TODO: move this to some commonUtils.js
-//    String.prototype.format = function () {
-//      var args = arguments;
-//      return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
-//        if (m == "{{") {
-//          return "{";
-//        }
-//        if (m == "}}") {
-//          return "}";
-//        }
-//        return args[n];
-//      });
-//    };
-
     function getParameterByName(name) {
       name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
       var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -436,11 +422,16 @@ define([
 
         this.loginWindow = window.open(url, "ORCID Login", 'width=' + WIDTH + ', height=' + HEIGHT + ', top=' + top + ', left=' + left);
         this.loginWindow.onbeforeunload = _.bind(function(e) {
-          this.cleanLoginWindow();
-          this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT,
-            {
-              msgType: OrcidApiConstants.Events.LoginCancelled
-            });
+          var _that = this;
+            setTimeout(function() {
+              if (_that.loginWindow) {
+                _that.cleanLoginWindow();
+                _that.pubSub.publish(_that.pubSub.ORCID_ANNOUNCEMENT,
+                  {
+                    msgType: OrcidApiConstants.Events.LoginCancelled
+                  });
+              }
+            }, 500);
         }, this);
       },
 
