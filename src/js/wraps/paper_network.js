@@ -326,146 +326,92 @@ define([
     options.showDetailGraphView = function () {
 
       var groupId = this.model.get("currentGroup");
-
       var groupIndex;
-
       _.each(this.model.get("data").summaryGraph.nodes, function (n, i) {
-
         if (n.id == groupId) {
-
           groupIndex = i;
-
         }
-
       });
 
       //get data
       var summaryData = _.filter(this.model.get("data").summaryGraph.nodes, function (n, i) {
-
         return ( n.id == groupId)
-
       })[0];
 
       //make a copy
       summaryData = $.extend({}, summaryData);
-
       summaryData.processedTopCommonReferences = [];
 
       _.each(summaryData.topCommonReferences, function (v, k) {
-
         summaryData.processedTopCommonReferences.push([k, (v * 100).toFixed(0)]);
-
       });
 
       summaryData.processedTopCommonReferences = _.sortBy(summaryData.processedTopCommonReferences,
         function(n){return n[1]}).reverse();
 
       var detailGraph = this.extractGraphData(groupId);
-
       var topNodes = _.sortBy(detailGraph.nodes, function (o) {
-
         return o.citation_count;
-
       }).reverse().slice(0, 5);
-
       var detailModel = new Backbone.Model();
 
       //if there are no citations for any paper, let the template know
-
       if (topNodes[0].citation_count === 0){
-
         detailModel.set("noCitations", true);
-
       }
-
       detailModel.set("summaryData", summaryData);
-
       if (this.model.get("currentlySelectedGroupIds").indexOf(groupId)!== -1){
-
         detailModel.set("currentlySelected", true);
-
       }
       else {
-
         detailModel.set("currentlySelected", false);
-
       }
-
       detailModel.set("topNodes", topNodes);
-
       detailModel.set("fullGraph", this.model.get("data").fullGraph);
-
       detailModel.set("groupId", groupId);
-
       detailModel.set("backgroundColor", this.adsColors[groupIndex]);
 
       //render view
-
       var detailView = new DetailView({model: detailModel});
-
       this.listenTo(detailView, "name:toggle", this.updateSingleName);
       this.listenTo(detailView, "names:toggle", this.updateGroupOfNames);
-
       this.listenTo(detailView, "close", function () {
         this.stopListening(detailView);
       });
 
       this.$(".info-region").empty().append(detailView.render().el);
-
       this.$(".info-region").fadeIn();
-
     };
 
     var DetailView = Marionette.ItemView.extend({
-
       template: DataTemplate,
-
       className : "paper-network-detail-view",
-
       events: {
         "click .update-all": "toggleAllNames"
       },
 
       toggleAllNames: function () {
-
         var names = [];
-
         _.each(this.model.get("fullGraph").nodes, function (n) {
-
           if (n.group ===this.model.get("groupId")) {
-
             names.push(n.nodeName);
           }
-
         }, this);
 
         var action = this.$(".update-all").hasClass("add-all") ? "add" : "remove";
-
         this.trigger("names:toggle", names, action);
-
         this.toggleUpdateButton();
-
       },
 
       toggleUpdateButton: function () {
-
         this.$(".update-all").toggleClass("add-all");
-
         if (this.$(".update-all").hasClass("add-all")) {
-
           this.$(".update-all").text("Add entire group to filter list.");
-
         }
-
         else {
-
           this.$(".update-all").text("Remove entire group from filter list.");
-
         }
-
       }
-
-
     });
 
     options.broadcastFilteredQuery = function (bibcodes) {

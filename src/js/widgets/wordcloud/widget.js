@@ -421,7 +421,7 @@ define([
           this.listView = new ListView();
           this.model = new WordCloudModel();
           this.view = new WordCloudView({model: this.model, listView : this.listView});
-
+          this.max_rows = options.max_rows || 150;
           this.on("all", this.onAllInternalEvents);
           this.listenTo(this.listView, "all", this.onAllInternalEvents);
         },
@@ -446,11 +446,26 @@ define([
           var request = new ApiRequest({
 
             target: Marionette.getOption(this, "endpoint") || "services/vis/word-cloud",
-            query: this.getCurrentQuery()
+            query: this.customizeQuery(this.getCurrentQuery())
           });
 
           this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
 
+        },
+
+        customizeQuery: function (apiQuery) {
+          var q = apiQuery.clone();
+          q.unlock();
+
+          if (this.defaultQueryArguments) {
+            q = this.composeQuery(this.defaultQueryArguments, q);
+          }
+          var r = this.max_rows;
+          if (q.has('rows')) {
+            r = q.get('rows')[0];
+          }
+          q.set('rows', Math.min(r, this.max_rows));
+          return q;
         },
 
         processResponse: function (data) {
