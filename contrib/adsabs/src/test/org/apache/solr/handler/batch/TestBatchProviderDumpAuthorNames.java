@@ -25,6 +25,8 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     assertU(adoc(F.ID, "13", F.BIBCODE, "xxxxxxxxxxx13", F.AUTHOR, "")); // no author
     assertU(adoc(F.ID, "14", F.BIBCODE, "xxxxxxxxxxx14", F.AUTHOR, "á"));
     assertU(adoc(F.ID, "15", F.BIBCODE, "xxxxxxxxxxx15", F.AUTHOR, "sárname \\, name ,,,,")); // try to confuse it
+    assertU(adoc(F.ID, "16", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk"));
+    assertU(adoc(F.ID, "17", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk  "));
     assertU(commit());
 		
 		
@@ -39,7 +41,7 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
 
     
 		checkFile(tmpDir + "/00000", 
-				formatSynonyms(new String[]{
+				new String[]{
         "Adamcuk, Molja Karel=>Adamčuk, Molja Karel",
         "Adamcuk, Molja K=>Adamčuk, Molja K",
         //"Adamcuk, M Karel=>Adamčuk, M Karel",
@@ -48,20 +50,21 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
         "Adamchuk, Molja Karel=>Adamčuk, Molja Karel",
         "Adamchuk, Molja K=>Adamčuk, Molja K",
         //"Adamczuk, M Karel=>Adamčuk, M Karel",
-        "Adamchuk, M K =>Adamčuk, M K",
-        "Adamchuk, M =>Adamčuk, M",
+        "Adamchuk, M K=>Adamčuk, M K",
+        "Adamchuk, M=>Adamčuk, M",
         "Adamcuk, Karel Molja=>Adamčuk, Karel Molja",
         "Adamcuk, Karel M=>Adamčuk, Karel M",
         "!ahguşan, Adrian, , Dr=>ǎguşan, Adrian, , Dr",
         "!agusan, Adrian, ,=>ǎguşan, Adrian, ,",
         "!ahguşan, A ,=>ǎguşan, A ,",
         "!agusan, A , D=>ǎguşan, A , D",
-        "agusan, Adrian  Dr=>ǎguşan, Adrian  Dr",
+        "agusan, Adrian Dr=>ǎguşan, Adrian Dr",
         "agusan, A=>ǎguşan, A",
-        "ahguşan, Adrian  D=>ǎguşan, Adrian  D",
-        "ahguşan, Adrian  Dr=>ǎguşan, Adrian  Dr",
-        "ahguşan, A  D=>ǎguşan, A  D",
-				})
+        "ahguşan, Adrian D=>ǎguşan, Adrian D",
+        "ahguşan, Adrian Dr=>ǎguşan, Adrian Dr",
+        "ahguşan, A D=>ǎguşan, A D",
+        "!a=>á,"
+				}
 		);
 	}
 	

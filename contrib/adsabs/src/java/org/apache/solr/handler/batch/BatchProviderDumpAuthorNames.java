@@ -146,7 +146,8 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       }
       private void addTokensToSynMap() {
 		    if (tokenBuffer.size()>0) {
-		      synMap.add(authorInput, tokenBuffer);
+		    	if (authorInput != null && authorInput.length() >= 4 && authorInput.split(" ").length <= 5) // ignore obvious mistakes
+		    		synMap.add(authorInput, tokenBuffer);
 		      tokenBuffer.clear();
 		      authorInput=null;
 		    }
@@ -176,9 +177,9 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
        * 
        *    MULLER, BILL=>MÜLLER, BILL
        *    MUELLER, BILL=>MÜLLER, BILL
-       *    MULLER, B => MÜLLER, B
-       *    MUELLER, B => MÜLLER, B
-       *    MULLER, => MÜLLER,
+       *    MULLER, B=>MÜLLER, B
+       *    MUELLER, B=>MÜLLER, B
+       *    MULLER,=>MÜLLER,
        * 
        * (non-Javadoc)
        * @see org.apache.solr.analysis.WriteableExplicitSynonymMap#add(java.lang.String, java.util.Set)
@@ -228,23 +229,25 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       
       @Override
       public String formatEntry(String key, Set<String>values) {
-        //out.append(super.formatEntry(key, values));
         List<String> rows = new ArrayList<String>();
+
         // remove all but the first comma
         //System.out.println("before replace " + key);
         key = key.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1"); //"agusan, Adrian, , Dr" -> "agusan, Adrian Dr"
+        key = AuthorUtils.normalizeAuthor(key);
         //System.out.println("after replace " + key);
             
         String[] nameParts = key.split(" ");
         if (nameParts.length > 1) {
-          nameParts[0] = nameParts[0].replace(",", "\\,");
+          //nameParts[0] = nameParts[0].replace(",", "\\,");
           String[][] otherNames = new String[values.size()][];
           int n = 0;
           for (String name: values) {
-	        // remove all but the first comma
-	        name = name.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
+          	// remove all but the first comma
+          	name = name.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
+	        	name = AuthorUtils.normalizeAuthor(name);
             otherNames[n++] = name.split(" ");
-            otherNames[n-1][0] = otherNames[n-1][0].replace(",", "\\,"); 
+            //otherNames[n-1][0] = otherNames[n-1][0].replace(",", "\\,"); 
           }
           int cycle=0;
           do {
@@ -256,7 +259,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
               out.append("=>");
               boolean notFirst = false;
               for (String[] other: otherNames) {
-                if (notFirst) out.append(",");
+                if (notFirst) out.append(";");
                 out.append(join(other, n));
                 notFirst = true;
               }
@@ -290,7 +293,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
         StringBuffer out = new StringBuffer();
         boolean notFirst = false;
         for (int i=0;i<=v;i++) {
-          if (notFirst) out.append("\\ ");
+          if (notFirst) out.append(" ");
           out.append(name[i]);
           notFirst=true;
         }
