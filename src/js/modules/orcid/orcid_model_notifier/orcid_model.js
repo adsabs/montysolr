@@ -26,7 +26,7 @@ define([
                   return e['work-external-identifier-type'] == 'other-id' && e['work-external-identifier-id'].indexOf('ads:') == 0;
                 };
 
-                var identifiers = e["work-external-identifiers"]["work-external-identifier"]
+                var identifiers = e["work-external-identifiers"]["work-external-identifier"];
                 var adsId = undefined;
 
                 if (identifiers instanceof Array) {
@@ -67,54 +67,6 @@ define([
         };
       }
     });
-
-    _.extend(OrcidModel.prototype, {
-      //addToBulkWorks: function(adsWork){
-      //  if (this.isWorkInCollection(adsWork))
-      //  {
-      //    return;
-      //  }
-      //
-      //  this.attributes.bulkInsertWorks.push(adsWork);
-      //},
-
-      //removeFromBulkWorks: function(adsWork){
-      //  var toRemove =
-      //    this.attributes.bulkInsertWorks.filter(function (item) {
-      //      return item.id == adsWork.id;
-      //    })[0];
-      //
-      //  this.attributes.bulkInsertWorks.splice(toRemove, 1);
-      //},
-
-      //cancelBulkInsert: function(){
-      //  this.set('isInBulkInsertMode', false);
-      //  this.set('bulkInsertWorks', []);
-      //},
-
-      //triggerBulkInsert: function(){
-      //  this.trigger('bulkInsert', this.attributes.bulkInsertWorks);
-      //  this.set('isInBulkInsertMode', false);
-      //  this.set('bulkInsertWorks', []);
-      //},
-
-      //isWorkInCollection : function(adsItem){
-      //  var adsIdsWithPutCode = this.get('adsIdsWithPutCodeList');
-      //  var formattedAdsId = "ads:" + adsItem.id;
-      //
-      //  return adsIdsWithPutCode
-      //    .filter(function(e){
-      //      return e.adsId == formattedAdsId;
-      //    })
-      //    .length > 0;
-      //},
-      //isOrcidItemAdsItem: function (orcidItem) {
-      //  return orcidItem.workExternalIdentifiers.filter(function (e) {
-      //      return e.type == 'other-id' && e.id.indexOf('ads:') == 0  ;
-      //    }).length > 0;
-      //}
-    });
-
     return OrcidModel;
 
   });
