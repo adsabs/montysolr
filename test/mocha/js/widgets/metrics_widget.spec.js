@@ -233,7 +233,7 @@ define([
       },
       "metrics series": {
         "1980": "0:0:0:0:0.0:0:0:0",
-        "1981": "1:2:0:0.472023809524:0.5:343:0:0",
+        "1981": "1:2:0:0.472023809524:0.5:343:0:17",
         "type": "metrics_series"
       },
       "paper histogram": {
@@ -304,7 +304,6 @@ define([
       var norm_paperhist = DataExtractor.plot_paperhist({norm : false, paperhist_data : testDataSmall["paper histogram"]});
 
       var indexes_data = DataExtractor.plot_series({series_data : testDataSmall["metrics series"]});
-
 
       expect(citshist).to.eql([{
         "key": "Ref. citations to ref. papers",
@@ -515,86 +514,103 @@ define([
         }
       ]);
 
+    //  "metrics series": {
+     //   "1980": "0:0:0:0:0.0:0:0:0",
+     //     "1981": "1:2:0:0.472023809524:0.5:343:0:17",
+     //     "type": "metrics_series"
+
+      //checking parsing
+      expect(_.findWhere(indexes_data, {key : "h Index"}).values[1].y).to.eql(1);
+      expect(_.findWhere(indexes_data, {key : "g Index"}).values[1].y).to.eql(2);
+      expect(_.findWhere(indexes_data, {key : "i10 Index"}).values[1].y).to.eql(0)
+      expect(_.findWhere(indexes_data, {key : "tori Index"}).values[1].y).to.eql(0.5);
+      expect(_.findWhere(indexes_data, {key : "i100 Index"}).values[1].y).to.eql(0)
+      expect(_.findWhere(indexes_data, {key : "read10 Index"}).values[1].y).to.eql(17)
+
+
+
       expect(indexes_data).to.eql([
-        {
-          "key": "h Index",
-          "values": [
-            {
-              "x": "1980",
-              "y": 0
-            },
-            {
-              "x": "1981",
-              "y": 1
-            }
-          ]
-        },
-        {
-          "key": "g Index",
-          "values": [
-            {
-              "x": "1980",
-              "y": 0
-            },
-            {
-              "x": "1981",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "i10 Index",
-          "values": [
-            {
-              "x": "1980",
-              "y": 0
-            },
-            {
-              "x": "1981",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "i100 Index",
-          "values": [
-            {
-              "x": "1980",
-              "y": 0
-            },
-            {
-              "x": "1981",
-              "y": 0.5
-            }
-          ]
-        },
-        {
-          "key": "tori Index",
-          "values": [
-            {
-              "x": "1980",
-              "y": 0
-            },
-            {
-              "x": "1981",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "read10 Index",
-          "values": [
-            {
-              "x": "1980",
-              "y": 0
-            },
-            {
-              "x": "1981",
-              "y": 0
-            }
-          ]
-        }
-      ]);
+          {
+            "key": "h Index",
+            "values": [
+              {
+                "x": "1980",
+                "y": 0
+              },
+              {
+                "x": "1981",
+                "y": 1
+              }
+            ]
+          },
+          {
+            "key": "g Index",
+            "values": [
+              {
+                "x": "1980",
+                "y": 0
+              },
+              {
+                "x": "1981",
+                "y": 2
+              }
+            ]
+          },
+          {
+            "key": "i10 Index",
+            "values": [
+              {
+                "x": "1980",
+                "y": 0
+              },
+              {
+                "x": "1981",
+                "y": 0
+              }
+            ]
+          },
+          {
+            "key": "tori Index",
+            "values": [
+              {
+                "x": "1980",
+                "y": 0
+              },
+              {
+                "x": "1981",
+                "y": 0.5
+              }
+            ]
+          },
+          {
+            "key": "i100 Index",
+            "values": [
+              {
+                "x": "1980",
+                "y": 0
+              },
+              {
+                "x": "1981",
+                "y": 0
+              }
+            ]
+          },
+          {
+            "key": "read10 Index",
+            "values": [
+              {
+                "x": "1980",
+                "y": 0
+              },
+              {
+                "x": "1981",
+                "y": 17
+              }
+            ]
+          }
+        ]
+
+      );
 
     })
 

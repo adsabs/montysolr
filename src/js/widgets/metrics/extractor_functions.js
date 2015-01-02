@@ -267,8 +267,8 @@ define([
     var hIndex = data_to_plot[0],
         gIndex = data_to_plot[1],
         i10Index = data_to_plot[2],
-        i100Index = data_to_plot[6],
         toriIndex = data_to_plot[3],
+        i100Index = data_to_plot[6],
         read10Index = data_to_plot[7];
 
     /*these are not being shown, maybe in the future?
@@ -277,21 +277,21 @@ define([
         roqIndex = data_to_plot[5];
      */
 
-    var returnArray = [hIndex, gIndex, i10Index, i100Index, toriIndex, read10Index];
+    var returnArray = [hIndex, gIndex, i10Index, toriIndex, i100Index, read10Index];
 
     _.each(returnArray, function (a, index) {
       returnArray[index] = _.map(a, function (list) {
         return {x: list[0], y: list[1]}
       })
-    })
+    });
 
     var vals = [];
 
     vals.push({key: "h Index", values: returnArray[0]});
-    vals.push({key: "g Index", values: returnArray[2]});
-    vals.push({key: "i10 Index", values: returnArray[3]});
+    vals.push({key: "g Index", values: returnArray[1]});
+    vals.push({key: "i10 Index", values: returnArray[2]});
+    vals.push({key: "tori Index", values: returnArray[3]});
     vals.push({key: "i100 Index", values: returnArray[4]});
-    vals.push({key: "tori Index", values: returnArray[5]});
     vals.push({key: "read10 Index", values: returnArray[5]});
 
     return vals;
