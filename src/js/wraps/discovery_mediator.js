@@ -27,14 +27,31 @@ define([
         if (child.view && child.view.showCols) {
           child.view.showCols({right: false});
           // open the view again
-          this.pubsub.once(this.pubsub.NAVIGATE + ' ' + this.pubsub.START_SEARCH,
+          this.pubsub.once(this.pubsub.START_SEARCH,
             _.once(function() {child.view.showCols({right:true})}));
+        }
+      }
+      this.pubsub.once(this.pubsub.DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
+        if(this._tmp.callOnce[psk.getId()]) {
+          return;
+        }
+        this._makeWidgetsSpin([psk.getId()]);
+        this._tmp.callOnce[psk.getId()] = true;
+      }, this));
+    };
+
+    handlers[ApiFeedback.CODES.UNMAKE_SPACE] = function(feedback) {
+      var mpm = this.getApp().getObject('MasterPageManager');
+      if (mpm) {
+        var child = mpm.getCurrentActiveChild();
+        if (child.view && child.view.showCols) {
+          child.view.showCols({right: true});
         }
       }
     };
 
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_STARTED] = function(feedback) {
-
+      this.reset();
       var app = this.getApp();
 
       if (feedback.query) {
@@ -49,66 +66,44 @@ define([
       if (feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
 
-        var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
-
         //TODO: in the future, we can look inside the query and decide whether they would like to expand it by
         // a) searching fulltext (if there is any unfielded query)
         // b) modifying phrases and/or operators
-        var newQuery = q.clone();
 
-        this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
-          type: Alerts.TYPE.DANGER,
-          msg: msg,
-          events: {
-            'click a#query-assistant': {
-              action: Alerts.ACTION.TRIGGER_FEEDBACK,
-              arguments: {
-                code: ApiFeedback.CODES.QUERY_ASSISTANT,
-                query: newQuery
-              }
-            },
-            'click #new-query': {
-              action: Alerts.ACTION.CALL_PUBSUB,
-              signal: this.pubsub.START_SEARCH,
-              arguments: newQuery
+        var newQuery = q.clone();
+        var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
+        this.getAlerter().alert(new ApiFeedback({
+            type: Alerts.TYPE.DANGER,
+            msg: msg,
+            events: {
+              'click a#query-assistant': 'query-assistant'
             }
+        }))
+        .done(function(name) {
+          if (name == 'query-assistant') {
+            var app = self.getApp();
+            var search = app.getWidget('SearchWidget');
+            var q = newQuery.query.get('q').join(' ');
+            if (q)
+              search.openQueryAssistant(q);
           }
-        }));
+        });
         return; // do not bother with the rest
       }
-      else {
-        this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
-          type: Alerts.TYPE.INFO,
-          msg: null}));
-      }
 
-      // too many results, draw their attention to the search form
+
+      // too many results
       if (feedback.numFound > 1000) {
         var search = app.getWidget('SearchWidget');
         if (search && search.view && search.view.highlightFields)
+          // make the search form pulsate little bit
           search.view.highlightFields();
       }
 
       // retrieve ids of all components that wait for a query
       var ids = _.keys(feedback.cycle.waiting);
 
-      // turn ids into a list of widgets
-      var widgets = this.getWidgets(ids);
-
-      // activate loading state
-      if (widgets) {
-        this.changeWidgetsState(widgets, {state: WidgetStates.WAITING});
-      }
-
-      // register handlers which will remove the spinning wheel
-      var self = this;
-      var pubsub = app.getService('PubSub');
-      _.each(ids, function(k) {
-        var key = k;
-        pubsub.once(pubsub.DELIVERING_RESPONSE + k, function() {
-          self.changeWidgetsState(self.getWidgets([key]), {state: WidgetStates.IDLE});
-        })
-      });
+      this._makeWidgetsSpin(ids);
 
     };
 
@@ -132,11 +127,9 @@ define([
       var xhr = feedback.error.jqXHR;
 
       var app = this.getApp();
-      var alerts = app.getWidget('Alerts');
+      var alerts = this.getAlerter();
       var self = this;
 
-      if (!alerts)
-        console.warn('There is no widget Alerts, that can handle the user feedback!');
 
       if (xhr && apiRequest) {
         switch(xhr.status) {
@@ -152,17 +145,16 @@ define([
                    app.getController('QueryMediator').resetFailures();
                    self.pubsub.publish(self.pubSubKey, self.pubsub.START_SEARCH, apiRequest.get('query'));
                  }, fail: function() {
-                   self.pubsub.publish(self.pubSubKey, self.pubsub.ALERT, new ApiFeedback({
-                     code: ApiFeedback.CODES.ALERT,
-                     msg: "I'm sorry, you don't have access rights to get data from: " + apiRequest.get('target'),
+                   alerts.alert(new ApiFeedback({
+                     msg: "I'm sorry, you don't have access rights to query: " + apiRequest.get('target'),
                      modal: true
                    }));
                  }});
                })
                .fail(function() {
-                 self.pubsub.publish(self.pubSubKey, self.pubsub.ALERT, new ApiFeedback({
+                 alerts.alert(new ApiFeedback({
                    code: ApiFeedback.CODES.ALERT,
-                   msg: 'There is a problem with our API, it does not respond to queries. (in near future, we\'ll be able to send feedback automatically)</span>',
+                   msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...please retry later.',
                    modal: true
                  }));
                });
@@ -176,20 +168,21 @@ define([
         if (target.indexOf('/search') > -1 && xhr.status == 400) { // wrong query
           var apiQuery = apiRequest.getApiQuery();
 
-          this.pubsub.publish(this.pubSubKey, this.pubsub.ALERT, new ApiFeedback({
-            code: ApiFeedback.CODES.ALERT,
-            msg: 'There is a problem with your query: <span id="query-assistant">you can use this tool to fix it.</span>',
+          alerts.alert(new ApiFeedback({
+            msg: 'Your query seems to be syntactically challenged, <span id="query-assistant">please use this tool to fix it.</span>',
             events: {
-              'click #query-assistant': {
-                action: Alerts.ACTION.TRIGGER_FEEDBACK,
-                type: Alerts.TYPE.ERROR,
-                arguments: {
-                  code: ApiFeedback.CODES.QUERY_ASSISTANT,
-                  query: apiQuery.clone()
-                }
-              }
+              'click a#query-assistant': 'query-assistant'
             }
           }))
+          .done(function(name) {
+            if (name == 'query-assistant') {
+              var app = self.getApp();
+              var search = app.getWidget('SearchWidget');
+              var q = apiQuery.query.get('q').join(' ');
+              if (q)
+                search.openQueryAssistant(q);
+            }
+          });
         }
       }
 
@@ -206,7 +199,38 @@ define([
     };
 
     return function() {
-      var mediator = new FeedbackMediator();
+      var mediator = new (FeedbackMediator.extend({
+        getAlerter: function() {
+          return this.getApp().getController(this.alertsController || 'AlertsController');
+        },
+        createFeedback: function(options) {
+          return new ApiFeedback(options);
+        },
+
+        _makeWidgetsSpin: function(ids) {
+          // turn ids into a list of widgets
+          var widgets = this.getWidgets(ids);
+
+          // activate loading state
+          if (widgets) {
+            this.changeWidgetsState(widgets, {state: WidgetStates.WAITING});
+          }
+
+          // register handlers which will remove the spinning wheel
+          var self = this;
+          var pubsub = this.getApp().getService('PubSub');
+          _.each(ids, function(k) {
+            var key = k;
+            pubsub.once(pubsub.DELIVERING_RESPONSE + k, function() {
+              self.changeWidgetsState(self.getWidgets([key]), {state: WidgetStates.RESET});
+            })
+          });
+        },
+
+        reset: function() {
+          this._tmp = {callOnce: {}};
+        }
+      }))();
       _.each(_.pairs(handlers), function(pair) {
         mediator.addFeedbackHandler(pair[0], pair[1]);
       });

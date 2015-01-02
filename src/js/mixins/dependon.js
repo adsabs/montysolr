@@ -37,17 +37,29 @@ define(['underscore'], function(_) {
      * to send messages to/from.
      */
     PubSub: {
-      setPubSub: function(pubsub) {
-        this.PubSub = pubsub;
+      setPubSub: function(beehive) {
+        this.pubsub = beehive.getService('PubSub').getHardenedInstance();
       },
       getPubSub: function() {
-        return this.PubSub;
+        return this.pubsub;
       },
       hasPubSub: function() {
-        if (this.PubSub) {
+        if (this.pubsub) {
           return true;
         }
         return false;
+      }
+    },
+
+    App: {
+      setApp: function(app) {
+        this.app = app;
+      },
+      getApp: function() {
+        return this.app;
+      },
+      hasApp: function() {
+        return this.app ? true : false;
       }
     }
   };

@@ -42,7 +42,7 @@ define([
 
     it("displays messages", function(done) {
       var widget = _getWidget();
-      sinon.spy(widget.pubsub, 'publish');
+      expect(widget.pubsub).to.be.undefined;
 
       var $w = widget.render().$el;
       $('#test').append($w);
@@ -56,8 +56,8 @@ define([
       widget.model.set('msg', 'this is <a href="foo">html</a> message');
       expect($w.find('#alertBox a').attr('href')).to.be.eql('foo');
 
-      // we can pass 'events' and they will be delegated
-      widget.model.set({
+      // we can pass pass events
+      var promise = widget.alert({
         msg: 'this is <a href="foo">html</a> message',
         events: {
           'click #alertBox a': {
@@ -67,30 +67,44 @@ define([
           }
         }
       });
+      expect(promise.state()).to.be.eql('pending');
+      var spy;
+      promise.done((spy = sinon.spy()));
       $w.find('#alertBox a').click();
+      expect(promise.state()).to.be.eql('resolved');
+      expect(spy.lastCall.args[0]).to.be.eql({
+        action: Alerts.ACTION.CALL_PUBSUB,
+        signal: minsub.BIG_FIRE,
+        arguments: ['foo', 'bar']
+      });
 
-      expect(widget.pubsub.publish.lastCall.args).to.be.eql([minsub.BIG_FIRE, ['foo', 'bar']]);
 
-      widget.pubsub.publish.reset();
-
-      widget.model.set({
+      // now test that the event gets properly removed
+      // after it was called
+      sinon.spy(widget.model, 'get');
+      widget.alert({
         msg: 'this is <a href="foo">html</a> message',
         events: {
-          'click #alertBox a': {
-            action: Alerts.ACTION.TRIGGER_FEEDBACK,
-            arguments: {code: 0}
-          }
+          'click #alertBox a': 'foo-bar'
         }
       });
       $w.find('#alertBox a').click();
 
-      // if the previous handler was removed, we'll get only one call
-      expect(widget.pubsub.publish.callCount).to.be.eql(1);
-      expect(widget.pubsub.publish.lastCall.args[0]).to.be.eql(minsub.FEEDBACK);
-      expect(widget.pubsub.publish.lastCall.args[1].toJSON()).to.be.eql({code: 0, msg: undefined});
+      widget.alert({
+        msg: 'this is <a href="foo">html</a> message',
+        events: {
+          'click #alertBox a': 'foo-bar'
+        }
+      });
+      $w.find('#alertBox a').click();
 
-      //now it should appear in modal mode
-      widget.model.set({
+      // if the previous handler was removed, we'll get only 2 calls
+      expect(_.filter(_.flatten(widget.model.get.args), function(x) {return x == 'promise'}).length).to.be.eql(2);
+
+
+
+      //now check the widget appears in modal mode
+      promise = widget.alert({
         msg: 'this is <a href="foo">html</a> message',
         modal: true,
         events: {
@@ -102,12 +116,13 @@ define([
       });
 
       $w.find('#alertBox a').click();
+      expect(promise.state()).to.be.eql('resolved');
+
       setTimeout(function() {
         expect($w.find('#alertBox a').is(':visible')).to.be.true;
-        //widget.view.closeModal();
-        widget.model.set({modal: false});
+        widget.closeModal();
         setTimeout(function() {
-          expect($w.find('#alertBox.modal').length).to.be.eql(0);
+          expect($w.find('#alertBox a').is(':visible')).to.be.false;
           done();
         }, 500)
 

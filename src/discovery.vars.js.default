@@ -27,7 +27,7 @@ define([], function() {
      *  http://somewhere.org/foo/bar/index.html
      */
     routerConf: {
-      pushState: true,
+      pushState: false,
       root: '/',
     },
 
