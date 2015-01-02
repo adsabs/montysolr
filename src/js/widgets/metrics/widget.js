@@ -323,8 +323,7 @@ define([
     },
 
     updateMax : function() {
-
-      this.set("max", _.min([500, this.get("numFound")]));
+      this.set("max", _.min([300, this.get("numFound")]));
     },
 
     updateCurrent : function(){
@@ -334,18 +333,14 @@ define([
     },
 
     defaults : function(){
-
       return {
-
         rows : undefined,
         numFound : undefined,
         current : undefined,
         max : undefined,
         userVal: undefined
-
       }
     }
-
   });
 
   var ContainerView = Marionette.Layout.extend({
@@ -629,7 +624,7 @@ define([
     defaultQueryArguments : {
 
       fl : "bibcode",
-      rows : 20 // the metrics service is not handling big numbers nicely, so let's be conservative
+      rows : 200
     },
 
 
