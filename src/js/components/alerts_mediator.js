@@ -5,7 +5,7 @@
  */
 
 define([
-    '../../libs/lodash/lodash.compat',
+    'underscore',
     'jquery',
     'cache',
     'js/components/generic_module',
@@ -40,6 +40,7 @@ define([
       activate: function(beehive, app) {
         this.setBeeHive(beehive);
         this.setApp(app);
+        this.setPubSub(beehive);
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.ALERT, _.bind(this.onAlert, this));
         pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.onStartSearch, this));
@@ -58,11 +59,29 @@ define([
       },
 
       onAlert: function(apiFeedback, psk) {
+        var self = this;
         this.alert(apiFeedback)
           .done(function(result) {
-            if (apiFeedback.modal) {
-              var pubsub = self.getPubSub();
-              // do whatever is necessary
+
+            if (_.isFunction(result)) {
+              result();
+              return;
+            };
+
+            // non-privileged components can reach alerts sending limited
+            // definition of actions; we'll turn those into functions/actions
+
+            if (_.isObject(result) && result.action) {
+              switch (result.action) {
+                case Alerts.ACTION.TRIGGER_FEEDBACK:
+                  this.pubsub.publish(this.pubsub.FEEDBACK, new ApiFeedback(result.arguments));
+                  break;
+                case Alerts.ACTION.CALL_PUBSUB:
+                  this.pubsub.publish(result.signal, result.arguments);
+                  break;
+                default:
+                  throw new Exception('Unknow action type:' + result);
+              }
             }
           })
       },
@@ -72,14 +91,14 @@ define([
       },
 
       alert: function(apiFeedback) {
-        var app = this.getApp();
         var w = this.getWidget();
         if (!w) {
           console.warn('"AlertsWidget" has disappered, we cant display messages to the user');
-          var defer = $.Deferred();
+          var defer = $.Deferred().promise();
           defer.fail(null);
           return defer;
         }
+        // return promise
         return w.alert(apiFeedback);
       },
 
@@ -89,7 +108,7 @@ define([
       }
     });
 
-    _.extend(Alerts.prototype, Dependon.BeeHive);
+    _.extend(Alerts.prototype, Dependon.BeeHive, Dependon.App, Dependon.PubSub);
     _.extend(Alerts.prototype, Hardened);
 
     return Alerts;

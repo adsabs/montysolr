@@ -84,16 +84,30 @@ define([
         var events = this.model.get('events');
 
         // attach functions to events; copied from backbone
+        // when 'event' is fired, it will call/resolve the
+        // promise object with the name of the event
         if (events) {
           var bindings = {};
-          _.each(events, function(data, evt) {
+          _.each(events, function(evtValue, evt) {
 
             var match = evt.match(delegateEventSplitter);
             var eventName = match[1], selector = match[2];
             var key = evt;
 
             var method = function(ev) {
-              this.trigger('custom-event', ev, key);
+              if (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+              }
+              var promise = this.model.get('promise');
+              var evts = this.model.get('events');
+              if (evts[key])
+                promise.resolve(evts[key]);
+              promise.resolve(key);
+              // unless it is modal, close it automatically
+              if (!this.model.get('modal')) {
+                this.model.set('msg', null);
+              }
             };
 
             method = _.bind(method, self);
@@ -130,20 +144,23 @@ define([
       },
 
       activate: function (beehive) {
-        this.pubsub = beehive.getService('PubSub');
+        //pass
+      },
+
+      closeModal: function() {
+        this.view.closeModal();
       },
 
       alert: function(feedback) {
-        var defer = $.Deferred();
-        if (feedback.events) {
-
-        }
+        var promise = $.Deferred();
         this.model.set({
           events: feedback.events,
           msg: feedback.msg,
           type: feedback.type,
-          modal: feedback.modal
+          modal: feedback.modal,
+          promise: promise
         });
+        return promise.promise();
       },
 
       onCustomEvent: function(ev, evtName) {
@@ -153,30 +170,7 @@ define([
         }
 
         var events = this.model.get('events');
-        if (events[evtName]) {
-          var data = events[evtName];
 
-          if (typeof data == 'function') {
-            return data(evtName);
-          }
-
-          if (data.resolve) {
-            return data.resolve(evtName);
-          }
-
-          if (_.isNumber(data)) {
-            switch (data.action) {
-              case Alerts.ACTION.TRIGGER_FEEDBACK:
-                this.pubsub.publish(this.pubsub.FEEDBACK, new ApiFeedback(data.arguments));
-                break;
-              case Alerts.ACTION.CALL_PUBSUB:
-                this.pubsub.publish(data.signal, data.arguments);
-                break;
-              default:
-                throw new Exception('Unknow action type:' + data);
-            }
-          }
-        }
       }
 
     });

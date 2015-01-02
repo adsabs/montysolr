@@ -126,7 +126,7 @@ define([
       var xhr = feedback.error.jqXHR;
 
       var app = this.getApp();
-      var alerts = self.getAlerter();
+      var alerts = this.getAlerter();
       var self = this;
 
 
@@ -200,7 +200,7 @@ define([
     return function() {
       var mediator = new (FeedbackMediator.extend({
         getAlerter: function() {
-          return this.getBeeHive().getController('Alerts');
+          return this.getApp().getController(this.alertsController || 'AlertsController');
         },
         createFeedback: function(options) {
           return new ApiFeedback(options);

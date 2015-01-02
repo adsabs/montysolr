@@ -46,7 +46,7 @@ define([
 
         var urlCodes = {};
         var getNextCode = function(url) {
-          url = url.substring(0, url.indexOf('&_')); // remove the caching tmp key
+          //url = url.substring(0, url.indexOf('&_')); // remove the caching tmp key
           urlCodes['lastUrl'] = url;
           if (urlCodes[url]) return urlCodes[url];
 
