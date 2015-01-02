@@ -21,7 +21,10 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel Molja"));
     assertU(adoc(F.ID, "10", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel M"));
     assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, K Molja"));
-    assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "ǎguşan, Adrian, , Dr"));
+    assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxx12", F.AUTHOR, "ǎguşan, Adrian, , Dr"));
+    assertU(adoc(F.ID, "13", F.BIBCODE, "xxxxxxxxxxx13", F.AUTHOR, "")); // no author
+    assertU(adoc(F.ID, "14", F.BIBCODE, "xxxxxxxxxxx14", F.AUTHOR, "á"));
+    assertU(adoc(F.ID, "15", F.BIBCODE, "xxxxxxxxxxx15", F.AUTHOR, "sárname \\, name ,,,,")); // try to confuse it
     assertU(commit());
 		
 		

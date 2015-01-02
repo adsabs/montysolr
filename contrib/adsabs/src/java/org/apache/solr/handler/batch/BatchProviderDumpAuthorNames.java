@@ -121,6 +121,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 						  	if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
 						  		addTokensToSynMap();
 						      authorInput = termAtt.toString();
+						      //System.out.println("authorInput " + authorInput);
 						    }
 						  	else {
 						  		tokenBuffer.add(termAtt.toString());
@@ -230,8 +231,10 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
         //out.append(super.formatEntry(key, values));
         List<String> rows = new ArrayList<String>();
         // remove all but the first comma
-        key = key.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
-        
+        //System.out.println("before replace " + key);
+        key = key.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1"); //"agusan, Adrian, , Dr" -> "agusan, Adrian Dr"
+        //System.out.println("after replace " + key);
+            
         String[] nameParts = key.split(" ");
         if (nameParts.length > 1) {
           nameParts[0] = nameParts[0].replace(",", "\\,");
@@ -299,6 +302,8 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
           if (nameParts[i].length() > 1) {
             nameParts[i] = nameParts[i].substring(0, 1);
             for (String[] other: otherNames) {
+              if (other[i] == null || other[i].length() < 2)
+                return false;  // this may happen if synonyms map the name to a shorter version, my solution is to stop processing (cheap?)
               other[i] = other[i].substring(0, 1);
             }
             return true;
