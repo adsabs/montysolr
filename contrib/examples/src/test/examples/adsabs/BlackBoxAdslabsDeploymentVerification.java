@@ -170,6 +170,9 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 				"//doc/lst[@name='[citations]']/int[@name='num_citations'][.='1']",
 				"//doc/lst[@name='[citations]']/arr[@name='citations']/str[1][.='2002rvmp....74...11']"
 		);
+		
+		//data = direct.request("/select?q=author:goodman&debugQuery=true&wt=json", null);
+		//System.out.println(data);
 
 	}
 	

@@ -164,8 +164,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
 
       File newSchema = duplicateModify(new File(schemaConfig), 
-          "synonyms=\"author_curated.synonyms\"", "synonyms=\"" + curatedSynonyms.getAbsolutePath() + "\"",
-          "synonyms=\"author_generated.translit\"", "synonyms=\"" + generatedTransliterations.getAbsolutePath() + "\""
+          "synonyms=\"author_curated.synonyms\"", "synonyms=\"" + curatedSynonyms.getAbsolutePath().replace('\\', '/') + "\"",
+          "synonyms=\"author_generated.translit\"", "synonyms=\"" + generatedTransliterations.getAbsolutePath().replace('\\', '/') + "\""
       );
       return newSchema.getAbsolutePath();
 
@@ -404,12 +404,17 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	
   	
   	
-  	// first is considered a title
+  	// first is considered a title (but when the only thing we have, it will be searched as surname)
   	testAuthorQuery(
         "first", 
-        		"",
+        		"author:first, author:first,*",
         		"//*[@numFound='0']"
         		);
+  	testAuthorQuery(
+        "goodman", 
+            "author:goodman, author:goodman,*",
+            "//*[@numFound='0']"
+            );
   	
   	
     // 'xxx' will be removed from the author (at least in the modified version)
@@ -620,6 +625,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertQ(req("q", String.format("%s:130", F.ID)), "//*[@numFound='1']");
     assert h.query(req("q", String.format("%s:130", F.ID)))
       .contains("<arr name=\"author\"><str>Author, A</str><str>Author, B</str><str>Author, C</str></arr>");
+    
 
   }
   
