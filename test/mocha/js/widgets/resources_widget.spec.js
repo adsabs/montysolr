@@ -85,11 +85,11 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
 
 
       expect($w.find("ul:first").find("a").attr("href")).to.eql(
-        'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=GIF'
+        'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD'
       )
 
       expect($w.find("ul:last").find("a").attr("href")).to.eql(
-        "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD"
+        'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD'
       )
 
 
