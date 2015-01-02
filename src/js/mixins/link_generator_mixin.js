@@ -3,282 +3,178 @@ define(["underscore"], function(_){
 
 var linkGenerator = {
 
-  abstractPageFields: "links_data,ids_data,[citations],property,bibcode",
+  abstractPageFields: "links_data,[citations],property,bibcode",
 
-  resultsPageFields : "links_data,ids_data,[citations],property",
+  resultsPageFields: "links_data,[citations],property",
 
   //function that can turn links_data into a list of actual links
 
   //using Giovanni's function from beer
-  adsUrlRedirect : function(type, id) {
+  adsUrlRedirect: function (type, id) {
 
     var adsClassicBaseUrl = "http://adsabs.harvard.edu/";
 
     switch (type) {
       case "doi":
-        return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/" + id
+        return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/" + id;
       case "data":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=DATA"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=DATA";
       case "electr":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=EJOURNAL"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=EJOURNAL";
       case "gif":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=GIF"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=GIF";
       case "article":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=ARTICLE"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=ARTICLE";
       case "preprint":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=PREPRINT"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=PREPRINT";
       case "arXiv":
         //in this case id should be arxivid, not bibcode
-        return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/" + id
+        return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/" + id;
       case "simbad":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=SIMBAD"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=SIMBAD";
       case "ned":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=NED"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=NED";
       case "openurl":
-        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=OPENURL"
+        return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=OPENURL";
 
     }
   },
-      /*
-    *   Takes data--a json object from apiResponse--and augments it with a "links"
-    *   object.  I used mostly Giovanni's logic here as well. This is to be called
-    *   by the processData method of a widget.
-    * */
+  /*
+   *   Takes data--a json object from apiResponse--and augments it with a "links"
+   *   object.  I used mostly Giovanni's logic here as well. This is to be called
+   *   by the processData method of a widget.
+   * */
 
-     parseLinksData : function(data) {
-       var dataWithLinks;
+  parseLinksData: function (data) {
+    var dataWithLinks;
 
-       dataWithLinks = _.map(data, function (d) {
-         return this.parseLinksDataForModel(d)
-       }, this)
+    dataWithLinks = _.map(data, function (d) {
+      return this.parseLinksDataForModel(d)
+    }, this);
 
-       return dataWithLinks
+    return dataWithLinks;
 
-     },
+  },
 
-     parseLinksDataForModel : function(data){
+  getTextAndDataLinks: function (links_data, bib) {
 
-       var links, bib, openAccess, ADSScan;
+    var link_types, links = { text : [], data : []};
 
-       openAccess = false;
-       ADSScan = false;
-       bib = data.bibcode;
-
-       links = {text : [], list : [], data : []};
-
-       if (data.ids_data){
-         _.each(data.ids_data, function(d){
-           var idDict = JSON.parse(d);
-           if (idDict.description === "arXiv") {
-             links.text.push({openAccess: true, title: "arXiv eprint", link: this.adsUrlRedirect("arXiv", idDict.identifier)})
-           }
-         }, this)
-       }
-
-
-
-       if(data["[citations]"]){
-
-         var nc = data["[citations]"].num_citations;
-         var nr = data["[citations]"].num_references;
-         if (nc >= 1){
-           links.list.push({letter: "C", title: "Citations ("+ nc + ")",   link:"/#abs/"+ bib + "/citations" })
-
-         }
-         if (nr >= 1){
-           links.list.push({ letter: "R", title: "References ("+ nr + ")" , link:"/#abs/"+ bib + "/references"})
-         }
-       }
-
-       if (data.property){
-         if (_.contains(data.property, "TOC")){
-           links.list.push({letter: "T", title: "Table of Contents", link:"/#abs/"+ bib + "/tableofcontents"})
-         }
-         if (_.contains(data.property, "PUB_OPENACCESS")){
-           //this will be accessed by the links_data part below
-           openAccess = true;
-         }
-         if (_.contains(data.property, "ADS_SCAN")){
-           //this will also be accessed by links_data below
-           ADSScan = true;
-           links.text.push({ openAccess : true, letter: "G", title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)})
-
-         }
-       }
-
-       if (data.links_data){
-
-         var link_types;
-
-         link_types = _.map(data.links_data, function(d){
-           try{
-             return JSON.parse(d);
-           }
-           catch(SyntaxError){
-             console.warn(d, "was not parsed")
-           }
-         });
-
-         link_types = _.filter(link_types, function(l){if (l!== undefined){
-           return true;
-         }});
-
-         _.each(link_types, function(l){
-
-           //limit to only one in links list, even though there may be multiple articles
-           if (l.type === 'electr' && openAccess && !_.findWhere(links.text, {title: "Publisher article"})){
-
-             links.text.push({openAccess : true, letter: "E",title: "Publisher article", link : this.adsUrlRedirect(l.type, bib)})
-
-           }
-           else if (l.type === 'electr' && !openAccess  && !_.findWhere(links.text, {title: "Publisher article"})){
-             links.text.push({letter: "E", title: "Publisher article", link : this.adsUrlRedirect(l.type, bib)})
-
-           }
-           //has some more involved logic
-           else if (l.type === 'pdf'){
-             //default to adsscan
-             if (ADSScan){
-               links.text.push({ openAccess : true, letter: "F", title: "ADS PDF", link : this.adsUrlRedirect('article', bib)})
-             }
-             else {
-               if (openAccess){
-                 links.text.push({ openAccess : true, letter: "F", title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
-               }
-               else {
-                 links.text.push({letter: "F", title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
-
-               }
-
-             }
-
-           }
-           else if (l.type === 'simbad' && !_.findWhere(links.data, {title: "SIMBAD Objects"})){
-             links.data.push({ letter: "S", title: "SIMBAD Objects", link : this.adsUrlRedirect(l.type, bib)})
-
-           }
-           else if (l.type === 'ned' && !_.findWhere(links.data, {title: "NED Objects"})){
-             links.data.push({ letter: "N", title: "NED Objects", link : this.adsUrlRedirect(l.type, bib)})
-
-           }
-           else if (l.type === 'data' && !_.findWhere(links.data, {title: "Archival Data"})){
-             links.data.push({letter: "D", title: "Archival Data", link : this.adsUrlRedirect(l.type, bib)})
-
-           }
-
-         }, this);
-
-       }
-
-       data.links  = links;
-
-       return data
-
-     },
-
-    parseResourcesData : function(data) {
-
-      var fullTextSources, dataProducts, bib, openAccess, ADSScan;
-
-      fullTextSources = [];
-      dataProducts = [];
-
-      openAccess = false;
-      ADSScan = false;
-      links = [];
-      bib = data.bibcode;
-
-      if (data.ids_data) {
-        _.each(data.ids_data, function (d) {
-          var idDict = JSON.parse(d);
-          if (idDict.description === "arXiv") {
-            fullTextSources.push({openAccess: true, title: "arXiv eprint", link: this.adsUrlRedirect("arXiv", idDict.identifier)})
-          }
-        }, this)
+    link_types = _.map(links_data, function (d) {
+      try {
+        return JSON.parse(d);
+      }
+      catch (SyntaxError) {
+        console.warn(d, "was not parsed")
       }
 
-      if (data.property) {
+    });
 
-        if (_.contains(data.property, "PUB_OPENACCESS")) {
-          //this will be accessed by the links_data part below
-          openAccess = true;
-        }
-        if (_.contains(data.property, "ADS_SCAN")) {
-          //this will also be accessed by links_data below
-          ADSScan = true;
-          fullTextSources.push({openAccess: true, title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)})
-        }
+    _.each(link_types, function (l) {
+
+      var openAccess = l.access === "open" ? true : false;
+
+      switch (l.type) {
+
+        case "preprint":
+          links.text.push({openAccess: openAccess, title: "arXiv e-print", link: this.adsUrlRedirect("preprint", bib)});
+          break
+        case "electr":
+          links.text.push({openAccess: openAccess, title: "Publisher Article", link: this.adsUrlRedirect('electr', bib)})
+          break
+        case "pdf":
+          links.text.push({openAccess: openAccess, title: "Publisher PDF", link: this.adsUrlRedirect('article', bib)});
+          break
+        case "article":
+          links.text.push({openAccess: openAccess, title: "ADS PDF", link: this.adsUrlRedirect('article', bib)});
+          break
+        case "gif":
+          links.text.push({openAccess: openAccess, title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)});
+          break
+        case "data":
+          var title = l.instances ? "Archival Data (" + l.instances + ")" : "Archival Data";
+          links.data.push({title: title, link: this.adsUrlRedirect('data', bib)});
+          break
+        case "simbad":
+          var title = l.instances ? "SIMBAD objects (" + l.instances + ")" : "SIMBAD objects";
+          links.data.push({title: title, link: this.adsUrlRedirect('simbad', bib)});
+          break
+        case "ned":
+          var title = l.instances ? "NED objects (" + l.instances + ")" : "NED objects";
+          links.data.push({title: title, link: this.adsUrlRedirect('ned', bib)});
+          break
       }
 
-      if (data.links_data) {
+    }, this);
 
-        var link_types;
+    //get rid of duplicates and default to open access
+    var groups = _.groupBy(links.text, "title");
+    _.each(groups, function(v,k){
 
-        link_types = _.map(data.links_data, function (d) {
-          try{
-            return JSON.parse(d);
-          }
-          catch(SyntaxError){
-            console.warn(d, "was not parsed")
-          }
+      var singleVersion;
 
+      if (v.length > 1){
+        //remove duplicates from links
+        links.text = _.filter(links.text, function(l){
+          return (l.title !== k);
         });
 
-        link_types = _.filter(link_types, function(l){if (l!== undefined){
-          return true;
-        }});
+        singleVersion = _.findWhere(v, {"openAccess" : true}) || v[0];
+        links.text.push(singleVersion)
+      }
 
-        _.each(link_types, function (l) {
+    });
 
-          if (l.type === "electr" && openAccess && !_.findWhere(fullTextSources, {title: "Publisher article"}))  {
-            fullTextSources.push({openAccess: true, title: "Publisher article", link: this.adsUrlRedirect('electr', bib)})
-          }
+    return links
 
-          else if (l.type === "electr" && !openAccess &&  !_.findWhere(fullTextSources, {title: "Publisher article"})) {
+  },
 
-            fullTextSources.push({title: "Publisher article", link: this.adsUrlRedirect('electr', bib)})
+  // this function is used by list-of-things to add quick links to an item
+  parseLinksDataForModel: function (data) {
 
-          }
+    var links = {list : [], data : [], text : []};
 
-         //has some more involved logic
-          else if (l.type === 'pdf'){
-            //default to adsscan
-            if (ADSScan){
-              fullTextSources.push({openAccess : true,  title: "ADS PDF", link : this.adsUrlRedirect('article', bib)})
-            }
-            else if (!_.findWhere(fullTextSources, {title: "Publisher PDF"})) {
-              if (openAccess){
-                fullTextSources.push({openAccess : true,  title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
-              }
-              else {
-                fullTextSources.push({title: "Publisher PDF", link : this.adsUrlRedirect('article', bib)})
-
-              }
-            }
-          }
-
-          else if (l.type === 'data' &&  !_.findWhere(dataProducts, {title: "Archival data"})){
-            dataProducts.push({title : "Archival data", link : this.adsUrlRedirect('data', bib)})
-          }
-          else if (l.type === 'simbad' && !_.findWhere(dataProducts, {title: "SIMBAD objects"})){
-            dataProducts.push({title : "SIMBAD objects", link : this.adsUrlRedirect('simbad', bib)})
-
-          }
-          else if (l.type === 'ned' && !_.findWhere(dataProducts, {title: "NED objects"})){
-            dataProducts.push({title : "NED objects", link : this.adsUrlRedirect('ned', bib)})
-
-          }
-
-        }, this);
-
-      };
-
-      data.fullTextSources = fullTextSources;
-      data.dataProducts = dataProducts;
-
-      return data
+    if (data.links_data) {
+      _.extend(links, this.getTextAndDataLinks(data.links_data, data.bibcode));
     }
 
+    if (data["[citations]"]) {
+
+      var nc = data["[citations]"].num_citations;
+      var nr = data["[citations]"].num_references;
+      if (nc >= 1) {
+        links.list.push({letter: "C", title: "Citations (" + nc + ")", link: "/#abs/" + data.bibcode + "/citations" })
+      }
+      if (nr >= 1) {
+        links.list.push({ letter: "R", title: "References (" + nr + ")", link: "/#abs/" + data.bibcode + "/references"})
+      }
+    }
+
+    if (data.property) {
+      if (_.contains(data.property, "TOC")) {
+        links.list.push({letter: "T", title: "Table of Contents", link: "/#abs/" + data.bibcode + "/tableofcontents"})
+      }
+
+    }
+
+    data.links = links;
+
+    return data
+
+  },
+
+  //this function is used as a widget on the abstract page
+  parseResourcesData: function (data) {
+
+    if (data.links_data) {
+      var links = this.getTextAndDataLinks(data.links_data, data.bibcode);
+      data.fullTextSources = links.text;
+      data.dataProducts = links.data;
+    }
+
+    return data;
+
+  }
 }
 
   return linkGenerator

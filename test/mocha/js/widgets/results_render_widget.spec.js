@@ -72,8 +72,7 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         setTimeout(function() {
           expect(widget.model.get('currentQuery').url()).to.eql(
-            "fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cids_data%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0"
-          );
+            'fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0'          );
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
@@ -308,11 +307,10 @@ define([
 
         //now check to make sure it was rendered correctly
         setTimeout(function() {
+
           //checking first record
           expect($w.find(".s-identifier:first").text().trim()).to.eql("2013arXiv1305.3460H");
           expect($w.find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H");
-          expect($w.find(".s-results-links:first").find("a").attr("href")).to.eql("http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/arXiv:1305.3460");
-          expect($w.find(".s-results-links:first").find("a").text().trim()).to.eql("arXiv eprint");
           expect($w.find("h5:first").text().trim()).to.eql("A bijection for tri-cellular maps");
           expect($w.find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
 
@@ -320,8 +318,6 @@ define([
           //checking last record
           expect($w.find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
           expect($w.find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M");
-          expect($w.find(".s-results-links:last").find("a").attr("href")).to.eql("/#abs/1987sbge.proc...47M/tableofcontents");
-          expect($w.find(".s-results-links:last").find("a").text().trim()).to.eql("Table of Contents");
           expect($w.find("h5:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
 
           //checking render order of more than 3 authors

@@ -15,8 +15,8 @@ define(['js/mixins/link_generator_mixin'],
 
         //added to defaultQueryFields
 
-        expect(mixin.abstractPageFields).to.equal("links_data,ids_data,[citations],property,bibcode");
-        expect(mixin.resultsPageFields).to.equal("links_data,ids_data,[citations],property");
+        expect(mixin.abstractPageFields).to.equal("links_data,[citations],property,bibcode");
+        expect(mixin.resultsPageFields).to.equal("links_data,[citations],property");
 
       })
 
@@ -29,32 +29,91 @@ define(['js/mixins/link_generator_mixin'],
 
       });
 
+      it("should have a getTextAndDataLinks function that takes links data and parses it into seperate dicts with link information, and gets rid of duplicates", function(){
+
+        var links_data = ['{"title":"", "type":"simbad", "instances":"10", "access":""}',
+          '{"title":"", "type":"ned", "instances":"3", "access":""}',
+          '{"title":"", "type":"pdf", "instances":"", "access":"open"}',
+          '{"title":"", "type":"gif", "instances":"", "access":"open"}',
+          '{"title":"", "type":"article", "instances":"", "access":"open"}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"data", "instances":"", "access":""}',
+          '{"title":"", "type":"electr", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
+        ];
+
+        var output = mixin.getTextAndDataLinks(links_data, "fakeBib");
+
+        //testing every link type
+
+        expect(output.text.length).to.eql(5);
+        //type : electr
+        expect(_.where(output.text, {title : "Publisher Article"}).length).to.eql(1);
+        //type : gif
+        expect(_.where(output.text, {title : "ADS Scanned Article"}).length).to.eql(1);
+        //type : preprint
+        expect(_.where(output.text, {title : "arXiv e-print"}).length).to.eql(1);
+        //type : pdf
+        expect(_.where(output.text, {title : "Publisher PDF"}).length).to.eql(1);
+        //type : article
+        expect(_.where(output.text, {title : "ADS PDF"}).length).to.eql(1);
+
+        //get rid of duplicate publisher articles, only show 1 listing with openaccess
+        expect(_.findWhere(output.text, {title : "Publisher Article"}).openAccess).to.be.true;
+
+        expect(output.data.length).to.eql(3);
+
+        expect(_.where(output.data, {title : "SIMBAD objects (10)"}).length).to.eql(1);
+        expect(_.where(output.data, {title : "Archival Data"}).length).to.eql(1);
+        expect(_.where(output.data, {title : "NED objects (3)"}).length).to.eql(1);
+
+      })
+
       it("should have a parseLinksData method used to add links for a list of results", function(){
 
         var dataWithLinks = mixin.parseLinksData([{
 
           "bibcode": "1993A&A...277..309L",
 
-          "ids_data": [
-            "{\"identifier\":\"1993A&A...277..309L\", \"alternate_bibcode\":\"\", \"deleted_bibcode\":\"\", \"description\":\"ADS bibcode\"}"
-          ],
           "[citations]": {
             "num_citations": 62,
             "num_references": 8
           },
+          links_data : ['{"title":"", "type":"simbad", "instances":"10", "access":""}',
+            '{"title":"", "type":"ned", "instances":"3", "access":""}',
+            '{"title":"", "type":"pdf", "instances":"", "access":"open"}',
+            '{"title":"", "type":"gif", "instances":"", "access":""}',
+            '{"title":"", "type":"article", "instances":"", "access":"open"}',
+            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+            '{"title":"", "type":"data", "instances":"", "access":""}',
+            '{"title":"", "type":"electr", "instances":"", "access":"open"}',
+            '{"title":"", "type":"electr", "instances":"", "access":""}'
+          ],
+
           "property": [
             "OPENACCESS",
-            "REFEREED",
+            "NOT REFEREED",
             "ADS_SCAN",
+            "TOC",
             "ARTICLE"
           ],
 
-          "orderNum": 5
+        "orderNum": 5
         }]);
 
-        expect(mixin.parseLinksData).to.be.instanceof(Function);
+        expect(JSON.stringify(dataWithLinks[0].links.list)).to.eql('[{"letter":"C","title":"Citations (62)","link":"/#abs/1993A&A...277..309L/citations"},'+
+        '{"letter":"R","title":"References (8)","link":"/#abs/1993A&A...277..309L/references"},' +
+        '{"letter":"T","title":"Table of Contents","link":"/#abs/1993A&A...277..309L/tableofcontents"}]');
 
-        expect(JSON.stringify(dataWithLinks[0]["links"]["text"][0])).to.eql('{"openAccess":true,"letter":"G","title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"}')
+        expect(JSON.stringify(dataWithLinks[0].links.text)).to.eql('[{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},'+
+        '{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"},'+
+        '{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},'+
+        '{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=PREPRINT"},'+
+        '{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=EJOURNAL"}]');
+
+        expect(JSON.stringify(dataWithLinks[0].links.data)).to.eql('[{"title":"SIMBAD objects (10)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=SIMBAD"},'+
+        '{"title":"NED objects (3)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=NED"},'+
+        '{"title":"Archival Data","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=DATA"}]');
 
       })
 
@@ -62,13 +121,16 @@ define(['js/mixins/link_generator_mixin'],
 
         var dataWithLinks = mixin.parseResourcesData({
           "bibcode": "1989RMxAA..18..125C",
-          "ids_data": [
-            "{\"identifier\":\"1989RMxAA..18..125C\", \"alternate_bibcode\":\"\", \"deleted_bibcode\":\"\", \"description\":\"ADS bibcode\"}"
-          ],
-          "links_data": [
-            "{\"title\":\"\", \"type\":\"simbad\", \"instances\":\"3\"}",
-            "{\"title\":\"\", \"type\":\"ned\", \"instances\":\"1\"}",
-            "{\"title\":\"\", \"type\":\"ADSlink\", \"instances\":\"\"}"
+
+          "links_data": ['{"title":"", "type":"simbad", "instances":"10", "access":""}',
+            '{"title":"", "type":"ned", "instances":"3", "access":""}',
+            '{"title":"", "type":"pdf", "instances":"", "access":"open"}',
+            '{"title":"", "type":"gif", "instances":"", "access":"false"}',
+            '{"title":"", "type":"article", "instances":"", "access":"open"}',
+            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+            '{"title":"", "type":"data", "instances":"", "access":""}',
+            '{"title":"", "type":"electr", "instances":"", "access":"open"}',
+            '{"title":"", "type":"electr", "instances":"", "access":""}'
           ],
           "property": [
             "OPENACCESS",
@@ -83,20 +145,8 @@ define(['js/mixins/link_generator_mixin'],
           }
         });
 
-        expect(mixin.parseResourcesData).to.be.instanceof(Function);
-
-        expect(dataWithLinks.fullTextSources[0].link).to.eql(
-          "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF");
-
-        expect(dataWithLinks.fullTextSources[0].title).to.eql("ADS Scanned Article");
-
-        expect(dataWithLinks.dataProducts[0].link).to.eql(
-          "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=SIMBAD"
-         );
-
-        expect(dataWithLinks.dataProducts[0].title).to.eql("SIMBAD objects");
-
-
+        expect(JSON.stringify(dataWithLinks.fullTextSources)).to.eql('[{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF"},{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=PREPRINT"},{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=EJOURNAL"}]');
+        expect(JSON.stringify(dataWithLinks.dataProducts)).to.eql('[{"title":"SIMBAD objects (10)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=SIMBAD"},{"title":"NED objects (3)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=NED"},{"title":"Archival Data","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=DATA"}]');
 
 
       })

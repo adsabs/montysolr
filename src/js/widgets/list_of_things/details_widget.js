@@ -17,7 +17,7 @@ define([
     ) {
     var DetailsWidget = ListOfThings.extend({
       defaultQueryArguments: {
-        fl: 'title,bibcode,author,keyword,pub,aff,volume,year,links_data,ids_data,[citations],property,pubdate,abstract',
+        fl: 'title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract',
         rows : 20,
         start : 0
       },
