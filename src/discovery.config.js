@@ -22,7 +22,8 @@ require.config({
         controllers: {
           FeedbackMediator: 'js/wraps/discovery_mediator',
           QueryMediator: 'js/components/query_mediator',
-          Diagnostics: 'js/bugutils/diagnostics'
+          Diagnostics: 'js/bugutils/diagnostics',
+          AlertsController: 'js/components/alerts_mediator'
         },
         services: {
           'Api': 'js/services/api',

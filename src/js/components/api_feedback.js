@@ -30,6 +30,7 @@ define([
 
       // Internal events
       MAKE_SPACE: -1,
+      UNMAKE_SPACE: -1.1,
       SEARCH_CYCLE_STARTED: -2,
       SEARCH_CYCLE_FAILED_TO_START: -3,
       SEARCH_CYCLE_PROGRESS: -4,

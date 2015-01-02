@@ -66,6 +66,7 @@ define([
             searchPageAlwaysVisible);
           var q = app.getObject('AppStorage').getCurrentQuery();
           this.route = '#search/' + queryUpdater.clean(q).url();
+          publishFeedback({code: ApiFeedback.CODES.UNMAKE_SPACE});
         });
         this.set('export-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',

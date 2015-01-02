@@ -90,7 +90,20 @@ define([
       $('#test').append($w);
 
       var promise;
+      promise = x.m.onAlert(new ApiFeedback({
+        msg: 'this is <a href="foo">html</a> message',
+        events: {
+          'click #alertBox a': 'foo-bar'
+        }
+      }))
+      .done(function(x) {
+        expect(x).to.be.eql('foo-bar');
+      });
+      $w.find('#alertBox a').click();
+      expect(promise.state()).to.be.eql('resolved');
 
+
+      // function
       var spy = sinon.spy();
       promise = x.m.onAlert(new ApiFeedback({
         msg: 'this is <a href="foo">html</a> message',
@@ -102,6 +115,7 @@ define([
       expect(promise.state()).to.eql('resolved');
       expect(spy.called).to.be.true;
 
+      // actions
       sinon.spy(x.m.pubsub, 'publish');
       promise = x.m.onAlert(new ApiFeedback({
         msg: 'this is <a href="foo">html</a> message',

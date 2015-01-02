@@ -27,14 +27,31 @@ define([
         if (child.view && child.view.showCols) {
           child.view.showCols({right: false});
           // open the view again
-          this.pubsub.once(this.pubsub.NAVIGATE + ' ' + this.pubsub.START_SEARCH,
+          this.pubsub.once(this.pubsub.START_SEARCH,
             _.once(function() {child.view.showCols({right:true})}));
+        }
+      }
+      this.pubsub.once(this.pubsub.DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
+        if(this._tmp.callOnce[psk.getId()]) {
+          return;
+        }
+        this._makeWidgetsSpin([psk.getId()]);
+        this._tmp.callOnce[psk.getId()] = true;
+      }, this));
+    };
+
+    handlers[ApiFeedback.CODES.UNMAKE_SPACE] = function(feedback) {
+      var mpm = this.getApp().getObject('MasterPageManager');
+      if (mpm) {
+        var child = mpm.getCurrentActiveChild();
+        if (child.view && child.view.showCols) {
+          child.view.showCols({right: true});
         }
       }
     };
 
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_STARTED] = function(feedback) {
-
+      this.reset();
       var app = this.getApp();
 
       if (feedback.query) {
@@ -86,23 +103,7 @@ define([
       // retrieve ids of all components that wait for a query
       var ids = _.keys(feedback.cycle.waiting);
 
-      // turn ids into a list of widgets
-      var widgets = this.getWidgets(ids);
-
-      // activate loading state
-      if (widgets) {
-        this.changeWidgetsState(widgets, {state: WidgetStates.WAITING});
-      }
-
-      // register handlers which will remove the spinning wheel
-      var self = this;
-      var pubsub = app.getService('PubSub');
-      _.each(ids, function(k) {
-        var key = k;
-        pubsub.once(pubsub.DELIVERING_RESPONSE + k, function() {
-          self.changeWidgetsState(self.getWidgets([key]), {state: WidgetStates.IDLE});
-        })
-      });
+      this._makeWidgetsSpin(ids);
 
     };
 
@@ -153,7 +154,7 @@ define([
                .fail(function() {
                  alerts.alert(new ApiFeedback({
                    code: ApiFeedback.CODES.ALERT,
-                   msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...',
+                   msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...please retry later.',
                    modal: true
                  }));
                });
@@ -204,6 +205,30 @@ define([
         },
         createFeedback: function(options) {
           return new ApiFeedback(options);
+        },
+
+        _makeWidgetsSpin: function(ids) {
+          // turn ids into a list of widgets
+          var widgets = this.getWidgets(ids);
+
+          // activate loading state
+          if (widgets) {
+            this.changeWidgetsState(widgets, {state: WidgetStates.WAITING});
+          }
+
+          // register handlers which will remove the spinning wheel
+          var self = this;
+          var pubsub = this.getApp().getService('PubSub');
+          _.each(ids, function(k) {
+            var key = k;
+            pubsub.once(pubsub.DELIVERING_RESPONSE + k, function() {
+              self.changeWidgetsState(self.getWidgets([key]), {state: WidgetStates.RESET});
+            })
+          });
+        },
+
+        reset: function() {
+          this._tmp = {callOnce: {}};
         }
       }))();
       _.each(_.pairs(handlers), function(pair) {
