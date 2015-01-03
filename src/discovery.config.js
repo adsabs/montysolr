@@ -5,7 +5,6 @@ require.config({
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
   deps: window.bbbTest ? [window.bbbTest.testLoader ? window.bbbTest.testLoader : '../test/test-loader' ] : [ 'js/apps/discovery/main'],
-
   waitSeconds: 15,
 
   // Configuration we want to make available to modules of ths application
@@ -101,16 +100,15 @@ require.config({
 
   paths: {
 
+    //TODO: these libs will ned manual optimization (they dont come with minified sources)
+    //TODO: require-handlebars-js, d3-cloud, jquery-hoverIntent, dsjslib/cache, query-builder
+
     // bumblebee components (here we'll lists simple names), paths are relative
     // to the config (the module that bootstraps our application; look at the html)
     // as a convention, all modules should be loaded using 'symbolic' names
     'config': './discovery.config',
     'main': 'js/apps/discovery/main',
     'router': 'js/apps/discovery/router',
-
-
-    // Almond is used to lighten the output filesize.
-    "almond": "libs/almond/almond",
 
     // Opt for Lo-Dash Underscore compatibility build over Underscore.
     "underscore": "libs/lodash/lodash.compat",
@@ -126,15 +124,15 @@ require.config({
     'bootstrap': 'libs/bootstrap/bootstrap',
     'jquery-ui' : 'libs/jqueryui/jquery-ui',
     'd3':'libs/d3/d3',
+    'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
-    'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
+
     'nvd3' :  'libs/nvd3/nv.d3',
 
-    // only for diagnostics/debugging
+    // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
-    // only for testing (won't get loaded otherwise)
     'chai': '../bower_components/chai/chai',
     'sinon': '../bower_components/sinon/index'
 
@@ -146,8 +144,6 @@ require.config({
   },
 
   shim: {
-
-
     'bootstrap' : {
       deps: ['jquery']
     },
@@ -186,6 +182,10 @@ require.config({
 
     'jquery-ui' : {
       deps: ['jquery', 'bootstrap']
+    },
+
+    'sprintf': {
+      deps: []
     }
   },
 

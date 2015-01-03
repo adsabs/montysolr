@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "dependencies": {
     "html5-boilerplate": "~4.3.0",
-    "almond": "~0.2.6",
     "lodash": "~2.4.1",
     "backbone": "~1.0.0",
     "jquery": "~2.0.3",

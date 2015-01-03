@@ -14,9 +14,6 @@ require.config({
     "libs": "../../../libs",
     "js": "../../../js",
 
-    // Almond is used to lighten the output filesize.
-    "almond": "../../../libs/almond/almond",
-
     // We are using Lo-Dash instead of Underscore (tests indicate it is much
     // faster; for some frequent operations, such as list recognition, it is
     // significant)
