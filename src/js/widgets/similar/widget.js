@@ -32,6 +32,11 @@ define([
         this.defaultQueryArguments["mlt.count"] = this.model.get("perPage");
       },
 
+      customizeQuery: function(apiQuery) {
+        var q = ListOfThingsWidget.prototype.customizeQuery.call(this, apiQuery);
+        q.set('fl', 'bibcode');
+        return q;
+      },
 
       //mlt info is in a different place than standard response info
       extractDocs: function (apiResponse) {
