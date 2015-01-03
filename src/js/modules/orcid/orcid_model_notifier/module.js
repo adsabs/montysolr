@@ -43,6 +43,8 @@ define([
       cancelBulkInsert: function () {
         this.model.set('isInBulkInsertMode', false);
         this.model.set('bulkInsertWorks', []);
+
+        this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.IsBulkInsertMode, data: false});
       },
       startBulkInsert: function(){
         this.model.set('isInBulkInsertMode', true);
