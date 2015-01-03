@@ -12,9 +12,10 @@
  *        (and how to bootstrap run-time values)
  */
 
-define(["config", 'module'], function(config, module) {
+define(['config', 'module', 'analytics'], function(config, module, analytics) {
 
-  require(["router",
+  require([
+      'router',
       'js/components/application',
       'js/mixins/discovery_bootstrap'
     ],
@@ -55,7 +56,7 @@ define(["config", 'module'], function(config, module) {
           }
 
         }).fail(function () {
-          app.redirect('/505.html');
+          app.redirect('/500.html');
         });
 
       }).fail(function() {

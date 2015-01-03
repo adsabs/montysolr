@@ -10,11 +10,6 @@ require.config({
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
   config: {
-    'js/page_managers/controller': {
-      'LandingPageManager': {
-
-      }
-    },
     'js/apps/discovery/main': {
 
       core: {
@@ -95,13 +90,14 @@ require.config({
       'api_query_impl': 'js/components/solr_params',
       'api_response_impl': 'js/components/solr_response',
       'api_request_impl': 'js/components/default_request',
-      'pubsub_service_impl': 'js/services/default_pubsub'
+      'pubsub_service_impl': 'js/services/default_pubsub',
+      'analytics_config': 'discovery.vars'
     }
   },
 
   paths: {
 
-    //TODO: these libs will ned manual optimization (they dont come with minified sources)
+    //TODO: these libs will need manual optimization (they dont come with minified sources)
     //TODO: require-handlebars-js, d3-cloud, jquery-hoverIntent, dsjslib/cache, query-builder
 
     // bumblebee components (here we'll lists simple names), paths are relative
@@ -110,6 +106,7 @@ require.config({
     'config': './discovery.config',
     'main': 'js/apps/discovery/main',
     'router': 'js/apps/discovery/router',
+    'analytics': 'js/components/analytics',
 
     // Opt for Lo-Dash Underscore compatibility build over Underscore.
     "underscore": "libs/lodash/lodash.compat",
@@ -129,8 +126,10 @@ require.config({
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
-
     'nvd3' :  'libs/nvd3/nv.d3',
+    // for development use
+    //'google-analytics': "//www.google-analytics.com/analytics_debug",
+    'google-analytics': "//www.google-analytics.com/analytics",
 
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
@@ -186,7 +185,7 @@ require.config({
     },
 
     'sprintf': {
-      deps: []
+      export: 'sprintf'
     }
   },
 

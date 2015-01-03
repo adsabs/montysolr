@@ -17,7 +17,7 @@
         });
         require(['analytics'], function(analytics) {
             analytics('send', 'pageview');
-            analytics('send', 'event', 'error', 'automatic_redirection', '404.html');
+            analytics('send', 'event', 'error', 'automatic_redirect', '500.html');
         });
     </script>
 
@@ -25,7 +25,7 @@
 <body style="background: black">
 
 <div style="text-align: center;margin-top:10%">
-    <a href="/"><img src="styles/img/bumblerocket.svg" alt="sad-bee"></a>
-    <h3 style="color:white;">Oups, not found. Would you like to <a href="/">go back to home, the Earth?</a></h3></div>
+    <img src="styles/img/bumblerocket.svg" alt="sad-bee">
+    <h3 style="color:white;">Oh no! Did you break, Bumblebee? 500</h3></div>
 </body>
 </html>
