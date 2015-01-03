@@ -57,7 +57,8 @@ def run(input, output):
     
     result = []    
     for k,v in out.items():
-        result.append(u'%s=>%s' % (k, u';'.join(v)))
+        result.append(u'%s=>%s' % (k.replace(u',', u'\\,').replace(u' ', u'\\ '), 
+                                   u','.join([x.replace(u',', u'\\,').replace(u' ', u'\\ ') for x in v])))
     
     result.sort()
     
