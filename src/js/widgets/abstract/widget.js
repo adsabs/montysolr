@@ -193,11 +193,13 @@ define([
           this._current = bibcode;
           this.model.set(this._docs[bibcode]);
           // let other widgets know details
-          this.trigger('page-manager-event', 'broadcast-payload', {title: this._docs[bibcode].title} );
+          this.trigger('page-manager-event', 'broadcast-payload', {
+              title: this._docs[bibcode].title,
+              bibcode: bibcode
+          });
         }
         else {
           if (q.has('__show')) return; // cycle protection
-
           q.set('__show', bibcode);
           this.dispatchRequest(q);
         }

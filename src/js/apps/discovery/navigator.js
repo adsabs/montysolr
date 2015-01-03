@@ -126,10 +126,16 @@ define([
             ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
         });
         this.set('ShowSimilar', function() {
-          app.getWidget("TOCWidget").collection.selectOne("ShowSimilar").set("isActive", true);
+          app.getWidget("TOCWidget").collection.selectOne("ShowSimilar");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowSimilar'].concat(detailsPageAlwaysVisible));
         });
+        this.set('ShowPaperMetrics', function() {
+          app.getWidget("TOCWidget").collection.selectOne("ShowPaperMetrics");
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowPaperMetrics'].concat(detailsPageAlwaysVisible));
+        });
+
         this.set('abstract-page:bibtex', function() { app.getObject('MasterPageManager').show('DetailsPage')});
         this.set('abstract-page:endnote', function() { app.getObject('MasterPageManager').show('DetailsPage')});
         this.set('abstract-page:metrics', function() { app.getObject('MasterPageManager').show('DetailsPage')});

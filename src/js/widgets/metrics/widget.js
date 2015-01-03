@@ -49,11 +49,8 @@ define([
   var TableView = Marionette.ItemView.extend({
 
     className: "table table-hover s-metrics-table table-condensed",
-
     tagName: "table",
-
     onRender: function () {
-
       this.$('[data-toggle="popover"]').popover(
         {
           html: true,
@@ -61,11 +58,9 @@ define([
         }
       )
     }
-
   });
 
   var GraphModel = Backbone.Model.extend({
-
     defaults: function () {
       return {
         //precompute this data to have on hand
@@ -76,8 +71,6 @@ define([
         //tells graph which options to allow
         //right now we do "histogram" and "line"
         graphType: "histogram"
-
-
       }
     }
   });
@@ -85,13 +78,9 @@ define([
   var GraphView = Marionette.ItemView.extend({
 
     className: "graph-view s-graph-view",
-
     initialize: function () {
-
       this.initial = true;
-
       this.listenTo(this.model, "change:normalized", this.drawGraph);
-
     },
 
     ui: {
@@ -99,21 +88,14 @@ define([
     },
 
     events: {
-
       "click .graph-tab": "updateTabValue"
-
     },
 
     updateTabValue: function (e) {
-
       var $e = $(e.currentTarget);
-
       this.$(".graph-tab").removeClass("active");
-
       $e.addClass("active");
-
       var val = $e.data("tab");
-
       if (val === "normalized") {
         this.model.set("normalized", true);
       }
@@ -127,32 +109,23 @@ define([
     drawHistogram: function () {
 
       var data, d3SVG;
-
       var that = this;
-
       d3SVG = d3.select(this.ui.svg[0]);
 
       //for the tooltip
       //tells you the total value of y for a given x value
       //e.g. adds refereed and non-refereed
       function countAll(data, year) {
-
         var total = 0;
-
         _.each(data, function (d) {
-
           var val = _.filter(d.values, function (v) {
             if (v.x == year) {
               return true
             }
           });
-
           total+= val[0].y;
-
         });
-
         return  total;
-
       }
 
       //get data
@@ -165,7 +138,7 @@ define([
       if (that.chart) {
         //it's a transition
 
-//        //overriding library tooltip function
+       //overriding library tooltip function
         that.chart.tooltip(function (key, x, y, e, graph) {
           var total = countAll(data, x);
           return  '<h3>'+x+'</h3>'+
@@ -173,14 +146,11 @@ define([
             '<p><b> Total: </b>' + total.toFixed(1) + '</p>'
         });
 
-
-
         d3SVG
           .datum(data)
           .transition()
           .duration(500)
           .call(that.chart);
-
       }
       else {
 
@@ -188,7 +158,7 @@ define([
           that.chart = nv.models.multiBarChart();
 
           that.chart
-            .color(that.colors)
+            .color(that.colors);
 
           that.chart.yAxis
             //only touch values that are divisible by 1 to get rid of #s that look like "4.0"
@@ -223,17 +193,12 @@ define([
           d3SVG
             .datum(data)
             .call(that.chart);
-
         });
-
       }
-
     },
 
     drawLineGraph: function () {
-
       var data, d3SVG, options;
-
       var that = this;
 
       d3SVG = d3.select(this.ui.svg[0]);
@@ -246,16 +211,13 @@ define([
 
       //figure out : is this a transition or a re-draw
       if (that.chart) {
-
         d3SVG
           .datum(data)
           .transition()
           .duration(500)
           .call(that.chart);
-
       }
       else {
-
         options = {
           showControls: false
         };
@@ -277,7 +239,6 @@ define([
 
           d3SVG.datum(data)
             .call(that.chart);
-
         });
       }
     },
@@ -286,50 +247,38 @@ define([
     drawGraph: function () {
 
       var type = this.model.get("graphType");
-
       //find correct function
-
       if (type === "histogram") {
-
         this.drawHistogram();
-
       }
       else if (type === "line") {
-
         this.drawLineGraph();
-
       }
-
     },
 
     template: GraphTemplate,
-
     onRender: function () {
-
       this.drawGraph();
-
     }
-
   });
 
 
   var ContainerModel = Backbone.Model.extend({
 
     initialize : function(){
-
       this.on("change:numFound", this.updateMax);
       this.on("change:rows", this.updateCurrent);
-
     },
 
     updateMax : function() {
-      this.set("max", _.min([300, this.get("numFound")]));
+      var m = _.min([300, this.get("numFound")]);
+      if (m == 1)
+        m = 0;
+      this.set("max", m);
     },
 
     updateCurrent : function(){
-
       this.set("current", _.min([this.get("rows"), this.get("numFound")]));
-
     },
 
     defaults : function(){
@@ -346,45 +295,28 @@ define([
   var ContainerView = Marionette.Layout.extend({
 
     onRender : function(){
-
       this.renderMetadata();
-
     },
 
     //function to just re-render the metadata part at the bottom
-
     renderMetadata : function(){
-
       var data = {};
-
       data.max = this.model.get("max");
-
       data.current = this.model.get("current");
-
       this.$(".metrics-metadata").html(this.metadataTemplate(data))
-
     },
 
     template: MetricsContainer,
-
     metadataTemplate : MetricsMetadataTemplate,
-
     events : {
-
       "click .submit-rows" : "changeRows"
-
     },
 
     changeRows : function(e) {
-
       var num = parseInt(this.$(".metrics-rows").val());
-
       if (num){
-
         this.model.set("userVal", _.min([this.model.get("max"), num]));
-
       }
-
     },
 
     regions: {
@@ -396,9 +328,7 @@ define([
       indicesTable: "#indices .metrics-table",
       readsGraph: "#reads .metrics-graph",
       readsTable: "#reads .metrics-table"
-
     }
-
   });
 
   var MetricsWidget = BaseWidget.extend({
@@ -436,7 +366,6 @@ define([
     },
 
     processResponse: function (response) {
-
       if (response instanceof ApiResponse){
         var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode});
         var options = {
@@ -475,19 +404,13 @@ define([
         }
 
         this.createTableViews(response);
-
         this.createGraphViews(response);
-
         this.insertViews();
-
       }
-
     },
 
     createTableData : function(response){
-
       var data = {};
-
       var generalData = {refereed: response["refereed stats"], total: response["all stats"]};
       var readsData = {refereed: response["refereed reads"], total: response["all reads"]};
 
@@ -516,7 +439,6 @@ define([
         averageRefereedCitations: [generalData.total["Average refereed citations"], generalData.refereed["Average refereed citations"]],
         medianRefereedCitations: [generalData.total["Median refereed citations"], generalData.refereed["Median refereed citations"]],
         normalizedRefereedCitations: [generalData.total["Normalized refereed citations"], generalData.refereed["Normalized refereed citations"]]
-
       };
 
       data.indicesModelData = {
@@ -528,11 +450,8 @@ define([
         toriIndex: [generalData.total["tori index"], generalData.refereed["tori index"]],
         roqIndex: [generalData.total["roq index"], generalData.refereed["roq index"]],
         read10Index: [generalData.total["read10 index"], generalData.refereed["read10 index"]]
-
       };
-
       return data;
-
     },
 
 
@@ -542,8 +461,7 @@ define([
 
       this.childViews.papersTableView = new TableView({
         template: PaperTableTemplate,
-        model: new TableModel(tableData.paperModelData),
-
+        model: new TableModel(tableData.paperModelData)
       });
 
       this.childViews.readsTableView = new TableView({
@@ -564,8 +482,6 @@ define([
     },
 
     createGraphViews: function (response) {
-
-
       //papers graph
       var papersModel = new GraphModel();
       this.childViews.papersGraphView = new GraphView({model: papersModel });
@@ -588,7 +504,6 @@ define([
       this.childViews.readsGraphView = new GraphView({model: readsModel });
       this.childViews.readsGraphView.model.set("graphData", DataExtractor.plot_readshist({norm: false, readshist_data: response["reads histogram"]}));
       this.childViews.readsGraphView.model.set("normalizedGraphData", DataExtractor.plot_readshist({norm: true, readshist_data: response["reads histogram"]}));
-
     },
 
     insertViews: function () {
@@ -610,7 +525,7 @@ define([
       this.view.readsGraph.show(this.childViews.readsGraphView);
     },
 
-//so I can test these individually
+    //so I can test these individually
     components: {
 
       TableModel: TableModel,
@@ -618,24 +533,19 @@ define([
       GraphView: GraphView,
       GraphModel: GraphModel,
       ContainerView: ContainerView
-
     },
 
     defaultQueryArguments : {
-
       fl : "bibcode",
       rows : 200
     },
 
 
     activate : function(beehive){
-
       _.bindAll(this, "setCurrentQuery", "processResponse");
-
       this.pubsub = beehive.Services.get('PubSub');
       this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-
     },
 
     //fetch data
@@ -643,9 +553,7 @@ define([
       this.resetWidget();
       this.dispatchRequest(this.getCurrentQuery());
     }
-
   });
 
   return MetricsWidget;
-
 });
