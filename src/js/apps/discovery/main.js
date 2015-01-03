@@ -56,7 +56,7 @@ define(['config', 'module', 'analytics'], function(config, module, analytics) {
           }
 
         }).fail(function () {
-          app.redirect('/505.html');
+          app.redirect('/500.html');
         });
 
       }).fail(function() {
