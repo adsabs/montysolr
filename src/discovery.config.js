@@ -127,7 +127,9 @@ require.config({
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
     'nvd3' :  'libs/nvd3/nv.d3',
-    'google-analytics': "//www.google-analytics.com/analytics_debug",
+    // for development use
+    //'google-analytics': "//www.google-analytics.com/analytics_debug",
+    'google-analytics': "//www.google-analytics.com/analytics",
 
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
