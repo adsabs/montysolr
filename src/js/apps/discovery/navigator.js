@@ -80,10 +80,10 @@ define([
           var widget = app.getWidget('ExportWidget');
 
           if (storage.hasSelectedPapers()) {
-            widget.export(format, storage.getSelectedPapers());
+            widget.exportRecords(format, storage.getSelectedPapers());
           }
           else if(storage.hasCurrentQuery()) {
-            widget.exportByQuery(format, storage.getCurrentQuery());
+            widget.exportQuery(format, storage.getCurrentQuery());
           }
           else {
             var alerts = app.getController('AlertsController');
