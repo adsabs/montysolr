@@ -1,8 +1,16 @@
 <!-- Button trigger modal -->
+{{#if query}}
 <button type="button" id="exportQuery" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#exportModal">
-    Export query
+    Export Last Query
 </button>
+{{/if}}
+{{#if numIdentifiers}}
+<button type="button" id="exportIdentifiers" class="btn btn-primary btn-lg">
+    Export Selected Records
+</button>
+{{/if}}
 
+{{#if query}}
 <!-- Modal -->
 <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -29,8 +37,11 @@
         </div>
     </div>
 </div>
+{{/if}}
 
+{{#if msg}}<div>{{msg}}</div>{{/if}}
+<br/><br/>
 <!-- Exports -->
-{{#if exports}}
-<pre id="exportData">{{exports}}</pre>
+{{#if export}}
+<pre id="exportData" class="pre-scrollable">{{export}}</pre>
 {{/if}}

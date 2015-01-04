@@ -9,8 +9,8 @@ define([
     'marionette',
     'js/components/api_feedback',
     'jquery',
-    'jquery-ui'
-
+    'jquery-ui',
+    'module'
   ],
   function(
     BaseWidget,
@@ -21,14 +21,15 @@ define([
     Marionette,
     ApiFeedback,
     $,
-    $ui
+    $ui,
+    WidgetConfig
     ){
 
 
     var ExportModel = Backbone.Model.extend({
       defaults : {
         format: 'bibtex',
-        exports: undefined,
+        export: undefined,
         query: undefined,
         identifiers: [],
         msg: undefined,
@@ -54,18 +55,27 @@ define([
       },
 
       modelEvents: {
-        "change:exports": 'render',
-        "change:msg" : 'render'
+        "change:export": 'render',
+        "change:msg" : 'render',
+        'change:query': 'render'
       },
 
       render: function() {
+        if (this.model.has('query')) {
+          this.model.set('numIdentifiers', this.model.get('identifiers').length, {silent: true});
+        }
+        else {
+          this.model.set('numIdentifiers', 0, {silent: true});
+        }
+
         // this seems to be necessary (at least when the actions happen too fast ... like in unittests)
-        if (this.$el && this.$el.find('#exportModal.modal').length) {
+        if (this.$el && this.$el.find('#exportQuery').length) {
           var self = this;
           var args = arguments;
-          this.$el.find('#exportModal.modal').modal('hide').one('hidden.bs.modal', function() {
+          var render = function() {
             Marionette.ItemView.prototype.render.apply(self, args);
-          });
+          };
+          this.$el.find('#exportModal.modal').modal('hide').one('hidden.bs.modal', render);
           return;
         }
 
@@ -96,7 +106,7 @@ define([
     var ExportWidget = BaseWidget.extend({
 
       modelEvents: {
-        'change:userExportVal': 'exportRecords'
+        'change:userExportVal': 'exportByQuery'
       },
 
       initialize : function(options){
@@ -126,13 +136,14 @@ define([
         }
       },
 
-      exportRecords: function() {
-        var max = this.model.get('userExportVal') || this.model.get('maxExport');
-        var q = this.getCurrentQuery();
+      exportByQuery: function(format, apiQuery) {
+        var max = this.model.get('userExportVal') || this.model.get('maxExport') || self.maxExport;
+        var q = apiQuery || this.getCurrentQuery();
         q = q.clone();
         q.unlock();
         q.set('rows', max);
         q.set('fl', 'bibcode');
+        this.model.set('format', format);
         var self = this;
         this._executeApiRequest(q)
           .done(function(apiResponse) {
@@ -141,6 +152,14 @@ define([
           });
       },
 
+      /**
+       * This function prepares export, it either takes
+       * list of identifiers(bibcodes), or an apiQuery
+       * and discovers the bibcodes itself
+       *
+       * @param format
+       * @param data
+       */
       export: function(format, data) {
         var self = this;
 
@@ -155,17 +174,17 @@ define([
               }
               else {
                 toSet['numFound'] = numFound;
-                toSet['maxExport'] = Math.min(numFound, self.maxExport);
+                toSet['maxExport'] = Math.min(numFound, self.model.get('maxExport'));
               }
-              this.model.set(toSet);
+              self.model.set(toSet);
             })
           }
         }
         else { // set of identifiers
           this._getExport(data)
             .done(function(exports) {
-              if (exports && exports.has('data')) {
-                self.model.set('exports', exports.get('data'));
+              if (exports && exports.has('export')) {
+                self.model.set('export', exports.get('export'));
               }
               else {
                 console.error('The export did return some garbage, tfuj!', exports);
@@ -188,7 +207,7 @@ define([
         if (q) {
           if (this.model.get('query') == q.url() && this.model.has('numFound')) {
             defer.resolve(this.model.get('numFound'));
-            return;
+            return defer;
           }
 
           var req = this.composeRequest(q);
@@ -216,11 +235,20 @@ define([
         format = format || this.model.get('format');
         var self = this;
         var q = new ApiQuery();
-        q.set('identifiers', identifiers);
-        q.set('format', format);
+        q.set('bibcode', identifiers);
+        q.set('data_type', format.toUpperCase());
+        q.set('sort', 'NONE');
 
         var req = this.composeRequest(q);
         req.set('target', '/export');
+
+        if (WidgetConfig) {
+          var c = WidgetConfig.config();
+          if (c && c.url) {
+            req.set('options', {url: c.url, headers: {}});
+            req.set('target', c.target);
+          }
+        }
 
         var defer = $.Deferred();
 
@@ -233,6 +261,7 @@ define([
         else {
           throw new Error('Well, this is unexpected behaviour! Who wrote this software?');
         }
+        this.model.set('identifiers', identifiers);
         return defer;
       },
 
@@ -269,6 +298,7 @@ define([
         }
         $f.submit();
       }
+
 
     });
 

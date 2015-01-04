@@ -36,7 +36,7 @@ define([
         this.api.trigger('api-response', response);
       },
       fail: function( jqXHR, textStatus, errorThrown ) {
-        console.warn('API call failed:', JSON.stringify(this.request.url()), jqXHR);
+        console.warn('API call failed:', JSON.stringify(this.request.url()), jqXHR.status, errorThrown);
         if (this.api)
           this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
       },

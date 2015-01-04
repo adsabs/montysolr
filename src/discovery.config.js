@@ -10,6 +10,10 @@ require.config({
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
   config: {
+    'js/widgets/export/widget': {
+      url: 'http://adsabs-classic-exports-service.elasticbeanstalk.com',
+      target: '/'
+    },
     'js/apps/discovery/main': {
 
       core: {
@@ -45,8 +49,9 @@ require.config({
         Results: 'js/widgets/results/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',
-        Export  : 'js/widgets/export/widget',
+        ExportWidget  : 'js/widgets/export/widget',
         Sort : 'js/widgets/sort/widget',
+        ExportDropdown : 'js/wraps/export_dropdown',
         VisualizationDropdown : 'js/wraps/visualization_dropdown',
         AuthorNetwork : 'js/wraps/author_network',
         PaperNetwork : 'js/wraps/paper_network',

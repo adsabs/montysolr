@@ -44,7 +44,7 @@ define([
      *    }
      * @returns Deferred
      */
-    apiRequest: function(options) {
+    apiRequest: function(options, reqOptions) {
       var app = this.getApp();
       var api = app.getService('Api');
       options = options || {};
@@ -54,7 +54,7 @@ define([
         options.query = new ApiQuery(options.query);
 
       var r = new ApiRequest({'target': options.target || 'search', query: options.query});
-      return api.request(r);
+      return api.request(r, reqOptions);
     },
 
     /**
@@ -79,13 +79,13 @@ define([
      *
      * @param options
      */
-    jsonp: function(options) {
+    jsonp: function(options, jsonpParameter) {
       options.dataType = 'jsonp';
       options.beforeSend = function(promise, xhr) {
         var parts = xhr.url.split('&');
         _.each(parts, function(p) {
           if (p.startsWith('callback=')) {
-            xhr.url += '&json.wrf=' + p.replace('callback=', ''); // jQuery generates a random callback, we'll pass it to solr
+            xhr.url += '&' + (jsonpParameter || 'json.wrf') + '=' + p.replace('callback=', ''); // jQuery generates a random callback, we'll pass it to solr
           }
         })
       };

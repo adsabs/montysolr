@@ -18,9 +18,9 @@ define([
     beforeEach(function (done) {
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
-          if (apiRequest.get('target').indexOf('export') > -1) {
+          if (apiRequest.url().indexOf('data_type=') > -1) {
             return {msg: 'Exported 6 records',
-            data: '@INPROCEEDINGS{2015cshn.conv..198T,\n\
+            export: '@INPROCEEDINGS{2015cshn.conv..198T,\n\
               author = {{Takatsuka}, T. and {Hatsuda}, T. and {Masuda}, K.},\n\
               title = "{Massive hybrid stars with strangeness}",\n\
               adsurl = {http://adsabs.harvard.edu/abs/2015cshn.conv..198T},\n\
@@ -61,6 +61,14 @@ define([
       var $w = widget.render().$el;
       $('#test').append($w);
 
+      // export query shows only if there was a query/identifiers
+      expect($w.find('#exportQuery').length).to.be.eql(0);
+      expect($w.find('#exportIdentifiers').length).to.be.eql(0);
+
+      minsub.publish(minsub.FEEDBACK, minsub.createFeedback({code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
+        query: minsub.createQuery({'q': 'crazy lazy'})}));
+      expect($w.find('#exportQuery').length).to.be.eql(1);
+
       widget.model.set('numFound', 5000);
       widget.view.buildSlider(0, 300);
 
@@ -74,6 +82,22 @@ define([
           done();
         }, 500);
       }, 500);
+
+    });
+
+    it("can be called programatically", function() {
+      var widget = _getWidget();
+      var $w = widget.render().$el;
+      $('#test').append($w);
+
+      widget.export('bibtex', ['one', 'two']);
+      expect($w.find('#exportIdentifiers').length).to.be.eql(0);
+      widget.model.set('query', 'foo');
+
+      expect($w.find('#exportIdentifiers').length).to.be.eql(1);
+      expect($w.find('#exportQuery').length).to.be.eql(1);
+
+      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
 
     });
 

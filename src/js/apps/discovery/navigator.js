@@ -48,7 +48,7 @@ define([
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
-          'VisualizationDropdown', 'SearchWidget',
+          'ExportDropdown', 'VisualizationDropdown', 'SearchWidget',
           'Sort', 'AlertsWidget'
         ];
 
@@ -68,9 +68,31 @@ define([
           this.route = '#search/' + queryUpdater.clean(q).url();
           publishFeedback({code: ApiFeedback.CODES.UNMAKE_SPACE});
         });
-        this.set('export-page', function() {
+
+
+        this.set('export-bibtex', function() {
+          self.get('export-page').execute('bibtex')});
+        this.set('export-aastex', function() {self.get('export-page').execute('aastex')});
+        this.set('export-endnote', function() {self.get('export-page').execute('endnote')});
+        this.set('export-page', function(format) {
+          format = format || 'bibtex';
+          var storage = app.getObject('AppStorage');
+          var widget = app.getWidget('ExportWidget');
+
+          if (storage.hasSelectedPapers()) {
+            widget.export(format, storage.getSelectedPapers());
+          }
+          else if(storage.hasCurrentQuery()) {
+            widget.exportByQuery(format, storage.getCurrentQuery());
+          }
+          else {
+            var alerts = app.getController('AlertsController');
+            alerts.alert({msg: 'There are no records to export yet (please search or select some)'});
+            this.get('results-page')();
+            return;
+          }
           app.getObject('MasterPageManager').show('SearchPage',
-            ['Export'].concat(searchPageAlwaysVisible.slice(1)));
+            ['ExportWidget'].concat(searchPageAlwaysVisible.slice(1)));
         });
 
         this.set('show-author-network', function() {
