@@ -9,8 +9,8 @@ define([
     'marionette',
     'js/components/api_feedback',
     'jquery',
-    'jquery-ui'
-
+    'jquery-ui',
+    'module'
   ],
   function(
     BaseWidget,
@@ -21,14 +21,15 @@ define([
     Marionette,
     ApiFeedback,
     $,
-    $ui
+    $ui,
+    WidgetConfig
     ){
 
 
     var ExportModel = Backbone.Model.extend({
       defaults : {
         format: 'bibtex',
-        exports: undefined,
+        export: undefined,
         query: undefined,
         identifiers: [],
         msg: undefined,
@@ -50,56 +51,45 @@ define([
       template: WidgetTemplate,
 
       events: {
-        'click #exportModal button.apply': 'selectedExport'
+        'click #exportQuery': 'exportQuery',
+        'click #exportRecords': 'exportRecords',
+        'change input.userExportVal': 'userExportVal'
       },
 
       modelEvents: {
-        "change:exports": 'render',
-        "change:msg" : 'render'
+        "change:export": 'render',
+        "change:msg" : 'render',
+        'change:query': 'render',
+        'change:numIdentifiers': 'render'
       },
 
-      render: function() {
-        // this seems to be necessary (at least when the actions happen too fast ... like in unittests)
-        if (this.$el && this.$el.find('#exportModal.modal').length) {
-          var self = this;
-          var args = arguments;
-          this.$el.find('#exportModal.modal').modal('hide').one('hidden.bs.modal', function() {
-            Marionette.ItemView.prototype.render.apply(self, args);
-          });
-          return;
-        }
-
-        Marionette.ItemView.prototype.render.apply(this, arguments);
+      userExportVal: function(ev) {
+        this.model.set('userExportVal', $(ev.target).val());
       },
 
-      buildSlider: function (min, max) {
-        var that = this;
-        this.$(".slider").slider({
-          range: 'min',
-          min: min,
-          max: max,
-          value: Math.min(20, max),
-          slide: function( event, ui ) {
-            that.$(".show-slider-data-second").val(ui.value);
-          }
-        });
-        this.$(".show-slider-data-first").val(min);
-        this.$(".show-slider-data-second").val(Math.min(20, max));
+      exportRecords: function(ev) {
+        if (ev)
+          ev.preventDefault()
+        this.trigger('export-records');
       },
 
-      selectedExport: function(ev) {
-        this.model.set('userExportVal', this.$(".show-slider-data-second").val());
+      exportQuery: function(ev) {
+        if (ev)
+          ev.preventDefault();
+        this.trigger('export-query');
       }
+
     });
 
 
     var ExportWidget = BaseWidget.extend({
 
-      modelEvents: {
-        'change:userExportVal': 'exportRecords'
+      viewEvents: {
+        'export-records': 'exportRecords',
+        'export-query': 'exportQuery'
       },
 
-      initialize : function(options){
+      initialize: function(options){
         this.model = new ExportModel();
         this.view = new ExportView({model : this.model});
         this.defaultMax = options.defaultMax || 300;
@@ -120,58 +110,91 @@ define([
         switch (feedback.code) {
           case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
             this.setCurrentQuery(feedback.query);
-            this.model.set('query', feedback.query.url());
+            this.model.set('query', feedback.query.clone());
             this.model.set('numFound', feedback.numFound);
             break;
         }
       },
 
-      exportRecords: function() {
-        var max = this.model.get('userExportVal') || this.model.get('maxExport');
-        var q = this.getCurrentQuery();
-        q = q.clone();
-        q.unlock();
-        q.set('rows', max);
-        q.set('fl', 'bibcode');
+      /**
+       * Export data directly - use the query, if supplied - if we already
+       * know max 'numFound', then we'll use that. If not, we'll first find
+       * out how many recs there are
+       *
+       * @param format
+       * @param apiQuery
+       */
+      exportQuery: function(format, apiQuery) {
+
         var self = this;
-        this._executeApiRequest(q)
-          .done(function(apiResponse) {
-            var ids = _.map(apiResponse.get('response.docs'), function(d) {return d.bibcode});
-            self.export(self.model.get('format') || 'bibtex', ids);
-          });
+        var q = apiQuery || this.model.get('query') || this.getCurrentQuery();
+        var d = this._getQueryInfo(q);
+
+        this.model.set('query', q);
+        this.model.set('format', format);
+
+        // first find out how many total docs there are in
+        d.done(function(numFound) {
+          var toSet = {};
+          if (numFound == -1) {
+            toSet['msg'] = 'Unknown number of results'
+          }
+          else {
+            toSet['numFound'] = numFound;
+            toSet['maxExport'] = Math.min(numFound, self.model.get('maxExport'));
+            self.model.set('msg', 'Please wait, fetching data. The query returns ' + numFound + ' results (maximum export is: ' + toSet.maxExport + ')');
+          }
+          toSet['userExportVal'] = Math.min((self.model.get('userExportVal') || self.model.get('maxExport')) || self.model.get('maxExport'));
+          self.model.set(toSet);
+
+          q = q.clone();
+          q.unlock();
+          q.set('rows', toSet.userExportVal);
+          q.set('fl', 'bibcode');
+          self.model.set('format', format);
+
+          // collect bibcodes of the query
+          self._executeApiRequest(q)
+            .done(function(apiResponse) {
+              // export documents by their ids
+              var ids = _.map(apiResponse.get('response.docs'), function(d) {return d.bibcode});
+
+              self._getExports(self.model.get('format') || 'bibtex', ids)
+                .done(function(exports) {
+                  self.model.set('msg', exports.msg);
+                })
+            });
+        });
       },
 
-      export: function(format, data) {
-        var self = this;
+      exportRecords: function(format, recs) {
+        recs = recs || this.model.get('identifiers');
+        if (!_.isArray(recs)) throw new Error('Identifiers must be an array');
+        if (recs.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
+        this.model.set('numIdentifiers', recs.lengt);
+        this.model.set('format', format);
+        this.model.set('identifiers');
+        this._getExports(format, recs);
+      },
 
-        if (data instanceof ApiQuery || !data) {
-          var q = data || this.getCurrentQuery();
-          if (q) {
-            var d = this.getQueryInfo(q);
-            d.done(function(numFound) {
-              var toSet = {};
-              if (numFound == -1) {
-                toSet['msg'] = 'Unknown number of results'
-              }
-              else {
-                toSet['numFound'] = numFound;
-                toSet['maxExport'] = Math.min(numFound, self.maxExport);
-              }
-              this.model.set(toSet);
-            })
-          }
-        }
-        else { // set of identifiers
-          this._getExport(data)
-            .done(function(exports) {
-              if (exports && exports.has('data')) {
-                self.model.set('exports', exports.get('data'));
-              }
-              else {
-                console.error('The export did return some garbage, tfuj!', exports);
-              }
-            });
-        }
+      /**
+       * Fetches data from the export api and saves into the model
+       *
+       * @param format
+       * @param data
+       */
+      _getExports: function(format, data) {
+        var self = this;
+        var promise = this._getData(data)
+          .done(function(exports) {
+            if (exports && exports.has('export')) {
+              self.model.set('export', exports.get('export'));
+            }
+            else {
+              console.error('The export did return some garbage, tfuj!', exports);
+            }
+          });
+        return promise;
       },
 
 
@@ -181,20 +204,23 @@ define([
        * @param apiQuery
        * @returns {*}
        */
-      getQueryInfo : function(apiQuery){
+      _getQueryInfo : function(apiQuery){
         var q = apiQuery || this.getCurrentQuery();
         var defer = $.Deferred();
+        var self = this;
 
         if (q) {
-          if (this.model.get('query') == q.url() && this.model.has('numFound')) {
-            defer.resolve(this.model.get('numFound'));
-            return;
+          if (self._lastQueryId == q.url() && self._lastQueryNumFound) {
+            defer.resolve(self._lastQueryNumFound);
+            return defer;
           }
-
+          self._lastQueryNumFound = null;
           var req = this.composeRequest(q);
           if (req) {
             this.pubsub.subscribeOnce(this.pubsub.DELIVERING_RESPONSE, _.bind(function(apiResponse) {
-              defer.resolve(apiResponse.get('response.numFound'));
+              self._lastQueryId = q.url();
+              self._lastQueryNumFound = apiResponse.get('response.numFound');
+              defer.resolve(self._lastQueryNumFound);
             }), this);
             this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
           }
@@ -208,19 +234,40 @@ define([
         return defer;
       },
 
-      _getExport: function(identifiers, format){
+      /**
+       * From the remote Api, retrieve data
+       *
+       * @param identifiers
+       * @param format
+       * @returns {*}
+       * @private
+       */
+      _getData: function(identifiers, format){
 
         if (!_.isArray(identifiers)) throw new Error('Identifiers must be an array');
         if (identifiers.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
 
-        format = format || this.model.get('format');
+        format = format || this.model.get('format') || 'bibtex';
         var self = this;
         var q = new ApiQuery();
-        q.set('identifiers', identifiers);
-        q.set('format', format);
+        q.set('bibcode', identifiers);
+        q.set('data_type', format.toUpperCase());
+        q.set('sort', 'NONE');
 
         var req = this.composeRequest(q);
         req.set('target', '/export');
+        var reqOptions = {method: 'POST'};
+
+        // hack: we are quering different url (to go away once our api can handle it)
+        if (WidgetConfig) {
+          var c = WidgetConfig.config();
+          if (c && c.url) {
+            reqOptions.url = c.url;
+            reqOptions.headers = c.headers;
+            req.set('target', c.target);
+          }
+        }
+        req.set('options', reqOptions);
 
         var defer = $.Deferred();
 
@@ -233,6 +280,7 @@ define([
         else {
           throw new Error('Well, this is unexpected behaviour! Who wrote this software?');
         }
+        this.model.set('identifiers', identifiers);
         return defer;
       },
 
@@ -254,24 +302,12 @@ define([
         return defer;
       },
 
-
-      post : function (path, params, method) {
-        method = method || "post"; // Set method to post by default if not specified.
-
-        var $f = $("<form/>", {method : method, action : path, "target": "_blank"});
-
-        if ($.isArray(params)){
-          _.each(params, function(l,i){
-            l = _.pairs(l)[0];
-            var hiddenField = $("<input>", {type : "hidden", "name": l[0], value: l[1]});
-            $f.append(hiddenField);
-          })
-        }
-        $f.submit();
+      reset: function() {
+        this.model.set({
+          export: null,
+          query: this.model.get('query'),
+          numFound: this.model.get('numFound')});
       }
-
     });
-
-
     return ExportWidget;
   });

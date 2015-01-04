@@ -18,9 +18,9 @@ define([
     beforeEach(function (done) {
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
-          if (apiRequest.get('target').indexOf('export') > -1) {
+          if (apiRequest.url().indexOf('data_type=') > -1) {
             return {msg: 'Exported 6 records',
-            data: '@INPROCEEDINGS{2015cshn.conv..198T,\n\
+            export: '@INPROCEEDINGS{2015cshn.conv..198T,\n\
               author = {{Takatsuka}, T. and {Hatsuda}, T. and {Masuda}, K.},\n\
               title = "{Massive hybrid stars with strangeness}",\n\
               adsurl = {http://adsabs.harvard.edu/abs/2015cshn.conv..198T},\n\
@@ -47,7 +47,6 @@ define([
 
     var _getWidget = function() {
       var widget = new ExportWidget();
-      sinon.spy(widget, 'export');
       widget.activate(minsub.beehive.getHardenedInstance());
       return widget;
     };
@@ -56,25 +55,58 @@ define([
       expect(new ExportWidget()).to.be.instanceof(BaseWidget);
     });
 
-    it("displays exported documents in pre-formatted area", function(done) {
+    it("shows controls when necessary", function(done) {
       var widget = _getWidget();
       var $w = widget.render().$el;
       $('#test').append($w);
 
-      widget.model.set('numFound', 5000);
-      widget.view.buildSlider(0, 300);
+      // export query shows only if there was a query/identifiers
+      expect($w.find('#exportQuery').length).to.be.eql(0);
+      expect($w.find('#exportRecords').length).to.be.eql(0);
 
+      minsub.publish(minsub.FEEDBACK, minsub.createFeedback({code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
+        query: minsub.createQuery({'q': 'crazy lazy'})}));
+      expect($w.find('#exportQuery').length).to.be.eql(1);
+
+      // should show button to export identifiers
+      widget.model.set('numIdentifiers', 200);
+      widget.model.set('identifiers', ['one', 'two']);
+      expect($w.find('#exportRecords').length).to.be.eql(1);
+
+      // clicking produces actions
       $w.find('#exportQuery').click();
-      setTimeout(function() {
-        expect(widget.export.called).to.be.equal(false);
-        $w.find('#exportModal button.apply').click();
-        setTimeout(function() {
-          expect(widget.export.called).to.be.equal(true);
-          expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
-          done();
-        }, 500);
-      }, 500);
+      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
 
+      widget.reset();
+      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(false);
+
+      $w.find('#exportRecords').click();
+      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
+
+      done();
+
+    });
+
+    it("can be called programatically", function() {
+      var widget = _getWidget();
+      var $w = widget.render().$el;
+      $('#test').append($w);
+
+      widget.exportRecords('bibtex', ['one', 'two']);
+      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
+      expect($w.find('#exportQuery').length).to.be.eql(0);
+      expect($w.find('#exportRecords').length).to.be.eql(0);
+
+      widget.reset();
+      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(false);
+
+      widget.exportQuery('bibtex', minsub.createQuery({'q': 'foo:bar'}));
+      expect(widget.model.get('numFound')).to.be.eql(841359);
+      expect(widget.model.get('maxExport')).to.be.eql(300);
+
+      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
+      expect($w.find('#exportQuery').length).to.be.eql(1);
+      expect($w.find('#exportRecords').length).to.be.eql(0);
     });
 
     it.skip("catches ctrl-a to select only the contents of the text-area", function() {

@@ -28,6 +28,8 @@ define([
         [200, { "Content-Type": "application/json" }, validResponse.substring(2)]);
       this.server.respondWith(/\/api\/1\/error.*/,
         [500, { "Content-Type": "application/json" }, validResponse.substring(2)]);
+      this.server.respondWith(/http:\/\/foo.*/,
+        [200, { "Content-Type": "application/json" }, validResponse]);
       //sinon.stub($, 'ajax').yieldsTo('done', apiResponseOK);
       done();
     });
@@ -62,7 +64,6 @@ define([
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
 
       var q = new ApiQuery({q: 'foo'});
-
       api.request(new ApiRequest({target: 'search', query: q}));
       this.server.respond();
 
@@ -78,6 +79,22 @@ define([
       expect(this.server.requests[1].requestHeaders["Content-Type"]).to.eql('application/json;charset=utf-8');
       expect(this.server.requests[1].requestBody).to.eql("{\"q\":[\"foo\"]}");
       done();
+
+    });
+
+    it("should allow to override anything via options", function() {
+      var api = new Api({url: '/nonexisting/1'});
+      var q = new ApiQuery({q: 'foo'});
+      var spy = sinon.spy();
+      api.request(new ApiRequest({target: 'search', query: q}), {url: 'http://foo.dot.com'})
+        .done(spy);
+      this.server.respond();
+      expect(spy.callCount).to.eql(1);
+
+      api.request(new ApiRequest({target: 'search', query: q, options:{url: 'http://foo.dot.com'}}))
+        .done(spy);
+      this.server.respond();
+      expect(spy.callCount).to.eql(2);
 
     });
 

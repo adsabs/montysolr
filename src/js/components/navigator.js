@@ -93,7 +93,8 @@ define(['underscore',
       },
 
       handleTransitionError: function(transition, error, args) {
-        console.error("Error while executing transition", transition, error, args);
+        console.error("Error while executing transition", transition, args);
+        console.error(error.stack);
         this.pubsub.publish(this.pubSubKey, this.pubsub.CITY_BURNING, 'navigation-error', arguments);
       },
 
