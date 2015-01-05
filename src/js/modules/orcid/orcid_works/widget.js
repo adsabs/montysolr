@@ -19,6 +19,7 @@ define([
 
         var item = {
           publicationData: undefined,
+          bibcode: undefined,
           workExternalIdentifiers: [],
           workTitle: undefined,
           workType: undefined,
@@ -38,6 +39,9 @@ define([
     });
 
     var OrcidWorkView = Marionette.ItemView.extend({
+
+      tagName: "li",
+      className: "col-sm-12 s-display-block",
       template: OrcidWorkTemplate,
 
       events: {
@@ -312,6 +316,7 @@ define([
           case OrcidApiConstants.Events.LoginRequested:
             this.showLoading();
             break;
+          case OrcidApiConstants.Events.LoginCancelled:
           case OrcidApiConstants.Events.SignOut:
             this.hideWorks();
             break;
@@ -404,7 +409,17 @@ define([
 
           item.isFromAds = that.orcidModelNotifier.isOrcidItemAdsItem(item);
 
+          if (item.isFromAds){
+            var bibcodes = item.workExternalIdentifiers.filter(function(e){
+              return e.type == 'bibcode';
+            });
+            if (bibcodes.length > 0){
+              item.bibcode = bibcodes[0].id;
+            }
+          }
         });
+
+        works = works.sort(function(a, b){return a.isFromAds - b.isFromAds;}).reverse();
 
         this.view.collection = new OrcidWorksCollection(works);
 
