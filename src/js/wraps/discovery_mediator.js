@@ -75,6 +75,9 @@ define([
         // b) modifying phrases and/or operators
 
         var newQuery = q.clone();
+
+        analytics('send', 'event', 'display', 'tooltip', 'query-helper');
+
         var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
         this.getAlerter().alert(new ApiFeedback({
             type: Alerts.TYPE.ALERT,
@@ -93,7 +96,7 @@ define([
             }
             else {
               search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-              analytics('send', 'event', 'interaction', 'click', 'query-helper-failed-get-q');
+              analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
             }
           }
         });
@@ -204,6 +207,8 @@ define([
               }
             }
 
+            analytics('send', 'event', 'display', 'tooltip', 'query-assistant');
+
             alerts.alert(new ApiFeedback({
               msg: (msg || 'There is something wrong with the query,') + ' <a id="query-assistant">please use this tool to fix it.</a>',
               events: {
@@ -218,11 +223,11 @@ define([
                 var q = apiQuery.get('q').join(' ');
                 if (q) {
                   search.openQueryAssistant(q);
-                  analytics('send', 'event', 'interaction', 'click', 'query-helper');
+                  analytics('send', 'event', 'interaction', 'click', 'query-assistant');
                 }
                 else {
                   search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                  analytics('send', 'event', 'interaction', 'click', 'query-helper-failed-get-q');
+                  analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
                 }
               }
             });
@@ -263,6 +268,9 @@ define([
     };
 
     handlers[ApiFeedback.CODES.API_REQUEST_ERROR] = function(feedback) {
+
+      analytics('send', 'event', 'error', 'api-request', feedback.errorThrown);
+
       var req = feedback.request;
       var q = req.get('query');
       var target = req.get('target');

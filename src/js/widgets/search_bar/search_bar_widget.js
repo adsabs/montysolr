@@ -6,7 +6,8 @@ define([
     'hbs!./templates/search_form_template',
     'js/components/query_builder/plugin',
     'js/components/api_feedback',
-    'bootstrap' // if bootstrap is missing, jQuery events get propagated
+    'bootstrap', // if bootstrap is missing, jQuery events get propagated
+    'analytics'
   ],
   function (
     Marionette,
@@ -16,7 +17,8 @@ define([
     SearchFormTemplate,
     QueryBuilderPlugin,
     ApiFeedback,
-    bootstrap
+    bootstrap,
+    analytics
     ) {
 
     // XXX:rca - to be removed
@@ -101,6 +103,9 @@ define([
       },
 
       onShowForm: function() {
+
+        analytics('send', 'event', 'interaction', 'click', 'query-assistant');
+
         var formVal = this.getFormVal();
         if (formVal.trim().length > 0) {
           this.queryBuilder.updateQueryBuilder(formVal);
