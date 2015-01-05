@@ -81,7 +81,7 @@ define([
         var params = apiResponse.get("responseHeader.params");
         var start = params.start || 0;
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
-        var highlights = apiResponse.get("highlighting");
+        var highlights = apiResponse.has("highlighting") ? apiResponse.get('highlighting') : {};
         var self = this;
 
         //any preprocessing before adding the resultsIndex is done here

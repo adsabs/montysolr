@@ -158,6 +158,8 @@ define([
         })
         .fail(function () {
           console.error("Generic error - we were not successul in loading all modules for config", config);
+          if (arguments.length)
+            console.error(arguments);
           //throw new Error("We are screwed!"); do not throw errors because then .fail() callbacks cannot be used
         });
         //.done(function() {
@@ -320,9 +322,9 @@ define([
     _setTimeout: function(deferred) {
       setTimeout(function () {
         if (deferred.state() != 'resolved') {
-          deferred.reject();
+          deferred.reject('Timeout, application is loading too long');
         }
-      }, this.timeout || 5000);
+      }, this.timeout || 30000);
       return deferred;
     },
 

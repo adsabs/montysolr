@@ -5,7 +5,8 @@ define([
     'js/components/feedback_mediator',
     'js/components/api_feedback',
     'js/widgets/widget_states',
-    'js/components/alerts'
+    'js/components/alerts',
+    'js/components/api_response'
   ],
 
   function (
@@ -14,7 +15,8 @@ define([
     FeedbackMediator,
     ApiFeedback,
     WidgetStates,
-    Alerts
+    Alerts,
+    ApiResponse
     ) {
 
 
@@ -73,7 +75,7 @@ define([
         var newQuery = q.clone();
         var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
         this.getAlerter().alert(new ApiFeedback({
-            type: Alerts.TYPE.DANGER,
+            type: Alerts.TYPE.ALERT,
             msg: msg,
             events: {
               'click a#query-assistant': 'query-assistant'
@@ -133,9 +135,19 @@ define([
       var app = this.getApp();
       var alerts = this.getAlerter();
       var self = this;
+      var resolved = false;
 
+      var errorDetails = {
+        target: '',
+        msg: xhr.statusText
+      };
 
       if (xhr && apiRequest) {
+
+        var target = apiRequest.get('target');
+        errorDetails.target = target;
+        errorDetails.query = apiRequest.get('query').toJSON();
+
         switch(xhr.status) {
           case 401: // unauthorized
           case 404: // for some unknow reason (yet) - 401 comes marked as 404
@@ -157,7 +169,7 @@ define([
                })
                .fail(function() {
                  alerts.alert(new ApiFeedback({
-                   code: ApiFeedback.CODES.ALERT,
+                   code: ApiFeedback.CODES.DANGER,
                    msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...please retry later.',
                    modal: true
                  }));
@@ -167,27 +179,72 @@ define([
         }
 
 
-        var target = apiRequest.get('target');
+        if (target.indexOf('search') > -1) {
+          if (xhr.status == 400) { // wrong query syntax
+            var apiQuery = apiRequest.get('query');
 
-        if (target.indexOf('/search') > -1 && xhr.status == 400) { // wrong query
-          var apiQuery = apiRequest.getApiQuery();
+            var msg = '';
+            if (xhr.responseJSON && xhr.responseJSON.error && xhr.responseJSON.error.msg) {
+              msg = xhr.responseJSON.error.msg;
+              if (msg.indexOf('INVALID_SYNTAX') > -1) {
+                // what will remain: Syntax Error, cannot parse doi:a* keyword_schema:arXiv:
+                msg = msg.replace('org.apache.solr.search.SyntaxError: INVALID_SYNTAX_CANNOT_PARSE:', '');
+                msg = msg.replace('The parser reported a syntax error, antlrqueryparser hates errors!', '');
+                msg = msg.replace('Syntax Error, cannot parse', 'Syntax Error, cannot parse<b>') + '</b>';
+              }
+            }
 
-          alerts.alert(new ApiFeedback({
-            msg: 'Your query seems to be syntactically challenged, <span id="query-assistant">please use this tool to fix it.</span>',
-            events: {
-              'click a#query-assistant': 'query-assistant'
+            alerts.alert(new ApiFeedback({
+              msg: (msg || 'There is something wrong with the query,') + ' <a id="query-assistant">please use this tool to fix it.</a>',
+              events: {
+                'click a#query-assistant': 'query-assistant'
+              }
+            }))
+            .done(function (name) {
+              if (name == 'query-assistant') {
+                var app = self.getApp();
+                var search = app.getWidget('SearchWidget');
+                var q = apiQuery.get('q').join(' ');
+                if (q) {
+                  search.openQueryAssistant(q);
+                }
+                else {
+                  search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                }
+              }
+            });
+            return; // stop here
+          }
+          else if (xhr.status == 500) { // server errors; some are recoverable
+            if (xhr.responseJSON) {
+              var r = xhr.responseJSON;
+              if (r.error && r.error.msg) {
+                if (r.error.msg.indexOf('maxClauseCount') > -1) { // highlights failed, we can deliver response
+                  var response = new ApiResponse(r);
+                  var cycle = feedback.cycle;
+                  var key = _.keys(cycle.inprogress)[0];
+                  var req = cycle.inprogress[key];
+                  response.setApiQuery(req.request.get('query'));
+                  cycle.done[key] = cycle.inprogress[key];
+                  delete cycle.inprogress[key];
+                  self.pubsub.publish(self.pubSubKey, self.pubsub.DELIVERING_RESPONSE+key, response);
+                  cycle.running = false;
+                  app.getController('QueryMediator').startExecutingQueries();
+                  return; // we are done!
+                }
+              }
             }
-          }))
-          .done(function(name) {
-            if (name == 'query-assistant') {
-              var app = self.getApp();
-              var search = app.getWidget('SearchWidget');
-              var q = apiQuery.query.get('q').join(' ');
-              if (q)
-                search.openQueryAssistant(q);
-            }
-          });
+          }
         }
+      }
+
+      if (!resolved) {
+
+        alerts.alert(new ApiFeedback({
+          code: ApiFeedback.CODES.ALERT,
+          msg: 'The ADS Api is having a bad day, I\'m sorry - I can\'t get data for this request <pre>' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
+          modal: true
+        }));
       }
 
     };
