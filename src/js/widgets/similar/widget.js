@@ -51,6 +51,9 @@ define([
 
       getPaginationInfo: function(apiResponse, docs) {
         var q = apiResponse.getApiQuery();
+        if (!apiResponse.has('moreLikeThis[0].numFound'))
+          return;
+
         var toSet = {
           "numFound":  apiResponse.get("moreLikeThis[0].numFound"),
           "currentQuery":q

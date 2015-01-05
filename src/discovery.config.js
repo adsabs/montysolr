@@ -75,9 +75,9 @@ require.config({
         ShowCitations : 'js/wraps/citations',
         ShowCoreads : 'js/wraps/coreads',
         ShowTableOfContents : 'js/wraps/table_of_contents',
-        ShowSimilar : 'js/widgets/similar/widget',
+        //ShowSimilar : 'js/widgets/similar/widget',
         ShowResources : 'js/widgets/resources/widget',
-        ShowRecommender : 'js/widgets/recommender/widget',
+        //ShowRecommender : 'js/widgets/recommender/widget',
         ShowPaperMetrics: 'js/wraps/paper_metrics',
 
         TOCWidget: 'js/page_managers/toc_widget'

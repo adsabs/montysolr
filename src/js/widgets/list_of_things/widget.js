@@ -212,6 +212,7 @@ define([
 
 
       processDocs: function(apiResponse, docs, paginationInfo) {
+        if (!apiResponse.has('response')) return [];
         var params = apiResponse.get("response");
         var start = params.start || (paginationInfo.start || 0);
         docs = PaginationMixin.addPaginationToDocs(docs, start);

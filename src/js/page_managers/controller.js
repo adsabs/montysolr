@@ -130,7 +130,8 @@ define([
               }
             }
             else {
-              console.error("Cannot show widget: " + widgetName + "(because, frankly... there is no such widget there!)");
+              if (self.debug)
+                console.error("Cannot show widget: " + widgetName + "(because, frankly... there is no such widget there!)");
             }
           });
         }

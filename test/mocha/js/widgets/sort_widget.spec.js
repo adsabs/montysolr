@@ -65,7 +65,7 @@ define([
 
         expect($("#test").find("#sort-button").text().trim()).to.eql("Current Sort: Relevancy");
 
-        expect($("#test").find("input[name=sort-options]:checked").val()).to.eql("score");
+        expect($("#test").find("input[name=sort-options]:checked").val()).to.eql("classic_factor");
 
         expect($("#test").find("input[name=order-options]:checked").val()).to.eql("desc");
 
@@ -135,7 +135,7 @@ define([
         var pubSubStub = sinon.stub(w.pubsub, "publish");
 
         // simulate the click (works in phantomjs)
-        $("input[value=score]").attr('checked', false);
+        $("input[value=classic_factor]").attr('checked', false);
         $("input[value=date]").attr('checked', true);
         $("input[value=desc]").attr('checked', false);
         $("input[value=asc]").attr('checked', true);
