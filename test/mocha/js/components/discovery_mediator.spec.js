@@ -81,6 +81,24 @@ define([
       };
     };
 
+    it("on SEARCH_CYCLE_STARTED", function(done) {
+      var x = _getM();
+      var m = x.m;
+      x.app.getObject = sinon.stub().returns({setCurrentQuery: sinon.spy()});
+      x.app.getService = sinon.stub().returns({navigate: sinon.spy()});
+      x.dm.getAlerter = sinon.stub().returns({alert: sinon.spy()});
+
+      // it resets itself on new search
+      minsub.publish(minsub.FEEDBACK, minsub.createFeedback({
+        code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
+        cycle: {}
+      }));
+      expect(x.dm.getAlerter.called).to.be.true;
+
+      done();
+    });
+
+
     it("catches errors (wrong token)", function(done) {
       var x = _getM();
       minsub.subscribeOnce(minsub.INVITING_REQUEST, function() {

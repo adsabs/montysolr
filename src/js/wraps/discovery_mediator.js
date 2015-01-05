@@ -63,7 +63,7 @@ define([
 
       app.getService('Navigator').navigate('results-page');
 
-      if (feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
+      if (feedback.request && feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
 
         //TODO: in the future, we can look inside the query and decide whether they would like to expand it by
@@ -216,7 +216,7 @@ define([
           var widgets = this.getWidgets(ids);
 
           // activate loading state
-          if (widgets) {
+          if (widgets && widgets.length > 0) {
             this.changeWidgetsState(widgets, {state: WidgetStates.WAITING});
           }
 

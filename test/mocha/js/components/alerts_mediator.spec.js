@@ -69,11 +69,6 @@ define([
       expect(m.onAlert.called).to.be.true;
       expect(m.alert.called).to.be.true;
 
-      // it resets itself on new search
-      expect(x.widget.model.get('msg')).to.not.eql(null);
-      minsub.publish(minsub.FEEDBACK, new ApiFeedback({code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED}));
-      expect(x.widget.model.get('msg')).to.eql(null);
-
       done();
     });
 
