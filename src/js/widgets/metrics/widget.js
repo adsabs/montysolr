@@ -537,7 +537,7 @@ define([
 
     defaultQueryArguments : {
       fl : "bibcode",
-      rows : 200
+      rows : 100
     },
 
 
