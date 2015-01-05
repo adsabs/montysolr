@@ -20,7 +20,7 @@ define([
 
         this.listenTo(this.view, 'composite:collection:rendered',
           function() {
-            if (that.orcidModelNotifier.model.get('actionsVisible'))
+            if (that.orcidModelNotifier != undefined && that.orcidModelNotifier.model.get('actionsVisible'))
               that.view.children.call('showOrcidActions', that.orcidModelNotifier.isWorkInCollection);
           });
 
