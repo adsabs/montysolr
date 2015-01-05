@@ -53,7 +53,8 @@ define([
       events: {
         'click #exportQuery': 'exportQuery',
         'click #exportRecords': 'exportRecords',
-        'change input.userExportVal': 'userExportVal'
+        'change input.userExportVal': 'userExportVal',
+        "click .close-widget": "signalCloseWidget"
       },
 
       modelEvents: {
@@ -77,6 +78,10 @@ define([
         if (ev)
           ev.preventDefault();
         this.trigger('export-query');
+      },
+
+      signalCloseWidget: function(ev) {
+        this.trigger('close-widget');
       }
 
     });
@@ -86,7 +91,8 @@ define([
 
       viewEvents: {
         'export-records': 'exportRecords',
-        'export-query': 'exportQuery'
+        'export-query': 'exportQuery',
+        'close-widget': 'closeWidget'
       },
 
       initialize: function(options){
@@ -307,6 +313,10 @@ define([
           export: null,
           query: this.model.get('query'),
           numFound: this.model.get('numFound')});
+      },
+
+      closeWidget: function () {
+        this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
       }
     });
     return ExportWidget;

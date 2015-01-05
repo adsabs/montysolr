@@ -103,7 +103,7 @@ define([
       var ids = _.keys(feedback.cycle.waiting);
 
       // remove alerts from previous searches
-      this.alert(new ApiFeedback({
+      this.getAlerter().alert(new ApiFeedback({
         type: Alerts.TYPE.INFO,
         msg: null}));
 

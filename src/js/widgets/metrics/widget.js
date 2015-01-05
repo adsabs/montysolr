@@ -309,7 +309,8 @@ define([
     template: MetricsContainer,
     metadataTemplate : MetricsMetadataTemplate,
     events : {
-      "click .submit-rows" : "changeRows"
+      "click .submit-rows" : "changeRows",
+      "click .close-widget": "signalCloseWidget"
     },
 
     changeRows : function(e) {
@@ -317,6 +318,10 @@ define([
       if (num){
         this.model.set("userVal", _.min([this.model.get("max"), num]));
       }
+    },
+
+    signalCloseWidget: function () {
+      this.trigger('close-widget');
     },
 
     regions: {
@@ -333,12 +338,22 @@ define([
 
   var MetricsWidget = BaseWidget.extend({
 
+    viewEvents: {
+      'close-widget': 'closeWidget'
+    },
+
     initialize: function (options) {
       options = options || {};
       this.containerModel = new ContainerModel();
       this.listenTo(this.containerModel, "change:userVal", this.requestDifferentRows);
       this.view = new ContainerView({model : this.containerModel});
       this.childViews = {};
+      Marionette.bindEntityEvents(this, this.view, Marionette.getOption(this, "viewEvents"));
+    },
+
+    closeWidget: function () {
+      this.resetWidget();
+      this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
     },
 
     resetWidget: function () {
