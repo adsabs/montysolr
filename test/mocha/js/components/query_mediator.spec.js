@@ -428,7 +428,7 @@ define([
         this.server.respond();
 
         setTimeout(function() {
-          expect(pubSpy.firstCall.args[1].code).to.be.eql(ApiFeedback.CODES.INTERNAL_SERVER_ERROR);
+          expect(pubSpy.firstCall.args[1].error.status).to.be.eql(ApiFeedback.CODES.INTERNAL_SERVER_ERROR);
           expect(pubSpy.lastCall.args[1].code).to.be.eql(ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START);
 
           expect(qm._executeRequest.callCount).to.be.eql(1);

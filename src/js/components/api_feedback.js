@@ -38,7 +38,8 @@ define([
       SEARCH_CYCLE_FINISHED: -6,
       QUERY_ASSISTANT: -7,
       ALERT: -8,
-      CANNOT_ROUTE: -9
+      CANNOT_ROUTE: -9,
+      API_REQUEST_ERROR: -10
     };
 
     var _codes = {};

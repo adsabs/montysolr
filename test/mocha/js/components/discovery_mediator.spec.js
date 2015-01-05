@@ -110,6 +110,7 @@ define([
       minsub.subscribeOnce(minsub.START_SEARCH, function() {
         done()}); // if this fires, query was resurrected
 
+      x.app.getPluginOrWidgetName = sinon.stub().returns(null);
       x.app = _.extend(x.app, {
         getApiAccess: function() {
           var defer = $.Deferred();

@@ -463,18 +463,15 @@ define(['underscore',
           return true; // means we are trying to recover
         }
 
-        var feedback = new ApiFeedback({code:jqXHR.status, msg:textStatus});
-        try {
-          feedback.setCode(jqXHR.status);
-        }
-        catch(e) {
-          console.error(e.stack);
-        }
-
-        if (this.request) {
-          feedback.setApiRequest(this.request);
-        }
-        feedback.setSenderKey(this.key);
+        var feedback = new ApiFeedback({
+          code:ApiFeedback.CODES.API_REQUEST_ERROR,
+          msg:textStatus,
+          request: this.request,
+          error: jqXHR,
+          psk: this.key,
+          errorThrown: errorThrown,
+          text: textStatus
+        });
 
         var pubsub = qm.getBeeHive().Services.get('PubSub');
         if (pubsub)

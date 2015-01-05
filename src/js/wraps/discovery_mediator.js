@@ -53,7 +53,8 @@ define([
     };
 
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_STARTED] = function(feedback) {
-      this.reset();
+      this._tmp.cycle_started = true;
+
       var app = this.getApp();
 
       if (feedback.query) {
@@ -242,7 +243,62 @@ define([
 
         alerts.alert(new ApiFeedback({
           code: ApiFeedback.CODES.ALERT,
-          msg: 'The ADS Api is having a bad day, I\'m sorry - I can\'t get data for this request <pre>' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
+          msg: 'The ADS Api is having a bad day, I\'m sorry - server returned error for this request <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
+          modal: true
+        }));
+      }
+
+    };
+
+    handlers[ApiFeedback.CODES.API_REQUEST_ERROR] = function(feedback) {
+      var req = feedback.request;
+      var q = req.get('query');
+      var target = req.get('target');
+      var psk = feedback.psk;
+      var errorDetails = {
+        error: feedback.errorThrown,
+        errorCode: feedback.error.status,
+        destination: target,
+        query: q.toJSON()
+      };
+      var app = this.getApp();
+      var alerter = this.getAlerter();
+
+      var n = app.getPluginOrWidgetName(psk.getId());
+
+      if (!n) {
+        return; // can be ignored
+      }
+
+      console.error('Query failed for widget: ' + n, errorDetails);
+
+      var widgets = this.getWidgets([psk.getId()]);
+      if (widgets && widgets.length == 0) {
+        return; // we can ignore it
+      }
+      this.changeWidgetsState(widgets, {state: WidgetStates.ERRORED});
+
+      this._tmp.api_failures = this._tmp.api_failures || {};
+      this._tmp.api_failures[n] = this._tmp.api_failures[n] || 0;
+      this._tmp.api_failures[n] += 1;
+      var numErr = this._tmp.api_failures[n];
+
+
+      // we'll not show messages until search cycle is over
+      if (!this._tmp.cycle_started)
+        return;
+
+      var msg;
+      if (numErr > 2) {
+        alerter.alert(new ApiFeedback({
+          code: ApiFeedback.CODES.ERROR,
+          msg: 'I\'m afraid this component ' + n + ' (and us) - we are getting frustrated with the API. Error again! <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>'
+        }));
+      }
+      else {
+        alerter.alert(new ApiFeedback({
+          code: ApiFeedback.CODES.ALERT,
+          msg: 'Error getting data for: ' + n + ' <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
           modal: true
         }));
       }
@@ -261,6 +317,17 @@ define([
 
     return function() {
       var mediator = new (FeedbackMediator.extend({
+        _tmp: {},
+
+        activate: function() {
+          FeedbackMediator.prototype.activate.apply(this, arguments);
+          this.pubsub.subscribe(this.pubSubKey, this.pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
+        },
+
+        onNewCycle: function() {
+          this.reset();
+        },
+
         getAlerter: function() {
           return this.getApp().getController(this.alertsController || 'AlertsController');
         },
