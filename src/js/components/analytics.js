@@ -1,5 +1,8 @@
 define(['require', 'analytics_config'], function (require, config) {
 
+  if (window.GoogleAnalyticsObject)
+    return function () { window[window.GoogleAnalyticsObject].apply(this, arguments); };
+
   if (!config) {
     console.error('Analytics will not work because require.config["js/components/analytics"]["require"] does not tells where to find config');
     return function() {}; // empty function, ignoring

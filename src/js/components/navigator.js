@@ -17,7 +17,9 @@ define(['underscore',
     'js/components/generic_module',
     'js/mixins/dependon',
     'js/components/transition',
-    'js/components/transition_catalog'],
+    'js/components/transition_catalog',
+    'analytics'
+  ],
   function(
     _,
     $,
@@ -25,8 +27,9 @@ define(['underscore',
     GenericModule,
     Mixins,
     Transition,
-    TransitionCatalog) {
-
+    TransitionCatalog,
+    analytics
+    ) {
 
 
     var Navigator = GenericModule.extend({
@@ -61,6 +64,10 @@ define(['underscore',
         if (!this.router || ! (this.router instanceof Backbone.Router)) {
           throw new Error('Navigator must be given \'router\' instance');
         }
+
+        analytics('send', 'pageview', {
+          page: ev
+        });
 
         var transition = this.catalog.get(ev);
         if (!transition) {

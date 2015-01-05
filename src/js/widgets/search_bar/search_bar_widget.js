@@ -19,7 +19,6 @@ define([
     bootstrap
     ) {
 
-
     // XXX:rca - to be removed
     $.fn.selectRange = function (start, end) {
       if (!end) end = start;

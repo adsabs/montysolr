@@ -6,7 +6,8 @@ define([
     'js/components/api_feedback',
     'js/widgets/widget_states',
     'js/components/alerts',
-    'js/components/api_response'
+    'js/components/api_response',
+    'analytics'
   ],
 
   function (
@@ -16,9 +17,9 @@ define([
     ApiFeedback,
     WidgetStates,
     Alerts,
-    ApiResponse
+    ApiResponse,
+    analytics
     ) {
-
 
     var handlers = {};
 
@@ -86,8 +87,14 @@ define([
           if (name == 'query-assistant') {
             var search = app.getWidget('SearchWidget');
             var q = newQuery.get('q').join(' ');
-            if (q)
+            if (q) {
               search.openQueryAssistant(q);
+              analytics('send', 'event', 'interaction', 'click', 'query-helper');
+            }
+            else {
+              search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+              analytics('send', 'event', 'interaction', 'click', 'query-helper-failed-get-q');
+            }
           }
         });
         return; // do not bother with the rest
@@ -143,6 +150,8 @@ define([
         msg: xhr.statusText
       };
 
+      analytics('send', 'event', 'error', 'search', xhr.statusText);
+
       if (xhr && apiRequest) {
 
         var target = apiRequest.get('target');
@@ -190,7 +199,7 @@ define([
               if (msg.indexOf('INVALID_SYNTAX') > -1) {
                 // what will remain: Syntax Error, cannot parse doi:a* keyword_schema:arXiv:
                 msg = msg.replace('org.apache.solr.search.SyntaxError: INVALID_SYNTAX_CANNOT_PARSE:', '');
-                msg = msg.replace('The parser reported a syntax error, antlrqueryparser hates errors!', '');
+                msg = msg.replace(': The parser reported a syntax error, antlrqueryparser hates errors!', '');
                 msg = msg.replace('Syntax Error, cannot parse', 'Syntax Error, cannot parse<b>') + '</b>';
               }
             }
@@ -203,14 +212,17 @@ define([
             }))
             .done(function (name) {
               if (name == 'query-assistant') {
+
                 var app = self.getApp();
                 var search = app.getWidget('SearchWidget');
                 var q = apiQuery.get('q').join(' ');
                 if (q) {
                   search.openQueryAssistant(q);
+                  analytics('send', 'event', 'interaction', 'click', 'query-helper');
                 }
                 else {
                   search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                  analytics('send', 'event', 'interaction', 'click', 'query-helper-failed-get-q');
                 }
               }
             });
@@ -322,10 +334,18 @@ define([
         activate: function() {
           FeedbackMediator.prototype.activate.apply(this, arguments);
           this.pubsub.subscribe(this.pubSubKey, this.pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
+          this.pubsub.subscribe(this.pubSubKey, this.pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
         },
 
         onNewCycle: function() {
           this.reset();
+        },
+
+        onPageChange: function(msg) {
+          msg = msg.replace('Switching to: ', '');
+          analytics('send', 'pageview', {
+            page: msg
+          });
         },
 
         getAlerter: function() {
