@@ -16,8 +16,7 @@ define([
     'js/mixins/add_stable_index_to_collection',
     'hbs!./templates/empty-view-template',
     'hbs!./templates/initial-view-template',
-    './item_view',
-    'js/modules/orcid/orcid_model_notifier/orcid_model'
+    './item_view'
   ],
 
   function (Marionette,
@@ -32,8 +31,7 @@ define([
             WidgetPaginationMixin,
             EmptyViewTemplate,
             InitialViewTemplate,
-            ItemView,
-            OrcidModel
+            ItemView
     ) {
 
 
@@ -71,27 +69,7 @@ define([
         var args = _.toArray(arguments);
         args[0] = options;
 
-        //BC:rca - this will result in slow memory leaks because you are not
-        //removing listeners; besides, the generic paginated_widget should NOT know
-        //anything about ORCID; and lastly - and most importantly - bbb widgets
-        // MUST NOT share objects (and here you are listening to actions in other
-        // widget). == must go away
-        OrcidModel.on('change:orcidProfile',
-          _.bind(function(){
-            this.children.call('showOrcidActions');
-          }, this));
-
-        OrcidModel.on('change:actionsVisible',
-          _.bind(function(e){
-            if(e.get('actionsVisible')){
-              this.children.call('showOrcidActions');
-            } else{
-              this.children.call('hideOrcidActions');
-            }
-          } ,this)
-        );
-
-        return Marionette.CompositeView.prototype.constructor.apply(this, args);
+         return Marionette.CompositeView.prototype.constructor.apply(this, args);
       },
 
       initialize: function (options) {

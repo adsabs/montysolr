@@ -96,6 +96,7 @@ define([
             this.switchToProfileView(msg.data);
             break;
           case OrcidApiConstants.Events.SignOut:
+          case OrcidApiConstants.Events.LoginCancelled:
             this.switchToLoginView(msg.data);
             break;
         }

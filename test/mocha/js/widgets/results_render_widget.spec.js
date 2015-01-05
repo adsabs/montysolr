@@ -312,7 +312,7 @@ define([
           expect($w.find(".s-identifier:first").text().trim()).to.eql("2013arXiv1305.3460H");
           expect($w.find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H");
           expect($w.find(".s-results-links:first").find("a").attr("href")).to.eql("http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/arXiv:1305.3460");
-          expect($w.find(".s-results-links:first").find("a").text().trim()).to.eql("arXiv eprint");
+          expect($w.find(".s-results-links:first").find('div:not(.orcid-actions)').find("a").text().trim()).to.eql("arXiv eprint");
           expect($w.find("h5:first").text().trim()).to.eql("A bijection for tri-cellular maps");
           expect($w.find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
 
@@ -321,7 +321,7 @@ define([
           expect($w.find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
           expect($w.find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M");
           expect($w.find(".s-results-links:last").find("a").attr("href")).to.eql("/#abs/1987sbge.proc...47M/tableofcontents");
-          expect($w.find(".s-results-links:last").find("a").text().trim()).to.eql("Table of Contents");
+          expect($w.find(".s-results-links:last").find('div:not(.orcid-actions)').find("a").text().trim()).to.eql("Table of Contents");
           expect($w.find("h5:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
 
           //checking render order of more than 3 authors

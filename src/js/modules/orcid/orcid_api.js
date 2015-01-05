@@ -6,10 +6,12 @@ define([
     'backbone',
     'js/components/generic_module',
     'js/mixins/dependon',
+    'js/mixins/string_utils',
     'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/mixins/link_generator_mixin',
-    'js/modules/orcid/orcid_model_notifier/orcid_model'
+    //'js/modules/orcid/orcid_model_notifier/orcid_model'
+    'js/modules/orcid/orcid_model_notifier/module'
 
   ],
   function (_,
@@ -19,10 +21,11 @@ define([
             Backbone,
             GenericModule,
             Mixins,
+            StringUtils,
             OrcidApiConstants,
 			      PubSubEvents,
             LinkGeneratorMixin,
-            OrcidModel
+            OrcidModelNotifier
   ) {
     function addXmlHeadersToOrcidMessage(message) {
       var messageCopy = $.extend(true, {}, message);
@@ -33,20 +36,6 @@ define([
       };
       return messageCopy;
     }
-
-    // TODO: move this to some commonUtils.js
-    String.prototype.format = function () {
-      var args = arguments;
-      return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
-        if (m == "{{") {
-          return "{";
-        }
-        if (m == "}}") {
-          return "}";
-        }
-        return args[n];
-      });
-    };
 
     function getParameterByName(name) {
       name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -91,6 +80,9 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
+
+        this.orcidModelNotifier = this.getBeeHive().getService('OrcidModelNotifier');
+
         this.pubSub = this.getBeeHive().getService('PubSub').getHardenedInstance();
         this.pubSubKey = this.pubSub.getPubSubKey();
 
@@ -114,7 +106,7 @@ define([
         }
       },
       redirectToLogin: function() {
-        var url = ORCID_OAUTH_LOGIN_URL.format(window.location.origin);
+        var url = StringUtils.format(ORCID_OAUTH_LOGIN_URL, window.location.origin);
 
         window.location.replace(url);
       },
@@ -180,7 +172,7 @@ define([
         var extIdentifiersObj = orcidWork["work-external-identifiers"];
 
         if (!extIdentifiersObj) {
-          return undefined;
+          return [];
         }
 
         var extIdentifiers = extIdentifiersObj["work-external-identifier"] || [];
@@ -196,8 +188,9 @@ define([
         return adsExtIdentifiers;
       },
       isWorkFromAds: function(orcidWork) {
+        var result = this.getAdsIds(orcidWork);
 
-        return this.getAdsIds(orcidWork).length > 0;
+        return result != undefined && result.length > 0;
       },
 
       formatOrcidWork: function(adsWork, putCode){
@@ -207,16 +200,16 @@ define([
 
           _.each(adsAuthors, function(author){
             result.push({
-              "contributor": {
-                "credit-name": author,
-                "contributor-attributes": {
-                  "contributor-role": "author"
-                }
+              "credit-name": author,
+              "contributor-attributes": {
+                "contributor-role": "author"
               }
             });
           });
 
-          return result;
+          return {
+            contributor: result
+          };
         };
 
         var result =
@@ -227,26 +220,23 @@ define([
           },
 
           "short-description": adsWork.abstract,
-          "publication-date": {
-            "year": adsWork.year
-          },
+          //"publication-date": {
+          //  "year": adsWork.pubdate.split(' ')[1]
+          //},
 
-          "work-external-identifiers": [
-            {
-              "work-external-identifier": {
+          "work-external-identifiers": {
+            "work-external-identifier": [
+              {
                 "work-external-identifier-type": 'bibcode',
                 "work-external-identifier-id": adsWork.bibcode
-              }
-            },
-            {
-              "work-external-identifier": {
+              },
+              {
                 "work-external-identifier-type": 'other-id',
                 "work-external-identifier-id": 'ads:' + adsWork.id
               }
-            }
-
-            // TODO : add DOI, if available
-          ],
+              // TODO : add DOI, if available
+            ]
+          },
 
           "work-type": "book",
 
@@ -256,6 +246,11 @@ define([
 
         };
 
+        if (adsWork.pubdate && adsWork.pubdate.length > 0 && adsWork.pubdate.indexOf(' ') > 0){
+          result['publication-date'] = {
+            "year" : adsWork.pubdate.split(' ')[1]
+          }
+        }
 
         if (putCode){
           result["$"] = {"put-code": putCode};
@@ -315,7 +310,7 @@ define([
         else if (data.actionType == 'delete') {
 
           if (data.modelType == 'adsData') {
-            var adsIdsWithPutCodeList = OrcidModel.get('adsIdsWithPutCodeList');
+            var adsIdsWithPutCodeList = this.orcidModelNotifier.getAdsIdsWithPutCodeList();
             var formattedAdsId = "ads:" + data.model.id;
 
             // find putcode
@@ -403,9 +398,9 @@ define([
 
         return this.sendData({
           type: "GET",
-          url: ORCID_PROFILE_URL.format(userSession.authData.orcid),
+          url: StringUtils.format(ORCID_PROFILE_URL, userSession.authData.orcid),
           headers: {
-            Authorization: "Bearer {0}".format(userSession.authData.access_token)
+            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token)
           }
         })
       },
@@ -413,7 +408,7 @@ define([
       showLoginDialog: function () {
         var ORCID_REDIRECT_URI = 'http://localhost:3000/oauthRedirect.html';
 
-        var url = ORCID_OAUTH_LOGIN_URL.format(ORCID_REDIRECT_URI);
+        var url = StringUtils.format(ORCID_OAUTH_LOGIN_URL, ORCID_REDIRECT_URI);
 
         var WIDTH = 600;
         var HEIGHT = 650;
@@ -424,11 +419,16 @@ define([
 
         this.loginWindow = window.open(url, "ORCID Login", 'width=' + WIDTH + ', height=' + HEIGHT + ', top=' + top + ', left=' + left);
         this.loginWindow.onbeforeunload = _.bind(function(e) {
-          this.cleanLoginWindow();
-          this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT,
-            {
-              msgType: OrcidApiConstants.Events.LoginCancelled
-            });
+          var _that = this;
+            setTimeout(function() {
+              if (_that.loginWindow) {
+                _that.cleanLoginWindow();
+                _that.pubSub.publish(_that.pubSub.ORCID_ANNOUNCEMENT,
+                  {
+                    msgType: OrcidApiConstants.Events.LoginCancelled
+                  });
+              }
+            }, 500);
         }, this);
       },
 
@@ -444,10 +444,10 @@ define([
 
         return this.sendData({
           type: "POST",
-          url: ORCID_WORKS_URL.format(userSession.authData.orcid),
+          url: StringUtils.format(ORCID_WORKS_URL, userSession.authData.orcid),
           data: Json2Xml.xml(orcidWorks, { attributes_key: '$', header: true }),
           headers: {
-            Authorization: "Bearer {0}".format(userSession.authData.access_token),
+            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
             "Content-Type": "application/orcid+xml"
           }})
           .done(function() {
@@ -548,10 +548,10 @@ define([
 
         return this.sendData({
           type: "PUT",
-          url: ORCID_WORKS_URL.format(userSession.authData.orcid),
+          url: StringUtils.format(ORCID_WORKS_URL, userSession.authData.orcid),
           data: Json2Xml.xml(orcidWorks, { attributes_key: '$', header: true }),
           headers: {
-            Authorization: "Bearer {0}".format(userSession.authData.access_token),
+            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
             "Content-Type": "application/orcid+xml"
           }})
           .done(function() {

@@ -6,11 +6,9 @@ define([
     'js/widgets/base/base_widget',
     'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/orcid_work_template',
-    'hbs!./templates/orcid_works_template',
-    'js/modules/orcid_model_notifier/orcid_model'
-
+    'hbs!./templates/orcid_works_template'
   ],
-  function (_, $, Backbone, Marionette, BaseWidget, OrcidApiConstants, OrcidWorkTemplate, OrcidWorksTemplate, OrcidModel) {
+  function (_, $, Backbone, Marionette, BaseWidget, OrcidApiConstants, OrcidWorkTemplate, OrcidWorksTemplate) {
 
     var OrcidWorkModel = Backbone.Model.extend({
       defaults: function () {
@@ -21,11 +19,14 @@ define([
 
         var item = {
           publicationData: undefined,
+          bibcode: undefined,
           workExternalIdentifiers: [],
           workTitle: undefined,
           workType: undefined,
           workSourceUri: undefined,
-          workSourceHost: undefined
+          workSourceHost: undefined,
+          shownContributors: [],
+          extraContributors: 0
         };
 
         var result = {
@@ -38,6 +39,9 @@ define([
     });
 
     var OrcidWorkView = Marionette.ItemView.extend({
+
+      tagName: "li",
+      className: "col-sm-12 s-display-block",
       template: OrcidWorkTemplate,
 
       events: {
@@ -54,11 +58,15 @@ define([
         return Marionette.ItemView.prototype.constructor.apply(this, arguments);
       },
 
-      onItemRendered: function(ev, arg1, arg2) {
-          this.showOrcidActions();
+      onItemRendered: function (ev, arg1, arg2) {
+        this.showOrcidActions();
       },
 
-      showOrcidActions: function(){
+      showOrcidActions: function () {
+        var $icon = this.$('.mini-orcid-icon');
+        $icon.removeClass('green');
+        $icon.removeClass('gray');
+
         var $orcidActions = this.$('.orcid-actions');
         $orcidActions.removeClass('hidden');
         $orcidActions.removeClass('orcid-wait');
@@ -70,9 +78,10 @@ define([
         //$insert.addClass('hidden');
         $delete.addClass('hidden');
 
-        if (OrcidModel.isOrcidItemAdsItem(this.model.attributes)){
+        if (this.model.attributes.isFromAds){
           $update.removeClass('hidden');
           $delete.removeClass('hidden');
+          $icon.addClass('green');
         }
         else {
           //$insert.removeClass('hidden');
@@ -157,16 +166,16 @@ define([
 
         var actionType = '';
 
-        if ($c.hasClass('orcid-action-insert')){
+        if ($c.hasClass('orcid-action-insert')) {
           actionType = 'insert';
-        } else if ($c.hasClass('orcid-action-update')){
+        } else if ($c.hasClass('orcid-action-update')) {
           actionType = 'update';
-        } else if ($c.hasClass('orcid-action-delete')){
+        } else if ($c.hasClass('orcid-action-delete')) {
           actionType = 'delete';
         }
 
         var msg = {
-          actionType : actionType,
+          actionType: actionType,
           model: this.model.attributes,
           modelType: 'orcidData'
         };
@@ -201,12 +210,6 @@ define([
 
         this.listenTo(this, "all", this.onAllInternalEvents);
 
-        //OrcidModel.on('change:orcidProfile',
-        //  _.bind(function(){
-        //    this.children.call('showOrcidActions');
-        //  }, this));
-
-
         return Marionette.CompositeView.prototype.constructor.apply(this, arguments);
 
       },
@@ -216,7 +219,7 @@ define([
       },
 
 
-      events:{
+      events: {
         'click button[name=doBulkInsert]': "startBulkInsertClick",
         'click button[name=cancelBulkInsert]': "cancelBulkInsertClick",
         'click button[name=finishBulkInsert]': "finishBulkInsertClick"
@@ -225,45 +228,44 @@ define([
       template: OrcidWorksTemplate,
       itemView: OrcidWorkView,
 
-      onAllInternalEvents: function(ev, arg1, arg2) {
-        if (ev == 'orcidWorksWidget:stateChanged'){
+      onAllInternalEvents: function (ev, arg1, arg2) {
+        if (ev == 'orcidWorksWidget:stateChanged') {
           this.stateChanged(arg1);
         }
       },
 
-      startBulkInsertClick: function(){
-          $('button[name=doBulkInsert]').addClass('hidden');
+      startBulkInsertClick: function () {
+        $('button[name=doBulkInsert]').addClass('hidden');
 
-          $('button[name=cancelBulkInsert]').removeClass('hidden');
-          $('button[name=finishBulkInsert]').removeClass('hidden');
+        $('button[name=cancelBulkInsert]').removeClass('hidden');
+        $('button[name=finishBulkInsert]').removeClass('hidden');
 
-          OrcidModel.set('isInBulkInsertMode', true);
-
+        this.trigger('setBulkInsertMode');
       },
 
-      finishBulkInsertClick: function(){
+      finishBulkInsertClick: function () {
         $('button[name=cancelBulkInsert]').addClass('hidden');
         $('button[name=finishBulkInsert]').addClass('hidden');
 
         $('button[name=doBulkInsert]').removeClass('hidden');
 
-        OrcidModel.triggerBulkInsert();
+        this.trigger('triggerBulkInsert');
       },
 
-      cancelBulkInsertClick: function(){
+      cancelBulkInsertClick: function () {
         $('button[name=cancelBulkInsert]').addClass('hidden');
         $('button[name=finishBulkInsert]').addClass('hidden');
         $('button[name=doBulkInsert]').removeClass('hidden');
 
-        OrcidModel.cancelBulkInsert();
+        this.trigger('cancelBulkInsert');
       },
 
-      stateChanged : function(state){
+      stateChanged: function (state) {
         this.model.set('isLoaded', false);
         this.model.set('isLoading', false);
         this.itemViewContainer = '';
 
-        switch (state){
+        switch (state) {
           case 'loaded':
             this.itemViewContainer = '.items';
             this.model.set('isLoaded', true);
@@ -284,6 +286,7 @@ define([
 
     var OrcidWorks = BaseWidget.extend({
       activate: function (beehive) {
+        this.orcidModelNotifier = beehive.Services.get('OrcidModelNotifier');
         this.pubSub = beehive.Services.get('PubSub');
         this.pubSubKey = this.pubSub.getPubSubKey();
 
@@ -303,9 +306,9 @@ define([
         return this.view;
       },
 
-      routeOrcidPubSub : function(msg){
+      routeOrcidPubSub: function (msg) {
 
-        switch (msg.msgType){
+        switch (msg.msgType) {
           case OrcidApiConstants.Events.UserProfileRefreshed:
           case OrcidApiConstants.Events.LoginSuccess:
             this.showWorks(msg.data);
@@ -313,6 +316,7 @@ define([
           case OrcidApiConstants.Events.LoginRequested:
             this.showLoading();
             break;
+          case OrcidApiConstants.Events.LoginCancelled:
           case OrcidApiConstants.Events.SignOut:
             this.hideWorks();
             break;
@@ -332,12 +336,38 @@ define([
 
         var works = [];
 
+        var that = this;
+
         _.each(orcidWorks, function (work) {
 
           var publicationData = work['publication-date'] != undefined ? work['publication-date']['year'] : "";
           var workTitle = work['work-title'] != undefined ? work['work-title']['title'] : "";
           var workSourceUri = work['work-source'] != undefined ? work['work-source']['uri'] : "";
           var workSourceHost = work['work-source'] != undefined ? work['work-source']['host'] : "";
+          var contributors = "";
+
+          if (work['work-contributors']) {
+            if (work['work-contributors']['contributor']) {
+              var contributors = work['work-contributors']['contributor'];
+              contributors = Array.isArray(contributors) ? contributors : [contributors];
+              contributors = contributors.map(function(item) {
+                return item["credit-name"]._;
+              });
+
+              var maxContributors = 3;
+
+              var extraContributors = 0;
+              var shownContributors = "";
+              if (contributors.length > maxContributors) {
+                extraContributors = contributors.length - maxContributors;
+                shownContributors = contributors.slice(0, maxContributors);
+              }
+              else {
+                shownContributors = contributors;
+              }
+
+            }
+          }
 
           var item = {
             putCode: work['$']['put-code'],
@@ -346,52 +376,50 @@ define([
             workTitle: workTitle,
             workType: work['work-type'],
             workSourceUri: workSourceUri,
-            workSourceHost: workSourceHost
+            workSourceHost: workSourceHost,
+            shownContributors: shownContributors,
+            extraContributors: extraContributors
           };
 
           works.push(item);
 
-          var addExternalIdentifier = function(workIdentifierNode) {
-            //var workExternalIdentifiers = work['work-external-identifiers'];
-            //if (workExternalIdentifiers) {
-            //
-            //  var workIdentifierNode = workExternalIdentifiers['work-external-identifier'];
-              if (workIdentifierNode) {
+          var addExternalIdentifier = function (workIdentifierNode) {
 
-                var identifier = {
-                  id: workIdentifierNode['work-external-identifier-id'],
-                  type: workIdentifierNode['work-external-identifier-type']
-                };
-                item.workExternalIdentifiers.push(identifier);
-              }
-            //}
+            if (workIdentifierNode) {
+
+              var identifier = {
+                id: workIdentifierNode['work-external-identifier-id'],
+                type: workIdentifierNode['work-external-identifier-type']
+              };
+              item.workExternalIdentifiers.push(identifier);
+            }
           };
 
           var workExternalIdentifiers = work['work-external-identifiers'];
           if (workExternalIdentifiers) {
             var workIdentifierNode = workExternalIdentifiers['work-external-identifier'];
 
-            if (workIdentifierNode instanceof Array){
+            if (workIdentifierNode instanceof Array) {
               _.each(workIdentifierNode, addExternalIdentifier)
             }
-            else{
+            else {
               addExternalIdentifier(workIdentifierNode);
             }
           }
 
+          item.isFromAds = that.orcidModelNotifier.isOrcidItemAdsItem(item);
 
-          //_.each(work['work-external-identifiers'], function(workIdentifier){
-          //  var workIdentifierNode = workIdentifier['work-external-identifier'];
-          //
-          //  var identifier = {
-          //    id: workIdentifierNode['work-external-identifier-id'],
-          //    type: workIdentifierNode['work-external-identifier-type']
-          //  };
-          //
-          //  item.workExternalIdentifiers.push(identifier);
-          //
-          //});
+          if (item.isFromAds){
+            var bibcodes = item.workExternalIdentifiers.filter(function(e){
+              return e.type == 'bibcode';
+            });
+            if (bibcodes.length > 0){
+              item.bibcode = bibcodes[0].id;
+            }
+          }
         });
+
+        works = works.sort(function(a, b){return a.isFromAds - b.isFromAds;}).reverse();
 
         this.view.collection = new OrcidWorksCollection(works);
 
@@ -402,8 +430,17 @@ define([
 
       },
       onAllInternalEvents: function (ev, arg1, arg2) {
-        if (ev == 'itemview:OrcidAction'){
-          this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.OrcidAction, data: arg2});
+        if (ev == 'itemview:OrcidAction') {
+          this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT, {
+            msgType: OrcidApiConstants.Events.OrcidAction,
+            data: arg2
+          });
+        } else if (ev == 'setBulkInsertMode'){
+          this.orcidModelNotifier.startBulkInsert();
+        } else if (ev == 'triggerBulkInsert'){
+          this.orcidModelNotifier.triggerBulkInsert();
+        } else if (ev == 'cancelBulkInsert'){
+          this.orcidModelNotifier.cancelBulkInsert();
         }
       }
     });

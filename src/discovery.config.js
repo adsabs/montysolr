@@ -30,6 +30,7 @@ require.config({
           'PubSub': 'js/services/pubsub',
           'Navigator': 'js/apps/discovery/navigator',
           OrcidApi: 'js/modules/orcid/orcid_api',
+          OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier/module',
           LocalStorage: 'js/services/localStorage',
           Json2Xml: 'js/modules/orcid/json2xml'
         },
@@ -63,7 +64,7 @@ require.config({
 
         OrcidLogin: 'js/modules/orcid/orcid_login/widget',
         OrcidWorks: 'js/modules/orcid/orcid_works/widget',
-        OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier/widget',
+        //OrcidResults: 'js/modules/orcid/orcid_result_row_extension/widget',
 
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
