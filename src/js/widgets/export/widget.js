@@ -250,14 +250,22 @@ define([
        */
       _getData: function(identifiers, format){
 
+        format = format || this.model.get('format') || 'bibtex';
+        var tbl = {
+          ENDNOTE: 'ENDNOTE',
+          AASTEX: 'AASTeX',
+          BIBTEX: 'BIBTEX'
+        };
+        format = tbl[format.toUpperCase()] || format.toUpperCase();
+
         if (!_.isArray(identifiers)) throw new Error('Identifiers must be an array');
         if (identifiers.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
 
-        format = format || this.model.get('format') || 'bibtex';
+
         var self = this;
         var q = new ApiQuery();
         q.set('bibcode', identifiers);
-        q.set('data_type', format.toUpperCase());
+        q.set('data_type', format);
         q.set('sort', 'NONE');
 
         var req = this.composeRequest(q);
