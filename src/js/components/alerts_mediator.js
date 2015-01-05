@@ -52,14 +52,7 @@ define([
       },
 
       onStartSearch: function(apiFeedback) {
-        // reset the widget
-        switch(apiFeedback.code) {
-          case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
-            this.alert(new ApiFeedback({
-              type: Alerts.TYPE.INFO,
-              msg: null}));
-            break;
-        }
+
       },
 
       onAlert: function(apiFeedback, psk) {

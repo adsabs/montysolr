@@ -81,9 +81,8 @@ define([
         }))
         .done(function(name) {
           if (name == 'query-assistant') {
-            var app = self.getApp();
             var search = app.getWidget('SearchWidget');
-            var q = newQuery.query.get('q').join(' ');
+            var q = newQuery.get('q').join(' ');
             if (q)
               search.openQueryAssistant(q);
           }
@@ -102,6 +101,11 @@ define([
 
       // retrieve ids of all components that wait for a query
       var ids = _.keys(feedback.cycle.waiting);
+
+      // remove alerts from previous searches
+      this.alert(new ApiFeedback({
+        type: Alerts.TYPE.INFO,
+        msg: null}));
 
       this._makeWidgetsSpin(ids);
 

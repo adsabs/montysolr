@@ -296,7 +296,7 @@ define([
         if (queryString) {
           this.view.setFormVal(queryString);
         }
-        this.view.onShowForm();
+        this.view.$el.find('.show-form').click();
       }
     });
     return SearchBarWidget;
