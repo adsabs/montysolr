@@ -117,14 +117,6 @@ define([
                 "input": "text",
                 "operator": "is",
                 "value": ""
-              },
-              {
-                "id": "title",
-                "field": "title",
-                "type": "string",
-                "input": "text",
-                "operator": "contains",
-                "value": ""
               }
             ]
           });
