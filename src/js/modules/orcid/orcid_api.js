@@ -224,22 +224,19 @@ define([
           //  "year": adsWork.pubdate.split(' ')[1]
           //},
 
-          "work-external-identifiers": [
-            {
-              "work-external-identifier": {
+          "work-external-identifiers": {
+            "work-external-identifier": [
+              {
                 "work-external-identifier-type": 'bibcode',
                 "work-external-identifier-id": adsWork.bibcode
-              }
-            },
-            {
-              "work-external-identifier": {
+              },
+              {
                 "work-external-identifier-type": 'other-id',
                 "work-external-identifier-id": 'ads:' + adsWork.id
               }
-            }
-
-            // TODO : add DOI, if available
-          ],
+              // TODO : add DOI, if available
+            ]
+          },
 
           "work-type": "book",
 
