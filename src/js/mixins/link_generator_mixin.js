@@ -60,15 +60,14 @@ var linkGenerator = {
 
     var link_types, links = { text : [], data : []};
 
-    link_types = _.map(links_data, function (d) {
+    link_types = _.filter(_.map(links_data, function (d) {
       try {
         return JSON.parse(d);
       }
       catch (SyntaxError) {
-        console.warn(d, "was not parsed")
+        console.error("Error parsing links_data value", bib, d);
       }
-
-    });
+    }));
 
     _.each(link_types, function (l) {
 
@@ -78,31 +77,31 @@ var linkGenerator = {
 
         case "preprint":
           links.text.push({openAccess: openAccess, title: "arXiv e-print", link: this.adsUrlRedirect("preprint", bib)});
-          break
+          break;
         case "electr":
           links.text.push({openAccess: openAccess, title: "Publisher Article", link: this.adsUrlRedirect('electr', bib)})
-          break
+          break;
         case "pdf":
           links.text.push({openAccess: openAccess, title: "Publisher PDF", link: this.adsUrlRedirect('article', bib)});
-          break
+          break;
         case "article":
           links.text.push({openAccess: openAccess, title: "ADS PDF", link: this.adsUrlRedirect('article', bib)});
-          break
+          break;
         case "gif":
           links.text.push({openAccess: openAccess, title: "ADS Scanned Article", link: this.adsUrlRedirect('gif', bib)});
-          break
+          break;
         case "data":
           var title = l.instances ? "Archival Data (" + l.instances + ")" : "Archival Data";
           links.data.push({title: title, link: this.adsUrlRedirect('data', bib)});
-          break
+          break;
         case "simbad":
           var title = l.instances ? "SIMBAD objects (" + l.instances + ")" : "SIMBAD objects";
           links.data.push({title: title, link: this.adsUrlRedirect('simbad', bib)});
-          break
+          break;
         case "ned":
           var title = l.instances ? "NED objects (" + l.instances + ")" : "NED objects";
           links.data.push({title: title, link: this.adsUrlRedirect('ned', bib)});
-          break
+          break;
       }
 
     }, this);
