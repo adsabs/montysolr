@@ -178,7 +178,10 @@ module.exports = function(grunt) {
     env: {
       options: {
         SOLR_ENDPOINT: '<%= local.solr_endpoint || "http://localhost:9000/solr/select" %>',
-        API_ENDPOINT: '<%= local.api_endpoint || "http://localhost:5000/api/1" %>'
+        API_ENDPOINT: '<%= local.api_endpoint || "http://localhost:5000/api/1" %>',
+        ORCID_OAUTH_CLIENT_ID: '<%= local.orcid_oauth_cliend_id || ""%>',
+        ORCID_OAUTH_CLIENT_SECRET:'<%= local.orcid_oauth_client_secret || "" %>',
+        ORCID_API_ENDPOINT :'<%= local.orcid_oauth_client_secret || "" %>'
       },
       dev: {
         HOMEDIR: 'src'
@@ -693,6 +696,8 @@ module.exports = function(grunt) {
   // runs tests (only once)
   grunt.registerTask('test', ['env:dev', 'express:dev', 'mocha_phantomjs:full_testing']);
 
+  // runs test server only
+  grunt.registerTask('test:server', ['env:dev', 'express:dev', 'watch:server']);
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
   grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_jqueryuicss']);

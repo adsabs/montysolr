@@ -49,7 +49,7 @@ define([
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
           'ExportDropdown', 'VisualizationDropdown', 'SearchWidget',
-          'Sort', 'AlertsWidget'
+          'Sort', 'AlertsWidget', 'OrcidLogin', 'OrcidWorks'
         ];
 
         var detailsPageAlwaysVisible = [

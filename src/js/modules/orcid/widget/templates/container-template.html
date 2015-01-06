@@ -1,0 +1,74 @@
+<div class="row s-list-controls">
+
+    <div class="s-results-border-bottom">
+
+        <div class="col-sm-1">
+
+            <button class="btn btn-default btn-expand left-expand hidden-xs" title="hide left column" aria-label="hide left column"><i></i></button>
+        </div>
+
+        <div class="col-sm-5">
+
+
+            <div class="s-show-details-container col-sm-4 ">
+                {{#if showDetails}}
+                    {{#compare showDetails "opened"}}
+                    <button class="btn btn-default show-details"> <i class="icon-hide-details"></i> Hide details</button>
+                    {{else}}
+                    <button class="btn btn-default show-details"> <i class="icon-details"></i> Show details</button>
+                    {{/compare}}
+                {{else}}
+                <button class="btn btn-default s-disabled"> No details</button>
+                {{/if}}
+            </div>
+
+        </div>
+
+
+        <div class="col-sm-5 sort-container">
+
+        </div>
+
+        <div class="col-sm-1">
+            <button class="btn btn-default btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row">
+    <h2 class="sr-only">Search Results</h2>
+
+
+    {{#if title}}
+    <div class="col-sm-12">
+        <h2 class="s-article-title">{{title}}</h2>
+    </div>
+    {{/if}}
+    <ul class="col-sm-12 results-list  s-results-list list-unstyled s-display-block" aria-label="list of results">
+    </ul>
+
+</div>
+{{#if pagination}}
+<div class="row">
+    <div class="col-sm-12 pagination-controls s-pagination-controls">
+        <div class="col-sm-5 col-sm-offset-2">
+            <ul class="pagination">
+                {{#if showFirst}}
+                <li><a href="search/{{../currentQuery}}" data-paginate = "1" data-bypass>&laquo;</a></li>
+                {{/if}}
+                {{#each pageData}}
+                <li {{#if this.current}} class="active" {{/if}} >
+                <a href="{{this.link}}" data-bypass  data-paginate = "{{this.p}}" >{{this.p}} </a>
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+        <div class="col-sm-5 s-per-page-controls">
+            Show <input class="per-page" type="text" placeholder="{{perPage}}"/> per page
+        </div>
+    </div>
+</div>
+{{/if}}
+

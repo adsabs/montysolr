@@ -4,8 +4,7 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
-    'hbs!./templates/item-template',
-    'bootstrap'
+    'hbs!./templates/item-template'
   ],
 
   function (Marionette,
@@ -26,10 +25,14 @@ define([
         if (options) {
           _.defaults(options, _.pick(this, ['model', 'collectionEvents', 'modelEvents']));
         }
+
+        _.bindAll(this, 'resetToggle');
+
         return Marionette.ItemView.prototype.constructor.apply(this, arguments);
       },
 
       render: function () {
+
         if (this.model.get('visible')) {
           return Marionette.ItemView.prototype.render.apply(this, arguments);
         }
@@ -45,7 +48,9 @@ define([
         'click .details-control' : "toggleDetails",
         'mouseenter .letter-icon': "showLinks",
         'mouseleave .letter-icon': "hideLinks",
+        'click .orcid-action': "orcidAction",
         'click .letter-icon': "pinLinks"
+
       },
 
       modelEvents: {
@@ -59,8 +64,35 @@ define([
       },
 
       toggleSelect: function () {
+
+        this.trigger('toggleSelect',
+          {
+            selected: !this.model.get('chosen'),
+            data : this.model.attributes }
+        );
+
         this.$el.toggleClass("chosen");
         this.model.set('chosen', this.model.get('chosen') ? false : true);
+      },
+
+      resetToggle: function(){
+        this.setToggleTo(false);
+      },
+
+      setToggleTo : function(to){
+
+        var $checkbox = $('input[name=identifier]');
+        if (to) {
+          this.$el.addClass("chosen");
+          this.model.set('chosen', true);
+          $checkbox.prop('checked', true);
+        }
+        else
+        {
+          this.$el.removeClass("chosen");
+          this.model.set('chosen', false);
+          $checkbox.prop('checked', false);
+        }
       },
 
       toggleDetails : function(){
@@ -143,6 +175,67 @@ define([
           return
         }
         this.removeActiveQuickLinkState($c)
+      },
+
+      showOrcidActions: function(isWorkInCollection){
+        var $icon = this.$('.mini-orcid-icon');
+        $icon.removeClass('green');
+        $icon.removeClass('gray');
+
+
+        var $orcidActions = this.$('.orcid-actions');
+        $orcidActions.removeClass('hidden');
+        $orcidActions.removeClass('orcid-wait');
+        var $update = $orcidActions.find('.orcid-action-update');
+        var $insert = $orcidActions.find('.orcid-action-insert');
+        var $delete = $orcidActions.find('.orcid-action-delete');
+
+        $update.addClass('hidden');
+        $insert.addClass('hidden');
+        $delete.addClass('hidden');
+
+        if (isWorkInCollection(this.model.attributes)){
+          $update.removeClass('hidden');
+          $delete.removeClass('hidden');
+          $icon.addClass('green');
+        }
+        else {
+          $insert.removeClass('hidden');
+          $icon.addClass('gray');
+        }
+      },
+
+      hideOrcidActions: function(){
+        var $orcidActions = this.$('.orcid-actions');
+        $orcidActions.addClass('hidden');
+      },
+
+      orcidAction: function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var $c = $(e.currentTarget);
+        var $orcidActions = this.$('.orcid-actions');
+        $orcidActions.addClass('orcid-wait');
+
+        var actionType = '';
+
+        if ($c.hasClass('orcid-action-insert')){
+          actionType = 'insert';
+        } else if ($c.hasClass('orcid-action-update')){
+          actionType = 'update';
+        } else if ($c.hasClass('orcid-action-delete')){
+          actionType = 'delete';
+        }
+
+        var msg = {
+          actionType : actionType,
+          model: this.model.attributes,
+          modelType: 'adsData'
+
+        };
+
+        this.trigger('OrcidAction', msg);
+
       }
     });
 

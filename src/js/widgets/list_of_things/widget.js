@@ -19,6 +19,7 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
+    'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
     'hbs!./templates/pagination-template',
@@ -32,6 +33,7 @@ define([
     ApiRequest,
     ApiQuery,
     BaseWidget,
+    OrcidApiConstants,
     ItemTemplate,
     ResultsContainerTemplate,
     PaginationTemplate,
@@ -92,7 +94,6 @@ define([
 
       },
 
-
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
 
@@ -133,7 +134,10 @@ define([
 
         // XXX:rca - hack, to be solved later
         this.trigger('page-manager-event', 'widget-ready',
-          {numFound: apiResponse.get("response.numFound"), widget: this});
+          {numFound: apiResponse.has("response.numFound")
+            ? apiResponse.get("response.numFound")
+            : this.hiddenCollection.length,
+            widget: this});
       },
 
       extractDocs: function(apiResponse) {

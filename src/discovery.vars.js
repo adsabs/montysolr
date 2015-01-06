@@ -33,7 +33,7 @@ define([], function() {
      *  http://somewhere.org/foo/bar/index.html
      */
     routerConf: {
-      pushState: false,
+      pushState: true,
       root: '/',
     },
 
@@ -54,26 +54,6 @@ define([], function() {
      * between widgets and API (and doesn't bother issuing another
      * request when the query can be served from the application cache)
      */
-    useCache: false,
-
-
-    /**
-     * Google analytics tracking info, your main config should have
-     * info how to load 'analytics_config', see config.map section
-     *
-     * For testing, the following will work from localhost (your GA
-     * instance must be configured to accept domain localhost)
-     *
-     * googleTrackingCode: 'UA-37369750-7',
-     * googleTrackingOptions: {
-     *   'cookieDomain': 'none'
-     * }
-     *
-     * For more, see:
-     * https://developers.google.com/analytics/devguides/collection/analyticsjs/advanced
-     */
-     googleTrackingCode: 'UA-XXXXXXXX-X',
-     googleTrackingOptions: 'auto'
-
+    useCache: true,
   }
 });
