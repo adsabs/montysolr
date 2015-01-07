@@ -1,18 +1,28 @@
 define([
     'marionette',
     'backbone',
+    'jquery',
+    'xml2json',
     'js/bugutils/minimal_pubsub',
     'js/modules/orcid/widget/widget',
     'js/widgets/list_of_things/widget',
-    'js/components/json_response'
+    'js/components/json_response',
+    'js/modules/orcid/orcid_model_notifier/module',
+    'js/modules/orcid/orcid_api_constants',
+    '../../widgets/test_orcid_data/orcid_profile_data'
   ],
   function (
     Marionette,
     Backbone,
+    $,
+    xml2json,
     MinimalPubsub,
     OrcidWidget,
     ListOfThingsWidget,
-    JsonResponse
+    JsonResponse,
+    OrcidNotifierModule,
+    OrcidApiConstants,
+    TestOrcidProfileData
     ) {
 
     describe("Render Results UI Widget (orcid_widget.spec.js)", function () {
@@ -65,7 +75,7 @@ define([
           }
         }
       };
-      var minsub;
+      var minsub, beehive, notifier;
       // this is useful if you want to test widget getting data from Orcid
       // it simulates pubsub response
       beforeEach(function (done) {
@@ -74,6 +84,15 @@ define([
             return orcidData;
           }
         }))({verbose: false});
+
+        beehive = minsub.beehive;
+
+        notifier = new OrcidNotifierModule();
+        notifier.activate(beehive);
+        notifier.initialize();
+
+        beehive.addService('OrcidModelNotifier', notifier);
+
         done();
       });
 
@@ -99,13 +118,17 @@ define([
         return widget;
       };
 
-      it("should listen to DELIVERING_RESPONSE and automatically render data", function (done) {
+      var getUserProfileJson = function () {
+        return $.xml2json(TestOrcidProfileData)['orcid-message']['orcid-profile'];
+      };
+
+      it("should listen to ORCID_ANNOUNCEMENT UserProfileRefreshed and automatically render data", function (done) {
 
         // mock resolution
         minsub.beehive.Services.add('OrcidApi', {
-          getADSIdentifier: function(orcidId) {
-            return 'ads:' + orcidId;
-          },
+          //getADSIdentifier: function(orcidId) {
+          //  return 'ads:' + orcidId;
+          //},
           getHardenedInstance: function() {
             return this;
           }
@@ -115,7 +138,12 @@ define([
         widget.model.set('perPage', 2);
 
         expect(widget.collection.length).to.eql(0);
-        minsub.publish(minsub.DELIVERING_RESPONSE, new JsonResponse(orcidData)); // can be triggered differently
+        //minsub.publish(minsub.ORCID_ANNOUNCEMENT, {data:orcidData}); // can be triggered differently
+
+        minsub.publish(minsub.ORCID_ANNOUNCEMENT, {
+          msgType: OrcidApiConstants.Events.UserProfileRefreshed,
+          data: getUserProfileJson()
+        });
 
         expect(widget.collection.length).to.eql(2);
         // insert the widget into page
@@ -123,16 +151,16 @@ define([
         $('#test').append($w);
 
         // check pagination works
-        expect($w.find(".pagination li").length).to.eql(3);
+        expect($w.find(".pagination li").length).to.eql(4);
         expect($w.find(".pagination li:first").text().trim()).to.eql("1");
-        expect($w.find(".pagination li:last").text().trim()).to.eql("3");
-        expect($w.find('.s-results-title').text()).to.eql('example 1example 2');
+        expect($w.find(".pagination li:last").text().trim()).to.eql("4");
+        expect($w.find('.s-results-title').text()).to.eql('Near-infrared multispectral images for Gassendi crater: mineralogical and geological inferences.itions on Efficiency of Heller Dry Cooling TowerEpidemic spreading on complex networks with overlapping and non-overlapping community structure');
 
         widget.updatePagination(({page : 2})); // it is zero-based index
-        expect($w.find(".pagination li").length).to.eql(3);
+        expect($w.find(".pagination li").length).to.eql(4);
         expect($w.find(".pagination li:first").text().trim()).to.eql("1");
-        expect($w.find(".pagination li:last").text().trim()).to.eql("3");
-        expect($w.find('.s-results-title').text()).to.eql('example 5');
+        expect($w.find(".pagination li:last").text().trim()).to.eql("4");
+        expect($w.find('.s-results-title').text()).to.eql('Powo·lanie i przeznaczenie : wspomnienia oficera Komendy Glównej AKKto ratuje jedno zycie-- : polacy i zydzi, 1939-1945');
 
         done();
       });

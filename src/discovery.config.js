@@ -66,6 +66,7 @@ require.config({
         OrcidLogin: 'js/modules/orcid/orcid_login/widget',
         OrcidWorks: 'js/modules/orcid/orcid_works/widget',
         //OrcidResults: 'js/modules/orcid/orcid_result_row_extension/widget',
+        OrcidBigWidget: 'js/modules/orcid/widget/widget',
 
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',

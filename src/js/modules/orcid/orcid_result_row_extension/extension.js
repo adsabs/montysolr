@@ -13,8 +13,8 @@ define([
         this.orcidModelNotifier = beehive.getService('OrcidModelNotifier');
 
         // 'this' should already contain the pubsub
-        _.bindAll(this, 'routeOrcidPubSub');
-        this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, this.routeOrcidPubSub);
+        _.bindAll(this, 'routeOrcidPubSub_results');
+        this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, this.routeOrcidPubSub_results);
 
         var that = this;
 
@@ -42,7 +42,7 @@ define([
       },
 
 
-      routeOrcidPubSub: function (msg) {
+      routeOrcidPubSub_results: function (msg) {
         switch (msg.msgType) {
           case OrcidApiConstants.Events.IsBulkInsertMode:
             this.view.children.call('resetToggle');

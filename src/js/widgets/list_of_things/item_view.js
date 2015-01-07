@@ -195,13 +195,22 @@ define([
         $delete.addClass('hidden');
 
         if (isWorkInCollection(this.model.attributes)){
-          $update.removeClass('hidden');
+          if (!(this.model.attributes.isFromAds === true))
+          {
+            $update.removeClass('hidden');
+          }
           $delete.removeClass('hidden');
           $icon.addClass('green');
         }
         else {
-          $insert.removeClass('hidden');
-          $icon.addClass('gray');
+          if (this.model.attributes.isFromAds === false){
+            // the nonAds item from orcid
+            // nothing to do
+          }
+          else {
+            $insert.removeClass('hidden');
+            $icon.addClass('gray');
+          }
         }
       },
 

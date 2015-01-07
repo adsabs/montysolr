@@ -68,7 +68,7 @@ define([
         var widget = new ResultsWidget();
         expect(widget.activateResultsExtension).to.be.ok;
         expect(widget.onAllInternalEvents_results).to.be.ok;
-        expect(widget.routeOrcidPubSub).to.be.ok;
+        expect(widget.routeOrcidPubSub_results).to.be.ok;
 
 
         done();
