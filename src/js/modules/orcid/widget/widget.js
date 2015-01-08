@@ -75,7 +75,7 @@ define([
             break;
           case OrcidApiConstants.Events.LoginCancelled:
           case OrcidApiConstants.Events.SignOut:
-            //this.hideWorks();
+            this.reset();
             break;
         }
       },
