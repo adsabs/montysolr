@@ -10,38 +10,51 @@ define([
     'js/components/pubsub_events'
   ],
 
-  function (GenericModule, Mixins, $, OrcidApi, _, xml2json, Application, OrcidApiConstants, PubSubEvents) {
+  function (
+    GenericModule,
+    Mixins,
+    $,
+    OrcidApi,
+    _,
+    xml2json,
+    Application,
+    OrcidApiConstants,
+    PubSubEvents
+    ) {
 
-    var app = new Application();
-    var config = {
-      core: {
-        services: {
-          PubSub: 'js/services/pubsub',
-          Api: 'js/services/api',
-          LocalStorage: 'js/services/localStorage',
-          OrcidApi: 'js/modules/orcid/orcid_api',
-          Json2Xml: 'js/modules/orcid/json2xml'
-        },
-        objects: {
-          QueryMediator: 'js/components/query_mediator'
-        }
-      },
-      widgets: {
-      }
-    };
-
-    app.activate();
-
-    var beeHive = app.getBeeHive();
 
     describe("Orcid API service", function () {
-      this.timeout(60000);
+      this.timeout(5000);
 
-      var promise = app.loadModules(config);
+      var app, beeHive;
+      before(function(done) {
+        app = new Application();
+        var config = {
+          core: {
+            services: {
+              PubSub: 'js/services/pubsub',
+              Api: 'js/services/api',
+              LocalStorage: 'js/services/localStorage',
+              OrcidApi: 'js/modules/orcid/orcid_api',
+              Json2Xml: 'js/modules/orcid/json2xml'
+            },
+            objects: {
+              QueryMediator: 'js/components/query_mediator'
+            }
+          },
+          widgets: {
+          }
+        };
 
-      it('prepare', function (done) {
-        promise.done(done);
+        app.loadModules(config)
+          .done(function() {
+            app.activate();
+            beeHive = app.getBeeHive();
+            done();
+          });
+
       });
+
 
       it('input to spec is not undefined', function(done){
 

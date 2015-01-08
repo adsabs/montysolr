@@ -265,9 +265,9 @@ define([], function() {
      </orcid-activities>
      </orcid-profile>
      </orcid-message>
+     */}).toString();
 
-     */}).toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
-
+  testXML = testXML.substring(testXML.indexOf('{') + 3, testXML.lastIndexOf('}') - 3);
   return testXML;
 
 });
