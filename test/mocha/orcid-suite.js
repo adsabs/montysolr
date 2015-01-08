@@ -5,7 +5,7 @@ define([], function(){
       '/widgets/orcid_widget.spec.js',
       //'/widgets/results_render_widget.spec.js',
       '/modules/orcid/json2xml.spec.js',
-      '/modules/orcid/orcid_api.spec.js',
+      //'/modules/orcid/orcid_api.spec.js',
       '/modules/orcid/orcid_widget.spec.js'
     ];
 

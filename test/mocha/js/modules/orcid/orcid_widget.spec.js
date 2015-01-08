@@ -26,63 +26,12 @@ define([
     ) {
 
     describe("Render Results UI Widget (orcid_widget.spec.js)", function () {
-
-      var orcidData = {
-        "orcid-message": {
-          "$": {
-            "xmlns": "http://www.orcid.org/ns/orcid"
-          },
-          "message-version": "1.1",
-          "orcid-profile": {
-            "$": {
-              "type": "user"
-            },
-            "orcid-identifier": {
-              "$": {},
-              "uri": "http://sandbox.orcid.org/0000-0001-7016-4666",
-              "path": "0000-0001-7016-4666",
-              "host": "sandbox.orcid.org"
-            },
-            "orcid-preferences": {
-              "$": {},
-              "locale": "en"
-            },
-            "orcid-history": {
-              "$": {},
-              "creation-method": "website",
-              "submission-date": "2014-12-05T09:58:18.525Z",
-              "last-modified-date": "2014-12-11T14:27:18.151Z",
-              "claimed": "true"
-            },
-            "orcid-bio": {
-              "$": {},
-              "personal-details": {
-                "$": {},
-                "given-names": "Martin",
-                "family-name": "Obrátil"
-              }
-            },
-            "orcid-activities": {
-              "$": {},
-              "orcid-works": [ // BC:rca i havent found in your tests, an example of multiple orcid works; so i'm making it out
-                {title: 'example 1', identifier: 'A'},
-                {title: 'example 2', identifier: 'B'},
-                {title: 'example 3', identifier: 'C'},
-                {title: 'example 4', identifier: 'D'},
-                {title: 'example 5', identifier: 'E'}
-              ]
-            }
-          }
-        }
-      };
       var minsub, beehive, notifier;
       // this is useful if you want to test widget getting data from Orcid
       // it simulates pubsub response
       beforeEach(function (done) {
         minsub = new (MinimalPubsub.extend({
-          request: function (apiRequest) {
-            return orcidData;
-          }
+
         }))({verbose: false});
 
         beehive = minsub.beehive;
@@ -126,9 +75,6 @@ define([
 
         // mock resolution
         minsub.beehive.Services.add('OrcidApi', {
-          //getADSIdentifier: function(orcidId) {
-          //  return 'ads:' + orcidId;
-          //},
           getHardenedInstance: function() {
             return this;
           }
@@ -138,7 +84,6 @@ define([
         widget.model.set('perPage', 2);
 
         expect(widget.collection.length).to.eql(0);
-        //minsub.publish(minsub.ORCID_ANNOUNCEMENT, {data:orcidData}); // can be triggered differently
 
         minsub.publish(minsub.ORCID_ANNOUNCEMENT, {
           msgType: OrcidApiConstants.Events.UserProfileRefreshed,
@@ -164,6 +109,58 @@ define([
 
         done();
       });
+
+      it('should trigger proper action', function(done){
+        var widget = new _getWidget();
+
+        var $renderResult = $(widget.render().el);
+        $("#test").append($renderResult);
+
+        // trigger event of user profile refreshment
+        minsub.publish(minsub.ORCID_ANNOUNCEMENT, {
+          msgType: OrcidApiConstants.Events.UserProfileRefreshed,
+          data: getUserProfileJson()
+        });
+
+
+        var $actionList = $renderResult.find('.orcid-actions ul').first().find('a.orcid-action');
+
+        var deleteTriggered = false;
+        var updateTriggered = false;
+
+        minsub.subscribe(minsub.ORCID_ANNOUNCEMENT, function(msg){
+          var data = msg.data;
+          if (data.actionType == 'update'){
+            updateTriggered = true;
+          }
+          else if (data.actionType == 'delete') {
+            deleteTriggered = true;
+          }
+        });
+
+        expect($actionList.length > 0).to.be.true;
+
+        _.each($actionList, function($action){
+          eventFire($action, 'click');
+        });
+
+        expect(updateTriggered).to.be.true;
+        expect(deleteTriggered).to.be.true;
+
+        done();
+
+      });
+
+
+      function eventFire(el, etype){
+        if (el.fireEvent) {
+          el.fireEvent('on' + etype);
+        } else {
+          var evObj = document.createEvent('Events');
+          evObj.initEvent(etype, true, false);
+          el.dispatchEvent(evObj);
+        }
+      }
 
     });
   });

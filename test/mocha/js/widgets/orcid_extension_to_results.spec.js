@@ -168,7 +168,7 @@ define([
       it('should trigger proper action', function(done){
         var widget = new _getWidget();
 
-        var $renderResult = widget.render().$el;
+        var $renderResult = $(widget.render().el);
         $("#test").append($renderResult);
 
         minsub.publish(minsub.START_SEARCH, new ApiQuery({'q': 'foo:bar'}));
@@ -180,7 +180,7 @@ define([
         });
 
 
-        var $actionList = $renderResult.find('.orcid-actions ul').first().find('li a');
+        var $actionList = $renderResult.find('.orcid-actions ul').first().find('a.orcid-action');
 
         var insertTriggered = false;
         var deleteTriggered = false;
@@ -199,8 +199,10 @@ define([
           }
         });
 
+        expect($actionList.length > 0).to.be.true;
+
         _.each($actionList, function($action){
-          $action.click();
+          eventFire($action, 'click');
         });
 
         expect(insertTriggered).to.be.true;
@@ -211,6 +213,16 @@ define([
 
       });
 
+
+      function eventFire(el, etype){
+        if (el.fireEvent) {
+          el.fireEvent('on' + etype);
+        } else {
+          var evObj = document.createEvent('Events');
+          evObj.initEvent(etype, true, false);
+          el.dispatchEvent(evObj);
+        }
+      }
 
     })
   });

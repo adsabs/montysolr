@@ -184,12 +184,10 @@ define([
         return works;
       },
 
-      processDocs: function(jsonResponse, docs, paginationInfo) {
+      processDocs: function(jsonResponse, docs) {
 
         var start = 0;
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
-        var self = this;
-
         return docs;
       },
 
