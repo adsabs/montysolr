@@ -16,7 +16,8 @@ define([
     'js/mixins/papers_utils',
     'js/components/api_query',
     'js/components/json_response',
-    'js/modules/orcid/orcid_result_row_extension/extension'
+    'js/modules/orcid/orcid_result_row_extension/extension',
+    'hbs!./templates/empty-template'
   ],
 
   function (
@@ -31,13 +32,21 @@ define([
     PapersUtilsMixin,
     ApiQuery,
     JsonResponse,
-    OrcidResultRowExtension
+    OrcidResultRowExtension,
+    EmptyViewTemplate
     ) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
       initialize : function(options){
         ListOfThingsWidget.prototype.initialize.apply(this, arguments);
+
         //now adjusting the List Model
+        this.view.getEmptyView = function () {
+          return Marionette.ItemView.extend({
+            template: EmptyViewTemplate
+          });
+        };
+
         this.view.template = ContainerTemplate;
         this.view.model.set({"mainResults": true}, {silent : true});
         this.listenTo(this.collection, "reset", this.checkDetails);
@@ -185,7 +194,6 @@ define([
       },
 
       processDocs: function(jsonResponse, docs) {
-
         var start = 0;
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
         return docs;
@@ -220,6 +228,10 @@ define([
           pageData: pageData,
           currentQuery: new ApiQuery({'orcid': 'author X'})
         }
+      },
+
+      onShow: function() {
+        console.log('done')
       }
 
     });
