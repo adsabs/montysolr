@@ -181,9 +181,9 @@ define([
 
         var deleteTriggered = false;
 
-        minsub.subscribe(minsub.ORCID_ANNOUNCEMENT, function(msg){
+        minsub.subscribe(minsub.ORCID_ANNOUNCEMENT, function (msg) {
           var data = msg.data;
-      if (data.actionType == 'delete') {
+          if (data.actionType == 'delete') {
             deleteTriggered = true;
           }
         });

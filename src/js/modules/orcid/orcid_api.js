@@ -83,8 +83,7 @@ define([
 
         this.orcidModelNotifier = this.getBeeHive().getService('OrcidModelNotifier');
 
-        this.pubSub = this.getBeeHive().getService('PubSub').getHardenedInstance();
-        this.pubSubKey = this.pubSub.getPubSubKey();
+        this.pubSub = beehive.Services.get('PubSub').getHardenedInstance();// this.getBeeHive().getService('PubSub').getHardenedInstance();
 
         var _that = this;
 
@@ -144,7 +143,14 @@ define([
 
                 var userSession = LocalStorage.getObject("userSession");
 
-                var orcidProfile = userSession.orcidProfile['#document']['orcid-message']['orcid-profile'];
+                var orcidProfile = {};
+
+                if (userSession.orcidProfile['#document'] != undefined){
+                  orcidProfile = userSession.orcidProfile['#document']['orcid-message']['orcid-profile'];
+                }
+                else{
+                  orcidProfile = userSession.orcidProfile['orcid-message']['orcid-profile'];
+                }
 
                 var pubSub = _that.pubSub;
                 pubSub.publish(pubSub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.LoginSuccess, data: orcidProfile});
@@ -337,7 +343,16 @@ define([
             var LocalStorage = beeHive.getService("LocalStorage");
             var userSession = LocalStorage.getObject("userSession");
 
-            var orcidWorks = userSession.orcidProfile['#document']['orcid-message']['orcid-profile']['orcid-activities']['orcid-works']['orcid-work'];
+            var orcidProfile = {};
+
+            if (userSession.orcidProfile['#document'] != undefined){
+              orcidProfile = userSession.orcidProfile['#document']['orcid-message']['orcid-profile'];
+            }
+            else{
+              orcidProfile = userSession.orcidProfile['orcid-message']['orcid-profile'];
+            }
+
+            var orcidWorks = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
 
             var formattedAdsId = "ads:" + data.model.id;
 
@@ -383,10 +398,19 @@ define([
 
             LocalStorage.setObject("userSession", userSession);
 
+            var orcidProfile = {};
+
+            if (userSession.orcidProfile['#document'] != undefined){
+              orcidProfile = userSession.orcidProfile['#document']['orcid-message']['orcid-profile'];
+            }
+            else{
+              orcidProfile = userSession.orcidProfile['orcid-message']['orcid-profile'];
+            }
+
             _that.pubSub.publish(_that.pubSub.ORCID_ANNOUNCEMENT,
               {
                 msgType: OrcidApiConstants.Events.UserProfileRefreshed,
-                data: userSession.orcidProfile['#document']['orcid-message']['orcid-profile']
+                data: orcidProfile
               });
           })
       },
@@ -464,6 +488,14 @@ define([
           .done(function(data) {
             var xml = $.xml2json(data);
             var message = xml['#document'];
+
+            if (xml['#document'] != undefined){
+              message = xml['#document'];
+            }
+            else{
+              message = xml;
+            }
+
             var orcidWorks = message['orcid-message']['orcid-profile']["orcid-activities"]["orcid-works"];
 
             // Exclude works not comming from ADS and works to delete
@@ -506,6 +538,14 @@ define([
           .done(function(data) {
             var xml = $.xml2json(data);
             var message = xml['#document'];
+
+            if (xml['#document'] != undefined){
+              message = xml['#document'];
+            }
+            else{
+              message = xml;
+            }
+
             var orcidWorks = message['orcid-message']['orcid-profile']["orcid-activities"]["orcid-works"];
 
             // Exclude works not comming from ADS and works to update
