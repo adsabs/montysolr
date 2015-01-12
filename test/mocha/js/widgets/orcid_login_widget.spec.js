@@ -11,7 +11,7 @@ define(['marionette',
             OrcidApiConstants,
             PubSubEvents) {
 
-    describe('Orcid login widget', function(){
+    describe('Orcid login widget (orcid_login_widget.spec.js)', function(){
 
       var orcidProfileJson = {
         "orcid-bio": {
@@ -36,13 +36,8 @@ define(['marionette',
       it('should show login button', function(done){
 
         var widget = _getWidget();
-
-        var $renderResult = widget.render();
-
-        var loginButton = $renderResult.$el.find("button.login-orcid-button")[0];
-
-        expect(loginButton.innerText == "Orcid login ").to.be.true;
-
+        var $w = widget.render().$el;
+        expect($w.find('button.login-orcid-button').text().trim()).to.be.eql('Orcid login');
         done();
       });
 
@@ -62,15 +57,15 @@ define(['marionette',
       it('should show name of user after successful login', function(done){
 
         var widget = _getWidget();
-        var $renderResult = widget.render();
+        var $w = widget.render().$el;
 
         minsub.publish(PubSubEvents.ORCID_ANNOUNCEMENT, {
           msgType: OrcidApiConstants.Events.LoginSuccess,
           data: orcidProfileJson
         });
 
-        expect($renderResult.$el.find(".orcid-bio div")[0].innerText == "Orcid name: Obrátil, Martin").to.be.true;
-        expect($renderResult.$el.find(".signout-orcid-button")[0].innerText == "sign out").to.be.true;
+        expect($w.find(".orcid-bio div").text().trim()).to.be.eql("Orcid name: Obrátil, Martin");
+        expect($w.find(".signout-orcid-button").text().trim()).to.be.eql("sign out");
 
         done();
 
@@ -89,11 +84,8 @@ define(['marionette',
           msgType: OrcidApiConstants.Events.SignOut
         });
 
-        var $renderResult = widget.render();
-
-        var loginButton = $renderResult.$el.find("button.login-orcid-button")[0];
-
-        expect(loginButton.innerText == "Orcid login ").to.be.true;
+        var $w = widget.render().$el;
+        expect($w.find("button.login-orcid-button").text().trim()).to.be.eql('Orcid login');
 
         done();
       });
