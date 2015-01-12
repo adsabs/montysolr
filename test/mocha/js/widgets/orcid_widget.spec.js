@@ -163,5 +163,91 @@ define([
 
         done();
       });
+
+      it('should trigger proper action', function(done){
+        var widget = new _getWidget();
+
+        var $renderResult = $(widget.render().el);
+        $("#test").append($renderResult);
+
+        // trigger event of user profile refreshment
+        minsub.publish(minsub.ORCID_ANNOUNCEMENT, {
+          msgType: OrcidApiConstants.Events.UserProfileRefreshed,
+          data: getUserProfileJson()
+        });
+
+
+        var $actionList = $renderResult.find('.orcid-actions ul').first().find('a.orcid-action');
+
+        var deleteTriggered = false;
+
+        minsub.subscribe(minsub.ORCID_ANNOUNCEMENT, function(msg){
+          var data = msg.data;
+      if (data.actionType == 'delete') {
+            deleteTriggered = true;
+          }
+        });
+
+        expect($actionList.length > 0).to.be.true;
+
+        _.each($actionList, function($action){
+          eventFire($action, 'click');
+        });
+
+        expect(deleteTriggered).to.be.true;
+
+        done();
+
+      });
+
+      it('should handle some UI clicks', function(done)
+        {
+          var widget = _getWidget();
+
+          var $renderResult = widget.render().$el;
+          $("#test").append($renderResult);
+
+          // the widget is not currently displayed - no orcid user
+          expect($renderResult.html()).to.be.equal('');
+
+          // trigger event of user profile refreshment
+          minsub.publish(minsub.ORCID_ANNOUNCEMENT, {
+            msgType: OrcidApiConstants.Events.UserProfileRefreshed,
+            data: getUserProfileJson()
+          });
+
+          var $activeLinkButtons = $renderResult.find('button.active-link');
+          var $hiddenActionLists = $renderResult.find('ul.link-details.hidden');
+
+          $activeLinkButtons.trigger('click');
+
+          var $shownActionLists = $renderResult.find('ul.link-details');
+
+          expect($renderResult.find('ul.link-details.hidden').length == 0).to.be.true;
+          expect($shownActionLists.length == $hiddenActionLists.length).to.be.true;
+
+          $activeLinkButtons.trigger('click');
+
+          $hiddenActionLists = $renderResult.find('ul.link-details.hidden');
+
+          expect($hiddenActionLists.length == $shownActionLists.length).to.be.true;
+
+          $activeLinkButtons.trigger('mouseenter');
+          $activeLinkButtons.trigger('mouseleave');
+
+          done();
+        });
+
+      function eventFire(el, etype){
+        if (el.fireEvent) {
+          el.fireEvent('on' + etype);
+        } else {
+          var evObj = document.createEvent('Events');
+          evObj.initEvent(etype, true, false);
+          el.dispatchEvent(evObj);
+        }
+      }
     });
+
+
   });

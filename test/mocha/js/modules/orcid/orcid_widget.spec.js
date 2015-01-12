@@ -161,6 +161,5 @@ define([
           el.dispatchEvent(evObj);
         }
       }
-
     });
   });

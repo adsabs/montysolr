@@ -70,16 +70,12 @@ define([
         var $orcidActions = this.$('.orcid-actions');
         $orcidActions.removeClass('hidden');
         $orcidActions.removeClass('orcid-wait');
-        var $update = $orcidActions.find('.orcid-action-update');
-        //var $insert = $orcidActions.find('.orcid-action-insert');
         var $delete = $orcidActions.find('.orcid-action-delete');
 
-        $update.addClass('hidden');
-        //$insert.addClass('hidden');
         $delete.addClass('hidden');
 
         if (this.model.attributes.isFromAds){
-          $update.removeClass('hidden');
+          //$update.removeClass('hidden');
           $delete.removeClass('hidden');
           $icon.addClass('green');
         }
@@ -166,11 +162,7 @@ define([
 
         var actionType = '';
 
-        if ($c.hasClass('orcid-action-insert')) {
-          actionType = 'insert';
-        } else if ($c.hasClass('orcid-action-update')) {
-          actionType = 'update';
-        } else if ($c.hasClass('orcid-action-delete')) {
+        if ($c.hasClass('orcid-action-delete')) {
           actionType = 'delete';
         }
 
