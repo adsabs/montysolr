@@ -15,6 +15,19 @@ define([
     /*globals mocha, expect, chai,bbbTest */
     chai.Assertion.includeStack = true;
 
+    try {
+      Function.bind();
+    }
+    catch (e) {
+      console.log('Adding es5shim because we run non-Ecma5 environment');
+
+      // this will be asynchronous, but the hope is that when the other tests finish loading
+      // the es5-shim was already installed and is there
+      require(["../../bower_components/es5-shim/es5-shim"], function() {
+        console.log('ES5 activated');
+      });
+    }
+
     mocha.setup('bdd');
     mocha.bail(false);
 
