@@ -123,7 +123,9 @@ define([], function() {
      * A message/action that should be displayed to the user (on prominent)
      * place
      */
-    ALERT: "[Alert]-Message"
+    ALERT: "[Alert]-Message",
+    ORCID_ANNOUNCEMENT: "[PubSub]-Orcid-Announcement",
+    BOOTSTRAP_CONFIGURED: "[PubSub]-Bootstrap-Configured"
 
 
 };

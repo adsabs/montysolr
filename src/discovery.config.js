@@ -26,7 +26,11 @@ require.config({
         services: {
           'Api': 'js/services/api',
           'PubSub': 'js/services/pubsub',
-          'Navigator': 'js/apps/discovery/navigator'
+          'Navigator': 'js/apps/discovery/navigator',
+          OrcidApi: 'js/modules/orcid/orcid_api',
+          OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier/module',
+          LocalStorage: 'js/services/localStorage',
+          Json2Xml: 'js/modules/orcid/json2xml'
         },
         objects: {
           User: 'js/components/user',
@@ -59,6 +63,11 @@ require.config({
 
         Metrics :  'js/widgets/metrics/widget',
 
+        OrcidLogin: 'js/modules/orcid/orcid_login/widget',
+        OrcidWorks: 'js/modules/orcid/orcid_works/widget',
+        //OrcidResults: 'js/modules/orcid/orcid_result_row_extension/widget',
+        OrcidBigWidget: 'js/modules/orcid/widget/widget',
+
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
         BibstemFacet: 'js/wraps/bibstem_facet',
@@ -81,11 +90,9 @@ require.config({
         ShowPaperMetrics: 'js/wraps/paper_metrics',
 
         TOCWidget: 'js/page_managers/toc_widget'
-
       },
-      plugins: {
+      plugins: {}
       }
-    }
   },
 
   // Configuration for the facades (you can pick specific implementation, just for your
@@ -135,6 +142,8 @@ require.config({
     // for development use
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
+    'xml2json': 'libs/jquery-xml2json/xml2json',
+    'localstorage': 'libs/backbone.localStorage/backbone.localStorage',
 
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
@@ -191,6 +200,10 @@ require.config({
 
     'sprintf': {
       export: 'sprintf'
+    },
+
+    xml2json: {
+      deps: ['jquery']
     }
   },
 

@@ -1,0 +1,78 @@
+//http://support.orcid.org/knowledgebase/articles/433434-orcid-example-web-graphics?
+
+.login-orcid-button, .signout-orcid-button{
+  border: 1px solid #D3D3D3;
+  padding: .3em;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 1px 1px 3px #999;
+  cursor: pointer;
+  color: #999;
+  font-weight: bold;
+  font-size: .8em;
+  line-height: 24px;
+  vertical-align: middle;
+}
+
+.login-orcid-button:hover, .signout-orcid-button:hover{
+  border: 1px solid #338caf;
+  color: #338caf;
+}
+
+.orcid-id-logo{
+  display: block;
+  margin: 0 .5em 0 0;
+  padding: 0;
+  float: left;
+}
+
+.orcid-wait {
+  &:after {
+    .fa;
+    .fa-spin;
+    .fa-2x;
+
+    content: @fa-var-cog;
+    color: @brand-info;
+  }
+}
+
+.orcid-works {
+  margin-top: .8em;
+
+  .s-results-title{
+    display: inline;
+  }
+
+  .s-display-block {
+
+    margin-bottom : .8em
+  }
+  .orcid-actions{
+    display: inline;
+  }
+
+
+
+}
+
+.orcid-action{
+  cursor: pointer; cursor: hand;
+}
+
+.mini-orcid-icon {
+  background-size: 20px 20px;
+  width: 20px;
+  height: 20px;
+  display: block;
+  float: left;
+
+  &.green {
+    background: url('/styles/img/orcid-mini-icon-green.png') transparent no-repeat;
+    background-size: 20px 20px;
+  }
+  &.gray{
+    background: url('/styles/img/orcid-mini-icon-gray.png') transparent no-repeat;
+    background-size: 20px 20px;
+  }
+}

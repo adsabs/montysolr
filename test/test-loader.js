@@ -111,7 +111,8 @@ define([
           window.bbbTest.serverReady = true;
           console.log('We seem to have access to the api, setting serverReady=true');
         }
-      }
+      },
+      timeout:100
     }).always(function() {
       console.log('About to load testsuite(s): ' + JSON.stringify(suites));
       console.log('window.location=' + window.location + ' (testBase=' + testBase + ')');
