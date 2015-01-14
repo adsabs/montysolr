@@ -6,21 +6,13 @@ define([
   'js/components/json_response',
   'underscore'
 
-], function (
-  Marionette,
-  NetworkWidget,
-  MinimalPubsub,
-  ApiQuery,
-  JsonResponse,
-  _
-  ) {
-
+], function (Marionette, NetworkWidget, MinimalPubsub, ApiQuery, JsonResponse, _) {
 
   describe("Network Visualization Widget", function () {
 
     var testDataSmall, testDataLarge, testDataEmpty, networkWidget;
 
-    testDataSmall = {"fullGraph": {"links": [
+    testDataSmall = {"data": {"fullGraph": {"links": [
       {"source": 10, "target": 15, "value": 13.509433962264154},
       {"source": 9, "target": 11, "value": 28.962264150943401},
       {"source": 18, "target": 9, "value": 32.641509433962256},
@@ -109,7058 +101,1802 @@ define([
       {"nodeName": "Wyatt, W", "nodeWeight": 7.1183069197156463},
       {"nodeName": "Bollen, J", "nodeWeight": 14.26759277375595},
       {"nodeName": "Eichhorn, G", "nodeWeight": 18.664970977629945}
-    ]}}
+    ]}}, "msg": {"numFound": 10, "rows": 10}};
 
-    testDataLarge =  {
-      "fullGraph": {
-        "directed": false,
-        "graph": [],
-        "links": [
-          {
-            "source": 0,
-            "target": 3,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 0,
-            "target": 206,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 0,
-            "target": 211,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 0,
-            "target": 121,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 0,
-            "target": 103,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 0,
-            "target": 155,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 1,
-            "target": 32,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 1,
-            "target": 207,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 1,
-            "target": 34,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 1,
-            "target": 197,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 2,
-            "target": 196,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 2,
-            "target": 144,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 2,
-            "target": 62,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 2,
-            "target": 201,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 3,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 3,
-            "target": 206,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 3,
-            "target": 208,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 3,
-            "target": 113,
-            "weight": 33.938775510204096
-          },
-          {
-            "source": 3,
-            "target": 11,
-            "weight": 1.0
-          },
-          {
-            "source": 3,
-            "target": 121,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 3,
-            "target": 155,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 3,
-            "target": 51,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 3,
-            "target": 62,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 3,
-            "target": 67,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 3,
-            "target": 211,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 3,
-            "target": 74,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 3,
-            "target": 86,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 3,
-            "target": 90,
-            "weight": 1.0
-          },
-          {
-            "source": 3,
-            "target": 92,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 3,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 3,
-            "target": 97,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 3,
-            "target": 98,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 3,
-            "target": 103,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 3,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 4,
-            "target": 106,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 4,
-            "target": 7,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 4,
-            "target": 34,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 4,
-            "target": 187,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 4,
-            "target": 73,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 4,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 5,
-            "target": 23,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 5,
-            "target": 84,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 5,
-            "target": 207,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 5,
-            "target": 34,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 6,
-            "target": 51,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 6,
-            "target": 78,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 6,
-            "target": 29,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 6,
-            "target": 60,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 6,
-            "target": 62,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 6,
-            "target": 123,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 7,
-            "target": 106,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 7,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 7,
-            "target": 34,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 7,
-            "target": 187,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 7,
-            "target": 73,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 8,
-            "target": 27,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 105,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 64,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 93,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 96,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 72,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 127,
-            "weight": 1.0
-          },
-          {
-            "source": 8,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 9,
-            "target": 51,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 9,
-            "target": 77,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 9,
-            "target": 108,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 9,
-            "target": 135,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 9,
-            "target": 62,
-            "weight": 38.19387755102043
-          },
-          {
-            "source": 10,
-            "target": 51,
-            "weight": 37.24489795918368
-          },
-          {
-            "source": 10,
-            "target": 78,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 10,
-            "target": 54,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 10,
-            "target": 181,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 10,
-            "target": 134,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 10,
-            "target": 74,
-            "weight": 32.59183673469388
-          },
-          {
-            "source": 10,
-            "target": 167,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 10,
-            "target": 89,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 10,
-            "target": 213,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 10,
-            "target": 214,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 10,
-            "target": 71,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 10,
-            "target": 62,
-            "weight": 38.25510204081635
-          },
-          {
-            "source": 10,
-            "target": 196,
-            "weight": 35.19387755102042
-          },
-          {
-            "source": 10,
-            "target": 175,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 10,
-            "target": 198,
-            "weight": 38.01020408163267
-          },
-          {
-            "source": 11,
-            "target": 51,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 208,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 113,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 62,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 90,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 92,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 86,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 97,
-            "weight": 1.0
-          },
-          {
-            "source": 11,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 12,
-            "target": 51,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 12,
-            "target": 78,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 12,
-            "target": 62,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 13,
-            "target": 179,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 13,
-            "target": 159,
-            "weight": 37.428571428571445
-          },
-          {
-            "source": 13,
-            "target": 32,
-            "weight": 37.428571428571445
-          },
-          {
-            "source": 13,
-            "target": 34,
-            "weight": 37.428571428571445
-          },
-          {
-            "source": 13,
-            "target": 61,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 13,
-            "target": 126,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 13,
-            "target": 65,
-            "weight": 37.428571428571445
-          },
-          {
-            "source": 13,
-            "target": 197,
-            "weight": 37.428571428571445
-          },
-          {
-            "source": 13,
-            "target": 75,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 13,
-            "target": 76,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 14,
-            "target": 77,
-            "weight": 27.142857142857157
-          },
-          {
-            "source": 14,
-            "target": 214,
-            "weight": 34.153061224489804
-          },
-          {
-            "source": 14,
-            "target": 29,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 14,
-            "target": 182,
-            "weight": 27.142857142857157
-          },
-          {
-            "source": 14,
-            "target": 102,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 14,
-            "target": 88,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 14,
-            "target": 62,
-            "weight": 34.48979591836736
-          },
-          {
-            "source": 14,
-            "target": 40,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 14,
-            "target": 119,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 14,
-            "target": 120,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 14,
-            "target": 172,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 14,
-            "target": 24,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 14,
-            "target": 124,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 14,
-            "target": 196,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 15,
-            "target": 207,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 16,
-            "target": 25,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 79,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 137,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 117,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 17,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 18,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 16,
-            "target": 43,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 25,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 79,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 137,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 117,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 18,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 17,
-            "target": 43,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 18,
-            "target": 25,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 18,
-            "target": 79,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 18,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 18,
-            "target": 137,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 18,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 18,
-            "target": 117,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 18,
-            "target": 43,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 19,
-            "target": 193,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 19,
-            "target": 62,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 20,
-            "target": 107,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 53,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 139,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 130,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 26,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 52,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 20,
-            "target": 147,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 21,
-            "target": 158,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 21,
-            "target": 32,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 21,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 21,
-            "target": 34,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 21,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 21,
-            "target": 138,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 22,
-            "target": 131,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 22,
-            "target": 64,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 22,
-            "target": 116,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 22,
-            "target": 212,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 22,
-            "target": 188,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 22,
-            "target": 66,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 22,
-            "target": 195,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 23,
-            "target": 84,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 23,
-            "target": 207,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 23,
-            "target": 34,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 24,
-            "target": 51,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 24,
-            "target": 77,
-            "weight": 32.59183673469388
-          },
-          {
-            "source": 24,
-            "target": 214,
-            "weight": 36.57142857142858
-          },
-          {
-            "source": 24,
-            "target": 134,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 24,
-            "target": 182,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 24,
-            "target": 56,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 24,
-            "target": 141,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 24,
-            "target": 200,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 24,
-            "target": 186,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 24,
-            "target": 63,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 24,
-            "target": 119,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 24,
-            "target": 172,
-            "weight": 29.98979591836736
-          },
-          {
-            "source": 24,
-            "target": 62,
-            "weight": 32.59183673469388
-          },
-          {
-            "source": 24,
-            "target": 196,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 24,
-            "target": 135,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 25,
-            "target": 79,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 25,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 25,
-            "target": 137,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 25,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 25,
-            "target": 117,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 25,
-            "target": 43,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 26,
-            "target": 107,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 53,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 130,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 139,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 52,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 147,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 26,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 27,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 64,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 93,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 96,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 72,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 127,
-            "weight": 1.0
-          },
-          {
-            "source": 27,
-            "target": 105,
-            "weight": 1.0
-          },
-          {
-            "source": 28,
-            "target": 188,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 28,
-            "target": 57,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 28,
-            "target": 87,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 28,
-            "target": 64,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 28,
-            "target": 44,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 28,
-            "target": 195,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 29,
-            "target": 51,
-            "weight": 34.122448979591844
-          },
-          {
-            "source": 29,
-            "target": 78,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 29,
-            "target": 85,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 29,
-            "target": 60,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 29,
-            "target": 202,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 29,
-            "target": 62,
-            "weight": 38.40816326530615
-          },
-          {
-            "source": 29,
-            "target": 91,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 29,
-            "target": 214,
-            "weight": 38.10204081632655
-          },
-          {
-            "source": 29,
-            "target": 123,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 29,
-            "target": 124,
-            "weight": 38.10204081632655
-          },
-          {
-            "source": 29,
-            "target": 196,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 30,
-            "target": 174,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 30,
-            "target": 164,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 30,
-            "target": 62,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 30,
-            "target": 214,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 30,
-            "target": 124,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 30,
-            "target": 196,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 31,
-            "target": 111,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 31,
-            "target": 63,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 31,
-            "target": 77,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 31,
-            "target": 62,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 32,
-            "target": 205,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 32,
-            "target": 110,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 112,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 207,
-            "weight": 39.78571428571429
-          },
-          {
-            "source": 32,
-            "target": 115,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 132,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 133,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 32,
-            "target": 138,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 34,
-            "weight": 39.81632653061225
-          },
-          {
-            "source": 32,
-            "target": 35,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 32,
-            "target": 141,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 143,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 32,
-            "target": 39,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 32,
-            "target": 126,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 32,
-            "target": 42,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 151,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 32,
-            "target": 50,
-            "weight": 36.57142857142858
-          },
-          {
-            "source": 32,
-            "target": 158,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 159,
-            "weight": 39.540816326530624
-          },
-          {
-            "source": 32,
-            "target": 163,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 32,
-            "target": 61,
-            "weight": 37.826530612244916
-          },
-          {
-            "source": 32,
-            "target": 168,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 32,
-            "target": 65,
-            "weight": 39.60204081632655
-          },
-          {
-            "source": 32,
-            "target": 69,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 32,
-            "target": 75,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 32,
-            "target": 76,
-            "weight": 39.14285714285717
-          },
-          {
-            "source": 32,
-            "target": 179,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 32,
-            "target": 81,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 32,
-            "target": 197,
-            "weight": 39.87755102040817
-          },
-          {
-            "source": 32,
-            "target": 187,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 189,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 32,
-            "target": 94,
-            "weight": 38.8979591836735
-          },
-          {
-            "source": 32,
-            "target": 99,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 32,
-            "target": 33,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 33,
-            "target": 110,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 33,
-            "target": 207,
-            "weight": 34.122448979591844
-          },
-          {
-            "source": 33,
-            "target": 34,
-            "weight": 34.122448979591844
-          },
-          {
-            "source": 33,
-            "target": 187,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 33,
-            "target": 189,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 33,
-            "target": 190,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 33,
-            "target": 197,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 34,
-            "target": 106,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 205,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 34,
-            "target": 110,
-            "weight": 36.23469387755103
-          },
-          {
-            "source": 34,
-            "target": 112,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 115,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 125,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 126,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 132,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 133,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 34,
-            "target": 138,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 35,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 141,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 143,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 39,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 34,
-            "target": 42,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 146,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 151,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 34,
-            "target": 207,
-            "weight": 39.75510204081634
-          },
-          {
-            "source": 34,
-            "target": 50,
-            "weight": 36.57142857142858
-          },
-          {
-            "source": 34,
-            "target": 158,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 159,
-            "weight": 39.540816326530624
-          },
-          {
-            "source": 34,
-            "target": 163,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 58,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 34,
-            "target": 61,
-            "weight": 36.72448979591837
-          },
-          {
-            "source": 34,
-            "target": 62,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 168,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 34,
-            "target": 65,
-            "weight": 39.57142857142859
-          },
-          {
-            "source": 34,
-            "target": 169,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 69,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 73,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 34,
-            "target": 75,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 34,
-            "target": 76,
-            "weight": 39.14285714285717
-          },
-          {
-            "source": 34,
-            "target": 179,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 81,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 34,
-            "target": 84,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 34,
-            "target": 197,
-            "weight": 39.84693877551021
-          },
-          {
-            "source": 34,
-            "target": 187,
-            "weight": 33.142857142857146
-          },
-          {
-            "source": 34,
-            "target": 189,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 34,
-            "target": 190,
-            "weight": 35.438775510204096
-          },
-          {
-            "source": 34,
-            "target": 94,
-            "weight": 38.8979591836735
-          },
-          {
-            "source": 34,
-            "target": 95,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 99,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 34,
-            "target": 100,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 34,
-            "target": 196,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 35,
-            "target": 163,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 35,
-            "target": 207,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 35,
-            "target": 143,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 35,
-            "target": 69,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 35,
-            "target": 197,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 36,
-            "target": 189,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 36,
-            "target": 197,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 36,
-            "target": 49,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 37,
-            "target": 157,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 166,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 114,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 38,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 68,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 148,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 37,
-            "target": 82,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 157,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 166,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 114,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 68,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 148,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 38,
-            "target": 82,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 39,
-            "target": 159,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 39,
-            "target": 207,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 39,
-            "target": 65,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 39,
-            "target": 99,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 39,
-            "target": 197,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 39,
-            "target": 76,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 40,
-            "target": 77,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 40,
-            "target": 182,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 40,
-            "target": 196,
-            "weight": 30.51020408163266
-          },
-          {
-            "source": 40,
-            "target": 88,
-            "weight": 30.51020408163266
-          },
-          {
-            "source": 40,
-            "target": 120,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 40,
-            "target": 214,
-            "weight": 30.51020408163266
-          },
-          {
-            "source": 40,
-            "target": 102,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 41,
-            "target": 207,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 41,
-            "target": 153,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 42,
-            "target": 132,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 42,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 42,
-            "target": 115,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 42,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 43,
-            "target": 79,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 43,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 43,
-            "target": 137,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 43,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 43,
-            "target": 117,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 44,
-            "target": 64,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 44,
-            "target": 57,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 44,
-            "target": 87,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 44,
-            "target": 188,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 44,
-            "target": 195,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 45,
-            "target": 161,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 45,
-            "target": 196,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 45,
-            "target": 59,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 45,
-            "target": 62,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 45,
-            "target": 70,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 45,
-            "target": 125,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 46,
-            "target": 196,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 46,
-            "target": 86,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 46,
-            "target": 62,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 46,
-            "target": 150,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 46,
-            "target": 119,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 46,
-            "target": 125,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 47,
-            "target": 97,
-            "weight": 37.70408163265308
-          },
-          {
-            "source": 47,
-            "target": 149,
-            "weight": 36.142857142857146
-          },
-          {
-            "source": 47,
-            "target": 199,
-            "weight": 37.70408163265308
-          },
-          {
-            "source": 48,
-            "target": 201,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 48,
-            "target": 136,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 48,
-            "target": 86,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 48,
-            "target": 62,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 48,
-            "target": 144,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 48,
-            "target": 196,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 49,
-            "target": 197,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 50,
-            "target": 207,
-            "weight": 36.57142857142858
-          },
-          {
-            "source": 50,
-            "target": 197,
-            "weight": 36.57142857142858
-          },
-          {
-            "source": 51,
-            "target": 202,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 51,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 51,
-            "target": 208,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 51,
-            "target": 108,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 51,
-            "target": 214,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 51,
-            "target": 123,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 51,
-            "target": 134,
-            "weight": 34.48979591836736
-          },
-          {
-            "source": 51,
-            "target": 135,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 51,
-            "target": 141,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 51,
-            "target": 175,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 51,
-            "target": 55,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 51,
-            "target": 165,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 51,
-            "target": 60,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 51,
-            "target": 167,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 51,
-            "target": 62,
-            "weight": 38.8979591836735
-          },
-          {
-            "source": 51,
-            "target": 63,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 51,
-            "target": 198,
-            "weight": 37.24489795918368
-          },
-          {
-            "source": 51,
-            "target": 170,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 51,
-            "target": 71,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 51,
-            "target": 74,
-            "weight": 34.36734693877552
-          },
-          {
-            "source": 51,
-            "target": 77,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 51,
-            "target": 78,
-            "weight": 35.591836734693885
-          },
-          {
-            "source": 51,
-            "target": 181,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 51,
-            "target": 86,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 51,
-            "target": 113,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 51,
-            "target": 90,
-            "weight": 1.0
-          },
-          {
-            "source": 51,
-            "target": 92,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 51,
-            "target": 191,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 51,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 51,
-            "target": 97,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 51,
-            "target": 67,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 51,
-            "target": 196,
-            "weight": 35.19387755102042
-          },
-          {
-            "source": 51,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 52,
-            "target": 130,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 52,
-            "target": 53,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 52,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 52,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 52,
-            "target": 139,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 52,
-            "target": 107,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 52,
-            "target": 147,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 52,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 53,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 53,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 53,
-            "target": 130,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 53,
-            "target": 139,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 53,
-            "target": 107,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 53,
-            "target": 147,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 53,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 54,
-            "target": 198,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 54,
-            "target": 62,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 55,
-            "target": 164,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 55,
-            "target": 62,
-            "weight": 38.683673469387784
-          },
-          {
-            "source": 55,
-            "target": 125,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 55,
-            "target": 170,
-            "weight": 35.438775510204096
-          },
-          {
-            "source": 55,
-            "target": 191,
-            "weight": 38.346938775510225
-          },
-          {
-            "source": 55,
-            "target": 196,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 55,
-            "target": 171,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 56,
-            "target": 200,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 56,
-            "target": 186,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 56,
-            "target": 172,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 56,
-            "target": 196,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 57,
-            "target": 64,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 57,
-            "target": 87,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 57,
-            "target": 188,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 57,
-            "target": 195,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 58,
-            "target": 207,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 58,
-            "target": 197,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 59,
-            "target": 161,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 59,
-            "target": 196,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 59,
-            "target": 62,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 59,
-            "target": 70,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 59,
-            "target": 125,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 60,
-            "target": 78,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 60,
-            "target": 62,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 60,
-            "target": 123,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 61,
-            "target": 179,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 61,
-            "target": 159,
-            "weight": 36.72448979591837
-          },
-          {
-            "source": 61,
-            "target": 65,
-            "weight": 37.826530612244916
-          },
-          {
-            "source": 61,
-            "target": 197,
-            "weight": 37.826530612244916
-          },
-          {
-            "source": 61,
-            "target": 76,
-            "weight": 34.48979591836736
-          },
-          {
-            "source": 62,
-            "target": 63,
-            "weight": 33.23469387755103
-          },
-          {
-            "source": 62,
-            "target": 67,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 62,
-            "target": 70,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 62,
-            "target": 71,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 74,
-            "weight": 34.36734693877552
-          },
-          {
-            "source": 62,
-            "target": 77,
-            "weight": 36.29591836734695
-          },
-          {
-            "source": 62,
-            "target": 78,
-            "weight": 35.591836734693885
-          },
-          {
-            "source": 62,
-            "target": 80,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 85,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 62,
-            "target": 86,
-            "weight": 36.72448979591837
-          },
-          {
-            "source": 62,
-            "target": 88,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 62,
-            "target": 89,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 62,
-            "target": 90,
-            "weight": 1.0
-          },
-          {
-            "source": 62,
-            "target": 91,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 62,
-            "target": 92,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 62,
-            "target": 95,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 97,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 62,
-            "target": 100,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 101,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 62,
-            "target": 108,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 62,
-            "target": 109,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 62,
-            "target": 111,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 62,
-            "target": 113,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 62,
-            "target": 118,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 62,
-            "target": 119,
-            "weight": 34.122448979591844
-          },
-          {
-            "source": 62,
-            "target": 122,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 123,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 124,
-            "weight": 39.204081632653086
-          },
-          {
-            "source": 62,
-            "target": 125,
-            "weight": 38.5918367346939
-          },
-          {
-            "source": 62,
-            "target": 129,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 62,
-            "target": 134,
-            "weight": 34.48979591836736
-          },
-          {
-            "source": 62,
-            "target": 135,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 62,
-            "target": 136,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 62,
-            "target": 141,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 62,
-            "target": 144,
-            "weight": 34.36734693877552
-          },
-          {
-            "source": 62,
-            "target": 145,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 62,
-            "target": 146,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 150,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 62,
-            "target": 154,
-            "weight": 37.91836734693879
-          },
-          {
-            "source": 62,
-            "target": 156,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 62,
-            "target": 161,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 62,
-            "target": 164,
-            "weight": 37.520408163265316
-          },
-          {
-            "source": 62,
-            "target": 165,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 167,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 169,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 170,
-            "weight": 35.438775510204096
-          },
-          {
-            "source": 62,
-            "target": 171,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 62,
-            "target": 172,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 62,
-            "target": 174,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 62,
-            "target": 175,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 177,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 180,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 181,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 182,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 62,
-            "target": 184,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 185,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 62,
-            "target": 191,
-            "weight": 38.50000000000003
-          },
-          {
-            "source": 62,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 62,
-            "target": 193,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 62,
-            "target": 196,
-            "weight": 39.32653061224492
-          },
-          {
-            "source": 62,
-            "target": 198,
-            "weight": 38.316326530612265
-          },
-          {
-            "source": 62,
-            "target": 201,
-            "weight": 37.153061224489804
-          },
-          {
-            "source": 62,
-            "target": 202,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 62,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 62,
-            "target": 208,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 62,
-            "target": 209,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 62,
-            "target": 213,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 62,
-            "target": 214,
-            "weight": 38.95918367346942
-          },
-          {
-            "source": 63,
-            "target": 77,
-            "weight": 33.23469387755103
-          },
-          {
-            "source": 63,
-            "target": 134,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 63,
-            "target": 135,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 63,
-            "target": 141,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 63,
-            "target": 111,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 64,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 127,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 212,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 64,
-            "target": 116,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 64,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 131,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 64,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 66,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 64,
-            "target": 72,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 87,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 64,
-            "target": 188,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 64,
-            "target": 93,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 96,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 64,
-            "target": 195,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 64,
-            "target": 105,
-            "weight": 1.0
-          },
-          {
-            "source": 65,
-            "target": 179,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 65,
-            "target": 159,
-            "weight": 39.418367346938794
-          },
-          {
-            "source": 65,
-            "target": 81,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 65,
-            "target": 207,
-            "weight": 39.38775510204084
-          },
-          {
-            "source": 65,
-            "target": 126,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 65,
-            "target": 168,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 65,
-            "target": 94,
-            "weight": 33.87755102040817
-          },
-          {
-            "source": 65,
-            "target": 99,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 65,
-            "target": 197,
-            "weight": 39.63265306122451
-          },
-          {
-            "source": 65,
-            "target": 75,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 65,
-            "target": 76,
-            "weight": 38.98979591836738
-          },
-          {
-            "source": 66,
-            "target": 131,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 66,
-            "target": 188,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 66,
-            "target": 212,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 66,
-            "target": 116,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 66,
-            "target": 195,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 67,
-            "target": 208,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 67,
-            "target": 86,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 67,
-            "target": 113,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 67,
-            "target": 92,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 67,
-            "target": 97,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 67,
-            "target": 74,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 68,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 68,
-            "target": 157,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 68,
-            "target": 166,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 68,
-            "target": 114,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 68,
-            "target": 148,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 68,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 68,
-            "target": 82,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 69,
-            "target": 163,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 69,
-            "target": 207,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 69,
-            "target": 143,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 69,
-            "target": 197,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 70,
-            "target": 161,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 70,
-            "target": 196,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 70,
-            "target": 125,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 71,
-            "target": 181,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 71,
-            "target": 175,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 71,
-            "target": 198,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 72,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 93,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 96,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 127,
-            "weight": 1.0
-          },
-          {
-            "source": 72,
-            "target": 105,
-            "weight": 1.0
-          },
-          {
-            "source": 73,
-            "target": 106,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 73,
-            "target": 187,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 73,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 74,
-            "target": 78,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 74,
-            "target": 208,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 74,
-            "target": 134,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 74,
-            "target": 86,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 74,
-            "target": 113,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 74,
-            "target": 167,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 74,
-            "target": 92,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 74,
-            "target": 214,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 74,
-            "target": 97,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 74,
-            "target": 196,
-            "weight": 32.59183673469388
-          },
-          {
-            "source": 74,
-            "target": 198,
-            "weight": 32.59183673469388
-          },
-          {
-            "source": 75,
-            "target": 159,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 75,
-            "target": 126,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 75,
-            "target": 197,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 76,
-            "target": 94,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 76,
-            "target": 159,
-            "weight": 39.14285714285717
-          },
-          {
-            "source": 76,
-            "target": 81,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 76,
-            "target": 207,
-            "weight": 38.43877551020411
-          },
-          {
-            "source": 76,
-            "target": 168,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 76,
-            "target": 99,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 76,
-            "target": 197,
-            "weight": 39.14285714285717
-          },
-          {
-            "source": 77,
-            "target": 108,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 77,
-            "target": 111,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 77,
-            "target": 120,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 77,
-            "target": 214,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 77,
-            "target": 134,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 77,
-            "target": 135,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 77,
-            "target": 141,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 77,
-            "target": 172,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 77,
-            "target": 182,
-            "weight": 27.142857142857157
-          },
-          {
-            "source": 77,
-            "target": 102,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 77,
-            "target": 88,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 77,
-            "target": 119,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 77,
-            "target": 196,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 78,
-            "target": 134,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 78,
-            "target": 123,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 78,
-            "target": 196,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 78,
-            "target": 198,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 79,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 79,
-            "target": 137,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 79,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 79,
-            "target": 117,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 80,
-            "target": 184,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 80,
-            "target": 209,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 80,
-            "target": 144,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 80,
-            "target": 191,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 80,
-            "target": 101,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 80,
-            "target": 177,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 81,
-            "target": 159,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 81,
-            "target": 168,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 81,
-            "target": 197,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 82,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 82,
-            "target": 157,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 82,
-            "target": 166,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 82,
-            "target": 114,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 82,
-            "target": 148,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 82,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 83,
-            "target": 134,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 84,
-            "target": 207,
-            "weight": 35.1326530612245
-          },
-          {
-            "source": 85,
-            "target": 91,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 85,
-            "target": 214,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 85,
-            "target": 124,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 86,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 86,
-            "target": 208,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 86,
-            "target": 113,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 86,
-            "target": 119,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 86,
-            "target": 125,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 86,
-            "target": 136,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 86,
-            "target": 150,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 86,
-            "target": 90,
-            "weight": 1.0
-          },
-          {
-            "source": 86,
-            "target": 92,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 86,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 86,
-            "target": 97,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 86,
-            "target": 196,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 86,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 87,
-            "target": 188,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 87,
-            "target": 195,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 88,
-            "target": 191,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 88,
-            "target": 182,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 88,
-            "target": 164,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 88,
-            "target": 185,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 88,
-            "target": 196,
-            "weight": 34.36734693877552
-          },
-          {
-            "source": 88,
-            "target": 214,
-            "weight": 30.51020408163266
-          },
-          {
-            "source": 88,
-            "target": 102,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 88,
-            "target": 120,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 89,
-            "target": 213,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 89,
-            "target": 196,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 90,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 90,
-            "target": 113,
-            "weight": 1.0
-          },
-          {
-            "source": 90,
-            "target": 92,
-            "weight": 1.0
-          },
-          {
-            "source": 90,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 90,
-            "target": 97,
-            "weight": 1.0
-          },
-          {
-            "source": 90,
-            "target": 208,
-            "weight": 1.0
-          },
-          {
-            "source": 90,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 91,
-            "target": 214,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 91,
-            "target": 124,
-            "weight": 37.06122448979593
-          },
-          {
-            "source": 92,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 92,
-            "target": 208,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 92,
-            "target": 113,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 92,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 92,
-            "target": 97,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 92,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 96,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 127,
-            "weight": 1.0
-          },
-          {
-            "source": 93,
-            "target": 105,
-            "weight": 1.0
-          },
-          {
-            "source": 94,
-            "target": 159,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 94,
-            "target": 207,
-            "weight": 38.8979591836735
-          },
-          {
-            "source": 94,
-            "target": 141,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 94,
-            "target": 112,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 94,
-            "target": 197,
-            "weight": 38.8979591836735
-          },
-          {
-            "source": 95,
-            "target": 196,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 95,
-            "target": 169,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 95,
-            "target": 146,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 95,
-            "target": 100,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 95,
-            "target": 125,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 96,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 96,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 96,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 96,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 96,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 96,
-            "target": 127,
-            "weight": 1.0
-          },
-          {
-            "source": 96,
-            "target": 105,
-            "weight": 1.0
-          },
-          {
-            "source": 97,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 97,
-            "target": 113,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 97,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 97,
-            "target": 149,
-            "weight": 36.142857142857146
-          },
-          {
-            "source": 97,
-            "target": 208,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 97,
-            "target": 104,
-            "weight": 1.0
-          },
-          {
-            "source": 97,
-            "target": 199,
-            "weight": 37.70408163265308
-          },
-          {
-            "source": 98,
-            "target": 113,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 99,
-            "target": 159,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 99,
-            "target": 207,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 99,
-            "target": 197,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 100,
-            "target": 196,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 100,
-            "target": 169,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 100,
-            "target": 146,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 100,
-            "target": 125,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 101,
-            "target": 184,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 101,
-            "target": 209,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 101,
-            "target": 144,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 101,
-            "target": 191,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 101,
-            "target": 177,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 102,
-            "target": 182,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 102,
-            "target": 120,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 102,
-            "target": 214,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 102,
-            "target": 196,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 103,
-            "target": 206,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 103,
-            "target": 211,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 103,
-            "target": 121,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 103,
-            "target": 155,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 104,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 104,
-            "target": 208,
-            "weight": 1.0
-          },
-          {
-            "source": 104,
-            "target": 113,
-            "weight": 1.0
-          },
-          {
-            "source": 104,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 105,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 105,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 105,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 105,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 105,
-            "target": 127,
-            "weight": 1.0
-          },
-          {
-            "source": 105,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 106,
-            "target": 187,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 106,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 107,
-            "target": 130,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 107,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 107,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 107,
-            "target": 139,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 107,
-            "target": 147,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 107,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 108,
-            "target": 135,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 109,
-            "target": 125,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 109,
-            "target": 119,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 109,
-            "target": 196,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 110,
-            "target": 187,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 110,
-            "target": 189,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 110,
-            "target": 190,
-            "weight": 35.438775510204096
-          },
-          {
-            "source": 110,
-            "target": 207,
-            "weight": 36.23469387755103
-          },
-          {
-            "source": 112,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 112,
-            "target": 141,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 112,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 113,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 113,
-            "target": 208,
-            "weight": 22.61224489795919
-          },
-          {
-            "source": 113,
-            "target": 192,
-            "weight": 1.0
-          },
-          {
-            "source": 114,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 114,
-            "target": 157,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 114,
-            "target": 166,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 114,
-            "target": 148,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 114,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 115,
-            "target": 132,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 115,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 115,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 116,
-            "target": 131,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 116,
-            "target": 212,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 116,
-            "target": 188,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 116,
-            "target": 195,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 117,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 117,
-            "target": 137,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 117,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 118,
-            "target": 145,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 118,
-            "target": 124,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 118,
-            "target": 214,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 119,
-            "target": 125,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 119,
-            "target": 172,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 119,
-            "target": 150,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 119,
-            "target": 196,
-            "weight": 30.357142857142872
-          },
-          {
-            "source": 119,
-            "target": 182,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 120,
-            "target": 182,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 120,
-            "target": 214,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 120,
-            "target": 196,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 121,
-            "target": 206,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 121,
-            "target": 211,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 121,
-            "target": 155,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 122,
-            "target": 180,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 124,
-            "target": 145,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 124,
-            "target": 214,
-            "weight": 38.92857142857146
-          },
-          {
-            "source": 124,
-            "target": 154,
-            "weight": 37.91836734693879
-          },
-          {
-            "source": 124,
-            "target": 198,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 125,
-            "target": 129,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 125,
-            "target": 146,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 125,
-            "target": 150,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 125,
-            "target": 156,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 125,
-            "target": 161,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 125,
-            "target": 164,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 125,
-            "target": 169,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 125,
-            "target": 172,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 125,
-            "target": 174,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 125,
-            "target": 196,
-            "weight": 38.5918367346939
-          },
-          {
-            "source": 126,
-            "target": 159,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 126,
-            "target": 197,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 127,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 127,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 127,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 127,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 127,
-            "target": 128,
-            "weight": 1.0
-          },
-          {
-            "source": 128,
-            "target": 140,
-            "weight": 1.0
-          },
-          {
-            "source": 128,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 128,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 128,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 129,
-            "target": 156,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 129,
-            "target": 196,
-            "weight": 35.98979591836735
-          },
-          {
-            "source": 130,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 130,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 130,
-            "target": 139,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 130,
-            "target": 147,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 130,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 131,
-            "target": 212,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 131,
-            "target": 188,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 131,
-            "target": 195,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 132,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 132,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 133,
-            "target": 207,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 133,
-            "target": 197,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 134,
-            "target": 135,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 134,
-            "target": 141,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 134,
-            "target": 196,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 134,
-            "target": 198,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 135,
-            "target": 141,
-            "weight": 27.020408163265316
-          },
-          {
-            "source": 137,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 137,
-            "target": 142,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 138,
-            "target": 158,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 138,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 138,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 139,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 139,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 139,
-            "target": 147,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 139,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 140,
-            "target": 152,
-            "weight": 1.0
-          },
-          {
-            "source": 140,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 140,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 141,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 141,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 142,
-            "target": 160,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 143,
-            "target": 163,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 143,
-            "target": 207,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 143,
-            "target": 197,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 144,
-            "target": 201,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 144,
-            "target": 184,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 144,
-            "target": 209,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 144,
-            "target": 191,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 144,
-            "target": 196,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 144,
-            "target": 177,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 145,
-            "target": 214,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 146,
-            "target": 196,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 146,
-            "target": 169,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 147,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 147,
-            "target": 162,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 147,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 148,
-            "target": 157,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 148,
-            "target": 166,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 148,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 148,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 149,
-            "target": 199,
-            "weight": 36.142857142857146
-          },
-          {
-            "source": 150,
-            "target": 196,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 151,
-            "target": 207,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 151,
-            "target": 197,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 152,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 152,
-            "target": 194,
-            "weight": 1.0
-          },
-          {
-            "source": 153,
-            "target": 207,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 154,
-            "target": 198,
-            "weight": 26.530612244897974
-          },
-          {
-            "source": 155,
-            "target": 206,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 155,
-            "target": 211,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 156,
-            "target": 196,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 157,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 157,
-            "target": 166,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 157,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 158,
-            "target": 197,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 158,
-            "target": 207,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 159,
-            "target": 179,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 159,
-            "target": 207,
-            "weight": 39.234693877551045
-          },
-          {
-            "source": 159,
-            "target": 197,
-            "weight": 39.540816326530624
-          },
-          {
-            "source": 159,
-            "target": 168,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 161,
-            "target": 196,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 162,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 162,
-            "target": 176,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 163,
-            "target": 207,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 163,
-            "target": 197,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 164,
-            "target": 185,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 164,
-            "target": 191,
-            "weight": 30.57142857142858
-          },
-          {
-            "source": 164,
-            "target": 174,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 164,
-            "target": 196,
-            "weight": 36.602040816326536
-          },
-          {
-            "source": 164,
-            "target": 171,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 166,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 166,
-            "target": 173,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 167,
-            "target": 214,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 167,
-            "target": 196,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 167,
-            "target": 198,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 168,
-            "target": 197,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 169,
-            "target": 196,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 170,
-            "target": 191,
-            "weight": 35.438775510204096
-          },
-          {
-            "source": 171,
-            "target": 191,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 172,
-            "target": 200,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 172,
-            "target": 182,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 172,
-            "target": 186,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 172,
-            "target": 196,
-            "weight": 32.22448979591837
-          },
-          {
-            "source": 173,
-            "target": 178,
-            "weight": 8.53061224489796
-          },
-          {
-            "source": 174,
-            "target": 196,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 175,
-            "target": 181,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 175,
-            "target": 198,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 176,
-            "target": 204,
-            "weight": 3.020408163265307
-          },
-          {
-            "source": 177,
-            "target": 184,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 177,
-            "target": 209,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 177,
-            "target": 191,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 179,
-            "target": 197,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 181,
-            "target": 198,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 182,
-            "target": 214,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 182,
-            "target": 196,
-            "weight": 11.102040816326532
-          },
-          {
-            "source": 183,
-            "target": 196,
-            "weight": 32.193877551020414
-          },
-          {
-            "source": 184,
-            "target": 209,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 184,
-            "target": 191,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 185,
-            "target": 191,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 185,
-            "target": 196,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 186,
-            "target": 200,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 186,
-            "target": 196,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 187,
-            "target": 207,
-            "weight": 33.142857142857146
-          },
-          {
-            "source": 187,
-            "target": 189,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 187,
-            "target": 190,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 188,
-            "target": 212,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 188,
-            "target": 195,
-            "weight": 27.6326530612245
-          },
-          {
-            "source": 189,
-            "target": 190,
-            "weight": 20.714285714285722
-          },
-          {
-            "source": 189,
-            "target": 207,
-            "weight": 29.9591836734694
-          },
-          {
-            "source": 190,
-            "target": 207,
-            "weight": 35.438775510204096
-          },
-          {
-            "source": 191,
-            "target": 209,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 191,
-            "target": 196,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 192,
-            "target": 203,
-            "weight": 1.0
-          },
-          {
-            "source": 192,
-            "target": 208,
-            "weight": 1.0
-          },
-          {
-            "source": 194,
-            "target": 210,
-            "weight": 1.0
-          },
-          {
-            "source": 195,
-            "target": 212,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 196,
-            "target": 200,
-            "weight": 21.785714285714295
-          },
-          {
-            "source": 196,
-            "target": 201,
-            "weight": 37.153061224489804
-          },
-          {
-            "source": 196,
-            "target": 202,
-            "weight": 33.051020408163275
-          },
-          {
-            "source": 196,
-            "target": 213,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 196,
-            "target": 214,
-            "weight": 36.29591836734695
-          },
-          {
-            "source": 196,
-            "target": 198,
-            "weight": 32.59183673469388
-          },
-          {
-            "source": 197,
-            "target": 205,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 197,
-            "target": 207,
-            "weight": 39.72448979591838
-          },
-          {
-            "source": 198,
-            "target": 214,
-            "weight": 15.724489795918373
-          },
-          {
-            "source": 203,
-            "target": 208,
-            "weight": 1.0
-          },
-          {
-            "source": 205,
-            "target": 207,
-            "weight": 25.489795918367356
-          },
-          {
-            "source": 206,
-            "target": 211,
-            "weight": 20.714285714285722
-          }
-        ],
-        "multigraph": false,
-        "nodes": [
-          {
-            "delete": false,
-            "group": 1,
-            "id": 1,
-            "nodeName": "Pasian, F",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 2,
-            "nodeName": "Rey Bacaicoa, V",
-            "nodeWeight": 5.436803841866236
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 3,
-            "nodeName": "Carter, B",
-            "nodeWeight": 5.8259563555288825
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 5,
-            "nodeName": "da Costa, L",
-            "nodeWeight": 5.7770415451380766
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 7,
-            "nodeName": "Good, J",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 8,
-            "nodeName": "Powell, A",
-            "nodeWeight": 5.71476992305384
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 9,
-            "nodeName": "Gioia, I",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 10,
-            "nodeName": "Nousek, J",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 11,
-            "nodeName": "Li, W",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 12,
-            "nodeName": "de Lapparent, V",
-            "nodeWeight": 6.786924807634601
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 13,
-            "nodeName": "Wegner, G",
-            "nodeWeight": 6.822001479784465
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 14,
-            "nodeName": "Smith, C",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 16,
-            "nodeName": "Bothun, G",
-            "nodeWeight": 5.2144309769161525
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 19,
-            "nodeName": "Luker, J",
-            "nodeWeight": 6.224374405231115
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 20,
-            "nodeName": "Roll, J",
-            "nodeWeight": 5.873828291733414
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 21,
-            "nodeName": "Coletti, D",
-            "nodeWeight": 5.436803841866236
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 22,
-            "nodeName": "Ildefonse, B",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 23,
-            "nodeName": "France, L",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 24,
-            "nodeName": "Python, M",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 26,
-            "nodeName": "Odewahn, S",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 28,
-            "nodeName": "Wilmer, H",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 29,
-            "nodeName": "Green, D",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 30,
-            "nodeName": "Olivera, A",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 32,
-            "nodeName": "Schulman, E",
-            "nodeWeight": 5.71476992305384
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 33,
-            "nodeName": "Mink, D",
-            "nodeWeight": 11.875248349374363
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 34,
-            "nodeName": "Abily, B",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 35,
-            "nodeName": "Muhler, M",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 36,
-            "nodeName": "Dahl, A",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 37,
-            "nodeName": "Broach, J",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 38,
-            "nodeName": "Beers, T",
-            "nodeWeight": 7.6565615473501065
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 39,
-            "nodeName": "Kewley, L",
-            "nodeWeight": 5.492397058103757
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 40,
-            "nodeName": "Prosser, C",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 41,
-            "nodeName": "Grant, C",
-            "nodeWeight": 44.42419402443904
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 42,
-            "nodeName": "Watson, J",
-            "nodeWeight": 5.575786882460038
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 43,
-            "nodeName": "Murray, S",
-            "nodeWeight": 44.859674218299624
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 44,
-            "nodeName": "Egret, D",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 45,
-            "nodeName": "Mussio, P",
-            "nodeWeight": 5.853752963647643
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 46,
-            "nodeName": "Gui-ru, L",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 47,
-            "nodeName": "Mendenhall, M",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 48,
-            "nodeName": "Warner, S",
-            "nodeWeight": 5.04765132820359
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 49,
-            "nodeName": "Moran, S",
-            "nodeWeight": 5.381210625628715
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 50,
-            "nodeName": "Barbato, L",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 51,
-            "nodeName": "Mortellaro, J",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 52,
-            "nodeName": "Oizumi, R",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 53,
-            "nodeName": "Nickels, J",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 55,
-            "nodeName": "Miyazaki, S",
-            "nodeWeight": 5.367312321569335
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 58,
-            "nodeName": "Wittman, D",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 59,
-            "nodeName": "Szalay, A",
-            "nodeWeight": 6.29849869354781
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 60,
-            "nodeName": "Mahdavi, A",
-            "nodeWeight": 5.528653503476053
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 62,
-            "nodeName": "Delfini, D",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 63,
-            "nodeName": "Rey Bakaikoa, V",
-            "nodeWeight": 5.992736004241445
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 64,
-            "nodeName": "Huchra, J",
-            "nodeWeight": 9.091456151298846
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 66,
-            "nodeName": "Rabe, S",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 67,
-            "nodeName": "Driess, M",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 68,
-            "nodeName": "Ringwald, F",
-            "nodeWeight": 5.2144309769161525
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 70,
-            "nodeName": "Diaferio, A",
-            "nodeWeight": 8.780856653371027
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 71,
-            "nodeName": "Torres, G",
-            "nodeWeight": 5.119128320508973
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 72,
-            "nodeName": "Tu, Z",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 73,
-            "nodeName": "Stern Grant, C",
-            "nodeWeight": 5.2144309769161525
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 74,
-            "nodeName": "Utsumi, Y",
-            "nodeWeight": 5.367312321569335
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 75,
-            "nodeName": "Stauffer, J",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 76,
-            "nodeName": "Di Milia, G",
-            "nodeWeight": 6.372622981864504
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 79,
-            "nodeName": "Geller, M",
-            "nodeWeight": 29.321507178948714
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 80,
-            "nodeName": "Berlind, P",
-            "nodeWeight": 5.529459202262104
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 81,
-            "nodeName": "Mandala, S",
-            "nodeWeight": 5.39378528168244
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 82,
-            "nodeName": "Henneken, E",
-            "nodeWeight": 21.096221572770787
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 83,
-            "nodeName": "Galve-Roperh, I",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 84,
-            "nodeName": "Calderon, J",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 85,
-            "nodeName": "Shapiro, M",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 86,
-            "nodeName": "Lesteven, S",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 88,
-            "nodeName": "Hamana, T",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 89,
-            "nodeName": "McMahan, R",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 90,
-            "nodeName": "Foor, F",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 91,
-            "nodeName": "Brugel, E",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 93,
-            "nodeName": "Marzke, R",
-            "nodeWeight": 5.611585544431168
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 94,
-            "nodeName": "Chyla, R",
-            "nodeWeight": 5.274656961173466
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 95,
-            "nodeName": "Bohlen, E",
-            "nodeWeight": 10.484535511432568
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 97,
-            "nodeName": "Tokarz, S",
-            "nodeWeight": 6.204740293147228
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 98,
-            "nodeName": "Schild, R",
-            "nodeWeight": 5.8166908194892954
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 100,
-            "nodeName": "Godard, M",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 101,
-            "nodeName": "CLASH Team",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 102,
-            "nodeName": "Rosvall, M",
-            "nodeWeight": 5.436803841866236
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 103,
-            "nodeName": "Epstein, S",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 104,
-            "nodeName": "Schneps, M",
-            "nodeWeight": 5.436803841866236
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 105,
-            "nodeName": "French, J",
-            "nodeWeight": 5.71476992305384
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 106,
-            "nodeName": "Allende Prieto, C",
-            "nodeWeight": 6.07215488458076
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 107,
-            "nodeName": "Ramella, M",
-            "nodeWeight": 6.027211018206921
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 108,
-            "nodeName": "Menzeleev, R",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 110,
-            "nodeName": "Chilingarian, I",
-            "nodeWeight": 5.619467266646661
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 111,
-            "nodeName": "Zabludoff, A",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 112,
-            "nodeName": "Lipari, S",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 113,
-            "nodeName": "Wilhelm, R",
-            "nodeWeight": 6.07215488458076
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 114,
-            "nodeName": "Latham, D",
-            "nodeWeight": 5.151617862465966
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 115,
-            "nodeName": "Baginsky, W",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 116,
-            "nodeName": "Demleitner, M",
-            "nodeWeight": 9.086763217460614
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 117,
-            "nodeName": "Starikova, S",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 118,
-            "nodeName": "Douglas, C",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 119,
-            "nodeName": "Willmer, C",
-            "nodeWeight": 6.56924487652275
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 120,
-            "nodeName": "Alonso, V",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 121,
-            "nodeName": "Ginsparg, P",
-            "nodeWeight": 5.04765132820359
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 122,
-            "nodeName": "Forman, W",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 123,
-            "nodeName": "Nonino, M",
-            "nodeWeight": 5.102438845655059
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 124,
-            "nodeName": "Matthews, A",
-            "nodeWeight": 5.04765132820359
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 125,
-            "nodeName": "Colless, M",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 126,
-            "nodeName": "Rite, C",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 127,
-            "nodeName": "El-Sherbeini, M",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 129,
-            "nodeName": "Farris, A",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 130,
-            "nodeName": "Hinrichsen, O",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 131,
-            "nodeName": "Horine, E",
-            "nodeWeight": 5.119128320508973
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 134,
-            "nodeName": "Woods, D",
-            "nodeWeight": 5.220608000942543
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 135,
-            "nodeName": "Karakashian, T",
-            "nodeWeight": 5.964939396122684
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 136,
-            "nodeName": "Garnavich, P",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 137,
-            "nodeName": "Martimbeau, N",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 141,
-            "nodeName": "Pellegrini, P",
-            "nodeWeight": 5.568566984247373
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 142,
-            "nodeName": "Jones, V",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 143,
-            "nodeName": "McMahon, S",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 145,
-            "nodeName": "Peterson, C",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 146,
-            "nodeName": "Abe, N",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 147,
-            "nodeName": "Bromley, B",
-            "nodeWeight": 5.8259563555288825
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 148,
-            "nodeName": "Caldwell, N",
-            "nodeWeight": 5.63755712272395
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 149,
-            "nodeName": "McLeod, B",
-            "nodeWeight": 5.109421568467502
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 151,
-            "nodeName": "Rowan-Robinson, M",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 152,
-            "nodeName": "Kannappan, S",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 153,
-            "nodeName": "Maccacaro, T",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 155,
-            "nodeName": "Kenyon, S",
-            "nodeWeight": 11.158934170313925
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 156,
-            "nodeName": "Dell'Antonio, I",
-            "nodeWeight": 8.658121871629254
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 157,
-            "nodeName": "Holachek, A",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 158,
-            "nodeName": "Frommer, B",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 159,
-            "nodeName": "Nielsen, J",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 161,
-            "nodeName": "Westra, E",
-            "nodeWeight": 5.8259563555288825
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 162,
-            "nodeName": "Gruenert, W",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 163,
-            "nodeName": "Bergstrom, J",
-            "nodeWeight": 5.121775616520284
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 164,
-            "nodeName": "Hughes, J",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 165,
-            "nodeName": "Rey Bacaico, V",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 166,
-            "nodeName": "Falco, E",
-            "nodeWeight": 8.702905295820589
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 167,
-            "nodeName": "Peters, J",
-            "nodeWeight": 5.489749762092446
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 168,
-            "nodeName": "Boehringer, H",
-            "nodeWeight": 5.2144309769161525
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 169,
-            "nodeName": "Payot, B",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 170,
-            "nodeName": "Marsden, B",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 171,
-            "nodeName": "Woell, C",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 172,
-            "nodeName": "Marrinan, J",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 173,
-            "nodeName": "Elwell, B",
-            "nodeWeight": 5.459967681965203
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 174,
-            "nodeName": "Alt, J",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 175,
-            "nodeName": "Wenger, M",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 178,
-            "nodeName": "Postman, M",
-            "nodeWeight": 5.658371008030269
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 179,
-            "nodeName": "Barcikowski, E",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 180,
-            "nodeName": "Vikhlinin, A",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 181,
-            "nodeName": "Klementiev, K",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 182,
-            "nodeName": "Melvin, J",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 183,
-            "nodeName": "Ellman, N",
-            "nodeWeight": 5.881549571766404
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 184,
-            "nodeName": "Tyson, J",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 186,
-            "nodeName": "ReyBacaicoa, V",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 187,
-            "nodeName": "Clemas, J",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 188,
-            "nodeName": "Mason, B",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 189,
-            "nodeName": "Kleyna, J",
-            "nodeWeight": 6.465278342260373
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 190,
-            "nodeName": "Renzini, A",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 192,
-            "nodeName": "Freedman Woods, D",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 193,
-            "nodeName": "Masdea, D",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 195,
-            "nodeName": "Williams, G",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 196,
-            "nodeName": "Thompson, D",
-            "nodeWeight": 14.965084010575627
-          },
-          {
-            "delete": false,
-            "group": 9,
-            "id": 197,
-            "nodeName": "Koepke, J",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 198,
-            "nodeName": "Oguri, M",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 199,
-            "nodeName": "Birkner, A",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 200,
-            "nodeName": "Genova, F",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 201,
-            "nodeName": "Hwang, H",
-            "nodeWeight": 6.286585861496913
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 202,
-            "nodeName": "Ostriker, E",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 203,
-            "nodeName": "Rice, A",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 206,
-            "nodeName": "Sakai, S",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 209,
-            "nodeName": "Bergstrom, C",
-            "nodeWeight": 5.436803841866236
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 211,
-            "nodeName": "Jones, C",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 212,
-            "nodeName": "Jarrett, T",
-            "nodeWeight": 5.770363139291361
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 213,
-            "nodeName": "Coe, D",
-            "nodeWeight": 5.1950942060509275
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 214,
-            "nodeName": "Wyatt, W",
-            "nodeWeight": 5.722932419088714
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 218,
-            "nodeName": "Tombrello, T",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 219,
-            "nodeName": "Zahid, H",
-            "nodeWeight": 5.436803841866236
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 221,
-            "nodeName": "Hamwey, R",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 222,
-            "nodeName": "Merz, K",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 223,
-            "nodeName": "Ford, H",
-            "nodeWeight": 5.102438845655059
-          },
-          {
-            "delete": false,
-            "group": 12,
-            "id": 225,
-            "nodeName": "Fong-liang, J",
-            "nodeWeight": 5.032489541956993
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 226,
-            "nodeName": "Thiell, B",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 228,
-            "nodeName": "Barton, E",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 230,
-            "nodeName": "Boley, F",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 231,
-            "nodeName": "Conroy, M",
-            "nodeWeight": 5.317896129358205
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 233,
-            "nodeName": "Kent, S",
-            "nodeWeight": 5.436803841866236
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 234,
-            "nodeName": "Medezinski, E",
-            "nodeWeight": 5.102438845655059
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 235,
-            "nodeName": "Del'Antonio, I",
-            "nodeWeight": 5.119128320508973
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 237,
-            "nodeName": "Kriss, G",
-            "nodeWeight": 5.119128320508973
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 240,
-            "nodeName": "Stoner, J",
-            "nodeWeight": 5.5062953621631365
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 241,
-            "nodeName": "Thornton, R",
-            "nodeWeight": 5.274656961173466
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 242,
-            "nodeName": "Ossorio, P",
-            "nodeWeight": 6.687651207210456
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 243,
-            "nodeName": "Stern, C",
-            "nodeWeight": 5.756464835231981
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 245,
-            "nodeName": "Rines, K",
-            "nodeWeight": 8.314932555380375
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 246,
-            "nodeName": "Chaves, O",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 248,
-            "nodeName": "Windhorst, R",
-            "nodeWeight": 5.297820801272433
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 249,
-            "nodeName": "Mazur, P",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 251,
-            "nodeName": "Spiegel, S",
-            "nodeWeight": 5.274656961173466
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 252,
-            "nodeName": "Fabricant, D",
-            "nodeWeight": 13.57745968464703
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 253,
-            "nodeName": "Accomazzi, A",
-            "nodeWeight": 45.67377790759604
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 254,
-            "nodeName": "Thorstensen, J",
-            "nodeWeight": 6.877594696021986
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 255,
-            "nodeName": "Koo, D",
-            "nodeWeight": 6.29849869354781
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 256,
-            "nodeName": "Tonry, J",
-            "nodeWeight": 5.119128320508973
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 257,
-            "nodeName": "McLean, B",
-            "nodeWeight": 6.103922436716487
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 258,
-            "nodeName": "Gorenstein, P",
-            "nodeWeight": 5.492397058103757
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 259,
-            "nodeName": "Maia, M",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 11,
-            "id": 260,
-            "nodeName": "Tkachenko, O",
-            "nodeWeight": 5.019854720084829
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 262,
-            "nodeName": "Reybacaicoa, V",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 265,
-            "nodeName": "Vettolani, P",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 2,
-            "id": 266,
-            "nodeName": "Eichhorn, G",
-            "nodeWeight": 47.07347550775805
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 267,
-            "nodeName": "Fairall, A",
-            "nodeWeight": 5.151617862465966
-          },
-          {
-            "delete": false,
-            "group": 3,
-            "id": 268,
-            "nodeName": "Lemze, D",
-            "nodeWeight": 5.102438845655059
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 269,
-            "nodeName": "Morin, N",
-            "nodeWeight": 5.0
-          },
-          {
-            "delete": false,
-            "group": 1,
-            "id": 270,
-            "nodeName": "Plionis, M",
-            "nodeWeight": 5.0893462403817304
-          },
-          {
-            "delete": false,
-            "group": 6,
-            "id": 271,
-            "nodeName": "Poulton, S",
-            "nodeWeight": 5.066182400282763
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 273,
-            "nodeName": "Mack, P",
-            "nodeWeight": 5.158837760678631
-          },
-          {
-            "delete": false,
-            "group": 5,
-            "id": 278,
-            "nodeName": "Brown, W",
-            "nodeWeight": 11.850760861269741
-          }
-        ]
+    testDataLarge = {"data": {
+      "bibcode_dict": {
+        "1974SPIE...45..171K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Found! Some More Practical Applications For Holograms"
+        },
+        "1981romi.work.....K": {
+          "authors": [
+            "Jannaway, W",
+            "Kurtz, M",
+            "Stone, G"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Experience with on-line generator partial discharge tests"
+        },
+        "1982BICDS..23...13K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Automatic Spectral Classification"
+        },
+        "1982PhDT.........2K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 11,
+          "read_count": 6.0,
+          "title": "Automatic Spectral Classification."
+        },
+        "1983ESASP.201...47K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 7,
+          "read_count": 0,
+          "title": "Classification methods: An introductory survey (Review)"
+        },
+        "1984BAAS...16..457K": {
+          "authors": [
+            "Beers, T",
+            "Geller, M",
+            "Gioia, I",
+            "Huchra, J",
+            "Kurtz, M",
+            "Maccacaro, T",
+            "Schild, R",
+            "Stauffer, J"
+          ],
+          "citation_count": 0,
+          "read_count": 4.0,
+          "title": "The Dynamics of the X-ray Cluster Abell 744"
+        },
+        "1984mpsc.conf..136K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 17,
+          "read_count": 0,
+          "title": "Progress in Automation Techniques for MK Classification."
+        },
+        "1985AJ.....90.1665K": {
+          "authors": [
+            "Beers, T",
+            "Geller, M",
+            "Gioia, I",
+            "Huchra, J",
+            "Kurtz, M",
+            "Maccacaro, T",
+            "Schild, R",
+            "Stauffer, J"
+          ],
+          "citation_count": 28,
+          "read_count": 14.0,
+          "title": "The X-ray cluster Abell 744."
+        },
+        "1986BICDS..30..171K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Topics in Observational Cosmology"
+        },
+        "1987BICDS..32...97K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Remarks on the Effects of Systematic Error"
+        },
+        "1988ESOC...28..113K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 2,
+          "read_count": 0,
+          "title": "The search for structure: object classification in large data sets."
+        },
+        "1988prai.proc..317K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Astronomical object classification"
+        },
+        "1989LNP...329...89K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Classification and knowledge"
+        },
+        "1989LNP...329...91K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 1,
+          "read_count": 2.0,
+          "title": "Classification and knowledge"
+        },
+        "1989daa..conf..155K": {
+          "authors": [
+            "Falco, E",
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Tests of Reduction and Analysis Algorithms for Astronomical Images"
+        },
+        "1990PaReL..11..507K": {
+          "authors": [
+            "Kurtz, M",
+            "Mussio, P",
+            "Ossorio, P"
+          ],
+          "citation_count": 1,
+          "read_count": 0,
+          "title": "A cognitive system for astronomical image interpretation"
+        },
+        "1990ebua.conf..363K": {
+          "authors": [
+            "Falco, E",
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "The Systematic Effect of Shape on Galaxy Magnitudes"
+        },
+        "1991opos.conf..133K": {
+          "authors": [
+            "Kurtz, M",
+            "LaSala, J"
+          ],
+          "citation_count": 4,
+          "read_count": 0,
+          "title": "Towards AN Automatic Spectral Classification"
+        },
+        "1992ASPC...25..432K": {
+          "authors": [
+            "Fabricant, D",
+            "Kriss, G",
+            "Kurtz, M",
+            "Mink, D",
+            "Tonry, J",
+            "Torres, G",
+            "Wyatt, W"
+          ],
+          "citation_count": 109,
+          "read_count": 3.0,
+          "title": "XCSAO: A Radial Velocity Package for the IRAF Environment"
+        },
+        "1992ESOC...43...85K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 3,
+          "read_count": 0,
+          "title": "Second Order Knowledge: Information Retrieval in the Terabyte Era"
+        },
+        "1992IAUTB..21..331K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "The Need for Automation in the Reduction and Analysis of Stellar Spectra"
+        },
+        "1993AAS...182.0306K": {
+          "authors": [
+            "Eichhorn, G",
+            "Karakashian, T",
+            "Kurtz, M",
+            "Murray, S",
+            "Ossorio, P",
+            "Stern, C",
+            "Stoner, J",
+            "Watson, J"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "The ADS Abstract Service"
+        },
+        "1993ASPC...52..132K": {
+          "authors": [
+            "Eichhorn, G",
+            "Grant, C",
+            "Karakashian, T",
+            "Kurtz, M",
+            "Murray, S",
+            "Ossorio, P",
+            "Stoner, J",
+            "Watson, J"
+          ],
+          "citation_count": 19,
+          "read_count": 3.0,
+          "title": "Intelligent Text Retrieval in the NASA Astrophysics Data System"
+        },
+        "1993ASSL..182...21K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 5,
+          "read_count": 2.0,
+          "title": "Advice from the Oracle: Really Intelligent Information Retrieval"
+        },
+        "1994AAS...184.3801K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Giant Shoulders: Data and Discovery in Astronomy"
+        },
+        "1994IAUS..161..331K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 1,
+          "read_count": 0,
+          "title": "The Future of Memory: Archiving Astronomical Information"
+        },
+        "1995AAS...186.0202K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Enhancements to the NASA Astrophysics Science Information and Abstract Service"
+        },
+        "1995PASP..107..776K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Giant Shoulders: Data and Discovery in Astronomy"
+        },
+        "1996AAS...189.0607K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 1,
+          "read_count": 2.0,
+          "title": "Journal Citations: An ADS-AAS Collaboration"
+        },
+        "1996VA.....40..393K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Indexing: what you find is what you get"
+        },
+        "1996dkcw.proc..123K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "The NASA Astrophysics Data System: A Heterogeneous Distributed Data Environment"
+        },
+        "1997AAS...191.1701K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 1,
+          "read_count": 0,
+          "title": "The Relative Effectiveness of Astronomy Journals"
+        },
+        "1997ASSL..212D..23K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Conquering Ignorance: Data, Information and Knowledge"
+        },
+        "1997DPS....29.2705K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Green, D",
+            "Kurtz, M",
+            "Marsden, B",
+            "Murray, S",
+            "Williams, G"
+          ],
+          "citation_count": 0,
+          "read_count": 2.0,
+          "title": "The IAU Circulars and Minor Planet Electronic Circulars are Now Available Through the NASA Astrophysics Data System"
+        },
+        "1998AAS...193.1311K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 0,
+          "read_count": 2.0,
+          "title": "ADS on WWW: Doubling Yearly for Five Years"
+        },
+        "1998ASPC..145..478K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 0,
+          "read_count": 3.0,
+          "title": "Keeping Bibliographies using ADS"
+        },
+        "1998ASPC..153..293K": {
+          "authors": [
+            "Eichhorn, G",
+            "Kurtz, M"
+          ],
+          "citation_count": 4,
+          "read_count": 4.0,
+          "title": "The Historical Literature of Astronomy, via ADS"
+        },
+        "1998PASP..110..934K": {
+          "authors": [
+            "Kurtz, M",
+            "Mink, D"
+          ],
+          "citation_count": 288,
+          "read_count": 37.0,
+          "title": "RVSAO 2.0: Digital Redshifts and Radial Velocities"
+        },
+        "1999AAS...194.4407K": {
+          "authors": [
+            "Accomazzi, A",
+            "Demleitner, M",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 0,
+          "read_count": 2.0,
+          "title": "A Model for Readership of Astronomical Journals, From an Analysis of ADS Readership"
+        },
+        "1999Dlib....5.....K": {
+          "authors": [
+            "Accomazzi, A",
+            "Demleitner, M",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 0,
+          "read_count": 2.0,
+          "title": "The NASA ADS Abstract Service and the Distributed Astronomy Digital Library"
+        },
+        "1999ascl.soft12003K": {
+          "authors": [
+            "Kurtz, M",
+            "Mink, D"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "RVSAO 2.0: Digital Redshifts and Radial Velocities"
+        },
+        "2000A&AS..143...41K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S",
+            "Watson, J"
+          ],
+          "citation_count": 60,
+          "read_count": 18.0,
+          "title": "The NASA Astrophysics Data System: Overview"
+        },
+        "2000ApJ...533L.183K": {
+          "authors": [
+            "Kurtz, M",
+            "Mink, D"
+          ],
+          "citation_count": 7,
+          "read_count": 15.0,
+          "title": "Eigenvector Sky Subtraction"
+        },
+        "2001JChEd..78.1122K": {
+          "authors": [
+            "Holden, B",
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Analysis of a Distance-Education Program in Organic Chemistry"
+        },
+        "2001SPIE.4477..186K": {
+          "authors": [
+            "Eichhorn, G",
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Evolution of Urania into the AVO"
+        },
+        "2002AAS...201.0904K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "The NASA Astrophysics Data System: Bibliometrics Investigations"
+        },
+        "2002SPIE.4847..238K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 7,
+          "read_count": 2.0,
+          "title": "Second order bibliometric operators in the Astrophysics Data System"
+        },
+        "2003AAS...203.2005K": {
+          "authors": [
+            "Accomazzi, A",
+            "Bohlen, E",
+            "Eichhorn, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S",
+            "Thompson, D"
+          ],
+          "citation_count": 4,
+          "read_count": 2.0,
+          "title": "The myADS Update Service"
+        },
+        "2003lisa.conf..223K": {
+          "authors": [
+            "Accomazzi, A",
+            "Bohlen, E",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S",
+            "Thompson, D"
+          ],
+          "citation_count": 3,
+          "read_count": 0,
+          "title": "The NASA Astrophysics Data System: Obsolescence of Reads and Cites"
+        },
+        "2005AAS...207.3405K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S",
+            "Thompson, D"
+          ],
+          "citation_count": 0,
+          "read_count": 2.0,
+          "title": "The significance of e-printed papers in Astronomy and Physics"
+        },
+        "2005IPM....41.1395K": {
+          "authors": [
+            "Accomazzi, A",
+            "Demleitner, M",
+            "Eichhorn, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 15,
+          "read_count": 34.0,
+          "title": "The Effect of Use and Access on Citations"
+        },
+        "2005JASIS..56...36K": {
+          "authors": [
+            "Accomazzi, A",
+            "Demleitner, M",
+            "Eichhorn, G",
+            "Grant, C",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 12,
+          "read_count": 15.0,
+          "title": "Worldwide Use and Impact of the NASA Astrophysics Data System Digital Library"
+        },
+        "2005JASIS..56..111K": {
+          "authors": [
+            "Accomazzi, A",
+            "Demleitner, M",
+            "Eichhorn, G",
+            "Elwell, B",
+            "Grant, C",
+            "Kurtz, M",
+            "Martimbeau, N",
+            "Murray, S"
+          ],
+          "citation_count": 9,
+          "read_count": 10.0,
+          "title": "The Bibliometric Properties of Article Readership Information"
+        },
+        "2006AAS...20921809K": {
+          "authors": [
+            "Accomazzi, A",
+            "Bohlen, E",
+            "Eichhorn, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S",
+            "Thompson, D"
+          ],
+          "citation_count": 0,
+          "read_count": 4.0,
+          "title": "The New Physics and Astronomy Education Portal of the Smithsonian/NASA Astrophysics Data System"
+        },
+        "2006ASPC..351..653K": {
+          "authors": [
+            "Accomazzi, A",
+            "Eichhorn, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 1,
+          "read_count": 6.0,
+          "title": "Intelligent Information Retrieval"
+        },
+        "2006oaks.book...45K": {
+          "authors": [
+            "Brody, T",
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "The impact lost to authors and research"
+        },
+        "2007AAS...211.4730K": {
+          "authors": [
+            "Accomazzi, A",
+            "Bergstrom, C",
+            "Bohlen, E",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S",
+            "Rosvall, M",
+            "Thompson, D"
+          ],
+          "citation_count": 1,
+          "read_count": 0,
+          "title": "Mapping The Astronomy Literature"
+        },
+        "2007AJ....134.1360K": {
+          "authors": [
+            "Dell'Antonio, I",
+            "Fabricant, D",
+            "Geller, M",
+            "Kurtz, M",
+            "Wyatt, W"
+          ],
+          "citation_count": 13,
+          "read_count": 9.0,
+          "title": "\u03bc-PhotoZ: Photometric Redshifts by Inverting the Tolman Surface Brightness Test"
+        },
+        "2007APS..MARU20009K": {
+          "authors": [
+            "Accomazzi, A",
+            "Bohlen, E",
+            "Eichhorn, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S",
+            "Thompson, D"
+          ],
+          "citation_count": 0,
+          "read_count": 6.0,
+          "title": "myADS-arXiv: A fully customized, open access virtual journal"
+        },
+        "2007ASPC..377...23K": {
+          "authors": [
+            "Accomazzi, A",
+            "Bohlen, E",
+            "Eichhorn, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M",
+            "Murray, S",
+            "Thompson, D"
+          ],
+          "citation_count": 0,
+          "read_count": 8.0,
+          "title": "The Future of Technical Libraries"
+        },
+        "2007arXiv0709.0896K": {
+          "authors": [
+            "Henneken, E",
+            "Kurtz, M"
+          ],
+          "citation_count": 4,
+          "read_count": 25.0,
+          "title": "Open Access does not increase citations for research articles from The Astrophysical Journal"
+        },
+        "2007fpca.conf..141K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "The ADS Position on Open Access"
+        },
+        "2009astro2010P..28K": {
+          "authors": [
+            "Accomazzi, A",
+            "Kurtz, M",
+            "Murray, S"
+          ],
+          "citation_count": 1,
+          "read_count": 13.0,
+          "title": "The Smithsonian/NASA Astrophysics Data System (ADS) Decennial Report"
+        },
+        "2010ARIST..44....3K": {
+          "authors": [
+            "Bollen, J",
+            "Kurtz, M"
+          ],
+          "citation_count": 8,
+          "read_count": 43.0,
+          "title": "Usage Bibliometrics"
+        },
+        "2010ASPC..434..155K": {
+          "authors": [
+            "Accomazzi, A",
+            "Di Milia, G",
+            "Grant, C",
+            "Henneken, E",
+            "Kurtz, M"
+          ],
+          "citation_count": 3,
+          "read_count": 8.0,
+          "title": "Using Multipartite Graphs for Recommendation and Discovery"
+        },
+        "2011ApSSP...1...23K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 1,
+          "read_count": 50.0,
+          "title": "The Emerging Scholarly Brain"
+        },
+        "2011ApSSP...1..143K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "FPCA-II Concluding Remarks"
+        },
+        "2012ApJ...750..168K": {
+          "authors": [
+            "Dell'Antonio, I",
+            "Fabricant, D",
+            "Geller, M",
+            "Kurtz, M",
+            "Miyazaki, S",
+            "Utsumi, Y"
+          ],
+          "citation_count": 8,
+          "read_count": 23.0,
+          "title": "Testing Weak-lensing Maps with Redshift Surveys: A Subaru Field"
+        },
+        "2014CTM....18..532K": {
+          "authors": [
+            "Kurtz, M",
+            "Regele, J"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Acoustic timescale characterisation of a one-dimensional model hot spot"
+        },
+        "2014CTM....18..711K": {
+          "authors": [
+            "Kurtz, M",
+            "Regele, J"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Acoustic timescale characterisation of symmetric and asymmetric multidimensional hot spots"
+        },
+        "2014PhDT.......168K": {
+          "authors": [
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 0,
+          "title": "Acoustic timescale characterization of hot spot detonability"
+        },
+        "2014bbmb.book..243K": {
+          "authors": [
+            "Henneken, E",
+            "Kurtz, M"
+          ],
+          "citation_count": 0,
+          "read_count": 23.0,
+          "title": "Finding and Recommending Scholarly Articles"
+        }
       },
-      "summaryGraph": {
-        "directed": false,
-        "graph": [],
-        "links": [
+      "link_data": [
+        [
+          2,
+          3,
+          26.999999999999968
+        ],
+        [
+          2,
+          45,
+          26.999999999999968
+        ],
+        [
+          2,
+          28,
+          10.189655172413781
+        ],
+        [
+          3,
+          9,
+          10.189655172413781
+        ],
+        [
+          3,
+          44,
+          26.999999999999968
+        ],
+        [
+          3,
+          42,
+          26.999999999999968
+        ],
+        [
+          3,
+          30,
+          30.36206896551721
+        ],
+        [
+          6,
+          38,
+          17.810344827586185
+        ],
+        [
+          9,
+          45,
+          10.189655172413781
+        ],
+        [
+          11,
+          30,
+          16.465517241379292
+        ],
+        [
+          15,
+          38,
+          29.689655172413758
+        ],
+        [
+          25,
+          38,
+          16.465517241379292
+        ],
+        [
+          28,
+          42,
+          10.189655172413781
+        ],
+        [
+          28,
+          44,
+          10.189655172413781
+        ],
+        [
+          28,
+          30,
+          27.224137931034452
+        ],
+        [
+          30,
+          45,
+          30.36206896551721
+        ],
+        [
+          32,
+          38,
+          29.689655172413758
+        ],
+        [
+          38,
+          43,
+          16.465517241379292
+        ],
+        [
+          42,
+          45,
+          26.999999999999968
+        ],
+        [
+          44,
+          45,
+          26.999999999999968
+        ]
+      ],
+      "root": {
+        "children": [
           {
-            "source": 0,
-            "target": 0,
-            "weight": 1031.5612244897964
+            "children": [
+              {
+                "citation_count": 134,
+                "name": "Murray, S",
+                "numberName": 3,
+                "papers": [
+                  "2000A&AS..143...41K",
+                  "1993ASPC...52..132K",
+                  "2005IPM....41.1395K",
+                  "2005JASIS..56...36K",
+                  "2005JASIS..56..111K",
+                  "2002SPIE.4847..238K",
+                  "2003AAS...203.2005K",
+                  "2003lisa.conf..223K",
+                  "2006ASPC..351..653K",
+                  "1997AAS...191.1701K",
+                  "2007AAS...211.4730K",
+                  "1996AAS...189.0607K",
+                  "2009astro2010P..28K",
+                  "2002AAS...201.0904K",
+                  "1993AAS...182.0306K",
+                  "1998AAS...193.1311K",
+                  "1998ASPC..145..478K",
+                  "1997DPS....29.2705K",
+                  "2007APS..MARU20009K",
+                  "1999Dlib....5.....K",
+                  "1995AAS...186.0202K",
+                  "1996dkcw.proc..123K",
+                  "2005AAS...207.3405K",
+                  "2006AAS...20921809K",
+                  "1999AAS...194.4407K",
+                  "2007ASPC..377...23K"
+                ],
+                "read_count": 136.0,
+                "size": 21.74795149131432
+              },
+              {
+                "citation_count": 9,
+                "name": "Martimbeau, N",
+                "numberName": 7,
+                "papers": [
+                  "2005JASIS..56..111K"
+                ],
+                "read_count": 10.0,
+                "size": 5.055446301758987
+              },
+              {
+                "citation_count": 3,
+                "name": "Di Milia, G",
+                "numberName": 8,
+                "papers": [
+                  "2010ASPC..434..155K"
+                ],
+                "read_count": 8.0,
+                "size": 5.354856331257511
+              },
+              {
+                "citation_count": 1,
+                "name": "Rosvall, M",
+                "numberName": 10,
+                "papers": [
+                  "2007AAS...211.4730K"
+                ],
+                "read_count": 0,
+                "size": 5.0
+              },
+              {
+                "citation_count": 118,
+                "name": "Accomazzi, A",
+                "numberName": 11,
+                "papers": [
+                  "2000A&AS..143...41K",
+                  "2005IPM....41.1395K",
+                  "2005JASIS..56...36K",
+                  "2005JASIS..56..111K",
+                  "2002SPIE.4847..238K",
+                  "2003AAS...203.2005K",
+                  "2003lisa.conf..223K",
+                  "2010ASPC..434..155K",
+                  "2006ASPC..351..653K",
+                  "1997AAS...191.1701K",
+                  "2007AAS...211.4730K",
+                  "1996AAS...189.0607K",
+                  "2009astro2010P..28K",
+                  "2002AAS...201.0904K",
+                  "1998AAS...193.1311K",
+                  "1998ASPC..145..478K",
+                  "1997DPS....29.2705K",
+                  "2007APS..MARU20009K",
+                  "1999Dlib....5.....K",
+                  "1995AAS...186.0202K",
+                  "1996dkcw.proc..123K",
+                  "2005AAS...207.3405K",
+                  "2006AAS...20921809K",
+                  "1999AAS...194.4407K",
+                  "2007ASPC..377...23K"
+                ],
+                "read_count": 141.0,
+                "size": 21.548344804981973
+              },
+              {
+                "citation_count": 1,
+                "name": "Bergstrom, C",
+                "numberName": 14,
+                "papers": [
+                  "2007AAS...211.4730K"
+                ],
+                "read_count": 0,
+                "size": 5.0
+              },
+              {
+                "citation_count": 0,
+                "name": "Green, D",
+                "numberName": 16,
+                "papers": [
+                  "1997DPS....29.2705K"
+                ],
+                "read_count": 2.0,
+                "size": 5.055446301758987
+              },
+              {
+                "citation_count": 8,
+                "name": "Bohlen, E",
+                "numberName": 18,
+                "papers": [
+                  "2003AAS...203.2005K",
+                  "2003lisa.conf..223K",
+                  "2007AAS...211.4730K",
+                  "2007APS..MARU20009K",
+                  "2006AAS...20921809K",
+                  "2007ASPC..377...23K"
+                ],
+                "read_count": 20.0,
+                "size": 7.566371681415928
+              },
+              {
+                "citation_count": 0,
+                "name": "Marsden, B",
+                "numberName": 26,
+                "papers": [
+                  "1997DPS....29.2705K"
+                ],
+                "read_count": 2.0,
+                "size": 5.055446301758987
+              },
+              {
+                "citation_count": 28,
+                "name": "Henneken, E",
+                "numberName": 27,
+                "papers": [
+                  "2005IPM....41.1395K",
+                  "2003AAS...203.2005K",
+                  "2007arXiv0709.0896K",
+                  "2010ASPC..434..155K",
+                  "2006ASPC..351..653K",
+                  "2007AAS...211.4730K",
+                  "2007APS..MARU20009K",
+                  "2005AAS...207.3405K",
+                  "2006AAS...20921809K",
+                  "2014bbmb.book..243K",
+                  "2007ASPC..377...23K"
+                ],
+                "read_count": 118.0,
+                "size": 13.592592592592592
+              },
+              {
+                "citation_count": 136,
+                "name": "Grant, C",
+                "numberName": 28,
+                "papers": [
+                  "2000A&AS..143...41K",
+                  "1993ASPC...52..132K",
+                  "2005IPM....41.1395K",
+                  "2005JASIS..56...36K",
+                  "2005JASIS..56..111K",
+                  "2002SPIE.4847..238K",
+                  "2003AAS...203.2005K",
+                  "2003lisa.conf..223K",
+                  "2010ASPC..434..155K",
+                  "2006ASPC..351..653K",
+                  "1997AAS...191.1701K",
+                  "2007AAS...211.4730K",
+                  "1996AAS...189.0607K",
+                  "2002AAS...201.0904K",
+                  "1998AAS...193.1311K",
+                  "1998ASPC..145..478K",
+                  "1997DPS....29.2705K",
+                  "2007APS..MARU20009K",
+                  "1999Dlib....5.....K",
+                  "1995AAS...186.0202K",
+                  "1996dkcw.proc..123K",
+                  "2005AAS...207.3405K",
+                  "2006AAS...20921809K",
+                  "1999AAS...194.4407K",
+                  "2007ASPC..377...23K"
+                ],
+                "read_count": 131.0,
+                "size": 20.71665027859718
+              },
+              {
+                "citation_count": 9,
+                "name": "Elwell, B",
+                "numberName": 29,
+                "papers": [
+                  "2005JASIS..56..111K"
+                ],
+                "read_count": 10.0,
+                "size": 5.055446301758987
+              },
+              {
+                "citation_count": 36,
+                "name": "Demleitner, M",
+                "numberName": 39,
+                "papers": [
+                  "2005IPM....41.1395K",
+                  "2005JASIS..56...36K",
+                  "2005JASIS..56..111K",
+                  "1999Dlib....5.....K",
+                  "1999AAS...194.4407K"
+                ],
+                "read_count": 63.0,
+                "size": 7.621817983174914
+              },
+              {
+                "citation_count": 0,
+                "name": "Williams, G",
+                "numberName": 40,
+                "papers": [
+                  "1997DPS....29.2705K"
+                ],
+                "read_count": 2.0,
+                "size": 5.055446301758987
+              },
+              {
+                "citation_count": 8,
+                "name": "Thompson, D",
+                "numberName": 41,
+                "papers": [
+                  "2003AAS...203.2005K",
+                  "2003lisa.conf..223K",
+                  "2007AAS...211.4730K",
+                  "2007APS..MARU20009K",
+                  "2005AAS...207.3405K",
+                  "2006AAS...20921809K",
+                  "2007ASPC..377...23K"
+                ],
+                "read_count": 22.0,
+                "size": 8.136676499508358
+              },
+              {
+                "citation_count": 136,
+                "name": "Eichhorn, G",
+                "numberName": 45,
+                "papers": [
+                  "2000A&AS..143...41K",
+                  "1993ASPC...52..132K",
+                  "2005IPM....41.1395K",
+                  "2005JASIS..56...36K",
+                  "2005JASIS..56..111K",
+                  "2002SPIE.4847..238K",
+                  "1998ASPC..153..293K",
+                  "2003AAS...203.2005K",
+                  "2003lisa.conf..223K",
+                  "2006ASPC..351..653K",
+                  "1997AAS...191.1701K",
+                  "1996AAS...189.0607K",
+                  "2001SPIE.4477..186K",
+                  "2002AAS...201.0904K",
+                  "1993AAS...182.0306K",
+                  "1998AAS...193.1311K",
+                  "1998ASPC..145..478K",
+                  "1997DPS....29.2705K",
+                  "2007APS..MARU20009K",
+                  "1999Dlib....5.....K",
+                  "1995AAS...186.0202K",
+                  "1996dkcw.proc..123K",
+                  "2005AAS...207.3405K",
+                  "2006AAS...20921809K",
+                  "1999AAS...194.4407K",
+                  "2007ASPC..377...23K"
+                ],
+                "read_count": 127.0,
+                "size": 23.96580356167377
+              }
+            ],
+            "name": 1
           },
           {
-            "source": 0,
-            "target": 2,
-            "weight": 126.5918367346939
+            "children": [
+              {
+                "citation_count": 109,
+                "name": "Torres, G",
+                "numberName": 4,
+                "papers": [
+                  "1992ASPC...25..432K"
+                ],
+                "read_count": 3.0,
+                "size": 5.12673440402054
+              },
+              {
+                "citation_count": 122,
+                "name": "Wyatt, W",
+                "numberName": 6,
+                "papers": [
+                  "1992ASPC...25..432K",
+                  "2007AJ....134.1360K"
+                ],
+                "read_count": 12.0,
+                "size": 5.92516114934994
+              },
+              {
+                "citation_count": 21,
+                "name": "Dell'Antonio, I",
+                "numberName": 15,
+                "papers": [
+                  "2007AJ....134.1360K",
+                  "2012ApJ...750..168K"
+                ],
+                "read_count": 32.0,
+                "size": 6.020211952365345
+              },
+              {
+                "citation_count": 109,
+                "name": "Kriss, G",
+                "numberName": 17,
+                "papers": [
+                  "1992ASPC...25..432K"
+                ],
+                "read_count": 3.0,
+                "size": 5.12673440402054
+              },
+              {
+                "citation_count": 404,
+                "name": "Mink, D",
+                "numberName": 19,
+                "papers": [
+                  "1998PASP..110..934K",
+                  "1992ASPC...25..432K",
+                  "2000ApJ...533L.183K",
+                  "1999ascl.soft12003K"
+                ],
+                "read_count": 55.0,
+                "size": 11.114934993991039
+              },
+              {
+                "citation_count": 8,
+                "name": "Utsumi, Y",
+                "numberName": 25,
+                "papers": [
+                  "2012ApJ...750..168K"
+                ],
+                "read_count": 23.0,
+                "size": 5.2217852070359445
+              },
+              {
+                "citation_count": 130,
+                "name": "Fabricant, D",
+                "numberName": 32,
+                "papers": [
+                  "1992ASPC...25..432K",
+                  "2007AJ....134.1360K",
+                  "2012ApJ...750..168K"
+                ],
+                "read_count": 35.0,
+                "size": 6.590516770457773
+              },
+              {
+                "citation_count": 109,
+                "name": "Tonry, J",
+                "numberName": 34,
+                "papers": [
+                  "1992ASPC...25..432K"
+                ],
+                "read_count": 3.0,
+                "size": 5.12673440402054
+              },
+              {
+                "citation_count": 8,
+                "name": "Miyazaki, S",
+                "numberName": 43,
+                "papers": [
+                  "2012ApJ...750..168K"
+                ],
+                "read_count": 23.0,
+                "size": 5.2217852070359445
+              }
+            ],
+            "name": 2
           },
           {
-            "source": 0,
-            "target": 3,
-            "weight": 304.36734693877554
+            "children": [
+              {
+                "citation_count": 28,
+                "name": "Huchra, J",
+                "numberName": 0,
+                "papers": [
+                  "1985AJ.....90.1665K",
+                  "1984BAAS...16..457K"
+                ],
+                "read_count": 18.0,
+                "size": 5.554463017589861
+              },
+              {
+                "citation_count": 28,
+                "name": "Stauffer, J",
+                "numberName": 5,
+                "papers": [
+                  "1985AJ.....90.1665K",
+                  "1984BAAS...16..457K"
+                ],
+                "read_count": 18.0,
+                "size": 5.554463017589861
+              },
+              {
+                "citation_count": 28,
+                "name": "Maccacaro, T",
+                "numberName": 12,
+                "papers": [
+                  "1985AJ.....90.1665K",
+                  "1984BAAS...16..457K"
+                ],
+                "read_count": 18.0,
+                "size": 5.554463017589861
+              },
+              {
+                "citation_count": 28,
+                "name": "Beers, T",
+                "numberName": 20,
+                "papers": [
+                  "1985AJ.....90.1665K",
+                  "1984BAAS...16..457K"
+                ],
+                "read_count": 18.0,
+                "size": 5.554463017589861
+              },
+              {
+                "citation_count": 28,
+                "name": "Schild, R",
+                "numberName": 21,
+                "papers": [
+                  "1985AJ.....90.1665K",
+                  "1984BAAS...16..457K"
+                ],
+                "read_count": 18.0,
+                "size": 5.554463017589861
+              },
+              {
+                "citation_count": 28,
+                "name": "Gioia, I",
+                "numberName": 31,
+                "papers": [
+                  "1985AJ.....90.1665K",
+                  "1984BAAS...16..457K"
+                ],
+                "read_count": 18.0,
+                "size": 5.554463017589861
+              },
+              {
+                "citation_count": 49,
+                "name": "Geller, M",
+                "numberName": 38,
+                "papers": [
+                  "1985AJ.....90.1665K",
+                  "2007AJ....134.1360K",
+                  "2012ApJ...750..168K",
+                  "1984BAAS...16..457K"
+                ],
+                "read_count": 50.0,
+                "size": 7.018245384027095
+              }
+            ],
+            "name": 3
           },
           {
-            "source": 0,
-            "target": 8,
-            "weight": 432.00000000000017
+            "children": [
+              {
+                "citation_count": 19,
+                "name": "Stoner, J",
+                "numberName": 2,
+                "papers": [
+                  "1993ASPC...52..132K",
+                  "1993AAS...182.0306K"
+                ],
+                "read_count": 3.0,
+                "size": 5.554463017589861
+              },
+              {
+                "citation_count": 0,
+                "name": "Stern, C",
+                "numberName": 9,
+                "papers": [
+                  "1993AAS...182.0306K"
+                ],
+                "read_count": 0,
+                "size": 5.055446301758987
+              },
+              {
+                "citation_count": 79,
+                "name": "Watson, J",
+                "numberName": 30,
+                "papers": [
+                  "2000A&AS..143...41K",
+                  "1993ASPC...52..132K",
+                  "1993AAS...182.0306K"
+                ],
+                "read_count": 21.0,
+                "size": 6.219818638697695
+              },
+              {
+                "citation_count": 1,
+                "name": "Mussio, P",
+                "numberName": 35,
+                "papers": [
+                  "1990PaReL..11..507K"
+                ],
+                "read_count": 0,
+                "size": 5.887140828143778
+              },
+              {
+                "citation_count": 20,
+                "name": "Ossorio, P",
+                "numberName": 42,
+                "papers": [
+                  "1993ASPC...52..132K",
+                  "1990PaReL..11..507K",
+                  "1993AAS...182.0306K"
+                ],
+                "read_count": 3.0,
+                "size": 6.885174259805527
+              },
+              {
+                "citation_count": 19,
+                "name": "Karakashian, T",
+                "numberName": 44,
+                "papers": [
+                  "1993ASPC...52..132K",
+                  "1993AAS...182.0306K"
+                ],
+                "read_count": 3.0,
+                "size": 5.554463017589861
+              }
+            ],
+            "name": 4
           },
           {
-            "source": 1,
-            "target": 8,
-            "weight": 1441.0714285714291
+            "children": [
+              {
+                "citation_count": 0,
+                "name": "Jannaway, W",
+                "numberName": 13,
+                "papers": [
+                  "1981romi.work.....K"
+                ],
+                "read_count": 0,
+                "size": 5.887140828143778
+              },
+              {
+                "citation_count": 0,
+                "name": "Stone, G",
+                "numberName": 37,
+                "papers": [
+                  "1981romi.work.....K"
+                ],
+                "read_count": 0,
+                "size": 5.887140828143778
+              }
+            ],
+            "name": 5
           },
           {
-            "source": 1,
-            "target": 1,
-            "weight": 5894.714285714282
+            "children": [
+              {
+                "citation_count": 0,
+                "name": "Falco, E",
+                "numberName": 23,
+                "papers": [
+                  "1989daa..conf..155K",
+                  "1990ebua.conf..363K"
+                ],
+                "read_count": 0,
+                "size": 8.548563312575112
+              }
+            ],
+            "name": 6
           },
           {
-            "source": 1,
-            "target": 2,
-            "weight": 94.34693877551024
+            "children": [
+              {
+                "citation_count": 0,
+                "name": "Regele, J",
+                "numberName": 46,
+                "papers": [
+                  "2014CTM....18..532K",
+                  "2014CTM....18..711K"
+                ],
+                "read_count": 0,
+                "size": 8.548563312575112
+              }
+            ],
+            "name": 7
           },
           {
-            "source": 1,
-            "target": 3,
-            "weight": 140.0102040816327
+            "children": [
+              {
+                "citation_count": 0,
+                "name": "Brody, T",
+                "numberName": 1,
+                "papers": [
+                  "2006oaks.book...45K"
+                ],
+                "read_count": 0,
+                "size": 6.552496449251612
+              }
+            ],
+            "name": 8
           },
           {
-            "source": 2,
-            "target": 2,
-            "weight": 2765.0918367346953
+            "children": [
+              {
+                "citation_count": 4,
+                "name": "LaSala, J",
+                "numberName": 22,
+                "papers": [
+                  "1991opos.conf..133K"
+                ],
+                "read_count": 0,
+                "size": 6.552496449251612
+              }
+            ],
+            "name": 9
           },
           {
-            "source": 2,
-            "target": 3,
-            "weight": 1959.4693877551024
+            "children": [
+              {
+                "citation_count": 8,
+                "name": "Bollen, J",
+                "numberName": 33,
+                "papers": [
+                  "2010ARIST..44....3K"
+                ],
+                "read_count": 43.0,
+                "size": 6.552496449251612
+              }
+            ],
+            "name": 10
           },
           {
-            "source": 2,
-            "target": 8,
-            "weight": 1082.683673469388
-          },
-          {
-            "source": 3,
-            "target": 3,
-            "weight": 5105.142857142865
-          },
-          {
-            "source": 3,
-            "target": 8,
-            "weight": 1504.8367346938783
-          },
-          {
-            "source": 4,
-            "target": 8,
-            "weight": 259.3163265306123
-          },
-          {
-            "source": 4,
-            "target": 4,
-            "weight": 926.8673469387752
-          },
-          {
-            "source": 5,
-            "target": 5,
-            "weight": 383.8775510204079
-          },
-          {
-            "source": 5,
-            "target": 8,
-            "weight": 85.30612244897958
-          },
-          {
-            "source": 6,
-            "target": 8,
-            "weight": 33.22448979591838
-          },
-          {
-            "source": 6,
-            "target": 6,
-            "weight": 166.12244897959172
-          },
-          {
-            "source": 7,
-            "target": 8,
-            "weight": 85.30612244897958
-          },
-          {
-            "source": 7,
-            "target": 7,
-            "weight": 383.8775510204079
-          },
-          {
-            "source": 8,
-            "target": 8,
-            "weight": 0
+            "children": [
+              {
+                "citation_count": 0,
+                "name": "Holden, B",
+                "numberName": 36,
+                "papers": [
+                  "2001JChEd..78.1122K"
+                ],
+                "read_count": 0,
+                "size": 6.552496449251612
+              }
+            ],
+            "name": 11
           }
         ],
-        "multigraph": false,
-        "nodes": [
+        "name": [
           {
-            "authorCount": 21,
-            "id": 1,
-            "nodeName": {
-              "Koo, D": 6.29849869354781,
-              "Szalay, A": 6.29849869354781,
-              "Willmer, C": 6.56924487652275
-            },
-            "size": 112.56302387522196
-          },
-          {
-            "authorCount": 51,
-            "id": 2,
-            "nodeName": {
-              "Accomazzi, A": 45.67377790759604,
-              "Eichhorn, G": 47.07347550775805,
-              "Grant, C": 44.42419402443904,
-              "Murray, S": 44.859674218299624
-            },
-            "size": 468.8241444713776
-          },
-          {
-            "authorCount": 40,
-            "id": 3,
-            "nodeName": {
-              "Dell'Antonio, I": 8.658121871629254,
-              "Diaferio, A": 8.780856653371027,
-              "Fabricant, D": 13.57745968464703,
-              "Rines, K": 8.314932555380375
-            },
-            "size": 232.18304594227612
-          },
-          {
-            "authorCount": 48,
-            "id": 5,
-            "nodeName": {
-              "Brown, W": 11.850760861269741,
-              "Geller, M": 29.321507178948714,
-              "Kenyon, S": 11.158934170313925,
-              "Mink, D": 11.875248349374363
-            },
-            "size": 316.6546987101776
-          },
-          {
-            "authorCount": 24,
-            "id": 6,
-            "nodeName": {
-              "Mandala, S": 5.39378528168244,
-              "Spiegel, S": 5.274656961173466,
-              "Thornton, R": 5.274656961173466
-            },
-            "size": 121.68698938320762
-          },
-          {
-            "authorCount": 10,
-            "id": 9,
-            "nodeName": {
-              "Ildefonse, B": 5.032489541956993
-            },
-            "size": 50.32489541956992
-          },
-          {
-            "authorCount": 11,
-            "id": 11,
-            "nodeName": {
-              "Muhler, M": 5.019854720084829,
-              "Wilmer, H": 5.019854720084829
-            },
-            "size": 55.21840192093312
-          },
-          {
-            "authorCount": 10,
-            "id": 12,
-            "nodeName": {
-              "Gui-ru, L": 5.032489541956993
-            },
-            "size": 50.32489541956992
-          },
-          {
-            "connector": true,
-            "id": "Kurtz, M",
-            "nodeName": {
-              "Kurtz, M": 150.0
-            },
-            "size": 150.0
+            "delete": true,
+            "nodeName": "Kurtz, M",
+            "nodeWeight": 150.0
           }
         ]
       }
-    };
+    }, "msg": {"numFound": 1500, "rows": 1000, "start": 0}};
 
-    testDataEmpty = {"fullGraph": {"nodes": [], "links": []}};
+    testDataEmpty = {"data": {"fullGraph": {"nodes": [], "links": []}}, "msg": {numFound: 0, rows:0}};
 
-
-    afterEach(function(){
+    afterEach(function () {
       $("#test").empty();
     });
 
+//    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+//    $("#test").append(networkWidget.view.el);
+//    //this should show a single, simple graph
+//    networkWidget.processResponse(new JsonResponse(testDataLarge));
 
-    it("renders different views with different types of graphs based on the data it is given", function(){
 
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
+  it("communicates with pubsub to get current query info and to request network data", function () {
 
-      //this should show a single, simple graph
-      networkWidget.processResponse(new JsonResponse(testDataSmall));
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    $("#test").append(networkWidget.view.el);
 
-      expect($("#test").find("svg").length).to.eql(1);
+    var minsub = new MinimalPubsub({verbose: false});
+    var q = new ApiQuery({q: 'star'});
 
-      expect($("#test").find("text.detail-node").length).to.eql(19);
-      expect($("#test").find("line.detail-link").length).to.eql(68);
+    networkWidget.activate(minsub.beehive.getHardenedInstance());
+    minsub.publish(minsub.START_SEARCH, q);
 
-      //this should show two graphs, a summary and a detail graph
-      networkWidget.processResponse(new JsonResponse(testDataLarge));
-      expect($("#test").find(".summary-node-group").length).to.eql(9);
+    expect(networkWidget.getCurrentQuery().get("q")).to.eql(q.get("q"));
+    networkWidget.pubsub.publish = sinon.stub();
 
-      networkWidget.view.model.set("currentGroup", 2);
-      expect($("#test").find("svg").length).to.eql(2);
+    networkWidget.onShow();
+    expect(networkWidget.pubsub.publish.calledOnce).to.be.true;
+    expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql('author-network?q=star&rows=300');
+  });
 
-      //this should show just a message;
-      networkWidget.processResponse(new JsonResponse(testDataEmpty));
-      expect($("#test").find(".author-graph").text()).to.eql("There wasn't enough data returned by your search to form a visualization.")
+  it("renders a pie/sunburst chart if the data is large enough", function () {
+
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    $("#test").append(networkWidget.view.el);
+
+    //this should show not enough data template
+    networkWidget.processResponse(new JsonResponse(testDataSmall));
+    expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
+
+    //this should also show not enough data template
+    networkWidget.processResponse(new JsonResponse(testDataEmpty));
+    expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
+
+    //this should show a donut chart with hidden link layer, representing the data
+    networkWidget.processResponse(new JsonResponse(testDataLarge));
+
+    expect($("#test").find(".link").length).to.eql(testDataLarge.data.link_data.length);
+
+    var totalChildren = [];
+    _.each(testDataLarge.data.root.children, function (group) {
+      var children = group.children;
+      Array.prototype.push.apply(totalChildren, children);
     });
+    expect($("#test").find(".author-node").length).to.eql(totalChildren.length);
 
-    it("listens to the graph view for node selection events (adding and removing) and updates the selected nodes list collection", function(){
+  });
 
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
+  it("allows you to click to view more data about a node or a group", function () {
 
-      networkWidget.processResponse(new JsonResponse(testDataSmall));
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    $("#test").append(networkWidget.view.el);
 
-      //testing view method instead of click
-      networkWidget.view.updateSingleName("Bohlen, Ex");
-      expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
+    // this would be the result of a click on group 1
+    networkWidget.view.graphView.model.set("selectedEntity", d3.select(".node-path")[0][0]);
 
-      //the x is from the close button
-      expect(networkWidget.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql("Bohlen, Exx");
-
-      networkWidget.view.updateSingleName("Bohlen, Ex");
-      expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
-      expect(networkWidget.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql('Click on a node in the detail view to add it to this list. You can then filter your current search to include only the selected items.');
-
-      networkWidget.view.$("button.update-all").click();
-      expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(19);
-
-      networkWidget.view.$("button.update-all").click();
-      expect(networkWidget.view.$("ul.dropdown-menu").find("li").length).to.eql(1);
-      expect(networkWidget.view.$("ul.dropdown-menu").find("li").text().trim()).to.eql('Click on a node in the detail view to add it to this list. You can then filter your current search to include only the selected items.');
+    //paper description div should contain an entry for every relevant paper from group 1
+    var children = testDataLarge.data.root.children[0].children;
+    var bibcodes = [];
+    _.each(children, function (c) {
+      Array.prototype.push.apply(bibcodes, c.papers)
     });
+    bibcodes = _.uniq(bibcodes);
+    expect($("#test").find(".paper-description li").length).to.eql(bibcodes.length);
 
+    //testing with a focus on accomazzi
+    var accomazziNode = d3.selectAll(".node-path").filter(function (d) {
+      return d.name == "Accomazzi, A"
+    })[0][0];
+    networkWidget.view.graphView.model.set("selectedEntity", accomazziNode);
+    expect($("#test").find(".paper-description li").length).to.eql(25);
 
+    //and this should remove the center div
+    networkWidget.view.graphView.model.set("selectedEntity", undefined);
 
-    it("communicates with pubsub to get current query info and to request network data", function(){
+    expect($("#test").find(".paper-description").length).to.eql(0);
 
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
+  });
 
-      var minsub = new MinimalPubsub({verbose: false});
-      var q =  new ApiQuery({q: 'star'});
+  it("has a filter capability that allows you to add or remove groups or individual nodes, and submit as a filter", function () {
 
-      networkWidget.activate(minsub.beehive.getHardenedInstance());
-      minsub.publish(minsub.START_SEARCH, q);
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    $("#test").append(networkWidget.view.el);
 
-      expect(networkWidget.getCurrentQuery().get("q")).to.eql(q.get("q"));
-      networkWidget.pubsub.publish = sinon.stub();
+    // this would be the result of a click on group 1
+    networkWidget.view.graphView.model.set("selectedEntity", d3.select(".node-path")[0][0]);
+    $("#test").find("button.filter-add").click();
+    var accomazziNode = d3.selectAll(".node-path").filter(function (d) {
+      return d.name == "Accomazzi, A"
+    })[0][0];
+    networkWidget.view.graphView.model.set("selectedEntity", accomazziNode);
+    $("#test").find("button.filter-add").click();
 
-      networkWidget.onShow();
-      expect (networkWidget.pubsub.publish.calledOnce).to.be.true;
-      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql("author-network?q=star");
+    expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('at least one member of Group 1  OR \n        \n            Accomazzi, A');
+
+    $("#test").find("button.filter-remove").click();
+
+    expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('at least one member of Group 1');
+
+    //putting accomazzi back
+    $("#test").find("button.filter-add").click();
+
+    var minsub = new MinimalPubsub({verbose: false});
+
+    networkWidget.setCurrentQuery(new ApiQuery({q: "original search"}));
+    networkWidget.activate(minsub.beehive.getHardenedInstance());
+    networkWidget.pubsub.publish = sinon.stub();
+
+    $("#test").find(".apply-filter").click();
+    expect(networkWidget.pubsub.publish.called).to.be.true;
+    expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
+    expect(networkWidget.pubsub.publish.args[0][1].get("fq")[0]).to.eql('(author:("Accomazzi, A" OR ("Accomazzi, A" OR "Bergstrom, C" OR "Bohlen, E" OR "Demleitner, M" OR "Di Milia, G" OR "Eichhorn, G" OR "Elwell, B" OR "Grant, C" OR "Green, D" OR "Henneken, E" OR "Marsden, B" OR "Martimbeau, N" OR "Murray, S" OR "Rosvall, M" OR "Thompson, D" OR "Williams, G")))');
+
+  });
+
+  it("allows you to toggle between three arc sizing modes, and correctly calculates the arcs' size based on different variables", function () {
+
+    //checking ratios of the first and second groups
+
+    var group1 = testDataLarge.data.root.children[0];
+    var group2 = testDataLarge.data.root.children[1];
+    var size1 = 0, size2 = 0;
+    _.each(group1.children, function (c) {
+      size1 += c.size;
     });
-
-    it("communicates a filtered request to pubsub", function(){
-
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
-
-      var minsub = new MinimalPubsub({verbose: false});
-      networkWidget.setCurrentQuery(new ApiQuery({q : "original search"}));
-      networkWidget.activate(minsub.beehive.getHardenedInstance());
-      networkWidget.pubsub.publish = sinon.stub();
-
-      networkWidget.view.trigger("filterSearch", ["testName1", "testName2"]);
-      expect(networkWidget.pubsub.publish.called).to.be.true;
-      expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
-      expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql( "__fq_fq=AND&__fq_fq=author%3A(%22testName1%22+OR+%22testName2%22)&fq=(author%3A(%22testName1%22+OR+%22testName2%22))&q=original+search");
+    _.each(group2.children, function (c) {
+      size2 += c.size;
     });
+    var sizeRatio = size1 / size2;
 
-
-    it("has a method to completely remove the graphView", function(){
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-
-      $("#test").append(networkWidget.view.el);
-
-      var minsub = new MinimalPubsub({verbose: false});
-      networkWidget.processResponse(new JsonResponse(testDataLarge));
-      expect(networkWidget.resetWidget).to.be.instanceof(Function);
-
-      expect(networkWidget.view.graphView.$el.children().length).not.be.eql(0);
-      expect(_.keys(networkWidget.view.graphView._listeners).length).not.be.eql(0);
-      networkWidget.resetWidget();
-
-      expect(networkWidget.view.graphView.$el.children().length).to.be.eql(0);
-      expect(networkWidget.model.get('data')).to.be.undefined;
-      expect(_.keys(networkWidget.view.graphView._listeners).length).to.be.eql(0);
+    var citation1 = 0, citation2 = 0;
+    _.each(group1.children, function (c) {
+      citation1 += c.citation_count;
     });
-
-    it("has a help popover that is accessible by hovering over the question mark icon", function(){
-
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
-
-      var minsub = new MinimalPubsub({verbose: false});
-      networkWidget.processResponse(new JsonResponse(testDataLarge));
-
-      //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
-      expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
-      expect($("div.popover").length).to.eql(0);
-
-      networkWidget.view.$(".icon-help").mouseover();
-      expect($("div.popover").length).to.eql(1);
+    _.each(group2.children, function (c) {
+      citation2 += c.citation_count;
     });
+    var citationRatio = citation1 / citation2;
+
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    $("#test").append(networkWidget.view.el);
+
+    var group1Path = $("#test").find("g.node-containers:not(.author-node)").eq(1).find("path").eq(0)[0];
+    var group2Path = $("#test").find("g.node-containers:not(.author-node)").eq(2).find("path").eq(0)[0];
+
+    expect(group1Path.__data__.value / group2Path.__data__.value).to.eql(sizeRatio);
+
+    $("#test input[value=citation_count]").click();
+
+    expect(group1Path.__data__.value / group2Path.__data__.value).to.eql(citationRatio);
+
+  });
+
+  it("has a method to completely remove the graphView", function () {
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    $("#test").append(networkWidget.view.el);
+
+    var minsub = new MinimalPubsub({verbose: false});
+    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    expect(networkWidget.resetWidget).to.be.instanceof(Function);
+
+    expect(networkWidget.view.graphView.$el.children().length).not.be.eql(0);
+    expect(_.keys(networkWidget.view.graphView._listeners).length).not.be.eql(0);
+    networkWidget.resetWidget();
+
+    expect(networkWidget.view.graphView.$el.children().length).to.be.eql(0);
+    expect(networkWidget.model.get('data')).to.be.undefined;
+    expect(_.keys(networkWidget.view.graphView._listeners).length).to.be.eql(0);
+  });
+
+  it("has a help popover that is accessible by hovering over the question mark icon", function () {
+
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    $("#test").append(networkWidget.view.el);
+
+    var minsub = new MinimalPubsub({verbose: false});
+    networkWidget.processResponse(new JsonResponse(testDataLarge));
+
+    //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
+    expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
+    expect($("div.popover").length).to.eql(0);
+
+    networkWidget.view.$(".icon-help").mouseover();
+    expect($("div.popover").length).to.eql(1);
+  });
+
+  it("should allow the user to request a different number of documents", function (done) {
 
 
-    it("should show a detail network for the summary graph node that was clicked", function(){
-
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
-
-      networkWidget.processResponse(new JsonResponse(testDataLarge));
-      $(".summary-node-group:first").click();
-
-      var names = $(".detail-graph-container .detail-node").map(function(){return d3.select(this).text()});
-      names = names.sort();
-
-      // now get names from testDataLarge
-      var testNames=[];
-      _.each(testDataLarge.fullGraph.nodes, function(n){
-        if (n.group == 0){
-          testNames.push(n.nodeName)
+    var minsub = new (MinimalPubsub.extend({
+      request: function (apiRequest) {
+        this.counter = this.counter || 0;
+        if (this.counter == 0) {
+          this.counter++;
+          var data = testDataLarge;
+          data.msg.rows = 1000
+          return data;
         }
-      });
+        else if (this.counter == 1) {
+          var data = testDataLarge;
+          data.msg.rows = 400
+          return data;
 
-      testNames = testNames.sort();
-      _.each(names, function(n, i){
-        expect(n).to.eql(testNames[i])
-      });
-    });
-
-    it("should have an extractGraphData method that extracts the apprpriate sub network, with optional limiting of nodes", function(){
-
-      var networkWidget = new NetworkWidget({networkType: "author", endpoint : "author-network", helpText : "test"});
-      $("#test").append(networkWidget.view.el);
-
-      //this should show two graphs, a summary and a detail graph
-      networkWidget.processResponse(new JsonResponse(testDataLarge));
-
-      // using group 2, the ads group, as an example
-      var detailGraph = networkWidget.view.extractGraphData(2, 5);
-
-      expect(detailGraph.nodes).to.eql([
-        {
-          "delete": false,
-          "group": 2,
-          "id": 41,
-          "nodeName": "Grant, C",
-          "nodeWeight": 44.42419402443904
-        },
-        {
-          "delete": false,
-          "group": 2,
-          "id": 43,
-          "nodeName": "Murray, S",
-          "nodeWeight": 44.859674218299624
-        },
-        {
-          "delete": false,
-          "group": 2,
-          "id": 82,
-          "nodeName": "Henneken, E",
-          "nodeWeight": 21.096221572770787
-        },
-        {
-          "delete": false,
-          "group": 2,
-          "id": 253,
-          "nodeName": "Accomazzi, A",
-          "nodeWeight": 45.67377790759604
-        },
-        {
-          "delete": false,
-          "group": 2,
-          "id": 266,
-          "nodeName": "Eichhorn, G",
-          "nodeWeight": 47.07347550775805
         }
-      ]);
+      }
+    }))({verbose: false});
 
-      expect(detailGraph.links).to.eql( [
-        {
-          "source": 0,
-          "target": 4,
-          "weight": 39.78571428571429
-        },
-        {
-          "source": 0,
-          "target": 1,
-          "weight": 39.81632653061225
-        },
-        {
-          "source": 0,
-          "target": 2,
-          "weight": 39.60204081632655
-        },
-        {
-          "source": 0,
-          "target": 3,
-          "weight": 39.87755102040817
-        },
-        {
-          "source": 1,
-          "target": 4,
-          "weight": 39.75510204081634
-        },
-        {
-          "source": 1,
-          "target": 2,
-          "weight": 39.57142857142859
-        },
-        {
-          "source": 1,
-          "target": 3,
-          "weight": 39.84693877551021
-        },
-        {
-          "source": 2,
-          "target": 4,
-          "weight": 39.38775510204084
-        },
-        {
-          "source": 2,
-          "target": 3,
-          "weight": 39.63265306122451
-        },
-        {
-          "source": 3,
-          "target": 4,
-          "weight": 39.72448979591838
-        }
-      ]);
-    })
-  })
+    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+    $("#test").append(networkWidget.view.el);
+
+    networkWidget.activate(minsub.beehive.getHardenedInstance());
+
+    //provide widget with current query
+    minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
+
+    //trigger show event, should prompt dispatchRequest
+    networkWidget.onShow();
+
+    expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 1000 papers.\n\nChange to first  papers (max is 1000).\n Submit');
+    sinon.spy(networkWidget.pubsub, "publish");
+    $("#test").find(".network-metadata input").val("400");
+    $("#test").find(".network-metadata button.submit-rows").trigger("click");
+
+    setTimeout(function () {
+        expect(networkWidget.pubsub.publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
+        expect(networkWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([400]);
+        expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 400 papers.\n\nChange to first  papers (max is 1000).\n Submit');
+        done();
+    }, 800);
+
+  });
+
+});
+
 });

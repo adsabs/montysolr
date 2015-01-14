@@ -1,54 +1,77 @@
 <div class="s-group-title" style="background:{{backgroundColor}}">
 
-    <h3>{{#each summaryData.nodeName}}
-        {{@key}}
+    <h3>Group {{groupIdToShow}}:
+        {{#each summaryData.titleWords}}
+        {{this}}{{#unless @last}}, {{/unless}}
         {{/each}}
     </h3>
 
 </div>
 
+   <div class="s-group-content">
 
-{{#if currentlySelected}}
-<button class="btn btn-default btn-sm update-all s-update-all">Remove entire group from filter list.</button>
-{{else}}
-<button class="btn btn-default btn-sm update-all s-update-all add-all">Add entire group to filter list.</button>
+       <p>This group consists of <b>{{summaryData.paper_count}}</b> papers, which have been cited, in total, <b>{{summaryData.total_citations}}</b>
+           times.</p>
 
-{{/if}}
+       <div>
+           <div>
+               {{#if inFilter}}
+               <button class="btn btn-xs btn-default filter-remove"><i class="s-filter-image"></i>remove group from filter</button>
+               {{else}}
+               <button class="btn btn-xs btn-default filter-add"><i class="s-filter-image"></i> add group to filter</button>
+               {{/if}}
+           </div>
+       </div>
+       <div>
+           {{#if morePapers}}
+           <p><b>Top papers from this group include:</b> </p>
+           {{else}}
+           <p><b>Papers in this group: </b></p>
+           {{/if}}
+           <ul class="list-unstyled s-top-papers">
+               {{#each topNodes}}
+               <li title="{{this.node_name}}">
+                   <a href="#abs/{{this.node_name}}" data-bypass target="_blank"><b>{{this.title}}</b></a>; <i>{{this.first_author}}</i>
+                   ({{this.citation_count}} citations)
+               </li>
+
+               {{/each}}
+           </ul>
+
+       </div>
+
+       <div>
+           <p><b> Papers highly referenced by papers in this group:</b> <br/>
+               (A <i class="fa fa-star-o"></i> indicates that this paper is also a member of Group {{groupIdToShow}})</p>
+
+           <ul class="list-unstyled">
+               {{#each summaryData.processedTopCommonReferences}}
+
+               <li>
+                   {{#if this.inGroup}}
+                   <i class="fa fa-star-o"></i>
+                   {{else}}
+                   <i class="fa fa-star-o no-show"></i>
+                   {{/if}}
+                   <a href="#abs/{{this.[0]}}" data-bypass target="_blank">{{this.bibcode}}</a> (cited by {{this.percent}}% of papers
+                   in this group)
+               </li>
+
+               {{/each}}
+
+           </ul>
+           <small>(Click on a link above to view the paper's abstract page in ADS in a new tab)</small>
+       </div>
 
 
-<p>This group consists of <b>{{summaryData.paperCount}}</b> papers, which have been cited, in total, <b>{{summaryData.size}}</b>
-    times.</p>
 
-{{#unless noCitations}}
-<p>The <b>most cited </b> papers of this group include : </p>
-{{else}}
-<p>A few papers from this group : </p>
-{{/unless}}
-<ul class="list-unstyled">
-    {{#each topNodes}}
-
-    <li title="{{this.nodeName}}">
-        <a href="#abs/{{this.nodeName}}" data-bypass target="_blank"><b>{{this.title}}</b></a>; <i>{{this.first_author}}</i>
-        ({{this.citation_count}} citations)
-
-    </li>
+   </div>
 
 
-    {{/each}}
-</ul>
 
 
-<p>The papers that have been most <b> highly referenced</b> by the papers in this group include:</p>
 
-<ul class="list-unstyled">
-    {{#each summaryData.processedTopCommonReferences}}
 
-    <li><a href="#abs/{{this.[0]}}" data-bypass target="_blank">{{this.[0]}}</a> (cited by {{this.[1]}}% of papers in this group)</li>
 
-    {{/each}}
-
-</ul>
-
-</div>
 
 

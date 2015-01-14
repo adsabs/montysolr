@@ -1,4 +1,4 @@
-
+@media screen {
 
 .s-metrics-svg {
   height: 340px !important;
@@ -140,4 +140,104 @@
 .nvtooltip{
   .ads-container;
   .box-shadow(2px 2px 2px @gray-light)
+}
+
+}
+
+/* print stylesheet */
+
+@media print {
+
+  .s-results-control-row-container {
+    display :none;
+  }
+
+  .s-results-control-row {
+    display : none;
+  }
+
+  .s-metrics-metadata {
+    display:none
+  }
+
+  .s-large-close {
+    display : none;
+  }
+
+
+  .s-search-bar-full-width-container {
+    display : none
+  }
+
+  .s-metrics-table {
+    font-size : 10px;
+    width : 300px;
+    float: left;
+    padding: 0;
+    margin: 0;
+
+    td:nth-of-type(2) * {
+      display:none
+
+    }
+  }
+
+  .s-metrics-title {
+    clear:both;
+  }
+
+  .s-metrics-graph {
+    width: 600px;
+    float : left;
+    padding: 0 0 0 20px;
+    margin: 0;
+  }
+
+  .s-metrics-svg {
+
+    height : 350px;
+
+  }
+
+  .s-graph-tab {
+    display: none;
+  }
+
+  .s-metrics-title {
+    h3 {
+      font-size: 14px;
+      margin: 5px;
+      border-bottom: 2px solid @brand-primary;
+    }
+  }
+
+  .s-main-content-container {
+    width: 100%;
+    border: 0px;
+  }
+
+  .s-stable-search-bar-height {
+    height: 0px;
+  }
+
+  .navbar-inverse {
+    height: 0px;
+
+  }
+
+ #body-template-container {
+    visibility: hidden;
+  }
+
+ div[data-widget=Metrics]{
+   visibility: visible !important;
+   width: 150%;
+   position: relative;
+   top: -60px;
+   left: -180px;
+ }
+
+
+
+
 }
