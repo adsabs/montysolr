@@ -15,9 +15,9 @@ define([
     {href : '/export/endnote' , description : 'EndNote' , navEvent: 'export-endnote'}
   ];
 
-  var btnType = "btn-success";
+  var btnType = "btn-primary-faded";
   var dropdownTitle = "Export";
-  var iconClass = "icon-visualize";
+  var iconClass = "icon-export";
   var rightAlign = true;
 
 
