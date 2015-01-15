@@ -1,7 +1,7 @@
 <nav class="s-abstract-nav-col">
-    <div class="s-nav-header s-view-nav"> View </div>
+    <div class="s-nav-header s-view-nav"> <i class="icon-list"></i>   View </div>
 
-    {{#each items}}
+    {{#each view}}
 
     <a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}}  data-bypass>
         <div class="abstract-nav s-abstract-nav {{#if this.isSelected}} s-abstract-nav-active {{/if}} {{#unless this.isActive}} s-abstract-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
@@ -15,7 +15,7 @@
     {{/each}}
 
 
-    <div class="s-nav-header s-export-nav"> Export </div>
+    <div class="s-nav-header s-export-nav"><i class="icon-export"></i> Export </div>
 
     <a href="#" data-bypass>
         <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive">
@@ -28,14 +28,20 @@
         </div>
     </a>
 
-    <div class="s-nav-header s-analyze-nav"> Analyze </div>
+    <div class="s-nav-header s-analyze-nav"> <i class="icon-explore"></i> Explore  </div>
 
-    <a href="#" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive">
-            Metrics
-            <span class="num-items"></span>
-        </div>
+    {{#each explore}}
+
+    <a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}}  data-bypass>
+    <div class="abstract-nav s-abstract-nav {{#if this.isSelected}} s-abstract-nav-active {{/if}} {{#unless this.isActive}} s-abstract-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
+        {{this.title}}
+        {{#if this.showCount}}
+        <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
+        {{/if}}
+    </div>
     </a>
+
+    {{/each}}
 
 
 

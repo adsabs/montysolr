@@ -20,7 +20,7 @@ define([
 
   var dropdownTitle = "Explore";
 
-  var iconClass = "icon-visualize";
+  var iconClass = "icon-explore";
 
   var rightAlign = true;
 

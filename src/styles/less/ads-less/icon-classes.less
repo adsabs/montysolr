@@ -25,12 +25,11 @@
 
 // to indicate that column expands
 
-
 .paginate-left-icon {
   .fa;
   .fa-lg;
-  &:before{
-    content:@fa-var-arrow-circle-left;
+  &:before {
+    content: @fa-var-arrow-circle-left;
   }
 
 }
@@ -38,14 +37,11 @@
 .paginate-right-icon {
   .fa;
   .fa-lg;
-  &:before{
-    content:@fa-var-arrow-circle-right;
+  &:before {
+    content: @fa-var-arrow-circle-right;
   }
 
 }
-
-
-
 
 //for query builder, alias from glyphicon to font awesome, so it doesn't barf
 
@@ -53,7 +49,7 @@
   .fa;
   .fa-lg;
   &:before {
-    content : @fa-var-plus;
+    content: @fa-var-plus;
   }
 
 }
@@ -62,29 +58,27 @@
   .fa;
   .fa-lg;
   &:before {
-    content : @fa-var-plus-circle;
+    content: @fa-var-plus-circle;
   }
 
 }
 
-.glyphicon-remove{
+.glyphicon-remove {
   .fa;
   .fa-lg;
   &:before {
-    content : @fa-var-minus;
+    content: @fa-var-minus;
   }
 }
-
 
 //currently used for facets
 
 .s-filter-image {
   .fa;
   &:before {
-    content : @fa-var-filter;
+    content: @fa-var-filter;
   }
 }
-
 
 //carets
 
@@ -116,11 +110,11 @@
 .icon-export {
   .fa;
   &:before {
-    content:@fa-var-share-square-o;
+    content: @fa-var-share-square-o;
   }
 }
 
-.icon-analyze {
+.icon-explore {
   .fa;
   &:before {
     content: @fa-var-bar-chart-o;
@@ -130,7 +124,7 @@
 .icon-help {
   .fa;
   &:before {
-    content : @fa-var-question-circle;
+    content: @fa-var-question-circle;
   }
   font-size: 1.3em;
   color: @gray-light;
@@ -143,21 +137,19 @@
 
 }
 
-
 .icon-details {
   .fa;
   cursor: pointer;
-  &:before{
+  &:before {
     content: @fa-var-plus-circle
   }
   color: @gray-light;
 }
 
-
 .icon-hide-details {
   .fa;
   cursor: pointer;
-  &:before{
+  &:before {
     content: @fa-var-minus-circle
   }
   color: @gray-light;
@@ -171,3 +163,28 @@
     content: @fa-var-arrow-circle-right;
   }
 }
+
+.icon-list {
+  .fa;
+  &:before {
+    content: @fa-var-list-ul;
+  }
+}
+
+.icon-data {
+  .fa;
+  &:before {
+    content: @fa-var-database;
+  }
+
+}
+
+.icon-text {
+  .fa;
+  &:before {
+    content: @fa-var-file-text-o;
+  }
+
+}
+
+
