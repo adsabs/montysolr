@@ -45,7 +45,7 @@ define([
     }
 
     // These first three constants are settings for modification by environment
-    var BUMBLEBEE_URL = "http://localhost:8000";
+    var BUMBLEBEE_URL = "//bumblebee-testing.elasticbeanstalk.com/";
     var ORCID_OAUTH_CLIENT_ID = 'APP-P5ANJTQRRTMA6GXZ';
     var ORCID_ENDPOINT = 'https://sandbox.orcid.org';
 
