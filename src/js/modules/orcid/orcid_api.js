@@ -44,16 +44,22 @@ define([
       return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
+    // These first three constants are settings for modification by environment
+    var BUMBLEBEE_URL = "http://localhost:8000";
     var ORCID_OAUTH_CLIENT_ID = 'APP-P5ANJTQRRTMA6GXZ';
     var ORCID_ENDPOINT = 'https://sandbox.orcid.org';
+
+    // Do not modify these. It is based on constants above
+    var ORCID_REDIRECT_URI = BUMBLEBEE_URL + '/oauthRedirect.html';
     var ORCID_API_ENDPOINT = 'https://api.sandbox.orcid.org/v1.1';
     var ORCID_PROFILE_URL = ORCID_API_ENDPOINT + '/{0}/orcid-profile';
     var ORCID_WORKS_URL = ORCID_API_ENDPOINT + '/{0}/orcid-works';
     var ORCID_OAUTH_LOGIN_URL = ORCID_ENDPOINT
       + "/oauth/authorize?scope=/orcid-profile/read-limited,/orcid-works/create,/orcid-works/update&response_type=code&access_type=offline"
       + "&client_id=" + ORCID_OAUTH_CLIENT_ID
-      + "&redirect_uri={0}";
-    var EXCHANGE_TOKEN_URI = 'http://localhost:3000/oauth/exchangeAuthCode';
+      + "&redirect_uri=" + ORCID_REDIRECT_URI;
+    var ORCID_LOGIN_WINDOW_URL = BUMBLEBEE_URL + "/orcidLoginContainer.html?oauthUrl=" + ORCID_OAUTH_LOGIN_URL;
+    var EXCHANGE_TOKEN_URI = BUMBLEBEE_URL + '/oauth/exchangeAuthCode';
 
 
     var OrcidApi = GenericModule.extend({
@@ -430,9 +436,6 @@ define([
       },
 
       showLoginDialog: function () {
-        var ORCID_REDIRECT_URI = 'http://localhost:3000/oauthRedirect.html';
-
-        var url = StringUtils.format(ORCID_OAUTH_LOGIN_URL, ORCID_REDIRECT_URI);
 
         var WIDTH = 600;
         var HEIGHT = 650;
@@ -441,18 +444,15 @@ define([
 
         this.cleanLoginWindow();
 
-        this.loginWindow = window.open(url, "ORCID Login", 'width=' + WIDTH + ', height=' + HEIGHT + ', top=' + top + ', left=' + left);
+        this.loginWindow = window.open(ORCID_LOGIN_WINDOW_URL, "ORCID Login", 'width=' + WIDTH + ', height=' + HEIGHT + ', top=' + top + ', left=' + left);
         this.loginWindow.onbeforeunload = _.bind(function(e) {
-          var _that = this;
-            setTimeout(function() {
-              if (_that.loginWindow) {
-                _that.cleanLoginWindow();
-                _that.pubSub.publish(_that.pubSub.ORCID_ANNOUNCEMENT,
-                  {
-                    msgType: OrcidApiConstants.Events.LoginCancelled
-                  });
-              }
-            }, 500);
+          if (this.loginWindow) {
+            this.cleanLoginWindow();
+            this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT,
+              {
+                msgType: OrcidApiConstants.Events.LoginCancelled
+              });
+          }
         }, this);
       },
 
