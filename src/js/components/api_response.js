@@ -14,7 +14,17 @@
  * },
  */
 
-define(['underscore', 'backbone', 'api_response_impl', 'js/components/facade'], function (_, Backbone, ApiResponseImplementation, Facade) {
+define([
+  'underscore',
+  'backbone',
+  'js/components/solr_response',
+  'js/components/facade'
+], function (
+  _,
+  Backbone,
+  ApiResponseImplementation,
+  Facade
+  ) {
 
   var hardenedInterface = {
     set: 'set (replace existing)',

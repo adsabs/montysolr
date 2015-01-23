@@ -2,10 +2,17 @@
  * Created by rchyla on 3/28/14.
  */
 
-define(['underscore', 'backbone',
-  'js/components/facade',
-  'api_request_impl'],
-  function(_, Backbone, Facade, ApiRequestImpl) {
+define([
+    'underscore', 'backbone',
+    'js/components/facade',
+    'js/components/default_request'
+  ],
+  function(
+    _,
+    Backbone,
+    Facade,
+    ApiRequestImpl
+    ) {
 
     var hardenedInterface =  {
       // add makes no sense with request

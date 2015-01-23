@@ -7,10 +7,10 @@ define([
   'js/widgets/base/base_widget',
   'hbs!./templates/wordcloud-template',
   'hbs!./templates/selected-list-template',
+  'js/components/api_targets',
   'jquery-ui',
   'bootstrap',
   'd3-cloud'
-
 ], function ($,
              Backbone,
              Marionette,
@@ -18,7 +18,9 @@ define([
              ApiRequest,
              BaseWidget,
              WordCloudTemplate,
-             SelectedListTemplate) {
+             SelectedListTemplate,
+             ApiTargets
+  ) {
 
 
   var helpText = "<p>This word cloud allows you to view interesting words from the titles and abstracts of your search results.</p>"+
@@ -449,7 +451,7 @@ define([
 
       var request = new ApiRequest({
 
-        target: Marionette.getOption(this, "endpoint") || "services/vis/word-cloud",
+        target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
         query: this.customizeQuery(this.getCurrentQuery())
       });
 

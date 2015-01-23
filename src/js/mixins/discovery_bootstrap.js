@@ -88,15 +88,18 @@ define([
         _.each(this.bootstrapUrls, function (url) {
           if (url.indexOf('http') > -1) {
             opts.u = url;
+            api.request(new ApiRequest({
+                query: new ApiQuery({redirect_uri: redirect_uri}),
+                target: ''}),
+              opts);
           }
           else {
             delete opts.u;
+            api.request(new ApiRequest({
+                query: new ApiQuery({redirect_uri: redirect_uri}),
+                target: url}),
+              opts);
           }
-
-          api.request(new ApiRequest({
-              query: new ApiQuery({redirect_uri: redirect_uri}),
-              target: '/bumblebee/bootstrap'}),
-            opts);
         });
 
         setTimeout(function() {
@@ -253,7 +256,7 @@ define([
       var defer = $.Deferred();
       api.request(new ApiRequest({
           query: new ApiQuery({redirect_uri: redirect_uri}),
-          target: '/bumblebee/bootstrap'}),
+          target: '/bootstrap'}),
          {
           done: function (data) {
             if (options.reconnect) {

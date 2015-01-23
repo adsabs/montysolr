@@ -15,7 +15,8 @@ define([
   'hbs!./templates/indices_table',
   'hbs!./templates/reads_table',
   'bootstrap',
-  'js/components/api_feedback'
+  'js/components/api_feedback',
+  'js/components/api_targets'
 ], function (
   Marionette,
   nvd3,
@@ -33,7 +34,8 @@ define([
   IndicesTableTemplate,
   ReadsTableTemplate,
   bs,
-  ApiFeedback
+  ApiFeedback,
+  ApiTargets
   ) {
 
   var TableModel = Backbone.Model.extend({
@@ -374,7 +376,7 @@ define([
       query.set("fl", "bibcode");
 
       var request = new ApiRequest({
-        target : 'search',
+        target : ApiTargets.SEARCH,
         query : query
       });
       this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
@@ -389,7 +391,7 @@ define([
         };
 
         var request =  new ApiRequest({
-          target: "services/metrics",
+          target: ApiTargets.SERVICE_METRICS,
           query: new ApiQuery({"bibcodes" : bibcodes}),
           options : options
         });

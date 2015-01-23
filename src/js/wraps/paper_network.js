@@ -3,19 +3,21 @@ define([
     'js/widgets/network_vis/network_widget',
     'js/components/api_query_updater',
     'hbs!./templates/paper-network-data',
-    'bootstrap'
+    'bootstrap',
+    'js/components/api_targets'
   ],
   function (
     Marionette,
     NetworkWidget,
     ApiQueryUpdater,
     DataTemplate,
-    bs
+    bs,
+    ApiTargets
     ) {
 
     var options = {};
 
-    options.endpoint = "services/vis/paper-network";
+    options.endpoint = ApiTargets.SERVICE_PAPER_NETWORK;
 
     options.networkType = "paper";
 

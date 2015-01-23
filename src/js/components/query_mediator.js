@@ -15,7 +15,9 @@ define(['underscore',
     'js/components/api_response',
     'js/components/api_query_updater',
     'js/components/api_feedback',
-    'js/components/json_response'],
+    'js/components/json_response',
+    'js/components/api_targets'
+  ],
   function(
     _,
     $,
@@ -26,7 +28,9 @@ define(['underscore',
     ApiResponse,
     ApiQueryUpdater,
     ApiFeedback,
-    JsonResponse) {
+    JsonResponse,
+    ApiTargets
+    ) {
 
 
     var QueryMediator = GenericModule.extend({
@@ -72,7 +76,7 @@ define(['underscore',
 
 
       getQTree: function(apiQuery, senderKey) {
-        var apiRequest = new ApiRequest({'query': apiQuery, 'target': 'qtree'});
+        var apiRequest = new ApiRequest({'query': apiQuery, 'target': ApiTargets.QTREE});
         var api = this.getBeeHive().getService('Api');
 
         this._executeRequest(apiRequest, senderKey);
