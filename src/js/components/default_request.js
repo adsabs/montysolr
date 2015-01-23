@@ -2,10 +2,18 @@
  * Created by rchyla on 3/28/14.
  */
 
-define(['underscore', 'backbone',
-  'js/components/api_query',
-  'js/components/multi_params'],
-  function(_, Backbone, ApiQuery, MultiParams) {
+define([
+    'underscore',
+    'backbone',
+    'js/components/api_query',
+    'js/components/multi_params'
+  ],
+  function(
+    _,
+    Backbone,
+    ApiQuery,
+    MultiParams
+    ) {
 
     var basicCheck = function(s) {
       if (_.isString(s)) {
@@ -21,7 +29,7 @@ define(['underscore', 'backbone',
         }
       }
       return true;
-    }
+    };
     var allowedAttrs = {
       query: function(v) {return v instanceof ApiQuery},
       target: basicCheck,

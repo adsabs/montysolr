@@ -15,7 +15,8 @@ define([
   'js/components/api_response',
   'js/mixins/dependon',
   'js/components/generic_module',
-  'sprintf'
+  'sprintf',
+  'js/components/api_targets'
 ], function(
   $,
   _,
@@ -24,7 +25,8 @@ define([
   ApiResponse,
   Dependon,
   GenericModule,
-  sprintf
+  sprintf,
+  ApiTargets
   ) {
 
   var Diagnostics = GenericModule.extend({
@@ -53,7 +55,7 @@ define([
       if (!(options.query instanceof ApiQuery))
         options.query = new ApiQuery(options.query);
 
-      var r = new ApiRequest({'target': options.target || 'search', query: options.query});
+      var r = new ApiRequest({'target': options.target || ApiTargets.SEARCH, query: options.query});
       return api.request(r, reqOptions);
     },
 

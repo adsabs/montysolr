@@ -20,7 +20,7 @@ define([
     ) {
 
     var Api = GenericModule.extend({
-      url: '/api/1/',
+      url: '/api/1/', // usually overriden during app bootstrap
       clientVersion: 20140329,
       outstandingRequests: 0,
 

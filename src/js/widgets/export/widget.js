@@ -10,7 +10,8 @@ define([
     'js/components/api_feedback',
     'jquery',
     'jquery-ui',
-    'module'
+    'module',
+    'js/components/api_targets'
   ],
   function(
     BaseWidget,
@@ -22,7 +23,8 @@ define([
     ApiFeedback,
     $,
     $ui,
-    WidgetConfig
+    WidgetConfig,
+    ApiTargets
     ){
 
 
@@ -268,7 +270,7 @@ define([
           q.set('sort', 'NONE');
 
           var req = this.composeRequest(q);
-          req.set("target",  'services/export/' + format);
+          req.set("target",  ApiTargets.EXPORT + format);
 
           //use post, although get is also possible
           var reqOptions = {
