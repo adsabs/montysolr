@@ -16,9 +16,9 @@ define([
       QTREE: 'search/qtree',
       BIGQUERY: 'search/bigquery',
       EXPORT: 'export/',
-      SERVICE_AUTHOR_NETWORK: 'author-network',
-      SERVICE_PAPER_NETWORK: 'paper-network',
-      SERVICE_WORDCLOUD: 'word-cloud',
+      SERVICE_AUTHOR_NETWORK: '/vis/author-network',
+      SERVICE_PAPER_NETWORK: '/vis/paper-network',
+      SERVICE_WORDCLOUD: '/vis/word-cloud',
       SERVICE_METRICS: 'metrics'
     };
   });
