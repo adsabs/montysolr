@@ -305,7 +305,7 @@ define([
       var data = {};
       data.max = this.model.get("max");
       data.current = this.model.get("current");
-      this.$(".metrics-metadata").html(this.metadataTemplate(data))
+      this.$(".metrics-metadata").html(this.metadataTemplate(data));
     },
 
     template: MetricsContainer,
@@ -371,7 +371,6 @@ define([
     requestDifferentRows : function(model, rows){
       var query = this.getCurrentQuery().clone();
       query.unlock();
-
       query.set("rows", model.get("userVal"));
       query.set("fl", "bibcode");
 

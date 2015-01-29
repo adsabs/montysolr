@@ -1,0 +1,49 @@
+<div class="s-group-title s-paper-network-link-data-header">
+
+    <h3>Top References From Both <span style="color:{{group1.color}}"> Group {{group1.name}} </span> and <span
+            style="color:{{group2.color}}"> Group {{group2.name }} </span></h3>
+
+</div>
+
+<div class="s-group-content">
+    <p>These groups have <b>{{referencesLength}} </b> unique references in common</p>
+
+    <p></p>
+    <small>(Click on a link below to view the paper's abstract page in ADS in a new tab)</small>
+    </p>
+
+
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th>
+                Paper
+            </th>
+            <th>
+                Group {{group1.name}}
+            </th>
+            <th>
+                Group {{group2.name}}
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each shared}}
+        <tr>
+            <td>
+                <a href="#abs/{{name}}">{{name}}</a>
+            </td>
+            <td>
+                {{percentOne}}%
+            </td>
+            <td>
+                {{percentTwo}}%
+            </td>
+        </tr>
+        {{/each}}
+        </tbody>
+    </table>
+
+
+</div>
+

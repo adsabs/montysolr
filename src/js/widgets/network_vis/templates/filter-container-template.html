@@ -1,0 +1,24 @@
+<div>
+    <b><i class="s-filter-image"></i> Filter current search:</b>
+    <button class="btn btn-default btn-xs clear-filter"> X clear</button>
+
+</div>
+<div class="s-filter-names-container ">
+    {{#if limit}}
+    {{#each limit}}
+            {{this}} {{#unless @last}} OR {{/unless}}
+        {{/each}}
+    {{else}}
+        select an author or group of authors in the visualization below and click the "add to filter" button
+    {{/if}}
+
+
+</div>
+
+
+<div class="s-filter-buttons-container">
+    <div>
+        <button class="btn btn-success apply-filter"> <i class="icon-go fa-lg"></i></button>
+    </div>
+
+</div>
