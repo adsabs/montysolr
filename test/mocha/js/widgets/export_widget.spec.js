@@ -18,7 +18,7 @@ define([
     beforeEach(function (done) {
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
-          if (apiRequest.url().indexOf('data_type=') > -1) {
+          if (apiRequest.url().indexOf('export') > -1) {
             return {msg: 'Exported 6 records',
             export: '@INPROCEEDINGS{2015cshn.conv..198T,\n\
               author = {{Takatsuka}, T. and {Hatsuda}, T. and {Masuda}, K.},\n\
@@ -95,7 +95,7 @@ define([
       widget.exportRecords('bibtex', ['one', 'two']);
       expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
       expect($w.find('#exportQuery').length).to.be.eql(0);
-      expect($w.find('#exportRecords').length).to.be.eql(0);
+      expect($w.find('#exportRecords').length).to.be.eql(1);
 
       widget.reset();
       expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(false);
@@ -106,7 +106,7 @@ define([
 
       expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
       expect($w.find('#exportQuery').length).to.be.eql(1);
-      expect($w.find('#exportRecords').length).to.be.eql(0);
+      expect($w.find('#exportRecords').length).to.be.eql(1);
     });
 
     it.skip("catches ctrl-a to select only the contents of the text-area", function() {

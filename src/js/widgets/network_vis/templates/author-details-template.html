@@ -1,0 +1,31 @@
+<div class="author-detail-header">
+    <h5 style="border-bottom:4px solid {{groupColor}}">{{name}}</h5>
+    <small>Total: {{total}}</small>
+    <small>Most recent: {{mostRecentYear}}</small>
+</div>
+<div class="paper-description">
+
+    <ul class="list-unstyled">
+        {{#each papers}}
+        <li>
+            <a href="#abs/{{bibcode}}"><b>{{title}}</b></a> {{#if citation_count}}
+            <small> {{citation_count}} citations</small>
+            {{else}}
+            <small>no citations</small>
+            {{/if}} {{#if numAuthors}}
+            <small>({{numAuthors}} authors from this group)</small>
+            {{/if}}
+        </li>
+        {{/each}}
+    </ul>
+</div>
+<div class="s-view-in-ads-button">
+    <div>
+        {{#if inFilter}}
+        <button class="btn btn-xs  btn-default filter-remove"><i class="s-filter-image"></i>remove from filter</button>
+        {{else}}
+        <button class="btn btn-xs btn-default filter-add"> <i class="s-filter-image"></i> add to filter</button>
+        {{/if}}
+    </div>
+    <!--<a class="btn btn-xs btn-default view-list" data-bypass href="#search/q=bibcode:({{#each bibcodes}}{{this}}{{#unless @last}} OR {{/unless}} {{/each}})" target="_blank">view this list in results page</a>-->
+</div>

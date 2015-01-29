@@ -13,7 +13,17 @@
  */
 
 
-define(['backbone', 'underscore', 'api_query_impl', 'js/components/facade'], function (Backbone, _, ApiQueryImplementation, Facade) {
+define([
+  'backbone',
+  'underscore',
+  'js/components/solr_params',
+  'js/components/facade'
+], function (
+  Backbone,
+  _,
+  ApiQueryImplementation,
+  Facade
+  ) {
 
 
   var hardenedInterface = {

@@ -4,14 +4,16 @@ define([
   'js/components/api_query',
   'js/components/api_request',
   'js/mixins/widget_mixin_method',
-  'js/mixins/widget_state_handling'
+  'js/mixins/widget_state_handling',
+  'js/components/api_targets'
 ], function (
   Backbone,
   Marionette,
   ApiQuery,
   ApiRequest,
   WidgetMixin,
-  WidgetStateMixin
+  WidgetStateMixin,
+  ApiTargets
   ) {
 
   /**
@@ -168,7 +170,7 @@ define([
      */
     composeRequest: function (apiQuery) {
       return new ApiRequest({
-        target: 'search',
+        target: ApiTargets.SEARCH,
         query: apiQuery
       });
     },

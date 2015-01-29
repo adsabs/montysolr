@@ -10,7 +10,8 @@ define([
     'js/components/api_feedback',
     'jquery',
     'jquery-ui',
-    'module'
+    'module',
+    'js/components/api_targets'
   ],
   function(
     BaseWidget,
@@ -22,7 +23,8 @@ define([
     ApiFeedback,
     $,
     $ui,
-    WidgetConfig
+    WidgetConfig,
+    ApiTargets
     ){
 
 
@@ -177,7 +179,7 @@ define([
         recs = recs || this.model.get('identifiers');
         if (!_.isArray(recs)) throw new Error('Identifiers must be an array');
         if (recs.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
-        this.model.set('numIdentifiers', recs.lengt);
+        this.model.set('numIdentifiers', recs.length);
         this.model.set('format', format);
         this.model.set('identifiers');
         this._getExports(format, recs);
@@ -250,40 +252,34 @@ define([
        */
       _getData: function(identifiers, format){
 
-        format = format || this.model.get('format') || 'bibtex';
-        var tbl = {
-          ENDNOTE: 'ENDNOTE',
-          AASTEX: 'AASTeX',
-          BIBTEX: 'BIBTEX'
-        };
-        format = tbl[format.toUpperCase()] || format.toUpperCase();
+          format = format || this.model.get('format') || 'bibtex';
+           //export endpoints
+          var tbl = {
+            endnote: 'endnote',
+            aastex: 'aastex',
+            bibtex: 'bibtex'
+          };
+          format = tbl[format.toLowerCase()] || format.toLowerCase();
 
-        if (!_.isArray(identifiers)) throw new Error('Identifiers must be an array');
-        if (identifiers.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
+          if (!_.isArray(identifiers)) throw new Error('Identifiers must be an array');
+          if (identifiers.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
 
+          var q = new ApiQuery();
+          //export parameter is "bibcode"
+          q.set('bibcode', identifiers);
+          q.set('sort', 'NONE');
 
-        var self = this;
-        var q = new ApiQuery();
-        q.set('bibcode', identifiers);
-        q.set('data_type', format);
-        q.set('sort', 'NONE');
+          var req = this.composeRequest(q);
+          req.set("target",  ApiTargets.EXPORT + format);
 
-        var req = this.composeRequest(q);
-        req.set('target', '/export');
-        var reqOptions = {method: 'POST'};
+          //use post, although get is also possible
+          var reqOptions = {
+            type: 'POST'
+          };
 
-        // hack: we are quering different url (to go away once our api can handle it)
-        if (WidgetConfig) {
-          var c = WidgetConfig.config();
-          if (c && c.url) {
-            reqOptions.url = c.url;
-            reqOptions.headers = c.headers;
-            req.set('target', c.target);
-          }
-        }
-        req.set('options', reqOptions);
+          req.set('options', reqOptions);
 
-        var defer = $.Deferred();
+          var defer = $.Deferred();
 
         if (req) {
           this.pubsub.subscribeOnce(this.pubsub.DELIVERING_RESPONSE, _.bind(function(data) {

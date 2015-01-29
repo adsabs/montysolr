@@ -4,7 +4,8 @@ define([
   'js/components/json_response',
   'js/bugutils/minimal_pubsub',
   'js/components/api_query',
-  'js/components/api_response'
+  'js/components/api_response',
+  'js/components/api_targets'
 
 ], function(
   MetricsWidget,
@@ -12,7 +13,8 @@ define([
   JsonResponse,
   MinimalPubSub,
   ApiQuery,
-  ApiResponse
+  ApiResponse,
+  ApiTargets
   ){
 
   describe("Metrics Widget (metrics_widget.spec.js)", function(){
@@ -775,7 +777,7 @@ define([
 
       var minsub = new (MinimalPubSub.extend({
         request: function(apiRequest) {
-          if (apiRequest.toJSON().target === "search"){
+          if (apiRequest.toJSON().target === ApiTargets.SEARCH){
             return {
               "responseHeader":{
                 "status":0,
@@ -794,7 +796,7 @@ define([
               }};
           }
           //just to be explicit
-          else if (apiRequest.toJSON().target === "services/metrics"){
+          else if (apiRequest.toJSON().target === ApiTargets.SERVICE_METRICS){
             return testData;
           }
         }
@@ -823,7 +825,7 @@ define([
       var minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
           this.counter = this.counter || 0;
-          if (apiRequest.toJSON().target === "search" && this.counter === 0) {
+          if (apiRequest.toJSON().target === ApiTargets.SEARCH && this.counter == 0) {
             this.counter++;
             return {
               "responseHeader": {
@@ -843,7 +845,7 @@ define([
               ]
               }}
           }
-          else if (apiRequest.toJSON().target === "search" && this.counter === 2){
+          else if (apiRequest.toJSON().target === ApiTargets.SEARCH && this.counter > 1){
             return {
               "responseHeader": {
                 "status": 0,
@@ -863,8 +865,8 @@ define([
               }}
           }
           //just to be explicit
-          else if (apiRequest.toJSON().target === "services/metrics" ) {
-            this.counter++
+          else if (apiRequest.toJSON().target === ApiTargets.SERVICE_METRICS ) {
+            this.counter++;
             return testData;
           }
         }

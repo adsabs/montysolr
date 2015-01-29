@@ -1,10 +1,22 @@
 /**
  * Created by alex on 4/23/14.
  */
-define(['backbone', 'marionette', 'js/components/api_query',
-    'js/components/api_request', 'js/widgets/base/base_widget'],
+define([
+    'backbone',
+    'marionette',
+    'js/components/api_query',
+    'js/components/api_request',
+    'js/widgets/base/base_widget',
+    'js/components/api_targets'
+  ],
   function(
-    Backbone, Marionette, ApiQuery, ApiRequest, BaseWidget) {
+    Backbone,
+    Marionette,
+    ApiQuery,
+    ApiRequest,
+    BaseWidget,
+    ApiTargets
+    ) {
 
     /**
      * This widget is for situations when you want to register
@@ -107,7 +119,7 @@ define(['backbone', 'marionette', 'js/components/api_query',
         }
 
         return new ApiRequest({
-          target: 'search',
+          target: ApiTargets.SEARCH,
           query: apiQuery
         });
       },

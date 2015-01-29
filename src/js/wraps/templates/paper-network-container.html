@@ -1,0 +1,29 @@
+<div class="s-network-graph-div">
+    <div class="s-network-control-panel">
+        <div class="detail-panel s-detail-panel">
+            <h4>Size wedges based on:</h4>
+            <label>
+                <input type="radio" name="mode" value="paper_count" checked> Total papers per group
+            </label><br/>
+            <label>
+                <input type="radio" name="mode" value="total_citations"> Total citations
+            </label><br/>
+            <label>
+                <input type="radio" name="mode" value="total_reads"> Total downloads
+            </label>
+            <br/>
+            <label>
+                <input type="radio" name="mode" value="references" > References in common
+            </label><br/>
+        </div>
+    </div>
+
+    <svg class="network-chart s-network-chart" width="400" height="400" viewBox="0 0 400 400">
+    </svg>
+</div>
+
+<div class="network-detail-area s-paper-network-detail-container">
+    <p class="instructions">Click a group to the left to view more information about the group</p>
+</div>
+
+

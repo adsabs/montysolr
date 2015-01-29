@@ -1,29 +1,23 @@
 
 <div class="s-vis-top-row">
     <div class="s-vis-center-col">
-        <span><i class="icon-help pull-left fa-3x" data-toggle="popover" title="<b>About This Network Visualization</b>" data-content="{{helpText}}" ></i></span>
-        <span class="selected-items-container s-selected-items-container"></span> <button class="btn s-filter-search filter-search btn-primary">Apply filter <i class="fa fa-arrow-circle-right"></i></button>
-        <span class="s-large-close close-widget">x</span>
+        <div class="one">
+            <div class="network-metadata s-network-metadata"></div>
+        </div>
+        <div class="two">
+            <div class="network-filter-container s-network-filter-container"></div>
+        </div>
+        <div class="three">
+            <span><i class="icon-help pull-left fa-3x" data-toggle="popover" title="<b>About This Network Visualization</b>" data-content="{{helpText}}" ></i></span>
+
+            <div class="s-large-close close-widget">x</div>
+
     </div>
 </div>
 
- <!--if the graph is too small ,just put a single detail graph here-->
+ <div>
 
- <div class="small-graph-region"></div>
-
-
-<div class="graph-region">
-
-</div>
-
- <div class="info-region">
-
-
-     <div class="s-detail-explanation">
-
-         Click a group to the left to see a detailed version of the group's network.
+     <div class="network-container s-network-container">
 
      </div>
-
-
  </div>

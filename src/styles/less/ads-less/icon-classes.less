@@ -133,6 +133,7 @@
     content : @fa-var-question-circle;
   }
   font-size: 1.3em;
+  color: @gray-light;
 
 }
 
@@ -162,4 +163,11 @@
   color: @gray-light;
 }
 
-
+/* indicates change of state, or movement, like applying a filter, a new search, something like that*/
+.icon-go {
+  .fa;
+  cursor: pointer;
+  &:before {
+    content: @fa-var-arrow-circle-right;
+  }
+}
