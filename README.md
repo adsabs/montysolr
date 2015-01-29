@@ -3,14 +3,12 @@ bumblebee
 
 [![Build Status](https://travis-ci.org/adsabs/bumblebee.svg?branch=master)](https://travis-ci.org/adsabs/bumblebee)
 
-This is a new UI for adslabs
+Bumblebee is an interface to Astrophysics Data System (http://ui.adslabs.org). A dynamic 
+and extensible application written in Backbone.
 
-A word or two as introduction into this bright new world of perplexity. Mistakes 
-are wonderful gifts to humanity, IT IS OK TO MAKE MISTAKES. Please let no 
-'getting it right' kill your creativity!
+Things change dramatically, be prepared - we are moving fast. AND IT IS OK TO MAKE MISTAKES. 
+Please let no 'getting it right' kill your creativity!
 
-
-Things may change dramatically, be prepared.
 
 
 dev setup - vagrant (virtualbox)
@@ -193,51 +191,7 @@ To help you get started, explore these examples:
   * finally, the complete test suite of the discovery application
 
      http://localhost:8000/test/tests.html
-
-  
-Explanation of the module structure:
-====================================
-
-
-This is the current file/folder structure, with short explanation:  
-
-```bash
-/bumblebee.
-   |-package.json
-   |-bower.json
-   |-Gruntfile.json
-   |-server.js
-   |   
-   |-/bower_components
-   |-/dist
-   |-/node_modules
-   |-/src/js     <-- our code lives here
-   |---apps
-   |-----discovery
-   |-------img
-   |-------styles
-   |-------templates
-   |---collections
-   |---components
-   |---libs
-   |---modules
-   |---views   
-   |-/src/libs   <-- external dependencies
-   |-/test
-   |---mocha
-   |-----apps
-   |-------discovery
-``` 
-
-We are using bower, because npm (browserify) is not yet ready to package libraries for client development. It works great, but mind the following:
-
-  - bower.json: specifies libraries that are needed for client-side ie. 
-         inside browser (e.g. backbone)
-  - package.json: lists libraries that are necessary for server-side, ie. development
-         (e.g. grunt, webserver)
-         
-
-
+     
 
 miscellanea
 ===========
@@ -257,3 +211,13 @@ miscellanea
 
 - you can see the search being routed to the SOLR api by accessing: http://localhost:port/api/1/search, for instance:
   http://localhost:port/api/1/search?q=kurtz 
+       
+
+documentation
+=============
+       
+Look inside the docs folder, mainly:
+       
+  - [How to write a widget](./docs/how-to-write-widget.md)
+  - [Architecture Overview](./docs/architecture.md) 
+  - [Explanation of the Search Cycle](./docs/search-cycle.md)
