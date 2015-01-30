@@ -18968,7 +18968,7 @@ define([
      //most highly cited
       expect($(".network-detail-area .s-top-papers").find("li:first").html().trim()).to.eql('<a href="#abs/1999PASP..111..438F" data-bypass="" target="_blank"><b>The Updated Zwicky Catalog (UZC)</b></a>; <i>Falco, Emilio E.</i>\n                   (295 citations)');
      //most highly referenced
-      expect($(".network-detail-area ul:last li:first").html().trim()).to.eql('<i class="fa fa-star-o"></i>\n                   \n                   <a href="#abs/" data-bypass="" target="_blank">2005PASP..117.1411F</a> (cited by 28% of papers\n                   in this group)');
+      expect($(".network-detail-area ul:last li:first").html().trim()).to.eql("<i class=\"fa fa-star-o\"></i>\n                   \n                   <a href=\"#abs/2005PASP..117.1411F\" data-bypass=\"\" target=\"_blank\">2005PASP..117.1411F</a> (cited by 28% of papers\n                   in this group)");
 
     });
 

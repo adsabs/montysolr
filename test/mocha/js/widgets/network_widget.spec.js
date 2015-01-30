@@ -1662,7 +1662,7 @@ define([
 //    $("#test").append(networkWidget.view.el);
 //    //this should show a single, simple graph
 //    networkWidget.processResponse(new JsonResponse(testDataLarge));
-
+//
 
   it("communicates with pubsub to get current query info and to request network data", function () {
 

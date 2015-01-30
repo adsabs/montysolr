@@ -682,6 +682,7 @@ define([
 
           papers = _.map(bibcodes, function (b, i) {
             var d = {};
+            d.bibcode = b;
             d.title = graphData.bibcode_dict[b].title;
             d.citation_count = graphData.bibcode_dict[b].citation_count;
             d.numAuthors = allPapers[i][1];
