@@ -1,4 +1,10 @@
-//noinspection Annotator
+/**
+ * Simple widget which just displays 'Login to Orcid' button and when the action
+ * is complete, changes the spinning wheel back to normal. It communicates
+ * through PubSub using ORCID_ANNOUNCEMENT signals
+ *
+ * XXX:rca This is a toy example that can be removed
+ */
 define([
     'underscore',
     'jquery',
@@ -8,9 +14,17 @@ define([
     'js/modules/orcid/orcid_api_constants',
     'hbs!./templates/orcid_login_template',
     './model'
-
   ],
-  function (_, $, Backbone, Marionette, BaseWidget, OrcidApiConstants, OrcidLoginTemplate, Model) {
+  function (
+    _,
+    $,
+    Backbone,
+    Marionette,
+    BaseWidget,
+    OrcidApiConstants,
+    OrcidLoginTemplate,
+    Model
+    ) {
 
     var OrcidLoginView = Marionette.ItemView.extend({
       template: OrcidLoginTemplate,
@@ -20,36 +34,27 @@ define([
         "click .signout-orcid-button": "signoutClick"
       },
 
-      modelEvents:{
+      modelEvents: {
       },
 
-      constructor: function (options){
+      constructor: function(options) {
         this.model = new Model();
-
-        this.listenTo(this, "all", this.onAllInternalEvents);
-
+        this.listenTo(this, "loginwidget:stateChanged", this.stateChanged);
         return Marionette.ItemView.prototype.constructor.apply(this, arguments);
       },
 
-      loginClick: function (e) {
+      loginClick: function(e) {
         e.preventDefault();
-
         this.trigger('loginwidget:loginRequested');
       },
 
       signoutClick: function(e){
         e.preventDefault();
-
         this.trigger('loginwidget:signoutRequested');
-
       },
 
-      onAllInternalEvents: function(ev, arg1, arg2) {
-        if (ev == 'loginwidget:stateChanged'){
-          this.stateChanged(arg1);
-        }
-      },
-      stateChanged: function(state){
+      //TODO:rca - move to the controller and let view synchronize via model changes
+      stateChanged: function(state) {
         this.model.set('isSignedIn', false);
         this.model.set('isWaitingForProfileInfo', false);
 
@@ -64,33 +69,25 @@ define([
             this.model.set('isWaitingForProfileInfo', true);
             break;
         }
-
         this.render();
       }
     });
 
     var OrcidLogin = BaseWidget.extend({
 
-
       activate: function (beehive) {
         this.pubSub = beehive.Services.get('PubSub');
-        this.pubSubKey = this.pubSub.getPubSubKey();
-
         this.pubSub.subscribe(this.pubSub.ORCID_ANNOUNCEMENT, _.bind(this.routeOrcidPubSub, this));
       },
 
       initialize: function (options) {
         this.view = new OrcidLoginView();
-
         this.listenTo(this.view, "all", this.onAllInternalEvents);
-
         BaseWidget.prototype.initialize.call(this, options);
-
         return this;
       },
 
       routeOrcidPubSub : function(msg){
-
         switch (msg.msgType){
           case OrcidApiConstants.Events.LoginSuccess:
             this.switchToProfileView(msg.data);
@@ -108,26 +105,23 @@ define([
       },
 
       switchToProfileView: function(orcidProfile){
-
         var personalDetails = orcidProfile['orcid-bio']['personal-details'];
-
         this.view.model.set('familyName', personalDetails['family-name']);
         this.view.model.set('givenName', personalDetails['given-names']);
-
         this.view.trigger('loginwidget:stateChanged', 'signedIn');
-
       },
+
       switchToLoginView : function(){
         this.view.model.set('familyName', undefined);
         this.view.model.set('givenName', undefined);
 
         this.view.trigger('loginwidget:stateChanged', 'signedOut');
       },
+
       onAllInternalEvents: function(ev, arg1, arg2) {
+
         if (ev === 'loginwidget:loginRequested') {
-
           this.view.trigger('loginwidget:stateChanged', 'waitingForProfileInfo');
-
           this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.LoginRequested});
         }
         else if (ev === 'loginwidget:signoutRequested') {

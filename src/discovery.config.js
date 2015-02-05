@@ -24,13 +24,12 @@ require.config({
           AlertsController: 'js/components/alerts_mediator'
         },
         services: {
-          'Api': 'js/services/api',
-          'PubSub': 'js/services/pubsub',
-          'Navigator': 'js/apps/discovery/navigator',
+          Api: 'js/services/api',
+          PubSub: 'js/services/pubsub',
+          Navigator: 'js/apps/discovery/navigator',
           OrcidApi: 'js/modules/orcid/orcid_api',
-          OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier/module',
-          LocalStorage: 'js/services/localStorage',
-          Json2Xml: 'js/modules/orcid/json2xml'
+          OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier',
+          LocalStorage: 'js/services/localStorage'
         },
         objects: {
           User: 'js/components/user',

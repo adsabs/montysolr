@@ -10,8 +10,7 @@ define([
     'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/mixins/link_generator_mixin',
-    //'js/modules/orcid/orcid_model_notifier/orcid_model'
-    'js/modules/orcid/orcid_model_notifier/module'
+    'js/modules/orcid/json2xml'
 
   ],
   function (_,
@@ -25,7 +24,7 @@ define([
             OrcidApiConstants,
 			      PubSubEvents,
             LinkGeneratorMixin,
-            OrcidModelNotifier
+            Json2Xml
   ) {
     function addXmlHeadersToOrcidMessage(message) {
       var messageCopy = $.extend(true, {}, message);
@@ -44,29 +43,12 @@ define([
       return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    // These first three constants are settings for modification by environment
-    var BUMBLEBEE_URL = "//bumblebee-testing.elasticbeanstalk.com/";
-    var ORCID_OAUTH_CLIENT_ID = 'APP-P5ANJTQRRTMA6GXZ';
-    var ORCID_ENDPOINT = 'https://sandbox.orcid.org';
-
-    // Do not modify these. It is based on constants above
-    var ORCID_REDIRECT_URI = BUMBLEBEE_URL + '/oauthRedirect.html';
-    var ORCID_API_ENDPOINT = 'https://api.sandbox.orcid.org/v1.1';
-    var ORCID_PROFILE_URL = ORCID_API_ENDPOINT + '/{0}/orcid-profile';
-    var ORCID_WORKS_URL = ORCID_API_ENDPOINT + '/{0}/orcid-works';
-    var ORCID_OAUTH_LOGIN_URL = ORCID_ENDPOINT
-      + "/oauth/authorize?scope=/orcid-profile/read-limited,/orcid-works/create,/orcid-works/update&response_type=code&access_type=offline"
-      + "&client_id=" + ORCID_OAUTH_CLIENT_ID
-      + "&redirect_uri=" + ORCID_REDIRECT_URI;
-    var ORCID_LOGIN_WINDOW_URL = BUMBLEBEE_URL + "/orcidLoginContainer.html?oauthUrl=" + ORCID_OAUTH_LOGIN_URL;
-    var EXCHANGE_TOKEN_URI = BUMBLEBEE_URL + '/oauth/exchangeAuthCode';
-
 
     var OrcidApi = GenericModule.extend({
       orcidProxyUri: '',
       userData: {},
 
-      routeOrcidPubSub: function(msg){
+      routeOrcidPubSub: function(msg) {
 
         switch(msg.msgType){
           case OrcidApiConstants.Events.LoginRequested:
@@ -86,35 +68,40 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
+        this.pubSub = this.getBeeHive().getService('PubSub').getHardenedInstance();
+        var that = this;
 
-        this.orcidModelNotifier = this.getBeeHive().getService('OrcidModelNotifier');
-
-        this.pubSub = beehive.Services.get('PubSub').getHardenedInstance();// this.getBeeHive().getService('PubSub').getHardenedInstance();
-
-        var _that = this;
-
+        // XXX:rca - this is very silly and will have to go
         window.oauthAuthCodeReceived = _.bind(this.oauthAuthCodeReceived, this);
-        this.pubSub.subscribe(PubSubEvents.BOOTSTRAP_CONFIGURED, function(page) {
+        this.pubSub.subscribeOnce(PubSubEvents.APP_LOADED, function(page) {
           var code = getParameterByName("code");
-          _that.oauthAuthCodeReceived(code, window.location.origin, _that);
+          that.oauthAuthCodeReceived(code, window.location.origin, that);
         });
 
         this.pubSub.subscribe(this.pubSub.ORCID_ANNOUNCEMENT, _.bind(this.routeOrcidPubSub, this));
+
+        var config = beehive.getObject('RuntimeConfig');
+        this.config = {};
+        _.extend(this.config, config['Orcid']);
       },
+
       initialize: function (options) {
 
       },
+
       cleanLoginWindow: function() {
         if (this.loginWindow) {
           this.loginWindow.onbeforeunload = null;
           this.loginWindow = null;
         }
       },
+
       redirectToLogin: function() {
-        var url = StringUtils.format(ORCID_OAUTH_LOGIN_URL, window.location.origin);
+        var url = StringUtils.format(this.config.loginUrl, window.location.origin);
 
         window.location.replace(url);
       },
+
       oauthAuthCodeReceived: function (code, redirectUri) {
 
         this.cleanLoginWindow();
@@ -129,7 +116,7 @@ define([
 
         this.sendData({
           type: "GET",
-          url: EXCHANGE_TOKEN_URI,
+          url: this.config.exchangeTokenUrl,
           data: {
             code: code,
             redirectUri: redirectUri
@@ -322,7 +309,7 @@ define([
         else if (data.actionType == 'delete') {
 
           if (data.modelType == 'adsData') {
-            var adsIdsWithPutCodeList = this.orcidModelNotifier.getAdsIdsWithPutCodeList();
+            var adsIdsWithPutCodeList = this.getBeeHive().getService('OrcidModelNotifier').getAdsIdsWithPutCodeList();
             var formattedAdsId = "ads:" + data.model.id;
 
             // find putcode
@@ -428,7 +415,7 @@ define([
 
         return this.sendData({
           type: "GET",
-          url: StringUtils.format(ORCID_PROFILE_URL, userSession.authData.orcid),
+          url: StringUtils.format(this.config.profileUrl, userSession.authData.orcid),
           headers: {
             Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token)
           }
@@ -444,7 +431,7 @@ define([
 
         this.cleanLoginWindow();
 
-        this.loginWindow = window.open(ORCID_LOGIN_WINDOW_URL, "ORCID Login", 'width=' + WIDTH + ', height=' + HEIGHT + ', top=' + top + ', left=' + left);
+        this.loginWindow = window.open(this.config.loginWindowUrl, "ORCID Login", 'width=' + WIDTH + ', height=' + HEIGHT + ', top=' + top + ', left=' + left);
         this.loginWindow.onbeforeunload = _.bind(function(e) {
           if (this.loginWindow) {
             this.cleanLoginWindow();
@@ -460,7 +447,6 @@ define([
         var beeHive = this.getBeeHive();
         var LocalStorage = beeHive.getService("LocalStorage");
         var userSession = LocalStorage.getObject("userSession");
-        var Json2Xml = beeHive.getService("Json2Xml");
 
         orcidWorks = addXmlHeadersToOrcidMessage(orcidWorks);
 
@@ -468,8 +454,8 @@ define([
 
         return this.sendData({
           type: "POST",
-          url: StringUtils.format(ORCID_WORKS_URL, userSession.authData.orcid),
-          data: Json2Xml.xml(orcidWorks, { attributes_key: '$', header: true }),
+          url: StringUtils.format(this.config.worksUrl, userSession.authData.orcid),
+          data: Json2Xml.transform(orcidWorks, { attributes_key: '$', header: true }),
           headers: {
             Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
             "Content-Type": "application/orcid+xml"
@@ -580,7 +566,6 @@ define([
         var beeHive = this.getBeeHive();
         var LocalStorage = beeHive.getService("LocalStorage");
         var userSession = LocalStorage.getObject("userSession");
-        var Json2Xml = beeHive.getService("Json2Xml");
 
         orcidWorks = addXmlHeadersToOrcidMessage(orcidWorks);
 
@@ -588,8 +573,8 @@ define([
 
         return this.sendData({
           type: "PUT",
-          url: StringUtils.format(ORCID_WORKS_URL, userSession.authData.orcid),
-          data: Json2Xml.xml(orcidWorks, { attributes_key: '$', header: true }),
+          url: StringUtils.format(this.config.worksUrl, userSession.authData.orcid),
+          data: Json2Xml.transform(orcidWorks, { attributes_key: '$', header: true }),
           headers: {
             Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
             "Content-Type": "application/orcid+xml"

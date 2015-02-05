@@ -148,7 +148,7 @@ define([
           done();
         };
 
-        pubSub.publish(pubSubKey, PubSubEvents.BOOTSTRAP_CONFIGURED);
+        pubSub.publish(pubSubKey, PubSubEvents.APP_LOADED);
       });
 
       it('show login dialog', function (done) {

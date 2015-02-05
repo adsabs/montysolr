@@ -1,22 +1,27 @@
+/**
+ * this is the main datastructure holding to data we know about
+ * the user (who logged in with ORCID) and also it contains
+ * the papers that were/will be claimed
+ */
+
 define([
     'backbone',
     'underscore'
   ],
-  function(
-    Backbone,
-    _) {
+  function (Backbone, _) {
     var OrcidModel = Backbone.Model.extend({
-      initialize: function(){
-        this.on("change:orcidProfile", function(model){
-          // recompute map of putCode and adsId
+      initialize: function () {
+
+        // recompute map of putCode and adsId
+        this.on("change:orcidProfile", function (model) {
 
           var orcidWorks = model.get("orcidProfile")["orcid-activities"]["orcid-works"];
 
-
+          //XXX:rca - error handling is missing? default values?
           var adsIds =
             orcidWorks["orcid-work"]
-              .map(function (e) {
-                if (!e["work-external-identifiers"])
+              .map(function (elem) {
+                if (!elem["work-external-identifiers"])
                   return undefined;
 
                 var isAdsId = function (e) {
@@ -26,7 +31,7 @@ define([
                   return e['work-external-identifier-type'] == 'other-id' && e['work-external-identifier-id'].indexOf('ads:') == 0;
                 };
 
-                var identifiers = e["work-external-identifiers"]["work-external-identifier"];
+                var identifiers = elem["work-external-identifiers"]["work-external-identifier"];
                 var adsId = undefined;
 
                 if (identifiers instanceof Array) {
@@ -37,32 +42,29 @@ define([
                 else if (isAdsId(identifiers)) {
                   adsId = identifiers;
                 }
-                else{
+                else {
                   return undefined;
                 }
 
                 return {
-                  putCode: e.$['put-code'],
+                  putCode: elem.$['put-code'],
                   adsId: adsId['work-external-identifier-id']
                 };
               })
-              .filter(function(e){
-                return e != undefined && e.adsId != undefined;
+              .filter(function (el) {
+                return el != undefined && el.adsId != undefined;
               });
 
           model.set('adsIdsWithPutCodeList', adsIds);
         });
       },
 
-      defaults: function(){
+      defaults: function () {
         return {
           actionsVisible: false,
-          orcidProfile : [],
-
+          orcidProfile: {'orcid-activities': {'orcid-works': {'orcid-work': []}}},
           adsIdsWithPutCodeList: [],
-
           bulkInsertWorks: [],
-
           isInBulkInsertMode: false
         };
       }

@@ -1,4 +1,5 @@
-define(['marionette',
+define([
+    'marionette',
     'backbone',
     'js/bugutils/minimal_pubsub',
     'js/modules/orcid/orcid_login/widget',

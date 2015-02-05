@@ -10,7 +10,6 @@ define(
         OrcidAction: 'Orcid-Action',
         UserProfileRefreshed: 'Orcid-User-Profile-Refreshed',
         IsBulkInsertMode: 'Orcid-is-Bulk-Insert-Mode'
-
       }
     };
 

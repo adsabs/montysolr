@@ -1,3 +1,9 @@
+/**
+ * Small widget to display works loaded from orcid
+ *
+ * XXX:rca - this is a toy, can be removed
+ */
+
 define([
     'underscore',
     'jquery',
@@ -12,6 +18,7 @@ define([
 
     var OrcidWorkModel = Backbone.Model.extend({
       defaults: function () {
+        //XXX:rca - the first two objects are useless??
         var workExternalItentifier = {
           id: undefined,
           type: undefined

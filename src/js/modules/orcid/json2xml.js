@@ -106,16 +106,9 @@ define([
       return attributes;
     };
 
-    var getHardenedInstance = function () {
-      return this;
+    var Json2Xml = {
+      transform: xml
     };
-
-    var Json2Xml = GenericModule.extend({
-      xml: xml,
-      getHardenedInstance: getHardenedInstance
-    });
-
-    _.extend(Json2Xml.prototype, Mixins.BeeHive);
 
     return Json2Xml;
   });

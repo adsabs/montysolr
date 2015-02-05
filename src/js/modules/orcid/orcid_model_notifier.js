@@ -1,3 +1,13 @@
+/**
+ * Keeps track of changes to the ORCID model.
+ * This component should be loaded as a service with name 'OrcidModelNotifier'
+ * ie.
+ *
+ * services: {
+ *   OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier'
+ *   }
+ */
+
 define([
     'underscore',
     'marionette',
@@ -7,17 +17,16 @@ define([
     './orcid_model'
   ],
 
-  function (_,
-            Marionette,
-            Backbone,
-            GenericModule,
-            OrcidApiConstants,
-            OrcidModel) {
+  function (_, Marionette, Backbone, GenericModule, OrcidApiConstants, OrcidModel) {
     var OrcidNotifierModule = GenericModule.extend({
+
+      initialize: function (options) {
+        this.model = new OrcidModel();
+      },
+
+
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub').getHardenedInstance();
-
-        this.pubSubKey = this.pubsub.getPubSubKey();
 
         _.bindAll(this, 'routeOrcidPubSub', 'isOrcidItemAdsItem', 'isWorkInCollection', 'getAdsIdsWithPutCodeList',
           'bulkInsert', 'cancelBulkInsert', 'triggerBulkInsert', 'addToBulkWorks', 'removeFromBulkWorks');
@@ -25,10 +34,21 @@ define([
         this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, this.routeOrcidPubSub);
       },
 
-      initialize: function (options) {
-        this.model = new OrcidModel();
 
-        _.bindAll(this, 'bulkInsert');
+      routeOrcidPubSub: function (msg) {
+        switch (msg.msgType) {
+          case OrcidApiConstants.Events.LoginSuccess:
+            this.model.set('actionsVisible', true);
+            break;
+
+          case OrcidApiConstants.Events.SignOut:
+            this.model.set('actionsVisible', false);
+            break;
+
+          case OrcidApiConstants.Events.UserProfileRefreshed:
+            this.model.set('orcidProfile', msg.data);
+            break;
+        }
       },
 
       bulkInsert: function (adsWorks) {
@@ -46,7 +66,7 @@ define([
 
         this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.IsBulkInsertMode, data: false});
       },
-      startBulkInsert: function(){
+      startBulkInsert: function () {
         this.model.set('isInBulkInsertMode', true);
 
         this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.IsBulkInsertMode, data: true});
@@ -75,22 +95,7 @@ define([
 
         this.model.attributes.bulkInsertWorks.splice(toRemove, 1);
       },
-      routeOrcidPubSub: function (msg) {
-        switch (msg.msgType) {
-          case OrcidApiConstants.Events.LoginSuccess:
 
-            this.model.set('actionsVisible', true);
-
-            break;
-          case OrcidApiConstants.Events.SignOut:
-            this.model.set('actionsVisible', false);
-            break;
-
-          case OrcidApiConstants.Events.UserProfileRefreshed:
-            this.model.set('orcidProfile', msg.data);
-            break;
-        }
-      },
       getAdsIdsWithPutCodeList: function () {
         return this.model.get('adsIdsWithPutCodeList');
       },
@@ -99,17 +104,18 @@ define([
         var formattedAdsId = "ads:" + adsItem.id;
 
         return adsIdsWithPutCode
-            .filter(function (e) {
-              return e.adsId == formattedAdsId;
-            })
-            .length > 0;
+          .filter(function (e) {
+            return e.adsId == formattedAdsId;
+          })
+          .length > 0;
       },
       isOrcidItemAdsItem: function (orcidItem) {
         return orcidItem.workExternalIdentifiers.filter(function (e) {
-            return e.type == 'other-id' && e.id.indexOf('ads:') == 0;
-          }).length > 0;
+          return e.type == 'other-id' && e.id.indexOf('ads:') == 0;
+        }).length > 0;
       },
 
+      //XXX:rca - big problem
       getHardenedInstance: function () {
         return this;
       }

@@ -54,9 +54,6 @@ define([
           this.triggerMethodOnAll('activateCache');
         }
 
-        var pubSub = beehive.getService('PubSub');
-        var pubSubKey = pubSub.getPubSubKey();
-        pubSub.publish(pubSubKey, PubSubEvents.BOOTSTRAP_CONFIGURED);
       }
     },
 
@@ -65,10 +62,15 @@ define([
       var beehive = this.getBeeHive();
       var results = this.getWidget('Results');
       var runtime = {};
+      var dynConf = this.getObject('DynamicConfig');
+      _.extend(runtime, dynConf);
+
       beehive.addObject('RuntimeConfig', runtime);
       if (results) {
         runtime.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
       }
+
+
 
 
       var defer = $.Deferred();

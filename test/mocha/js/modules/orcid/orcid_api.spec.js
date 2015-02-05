@@ -10,9 +10,9 @@ define([
     'js/bugutils/minimal_pubsub',
     'js/components/application',
     'js/modules/orcid/orcid_api_constants',
-    'js/modules/orcid/orcid_model_notifier/module',
+    'js/modules/orcid/orcid_model_notifier',
     'js/components/pubsub_events',
-    '../../widgets/test_orcid_data/orcid_profile_data'
+    './test_orcid_data/orcid_profile_data'
   ],
 
   function (
@@ -21,7 +21,7 @@ define([
     $,
     OrcidApi,
     LocalStorage,
-    Json2XML,
+    Json2Xml,
     _,
     xml2json,
     MinimalPubsub,
@@ -33,9 +33,9 @@ define([
   ) {
 
 
-    describe("Orcid API service", function () {
+    describe("Orcid API service (orcid_api.spec.js)", function () {
 
-      var app, minsub, beehive, notifier, localStorage, json2XML;
+      var app, minsub, beehive, notifier, localStorage;
       beforeEach(function (done) {
 
         app = new Application();
@@ -46,7 +46,6 @@ define([
               Api: 'js/services/api',
               LocalStorage: 'js/services/localStorage',
               OrcidApi: 'js/modules/orcid/orcid_api',
-              Json2Xml: 'js/modules/orcid/json2xml'
             },
             objects: {
               QueryMediator: 'js/components/query_mediator'
@@ -76,13 +75,8 @@ define([
         localStorage.activate(beehive);
         localStorage.initialize();
 
-        json2XML = new Json2XML();
-        json2XML.activate(beehive);
-        json2XML.initialize();
-
         beehive.addService('OrcidModelNotifier', notifier);
         beehive.addService('LocalStorage', localStorage);
-        beehive.addService('Json2Xml', json2XML);
 
         done();
       });

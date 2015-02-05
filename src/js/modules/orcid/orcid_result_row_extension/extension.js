@@ -1,15 +1,16 @@
 define([
     'underscore',
     'js/modules/orcid/orcid_api_constants',
-
   ],
 
-  function (_,
-            OrcidApiConstants
-  ) {
+  function (
+    _,
+    OrcidApiConstants
+    ) {
+
     var ResultsExtension = {
 
-      activateResultsExtension: function(beehive){
+      activateResultsExtension: function (beehive) {
         this.orcidModelNotifier = beehive.getService('OrcidModelNotifier');
 
         // 'this' should already contain the pubsub
@@ -19,7 +20,7 @@ define([
         var that = this;
 
         this.listenTo(this.view, 'composite:collection:rendered',
-          function() {
+          function () {
             if (that.orcidModelNotifier != undefined && that.orcidModelNotifier.model.get('actionsVisible'))
               that.view.children.call('showOrcidActions', that.orcidModelNotifier.isWorkInCollection);
           });
@@ -29,11 +30,11 @@ define([
 
       },
 
-      onAllInternalEvents_results: function(ev, arg1, arg2) {
-        if (ev == 'itemview:OrcidAction'){
+      onAllInternalEvents_results: function (ev, arg1, arg2) {
+        if (ev == 'itemview:OrcidAction') {
           this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.OrcidAction, data: arg2});
-        } else if (ev == 'itemview:toggleSelect'){
-          if (this.orcidModelNotifier.model.get('isInBulkInsertMode')){
+        } else if (ev == 'itemview:toggleSelect') {
+          if (this.orcidModelNotifier.model.get('isInBulkInsertMode')) {
             arg2.selected
               ? this.orcidModelNotifier.addToBulkWorks(arg2.data)
               : this.orcidModelNotifier.removeFromBulkWorks(arg2.data);

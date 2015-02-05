@@ -7,9 +7,9 @@ define([
     'js/modules/orcid/widget/widget',
     'js/widgets/list_of_things/widget',
     'js/components/json_response',
-    'js/modules/orcid/orcid_model_notifier/module',
+    'js/modules/orcid/orcid_model_notifier',
     'js/modules/orcid/orcid_api_constants',
-    '../../widgets/test_orcid_data/orcid_profile_data'
+    './test_orcid_data/orcid_profile_data'
   ],
   function (
     Marionette,
