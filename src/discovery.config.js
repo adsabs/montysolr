@@ -56,6 +56,7 @@ require.config({
         AuthorNetwork : 'js/wraps/author_network',
         PaperNetwork : 'js/wraps/paper_network',
         WordCloud : 'js/widgets/wordcloud/widget',
+        BubbleChart : 'js/widgets/bubble_chart/widget',
 
         Metrics :  'js/widgets/metrics/widget',
 

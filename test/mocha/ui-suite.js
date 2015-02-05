@@ -13,6 +13,7 @@ define([], function() {
       '/widgets/base_widget.spec.js',
 
       '/widgets/breadcrumb_widget.spec.js',
+      '/widgets/bubble_chart.spec.js',
       '/widgets/citation_graph_facet_widget.spec.js',
       '/widgets/dropdown_widget.spec.js',
       '/widgets/export_widget.spec.js',

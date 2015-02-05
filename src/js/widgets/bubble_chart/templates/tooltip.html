@@ -1,0 +1,12 @@
+{{#each bibs}}
+<h5>{{title}}</h5>
+({{bibcode}})</br>
+Citations: <b>{{citation_count}}</b>,
+Reads: <b>{{read_count}}</b><br/>
+{{/each}}
+
+{{#if extra}}
+<div class="pull-right">
+    <i><b>...and {{extra}} more </b></i>
+</div>
+{{/if}}
