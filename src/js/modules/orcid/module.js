@@ -28,6 +28,9 @@ define([
       activate: function(beehive) {
 
         var config = beehive.getObject('RuntimeConfig');
+        if (!config) {
+          throw new Error('RuntimeConfig is not available to Orcid module');
+        }
 
         var redirectUrlBase = config.orcidRedirectUrlBase || (location.protocol + '//' + location.host);
         var orcidClientId = config.orcidClientId;

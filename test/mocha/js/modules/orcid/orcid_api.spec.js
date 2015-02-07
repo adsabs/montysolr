@@ -3,12 +3,11 @@ define([
     'js/mixins/dependon',
     'jquery',
     'js/modules/orcid/orcid_api',
-    'js/services/localStorage',
+    'js/components/persistent_storage',
     'js/modules/orcid/json2xml',
     'underscore',
     'xml2json',
     'js/bugutils/minimal_pubsub',
-    'js/components/application',
     'js/modules/orcid/orcid_api_constants',
     'js/modules/orcid/orcid_model_notifier',
     'js/components/pubsub_events',
@@ -25,7 +24,6 @@ define([
     _,
     xml2json,
     MinimalPubsub,
-    Application,
     OrcidApiConstants,
     OrcidNotifierModule,
     PubSubEvents,
@@ -35,25 +33,8 @@ define([
 
     describe("Orcid API service (orcid_api.spec.js)", function () {
 
-      var app, minsub, beehive, notifier, localStorage;
+      var minsub, beehive, notifier, localStorage;
       beforeEach(function (done) {
-
-        app = new Application();
-        var config = {
-          core: {
-            services: {
-              PubSub: 'js/services/pubsub',
-              Api: 'js/services/api',
-              LocalStorage: 'js/services/localStorage',
-              OrcidApi: 'js/modules/orcid/orcid_api',
-            },
-            objects: {
-              QueryMediator: 'js/components/query_mediator'
-            }
-          },
-          widgets: {
-          }
-        };
 
         minsub = new (MinimalPubsub.extend({
           request: function (apiRequest) {
@@ -66,17 +47,6 @@ define([
         }))({verbose: false});
 
         beehive = minsub.beehive;
-
-        notifier = new OrcidNotifierModule();
-        notifier.activate(beehive);
-        notifier.initialize();
-
-        localStorage = new LocalStorage();
-        localStorage.activate(beehive);
-        localStorage.initialize();
-
-        beehive.addService('OrcidModelNotifier', notifier);
-        beehive.addService('LocalStorage', localStorage);
 
         done();
       });
@@ -126,10 +96,11 @@ define([
           return deferred.promise();
         };
 
+        beehive.addObject('RuntimeConfig', {'Orcid': {}});
         orcidApi.activate(beehive);
 
         return orcidApi;
-      }
+      };
 
       it('input to spec is not undefined', function(done){
 

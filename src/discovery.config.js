@@ -14,6 +14,14 @@ require.config({
       url: 'http://adsabs-classic-exports-service.elasticbeanstalk.com',
       target: '/'
     },
+
+    'js/components/persistent_storage': {
+      // the unique namespace under which the local storage will be created
+      // so every new instance of the storage will be saving its data into
+      // <namespace>[other-name]
+      namespace: 'bumblebee'
+    },
+
     'js/apps/discovery/main': {
 
       core: {
@@ -27,8 +35,6 @@ require.config({
           Api: 'js/services/api',
           PubSub: 'js/services/pubsub',
           Navigator: 'js/apps/discovery/navigator',
-          OrcidApi: 'js/modules/orcid/orcid_api',
-          OrcidModelNotifier: 'js/modules/orcid/orcid_model_notifier',
           LocalStorage: 'js/services/localStorage'
         },
         objects: {
@@ -39,7 +45,8 @@ require.config({
           AppStorage: 'js/components/app_storage'
         },
         modules: {
-          FacetFactory: 'js/widgets/facet/factory'
+          FacetFactory: 'js/widgets/facet/factory',
+          Orcid: 'js/modules/orcid/module'
         }
       },
       widgets: {
@@ -139,7 +146,7 @@ require.config({
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
     'xml2json': 'libs/jquery-xml2json/xml2json',
-    'localstorage': 'libs/backbone.localStorage/backbone.localStorage',
+    'persist-js': 'libs/persist-js/src/persist',
 
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
@@ -195,11 +202,15 @@ require.config({
     },
 
     'sprintf': {
-      export: 'sprintf'
+      exports: 'sprintf'
     },
 
     xml2json: {
       deps: ['jquery']
+    },
+
+    'persist-js': {
+      exports: 'Persist'
     }
   },
 

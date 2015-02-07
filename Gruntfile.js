@@ -643,6 +643,7 @@ module.exports = function(grunt) {
     paths['backbone.babysitter'] = 'libs/backbone.babysitter/backbone.babysitter.min';
     paths['d3'] = 'libs/d3/d3.min';
     paths['nvd3'] = 'libs/nvd3/nv.d3.min';
+    paths['persist-js'] = 'libs/persist-js/persist-all-min';
 
     // and replace the string
     var firstPart = config.substring(0, m.index);
