@@ -1,0 +1,37 @@
+
+<div class="s-bubble-label-container">
+    <div class="graph-select reads-vs-time active">
+        <img src="../../../styles/img/reads_vs_time.png" alt=""/>
+    </div>
+    <div class="graph-select citations-vs-time">
+        <img src="../../styles/img/citations_vs_time.png" alt=""/>
+    </div>
+    <div class="graph-select reads-vs-citations">
+            <img src="../../styles/img/reads_vs_citations.png" alt=""/>
+    </div>
+</div>
+<div class="s-bubble-graph-container">
+    <div class="d3-tooltip"></div>
+    <svg class="s-bubble-chart-svg bubble-chart-svg" viewBox="0 0 1160 550" preserveAspectRatio="xMinYMin meet"></svg>
+</div>
+
+<div class="controls s-controls">
+    <div>
+        <h6>What is the Paper Graph?</h6>
+        This graph allows you to view metrics for both the long-term influence (citation count)
+        and recent popularity (90 day read count) of the top 1000 papers from your search results.
+    </div>
+    <div>
+        <h6>Customize Graph</h6>
+        * Click on a journal name at right to limit papers (click again to return to the unfiltered view)<br/>
+        * Click on the y axis log/linear options <br/>
+        * Click below to swap y axis and bubble radius  <br/>
+        * Click on a paper bubble to outline it for tracking purposes throughout the three graphs
+    </div>
+    <div>
+        <h6>Filter Your Search</h6>
+        Select papers by dragging from left to right around bubbles to form a box, then click submit
+        <button class="btn btn-success submit disabled"> Submit <i class="icon-go"></i></button>
+    </div>
+</div>
+

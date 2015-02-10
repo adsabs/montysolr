@@ -111,6 +111,11 @@ define([
           app.getObject('MasterPageManager').show('SearchPage',
             ['PaperNetwork'].concat(searchPageAlwaysVisible.slice(1)));
         });
+        this.set('show-bubble-chart', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+          app.getObject('MasterPageManager').show('SearchPage',
+            ['BubbleChart'].concat(searchPageAlwaysVisible.slice(1)));
+        });
         this.set('show-metrics', function() {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
