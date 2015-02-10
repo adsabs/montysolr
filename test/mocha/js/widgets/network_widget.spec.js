@@ -103,7 +103,8 @@ define([
       {"nodeName": "Eichhorn, G", "nodeWeight": 18.664970977629945}
     ]}}, "msg": {"numFound": 10, "rows": 10}};
 
-    testDataLarge = {"data": {
+    testDataLarge = {
+      "data": {
       "bibcode_dict": {
         "1974SPIE...45..171K": {
           "authors": [
