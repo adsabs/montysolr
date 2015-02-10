@@ -61,13 +61,10 @@ define([
       // XXX:rca - solve this better, through config
       var beehive = this.getBeeHive();
       var results = this.getWidget('Results');
-      var runtime = {};
       var dynConf = this.getObject('DynamicConfig');
-      _.extend(runtime, dynConf);
 
-      beehive.addObject('RuntimeConfig', runtime);
       if (results) {
-        runtime.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
+        dynConf.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
       }
 
 

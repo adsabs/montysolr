@@ -49,7 +49,7 @@ define([
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
           'ExportDropdown', 'VisualizationDropdown', 'SearchWidget',
-          'Sort', 'AlertsWidget', 'OrcidLogin', 'OrcidWorks'
+          'Sort', 'AlertsWidget'
         ];
 
         var detailsPageAlwaysVisible = [
@@ -96,9 +96,20 @@ define([
         });
 
         this.set('orcid-page', function() {
+
+          var orcidApi = app.getService('OrcidApi');
+          if (orcidApi.hasExchangeCode() && !orcidApi.hasAccess()) {
+            orcidApi.getAccessData(orcidApi.getExchangeCode())
+            .done(function(data) {
+                orcidApi.saveAccessData(data);
+                self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'orcid-page');
+            });
+            return;
+          }
+
           app.getObject('MasterPageManager').show('SearchPage',
             ['OrcidBigWidget'].concat(searchPageAlwaysVisible.slice(1)));
-          this.route = '#user/orcid'; // TODO:rca - we'll have to identify users
+          this.route = '#user/orcid';
         });
 
         this.set('show-author-network', function() {

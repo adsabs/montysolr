@@ -76,8 +76,8 @@ define([
     var OrcidLogin = BaseWidget.extend({
 
       activate: function (beehive) {
-        this.pubSub = beehive.Services.get('PubSub');
-        this.pubSub.subscribe(this.pubSub.ORCID_ANNOUNCEMENT, _.bind(this.routeOrcidPubSub, this));
+        this.pubsub = beehive.Services.get('PubSub');
+        this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, _.bind(this.routeOrcidPubSub, this));
       },
 
       initialize: function (options) {
@@ -122,11 +122,11 @@ define([
 
         if (ev === 'loginwidget:loginRequested') {
           this.view.trigger('loginwidget:stateChanged', 'waitingForProfileInfo');
-          this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.LoginRequested});
+          this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.LoginRequested});
         }
         else if (ev === 'loginwidget:signoutRequested') {
           this.switchToLoginView();
-          this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.SignOut});
+          this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {msgType: OrcidApiConstants.Events.SignOut});
         }
       }
     });

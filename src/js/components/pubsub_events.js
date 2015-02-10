@@ -136,7 +136,8 @@ define([], function() {
     APP_LOADED: "[App]-Application-Loaded",
     APP_BOOTSTRAPPED: "[App]-Application-Bootstrapped",
     APP_STARTING: "[App]-Application-Starting",
-    APP_STARTED: "[App]-Application-Started"
+    APP_STARTED: "[App]-Application-Started",
+    APP_EXIT: '[App]-Exit'
 
 };
 

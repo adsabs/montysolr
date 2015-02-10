@@ -13,7 +13,7 @@ ORCID is using 3-legged OAuth: which means the user has to be redirected to ORCI
 authenticate with ORCID and authorize 'ADS application' to gain access to user's
 records.
 
- - Originally, this mechanism is implemented through a separate window (orcidLoginContainer.html)
+ - Originally, this mechanism was implemented through a separate window (orcidLoginContainer.html)
  - When authenticated, ORCID redirects to /oauthRedirect.html
  - which in turn passes code to /oauth/exchangeOauthCode; to exchange code for access token
    (this method is implemented in server.js)

@@ -19,11 +19,15 @@ define([
 
     onAppBootstrapped: function() {
       var beehive = this.getBeeHive();
-      var rconf = beehive.getObject('RuntimeConfig');
+      var rconf = beehive.getObject('DynamicConfig');
       if (!rconf) {
-        throw new Error('RuntimeConfig is missing');
+        throw new Error('DynamicConfig is missing');
       }
       var name = rconf.namespace; // the unique id that identifies this application (it serves as a namespace)
+      if (!name) {
+        console.warn('Application namespace not set; persistent storage will be created without it');
+        name = '';
+      }
       this._store = this._createStore(name);
     }
   });

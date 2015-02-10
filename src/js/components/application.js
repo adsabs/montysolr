@@ -517,6 +517,13 @@ define([
     getAllWidgets: function() {
       return _.pairs(this.__widgets.container);
     },
+    getAllServices: function() {
+      return this.getBeeHive().getAllServices();
+    },
+    getAllObjects: function() {
+      return this.getBeeHive().getAllObjects();
+    },
+
 
     /**
      * Helper method to invoke a 'function' on all objects

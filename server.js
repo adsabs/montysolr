@@ -1,3 +1,13 @@
+/**
+ * WARNING: this is a DEVELOPMENT server; DO NOT USE it in production!
+ *
+ * If you need to make SOLR available, you can use:
+ *  http://github.com/adsabs/adsws
+ *  http://github.com/adsabs/solr-service
+ *
+ * @type {exports}
+ */
+
 var express = require('express');
 var http = require('http');
 var url = require('url');
@@ -13,11 +23,10 @@ var app = express();
 var API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:5000/api/1';
 var SOLR_ENDPOINT = process.env.SOLR_ENDPOINT || API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
 
-//BC:rca - these secret tokens, can they be committed into a repository?
+//sandbox tokens (not production)
 var ORCID_OAUTH_CLIENT_ID = process.env.ORCID_OAUTH_CLIENT_ID || 'APP-P5ANJTQRRTMA6GXZ';
 var ORCID_OAUTH_CLIENT_SECRET = process.env.ORCID_OAUTH_CLIENT_SECRET || '989e54c8-7093-4128-935f-30c19ed9158c';
-var ORCID_API_ENDPOINT = process.env.ORCID_API_ENDPOINT || 'https://api.sandbox.orcid.org';
-var ORCID_REDIRECT_URI = 'http://localhost:3000/oauthRedirect.html';
+var ORCID_API_ENDPOINT = process.env.ORCID_API_ENDPOINT || 'https://sandbox.orcid.org';
 
 
 // this examples does not have any routes, however
@@ -34,70 +43,45 @@ app.use(express.urlencoded()); // to support URL-encoded bodies
 // log requests
 app.use(express.logger('dev'));
 
-app.use('/oauth/redirect', function(req, res, next){
+
+//$ curl -i -L -H 'Accept: application/json' --data 'client_id=APP-P5ANJTQRRTMA6G
+//XZ&client_secret=989e54c8-7093-4128-935f-30c19ed9158c&grant_type=authorization_
+//code&code=H1trXI' 'https://api.sandbox.orcid.org/oauth/token'
+
+app.use('/orcid/exchangeOAuthCode', function(req, res, next) {
+  console.log(req.query)
   var code = req.query.code;
-
-  // pair thru ids in headers ????
-});
-
-//https://sandbox.orcid.org/oauth/authorize
-// ?client_id=APP-P5ANJTQRRTMA6GXZ
-// &response_type=code
-// &scope=/orcid-profile/read-limited
-// &redirect_uri=https://developers.google.com/oauthplayground
-
-app.use('/oauth/getAuthCode', function(req, res, next){
-  var scope = req.query.scope;
-  var data = {
-    client_id: ORCID_OAUTH_CLIENT_ID,
-    response_type: 'code',
-    scope: scope,
-    redirect_uri: ORCID_REDIRECT_URI
-  };
-
-  var options = {
-    headers: {
-      'content-type': 'application/x-www-form-urlencoded'
-    }
-  };
-
-  needle.post(ORCID_API_ENDPOINT + '/oauth/authorize', data, options, function(err, resp, body) {
-    if (err) {
-      res.send(err.status || 500, err);
-    }
-    else {
-      res.send(resp.statusCode, body);
-    }
-  });
-
-});
-
-app.use('/oauth/exchangeAuthCode', function(req, res, next) {
-  var code = req.query.code;
-  var redirect_uri = req.query.redirectUri;
-  var scope = req.query.scope;
 
   var data = {
     code: code,
-    redirect_uri: redirect_uri,
-    scope: scope,
     grant_type: 'authorization_code',
     client_id: ORCID_OAUTH_CLIENT_ID,
     client_secret: ORCID_OAUTH_CLIENT_SECRET
   };
+  console.log(data);
 
   var options = {
     headers: {
-      'content-type': 'application/x-www-form-urlencoded'
+      'content-type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json'
     }
   };
 
+  console.log('foo', options);
+  console.log('endpoint', ORCID_API_ENDPOINT);
+  console.log('data', data)
+
   needle.post(ORCID_API_ENDPOINT + '/oauth/token', data, options, function(err, resp, body) {
     if (err) {
+      console.log('error', err)
       res.send(err.status || 500, err);
     }
     else {
+      console.log('done', body)
       res.send(resp.statusCode, body);
+      //res.writeHead(resp.statusCode, {'Content-Type': resp.headers['content-type']});
+      //res.write(body);
+      //res.end();
     }
   });
 });
@@ -223,6 +207,3 @@ console.log('HOMEDIR', home, process.env.HOMEDIR);
 console.log('API_ENDPOINT', API_ENDPOINT, process.env.API_ENDPOINT);
 console.log('SOLR_ENDPOINT', SOLR_ENDPOINT, process.env.SOLR_ENDPOINT);
 //console.log(process.env);
-
-
-

@@ -286,10 +286,10 @@ define([
     var OrcidWorks = BaseWidget.extend({
       activate: function (beehive) {
         this.orcidModelNotifier = beehive.Services.get('OrcidModelNotifier');
-        this.pubSub = beehive.Services.get('PubSub');
-        this.pubSubKey = this.pubSub.getPubSubKey();
+        this.pubsub = beehive.Services.get('PubSub');
+        this.pubSubKey = this.pubsub.getPubSubKey();
 
-        this.pubSub.subscribe(this.pubSub.ORCID_ANNOUNCEMENT, _.bind(this.routeOrcidPubSub, this));
+        this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, _.bind(this.routeOrcidPubSub, this));
       },
 
       initialize: function (options) {
@@ -430,7 +430,7 @@ define([
       },
       onAllInternalEvents: function (ev, arg1, arg2) {
         if (ev == 'itemview:OrcidAction') {
-          this.pubSub.publish(this.pubSub.ORCID_ANNOUNCEMENT, {
+          this.pubsub.publish(this.pubsub.ORCID_ANNOUNCEMENT, {
             msgType: OrcidApiConstants.Events.OrcidAction,
             data: arg2
           });

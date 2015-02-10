@@ -397,7 +397,7 @@ define([
         var x = createTestQM();
         var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
 
-        beehive.addObject('RuntimeConfig', {pskToExecuteFirst: key2.getId()});
+        beehive.addObject('DynamicConfig', {pskToExecuteFirst: key2.getId()});
         qm.__searchCycle.waiting[key1.getId()] = {key: key1, request: req1};
         qm.__searchCycle.waiting[key2.getId()] = {key: key2, request: req2};
         qm.startExecutingQueries();
@@ -416,7 +416,7 @@ define([
 
 
         req1.set('target', 'error');
-        beehive.addObject('RuntimeConfig', {pskToExecuteFirst: key1.getId()});
+        beehive.addObject('DynamicConfig', {pskToExecuteFirst: key1.getId()});
         qm.__searchCycle.waiting[key1.getId()] = {key: key1, request: req1};
         qm.__searchCycle.waiting[key2.getId()] = {key: key2, request: req2};
 
@@ -500,7 +500,7 @@ define([
         var x = createTestQM();
         var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
 
-        beehive.addObject('RuntimeConfig', {pskToExecuteFirst: key2.getId()});
+        beehive.addObject('DynamicConfig', {pskToExecuteFirst: key2.getId()});
         qm.__searchCycle.waiting[key1.getId()] = {key: key1, request: req1};
         qm.__searchCycle.waiting[key2.getId()] = {key: key2, request: req2};
         qm.startExecutingQueries();

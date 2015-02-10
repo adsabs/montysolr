@@ -29,13 +29,14 @@ require.config({
           FeedbackMediator: 'js/wraps/discovery_mediator',
           QueryMediator: 'js/components/query_mediator',
           Diagnostics: 'js/bugutils/diagnostics',
-          AlertsController: 'js/components/alerts_mediator'
+          AlertsController: 'js/components/alerts_mediator',
+          Orcid: 'js/modules/orcid/module'
         },
         services: {
           Api: 'js/services/api',
           PubSub: 'js/services/pubsub',
           Navigator: 'js/apps/discovery/navigator',
-          LocalStorage: 'js/services/localStorage'
+          PersistentStorage: 'js/services/storage'
         },
         objects: {
           User: 'js/components/user',
@@ -45,8 +46,7 @@ require.config({
           AppStorage: 'js/components/app_storage'
         },
         modules: {
-          FacetFactory: 'js/widgets/facet/factory',
-          Orcid: 'js/modules/orcid/module'
+          FacetFactory: 'js/widgets/facet/factory'
         }
       },
       widgets: {
@@ -69,9 +69,6 @@ require.config({
 
         Metrics :  'js/widgets/metrics/widget',
 
-        OrcidLogin: 'js/modules/orcid/orcid_login/widget',
-        OrcidWorks: 'js/modules/orcid/orcid_works/widget',
-        //OrcidResults: 'js/modules/orcid/orcid_result_row_extension/widget',
         OrcidBigWidget: 'js/modules/orcid/widget/widget',
 
         AuthorFacet: 'js/wraps/author_facet',

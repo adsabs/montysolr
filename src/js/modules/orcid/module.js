@@ -11,8 +11,8 @@ define([
     'backbone',
     'underscore',
     'js/components/generic_module',
-    'orcid_api',
-    'orcid_model_notifier'
+    './orcid_api',
+    './orcid_model_notifier'
   ],
   function (
     Backbone,
@@ -27,9 +27,9 @@ define([
 
       activate: function(beehive) {
 
-        var config = beehive.getObject('RuntimeConfig');
+        var config = beehive.getObject('DynamicConfig');
         if (!config) {
-          throw new Error('RuntimeConfig is not available to Orcid module');
+          throw new Error('DynamicConfig is not available to Orcid module');
         }
 
         var redirectUrlBase = config.orcidRedirectUrlBase || (location.protocol + '//' + location.host);
@@ -49,11 +49,8 @@ define([
           loginUrl: orcidApiEndpoint
             + "/oauth/authorize?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline"
             + "&client_id=" + orcidClientId
-            + "&redirect_uri=" + (redirectUrlBase + '/oauthRedirect.html'),
-
-          // XXX:rca - this needs to be re-thought/re-done
-          loginWindowUrl: redirectUrlBase + "/orcidLoginContainer.html?oauthUrl=" + orcidApiEndpoint,
-          exchangeTokenUrl: redirectUrlBase + '/oauth/exchangeAuthCode'
+            + "&redirect_uri=" + encodeURIComponent(redirectUrlBase + '/#/user/orcid'),
+          exchangeTokenUrl: redirectUrlBase + '/orcid/exchangeOAuthCode'
         };
 
         _.extend(config, {Orcid: opts });
@@ -81,5 +78,12 @@ define([
 
     });
 
-    return OrcidModule;
+    return function() {
+      return {
+        activate: function(beehive) {
+          var om = new OrcidModule();
+          om.activate(beehive);
+        }
+      }
+    }
   });
