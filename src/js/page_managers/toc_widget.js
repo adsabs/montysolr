@@ -16,6 +16,8 @@ define([
         id: undefined, // widgetId
         path: undefined,
         title: undefined,
+        showCount: undefined,
+        category: undefined,
         isActive : false,
         isSelected: false,
         numFound : 0,
@@ -65,9 +67,17 @@ define([
     },
 
     serializeData : function(){
-      var data = {};
+      var data = {},
+          groupedCollectionJSON;
+
       data = _.extend(data, this.model.toJSON());
-      data = _.extend(data, {items : this.collection.toJSON()});
+
+      groupedCollectionJSON = _.groupBy(this.collection.toJSON(), function(object){
+        return object.category;
+      });
+
+      data = _.extend(data, groupedCollectionJSON);
+
       return data;
     },
 
