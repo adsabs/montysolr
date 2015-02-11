@@ -181,8 +181,11 @@ define([
     var ContainerModel = Backbone.Model.extend({
 
       initialize : function(){
-        this.on("change:numFound", this.updateMax);
-        this.on("change:rows", this.updateCurrent);
+        // newMetadata is triggered for every processResponse
+        this.on("newMetadata", function(){
+          this.updateCurrent();
+          this.updateMax();
+          });
       },
 
       updateMax : function() {
@@ -442,9 +445,12 @@ define([
           .attr("transform", computeLabelPosition);
 
         //append connector nodes if possible
-        _.each(graphData.root.name, function (n) {
+        _.each(graphData.root.name, function (n, i) {
           svg.append("text")
             .classed("s-connector-node", true)
+            .attr("y", function(){
+              return (i * 25) - (graphData.root.name.length *25/2);
+            })
             .text(n.nodeName);
         });
 
@@ -862,9 +868,6 @@ define([
           query: query
         });
 
-//        var options = {};
-//        options.url = "http://127.0.0.1:5000/paper-network?"
-//        request.set('options', options);
 
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
       },
@@ -912,10 +915,6 @@ define([
           query: query
         });
 
-//        var options = {};
-//        options.url = "http://127.0.0.1:5000/paper-network?"
-//        request.set('options', options);
-
         this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
       },
 
@@ -931,6 +930,8 @@ define([
           numFound: parseInt(data.msg.numFound),
           rows: parseInt(data.msg.rows)
         });
+        //so there is a one time render event
+        this.model.trigger("newMetadata");
       },
 
       broadcastFilteredQuery: function () {
