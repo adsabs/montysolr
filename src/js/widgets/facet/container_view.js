@@ -53,6 +53,10 @@ define(['backbone', 'marionette',
           //this.on('all', function(ev) {console.log(ev, arguments)});
         }
 
+        //show only tiny loading indicators, the widget_state_handling mixin will use this flag
+        //in deciding which template to use
+        this.smallLoadingIcon = true;
+
       },
 
       //id: "search-results",

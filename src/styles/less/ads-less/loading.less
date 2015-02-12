@@ -1,6 +1,6 @@
 
 .s-loading {
-  opacity: .7;
+  opacity: 1;
   z-index : @z-index-3;
   background-color: white;
   position: absolute;
@@ -11,18 +11,32 @@
 
   &:before {
     .fa;
-    .fa-spin;
+    .fa-pulse;
     .fa-2x;
     color: lighten(@brand-info, 10%);
-    content : @fa-var-cog;
+    content : @fa-var-spinner;
     position: absolute;
     top: 50%;
     right: 50%;
     z-index: @z-index-4;
 
   }
+}
 
+//for smaller widgets that just need a tiny loading image
+.s-loading.s-small{
+  .s-loading;
 
+  &:before{
+    .fa;
+    .fa-pulse;
+    color: lighten(@brand-info, 10%);
+    content : @fa-var-spinner;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    z-index: @z-index-4;
+  }
 }
 
 //move up the loader image gif for lists of results

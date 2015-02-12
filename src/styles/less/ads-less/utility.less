@@ -39,9 +39,25 @@
 }
 
 .s-large-close {
-  .close;
+  font-weight: bold;
   font-size: 4.5em;
-  line-height: .5;
+  .lh-box-shadow(2px 2px 2px @default-box-shadow-color);
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  padding-left: .3em;
+  opacity: .5;
+  border: 1px solid @gray;
+  .lh-border-radius(50px);
+  line-height: 1;
+  z-index: @z-index-4;
+  float: right;
+  cursor: pointer;
+  position:relative;
+
+  &:hover {
+    opacity: .8;
+  }
 }
 
 .s-disabled {

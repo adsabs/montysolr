@@ -28,7 +28,7 @@ define([
 
       var bibs, journalNames;
 
-      if (_.isEmpty("solrData")) {
+      if (_.isEmpty(this.get("solrData"))) {
         return
       }
       //always do this when the data is reset
@@ -77,11 +77,11 @@ define([
         this.set("journalNames", []);
       }
       //now set the data, initiates the graph drawing
-      this.set("data", data);
+      this.set("modifiedSolrData", data);
     },
 
     reset : function(){
-      this.set(this.defaults());
+      this.set(this.defaults(), {silent : true});
     },
 
     toggleTracked : function(bibcode){
@@ -101,13 +101,15 @@ define([
       return {
         //straight from solr
         solrData: {},
-        //processed solrData, only happens 1x
-        data: [],
+        //processed solrData, only happens 1x per new solrData
+        modifiedSolrData: [],
         //for each graph, changes when user changes x and y vals
         currentGraphData: {},
         //a change in scale will call "rearrangeGraph"
         yScale: "log",
         xScale : "linear",
+        yLogPossible: true,
+        xLogPossible: false,
         //changes in these values won't call rearrangeGraph, you
         //have to do it manually
         xValue: "date",
@@ -139,7 +141,7 @@ define([
     },
 
     modelEvents: {
-      "change:data": "render",
+      "change:modifiedSolrData": "render",
       "change:currentPub": "rearrangeGraph",
       "change:yScale" : "rearrangeGraph",
       "change:xScale" : "rearrangeGraph",
@@ -161,7 +163,7 @@ define([
             xValue: "date",
             yValue: "read_count",
             yScale: "log"
-          });
+          }, {silent : true});
         }
         else if ($target.hasClass("citations-vs-time")) {
 
@@ -171,7 +173,7 @@ define([
             xScale: "linear",
             yValue: "citation_count",
             yScale: "log"
-          });
+          }, {silent : true});
         }
         else if ($target.hasClass("reads-vs-citations")) {
 
@@ -180,7 +182,7 @@ define([
             yValue: "read_count",
             xValue: "citation_count",
             xScale: "log"
-          });
+          }, {silent : true});
 
         }
         this.rearrangeGraph();
@@ -188,7 +190,11 @@ define([
       },
       "click .submit" : function(){
         this.trigger("filterBibs", this.model.get("selectedBibs"));
-      }
+      },
+
+      "click .close" : function(){
+          this.trigger("close");
+        }
     },
 
     getConfig: function () {
@@ -218,18 +224,13 @@ define([
     //this function is run every time the graph is rendered or changes
     setScales: function () {
 
-      if (!this.scales) {
-        this.scales = {};
-      }
+      this.scales = {};
 
       var data = this.model.get("currentGraphData"),
         that = this,
         dateRange,
+        yExtent, xExtent,
         newDateRange = [];
-
-      if (_.isEmpty(data)){
-        return
-      }
 
       //journal scale
       if (this.model.get("journalNames").length) {
@@ -273,37 +274,41 @@ define([
           .range([0, that.config.width]);
       }
 
-      else if (that.model.get("xValue") == "citation_count" && that.model.get("xScale") === "log"){
+      else if (that.model.get("xValue") == "citation_count"){
 
-        this.scales.xScale = d3.scale.log()
-          .domain(d3.extent(data, function (d) {
-            return d[that.model.get("xValue")]
-          }))
-          .range([0, that.config.width]);
-      }
-      else if (that.model.get("xValue") == "citation_count" && that.model.get("xScale") === "linear"){
+        xExtent = d3.extent(data, function (d) {
+          return d[that.model.get("xValue")]
+        });
 
-        this.scales.xScale = d3.scale.linear()
-          .domain(d3.extent(data, function (d) {
-            return d[that.model.get("xValue")]
-          }))
-          .range([0, that.config.width]);
+        if (that.model.get("xScale") === "log"){
+
+          this.scales.xScale = d3.scale.log()
+            .domain(xExtent)
+            .range([0, that.config.width]);
+        }
+        else {
+
+          this.scales.xScale = d3.scale.linear()
+            .domain(xExtent)
+            .range([0, that.config.width]);
+        }
       }
+
+      yExtent = d3.extent(data, function (d) {
+        return d[that.model.get("yValue")]
+      });
 
       //y scale
       if (this.model.get("yScale") === "log") {
 
         this.scales.yScale = d3.scale.log()
-          .domain(d3.extent(data, function (d) {
-            return d[that.model.get("yValue")]
-          }))
+          .domain(yExtent)
           .range([that.config.height, 0]);
       }
       else {
+
         this.scales.yScale = d3.scale.linear()
-          .domain(d3.extent(data, function (d) {
-            return d[that.model.get("yValue")]
-          }))
+          .domain(yExtent)
           .range([that.config.height, 0]);
       }
 
@@ -327,11 +332,31 @@ define([
     finalProcess: function () {
 
       var that = this,
-        data = this.model.get("data");
+        data = this.model.get("modifiedSolrData"),
+        yExtent, xExtent;
+
+      //do last minute scale adjustments if necessary
+
+      yExtent = d3.sum(_.pluck(data, that.model.get("yValue")));
+      xExtent = d3.sum(_.pluck(data, that.model.get("xValue")));
+
+      if (!yExtent){
+        this.model.set("yScale", "linear", {silent : true});
+        this.model.set("yLogPossible", false);
+      }
+      else {
+        this.model.set("yLogPossible", true);
+      }
+      if (!xExtent){
+        this.model.set("xScale", "linear", {silent : true});
+        this.model.set("xLogPossible", false);
+      }
+      else {
+        this.model.set("xLogPossible", true);
+      }
 
       //make sure that any log scales only get data > 0
-
-      data = _.chain($.extend({}, data)).filter(function (d) {
+      data = _.chain(data).filter(function (d) {
         if (that.model.get("yScale") === "linear") {
           return true
         }
@@ -347,11 +372,16 @@ define([
           else if (d[that.model.get("xValue")]) {
             return true
           }
-        }).sortBy(function (d) {
+        })
+        //sorting is important for mouseover interactions,
+        //you don't want the circles hidden behind larger ones
+        .sortBy(function (d) {
         return -d[that.model.get("radius")]
       }).value();
 
       this.model.set("currentGraphData", data);
+
+      this.setScales();
 
     },
 
@@ -362,6 +392,11 @@ define([
     },
 
     rearrangeGraph: function () {
+
+
+      this.finalProcess();
+      this.resetSelection();
+
       var svg = this.cache.svg,
         realSvg = this.cache.realSvg,
         data,
@@ -371,10 +406,6 @@ define([
         pubName,
         xTickFormat,
         that = this;
-
-      this.finalProcess();
-      this.setScales();
-      this.resetSelection();
 
       realSvg.select("rect.selection").remove();
 
@@ -481,8 +512,11 @@ define([
     },
 
     onRender : function(){
-      if (!_.isEmpty(this.model.get("data"))){
+      if (!_.isEmpty(this.model.get("modifiedSolrData"))){
         this.renderGraph();
+      }
+      else {
+        this.$el.html("Not enough data to form the citations/reads graphs");
       }
     },
 
@@ -528,6 +562,7 @@ define([
           .attr("x", 260)
           .attr("y", -5)
           .text("linear");
+
       }
 
       yLabel.selectAll("*").remove();
@@ -563,6 +598,18 @@ define([
       }
 
       this.attachLogLinearEventListeners();
+
+      //finally, hide log options if they are  impossible
+      if (!this.model.get("yLogPossible")){
+        yLabel.selectAll(".scale-choice").classed("hidden", true);
+        yLabel.selectAll("text.log").classed("hidden", true);
+      }
+
+      if (!this.model.get("xLogPossible")){
+        xLabel.selectAll(".scale-choice").classed("hidden", true);
+        xLabel.selectAll("text.log").classed("hidden", true);
+      }
+
     },
 
     //so that the fake radio buttons work
@@ -595,6 +642,7 @@ define([
 
       this.getConfig();
       this.cacheVals();
+      this.finalProcess();
 
       var svg = this.cache.svg,
         realSvg = this.cache.realSvg,
@@ -603,9 +651,6 @@ define([
         journalNames = that.model.get("journalNames"),
         isMousePressed = false,
         xLabel, xAxis, yLabel, yAxis;
-
-      this.finalProcess();
-      this.setScales();
 
       data = this.model.get("currentGraphData");
 
@@ -907,14 +952,12 @@ define([
   var BubbleChart = BaseWidget.extend({
 
     initialize: function (options) {
-
       options = options || {};
-
       this.model = new BubbleModel();
       //testing reduces animations to 0
       this.view = new BubbleView({model: this.model, testing: options.testing});
-
-      this.listenTo(this.view, "all", this.onAll);
+      this.listenTo(this.view, "filterBibs", this.onFilterBibs);
+      this.listenTo(this.view, "close", this.broadcastClose);
 
     },
 
@@ -950,14 +993,12 @@ define([
 
       this.model.reset();
       this.view.reset();
-
       this.model.set("solrData", apiResponse.get("response.docs"));
 
     },
 
-    onAll:function(ev){
+    onFilterBibs: function(){
 
-      if (ev === "filterBibs"){
         var updater = new ApiQueryUpdater("fq"),
         bibs = this.model.get("selectedBibs"),
         fqString = "",
@@ -971,20 +1012,15 @@ define([
         });
 
         fqString = 'bibcode:(' + fqString.slice(3) +')';
-
         newQuery.unlock();
-
         updater.updateQuery(newQuery, "fq", "limit", fqString);
-
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+    },
 
-      }
 
+    broadcastClose: function () {
+      this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
     }
-
-
-
-
 
   })
 
