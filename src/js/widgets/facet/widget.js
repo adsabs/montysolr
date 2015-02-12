@@ -40,8 +40,6 @@ define(['backbone',
         this._extractor = undefined;
         this._preprocessor = undefined;
 
-
-
       },
 
 

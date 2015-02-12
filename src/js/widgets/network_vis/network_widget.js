@@ -114,7 +114,12 @@ define([
 
       events : {
         "click button.limit" : "addItem",
-        "click .submit-rows" : "changeRows"
+        "click .submit-rows" : "changeRows",
+        "click .close" : "triggerClose"
+      },
+
+      triggerClose : function(){
+        this.trigger("close")
       },
 
       changeRows : function(e) {

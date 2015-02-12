@@ -8,12 +8,15 @@ define([
   'underscore',
   'jquery',
   'js/widgets/widget_states',
-  'hbs!js/widgets/base/templates/loading-template'
-  ], function (
+  'hbs!js/widgets/base/templates/loading-template',
+  'hbs!js/widgets/base/templates/loading-template-small',
+
+], function (
   _,
   $,
   WidgetStates,
-  LoadingTemplate
+  LoadingTemplate,
+  LoadingTemplateSmall
   ) {
 
   /**
@@ -65,7 +68,15 @@ define([
       var view = getView(this);
       if (view && view.$el) {
         if(view.$el.find(".s-loading").length === 0) {
-          view.$el.append(LoadingTemplate(state));
+          //if the widget is small, it can have an attribute on the object
+          //or be passed an option to show a small loading indicator
+          if (Marionette.getOption(view, "smallLoadingIcon")){
+            view.$el.append(LoadingTemplateSmall(state));
+          }
+          else {
+            //otherwise, show a larger indivator
+            view.$el.append(LoadingTemplate(state));
+          }
         }
       }
     },
