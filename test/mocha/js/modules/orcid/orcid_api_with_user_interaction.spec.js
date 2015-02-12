@@ -238,7 +238,7 @@ define([
         var orcidApi = new OrcidApi();
         orcidApi.activate(beeHive);
 
-        orcidApi.replaceAllWorks({
+        orcidApi.setWorks({
             "orcid-message": {
               "$": {
                 "xmlns": "http://www.orcid.org/ns/orcid"
@@ -337,7 +337,7 @@ define([
                 orcidWorks = Array.isArray(orcidWorks) ? orcidWorks : [orcidWorks];
 
                 orcidWorks = orcidWorks.filter(function(item) {
-                  return orcidApi.isWorkFromAds(item);
+                  return orcidApi.isWorkCreatedByUs(item);
                 });
 
                 var adsId = orcidWorks[0]["work-external-identifiers"]["work-external-identifier"]["work-external-identifier-id"];

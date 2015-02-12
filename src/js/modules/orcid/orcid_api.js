@@ -32,16 +32,6 @@ define([
     ) {
 
 
-    function addXmlHeadersToOrcidMessage(message) {
-      var messageCopy = $.extend(true, {}, message);
-      messageCopy.$ = {
-        "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-        "xsi:schemaLocation": "http://www.orcid.org/ns/orcid https://raw.github.com/ORCID/ORCID-Source/master/orcid-model/src/main/resources/orcid-message-1.1.xsd",
-        "xmlns": "http://www.orcid.org/ns/orcid"
-      };
-      return messageCopy;
-    }
-
 
     var OrcidApi = GenericModule.extend({
 
@@ -88,10 +78,7 @@ define([
        * Forgets the OAuth access_token
        */
       signOut: function () {
-        this.authData = null;
-        //this.getBeeHive()
-        //  .getService('LocalStorage')
-        //  .setObject("userSession", {isEmpty: true});
+        this.saveAccessData(null);
       },
 
       hasExchangeCode: function (searchString) {
@@ -102,6 +89,23 @@ define([
 
       getExchangeCode: function (searchString) {
         return this.getUrlParameter('code', searchString || window.location.search);
+      },
+
+      /**
+       * Extract values from the URL (used to get code from redirects)
+       *
+       * @param sParam
+       * @returns {string}
+       */
+      getUrlParameter: function (sParam, searchString) {
+        var sPageURL = searchString.substring(1);
+        var sURLVariables = sPageURL.split('&');
+        for (var i = 0; i < sURLVariables.length; i++) {
+          var sParameterName = sURLVariables[i].split('=');
+          if (sParameterName[0] == sParam) {
+            return decodeURIComponent(sParameterName[1]);
+          }
+        }
       },
 
       /**
@@ -151,442 +155,362 @@ define([
         }
       },
 
-      /**
-       * This function was there (and it is not clear where it was used)
-       * blocshop got totally confused (their code duplicated) and i removed
-       * the awful cycle of redirections
-       *
-       * XXX:rca - find a place to use this
-       */
-      getOrcidProfile: function() {
-        var userSession = LocalStorage.getObject("userSession");
-        var orcidProfile = {};
-        if (userSession.orcidProfile['#document'] != undefined) {
-          orcidProfile = userSession.orcidProfile['#document']['orcid-message']['orcid-profile'];
-        }
-        else {
-          orcidProfile = userSession.orcidProfile['orcid-message']['orcid-profile'];
-        }
-        return orcidProfile;
-      },
-
-      /**
-       * Extract values from the URL (used to get code from redirects)
-       *
-       * @param sParam
-       * @returns {string}
-       */
-      getUrlParameter: function (sParam, searchString) {
-        var sPageURL = searchString.substring(1);
-        var sURLVariables = sPageURL.split('&');
-        for (var i = 0; i < sURLVariables.length; i++) {
-          var sParameterName = sURLVariables[i].split('=');
-          if (sParameterName[0] == sParam) {
-            return decodeURIComponent(sParameterName[1]);
-          }
-        }
+      checkAccess: function() {
+        if (!this.hasAccess())
+          throw new Error('You must first obtain access_token before calling this API');
+        if (!this.config.apiEndpoint)
+          throw new Error('OrcidApi was not properly configured; apiEndpoint is missing');
       },
 
 
       /**
-       * From the ORCID response extract all IDs that are known to ADS
+       * ===============================================================================
+       * API ORCID access points
+       * ===============================================================================
+       */
+
+      /**
+       * Retrieve user profile
        *
-       * @param orcidWork
+       *  curl -H 'Authorization: Bearer bd25a79d-eb7d-4341-aab9-c17e17f5fd21' 'http://api.sandbox.orcid.org/v1.2/0000-0001-8178-9506/orcid-profile' -L -i -H 'Accept: application/json'
+       *
+       * Must have scope: /orcid-profile/read-limited
+       *
        * @returns {*}
        */
-      getAdsIds: function (orcidWork) {
-        var extIdentifiersObj = orcidWork["work-external-identifiers"];
-        if (!extIdentifiersObj) {
-          return [];
-        }
+      getUserProfile: function () {
+        this.checkAccess();
+        var ret = $.Deferred();
+        this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-profile')
+          .done(function(res) {
+            ret.resolve(res['orcid-profile']);
+          });
+        return ret.promise();
+      },
 
-        var extIdentifiers = extIdentifiersObj["work-external-identifier"] || [];
-        if (!(extIdentifiers instanceof Array)) {
-          extIdentifiers = [extIdentifiers];
-        }
 
-        var adsExtIdentifiers = extIdentifiers.filter(function (extIdentifier) {
-          return extIdentifier["work-external-identifier-id"].indexOf("ads:") != -1;
+      /**
+       * Retrieve User's documents
+       *
+       *  curl -H 'Authorization: Bearer bd25a79d-eb7d-4341-aab9-c17e17f5fd21' 'http://api.sandbox.orcid.org/v1.2/0000-0001-8178-9506/orcid-works' -L -i -H 'Accept: application/json'
+       *
+       * Must have scope: /orcid-works/....
+       */
+      getWorks: function() {
+        this.checkAccess();
+        var ret = $.Deferred();
+        this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-works')
+          .done(function(res) {
+            ret.resolve(res['orcid-profile']['orcid-activities']['orcid-works']);
+          });
+        return ret.promise();
+      },
+
+
+      /**
+       * From the ORCID response extract all external IDs
+       *
+       * @param orcidWorks
+       * @returns {*}
+       */
+      getExternalIds: function (orcidWorks) {
+        var ret = {};
+        if (!orcidWorks) return ret;
+
+        if (orcidWorks && orcidWorks['orcid-work']) {
+          orcidWorks = orcidWorks['orcid-work']
+        }
+        else if(!_.isArray(orcidWorks)) {
+          orcidWorks = [orcidWorks];
+        }
+        _.each(orcidWorks, function(w, idx) {
+          if (w['work-external-identifiers'] && w['work-external-identifiers']['work-external-identifier']) {
+            _.each(w['work-external-identifiers']['work-external-identifier'], function(el) {
+              ret[el['work-external-identifier-id']['value']] = {idx: idx, type: el['work-external-identifier-type'], "put-code": w['put-code']};
+            });
+          }
         });
-
-        return adsExtIdentifiers;
+        return ret;
       },
 
-      isWorkFromAds: function (orcidWork) {
-        // XXX:rca this is very stupid
-        var result = this.getAdsIds(orcidWork);
-        return result != undefined && result.length > 0;
+      /**
+       * Orcid stores application id inside the source field when the OAuth app
+       * created the record. We can identify resources by matching the ID.
+       *
+       * "source": {
+       *       "source-client-id": {
+       *         "path": "APP-P5ANJTQRRTMA6GXZ",
+       *         "host": "sandbox.orcid.org",
+       *         "uri": "http://sandbox.orcid.org/client/APP-P5ANJTQRRTMA6GXZ",
+       *         "value": null
+       *       },
+       *       "source-name": {
+       *         "value": "nasa ads"
+       *       },
+       *       "source-date": {
+       *         "value": 1424194783005
+       *       }
+       *     },
+       * @param orcidWork
+       * @returns {boolean}
+       */
+      isWorkCreatedByUs: function (orcidWork) {
+        if (orcidWork['source']
+          && orcidWork['source']['source-client-id']
+          && orcidWork['source']['source-client-id']['path']
+          && orcidWork['source']['source-client-id']['path'] == this.config.clientId) {
+          return true;
+        }
+        return false;
       },
 
+      /**
+       *  Formats the datastructure of one paper - to be sent to the Orcid API
+       *
+       * @param adsWork
+       * @param putCode
+       * @returns {{work-title: {$: {}, title: *}, short-description: (.response.abstract|*|ItemModel.defaults.abstract|AbstractModel.defaults.abstract|AbstractModel.parse.abstract|responseWithHighlights.highlighting.abstract), work-external-identifiers: *[], work-type: string, work-contributors, url: *}}
+       */
       formatOrcidWork: function (adsWork, putCode) {
+        var self = this;
         var formatContributors = function (adsAuthors) {
-
           var result = [];
-
           _.each(adsAuthors, function (author) {
             result.push({
               "credit-name": author,
               "contributor-attributes": {
-                "contributor-role": "author"
+                "contributor-role": "AUTHOR"
               }
             });
           });
-
           return {
             contributor: result
           };
         };
 
-        var result =
-        {
-          "work-title": {
-            "$": {},
-            "title": adsWork.title.join(' ')
-          },
-
-          "short-description": adsWork.abstract,
-          //"publication-date": {
-          //  "year": adsWork.pubdate.split(' ')[1]
-          //},
-
-          "work-external-identifiers": {
-            "work-external-identifier": [
-              {
-                "work-external-identifier-type": 'bibcode',
-                "work-external-identifier-id": adsWork.bibcode
-              },
-              {
-                "work-external-identifier-type": 'other-id',
-                "work-external-identifier-id": 'ads:' + adsWork.id
-              }
-              // TODO : add DOI, if available
-            ]
-          },
-
-          "work-type": "book",
-
-          "work-contributors": formatContributors(adsWork.author),
-
-          "url": adsWork.doi ? LinkGeneratorMixin.adsUrlRedirect("doi", adsWork.doi) : '' // TODO : in item_view model DOI is missing
-
+        var out = {
+          "work-type": self._getOrcidWorkType(adsWork),
+          "url": adsWork.doi
+            ? LinkGeneratorMixin.adsUrlRedirect("doi", adsWork.doi)
+            : LinkGeneratorMixin.adsUrlRedirect("article", adsWork.bibcode) // TODO : in item_view model DOI is missing
         };
+        var ids = ['bibcode', 'id'];
+        _.each(ids, function(fldName) {
+          if (adsWork[fldName]) {
+            if (!out["work-external-identifiers"]) out["work-external-identifiers"] = {"work-external-identifier": []};
+
+            if (_.isArray(adsWork[fldName])) {
+              _.each(adsWork[fldName], function(value) {
+                out["work-external-identifiers"]['work-external-identifier'].push({
+                  "work-external-identifier-type": self._getOrcidIdentifierType(fldName),
+                  "work-external-identifier-id": {
+                      value: value
+                    }
+                  }
+                );
+              })
+            }
+            else {
+              out["work-external-identifiers"]['work-external-identifier'].push({
+                  "work-external-identifier-type": self._getOrcidIdentifierType(fldName),
+                  "work-external-identifier-id": {
+                    value: adsWork[fldName]
+                  }
+                }
+              );
+            }
+          }
+        });
+
+        if (adsWork.title) {
+          out["work-title"] = {
+            "title": _.isArray(adsWork.title) ? adsWork.title.join(' ') : adsWork.title
+          };
+        }
+        if (adsWork.abstract) {
+          out["short-description"] = adsWork.abstract;
+        }
+        if (adsWork.author) {
+          out["work-contributors"] = formatContributors(adsWork.author);
+        }
 
         if (adsWork.pubdate && adsWork.pubdate.length > 0 && adsWork.pubdate.indexOf(' ') > 0) {
-          result['publication-date'] = {
+          out['publication-date'] = {
             "year": adsWork.pubdate.split(' ')[1]
           }
         }
 
         if (putCode) {
-          result["$"] = {"put-code": putCode};
+          out["put-code"] = putCode;
         }
-
-        return result;
+        return out;
       },
 
-      fillOrcidWorks: function (adsData) {
+      /**
+       * Get the appropriate type, accepted values:
+       * http://support.orcid.org/knowledgebase/articles/118795-supported-work-types
+       */
+      _getOrcidWorkType: function(adsWork) {
+        //TODO: rca enhance this
+        return 'JOURNAL_ARTICLE'
+      },
 
-        //"{"abstract":"Laser active imaging systems are widespread tools used in region surveillance and threat identification. However, the photoelectric imaging detector in the imaging systems is easy to be disturbed and this leads to errors of the recognition and even the missing of the target. In this paper, a novel wavelet-weighted multi-scale structural similarity (WWMS-SSIM) algorithm is proposed. 2-D four-level wavelet decomposition is performed for the original and disturbed images. Each image can be partitioned into one low-frequency subband (LL) and a series of octave high-frequency subbands (HL, LH and HH). Luminance, contrast and structure comparison are computed in different subbands with different weighting factors. Based on the results of the above, we can construct a modified WWMS-SSIM. Cross-distorted image quality assessment experiments show that the WWMS-SSIM algorithm is more suitable for the subjective visual feeling comparing with NMSE and SSIM. In the laser-dazzling image quality assessment experiments, the WWMS-SSIM gives more reasonable evaluations to the images with different power and laser spot positions, which can be useful to give the guidance of the laser active imaging system defense and application.","pub":"Optics Laser Technology","volume":"67","email":["-","-","-","-"],"bibcode":"2015OptLT..67..183Q","year":"2015","id":"10666236","keyword":["Image quality assessment","Laser-dazzling effect","Wavelet decomposition"],"author":["Qian, Fang","Guo, Jin","Sun, Tao","Wang, Tingfeng"],"aff":["State Key Laboratory of Laser Interaction with Matter, Changchun Institute of Optics, Fine Mechanics and Physics Chinese Academy of Sciences, Changchun 130033, Jilin, China","State Key Laboratory of Laser Interaction with Matter, Changchun Institute of Optics, Fine Mechanics and Physics Chinese Academy of Sciences, Changchun 130033, Jilin, China","State Key Laboratory of Laser Interaction with Matter, Changchun Institute of Optics, Fine Mechanics and Physics Chinese Academy of Sciences, Changchun 130033, Jilin, China","State Key Laboratory of Laser Interaction with Matter, Changchun Institute of Optics, Fine Mechanics and Physics Chinese Academy of Sciences, Changchun 130033, Jilin, China"],"title":["Quantitative assessment of laser-dazzling effects through wavelet-weighted multi-scale SSIM measurements"],"[citations]":{"num_citations":0,"num_references":2},"identifier":"2015OptLT..67..183Q","resultsIndex":0,"details":{"highlights":["-frequency subband <em>(LL)</em> and a series of octave high-frequency subbands (HL, LH and HH). Luminance, contrast"]},"num_citations":0,"links":{"text":[],"list":[{"letter":"R","title":"References (2)","link":"/#abs/2015OptLT..67..183Q/references"}],"data":[]},"emptyPlaceholder":false,"visible":true,"actionsVisible":true,"orcidActionsVisible":false}"
+      _getOrcidIdentifierType: function(fldName) {
+        var f = fldName.toLowerCase();
+        switch (f) {
+          case 'doi':
+            return 'DOI';
+          case 'bibcode':
+            return 'BIBCODE';
+          default:
+            return 'OTHER_ID';
+        }
+      },
+
+      /**
+       * Original method as developed by blocshop
+       *
+       * It formats a list of papers into orcid-message
+       *
+       * @param adsData
+       * @returns {{orcid-message: {$: {xmlns: string}, message-version: string, orcid-profile: {orcid-activities: {$: {}, orcid-works}}}}}
+       */
+      formatOrcidWorks: function (adsData) {
+
+        if (!_.isArray(adsData))
+          throw new Exception('Input to formatOrcidWorks must be an array of objects');
 
         var that = this;
         var formatWorks = function (adsWorks) {
-
           var result = [];
           _.each(adsWorks,
             function (adsWork) {
               result.push(that.formatOrcidWork(adsWork));
             }
           );
-
           return {'orcid-work': result};
-
         };
 
         var orcidWorksMessage = {
-          "orcid-message": {
-            "$": {
-              "xmlns": "http://www.orcid.org/ns/orcid"
-            },
-            "message-version": "1.1",
-            "orcid-profile": {
-              "orcid-activities": {
-                "$": {},
-                "orcid-works": formatWorks(adsData)
-              }
+          "message-version": "1.2",
+          "orcid-profile": {
+            "orcid-activities": {
+              "orcid-works": formatWorks(adsData)
             }
           }
         };
-
         return orcidWorksMessage;
-
-      },
-
-      processOrcidAction: function (data) {
-        if (data.actionType == 'insert') {
-          var orcidWorksMessage = this.fillOrcidWorks([data.model]);
-
-          this.addWorks(orcidWorksMessage);
-        }
-        else if (data.actionType == 'bulkInsert') {
-          var orcidWorksMessage = this.fillOrcidWorks(data.model);
-
-          this.addWorks(orcidWorksMessage);
-        }
-        else if (data.actionType == 'delete') {
-
-          if (data.modelType == 'adsData') {
-            var adsIdsWithPutCodeList = this.getBeeHive().getService('OrcidModelNotifier').getAdsIdsWithPutCodeList();
-            var formattedAdsId = "ads:" + data.model.id;
-
-            // find putcode
-
-            var putCodes = adsIdsWithPutCodeList.filter(function (e) {
-              return e.adsId == formattedAdsId
-            });
-
-            if (putCodes.length < 1) {
-              return;
-            }
-
-            this.deleteWorks([putCodes[0].putCode]);
-          } else if (data.modelType == 'orcidData') {
-            this.deleteWorks([data.model.putCode]);
-          }
-        }
-        else if (data.actionType == 'update') {
-          if (data.modelType == 'adsData') {
-            // fill orcid message with putCode
-
-            var that = this;
-            var beeHive = this.getBeeHive();
-            var LocalStorage = beeHive.getService("LocalStorage");
-            var userSession = LocalStorage.getObject("userSession");
-
-            var orcidProfile = {};
-
-            if (userSession.orcidProfile['#document'] != undefined) {
-              orcidProfile = userSession.orcidProfile['#document']['orcid-message']['orcid-profile'];
-            }
-            else {
-              orcidProfile = userSession.orcidProfile['orcid-message']['orcid-profile'];
-            }
-
-            var orcidWorks = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
-
-            var formattedAdsId = "ads:" + data.model.id;
-
-            var foundOrcidWork =
-              orcidWorks.filter(function (orcidWork) {
-                var adsIds = that.getAdsIds(orcidWork);
-                if (!adsIds || adsIds.length < 1)
-                  return false;
-                return adsIds.filter(function (adsId) {
-                  return adsId["work-external-identifier-id"] == formattedAdsId;
-                }).length > 0;
-              });
-
-            if (foundOrcidWork.length < 1) {
-              return;
-            }
-
-            var putCode = foundOrcidWork[0].$['put-code'];
-
-            var newOrcidWork = this.formatOrcidWork(data.model, putCode);
-
-            this.updateWorks([newOrcidWork]);
-
-          }
-          else if (data.model.modelType == 'orcidData') {
-            // probably ignore
-            // should do the fetch of fresh ads data based on adsId
-            // and create orcidData based on this
-          }
-        }
-      },
-
-      refreshUserProfile: function () {
-        var that = this;
-        return this.getUserProfile()
-          .done(function (orcidProfileXml) {
-            var beeHive = that.getBeeHive();
-            var LocalStorage = beeHive.getService("LocalStorage");
-            var userSession = LocalStorage.getObject("userSession");
-
-            userSession.orcidProfile = $.xml2json(orcidProfileXml);
-
-            LocalStorage.setObject("userSession", userSession);
-
-            var orcidProfile = {};
-
-            if (userSession.orcidProfile['#document'] != undefined) {
-              orcidProfile = userSession.orcidProfile['#document']['orcid-message']['orcid-profile'];
-            }
-            else {
-              orcidProfile = userSession.orcidProfile['orcid-message']['orcid-profile'];
-            }
-
-            that.pubsub.publish(that.pubsub.ORCID_ANNOUNCEMENT,
-              {
-                msgType: OrcidApiConstants.Events.UserProfileRefreshed,
-                data: orcidProfile
-              });
-          })
-      },
-
-      getUserProfile: function () {
-        var beeHive = this.getBeeHive();
-        var LocalStorage = beeHive.getService("LocalStorage");
-        var userSession = LocalStorage.getObject("userSession");
-
-        return this.sendData({
-          type: "GET",
-          url: StringUtils.format(this.config.profileUrl, userSession.authData.orcid),
-          headers: {
-            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token)
-          }
-        })
       },
 
 
-      addWorks: function (orcidWorks) {
-        var beeHive = this.getBeeHive();
-        var LocalStorage = beeHive.getService("LocalStorage");
-        var userSession = LocalStorage.getObject("userSession");
-
-        orcidWorks = addXmlHeadersToOrcidMessage(orcidWorks);
-
-        var _that = this;
-
-        return this.sendData({
-          type: "POST",
-          url: StringUtils.format(this.config.worksUrl, userSession.authData.orcid),
-          data: Json2Xml.transform(orcidWorks, { attributes_key: '$', header: true }),
-          headers: {
-            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
-            "Content-Type": "application/orcid+xml"
-          }})
-          .done(function () {
-            _that.refreshUserProfile();
+      /**
+       * Posts (appends) new papers to Orcid;
+       *
+       * @param adsRecords
+       * @returns {*}
+       */
+      addWorks: function (adsRecs) {
+        return this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-works',
+          this.formatOrcidWorks(adsRecs),
+          {
+            type: "POST"
           });
       },
 
-      deleteWorks: function (putCodes) {
-        var _that = this;
-
+      /**
+       * Deletes certain records from Orcid database. This operation is three-step
+       *
+       *  1. retrieve works from the user profile
+       *  2. filter them and remove the un-wanted put-codes
+       *  3. update the profile (sending the new datastructure)
+       *
+       *
+       * @param identifiers
+       * @returns {*}
+       */
+      deleteWorks: function (identifiers) {
+        var self = this;
         var deferred = $.Deferred();
 
-        this.getUserProfile()
-          .done(function (data) {
-            var xml = $.xml2json(data);
-            var message = xml['#document'];
+        this.getWorks()
+          .done(function (orcidWorks) {
 
-            if (xml['#document'] != undefined) {
-              message = xml['#document'];
-            }
-            else {
-              message = xml;
-            }
-
-            var orcidWorks = message['orcid-message']['orcid-profile']["orcid-activities"]["orcid-works"];
-
-            // Exclude works not comming from ADS and works to delete
-            orcidWorks["orcid-work"] = orcidWorks["orcid-work"].filter(function (orcidWork) {
-              return _that.isWorkFromAds(orcidWork)
-                && putCodes.indexOf(orcidWork.$["put-code"]) == -1;
+            // Exclude works not coming from ADS (since we can only modify
+            // records created by us)
+            var adsWorks = orcidWorks["orcid-work"].filter(function (orcidWork) {
+              return self.isWorkCreatedByUs(orcidWork);
             });
 
-            if (orcidWorks["orcid-work"].length == 0) {
-              delete orcidWorks["orcid-work"];
+            if (adsWorks.length == 0) {
+              deferred.resolve({
+                deleted: 0,
+                added: 0,
+                msg: 'No ADS records found',
+                totalRecs: orcidWorks["orcid-work"].length,
+                adsTotal: 0
+              });
+              return;
             }
 
-            _that.replaceAllWorks(message)
-              .done(function () {
-                deferred.resolve();
-              })
-              .fail(function (err) {
-                deferred.reject(err);
+            var toRemove = [];
+            var extIds = self.getExternalIds(adsWorks);
+            _.each(identifiers, function(id) {
+              if (extIds[id]) {
+                toRemove.push(extIds[id].idx);
+              }
+            });
+
+            if (toRemove.length == 0) {
+              deferred.resolve({
+                deleted: 0,
+                added: 0,
+                msg: 'No ADS rec found that could be deleted',
+                totalRecs: orcidWorks["orcid-work"].length,
+                adsTotal: adsWorks.length
+              });
+              return;
+            }
+
+            var newWorks = [];
+            _.each(adsWorks, function (work, idx, l) {
+              if (toRemove.indexOf(idx) == -1)
+                newWorks.push(work);
+            });
+
+            var report = {
+              deleted: toRemove.length,
+              added: 0,
+              msg: 'Attempting removal',
+              adsTotal: newWorks.length,
+              totalRecs: orcidWorks["orcid-work"].length
+            };
+
+            self.setWorks(newWorks)
+              .done(function (res) {
+                report['response'] = res;
+                deferred.resolve(report);
               });
           })
           .fail(function (err) {
-            deferred.reject(err);
+            deferred.reject({msg: 'Error getting list of Orcid records (we cant delete anything)'});
           });
 
         return deferred.promise();
 
       },
 
-      updateWorks: function (orcidWorksToUpdate) {
 
-        var putCodesToUpdate = orcidWorksToUpdate.map(function (item) {
-          return item['$']["put-code"];
-        });
-
-        var _that = this;
-
-        var deferred = $.Deferred();
-
-        this.getUserProfile()
-          .done(function (data) {
-            var xml = $.xml2json(data);
-            var message = xml['#document'];
-
-            if (xml['#document'] != undefined) {
-              message = xml['#document'];
-            }
-            else {
-              message = xml;
-            }
-
-            var orcidWorks = message['orcid-message']['orcid-profile']["orcid-activities"]["orcid-works"];
-
-            // Exclude works not comming from ADS and works to update
-            orcidWorks["orcid-work"] = orcidWorks["orcid-work"].filter(function (orcidWork) {
-              return _that.isWorkFromAds(orcidWork)
-                && putCodesToUpdate.indexOf(orcidWork.$["put-code"]) == -1;
-            });
-
-            orcidWorks["orcid-work"] = orcidWorks["orcid-work"].concat(orcidWorksToUpdate);
-
-            if (orcidWorks["orcid-work"].length == 0) {
-              delete orcidWorks["orcid-work"];
-            }
-
-            _that.replaceAllWorks(message)
-              .done(function () {
-                deferred.resolve();
-              })
-              .fail(function (err) {
-                deferred.reject(err);
-              });
-          })
-          .fail(function (err) {
-            deferred.reject(err);
-          });
-
-        return deferred.promise();
-
-      },
-
-      replaceAllWorks: function (orcidWorks) {
-        var beeHive = this.getBeeHive();
-        var LocalStorage = beeHive.getService("LocalStorage");
-        var userSession = LocalStorage.getObject("userSession");
-
-        orcidWorks = addXmlHeadersToOrcidMessage(orcidWorks);
-
-        var _that = this;
-
-        return this.sendData({
-          type: "PUT",
-          url: StringUtils.format(this.config.worksUrl, userSession.authData.orcid),
-
-          headers: {
-            Authorization: StringUtils.format("Bearer {0}", userSession.authData.access_token),
-            "Content-Type": "application/orcid+xml"
-          }})
-          .done(function () {
-            _that.refreshUserProfile();
-          });
+      /**
+       * Replaces orcid-works with a new set of works (PUT operation)
+       *
+       * @param adsRecs
+       * @returns {*}
+       */
+      setWorks: function (adsRecs) {
+        return this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-works',
+          this.formatOrcidWorks(adsRecs),
+          {type: "PUT"}
+        );
       },
 
       /**
@@ -600,28 +524,40 @@ define([
       sendData: function (url, data, opts) {
 
         var result = $.Deferred();
+        opts = opts || {};
 
         var options = {
           type: 'GET',
           url: url,
-          dataType: 'application/xml',
-          data: Json2Xml.transform(data, { attributes_key: '$', header: true }),
           cache: false,
           done: function(data) {
             result.resolve(data);
-          },
-          fail: function(error) {
-            result.reject(error);
           }
         };
+
+        if (data) {
+          options.dataType = 'json';
+          options.data = JSON.stringify(data);
+
+          // because ORCID sends empty response for POST requests
+          // we must be able to handle it properly (but it is not
+          // nice of them)
+          options.converters = {
+            "* text": window.String,
+            "text html": true,
+            "text json": function(input) {input = input || '{}'; return $.parseJSON(input)},
+            "text xml": $.parseXML
+          }
+        }
+
         _.extend(options, opts);
 
         if (!options.headers)
           options.headers = {};
-        if (!options.headers.Authorization && this.authData)
-          options.headers.Authorization = "Bearer " + this.authData.access_token;
+        if (!options.headers["Orcid-Authorization"] && this.authData)
+          options.headers["Orcid-Authorization"] = "Bearer " + this.authData.access_token;
         if (!options.headers["Content-Type"])
-          options.headers["Content-Type"] = "application/orcid+xml";
+          options.headers["Content-Type"] = "application/json";
         if (!options.headers["Accept"])
           options.headers["Accept"] = "application/json";
 

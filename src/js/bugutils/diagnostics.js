@@ -36,12 +36,28 @@ define([
       this.setBeeHive(beehive);
     },
 
+    getFirstDoc: function(queryString, options) {
+      var opts = {
+        query: {'q': queryString, fl: 'title,abstract,bibcode,id,author'},
+        target: ApiTargets.SEARCH
+      };
+      if (options) {
+        _.extend(opts, options);
+      }
+      var promise = $.Deferred();
+      this.apiRequest(opts)
+        .done(function(res) {
+          promise.resolve(res['response']['docs'][0]);
+        });
+      return promise.promise();
+    },
+
     /**
      * Helper methods, you can pass in json structure to make api request
      *
      * @param options
      *    {
-     *      target: '/search',
+     *      target: 'search/query',
      *      query: {'q': 'title:foo'}
      *    }
      * @returns Deferred
@@ -234,7 +250,41 @@ define([
 
     request: function(options) {
       return $.ajax(options);
+    },
+
+
+    /**
+     * ==================================================================
+     * TEST CASES; these are to be run manually from the console and only
+     * by those who understand what they are doing ;-)
+     * ==================================================================
+     */
+
+
+    testOrcidLogin: function() {
+      var oa = this.getApp().getService('OrcidApi');
+      oa.signOut();
+      window.location = oa.config.loginUrl;
+    },
+
+    /**
+     * Upload one document to orcid;
+     * Prerequisite: testOrcidLogin()
+     */
+    testOrcidSendingData: function() {
+      var app = this.getApp();
+      var self = this;
+      this.getFirstDoc('bibcode:1978yCat.1072....0C').done(
+        function(doc) {
+          var oa = app.getService('OrcidApi');
+          oa.addWorks(oa.formatOrcidWorks([doc]))
+            .done(function(result) {
+              console.log('result:', result, 'expected: {}');
+            })
+        }
+      )
     }
+
   });
 
   _.extend(Diagnostics.prototype, Dependon.App, Dependon.BeeHive);

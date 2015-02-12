@@ -73,7 +73,19 @@ define([], function() {
      * https://developers.google.com/analytics/devguides/collection/analyticsjs/advanced
      */
      googleTrackingCode: 'UA-XXXXXXXX-X',
-     googleTrackingOptions: 'auto'
+     googleTrackingOptions: 'auto',
+
+
+     /**
+      * If you have activated Orcid module, these settings
+      * are necessary (showing sandbox/testing values):
+      *  orcidClientId: 'APP-P5ANJTQRRTMA6GXZ'
+      *  orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
+      */
+     orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+     orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
+
+
 
   }
 });

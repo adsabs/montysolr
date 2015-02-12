@@ -68,7 +68,7 @@ app.use('/orcid/exchangeOAuthCode', function(req, res, next) {
   };
 
   console.log('foo', options);
-  console.log('endpoint', ORCID_API_ENDPOINT);
+  console.log('endpoint', ORCID_API_ENDPOINT + '/oauth/token');
   console.log('data', data)
 
   needle.post(ORCID_API_ENDPOINT + '/oauth/token', data, options, function(err, resp, body) {

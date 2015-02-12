@@ -35,6 +35,7 @@ define([
         var redirectUrlBase = config.orcidRedirectUrlBase || (location.protocol + '//' + location.host);
         var orcidClientId = config.orcidClientId;
         var orcidApiEndpoint = config.orcidApiEndpoint;
+        var orcidLoginEndpoint = config.orcidLoginEndpoint;
 
         if (!orcidClientId || !orcidApiEndpoint) {
           throw new Error('Missing configuration for ORCID module: orcidApiEndpoint, orcidClientId');
@@ -43,14 +44,12 @@ define([
         var opts = {
           apiEndpoint: orcidApiEndpoint,
           clientId: orcidClientId,
-          redirectUri: redirectUrlBase + '/oauthRedirect.html',
-          profileUrl: orcidApiEndpoint + '/{0}/orcid-profile',
           worksUrl: orcidApiEndpoint + '/{0}/orcid-works',
-          loginUrl: orcidApiEndpoint
-            + "/oauth/authorize?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline"
+          loginUrl: orcidLoginEndpoint
+            + "?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline"
             + "&client_id=" + orcidClientId
             + "&redirect_uri=" + encodeURIComponent(redirectUrlBase + '/#/user/orcid'),
-          exchangeTokenUrl: redirectUrlBase + '/orcid/exchangeOAuthCode'
+          exchangeTokenUrl: orcidApiEndpoint + '/exchangeOAuthCode'
         };
 
         _.extend(config, {Orcid: opts });
