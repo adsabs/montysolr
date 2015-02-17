@@ -105,7 +105,8 @@
   margin-top: -3px;
   margin-bottom: 3px;
   font-size:16px;
-  color: @subtle-brand-primary;
+  /*need to investigate why this gets overridden in the case of 2 links*/
+  color: @subtle-brand-primary !important;
   font-weight: 600;
   line-height: 1.2;
 
@@ -314,6 +315,7 @@ li.article-author {
   font-size: 22px;
   margin: 0 5% 20px 2%;
   font-weight: 500;
+
 }
 
 
@@ -321,14 +323,20 @@ li.article-author {
   text-align: right;
   i.icon-details {
     position: relative;
-    left: -10%;
+    font-size:1.8em;
     .s-icon-hover;
   }
 
   i.icon-hide-details {
     position: relative;
     left: -2%;
+    font-size:1.8em;
     .s-icon-hover;
-
   }
+}
+
+
+.s-list-title {
+  padding-left: 5.2%;
+  margin-bottom: 40px;
 }

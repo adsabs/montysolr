@@ -9,7 +9,7 @@ define([
     var Widget = ListOfThingsWidget.extend({
       queryOperator : "references",
       sortOrder: "first_author asc",
-      description : "List of papers referenced by"
+      description : "Papers referenced by"
     });
 
     return Widget;

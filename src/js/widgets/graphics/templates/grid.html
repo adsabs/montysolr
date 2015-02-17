@@ -1,0 +1,32 @@
+
+{{#if title}}
+    <div class="s-grid-title">
+        <h4 class="s-list-description">Graphics from</h4>
+        <h2 class="s-article-title">{{title}}</h2>
+    </div>
+{{/if}}
+
+{{#if graphics}}
+
+<div class="s-grid-container">
+    <p><i>Each image links to the <a href="http://astroexplorer.org" target="_blank">Astronomy Image Explorer</a> for
+        more detail.</i></p>
+    {{#each graphics}}
+    <a href="{{this.highres}}" target="_blank">
+
+        <div class="s-grid-cell">
+
+            <figure>
+                <img src="{{this.thumbnail}}" alt="{{@key}}"/>
+            </figure>
+            <figcaption>
+                {{@key}}
+            </figcaption>
+        </div>
+    </a>
+
+{{/each}}
+
+</div>
+
+{{/if}}

@@ -92,6 +92,8 @@ require.config({
         GraphTabs : 'js/wraps/graph_tabs',
 
         ShowAbstract: 'js/widgets/abstract/widget',
+        ShowGraphics: 'js/widgets/graphics/widget',
+        ShowGraphicsSidebar: 'js/wraps/sidebar-graphics-widget',
         ShowReferences: 'js/wraps/references',
         ShowCitations : 'js/wraps/citations',
         ShowCoreads : 'js/wraps/coreads',

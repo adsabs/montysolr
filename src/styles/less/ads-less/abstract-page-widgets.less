@@ -120,7 +120,7 @@
 }
 
 .s-abstract-title {
-  font-size: 26px;
+  font-size: 24px;
   margin: 20px 0 20px 0;
   font-weight: 400;
 }
@@ -219,6 +219,93 @@ this messes with the popover
 
   .s-author {
     color: @text-color !important
+
+  }
+}
+
+
+
+.s-graphics-grid {
+
+  .s-grid-title{
+    padding-left: 4%;
+  }
+
+  .s-grid-container{
+    padding-left: 3%;
+  }
+
+  p {
+    padding-left: 1%;
+  }
+
+  a:hover, a:focus {
+    text-decoration: none;
+  }
+
+  .s-grid-cell {
+          display: inline-block;
+          width: 30%;
+          margin-left: 1%;
+          margin-bottom: 20px;
+          border: 2px solid @gray-lighter;
+          .lh-border-radius(8px);
+          .lh-transition(box-shadow, .5s, ease-out);
+
+          &:hover {
+            .lh-box-shadow(0px 0px 4px @gray-light);
+          }
+
+    @media(max-width: @screen-sm-max){
+      width: 97%;
+    }
+
+        }
+
+  figure {
+    height: 200px;
+    overflow: auto;
+    position: relative;
+  }
+
+  img {
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+  }
+
+  figcaption {
+    text-align: center;
+    margin-bottom: 10px;
+    color: @gray;
+  }
+
+}
+
+.s-graphics-container {
+  cursor: pointer;
+
+  img {
+    display: block;
+    margin: 0 auto;
+  }
+  p {
+    text-align: center;
+  }
+
+  .s-grid-cell {
+    margin: 0 4%;
+    padding-top: 18px;
+    border: 2px solid @gray-lighter;
+    .lh-border-radius(8px);
+    .lh-transition(box-shadow, .5s, ease-out);
+
+    &:hover {
+      .lh-box-shadow(0px 0px 4px @gray-light);
+    }
+
   }
 
 }

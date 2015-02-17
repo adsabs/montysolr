@@ -459,7 +459,7 @@ define(['underscore',
 
         // TODO: check the status responses
 
-        var response = (data.responseHeader && data.responseHeader.QTime) ? new ApiResponse(data) : new JsonResponse(data);
+        var response = (data.responseHeader && data.responseHeader.params) ? new ApiResponse(data) : new JsonResponse(data);
 
         response.setApiQuery(this.request.get('query'));
 
@@ -481,6 +481,11 @@ define(['underscore',
       },
 
       onApiRequestFailure: function( jqXHR, textStatus, errorThrown ) {
+
+        //ignore 404s from graphics endpoint
+       if (jqXHR.status === 404 && jqXHR.target.split("/")[0] === "graphics")
+        return
+
         var qm = this.qm;
         var query = this.request.get('query');
         if (qm.debug) {

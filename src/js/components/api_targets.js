@@ -22,6 +22,7 @@ define([
       SERVICE_METRICS: 'metrics',
       MYADS_STORAGE: 'http://localhost:5000',
 
+
       USER: 'accounts/user',
       LOGOUT: 'accounts/logout',
       REGISTER: 'accounts/register',
@@ -32,5 +33,6 @@ define([
       CHANGE_PASSWORD: 'accounts/change-password',
       CHANGE_EMAIL: 'accounts/change-email',
       RECOMMENDER : 'recommender'
+      GRAPHICS: 'graphics'
     };
   });

@@ -60,7 +60,7 @@ define([
         ];
 
         var detailsPageAlwaysVisible = [
-          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'AlertsWidget'
+          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'AlertsWidget', 'ShowGraphicsSidebar'
         ];
 
         this.set('index-page', function() {
@@ -316,6 +316,11 @@ define([
           app.getWidget("TOCWidget").collection.selectOne("ShowPaperMetrics");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowPaperMetrics'].concat(detailsPageAlwaysVisible));
+        });
+        this.set('ShowGraphics', function() {
+          app.getWidget("TOCWidget").collection.selectOne("ShowGraphics");
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowGraphics'].concat(detailsPageAlwaysVisible));
         });
 
         this.set('abstract-page:bibtex', function() { app.getObject('MasterPageManager').show('DetailsPage')});

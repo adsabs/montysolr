@@ -19,6 +19,8 @@ define([
       this.debug = beehive.getDebug(); // XXX:rca - think of st better
       this.view = this.createView({debug : this.debug, widgets: this.widgets});
       this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, _.bind(this.addQuery, this));
+      this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, _.bind(this.onDisplayDocuments, this));
+
     },
 
     // xxx:rca - this is just a quick hack (the best solution would be to have
