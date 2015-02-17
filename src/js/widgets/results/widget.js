@@ -146,9 +146,7 @@ define([
           }
 
           d.formattedDate = d.pubdate ? self.formatDate(d.pubdate, {format: 'yy/mm', missing: {day: 'yy/mm', month: 'yy'}}) : undefined;
-
           d.details.shortAbstract = d.abstract? self.shortenAbstract(d.abstract) : undefined;
-
           return d;
         });
 

@@ -97,7 +97,7 @@ define([
 
     shortenAbstract : function(abs, maxLen){
       maxLen = maxLen || 500;
-      if (abs.length >= maxLen) return abs;
+      if (abs.length <= maxLen) return abs;
       var i = abs.slice(0, maxLen).lastIndexOf(" ");
       return abs.slice(0, i + 1) + "...";
     },

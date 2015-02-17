@@ -104,9 +104,9 @@
     <div class="col-xs-10 col-xs-offset-1 s-more-info details {{#unless showDetails}}hide {{/unless}}">
         <dl>
         {{#if details.highlights}}
-        <dt>Highlights</dt>
+        <dt class="sr-only">Highlights</dt>
           <dd>
-            <ul aria-label="search snippets">
+            <ul aria-label="search snippets" class="s-search-snippets">
                 {{#each details.highlights}}
                 <li>{{{this}}}</li>
                 {{/each}}
@@ -118,13 +118,13 @@
         <dd>
         {{{details.shortAbstract}}}
         {{/if}}
-        {{#if details.pub}}
-        </dd>
-        <dt>Publication</dt>
-        <dd>
-        {{details.pub}}
-        {{/if}}
         </dd>
         </dl>
+        {{#unless details.highlights}}
+        {{#unless details.shortAbstract}}
+         <i>no data</i>
+        {{/unless}}
+        {{/unless}}
     </div>
+
   </div>
