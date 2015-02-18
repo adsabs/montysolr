@@ -13,7 +13,7 @@ define([
     'js/mixins/formatter',
     'hbs!./templates/container-template',
     'js/mixins/papers_utils',
-    'js/modules/orcid/orcid_result_row_extension/extension'
+    'js/modules/orcid/extension'
   ],
 
   function (
@@ -25,7 +25,7 @@ define([
     Formatter,
     ContainerTemplate,
     PapersUtilsMixin,
-    OrcidResultRowExtension
+    OrcidExtension
     ) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
@@ -167,7 +167,7 @@ define([
     _.extend(ResultsWidget.prototype, LinkGenerator);
     _.extend(ResultsWidget.prototype, Formatter);
     _.extend(ResultsWidget.prototype, PapersUtilsMixin);
-    _.extend(ResultsWidget.prototype, OrcidResultRowExtension);
-    return ResultsWidget;
+    return OrcidExtension(ResultsWidget);
+    //return ResultsWidget;
 
   });

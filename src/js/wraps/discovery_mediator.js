@@ -343,6 +343,7 @@ define([
           FeedbackMediator.prototype.activate.apply(this, arguments);
           this.pubsub.subscribe(this.pubSubKey, this.pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
           this.pubsub.subscribe(this.pubSubKey, this.pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
+          this.pubsub.subscribe(this.pubSubKey, this.pubsub.APP_EXIT, _.bind(this.onAppExit, this));
         },
 
         onNewCycle: function() {
@@ -354,6 +355,13 @@ define([
           analytics('send', 'pageview', {
             page: msg
           });
+        },
+
+        onAppExit: function(data) {
+          console.log('App exit requested to: ' + data);
+          //TODO:rca - save the application history and persist it
+          if (data && data.url)
+            window.location = data.url;
         },
 
         getAlerter: function() {

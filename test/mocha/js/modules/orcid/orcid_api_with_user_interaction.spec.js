@@ -4,7 +4,6 @@ define([
     'jquery',
     'js/modules/orcid/orcid_api',
     'underscore',
-    'xml2json',
     'js/components/application',
     'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events'
@@ -16,7 +15,6 @@ define([
     $,
     OrcidApi,
     _,
-    xml2json,
     Application,
     OrcidApiConstants,
     PubSubEvents
@@ -36,7 +34,6 @@ define([
               Api: 'js/services/api',
               LocalStorage: 'js/services/localStorage',
               OrcidApi: 'js/modules/orcid/orcid_api',
-              Json2Xml: 'js/modules/orcid/json2xml'
             },
             objects: {
               QueryMediator: 'js/components/query_mediator'

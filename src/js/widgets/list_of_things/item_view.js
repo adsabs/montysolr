@@ -50,12 +50,12 @@ define([
         'mouseleave .letter-icon': "hideLinks",
         'click .orcid-action': "orcidAction",
         'click .letter-icon': "pinLinks"
-
       },
 
       modelEvents: {
         "change:visible": 'render',
-        "change:showDetails" : 'render'
+        "change:showDetails" : 'render',
+        "change:orcid": 'render'
       },
 
       collectionEvents: {
@@ -175,6 +175,22 @@ define([
           return
         }
         this.removeActiveQuickLinkState($c)
+      },
+
+      orcidAction: function (e) {
+        if (!e) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        var $target = $(e.currentTarget);
+
+        var msg = {
+          action: $target.data('action') ? $target.data('action') : $target.text().trim(),
+          model: this.model,
+          view: this,
+          target: $target
+        };
+        this.trigger('OrcidAction', msg);
       }
     });
 

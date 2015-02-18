@@ -277,7 +277,7 @@ define([
       this.getFirstDoc('bibcode:1978yCat.1072....0C').done(
         function(doc) {
           var oa = app.getService('OrcidApi');
-          oa.addWorks(oa.formatOrcidWorks([doc]))
+          oa.addWorks([doc])
             .done(function(result) {
               console.log('result:', result, 'expected: {}');
             })

@@ -142,7 +142,6 @@ require.config({
     // for development use
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
-    'xml2json': 'libs/jquery-xml2json/xml2json',
     'persist-js': 'libs/persist-js/src/persist',
 
     // only for diagnostics/debugging/testing - wont get loaded otherwise
@@ -200,10 +199,6 @@ require.config({
 
     'sprintf': {
       exports: 'sprintf'
-    },
-
-    xml2json: {
-      deps: ['jquery']
     },
 
     'persist-js': {

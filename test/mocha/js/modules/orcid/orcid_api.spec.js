@@ -4,14 +4,10 @@ define([
     'jquery',
     'js/modules/orcid/orcid_api',
     'js/components/persistent_storage',
-    'js/modules/orcid/json2xml',
     'underscore',
-    'xml2json',
     'js/bugutils/minimal_pubsub',
     'js/modules/orcid/orcid_api_constants',
-    'js/modules/orcid/orcid_model_notifier',
     'js/components/pubsub_events',
-    './test_orcid_data/orcid_profile_data',
     'js/modules/orcid/module'
   ],
 
@@ -21,14 +17,10 @@ define([
     $,
     OrcidApi,
     LocalStorage,
-    Json2Xml,
     _,
-    xml2json,
     MinimalPubsub,
     OrcidApiConstants,
-    OrcidNotifierModule,
     PubSubEvents,
-    TestOrcidProfileData,
     OrcidModule
   ) {
 
@@ -523,12 +515,14 @@ define([
           var oApi = getOrcidApi();
           sinon.spy(oApi, 'getWorks');
           sinon.spy(oApi, 'setWorks');
+          sinon.spy(oApi, 'deleteWorks');
           sinon.spy(oApi, 'sendData');
 
           oApi.deleteWorks(['test-bibcode'])
             .done(function(res) {
               expect(oApi.getWorks.called).to.eql(true);
-              expect(oApi.setWorks.called).to.eql(true);
+              expect(oApi.setWorks.called).to.eql(false);
+              expect(oApi.deleteWorks.called).to.eql(true);
               expect(oApi.sendData.callCount).to.eql(2);
 
               expect(res.deleted).to.eql(1);
@@ -568,30 +562,121 @@ define([
         });
 
 
-        it.skip('function should be called on event trigger', function(done){
-          var orcidApi = getOrcidApi();
-
-          var pubSub = beehive.getService('PubSub');
-          var pubSubKey = pubSub.getPubSubKey();
-
-          orcidApi.signOut = function(){};
-          var spy = sinon.spy(orcidApi, "signOut");
-          pubSub.publish(pubSubKey, PubSubEvents.ORCID_ANNOUNCEMENT, { msgType: OrcidApiConstants.Events.SignOut });
-          expect(spy.called).to.be.ok;
-
-          orcidApi.showLoginDialog = function(){};
-          var spy = sinon.spy(orcidApi, "showLoginDialog");
-          pubSub.publish(pubSubKey, PubSubEvents.ORCID_ANNOUNCEMENT, { msgType: OrcidApiConstants.Events.LoginRequested });
-          expect(spy.called).to.be.ok;
-
-          orcidApi.processOrcidAction = function(){};
-          var spy = sinon.spy(orcidApi, "processOrcidAction");
-          pubSub.publish(pubSubKey, PubSubEvents.ORCID_ANNOUNCEMENT, { msgType: OrcidApiConstants.Events.OrcidAction, dummy:'dummy'});
-          expect(spy.called).to.be.ok;
-
+        it("exports hardened interface", function(done) {
+          var oApi = getOrcidApi();
+          var hardened = oApi.getHardenedInstance();
+          expect(hardened.getRecordInfo).to.be.defined;
+          expect(hardened.hasAccess).to.be.defined;
+          expect(hardened.updateOrcid).to.be.defined;
+          expect(hardened.config).to.be.undefined;
           done();
         });
+
+        it("has methods to query status of a record", function(done) {
+          var oApi = getOrcidApi();
+          oApi.updateDatabase().done(function() {
+            var recInfo = oApi.getRecordInfo({bibcode: 'test-bibcode'});
+            expect(recInfo.isCreatedByUs).to.eql(true);
+            expect(recInfo.isCreatedByOthers).to.eql(false);
+
+            recInfo = oApi.getRecordInfo({bibcode: 'bibcode-foo'});
+            expect(recInfo.isCreatedByUs).to.eql(false);
+            expect(recInfo.isCreatedByOthers).to.eql(true);
+
+            done();
+          });
+        });
+
+        it("updateOrcid(add)", function(done) {
+          var oApi = getOrcidApi();
+          sinon.spy(oApi, 'addWorks');
+          sinon.spy(oApi, 'updateWorks');
+          sinon.spy(oApi, 'deleteWorks');
+          sinon.spy(oApi, 'updateDatabase');
+
+          oApi.updateOrcid('add', {title: 'foo', bibcode: 'bar'})
+            .done(function(recInfo) {
+              expect(recInfo.isCreatedByUs).to.eql(true);
+              expect(oApi.addWorks.called).to.eql(true);
+              expect(oApi.updateWorks.called).to.eql(false);
+              expect(oApi.deleteWorks.called).to.eql(false);
+              expect(oApi.updateDatabase.called).to.eql(false);
+              done();
+            });
+        });
+
+        it("updateOrcid(update)", function(done) {
+          var oApi = getOrcidApi();
+          sinon.spy(oApi, 'addWorks');
+          sinon.spy(oApi, 'updateWorks');
+          sinon.spy(oApi, 'deleteWorks');
+          sinon.spy(oApi, 'updateDatabase');
+
+          oApi.updateDatabase()
+            .done(function() {
+              oApi.updateDatabase.reset();
+
+              oApi.updateOrcid('update', {title: 'foo', bibcode: 'test-bibcode'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(true);
+                  expect(oApi.addWorks.called).to.eql(false);
+                  expect(oApi.updateWorks.called).to.eql(true);
+                  expect(oApi.deleteWorks.called).to.eql(true);
+                  expect(oApi.updateDatabase.called).to.eql(true);
+                  done();
+                });
+            })
+
+        });
+
+        it("has translateOrcidWorks function", function(done) {
+          var oApi = getOrcidApi();
+
+          oApi.getUserProfile()
+            .done(function(res) {
+              var ads = oApi.transformOrcidProfile(res);
+              expect(ads).to.eql({
+                "responseHeader": {
+                  "params": {
+                    "orcid": "0000-0001-8178-9506"
+                  }
+                },
+                "response": {
+                  "numFound": 2,
+                  "start": 0,
+                  "docs": [
+                    {
+                      "bibcode": "test-bibcode",
+                      "putcode": "469257",
+                      "title": "Tecnologias XXX",
+                      "visibility": "PUBLIC",
+                      "formattedDate": "2014/11",
+                      "pub": "El Profesional de la Informacion",
+                      "abstract": null,
+                      "author": [],
+                      "identifier": "test-bibcode"
+                    },
+                    {
+                      "bibcode": "bibcode-foo",
+                      "putcode": "466190",
+                      "title": "ADS 2.0",
+                      "visibility": "PUBLIC",
+                      "formattedDate": "2015/01",
+                      "pub": "foo",
+                      "abstract": null,
+                      "author": [],
+                      "identifier": "bibcode-foo"
+                    }
+                  ]
+                }
+              });
+              done();
+            });
+        });
+
       });
+
+
 
     });
   });

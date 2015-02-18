@@ -9,7 +9,9 @@ define([
     'underscore',
     'js/components/navigator',
     'js/components/api_feedback',
-    'js/components/api_query_updater'
+    'js/components/api_query_updater',
+    'js/components/json_response',
+    'js/components/api_query'
   ],
   function (
     $,
@@ -17,7 +19,9 @@ define([
     _,
     Navigator,
     ApiFeedback,
-    ApiQueryUpdater
+    ApiQueryUpdater,
+    JsonResponse,
+    ApiQuery
     ) {
 
     "use strict";
@@ -102,14 +106,30 @@ define([
             orcidApi.getAccessData(orcidApi.getExchangeCode())
             .done(function(data) {
                 orcidApi.saveAccessData(data);
-                self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'orcid-page');
+                self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname + window.location.hash});
             });
             return;
           }
 
-          app.getObject('MasterPageManager').show('SearchPage',
-            ['OrcidBigWidget'].concat(searchPageAlwaysVisible.slice(1)));
           this.route = '#user/orcid';
+
+          var orcidWidget = app.getWidget('OrcidBigWidget');
+          if (orcidWidget && orcidApi.hasAccess()) {
+            orcidApi.getUserProfile()
+              .done(function(profile) {
+                orcidApi.updateDatabase(profile);
+                var response = new JsonResponse(orcidApi.transformOrcidProfile(profile));
+                response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
+                orcidWidget.processResponse(response);
+
+                app.getObject('MasterPageManager').show('SearchPage',
+                  ['OrcidBigWidget'].concat(searchPageAlwaysVisible.slice(1)));
+              });
+          }
+          else {
+            self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'index-page');
+          }
+
         });
 
         this.set('show-author-network', function() {

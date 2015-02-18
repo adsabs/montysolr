@@ -1,7 +1,6 @@
 define([
     'marionette',
     'jquery',
-    'xml2json',
     'backbone',
     'js/bugutils/minimal_pubsub',
     'js/widgets/results/widget',
@@ -15,7 +14,6 @@ define([
   ],
   function (Marionette,
             $,
-            xml2json,
             Backbone,
             MinimalPubsub,
             ResultsWidget,

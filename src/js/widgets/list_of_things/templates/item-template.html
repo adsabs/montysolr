@@ -67,18 +67,36 @@
                 {{/if}}
             </div>
             {{/if}}
-
-            <div class="{{#if this.orcidActionsVisible}}{{else}} hidden {{/if}} letter-icon s-letter-icon orcid-actions">
-                <button class="btn-link active-link s-active-link">
-                    <i class="mini-orcid-icon" aria-label="orcid actions"/>
+            {{#if orcid}}
+            <div class="letter-icon s-letter-icon">
+                {{#if orcid.needLogin}}
+                <button class="btn-link active-link ">
+                <a class="orcid-action orcid-login" title="To claim papers, login with ORCID first" href="#" data-action="orcid-login">
+                    <i class="s-orcid-icon" aria-label="Pending ORCID update"></i>
+                </a>
                 </button>
 
-                <ul class="hidden list-unstyled link-details s-link-details" role="menu">
-                    <li><a class="hidden orcid-action orcid-action-insert"> insert </a></li>
-                    <li><a class="hidden orcid-action orcid-action-update"> update </a></li>
-                    <li><a class="hidden orcid-action orcid-action-delete"> delete </a></li>
-                </ul>
+                {{else}}
+                    {{#if orcid.pending}}
+                    <button class="btn-link" aria-disabled="true">
+                    <i class="s-orcid-icon" aria-label="Pending ORCID update"></i>
+                    </button>
+                    {{else}}
+                    <button class="btn-link  {{#if orcid}} active-link s-active-link {{/if}}" aria-disabled = {{#if orcid.ariaDisabled}} "true" {{else}} "false"  {{/if}}>
+                    <i class="s-orcid-icon" aria-label="actions for claiming authorship in ORCID"></i>
+                    </button>
+                    {{#if orcid.actions}}
+                    <ul class="hidden list-unstyled link-details s-link-details" role="menu">
+                        {{#each orcid.actions}}
+                        <li><a class="orcid-action {{this.action}}" data-action="{{this.action}}" title="{{this.caption}}">{{this.title}}</a>
+                        </li>
+                        {{/each}}
+                    </ul>
+                    {{/if}}
+                    {{/if}}
+                {{/if}}
             </div>
+            {{/if}}
         </div>
     </div>
 

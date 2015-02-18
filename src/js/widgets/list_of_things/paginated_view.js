@@ -69,7 +69,7 @@ define([
         var args = _.toArray(arguments);
         args[0] = options;
 
-         return Marionette.CompositeView.prototype.constructor.apply(this, args);
+        return Marionette.CompositeView.prototype.constructor.apply(this, args);
       },
 
       initialize: function (options) {

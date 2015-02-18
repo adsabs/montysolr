@@ -2,33 +2,29 @@ define([
     'underscore',
     'bootstrap',
     'jquery',
-    'xml2json',
     'backbone',
     'js/components/generic_module',
     'js/mixins/dependon',
-    'js/mixins/string_utils',
     'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/mixins/link_generator_mixin',
-    'js/modules/orcid/json2xml',
     'js/components/api_query',
-    'js/components/api_request'
+    'js/components/api_request',
+    'js/mixins/hardened'
   ],
   function (
     _,
     Bootstrap,
     $,
-    Xml2json,
     Backbone,
     GenericModule,
     Mixins,
-    StringUtils,
     OrcidApiConstants,
     PubSubEvents,
     LinkGeneratorMixin,
-    Json2Xml,
     ApiQuery,
-    ApiRequest
+    ApiRequest,
+    HardenedMixin
     ) {
 
 
@@ -39,6 +35,8 @@ define([
         this.orcidProxyUri = '';
         this.userData = {};
         this.authData = null;
+        this.db = {};
+        this.profile = {};
       },
 
       activate: function (beehive) {
@@ -142,10 +140,6 @@ define([
 
       saveAccessData: function(authData) {
         var beehive = this.getBeeHive();
-        //var LocalStorage = beeHive.getService("LocalStorage");
-        //LocalStorage.setObject("userSession", {
-        //  authData: authData
-        //});
         this.authData = authData;
         var storage = beehive.getService('PersistentStorage');
         if (storage) {
@@ -380,28 +374,27 @@ define([
         if (!_.isArray(adsData))
           throw new Exception('Input to formatOrcidWorks must be an array of objects');
 
-        var that = this;
-        var formatWorks = function (adsWorks) {
-          var result = [];
-          _.each(adsWorks,
-            function (adsWork) {
-              result.push(that.formatOrcidWork(adsWork));
-            }
-          );
-          return {'orcid-work': result};
-        };
+        var self = this;
+        var result = [];
+        _.each(adsData, function (adsWork) {
+            result.push(self.formatOrcidWork(adsWork));
+          }
+        );
+        return this._createOrcidMessage(result);
+      },
 
-        var orcidWorksMessage = {
+      _createOrcidMessage: function(orcidWorks) {
+        return {
           "message-version": "1.2",
           "orcid-profile": {
             "orcid-activities": {
-              "orcid-works": formatWorks(adsData)
+              "orcid-works": {
+                'orcid-work': orcidWorks
+              }
             }
           }
         };
-        return orcidWorksMessage;
       },
-
 
       /**
        * Posts (appends) new papers to Orcid;
@@ -418,6 +411,31 @@ define([
       },
 
       /**
+       * Updates the profile - by removing works from the profile, and re-adding
+       * them using new call to formatOrcidWork
+       *
+       * @param identifiers
+       * @returns {*}
+       */
+      updateWorks: function(adsRecs) {
+        return this.deleteWorks(this._extractIdentifiers(adsRecs), adsRecs);
+      },
+
+      _extractIdentifiers: function(adsRecs) {
+        var ids = [];
+        _.each(adsRecs, function(r) {
+          if (r.bibcode) ids.push(r.bibcode);
+          if (r.doi) ids.push(r.doi);
+          if (r.alternate_bibcode) {
+            for (var bb in r.alternate_bibcode) {
+              ids.push(bb);
+            }
+          }
+        });
+        return ids;
+      },
+
+      /**
        * Deletes certain records from Orcid database. This operation is three-step
        *
        *  1. retrieve works from the user profile
@@ -428,7 +446,7 @@ define([
        * @param identifiers
        * @returns {*}
        */
-      deleteWorks: function (identifiers) {
+      deleteWorks: function (identifiers, recsToAdd) {
         var self = this;
         var deferred = $.Deferred();
 
@@ -477,6 +495,12 @@ define([
                 newWorks.push(work);
             });
 
+            if (recsToAdd) {
+              _.each(recsToAdd, function(rec) {
+                newWorks.push(self.formatOrcidWork(rec));
+              })
+            }
+
             var report = {
               deleted: toRemove.length,
               added: 0,
@@ -485,7 +509,10 @@ define([
               totalRecs: orcidWorks["orcid-work"].length
             };
 
-            self.setWorks(newWorks)
+            self.sendData(self.config.apiEndpoint + '/' + self.authData.orcid + '/orcid-works',
+                self._createOrcidMessage(newWorks),
+                {type: "PUT"}
+              )
               .done(function (res) {
                 report['response'] = res;
                 deferred.resolve(report);
@@ -506,9 +533,9 @@ define([
        * @param adsRecs
        * @returns {*}
        */
-      setWorks: function (adsRecs) {
+      setWorks: function (adsRecs, skipFormatting) {
         return this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-works',
-          this.formatOrcidWorks(adsRecs),
+          skipFormatting ? adsRecs : this.formatOrcidWorks(adsRecs),
           {type: "PUT"}
         );
       },
@@ -567,14 +594,228 @@ define([
       },
 
 
-      hardenedInstance: {
+      /**
+       * Returns information about an ORCID document, it accepts an object with
+       *  - bibcode
+       *  - doi
+       *  - id
+       *  - alternate_bibcode
+       *
+       * @param data
+       * @returns {{isCreatedByUs: boolean, isCreatedByOthers: boolean, provenance: null}}
+       */
+      getRecordInfo: function(data) {
+        var out = {
+          isCreatedByUs: false,
+          isCreatedByOthers: false,
+          provenance: null
+        };
+        var self = this;
+        if (!data) return out;
+
+        var update = function(k) {
+          if (self.db[k]) {
+            if (self.db[k].isAds) {
+              out.isCreatedByUs = true;
+            }
+            else {
+              out.isCreatedByOthers = true;
+            }
+            out.putcode = self.db[k].putcode;
+          }
+        };
+
+        _.each(data, function(value, key, obj) {
+          if (_.isArray(value)) {
+            for (var v in value) {
+              update(key + ':' + v)
+            }
+          }
+          else {
+            update(key + ':' + value);
+          }
+        });
+
+        return out;
+      },
+
+      /**
+       * Updates our knowledge about ORCID by
+       *  - fetching fresh profile (unless one is supplied)
+       *  - extracting info into fast-lookup format
+       */
+      updateDatabase: function(profile) {
+        var self = this;
+        self.db.pending = true;
+
+        var whenDone = $.Deferred();
+
+        var defer;
+        if (profile && profile.orcid) {
+          defer = $.Deferred();
+          defer.resolve(profile);
+        }
+        else {
+          defer = this.getUserProfile();
+        }
+
+        defer.done(function(profile) {
+          var works = profile['orcid-activities']['orcid-works'];
+          var ids = self.getExternalIds(works);
+          var db = {}, key, isOurs;
+          _.each(ids, function(value, key, obj) {
+            key = value.type.toLowerCase().trim() + ':' + key.toLowerCase().trim();
+            isOurs = self.isWorkCreatedByUs(works['orcid-work'][value.idx]);
+            //TODO:rca - what if there are mutliple ids, one created by us, one by others?
+            db[key] = {isAds: isOurs, idx: value.idx, putcode: value['put-code']};
+          });
+          self.db = db;
+          self.profile = profile;
+          whenDone.resolve();
+        })
+        .fail(function() {
+          whenDone.reject(arguments);
+        });
+        return whenDone;
+      },
+
+      /**
+       * Updates ORCID - this method is made available to widgets
+       */
+      updateOrcid: function(action, adsDoc) {
+        if (!_.isObject(adsDoc)) throw new Error('You are supposed to send simple object');
+
+        var result = $.Deferred();
+        var self = this;
+
+        if (action == 'update') {
+          this.updateWorks([adsDoc])
+            .done(function(resp) {
+              self.updateDatabase(resp.response)
+                .done(function() {
+                  result.resolve(self.getRecordInfo(adsDoc));
+                })
+            })
+        }
+        else if (action == 'delete') {
+          this.deleteWorks(this._extractIdentifiers([adsDoc]))
+            .done(function(resp) {
+              self.updateDatabase(resp.response)
+                .done(function() {
+                  result.resolve(self.getRecordInfo(adsDoc));
+                })
+            })
+        }
+        else if (action == 'add') {
+          var recInfo = this.getRecordInfo(adsDoc);
+          if (!recInfo.isCreatedByUs && !recInfo.isCreatedByOthers) {
+            this.addWorks([adsDoc])
+              .done(function() {
+                recInfo.isCreatedByUs = true;
+                result.resolve(recInfo);
+                setTimeout(function() {self.updateDatabase()}, 1); // no need to wait
+              })
+          }
+          else {
+            return this.updateOrcid('update', adsDoc); // not safe to just add
+          }
+        }
+        else {
+          throw new Error('Unknown action: ' + action);
+        }
+
+        return result.promise();
+      },
+
+      /**
+       * Transfroms ORCID profile into ADS format (ApiResponse) which is easy to
+       * ingest for the widgets
+       *
+       * @param orcidProfile
+       */
+      transformOrcidProfile: function(orcidProfile) {
+        var docs = [];
+        var works = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
+        var orcidId = orcidProfile['orcid-identifier']['path'];
+
+        function extr(el) {
+          if (!el) return null;
+          if (el.value)
+            return el.value;
+          return el;
+        }
+
+        function formatDate(el) {
+          if (!el) return null;
+          var yr = extr(el['year']) || '????';
+          var mn = extr(el['month']) || '??';
+          return yr + '/' + mn;
+        }
+
+        function pickIdentifier(d, ids) {
+          if (d.bibcode) return d.bibcode;
+          if (d.doi) return d.doi;
+          if (ids.length) return ids[0];
+          return 'unknown';
+        }
+
+        function extractAuthors(el) {
+          if (!el) return [];
+          var res = [];
+          if (el.contributor) {
+            _.each(el.contributor, function(x) {
+              if (x['credit-name'])
+                res.push(extr(x['credit-name']));
+            });
+          }
+          return res;
+        }
+
+        var self = this;
+        _.each(works, function(w) {
+          var d = {};
+          var ids = self.getExternalIds(w);
+          _.each(ids, function(value, key, obj) {
+            d[value.type.toLowerCase()] = key;
+          });
+          d['putcode'] = extr(w['put-code']);
+          d['title'] = extr(w['work-title']['title']);
+          d['visibility'] = extr(w['visibility']);
+          d['formattedDate'] = formatDate(w['publication-date']);
+          d['pub'] = extr(w['journal-title']);
+          d['abstract'] = extr(w['short-description']);
+          d.author = extractAuthors(w["work-contributors"]);
+          d.identifier = pickIdentifier(d, ids);
+          //d.orcid = self.getRecordInfo(d);
+          docs.push(d);
+        });
+
+        return {
+          responseHeader: {
+            params: {
+              orcid: orcidId
+            }
+          },
+          response:{
+            numFound:docs.length,
+            start: 0,
+            docs: docs
+          }
+        }
+
+      },
+
+      hardenedInterface: {
         hasAccess: 'boolean indicating access to ORCID Api',
         signIn: 'login',
-        signOut: 'logout'
+        signOut: 'logout',
+        getRecordInfo: 'provides info about a document',
+        updateOrcid: 'the main access point for widgets'
       }
     });
 
     _.extend(OrcidApi.prototype, Mixins.BeeHive);
+    _.extend(OrcidApi.prototype, HardenedMixin);
 
     return OrcidApi;
   });

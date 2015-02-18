@@ -29,6 +29,14 @@ define(['marionette',
 
     describe("ListOfThings (list_of_things_widget.spec.js)", function () {
 
+      afterEach(function (done) {
+        var ta = $('#test');
+        if (ta) {
+          ta.empty();
+        }
+        done();
+      });
+
       it("returns PaginatedView object", function(done) {
         expect(new PaginatedView()).to.be.instanceof(Marionette.CompositeView);
         var m = new PaginatedCollection();
@@ -275,15 +283,27 @@ define(['marionette',
               {link: 'link1', title: 'title1'},
               {link: 'link2', title: 'title2'}
             ]
-        }});
+          },
+          orcid: {
+            actions: [
+              {action: 'orcid-update', title: 'update'},
+              {action: 'orcid-delete', title: 'delete'}
+            ]
+          }
+        });
         var M = ItemView.extend({});
         sinon.spy(M.prototype, 'toggleSelect');
         sinon.spy(M.prototype, 'toggleDetails');
         sinon.spy(M.prototype, 'showLinks');
         sinon.spy(M.prototype, 'hideLinks');
+        var triggerSpy = sinon.spy();
+
+
         var view = new M({model: model});
+        view.on('all', triggerSpy);
+
         var $w = view.render().$el;
-        //$('#test').append($w);
+        $('#test').append($w);
 
 
         $w.find('input[name=identifier]').trigger('change');
@@ -302,6 +322,16 @@ define(['marionette',
         expect(view.showLinks.called).to.be.true;
         $w.find('.letter-icon').trigger('mouseleave');
         expect(view.hideLinks.called).to.be.true;
+
+        triggerSpy.reset();
+        $w.find('.letter-icon:last').trigger('mouseenter');
+        $w.find('.orcid-action.orcid-update').click();
+        expect(triggerSpy.called).to.eql(true);
+        expect(triggerSpy.lastCall.args[0]).to.eql('OrcidAction');
+        expect(triggerSpy.lastCall.args[1].model.attributes.identifier).to.eql('foo');
+        expect(triggerSpy.lastCall.args[1].target).to.be.defined;
+        expect(triggerSpy.lastCall.args[1].view).to.be.defined;
+        expect(triggerSpy.lastCall.args[1].action).to.eql('orcid-update');
       });
     })
 

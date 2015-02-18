@@ -12,14 +12,14 @@ define([
     'underscore',
     'js/components/generic_module',
     './orcid_api',
-    './orcid_model_notifier'
+    //'./orcid_model_notifier'
   ],
   function (
     Backbone,
     _,
     GenericModule,
-    OrcidApi,
-    OrcidNotifier
+    OrcidApi
+    //OrcidNotifier
     ) {
 
 
@@ -60,15 +60,15 @@ define([
       activateDependencies: function(beehive) {
         var orcidApi, orcidNotifier;
         orcidApi = beehive.getService('OrcidApi');
-        orcidNotifier = beehive.getService('OrcidNotifier');
+        //orcidNotifier = beehive.getService('OrcidNotifier');
 
-        if (orcidApi && orcidNotifier) // already activated
+        if (orcidApi) // already activated
           return;
 
         // must be first
-        orcidNotifier = new OrcidNotifier();
-        orcidNotifier.activate(beehive);
-        beehive.addService('OrcidNotifier', orcidNotifier);
+        //orcidNotifier = new OrcidNotifier();
+        //orcidNotifier.activate(beehive);
+        //beehive.addService('OrcidNotifier', orcidNotifier);
 
         orcidApi = new OrcidApi();
         orcidApi.activate(beehive);
