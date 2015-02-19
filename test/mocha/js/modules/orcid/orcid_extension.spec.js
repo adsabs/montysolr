@@ -25,7 +25,7 @@ define([
               return Test1();
             }
           }
-        }))({verbose: true});
+        }))({verbose: false});
 
         minsub.beehive.addService('OrcidApi', {
           hasAccess: function() {return true;},
