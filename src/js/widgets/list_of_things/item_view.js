@@ -52,7 +52,6 @@ define([
         'click .show-full-abstract' : "showFullAbstract",
         'click .hide-full-abstract' : "hideFullAbstract",
         'click .orcid-action': "orcidAction",
-        'click .letter-icon': "pinLinks"
       },
 
       modelEvents: {

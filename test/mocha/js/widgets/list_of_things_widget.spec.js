@@ -154,8 +154,8 @@ define(['marionette',
 
         view.toggleDetails();
 
-        expect($w.find('.details:first').hasClass("hide")).to.be.true;
-        expect($w.find('.details:last').hasClass("hide")).to.be.true;
+        expect($w.find('.details:first').hasClass("sr-only")).to.be.true;
+        expect($w.find('.details:last').hasClass("sr-only")).to.be.true;
 
 
         view.close();
@@ -310,10 +310,10 @@ define(['marionette',
         expect(view.toggleSelect.callCount).to.be.eql(1);
         $w.find('.details-control').click();
         expect(view.toggleDetails.callCount).to.be.eql(1);
-        expect($w.find('.details').hasClass('hide')).to.be.false;
+        expect($w.find('.details').hasClass('sr-only')).to.be.false;
         $w.find('.details-control').click();
         expect(view.toggleDetails.callCount).to.be.eql(2);
-        expect($w.find('.details').hasClass('hide')).to.be.true;
+        expect($w.find('.details').hasClass('sr-only')).to.be.true;
 
         view.showLinks.reset();
         view.hideLinks.reset();
