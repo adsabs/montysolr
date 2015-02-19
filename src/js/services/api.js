@@ -33,7 +33,7 @@ define([
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
-        this.pubSubKey = this.getBeeHive().getService('PubSub').getPubSubKey();
+        this.pubSubKey = null; // will be initialized once needed
       },
 
       done: function( data, textStatus, jqXHR ) {
@@ -46,8 +46,11 @@ define([
 
         console.error('API call failed:', JSON.stringify(this.request.url()), jqXHR.status, errorThrown);
 
-        var pubsub = this.api.getBeeHive().getService('PubSub');
+        var pubsub = this.api.hasBeeHive() ? this.api.getBeeHive().getService('PubSub') : null;
         if (pubsub) {
+          if (!this.api.pubSubKey)
+            this.api.pubSubKey = pubsub.getPubSubKey();
+
           var feedback = new ApiFeedback({
             code:ApiFeedback.CODES.API_REQUEST_ERROR,
             msg:textStatus,
@@ -59,6 +62,10 @@ define([
             beVerbose: true
           });
           pubsub.publish(this.api.pubSubKey, pubsub.FEEDBACK, feedback);
+        }
+        else {
+          if (this.api)
+            this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
         }
       },
       initialize: function() {
