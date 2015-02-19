@@ -147,7 +147,7 @@
 
     em {
       font-weight: bold;
-      color: mix(@brand-primary, @brand-primary-faded);
+      color: mix(@brand-primary, @brand-primary-faded, 40);
     }
   }
 
@@ -166,7 +166,7 @@
     padding:.5em .5em;
     font-size: 1em}
 
-  border-left: 3px solid @gray-light;
+  border-left: 8px solid @gray-lighter;
   padding: 1% 3% 0% 3%;
   margin-left: 10.4%;
   margin-top: 10px;
@@ -174,11 +174,22 @@
 
   dt {
     color: @gray;
+    font-weight: 500;
+    //targetting only the "Abstract" link
+    a{
+      color: @subtle-brand-primary;
+    }
   }
 
   dd {
     font-weight: 300;
     margin-bottom: 8px;
+  }
+
+  i.s-no-data {
+    position: relative;
+    top: -16px;
+    font-weight: 300;
   }
 
 }

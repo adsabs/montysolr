@@ -22,7 +22,9 @@
         {{#if links}}
         <div class="s-results-links">
             <div class="letter-icon s-letter-icon">
-                <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "true" {{else}} "false" {{/if}}>
+                <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}" aria-disabled={{#if
+                        links.data
+                }} "true" {{else}} "false" {{/if}}>
                 <i class="s-text-icon" aria-label="quick access to full text links"></i>
                 </button>
                 {{#if links.text}}
@@ -36,7 +38,9 @@
                 {{/if}}
             </div>
             <div class="letter-icon s-letter-icon">
-                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.list}} "true" {{else}} "false"  {{/if}}>
+                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}" aria-disabled={{#if
+                        links.list
+                }} "true" {{else}} "false" {{/if}}>
                 <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
                 </button>
 
@@ -51,7 +55,9 @@
             </div>
             <div class="letter-icon s-letter-icon">
 
-                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}" aria-disabled = {{#if links.data}} "true" {{else}} "false"  {{/if}}>
+                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}" aria-disabled={{#if
+                        links.data
+                }} "true" {{else}} "false" {{/if}}>
                 <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
                 </button>
 
@@ -103,28 +109,44 @@
 <div class="row">
     <div class="col-xs-10 col-xs-offset-1 s-more-info details {{#unless showDetails}}hide {{/unless}}">
         <dl>
-        {{#if details.highlights}}
-        <dt class="sr-only">Highlights</dt>
-          <dd>
-            <ul aria-label="search snippets" class="s-search-snippets">
-                {{#each details.highlights}}
-                <li>{{{this}}}</li>
-                {{/each}}
-            </ul>
-          </dd>
-        {{/if}}
-        {{#if details.shortAbstract}}
-        <dt>Abstract</dt>
-        <dd>
-        {{{details.shortAbstract}}}
-        {{/if}}
-        </dd>
+            {{#if details.highlights}}
+            <dt class="sr-only">Highlights</dt>
+            <dd>
+                <ul aria-label="search snippets" class="s-search-snippets">
+                    {{#each details.highlights}}
+                    <li>{{{this}}}</li>
+                    {{/each}}
+                </ul>
+            </dd>
+            {{/if}}
+
+            {{#if details.abstract}}
+            <dt><a href="#abs/{{identifier}}">Abstract</a></dt>
+            <dd>
+                {{#if details.shortAbstract}}
+                <div class="short-abstract">
+                    {{details.shortAbstract}}
+                    <button class="btn btn-xs btn-default show-full-abstract">more</button>
+                </div>
+                <div class="full-abstract hidden">
+                    {{ details.abstract }}
+                    <button class="btn btn-xs btn-default hide-full-abstract">less</button>
+                </div>
+                {{else}}
+                <!--the abstract is short enough to be shown all at once-->
+                {{details.abstract}}
+                {{/if}}
+            </dd>
+
+            {{/if}}
+
+
         </dl>
         {{#unless details.highlights}}
-        {{#unless details.shortAbstract}}
-         <i>no data</i>
-        {{/unless}}
+            {{#unless details.abstract}}
+                 <i class="s-no-data">no data</i>
+            {{/unless}}
         {{/unless}}
     </div>
 
-  </div>
+</div>
