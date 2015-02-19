@@ -1,3 +1,10 @@
+/**
+ * This is not currently used; it is essentially the same code (or maybe slightly different)
+ * that lives inside item_view - that means that item_view has orcid events and functions
+ * hardcoded; maybe in the future we'll want to extract them (in a similar way the
+ * orcid/extension provides functionality for the widget controllers)
+ *
+ */
 define([
     'backbone',
     'underscore'

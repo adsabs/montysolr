@@ -1,3 +1,10 @@
+/**
+ * Extension for a controller; it adds a functionality that allows a widget
+ * to handle ORCID actions.
+ *
+ * It is installed as return OrcidExtension(WidgetClass)
+ */
+
 define([
     'underscore'
   ],

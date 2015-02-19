@@ -2,7 +2,7 @@ Orcid module
 ============
 
 This module has been developed by blocshop.cz, with support of AAS. The module itself has
-*been substantially remodelled* by ADS (to actually work well; here my rant should end...eh?)
+*been substantially remodelled* by ADS (to actually work; here my rant should end...eh?)
 
 Documentation
 =============

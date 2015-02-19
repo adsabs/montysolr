@@ -1,3 +1,47 @@
+/**
+ * This is the core of the ORCID implementation
+ * Written by (rca) - totally re-implemented the
+ * initial implementation.
+ *
+ * The important details are:
+ *
+ *  - all communication with ORCID happens in JSON
+ *  - there are multiple access points
+ *    addWorks()
+ *    setWorks()
+ *    deleteWorks()
+ *
+ *    But in reality, the ORCID API allows three
+ *    operations:
+ *
+ *      reading (GET)
+ *      adding (POST)
+ *      re-writing (PUT)
+ *
+ * This module will be contacting a web-service, such
+ * a service needs to allows CORS requests (since we
+ * run inside a browser)
+ *
+ * Our implementation of the orcid-proxy can be found
+ * at:  http://github.com/adsabs/orcid-service
+ *
+ * The important configuration details are configured
+ * in the ./module.js (the module will actually create
+ * OrcidApi and insert it into the beehive)
+ *
+ *
+ * TODO:
+ *  - error handling (discover more error situations and
+ *    take care of them; such as duplicated put-codes)
+ *  - keep track of write operations and cache ORCID
+ *    profile (to avoid refetching it every time)
+ *  - provide a more frindly api to query a status of
+ *    a document
+ *  - wrap write operations into throttling mode? (it is
+ *    more efficient to do updates in bulk)
+ *
+ */
+
 define([
     'underscore',
     'bootstrap',
@@ -5,7 +49,6 @@ define([
     'backbone',
     'js/components/generic_module',
     'js/mixins/dependon',
-    'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/mixins/link_generator_mixin',
     'js/components/api_query',
@@ -19,7 +62,6 @@ define([
     Backbone,
     GenericModule,
     Mixins,
-    OrcidApiConstants,
     PubSubEvents,
     LinkGeneratorMixin,
     ApiQuery,

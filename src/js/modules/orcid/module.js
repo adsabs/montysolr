@@ -1,9 +1,20 @@
 /**
  * ORCID module is the main component for enabling communication with ORCID Api
  *
- * When the module is activated, it will insert into BeeHive its dependencies:
- *  OrcidApi - service that controls jobs
- *  OrcidNotifier - service which gets notified of new changes
+ * It should be installed through discovery.config.js, it needs to go into
+ * the controllers section (because it will create an instance of the OrcidApi
+ * and insert that into services)
+ *
+ * You config should look like:
+ *
+ *   'js/apps/discovery/main': {
+ *
+ *      core: {
+ *       controllers: {
+ *         Orcid: 'js/modules/orcid/module'
+ *         ....
+ *         }
+ *   }
  *
  */
 
@@ -12,14 +23,12 @@ define([
     'underscore',
     'js/components/generic_module',
     './orcid_api',
-    //'./orcid_model_notifier'
   ],
   function (
     Backbone,
     _,
     GenericModule,
     OrcidApi
-    //OrcidNotifier
     ) {
 
 
@@ -41,6 +50,7 @@ define([
           throw new Error('Missing configuration for ORCID module: orcidApiEndpoint, orcidClientId');
         }
 
+        //TODO:rca - clean up this
         var opts = {
           apiEndpoint: orcidApiEndpoint,
           clientId: orcidClientId,
@@ -60,15 +70,9 @@ define([
       activateDependencies: function(beehive) {
         var orcidApi, orcidNotifier;
         orcidApi = beehive.getService('OrcidApi');
-        //orcidNotifier = beehive.getService('OrcidNotifier');
 
         if (orcidApi) // already activated
           return;
-
-        // must be first
-        //orcidNotifier = new OrcidNotifier();
-        //orcidNotifier.activate(beehive);
-        //beehive.addService('OrcidNotifier', orcidNotifier);
 
         orcidApi = new OrcidApi();
         orcidApi.activate(beehive);

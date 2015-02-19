@@ -6,7 +6,6 @@ define([
     'js/components/persistent_storage',
     'underscore',
     'js/bugutils/minimal_pubsub',
-    'js/modules/orcid/orcid_api_constants',
     'js/components/pubsub_events',
     'js/modules/orcid/module'
   ],
@@ -19,7 +18,6 @@ define([
     LocalStorage,
     _,
     MinimalPubsub,
-    OrcidApiConstants,
     PubSubEvents,
     OrcidModule
   ) {
