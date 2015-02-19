@@ -39,7 +39,6 @@ define([
          *
          */
 
-        var self = this;
         var pubsub = this.pubsub;
         var self = this;
         var queryUpdater = new ApiQueryUpdater('navigator');
@@ -107,6 +106,16 @@ define([
             .done(function(data) {
                 orcidApi.saveAccessData(data);
                 self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname + window.location.hash});
+            })
+            .fail(function() {
+                console.warn('Unsuccessful login to ORCID');
+                self.get('index-page').execute();
+                var alerter = app.getController('AlertsController');
+                alerter.alert(new ApiFeedback({
+                  code: ApiFeedback.CODES.ALERT,
+                  msg: 'Error getting OAuth code to access ORCID',
+                  modal: true
+                }));
             });
             return;
           }

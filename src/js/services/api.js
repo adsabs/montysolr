@@ -7,7 +7,8 @@ define([
     'js/components/api_request',
     'js/mixins/dependon',
     'js/components/api_response',
-    'js/components/api_query'
+    'js/components/api_query',
+    'js/components/api_feedback'
   ],
   function(
     _,
@@ -16,7 +17,8 @@ define([
     ApiRequest,
     Mixin,
     ApiResponse,
-    ApiQuery
+    ApiQuery,
+    ApiFeedback
     ) {
 
     var Api = GenericModule.extend({
@@ -29,6 +31,11 @@ define([
       expires_in: null,
       defaultTimeoutInMs: 60000,
 
+      activate: function(beehive) {
+        this.setBeeHive(beehive);
+        this.pubSubKey = this.getBeeHive().getService('PubSub').getPubSubKey();
+      },
+
       done: function( data, textStatus, jqXHR ) {
         // TODO: check the status responses
         var response = new ApiResponse(data);
@@ -36,9 +43,23 @@ define([
         this.api.trigger('api-response', response);
       },
       fail: function( jqXHR, textStatus, errorThrown ) {
-        console.warn('API call failed:', JSON.stringify(this.request.url()), jqXHR.status, errorThrown);
-        if (this.api)
-          this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
+
+        console.error('API call failed:', JSON.stringify(this.request.url()), jqXHR.status, errorThrown);
+
+        var pubsub = this.api.getBeeHive().getService('PubSub');
+        if (pubsub) {
+          var feedback = new ApiFeedback({
+            code:ApiFeedback.CODES.API_REQUEST_ERROR,
+            msg:textStatus,
+            request: this.request,
+            error: jqXHR,
+            psk: this.key || this.api.pubSubKey,
+            errorThrown: errorThrown,
+            text: textStatus,
+            beVerbose: true
+          });
+          pubsub.publish(this.api.pubSubKey, pubsub.FEEDBACK, feedback);
+        }
       },
       initialize: function() {
         this.always = _.bind(function() {this.outstandingRequests--;}, this);
@@ -73,7 +94,6 @@ define([
         dataType: 'json',
         data: options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url() || "{}",
         contentType: 'application/x-www-form-urlencoded',
-        cache: false,
         headers: {"X-BB-Api-Client-Version": this.clientVersion},
         context: {request: request, api: self },
         timeout: this.defaultTimeoutInMs,
@@ -82,20 +102,6 @@ define([
 
       if (this.access_token) {
         opts.headers['Authorization'] = this.access_token;
-      }
-
-      if (this.hasBeeHive()) {
-        var beehive = this.getBeeHive();
-        if (beehive.hasUser() && beehive.getUser().get('apiKey')) {
-          _.extend(opts.headers, {'X-BB-ApiKey': beehive.getUser().get('apiKey')});
-        }
-
-        var clientId = beehive.getSettings('apiClientId');
-        if (clientId) {
-          opts.headers = _.extend(opts.headers || {}, {
-            'X-BB-Client-Id': clientId
-          });
-        }
       }
 
       // one potential problem is that 'options' will override

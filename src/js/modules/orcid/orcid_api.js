@@ -162,21 +162,21 @@ define([
       getAccessData: function (oAuthCode) {
         var api = this.getBeeHive().getService('Api');
         var promise = $.Deferred();
-        api.request(
+        var r = api.request(
           new ApiRequest({target: this.config.exchangeTokenUrl, query: new ApiQuery({code: oAuthCode})}),
           {
             url: this.config.exchangeTokenUrl,
             done: function (data, textStatus, jqXHR) {
               promise.resolve(data);
             },
-            fail: function (jqXHR, textStatus, errorThrown) {
-              promise.reject(jqXHR);
-            },
             headers: {
               Accept: 'application/json'
             }
           }
         );
+        r.fail(function (jqXHR, textStatus, errorThrown) {
+          promise.reject(jqXHR);
+        });
         return promise.promise();
       },
 

@@ -23,7 +23,7 @@ var app = express();
 var API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:5000/api/1';
 var SOLR_ENDPOINT = process.env.SOLR_ENDPOINT || API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
 
-//sandbox tokens (not production)
+//sandbox tokens (not for production; these are sandbox values for testing)
 var ORCID_OAUTH_CLIENT_ID = process.env.ORCID_OAUTH_CLIENT_ID || 'APP-P5ANJTQRRTMA6GXZ';
 var ORCID_OAUTH_CLIENT_SECRET = process.env.ORCID_OAUTH_CLIENT_SECRET || '989e54c8-7093-4128-935f-30c19ed9158c';
 var ORCID_API_ENDPOINT = process.env.ORCID_API_ENDPOINT || 'https://sandbox.orcid.org';
@@ -48,8 +48,8 @@ app.use(express.logger('dev'));
 //XZ&client_secret=989e54c8-7093-4128-935f-30c19ed9158c&grant_type=authorization_
 //code&code=H1trXI' 'https://api.sandbox.orcid.org/oauth/token'
 
-app.use('/orcid/exchangeOAuthCode', function(req, res, next) {
-  console.log(req.query)
+app.use('/exchangeOAuthCode', function(req, res, next) {
+  console.log(req.query);
   var code = req.query.code;
 
   var data = {
