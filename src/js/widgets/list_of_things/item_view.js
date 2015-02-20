@@ -39,13 +39,15 @@ define([
         return this;
       },
 
-
       events: {
         'change input[name=identifier]': 'toggleSelect',
         'click .details-control' : "toggleDetails",
         'mouseenter .letter-icon': "showLinks",
         'mouseleave .letter-icon': "hideLinks",
-        'click .letter-icon': "pinLinks"
+        'click .letter-icon': "pinLinks",
+        //only relevant to results view for the moment
+        'click .show-full-abstract' : "showFullAbstract",
+        'click .hide-full-abstract' : "hideFullAbstract"
       },
 
       modelEvents: {
@@ -56,6 +58,16 @@ define([
       collectionEvents: {
         "add": "render",
         "change:visible": "render"
+      },
+
+      showFullAbstract : function(){
+        this.$(".short-abstract").addClass("hidden");
+        this.$(".full-abstract").removeClass("hidden");
+      },
+
+      hideFullAbstract : function(){
+        this.$(".short-abstract").removeClass("hidden");
+        this.$(".full-abstract").addClass("hidden");
       },
 
       toggleSelect: function () {

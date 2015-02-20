@@ -96,8 +96,10 @@ define([
     },
 
     shortenAbstract : function(abs, maxLen){
-      maxLen = maxLen || 500;
-      if (abs.length >= maxLen) return abs;
+      maxLen = maxLen || 300;
+      //if this function returns undefined,
+      //the template knows to just show the whole abstract
+      if (abs.length <= maxLen) return undefined;
       var i = abs.slice(0, maxLen).lastIndexOf(" ");
       return abs.slice(0, i + 1) + "...";
     },

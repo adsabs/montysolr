@@ -65,7 +65,6 @@ define([
 
     var ResultsWidget = PaginatedBaseWidget.extend({
 
-
       ItemModelClass: ItemModel,
       ItemViewClass: ItemView,
       CollectionClass: ListCollection,
@@ -194,7 +193,6 @@ define([
         }
 
         var keys = _.map(this.defaultQueryArguments.fl.split(','), function(v) {return v.trim()});
-
 
         var docs = _.map(raw.response.docs, function (d) {
           orderNum += 1;
