@@ -49,7 +49,7 @@
 
   display: inline-block;
   position:relative;
-  margin-right: 8%;
+  margin-right: 4%;
   margin-top: 0px;
   margin-bottom: -4px;
   font-size : 1.05em;
@@ -139,15 +139,17 @@
 
 .s-more-info {
 
+  font-weight: 300;
 
   //for highlights
   .s-search-snippets
   {
     font-style: italic;
+    margin-bottom: 10px;
 
     em {
       font-weight: bold;
-      color: mix(@brand-primary, @brand-primary-faded, 40);
+      color: mix(@brand-primary, @brand-primary-faded, 30);
     }
   }
 
@@ -171,20 +173,23 @@
   margin-left: 10.4%;
   margin-top: 10px;
 
-
-  dt {
-    color: @gray;
+/* title for abstract*/
+  h4 {
     font-weight: 500;
-    //targetting only the "Abstract" link
+    font-size: @font-size-base;
+    margin: 0px 0 4px 0;
+    //targeting only the "Abstract" link
     a{
       color: @subtle-brand-primary;
     }
+
   }
 
-  dd {
+  p {
     font-weight: 300;
-    margin-bottom: 8px;
   }
+
+
 
   i.s-no-data {
     position: relative;
@@ -195,8 +200,8 @@
 }
 
 .s-checkbox-col {
-  padding-right: 0px;
-
+  text-align: right;
+  padding-left: 0;
   label {
 
     .s-light-font;
@@ -328,3 +333,8 @@ li.article-author {
   margin: 0 4% 20px 4%;
 }
 
+
+.s-details-container {
+  text-align: right;
+
+}

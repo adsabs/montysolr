@@ -285,12 +285,12 @@ define([
         //$('#scratch').append($w);
 
         setTimeout(function() {
-          expect($w.find('.details:last').hasClass("hide")).to.equal(true);
+          expect($w.find('.details:last').hasClass("sr-only")).to.equal(true);
 
           $w.find("button.show-details").click();
-          expect($w.find('.details:last').hasClass("hide")).to.be.equal(false);
+          expect($w.find('.details:last').hasClass("sr-only")).to.be.equal(false);
           $w.find("button.show-details").click();
-          expect($w.find('.details:last').hasClass("hide")).to.be.equal(true);
+          expect($w.find('.details:last').hasClass("sr-only")).to.be.equal(true);
           done();
         }, 5);
       });
@@ -312,7 +312,7 @@ define([
           expect($w.find(".s-identifier:first").text().trim()).to.eql("2013arXiv1305.3460H");
           expect($w.find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H");
           /// expect($w.find(".s-results-links:first").find('div:not(.orcid-actions)').find("a").text().trim()).to.eql("arXiv eprint"); // without .orcid-actions
-          expect($w.find("h5:first").text().trim()).to.eql("A bijection for tri-cellular maps");
+          expect($w.find("h3:first").text().trim()).to.eql("A bijection for tri-cellular maps");
           expect($w.find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
 
 
@@ -320,7 +320,7 @@ define([
           expect($w.find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
           expect($w.find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M");
           /// expect($w.find(".s-results-links:last").find('div:not(.orcid-actions)').find("a").text().trim()).to.eql("Table of Contents"); // without .orcid-actions
-          expect($w.find("h5:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
+          expect($w.find("h3:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
 
           //checking render order of more than 3 authors
           expect($w.find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2and3more");
@@ -347,13 +347,13 @@ define([
         $w.find(".details-control").click();
 
         expect($w.find(".details-control").hasClass("icon-hide-details")).to.be.true;
-        expect($w.find(".details").hasClass("hide")).to.be.false;
+        expect($w.find(".details").hasClass("sr-only")).to.be.false;
 
         $w.find(".details-control").click();
 
         expect($w.find(".details-control").hasClass("icon-details")).to.be.true;
 
-        expect($w.find(".details").hasClass("hide")).to.be.true;
+        expect($w.find(".details").hasClass("sr-only")).to.be.true;
       })
     })
   });

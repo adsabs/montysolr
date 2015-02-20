@@ -65,6 +65,10 @@ define(['config', 'module', 'analytics'], function(config, module, analytics) {
         });
 
       }).fail(function() {
+        if (debug){
+          //so error messages remain in the console
+          return
+        }
         // if we failed loading, retry *once again* (and give up eventually)
         app.reload('/404.html');
       });

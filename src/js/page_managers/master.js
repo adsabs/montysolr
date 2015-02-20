@@ -169,8 +169,7 @@ define([
     },
 
     handleAriaAnnouncement: function(msg) {
-      //TODO: insert this into the page
-      console.log('Aria Announcement: ' + msg);
+      $("#aria-announcement-container").text(msg);
     }
 
   });
