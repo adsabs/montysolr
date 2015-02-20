@@ -3,12 +3,14 @@ bumblebee
 
 [![Build Status](https://travis-ci.org/adsabs/bumblebee.svg?branch=master)](https://travis-ci.org/adsabs/bumblebee)
 
-Bumblebee is an interface to Astrophysics Data System (http://ui.adslabs.org). A dynamic 
-and extensible application written in Backbone.
+Bumblebee is an interface to Astrophysics Data System (http://ui.adslabs.org) - we have built it to expose our search system and other components of the ADS ecosystem. 
 
-Things change dramatically, be prepared - we are moving fast. AND IT IS OK TO MAKE MISTAKES. 
-Please let no 'getting it right' kill your creativity!
+**Bumblebee can be used as a search front-end for any SOLR application. However it is NOT A GOOD IDEA to expose SOLR directly to the internet traffic.** If in doubt, try these projects:
 
+  - http://github.com/adsabs/adsws (our API middle-layer)
+  - http://github.com/adsabs/solr-service (micro-service which exposes SOLR)
+
+To get Bumblebee up and running on your machine, follow one of these instructions:
 
 
 dev setup - vagrant (virtualbox)
@@ -24,8 +26,6 @@ Port 8000 is forwarded directly to the host (8000:8000). This directory is synce
 
 dev setup - linux
 =================
-
-This is mode is for developers.
 
 ```bash
   $ sudo apt-get install node npm phantomjs
@@ -74,8 +74,35 @@ Yes, you can develop even on Windows! ;-)
    $ grunt setup 
 ```
 
+Configuration
+=============
+
+The web application loads its config from local modules and from remote urls
+(if configured to do so). The most important config files are:
+
+  * ./src/js/discovery.config.js
+
+    This is the require.js configuration, but we keep there also the definition
+    of all modules/widgets/plugins that the application should load (or make
+    available). It is in the section: 'js/apps/discovery/main'
+
+  * src/js/discovery.vars.js
+
+    This is for often changing variables (e.g. what is the main url under which
+    bumblebee is running, or the url to the API services). By default,
+    this file will be created during 'grunt setup' and if already exists, it
+    will NOT be overwritten. Look at 'discovery.vars.js.defaults' for explanation.
+
+  * dynamic discovery
+
+    The application can also load config from remote urls (during startup) if
+    configured to do so in src/js/discoverry.vars.js >> 'bootstrapUrls'
+
+
 Developing for bumblebee
 ========================
+
+We develop very robust code, with excellent test coverage, however without promises of backward compatibility. Things change dramatically and we are moving fast. Do let no 'getting it right' kill your creativity, IT IS OK TO MAKE MISTAKES!
 
 Set your editor to use spaces instead of tabs (width: 2)
 
@@ -140,30 +167,6 @@ Unit Test Results: 271 specs passed! (6.04s)
 Done, without errors.
 ```
 
-Configuration
-=============
-
-The web application loads its config from local modules and from remote urls
-(if configured to do so). The most important config files are:
-
-  * src/js/discovery.config.js
-
-    This is the require.js configuration, but we keep there also the definition
-    of all modules/widgets/plugins that the application should load (or make
-    available). It is in the section: 'js/apps/discovery/main'
-
-  * src/js/discovery.vars.js
-
-    This is for often changing variables (e.g. what is the main url under which
-    bumblebee is running, or the url to the API services). By default,
-    this file will be created during 'grunt setup' and if already exists, it
-    will NOT be overwritten. Look at 'discovery.vars.js.defaults' for explanation.
-
-  * dynamic discovery
-
-    The application can also load config from remote urls (during startup) if
-    configured to do so in src/js/discoverry.vars.js >> 'bootstrapUrls'
-
 If you need to change the way how grunt works, you can edit `local-config.js`
 
   * port_development: when running tests, webserver will start on this port [default: 8000]
@@ -172,7 +175,7 @@ If you need to change the way how grunt works, you can edit `local-config.js`
   * api_endpoint: url of API service, see below for help on setting up a tunnel [default: http://localhost:8000/api/1]
 
 
-To help you get started, explore these examples:
+To help you get started, explore these:
 
   * ./src/example.html (./src/js/apps/example)
 
@@ -191,7 +194,17 @@ To help you get started, explore these examples:
   * finally, the complete test suite of the discovery application
 
      http://localhost:8000/test/tests.html
-     
+
+documentation
+=============
+       
+Look inside the docs folder, mainly:
+       
+  - [How to write a widget](./docs/how-to-write-widget.md)
+  - [Architecture Overview](./docs/architecture.md) 
+  - [Explanation of the Search Cycle](./docs/search-cycle.md)
+
+  
 
 miscellanea
 ===========
@@ -212,12 +225,3 @@ miscellanea
 - you can see the search being routed to the SOLR api by accessing: http://localhost:port/api/1/search, for instance:
   http://localhost:port/api/1/search?q=kurtz 
        
-
-documentation
-=============
-       
-Look inside the docs folder, mainly:
-       
-  - [How to write a widget](./docs/how-to-write-widget.md)
-  - [Architecture Overview](./docs/architecture.md) 
-  - [Explanation of the Search Cycle](./docs/search-cycle.md)
