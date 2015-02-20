@@ -178,7 +178,10 @@ module.exports = function(grunt) {
     env: {
       options: {
         SOLR_ENDPOINT: '<%= local.solr_endpoint || "http://localhost:9000/solr/select" %>',
-        API_ENDPOINT: '<%= local.api_endpoint || "http://localhost:5000/api/1" %>'
+        API_ENDPOINT: '<%= local.api_endpoint || "http://localhost:5000/api/1" %>',
+        ORCID_OAUTH_CLIENT_ID: '<%= local.orcid_oauth_cliend_id || ""%>',
+        ORCID_OAUTH_CLIENT_SECRET:'<%= local.orcid_oauth_client_secret || "" %>',
+        ORCID_API_ENDPOINT :'<%= local.orcid_api_endpoint || "" %>'
       },
       dev: {
         HOMEDIR: 'src'
@@ -640,6 +643,7 @@ module.exports = function(grunt) {
     paths['backbone.babysitter'] = 'libs/backbone.babysitter/backbone.babysitter.min';
     paths['d3'] = 'libs/d3/d3.min';
     paths['nvd3'] = 'libs/nvd3/nv.d3.min';
+    paths['persist-js'] = 'libs/persist-js/persist-all-min';
 
     // and replace the string
     var firstPart = config.substring(0, m.index);
@@ -682,6 +686,7 @@ module.exports = function(grunt) {
 
   // starts a web server (automatically reloading)
   grunt.registerTask('server', ['env:dev',  "less", 'express:dev', 'concurrent:serverTasks']);
+  grunt.registerTask('server:watch', ['env:dev',  "less", 'express:dev', 'watch:server']);
   grunt.registerTask('server:release', ['env:release',  'express:release', 'watch:release']);
 
   // runs tests in a web server (automatically reloading)
@@ -693,6 +698,8 @@ module.exports = function(grunt) {
   // runs tests (only once)
   grunt.registerTask('test', ['env:dev', 'express:dev', 'mocha_phantomjs:full_testing']);
 
+  // runs test server only
+  grunt.registerTask('test:server', ['env:dev', 'express:dev', 'watch:server']);
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
   grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_jqueryuicss']);

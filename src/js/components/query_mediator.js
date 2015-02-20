@@ -171,8 +171,8 @@ define(['underscore',
         if (!(ps && api)) return; // application is gone
 
 
-        if (beehive.hasObject('RuntimeConfig')) { // pick a request that will be executed first
-          var runtime = beehive.getObject('RuntimeConfig');
+        if (beehive.hasObject('DynamicConfig')) { // pick a request that will be executed first
+          var runtime = beehive.getObject('DynamicConfig');
           if (runtime.pskToExecuteFirst && cycle.waiting[runtime.pskToExecuteFirst]) {
             data = cycle.waiting[runtime.pskToExecuteFirst];
             delete cycle.waiting[runtime.pskToExecuteFirst];
@@ -184,7 +184,7 @@ define(['underscore',
         }
         if (!data) {
           if (this.debug)
-            console.warn('RuntimeConfig does not tell us which request to execute first (grabbing random one).');
+            console.warn('DynamicConfig does not tell us which request to execute first (grabbing random one).');
 
           var kx;
           data = cycle.waiting[(kx=_.keys(cycle.waiting)[0])];

@@ -39,15 +39,20 @@ define(['config', 'module', 'analytics'], function(config, module, analytics) {
         // this will activate all loaded modules
         app.activate();
 
+        var pubsub = app.getService('PubSub');
+        pubsub.publish(pubsub.getPubSubKey(), pubsub.APP_LOADED);
+
         // set some important urls, parameters before doing anything
         app.configure();
 
         app.bootstrap().done(function (data) {
 
-
           app.onBootstrap(data);
+          pubsub.publish(pubsub.getPubSubKey(), pubsub.APP_BOOTSTRAPPED);
 
+          pubsub.publish(pubsub.getPubSubKey(), pubsub.APP_STARTING);
           app.start(Router);
+          pubsub.publish(pubsub.getPubSubKey(), pubsub.APP_STARTED);
 
           var dynConf = app.getObject('DynamicConfig');
           if (dynConf && dynConf.debugExportBBB) {

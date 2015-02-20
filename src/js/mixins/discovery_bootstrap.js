@@ -7,6 +7,7 @@ define([
     'backbone',
     'js/components/api_query',
     'js/components/api_request',
+    'js/components/pubsub_events',
     'hbs'
     ],
   function(
@@ -14,6 +15,7 @@ define([
     Backbone,
     ApiQuery,
     ApiRequest,
+    PubSubEvents,
     HandleBars) {
 
   var Mixin = {
@@ -40,11 +42,18 @@ define([
           api.url = conf.apiRoot;
         }
 
+        var orcidApi = beehive.getService('OrcidApi');
+
+        if (conf.orcidProxy){
+          orcidApi.orcidProxyUri = location.origin + conf.orcidProxy;
+        }
+
         this.bootstrapUrls = conf.bootstrapUrls;
 
         if (conf.useCache) {
           this.triggerMethodOnAll('activateCache');
         }
+
       }
     },
 
@@ -52,11 +61,13 @@ define([
       // XXX:rca - solve this better, through config
       var beehive = this.getBeeHive();
       var results = this.getWidget('Results');
-      var runtime = {};
-      beehive.addObject('RuntimeConfig', runtime);
+      var dynConf = this.getObject('DynamicConfig');
+
       if (results) {
-        runtime.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
+        dynConf.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
       }
+
+
 
 
       var defer = $.Deferred();

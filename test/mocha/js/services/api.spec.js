@@ -36,7 +36,7 @@ define([
 
     afterEach(function(done) {
       this.server.restore();
-      //$.ajax.restore();
+      //$.ajax.restore()
       done();
     });
 

@@ -284,24 +284,29 @@ define([
       var app = this.getApp();
       var alerter = this.getAlerter();
 
+      if (!psk) {
+        console.error('We are not going to handle the error (PSK is empty, can\'t identify the component');
+        return;
+      }
+
       var n = app.getPluginOrWidgetName(psk.getId());
+      if (n) {
+        console.error('Query failed for widget: ' + n, errorDetails);
 
-      if (!n) {
-        return; // can be ignored
+        var widgets = this.getWidgets([psk.getId()]);
+        if (widgets && widgets.length == 0) {
+          return; // we can ignore it
+        }
+        this.changeWidgetsState(widgets, {state: WidgetStates.ERRORED});
+
+        this._tmp.api_failures = this._tmp.api_failures || {};
+        this._tmp.api_failures[n] = this._tmp.api_failures[n] || 0;
+        this._tmp.api_failures[n] += 1;
+        var numErr = this._tmp.api_failures[n];
       }
-
-      console.error('Query failed for widget: ' + n, errorDetails);
-
-      var widgets = this.getWidgets([psk.getId()]);
-      if (widgets && widgets.length == 0) {
-        return; // we can ignore it
+      else {
+        if (!feedback.beVerbose) return;
       }
-      this.changeWidgetsState(widgets, {state: WidgetStates.ERRORED});
-
-      this._tmp.api_failures = this._tmp.api_failures || {};
-      this._tmp.api_failures[n] = this._tmp.api_failures[n] || 0;
-      this._tmp.api_failures[n] += 1;
-      var numErr = this._tmp.api_failures[n];
 
 
       // we'll not show messages until search cycle is over
@@ -312,7 +317,7 @@ define([
       if (numErr > 2) {
         alerter.alert(new ApiFeedback({
           code: ApiFeedback.CODES.ERROR,
-          msg: 'I\'m afraid this component ' + n + ' (and us) - we are getting frustrated with the API. Error again! <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>'
+          msg: 'I\'m afraid this component ' + n + ' is getting frustrated with the API. It failed it several times. <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>'
         }));
       }
       else {
@@ -343,6 +348,7 @@ define([
           FeedbackMediator.prototype.activate.apply(this, arguments);
           this.pubsub.subscribe(this.pubSubKey, this.pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
           this.pubsub.subscribe(this.pubSubKey, this.pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
+          this.pubsub.subscribe(this.pubSubKey, this.pubsub.APP_EXIT, _.bind(this.onAppExit, this));
         },
 
         onNewCycle: function() {
@@ -354,6 +360,13 @@ define([
           analytics('send', 'pageview', {
             page: msg
           });
+        },
+
+        onAppExit: function(data) {
+          console.log('App exit requested to: ' + data);
+          //TODO:rca - save the application history and persist it
+          if (data && data.url)
+            window.location = data.url;
         },
 
         getAlerter: function() {

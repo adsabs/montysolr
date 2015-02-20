@@ -1,3 +1,13 @@
+/**
+ * WARNING: this is a DEVELOPMENT server; DO NOT USE it in production!
+ *
+ * If you need to make SOLR available, you can use:
+ *  http://github.com/adsabs/adsws
+ *  http://github.com/adsabs/solr-service
+ *
+ * @type {exports}
+ */
+
 var express = require('express');
 var http = require('http');
 var url = require('url');
@@ -13,6 +23,12 @@ var app = express();
 var API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:5000/api/1';
 var SOLR_ENDPOINT = process.env.SOLR_ENDPOINT || API_ENDPOINT || "http://adswhy.cfa.harvard.edu:9000/solr/select";
 
+//sandbox tokens (not for production; these are sandbox values for testing)
+var ORCID_OAUTH_CLIENT_ID = process.env.ORCID_OAUTH_CLIENT_ID || 'APP-P5ANJTQRRTMA6GXZ';
+var ORCID_OAUTH_CLIENT_SECRET = process.env.ORCID_OAUTH_CLIENT_SECRET || '989e54c8-7093-4128-935f-30c19ed9158c';
+var ORCID_API_ENDPOINT = process.env.ORCID_API_ENDPOINT || 'https://sandbox.orcid.org';
+
+
 // this examples does not have any routes, however
 // you may `app.use(app.router)` before or after these
 // static() middleware. If placed before them your routes
@@ -27,6 +43,48 @@ app.use(express.urlencoded()); // to support URL-encoded bodies
 // log requests
 app.use(express.logger('dev'));
 
+
+//$ curl -i -L -H 'Accept: application/json' --data 'client_id=APP-P5ANJTQRRTMA6G
+//XZ&client_secret=989e54c8-7093-4128-935f-30c19ed9158c&grant_type=authorization_
+//code&code=H1trXI' 'https://api.sandbox.orcid.org/oauth/token'
+
+app.use('/exchangeOAuthCode', function(req, res, next) {
+  console.log(req.query);
+  var code = req.query.code;
+
+  var data = {
+    code: code,
+    grant_type: 'authorization_code',
+    client_id: ORCID_OAUTH_CLIENT_ID,
+    client_secret: ORCID_OAUTH_CLIENT_SECRET
+  };
+  console.log(data);
+
+  var options = {
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json'
+    }
+  };
+
+  console.log('foo', options);
+  console.log('endpoint', ORCID_API_ENDPOINT + '/oauth/token');
+  console.log('data', data)
+
+  needle.post(ORCID_API_ENDPOINT + '/oauth/token', data, options, function(err, resp, body) {
+    if (err) {
+      console.log('error', err)
+      res.send(err.status || 500, err);
+    }
+    else {
+      console.log('done', body)
+      res.send(resp.statusCode, body);
+      //res.writeHead(resp.statusCode, {'Content-Type': resp.headers['content-type']});
+      //res.write(body);
+      //res.end();
+    }
+  });
+});
 
 // a simple 'proxy' that takes the query and fetches response
 // from the remote url; care is taken to pass only parameters
@@ -149,6 +207,3 @@ console.log('HOMEDIR', home, process.env.HOMEDIR);
 console.log('API_ENDPOINT', API_ENDPOINT, process.env.API_ENDPOINT);
 console.log('SOLR_ENDPOINT', SOLR_ENDPOINT, process.env.SOLR_ENDPOINT);
 //console.log(process.env);
-
-
-

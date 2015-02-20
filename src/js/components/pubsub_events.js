@@ -123,8 +123,21 @@ define([], function() {
      * A message/action that should be displayed to the user (on prominent)
      * place
      */
-    ALERT: "[Alert]-Message"
+    ALERT: "[Alert]-Message",
+    ORCID_ANNOUNCEMENT: "[PubSub]-Orcid-Announcement",
 
+    /**
+     * Happens during the main cycle of the application birth
+     *  LOADED = when all components were successfuly loaded
+     *  BOOTSTRAPPED = + when all dynamic config was loaded
+     *  STARTING = + right before the router and history objects start()
+     *  STARTED = app is alive and handling requests
+     */
+    APP_LOADED: "[App]-Application-Loaded",
+    APP_BOOTSTRAPPED: "[App]-Application-Bootstrapped",
+    APP_STARTING: "[App]-Application-Starting",
+    APP_STARTED: "[App]-Application-Started",
+    APP_EXIT: '[App]-Exit'
 
 };
 

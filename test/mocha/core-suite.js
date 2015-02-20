@@ -21,6 +21,7 @@ define([], function() {
 
       '/components/discovery_mediator.spec.js',
       '/components/alerts_mediator.spec.js',
+      '/components/persistent_storage.spec.js',
 
       '/services/backbone.events.spec.js',
       '/services/pubsub.spec.js',

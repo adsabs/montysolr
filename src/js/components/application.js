@@ -58,7 +58,7 @@ define([
   var Application = function(options) {
     options || (options = {});
     this.aid = _.uniqueId('application');
-    this.debug = false;
+    this.debug = true;
     _.extend(this, _.pick(options, ['timeout', 'debug']));
     this.initialize.apply(this, arguments);
   };
@@ -517,6 +517,13 @@ define([
     getAllWidgets: function() {
       return _.pairs(this.__widgets.container);
     },
+    getAllServices: function() {
+      return this.getBeeHive().getAllServices();
+    },
+    getAllObjects: function() {
+      return this.getBeeHive().getAllObjects();
+    },
+
 
     /**
      * Helper method to invoke a 'function' on all objects

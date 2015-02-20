@@ -13,6 +13,12 @@ define([], function() {
     apiRoot: '//api.adslabs.org/v1/',
 
     /**
+     * The url for orcid proxy, which adds the application token and
+     * secret on the server side
+     */
+    orcidProxy: '/oauth/',
+
+    /**
      * to let bumblebee discover oauth access_token at boot time
      * and load dynamic configuration (which will be merged with
      * the default config)
@@ -67,7 +73,19 @@ define([], function() {
      * https://developers.google.com/analytics/devguides/collection/analyticsjs/advanced
      */
      googleTrackingCode: 'UA-XXXXXXXX-X',
-     googleTrackingOptions: 'auto'
+     googleTrackingOptions: 'auto',
+
+
+     /**
+      * If you have activated Orcid module, these settings
+      * are necessary (showing sandbox/testing values):
+      *  orcidClientId: 'APP-P5ANJTQRRTMA6GXZ'
+      *  orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
+      */
+     orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+     orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
+
+
 
   }
 });

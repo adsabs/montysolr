@@ -12,7 +12,8 @@ define([
   var links = [
     {href : '/export/bibtex' , description : 'BibTEX' , navEvent: 'export-bibtex'},
     {href : '/export/aastex' , description : 'AASTex' , navEvent: 'export-aastex'},
-    {href : '/export/endnote' , description : 'EndNote' , navEvent: 'export-endnote'}
+    {href : '/export/endnote' , description : 'EndNote' , navEvent: 'export-endnote'},
+    {href : 'user/orcid' , description : 'Show Orcid Page' , navEvent: 'orcid-page'}
   ];
 
   var btnType = "btn-primary-faded";

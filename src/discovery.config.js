@@ -14,6 +14,14 @@ require.config({
       url: 'http://adsabs-classic-exports-service.elasticbeanstalk.com',
       target: '/'
     },
+
+    'js/components/persistent_storage': {
+      // the unique namespace under which the local storage will be created
+      // so every new instance of the storage will be saving its data into
+      // <namespace>[other-name]
+      namespace: 'bumblebee'
+    },
+
     'js/apps/discovery/main': {
 
       core: {
@@ -21,12 +29,14 @@ require.config({
           FeedbackMediator: 'js/wraps/discovery_mediator',
           QueryMediator: 'js/components/query_mediator',
           Diagnostics: 'js/bugutils/diagnostics',
-          AlertsController: 'js/components/alerts_mediator'
+          AlertsController: 'js/components/alerts_mediator',
+          Orcid: 'js/modules/orcid/module'
         },
         services: {
-          'Api': 'js/services/api',
-          'PubSub': 'js/services/pubsub',
-          'Navigator': 'js/apps/discovery/navigator'
+          Api: 'js/services/api',
+          PubSub: 'js/services/pubsub',
+          Navigator: 'js/apps/discovery/navigator',
+          PersistentStorage: 'js/services/storage'
         },
         objects: {
           User: 'js/components/user',
@@ -60,6 +70,8 @@ require.config({
 
         Metrics :  'js/widgets/metrics/widget',
 
+        OrcidBigWidget: 'js/modules/orcid/widget/widget',
+
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
         BibstemFacet: 'js/wraps/bibstem_facet',
@@ -82,11 +94,9 @@ require.config({
         ShowPaperMetrics: 'js/wraps/paper_metrics',
 
         TOCWidget: 'js/page_managers/toc_widget'
-
       },
-      plugins: {
+      plugins: {}
       }
-    }
   },
 
   // Configuration for the facades (you can pick specific implementation, just for your
@@ -133,6 +143,7 @@ require.config({
     // for development use
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
+    'persist-js': 'libs/persist-js/src/persist',
 
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
@@ -188,7 +199,11 @@ require.config({
     },
 
     'sprintf': {
-      export: 'sprintf'
+      exports: 'sprintf'
+    },
+
+    'persist-js': {
+      exports: 'Persist'
     }
   },
 

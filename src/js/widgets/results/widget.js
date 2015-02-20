@@ -12,7 +12,8 @@ define([
     'js/mixins/link_generator_mixin',
     'js/mixins/formatter',
     'hbs!./templates/container-template',
-    'js/mixins/papers_utils'
+    'js/mixins/papers_utils',
+    'js/modules/orcid/extension'
   ],
 
   function (
@@ -23,7 +24,8 @@ define([
     LinkGenerator,
     Formatter,
     ContainerTemplate,
-    PapersUtilsMixin
+    PapersUtilsMixin,
+    OrcidExtension
     ) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
@@ -48,6 +50,11 @@ define([
         _.bindAll(this, 'onDisplayDocuments', 'processResponse');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+        if (this.activateResultsExtension)
+        {
+          this.activateResultsExtension(beehive);
+        } // also current this is passed
       },
 
       onDisplayDocuments: function(apiQuery) {
@@ -159,6 +166,7 @@ define([
     _.extend(ResultsWidget.prototype, LinkGenerator);
     _.extend(ResultsWidget.prototype, Formatter);
     _.extend(ResultsWidget.prototype, PapersUtilsMixin);
-    return ResultsWidget;
+    return OrcidExtension(ResultsWidget);
+    //return ResultsWidget;
 
   });

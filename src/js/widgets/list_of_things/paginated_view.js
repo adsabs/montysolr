@@ -65,8 +65,10 @@ define([
         if (!options.model) {
           options.model = new MainViewModel();
         }
+
         var args = _.toArray(arguments);
         args[0] = options;
+
         return Marionette.CompositeView.prototype.constructor.apply(this, args);
       },
 

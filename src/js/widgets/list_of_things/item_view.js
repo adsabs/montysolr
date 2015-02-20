@@ -4,8 +4,7 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
-    'hbs!./templates/item-template',
-    'bootstrap'
+    'hbs!./templates/item-template'
   ],
 
   function (Marionette,
@@ -26,10 +25,14 @@ define([
         if (options) {
           _.defaults(options, _.pick(this, ['model', 'collectionEvents', 'modelEvents']));
         }
+
+        _.bindAll(this, 'resetToggle');
+
         return Marionette.ItemView.prototype.constructor.apply(this, arguments);
       },
 
       render: function () {
+
         if (this.model.get('visible')) {
           return Marionette.ItemView.prototype.render.apply(this, arguments);
         }
@@ -47,12 +50,15 @@ define([
         'click .letter-icon': "pinLinks",
         //only relevant to results view for the moment
         'click .show-full-abstract' : "showFullAbstract",
-        'click .hide-full-abstract' : "hideFullAbstract"
+        'click .hide-full-abstract' : "hideFullAbstract",
+        'click .orcid-action': "orcidAction",
+        'click .letter-icon': "pinLinks"
       },
 
       modelEvents: {
         "change:visible": 'render',
-        "change:showDetails" : 'render'
+        "change:showDetails" : 'render',
+        "change:orcid": 'render'
       },
 
       collectionEvents: {
@@ -71,8 +77,35 @@ define([
       },
 
       toggleSelect: function () {
+
+        this.trigger('toggleSelect',
+          {
+            selected: !this.model.get('chosen'),
+            data : this.model.attributes }
+        );
+
         this.$el.toggleClass("chosen");
         this.model.set('chosen', this.model.get('chosen') ? false : true);
+      },
+
+      resetToggle: function(){
+        this.setToggleTo(false);
+      },
+
+      setToggleTo : function(to){
+
+        var $checkbox = $('input[name=identifier]');
+        if (to) {
+          this.$el.addClass("chosen");
+          this.model.set('chosen', true);
+          $checkbox.prop('checked', true);
+        }
+        else
+        {
+          this.$el.removeClass("chosen");
+          this.model.set('chosen', false);
+          $checkbox.prop('checked', false);
+        }
       },
 
       toggleDetails : function(){
@@ -150,11 +183,27 @@ define([
       },
 
       hideLinks: function (e) {
-        $c = $(e.currentTarget);
+        var $c = $(e.currentTarget);
         if ($c.hasClass("pinned")) {
           return
         }
         this.removeActiveQuickLinkState($c)
+      },
+
+      orcidAction: function (e) {
+        if (!e) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        var $target = $(e.currentTarget);
+
+        var msg = {
+          action: $target.data('action') ? $target.data('action') : $target.text().trim(),
+          model: this.model,
+          view: this,
+          target: $target
+        };
+        this.trigger('OrcidAction', msg);
       }
     });
 

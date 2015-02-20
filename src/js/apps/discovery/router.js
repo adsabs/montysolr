@@ -39,6 +39,7 @@ define([
         'index/(:query)': 'index',
         "search/(:query)": 'search',
         'abs/:bibcode(/)(:subView)': 'view',
+        'user/(:view)': 'userPage',
         //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
@@ -80,6 +81,16 @@ define([
           }
         }
         this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');
+      },
+
+      userPage: function(subView) {
+        if (subView == 'orcid') {
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page');
+        }
+        else {
+          // TODO:rca - for me: generate warning, or handle the error
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'landing-page');
+        }
       },
 
       noPageFound : function() {

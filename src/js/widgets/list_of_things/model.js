@@ -1,7 +1,7 @@
 define([
     'backbone',
     'underscore',
-    'js/mixins/add_stable_index_to_collection',
+    'js/mixins/add_stable_index_to_collection'
 ],
 function(
   Backbone,
@@ -24,13 +24,13 @@ function(
         details: undefined,
         links_data: undefined,
         resultsIndex: undefined,
-        visible: false
+        visible: false,
+        actionsVisible: true
       }
     },
     idAttribute: "resultsIndex"
 
   });
-
 
   var ListOfThingsCollection = Backbone.Collection.extend({
 

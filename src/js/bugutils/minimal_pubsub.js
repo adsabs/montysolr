@@ -71,6 +71,9 @@ define(['underscore', 'backbone',
       this.beehive.addService('Api', options.Api || {
         request: function(req, context) {
           self.requestCounter += 1;
+          if (!context) {
+            context = req.get('options');
+          }
           var response = self.request.apply(self, arguments);
           if (self.verbose) {
             console.log('[MinSub]', 'request', self.requestCounter, response);
