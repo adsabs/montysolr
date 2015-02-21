@@ -113,6 +113,14 @@ define([
       this.model = this.view.model;
     },
 
+    ariaDict : {
+
+      LandingPage: "home page",
+      SearchPage: "search results page",
+      DetailsPage: "article abstract page"
+
+    },
+
     activate: function(beehive) {
       this.pubsub = beehive.getHardenedInstance().getService('PubSub');
       this.pubsub.subscribe(this.pubsub.ARIA_ANNOUNCEMENT, this.handleAriaAnnouncement);
@@ -147,7 +155,7 @@ define([
           this.hideAll();
         }
 
-        this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, "Switching to: " + pageManager);
+        this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, "Now on: " + this.ariaDict[pageManager]);
 
         pm.set({'id': pageManager, 'isSelected': true, options: options});
       }
