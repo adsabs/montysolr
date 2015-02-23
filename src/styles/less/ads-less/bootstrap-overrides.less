@@ -4,6 +4,8 @@
 
 For all changes that can't be made by altering the ads-variables file
 
+including reset-like things
+
 */
 
 .modal-header {
@@ -12,7 +14,6 @@ For all changes that can't be made by altering the ads-variables file
 .modal-content {
   margin-top: 30%;
 }
-
 .modal-body {
   padding: 60px 20px;
 }
@@ -79,18 +80,9 @@ select:focus {
 
 }
 
-.nav>li>a {
-
-  padding: 5px 15px 10px 15px;
-
-}
-
-
 .tab-pane {
   min-height: 400px;
-
 }
-
 
 .open .dropdown-toggle.btn-default {
   background-color: white;
@@ -118,7 +110,7 @@ select:focus {
 }
 
 .btn-default{
-  .lh-transition(all, 1s)
+  .lh-transition(all, .5s);
 }
 
 .btn-default:hover {
@@ -160,7 +152,14 @@ select:focus {
   min-width: 400px;
 }
 
-
 .nav a {
   font-size: 16px;
+}
+
+.panel-body {
+  margin: 2%;
+}
+
+.has-feedback .form-control-feedback {
+  top: 31px;
 }

@@ -5,10 +5,17 @@
   .lh-animation(pulseActive 2s linear 0s 3 alternate)
 }
 
-
 .lh-keyframes(~'pulseActivePrimaryFaded, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 15px  #4073dd; background-color : #4073dd}');
 
 
 .draw-attention-primary-faded {
   .lh-animation(pulseActivePrimaryFaded 2s linear 0s 1 alternate)
+}
+
+.lh-keyframes(~'fadeOut, 0% {opacity: 1} 100% {opacity: 0 }');
+
+
+.fade-out{
+  .lh-animation(fadeOut 2s 5s linear forwards);
+
 }

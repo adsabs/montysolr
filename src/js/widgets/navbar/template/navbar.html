@@ -106,26 +106,28 @@
 
                 {{/if}}
 
-                <li><a href="http://adsabs.github.io/help/" target="_blank">Help</a></li>
+                <li><a href="http://adsabs.github.io/help/"  target="_blank">Help</a></li>
 
-                <!--{{#if currentUser}}-->
 
-                <!--&lt;!&ndash; Single button &ndash;&gt;-->
-                <!--<li class="dropdown">-->
-                    <!--<button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">-->
-                        <!--{{currentUser}} <span class="caret"></span>-->
-                    <!--</button>-->
-                    <!--<ul class="dropdown-menu" role="menu">-->
-                        <!--<li><a href="#" class="settings">Settings</a></li>-->
-                        <!--<li class="divider"></li>-->
-                        <!--<li><a href="#" class="logout">Log Out</a></li>-->
-                    <!--</ul>-->
-                <!--</li>-->
+                {{#if currentUser}}
 
-                <!--{{else}}-->
-                <!--<li class="register"><a href="#">Sign Up</a></li>-->
-                <!--<li class=" login"><a href="#">Log In</a></li>-->
-                <!--{{/if}}-->
+                <!-- Single button -->
+                <li class="dropdown">
+                    <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        {{currentUser}} <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a href="#" class="settings">Settings</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#" class="logout">Log Out</a></li>
+                    </ul>
+                </li>
+
+                {{else}}
+                <li class="s-nav-border-right login"><a href="#">Log In</a></li>
+                <li class="register"><a href="#">Sign Up</a></li>
+
+                {{/if}}
 
             </ul>
 

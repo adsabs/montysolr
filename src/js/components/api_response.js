@@ -37,7 +37,9 @@ define([
     lock: true,
     unlock: true,
     setApiQuery: 'sets the ApiQuery',
-    getApiQuery: 'gets the query'
+    getApiQuery: 'gets the query',
+    setApiRequest: 'sets ApiRequest',
+    getApiRequest: 'sets ApiRequest'
   };
 
   var ApiResponse = function (data, options) {

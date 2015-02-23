@@ -4,7 +4,8 @@ define([
     'js/components/api_query',
     'js/mixins/dependon',
     'hbs!./404',
-    'js/components/api_feedback'
+    'js/components/api_feedback',
+    'js/components/api_request'
 
   ],
   function (
@@ -13,7 +14,9 @@ define([
     ApiQuery,
     Dependon,
     ErrorTemplate,
-    ApiFeedback
+    ApiFeedback,
+    ApiRequest
+
     ) {
 
     "use strict";
@@ -33,17 +36,19 @@ define([
         }
       },
 
-
       routes: {
         "": "index",
         'index/(:query)': 'index',
         "search/(:query)": 'search',
         'abs/:bibcode(/)(:subView)': 'view',
-        'user/(:view)/*(:subView)': 'userPage',
+        'user/orcid*(:subView)' : 'orcidPage',
+        'user/account(/)(:subView)' : 'authenticationPage',
+        'user/account/verify/(:subView)/(:token)' : 'routeToVerifyPage',
+        'user/settings(/)(:subView)' : 'settingsPage',
+
         //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
-
 
       index: function (query) {
         this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
@@ -83,14 +88,67 @@ define([
         this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');
       },
 
-      userPage: function(view, subView) {
-        if (view == 'orcid') {
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page', subView);
+
+      routeToVerifyPage : function(subView, token){
+
+        var successMessage, failMessage, done, fail, request;
+
+        if (subView === "register") {
+          successMessage = "You have been successfully registered.",
+              failMessage = "Registration failed.";
         }
-        else {
-          // TODO:rca - for me: generate warning, or handle the error
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'landing-page');
+        else if (subView === "email") {
+         successMessage = "Email has been changed.",
+            failMessage = "Attempt to change email failed";
         }
+        else if (subView === "reset-password") {
+
+          done = function() {
+            //route to reset-password-2 form
+            this.pubsub.publish(this.pubsub.NAVIGATE, 'settings-page', {subView: "reset-password-2"});
+          };
+
+         failMessage = "Reset password token was invalid."
+        }
+
+        done = done ? done : function() {
+          //redirect to index page
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+          //call alerts widget
+          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, msg: successMessage, modal : true, type : "success"}));
+        };
+
+        fail = function() {
+          //redirect to index page
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+          //call alerts widget
+          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, msg: failMessage, modal : true, type : "danger"}));
+
+        };
+
+         request = new ApiRequest({
+            target : subView,
+            type : "GET",
+            context : this,
+            done : done,
+            fail : fail
+          });
+
+          this.getBeeHive().getService("Api").request(request);
+        },
+
+      orcidPage :function(){
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page');
+      },
+
+      authenticationPage: function(subView){
+        //possible subViews: "login", "register", "reset-password"
+         this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
+      },
+
+      settingsPage : function(subView){
+        //possible subViews: "token", "password", "email", "preferences"
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'settings-page', {subView: subView});
       },
 
       noPageFound : function() {

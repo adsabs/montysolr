@@ -87,10 +87,10 @@ define([
       "click a" : function(e){
        var $t  = $(e.currentTarget);
         var idAttribute = $t.find("div").attr("data-widget-id");
-        if ($t.find("div").hasClass("s-abstract-nav-inactive")){
+        if ($t.find("div").hasClass("s-nav-inactive")){
           return false;
         }
-        else if (idAttribute !== $(".s-abstract-nav-active").attr("data-widget-id")) {
+        else if (idAttribute !== $(".s-nav-active").attr("data-widget-id")) {
           this.trigger('page-manager-event', 'widget-selected', idAttribute);
           this.collection.selectOne(idAttribute);
         }

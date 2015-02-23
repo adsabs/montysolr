@@ -32,7 +32,10 @@ define([
         type: 'info',
         msg: undefined,
         events: undefined,
-        modal: false
+        modal: false,
+        //for non-modal alerts so they will
+        //only show for ~5 seconds
+        fade: true
       }
     });
 
@@ -75,7 +78,6 @@ define([
           });
           return;
         }
-
         Marionette.ItemView.prototype.render.apply(this, arguments);
       },
 

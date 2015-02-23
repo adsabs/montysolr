@@ -107,7 +107,7 @@ define([
       WidgetClass.prototype.processDocs = function() {
         var docs = processDocs.apply(this, arguments);
         var user = this.beehive.getObject('User');
-        if (user && user.isOrcidModeOn()){
+        if (user && user.isOrcidUIOn()){
           return this.addOrcidInfo(docs);
         }
         return docs;

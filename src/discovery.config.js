@@ -40,6 +40,7 @@ require.config({
         },
         objects: {
           User: 'js/components/user',
+          Session: 'js/components/session',
           DynamicConfig: 'discovery.vars',
           HistoryManager: 'js/components/history_manager',
           MasterPageManager: 'js/page_managers/master',
@@ -53,6 +54,11 @@ require.config({
         LandingPage: 'js/wraps/landing_page_manager',
         SearchPage: 'js/wraps/results_page_manager',
         DetailsPage: 'js/wraps/details_page_manager',
+        AuthenticationPage: 'js/wraps/authentication_page_manager',
+        SettingsPage: 'js/wraps/user_settings_page_manager',
+
+        Authentication: 'js/widgets/authentication/widget',
+        UserSettings: 'js/widgets/user_settings/widget',
 
         NavbarWidget: 'js/widgets/navbar/widget',
         AlertsWidget: 'js/widgets/alerts/widget',
@@ -70,7 +76,6 @@ require.config({
         BubbleChart : 'js/widgets/bubble_chart/widget',
 
         Metrics :  'js/widgets/metrics/widget',
-
         OrcidBigWidget: 'js/modules/orcid/widget/widget',
 
         AuthorFacet: 'js/wraps/author_facet',
@@ -145,7 +150,8 @@ require.config({
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
     'persist-js': 'libs/persist-js/src/persist',
-
+    'backbone-validation': 'libs/backbone-validation/backbone-validation',
+    'backbone.stickit' : 'libs/backbone.stickit/backbone.stickit',
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
     'chai': '../bower_components/chai/chai',
@@ -159,6 +165,13 @@ require.config({
   },
 
   shim: {
+
+    'backbone.stickit' : {
+      deps : ['backbone']
+    },
+    'backbone-validation' : {
+      deps : ['backbone']
+    },
     'bootstrap' : {
       deps: ['jquery']
     },

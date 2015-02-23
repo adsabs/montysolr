@@ -60,7 +60,6 @@ define(['underscore',
        * Responds to PubSubEvents.NAVIGATE signal
        */
       navigate: function(ev, arg1, arg2) {
-
         if (!this.router || ! (this.router instanceof Backbone.Router)) {
           throw new Error('Navigator must be given \'router\' instance');
         }

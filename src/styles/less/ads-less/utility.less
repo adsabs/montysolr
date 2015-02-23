@@ -66,10 +66,20 @@
   color : lighten(@gray-light, 10%);
 }
 
+.s-darker-background {
+  height: 100%;
+  background-color: @darker-background;
+}
+
+//get rid of this later
 .s-full-height {
   height: auto;
   min-height: 100%;  /* fallback for browsers that doesn't support "vh" */
   min-height: 100vh;
+}
+
+.s-100-height {
+  height: 100%
 }
 
 .s-center-text {
@@ -91,4 +101,101 @@
   vertical-align: top;
   width: 19%;
 
+}
+
+//loading template
+
+.s-loading {
+  opacity: 1;
+  z-index : @z-index-3;
+  background-color: white;
+  position: absolute;
+  top: 0px;
+  left:0px;
+  bottom: 0px;
+  right: 0px;
+
+  &:before {
+    .fa;
+    .fa-pulse;
+    .fa-2x;
+    color: lighten(@brand-info, 10%);
+    content : @fa-var-spinner;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    z-index: @z-index-4;
+
+  }
+}
+
+//for smaller widgets that just need a tiny loading image
+.s-loading.s-small{
+  .s-loading;
+  &:before{
+    .fa;
+    .fa-pulse;
+    color: lighten(@brand-info, 10%);
+    content : @fa-var-spinner;
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    z-index: @z-index-4;
+  }
+}
+
+//move up the loader image gif for lists of results
+.list-of-things {
+  .s-loading {
+    opacity: .5;
+    z-index : @z-index-max;
+    background-color: white;
+    position: absolute;
+    top: 0px;
+    left:0px;
+    bottom: 0px;
+    right: 0px;
+
+    &:before {
+      .fa;
+      .fa-spin;
+      .fa-2x;
+      color: @brand-info;
+      content : @fa-var-cog;
+      position: absolute;
+      top: 10%;
+      right: 50%;
+      z-index: @z-index-4;
+
+    }
+  }
+}
+
+//success template with just checkmark
+.s-success {
+    opacity: 1;
+    z-index : @z-index-3;
+    background-color: white;
+    position: absolute;
+    top: 0px;
+    left:0px;
+    bottom: 0px;
+    right: 0px;
+
+    &:before {
+      .fa;
+      .fa-3x;
+      color: @brand-success;
+      content : @fa-var-check;
+      position: absolute;
+      top: 50%;
+      right: 50%;
+      z-index: @z-index-4;
+
+    }
+}
+
+
+.s-light-font {
+  font-weight: 300;
 }

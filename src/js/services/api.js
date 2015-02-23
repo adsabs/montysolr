@@ -82,10 +82,23 @@ define([
 
       options = _.extend({}, options, request.get('options'));
 
-      var self = this;
-      var query = request.get('query');
+      var self = this,
+        data,
+       query = request.get('query');
       if (query && !(query instanceof ApiQuery)) {
         throw Error("Api.query must be instance of ApiQuery");
+      }
+
+      //can pass in query parameter (instance of ApiQuery) or just pass data directly in the data parameter
+      //if you pass in an api query, it overrides data, otherwise just pass in data for the ajax request as expected
+      if (query){
+        data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
+      }
+      else if (data){
+        data = data;
+      }
+      else if (!data){
+        data = undefined;
       }
 
       var u = this.url + (request.get('target') || '');
@@ -99,13 +112,14 @@ define([
         type: 'GET',
         url: u,
         dataType: 'json',
-        data: options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url() || "{}",
+        data: data,
         contentType: 'application/x-www-form-urlencoded',
-        headers: {"X-BB-Api-Client-Version": this.clientVersion},
+        headers: {"X-BB-Api-Client-Version": this.clientVersion, 'X-CSRFToken' : this.csrf},
         context: {request: request, api: self },
         timeout: this.defaultTimeoutInMs,
         cache: true // do not generate _ parameters (let browser cache responses)
       };
+
 
       if (this.access_token) {
         opts.headers['Authorization'] = this.access_token;

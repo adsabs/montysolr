@@ -1,0 +1,9 @@
+<div class="s-nav-container">
+{{#each this}}
+<a href="/#user/settings/{{this.href}}" data-subpage="{{this.href}}" data-bypass>
+    <div class="s-nav {{#if this.active}} s-nav-active {{/if}} {{#if this.inactive}} s-nav-inactive {{/if}} ">
+    <div class="s-content">{{this.title}}</div>
+</div>
+</a>
+{{/each}}
+</div>

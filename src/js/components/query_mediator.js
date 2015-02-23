@@ -433,6 +433,8 @@ define(['underscore',
 
         var response = (data.responseHeader && data.responseHeader.QTime) ? new ApiResponse(data) : new JsonResponse(data);
 
+        response.setApiRequest(this.request);
+
         response.setApiQuery(this.request.get('query'));
 
         if (qm.debug)

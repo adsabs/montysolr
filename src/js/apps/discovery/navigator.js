@@ -1,5 +1,5 @@
 /**
- * The main 'navigation' enpoints (the part executed inside
+ * The main 'navigation' endpoints (the part executed inside
  * the applicaiton) - this is a companion to the 'router'
  */
 
@@ -64,6 +64,47 @@ define([
           var q = app.getObject('AppStorage').getCurrentQuery();
           this.route = '#index/' + queryUpdater.clean(q).url();
         });
+
+        this.set('settings-page', function(passedArgs){
+          var subView = passedArgs[1].subView;
+          subView = subView ? subView : "preferences";
+          var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
+
+          if (!loggedIn){
+            //redirect to authentication page
+            app.getObject('MasterPageManager').show("AuthenticationPage",
+              ['Authentication', 'AlertsWidget']);
+            app.getWidget("Authentication").setSubView("login");
+            this.route = "#user/account/login"
+          }
+          else {
+            app.getWidget("UserSettings").setSubView(subView);
+            this.route = "#user/settings/"+subView;
+            app.getObject('MasterPageManager').show("SettingsPage",
+              ['UserSettings', 'AlertsWidget']);
+          }
+        });
+
+        this.set('authentication-page', function(passedArgs){
+          var subView = passedArgs[1].subView;
+          subView = subView ? subView : "login";
+          var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
+
+          if (loggedIn){
+            //redirect to preferences
+            app.getObject('MasterPageManager').show("SettingsPage",
+              ['UserSettings', 'AlertsWidget']);
+            app.getWidget("UserSettings").setSubView("preferences");
+            this.route = "#user/settings/preferences"
+          }
+          else {
+            app.getWidget("Authentication").setSubView(subView);
+            this.route = "#user/account/"+subView;
+            app.getObject('MasterPageManager').show("AuthenticationPage",
+              ['Authentication', 'AlertsWidget']);
+            }
+        });
+
         this.set('results-page', function() {
           app.getObject('MasterPageManager').show('SearchPage',
             searchPageAlwaysVisible);
@@ -71,7 +112,6 @@ define([
           this.route = '#search/' + queryUpdater.clean(q).url();
           publishFeedback({code: ApiFeedback.CODES.UNMAKE_SPACE});
         });
-
 
         this.set('export-bibtex', function() {
           self.get('export-page').execute('bibtex')});

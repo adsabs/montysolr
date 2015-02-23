@@ -1,0 +1,81 @@
+/* this is to ensure a full length background for widgets that need it */
+html {
+  height:100%;
+}
+
+body {
+  height: 100%;
+}
+
+#app-container{
+  height: 100%;
+}
+
+#body-template-container{
+  height: 100%
+}
+
+.s-master-page-manager{
+  height: 100%;
+}
+
+
+.s-nav-container {
+  a {
+    color :@text-color;
+    &:hover {
+      text-decoration: none !important;
+      color :@text-color !important;
+    }
+    &:focus {
+      text-decoration: none !important;
+      color :@text-color !important;
+    }
+  }
+  background-color: #fff;
+  border: @border-default;
+}
+
+.s-nav {
+  padding: 5% 2% 5% 10%;
+  border-left: 6px solid #fff;
+  .lh-transition(all, .5s, ease-out);
+
+  &:hover{
+    border-left: 6px solid mix(@brand-primary-faded, #fff, 20%);
+  }
+
+  .s-content{
+    position: relative;
+  }
+}
+
+.s-nav-active {
+  border-left: 6px solid @brand-primary-faded;
+  color: @brand-primary-faded;
+
+  &:hover{
+    border-left: 6px solid @brand-primary-faded;
+  }
+
+}
+
+.s-nav-inactive {
+  color: @gray-lighter;
+  &:hover{
+    border-left:6px solid #fff;
+  }
+}
+
+.s-nav-inactive:hover {
+  cursor: not-allowed;
+  background-color: #fff;
+
+}
+
+.s-nav-header {
+  padding: 4%;
+  font-weight: 300;
+  font-size: 18px;
+  background-color: darken(@gray-lighter, 5%);
+}

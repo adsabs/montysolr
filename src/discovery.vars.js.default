@@ -83,7 +83,11 @@ define([], function() {
       *  orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
       */
      orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
-     orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
+     orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2',
+
+
+     // google recaptcha
+     sitekey : "6LfE6AITAAAAALdSy2qxVW4TBqy5RdmREiv-AwlJ"
 
 
 

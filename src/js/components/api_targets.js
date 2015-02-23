@@ -19,6 +19,16 @@ define([
       SERVICE_AUTHOR_NETWORK: '/vis/author-network',
       SERVICE_PAPER_NETWORK: '/vis/paper-network',
       SERVICE_WORDCLOUD: '/vis/word-cloud',
-      SERVICE_METRICS: 'metrics'
+      SERVICE_METRICS: 'metrics',
+
+      USER: 'accounts/user',
+      VERIFY: 'accounts/verify',
+      LOGOUT: 'accounts/logout',
+      REGISTER: 'accounts/register',
+      DELETE: 'accounts/user/delete',
+      TOKEN:'accounts/token',
+      RESET_PASSWORD: 'accounts/reset-password',
+      CHANGE_PASSWORD: 'accounts/change-password',
+      CHANGE_EMAIL: 'accounts/change-email'
     };
   });
