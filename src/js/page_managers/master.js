@@ -13,11 +13,13 @@ define([
   'js/widgets/base/base_widget',
   'js/components/generic_module',
   'js/page_managers/controller',
+  'hbs!./templates/aria-announcement',
   'marionette'
 ], function(
   BaseWidget,
   GenericModule,
   PageManagerController,
+  AriaAnnouncementTemplate,
   Marionette
   ){
 
@@ -113,13 +115,7 @@ define([
       this.model = this.view.model;
     },
 
-    ariaDict : {
 
-      LandingPage: "home page",
-      SearchPage: "search results page",
-      DetailsPage: "article abstract page"
-
-    },
 
     activate: function(beehive) {
       this.pubsub = beehive.getHardenedInstance().getService('PubSub');
@@ -155,7 +151,7 @@ define([
           this.hideAll();
         }
 
-        this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, "Now on: " + this.ariaDict[pageManager]);
+        this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, pageManager);
 
         pm.set({'id': pageManager, 'isSelected': true, options: options});
       }
@@ -177,7 +173,8 @@ define([
     },
 
     handleAriaAnnouncement: function(msg) {
-      $("#aria-announcement-container").text(msg);
+      //template will match the page name with the proper message
+      $("#aria-announcement-container").text(AriaAnnouncementTemplate({page : msg}));
     }
 
   });
