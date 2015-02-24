@@ -124,6 +124,8 @@ define([
 
     assemble: function(app) {
       this.discoverPageManagers(app);
+      //for widgets like navbar and footer that are persistent
+      this.insertStaticWidgets(app);
     },
 
     discoverPageManagers: function(app) {
@@ -175,6 +177,13 @@ define([
     handleAriaAnnouncement: function(msg) {
       //template will match the page name with the proper message
       $("#aria-announcement-container").text(AriaAnnouncementTemplate({page : msg}));
+    },
+
+    insertStaticWidgets : function(app){
+      //for header and footer
+      var nav = app.getWidget("NavbarWidget");
+      $("#navbar-container").append(nav.render().el);
+
     }
 
   });

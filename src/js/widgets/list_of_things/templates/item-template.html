@@ -69,23 +69,17 @@
                 {{/if}}
             </div>
             {{/if}}
+
             {{#if orcid}}
             <div class="letter-icon s-letter-icon">
-                {{#if orcid.needLogin}}
-                <button class="btn-link active-link ">
-                <a class="orcid-action orcid-login" title="To claim papers, login with ORCID first" href="#" data-action="orcid-login">
-                    <i class="s-orcid-icon" aria-label="Pending ORCID update"></i>
-                </a>
-                </button>
-
-                {{else}}
+                {{#unless orcid.orcidOff}}
                     {{#if orcid.pending}}
                     <button class="btn-link" aria-disabled="true">
-                    <i class="s-orcid-icon" aria-label="Pending ORCID update"></i>
+                        <img src="../../styles/img/orcid_24x24.png" alt="orcid-logo" aria-label="Pending ORCID update"/>
                     </button>
                     {{else}}
-                    <button class="btn-link  {{#if orcid}} active-link s-active-link {{/if}}" aria-disabled = {{#if orcid.ariaDisabled}} "true" {{else}} "false"  {{/if}}>
-                    <i class="s-orcid-icon" aria-label="actions for claiming authorship in ORCID"></i>
+                    <button class="btn-link  active-link s-active-link " aria-disabled = {{#if orcid.ariaDisabled}} "true" {{else}} "false"  {{/if}}>
+                            <img src="../../styles/img/orcid_24x24.png" alt="orcid-logo"/>
                     </button>
                     {{#if orcid.actions}}
                     <ul class="hidden list-unstyled link-details s-link-details" role="menu">
@@ -96,7 +90,7 @@
                     </ul>
                     {{/if}}
                     {{/if}}
-                {{/if}}
+                {{/unless}}
             </div>
             {{/if}}
         </div>

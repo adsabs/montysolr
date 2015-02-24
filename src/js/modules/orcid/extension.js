@@ -71,15 +71,15 @@ define([
           return docs;
         }
 
-        var isLoggedIn = orcidApi.hasAccess();
+        var orcidOn = orcidApi.hasAccess() && orcidApi.isOrcidUIOn();
         var msg, recInfo;
         _.each(docs, function(d) {
-          if (isLoggedIn) {
+          if (orcidOn) {
             recInfo = orcidApi.getRecordInfo(d);
             d.orcid = self._getOrcidInfo(recInfo);
           }
           else {
-            d.orcid = {needLogin: true};
+            d.orcid = {orcidOff: true};
           }
         });
         return docs;

@@ -1,0 +1,62 @@
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand s-navbar-brand" href="#"><h1>NASA <i class="fa fa-star"></i><span> ADS</span></h1>
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+            <ul class="nav navbar-nav">
+                <li><a href="http://adsabs.github.io/help/" data-bypass target="_blank"><i
+                        class="fa fa-lg fa-question-circle"></i> Help</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="s-orcid-button-container">
+                    <div>
+                    {{#if OrcidModeOn}}
+                       <span class="s-orcid-title"> <img src="../../styles/img/orcid_24x24.png"  alt="orcid symbol"/>  Orcid Mode </span>
+                        <button class="btn btn-sm pull-right btn-success orcid-on"  title="orcid mode is on">On</button>
+                        <button class="btn btn-sm btn-default pull-right orcid-off" title="turn orcid mode off"> Off </button>
+                    {{else}}
+                   <span class="s-orcid-title"><img src="../../styles/img/orcid_24x24_b_w.png"  alt="orcid symbol"/>  Orcid Mode</span>
+                        <button class="btn btn-sm btn-default pull-right orcid-on"  title="turn orcid mode on">On</button>
+                        <button class="btn btn-sm btn-danger pull-right orcid-off" title="orcid mode is off"> Off </button>
+                {{/if }}
+                    </div>
+                </li>
+
+
+                <li class="dropdown">
+                    <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
+                             Log In <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
+                        {{#unless adsLoggedIn}}
+                        <li class="ads">
+                            <button class="btn-link"> (coming soon)</button>
+                        </li>
+                        {{else}}
+                        <li class="ads">
+                            <button class="btn-link"> Sign out</button>
+                        </li>
+                        {{/unless}}
+                    </ul>
+                </li>
+
+
+            </ul>
+
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+</nav>

@@ -19,3 +19,45 @@
 .nav li {
   margin-top:4px;
 }
+
+.nav .btn-link {
+  color: @navbar-inverse-color;
+  &:hover, &:focus  {
+    text-decoration: none !important;
+  }
+}
+
+//for all dropdowns, because we replaced hash links with buttons styled like links
+.nav .dropdown-menu .btn-link {
+  color: @text-color;
+  text-align: left;
+}
+
+.nav .dropdown-menu li:hover {
+  background-color: @dropdown-link-hover-bg;
+
+  .btn-link {
+    text-decoration: none !important;
+  }
+}
+
+.s-orcid-button-container {
+  position: relative;
+  left: -15%;
+}
+
+
+/*container for inactive orcid title/button to turn on*/
+.s-orcid-button-container div {
+  padding: 2%;
+  min-width: 232px;
+  background: @gray-lighter;
+  display: inline-block;
+  margin-top: -4px;
+}
+
+.s-orcid-title {
+  position: relative;
+  top: 4px;
+  left: 2%;
+}

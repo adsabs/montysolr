@@ -77,6 +77,8 @@ define([
         this.orcidProxyUri = '';
         this.userData = {};
         this.authData = null;
+        /*so that user can be signed in without the orcid ui being shown necessarily*/
+        this.orcidUIOn = false;
         this.db = {};
         this.profile = {};
       },
@@ -104,6 +106,19 @@ define([
         if (this.authData)
           return true;
         return false;
+      },
+
+      isOrcidUIOn : function(){
+        if (this.orcidUiOn){
+          return true
+        }
+        return false
+      },
+
+      toggleOrcidUI : function(val){
+
+        this.orcidUIOn = val;
+
       },
 
       /**
@@ -857,6 +872,8 @@ define([
 
       hardenedInterface: {
         hasAccess: 'boolean indicating access to ORCID Api',
+        toggleOrcidUI : 'function to activate Orcid UI',
+        isOrcidUIOn : 'function to check if Orcid UI setting is true',
         signIn: 'login',
         signOut: 'logout',
         getRecordInfo: 'provides info about a document',

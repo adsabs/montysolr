@@ -54,6 +54,7 @@ require.config({
         SearchPage: 'js/wraps/results_page_manager',
         DetailsPage: 'js/wraps/details_page_manager',
 
+        NavbarWidget: 'js/widgets/navbar/widget',
         AlertsWidget: 'js/widgets/alerts/widget',
         SearchWidget: 'js/widgets/search_bar/search_bar_widget',
         Results: 'js/widgets/results/widget',
