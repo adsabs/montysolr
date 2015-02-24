@@ -267,7 +267,7 @@ define([
       var defer = $.Deferred();
       api.request(new ApiRequest({
           query: new ApiQuery({redirect_uri: redirect_uri}),
-          target: '/bootstrap'}),
+          target: this.bootstrapUrls ? this.bootstrapUrls[0] : '/bootstrap'}),
          {
           done: function (data) {
             if (options.reconnect) {
