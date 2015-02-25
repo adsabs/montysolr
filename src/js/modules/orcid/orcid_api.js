@@ -170,7 +170,8 @@ define([
               promise.resolve(data);
             },
             headers: {
-              Accept: 'application/json'
+              Accept: 'application/json',
+              Authorization: api.access_token
             }
           }
         );
