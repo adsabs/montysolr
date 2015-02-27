@@ -619,11 +619,18 @@ define([
             "text xml": $.parseXML
           }
         }
+        else {
+          options.data = null; // to prevent api.request() from adding {} to the url params
+        }
 
         _.extend(options, opts);
 
+        var api = this.getBeeHive().getService('Api');
+
         if (!options.headers)
           options.headers = {};
+
+        options.headers.Authorization = api.access_token;
         if (!options.headers["Orcid-Authorization"] && this.authData)
           options.headers["Orcid-Authorization"] = "Bearer " + this.authData.access_token;
         if (!options.headers["Content-Type"])
@@ -631,7 +638,7 @@ define([
         if (!options.headers["Accept"])
           options.headers["Accept"] = "application/json";
 
-        var api = this.getBeeHive().getService('Api');
+
         api.request(new ApiRequest({target: url, query: new ApiQuery(), options: options}));
         return result.promise();
       },
