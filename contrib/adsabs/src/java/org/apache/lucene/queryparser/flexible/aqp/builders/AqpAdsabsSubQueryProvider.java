@@ -722,13 +722,14 @@ AqpFunctionQueryBuilderProvider {
 				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
 						fp.getReq().getSearcher().getAtomicReader());
 				
-				return  new SecondOrderQuery( // references
+				SecondOrderQuery outerQuery = new SecondOrderQuery( // references
 						new SecondOrderQuery( // topn
 								new SecondOrderQuery(innerQuery, // classic_relevance
 										new SecondOrderCollectorAdsClassicScoringFormula(referencesWrapper, boostWrapper)), 
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitesRAM(referencesWrapper));
-
+				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT_NORM);
+				return outerQuery;
 			};
 		});
 
