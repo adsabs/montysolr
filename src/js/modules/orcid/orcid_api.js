@@ -238,7 +238,7 @@ define([
         var ret = $.Deferred();
         this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-works')
           .done(function(res) {
-            ret.resolve(res['orcid-profile']['orcid-activities']['orcid-works']);
+            ret.resolve(res['orcid-profile']['orcid-activities'] ? res['orcid-profile']['orcid-activities']['orcid-works'] : {});
           });
         return ret.promise();
       },
