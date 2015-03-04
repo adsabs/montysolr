@@ -77,8 +77,6 @@ define([
         this.orcidProxyUri = '';
         this.userData = {};
         this.authData = null;
-        /*so that user can be signed in without the orcid ui being shown necessarily*/
-        this.orcidUIOn = false;
         this.db = {};
         this.profile = {};
       },
@@ -106,19 +104,6 @@ define([
         if (this.authData)
           return true;
         return false;
-      },
-
-      isOrcidUIOn : function(){
-        if (this.orcidUiOn){
-          return true
-        }
-        return false
-      },
-
-      toggleOrcidUI : function(val){
-
-        this.orcidUIOn = val;
-
       },
 
       /**
@@ -354,8 +339,8 @@ define([
             if (_.isArray(adsWork[fldName])) {
               _.each(adsWork[fldName], function(value) {
                 out["work-external-identifiers"]['work-external-identifier'].push({
-                  "work-external-identifier-type": self._getOrcidIdentifierType(fldName),
-                  "work-external-identifier-id": {
+                    "work-external-identifier-type": self._getOrcidIdentifierType(fldName),
+                    "work-external-identifier-id": {
                       value: value
                     }
                   }
@@ -568,9 +553,9 @@ define([
             };
 
             self.sendData(self.config.apiEndpoint + '/' + self.authData.orcid + '/orcid-works',
-                self._createOrcidMessage(newWorks),
-                {type: "PUT"}
-              )
+              self._createOrcidMessage(newWorks),
+              {type: "PUT"}
+            )
               .done(function (res) {
                 report['response'] = res;
                 deferred.resolve(report);
@@ -738,9 +723,9 @@ define([
           self.profile = profile;
           whenDone.resolve();
         })
-        .fail(function() {
-          whenDone.reject(arguments);
-        });
+          .fail(function() {
+            whenDone.reject(arguments);
+          });
         return whenDone;
       },
 
@@ -872,8 +857,6 @@ define([
 
       hardenedInterface: {
         hasAccess: 'boolean indicating access to ORCID Api',
-        toggleOrcidUI : 'function to activate Orcid UI',
-        isOrcidUIOn : 'function to check if Orcid UI setting is true',
         signIn: 'login',
         signOut: 'logout',
         getRecordInfo: 'provides info about a document',

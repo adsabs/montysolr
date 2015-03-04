@@ -28,26 +28,28 @@ define([
       };
 
       WidgetClass.prototype._getOrcidInfo = function(recInfo) {
-        var msg = {actions: []};
+        var msg = {actions: {} , provenance : null};
 
-        if (recInfo.isCreatedByOthers && recInfo.isCreatedByUs) {
-          msg.actions.push({title: 'update in ORCID', caption:'Update ADS version with latest data', action: 'orcid-update'});
-          msg.actions.push({title: 'delete in ORCID', caption:'Delete ADS version from ORCID', action: 'orcid-delete'});
-          msg.actions.push({title: 'view in ORCID', caption:'Another version exists (we don\'t have rights to update it)', action: 'orcid-view'});
+        if (recInfo.isCreatedByOthers && recInfo.isCreatedByUs){
 
+          msg.actions.update = {title: 'update in ORCID', caption:'Update ADS version with latest data', action: 'orcid-update'};
+          msg.actions.delete = {title: 'delete from ORCID', caption:'Delete ADS version from ORCID', action: 'orcid-delete'};
+          msg.actions.view = {title: 'view in ORCID', caption:'Another version exists (we don\'t have rights to update it)', action: 'orcid-view'};
         }
         else if (recInfo.isCreatedByOthers && !recInfo.isCreatedByUs) {
-          msg.actions.push({title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'});
-          msg.actions.push({title: 'view in ORCID', caption:'Another version exists (we don\'t have rights to update it)', action: 'orcid-view'});
-        }
+
+          msg.actions.add = {title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'}
+          msg.actions.view = {title: 'view in ORCID', caption:'Another version exists (we don\'t have rights to update it)', action: 'orcid-view'};
+
+       }
         else if (!recInfo.isCreatedByOthers && recInfo.isCreatedByUs) {
-          msg.actions.push({title: 'update in ORCID', caption:'Update ADS version with latest data', action: 'orcid-update'});
-          msg.actions.push({title: 'delete in ORCID', caption:'Delete ADS version from ORCID', action: 'orcid-delete'});
+
+         msg.actions.update = {title: 'update in ORCID', caption:'Update ADS version with latest data', action: 'orcid-update'};
+         msg.actions.delete = {title: 'delete from ORCID', caption:'Delete ADS version from ORCID', action: 'orcid-delete'};
         }
         else {
-          msg.actions.push({title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'});
+          msg.actions.add = {title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'};
         }
-
 
         if (recInfo.isCreatedByUs) {
           msg.provenance = 'ADS';
@@ -61,28 +63,35 @@ define([
         return msg;
       },
 
+     WidgetClass.prototype.addOrcidInfo = function(docs) {
+       var self = this;
+       // add orcid info to the documents
+       var orcidApi = this.beehive.getService('OrcidApi');
+       var user = this.beehive.getObject('User');
+       if (!orcidApi) {
+         return docs;
+       }
+
+       var orcidOn = orcidApi.hasAccess() && user.orcidUIOn(),
+         recInfo;
+
+       _.each(docs, function(d) {
+         if (orcidOn) {
+           recInfo = orcidApi.getRecordInfo(d);
+           d.orcid = self._getOrcidInfo(recInfo);
+         }
+         else {
+           d.orcid = false;
+         }
+       });
+       return docs;
+     };
+
       WidgetClass.prototype.processDocs = function() {
         var docs = processDocs.apply(this, arguments);
-        var self = this;
 
-        // add orcid info to the documents
-        var orcidApi = this.beehive.getService('OrcidApi');
-        if (!orcidApi) {
-          return docs;
-        }
+        return this.addOrcidInfo(docs);
 
-        var orcidOn = orcidApi.hasAccess() && orcidApi.isOrcidUIOn();
-        var msg, recInfo;
-        _.each(docs, function(d) {
-          if (orcidOn) {
-            recInfo = orcidApi.getRecordInfo(d);
-            d.orcid = self._getOrcidInfo(recInfo);
-          }
-          else {
-            d.orcid = {orcidOff: true};
-          }
-        });
-        return docs;
       };
 
       WidgetClass.prototype.onAllInternalEvents = function(ev, arg1, arg2) {

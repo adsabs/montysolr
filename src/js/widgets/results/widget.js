@@ -47,14 +47,24 @@ define([
 
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
-        _.bindAll(this, 'onDisplayDocuments', 'processResponse');
+        _.bindAll(this, 'onDisplayDocuments', 'processResponse', 'onOrcidUIChange');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+        this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onOrcidUIChange);
+
 
         if (this.activateResultsExtension)
         {
           this.activateResultsExtension(beehive);
         } // also current this is passed
+      },
+
+      onOrcidUIChange: function(val){
+        //how to directly rerender the item views??
+        var data = this.view.collection.toJSON();
+        this.view.collection.reset();
+        this.view.collection.reset(this.addOrcidInfo(data));
       },
 
       onDisplayDocuments: function(apiQuery) {

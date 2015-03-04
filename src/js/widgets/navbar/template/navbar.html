@@ -21,24 +21,44 @@
                         class="fa fa-lg fa-question-circle"></i> Help</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li class="s-orcid-button-container">
+                {{#if orcidModeOn}}
+                <li class="s-orcid-button-container s-active">
                     <div>
-                    {{#if OrcidModeOn}}
-                       <span class="s-orcid-title"> <img src="../../styles/img/orcid_24x24.png"  alt="orcid symbol"/>  Orcid Mode </span>
-                        <button class="btn btn-sm pull-right btn-success orcid-on"  title="orcid mode is on">On</button>
-                        <button class="btn btn-sm btn-default pull-right orcid-off" title="turn orcid mode off"> Off </button>
-                    {{else}}
-                   <span class="s-orcid-title"><img src="../../styles/img/orcid_24x24_b_w.png"  alt="orcid symbol"/>  Orcid Mode</span>
-                        <button class="btn btn-sm btn-default pull-right orcid-on"  title="turn orcid mode on">On</button>
-                        <button class="btn btn-sm btn-danger pull-right orcid-off" title="orcid mode is off"> Off </button>
-                {{/if }}
+                        <span class="s-orcid-title"> <img src="../../styles/img/orcid-active.svg" alt="orcid symbol"/> ORCID MODE &nbsp;&nbsp; </span>
+
+                        <div class="s-orcid-label-container">
+                            off
+                            <div class="switch">
+                                <input id="cmn-toggle-1" class="cmn-toggle cmn-toggle-round orcid-mode" type="checkbox"
+                                       checked="checked">
+                                <label for="cmn-toggle-1"></label>
+                            </div>
+                            on
+                        </div>
+                        </div>
+                    </li>
+                        {{else}}
+                <li class="s-orcid-button-container s-inactive">
+                    <div>
+                        <span class="s-orcid-title"> <img src="../../styles/img/orcid-inactive.svg"
+                                                          alt="orcid symbol"/>  ORCID MODE &nbsp;&nbsp; </span>
+
+                        <div class="s-orcid-label-container">
+                            off
+                            <div class="switch">
+                                <input id="cmn-toggle-1" class="cmn-toggle cmn-toggle-round orcid-mode" type="checkbox">
+                                <label for="cmn-toggle-1"></label>
+                            </div>
+                            on
+                        </div>
                     </div>
                 </li>
+               {{/if }}
 
 
                 <li class="dropdown">
                     <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
-                             Log In <span class="caret"></span></button>
+                        Log In <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
                         {{#unless adsLoggedIn}}
                         <li class="ads">

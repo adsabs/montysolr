@@ -30,14 +30,32 @@ define([
 
     modelEvents : {
 
-      "change" : "render"
+      "change:adsLoggedIn" : "render"
 
     },
 
     triggers : {
-      "click .orcid-on" : "orcid-on",
-      "click .orcid-off" : "orcid-off",
       "click .ads" : "ads-toggle-state"
+    },
+
+    events : {
+      "change .orcid-mode" : "changeOrcidMode"
+    },
+
+    changeOrcidMode : function(){
+      var that = this;
+
+      if (this.$(".orcid-mode").is(":checked")){
+        this.model.set("orcidModeOn", true);
+      }
+      else {
+        this.model.set("orcidModeOn", false);
+      }
+      //allow animation to run before rerendering
+      setTimeout(function(){
+        that.render();
+      }, 400);
+
     }
 
   });
@@ -56,7 +74,6 @@ define([
     activate: function (beehive) {
       this.beehive = beehive;
       this.pubsub = this.beehive.Services.get('PubSub');
-
       this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, _.bind(this, "handleOrcidAnnouncement"));
 
       this.setInitialVals();
@@ -74,35 +91,34 @@ define([
 
     handleOrcidAnnouncement : function(){
 
-      debugger;
-
     },
 
     viewEvents : {
-      "orcid-on" : "toggleOrcidOn",
-      "orcid-off" : "toggleOrcidOff",
+
       "ads-toggle-state" : "triggerADSAction"
     },
 
     modelEvents : {
 
+      "change:orcidModeOn" :"toggleOrcid"
+
     },
 
-    toggleOrcidOn : function(){
+    toggleOrcid : function(){
+      var user = this.beehive.getObject('User'),
+        orcidApi = this.beehive.getService("OrcidApi");
 
-      var orcidApi = this.beehive.getService('OrcidApi');
-      orcidApi.toggleOrcidUI(true);
-
-      if (!orcidApi.hasAccess() ){
-        orcidApi.signIn();
+      if (this.model.get("orcidModeOn")){
+         user.toggleOrcidUI(true);
+        //sign into orcid api if not signed in already
+        if (!orcidApi.hasAccess() ){
+          orcidApi.signIn();
+        }
       }
-    },
 
-    toggleOrcidOff : function(){
-
-      var orcidApi = this.beehive.getService('OrcidApi');
-      orcidApi.toggleOrcidUI(false);
-
+      else {
+        user.toggleOrcidUI(false);
+      }
     },
 
     triggerADSAction : function(){

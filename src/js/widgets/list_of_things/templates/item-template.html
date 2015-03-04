@@ -19,13 +19,13 @@
         {{/if}}
     </div>
     <div class="col-sm-4">
-
         <div class="s-results-links">
             {{#if links}}
             <div class="letter-icon s-letter-icon">
 
-            <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}" aria-disabled = "{{#if links.text}} false {{else}} true {{/if}}">
-                <i class="s-text-icon" aria-label="quick access to full text links"></i>
+                <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}"
+                        aria-disabled="{{#if links.text}} false {{else}} true {{/if}}">
+                    <i class="s-text-icon" aria-label="quick access to full text links"></i>
                 </button>
                 {{#if links.text}}
                 <ul class="hidden list-unstyled link-details s-link-details" role="menu">
@@ -39,8 +39,9 @@
             </div>
             <div class="letter-icon s-letter-icon">
 
-                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}" aria-disabled = "{{#if links.list}} false {{else}} true{{/if}}">
-                <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
+                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}"
+                        aria-disabled="{{#if links.list}} false {{else}} true{{/if}}">
+                    <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
                 </button>
 
                 {{#if links.list}}
@@ -54,8 +55,9 @@
             </div>
             <div class="letter-icon s-letter-icon">
 
-                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}" aria-disabled = "{{#if links.data}} false {{else}} true  {{/if}}">
-                <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
+                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}"
+                        aria-disabled="{{#if links.data}} false {{else}} true  {{/if}}">
+                    <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
                 </button>
 
                 {{#if links.data}}
@@ -69,31 +71,7 @@
                 {{/if}}
             </div>
             {{/if}}
-
-            {{#if orcid}}
-            <div class="letter-icon s-letter-icon">
-                {{#unless orcid.orcidOff}}
-                    {{#if orcid.pending}}
-                    <button class="btn-link" aria-disabled="true">
-                        <img src="../../styles/img/orcid_24x24.png" alt="orcid-logo" aria-label="Pending ORCID update"/>
-                    </button>
-                    {{else}}
-                    <button class="btn-link  active-link s-active-link " aria-disabled = {{#if orcid.ariaDisabled}} "true" {{else}} "false"  {{/if}}>
-                            <img src="../../styles/img/orcid_24x24.png" alt="orcid-logo"/>
-                    </button>
-                    {{#if orcid.actions}}
-                    <ul class="hidden list-unstyled link-details s-link-details" role="menu">
-                        {{#each orcid.actions}}
-                        <li><a class="orcid-action {{this.action}}" data-action="{{this.action}}" title="{{this.caption}}">{{this.title}}</a>
-                        </li>
-                        {{/each}}
-                    </ul>
-                    {{/if}}
-                    {{/if}}
-                {{/unless}}
-            </div>
-            {{/if}}
-        </div>
+      </div>
     </div>
 
 </div>
@@ -105,7 +83,7 @@
     </div>
     <div class="col-xs-10">
         <a href="#abs/{{identifier}}">
-            <h3 class="s-results-title" >{{{title}}}</h3>
+            <h3 class="s-results-title">{{{title}}}</h3>
         </a>
     </div>
 </div>
@@ -125,38 +103,86 @@
 
 </div>
 
+ {{#if orcid}}
+<div class="row">
+    <div class="col-sm-6 col-sm-offset-1">
+        <div class="s-results-orcid-container">
+            {{#if orcid.pending}}
+            <button class="btn btn-default btn-xs s-orcid-loading" aria-disabled="true">
+                <i class="fa fa-lg fa-spinner fa-pulse"></i> Loading...
+
+            </button>
+            {{else}}
+            <!-- if provenance, it has been added by us or someone else-->
+            {{#if orcid.provenance}}
+
+            <div class="alert alert-success s-orcid-alert" role="alert">
+
+                <span class="text-success s-orcid-success"> <i class="icon-success"></i>&nbsp;Added to ORCID&nbsp;&nbsp;</span>
+
+                <div class="btn-group pull-right">
+                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                            aria-expanded="false">
+                        <img src="../../styles/img/orcid-active.svg" alt="orcid logo active" class="s-orcid-img"/> Actions <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        {{#each orcid.actions}}
+                        <li><a class="orcid-action {{this.action}}" data-action="{{this.action}}"
+                               title="{{this.caption}}">{{this.title}}</a>
+                            {{/each}}
+                    </ul>
+                </div>
+            </div>
+
+
+
+            {{else}}<!-- add this paper to ORCID-->
+
+            <button class="btn btn-default btn-xs orcid-action {{orcid.actions.add.action}}"  data-action="{{orcid.actions.add.action}}">
+               <img src="../../styles/img/orcid-inactive.svg" alt="orcid logo inactive" class="s-orcid-img" title="{{orcid.actions.add.caption}}"/>
+                Claim in ORCID
+            </button>
+
+
+            {{/if}}<!--orcid.provenance -->
+            {{/if}} <!--orcid.pending-->
+    </div>
+
+</div>
+{{/if}}
+
 <div class="row details {{#unless showDetails}}sr-only {{/unless}}">
     <div class="col-xs-10 col-xs-offset-1 s-more-info">
-            {{#if details.highlights}}
-            <h4 class="sr-only">Highlights</h4>
-                <ul aria-label="search snippets" class="s-search-snippets">
-                    {{#each details.highlights}}
-                    <li>{{{this}}}</li>
-                    {{/each}}
-                </ul>
-            {{/if}}
+        {{#if details.highlights}}
+        <h4 class="sr-only">Highlights</h4>
+        <ul aria-label="search snippets" class="s-search-snippets">
+            {{#each details.highlights}}
+            <li>{{{this}}}</li>
+            {{/each}}
+        </ul>
+        {{/if}}
 
-            {{#if details.abstract}}
-            <h4 aria-label="read full abstract below"><a href="#abs/{{identifier}}">Abstract</a></h4>
-                {{#if details.shortAbstract}}
-                <!--for screen readers-->
-                <div class="full-abstract sr-only">
-                    {{ details.abstract }}
-                    </div>
-                <div class="short-abstract" aria-label="a truncated version of the abstract">
-                    {{details.shortAbstract}}
-                    <button class="btn btn-xs btn-default show-full-abstract">more</button>
-                </div>
-                <div class="full-abstract hidden">
-                    {{ details.abstract }}
-                    <button class="btn btn-xs btn-default hide-full-abstract">less</button>
-                </div>
-                {{else}}
-                <!--the abstract is short enough to be shown all at once-->
-                {{details.abstract}}
-                {{/if}}
+        {{#if details.abstract}}
+        <h4 aria-label="read full abstract below"><a href="#abs/{{identifier}}">Abstract</a></h4>
+        {{#if details.shortAbstract}}
+        <!--for screen readers-->
+        <div class="full-abstract sr-only">
+            {{ details.abstract }}
+        </div>
+        <div class="short-abstract" aria-label="a truncated version of the abstract">
+            {{details.shortAbstract}}
+            <button class="btn btn-xs btn-default show-full-abstract">more</button>
+        </div>
+        <div class="full-abstract hidden">
+            {{ details.abstract }}
+            <button class="btn btn-xs btn-default hide-full-abstract">less</button>
+        </div>
+        {{else}}
+        <!--the abstract is short enough to be shown all at once-->
+        {{details.abstract}}
+        {{/if}}
 
-            {{/if}}
+        {{/if}}
 
 
     </div>
