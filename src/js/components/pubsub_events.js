@@ -137,7 +137,13 @@ define([], function() {
     APP_BOOTSTRAPPED: "[App]-Application-Bootstrapped",
     APP_STARTING: "[App]-Application-Starting",
     APP_STARTED: "[App]-Application-Started",
-    APP_EXIT: '[App]-Exit'
+    APP_EXIT: '[App]-Exit',
+
+
+    /**
+     * Is triggered when user selects/deselects records
+     */
+    PAPER_SELECTION: "[User]-Paper-Selection"
 
 };
 

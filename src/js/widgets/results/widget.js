@@ -13,7 +13,8 @@ define([
     'js/mixins/formatter',
     'hbs!./templates/container-template',
     'js/mixins/papers_utils',
-    'js/modules/orcid/extension'
+    'js/modules/orcid/extension',
+    'js/mixins/dependon'
   ],
 
   function (
@@ -25,7 +26,8 @@ define([
     Formatter,
     ContainerTemplate,
     PapersUtilsMixin,
-    OrcidExtension
+    OrcidExtension,
+    Dependon
     ) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
@@ -38,23 +40,20 @@ define([
       },
 
       defaultQueryArguments: {
-          hl     : "true",
-          "hl.fl": "title,abstract,body",
-          fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate',
-          rows : 25,
-          start : 0
+        hl     : "true",
+        "hl.fl": "title,abstract,body",
+        fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate',
+        rows : 25,
+        start : 0
       },
 
       activate: function (beehive) {
+        this.setBeeHive(beehive);
         this.pubsub = beehive.Services.get('PubSub');
         _.bindAll(this, 'onDisplayDocuments', 'processResponse');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
-        if (this.activateResultsExtension)
-        {
-          this.activateResultsExtension(beehive);
-        } // also current this is passed
       },
 
       onDisplayDocuments: function(apiQuery) {
@@ -90,6 +89,11 @@ define([
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
         var highlights = apiResponse.has("highlighting") ? apiResponse.get('highlighting') : {};
         var self = this;
+
+        var appStorage = null;
+        if (this.hasBeeHive() && this.getBeeHive().hasObject('AppStorage')) {
+          appStorage = this.getBeeHive().getObject('AppStorage');
+        }
 
         //any preprocessing before adding the resultsIndex is done here
         docs = _.map(docs, function (d) {
@@ -140,7 +144,7 @@ define([
 
           if (h.highlights && h.highlights.length > 0){
             _.extend(d.details, h);
-        }
+          }
 
           d.details.pub = d.pub;
 
@@ -155,6 +159,12 @@ define([
           d.formattedDate = d.pubdate ? self.formatDate(d.pubdate, {format: 'yy/mm', missing: {day: 'yy/mm', month: 'yy'}}) : undefined;
           d.details.abstract = d.abstract;
           d.details.shortAbstract = d.abstract? self.shortenAbstract(d.abstract) : undefined;
+
+
+          if (appStorage && appStorage.isPaperSelected(d.identifier)) {
+            d.chosen = true;
+          }
+
           return d;
         });
 
@@ -165,7 +175,7 @@ define([
 
     _.extend(ResultsWidget.prototype, LinkGenerator);
     _.extend(ResultsWidget.prototype, Formatter);
-    _.extend(ResultsWidget.prototype, PapersUtilsMixin);
+    _.extend(ResultsWidget.prototype, PapersUtilsMixin, Dependon.BeeHive);
     return OrcidExtension(ResultsWidget);
     //return ResultsWidget;
 

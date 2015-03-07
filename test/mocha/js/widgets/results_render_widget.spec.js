@@ -8,7 +8,8 @@ define([
     './test_json/test2',
     'js/widgets/list_of_things/widget',
     'js/components/api_response',
-    'js/components/api_query'
+    'js/components/api_query',
+    'js/components/app_storage'
   ],
   function (
     Marionette,
@@ -20,7 +21,8 @@ define([
     Test2,
     ListOfThingsWidget,
     ApiResponse,
-    ApiQuery
+    ApiQuery,
+    AppStorage
     ) {
 
     describe("Render Results UI Widget (results_render_widget.spec.js)", function () {
@@ -354,6 +356,34 @@ define([
         expect($w.find(".details-control").hasClass("icon-details")).to.be.true;
 
         expect($w.find(".details").hasClass("sr-only")).to.be.true;
-      })
+      });
+
+      it("should mark papers as selected", function() {
+        var s = new AppStorage();
+        s.activate(minsub.beehive);
+        minsub.beehive.addObject('AppStorage', s);
+
+        var widget  = _getWidget();
+
+        s.addSelectedPapers('2013arXiv1305.3460H');
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({'q': 'foo:bar'}));
+
+        var $w = widget.render().$el;
+        $("#test").append($w);
+
+        expect(widget.collection.models[0].get('chosen')).to.eql(true);
+        expect(widget.collection.models[1].get('chosen')).to.eql(undefined);
+
+
+        // select a paper and observe it gets into the storage
+        expect(s.isPaperSelected('1993sfgi.conf..324C')).to.eql(false);
+        $w.find('input[value="1993sfgi.conf..324C"]').click();
+        expect(s.isPaperSelected('1993sfgi.conf..324C')).to.eql(true);
+
+        // but unselecting through the storage is not propagated back to the model
+        // that happens only on fresh re-render (and I guess we are fine with
+        // that for now)
+
+      });
     })
   });
