@@ -24,7 +24,7 @@ define(['underscore'], function(_) {
         return this.BeeHive;
       },
       hasBeeHive: function() {
-        if (this.BeeHive && this.BeeHive.active) {
+        if (this.BeeHive && (this.BeeHive.active || (this.BeeHive.__facade__ && this.BeeHive.getActive()))) {
           return true;
         }
         return false;

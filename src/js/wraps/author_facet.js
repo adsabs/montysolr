@@ -30,7 +30,7 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
 
         conditions = _.values(conditions);
         _.each(conditions, function (c, i, l) {
-          l[i] = "author:\"" + c.title + "\"";
+          l[i] = "author_facet_hier:\"" + c.value + "\"";
         });
 
         q = q.clone();

@@ -454,7 +454,7 @@ module.exports = function(grunt) {
             'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=discovery-suite'
           ],
           threshold : 0,
-          globalThreshold : 75,
+          globalThreshold : 76,
           log : true,
           logErrors: true,
           moduleThreshold : 80,
@@ -468,7 +468,7 @@ module.exports = function(grunt) {
             "widgets/export/widget.js":23,
             "widgets/facet/collection.js":33,
             "mixins/widget_mixin_method.js":37,
-            "page_managers/three_column_view.js":38,
+            "page_managers/three_column_view.js":60,
             "mixins/widget_utility.js":40,
             "components/query_builder/rules_translator.js":45,
             "widgets/base/tree_view.js":50,
@@ -487,7 +487,6 @@ module.exports = function(grunt) {
             "wraps/table_of_contents.js":73,
             "bugutils/minimal_pubsub.js":74,
             "components/history_manager.js":75,
-            "services/api.js":76,
             "components/api_feedback.js":77,
             "components/transition.js":77,
             "widgets/dropdown-menu/widget.js":78,
@@ -495,7 +494,7 @@ module.exports = function(grunt) {
             "wraps/paper_network.js": 77, // some tests don't run properly in phantomjs,
 
             "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i've already started)
-            "mixins/feedback_handling.js": 1,
+            "mixins/feedback_handling.js": 35,
             "mixins/discovery_bootstrap.js": 1
 
           }

@@ -59,6 +59,7 @@ define(['underscore', 'backbone',
 
   _.extend(MinimalPubsub.prototype, Backbone.Events, PubSubEvents,  {
     initialize: function(options) {
+      options =  options || {};
       if (options.verbose) {
         console.log('[MinSub]', 'starting');
       }

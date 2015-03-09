@@ -297,6 +297,9 @@ define([
           }, this);
 
         }
+        else if (ev == "itemview:toggleSelect") {
+          this.pubsub.publish(this.pubsub.PAPER_SELECTION, arg2.data.identifier);
+        }
       },
 
       reset: function() {

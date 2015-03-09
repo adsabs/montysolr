@@ -5,15 +5,40 @@
 define([
   'backbone',
   'underscore',
-  'js/components/api_query'
+  'js/components/api_query',
+  'js/mixins/hardened',
+  'js/mixins/dependon'
 ], function(
   Backbone,
   _,
-  ApiQuery
+  ApiQuery,
+  Hardened,
+  Dependon
   ) {
 
 
   var AppStorage = Backbone.Model.extend({
+
+      activate: function(beehive) {
+        this.setBeeHive(beehive);
+        _.bindAll(this, "onPaperSelection");
+        var pubsub = beehive.getService('PubSub');
+        var key = pubsub.getPubSubKey();
+        pubsub.subscribe(key, pubsub.PAPER_SELECTION, this.onPaperSelection);
+      },
+
+      initialize: function() {
+        var that = this;
+        this.on('change:selectedPapers', function(model) {
+          that._updateNumSelected();
+        });
+      },
+
+      /**
+       * functions related to remembering/removing the
+       * current query object
+       * @param apiQuery
+       */
       setCurrentQuery: function(apiQuery) {
         if (!apiQuery)
           apiQuery = new ApiQuery();
@@ -32,45 +57,94 @@ define([
         return this.has('currentQuery');
       },
 
+      /**
+       * Functions to remember save bibcodes (that were
+       * selected by an user)
+       *
+       * @returns {*}
+       */
       hasSelectedPapers: function() {
         return this.has('selectedPapers');
       },
+
       getSelectedPapers: function() {
         return _.keys(this.get('selectedPapers') || {});
       },
+
       addSelectedPapers: function(identifiers) {
-        var data = this.get('selectedPapers') || {};
+        var data = _.clone(this.get('selectedPapers') || {});
+        var updated = false;
+
         if (_.isArray(identifiers)) {
-          _.each(identifiers, function(i) {
-            data[i] = true;
+          _.each(identifiers, function(idx) {
+            if (!data[idx]) {
+              data[idx] = true;
+              updated = true;
+            }
           })
         }
         else {
-          data[identifiers] = true;
+          if (!data[identifiers]) {
+            data[identifiers] = true;
+            updated = true;
+          }
         }
-        this.set('selectedPapers', data);
+        if (updated)
+          this.set('selectedPapers', data);
       },
-      isSelectedPaper: function(identifier) {
+
+      isPaperSelected: function(identifier) {
+        if (_.isArray(identifier))
+          throw new Error('Identifier must be a string or a number');
         var data = this.get('selectedPapers') || {};
-        return data[identifier];
+        return data[identifier] ? true : false;
       },
+
       removeSelectedPapers: function(identifiers) {
-        var data = this.get('selectedPapers') || {};
+        var data = _.clone(this.get('selectedPapers') || {});
         if (_.isArray(identifiers)) {
           _.each(identifiers, function(i) {
             delete data[i];
           })
         }
-        else {
+        else if (identifiers) {
           delete data[identifiers];
         }
+        else {
+          data = {};
+        }
         this.set('selectedPapers', data);
+      },
+
+      getNumSelectedPapers: function() {
+        return this._numSelectedPapers || 0;
+      },
+
+      _updateNumSelected: function() {
+        this._numSelectedPapers = _.keys(this.get('selectedPapers') || {}).length;
+      },
+
+      onPaperSelection: function(data) {
+        if (this.isPaperSelected(data)) {
+          this.removeSelectedPapers(data);
+        }
+        else {
+          this.addSelectedPapers(data);
+        }
+      },
+
+      hardenedInterface:  {
+        getNumSelectedPapers: 'getNumSelectedPapers',
+        isPaperSelected: 'isPaperSelected',
+        hasSelectedPapers: 'hasSelectedPapers',
+        getSelectedPapers: 'getSelectedPapers',
+        getCurrentQuery: 'getCurrentQuery',
+        hasCurrentQuery: 'hasCurrentQuery'
       }
-
-
     }
   );
 
+  _.extend(AppStorage.prototype, Hardened, Dependon.BeeHive);
   return AppStorage;
 
 });

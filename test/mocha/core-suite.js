@@ -1,6 +1,7 @@
 define([], function() {
 
   var tests  = [
+      '/components/app_storage.spec.js',
       '/components/multi_params.spec.js',
       '/components/solr_params.spec.js',
       '/components/api_query.spec.js',

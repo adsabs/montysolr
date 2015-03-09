@@ -17,7 +17,12 @@ define([
 
     var ItemView = Marionette.ItemView.extend({
       tagName: "li",
-      className: "col-sm-12 s-display-block",
+      className: function() {
+        if (this.model.get('chosen')) {
+          return "col-sm-12 s-display-block chosen";
+        }
+        return "col-sm-12 s-display-block";
+      },
       template: ItemTemplate,
 
       constructor: function (options) {
