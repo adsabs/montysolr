@@ -27,6 +27,7 @@ define([], function() {
       '/widgets/lot_derivates.spec.js',
       '/widgets/metrics_widget.spec.js',
       '/widgets/multi_callback_widget.spec.js',
+      '/widgets/navbar_widget.spec.js',
       '/widgets/network_widget.spec.js',
       '/widgets/paper_network_widget.spec.js',
       '/widgets/reads_graph_facet_widget.spec.js',

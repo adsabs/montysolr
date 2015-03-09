@@ -664,6 +664,7 @@ define([
         if (!data) return out;
 
         var update = function(k) {
+          k = k.toLowerCase();
           if (self.db[k]) {
             if (self.db[k].isAds) {
               out.isCreatedByUs = true;
@@ -695,6 +696,10 @@ define([
        *  - extracting info into fast-lookup format
        */
       updateDatabase: function(profile) {
+
+        if (profile && profile['orcid-profile'])
+          profile = profile['orcid-profile'];
+        
         var self = this;
         self.db.pending = true;
 

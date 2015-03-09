@@ -16,6 +16,11 @@ define([
 
   var UserModel = Backbone.Model.extend({
 
+    defaults : function(){
+      return {
+        orcidUIOn : false
+      }
+    }
     });
 
   var User = GenericModule.extend({
@@ -24,20 +29,15 @@ define([
       this.model = new UserModel();
     },
 
-
     activate: function (beehive) {
       this.beehive = beehive;
       this.pubsub = this.beehive.Services.get('PubSub');
 
     },
 
-    toggleOrcidUI : function(val){
-      if (val === true || val === false){
-        this.model.set("orcidUIOn", val);
-      }
-      else {
-        this.model.set("orcidUIOn", !this.model.get("orcidUIOn"));
-      }
+    setOrcidMode : function(val){
+
+      this.model.set("orcidUIOn", val);
 
       if (_.has(this.model.changedAttributes(), "orcidUIOn")){
         this.pubsub.publish(this.pubsub.getPubSubKey(), this.pubsub.USER_ANNOUNCEMENT, "orcidUIChange", this.model.get("orcidUIOn"));
@@ -50,7 +50,7 @@ define([
     },
 
     hardenedInterface: {
-      toggleOrcidUI : "toggle ORCID UI state on/off",
+      setOrcidMode : "toggle ORCID UI mode on/off (param true or false)",
       orcidUIOn : "find out if the ORCID UI state is active"
     }
 

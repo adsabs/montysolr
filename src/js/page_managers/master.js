@@ -115,8 +115,6 @@ define([
       this.model = this.view.model;
     },
 
-
-
     activate: function(beehive) {
       this.pubsub = beehive.getHardenedInstance().getService('PubSub');
       this.pubsub.subscribe(this.pubsub.ARIA_ANNOUNCEMENT, this.handleAriaAnnouncement);

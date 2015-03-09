@@ -17,6 +17,7 @@ define([
     defaults : function(){
       return {
         orcidModeOn : false,
+        orcidLoggedIn : false,
         adsLoggedIn  : false
       }
     }
@@ -28,12 +29,6 @@ define([
 
     template : NavBarTemplate,
 
-    modelEvents : {
-
-      "change:adsLoggedIn" : "render"
-
-    },
-
     triggers : {
       "click .ads" : "ads-toggle-state"
     },
@@ -43,6 +38,7 @@ define([
     },
 
     changeOrcidMode : function(){
+    debugger;
       var that = this;
 
       if (this.$(".orcid-mode").is(":checked")){
@@ -55,7 +51,6 @@ define([
       setTimeout(function(){
         that.render();
       }, 400);
-
     }
 
   });
@@ -74,23 +69,21 @@ define([
     activate: function (beehive) {
       this.beehive = beehive;
       this.pubsub = this.beehive.Services.get('PubSub');
-      this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, _.bind(this, "handleOrcidAnnouncement"));
+      this.pubsub.subscribe(this.pubsub.ORCID_ANNOUNCEMENT, _.bind(this.handleOrcidAnnouncement, this));
 
       this.setInitialVals();
     },
 
     //to set the correct initial values for signed in statuses
     setInitialVals : function(){
-
-      var orcidApi = this.beehive.getService('OrcidApi');
-      if (orcidApi.hasAccess()){
-        this.model.set({orcidLoggedIn : true}, {silent : true});
+      var user = this.beehive.getObject("User");
+      if (user.orcidUIOn()){
+        this.model.set({orcidUIOn : true}, {silent : true});
       }
 
-    },
+        },
 
     handleOrcidAnnouncement : function(){
-
     },
 
     viewEvents : {
@@ -100,16 +93,16 @@ define([
 
     modelEvents : {
 
-      "change:orcidModeOn" :"toggleOrcid"
+      "change:orcidModeOn" :"toggleOrcidMode"
 
     },
 
-    toggleOrcid : function(){
+    toggleOrcidMode : function(){
       var user = this.beehive.getObject('User'),
         orcidApi = this.beehive.getService("OrcidApi");
 
       if (this.model.get("orcidModeOn")){
-         user.toggleOrcidUI(true);
+         user.setOrcidMode(true);
         //sign into orcid api if not signed in already
         if (!orcidApi.hasAccess() ){
           orcidApi.signIn();
@@ -117,7 +110,7 @@ define([
       }
 
       else {
-        user.toggleOrcidUI(false);
+        user.setOrcidMode(false);
       }
     },
 
