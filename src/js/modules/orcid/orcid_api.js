@@ -101,8 +101,12 @@ define([
 
 
       hasAccess: function() {
-        if (this.authData)
+        if (this.authData) {
+          if (this.authData.expires && this.authData.expires <= new Date().getTime()) {
+            return false;
+          }
           return true;
+        }
         return false;
       },
 
@@ -183,6 +187,10 @@ define([
 
       saveAccessData: function(authData) {
         var beehive = this.getBeeHive();
+
+        if (authData && authData.expires_in) {
+          authData.expires = new Date().getTime() + ((authData.expires_in * 1000) - 1000);
+        }
         this.authData = authData;
         var storage = beehive.getService('PersistentStorage');
         if (storage) {

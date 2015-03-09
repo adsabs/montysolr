@@ -103,6 +103,9 @@ define([
             oApi.saveAccessData(res);
             expect(oApi.authData).to.eql(res);
 
+            // the expires was added
+            expect(oApi.authData.expires).to.be.gt(new Date().getTime());
+
             // now request uses access_token
             var req = oApi.sendData('test-query', {data: {foo: 'bar'}});
             req.done(function(res) {
@@ -119,6 +122,11 @@ define([
           oApi.authData = {foo: 'bar'};
           expect(oApi.hasAccess()).to.be.eql(true);
           oApi.signOut();
+          expect(oApi.hasAccess()).to.be.eql(false);
+
+          oApi.authData = {expires: new Date().getTime() + 100};
+          expect(oApi.hasAccess()).to.be.eql(true);
+          oApi.authData = {expires: new Date().getTime() - 100};
           expect(oApi.hasAccess()).to.be.eql(false);
         });
 
