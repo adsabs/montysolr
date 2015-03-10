@@ -50,10 +50,20 @@ define([
       activate: function (beehive) {
         this.setBeeHive(beehive);
         this.pubsub = beehive.Services.get('PubSub');
-        _.bindAll(this, 'onDisplayDocuments', 'processResponse');
+        _.bindAll(this, 'onDisplayDocuments', 'processResponse', 'onUserAnnouncement');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
+        this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
+      },
+
+      onUserAnnouncement: function(val){
+        if (val == "orcidUIChange"){
+          //how to directly rerender the item views??
+          var data = this.view.collection.toJSON();
+          this.view.collection.reset();
+          this.view.collection.reset(this.addOrcidInfo(data));
+        }
       },
 
       onDisplayDocuments: function(apiQuery) {

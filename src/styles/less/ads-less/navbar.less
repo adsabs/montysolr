@@ -19,3 +19,144 @@
 .nav li {
   margin-top:4px;
 }
+
+.nav .btn-link {
+  color: @navbar-inverse-color;
+  &:hover, &:focus  {
+    text-decoration: none !important;
+  }
+}
+
+//for all dropdowns, because we replaced hash links with buttons styled like links
+.nav .dropdown-menu .btn-link {
+  color: @text-color;
+  text-align: left;
+}
+
+.nav .dropdown-menu li:hover {
+  background-color: @dropdown-link-hover-bg;
+
+  .btn-link {
+    text-decoration: none !important;
+  }
+}
+
+.s-orcid-button-container {
+  position: relative;
+  left: -15%;
+}
+
+
+/*container for inactive orcid title/button to turn on*/
+.s-orcid-button-container {
+  padding: 1% 2% 4% 2%;
+  width: 280px;
+  display: inline-block !important;
+  margin-top: -4px !important;
+  background-color: @gray-lightest;
+  .lh-transition(color .4s ease, background-color .4s ease);
+
+  &.s-active {
+    background-color: #fff;
+    color: black;
+
+  }
+
+  div {
+    height: 26px;
+  }
+}
+
+
+.switch {
+  display: inline-block;
+  position: relative;
+  top: 6px;
+}
+
+.s-orcid-label-container {
+  display: inline-block;
+  position: relative;
+}
+
+.s-orcid-title {
+  display: inline-block;
+  width: 146px;
+}
+
+.s-orcid-title img {
+  height: 33px;
+  width: auto;
+}
+
+.cmn-toggle {
+  position: absolute;
+  margin-left: -9999px;
+  visibility: hidden;
+}
+.cmn-toggle + label {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+
+input.cmn-toggle-round + label {
+  padding: 2px;
+  width: 60px;
+  height: 30px;
+  background-color: @gray-light;
+  -webkit-border-radius: 60px;
+  -moz-border-radius: 60px;
+  -ms-border-radius: 60px;
+  -o-border-radius: 60px;
+  border-radius: 60px;
+}
+input.cmn-toggle-round + label:before, input.cmn-toggle-round + label:after {
+  display: block;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  content: "";
+}
+input.cmn-toggle-round + label:before {
+  right: 1px;
+  background-color: @gray-light;
+  -webkit-border-radius: 60px;
+  -moz-border-radius: 60px;
+  -ms-border-radius: 60px;
+  -o-border-radius: 60px;
+  border-radius: 60px;
+  -webkit-transition: background 0.4s;
+  -moz-transition: background 0.4s;
+  -o-transition: background 0.4s;
+  transition: background 0.4s;
+}
+input.cmn-toggle-round + label:after {
+  width: 28px;
+  background-color: #fff;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+  -webkit-box-shadow: 0 2px 5px @gray-dark;
+  -moz-box-shadow: 0 2px 5px @gray-dark;
+  box-shadow: 0 2px 5px @gray-dark;
+  -webkit-transition: margin 0.4s;
+  -moz-transition: margin 0.4s;
+  -o-transition: margin 0.4s;
+  transition: margin 0.4s;
+}
+input.cmn-toggle-round:checked + label:before {
+  background-color: lighten(@brand-success, 10%);
+}
+input.cmn-toggle-round:checked + label:after {
+  margin-left: 30px;
+}

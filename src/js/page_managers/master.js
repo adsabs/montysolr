@@ -14,13 +14,17 @@ define([
   'js/components/generic_module',
   'js/page_managers/controller',
   'hbs!./templates/aria-announcement',
-  'marionette'
+  'hbs!./templates/master-page-manager',
+  'marionette',
+  './controller'
 ], function(
   BaseWidget,
   GenericModule,
   PageManagerController,
   AriaAnnouncementTemplate,
-  Marionette
+  MasterPageManagerTemplate,
+  Marionette,
+  PageManagerController
   ){
 
   var WidgetData = Backbone.Model.extend({
@@ -69,7 +73,7 @@ define([
 
         if (!options.model)
           options.model = new WidgetModel();
-
+        options.template = MasterPageManagerTemplate;
         Marionette.ItemView.prototype.constructor.call(this, options);
       },
 
@@ -99,13 +103,17 @@ define([
       },
 
       render: function() {
-        // ignoring templating
+        // render only once
+        if (!this._rendered) {
+          Marionette.ItemView.prototype.render.apply(this);
+          this._rendered = true;
+        }
         return this;
       }
     }
   );
 
-  var MasterPageManager = GenericModule.extend({
+  var MasterPageManager = PageManagerController.extend({
     constructor: function(options) {
       options = options || {};
       this._managers = {};
@@ -113,9 +121,8 @@ define([
       this.view = new MasterView(options);
       this.collection = this.view.collection;
       this.model = this.view.model;
+      this.initialize();
     },
-
-
 
     activate: function(beehive) {
       this.pubsub = beehive.getHardenedInstance().getService('PubSub');
@@ -123,7 +130,10 @@ define([
     },
 
     assemble: function(app) {
+      PageManagerController.prototype.assemble.call(this, app);
       this.discoverPageManagers(app);
+      //for widgets like navbar and footer that are persistent
+      //this.insertStaticWidgets(app);
     },
 
     discoverPageManagers: function(app) {
@@ -175,6 +185,17 @@ define([
     handleAriaAnnouncement: function(msg) {
       //template will match the page name with the proper message
       $("#aria-announcement-container").text(AriaAnnouncementTemplate({page : msg}));
+    },
+
+    /**
+     * Will find and insert any widget that is still not filled on the page
+     * @param app
+     */
+    insertMasterWidgets: function(app){
+      //for header and footer
+      //var nav = app.getWidget("NavbarWidget");
+      //$("#navbar-container").append(nav.render().el);
+
     }
 
   });

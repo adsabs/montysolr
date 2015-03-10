@@ -75,6 +75,8 @@ define([
         var Widget = OrcidExtension(ListOfThingsWidget);
         var widget = new Widget();
 
+        minsub.beehive.addObject('User', {getHardenedInstance: function() {return this}, isOrcidModeOn: function() {return true;}});
+
         widget.activate(minsub.beehive.getHardenedInstance());
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({
           q: "star"
