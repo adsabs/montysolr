@@ -139,18 +139,20 @@
 
 .icon-details {
   .fa;
+  .fa-lg;
   cursor: pointer;
   &:before {
-    content: @fa-var-plus-circle
+    content: @fa-var-caret-right;
   }
   color: @gray-light;
 }
 
 .icon-hide-details {
   .fa;
+  .fa-lg;
   cursor: pointer;
   &:before {
-    content: @fa-var-minus-circle
+    content: @fa-var-caret-down;
   }
   color: @gray-light;
 }
@@ -176,7 +178,6 @@
   &:before {
     content: @fa-var-database;
   }
-
 }
 
 .icon-text {
@@ -184,7 +185,13 @@
   &:before {
     content: @fa-var-file-text-o;
   }
-
 }
 
+.icon-success {
+  .fa;
+  .fa-lg;
+  &:before {
+    content: @fa-var-check;
+  }
+}
 

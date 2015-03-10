@@ -495,7 +495,8 @@ module.exports = function(grunt) {
 
             "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i've already started)
             "mixins/feedback_handling.js": 35,
-            "mixins/discovery_bootstrap.js": 1
+            "mixins/discovery_bootstrap.js": 1,
+            "widgets/navbar/widget.js": 53
 
           }
         }

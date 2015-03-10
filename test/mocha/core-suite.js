@@ -19,6 +19,7 @@ define([], function() {
       '/components/api_feedback.spec.js',
       '/components/feedback_mediator.spec.js',
       '/components/history_manager.spec.js',
+      '/components/user.spec.js',
 
       '/components/discovery_mediator.spec.js',
       '/components/alerts_mediator.spec.js',

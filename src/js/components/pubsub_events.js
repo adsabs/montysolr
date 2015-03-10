@@ -119,6 +119,8 @@ define([], function() {
 
     ARIA_ANNOUNCEMENT : "[PubSub]-Aria-Announcement",
 
+    USER_ANNOUNCEMENT : "[PubSub]-User-Announcement",
+
     /**
      * A message/action that should be displayed to the user (on prominent)
      * place

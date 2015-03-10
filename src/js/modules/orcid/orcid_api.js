@@ -347,8 +347,8 @@ define([
             if (_.isArray(adsWork[fldName])) {
               _.each(adsWork[fldName], function(value) {
                 out["work-external-identifiers"]['work-external-identifier'].push({
-                  "work-external-identifier-type": self._getOrcidIdentifierType(fldName),
-                  "work-external-identifier-id": {
+                    "work-external-identifier-type": self._getOrcidIdentifierType(fldName),
+                    "work-external-identifier-id": {
                       value: value
                     }
                   }
@@ -561,9 +561,9 @@ define([
             };
 
             self.sendData(self.config.apiEndpoint + '/' + self.authData.orcid + '/orcid-works',
-                self._createOrcidMessage(newWorks),
-                {type: "PUT"}
-              )
+              self._createOrcidMessage(newWorks),
+              {type: "PUT"}
+            )
               .done(function (res) {
                 report['response'] = res;
                 deferred.resolve(report);
@@ -672,6 +672,7 @@ define([
         if (!data) return out;
 
         var update = function(k) {
+          k = k.toLowerCase();
           if (self.db[k]) {
             if (self.db[k].isAds) {
               out.isCreatedByUs = true;
@@ -703,6 +704,10 @@ define([
        *  - extracting info into fast-lookup format
        */
       updateDatabase: function(profile) {
+
+        if (profile && profile['orcid-profile'])
+          profile = profile['orcid-profile'];
+        
         var self = this;
         self.db.pending = true;
 
@@ -731,9 +736,9 @@ define([
           self.profile = profile;
           whenDone.resolve();
         })
-        .fail(function() {
-          whenDone.reject(arguments);
-        });
+          .fail(function() {
+            whenDone.reject(arguments);
+          });
         return whenDone;
       },
 
