@@ -147,6 +147,7 @@ solr.home=${solr.home}
 solr.real.location=${solr.real.location}
 lucene.real.location=${lucene.real.location}    
 montysolr.version=${montysolr.version}
+solr.version=${solr.version}		   	
 		   </echo>
 		
 		<!-- necessary only on windows (git bash) -->
