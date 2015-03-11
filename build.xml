@@ -95,6 +95,7 @@
 		<condition property="propertiesOK">
 			<and>
 				<isset property="montysolr.version" />
+				<isset property="solr.version" />
 			</and>
 		</condition>
 	</target>
