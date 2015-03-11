@@ -488,7 +488,7 @@
 				<attribute name="Implementation-Version"
 	                   value="${version} ${svnversion} - ${user.name} - ${DSTAMP} ${TSTAMP}"/>
 				<attribute name="Implementation-Vendor"
-	                   value="CERN"/>
+	                   value="ADS"/>
 				<attribute name="X-Compile-Source-JDK" value="${javac.source}"/>
 				<attribute name="X-Compile-Target-JDK" value="${javac.target}"/>
 			</manifest>
