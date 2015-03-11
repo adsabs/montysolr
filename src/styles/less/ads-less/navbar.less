@@ -42,28 +42,30 @@
 }
 
 .s-orcid-button-container {
-  position: relative;
-  left: -15%;
+  @media(min-width: @screen-sm-min){
+    position: relative;
+    left: -15%;
+ }
+
 }
 
 
 /*container for inactive orcid title/button to turn on*/
 .s-orcid-button-container {
-  padding: 1% 2% 4% 2%;
+  padding: 7px;
   width: 280px;
+  height: 44px;
   display: inline-block !important;
   margin-top: -4px !important;
-  background-color: @gray-lightest;
   .lh-transition(color .4s ease, background-color .4s ease);
+  color: @gray-lightest;
+  background-color: lighten(@navbar-inverse-bg, 10%);
+  border-left: 1px solid @gray-dark;
+  border-right: 1px solid @gray-dark;
 
   &.s-active {
-    background-color: #fff;
-    color: black;
+    color: white;
 
-  }
-
-  div {
-    height: 26px;
   }
 }
 
@@ -71,12 +73,13 @@
 .switch {
   display: inline-block;
   position: relative;
-  top: 6px;
+  top: 12px;
 }
 
 .s-orcid-label-container {
-  display: inline-block;
-  position: relative;
+  position: absolute;
+  right: 7px;
+  top: -4px;
 }
 
 .s-orcid-title {
@@ -155,7 +158,7 @@ input.cmn-toggle-round + label:after {
   transition: margin 0.4s;
 }
 input.cmn-toggle-round:checked + label:before {
-  background-color: lighten(@brand-success, 10%);
+  background-color: @brand-success;
 }
 input.cmn-toggle-round:checked + label:after {
   margin-left: 30px;
