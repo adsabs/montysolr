@@ -19,7 +19,6 @@
 
 	<property file="build.properties" />
 
-	<property name="solr.version" value="48"/>
 	<property name="solr.home" location="${build.dir}/solr-download/apache-solr-${solr.version}"/>
 	<property name="webdist.home" location="${webdist}" />
 	<property name="lib.dir" value="lib" />
