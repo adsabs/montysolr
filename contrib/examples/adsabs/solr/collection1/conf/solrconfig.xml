@@ -289,6 +289,7 @@
        <str name="defType">aqp</str>
        <str name="aqp.unfielded.tokens.strategy">multiply</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
+       <str name="aqp.unfielded.ignore.fields">pubdate year</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
      </lst>
@@ -303,6 +304,7 @@
        <str name="defType">aqp</str>
        <str name="aqp.unfielded.tokens.strategy">multiply</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
+       <str name="aqp.unfielded.ignore.fields">pubdate year</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
      </lst>
     <arr name="last-components">
@@ -341,6 +343,7 @@
        <str name="aqp.unfielded.tokens.strategy">multiply</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
+       <str name="aqp.unfielded.ignore.fields">pubdate year</str>
      </lst>
   </requestHandler>
 

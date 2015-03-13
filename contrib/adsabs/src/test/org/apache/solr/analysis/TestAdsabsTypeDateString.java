@@ -21,6 +21,7 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.adsabs.solr.AdsConfig.F;
 import org.junit.BeforeClass;
@@ -54,24 +55,25 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 
   public void test() throws Exception {
 
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-10-01T00:00:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-10-01T00:30:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-10-01T00:31:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-11-01T00:00:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2012-12-01T00:00:00Z"));
     
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-10-01T00:00:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-10-01T00:30:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-10-01T00:31:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-11-01T00:00:00Z"));
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "2013-12-01T00:00:00Z"));
+    assertU(addDocs("date", "2012-10-01T00:00:00Z"));
+    assertU(addDocs("date", "2012-10-01T00:30:00Z"));
+    assertU(addDocs("date", "2012-10-01T00:31:00Z"));
+    assertU(addDocs("date", "2012-11-01T00:00:00Z"));
+    assertU(addDocs("date", "2012-12-01T00:00:00Z"));
     
-    assertU(addDocs(F.TYPE_DATE_FIELDS, "1976-01-01T00:30:00Z"));
-		assertU(addDocs(F.TYPE_DATE_FIELDS, "1976-01-02T00:30:00Z"));
-		assertU(addDocs(F.TYPE_DATE_FIELDS, "1976-02-01T00:30:00Z"));
-		assertU(addDocs(F.TYPE_DATE_FIELDS, "1976-01-02T00:30:00Z"));
-		assertU(addDocs(F.TYPE_DATE_FIELDS, "1976-12-30T00:30:00Z")); // year 76 had only 30 days in Dec
-		assertU(addDocs(F.TYPE_DATE_FIELDS, "1977-01-01T00:30:00Z"));
+    assertU(addDocs("date", "2013-10-01T00:00:00Z"));
+    assertU(addDocs("date", "2013-10-01T00:30:00Z"));
+    assertU(addDocs("date", "2013-10-01T00:31:00Z"));
+    assertU(addDocs("date", "2013-11-01T00:00:00Z"));
+    assertU(addDocs("date", "2013-12-01T00:00:00Z"));
+    
+    assertU(addDocs("date", "1976-01-01T00:30:00Z", "title", "foo"));
+		assertU(addDocs("date", "1976-01-02T00:30:00Z"));
+		assertU(addDocs("date", "1976-02-01T00:30:00Z"));
+		assertU(addDocs("date", "1976-01-02T00:30:00Z"));
+		assertU(addDocs("date", "1976-12-30T00:30:00Z")); // year 76 had only 30 days in Dec
+		assertU(addDocs("date", "1977-01-01T00:30:00Z"));
 
     assertU(commit());
 
@@ -216,6 +218,18 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='4']"
         );
 		
+		// github#19 - 'pubdate:2013 foobarbaz' doesn't play nicely in range queries
+		assertQ(req("q", "pubdate:1976 foo", "qf", "title keyword"), 
+      "//*[@numFound='1']"
+      );
+		assertQueryEquals(req("q", "pubdate:2013 foo", 
+		    "defType", "aqp", "qf", "title keyword"), 
+        "+date:[1356998400000 TO 1388534400000} +(title:foo | keyword:foo)", 
+        BooleanQuery.class);
+		assertQueryEquals(req("q", "pubdate:2013 title:foo", 
+        "defType", "aqp", "qf", "title keyword"), 
+        "+date:[1356998400000 TO 1388534400000} +title:foo", 
+        BooleanQuery.class);
     
   }
   

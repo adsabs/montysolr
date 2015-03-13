@@ -156,6 +156,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				
 				// must be: "yyyy-MM-dd (metadata often is just: yyyy-MM|yyyy)
 				", \"pubdate\": \"2013-08-05\"" +
+				", \"year\": \"2013\"" +
 				// it is solr format for the pubdate, must be in the right format
 				// we need to add 30 minutes to every day; this allows us to search
 				// for ranges effectively; thus:
@@ -935,7 +936,16 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		
 
 
+		/*
+		 * year 
+		 */
 
+		assertQ(req("q", "year:2013"), 
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+		assertQ(req("q", "year:[2011 TO 2014]"), 
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
 
 		/*
 		 * links_data (generated and stored as JSON for display purposes)
