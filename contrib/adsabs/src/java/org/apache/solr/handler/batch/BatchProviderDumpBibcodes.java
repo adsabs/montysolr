@@ -3,6 +3,7 @@ package org.apache.solr.handler.batch;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.Filter;
@@ -15,10 +16,13 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationLRUCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class BatchProviderDumpBibcodes extends BatchProvider {
 	
+  public static final Logger log = LoggerFactory.getLogger(BatchProviderDumpBibcodes.class);
 	private BatchProviderDumpAnalyzedFields internalWorker = new BatchProviderDumpAnalyzedFields();
 
 	@Override
@@ -63,7 +67,7 @@ public class BatchProviderDumpBibcodes extends BatchProvider {
 	  br.close();
 	  
 	  if (bits.cardinality() <= 0) {
-	  	return; // nothing to do
+	  	log.warn("The input is an empty set (handler: {})", this.getName());
 	  }
 	  
 	  

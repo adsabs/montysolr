@@ -36,7 +36,26 @@ public class TestBatchProviderDumpBibcodes extends BatchProviderTest {
 				"!{\"bibcode\":\"xxxxxxxxxxxx7\",\"title\":[\"no fight\"]},",
 				"!{\"bibcode\":\"xxxxxxxxxxxx8\",\"title\":[\"for peace\"]},"
 		);
-
+		
+		
+		// empty result set should still produce output
+		File f = new File(tmpDir + "/" + jobid);
+		f.delete();
+		
+		fo = new PrintWriter(jobFile);
+    fo.println("foo");
+    fo.close();
+    
+    req = req("jobid", jobid, "#workdir", tmpDir, 
+        "fields", "bibcode,title", "analyze", "false");
+    
+    provider = new BatchProviderDumpBibcodes();
+    provider.run(req, queue);
+    req.close();
+    
+    checkFile(tmpDir + "/" + jobid, 
+        "\"data\" : ["
+    );
 		
 	}
 	
