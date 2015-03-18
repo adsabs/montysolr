@@ -16,7 +16,7 @@ define([
     'js/components/api_query',
     'js/components/json_response',
     'hbs!./templates/empty-template',
-    'js/modules/orcid/extension'
+    'js/modules/orcid/extension',
   ],
 
   function (
@@ -53,7 +53,8 @@ define([
 
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
-        this.beehive = beehive;
+        this.setBeeHive(beehive);
+
         _.bindAll(this, 'processResponse');
         this.on('orcidAction:delete', function(model) {
           this.collection.remove(model);
@@ -104,7 +105,21 @@ define([
       },
 
       onShow: function() {
-        console.log('done')
+        var oApi = this.getBeeHive().getService('OrcidApi');
+        var self = this;
+        if (oApi) {
+
+          if (!oApi.hasAccess())
+            return;
+
+          oApi.getOrcidProfileInAdsFormat()
+          .done(function(data) {
+            var response = new JsonResponse(data);
+            response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
+            self.processResponse(response);
+          });
+        }
+
       }
 
     });

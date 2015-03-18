@@ -253,6 +253,32 @@ define([
         expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('bibcode-foo');
         done();
       });
+
+      it("should load ORCID when onShow is called", function(done) {
+
+        var orcidApi = getOrcidApi();
+        orcidApi.saveAccessData({access: true});
+        orcidApi.getUserProfile = function() {
+          var d = $.Deferred();
+          d.resolve(defaultResponse()['orcid-profile']);
+          return d;
+        };
+
+        var widget = _getWidget();
+
+        widget.onShow();
+        setTimeout(function() {
+
+          var $w = widget.render().$el
+          $('#test').append($w);
+
+          expect(widget.collection.models.length).to.eql(2);
+          expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
+          expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('bibcode-foo');
+
+          done();
+        }, 200);
+      });
     });
 
   });

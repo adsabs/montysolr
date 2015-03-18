@@ -365,8 +365,28 @@ define([
         onAppExit: function(data) {
           console.log('App exit requested to: ' + data);
           //TODO:rca - save the application history and persist it
-          if (data && data.url)
-            window.location = data.url;
+
+          var alerts = this.getAlerter();
+          if (data && data.url) {
+            if (data.type == 'orcid') {
+              alerts.alert(new ApiFeedback({
+                code: ApiFeedback.CODES.WARNING,
+                msg: 'You will be redirected to ORCID. Please sign in with your ORCID credentials and click on authorize.<br/><button id="okOrcid">OK</button>',
+                modal: true,
+                events: {
+                  'click #alertBox button#okOrcid': 'OK'
+                }
+              }))
+              .done(function(resp) {
+                if (resp == 'OK') {
+                  window.location = data.url
+                }
+              })
+            }
+            else {
+              window.location = data.url;
+            }
+          }
         },
 
         getAlerter: function() {

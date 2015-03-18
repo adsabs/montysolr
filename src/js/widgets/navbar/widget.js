@@ -39,10 +39,10 @@ define([
       var that = this;
 
       if (this.$(".orcid-mode").is(":checked")){
-        this.model.set("orcidModeOn", true);
+        this.model.set("uiOrcidModeOn", true);
       }
       else {
-        this.model.set("orcidModeOn", false);
+        this.model.set("uiOrcidModeOn", false);
       }
       //allow animation to run before rerendering
       setTimeout(function(){
@@ -64,17 +64,26 @@ define([
     activate: function (beehive) {
       this.setBeeHive(beehive);
       this.setInitialVals();
+      var pubsub = beehive.getService('PubSub');
+      pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
     },
 
     //to set the correct initial values for signed in statuses
     setInitialVals : function(){
       var user = this.getBeeHive().getObject("User");
-      if (user.isOrcidModeOn()){
-        this.model.set({orcidModeOn : true}, {silent : true});
+      var orcidApi = this.getBeeHive().getService("OrcidApi");
+      var val = false;
+      if (user.isOrcidModeOn() && orcidApi.hasAccess()){
+        val = true;
       }
+      this.model.set({orcidModeOn : val}, {silent : true});
     },
 
-    handleUserAnnouncement : function(){
+    handleUserAnnouncement : function(key, val){
+      if (key == 'orcidUIChange') {
+        var orcidApi = this.getBeeHive().getService("OrcidApi");
+        this.model.set('orcidModeOn', val && orcidApi.hasAccess());
+      }
     },
 
     viewEvents : {
@@ -82,24 +91,20 @@ define([
     },
 
     modelEvents : {
-      "change:orcidModeOn" :"toggleOrcidMode"
+      "change:uiOrcidModeOn" :"toggleOrcidMode"
     },
 
     toggleOrcidMode : function() {
       var user = this.getBeeHive().getObject('User'),
         orcidApi = this.getBeeHive().getService("OrcidApi");
 
-      if (this.model.get("orcidModeOn")){
-        user.setOrcidMode(true);
+      var newVal = this.model.get("uiOrcidModeOn");
+      user.setOrcidMode(newVal);
+
+      if (newVal){
         //sign into orcid api if not signed in already
         if (!orcidApi.hasAccess() ){
           orcidApi.signIn();
-        }
-      }
-      else {
-        user.setOrcidMode(false);
-        if (!orcidApi.hasAccess()) {
-          orcidApi.signOut();
         }
       }
     },
