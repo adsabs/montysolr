@@ -30,30 +30,33 @@ define([
         minsub.beehive.addService('OrcidApi', {
           hasAccess: function() {return true;},
           getRecordInfo: function(data) {
+            var defer = $.Deferred();
+
             if (data.bibcode == '2013arXiv1305.3460H') {
-              return {
+              defer.resolve({
                 isCreatedByUs: true,
                 isCreatedByOthers: false
-              }
+              });
             }
             else if (data.bibcode == '2008PhDT.......169R') {
-              return {
+              defer.resolve({
                 isCreatedByUs: true,
                 isCreatedByOthers: true
-              }
+              });
             }
             else if (data.bibcode == '1987sbge.proc..355F') {
-              return {
+              defer.resolve({
                 isCreatedByUs: false,
                 isCreatedByOthers: true
-              }
+              });
             }
             else {
-              return {
+              defer.resolve({
                 isCreatedByUs: false,
                 isCreatedByOthers: false
-              }
+              });
             }
+            return defer.promise();
           },
           getHardenedInstance: function() {
             return this;
@@ -94,7 +97,7 @@ define([
         done();
       });
 
-      it("has method to add record", function(done) {
+      it("has methods to manipulate records", function(done) {
         var w = _getWidget();
 
         var oApi = minsub.beehive.getService('OrcidApi');
@@ -135,6 +138,37 @@ define([
         expectedAction = 'add';
         w.widget.view.children.findByIndex(2).$el.find('.orcid-add').click();
 
+
+        done();
+      });
+
+      it("when displaying a record, it can handle the 'pending' state", function(done) {
+        var w = _getWidget();
+
+        var oApi = minsub.beehive.getService('OrcidApi');
+        var d = $.Deferred();
+
+        oApi.getRecordInfo = function() {
+          return d.promise();
+        };
+
+        // force new batch (render)
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({
+          q: "star"
+        }));
+
+        // widgets are in the 'loading' state
+        expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(1);
+
+        // simulate the data has arrived
+        d.resolve({
+          isCreatedByUs: true,
+          isCreatedByOthers: true
+        });
+
+        // the widget is display orcid actions
+        expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(0);
+        expect(w.widget.view.children.findByIndex(1).$el.find('.orcid-update').length).to.eql(1);
 
         done();
       });

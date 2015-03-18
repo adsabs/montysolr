@@ -98,14 +98,25 @@ define([
             ['ExportWidget'].concat(searchPageAlwaysVisible.slice(1)));
         });
 
-        this.set('orcid-page', function() {
+        this.set('orcid-page', function(view, targetRoute) {
 
           var orcidApi = app.getService('OrcidApi');
+
+          /**
+          if (newVal){
+            //sign into orcid api if not signed in already
+            if (!orcidApi.hasAccess() ){
+              orcidApi.signIn();
+            }
+          }
+          **/
+
+          // traffic from Orcid - user has authorized our access
           if (orcidApi.hasExchangeCode() && !orcidApi.hasAccess()) {
             orcidApi.getAccessData(orcidApi.getExchangeCode())
             .done(function(data) {
                 orcidApi.saveAccessData(data);
-                self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname + window.location.hash});
+                self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname + (targetRoute ? targetRoute : window.location.hash)});
             })
             .fail(function() {
                 console.warn('Unsuccessful login to ORCID');
@@ -123,17 +134,9 @@ define([
           this.route = '#user/orcid';
 
           var orcidWidget = app.getWidget('OrcidBigWidget');
-          if (orcidWidget && orcidApi.hasAccess()) {
-            orcidApi.getUserProfile()
-              .done(function(profile) {
-                orcidApi.updateDatabase(profile);
-                var response = new JsonResponse(orcidApi.transformOrcidProfile(profile));
-                response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
-                orcidWidget.processResponse(response);
-
-                app.getObject('MasterPageManager').show('SearchPage',
-                  ['OrcidBigWidget'].concat(searchPageAlwaysVisible.slice(1)));
-              });
+          if (orcidWidget) {
+              app.getObject('MasterPageManager').show('SearchPage',
+                ['OrcidBigWidget', 'SearchWidget', 'AlertsWidget']);
           }
           else {
             self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'index-page');

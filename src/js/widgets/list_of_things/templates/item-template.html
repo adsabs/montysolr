@@ -82,9 +82,13 @@
         {{/if}}
     </div>
     <div class="col-xs-10">
+        {{#if bibcode}}
         <a href="#abs/{{identifier}}">
             <h3 class="s-results-title">{{{title}}}</h3>
         </a>
+        {{else}}
+            <h3 class="s-results-title">{{{title}}}</h3>
+        {{/if}}
     </div>
 </div>
 
@@ -118,7 +122,7 @@
 
             <div class="alert alert-success s-orcid-alert" role="alert">
 
-                <span class="text-success s-orcid-success"> <i class="icon-success"></i>&nbsp;Added to ORCID&nbsp;&nbsp;</span>
+                <span class="text-success s-orcid-success"> <i class="icon-success"></i>&nbsp;In ORCID&nbsp;&nbsp;</span>
 
                 <div class="btn-group pull-right">
                     <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
@@ -138,10 +142,17 @@
 
             {{else}}<!-- add this paper to ORCID-->
 
+            {{#if bibcode}}
             <button class="btn btn-default btn-xs orcid-action {{orcid.actions.add.action}}"  data-action="{{orcid.actions.add.action}}">
                <img src="../../styles/img/orcid-inactive.svg" alt="orcid logo inactive" class="s-orcid-img" title="{{orcid.actions.add.caption}}"/>
                 Claim in ORCID
             </button>
+            {{else}}
+            <button class="btn btn-default btn-xs orcid-action"  data-action="orcid-view">
+                <img src="../../styles/img/orcid-inactive.svg" alt="orcid logo inactive" class="s-orcid-img" title=""/>
+                Record not known to ADS (view it in ORCID)
+            </button>
+            {{/if}}
 
 
             {{/if}}<!--orcid.provenance -->

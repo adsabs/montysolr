@@ -79,7 +79,7 @@ define(['underscore',
           return; // do nothing
 
         try {
-          transition.execute(arguments);
+          transition.execute.apply(transition, arguments);
         }
         catch (e) {
           this.handleTransitionError(transition, e, arguments);

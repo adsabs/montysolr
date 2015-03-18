@@ -30,6 +30,11 @@ define([
       u.activate(minsub.beehive);
       minsub.beehive.addObject("User", u);
 
+      minsub.beehive.addService('OrcidApi', {
+        hasAccess: function() {return true},
+        getHardenedInstance: function() {return this}
+      });
+
       var n = new NavBarWidget();
       n.activate(minsub.beehive.getHardenedInstance());
       $("#test").append(n.render().el);

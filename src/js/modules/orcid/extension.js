@@ -41,7 +41,7 @@ define([
           msg.actions.add = {title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'}
           msg.actions.view = {title: 'view in ORCID', caption:'Another version exists (we don\'t have rights to update it)', action: 'orcid-view'};
 
-       }
+        }
         else if (!recInfo.isCreatedByOthers && recInfo.isCreatedByUs) {
 
          msg.actions.update = {title: 'update in ORCID', caption:'Update ADS version with latest data', action: 'orcid-update'};
@@ -68,7 +68,7 @@ define([
        // add orcid info to the documents
        var orcidApi = this.beehive.getService('OrcidApi');
 
-       if (!orcidApi) {
+       if (!orcidApi || !orcidApi.hasAccess()) {
          return docs;
        }
 
@@ -76,7 +76,27 @@ define([
 
        _.each(docs, function(d) {
          recInfo = orcidApi.getRecordInfo(d);
-         d.orcid = self._getOrcidInfo(recInfo);
+         if (recInfo.state() == 'pending') {
+           recInfo.done(function(rInfo) {
+             //console.log('pending: ' + d.bibcode + JSON.stringify(rInfo));
+             var actions = self._getOrcidInfo(rInfo);
+             // get the model for this document
+             if (self.collection && self.collection.findWhere) {
+               var model = self.collection.findWhere({bibcode: d.bibcode});
+               if (model) {
+                 model.set('orcid', actions); // if not found, we can ignore this update (the view changed already)
+               }
+             }
+           });
+           d.orcid = {pending: true};
+         }
+         else {
+           recInfo.done(function(rInfo) {
+             //console.log('ready: ' + d.bibcode + JSON.stringify(rInfo));
+             d.orcid = self._getOrcidInfo(rInfo);
+           });
+         }
+
        });
        return docs;
      };

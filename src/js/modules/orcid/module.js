@@ -52,13 +52,13 @@ define([
 
         //TODO:rca - clean up this
         var opts = {
+          redirectUrlBase: redirectUrlBase,
           apiEndpoint: orcidApiEndpoint,
           clientId: orcidClientId,
           worksUrl: orcidApiEndpoint + '/{0}/orcid-works',
           loginUrl: orcidLoginEndpoint
             + "?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline"
-            + "&client_id=" + orcidClientId
-            + "&redirect_uri=" + encodeURIComponent(redirectUrlBase + '/#/user/orcid'),
+            + "&client_id=" + orcidClientId,
           exchangeTokenUrl: orcidApiEndpoint + '/exchangeOAuthCode'
         };
 

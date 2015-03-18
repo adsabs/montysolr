@@ -57,12 +57,16 @@ define([
         this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
       },
 
-      onUserAnnouncement: function(val){
-        if (val == "orcidUIChange"){
-          //how to directly rerender the item views??
+      onUserAnnouncement: function(key, val){
+        if (key == "orcidUIChange"){
           var data = this.view.collection.toJSON();
-          this.view.collection.reset();
-          this.view.collection.reset(this.addOrcidInfo(data));
+          var docs = _.map(data, function(x) {
+            delete x.orcid;
+            return x;
+          });
+          if (val)
+            this.addOrcidInfo(docs);
+          this.view.collection.reset(docs);
         }
       },
 

@@ -75,7 +75,10 @@ define([
           minsub.subscribe(minsub.APP_EXIT, spy);
           oApi.signIn();
           expect(spy.called).to.eql(true);
-          expect(spy.lastCall.args[0]).to.eql({url: 'https://api.orcid.org/oauth/authorize?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline&client_id=APP-P5ANJTQRRTMA6GXZ&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F%23%2Fuser%2Forcid'})
+          expect(spy.lastCall.args[0]).to.eql({
+            url: 'https://api.orcid.org/oauth/authorize?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline&client_id=APP-P5ANJTQRRTMA6GXZ&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F%23%2Fuser%2Forcid',
+            type: 'orcid'
+          })
         });
 
         it("has methods to extract access code", function() {
@@ -580,17 +583,24 @@ define([
 
         it("has methods to query status of a record", function(done) {
           var oApi = getOrcidApi();
-          oApi.updateDatabase().done(function() {
-            var recInfo = oApi.getRecordInfo({bibcode: 'test-bibcode'});
-            expect(recInfo.isCreatedByUs).to.eql(true);
-            expect(recInfo.isCreatedByOthers).to.eql(false);
+          sinon.spy(oApi, 'updateDatabase');
 
-            recInfo = oApi.getRecordInfo({bibcode: 'bibcode-foo'});
-            expect(recInfo.isCreatedByUs).to.eql(false);
-            expect(recInfo.isCreatedByOthers).to.eql(true);
 
-            done();
-          });
+          oApi.getRecordInfo({bibcode: 'test-bibcode'})
+            .done(function(recInfo) {
+              expect(recInfo.isCreatedByUs).to.eql(true);
+              expect(recInfo.isCreatedByOthers).to.eql(false);
+
+              // this one should return immediately
+              oApi.getRecordInfo({bibcode: 'bibcode-foo'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(true);
+                })
+
+              done();
+            });
+
         });
 
         it("updateOrcid(add)", function(done) {
@@ -606,7 +616,7 @@ define([
               expect(oApi.addWorks.called).to.eql(true);
               expect(oApi.updateWorks.called).to.eql(false);
               expect(oApi.deleteWorks.called).to.eql(false);
-              expect(oApi.updateDatabase.called).to.eql(false);
+              expect(oApi.updateDatabase.called).to.eql(true);
               done();
             });
         });

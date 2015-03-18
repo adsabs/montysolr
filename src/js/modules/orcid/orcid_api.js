@@ -79,6 +79,8 @@ define([
         this.authData = null;
         this.db = {};
         this.profile = {};
+        this.checkInterval = 3600 * 1000;
+        this.virgin = true;
       },
 
       activate: function (beehive) {
@@ -114,8 +116,13 @@ define([
        * Redirects to ORCID where the user logs in and ORCID will forward
        * user back to us
        */
-      signIn: function () {
-        this.pubsub.publish(this.pubsub.APP_EXIT, {url: this.config.loginUrl});
+      signIn: function (targetRoute) {
+        this.pubsub.publish(this.pubsub.APP_EXIT, {
+          type: 'orcid',
+          url: this.config.loginUrl
+            + "&redirect_uri=" + encodeURIComponent(this.config.redirectUrlBase +
+            (targetRoute || '/#/user/orcid'))
+        });
       },
 
       /**
@@ -188,7 +195,7 @@ define([
       saveAccessData: function(authData) {
         var beehive = this.getBeeHive();
 
-        if (authData && authData.expires_in) {
+        if (authData && !authData.expires && authData.expires_in) {
           authData.expires = new Date().getTime() + ((authData.expires_in * 1000) - 1000);
         }
         this.authData = authData;
@@ -454,6 +461,7 @@ define([
        * @returns {*}
        */
       addWorks: function (adsRecs) {
+        this.dirty = true; // will need to synchronize
         return this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-works',
           this.formatOrcidWorks(adsRecs),
           {
@@ -563,8 +571,9 @@ define([
             self.sendData(self.config.apiEndpoint + '/' + self.authData.orcid + '/orcid-works',
               self._createOrcidMessage(newWorks),
               {type: "PUT"}
-            )
+              )
               .done(function (res) {
+                self.dirty = true; // will need to synchronize
                 report['response'] = res;
                 deferred.resolve(report);
               });
@@ -653,49 +662,70 @@ define([
 
 
       /**
-       * Returns information about an ORCID document, it accepts an object with
+       * Returns a promise with information about an ORCID document, it accepts an object with
        *  - bibcode
        *  - doi
        *  - id
        *  - alternate_bibcode
        *
+       * It will automatically update orcid-database if necessary
+       *
        * @param data
-       * @returns {{isCreatedByUs: boolean, isCreatedByOthers: boolean, provenance: null}}
+       * @returns Promise
+       *  {{isCreatedByUs: boolean, isCreatedByOthers: boolean, provenance: null}}
        */
       getRecordInfo: function(data) {
+
+        if (!data) {
+          throw new Error("Empty input");
+        }
+        var result = $.Deferred();
+        var self = this;
+
+        if (this.needsUpdate() || this.pending) {
+          this.updateDatabase()
+            .done(function() {
+              result.resolve(self._getRecInfo(data));
+            })
+        }
+        else {
+          result.resolve(self._getRecInfo(data));
+        }
+
+        return result.promise();
+      },
+
+      _getRecInfo: function(data) {
         var out = {
           isCreatedByUs: false,
           isCreatedByOthers: false,
           provenance: null
         };
         var self = this;
-        if (!data) return out;
-
-        var update = function(k) {
-          k = k.toLowerCase();
-          if (self.db[k]) {
-            if (self.db[k].isAds) {
-              out.isCreatedByUs = true;
-            }
-            else {
-              out.isCreatedByOthers = true;
-            }
-            out.putcode = self.db[k].putcode;
-          }
-        };
-
         _.each(data, function(value, key, obj) {
           if (_.isArray(value)) {
             for (var v in value) {
-              update(key + ':' + v)
+              self._updateRec(key + ':' + v, out)
             }
           }
           else {
-            update(key + ':' + value);
+            self._updateRec(key + ':' + value, out);
           }
         });
-
         return out;
+      },
+
+      _updateRec: function(k, out) {
+        k = k.toLowerCase();
+        if (this.db[k]) {
+          if (this.db[k].isAds) {
+            out.isCreatedByUs = true;
+          }
+          else {
+            out.isCreatedByOthers = true;
+          }
+          out.putcode = this.db[k].putcode;
+        }
       },
 
       /**
@@ -709,9 +739,23 @@ define([
           profile = profile['orcid-profile'];
         
         var self = this;
-        self.db.pending = true;
 
         var whenDone = $.Deferred();
+        if (self.pending) { // update is already running
+          var tme = setInterval(function() {
+            if (self.pending == false) {
+              whenDone.resolve();
+              clearInterval(tme);
+            }
+          }, 200);
+          setTimeout(function() {
+            clearInterval(tme);
+          }, 3000);
+          return whenDone.promise();
+        }
+
+        self.pending = true;
+        self.virgin = false;
 
         var defer;
         if (profile && profile.orcid) {
@@ -723,6 +767,9 @@ define([
         }
 
         defer.done(function(profile) {
+
+          self.dirty = false;
+
           var works = profile['orcid-activities']['orcid-works'];
           var ids = self.getExternalIds(works);
           var db = {}, key, isOurs;
@@ -734,12 +781,34 @@ define([
           });
           self.db = db;
           self.profile = profile;
+          self.pending = false;
+
           whenDone.resolve();
         })
           .fail(function() {
             whenDone.reject(arguments);
           });
         return whenDone;
+      },
+
+      /**
+       * Returns true when the OrcidApi needs to update its own database (synchronize
+       * with the remote API); this happens either because we have updated something
+       * or when a predefined time-interval passed
+       */
+      needsUpdate: function() {
+
+        if (this.virgin)
+          return true;
+
+        if (!this.dirtyThrottle) {
+          this.dirtyThrottle = _.throttle(function(orcidApi) {
+            orcidApi.updateDatabase();
+          }, this.checkInterval || (3600 * 1000), this); // check every hour (or sooner?)
+        }
+        this.dirtyThrottle(this);
+
+        return this.dirty;
       },
 
       /**
@@ -754,19 +823,19 @@ define([
         if (action == 'update') {
           this.updateWorks([adsDoc])
             .done(function(resp) {
-              self.updateDatabase(resp.response)
-                .done(function() {
-                  result.resolve(self.getRecordInfo(adsDoc));
-                })
+              self.getRecordInfo(adsDoc)
+                .done(function(recInfo) {
+                  result.resolve(recInfo);
+                });
             })
         }
         else if (action == 'delete') {
           this.deleteWorks(this._extractIdentifiers([adsDoc]))
             .done(function(resp) {
-              self.updateDatabase(resp.response)
-                .done(function() {
-                  result.resolve(self.getRecordInfo(adsDoc));
-                })
+              self.getRecordInfo(adsDoc)
+                .done(function(recInfo) {
+                  result.resolve(recInfo);
+                });
             })
         }
         else if (action == 'add') {
@@ -776,7 +845,6 @@ define([
               .done(function() {
                 recInfo.isCreatedByUs = true;
                 result.resolve(recInfo);
-                setTimeout(function() {self.updateDatabase()}, 1); // no need to wait
               })
           }
           else {
@@ -868,12 +936,26 @@ define([
 
       },
 
+      getOrcidProfileInAdsFormat: function() {
+        var d = $.Deferred();
+        var self = this;
+        this.getUserProfile()
+          .done(function(profile) {
+            self.updateDatabase(profile)
+              .done(function() {
+                d.resolve(self.transformOrcidProfile(profile));
+              });
+          });
+        return d.promise();
+      },
+
       hardenedInterface: {
         hasAccess: 'boolean indicating access to ORCID Api',
         signIn: 'login',
         signOut: 'logout',
         getRecordInfo: 'provides info about a document',
-        updateOrcid: 'the main access point for widgets'
+        updateOrcid: 'the main access point for widgets',
+        getOrcidProfileInAdsFormat: 'retrieves the Orcid profile in ADS format'
       }
     });
 
