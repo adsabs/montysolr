@@ -39,10 +39,10 @@ define([
       var that = this;
 
       if (this.$(".orcid-mode").is(":checked")){
-        this.model.set("orcidModeOn", true);
+        this.model.set("uiOrcidModeOn", true);
       }
       else {
-        this.model.set("orcidModeOn", false);
+        this.model.set("uiOrcidModeOn", false);
       }
       //allow animation to run before rerendering
       setTimeout(function(){
@@ -91,22 +91,22 @@ define([
     },
 
     modelEvents : {
-      "change:orcidModeOn" :"toggleOrcidMode"
+      "change:uiOrcidModeOn" :"toggleOrcidMode"
     },
 
     toggleOrcidMode : function() {
       var user = this.getBeeHive().getObject('User'),
         orcidApi = this.getBeeHive().getService("OrcidApi");
 
-      var newVal = this.model.get("orcidModeOn");
+      var newVal = this.model.get("uiOrcidModeOn");
+      user.setOrcidMode(newVal);
+
       if (newVal){
         //sign into orcid api if not signed in already
         if (!orcidApi.hasAccess() ){
           orcidApi.signIn();
         }
       }
-      user.setOrcidMode(newVal);
-      var pubsub = this.getBeeHive().getService('PubSub');
     },
 
     triggerADSAction : function(){

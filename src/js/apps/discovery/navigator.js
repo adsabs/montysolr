@@ -102,15 +102,6 @@ define([
 
           var orcidApi = app.getService('OrcidApi');
 
-          /**
-          if (newVal){
-            //sign into orcid api if not signed in already
-            if (!orcidApi.hasAccess() ){
-              orcidApi.signIn();
-            }
-          }
-          **/
-
           // traffic from Orcid - user has authorized our access
           if (orcidApi.hasExchangeCode() && !orcidApi.hasAccess()) {
             orcidApi.getAccessData(orcidApi.getExchangeCode())
