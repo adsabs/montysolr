@@ -197,13 +197,13 @@ define([
           abstract.processResponse(r);
 
           // the navigation must turn active
-          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-abstract-nav-inactive')).to.be.false;
-          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-abstract-nav-inactive')).to.be.true;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-nav-inactive')).to.be.false;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-nav-inactive')).to.be.true;
 
           // simulated late arrival
           references.processResponse(r);
-          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-abstract-nav-inactive')).to.be.false;
-          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-abstract-nav-inactive')).to.be.false;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-nav-inactive')).to.be.false;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-nav-inactive')).to.be.false;
 
           // click on the link (NAVIGATE event should be triggered)
           var pubsub = app.getService('PubSub').getHardenedInstance();
@@ -213,8 +213,8 @@ define([
           expect(spy.callCount).to.be.eql(1);
 
           // it has to be selected and contain numcount
-          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-abstract-nav-active')).to.be.true;
-          expect($(pageManager.view.$el.find('div[data-widget-id="ShowReferences"] span')).text().trim()).to.eql('(841359)');
+          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-nav-active')).to.be.true;
+          expect($(pageManager.view.$el.find('div[data-widget-id="ShowReferences"] span').eq(1)).text().trim()).to.eql('(841359)');
           done();
         });
 

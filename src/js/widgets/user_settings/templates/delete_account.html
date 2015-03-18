@@ -1,1 +1,32 @@
-havent added this option yet :(
+<div class="panel panel-default s-form-container">
+    <legend class="panel-heading">Delete Account
+    </legend>
+    <div class="panel-body">
+        <div class="form-group">
+            <p> This action cannot be reversed.
+            </p>
+            <div>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".confirm-delete">Delete my account</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade confirm-delete" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+              <h4>  <i class="fa fa-lg fa-exclamation-triangle"></i> Confirm deletion</h4>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete your account permanently?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-primary" data-dismiss="modal">Yes, delete my account</button>
+            </div>
+        </div>
+
+    </div>
+</div>

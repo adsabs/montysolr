@@ -1,21 +1,19 @@
 define([
-  "underscore",
+  "underscore"
 ], function(
-  _,
-  LoadingTemplate,
-  SuccessTemplate
+  _
 
   ){
 
   //some functions to be used by form views which auto-validate
-  var formFunctions =  {
+  var formFunctions = {
     //for the view
     //call in onRender method to activate the recaptcha
     //otherwise it won't work
     activateRecaptcha: function (sitekey) {
       var that = this;
       //for testing, ignore
-      if (window.grecaptcha){
+      if (window.grecaptcha) {
         grecaptcha.render(this.$(".g-recaptcha")[0],
           {
             sitekey: sitekey, callback: function (response) {
@@ -31,9 +29,9 @@ define([
     },
     //for the view
     //checks whether to show a green submit button on model change
-    checkValidationState : function(){
+    checkValidationState: function () {
       //hide possible submit button message
-      if (this.model.isValidSafe()){
+      if (this.model.isValidSafe()) {
 
         this.$("button[type=submit]")
           .addClass("btn-success")
@@ -51,7 +49,7 @@ define([
     //for the view
     //when someone clicks on submit button
     //parent views/controllers need to listen for "submit-form" event
-    triggerSubmit : function (e) {
+    triggerSubmit: function (e) {
       e.preventDefault();
       // (only show error messages if submit == true), so once user has unsuccessfully
       // submitted 1 time
@@ -77,7 +75,7 @@ define([
     },
 
     //for the view, to be called onRender
-    activateValidation : function(){
+    activateValidation: function () {
       Backbone.Validation.bind(this, {
         forceUpdate: true
       });
@@ -99,8 +97,19 @@ define([
       if (allRequired && this.isValid(true)) {
         return true
       }
+    },
+
+    //for the model, if it has a validation hash from backbone-validation
+    //right now, useful only for user setting models that combine user-entered info and info from the server
+    reset: function () {
+      var valKeys = _.keys(this.validation);
+      _.each(this.attributes, function (v,k) {
+        if (_.contains(valKeys, k)) {
+          this.unset(k, {silent: true});
+        }
+      }, this);
     }
-  };
+  }
 
 
   return formFunctions

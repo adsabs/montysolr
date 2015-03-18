@@ -16,7 +16,7 @@ define([
         id: undefined, // widgetId
         path: undefined,
         title: undefined,
-        showCount: undefined,
+        showCount: false,
         category: undefined,
         isActive : false,
         isSelected: false,
@@ -126,6 +126,9 @@ define([
         if (model) {
           model.set(_.pick(data, model.keys()));
         }
+      }
+      else if (event === "broadcast-payload"){
+        this.model.set("bibcode", data.bibcode);
       }
     }
 

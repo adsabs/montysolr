@@ -44,8 +44,8 @@ define([
         }
         else if (!recInfo.isCreatedByOthers && recInfo.isCreatedByUs) {
 
-         msg.actions.update = {title: 'update in ORCID', caption:'Update ADS version with latest data', action: 'orcid-update'};
-         msg.actions.delete = {title: 'delete from ORCID', caption:'Delete ADS version from ORCID', action: 'orcid-delete'};
+          msg.actions.update = {title: 'update in ORCID', caption:'Update ADS version with latest data', action: 'orcid-update'};
+          msg.actions.delete = {title: 'delete from ORCID', caption:'Delete ADS version from ORCID', action: 'orcid-delete'};
         }
         else {
           msg.actions.add = {title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'};
@@ -66,48 +66,48 @@ define([
         return msg;
       },
 
-     WidgetClass.prototype.addOrcidInfo = function(docs) {
-       var self = this;
-       // add orcid info to the documents
-       var orcidApi = this.beehive.getService('OrcidApi');
+        WidgetClass.prototype.addOrcidInfo = function(docs) {
+          var self = this;
+          // add orcid info to the documents
+          var orcidApi = this.beehive.getService('OrcidApi');
 
-       if (!orcidApi || !orcidApi.hasAccess()) {
-         return docs;
-       }
+          if (!orcidApi || !orcidApi.hasAccess()) {
+            return docs;
+          }
 
-       var recInfo;
+          var recInfo;
 
-       _.each(docs, function(d) {
-         recInfo = orcidApi.getRecordInfo(d);
-         if (recInfo.state() == 'pending') {
-           recInfo.done(function(rInfo) {
-             //console.log('pending: ' + d.bibcode + JSON.stringify(rInfo));
-             var actions = self._getOrcidInfo(rInfo);
-             // get the model for this document
-             if (self.collection && self.collection.findWhere) {
-               var model = self.collection.findWhere({bibcode: d.bibcode});
-               if (model) {
-                 model.set('orcid', actions); // if not found, we can ignore this update (the view changed already)
-               }
-             }
-           });
-           d.orcid = {pending: true};
-         }
-         else {
-           recInfo.done(function(rInfo) {
-             //console.log('ready: ' + d.bibcode + JSON.stringify(rInfo));
-             d.orcid = self._getOrcidInfo(rInfo);
-           });
-         }
+          _.each(docs, function(d) {
+            recInfo = orcidApi.getRecordInfo(d);
+            if (recInfo.state() == 'pending') {
+              recInfo.done(function(rInfo) {
+                //console.log('pending: ' + d.bibcode + JSON.stringify(rInfo));
+                var actions = self._getOrcidInfo(rInfo);
+                // get the model for this document
+                if (self.collection && self.collection.findWhere) {
+                  var model = self.collection.findWhere({bibcode: d.bibcode});
+                  if (model) {
+                    model.set('orcid', actions); // if not found, we can ignore this update (the view changed already)
+                  }
+                }
+              });
+              d.orcid = {pending: true};
+            }
+            else {
+              recInfo.done(function(rInfo) {
+                //console.log('ready: ' + d.bibcode + JSON.stringify(rInfo));
+                d.orcid = self._getOrcidInfo(rInfo);
+              });
+            }
 
-       });
-       return docs;
-     };
+          });
+          return docs;
+        };
 
       WidgetClass.prototype.processDocs = function() {
         var docs = processDocs.apply(this, arguments);
         var user = this.beehive.getObject('User');
-        if (user && user.isOrcidUIOn()){
+        if (user && user.isOrcidModeOn()){
           return this.addOrcidInfo(docs);
         }
         return docs;

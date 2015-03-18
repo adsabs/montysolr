@@ -29,7 +29,7 @@ function(
       $("#test").append(a.view.render().el);
 
       //should render nothing since there is no subview indicated in the view model
-      expect($("#test").html()).to.eql('<div class="s-authentication-container row s-form-widget"><div class="form-container s-form-container col-sm-6 col-sm-offset-3">\n\n</div></div>');
+      expect($("#test").html()).to.eql('<div class="s-authentication-container row s-form-widget"><div class="form-container s-form-container  col-sm-10 col-sm-offset-1  col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">\n\n</div></div>');
 
       a.setSubView("login");
 
@@ -105,6 +105,7 @@ function(
 
     it("should interactively validate form inputs, only allowing correctly filled forms to be submitted", function(){
 
+      //testing only a single view-- is this ok?
       var minsub = new (MinSub.extend({
         request: function (apiRequest) {}
       }))({verbose: false});
@@ -116,47 +117,63 @@ function(
       a.activate(hardened);
       $("#test").append(a.view.render().el);
 
+      //testing form validation for register page
+      a.setSubView("register");
+
+      var triggerStub = sinon.stub(a.view, "trigger");
+
+      $("#test").find("input[name=email]").val("foo");
+      $("#test").find("input[name=email]").trigger("change");
+      expect($("#test").find("input[name=email]").parent().hasClass("has-success")).to.be.false;
+      expect($("#test").find("input[name=email]").parent().hasClass("has-error")).to.be.false;
+
+      $("#test").find("input[name=email]").val("foo@goo.com");
+      $("#test").find("input[name=email]").trigger("change");
+      expect($("#test").find("input[name=email]").parent().hasClass("has-success")).to.be.true;
+      expect($("#test").find("input[name=email]").parent().hasClass("has-error")).to.be.false;
+
+      $("#test").find("input[name=password1]").val("1aaaa");
+      $("#test").find("input[name=password1]").trigger("change");
+      expect($("#test").find("input[name=password1]").parent().hasClass("has-success")).to.be.false;
+      expect($("#test").find("input[name=password1]").parent().hasClass("has-error")).to.be.false;
+
+      $("#test").find("input[name=password1]").val("1Aaaaa");
+      $("#test").find("input[name=password1]").trigger("change");
+      expect($("#test").find("input[name=password1]").parent().hasClass("has-success")).to.be.true;
+      expect($("#test").find("input[name=password1]").parent().hasClass("has-error")).to.be.false;
+
+      //premature submit should trigger error message instead of submitting the form,
+      // and show error highlight on invalid fields
+
+      $("#test").find("button[type=submit]").click();
+      expect($("#test").find("button[type=submit]").hasClass("btn-success")).to.be.false;
+
+      expect(triggerStub.callCount).to.eql(0);
+      expect($("#test").find("input[name=password1]").parent().hasClass("has-success")).to.be.true;
+      expect($("#test").find("input[name=password2]").parent().hasClass("has-error")).to.be.true;
+
+      expect($("#test").find("input[name=password1]").parent().find(".help-block").hasClass("no-show")).to.be.true;
+      expect($("#test").find("input[name=password2]").parent().find(".help-block").hasClass("no-show")).to.be.false;
+
+      $("#test").find("input[name=password2]").val("1A");
+      $("#test").find("input[name=password2]").trigger("change");
+
+      expect($("#test").find("input[name=password2]").parent().hasClass("has-error")).to.be.true;
+
+      $("#test").find("input[name=password2]").val("1Aaaaa");
+      $("#test").find("input[name=password2]").trigger("change");
+
+      expect($("#test").find("input[name=password2]").parent().hasClass("has-error")).to.be.false;
+
+      //finally,  fake the g-recaptcha-response
+      a.view.registerModel.set("g-recaptcha-response", "foo");
+      expect($("#test").find("button[type=submit]").hasClass("btn-success")).to.be.true;
+
+      $("#test").find("button[type=submit]").click();
+      expect(triggerStub.callCount).to.eql(1);
 
 
     });
-
-
-
-    it("should handle both success and fail states on submit so the user sees the correct thing", function(){
-
-      var minsub = new (MinSub.extend({
-        request: function (apiRequest) {}
-      }))({verbose: false});
-
-      var a = new AuthenticationWidget();
-      a.viewKey = "foo";
-      a.activate(minsub.beehive.getHardenedInstance());
-
-      //register success
-
-      $("#test").append(a.view.render().el);
-//      a.;
-
-      expect($(".panel-body").text().trim()).to.eql("Please check your email for further instructions.");
-      $("#test").empty();
-
-    });
-
-    it()
-
-
-    it("should listen to USER_ANNOUNCEMENT and reset the models and, if there was an error, show the relevant form", function(){
-
-
-
-    });
-
-    it("should be able to show the correct form depending on the route", function(){
-
-
-    });
-
-
 
   });
 

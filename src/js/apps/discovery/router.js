@@ -5,7 +5,9 @@ define([
     'js/mixins/dependon',
     'hbs!./404',
     'js/components/api_feedback',
-    'js/components/api_request'
+    'js/components/api_request',
+    'js/components/api_targets',
+    'js/mixins/discovery_bootstrap'
 
   ],
   function (
@@ -15,7 +17,9 @@ define([
     Dependon,
     ErrorTemplate,
     ApiFeedback,
-    ApiRequest
+    ApiRequest,
+    ApiTargets,
+    DiscoveryBootstrap
 
     ) {
 
@@ -91,47 +95,73 @@ define([
 
       routeToVerifyPage : function(subView, token){
 
-        var successMessage, failMessage, done, fail, request;
+        var failMessage, failTitle, route, done, fail, request, type;
 
         if (subView === "register") {
-          successMessage = "You have been successfully registered.",
-              failMessage = "Registration failed.";
+          failTitle = "Registration failed.";
+          failMessage = "<p>Please try again, or contact <b> adshelp@cfa.harvard.edu for support </b></p>";
+          route = ApiTargets.VERIFY + "/" + token;
+
+          done = function(reply) {
+            //user has been logged in already by server
+            //request bootstrap
+            this.getApiAccess({reconnect : true});
+            //redirect to index page
+            this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+            //call alerts widget
+            var title = "Welcome to ADS";
+            var msg = "<p>You have been successfully registered with the username</p> <p><b>"+ reply.email +"</b></p>";
+            this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+          };
         }
-        else if (subView === "email") {
-         successMessage = "Email has been changed.",
-            failMessage = "Attempt to change email failed";
+        else if (subView === "change-email") {
+            failTitle = "Attempt to change email failed";
+            failMessage = "Please try again, or contact adshelp@cfa.harvard.edu for support";
+            route = ApiTargets.VERIFY + "/" + token;
+
+          done = function(reply) {
+            //user has been logged in already
+            //request bootstrap
+            this.getApiAccess({reconnect : true});
+
+            //redirect to index page
+            this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+            //call alerts widget
+
+            var title = "Email has been changed.";
+            var msg = "Your new ADS email is <b>" + reply.email + "</b>";
+            this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+          };
         }
         else if (subView === "reset-password") {
 
           done = function() {
             //route to reset-password-2 form
-            this.pubsub.publish(this.pubsub.NAVIGATE, 'settings-page', {subView: "reset-password-2"});
+            //set the token so that session can use it in the put request with the new password
+            this.getBeeHive().getObject("Session").setChangeToken(token);
+            this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: "reset-password-2"});
           };
 
-         failMessage = "Reset password token was invalid."
+          failMessage = "Reset password token was invalid.";
+          route = ApiTargets["RESET_PASSWORD"] + "/" + token;
+          type = "GET";
+
         }
-
-        done = done ? done : function() {
-          //redirect to index page
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
-          //call alerts widget
-          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, msg: successMessage, modal : true, type : "success"}));
-        };
-
         fail = function() {
           //redirect to index page
           this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
           //call alerts widget
-          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, msg: failMessage, modal : true, type : "danger"}));
-
+          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title: failTitle, msg: failMessage, modal : true, type : "danger"}));
         };
 
          request = new ApiRequest({
-            target : subView,
-            type : "GET",
-            context : this,
-            done : done,
-            fail : fail
+            target : route,
+           options : {
+             type : type || "GET",
+             context : this,
+             done : done,
+             fail : fail
+           }
           });
 
           this.getBeeHive().getService("Api").request(request);
@@ -170,6 +200,8 @@ define([
     });
 
     _.extend(Router.prototype, Dependon.BeeHive);
+    _.extend(Router.prototype, DiscoveryBootstrap);
+
     return Router;
 
   });

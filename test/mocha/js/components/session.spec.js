@@ -2,14 +2,16 @@ define([
   'js/components/session',
   'js/bugutils/minimal_pubsub',
   'js/services/api',
-  'js/components/api_request'
+  'js/components/api_request',
+  'js/components/user'
 
 
 ], function(
   Session,
   MinSub,
   Api,
-  ApiRequest
+  ApiRequest,
+  User
   ){
 
 
@@ -23,13 +25,13 @@ define([
       expect(hardened.handleCallbackError).to.be.undefined;
 
       expect(hardened.start).to.be.undefined;
-      expect(_.keys(hardened)).to.eql(["isLoggedIn", "login", "logout", "register", "resetPassword", "deleteAccount", "__facade__", "mixIn"]);
+      expect(_.keys(hardened)).to.eql(["isLoggedIn", "login", "logout", "register", "resetPassword1", "resetPassword2", "setChangeToken", "__facade__", "mixIn"]);
 
     });
 
     it("has an explicit method for every action (login, logout, register, etc) a user might need to do before he/she is authenticated", function(){
 
-      var s = new Session();
+      var s = new Session({test: true});
 
       var minsub = new (MinSub.extend({
         request: function (apiRequest) {
@@ -63,55 +65,122 @@ define([
       expect(requestStub.args[2][0]).to.be.instanceof(ApiRequest)
       expect(requestStub.args[2][0].toJSON().target).to.eql("accounts/register");
       expect(requestStub.args[2][0].toJSON().options.type).to.eql("POST");
-      expect(requestStub.args[2][0].toJSON().options.data).to.eql('{"email":"goo@goo.com","password1":"foo","password2":"foo","g-recaptcha-response":"boo"}');
+      //test version just uses string  "location.origin", real version will use the actual origin
+      expect(requestStub.args[2][0].toJSON().options.data).to.eql('{"email":"goo@goo.com","password1":"foo","password2":"foo","g-recaptcha-response":"boo","verify_url":"location.origin/#user/account/verify/register"}');
       expect(requestStub.args[2][0].toJSON().options.done).to.eql(s.registerSuccess);
       expect(requestStub.args[2][0].toJSON().options.fail).to.eql(s.registerFail);
 
-      debugger;
-
-      s.resetPassword({email: "goo@goo.com", "g-recaptcha-response" : "boo"});
+      s.resetPassword1({email: "goo@goo.com", "g-recaptcha-response" : "boo"});
 
       expect(requestStub.args[3][0]).to.be.instanceof(ApiRequest)
       expect(requestStub.args[3][0].toJSON().target).to.eql('accounts/reset-password/goo@goo.com');
       expect(requestStub.args[3][0].toJSON().options.type).to.eql("POST");
-      expect(requestStub.args[3][0].toJSON().options.data).to.eql('{"g-recaptcha-response":"boo"}');
-      expect(requestStub.args[3][0].toJSON().options.done).to.eql(s.resetPasswordSuccess);
-      expect(requestStub.args[3][0].toJSON().options.fail).to.eql(s.resetPasswordFail);
+      expect(requestStub.args[3][0].toJSON().options.data).to.eql('{"g-recaptcha-response":"boo","reset_url":"location.origin/#user/account/verify/reset-password"}');
+      expect(requestStub.args[3][0].toJSON().options.done).to.eql(s.resetPassword1Success);
+      expect(requestStub.args[3][0].toJSON().options.fail).to.eql(s.resetPassword1Fail);
 
-      s.deleteAccount();
+
+      //this happens in the router after the user has clicked on a link in their email
+      s.setChangeToken("fakeToken")
+
+      s.resetPassword2({password1 : "1Aaaaa", password2 : "1Aaaaa"});
 
       expect(requestStub.args[4][0]).to.be.instanceof(ApiRequest)
-      expect(requestStub.args[4][0].toJSON().target).to.eql("accounts/user/delete");
-      expect(requestStub.args[4][0].toJSON().options.type).to.eql("POST");
-      expect(requestStub.args[4][0].toJSON().options.done).to.eql(s.deleteSuccess);
-      expect(requestStub.args[4][0].toJSON().options.fail).to.eql(s.deleteFail);
+      //test version just uses string  "location.origin", real version will use the actual origin
+      expect(requestStub.args[4][0].toJSON().target).to.eql('accounts/reset-password/fakeToken');
+      expect(requestStub.args[4][0].toJSON().options.type).to.eql("PUT");
+      expect(requestStub.args[4][0].toJSON().options.data).to.eql('{"password1":"1Aaaaa","password2":"1Aaaaa"}' );
+      expect(requestStub.args[4][0].toJSON().options.done).to.eql(s.resetPassword2Success);
+      expect(requestStub.args[4][0].toJSON().options.fail).to.eql(s.resetPassword2Fail)
+
+
+      requestStub.restore();
 
     });
 
-    it("sends a pubsub event to notify interested widgets of success/fail of the various methods", function(){
+    it("handles fail of method by 1) sending pubsub method and 2) sending alert", function(){
 
-//      var minsub = new (MinSub.extend({
-//        request: function (apiRequest) {
-//        }
-//      }))({verbose: false});
-//
-//      var s = new Session();
-//      var beehive = minsub.beehive.getHardenedInstance();
-//      s.pubsub =  beehive.Services.get('PubSub');
-//      sinon.stub(s.pubsub, "publish");
-//
-//      s.user.fetchInitialUserData = function(){};
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {
+        }
+      }))({verbose: false});
+
+      var s = new Session();
+      var beehive = minsub.beehive.getHardenedInstance();
+      s.pubsub =  beehive.Services.get('PubSub');
+      sinon.stub(s.pubsub, "publish");
+
+      var fakeXHR = {responseJson : {error :"no account"}};
+
+      s.loginFail(fakeXHR);
+
+      expect(s.pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
+      expect(s.pubsub.publish.args[0][1].msg).to.eql("Log in was unsuccessful (error unknown)");
+      expect(s.pubsub.publish.args[1]).to.eql(["[PubSub]-User-Announcement", "login_fail"]);
+
+      s.registerFail(fakeXHR);
+
+      expect(s.pubsub.publish.args[2][0]).to.eql("[Alert]-Message");
+      expect(s.pubsub.publish.args[2][1].msg).to.eql('Registration was unsuccessful (error unknown)');
+      expect(s.pubsub.publish.args[3]).to.eql(["[PubSub]-User-Announcement", "register_fail"]);
+
+      s.resetPassword1Fail(fakeXHR);
+
+      expect(s.pubsub.publish.args[4][0]).to.eql("[Alert]-Message");
+      expect(s.pubsub.publish.args[4][1].msg).to.eql("password reset step 1 was unsucessful (error unknown)")
+      expect(s.pubsub.publish.args[5]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_fail"]);
+
+      s.resetPassword2Fail(fakeXHR);
+
+      expect(s.pubsub.publish.args[6][0]).to.eql("[Alert]-Message");
+      expect(s.pubsub.publish.args[6][1].msg).to.eql("password reset step 2 was unsucessful (error unknown)");
+      expect(s.pubsub.publish.args[7]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_fail"]);
 
 
     });
 
-    it("also sends the proper alerts to the alert widget on failure", function(){
+    it("handles success of methods by 1) sending pubsub method and 2) optionally doing additional work", function(){
 
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {
+        }
+      }))({verbose: false});
 
+      var s = new Session();;
+      var u = new User();
+      sinon.stub(u, "completeLogIn");
+      sinon.stub(u, "completeLogOut");
+      minsub.beehive.addObject("User", u);
 
-    })
+      s.activate(minsub.beehive);
+      sinon.stub(s.pubsub, "publish");
+      var deferred = $.Deferred();
+      sinon.stub(s, "getApiAccess", function(){return deferred.promise()});
 
+      s.loginSuccess();
 
+      expect(s.getApiAccess.callCount).to.eql(1);
+      expect(u.completeLogIn.callCount).to.eql(0);
+
+      //now resolve the fake promise returned by getApiAccess;
+      deferred.resolve();
+      expect(s.pubsub.publish.args[0]).to.eql(["[PubSub]-User-Announcement", "login_success"]);
+
+      s.logoutSuccess();
+      expect(s.pubsub.publish.args[1]).to.eql(["[PubSub]-User-Announcement", "logout_success"]);
+      //logout is called before logged in to get rid of anything that might have been there previously
+      expect(u.completeLogOut.callCount).to.eql(1);
+
+      s.registerSuccess();
+      expect(s.pubsub.publish.args[2]).to.eql(["[PubSub]-User-Announcement", "register_success"]);
+
+      s.resetPassword1Success();
+      expect(s.pubsub.publish.args[3]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_success"]);
+
+      s.resetPassword2Success();
+      expect(s.pubsub.publish.args[4]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_success"]);
+
+    });
 
   });
 

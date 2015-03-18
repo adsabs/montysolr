@@ -33,9 +33,7 @@ define([
 
 //for the User Collection
  UserModel = Backbone.Model.extend({
-   reset : function(){
-      this.clear();
-    },
+
     idAttribute : "target"
     });
 
@@ -66,8 +64,20 @@ define([
       //each entry in the collection corresponds to an target
       this.collection = new UserCollection(Config);
 
-     this.listenTo(this.collection, "change", this.broadcastChange);
+      _.bindAll(this, "completeLogIn", "completeLogOut");
+
+      this.listenTo(this.collection, "change", this.broadcastChange);
      this.listenTo(this.collection, "reset", this.broadcastReset);
+
+      //set base url, currently only necessary for change_email endpoint
+      if (!this.test){
+        this.base_url = location.origin;
+      }
+      else {
+        this.base_url = "location.origin"
+      }
+
+      this.buildAdditionalParameters();
     },
 
     activate: function (beehive) {
@@ -98,7 +108,7 @@ define([
       this._persistModel();
     },
 
-    isOrcidUIOn : function(){
+    isOrcidModeOn : function(){
       return this.model.get("isOrcidModeOn");
     },
 
@@ -117,6 +127,7 @@ define([
     //every time something in the collection changes
     // tell subscribing widgets that something has changed, and tell them which
     // endpoint the change belonged to
+    //finally, check if logged in, might have to redirect to auth page/settings page
     broadcastChange : function(model){
       this.getPubSub().publish(this.pubsub.USER_ANNOUNCEMENT, "user_info_change", model.get("target"));
       this.redirectIfNecessary();
@@ -135,8 +146,12 @@ define([
     },
 
     handleFailedGET : function(jqXHR, status, errorThrown){
-      var target = jqXHR.target;
-      this.getPubSub().publish(this.pubsub.USER_ANNOUNCEMENT, "data_get_unsuccessful", target);
+      // sanity check : if user target is unauthorized, the user isn't actually logged in, so clear the model
+      // not sure if this gets all cases
+      if (jqXHR.target === "USER" && jqXHR.status === 401){
+        this.completeLogOut();
+      }
+      this.getPubSub().publish(this.pubsub.USER_ANNOUNCEMENT, "data_get_unsuccessful", jqXHR.target);
     },
 
     // so success post handler can call the right callback depending on the target
@@ -147,11 +162,24 @@ define([
       },
       "CHANGE_EMAIL" : function ChangeEmailSuccess(response, status, jqXHR){
         this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, "data_post_successful", "CHANGE_EMAIL");
-        //logout?
       },
       "CHANGE_PASSWORD" : function changePasswordSuccess(response, status, jqXHR){
         this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, "data_post_successful", "CHANGE_PASSWORD");
+      },
+      "DELETE" : function deleteAccountSuccess(response, status, jqXHR){
+        this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, "delete_account_successful", "DELETE");
+        this.completeLogOut();
       }
+    },
+
+    buildAdditionalParameters : function() {
+      //any extra info that needs to be sent in post or get requests
+      //but not known about by the widget models goes here
+      //this will be called by user.initialize
+      var additional = {};
+          additional.CHANGE_EMAIL = { verify_url : this.base_url + "/#user/account/verify/change-email"};
+
+      this.additionalParameters = additional;
     },
 
     handleSuccessfulPOST : function(response, status, jqXHR) {
@@ -163,8 +191,9 @@ define([
     handleFailedPOST : function(jqXHR, status, errorThrown){
       var target = jqXHR.target;
       var pubsub = this.getPubSub();
+      var error = (jqXHR.responseJSON && jqXHR.responseJSON.error) ? jqXHR.responseJSON.error : "error unknown";
 
-      var message = 'User update was unsuccessful (' + errorThrown + ')';
+      var message = 'User update was unsuccessful (' + error + ')';
       pubsub.publish(pubsub.USER_ANNOUNCEMENT, "data_post_unsuccessful", target);
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
     },
@@ -178,6 +207,9 @@ define([
       //make sure it has a callback to access later
       if (!this.callbacks[target]){
         throw new Error("a post request was made that doesn't have a success callback");
+      }
+      if (this.additionalParameters[target]){
+        _.extend(data, this.additionalParameters[target]);
       }
       this.composeRequest(target, "POST", data);
     },
@@ -243,7 +275,7 @@ define([
     redirectIfNecessary : function(){
       var pubsub = this.getPubSub();
       if (this.getBeeHive().getObject("MasterPageManager").currentChild === "AuthenticationPage" && this.isLoggedIn()){
-        pubsub.publish(pubsub.NAVIGATE, "settings-page");
+        pubsub.publish(pubsub.NAVIGATE, "index-page");
       }
       else  if (this.getBeeHive().getObject("MasterPageManager").currentChild === "SettingsPage" && !this.isLoggedIn()){
         pubsub.publish(pubsub.NAVIGATE, "authentication-page");
@@ -268,7 +300,7 @@ define([
    //this function is called immediately after the logout is confirmed
     completeLogOut : function(){
       // should the setting model be cleared?
-//      this.model.clear();
+      this.model.clear();
       //this clears the username at target = "USER", which is the cue that we are no longer signed in
       this.collection.reset(Config);
     },
@@ -280,8 +312,9 @@ define([
       postData: "POST new values to user endpoint (params: endpoint, data)",
       getUserData: "get a copy of user data currently in the model for an endpoint, or all user data (params: optional endpoint)",
       getUserName: "get the user's email before the @",
-      isOrcidUIOn : "figure out if user has Orcid mode activated",
-      setOrcidMode : "set orcid ui on or off"
+      isOrcidModeOn : "figure out if user has Orcid mode activated",
+      setOrcidMode : "set orcid ui on or off",
+      setUser : "set the username to log the user in and fetch his/her info"
     }
 
   });

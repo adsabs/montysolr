@@ -7,11 +7,10 @@
 define(['underscore',
   'backbone',
   'js/components/api_query',
-  'js/components/api_request'
-], function(_,
+], function(
+            _,
             Backbone,
-            ApiQuery,
-            ApiRequest
+            ApiQuery
   ) {
 
 
@@ -49,21 +48,6 @@ define(['underscore',
         throw new Error("Only ApiQuery instances accepted");
       }
       this.apiQuery = q;
-    },
-
-    setApiRequest : function(r){
-
-      if (!r) {
-        return;
-      }
-      if (!(r instanceof ApiRequest)) {
-        throw new Error("Only ApiRequest instances accepted");
-      }
-      this.apiRequest = r;
-    },
-
-    getApiRequest : function(){
-      return this.apiRequest;
     },
 
     // Return a copy of the model's `attributes` object.

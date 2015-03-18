@@ -422,15 +422,10 @@ module.exports = function(grunt) {
       }
     },
 
-    // concatenates all javascript into one big minified file (of limited 
-    // use for now)
+    // minifying files we need to minify ourselves
     uglify: {
-      options: {
-        banner: "/*! <%= pkg.name %> <%= grunt.template.today('yyyy-mm-dd') %> */\n"
-      },
-      build: {
-        src: 'dist/js/**/*.js',
-        dest: 'dist/<%= pkg.name %>.min.js'
+      bumblebee_minify_files : {
+        files : {"dist/libs/backbone/backbone-min.js": "dist/libs/backbone/backbone.js"}
       }
     },
 
@@ -711,7 +706,8 @@ module.exports = function(grunt) {
       'requirejs:release', 'requirejs:release_css',
       'hash_require:js', 'hash_require:css',
       'exec:git_describe', 'copy:keep_original',
-      'assemble'
+      'assemble',
+      'uglify'
   ]);
 
 };

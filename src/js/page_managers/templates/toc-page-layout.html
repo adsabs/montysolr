@@ -4,7 +4,7 @@
         <div class="s-search-bar-full-width-container">
             <div class="col-sm-2 s-back-button-container">
                 {{#if this.query}}
-                <a href="" class="back-button"> <i class="fa fa-arrow-left"></i> Back to results</a>
+                <a href="" class="back-button btn btn-sm btn-default"> <i class="fa fa-arrow-left"></i> Back to results</a>
                 {{/if}}
             </div>
             <div class="col-sm-7 s-search-bar-row" id="search-bar-row"
@@ -23,8 +23,8 @@
                          data-ShowAbstract='{"title": "Abstract", "path":"abstract", "showCount": false, "isSelected":true, "category":"view"}'
                          data-ShowCitations='{"title": "Citations", "path":"citations", "category":"view"}'
                          data-ShowReferences='{"title": "References", "path":"references", "category":"view"}'
-                         data-ShowCoreads='{"title": "Co-Reads", "path":"coreads","category":"view"}'
-                         data-ShowTableOfContents='{"title": "Volume Content", "path":"toc", "category":"view"}'
+                         data-ShowCoreads='{"title": "Co-Reads", "path":"coreads","category":"view", "showCount": false}'
+                         data-ShowTableOfContents='{"title": "Volume Content", "path":"toc", "category":"view", "showCount": false}'
                          data-ShowSimilar='{"title": "Similar Papers", "path":"similar" data-debug="true", "category":"view"}'
                          data-ShowPaperMetrics='{"title": "Metrics", "path":"metrics", "showCount": false, "category":"explore"}'
                          />

@@ -20,6 +20,7 @@ define([], function() {
       '/components/feedback_mediator.spec.js',
       '/components/history_manager.spec.js',
       '/components/user.spec.js',
+      '/components/session.spec.js',
 
       '/components/discovery_mediator.spec.js',
       '/components/alerts_mediator.spec.js',

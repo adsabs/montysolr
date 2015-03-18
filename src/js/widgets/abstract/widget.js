@@ -195,7 +195,8 @@ define([
           // let other widgets know details
           this.trigger('page-manager-event', 'broadcast-payload', {
               title: this._docs[bibcode].title,
-              bibcode: bibcode
+              bibcode: bibcode,
+             //used for the
           });
         }
         else {

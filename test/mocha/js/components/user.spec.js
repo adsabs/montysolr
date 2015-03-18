@@ -25,8 +25,10 @@ define([
 
      sinon.stub(User.prototype, "broadcastChange");
      sinon.stub(User.prototype, "broadcastReset");
+     var logoutStub = sinon.stub(User.prototype, "completeLogOut");
 
      var u = new User();
+     u.pubsub = {publish : function(){}};
 
      var fetchStub = sinon.stub(u, "fetchData");
 
@@ -34,11 +36,35 @@ define([
 
      u.setUser("foo");
 
+     //automatically logs in user before doing a double check
+
      expect(u.collection.get("USER").get("user")).to.eql("foo");
      expect(u.isLoggedIn()).to.be.true;
 
      expect(fetchStub.args[0][0]).to.eql("TOKEN");
      expect(fetchStub.args[1][0]).to.eql("USER");
+
+     //will automatically log user out if the request to user endpoint returns status 401
+     u.handleFailedGET({target : "USER", status : 401 });
+
+     expect(logoutStub.callCount).to.eql(1);
+
+     logoutStub.restore();
+
+     User.prototype.broadcastChange.restore();
+     User.prototype.broadcastReset.restore();
+   });
+
+   it("has a log out method", function(){
+
+     sinon.stub(User.prototype, "broadcastChange");
+     sinon.stub(User.prototype, "broadcastReset");
+
+     var u = new User();
+     u.pubsub = {publish : function(){}};
+     var fetchStub = sinon.stub(u, "fetchData");
+     u.setUser("foo");
+     expect(u.isLoggedIn()).to.eql(true);
 
      //clears the collection
      u.completeLogOut();
@@ -50,8 +76,7 @@ define([
      User.prototype.broadcastChange.restore();
      User.prototype.broadcastReset.restore();
 
-
-   });
+   })
 
    it("provides a hardened interface with the methods widgets and other objects might need", function(){
 
@@ -59,7 +84,7 @@ define([
      var hardened = u.getHardenedInstance();
      expect(hardened.__facade__).equals(true);
      expect(hardened.handleCallbackError).to.be.undefined;
-     expect(_.keys(hardened)).to.eql(["completeLogIn", "completeLogOut", "isLoggedIn", "postData", "getUserData", "getUserName", "isOrcidUIOn", "setOrcidMode", "__facade__", "mixIn"]);
+     expect(_.keys(hardened)).to.eql(["completeLogIn", "completeLogOut", "isLoggedIn", "postData", "getUserData", "getUserName", "isOrcidModeOn", "setOrcidMode", "setUser", "__facade__", "mixIn"]);
 
    });
 
@@ -81,6 +106,8 @@ define([
      u.collection.get("TOKEN").set("access_token", "boo");
 
      expect(u.pubsub.publish.args[0]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "TOKEN"]);
+
+
 
    });
 
@@ -107,6 +134,7 @@ define([
       });
 
        expect(u.getUserName()).to.eql("foobly@gmail.com");
+
        User.prototype.broadcastChange.restore();
 
      });
@@ -136,6 +164,8 @@ define([
      expect(request.toJSON().options.data).to.eql('{"old_password":"foo","new_password1":"goo","new_password_2":"goo"}');
      expect(request.toJSON().options.context).to.eql(u);
 
+     requestStub.restore();
+
    });
 
 
@@ -151,6 +181,8 @@ define([
      u.activate(minsub.beehive);
 
      sinon.stub(User.prototype, "broadcastChange");
+
+     sinon.spy(u, "completeLogOut")
 
      var publishStub = sinon.stub(u.pubsub, "publish");
 
@@ -173,12 +205,24 @@ define([
      //these two events seem redundant for the token endpoint but wont be for endpoints like change_password
      expect(u.collection.get("TOKEN").toJSON()).to.eql({target: "TOKEN", api_token: "boobly"});
 
-     //post fail
-     u.handleFailedPOST({target: "TOKEN"}, "error", "what??");
+     //post success to delete endpoint
+     expect(u.completeLogOut.callCount).to.eql(0);
 
-     expect(publishStub.args[4]).to.eql(["[PubSub]-User-Announcement", "data_post_unsuccessful", "TOKEN"]);
-     expect(publishStub.args[5][0]).to.eql("[Alert]-Message")
-     expect(publishStub.args[5][1].msg).to.eql("User update was unsuccessful (what??)");
+     u.handleSuccessfulPOST({api_token : "boobly"}, "success", {target : "DELETE"});
+     expect(publishStub.args[4]).to.eql(["[PubSub]-User-Announcement", "delete_account_successful", "DELETE"]);
+     //these two events seem redundant for the token endpoint but wont be for endpoints like change_password
+     expect(u.completeLogOut.callCount).to.eql(1);
+
+     //the deletion of the account should yield 2 more pubsub calls announcing that token and username have changed:
+     expect(publishStub.args[5]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "TOKEN"]);
+     expect(publishStub.args[6]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "USER"]);
+
+     //post fail
+     u.handleFailedPOST({target: "TOKEN", responseJSON : {error : "random error message"}});
+
+     expect(publishStub.args[7]).to.eql(["[PubSub]-User-Announcement", "data_post_unsuccessful", "TOKEN"]);
+     expect(publishStub.args[8][0]).to.eql("[Alert]-Message")
+     expect(publishStub.args[8][1].msg).to.eql("User update was unsuccessful (random error message)");
 
 
      User.prototype.broadcastChange.restore();

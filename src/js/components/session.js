@@ -27,10 +27,25 @@ define([
     ) {
 
 
+  var SessionModel = Backbone.Model.extend({
+
+    defaults : function(){
+      return {
+        resetPasswordToken: undefined
+      }
+    }
+
+  });
+
+
   var Session = GenericModule.extend({
 
     initialize: function (options) {
       var options = options || {};
+      //right now, this will only be used if someone forgot their password
+      this.model = new SessionModel();
+
+      this.test = options.test ? true : undefined;
 
       _.bindAll(this, [
         "loginSuccess",
@@ -90,8 +105,16 @@ define([
     },
 
     register: function (data) {
+      var base_url;
       //add base_url to data so email redirects to right url
-      _.extend(data, {verify_url : location.origin + "/user/account/verify/" + ApiTargets.REGISTER });
+      if (!this.test){
+        base_url = location.origin
+        _.extend(data, {verify_url : location.origin + "/#user/account/verify/" + ApiTargets.REGISTER.match(/\/(.*)$/)[1] });
+      }
+      else {
+        base_url = "location.origin"
+      }
+      _.extend(data, {verify_url : base_url + "/#user/account/verify/" + ApiTargets.REGISTER.match(/\/(.*)$/)[1] });
 
       var request = new ApiRequest({
         target : ApiTargets.REGISTER,
@@ -107,27 +130,19 @@ define([
       this.getBeeHive().getService("Api").request(request);
     },
 
-    deleteAccount: function () {
-      var request = new ApiRequest({
-        target : ApiTargets.DELETE,
-        query : new ApiQuery({}),
-        options : {
-          type : "POST",
-          data : undefined,
-          contentType : "application/json",
-          done : this.deleteSuccess,
-          fail : this.deleteFail
-        }
-      });
-      this.getBeeHive().getService("Api").request(request);
-    },
-
     resetPassword1: function(data){
+      var current_loc
       //add base_url to data so email redirects to right url
-      _.extend(data, {verify_url : location.origin + "/user/account/verify/" + ApiTargets.RESET_PASSWORD });
+      if (!this.test){
+        current_loc = location.origin;
+      }
+      else {
+        current_loc = "location.origin";
+      }
+      _.extend(data, {reset_url : current_loc + "/#user/account/verify/" + ApiTargets.RESET_PASSWORD.match(/\/(.*)$/)[1] });
 
      var email = data.email;
-     var data = _.pick(data, "g-recaptcha-response");
+     var data = _.omit(data, "email");
 
       var request = new ApiRequest({
         target : ApiTargets.RESET_PASSWORD + "/" + email,
@@ -144,11 +159,8 @@ define([
     },
 
     resetPassword2: function(data){
-      var email = data.email;
-      var data = _.pick(data, "g-recaptcha-response");
-
       var request = new ApiRequest({
-        target : ApiTargets.RESET_PASSWORD + "/" + email,
+        target : ApiTargets.RESET_PASSWORD + "/" + this.model.get("resetPasswordToken"),
         query : new ApiQuery({}),
         options : {
           type : "PUT",
@@ -161,31 +173,30 @@ define([
       this.getBeeHive().getService("Api").request(request);
     },
 
+    setChangeToken : function(token){
+      this.model.set("resetPasswordToken", token);
+    },
+
     /* private methods */
 
     loginSuccess: function (response, status, jqXHR) {
-      var user, promise, pubsub;
-      user = this.getBeeHive().getObject("User");
-
+      var promise, pubsub;
       //reset auth token by contacting Bootstrap
-      promise = this.getApiAccess();
-      promise.done(user.completeLogIn());
-
+      //this will log the user in
+      promise = this.getApiAccess({reconnect: true});
       //notify interested widgets
       pubsub = this.getPubSub();
       promise.done(function(){
         pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_success");
       });
-      //finally, redirect to landing page
-      promise.done(function(){
-        pubsub.publish(pubsub.NAVIGATE, 'index-page');
-      });
     },
 
     loginFail : function(xhr, status, errorThrown){
       var pubsub = this.getPubSub();
-      var message = 'Log in was unsuccessful (' + errorThrown + ')';
-      pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
+      var error =  xhr.responseJSON && xhr.responseJSON.error ?  xhr.responseJSON.error : "error unknown";
+
+      var message = 'Log in was unsuccessful (' + error + ')';
+      pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
       pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_fail");
     },
 
@@ -206,46 +217,48 @@ define([
 
     registerFail : function(xhr, status, errorThrown){
       var pubsub = this.getPubSub();
-      var message = 'Registration was unsuccessful (' + errorThrown + ')';
+      var error = (xhr.responseJSON && xhr.responseJSON.error)  ? xhr.responseJSON.error : "error unknown";
+      var message = 'Registration was unsuccessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
       pubsub.publish(pubsub.USER_ANNOUNCEMENT, "register_fail");
     },
 
-    deleteSuccess : function (response, status, jqXHR) {
-      //this doesn't exist yet
-      var pubsub = this.getPubSub();
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "user_delete_success");
-    },
-
-    deleteFail : function(xhr, status, errorThrown){
-      var pubsub = this.getPubSub();
-      var message = 'Account deletion was unsuccessful (' + errorThrown + ')';
-      pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "user_delete_fail");
-    },
-
     resetPassword1Success :function(response, status, jqXHR){
       var pubsub = this.getPubSub();
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_success");
+      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_1_success");
     },
 
     resetPassword1Fail: function(xhr, status, errorThrown){
       var pubsub = this.getPubSub();
-      var message = 'Request for password reset was unsucessful (' + errorThrown + ')';
+      var error = (xhr.responseJSON && xhr.responseJSON.error)  ? xhr.responseJSON.error : "error unknown";
+      var message = 'password reset step 1 was unsucessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_fail");
+      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_1_fail");
     },
 
     resetPassword2Success :function(response, status, jqXHR){
-      var pubsub = this.getPubSub();
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_success");
+
+      var promise, pubsub;
+      //reset auth token by contacting Bootstrap
+      //this will log the user in
+      promise = this.getApiAccess({reconnect : true});
+      //notify interested widgets
+      pubsub = this.getPubSub();
+      promise.done(function(){
+        pubsub.publish(pubsub.USER_ANNOUNCEMENT, "reset_password_2_success");
+      });
+
+      var message = "Your password has been successfully reset";
+      pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "success", modal: true}));
+
     },
 
     resetPassword2Fail: function(xhr, status, errorThrown){
       var pubsub = this.getPubSub();
-      var message = 'Request for password reset was unsucessful (' + errorThrown + ')';
+      var error = (xhr.responseJSON && xhr.responseJSON.error)  ? xhr.responseJSON.error : "error unknown";
+      var message = 'password reset step 2 was unsucessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_fail");
+      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_2_fail");
     },
 
 
@@ -256,7 +269,7 @@ define([
       register: "registers a new user",
       resetPassword1 : "sends an email to account",
       resetPassword2 : "updates the password",
-      deleteAccount: "deletes the current account"
+      setChangeToken : "the router stores the token to reset password here"
     }
 
   });

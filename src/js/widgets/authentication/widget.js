@@ -30,32 +30,6 @@ define([
   *
   * */
 
-  //this allows for instant validation of form fields using the backbone-validation plugin
-  _.extend(Backbone.Validation.callbacks, {
-    valid: function (view, attr, selector) {
-      var $el = view.$('input[name=' + attr + ']'),
-         $group = $el.closest('.form-group');
-
-      $group.removeClass('has-error').addClass("has-success");
-      $group.find(".icon-success").removeClass("hidden");
-      $group.find('.help-block').html('').addClass('no-show');
-
-    },
-    invalid: function (view, attr, error, selector) {
-      var $el = view.$('[name=' + attr + ']');
-      $group = $el.closest('.form-group');
-
-      $group.removeClass("has-success");
-      $group.find(".icon-success").addClass("hidden");
-
-      if (view.submit === true){
-        //only show error states if there has been a submit event
-        $group.addClass('has-error');
-        $group.find('.help-block').html(error).removeClass('no-show');
-      }
-    }
-  });
-
   var FormView, FormModel;
 
   FormView = Marionette.ItemView.extend({
@@ -76,7 +50,8 @@ define([
   });
 
   FormModel = Backbone.Model.extend({
-    isValidSafe : FormFunctions.isValidSafe
+    isValidSafe : FormFunctions.isValidSafe,
+    reset: FormFunctions.reset
   });
 
   var RegisterModel, RegisterView;
@@ -104,10 +79,6 @@ define([
       "g-recaptcha-response": {
         required: true
       }
-    },
-
-    reset: function () {
-      this.clear();
     },
 
     target : "REGISTER"
@@ -170,10 +141,6 @@ define([
       }
     },
 
-    reset: function () {
-      this.clear();
-    },
-
     target : "USER"
 
   });
@@ -217,11 +184,10 @@ define([
         required: true
       }
     },
-    reset: function () {
-      this.clear();
-    },
 
-    target : "RESET_PASSWORD"
+    target : "RESET_PASSWORD",
+
+    method : "POST"
 
   });
 
@@ -246,15 +212,19 @@ define([
 
   });
 
+  //this view is only accessible after user has clicked on a link in a verification
+  //email after they enter the "forgot password form".
 
-  var ResetPassword2View, ResetPassword2Model;
+  var ResetPassword2View, ResetPassword2Model
+
 
   ResetPassword2Model = FormModel.extend({
 
-    validation: {
+    validation : {
+
       password1: {
         required: true,
-        pattern: /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
         msg: "(Password isn't valid)"
 
       },
@@ -263,15 +233,14 @@ define([
         equalTo: 'password1',
         msg: "(The passwords do not match)"
       }
+
     },
 
-    reset: function () {
-      this.clear();
-    },
-
-    target : "RESET_PASSWORD"
+    target : "RESET_PASSWORD",
+    method : "PUT"
 
   });
+
 
   ResetPassword2View = FormView.extend({
 
@@ -290,14 +259,14 @@ define([
           validate: true
         }
       }
-     },
+    },
 
     onRender: function () {
       this.activateValidation();
-      this.activateRecaptcha(Marionette.getOption(this, "recaptchaKey"));
     }
 
   });
+
 
   var StateModel = Backbone.Model.extend({
 
@@ -331,7 +300,7 @@ define([
     triggers : {
       "click .show-login": "navigateToLoginForm",
       "click .show-register": "navigateToRegisterForm",
-      "click .show-reset-password": "navigateToResetPasswordForm"
+      "click .show-reset-password-1": "navigateToResetPassword1Form"
     },
 
     onRender : function(){
@@ -356,7 +325,7 @@ define([
     },
 
     showLoginForm: function () {
-      var view = new LogInView({model: this.logInModel, recaptchaKey : this.recaptchaKey });
+      var view = new LogInView({model: this.logInModel});
       this.listenToOnce(view, "submit-form", this.forwardSubmit);
       this.container.show(view);
     },
@@ -374,7 +343,7 @@ define([
     },
 
     showResetPasswordForm2: function () {
-      var view = new ResetPassword2View({model: this.resetPassword2Model, recaptchaKey : this.recaptchaKey });
+      var view = new ResetPassword2View({model: this.resetPassword2Model});
       this.listenToOnce(view, "submit-form", this.forwardSubmit);
       this.container.show(view);
     },
@@ -404,7 +373,7 @@ define([
       this.listenTo(this.view, "submit-form", this.triggerCorrectSubmit);
       this.listenTo(this.view, "navigateToLoginForm", this.navigateToLoginForm);
       this.listenTo(this.view, "navigateToRegisterForm", this.navigateToRegisterForm);
-      this.listenTo(this.view, "navigateToResetPasswordForm", this.navigateToResetPasswordForm);
+      this.listenTo(this.view, "navigateToResetPassword1Form", this.navigateToResetPassword1Form);
 
     },
 
@@ -416,8 +385,8 @@ define([
       this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page",{subView : "register" });
     },
 
-    navigateToResetPasswordForm : function(){
-      this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page", {subView : "reset-password"});
+    navigateToResetPassword1Form : function(){
+      this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page", {subView : "reset-password-1"});
     },
 
     activate: function (beehive) {
@@ -426,7 +395,6 @@ define([
       this.view.recaptchaKey = this.beehive.getObject("DynamicConfig").getRecaptchaKey();
 
       this.pubsub = beehive.Services.get('PubSub');
-
       _.bindAll(this, ["handleUserAnnouncement"]);
       this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
     },
@@ -461,12 +429,6 @@ define([
         case "reset_password_1_fail":
           this.view.showResetPasswordForm1();
           break;
-        case "reset_password_2_success":
-          this.resetPassword2Success();
-          break;
-        case "reset_password_2_fail":
-          this.view.showResetPasswordForm2();
-          break;
       }
     },
 
@@ -474,15 +436,15 @@ define([
       this.view.logInModel.reset();
       this.view.registerModel.reset();
       this.view.resetPassword1Model.reset();
-      this.view.resetPassword2Model.reset();
     },
 
     triggerCorrectSubmit : function(model) {
 
+      var data = model.toJSON();
+
       if (model.target === "REGISTER"){
-        var data = model.toJSON();
         //add base_url to data so email redirects to right url
-        _.extend(data, {verify_url : location.origin + "/user/account/verify/" + ApiTargets.REGISTER });
+        _.extend(data, {verify_url : location.origin + "/#user/account/verify/" + ApiTargets.REGISTER });
         this.beehive.getObject("Session").register(model.toJSON());
       }
 
@@ -491,16 +453,12 @@ define([
       }
 
       else if (model.target === "RESET_PASSWORD" && model.method === "POST"){
-        //first step
-        var data = model.toJSON();
-        _.extend(data, {verify_url : location.origin + "/user/account/verify/" + ApiTargets.RESET_PASSWORD });
         //add base_url to data so email redirects to right url
         this.beehive.getObject("Session").resetPassword1(data);
       }
 
       else if (model.target === "RESET_PASSWORD" && model.method === "PUT"){
-        //second step
-        this.beehive.getObject("Session").resetPassword2(model.toJSON());
+        this.beehive.getObject("Session").resetPassword2(data);
       }
     },
 

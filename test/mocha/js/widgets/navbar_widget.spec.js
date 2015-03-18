@@ -21,6 +21,7 @@ define([
       $("#test").empty();
     });
 
+//orcid accounts
 
     it("should query initial logged in / logged out orcid states in order to render the correct values", function(){
 
@@ -95,6 +96,7 @@ define([
       $("#test").append(n.view.render().el);
       var $w = n.view.$el;
       $w.find('.orcid-sign-in').click();
+      debugger;
 
       expect(signInStub.callCount).to.eql(1);
       expect(setOrcidModeStub.callCount).to.eql(1);
@@ -129,10 +131,11 @@ define([
       $("#test").find('.orcid-sign-in').click();
 
       $("#test").find('.orcid-link').click();
-      expect(n.pubsub.publish.args[0]).to.eql(["[Router]-Navigate-Without-Trigger", "orcid-page"]);
+      expect(n.pubsub.publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "orcid-page"]);
 
     });
 
+//ADS user accounts
 
   it("should query initial user logged in/logged out state and show the correct options", function(){
 
@@ -144,9 +147,21 @@ define([
     var minsub = new (MinSub.extend({
       request: function (apiRequest) {}
     }))({verbose: false});
+
+    sinon.stub(User.prototype, "redirectIfNecessary");
     var u = new User();
 
     minsub.beehive.addObject("User", u);
+
+    minsub.beehive.addService('OrcidApi', {
+      hasAccess: function() {return true},
+      getHardenedInstance: function() {return this},
+      getUserProfile : function(){
+        var d = $.Deferred();
+        d.resolve(profileInfo);
+        return d
+      }
+    });
 
     var n = new NavBarWidget();
     n.activate(minsub.beehive.getHardenedInstance());
@@ -176,7 +191,7 @@ define([
   });
 
 
-  it("should emit the proper events when links are clicked", function(){
+  it("should emit the proper events when user links are clicked", function(){
 
     var minsub = new (MinSub.extend({
       request: function (apiRequest) {}
@@ -190,6 +205,19 @@ define([
     sinon.stub(s, "logout");
 
     minsub.beehive.addObject("Session", s);
+
+    var orcidSignOutSpy = sinon.spy();
+
+    minsub.beehive.addService('OrcidApi', {
+      hasAccess: function() {return true},
+      getHardenedInstance: function() {return this},
+      signOut : orcidSignOutSpy,
+      getUserProfile : function(){
+        var d = $.Deferred();
+        d.resolve(profileInfo);
+        return d
+      }
+    });
 
     var n = new NavBarWidget();
     n.activate(minsub.beehive.getHardenedInstance());
@@ -213,7 +241,7 @@ define([
     //now show navbar in logged in state
     
     u.collection.get("USER").set("user", "foo");
-    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change");
+    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
 
     $("#test").find(".settings").click();
     expect(publishSpy.callCount).to.eql(3);
@@ -226,7 +254,10 @@ define([
     //calls session logout method explicitly
 
     expect(s.logout.callCount).to.eql(1);
+    expect(orcidSignOutSpy.callCount).to.eql(1);
 
   });
+
+});
 
 });

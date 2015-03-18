@@ -31,6 +31,7 @@ define([
       defaults : {
         type: 'info',
         msg: undefined,
+        title: undefined,
         events: undefined,
         modal: false,
         //for non-modal alerts so they will
@@ -38,7 +39,6 @@ define([
         fade: true
       }
     });
-
 
     var delegateEventSplitter = /^(\S+)\s*(.*)$/;
     
@@ -53,8 +53,19 @@ define([
       template: WidgetTemplate,
 
       events: {
-        'click #alertBox button.close': 'close'
+        'click #alertBox button.close': 'close',
+        'click button[data-dismiss=modal]' : 'closeModal'
+
       },
+
+      closeModal : function(){
+        debugger;
+        //manually close the modal, for some reason just the close markup
+        //only works some of the time
+        this.$(".modal").modal('hide');
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+     },
 
       modelEvents: {
         "change": 'render'
@@ -125,6 +136,7 @@ define([
         if (this.model.get('modal')) {
           this.showModal();
         }
+
       },
 
       showModal: function() {
@@ -146,7 +158,16 @@ define([
       },
 
       activate: function (beehive) {
-        //pass
+        _.bindAll(this, ["clearView"]);
+        //listen to navigate event and close widget
+        this.pubsub = beehive.getService("PubSub");
+        this.pubsub.subscribe(this.pubsub.NAVIGATE, this.clearView);
+
+      },
+
+      clearView : function(){
+        //to prevent re-rendering in inopportune moments
+        this.view.$el.empty();
       },
 
       closeModal: function() {
@@ -158,6 +179,7 @@ define([
         this.model.set({
           events: feedback.events,
           msg: feedback.msg,
+          title: feedback.title,
           type: feedback.type,
           modal: feedback.modal,
           promise: promise

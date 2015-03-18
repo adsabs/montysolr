@@ -4,6 +4,7 @@ define([
   'js/mixins/form_view_functions',
   'js/components/api_targets',
   'js/widgets/success/view',
+  'js/components/api_feedback',
   'hbs!./templates/api_key',
   'hbs!./templates/change_email',
   'hbs!./templates/change_password',
@@ -13,7 +14,8 @@ define([
   'hbs!./templates/nav_template',
   'hbs!./templates/header_template',
   'backbone-validation',
-  'backbone.stickit'
+  'backbone.stickit',
+  'bootstrap'
 
 ], function(
   Marionette,
@@ -21,6 +23,7 @@ define([
   FormFunctions,
   ApiTargets,
   SuccessView,
+  ApiFeedback,
   TokenTemplate,
   EmailTemplate,
   PasswordTemplate,
@@ -28,34 +31,9 @@ define([
   UserSettingsTemplate,
   DeleteAccountTemplate,
   NavTemplate,
-  HeadingTemplate
+  HeadingTemplate,
+  Bootstrap
   ){
-
-  //this allows for instant validation of form fields using the backbone-validation plugin
-  _.extend(Backbone.Validation.callbacks, {
-    valid: function (view, attr, selector) {
-      var $el = view.$('input[name=' + attr + ']'),
-        $group = $el.closest('.form-group');
-
-      $group.removeClass('has-error').addClass("has-success");
-      $group.find(".icon-success").removeClass("hidden");
-      $group.find('.help-block').html('').addClass('no-show');
-
-    },
-    invalid: function (view, attr, error, selector) {
-      var $el = view.$('[name=' + attr + ']');
-      $group = $el.closest('.form-group');
-
-      $group.removeClass("has-success");
-      $group.find(".icon-success").addClass("hidden");
-
-      if (view.submit === true){
-        //only show error states if there has been a submit event
-        $group.addClass('has-error');
-        $group.find('.help-block').html(error).removeClass('no-show');
-      }
-    }
-  });
 
   var FormView, FormModel;
 
@@ -75,9 +53,9 @@ define([
   });
 
   FormModel = Backbone.Model.extend({
-    isValidSafe : FormFunctions.isValidSafe
+    isValidSafe : FormFunctions.isValidSafe,
+    reset : FormFunctions.reset
   });
-
 
   var ChangePreferencesView, ChangePreferencesModel;
 
@@ -125,10 +103,35 @@ define([
 
     className : "change-email",
 
-    //override default to get rid of user
-    triggerSubmit : function(e){
+    triggerSubmit : function(){
       this.model.unset("user");
-      FormView.prototype.triggerSubmit.apply(this, arguments);
+
+      //manually close the modal, for some reason just the close markup
+      //only works some of the time
+      this.$(".modal").modal('hide');
+      $('body').removeClass('modal-open');
+      $('.modal-backdrop').remove();
+      FormFunctions.triggerSubmit.apply(this, arguments);
+
+    },
+
+    //for the view
+    //checks whether to show a green submit button on model change
+    checkValidationState : function(){
+      //hide possible submit button message
+      if (this.model.isValidSafe()){
+      //don't go for actual submit button, that is on the modal
+        this.$("button.initial-submit")
+          .addClass("btn-success")
+          .prev(".help-block")
+          .html("")
+          .addClass("no-show");
+
+      }
+      else {
+        this.$("button.initial-submit")
+          .removeClass("btn-success");
+      }
     },
 
     bindings: {
@@ -216,7 +219,6 @@ define([
   ChangeTokenView = FormView.extend({
 
     template : TokenTemplate,
-
     className : "change-token"
 
   });
@@ -232,11 +234,15 @@ define([
   DeleteAccountView = FormView.extend({
 
     template : DeleteAccountTemplate,
-
     className : "delete-account",
 
-    onRender : function(){
-      this.activateValidation();
+    triggerSubmit : function(){
+      //manually close the modal, for some reason just the close markup
+      //only works some of the time
+      this.$(".modal").modal('hide');
+      $('body').removeClass('modal-open');
+      $('.modal-backdrop').remove();
+      FormFunctions.triggerSubmit.apply(this, arguments);
     }
   });
 
@@ -268,11 +274,8 @@ define([
     },
 
     template : UserSettingsTemplate,
-
     navTemplate : NavTemplate,
-
     headingTemplate : HeadingTemplate,
-
     className : "s-user-settings s-form-widget",
 
     regions : {
@@ -286,7 +289,9 @@ define([
     },
 
     events : {
-      "click .nav-container a" : "changeActive"
+      "click .nav-container a" : "changeActive",
+      "click .user-pill-nav a:not(.dropdown-toggle)" : "stopPropagation",
+      "click .leave-form" : "completeChangeActive"
     },
 
     collectionEvents : {
@@ -295,6 +300,10 @@ define([
 
     modelEvents : {
       "change:user" : "renderHeading"
+    },
+
+    stopPropagation : function(){
+      return false
     },
 
     renderNav : function(){
@@ -312,10 +321,54 @@ define([
 
     changeActive : function(e){
       e.preventDefault();
+
       var $current = $(e.currentTarget);
-      var subPage = $current.data("subpage");
-      this.trigger("change:subview", subPage);
+      this.potentialSubPage = $current.data("subpage");
+
+      //do check for uncompleted current form info here
+      model = this.collection.findWhere({active : true});
+      //uses the active nav model to find the current view's model
+      currentModel = this.getCurrentModel(model);
+
+     //check the vals that we're validating, not just everything that might be in the model
+    var changedVals = _.values(_.pick(currentModel.attributes, _.keys(currentModel.validation)));
+
+     if (changedVals.join("")){
+       //model isn't empty, user has entered something, so show a warning
+       this.showConfirmModal();
+     }
+      else {
+       this.completeChangeActive();
+     }
     },
+
+    completeChangeActive : function(){
+      //reset the current model
+      model = this.collection.findWhere({active : true});
+      //uses the active nav model to find the current view's model
+      currentModel = this.getCurrentModel(model);
+      //clears all values that require validation
+      currentModel.reset();
+      this.trigger("change:subview", this.potentialSubPage);
+    },
+
+    getCurrentModel : function(navModel){
+      var name = navModel.get("name");
+      var model = Marionette.getOption(this, "subViewModels")[name[0].toLowerCase() + name.slice(1) + "Model"];
+      return model;
+    },
+
+    getCurrentViewConstructor : function(navModel){
+      var name = navModel.get("name");
+      var viewName = name + "View";
+      var View = this.views[viewName];
+      return View
+    },
+
+    showConfirmModal: function(){
+      this.$(".confirm-modal").modal();
+    },
+
 
     showView : function(model){
       if (!model){
@@ -326,10 +379,9 @@ define([
         //it's no longer showing a successView
         this.successView = false;
         this.renderNav();
-        var name = model.get("name");
-        var viewName = name + "View";
-        var View = this.views[viewName];
-        var viewToShow = new View({model : Marionette.getOption(this, "subViewModels")[name[0].toLowerCase() + name.slice(1) + "Model" ]});
+        var View = this.getCurrentViewConstructor(model);
+        var model = this.getCurrentModel(model);
+        var viewToShow = new View({model : model});
 
         this.listenToOnce(viewToShow, "submit-form", this.forwardSubmit);
         this.content.show(viewToShow);
@@ -340,11 +392,6 @@ define([
     showPasswordSuccessView : function(){
       this.successView = true;
       this.content.show(new SuccessView({title : "Password Changed" , message : "Next time you log in, please use your new password"}));
-    },
-
-    showEmailSuccessView : function(){
-      this.successView = true;
-      this.content.show(new SuccessView({title : "Email Changed"}));
     },
 
     forwardSubmit : function(model){
@@ -361,7 +408,7 @@ define([
      "ChangeEmailView" : ChangeEmailView,
      "ChangePasswordView" : ChangePasswordView,
      "ChangeTokenView" : ChangeTokenView,
-     "DeleteAccountView" : DeleteAccountView
+     "DeleteAccountView" : DeleteAccountView,
    },
 
    //only one of each of these models exists for the life of the app
@@ -380,21 +427,24 @@ define([
     {title : "Change password", href : "password", name : "ChangePassword"},
     {title : "Api Token", href : "token", name : "ChangeToken"},
     {title : "Delete Account", href : "delete", name : "DeleteAccount"}
-
     ],
 
   initialize : function(options){
       options = options || {};
 
       this.subViewModels = {};
+    //create and store the models
       _.each(this.modelConfig, function(v,k) {
         var instanceName = k[0].toLowerCase() + k.slice(1);
         this.subViewModels[instanceName] = new v();
       },this);
 
+    //the main model
       this.model = new UserSettingsModel();
 
+    //navigation collection
       this.navCollection = new UserSettingsCollection(this.layoutConfig);
+    //parent layout iew
       this.view = new UserSettingsView({model : this.model,
         collection : this.navCollection,
         subViewModels : this.subViewModels,
@@ -404,6 +454,7 @@ define([
     BaseWidget.prototype.initialize.apply(this, arguments);
     },
 
+   //only called by navigator
    setSubView : function(subView){
      this.navCollection.each(function(m){
        m.set("active", false, {silent : true});
@@ -429,6 +480,10 @@ define([
      this.pubsub.publish(this.pubsub.NAVIGATE, "settings-page", {subView: subPage});
    },
 
+   /*
+   * how to respond after form was submitted and
+   * server has replied with either success or fail message
+   * */
    handleUserAnnouncement : function(msg, endpoint){
      //the alert should actually provide the fail message
      if (msg === "data_post_successful" ) {
@@ -437,10 +492,19 @@ define([
            this.view.showPasswordSuccessView();
            break;
          case "CHANGE_EMAIL":
-           this.view.showEmailSuccessView();
+          //get current email, this will be discarded
+          //by the call to "resetModels" below
+           var new_email = this.subViewModels.changeEmailModel.get("email");
+           //publish alert
+           function alertSuccess (){
+           var message = "Please check <b>" + new_email+ "</b> for further instructions";
+           this.pubsub.publish(this.pubsub.ALERT,  new ApiFeedback({code: 0, msg: message, type : "success", title: "Success", modal: true}));
+          };
+           //need to do it this way so the alert doesnt get lost after page is changed
+           this.pubsub.subscribeOnce(this.pubsub.NAVIGATE, _.bind(alertSuccess, this));
+           this.beehive.getObject("Session").logout();
            break;
          case "TOKEN":
-          this.getUserData();
           break;
 //        case "CHANGE_PREFERENCE":
 //           this.changePreferenceSuccess();
@@ -448,10 +512,10 @@ define([
        }
      }
      else if (msg === "data_post_unsuccessful"){
+       //should show alert
      }
      else if (msg === "user_info_change"){
        //refresh all models in the widget
-       this.getUserData();
      }
      //clear models, then refill with data from user object
      this.resetModels();
@@ -471,6 +535,7 @@ define([
      user.postData(target, model.toJSON());
    },
 
+   // this function puts the data from user object into the correct models
    getUserData :function(){
      var data = this.beehive.getObject("User").getUserData();
 

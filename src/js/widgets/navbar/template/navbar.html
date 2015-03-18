@@ -51,7 +51,8 @@
                         <li class="divider"></li>
                         <li>
                             <a href="#" class="orcid-logout" >Log out from ORCID</a>
-                        </li>
+                        <li>
+
                     </ul>
                 </li>
 
@@ -81,7 +82,7 @@
                         </li>
                         <li class="divider"></li>
                         <li>
-                            <a href="#" class="orcid-logout" >Log out from ORCID</a>
+                            <a class="orcid-logout" >Log out from ORCID</a>
                         </li>
                     </ul>
                 </li>
@@ -106,8 +107,7 @@
 
                 {{/if}}
 
-                <li><a href="http://adsabs.github.io/help/"  target="_blank">Help</a></li>
-
+                <li><a href="http://adsabs.github.io/help/" target="_blank">Help</a></li>
 
                 {{#if currentUser}}
 
@@ -117,16 +117,15 @@
                         {{currentUser}} <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        <li><a href="#" class="settings">Settings</a></li>
+                        <li><a href="#/user/settings" class="settings">Settings</a></li>
                         <li class="divider"></li>
                         <li><a href="#" class="logout">Log Out</a></li>
                     </ul>
                 </li>
 
                 {{else}}
-                <li class="s-nav-border-right login"><a href="#">Log In</a></li>
-                <li class="register"><a href="#">Sign Up</a></li>
-
+                <li class="register"><a href="#user/account/register">Sign Up</a></li>
+                <li class="login"><a href="#user/account/login">Log In</a></li>
                 {{/if}}
 
             </ul>

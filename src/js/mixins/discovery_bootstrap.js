@@ -67,9 +67,6 @@ define([
         dynConf.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
       }
 
-
-
-
       var defer = $.Deferred();
 
       // this is the application dynamic config
@@ -211,8 +208,6 @@ define([
 
         }
       });
-
-
     },
 
     /**
