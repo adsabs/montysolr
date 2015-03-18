@@ -371,7 +371,7 @@ define([
             if (data.type == 'orcid') {
               alerts.alert(new ApiFeedback({
                 code: ApiFeedback.CODES.WARNING,
-                msg: 'You will be redirected to ORCID. Please sign in with your ORCID credentials and click on authorize.<br/><button id="okOrcid">OK</button>',
+                msg: '<p>You will be redirected to ORCID.</p> <p>Please sign in with your ORCID credentials and click on the "authorize" button.</p><button class="btn btn-success" id="okOrcid">Take me to ORCID.</button>',
                 modal: true,
                 events: {
                   'click #alertBox button#okOrcid': 'OK'
