@@ -770,7 +770,7 @@ define([
 
           self.dirty = false;
 
-          var works = profile['orcid-activities']['orcid-works'];
+          var works = profile['orcid-activities'] ? profile['orcid-activities']['orcid-works'] : [];
           var ids = self.getExternalIds(works);
           var db = {}, key, isOurs;
           _.each(ids, function(value, key, obj) {
@@ -866,6 +866,10 @@ define([
        */
       transformOrcidProfile: function(orcidProfile) {
         var docs = [];
+
+        if (!orcidProfile['orcid-activities'] || !orcidProfile['orcid-activities']['orcid-works'] || !orcidProfile['orcid-activities']['orcid-works']['orcid-work'])
+          return docs;
+
         var works = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
         var orcidId = orcidProfile['orcid-identifier']['path'];
 
