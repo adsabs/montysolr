@@ -635,6 +635,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	assertQueryEquals("A B D E", null, "\"a b d e\"");
   	assertQueryEquals("+A B D E", null, "\"a b d e\"");
   	assertQueryEquals("A +B D E", null, "+a +\"b d e\"");
+  	assertQueryEquals("+(A B D E)", null, "\"a b d e\"");
+  	//setDebug(true);
+  	assertQueryEquals("=(A B D E)", null, "+A +B +D +E"); // '=' modifier makes it reject concatenation
   	
   	assertQueryEquals("+foo:z +A B D E", null, "+foo:z +\"a b d e\"");
   	assertQueryEquals("+A B D E +foo:z", null, "+\"a b d e\" +foo:z");

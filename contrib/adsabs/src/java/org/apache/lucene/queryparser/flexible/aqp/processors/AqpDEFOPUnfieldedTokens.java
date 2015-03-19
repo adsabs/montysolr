@@ -101,12 +101,21 @@ import org.apache.lucene.queryparser.flexible.standard.parser.ParseException;
  *
  */
 
-public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
+public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 	
 	public static String PLAIN_TOKEN = "PLAIN_TOKEN";
 	public static String PLAIN_TOKEN_SEPARATOR = " ";
 	public static String PLAIN_TOKEN_CONCATENATED = "PLAIN_TOKEN_CONCATENATED";
+	
+	/*
+	 * Nodes will be considered 'bare' even if they have any of these modifiers
+	 * e.g. +foo will be effectively treated as if it was 'foo'
+	 */
 	private List<String> ignoreModifiers;
+
+	/*
+	 * Dtto as above 
+	 */
 	private List<String> ignoreTModifiers;
 	private List<String> ignoreFields;
 	private List<String> catchQTypes;
@@ -143,16 +152,30 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
-  		// this will refuse processing of: '=(this that token)'
-			// but the '=' modifier must not be in the list of modifiers to ignore
-			if (node.getParent() != null && node.getParent().getParent() != null) {
-				QueryNode p = node.getParent().getParent();
-				if (p.getChildren().size() > 1 &&
-						!ignoreModifiers.contains(((AqpANTLRNode) p.getChildren().get(0)).getTokenInput())) {
-					return false; 
-				}
-			}
-				
+		  if (node.getParent() != null && node.getParent().getParent() != null) {
+		    QueryNode immediateParent = node.getParent();
+		    QueryNode distantParent = node.getParent().getParent();
+		    
+		    if (!(immediateParent instanceof AqpANTLRNode)) return false;
+		    
+		    AqpANTLRNode distantP = (AqpANTLRNode) distantParent;
+		    AqpANTLRNode immediateP = (AqpANTLRNode) immediateParent;
+		    
+		    if (immediateP.getTokenName().equals("CLAUSE")
+		        && distantP.getTokenName().equals("FIELD") 
+		        && distantP.getChildren().size() == 2
+		        && ((AqpANTLRNode) (distantP.getChildren().get(0))).getTokenInput() != null) {
+		      return false;
+		    }
+		    
+		    if (immediateP.getTokenName().equals("TMODIFIER")
+            && distantP.getTokenName().equals("MODIFIER") 
+            && distantP.getChildren().size() == 2) {
+		      AqpANTLRNode modifier = ((AqpANTLRNode) (distantP.getChildren().get(0)));
+          if (modifier.getTokenName() != null && !ignoreModifiers.contains(modifier.getTokenName()))
+            return false;
+        }
+		  }
 			return true;
 		}
 		return false;

@@ -7,11 +7,11 @@ import java.io.IOException;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
@@ -88,7 +88,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			File synonymsFile = createTempFile(new String[]{
 					"weak => lightweak",
 					"lensing => mikrolinseneffekt",
-					"pink => pinkish"
+					"pink => pinkish",
+					"stephen, stephens => stephen"
 			});
 			replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
@@ -296,6 +297,55 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	}
 
 	public void testSpecialCases() throws Exception {
+	  
+	  // strange effect of paranthesis - github #23; we want to see this even (inside brackets)
+	  // +(
+	  //   (
+	  //    (
+    //     DisjunctionMaxQuery((((author:stephen, author:stephen,*)) | ((title:stephen title:syn::stephen)))) 
+    //     DisjunctionMaxQuery((((author:murray, author:murray, margaret a author:murray, m a author:hanson, m m author:hanson, margaret m author:murray,*)) | title:murray))
+    //    )~2
+    //   ) 
+	  //   DisjunctionMaxQuery((
+    //    ((author:stephen murray, author:stephen murray,* author:murray, stephen author:murray, stephen * author:murray, stephen * author:murray, s author:murray, s * author:murray, s * author:murray, author:murray,*))
+    //    |title:\"(stephen syn::stephen) murray\"
+    //   ))
+	  //  ) 
+	  // +author_facet_hier:0/Murray, S
+	  
+	  //setDebug(true);
+	  assertQueryEquals(req("defType", "aqp", 
+	      "q", "stephen murray author_facet_hier:\"0/Murray, S\"",
+	      "qf", "abstract title",
+	      "aqp.unfielded.tokens.strategy", "multiply",
+        "aqp.unfielded.tokens.new.type", "simple",
+        "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
+	      ), 
+        "+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S", 
+        BooleanQuery.class
+    );
+	  
+	  assertQueryEquals(req("defType", "aqp", 
+        "q", "((stephen murray)) author_facet_hier:\"0/Murray, S\"",
+        "qf", "title abstract",
+        "aqp.unfielded.tokens.strategy", "multiply",
+        "aqp.unfielded.tokens.new.type", "simple",
+        "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
+        ), 
+        "+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S", 
+        BooleanQuery.class
+    );
+	  assertQueryEquals(req("defType", "aqp", 
+        "q", "=(stephen murray) author_facet_hier:\"0/Murray, S\"",
+        "qf", "title abstract",
+        "aqp.unfielded.tokens.strategy", "multiply",
+        "aqp.unfielded.tokens.new.type", "simple",
+        "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
+        ), 
+        "+(abstract:stephen | title:stephen) +(abstract:murray | title:murray) +author_facet_hier:0/Murray, S", 
+        BooleanQuery.class
+    );
+	  
 	  
 		// virtual fields (their definition is in the solrconfig.xml)
 		assertQueryEquals(req("defType", "aqp", "q", "full:foo"), 
