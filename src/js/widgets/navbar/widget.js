@@ -27,12 +27,15 @@ define([
 
     template : NavBarTemplate,
 
-    triggers : {
-      "click .ads" : "ads-toggle-state"
-    },
+
 
     events : {
-      "change .orcid-mode" : "changeOrcidMode"
+      "change .orcid-mode" : "changeOrcidMode",
+      'click li.ads button.sign-out': 'adsSignout'
+    },
+
+    modelEvents: {
+      'change:adsLoggedIn': 'render'
     },
 
     changeOrcidMode : function() {
@@ -48,6 +51,10 @@ define([
       setTimeout(function(){
         that.render();
       }, 400);
+    },
+
+    adsSignout: function() {
+      this.trigger('ads-signout');
     }
 
   });
@@ -76,18 +83,25 @@ define([
       if (user.isOrcidModeOn() && orcidApi.hasAccess()){
         val = true;
       }
-      this.model.set({orcidModeOn : val}, {silent : true});
+      this.model.set({orcidModeOn : val, adsLoggedIn: val}, {silent : true});
     },
 
     handleUserAnnouncement : function(key, val){
       if (key == 'orcidUIChange') {
         var orcidApi = this.getBeeHive().getService("OrcidApi");
         this.model.set('orcidModeOn', val && orcidApi.hasAccess());
+        if (val && orcidApi.hasAccess()) {
+          this.model.set('adsLoggedIn', true);
+        }
+        else {
+          this.model.set('adsLoggedIn', false);
+        }
       }
     },
 
     viewEvents : {
-      "ads-toggle-state" : "triggerADSAction"
+      "ads-toggle-state" : "triggerADSAction",
+      'ads-signout': 'signOut'
     },
 
     modelEvents : {
@@ -107,6 +121,16 @@ define([
           orcidApi.signIn();
         }
       }
+    },
+
+    signOut: function() {
+      var user = this.getBeeHive().getObject('User'),
+        orcidApi = this.getBeeHive().getService("OrcidApi");
+
+      if (orcidApi)
+        orcidApi.signOut();
+
+      user.setOrcidMode(false);
     },
 
     triggerADSAction : function(){
