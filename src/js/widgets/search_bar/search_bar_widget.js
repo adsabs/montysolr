@@ -91,7 +91,24 @@ define([
         },
         "click #search-form-container .title": "toggleFormSection",
         "click .show-form": "onShowForm",
-        "submit form[name=main-query]": "submitQuery"
+        "submit form[name=main-query]": "submitQuery",
+        "keyup .q" : "toggleClear",
+        "click .icon-clear" : "clearInput"
+      },
+
+      toggleClear : function(){
+        var display = Boolean(this.$(".q").val());
+        if (display){
+          this.$(".icon-clear").removeClass("hidden");
+        }
+        else {
+          this.$(".icon-clear").addClass("hidden");
+        }
+      },
+
+      clearInput : function(e){
+        this.$(".q").val("");
+        this.$(".icon-clear").addClass("hidden");
       },
 
       getFormVal: function() {
@@ -253,7 +270,10 @@ define([
         this.listenTo(this.view, "render", function () {
           var query = this.getCurrentQuery().get("q");
           if (query) {
-            this.view.setFormVal(query)
+            this.view.setFormVal(query);
+            this.view.$(".icon-clear").removeClass("hidden");
+          }else {
+            this.view.$(".icon-clear").addClass("hidden");
           }
         });
 
