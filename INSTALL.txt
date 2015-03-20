@@ -3,6 +3,7 @@ Pre-requisites:
   * Java SDK (v1.7 and newer)
   * ant (at least 1.8)
   * python (on path, v2.5 and newer)
+  * subversion
 
 
 Build everything:

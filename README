@@ -33,6 +33,18 @@ You will need Java JDK (version 7), and 'ant' (v1.8 and newer)
  $ ant build-all
 ```
 
+
+ECLIPSE
+=======
+You should simply be able to load the project from eclipse using the .classpath from the repository.
+You may want to check that the projects created match the naming convention inside .project.
+
+i.e.,
+<name>montysolr</name>
+
+
+GENERAL
+=======
 MontySolr works on Linux/Mac/Windows. Releases are automatically tested/deployed
 see: https://github.com/romanchyla/montysolr/releases.
 

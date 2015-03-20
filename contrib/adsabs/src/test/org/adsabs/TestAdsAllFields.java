@@ -743,23 +743,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		);
 
 		
-		/*
-		 * citations()/references() queries (use special dummy records)
-		 */
-		// XXX:rca - to activate after fixing citation search
-		/*assertQ(req("q", "recid:[101 TO 104]"), "//*[@numFound='4']");
-		assertQ(req("q", "citations(recid:100)"), 
-				"//*[@numFound='2']",
-				"//doc/int[@name='recid'][.='101']",
-				"//doc/int[@name='recid'][.='102']"
-				);
-		assertQ(req("q", "references(recid:100)"), 
-				"//*[@numFound='2']",
-				"//doc/int[@name='recid'][.='103']",
-				"//doc/int[@name='recid'][.='104']"
-				);*/
-		
-
 
 		/*
 		 * read_count (float type)
@@ -980,6 +963,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 		    "//doc/int[@name='recid'][.='100']");
 
+		/*
+		 * citations()/references() queries (use special dummy records)
+		 */
+		assertQ(req("q", "recid:[101 TO 104]"), "//*[@numFound='4']");
+		assertQ(req("q", "citations(recid:100)"), 
+				"//*[@numFound='2']",
+				"//doc/int[@name='recid'][.='101']",
+				"//doc/int[@name='recid'][.='102']"
+				);
+
+		
 		// just check they are working
 		assertQ(req("q", "useful(*:*)"), 
 				"//*[@numFound='3']");

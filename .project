@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>montysolr-next</name>
+	<name>montysolr</name>
 	<comment></comment>
-	<projects>
-		<project>solr-next</project>
-	</projects>
 	<buildSpec>
 		<buildCommand>
 			<name>org.python.pydev.PyDevBuilder</name>

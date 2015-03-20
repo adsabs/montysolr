@@ -69,15 +69,18 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     assertU(addDocs("date", "2013-12-01T00:00:00Z"));
     
     assertU(addDocs("date", "1976-01-01T00:30:00Z", "title", "foo"));
-		assertU(addDocs("date", "1976-01-02T00:30:00Z"));
-		assertU(addDocs("date", "1976-02-01T00:30:00Z"));
-		assertU(addDocs("date", "1976-01-02T00:30:00Z"));
-		assertU(addDocs("date", "1976-12-30T00:30:00Z")); // year 76 had only 30 days in Dec
-		assertU(addDocs("date", "1977-01-01T00:30:00Z"));
+	assertU(addDocs("date", "1976-01-02T00:30:00Z"));
+	assertU(addDocs("date", "1976-02-01T00:30:00Z"));
+	assertU(addDocs("date", "1976-01-02T00:30:00Z"));
+	assertU(addDocs("date", "1976-12-30T00:30:00Z")); // year 76 had only 30 days in Dec
+	assertU(addDocs("date", "1977-01-01T00:30:00Z"));
+	
+	// DateField should not work before 1970
+	assertU(addDocs("date", "1969-01-01T00:00:00Z"));
 
     assertU(commit());
 
-    assertQ(req("q", "*:*"), "//*[@numFound='16']");
+    assertQ(req("q", "*:*"), "//*[@numFound='17']");
     
     
     // test the query parser does the right thing
@@ -208,7 +211,6 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 			);
 		
 		// and using the real date
-		// TODO: this should work too: assertQ(req("q", "date:[\"2012-10-01T00:00:00\" TO \"2012-11-01T00:00:00Z\"]", "indent", "true"),
 		assertQ(req("q", "date:[\"2012-10-01T00:00:00\" TO \"2012-12-01T00:00:00Z\"]", "indent", "true"), 
     		"//*[@numFound='5']", 
     		"//doc/str[@name='id'][.='0']",
@@ -217,6 +219,19 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='3']",
         "//doc/str[@name='id'][.='4']"
         );
+		
+		assertQ(req("q", "date:[\"2012-10-01T00:00:00\" TO \"2012-11-01T00:00:00Z\"]", "indent", "true"), 
+	    		"//*[@numFound='4']",
+    		"//doc/str[@name='id'][.='0']",
+	        "//doc/str[@name='id'][.='1']",
+	        "//doc/str[@name='id'][.='2']",
+	        "//doc/str[@name='id'][.='3']"
+	        );
+		
+		assertQ(req("q", "date:[\"1500-01-01T00:00:00\" TO \"1970-01-01T00:00:00\"]", "indent", "true"), 
+	    		"//*[@numFound='1']", 
+	        "//doc/str[@name='id'][.='16']"
+	        );
 		
 		// github#19 - 'pubdate:2013 foobarbaz' doesn't play nicely in range queries
 		assertQ(req("q", "pubdate:1976 foo", "qf", "title keyword"), 
