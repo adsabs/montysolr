@@ -947,7 +947,7 @@ define([
             d[value.type.toLowerCase()] = key;
           });
           d['putcode'] = extr(w['put-code']);
-          d['title'] = extr(w['work-title']['title']);
+          d['title'] = extr(w['work-title'] ? w['work-title']['title'] : null);
           d['visibility'] = extr(w['visibility']);
           d['formattedDate'] = formatDate(w['publication-date']);
           d['pub'] = extr(w['journal-title']);
