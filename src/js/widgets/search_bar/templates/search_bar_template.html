@@ -29,6 +29,7 @@
      <div class="row">
          <div class="col-sm-12 search-bar-input-row s-search-bar-input-row">
              <form name="main-query">
+                 <div class="form-group has-feedback">
                  <div class="input-group">
                      <div class="input-group-btn">
                          <div type="div" class="btn btn-default dropdown-toggle show-form hidden-xs" data-toggle="dropdown">Search Form
@@ -36,15 +37,15 @@
                          </div>
                          <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
                      </div>
-
                      <input type="text" class="form-control q" name="q" autofocus value={{currentQueryVal}}>
+                     <i class="icon-clear s-clear-control"></i>
                   <span class="input-group-btn">
-
-            <button type="submit" class= "btn btn-primary search-submit s-search-submit" aria-label="submit"><i class="fa fa-search"></i></button>
-                      </span>
+                       <button type="submit" class= "btn btn-primary search-submit s-search-submit" aria-label="submit"><i class="fa fa-search"></i></button>
+                  </span>
 
                  </div>
                  <!-- /input-group -->
+                 </div> <!-- /form-group-->
              </form>
 
 

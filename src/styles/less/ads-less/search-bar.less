@@ -4,19 +4,12 @@
   width: 50px;
 }
 
-
 .inactive-style {
   color: @gray-light
 }
 
 .active-style {
   color: @component-active-bg
-}
-
-//weird stuff going on with input-addon overriding css
-.search-submit {
-  background-color: @brand-primary !important;
-  color: @body-bg !important
 }
 
 .search-dropdown {
@@ -81,4 +74,31 @@
   padding-top: 1%;
   max-height: 40px;
   overflow: hidden;
+}
+
+.s-clear-control {
+  position: absolute;
+  top: 7px;
+  right: 15%;
+  display: block;
+  text-align: center;
+  z-index: @z-index-4;
+  font-size: 1.8em;
+  color: @gray-light;
+  cursor: pointer;
+
+  @media(min-width: @screen-sm-min) {
+    right: 12%;
+  }
+
+  @media(min-width: @screen-lg-min){
+    right: 8%;
+  }
+
+
+  &:hover{
+    color: @gray-dark;
+  }
+
+
 }

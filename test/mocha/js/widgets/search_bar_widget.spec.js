@@ -157,6 +157,35 @@ define([
       done();
     });
 
+    it("should have an x icon, only visible when search bar has content, that clears the search bar", function(){
+
+      var s = new SearchBarWidget();
+
+      $("#test").append(s.render().el);
+
+      expect($("#test").find(".icon-clear").hasClass("hidden")).to.be.true;
+
+      $("#test .q").val("a query").trigger("keyup");
+
+      expect($("#test").find(".icon-clear").hasClass("hidden")).to.be.false;
+
+      $("#test").find(".icon-clear").trigger("click");
+
+      expect(Boolean($("test").val())).to.be.false;
+
+      //finally, test whether x appears if controller adds content after render
+      $("#test").empty();
+
+      var s = new SearchBarWidget();
+      s.setCurrentQuery(new ApiQuery({q : "foo"}));
+      $("#test").append(s.render().el);
+
+      expect( $("#test .q").val()).to.eql("foo");
+      expect($("#test").find(".icon-clear").hasClass("hidden")).to.be.false;
+
+    });
+
+
 
     it("shows the query builder form on clicking 'Search Form' ", function() {
 
