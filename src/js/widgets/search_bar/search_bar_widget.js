@@ -198,6 +198,9 @@ define([
 
         this.$(".q").focus();
         this.$(".q").selectRange(this.$(".q").val().length - 1);
+
+        //figure out if clear button needs to be there
+        this.toggleClear();
       },
 
       tempFieldClear: function (e) {
