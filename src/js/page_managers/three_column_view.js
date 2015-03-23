@@ -35,21 +35,17 @@ define([
         var options = options || {};
         this.widgets = options.widgets;
         this.model = new ResultsStateModel();
-        _.bindAll(this, 'setScreenSize');
       },
 
       close: function() {
         Marionette.ItemView.prototype.close.call(this, arguments);
-        $(window).off("resize", this.setScreenSize);
       },
 
       template : pageTemplate,
 
-
       modelEvents: {
         "change:left": "_updateColumnView",
         "change:right": "_updateColumnView",
-        "change:largerThanTablet": "resizeColumns"
       },
 
       events: {
@@ -70,18 +66,9 @@ define([
 
       },
 
-      onShow : function(){
+      onShow : function() {
         //these functions must be called every time the template is inserted
         this.displaySearchBar(true);
-
-        //let view know whether it should display a 2 or 3 column layout
-        this.setScreenSize();
-
-        // safety precaution
-        $(window).off("resize", this.setScreenSize);
-
-        //listen for resizing events
-        $(window).resize(this.setScreenSize);
       },
 
       displaySearchBar: function (show) {
@@ -102,40 +89,6 @@ define([
 
       displayMiddleColumn: function (show) {
         this.$(".s-left-col-container").toggle(show === null ? true : show);
-      },
-
-      setScreenSize: _.debounce(function() {
-        if (this.$(".right-expand").css("display") == "none") {
-          this.model.set("largerThanTablet", false)
-        }
-        else {
-          this.model.set("largerThanTablet", true)
-
-        }
-        // higher debounce times had a noticable lag
-      }, 200),
-
-      /**
-       * when model.largerThanTablet changes; this function will
-       * decide how to lay out the individual columns
-       */
-      resizeColumns: function () {
-        var leftHidden = (this.model.get("left") === "closed");
-
-        if (this.model.get("largerThanTablet")) {
-          // it's a three column layout
-          this.$("#results-right-column").append(this.$(".right-col-container"));
-          if (leftHidden) {
-            this.$(".right-col-container").show();
-          }
-        }
-        else {
-          // two column layout
-          this.$("#results-left-column").append(this.$(".right-col-container"));
-          if (leftHidden) {
-            this.$(".right-col-container").show();
-          }
-        }
       },
 
       /**

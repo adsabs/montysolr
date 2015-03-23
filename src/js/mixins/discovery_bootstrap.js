@@ -192,36 +192,8 @@ define([
       navigator.start(this);
       navigator.router = app.router; // this feels hackish
 
-
       // Trigger the initial route and enable HTML5 History API support
       Backbone.history.start(conf ? conf.routerConf : {});
-
-
-      // All navigation that is relative should be passed through the navigate
-      // method, to be processed by the router. If the link has a `data-bypass`
-      // attribute, bypass the delegation completely.
-      $(document).on("click", "a[href]:not([data-bypass])", function (evt) {
-
-        var attr = $(this).attr("href");
-
-        //getting rid of first character so router.routes can easily do regex matches
-        var withoutSlashOrHash = attr.match(/^[#/]*(.*)/);
-        withoutSlashOrHash = withoutSlashOrHash.length === 2 ? withoutSlashOrHash[1] : attr;
-
-        var route = _.find(Backbone.history.handlers, function (h) {
-          //testing to see if it matches any router route other than the "catchall" 404 route
-          if (h.route.test(withoutSlashOrHash) && h.route.toString() !== /^(.*?)$/.toString()) {
-
-            return true
-          }
-        });
-
-        if (route !== undefined) {
-
-          evt.preventDefault();
-          Backbone.history.navigate(attr, true);
-        }
-      });
 
       $(document).on("scroll", function () {
 
