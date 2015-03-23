@@ -28,7 +28,7 @@ define([
       if (mpm) {
         var child = mpm.getCurrentActiveChild();
         if (child.view && child.view.showCols) {
-          child.view.showCols({right: false});
+          child.view.showCols({right: false, left: false});
           // open the view again
           this.pubsub.once(this.pubsub.START_SEARCH,
             _.once(function() {child.view.showCols({right:true})}));
@@ -48,7 +48,7 @@ define([
       if (mpm) {
         var child = mpm.getCurrentActiveChild();
         if (child.view && child.view.showCols) {
-          child.view.showCols({right: true});
+          child.view.showCols({right: true, left: true});
         }
       }
     };

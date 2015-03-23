@@ -1,3 +1,10 @@
+/*put this class on an icon if a hover should indicate interactivity */
+.s-icon-hover {
+  &:hover {
+    color: @gray-dark;
+  }
+}
+
 .s-item-closed {
   color: @gray-light;
   .fa;
@@ -71,6 +78,7 @@
   }
 }
 
+
 //currently used for facets
 
 .s-filter-image {
@@ -129,13 +137,13 @@
   font-size: 1.3em;
   color: @gray-light;
 
+  &:hover {
+    color: @gray-dark;
+  }
+
+
 }
 
-.icon-help:hover {
-
-  color: mix(@gray-light, @brand-info);
-
-}
 
 .icon-details {
   .fa;
@@ -201,4 +209,5 @@
     content: @fa-var-times-circle-o;
   }
 }
+
 

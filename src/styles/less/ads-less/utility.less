@@ -41,22 +41,24 @@
 .s-large-close {
   font-weight: bold;
   font-size: 4.5em;
-  .lh-box-shadow(2px 2px 2px @default-box-shadow-color);
   display: inline-block;
+  color: @text-color;
   width: 1.2em;
   height: 1.2em;
   padding-left: .3em;
-  opacity: .5;
-  border: 1px solid @gray;
+  border: 1px solid @gray-light;
   .lh-border-radius(50px);
   line-height: 1;
   z-index: @z-index-4;
   float: right;
   cursor: pointer;
   position:relative;
+  .lh-transition(all, .5s);
+  opacity: .8;
 
   &:hover {
-    opacity: .8;
+    .lh-box-shadow(4px 4px 4px darken(@default-box-shadow-color, 10%));
+    opacity: .8
   }
 }
 
