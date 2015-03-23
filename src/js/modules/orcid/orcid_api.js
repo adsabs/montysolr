@@ -94,13 +94,38 @@ define([
         var storage = beehive.getService('PersistentStorage');
         if (storage) {
           var orcid = storage.get('Orcid');
+
           if (orcid && orcid.authData) {
-            //TODO:rca - check the access_token works (by loading profile)
             this.saveAccessData(orcid.authData);
           }
         }
       },
 
+
+      /**
+       * Checks access to ORCID api by making request for a user profile
+       * returns a promise; done() means success, fail() no access
+       * @param authData
+       */
+      checkAccessOrcidApiAccess: function(authData) {
+        authData = authData || this.authData;
+        //check the access_token works (by loading profile)
+        var ret = $.Deferred();
+        this.sendData(this.config.apiEndpoint + '/' + authData.orcid + '/orcid-profile',
+          null,
+          {
+            fail: function() {
+              ret.reject();
+            },
+            done: function(res) {
+              ret.resolve(res);
+            },
+            headers: {
+              "Orcid-Authorization": "Bearer " + authData.access_token
+            }
+          });
+        return ret.promise();
+      },
 
       hasAccess: function() {
         if (this.authData) {
@@ -784,7 +809,7 @@ define([
           self.pending = false;
 
           whenDone.resolve();
-        })
+          })
           .fail(function() {
             whenDone.reject(arguments);
           });
@@ -803,7 +828,15 @@ define([
 
         if (!this.dirtyThrottle) {
           this.dirtyThrottle = _.throttle(function(orcidApi) {
-            orcidApi.updateDatabase();
+            orcidApi.checkAccessOrcidApiAccess()
+              .done(function(profile) {
+                orcidApi.updateDatabase(profile);
+              })
+              .fail(function() {
+                console.log('We have lost access to ORCID Api (maybe the user revoked the token?)');
+                orcidApi.authData = {};
+              })
+
           }, this.checkInterval || (3600 * 1000), this); // check every hour (or sooner?)
         }
         this.dirtyThrottle(this);
@@ -914,7 +947,7 @@ define([
             d[value.type.toLowerCase()] = key;
           });
           d['putcode'] = extr(w['put-code']);
-          d['title'] = extr(w['work-title']['title']);
+          d['title'] = extr(w['work-title'] ? w['work-title']['title'] : null);
           d['visibility'] = extr(w['visibility']);
           d['formattedDate'] = formatDate(w['publication-date']);
           d['pub'] = extr(w['journal-title']);
