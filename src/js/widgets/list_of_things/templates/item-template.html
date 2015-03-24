@@ -128,9 +128,19 @@
                     </button>
                     <ul class="dropdown-menu" role="menu">
                         {{#each orcid.actions}}
-                        <li><a class="orcid-action {{this.action}}" data-action="{{this.action}}"
+                        <li>
+                            <i class="
+                            {{#compare this.action 'orcid-update'}}
+                            icon-reload-c
+                            {{/compare}}
+                            {{#compare this.action 'orcid-delete'}}
+                            icon-clear-c
+                            {{/compare}}
+                            "></i>
+                            <a class="orcid-action {{this.action}}" data-action="{{this.action}}"
                                title="{{this.caption}}">{{this.title}}</a>
                             {{/each}}
+                        </li>
                     </ul>
                 </div>
 
