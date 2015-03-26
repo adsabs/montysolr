@@ -27,9 +27,8 @@ define([
 
     template : NavBarTemplate,
 
-
-
     events : {
+      "click .orcid-dropdown ul" : function(e){e.stopPropagation()},
       "change .orcid-mode" : "changeOrcidMode",
       'click li.ads button.sign-out': 'adsSignout'
     },
@@ -40,15 +39,16 @@ define([
 
     changeOrcidMode : function() {
       var that = this;
-
-      if (this.$(".orcid-mode").is(":checked")){
-        this.model.set("uiOrcidModeOn", true);
-      }
-      else {
-        this.model.set("uiOrcidModeOn", false);
-      }
       //allow animation to run before rerendering
       setTimeout(function(){
+
+        if (that.$(".orcid-mode").is(":checked")){
+          that.model.set("uiOrcidModeOn", true);
+        }
+        else {
+          that.model.set("uiOrcidModeOn", false);
+        }
+
         that.render();
       }, 400);
     },
