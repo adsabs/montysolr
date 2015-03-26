@@ -4,9 +4,17 @@
     font-family : Verdana, Geneva, sans-serif;
     vertical-align: top;
     color : darken(@gray-lighter, 25%) !important;
+    font-size: 18px !important;
+    position: relative;
+    top: -7px;
+
     span {
       color : @gray-lighter;
       vertical-align: top;
+      position: relative;
+      top: -36px;
+      display: block;
+      left: 77px;
     }
   }
 }
@@ -78,7 +86,8 @@
 .s-orcid-label-container {
   padding-bottom: 10%;
   width: 35%;
-  margin: auto;
+  float: right;
+
 }
 
 .s-orcid-title {
@@ -88,9 +97,10 @@
 }
 
 .s-orcid-title img {
-  height: 33px;
+  height: 30px;
   width: auto;
 }
+
 
 .s-orcid-dropdown .dropdown-menu {
   padding: 10%;
@@ -98,6 +108,23 @@
   li:hover{
     background-color: #fff;
   }
+
+  .divider {
+    clear:both;
+  }
+
+  .btn-link {
+    color: @brand-primary;
+  }
+
+  li:hover .btn-link {
+   text-decoration:underline !important;
+  }
+}
+
+.s-orcid-mode-label {
+  float:left;
+  margin-top: 17px;
 }
 
 .cmn-toggle {
@@ -175,5 +202,7 @@ input.cmn-toggle-round:checked + label:after {
 .s-ads-icon {
   height: 54px;
   position: relative;
-  top: -13px;
+  top: -15px;
+  left: 6px;
+  padding-right: 10px;
 }

@@ -8,7 +8,8 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand s-navbar-brand" href="#"><img class="s-ads-icon" src="styles/img/transparent_icon.png" alt=""/><h1> NASA/<span>ADS</span></h1>
+            <a class="navbar-brand s-navbar-brand" href="#"><img class="s-ads-icon" src="styles/img/transparent_icon.png" alt=""/>
+                <h1> NASA<span>Astrophysics Data System</span></h1>
             </a>
         </div>
 
@@ -17,15 +18,19 @@
 
             <ul class="nav navbar-nav navbar-right">
 
-                {{#if orcidModeOn}}
+                {{#if orcidLoggedIn}}
+
+                    {{#if orcidModeOn}}
+
                 <li class="dropdown orcid-dropdown s-orcid-dropdown">
-                    <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
+                    <button class=" btn-link" data-toggle="dropdown" aria-expanded="false">
                         <span class="s-orcid-title"> <img src="../../styles/img/orcid-active.svg"
                                                           alt="orcid symbol"/>   ORCID Claims <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
                         <li>
-                            You are signed in to ORCID and able to add papers from to your ORCID profile.
+                           <div>You are signed in to ORCID and able to add papers from ADS to your ORCID profile.</div>
 
+                            <div class="s-orcid-mode-label"><b>Orcid Mode</b></div>
                             <div class="s-orcid-label-container">
                                 off
                                 <div class="switch">
@@ -35,28 +40,58 @@
                                 on
                             </div>
                         </li>
+                        <li class="divider clearfix"></li>
+                        <li>
+                           <button class="btn btn-link orcid-link" href="#user/orcid">My ORCID papers</button>
+                        </li>
                     </ul>
                 </li>
-                {{else}}
+
+                    {{else}}
+
                 <li class="dropdown orcid-dropdown s-orcid-dropdown">
-                    <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
-                        <span class="s-orcid-title"> <img src="../../styles/img/orcid-inactive.svg"
+                    <button class="btn-link" data-toggle="dropdown" aria-expanded="false">
+                        <span class="s-orcid-title"> <img src="../../styles/img/orcid_inactive.png"
                                                           alt="orcid symbol"/>   ORCID Claims <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
-                        Sign in to ORCID.
                         <li>
+                           <div>You have turned off the ORCID view in ADS, but are still logged in to ORCID.</div>
+                            <div class="s-orcid-mode-label"><b>Orcid Mode</b></div>
                             <div class="s-orcid-label-container">
                                 off
-                                <div class="switch">
+                                <div class="switch clearfix">
                                     <input id="cmn-toggle-1" class="cmn-toggle cmn-toggle-round orcid-mode" type="checkbox">
                                     <label for="cmn-toggle-1"></label>
                                 </div>
                                 on
                             </div>
                         </li>
+                        <li class="divider"></li>
+                        <li>
+                            <button class="btn btn-link orcid-link" href="#user/orcid" >My ORCID papers</button>
+                        </li>
                     </ul>
                 </li>
-                {{/if }}
+
+                    {{/if}}
+                <!--end "if/else orcidModeOn"-->
+
+                {{else}}
+
+                <li class="dropdown orcid-dropdown s-orcid-dropdown">
+                    <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
+                        <span class="s-orcid-title"> <img src="../../styles/img/orcid_inactive.png"
+                                                          alt="orcid symbol"/>   ORCID Claims <span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li>
+                            <button class="btn-link orcid-sign-in"> Sign in to ORCID. </button>
+                        </li>
+                    </ul>
+                </li>
+
+                <!--end "if/else orcidLoggedIn"-->
+
+                {{/if}}
 
                 <li><a href="http://adsabs.github.io/help/"  target="_blank">Help</a></li>
 
