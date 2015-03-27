@@ -1,19 +1,26 @@
 .s-navbar-brand {
   h1 {
-    font-family : Verdana, Geneva, sans-serif;;
-    position: relative;
-    top: -3px;
+    display: inline;
+    font-family : Verdana, Geneva, sans-serif;
+    vertical-align: top;
     color : darken(@gray-lighter, 25%) !important;
+    font-size: 18px !important;
+    position: relative;
+    top: -7px;
+
     span {
       color : @gray-lighter;
+      vertical-align: top;
+      position: relative;
+      top: -36px;
+      display: block;
+      left: 77px;
     }
   }
+}
 
-  .fa-star {
-    color :white;
-    text-shadow:  3px 3px 0px  @brand-success, -3px -3px 0px lighten(@brand-primary-faded, 8%);
-    font-size: 1.2 em;
-  }
+.navbar ul {
+  padding-top: 10px;
 }
 
 .nav li {
@@ -77,19 +84,47 @@
 }
 
 .s-orcid-label-container {
-  position: absolute;
-  right: 7px;
-  top: -4px;
+  padding-bottom: 10%;
+  width: 35%;
+  float: right;
+
 }
 
 .s-orcid-title {
-  display: inline-block;
-  width: 146px;
+  position: relative;
+  top : -3px;
+  font-size: 16px;
 }
 
 .s-orcid-title img {
-  height: 33px;
+  height: 30px;
   width: auto;
+}
+
+
+.s-orcid-dropdown .dropdown-menu {
+  padding: 10%;
+  width: 350px;
+  li:hover{
+    background-color: #fff;
+  }
+
+  .divider {
+    clear:both;
+  }
+
+  .btn-link {
+    color: @brand-primary;
+  }
+
+  li:hover .btn-link {
+   text-decoration:underline !important;
+  }
+}
+
+.s-orcid-mode-label {
+  float:left;
+  margin-top: 17px;
 }
 
 .cmn-toggle {
@@ -162,4 +197,12 @@ input.cmn-toggle-round:checked + label:before {
 }
 input.cmn-toggle-round:checked + label:after {
   margin-left: 30px;
+}
+
+.s-ads-icon {
+  height: 54px;
+  position: relative;
+  top: -15px;
+  left: 6px;
+  padding-right: 10px;
 }

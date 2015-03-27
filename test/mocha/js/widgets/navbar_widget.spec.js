@@ -46,7 +46,7 @@ define([
       n.activate(minsub.beehive.getHardenedInstance());
       $("#test").append(n.render().el);
 
-      expect($(".s-orcid-button-container").hasClass("s-active")).to.be.true;
+      expect($(".orcid-dropdown li:first div:first").text().trim()).to.eql("You are signed in to ORCID and able to add papers from ADS to your ORCID profile.");
 
     });
 
@@ -72,7 +72,7 @@ define([
 
       $("#test").append(n.view.render().el);
       var $w = n.view.$el;
-      $w.find('.orcid-mode').click();
+      $w.find('.orcid-sign-in').click();
 
       expect(signInStub.callCount).to.eql(1);
       expect(setOrcidModeStub.callCount).to.eql(1);
@@ -80,6 +80,39 @@ define([
       done();
 
     });
+
+    it("should trigger navigate event when 'my orcid papers' is clicked", function(){
+
+
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {}
+      }))({verbose: false});
+
+      var u = new User();
+      u.activate(minsub.beehive);
+      minsub.beehive.addObject("User", u);
+
+      minsub.beehive.addService('OrcidApi', {
+        hasAccess: function() {return true},
+        getHardenedInstance: function() {return this}
+      });
+
+      u.setOrcidMode(true);
+      var n = new NavBarWidget();
+      n.activate(minsub.beehive.getHardenedInstance());
+      n.pubsub.publish = sinon.spy();
+      $("#test").append(n.render().el);
+
+      //show active view
+      $("#test").find('.orcid-sign-in').click();
+
+      $("#test").find('.orcid-link').click();
+
+      expect(n.pubsub.publish.args[0]).to.eql(["[Router]-Navigate-Without-Trigger", "orcid-page"]);
+
+
+
+    })
   })
 
 });
