@@ -129,7 +129,10 @@
                     <ul class="dropdown-menu" role="menu">
                         {{#each orcid.actions}}
                         <li>
-                            <i class="
+
+                            <a class="orcid-action {{this.action}}" data-action="{{this.action}}"
+                               title="{{this.caption}}">
+                                <i class="
                             {{#compare this.action 'orcid-update'}}
                             icon-reload-c
                             {{/compare}}
@@ -137,8 +140,7 @@
                             icon-clear-c
                             {{/compare}}
                             "></i>
-                            <a class="orcid-action {{this.action}}" data-action="{{this.action}}"
-                               title="{{this.caption}}">{{this.title}}</a>
+                                {{this.title}}</a>
                             {{/each}}
                         </li>
                     </ul>
