@@ -53,7 +53,7 @@ define([
       var pubsub = this.getBeeHive().getService('PubSub');
 
       if (_.has(this.model.changedAttributes(), "isOrcidModeOn")){
-        pubsub.publish(this.key, pubsub.USER_ANNOUNCEMENT, "orcidUIChange", this.model.get("isOrcidModeOn"));
+        pubsub.publish(pubsub.USER_ANNOUNCEMENT, "orcidUIChange", this.model.get("isOrcidModeOn"));
       }
       this._persistModel();
     },
