@@ -21,7 +21,7 @@ define([
       sinon.stub(u, 'getBeeHive').returns({getService: function(name) {
         if (name == 'PubSub')
           return {publish: function() {
-            expect(_.toArray(arguments)).to.eql([undefined, "orcidUIChange", true]);
+            expect(_.toArray(arguments)).to.eql([undefined, undefined, "orcidUIChange", true]);
       }}}});
 
       expect(u.isOrcidModeOn()).to.be.false;

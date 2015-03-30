@@ -16,7 +16,10 @@ define([
     defaults : function(){
       return {
         orcidModeOn : false,
-        orcidLoggedIn : false
+        orcidLoggedIn : false,
+        currentUser  : undefined,
+        orcidFirstName: undefined,
+        orcidLastName: undefined
       }
     }
   });
@@ -26,16 +29,24 @@ define([
 
     template : NavBarTemplate,
 
-    triggers : {
-      "click .orcid-link" : "navigate-to-orcid-link"
+
+    modelEvents : {
+      change: "render"
     },
 
     events : {
       "click .orcid-dropdown ul" : "stopPropagation",
       "click button.orcid-sign-in" : "orcidSignIn",
       "change .orcid-mode" : "changeOrcidMode",
-      'click li.ads button.sign-out': 'adsSignout'
-
+      'click li.ads button.sign-out': 'adsSignout',
+      'click li.ads button.sign-out': 'adsSignout',
+      //to avoid stopPropagation as in triggers hash
+      "click .orcid-link" : function(){this.trigger("navigate-to-orcid-link")},
+      "click .orcid-logout" : function(){this.trigger("logout-only-orcid")},
+      "click .logout" : function(){this.trigger("logout")},
+      "click .login" : function(){this.trigger("navigate-login")},
+      "click .register": function(){this.trigger("navigate-register")},
+      "click .settings" : function(){this.trigger("navigate-settings")}
     },
 
     modelEvents: {
@@ -43,7 +54,7 @@ define([
     },
 
     stopPropagation : function(e) {
-     if (e.target.tagName === "button"){
+     if (e.target.tagName === "button" || e.target.tagName === "A"){
        return
     }
       else {
@@ -53,7 +64,7 @@ define([
 
     orcidSignIn : function(){
 
-      this.model.set("uiOrcidModeOn", true);
+      this.model.set("orcidModeOn", true);
 
     },
 
@@ -63,10 +74,10 @@ define([
       setTimeout(function(){
 
         if (that.$(".orcid-mode").is(":checked")){
-          that.model.set("uiOrcidModeOn", true);
+          that.model.set("orcidModeOn", true);
         }
         else {
-          that.model.set("uiOrcidModeOn", false);
+          that.model.set("orcidModeOn", false);
         }
 
         that.render();
@@ -90,6 +101,12 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
+      _.bindAll(this, ["handleUserAnnouncement", "getOrcidUsername"]);
+      this.beehive = beehive;
+      this.pubsub = beehive.getService("PubSub");
+      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
+      this.pubsub.subscribe(this.pubsub.APP_STARTED, this.getOrcidUsername);
+
       this.setInitialVals();
       this.pubsub = beehive.getService('PubSub');
       this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
@@ -102,28 +119,54 @@ define([
       this.model.set({orcidModeOn : user.isOrcidModeOn(), orcidLoggedIn:  orcidApi.hasAccess()}, {silent : true});
     },
 
-    handleUserAnnouncement : function(key, val){
-      var user = this.getBeeHive().getObject("User");
-      if (key == 'orcidUIChange') {
-        var orcidApi = this.getBeeHive().getService("OrcidApi");
-        this.model.set({orcidModeOn : user.isOrcidModeOn(), orcidLoggedIn:  orcidApi.hasAccess()}, {silent : true});
+    getOrcidUsername : function(){
+      var that = this;
+      var orcidApi = this.beehive.getService("OrcidApi");
+      //get the orcid username if applicable
+      if (this.model.get("orcidLoggedIn")){
+        //set the orcid username into the model
+        var that = this;
+        orcidApi.getUserProfile().done(function(info){
+          var firstName = info["orcid-bio"]["personal-details"]["given-names"]["value"];
+          var lastName = info["orcid-bio"]["personal-details"]["family-name"]["value"];
+          that.model.set("orcidFirstName", firstName);
+          that.model.set("orcidLastName", lastName);
+        })
+      }
+    },
+ 
+    handleUserAnnouncement : function(msg, data){
+
+      var user = this.beehive.getObject("User");
+      var orcidApi = this.beehive.getService("OrcidApi");
+
+      if (msg === "user_info_change" &&  data === "USER"){
+        //if user logs out, username will be undefined
+        this.model.set("currentUser",  this.beehive.getObject("User").getUserName());
+      }
+      else if (msg == 'orcidUIChange') {
+        this.model.set({orcidModeOn : user.isOrcidModeOn(), orcidLoggedIn:  orcidApi.hasAccess()});
+        if (this.model.get("orcidLoggedIn")){
+              this.getOrcidUsername();
+        }
       }
     },
 
     viewEvents : {
       'ads-signout': 'signOut',
-      "navigate-to-orcid-link" : "navigateToOrcidLink"
+      "navigate-to-orcid-link" : "navigateToOrcidLink",
+      "logout-only-orcid" : "orcidLogout"
     },
 
     modelEvents : {
-      "change:uiOrcidModeOn" :"toggleOrcidMode"
+      "change:orcidModeOn" :"toggleOrcidMode"
     },
 
     toggleOrcidMode : function() {
       var user = this.getBeeHive().getObject('User'),
         orcidApi = this.getBeeHive().getService("OrcidApi");
 
-      var newVal = this.model.get("uiOrcidModeOn");
+      var newVal = this.model.get("orcidModeOn");
       user.setOrcidMode(newVal);
 
       if (newVal){
@@ -144,8 +187,12 @@ define([
       user.setOrcidMode(false);
     },
 
-    navigateToOrcidLink : function(){
+    orcidLogout : function() {
+       this.beehive.getService("OrcidApi").signOut();
+       this.beehive.getObject("User").setOrcidMode(false);
+    },
 
+    navigateToOrcidLink : function(){
       this.pubsub.publish(this.pubsub.NAVIGATE, "orcid-page")
     }
 

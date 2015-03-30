@@ -16,7 +16,7 @@ define([
     'js/components/api_query',
     'js/components/json_response',
     'hbs!./templates/empty-template',
-    'js/modules/orcid/extension',
+    'js/modules/orcid/extension'
   ],
 
   function (
@@ -118,10 +118,15 @@ define([
             response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
             self.processResponse(response);
           });
+            //get username
+            var that = this;
+            oApi.getUserProfile().done(function(info){
+              var firstName = info["orcid-bio"]["personal-details"]["given-names"]["value"];
+              var lastName = info["orcid-bio"]["personal-details"]["family-name"]["value"];
+              that.model.set("orcidUserName", firstName + " " + lastName);
+            })
+          }
         }
-
-      }
-
     });
     return OrcidExtension(ResultsWidget);
 

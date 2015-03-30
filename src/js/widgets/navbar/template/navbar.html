@@ -28,9 +28,8 @@
                                                           alt="orcid symbol"/>   ORCID Claims <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
                         <li>
-                           <div>You are signed in to ORCID and able to add papers from ADS to your ORCID profile.</div>
-
-                            <div class="s-orcid-mode-label"><b>Orcid Mode</b></div>
+                            {{#if orcidLastName}} <div> Signed in to ORCID as <strong>{{orcidFirstName}} {{orcidLastName}}</strong></div> {{/if}}
+                            <div class="s-orcid-mode-label"><b>ORCID Mode</b></div>
                             <div class="s-orcid-label-container">
                                 off
                                 <div class="switch">
@@ -40,9 +39,18 @@
                                 on
                             </div>
                         </li>
-                        <li class="divider clearfix"></li>
+                        {{#if orcidLastName}}
+                        <li style="clear:both"> Search <code>author:"{{orcidLastName}}, {{orcidFirstName}}"</code> to get started adding papers to your ORCID profile.</li>
+                        {{else}}
+                        <li style="clear:both">You are able to add papers from ADS to ORCID.</li>
+                        {{/if}}
+                        <li class="divider"></li>
                         <li>
-                           <button class="btn btn-link orcid-link" href="#user/orcid">My ORCID papers</button>
+                            <a class="orcid-link" href="#user/orcid" >My ORCID papers</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#" class="orcid-logout" >Log out from ORCID</a>
                         </li>
                     </ul>
                 </li>
@@ -55,8 +63,8 @@
                                                           alt="orcid symbol"/>   ORCID Claims <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
                         <li>
-                           <div>You have turned off the ORCID view in ADS, but are still logged in to ORCID.</div>
-                            <div class="s-orcid-mode-label"><b>Orcid Mode</b></div>
+                            {{#if orcidLastName}} <div> Signed in to ORCID as <strong>{{orcidFirstName}} {{orcidLastName}}</strong></div> {{/if}}
+                            <div class="s-orcid-mode-label"><b>ORCID Mode</b></div>
                             <div class="s-orcid-label-container">
                                 off
                                 <div class="switch clearfix">
@@ -66,9 +74,14 @@
                                 on
                             </div>
                         </li>
+                        <li style="clear:both">You have turned off the ORCID view for the ADS search results page, but are still logged in.</li>
                         <li class="divider"></li>
                         <li>
-                            <button class="btn btn-link orcid-link" href="#user/orcid" >My ORCID papers</button>
+                            <a class="orcid-link" href="#user/orcid" >My ORCID papers</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#" class="orcid-logout" >Log out from ORCID</a>
                         </li>
                     </ul>
                 </li>
@@ -93,24 +106,26 @@
 
                 {{/if}}
 
-                <li><a href="http://adsabs.github.io/help/"  target="_blank">Help</a></li>
+                <li><a href="http://adsabs.github.io/help/" target="_blank">Help</a></li>
 
-                <li class="dropdown">
-                    <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
-                        Menu <span class="caret"></span></button>
-                    <ul class="dropdown-menu" role="menu">
-                        {{#unless adsLoggedIn}}
-                        <li class="ads">
-                            <button class="btn-link"> (coming soon)</button>
-                        </li>
-                        {{else}}
-                        <li class="ads">
-                            <button class="btn-link sign-out"> Sign out</button>
-                        </li>
-                        {{/unless}}
-                    </ul>
-                </li>
+                <!--{{#if currentUser}}-->
 
+                <!--&lt;!&ndash; Single button &ndash;&gt;-->
+                <!--<li class="dropdown">-->
+                    <!--<button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">-->
+                        <!--{{currentUser}} <span class="caret"></span>-->
+                    <!--</button>-->
+                    <!--<ul class="dropdown-menu" role="menu">-->
+                        <!--<li><a href="#" class="settings">Settings</a></li>-->
+                        <!--<li class="divider"></li>-->
+                        <!--<li><a href="#" class="logout">Log Out</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+
+                <!--{{else}}-->
+                <!--<li class="register"><a href="#">Sign Up</a></li>-->
+                <!--<li class=" login"><a href="#">Log In</a></li>-->
+                <!--{{/if}}-->
 
             </ul>
 
