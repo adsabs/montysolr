@@ -33,8 +33,7 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-      this.key = beehive.getService('PubSub').getPubSubKey();
-
+      this.key = this.getBeeHive().getService("PubSub").getPubSubKey();
       var storage = beehive.getService('PersistentStorage');
       if (storage) {
         var prefs = storage.get('UserPreferences');
@@ -53,7 +52,7 @@ define([
       var pubsub = this.getBeeHive().getService('PubSub');
 
       if (_.has(this.model.changedAttributes(), "isOrcidModeOn")){
-        pubsub.publish(pubsub.USER_ANNOUNCEMENT, "orcidUIChange", this.model.get("isOrcidModeOn"));
+        pubsub.publish(this.key, pubsub.USER_ANNOUNCEMENT, "orcidUIChange", this.model.get("isOrcidModeOn"));
       }
       this._persistModel();
     },

@@ -2,13 +2,13 @@
 
     <div class="s-results-border-bottom">
 
-        <div class="col-sm-1">
+        <div class="col-sm-12">
+            {{#if orcidUserName}}
+                <h2> <span class="s-light-font">Orcid Papers for </span>{{orcidUserName}}</h2>
+            {{else}}
+                <h2 class="s-light-font">My Orcid Papers</h2>
+            {{/if}}
 
-            <button class="btn btn-default btn-expand left-expand hidden-xs" title="hide left column" aria-label="hide left column"><i></i></button>
-        </div>
-
-        <div class="col-sm-5">
-            <h2>My Orcid Papers</h2>
 
 
             <!--<div class="s-show-details-container col-sm-4 ">-->
@@ -23,15 +23,6 @@
                 <!--{{/if}}-->
             <!--</div>-->
 
-        </div>
-
-
-        <div class="col-sm-5 sort-container">
-
-        </div>
-
-        <div class="col-sm-1">
-            <button class="btn btn-default btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
         </div>
 
     </div>

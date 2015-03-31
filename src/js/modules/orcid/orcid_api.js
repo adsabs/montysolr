@@ -988,6 +988,7 @@ define([
 
       hardenedInterface: {
         hasAccess: 'boolean indicating access to ORCID Api',
+        getUserProfile : 'get user profile',
         signIn: 'login',
         signOut: 'logout',
         getRecordInfo: 'provides info about a document',

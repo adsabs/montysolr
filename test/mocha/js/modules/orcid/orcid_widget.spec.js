@@ -79,7 +79,10 @@ define([
               "path": "0000-0001-8178-9506",
               "host": "sandbox.orcid.org"
             },
-            "orcid-preferences": {
+
+        "orcid-bio":{"personal-details": {"family-name": {"value" : "Chyla"}, "given-names": {"value": "Roman"}}},
+
+        "orcid-preferences": {
               "locale": "EN"
             },
             "orcid-history": {
@@ -255,6 +258,7 @@ define([
       });
 
       it("should load ORCID when onShow is called", function(done) {
+
 
         var orcidApi = getOrcidApi();
         orcidApi.saveAccessData({access: true});
