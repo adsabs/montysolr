@@ -33,8 +33,6 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-      this.key = beehive.getService('PubSub').getPubSubKey();
-
       var storage = beehive.getService('PersistentStorage');
       if (storage) {
         var prefs = storage.get('UserPreferences');

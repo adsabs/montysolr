@@ -27,7 +27,7 @@ define([
       }))({verbose: false});
 
       var u = new User();
-      u.activate(minsub.beehive);
+      u.pubsub = {publish : function(){}, getPubSubKey : function(){}};
       minsub.beehive.addObject("User", u);
 
       minsub.beehive.addService('OrcidApi', {
@@ -89,7 +89,7 @@ define([
       }))({verbose: false});
 
       var u = new User();
-      u.activate(minsub.beehive);
+      u.pubsub = {publish : function(){}, getPubSubKey : function(){}};
       minsub.beehive.addObject("User", u);
 
       minsub.beehive.addService('OrcidApi', {
