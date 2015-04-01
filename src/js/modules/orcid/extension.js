@@ -38,7 +38,7 @@ define([
         }
         else if (recInfo.isCreatedByOthers && !recInfo.isCreatedByUs) {
 
-          msg.actions.add = {title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'}
+          msg.actions.add = {title: 'add ADS version ORCID', caption:'ORCID already has a record for this article (we don\'t have rights to update it).', action: 'orcid-add'};
           msg.actions.view = {title: 'view in ORCID', caption:'Another version exists (we don\'t have rights to update it)', action: 'orcid-view'};
 
         }
@@ -51,11 +51,14 @@ define([
           msg.actions.add = {title: 'add to ORCID', caption:'Add ADS version to ORCID', action: 'orcid-add'};
         }
 
-        if (recInfo.isCreatedByUs) {
-          msg.provenance = 'ADS';
+        if (recInfo.isCreatedByUs && recInfo.isCreatedByOthers) {
+          msg.provenance = 'both';
+        }
+        else if (recInfo.isCreatedByUs) {
+          msg.provenance = 'ads';
         }
         else if (recInfo.isCreatedByOthers) {
-          msg.provenance = 'Others';
+          msg.provenance = 'others';
         }
         else {
           msg.provenance = null;

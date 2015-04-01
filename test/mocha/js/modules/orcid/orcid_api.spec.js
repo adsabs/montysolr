@@ -311,15 +311,69 @@ define([
             request: function (apiRequest) {
               var target = apiRequest.get('target');
               var opts = apiRequest.get('options');
-              expect(opts.headers["Orcid-Authorization"]).to.eql('Bearer 4274a0f1-36a1-4152-9a6b-4246f166bafe');
+
 
               if (target.indexOf('/orcid-profile') > -1) {
+                expect(opts.headers["Orcid-Authorization"]).to.eql('Bearer 4274a0f1-36a1-4152-9a6b-4246f166bafe');
                 return defaultResponse();
               }
               else if (target.indexOf('orcid-works') > -1) {
+                expect(opts.headers["Orcid-Authorization"]).to.eql('Bearer 4274a0f1-36a1-4152-9a6b-4246f166bafe');
                 if (opts.type == 'GET')
                   return defaultResponse();
                 return opts;
+              }
+              else if (target.indexOf('query')) {
+                return {
+                  "responseHeader": {
+                    "status": 0,
+                    "QTime": 2,
+                    "params": {
+                      "fl": "id,bibcode,alternate_bibcode,doi",
+                      "indent": "true",
+                      "q": "doi:\"*\" and alternate_bibcode:2015*",
+                      "_": "1427847655704",
+                      "wt": "json",
+                      "rows": "5"
+                    }
+                  },
+                  "response": {
+                    "numFound": 2441,
+                    "start": 0,
+                    "docs": [
+                      {
+                        "alternate_bibcode": [
+                          "2015arXiv150105026H"
+                        ],
+                        "doi": [
+                          "10.1103/PhysRevLett.84.3823"
+                        ],
+                        "id": "5796418",
+                        "bibcode": "test-bibcode"
+                      },
+                      {
+                        "alternate_bibcode": [
+                          "bibcode-foo"
+                        ],
+                        "doi": [
+                          "10.1126/science.276.5309.88"
+                        ],
+                        "id": "1135646",
+                        "bibcode": "1997Sci...276...88V"
+                      },
+                      {
+                        "alternate_bibcode": [
+                          "2015CeMDA.tmp....1D"
+                        ],
+                        "doi": [
+                          "10.1007/s10569-014-9601-4"
+                        ],
+                        "id": "10734037",
+                        "bibcode": "2015CeMDA.121..301D"
+                      }
+                    ]
+                  }
+                };
               }
             }
           }))({verbose: false});
@@ -386,7 +440,7 @@ define([
           var res = oApi.formatOrcidWork({title: ['title'], author: ['one', 'two', 'three'], id:1, bibcode: 'bibcode'});
           expect(res).to.eql({
             "work-type": "JOURNAL_ARTICLE",
-            "url": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=bibcode&link_type=ARTICLE",
+            "url": "https://ui.adsabs.harvard.edu/#abs/bibcode",
             "work-external-identifiers": {
               "work-external-identifier": [
                 {
@@ -439,7 +493,65 @@ define([
                   "orcid-work": [
                     {
                       "work-type": "JOURNAL_ARTICLE",
-                      "url": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=bibcode&link_type=ARTICLE",
+                      "url": "https://ui.adsabs.harvard.edu/#abs/bibcode",
+                      "work-external-identifiers": {
+                        "work-external-identifier": [
+                          {
+                            "work-external-identifier-type": "BIBCODE",
+                            "work-external-identifier-id": {
+                              "value": "bibcode"
+                            }
+                          },
+                          {
+                            "work-external-identifier-type": "OTHER_ID",
+                            "work-external-identifier-id": {
+                              "value": 1
+                            }
+                          }
+                        ]
+                      },
+                      "work-title": {
+                        "title": "title"
+                      },
+                      "work-contributors": {
+                        "contributor": [
+                          {
+                            "credit-name": "one",
+                            "contributor-attributes": {
+                              "contributor-role": "AUTHOR"
+                            }
+                          },
+                          {
+                            "credit-name": "two",
+                            "contributor-attributes": {
+                              "contributor-role": "AUTHOR"
+                            }
+                          },
+                          {
+                            "credit-name": "three",
+                            "contributor-attributes": {
+                              "contributor-role": "AUTHOR"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+
+          res = oApi.formatOrcidWorks([{title: ['title'], author: ['one', 'two', 'three'], id: 1, bibcode: 'bibcode', doi: ['doifoo']}]);
+          expect(res).to.eql({
+            "message-version": "1.2",
+            "orcid-profile": {
+              "orcid-activities": {
+                "orcid-works": {
+                  "orcid-work": [
+                    {
+                      "work-type": "JOURNAL_ARTICLE",
+                      "url": "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/doifoo",
                       "work-external-identifiers": {
                         "work-external-identifier": [
                           {
@@ -501,7 +613,7 @@ define([
               expect(res.type).to.eql('POST');
               expect(res.dataType).to.eql('json');
               expect(res.converters['text json']('')).to.eql({});
-              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 2"}}]}}}}');
+              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 2"}}]}}}}');
               done();
             });
 
@@ -515,7 +627,7 @@ define([
               expect(res.type).to.eql('PUT');
               expect(res.dataType).to.eql('json');
               expect(res.converters['text json']('')).to.eql({});
-              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 2"}}]}}}}');
+              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 2"}}]}}}}');
               done();
             });
         });
@@ -584,10 +696,21 @@ define([
         it("has methods to query status of a record", function(done) {
           var oApi = getOrcidApi();
           sinon.spy(oApi, 'updateDatabase');
+          sinon.spy(oApi, '_checkOrcidIdsInAds');
+
+          // for testing purpose, force split into many queries
+          oApi.maxQuerySize = 2;
 
 
           oApi.getRecordInfo({bibcode: 'test-bibcode'})
             .done(function(recInfo) {
+
+              expect(oApi._checkOrcidIdsInAds.called).to.eql(true);
+              expect(oApi._checkOrcidIdsInAds.calledTwice).to.eql(true);
+              expect(oApi._checkOrcidIdsInAds.args[0][0].get('q')).eql(["alternate_bibcode:(bibcode-foo OR test-bibcode)"]);
+              expect(oApi._checkOrcidIdsInAds.args[1][0].get('q')).eql(["bibcode:(bibcode-foo OR test-bibcode)"]);
+
+
               expect(recInfo.isCreatedByUs).to.eql(true);
               expect(recInfo.isCreatedByOthers).to.eql(false);
 
@@ -596,7 +719,34 @@ define([
                 .done(function(recInfo) {
                   expect(recInfo.isCreatedByUs).to.eql(false);
                   expect(recInfo.isCreatedByOthers).to.eql(true);
-                })
+                });
+
+              oApi.getRecordInfo({doi: '10.1126/science.276.5309.88'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(true);
+                });
+
+              oApi.getRecordInfo({doi: '10.1103/physrevlett.84.3823'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(true);
+                  expect(recInfo.isCreatedByOthers).to.eql(false);
+                });
+
+              oApi.getRecordInfo({bibcode: '1997Sci...276...88V'}) // alternate is bibcode-foo
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(true);
+                });
+
+              // found by one of the queries, but could not be mapped to bibcode
+              // this should not normally be happening, but i've added the logic
+              // to accomodate it - just in case...
+              oApi.getRecordInfo({bibcode: '2015CeMDA.tmp....1D'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(true);
+                });
 
               done();
             });

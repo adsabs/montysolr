@@ -53,7 +53,8 @@ define([
     'js/mixins/link_generator_mixin',
     'js/components/api_query',
     'js/components/api_request',
-    'js/mixins/hardened'
+    'js/mixins/hardened',
+    'js/components/api_targets'
   ],
   function (
     _,
@@ -66,7 +67,8 @@ define([
     LinkGeneratorMixin,
     ApiQuery,
     ApiRequest,
-    HardenedMixin
+    HardenedMixin,
+    ApiTargets
     ) {
 
 
@@ -81,6 +83,7 @@ define([
         this.profile = {};
         this.checkInterval = 3600 * 1000;
         this.virgin = true;
+        this.maxQuerySize = 512;
       },
 
       activate: function (beehive) {
@@ -367,9 +370,9 @@ define([
 
         var out = {
           "work-type": self._getOrcidWorkType(adsWork),
-          "url": adsWork.doi
-            ? LinkGeneratorMixin.adsUrlRedirect("doi", adsWork.doi)
-            : LinkGeneratorMixin.adsUrlRedirect("article", adsWork.bibcode) // TODO : in item_view model DOI is missing
+          "url": (adsWork.doi && adsWork.doi[0])
+            ? LinkGeneratorMixin.adsUrlRedirect("doi", adsWork.doi[0])
+            : LinkGeneratorMixin.adsUrlRedirect("webrecord", adsWork.bibcode) // TODO : in item_view model DOI is missing
         };
         var ids = ['bibcode', 'id'];
         _.each(ids, function(fldName) {
@@ -685,6 +688,57 @@ define([
         return result.promise();
       },
 
+      /**
+       * Queries ADS Api using orcid identifiers; returns a map that maps
+       * known records, ie
+       *    {
+       *      'doi:1234.5566': '2015aas...34.4',
+       *      'bibcode:2015aas...34.4': '2015aas...34.4'
+       *    }
+       * @param apiQuery
+       * @returns {*}
+       * @private
+       */
+      _checkOrcidIdsInAds: function(apiQuery) {
+        var api = this.getBeeHive().getService('Api');
+        var defer = new $.Deferred();
+
+        if (!api) {
+          var p = defer.promise();
+          defer.resolve({});
+          return p;
+        }
+
+        apiQuery.set('fl', 'bibcode,doi,alternate_bibcode');
+        apiQuery.set('rows', '5000'); // unrealistic, but that's fine
+
+        api.request(new ApiRequest({target: ApiTargets.SEARCH, query: apiQuery, options: {
+          done: function(data, textStatus, jqXHR) {
+            var ret = {}, key, value, bibcode;
+            if (!data || !data.response || !data.response.docs)
+              return defer.resolve(ret);
+
+            _.each(data.response.docs, function(doc) {
+              bibcode = doc.bibcode.toLowerCase();
+              key = 'bibcode:' + bibcode;
+              ret[key] = bibcode;
+              _.each(doc.doi, function(doi) {
+                ret['doi:' + doi.toLowerCase().replace('doi:', '')] = bibcode;
+              });
+              _.each(doc.alternate_bibcode, function(ab) {
+                ret['bibcode:' + ab.toLowerCase()] = bibcode;
+              });
+            });
+            defer.resolve(ret);
+          },
+          fail: function() {
+            defer.resolve({});
+          }
+        }}));
+
+        return defer.promise();
+      },
+
 
       /**
        * Returns a promise with information about an ORCID document, it accepts an object with
@@ -797,23 +851,87 @@ define([
 
           var works = profile['orcid-activities'] ? profile['orcid-activities']['orcid-works'] : [];
           var ids = self.getExternalIds(works);
-          var db = {}, key, isOurs;
+          var db = {}, key, isOurs, query = [], field, fValue;
           _.each(ids, function(value, key, obj) {
-            key = value.type.toLowerCase().trim() + ':' + key.toLowerCase().trim();
+            field = value.type.toLowerCase().trim();
+            fValue = key.toLowerCase().trim();
+            key =  field + ':' + fValue;
+
+            query.push(key);
+            if (field == 'bibcode') {
+              query.push('alternate_bibcode:' + fValue);
+            }
+
             isOurs = self.isWorkCreatedByUs(works['orcid-work'][value.idx]);
             //TODO:rca - what if there are mutliple ids, one created by us, one by others?
             db[key] = {isAds: isOurs, idx: value.idx, putcode: value['put-code']};
           });
-          self.db = db;
-          self.profile = profile;
-          self.pending = false;
 
-          whenDone.resolve();
+          // query our API to find out which records ADS has
+          if (query.length && self.maxQuerySize > 0) {
+            var whereClauses = [];
+            query = query.sort();
+            var steps = _.range(0, query.length, self.maxQuerySize);
+            var start, end;
+            for(var i=0; i<steps.length; i++) {
+              var q = {};
+              for (var j=steps[i]; j<steps[i]+self.maxQuerySize; j++) {
+                if (j >= query.length) break;
+                var ps = query[j].split(':');
+                if (!q[ps[0]])
+                  q[ps[0]] = [];
+                q[ps[0]].push(ps[1]);
+              }
+              whereClauses.push(self._checkOrcidIdsInAds(self._buildQuery(q)));
+            }
+
+            $.when.apply($, whereClauses)
+              .then(function() {
+                _.each(arguments, function (adsResponse, idx) {
+                  _.each(adsResponse, function(bibcode, key) {
+                    var orcidRec = db['bibcode:' + bibcode];
+                    if (!orcidRec) {
+                      orcidRec = {idx: -1, putcode: -1}; // create an empty rec
+                    }
+                    if (orcidRec.idx == -1 && db[key] && db[key].idx > -1) {
+                      _.extend(orcidRec, db[key]); // update empty rec with real data
+                    }
+                    db[key] = orcidRec;
+                  });
+                });
+
+                self.db = db;
+                self.profile = profile;
+                self.pending = false;
+                whenDone.resolve();
+              }, function() {
+                console.error('Error processing response from ADS', arguments);
+                self.db = db;
+                self.profile = profile;
+                self.pending = false;
+                whenDone.resolve();
+              });
+          }
+          else {
+            self.db = db;
+            self.profile = profile;
+            self.pending = false;
+            whenDone.resolve();
+          }
           })
           .fail(function() {
             whenDone.reject(arguments);
           });
         return whenDone;
+      },
+
+      _buildQuery: function(query) {
+        var parts = _.map(query, function(values, field) {
+          if (values.length == 0)
+            return '';
+          return field + ':(' + values.join(' OR ') + ')';
+        }).filter(function(x) {return x.length});
+        return new ApiQuery({'q': parts.join(' OR ')});
       },
 
       /**
