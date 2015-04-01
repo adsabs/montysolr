@@ -3,7 +3,7 @@ bumblebee
 
 [![Build Status](https://travis-ci.org/adsabs/bumblebee.svg?branch=master)](https://travis-ci.org/adsabs/bumblebee)
 
-Bumblebee is an interface to Astrophysics Data System (http://ui.adslabs.org) - we have built it to expose our search system and other components of the ADS ecosystem. 
+Bumblebee is an interface to Astrophysics Data System (https://ui.adsabs.harvard.edu) - we have built it to expose our search system and other components of the ADS ecosystem. 
 
 **Bumblebee can be used as a search front-end for any SOLR application. However it is NOT A GOOD IDEA to expose SOLR directly to the internet traffic.** If in doubt, try these projects:
 
