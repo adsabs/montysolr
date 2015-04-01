@@ -324,7 +324,6 @@ define([
                 return opts;
               }
               else if (target.indexOf('query')) {
-                expect(apiRequest.get('query').get('q')).eql(["alternate_bibcode:(bibcode-foo OR test-bibcode) OR bibcode:(bibcode-foo OR test-bibcode)"]);
                 return {
                   "responseHeader": {
                     "status": 0,
@@ -639,10 +638,21 @@ define([
         it("has methods to query status of a record", function(done) {
           var oApi = getOrcidApi();
           sinon.spy(oApi, 'updateDatabase');
+          sinon.spy(oApi, '_checkOrcidIdsInAds');
+
+          // for testing purpose, force split into many queries
+          oApi.maxQuerySize = 2;
 
 
           oApi.getRecordInfo({bibcode: 'test-bibcode'})
             .done(function(recInfo) {
+
+              expect(oApi._checkOrcidIdsInAds.called).to.eql(true);
+              expect(oApi._checkOrcidIdsInAds.calledTwice).to.eql(true);
+              expect(oApi._checkOrcidIdsInAds.args[0][0].get('q')).eql(["alternate_bibcode:(bibcode-foo OR test-bibcode)"]);
+              expect(oApi._checkOrcidIdsInAds.args[1][0].get('q')).eql(["bibcode:(bibcode-foo OR test-bibcode)"]);
+
+
               expect(recInfo.isCreatedByUs).to.eql(true);
               expect(recInfo.isCreatedByOthers).to.eql(false);
 
@@ -651,7 +661,34 @@ define([
                 .done(function(recInfo) {
                   expect(recInfo.isCreatedByUs).to.eql(false);
                   expect(recInfo.isCreatedByOthers).to.eql(true);
-                })
+                });
+
+              oApi.getRecordInfo({doi: '10.1126/science.276.5309.88'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(true);
+                });
+
+              oApi.getRecordInfo({doi: '10.1103/physrevlett.84.3823'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(true);
+                  expect(recInfo.isCreatedByOthers).to.eql(false);
+                });
+
+              oApi.getRecordInfo({bibcode: '1997Sci...276...88V'}) // alternate is bibcode-foo
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(true);
+                });
+
+              // found by one of the queries, but could not be mapped to bibcode
+              // this should not normally be happening, but i've added the logic
+              // to accomodate it - just in case...
+              oApi.getRecordInfo({bibcode: '2015CeMDA.tmp....1D'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(true);
+                });
 
               done();
             });
