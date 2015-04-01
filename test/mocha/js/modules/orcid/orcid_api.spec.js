@@ -311,15 +311,70 @@ define([
             request: function (apiRequest) {
               var target = apiRequest.get('target');
               var opts = apiRequest.get('options');
-              expect(opts.headers["Orcid-Authorization"]).to.eql('Bearer 4274a0f1-36a1-4152-9a6b-4246f166bafe');
+
 
               if (target.indexOf('/orcid-profile') > -1) {
+                expect(opts.headers["Orcid-Authorization"]).to.eql('Bearer 4274a0f1-36a1-4152-9a6b-4246f166bafe');
                 return defaultResponse();
               }
               else if (target.indexOf('orcid-works') > -1) {
+                expect(opts.headers["Orcid-Authorization"]).to.eql('Bearer 4274a0f1-36a1-4152-9a6b-4246f166bafe');
                 if (opts.type == 'GET')
                   return defaultResponse();
                 return opts;
+              }
+              else if (target.indexOf('query')) {
+                expect(apiRequest.get('query').get('q')).eql(["alternate_bibcode:(bibcode-foo OR test-bibcode) OR bibcode:(bibcode-foo OR test-bibcode)"]);
+                return {
+                  "responseHeader": {
+                    "status": 0,
+                    "QTime": 2,
+                    "params": {
+                      "fl": "id,bibcode,alternate_bibcode,doi",
+                      "indent": "true",
+                      "q": "doi:\"*\" and alternate_bibcode:2015*",
+                      "_": "1427847655704",
+                      "wt": "json",
+                      "rows": "5"
+                    }
+                  },
+                  "response": {
+                    "numFound": 2441,
+                    "start": 0,
+                    "docs": [
+                      {
+                        "alternate_bibcode": [
+                          "2015arXiv150105026H"
+                        ],
+                        "doi": [
+                          "10.1103/PhysRevLett.84.3823"
+                        ],
+                        "id": "5796418",
+                        "bibcode": "test-bibcode"
+                      },
+                      {
+                        "alternate_bibcode": [
+                          "bibcode-foo"
+                        ],
+                        "doi": [
+                          "10.1126/science.276.5309.88"
+                        ],
+                        "id": "1135646",
+                        "bibcode": "1997Sci...276...88V"
+                      },
+                      {
+                        "alternate_bibcode": [
+                          "2015CeMDA.tmp....1D"
+                        ],
+                        "doi": [
+                          "10.1007/s10569-014-9601-4"
+                        ],
+                        "id": "10734037",
+                        "bibcode": "2015CeMDA.121..301D"
+                      }
+                    ]
+                  }
+                };
               }
             }
           }))({verbose: false});
