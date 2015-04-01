@@ -42,7 +42,7 @@ define([
       defaultQueryArguments: {
         hl     : "true",
         "hl.fl": "title,abstract,body",
-        fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate',
+        fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi',
         rows : 25,
         start : 0
       },

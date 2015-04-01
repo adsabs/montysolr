@@ -56,7 +56,7 @@ define([
         //only relevant to results view for the moment
         'click .show-full-abstract' : "showFullAbstract",
         'click .hide-full-abstract' : "hideFullAbstract",
-        'click .orcid-action': "orcidAction",
+        'click .orcid-action': "orcidAction"
       },
 
       modelEvents: {

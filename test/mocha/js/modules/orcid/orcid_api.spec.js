@@ -440,7 +440,7 @@ define([
           var res = oApi.formatOrcidWork({title: ['title'], author: ['one', 'two', 'three'], id:1, bibcode: 'bibcode'});
           expect(res).to.eql({
             "work-type": "JOURNAL_ARTICLE",
-            "url": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=bibcode&link_type=ARTICLE",
+            "url": "https://ui.adsabs.harvard.edu/#abs/bibcode",
             "work-external-identifiers": {
               "work-external-identifier": [
                 {
@@ -493,7 +493,65 @@ define([
                   "orcid-work": [
                     {
                       "work-type": "JOURNAL_ARTICLE",
-                      "url": "http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=bibcode&link_type=ARTICLE",
+                      "url": "https://ui.adsabs.harvard.edu/#abs/bibcode",
+                      "work-external-identifiers": {
+                        "work-external-identifier": [
+                          {
+                            "work-external-identifier-type": "BIBCODE",
+                            "work-external-identifier-id": {
+                              "value": "bibcode"
+                            }
+                          },
+                          {
+                            "work-external-identifier-type": "OTHER_ID",
+                            "work-external-identifier-id": {
+                              "value": 1
+                            }
+                          }
+                        ]
+                      },
+                      "work-title": {
+                        "title": "title"
+                      },
+                      "work-contributors": {
+                        "contributor": [
+                          {
+                            "credit-name": "one",
+                            "contributor-attributes": {
+                              "contributor-role": "AUTHOR"
+                            }
+                          },
+                          {
+                            "credit-name": "two",
+                            "contributor-attributes": {
+                              "contributor-role": "AUTHOR"
+                            }
+                          },
+                          {
+                            "credit-name": "three",
+                            "contributor-attributes": {
+                              "contributor-role": "AUTHOR"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          });
+
+          res = oApi.formatOrcidWorks([{title: ['title'], author: ['one', 'two', 'three'], id: 1, bibcode: 'bibcode', doi: ['doifoo']}]);
+          expect(res).to.eql({
+            "message-version": "1.2",
+            "orcid-profile": {
+              "orcid-activities": {
+                "orcid-works": {
+                  "orcid-work": [
+                    {
+                      "work-type": "JOURNAL_ARTICLE",
+                      "url": "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/doifoo",
                       "work-external-identifiers": {
                         "work-external-identifier": [
                           {
@@ -555,7 +613,7 @@ define([
               expect(res.type).to.eql('POST');
               expect(res.dataType).to.eql('json');
               expect(res.converters['text json']('')).to.eql({});
-              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 2"}}]}}}}');
+              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 2"}}]}}}}');
               done();
             });
 
@@ -569,7 +627,7 @@ define([
               expect(res.type).to.eql('PUT');
               expect(res.dataType).to.eql('json');
               expect(res.converters['text json']('')).to.eql({});
-              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=undefined&link_type=ARTICLE","work-title":{"title":"Test 2"}}]}}}}');
+              expect(res.data).to.eql('{"message-version":"1.2","orcid-profile":{"orcid-activities":{"orcid-works":{"orcid-work":[{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 1"}},{"work-type":"JOURNAL_ARTICLE","url":"https://ui.adsabs.harvard.edu/#abs/undefined","work-title":{"title":"Test 2"}}]}}}}');
               done();
             });
         });

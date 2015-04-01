@@ -74,7 +74,7 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         setTimeout(function() {
           expect(widget.model.get('currentQuery').url()).to.eql(
-            'fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0'          );
+            'fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0'          );
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);

@@ -13,8 +13,11 @@ var linkGenerator = {
   adsUrlRedirect: function (type, id) {
 
     var adsClassicBaseUrl = "http://adsabs.harvard.edu/";
+    var bumblebeeBaseUrl = 'https://ui.adsabs.harvard.edu/';
 
     switch (type) {
+      case 'webrecord':
+        return bumblebeeBaseUrl + '#abs/' + id;
       case "doi":
         return adsClassicBaseUrl + "cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/" + id;
       case "data":
