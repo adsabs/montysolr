@@ -28,7 +28,6 @@ define([
       beforeEach(function (done) {
         minsub = new (MinimalPubsub.extend({
           request: function(apiQuery) {
-            return null;
             return {
               "responseHeader": {
                 "status": 0,
@@ -80,7 +79,7 @@ define([
               }
             };
           }
-        }))({verbose: true});
+        }))({verbose: false});
 
         beehive = minsub.beehive;
         done();
@@ -278,6 +277,64 @@ define([
                       "value": 1422645668284
                     },
                     "visibility": "PUBLIC"
+                  },
+                  {
+                    "put-code": "466191",
+                    "work-title": {
+                      "title": {
+                        "value": "External article"
+                      },
+                      "subtitle": null
+                    },
+                    "journal-title": {
+                      "value": "foo"
+                    },
+                    "work-external-identifiers": {
+                      "scope": null,
+                      "work-external-identifier": [
+                        {
+                          "work-external-identifier-id": {
+                            "value": "external"
+                          },
+                          "work-external-identifier-type": "other"
+                        }
+                      ]
+                    },
+                    "work-type": "JOURNAL_ARTICLE",
+                    "publication-date": {
+                      "year": {
+                        "value": "2015"
+                      },
+                      "month": {
+                        "value": "01"
+                      },
+                      "day": {
+                        "value": "01"
+                      },
+                      "media-type": null
+                    },
+                    "url": null,
+                    "source": {
+                      "source-orcid": {
+                        "value": null,
+                        "uri": "http://sandbox.orcid.org/0000-0001-8178-9506",
+                        "path": "0000-0001-8178-9506",
+                        "host": "sandbox.orcid.org"
+                      },
+                      "source-name": {
+                        "value": "Roman Chyla"
+                      },
+                      "source-date": {
+                        "value": 1422645668284
+                      }
+                    },
+                    "created-date": {
+                      "value": 1422645668284
+                    },
+                    "last-modified-date": {
+                      "value": 1422645668284
+                    },
+                    "visibility": "PUBLIC"
                   }
                 ],
                 "scope": null
@@ -303,7 +360,7 @@ define([
         var $w = widget.render().$el
         $('#test').append($w);
 
-        expect(widget.collection.models.length).to.eql(2);
+        expect(widget.collection.models.length).to.eql(3);
         expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
         expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('bibcode-foo');
         done();
@@ -328,7 +385,7 @@ define([
           var $w = widget.render().$el
           $('#test').append($w);
 
-          expect(widget.collection.models.length).to.eql(2);
+          expect(widget.collection.models.length).to.eql(3);
           expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
           expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('bibcode-foo');
 

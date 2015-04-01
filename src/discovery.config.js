@@ -212,6 +212,10 @@ require.config({
     require(['hbs/handlebars'], function(Handlebars) {
       // register system-wide helper for handlebars
       // http://doginthehat.com.au/2012/02/comparison-block-helper-for-handlebars-templates/#comment-44
+
+      // {{#compare unicorns ponies operator="<"}}
+      // I knew it, unicorns are just low-quality ponies!
+      // {{/compare}}
       Handlebars.registerHelper('compare', function (lvalue, operator, rvalue, options) {
         var operators, result;
         if (arguments.length < 3) {
