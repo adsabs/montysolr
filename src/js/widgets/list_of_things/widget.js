@@ -289,7 +289,7 @@ define([
             q.set('rows', perPage);
             var req = this.composeRequest(q);
 
-            //console.log('we have to retrieve new data', arg1);
+            console.log('we have to retrieve new data' + JSON.stringify(arg1));
 
             if (req) {
               this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);

@@ -8,7 +8,7 @@ define([
 
 ], function (Marionette, NetworkWidget, MinimalPubsub, ApiQuery, JsonResponse, _) {
 
-  describe("Network Visualization Widget", function () {
+  describe("Network Visualization Widget (network_widget.spec.js)", function () {
 
     var testDataSmall, testDataLarge, testDataEmpty, networkWidget;
 
@@ -1828,12 +1828,12 @@ define([
     expect(networkWidget.resetWidget).to.be.instanceof(Function);
 
     expect(networkWidget.view.graphView.$el.children().length).not.be.eql(0);
-    expect(_.keys(networkWidget.view.graphView._listeners).length).not.be.eql(0);
+    expect(_.keys(networkWidget.view.graphView._listeningTo).length).not.be.eql(0);
     networkWidget.resetWidget();
 
     expect(networkWidget.view.graphView.$el.children().length).to.be.eql(0);
     expect(networkWidget.model.get('data')).to.be.undefined;
-    expect(_.keys(networkWidget.view.graphView._listeners).length).to.be.eql(0);
+    expect(_.keys(networkWidget.view.graphView._listeningTo).length).to.be.eql(0);
   });
 
   it("has a help popover that is accessible by hovering over the question mark icon", function () {

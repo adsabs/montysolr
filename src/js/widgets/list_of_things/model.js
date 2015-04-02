@@ -39,6 +39,7 @@ function(
       this.currentStartIndex = 0;
       this.currentEndIndex = 0;
       this.lastIndex = -1;
+      this.lastMissingTrigger = null;
 
       if (options && options.paginationModel) {
         this.paginationModel = options.paginationModel;
@@ -63,7 +64,6 @@ function(
       //already exist
       this.currentStartIndex = this.getPageStart(pageNum, perPage);
       this.currentEndIndex = this.getPageEnd(pageNum, perPage, numFound);
-
     },
 
     _onPaginationChange: function () {
@@ -76,6 +76,7 @@ function(
       if (this.paginationModel) {
         this._updateStartAndEndIndex();
       }
+      this.lastMissingTrigger = null;
     },
 
     onReset: function() {
@@ -109,6 +110,17 @@ function(
       return _.filter(this.models, function(x) {return x.attributes.visible});
     },
 
+
+    /**
+     * Zero-based method; goes through models in the collection; discovers those
+     * that are missing (in the given range) and marks the range as 'visible'
+     * It returns number of visible documents (and internally triggers 'show:missing'
+     * event)
+     *
+     * @param start
+     * @param end
+     * @returns {number}
+     */
     updateIndexes: function(start, end) {
       var start = _.isNumber(start) ? start : this.currentStartIndex;
       var end = _.isNumber(end) ?  end : this.currentEndIndex + 1;
@@ -121,18 +133,13 @@ function(
       this.each(function(model) {
         rIdx = model.attributes.resultsIndex;
 
-        if (model.attributes.emptyPlaceholder) {
-          // gaps.push(rIdx); // ignore them altogether
-          return; // skip this record
-        }
-
         if (lastIdx !== null && rIdx != lastIdx+1) {
           _.each(_.range(lastIdx+1, rIdx), function(c) {
             gaps.push(c);
           });
         }
         lastIdx = rIdx;
-        if (rIdx >= start && rIdx < end) {
+        if (rIdx >= start && rIdx <= end) {
           model.set('visible', true);
 
           if (currStart === null) currStart = rIdx;
@@ -145,34 +152,34 @@ function(
         }
       });
 
-      if (visible !== end-1-start) {
-        _.each(_.range((lastIdx || start+gaps.length), end-1), function(c) {
+      if (visible !== (end-start)+1) {
+        _.each(_.range((lastIdx || start+gaps.length)+1, end+1), function(c) {
           if (!this.get(c))
             gaps.push(c);
         }, this);
       }
+
       if (gaps.length) {
+
         // we have discoverd all gaps, but we want to report only those that span the start..end range
+        var startIdx = 0, endIdx = gaps.length;
         for (var i=0; i<gaps.length; i++) {
           if (gaps[i] > end) {
-            gaps = gaps.slice(0, i);
+            endIdx = i;
             break;
           }
-        }
-
-        for (var i=gaps.length; i>0; i--) {
           if (gaps[i] < start) {
-            gaps = gaps.slice(i, gaps.length);
-            break;
+            startIdx = i+1
           }
         }
+        gaps = gaps.slice(Math.min(gaps.length-1, startIdx), endIdx);
+        gaps = this._compressGaps(gaps);
 
-        // to prevent infinite recursion, we'll fill gaps with empty recs
-        var self = this;
-        _.each(gaps, function(r) {
-          self.add({resultsIndex: r, emptyPlaceholder: true});
-        });
-        this.trigger('show:missing', this._compressGaps(gaps));
+        // to prevent multiple recursive requests
+        if (JSON.stringify(gaps) != this.lastMissingTrigger) {
+          this.lastMissingTrigger = JSON.stringify(gaps);
+          this.trigger('show:missing', gaps);
+        }
       }
       this.numVisible = visible;
       this.currentStartIndex = currStart || 0;
@@ -199,10 +206,17 @@ function(
       return toSend;
     },
 
+    /**
+     * zero-based method to mark range of documents in the colleaction 'visible'
+     *
+     * @param start
+     * @param end
+     * @returns {*}
+     */
     showRange: function(start, end) {
       if (start < 0) throw new Error("Start cannot be negative");
       if (end < start) throw new Error("End cannot be smaller than start");
-      return this.updateIndexes(start, end+1);
+      return this.updateIndexes(start, end);
     },
     getNumVisible: function() {
       return this.numVisible;
@@ -214,7 +228,7 @@ function(
       }
       else {
         var visible = this.getNumVisible();
-        return this.updateIndexes(this.currentStartIndex, this.currentEndIndex + howMany) - visible;
+        return this.updateIndexes(this.currentStartIndex, this.currentEndIndex == 0 ? howMany-1 : this.currentEndIndex + howMany) - visible;
       }
     }
   });
