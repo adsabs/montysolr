@@ -107,7 +107,8 @@ define([
             orcidApi.getAccessData(orcidApi.getExchangeCode())
             .done(function(data) {
                 orcidApi.saveAccessData(data);
-                self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname + (targetRoute ? targetRoute : window.location.hash)});
+                self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname +
+                  ((targetRoute && _.isString(targetRoute)) ? targetRoute : window.location.hash)});
             })
             .fail(function() {
                 console.warn('Unsuccessful login to ORCID');
