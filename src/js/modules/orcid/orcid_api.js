@@ -857,9 +857,12 @@ define([
             fValue = key.toLowerCase().trim();
             key =  field + ':' + fValue;
 
-            query.push(key);
             if (field == 'bibcode') {
+              query.push(key);
               query.push('alternate_bibcode:' + fValue);
+            }
+            else if(field == 'doi') {
+              query.push(key);
             }
 
             isOurs = self.isWorkCreatedByUs(works['orcid-work'][value.idx]);
