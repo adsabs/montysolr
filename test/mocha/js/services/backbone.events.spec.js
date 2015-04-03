@@ -1,6 +1,6 @@
 define(['backbone', 'underscore'], function(Backbone, _) {
 
-  describe("BackBone.Events - test of problems (this test shows what we have to do to build robust PubSub)", function () {
+  describe("BackBone.Events - test of problems; this test shows what we have to do to build robust PubSub (backbone.events.spec.js)", function () {
 
     it("shows that BB events are synchronous and one bad egg can break the whole batch", function() {
       var pubsub = _.extend({}, Backbone.Events);
@@ -264,7 +264,7 @@ define(['backbone', 'underscore'], function(Backbone, _) {
     // anonymous functions and cannot be identified anymore
     expect(pubsub._events).to.not.be.eql({});
     pubsub.off();
-    expect(pubsub._events).to.be.eql({});
+    expect(pubsub._events).to.be.undefined;
 
     var spy = sinon.spy();
     var spy2 = sinon.spy();
