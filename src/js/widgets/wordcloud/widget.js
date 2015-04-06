@@ -105,7 +105,7 @@ define([
 
   var WordCloudView = Marionette.ItemView.extend({
 
-    className: "s-wordcloud-widget",
+    className: "s-wordcloud-widget clearfix",
 
     events: {
       "click .close-widget": "signalCloseWidget"
@@ -305,7 +305,7 @@ define([
 
       // update selection
       text
-        .style("font-size", function(d) {return d.size})
+        .attr("font-size", function(d) {return d.size})
         .style("fill", function(d, i) {return renderVals.fill(d.origSize);})
         .transition()
         .duration(1000)
