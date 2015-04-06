@@ -31,7 +31,14 @@ define([
       return true;
     };
     var allowedAttrs = {
-      query: function(v) {return v instanceof ApiQuery},
+      query: function(v){
+        if (v){
+          return v instanceof ApiQuery;
+        }
+         else {
+          return true;
+        }
+      },
       target: basicCheck,
       sender: basicCheck,
       options : basicCheck

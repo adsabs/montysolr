@@ -88,18 +88,16 @@ define([
     Api.prototype.request = function(request, options) {
 
       options = _.extend({}, options, request.get('options'));
+      
+      var self = this;
 
-      var self = this,
-        data,
-       query = request.get('query');
+      var query = request.get('query');
       if (query && !(query instanceof ApiQuery)) {
         throw Error("Api.query must be instance of ApiQuery");
       }
 
-      //can pass in query parameter (instance of ApiQuery) or just pass data directly in the data parameter
-      //if you pass in an api query, it overrides data, otherwise just pass in data for the ajax request as expected
-      if (query){
-        data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
+      if (query) {
+        var data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
       }
 
       var target = request.get('target') || '';

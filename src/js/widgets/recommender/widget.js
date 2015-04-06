@@ -1,6 +1,7 @@
 define([
   'marionette',
   'js/components/api_query',
+  'js/components/api_targets',
   'js/components/api_request',
   'js/widgets/base/base_widget',
   'hbs!./templates/recommender_template',
@@ -8,12 +9,11 @@ define([
 ], function(
   Marionette,
   ApiQuery,
+  ApiTargets,
   ApiRequest,
   BaseWidget,
   RecommenderTemplate
   ){
-
-
 
   var RecommenderView = Marionette.ItemView.extend({
 
@@ -24,14 +24,13 @@ define([
     template : RecommenderTemplate,
 
     onRender : function(){
-      this.$(".icon-help").popover({trigger : "hover", placement : "left"});
+      this.$(".icon-help").popover({trigger: "hover"});
     },
-    className : "s-recommender-widget"
+    className : "recommender-widget s-recommender-widget"
   });
 
 
   var RecommenderWidget = BaseWidget.extend({
-
 
     initialize : function(){
       this.collection = new Backbone.Collection();
@@ -40,54 +39,49 @@ define([
 
     activate: function (beehive) {
       this.pubsub = beehive.Services.get('PubSub');
-      _.bindAll(this, ['onNewQuery', 'processResponse', 'onDisplayDocuments']);
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onNewQuery);
+      _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
       this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
-    onNewQuery: function() {
-      this.collection.reset();
-    },
-
     onDisplayDocuments: function(apiQuery) {
+      //clear the current collection
+      this.collection.reset();
       var bibcode = apiQuery.get('q');
       var self = this;
       if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
         bibcode = bibcode[0].replace('bibcode:', '');
-        this.loadBibcodeData(bibcode).done(function(data) {
-          self.trigger('page-manager-event', 'widget-ready', {'isActive': true, numFound: data});
+        this.loadBibcodeData(bibcode).done(function() {
+          //right now this is being ignored by the toc widget
+          self.trigger('page-manager-event', 'widget-ready', {'isActive': true});
         });
       }
     },
 
     loadBibcodeData : function(bibcode){
 
+      this.deferredObject =  $.Deferred();
+
       if (bibcode === this._bibcode){
-        this.deferredObject =  $.Deferred();
-        this.deferredObject.resolve(this.model);
-        return this.deferredObject.promise();
+        this.deferredObject.resolve();
       }
       else {
         this._bibcode = bibcode;
-        this.deferredObject =  $.Deferred();
-
-        var target = "services/recommender/" + bibcode;
-
+        var target = ApiTargets.RECOMMENDER + "/" + bibcode;
         var request =  new ApiRequest({
-          target:target,
-          query : new ApiQuery()
+          target:target
         });
-
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
-        return this.deferredObject.promise();
       }
-
+      return this.deferredObject.promise();
     },
 
     processResponse : function(data){
       data = data.toJSON();
-      this.collection.reset(data.recommendations);
+      if (data.recommendations){
+        this.collection.reset(data.recommendations);
+        this.deferredObject.resolve();
+      }
     }
   });
 

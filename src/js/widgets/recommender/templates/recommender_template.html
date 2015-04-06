@@ -2,16 +2,15 @@
 <div>
     <h4 class="s-right-col-widget-title">Suggested Articles</h4>
 
-    <i class="icon-help" data-toggle="popover" data-content="These recommendations are based on a number of factors, including text similarity, citations, and co-readership information." ></i>
+    <i class="icon-help pull-right" style="margin-top:7px" data-toggle="popover" data-placement="left" data-content="These recommendations are based on a number of factors, including text similarity, citations, and co-readership information."></i>
 </div>
 
 
 <ul class="list-unstyled">
 
     {{#each items}}
-    <li title="{{bibcode}}">
-        <a href="#abs/{{bibcode}}">{{title}}</a>;
-        <i>{{author}}</i>
+    <li>
+        <a href="#abs/{{bibcode}}">{{title}} (<i class="s-author">{{author}}</i>)</a>;
     </li>
     {{/each}}
 

@@ -53,6 +53,24 @@ define([
       }
     };
 
+    handlers[ApiFeedback.CODES.BIBCODE_DATA_REQUESTED] = function(feedback){
+
+      var ids = [];
+
+      //have to put all ids for widgets on the abstract page that need loading views here
+
+      ids.push(this.getApp().__widgets.get("ShowRecommender").pubsub.getPubSubKey().getId());
+      ids.push(this.getApp().__widgets.get("ShowResources").pubsub.getPubSubKey().getId());
+
+      // remove alerts from previous searches
+      this.getAlerter().alert(new ApiFeedback({
+        type: Alerts.TYPE.INFO,
+        msg: null}));
+
+      this._makeWidgetsSpin(ids);
+
+    };
+
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_STARTED] = function(feedback) {
       this._tmp.cycle_started = true;
 
@@ -279,7 +297,8 @@ define([
         error: feedback.errorThrown,
         errorCode: feedback.error.status,
         destination: target,
-        query: q.toJSON()
+        //not all requests will have a query
+        query: q ? q.toJSON() : undefined
       };
       var app = this.getApp();
       var alerter = this.getAlerter();

@@ -39,7 +39,8 @@ define([
       QUERY_ASSISTANT: -7,
       ALERT: -8,
       CANNOT_ROUTE: -9,
-      API_REQUEST_ERROR: -10
+      API_REQUEST_ERROR: -10,
+      BIBCODE_DATA_REQUESTED: -11
     };
 
     var _codes = {};
