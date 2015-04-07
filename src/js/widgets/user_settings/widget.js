@@ -39,7 +39,6 @@ define([
 
   FormView = Marionette.ItemView.extend({
 
-    activateRecaptcha : FormFunctions.activateRecaptcha,
     activateValidation: FormFunctions.activateValidation,
     checkValidationState : FormFunctions.checkValidationState,
     triggerSubmit : FormFunctions.triggerSubmit,
@@ -174,6 +173,7 @@ define([
       new_password2: {
         required: true,
         equalTo: 'new_password1',
+        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
         msg: "(The passwords do not match)"
       }
     }

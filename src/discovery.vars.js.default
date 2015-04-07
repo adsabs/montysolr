@@ -1,6 +1,6 @@
 define([], function() {
   "use strict";
-  return {
+  var config = {
 
     /**
      * The url to the API services, if you develop locally,
@@ -87,9 +87,9 @@ define([], function() {
 
 
      // google recaptcha
-     sitekey : "6LfE6AITAAAAALdSy2qxVW4TBqy5RdmREiv-AwlJ"
-
-
+     recaptchaKey : "6LfE6AITAAAAALdSy2qxVW4TBqy5RdmREiv-AwlJ"
 
   }
+
+  return config
 });

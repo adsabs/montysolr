@@ -59,7 +59,6 @@ define([
       },
 
       closeModal : function(){
-        debugger;
         //manually close the modal, for some reason just the close markup
         //only works some of the time
         this.$(".modal").modal('hide');

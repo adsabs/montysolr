@@ -119,7 +119,7 @@ define([
         dataType: 'json',
         data: data,
         contentType: 'application/x-www-form-urlencoded',
-        headers: {"X-BB-Api-Client-Version": this.clientVersion, 'X-CSRFToken' : this.csrf},
+        headers: {"X-BB-Api-Client-Version": this.clientVersion},
         context: {request: request, api: self },
         timeout: this.defaultTimeoutInMs,
         cache: true, // do not generate _ parameters (let browser cache responses),
@@ -133,10 +133,13 @@ define([
         opts.headers['Authorization'] = this.access_token;
       }
 
+      //extend, rather than replace, the headers with user-supplied headers if any
+      _.extend(opts.headers, options.headers);
+
       // one potential problem is that 'options' will override
-      // whatever is set above (so if sb wants to shoot himself/herself,
+      // whatever is set above (other than headers) (so if sb wants to shoot himself/herself,
       // we gave them the weapon... ;-))
-      _.extend(opts, options);
+      _.extend(opts, _.omit(options, "headers"));
 
       this.outstandingRequests++;
 

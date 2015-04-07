@@ -17,18 +17,20 @@ define(['config', 'module', 'analytics'], function(config, module, analytics) {
   require([
       'router',
       'js/components/application',
-      'js/mixins/discovery_bootstrap'
+      'js/mixins/discovery_bootstrap',
+      'js/mixins/api_access'
     ],
     function(Router,
       Application,
-      DiscoveryBootstrap
+      DiscoveryBootstrap,
+      ApiAccess
       ) {
 
       // at the beginning, we don't know anything about ourselves...
       var debug = window.location.href.indexOf('debug=true') > -1 ? true : false;
 
       // app object will load everything
-      var app = new (Application.extend(DiscoveryBootstrap))({'debug': debug, timeout: 30000});
+      var app = new (Application.extend(DiscoveryBootstrap).extend(ApiAccess))({'debug': debug, timeout: 30000});
 
       // load the objects/widgets/modules (using discovery.config.js)
       var defer = app.loadModules(module.config());

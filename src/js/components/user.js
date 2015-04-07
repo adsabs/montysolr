@@ -100,10 +100,8 @@ define([
         return;
 
       this.model.set("isOrcidModeOn", val);
-      var pubsub = this.getPubSub();
-
       if (_.has(this.model.changedAttributes(), "isOrcidModeOn")){
-        pubsub.publish(this.key, pubsub.USER_ANNOUNCEMENT, "orcidUIChange", this.model.get("isOrcidModeOn"));
+        this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, "orcidUIChange", this.model.get("isOrcidModeOn"));
       }
       this._persistModel();
     },
@@ -119,7 +117,6 @@ define([
       if (storage) {
         storage.set('UserPreferences', this.model.attributes);
       }
-      this.setPubSub(beehive);
     },
 
     /* general functions */
@@ -129,7 +126,7 @@ define([
     // endpoint the change belonged to
     //finally, check if logged in, might have to redirect to auth page/settings page
     broadcastChange : function(model){
-      this.getPubSub().publish(this.pubsub.USER_ANNOUNCEMENT, "user_info_change", model.get("target"));
+      this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, "user_info_change", model.get("target"));
       this.redirectIfNecessary();
     },
     broadcastReset : function(){
@@ -211,7 +208,7 @@ define([
       if (this.additionalParameters[target]){
         _.extend(data, this.additionalParameters[target]);
       }
-      this.composeRequest(target, "POST", data);
+      return this.composeRequest(target, "POST", data);
     },
 
     /*return read-only copy of user model(s) for widgets: accessible through facade(2 of 3)*/
@@ -252,6 +249,9 @@ define([
       done = done || (method == "GET" ? this.handleSuccessfulGET : this.handleSuccessfulPOST);
       fail = fail || (method == "GET" ? this.handleFailedGET : this.handleFailedPOST);
 
+      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
+
+
       request = new ApiRequest({
         target : endpoint,
         options : {
@@ -259,6 +259,7 @@ define([
           type: method,
           data: JSON.stringify(data),
           contentType : "application/json",
+          headers : {'X-CSRFToken' :  csrfToken },
           done: done,
           fail : fail,
           //record the endpoint & data

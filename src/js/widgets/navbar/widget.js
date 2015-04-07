@@ -121,7 +121,6 @@ define([
     activate: function (beehive) {
       this.setBeeHive(beehive);
       _.bindAll(this, ["handleUserAnnouncement", "getOrcidUsername"]);
-      this.beehive = beehive;
       this.pubsub = beehive.getService("PubSub");
       this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
       this.pubsub.subscribe(this.pubsub.APP_STARTED, this.getOrcidUsername);
@@ -143,7 +142,7 @@ define([
      },
       "logout" : function() {
         //log the user out of both the session and orcid
-        this.beehive.getObject("Session").logout();
+        this.getBeeHive().getObject("Session").logout();
        //log out of ORCID too
        this.orcidLogout();
       },
@@ -159,13 +158,12 @@ define([
       var user = this.getBeeHive().getObject("User");
       var orcidApi = this.getBeeHive().getService("OrcidApi");
       var hasAccess = orcidApi.hasAccess();
-      this.model.set({orcidModeOn: user.isOrcidModeOn() && hasAccess, orcidLoggedIn: hasAccess}, {silent: true});
-      this.model.set("currentUser",  this.beehive.getObject("User").getUserName());
+      this.model.set({orcidModeOn: user.isOrcidModeOn() && hasAccess, orcidLoggedIn: hasAccess});
+      this.model.set("currentUser",  user.getUserName());
     },
 
     getOrcidUsername: function () {
-      var that = this;
-      var orcidApi = this.beehive.getService("OrcidApi");
+      var orcidApi = this.getBeeHive().getService("OrcidApi");
       //get the orcid username if applicable
       if (this.model.get("orcidLoggedIn")) {
         //set the orcid username into the model
@@ -180,22 +178,14 @@ define([
       }
     },
 
-    //to set the correct initial values for signed in statuses
-    setInitialVals : function(){
-      var user = this.beehive.getObject("User");
-      var orcidApi = this.beehive.getService("OrcidApi");
-      this.model.set({orcidModeOn : user.isOrcidModeOn(), orcidLoggedIn:  orcidApi.hasAccess()});
-      this.model.set("currentUser",  user.getUserName());
-    },
- 
     handleUserAnnouncement : function(msg, data) {
 
-      var user = this.beehive.getObject("User");
-      var orcidApi = this.beehive.getService("OrcidApi");
+      var user = this.getBeeHive().getObject("User");
+      var orcidApi = this.getBeeHive().getService("OrcidApi");
 
       if (msg === "user_info_change" && data === "USER") {
         //if user logs out, username will be undefined
-        this.model.set("currentUser", this.beehive.getObject("User").getUserName());
+        this.model.set("currentUser", this.getBeeHive().getObject("User").getUserName());
       }
       else if (msg == 'orcidUIChange') {
         this.model.set({orcidModeOn: user.isOrcidModeOn(), orcidLoggedIn: orcidApi.hasAccess()});
@@ -243,8 +233,8 @@ define([
     },
 
     orcidLogout: function () {
-      this.beehive.getService("OrcidApi").signOut();
-      this.beehive.getObject("User").setOrcidMode(false);
+      this.getBeeHive().getService("OrcidApi").signOut();
+      this.getBeeHive().getObject("User").setOrcidMode(false);
     },
 
     navigateToOrcidLink : function(){

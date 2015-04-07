@@ -11,7 +11,7 @@ define([
   'js/components/api_query',
   'js/components/user',
   'js/components/api_feedback',
-  'js/mixins/discovery_bootstrap'
+  'js/mixins/api_access'
 
 ], function
   (Backbone,
@@ -23,7 +23,7 @@ define([
    ApiQuery,
    User,
    ApiFeedback,
-   DiscoveryBootstrap
+   ApiAccess
     ) {
 
 
@@ -72,6 +72,9 @@ define([
     },
 
     login: function (data) {
+
+      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
+
       var request = new ApiRequest({
         target : ApiTargets.USER,
         query: new ApiQuery({}),
@@ -79,6 +82,7 @@ define([
           type : "POST",
           data: JSON.stringify(data),
           contentType : "application/json",
+          headers : {'X-CSRFToken' :  csrfToken },
           done : this.loginSuccess,
           fail : this.loginFail,
           beforeSend: function(jqXHR, settings) {
@@ -86,22 +90,25 @@ define([
           }
         }
       });
-
-     this.getBeeHive().getService("Api").request(request);
+     return this.getBeeHive().getService("Api").request(request);
     },
 
     logout: function () {
+
+      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
+
       var request = new ApiRequest({
         target : ApiTargets.LOGOUT,
         query : new ApiQuery({}),
         options : {
           context : this,
           type : "GET",
+          headers : {'X-CSRFToken' :  csrfToken },
           contentType : "application/json",
           done : this.logoutSuccess
         }
       });
-      this.getBeeHive().getService("Api").request(request);
+      return this.getBeeHive().getService("Api").request(request);
     },
 
     register: function (data) {
@@ -109,12 +116,14 @@ define([
       //add base_url to data so email redirects to right url
       if (!this.test){
         base_url = location.origin
-        _.extend(data, {verify_url : location.origin + "/#user/account/verify/" + ApiTargets.REGISTER.match(/\/(.*)$/)[1] });
+        _.extend(data, {verify_url : location.origin + "/#user/account/verify/register" });
       }
       else {
         base_url = "location.origin"
       }
-      _.extend(data, {verify_url : base_url + "/#user/account/verify/" + ApiTargets.REGISTER.match(/\/(.*)$/)[1] });
+      _.extend(data, {verify_url : base_url + "/#user/account/verify/register" });
+
+      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
 
       var request = new ApiRequest({
         target : ApiTargets.REGISTER,
@@ -123,11 +132,13 @@ define([
           type : "POST",
           data : JSON.stringify(data),
           contentType : "application/json",
+          headers : {'X-CSRFToken' :  csrfToken },
           done : this.registerSuccess,
           fail : this.registerFail
         }
       });
-      this.getBeeHive().getService("Api").request(request);
+      return this.getBeeHive().getService("Api").request(request);
+
     },
 
     resetPassword1: function(data){
@@ -139,10 +150,11 @@ define([
       else {
         current_loc = "location.origin";
       }
-      _.extend(data, {reset_url : current_loc + "/#user/account/verify/" + ApiTargets.RESET_PASSWORD.match(/\/(.*)$/)[1] });
+      _.extend(data, {reset_url : current_loc + "/#user/account/verify/reset-password"});
 
      var email = data.email;
      var data = _.omit(data, "email");
+     var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
 
       var request = new ApiRequest({
         target : ApiTargets.RESET_PASSWORD + "/" + email,
@@ -150,15 +162,18 @@ define([
         options : {
           type : "POST",
           data : JSON.stringify(data),
+          headers : {'X-CSRFToken' :  csrfToken },
           contentType : "application/json",
           done : this.resetPassword1Success,
           fail : this.resetPassword1Fail
         }
     });
-      this.getBeeHive().getService("Api").request(request);
+      return this.getBeeHive().getService("Api").request(request);
     },
 
     resetPassword2: function(data){
+      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
+
       var request = new ApiRequest({
         target : ApiTargets.RESET_PASSWORD + "/" + this.model.get("resetPasswordToken"),
         query : new ApiQuery({}),
@@ -166,11 +181,12 @@ define([
           type : "PUT",
           data : JSON.stringify(data),
           contentType : "application/json",
+          headers : {'X-CSRFToken' :  csrfToken },
           done : this.resetPassword2Success,
           fail : this.resetPassword2Fail
         }
       });
-      this.getBeeHive().getService("Api").request(request);
+      return this.getBeeHive().getService("Api").request(request);
     },
 
     setChangeToken : function(token){
@@ -189,6 +205,9 @@ define([
       promise.done(function(){
         pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_success");
       });
+      promise.fail(function(){
+        pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_fail");
+      })
     },
 
     loginFail : function(xhr, status, errorThrown){
@@ -246,10 +265,15 @@ define([
       pubsub = this.getPubSub();
       promise.done(function(){
         pubsub.publish(pubsub.USER_ANNOUNCEMENT, "reset_password_2_success");
+        var message = "Your password has been successfully reset";
+        pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "success", modal: true}));
       });
 
-      var message = "Your password has been successfully reset";
-      pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "success", modal: true}));
+      promise.fail(function(){
+        pubsub.publish(pubsub.USER_ANNOUNCEMENT, "reset_password_2_fail");
+        var message = "Your password was not successfully reset. Please try to follow the link from the email you received again.";
+        pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", modal: true}));
+      });
 
     },
 
@@ -276,7 +300,7 @@ define([
 
   _.extend(Session.prototype, Dependon.BeeHive, Dependon.PubSub);
   _.extend(Session.prototype, Hardened);
-  _.extend(Session.prototype, DiscoveryBootstrap);
+  _.extend(Session.prototype, ApiAccess);
 
   return Session;
 

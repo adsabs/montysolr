@@ -10,7 +10,8 @@ define([
   'hbs!./templates/reset-password-1',
   'hbs!./templates/reset-password-2',
   'backbone-validation',
-  'backbone.stickit'
+  'backbone.stickit',
+  'google-recaptcha'
 
 ], function (Marionette,
              BaseWidget,
@@ -231,6 +232,7 @@ define([
       password2: {
         required: true,
         equalTo: 'password1',
+        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
         msg: "(The passwords do not match)"
       }
 
@@ -391,12 +393,14 @@ define([
 
     activate: function (beehive) {
       this.beehive = beehive;
-      //set the sitekey (recaptcha) variable
-      this.view.recaptchaKey = this.beehive.getObject("DynamicConfig").getRecaptchaKey();
-
       this.pubsub = beehive.Services.get('PubSub');
-      _.bindAll(this, ["handleUserAnnouncement"]);
+      _.bindAll(this, ["handleUserAnnouncement", "getReCaptchaKey"]);
       this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
+      this.pubsub.subscribe(this.pubsub.APP_STARTED, this.getReCaptchaKey);
+    },
+
+    getReCaptchaKey : function(){
+      this.view.recaptchaKey = this.beehive.getObject("AppStorage").getConfigCopy().recaptchaKey;
     },
 
     setSubView : function(subView){

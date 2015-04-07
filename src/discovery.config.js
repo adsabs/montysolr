@@ -149,6 +149,7 @@ require.config({
     // for development use
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
+    'google-recaptcha' : '//www.google.com/recaptcha/api.js?&render=explicit',
     'persist-js': 'libs/persist-js/src/persist',
     'backbone-validation': 'libs/backbone-validation/backbone-validation',
     'backbone.stickit' : 'libs/backbone.stickit/backbone.stickit',

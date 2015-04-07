@@ -6,8 +6,7 @@ define([
     'hbs!./404',
     'js/components/api_feedback',
     'js/components/api_request',
-    'js/components/api_targets',
-    'js/mixins/discovery_bootstrap'
+    'js/components/api_targets'
 
   ],
   function (
@@ -18,8 +17,7 @@ define([
     ErrorTemplate,
     ApiFeedback,
     ApiRequest,
-    ApiTargets,
-    DiscoveryBootstrap
+    ApiTargets
 
     ) {
 
@@ -95,9 +93,10 @@ define([
 
       routeToVerifyPage : function(subView, token){
 
-        var failMessage, failTitle, route, done, fail, request, type;
+        var failMessage, failTitle, route, done, request, type,
+          that = this;
 
-        if (subView === "register") {
+        if (subView == "register") {
           failTitle = "Registration failed.";
           failMessage = "<p>Please try again, or contact <b> adshelp@cfa.harvard.edu for support </b></p>";
           route = ApiTargets.VERIFY + "/" + token;
@@ -105,16 +104,21 @@ define([
           done = function(reply) {
             //user has been logged in already by server
             //request bootstrap
-            this.getApiAccess({reconnect : true});
-            //redirect to index page
-            this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
-            //call alerts widget
-            var title = "Welcome to ADS";
-            var msg = "<p>You have been successfully registered with the username</p> <p><b>"+ reply.email +"</b></p>";
-            this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+            this.getApiAccess({reconnect : true}).done(function(){
+              //redirect to index page
+              that.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+              //call alerts widget
+              var title = "Welcome to ADS";
+              var msg = "<p>You have been successfully registered with the username</p> <p><b>"+ reply.email +"</b></p>";
+              that.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+            }).fail(function(){
+              //fail function defined below
+              fail();
+            });
+
           };
         }
-        else if (subView === "change-email") {
+        else if (subView == "change-email") {
             failTitle = "Attempt to change email failed";
             failMessage = "Please try again, or contact adshelp@cfa.harvard.edu for support";
             route = ApiTargets.VERIFY + "/" + token;
@@ -122,18 +126,20 @@ define([
           done = function(reply) {
             //user has been logged in already
             //request bootstrap
-            this.getApiAccess({reconnect : true});
-
-            //redirect to index page
-            this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
-            //call alerts widget
-
-            var title = "Email has been changed.";
-            var msg = "Your new ADS email is <b>" + reply.email + "</b>";
-            this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+            this.getApiAccess({reconnect : true}).done(function(){
+                //redirect to index page
+                this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+                //call alerts widget
+                var title = "Email has been changed.";
+                var msg = "Your new ADS email is <b>" + reply.email + "</b>";
+                this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+              }).fail(function(){
+                 //fail function defined below
+                 fail();
+              });
           };
         }
-        else if (subView === "reset-password") {
+        else if (subView == "reset-password") {
 
           done = function() {
             //route to reset-password-2 form
@@ -147,7 +153,7 @@ define([
           type = "GET";
 
         }
-        fail = function() {
+        function fail() {
           //redirect to index page
           this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
           //call alerts widget
@@ -173,11 +179,17 @@ define([
 
       authenticationPage: function(subView){
         //possible subViews: "login", "register", "reset-password"
+        if (subView && !_.contains(["login", "register", "reset-password-1", "reset-password-2"], subView)){
+            throw new Error("that isn't a subview that the authentication page knows about")
+        }
          this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
       },
 
       settingsPage : function(subView){
         //possible subViews: "token", "password", "email", "preferences"
+        if (subView && !_.contains(["token", "password", "email", "preferences"], subView)){
+          throw new Error("that isn't a subview that the settings page knows about")
+        }
         this.pubsub.publish(this.pubsub.NAVIGATE, 'settings-page', {subView: subView});
       },
 
@@ -200,7 +212,6 @@ define([
     });
 
     _.extend(Router.prototype, Dependon.BeeHive);
-    _.extend(Router.prototype, DiscoveryBootstrap);
 
     return Router;
 
