@@ -93,13 +93,13 @@ define([
       getConfig: function () {
         //hold static config variables here
         this.config = {
-          width: 400,
-          height: 400,
-          noGroupColor: "#a6a6a6"
+          width: 300,
+          height: 300,
+          noGroupColor: "hsl(0, 0%, 65%)"
         };
-        this.config.radius = Math.min(this.config.width, this.config.height) / 2;
-        this.config.outerRadius = Math.min(this.config.width, this.config.height) * .23;
-        this.config.innerRadius = Math.min(this.config.width, this.config.height) * .13
+        this.config.radius = Math.min(this.config.width, this.config.height) / 1.5;
+        this.config.outerRadius = Math.min(this.config.width, this.config.height) * .33;
+        this.config.innerRadius = Math.min(this.config.width, this.config.height) * .21
       },
 
       generateCachedVals: function () {
@@ -140,7 +140,7 @@ define([
           .attr("width", that.config.width)
           .attr("height", that.config.height)
           .append("g")
-          .attr("transform", "translate(" + that.config.width / 2 + "," + that.config.height / 2.5 + ")");
+          .attr("transform", "translate(" + that.config.width / 2 + "," + that.config.height / 2.7 + ")");
 
         this.cachedVals.arc = d3.svg.arc()
           .innerRadius(that.config.innerRadius)
@@ -187,11 +187,11 @@ define([
         //set up initial font scale
         this.scales.initialFontScale = d3.scale.linear()
           .domain([d3.min(paperCounts), d3.max(paperCounts)])
-          .range([7, 17]);
+          .range([9, 14]);
 
         this.scales.fill = d3.scale.ordinal()
           .domain([1, 2, 3, 4, 5, 6])
-          .range(["hsla(282, 80%, 52%, 1)", "hsla(1, 80%, 51%, 1)", "hsla(42, 97%, 48%, 1)", "hsla(152, 80%, 40%, 1)", "hsla(193, 80%, 48%, 1)", "hsla(220, 80%, 56%, 1)", "hsla(250, 69%, 47%, 1)"]);
+          .range(["hsl(282, 80%, 60%)", "hsl(1, 80%, 60%)", "hsl(42, 97%, 60%)", "hsl(152, 80%, 60%)", "hsl(193, 80%, 60%)", "hsl(220, 80%, 60%)", "hsl(250, 69%, 60%)"]);
       },
 
       renderGraph: function () {
@@ -248,9 +248,10 @@ define([
           .on("mouseover", fade("mouseenter"))
           .on("mouseout", fade("mouseleave"))
           //trigger group select events
-          .on("click", function (d, i) {
+          .on("click", function (d, i)
+          {
             var groupId = d.data.id;
-            that.model.set("selectedEntity", groupId);
+            that.model.set("selectedEntity", this);
           });
 
         var ticks = svg.selectAll(".groupLabel")
@@ -266,7 +267,7 @@ define([
           })
           .classed("groupLabel", true)
           .attr("transform", function (d) {
-            return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")" + "translate(" + that.config.outerRadius + ",0)";
+            return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")" + "translate(" + that.config.outerRadius * 1/1 + ",0)";
           });
 
         labelSum = d3.sum(labelSum);
@@ -317,34 +318,53 @@ define([
 
         //trigger group select events
         text.on("click", function (d) {
-          var groupId = d[2];
-          that.model.set("selectedEntity", groupId);
+          var nodeName = d3.select(this.parentNode).data()[0].data.data.node_name;
+          var nodePath = that.$("#vis-group-" + nodeName)[0];
+          that.model.set("selectedEntity", nodePath);
         });
 
         // Returns an event handler for fading a given chord group.
         function fade(event) {
           return function (g, i, j) {
-            var textOpacity = event == "mouseenter" ? 1 : .8;
-            //fade the text
-            d3.selectAll(self.$(".summary-label-container"))
-              .filter(function (d, i2) {
-                return i2 == i
-              })
-              .selectAll("text")
-              .transition()
-              .style("opacity", textOpacity);
+            //properly color the group background
+            if (event === "mouseenter"){
+              if (g.data.node_name > 7) {
+                d3.select(this).attr("fill", d3.hsl(that.config.noGroupColor).darker(.7));
+              }else {
+                d3.select(this).attr("fill", d3.hsl(that.scales.fill(g.data.node_name)).darker(.7));
+              }
+            }
+            else {
+              if (g.data.node_name > 7) {
+                d3.select(this).attr("fill", that.config.noGroupColor);
+              }else {
+                d3.select(this).attr("fill", that.scales.fill(g.data.node_name));
+              }
+            }
           };
         };
 
         //have to add this to the text or else it interferes with mouseover
         function fadeText(event) {
           return function (g, j, i) {
-            var textOpacity = event == "mouseenter" ? 1 : .8;
-            //fade the text
-            d3.select(this.parentNode)
-              .selectAll("text")
-              .transition()
-              .style("opacity", textOpacity);
+            //properly color the group background
+            var nodeName = d3.select(this.parentNode).data()[0].data.data.node_name;
+            var pieNode = d3.selectAll(".node-path").filter(function(d){return d.data.node_name === nodeName})[0][0];
+            if (event === "mouseenter"){
+              if (nodeName > 7){
+                d3.select(pieNode).attr("fill", d3.hsl(that.config.noGroupColor).darker(.7));
+              } else {
+                d3.select(pieNode).attr("fill", d3.hsl(that.scales.fill(nodeName)).darker(.7));
+              }
+            }
+            else {
+              if (nodeName > 7){
+                d3.select(pieNode).attr("fill", d3.hsl(that.config.noGroupColor));
+              }
+              else {
+                d3.select(pieNode).attr("fill", that.scales.fill(nodeName));
+              }
+            }
           };
         }
       },
@@ -436,12 +456,14 @@ define([
 
       },
 
+
       showSelectedEntity: function () {
 
         var that = this,
           data = {},
           topNodes;
 
+        //expects the id, not the path itself
         var entity = this.model.get("selectedEntity");
 
         // it's a link
@@ -489,11 +511,15 @@ define([
 
           data.referencesLength = data.shared.length;
 
-          this.$(".network-detail-area").html(LinkDataTemplate(data));
+          //not actually located within this view, so slightly messy
+          $(".details-container #selected-item").html(LinkDataTemplate(data));
 
         }
         //it's a node id
         else {
+
+        //the network widget actually expects a path
+        var entity = entity.__data__.data.id
 
           var groupData = _.findWhere(that.model.get("graphData").summaryGraph.nodes, function (g) {
             return ( g.id == entity);
@@ -525,10 +551,17 @@ define([
           data.inFilter = Marionette.getOption(that, "filterCollection").get(groupData.node_name) ? true : false;
           data.topNodes = topNodes.slice(0, 30);
           data.groupIdToShow = groupData.node_name;
-          data.backgroundColor = groupData.node_name < 8 ? that.scales.fill(groupData.node_name) : that.config.noGroupColor;
+          data.borderColor = groupData.node_name < 8 ? that.scales.fill(groupData.node_name) : that.config.noGroupColor;
+          //create a faded background color
+          data.backgroundColor = d3.hsl(data.borderColor).brighter();
 
-          this.$(".network-detail-area").html(GroupDataTemplate(data));
+
+          $(".details-container #selected-item").html(GroupDataTemplate(data));
+
         }
+
+        //set the selected details tab as default
+        $(".nav-tabs a[href='#selected-item']").tab("show");
 
       },
 

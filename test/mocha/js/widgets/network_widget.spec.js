@@ -1689,16 +1689,25 @@ define([
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
     $("#test").append(networkWidget.view.el);
 
+    var apiQuery = new ApiQuery({q: "star"})
+
     //this should show not enough data template
-    networkWidget.processResponse(new JsonResponse(testDataSmall));
+    var j = new JsonResponse(testDataSmall);
+    j.setApiQuery(apiQuery);
+    networkWidget.processResponse(j);
     expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
 
+    var j = new JsonResponse(testDataEmpty);
+    j.setApiQuery(apiQuery);
     //this should also show not enough data template
-    networkWidget.processResponse(new JsonResponse(testDataEmpty));
+    networkWidget.processResponse(j);
     expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
 
+
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
     //this should show a donut chart with hidden link layer, representing the data
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    networkWidget.processResponse(j);
 
     expect($("#test").find(".link").length).to.eql(testDataLarge.data.link_data.length);
 
@@ -1714,7 +1723,12 @@ define([
   it("allows you to click to view more data about a node or a group", function () {
 
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+    networkWidget.processResponse(j);
     $("#test").append(networkWidget.view.el);
 
     // this would be the result of a click on group 1
@@ -1736,17 +1750,18 @@ define([
     networkWidget.view.graphView.model.set("selectedEntity", accomazziNode);
     expect($("#test").find(".paper-description li").length).to.eql(25);
 
-    //and this should remove the center div
-    networkWidget.view.graphView.model.set("selectedEntity", undefined);
-
-    expect($("#test").find(".paper-description").length).to.eql(0);
 
   });
 
   it("has a filter capability that allows you to add or remove groups or individual nodes, and submit as a filter", function () {
 
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+    networkWidget.processResponse(j);
     $("#test").append(networkWidget.view.el);
 
     // this would be the result of a click on group 1
@@ -1757,6 +1772,9 @@ define([
     })[0][0];
     networkWidget.view.graphView.model.set("selectedEntity", accomazziNode);
     $("#test").find("button.filter-add").click();
+
+
+    debugger;
 
     expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('at least one member of Group 1  OR \n        \n            Accomazzi, A');
 
@@ -1805,7 +1823,12 @@ define([
     var citationRatio = citation1 / citation2;
 
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+    networkWidget.processResponse(j);
+
     $("#test").append(networkWidget.view.el);
 
     var group1Path = $("#test").find("g.node-containers:not(.author-node)").eq(1).find("path").eq(0)[0];
@@ -1824,7 +1847,13 @@ define([
     $("#test").append(networkWidget.view.el);
 
     var minsub = new MinimalPubsub({verbose: false});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+    networkWidget.processResponse(j);
+
     expect(networkWidget.resetWidget).to.be.instanceof(Function);
 
     expect(networkWidget.view.graphView.$el.children().length).not.be.eql(0);
@@ -1834,22 +1863,6 @@ define([
     expect(networkWidget.view.graphView.$el.children().length).to.be.eql(0);
     expect(networkWidget.model.get('data')).to.be.undefined;
     expect(_.keys(networkWidget.view.graphView._listeningTo).length).to.be.eql(0);
-  });
-
-  it("has a help popover that is accessible by hovering over the question mark icon", function () {
-
-    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    $("#test").append(networkWidget.view.el);
-
-    var minsub = new MinimalPubsub({verbose: false});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
-
-    //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
-    expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
-    expect($("div.popover").length).to.eql(0);
-
-    networkWidget.view.$(".icon-help").mouseover();
-    expect($("div.popover").length).to.eql(1);
   });
 
   it("should allow the user to request a different number of documents", function (done) {

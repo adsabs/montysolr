@@ -18872,8 +18872,11 @@ define([
 
   it("should show angle of summary graph based on # of papers", function(){
 
-      var paperNetwork = new PaperNetwork();
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
+     var paperNetwork = new PaperNetwork();
+     var apiQuery = new ApiQuery({q: "star"})
+     var j = new JsonResponse(testDataBig);
+     j.setApiQuery(apiQuery);
+      paperNetwork.processResponse(j);
 
       $("#test").append(paperNetwork.view.el);
       var largeAdsGroupData = d3.selectAll("#vis-group-2").data()[0];
@@ -18893,7 +18896,11 @@ define([
       //also based on read_count, but that logic is identical
 
       var paperNetwork = new PaperNetwork();
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
+      var apiQuery = new ApiQuery({q: "star"})
+      var j = new JsonResponse(testDataBig);
+      j.setApiQuery(apiQuery);
+      paperNetwork.processResponse(j);
+
       $("#test").append(paperNetwork.view.el);
 
       //test sizing by citation
@@ -18915,7 +18922,11 @@ define([
     it("should allow the user to toggle to wedge sizing based on references in common", function() {
 
       var paperNetwork = new PaperNetwork();
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
+      var apiQuery = new ApiQuery({q: "star"})
+      var j = new JsonResponse(testDataBig);
+      j.setApiQuery(apiQuery);
+      paperNetwork.processResponse(j);
+
       $("#test").append(paperNetwork.view.el);
 
       //test sizing by citation
@@ -18937,9 +18948,13 @@ define([
 
     it("should show links corresponding to the summary node graph links", function(){
 
-    var paperNetwork = new PaperNetwork();
-    paperNetwork.processResponse(new JsonResponse(testDataBig));
-    $("#test").append(paperNetwork.view.el);
+      var paperNetwork = new PaperNetwork();
+      var apiQuery = new ApiQuery({q: "star"})
+      var j = new JsonResponse(testDataBig);
+      j.setApiQuery(apiQuery);
+      paperNetwork.processResponse(j);
+
+      $("#test").append(paperNetwork.view.el);
 
       var linkNum = d3.selectAll(".link")[0].length;
 
@@ -18957,25 +18972,33 @@ define([
     it("should display a view with several details about the group when the group is selected", function(){
 
       var paperNetwork = new PaperNetwork();
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
+      var apiQuery = new ApiQuery({q: "star"})
+      var j = new JsonResponse(testDataBig);
+      j.setApiQuery(apiQuery);
+      paperNetwork.processResponse(j);
+
       $("#test").append(paperNetwork.view.el);
 
-      //to change the detail view, set the current group in the container view model to the group id
-      paperNetwork.view.graphView.model.set("selectedEntity", 0);
+      //to change the detail view, set the current group in the container view model to the svg path
+      paperNetwork.view.graphView.model.set("selectedEntity", $("#test").find("#vis-group-1")[0]);
 
       //summary
-      expect($(".network-detail-area p:first").text()).to.eql('This group consists of 60 papers, which have been cited, in total, 2904\n           times.');
+      expect($(".s-group-content p:first").text()).to.eql('This group consists of 60 papers, which have been cited, in total, 2904\n           times.');
      //most highly cited
-      expect($(".network-detail-area .s-top-papers").find("li:first").html().trim()).to.eql('<a href="#abs/1999PASP..111..438F" data-bypass="" target="_blank"><b>The Updated Zwicky Catalog (UZC)</b></a>; <i>Falco, Emilio E.</i>\n                   (295 citations)');
+      expect($(".s-group-content .s-top-papers").find("li:first").html().trim()).to.eql('<a href="#abs/1999PASP..111..438F" data-bypass="" target="_blank"><b>The Updated Zwicky Catalog (UZC)</b></a>; <i>Falco, Emilio E.</i>\n                   (295 citations)');
      //most highly referenced
-      expect($(".network-detail-area ul:last li:first").html().trim()).to.eql("<i class=\"fa fa-star-o\"></i>\n                   \n                   <a href=\"#abs/2005PASP..117.1411F\" data-bypass=\"\" target=\"_blank\">2005PASP..117.1411F</a> (cited by 28% of papers\n                   in this group)");
+      expect($(".s-group-content ul:last li:first").html().trim()).to.eql("<i class=\"fa fa-star-o\"></i>\n                   \n                   <a href=\"#abs/2005PASP..117.1411F\" data-bypass=\"\" target=\"_blank\">2005PASP..117.1411F</a> (cited by 28% of papers\n                   in this group)");
 
     });
 
     it("should display a view with a list of most significant common references when a link between groups is selected", function(){
 
       var paperNetwork = new PaperNetwork();
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
+      var apiQuery = new ApiQuery({q: "star"})
+      var j = new JsonResponse(testDataBig);
+      j.setApiQuery(apiQuery);
+      paperNetwork.processResponse(j);
+
       $("#test").append(paperNetwork.view.el);
 
 
@@ -18985,8 +19008,7 @@ define([
       //to change the detail view, set the current group in the container view model to the group id
       paperNetwork.view.graphView.model.set("selectedEntity", [group1, group2]);
 
-      expect($(".network-detail-area tbody tr:first").html().trim()).to.eql('<td>\n                <a href="#abs/1986SPIE..627..733T">1986SPIE..627..733T</a>\n            </td>\n            <td>\n                0.61%\n            </td>\n            <td>\n                0.69%\n            </td>')
-
+      expect($(".s-group-content tbody tr:first").html().trim()).to.eql('<td>\n                <a href="#abs/1986SPIE..627..733T">1986SPIE..627..733T</a>\n            </td>\n            <td>\n                0.61%\n            </td>\n            <td>\n                0.69%\n            </td>')
 
     });
 
@@ -18995,19 +19017,23 @@ define([
     it("has a filter capability that allows you to add or remove groups or individual nodes, and submit as a filter", function(){
 
       var paperNetwork = new PaperNetwork();
-      paperNetwork.processResponse(new JsonResponse(testDataBig));
+      var apiQuery = new ApiQuery({q: "star"})
+      var j = new JsonResponse(testDataBig);
+      j.setApiQuery(apiQuery);
+      paperNetwork.processResponse(j);
+
       $("#test").append(paperNetwork.view.el);
 
       // this would be the result of a click on group 1
-      paperNetwork.view.graphView.model.set("selectedEntity", 8);
+      paperNetwork.view.graphView.model.set("selectedEntity", $("#test").find("#vis-group-1")[0]);
       $("#test").find("button.filter-add").click();
-      paperNetwork.view.graphView.model.set("selectedEntity", 1);
+      paperNetwork.view.graphView.model.set("selectedEntity", $("#test").find("#vis-group-2")[0]);
       $("#test").find("button.filter-add").click();
 
-      expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('Group 6  OR \n        \n            Group 2')
+      expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('Group 1  OR \n        \n            Group 2');
       $("#test").find("button.filter-remove").click();
 
-      expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('Group 6');
+      expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('Group 1');
 
       var minsub = new MinPubSub({verbose: false});
 
@@ -19019,7 +19045,7 @@ define([
 
       expect(paperNetwork.pubsub.publish.called).to.be.true;
       expect(paperNetwork.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
-      expect(paperNetwork.pubsub.publish.args[0][1].get("fq")).to.eql(["(bibcode:(1995ASPC...77...28E OR 1997ASPC..125..357A))"]);
+      expect(paperNetwork.pubsub.publish.args[0][1].get("fq")).to.eql(["(bibcode:(2004AJ....128.1078R OR 1999ApJ...517L..23G OR 2003ASPC..295...51M OR 2005ApJ...635L.125G OR 1990ApJS...74....1Z OR 2014ApJ...786...93U OR 1996AJ....111...64M OR 1992ApJ...395..347B OR 1986ApJ...308..530F OR 2014ApJ...783...52G OR 1985PASP...97..605L OR 1998ASPC..145...93M OR 2010PASP..122.1258W OR 1993AJ....105..788F OR 1995AJ....109.2368T OR 1988AJ.....96.1775O OR 2012ApJ...750..168K OR 2005AJ....130.1482R OR 1997AJ....113..624K OR 1994ApJ...437..560W OR 2012ApJ...757...22C OR 1994ApJ...424L...1D OR 1993AJ....106..676A OR 2005ASPC..347..228M OR 2010AJ....139.1857F OR 2001ApJ...559..606C OR 1995PASP..107..776K OR 1999ApJ...518...69M OR 2013ApJ...771L..19Z OR 2014ApJ...786..125S OR 2007AJ....133..882K OR 2007AJ....134.1360K OR 1989ApJ...336...77F OR 1997AJ....114.2205G OR 1999PASP..111..438F OR 2010ApJ...709..832G OR 1996ApJS..107..823W OR 2001ApJ...561L..41R OR 2012AJ....143..102G OR 2014ApJS..213...35G OR 1989AJ.....98.1143T OR 2010ApJ...708..534W OR 2000ApJ...533L.183K OR 2008PASP..120.1222F OR 1990AJ....100.1405W OR 2001AJ....122..714B OR 2001AJ....122.2893W OR 1992ASPC...25..432K OR 2012ApJ...758...25H OR 2013PASP..125.1362F OR 1996ApJS..104..199W OR 2000PASP..112..367B OR 2001ASPC..238..491M OR 1998PASP..110..934K OR 1998AJ....116....1D OR 2011AJ....142..133G OR 2003AJ....126.2152R OR 2005PASP..117.1411F OR 2013ApJ...767...15R OR 1985AJ.....90.1665K))"]);
     });
 
 

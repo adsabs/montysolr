@@ -1,10 +1,20 @@
-<div class="s-group-title" style="background:{{backgroundColor}}">
+<div style="padding: 0 -15px">
+<div class="s-group-title clearfix" style="border-bottom: 6px solid {{borderColor}};">
 
     <h3>Group {{groupIdToShow}}:
-        {{#each summaryData.titleWords}}
+       <span class="s-light-font"> {{#each summaryData.titleWords}}
         {{this}}{{#unless @last}}, {{/unless}}
         {{/each}}
+        </span>
     </h3>
+
+    <div class="pull-right">
+        {{#if inFilter}}
+        <button class="btn btn-xs btn-default filter-remove"><i class="s-filter-image"></i>remove group from filter</button>
+        {{else}}
+        <button class="btn btn-xs btn-default filter-add"><i class="s-filter-image"></i> add group to filter</button>
+        {{/if}}
+    </div>
 
 </div>
 
@@ -13,15 +23,6 @@
        <p>This group consists of <b>{{summaryData.paper_count}}</b> papers, which have been cited, in total, <b>{{summaryData.total_citations}}</b>
            times.</p>
 
-       <div>
-           <div>
-               {{#if inFilter}}
-               <button class="btn btn-xs btn-default filter-remove"><i class="s-filter-image"></i>remove group from filter</button>
-               {{else}}
-               <button class="btn btn-xs btn-default filter-add"><i class="s-filter-image"></i> add group to filter</button>
-               {{/if}}
-           </div>
-       </div>
        <div>
            {{#if morePapers}}
            <p><b>Top papers from this group include:</b> </p>
@@ -67,7 +68,7 @@
 
    </div>
 
-
+</div>
 
 
 

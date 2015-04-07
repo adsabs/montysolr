@@ -13,6 +13,7 @@ define([
     'hbs!./templates/not-enough-data-template',
     'hbs!./templates/network_metadata',
     'hbs!./templates/loading-template',
+    'hbs!./templates/default-details-template',
     'bootstrap'
   ],
   function (Marionette,
@@ -28,7 +29,8 @@ define([
             groupDetailsTemplate,
             notEnoughDataTemplate,
             metadataTemplate,
-            loadingTemplate
+            loadingTemplate,
+            DefaultDetailsTemplate
     ) {
 
     function isInt(value) {
@@ -89,6 +91,232 @@ define([
 
     });
 
+    //this will render a tiny tiny little graph
+
+    var DefaultDetailsView = Marionette.ItemView.extend({
+
+      template : DefaultDetailsTemplate,
+
+      serializeData : function(){
+        return {
+          currentQuery : Marionette.getOption(this, "query"),
+          networkType : Marionette.getOption(this, "networkType")
+        }
+      },
+
+
+      getData : function(){
+
+        if (Marionette.getOption(this, "networkType") == "author") {
+
+          var data = [];
+
+          _.each(Marionette.getOption(this, "graphData").root.children, function (el, index) {
+
+            var name = index;
+
+            if (index > 6) {
+              return
+            }
+            var allPapers = [];
+
+            //get all papers
+            _.each(el.children, function (author, index) {
+              Array.prototype.push.apply(allPapers, author.papers);
+            })
+
+            //unique the list
+            allPapers = _.uniq(allPapers);
+
+            //fill in years with 0 papers
+            var years = _.map(allPapers, function (bibcode) {
+              return parseInt(bibcode.slice(0, 4));
+            });
+
+            //extract the years
+            allPapers = _.countBy(allPapers, function (bibcode) {
+              return bibcode.slice(0, 4);
+            });
+
+            var yearRange = _.range.apply(undefined, d3.extent(years));
+
+            var skeleton = {}
+            _.each(yearRange, function (y) {
+              skeleton[y] = 0;
+            });
+
+            allPapers = _.extend(skeleton, allPapers)
+
+            allPapers = _.map(allPapers, function (v, k) {
+              return {year: parseInt(k), amount: v}
+            })
+
+            data.push({name: name, values: allPapers });
+
+          });
+        }
+        else if ( Marionette.getOption(this, "networkType") == "paper" ){
+
+          var summaryGraph = Marionette.getOption(this, "graphData").summaryGraph;
+          var fullGraph = Marionette.getOption(this, "graphData").fullGraph
+          var data = [];
+          var nameDict = {};
+
+          var ids = _.pluck(summaryGraph.nodes, "id");
+          var names = _.pluck(summaryGraph.nodes, "node_name");
+
+          _.each(ids, function(id, index) {
+
+            var filteredNodes = [];
+
+            _.each(fullGraph.nodes, function (n, i) {
+              if (n.group === id) {
+                filteredNodes.push(n.node_name)
+              }
+            });
+
+            nameDict[names[index]] = filteredNodes;
+
+          });
+
+            _.each(nameDict, function(v, k ){
+
+              if (k > 6){
+                return
+              }
+
+              //unique the list
+              allPapers = _.uniq(v);
+
+              //fill in years with 0 papers
+              var years = _.map(allPapers, function (bibcode) {
+                return parseInt(bibcode.slice(0, 4));
+              });
+
+              //extract the years
+              allPapers = _.countBy(allPapers, function (bibcode) {
+                return bibcode.slice(0, 4);
+              });
+
+              var yearRange = _.range.apply(undefined, d3.extent(years));
+
+              var skeleton = {}
+              _.each(yearRange, function (y) {
+                skeleton[y] = 0;
+              });
+
+              allPapers = _.extend(skeleton, allPapers)
+
+              allPapers = _.map(allPapers, function (v, k) {
+                return {year: parseInt(k), amount: v}
+              });
+
+              //to make it the same as the author network: key is the index of the group based on size
+              data.push({name: parseInt(k)-1, values: allPapers });
+
+            });
+        }
+
+        return data;
+      },
+
+      onRender : function(){
+
+        var data = this.getData();
+
+        var margin = {top: 20, right: 80, bottom: 30, left: 50},
+          width = 960 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
+
+        var x = d3.scale.linear()
+          .range([0, width]);
+
+        var y = d3.scale.linear()
+          .range([height, 0]);
+
+        var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom")
+          .tickFormat(d3.format("0f"))
+
+        var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+        var line = d3.svg.line()
+          .interpolate("basis")
+          .x(function(d) { return x(d.year); })
+          .y(function(d) { return y(d.amount); });
+
+        var svg = d3.select(this.$("svg")[0])
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var color = d3.scale.ordinal()
+          .domain([0, 1, 2, 3, 4, 5, 6])
+          .range(["hsla(282, 80%, 52%, 1)", "hsla(1, 80%, 51%, 1)", "hsla(42, 97%, 48%, 1)", "hsla(152, 80%, 40%, 1)", "hsla(193, 80%, 48%, 1)", "hsla(220, 80%, 56%, 1)", "hsla(250, 69%, 47%, 1)"]);
+
+        var allX = [];
+        var allY = [];
+        _.each(data, function(group){
+
+          _.each(group.values, function(entry){
+            allX.push(entry.year);
+            allY.push(entry.amount);
+          })
+
+        })
+        x.domain(d3.extent(allX));
+        y.domain([0, _.max(allY)]);
+
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis);
+
+        svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis);
+
+        var groups = svg.selectAll(".group")
+          .data(data)
+          .enter().append("g")
+          .attr("class", "group");
+
+        groups.append("path")
+          .attr("class", "line")
+          .attr("d", function(d) { return line(d.values); })
+          .style("stroke", function(d) { return color(d.name); });
+
+        groups.append("text")
+          .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+          .attr("transform", function(d) { return "translate(" + x(d.value.year) + "," + y(d.value.amount) + ")"; })
+          .attr("x", 3)
+          .attr("dy", ".35em")
+          .text(function(d) { return d.name + 1; });
+
+        var oneYear = _.filter(data, function(d){
+          if (d.values.length == 1){
+            return true
+          }
+        });
+
+        //hack to show groups with only one year (otherwise line has width 0)
+        svg.selectAll(".one-year")
+          .data(oneYear)
+          .enter()
+          .append("circle")
+          .classed("one-year", true)
+          .attr("r", 5)
+          .attr("cx", function(d){return x(d.values[0].year)})
+          .attr("cy", function(d){return y(d.values[0].amount)})
+          .attr("fill", function(d){return color(d.name)});
+      }
+
+    });
+
     var ContainerView = Marionette.ItemView.extend({
 
       template: containerTemplate,
@@ -107,17 +335,59 @@ define([
 
       ui: {
         filterContainer: ".network-filter-container",
-        graphContainer: ".network-container"
+        graphContainer: ".graph-container",
+        detailsContainerSelected : ".details-container #selected-item",
+        detailsContainerHome : ".details-container #home"
+
       },
 
       events : {
+        "click .load-author-network" : "forwardNewQueryRequest",
         "click button.limit" : "addItem",
         "click .submit-rows" : "changeRows",
-        "click .close" : "triggerClose"
+        "click .close" : "triggerClose",
+        "click .filter-remove" : function(e){
+          if (Marionette.getOption(this, "networkType") == "paper"){
+            var name = this.graphModel.get("selectedEntity").__data__.data.node_name;
+            Marionette.getOption(this, "filterCollection").remove({id : name});
+            //re-render detail sub view
+            this.graphView.showSelectedEntity(this.graphModel.get("selectedEntity"));
+          }
+          else {
+            var name = this.graphModel.get("selectedEntity").__data__.name;
+            Marionette.getOption(this, "filterCollection").remove({id : name});
+            //re-render detail sub view
+            this.showDetailView(this.graphModel.get("selectedEntity"));
+          }
+        },
+        "click .filter-add": function(e){
+          if (Marionette.getOption(this, "networkType") == "paper"){
+            var name = this.graphModel.get("selectedEntity").__data__.data.node_name;
+            Marionette.getOption(this, "filterCollection").add({name: name});
+            //re-render detail sub view
+            this.graphView.showSelectedEntity(this.graphModel.get("selectedEntity"));
+          }
+          else {
+            var name = this.graphModel.get("selectedEntity").__data__.name;
+            Marionette.getOption(this, "filterCollection").add({name: name});
+            //re-render detail sub view
+            this.showDetailView(this.graphModel.get("selectedEntity"));
+          }
+
+        }
       },
 
       triggerClose : function(){
         this.trigger("close")
+      },
+
+      //user has requested author network for current author
+      forwardNewQueryRequest : function(e){
+        var query = "author:\"" + $(e.target).data("query") + "\"";
+
+        //show loading template
+        this.ui.graphContainer.html(loadingTemplate());
+        this.trigger("new-network-requested", query);
       },
 
       changeRows : function(e) {
@@ -136,39 +406,162 @@ define([
 
       onRender: function () {
         //append sub views
-        var graphModel, graphViewToUse;
+        var graphViewToUse;
 
         // do nothing if there is no data
 
-        if (!this.model.get("graphData") || _.isEmpty(this.model.get("graphData"))){
+        if (!this.model.get("graphData") || _.isEmpty(this.model.get("graphData"))) {
           this.$(".network-metadata").html("");
           this.$(".network-container").html(notEnoughDataTemplate());
           return
         }
         //it's a paper network with no summary info
-        else if (!this.model.get("graphData").summaryGraph && !this.model.get("graphData").root){
+        else if (!this.model.get("graphData").summaryGraph && !this.model.get("graphData").root) {
           //maybe later show something if we just have the fullGraph
           this.$(".network-metadata").html("");
           this.$(".network-container").html(notEnoughDataTemplate());
           return
 
         }
-        graphModel = new GraphModel({graphData: this.model.get("graphData")});
-        this.filterView = new FilterView({collection: Marionette.getOption(this, "filterCollection"), networkType : Marionette.getOption(this, "networkType")});
-        this.listenTo(this.filterView, "filter:initiated", function(){
+        this.graphModel = new GraphModel({graphData: this.model.get("graphData")});
+        this.filterView = new FilterView({collection: Marionette.getOption(this, "filterCollection"), networkType: Marionette.getOption(this, "networkType")});
+        this.listenTo(this.filterView, "filter:initiated", function () {
           //forward to controller
           this.trigger("filter:initiated");
         });
         //can pass another view in if inheriting
-        graphViewToUse =  this.options.graphView ? this.options.graphView : GraphView
-        this.graphView = new graphViewToUse({model: graphModel, filterCollection : Marionette.getOption(this, "filterCollection")});
+        graphViewToUse = this.options.graphView ? this.options.graphView : GraphView
+        this.graphView = new graphViewToUse({model: this.graphModel, filterCollection: Marionette.getOption(this, "filterCollection")});
+
+        this.graphView.on("show-detail-view", _.bind(this.showDetailView, this));
+
         this.ui.filterContainer.append(this.filterView.render().el);
         this.ui.graphContainer.append(this.graphView.render().el);
 
-        this.renderMetadata();
+        this.ui.detailsContainerHome.append(new DefaultDetailsView({
+            graphData: this.model.get("graphData"),
+            query: this.model.get("query"),
+            networkType : Marionette.getOption(this, "networkType")
+          }).render().el);
 
-        //help popover
-        this.$(".icon-help").popover({trigger: "hover", placement: "bottom", html: true});
+        //set the home tab as default
+        this.$(".nav-tabs a[href='#home']").tab("show");
+
+        this.renderMetadata();
+      },
+
+      //triggered by graph view
+      showDetailView : function(selected){
+
+        var d = selected.__data__;
+
+        selected = d3.select(selected);
+        //there might not be a label because it might be a group
+        selected
+          .select(".node-label").classed("selected-label", true)
+        //but there should definitely be a path
+        selected
+          .select(".node-path").classed("selected-node", true);
+
+        //now, get the data
+        var allPapers = [],
+          children,
+          data = {},
+          label, papers = [],
+          graphData = this.model.get("graphData");
+
+        //author node
+        if (!d.children) {
+          papers = _.map(d.papers, function (bib) {
+            var paperDict = graphData.bibcode_dict[bib];
+            paperDict["bibcode"] = bib;
+            if (_.isArray(paperDict["title"])) {
+              paperDict["title"] = paperDict["title"][0]
+            }
+            return paperDict;
+          });
+
+          papers = _.sortBy(papers, function (p) {
+            return p.citation_count;
+          }).reverse();
+
+          //now find most recent year, and papers from that year
+          var mostRecentYear = _.chain(papers)
+            .pluck("bibcode")
+            .sortBy(function (bibcode) {
+              return bibcode.slice(0, 4)
+            })
+            .value()
+            .reverse()[0].slice(0, 4);
+
+          data.bibcodes = d.papers;
+          data.mostRecentYear = mostRecentYear;
+          data.papers = papers;
+          data.total = papers.length;
+          data.name = d.name;
+          data.groupColor = d.parent.color;
+          data.inFilter = Marionette.getOption(this, "filterCollection").get(d.name) ? true : false;
+          data.dataQuery = d.name
+
+          this.ui.detailsContainerSelected.empty().append(authorDetailsTemplate(data));
+
+          //group node
+        } else {
+
+          children = d.children;
+          _.each(children, function (c) {
+            Array.prototype.push.apply(allPapers, c.papers)
+          });
+
+          //now find most recent year
+          var mostRecentYear = _.sortBy(allPapers, function (bibcode) {
+            return bibcode.slice(0, 4)
+          }).reverse()[0].slice(0, 4);
+
+          allPapers = _.pairs(_.countBy(allPapers));
+
+          /*
+           * compare three variables to get a final score : number of authors in the group,
+           * percent authors in the group, and total number of citations
+           * */
+
+          var numAuthors = _.chain(allPapers).map(function(a){return a[1]}).sortBy(function(x){return x}).value();
+          var percentAuthors = _.chain(allPapers).map(function(a){return a[1] / graphData.bibcode_dict[a[0]].authors.length}).sortBy(function(x){return x}).value();
+          var numCitations = _.chain(allPapers).map(function(a){ return graphData.bibcode_dict[a[0]].citation_count/graphData.bibcode_dict[a[0]].authors.length}).sortBy(function(x){return x}).value();
+
+          allPapers = _.sortBy(allPapers, function (list) {
+            // percent of authors that are members of this group
+            return (list[1]-numAuthors[0])/(numAuthors[numAuthors.length-1]-numAuthors[0]) *
+              (list[1]/graphData.bibcode_dict[list[0]].authors.length - percentAuthors[0])/(percentAuthors[percentAuthors.length-1]-percentAuthors[0]) *
+              (graphData.bibcode_dict[list[0]].citation_count/graphData.bibcode_dict[list[0]].authors.length-numCitations[0])/(numCitations[numCitations.length-1]-numCitations[0]);
+          }).reverse();
+
+          bibcodes = _.map(allPapers, function (l) {
+            return l[0];
+          });
+
+          papers = _.map(bibcodes, function (b, i) {
+            var d = {};
+            d.bibcode = b;
+            d.title = graphData.bibcode_dict[b].title;
+            d.citation_count = graphData.bibcode_dict[b].citation_count;
+            d.numAuthors = allPapers[i][1];
+            return d
+          });
+
+          data.bibcodes = bibcodes;
+          data.papers = papers;
+          data.groupColor = d.color;
+          data.total = allPapers.length;
+          data.mostRecentYear = mostRecentYear;
+          data.name = d.name;
+          data.inFilter = Marionette.getOption(this, "filterCollection").get(d.name) ? true : false;
+
+          this.ui.detailsContainerSelected.empty().append(groupDetailsTemplate(data));
+        }
+        //set the selected details tab as default
+        this.$(".nav-tabs a[href='#selected-item']").tab("show");
+
       },
 
       //function to just re-render the metadata part
@@ -232,19 +625,6 @@ define([
         "change input[name=show-link]" : function(e){
           this.model.set("linkLayer", e.target.checked);
         },
-        "click .filter-remove" : function(e){
-          var name = this.model.get("selectedEntity").__data__.name;
-          Marionette.getOption(this, "filterCollection").remove({id : name});
-          //re-render detail sub view
-          this.showSelectedEntity();
-        },
-        "click .filter-add": function(e){
-          var name = this.model.get("selectedEntity").__data__.name;
-          Marionette.getOption(this, "filterCollection").add({name: name});
-          //re-render detail sub view
-          this.showSelectedEntity();
-        }
-
       },
 
       modelEvents: {
@@ -265,12 +645,12 @@ define([
       getConfig: function () {
         //hold static config variables here
         this.config = { numberOfLabelsToShow: 100,
-          width: 960,
+          width: 900,
           height: 900,
           noGroupColor: "#a6a6a6"
         };
 
-        this.config.radius = Math.min(this.config.width, this.config.height) / 2 - 140;
+        this.config.radius = Math.min(this.config.width, this.config.height) / 3;
       },
 
 ///   for items generated over the course of regular d3 functions that might be useful later
@@ -319,8 +699,26 @@ define([
           .attr("width", that.config.width)
           .attr("height", that.config.height)
           .append("g")
-          .classed("network-g", true)
-          .attr("transform", "translate(" + that.config.width / 2 + "," + (that.config.height / 2.1) + ")");
+          .classed("network-g", true);
+
+        var g2 = svg.append("g").classed("real-container-of-stuff", true);
+
+        //zoom behavior
+        var zoom = d3.behavior.zoom()
+          .scaleExtent([1, 3])
+          .on("zoom", zoomed);
+
+        function zoomed() {
+          g2.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        }
+
+        svg.call(zoom);
+
+        svg.on("dblclick.zoom", null);
+
+
+        svg.attr("transform", "translate(" + that.config.width / 2 + "," + (that.config.height / 2.1) + ")");
+
 
         var partition = d3.layout.partition()
           .value(function (d) {
@@ -353,7 +751,15 @@ define([
 
         this.cachedVals.arc = arc;
 
-        var containers = svg.selectAll("g")
+        //for mouse interaction
+        //otherwise there is a weird hollow space between center and the colored sections
+
+        g2.append("circle")
+          .attr("r", that.config.radius)
+          .attr("fill", "#fff");
+
+
+        var containers = g2.selectAll("g")
           .data(partition.nodes(graphData.root))
           .enter()
           .append("g")
@@ -449,7 +855,7 @@ define([
 
         //append connector nodes if possible
         _.each(graphData.root.name, function (n, i) {
-          svg.append("text")
+          g2.append("text")
             .classed("s-connector-node", true)
             .attr("y", function(){
               return (i * 25) - (graphData.root.name.length *25/2);
@@ -459,6 +865,11 @@ define([
 
         //attach event listeners
         containers.on("click", function (d,i) {
+
+          //ignore top-level node
+          if (d.depth == 0){
+            return
+          }
 
           //prevent interaction when link layer is active
           if (that.model.get("linkLayer")){
@@ -474,13 +885,14 @@ define([
             that.model.set("selectedEntity", this);
           }
         });
-        //finally, render the link layer
+        //render the link layer
         this.renderLinkLayer();
+
       },
 
       renderLinkLayer: function () {
         var that = this;
-        svg = d3.select(that.$(".network-g")[0]),
+        svg = d3.select(that.$(".real-container-of-stuff")[0]),
         tooltip = d3.select(that.$(".d3-tooltip")[0]),
         bibDict = this.model.get("graphData").bibcode_dict;
         var links, bundle, line, linkContainer;
@@ -602,112 +1014,8 @@ define([
         if (!selected) {
           return
         }
-
-        var d = selected.__data__;
-
-        selected = d3.select(selected);
-        //there might not be a label because it might be a group
-        selected
-          .select(".node-label").classed("selected-label", true)
-        //but there should definitely be a path
-        selected
-          .select(".node-path").classed("selected-node", true);
-
-        //now, get the data
-        var allPapers = [],
-          children,
-          data = {},
-          label, papers = [],
-          graphData = this.model.get("graphData");
-
-        //author node
-        if (!d.children) {
-          papers = _.map(d.papers, function (bib) {
-            var paperDict = graphData.bibcode_dict[bib];
-            paperDict["bibcode"] = bib;
-            if (_.isArray(paperDict["title"])) {
-              paperDict["title"] = paperDict["title"][0]
-            }
-            return paperDict;
-          });
-
-          papers = _.sortBy(papers, function (p) {
-            return p.citation_count;
-          }).reverse();
-
-          //now find most recent year, and papers from that year
-          var mostRecentYear = _.chain(papers)
-            .pluck("bibcode")
-            .sortBy(function (bibcode) {
-              return bibcode.slice(0, 4)
-            })
-            .value()
-            .reverse()[0].slice(0, 4);
-
-          data.bibcodes = d.papers;
-          data.mostRecentYear = mostRecentYear;
-          data.papers = papers;
-          data.total = papers.length;
-          data.name = d.name;
-          data.groupColor = d.parent.color;
-          data.inFilter = Marionette.getOption(this, "filterCollection").get(d.name) ? true : false;
-
-          $div.append(authorDetailsTemplate(data));
-
-          //group node
-        } else {
-
-          children = d.children;
-          _.each(children, function (c) {
-            Array.prototype.push.apply(allPapers, c.papers)
-          });
-
-          //now find most recent year
-          var mostRecentYear = _.sortBy(allPapers, function (bibcode) {
-            return bibcode.slice(0, 4)
-          }).reverse()[0].slice(0, 4);
-
-          allPapers = _.pairs(_.countBy(allPapers));
-
-          /*
-          * compare three variables to get a final score : number of authors in the group,
-          * percent authors in the group, and total number of citations
-          * */
-
-          var numAuthors = _.chain(allPapers).map(function(a){return a[1]}).sortBy(function(x){return x}).value();
-          var percentAuthors = _.chain(allPapers).map(function(a){return a[1] / graphData.bibcode_dict[a[0]].authors.length}).sortBy(function(x){return x}).value();
-          var numCitations = _.chain(allPapers).map(function(a){ return graphData.bibcode_dict[a[0]].citation_count/graphData.bibcode_dict[a[0]].authors.length}).sortBy(function(x){return x}).value();
-
-          allPapers = _.sortBy(allPapers, function (list) {
-            // percent of authors that are members of this group
-            return (list[1]-numAuthors[0])/(numAuthors[numAuthors.length-1]-numAuthors[0]) *
-                  (list[1]/graphData.bibcode_dict[list[0]].authors.length - percentAuthors[0])/(percentAuthors[percentAuthors.length-1]-percentAuthors[0]) *
-                  (graphData.bibcode_dict[list[0]].citation_count/graphData.bibcode_dict[list[0]].authors.length-numCitations[0])/(numCitations[numCitations.length-1]-numCitations[0]);
-          }).reverse();
-
-          bibcodes = _.map(allPapers, function (l) {
-            return l[0];
-          });
-
-          papers = _.map(bibcodes, function (b, i) {
-            var d = {};
-            d.bibcode = b;
-            d.title = graphData.bibcode_dict[b].title;
-            d.citation_count = graphData.bibcode_dict[b].citation_count;
-            d.numAuthors = allPapers[i][1];
-            return d
-          });
-
-          data.bibcodes = bibcodes;
-          data.papers = papers;
-          data.groupColor = d.color;
-          data.total = allPapers.length;
-          data.mostRecentYear = mostRecentYear;
-          data.name = d.name;
-          data.inFilter = Marionette.getOption(this, "filterCollection").get(d.name) ? true : false;
-
-          $div.append(groupDetailsTemplate(data));
-
+        else {
+          this.trigger("show-detail-view", selected);
         }
       },
 
@@ -852,6 +1160,7 @@ define([
           showDetailGraphView: options.showDetailGraphView
         });
 
+       this.listenTo(this.view, "new-network-requested", this.requestDifferentQuery);
         this.listenTo(this.view, "filter:initiated", this.broadcastFilteredQuery);
         this.listenTo(this.view, "close", this.broadcastClose);
 
@@ -870,9 +1179,22 @@ define([
           target: Marionette.getOption(this, "endpoint"),
           query: query
         });
-
-
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+      },
+
+      //allows you to view network for another author
+      requestDifferentQuery : function(newQuery){
+
+        var query = this.getCurrentQuery().clone();
+        query.unlock();
+        query.set("q", newQuery);
+
+        var request = new ApiRequest({
+          target: Marionette.getOption(this, "endpoint"),
+          query: query
+        });
+        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+
       },
 
       activate: function (beehive) {
@@ -891,17 +1213,9 @@ define([
           this.view.graphView.$el.empty();
           this.view.graphView.stopListening();
         }
-        this.filterCollection.reset(null);
+        this.filterCollection.reset(null, {silent : true});
         //reset model
         this.model.set(_.result(this.model, "defaults"), {silent: true});
-      },
-
-      destroyWidget: function () {
-        //close graphView
-        if (this.view.graphView) {
-          this.view.graphView.close();
-        }
-        this.view.graphView.close();
       },
 
       //fetch data
@@ -921,17 +1235,17 @@ define([
         this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
       },
 
-      processResponse: function (data) {
+      processResponse: function (jsonResponse) {
         //force a reset even if the data is the same
         //so the earlier state of the widget is not preserved
-
         this.model.set({graphData: {}});
-        data = data.toJSON();
-        this.model.set({graphData: data.data});
+
+        data = jsonResponse.toJSON();
         // let container view know how many bibcodes we have
         this.model.set({graphData : data.data,
           numFound: parseInt(data.msg.numFound),
-          rows: parseInt(data.msg.rows)
+          rows: parseInt(data.msg.rows),
+          query: jsonResponse.getApiQuery().get("q")
         });
         //so there is a one time render event
         this.model.trigger("newMetadata");
