@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+
+  <searchComponent name="wordcloud" class="solr.WordCloudComponent"/>
+  
+  <requestHandler name="standard" class="solr.StandardRequestHandler">
+    <arr name="last-components">
+      <str>wordcloud</str>
+    </arr>
+  </requestHandler>
+  
+</config>

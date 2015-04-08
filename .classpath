@@ -48,7 +48,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-analyzers-uima-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-benchmark-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-classification-4.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-codecs-4.8-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-codecs-4.8-SNAPSHOT.jar" sourcepath="/solr-next/lucene/memory/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-core-4.8-SNAPSHOT.jar" sourcepath="build/solr-download/apache-solr-4.0.0-SVN/lucene/core/src/java"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-demo-4.8-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-expressions-4.8-SNAPSHOT.jar"/>
@@ -113,5 +113,6 @@
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-3.4.jar"/>
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-runtime-3.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/solr-next"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
