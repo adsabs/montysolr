@@ -293,6 +293,10 @@
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
      </lst>
+     
+     <arr name="last-components">
+      <str>wordcloud</str>
+     </arr>
     </requestHandler>
 
   <!-- this allows to send query data in content-stream -->
@@ -588,6 +592,7 @@
         <processor class="solr.RunUpdateProcessorFactory" />
     </updateRequestProcessorChain>
  
+  <searchComponent name="wordcloud" class="solr.WordCloudComponent"/>
 
   <queryResponseWriter name="json" class="solr.JSONResponseWriter" />
     
