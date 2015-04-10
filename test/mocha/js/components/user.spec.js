@@ -6,7 +6,8 @@ define([
   'js/components/api_request',
   'js/components/json_response',
   'js/components/api_query',
-  'js/services/api'
+  'js/services/api',
+  'js/components/app_storage'
 
 ], function(
   _,
@@ -16,7 +17,8 @@ define([
   ApiRequest,
   JsonResponse,
   ApiQuery,
-  Api
+  Api,
+  AppStorage
   ){
 
  describe("User Object", function(){
@@ -95,10 +97,13 @@ define([
      var minsub = new (MinSub.extend({
        request: function (apiRequest) {
        }
-     }))({verbose: false});
+     }))({verbose: false})
 
-     var beehive = minsub.beehive.getHardenedInstance()
-     u.pubsub =  beehive.Services.get('PubSub');
+     var appStorage = new AppStorage({csrf : "fake"});
+
+     minsub.beehive.addObject("AppStorage", appStorage);
+     u.activate(minsub.beehive);
+
      sinon.stub(u.pubsub, "publish");
 
      u.redirectIfNecessary = sinon.stub();
@@ -107,8 +112,6 @@ define([
 
      expect(u.pubsub.publish.args[0]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "TOKEN"]);
 
-
-
    });
 
 
@@ -116,7 +119,22 @@ define([
 
      sinon.stub(User.prototype, "broadcastChange");
 
+       var minsub = new (MinSub.extend({
+         request: function (apiRequest) {
+         }
+       }))({verbose: false});
+
        var u = new User();
+
+       var minsub = new (MinSub.extend({
+         request: function (apiRequest) {
+         }
+       }))({verbose: false})
+
+       var appStorage = new AppStorage({csrf : "fake"});
+
+       minsub.beehive.addObject("AppStorage", appStorage);
+
        u.collection.get("USER").set("user", "foobly@gmail.com");
        u.collection.get("TOKEN").set("api_token", "woobly");
 
@@ -147,12 +165,17 @@ define([
      var minsub = new (MinSub.extend({
        request: function (apiRequest) {
        }
-     }))({verbose: false});
+     }))({verbose: false})
+
+     var appStorage = new AppStorage({csrf : "fake"});
+
+     minsub.beehive.addObject("AppStorage", appStorage);
 
      var api = new Api();
      var requestStub = sinon.stub(Api.prototype, "request");
      minsub.beehive.removeService("Api");
      minsub.beehive.addService("Api", api);
+
      u.activate(minsub.beehive);
 
      u.postData("CHANGE_PASSWORD", {old_password: "foo", new_password1 : "goo", new_password_2: "goo"});

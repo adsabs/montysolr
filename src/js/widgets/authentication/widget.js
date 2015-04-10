@@ -368,7 +368,9 @@ define([
 
   var AuthenticationWidget = BaseWidget.extend({
 
-    initialize: function () {
+    initialize: function (options) {
+
+      options = options || {};
 
       this.stateModel =  new StateModel();
       this.view = new AuthenticationContainer({controller : this, model : this.stateModel});
@@ -376,6 +378,10 @@ define([
       this.listenTo(this.view, "navigateToLoginForm", this.navigateToLoginForm);
       this.listenTo(this.view, "navigateToRegisterForm", this.navigateToRegisterForm);
       this.listenTo(this.view, "navigateToResetPassword1Form", this.navigateToResetPassword1Form);
+
+      if (options.test)
+        window.grecaptcha = null;
+
 
     },
 

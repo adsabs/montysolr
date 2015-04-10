@@ -3,7 +3,8 @@ define([
   'js/bugutils/minimal_pubsub',
   'js/services/api',
   'js/components/api_request',
-  'js/components/user'
+  'js/components/user',
+  'js/components/app_storage'
 
 
 ], function(
@@ -11,7 +12,8 @@ define([
   MinSub,
   Api,
   ApiRequest,
-  User
+  User,
+  AppStorage
   ){
 
 
@@ -32,16 +34,17 @@ define([
     it("has an explicit method for every action (login, logout, register, etc) a user might need to do before he/she is authenticated", function(){
 
       var s = new Session({test: true});
-
       var minsub = new (MinSub.extend({
         request: function (apiRequest) {
         }
       }))({verbose: false});
 
       var api = new Api();
+      var appStorage = new AppStorage({csrf : "fake"});
       var requestStub = sinon.stub(Api.prototype, "request");
       minsub.beehive.removeService("Api");
       minsub.beehive.addService("Api", api);
+      minsub.beehive.addObject("AppStorage", appStorage);
       s.activate(minsub.beehive);
 
       s.login({username: "goo", password : "foo", "g-recaptcha-response" : "boo"});

@@ -251,7 +251,6 @@ define([
 
       var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
 
-
       request = new ApiRequest({
         target : endpoint,
         options : {

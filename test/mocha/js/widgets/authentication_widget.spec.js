@@ -24,7 +24,7 @@ function(
       var hardened = minsub.beehive.getHardenedInstance();
       sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
 
-      var a = new AuthenticationWidget();
+      var a = new AuthenticationWidget({test: true});
       a.activate(hardened);
       $("#test").append(a.view.render().el);
 
@@ -58,7 +58,8 @@ function(
       var hardened = minsub.beehive.getHardenedInstance();
       sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
 
-      var a = new AuthenticationWidget();
+      var a = new AuthenticationWidget({test: true});
+
       a.activate(hardened);
 
       var publishStub = sinon.stub(a.pubsub, "publish");
@@ -113,7 +114,8 @@ function(
       var hardened = minsub.beehive.getHardenedInstance();
       sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
 
-      var a = new AuthenticationWidget();
+      var a = new AuthenticationWidget({test: true});
+
       a.activate(hardened);
       $("#test").append(a.view.render().el);
 
