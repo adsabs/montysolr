@@ -67,16 +67,14 @@ define(['backbone', 'marionette',
 
       events: {
 
-        "click .widget-name > h5": "toggleWidget",
         "click .widget-options.top": "onClickOptions",
         "click .widget-options.bottom": "onClickOptions",
-        "click .widget-name .main-caret" : "toggleWidget",
+        "click .widget-name" : "toggleWidget",
         "click .dropdown-toggle": "enableLogic",
         "click .dropdown-menu .close": "closeLogic",
         "click .logic-container input": "onLogic"
 
       },
-
 
       itemViewOptions: function (model, index) {
 //       merging in options from factory stage
