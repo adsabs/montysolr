@@ -109,24 +109,75 @@ define([
         var self = this;
         if (oApi) {
 
-          if (!oApi.hasAccess())
-            return;
+        if (!oApi.hasAccess())
+          return;
 
-          oApi.getOrcidProfileInAdsFormat()
-          .done(function(data) {
-            var response = new JsonResponse(data);
-            response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
-            self.processResponse(response);
-          });
-            //get username
-            var that = this;
-            oApi.getUserProfile().done(function(info){
-              var firstName = info["orcid-bio"]["personal-details"]["given-names"]["value"];
-              var lastName = info["orcid-bio"]["personal-details"]["family-name"]["value"];
-              that.model.set("orcidUserName", firstName + " " + lastName);
-            })
-          }
+        oApi.getOrcidProfileInAdsFormat()
+        .done(function(data) {
+          var response = new JsonResponse(data);
+          response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
+          self.processResponse(response);
+        });
+          //get username
+          var that = this;
+          oApi.getUserProfile().done(function(info){
+            var firstName = info["orcid-bio"]["personal-details"]["given-names"]["value"];
+            var lastName = info["orcid-bio"]["personal-details"]["family-name"]["value"];
+            that.model.set("orcidUserName", firstName + " " + lastName);
+          })
         }
+      },
+
+      /**
+       * function to update what we are displaying; it always works with the existing
+       * models - does not fetch new data
+       *
+       * @param sortBy
+       * @param filterBy
+       *  - allowed values are: 'ads', 'both', 'others'
+       */
+      update: function(options) {
+        options = options || {};
+
+        if (this.hiddenCollection && this.view.collection) {
+
+          if (!this._originalCollection) {
+            this._originalCollection = new this.hiddenCollection.constructor(this.hiddenCollection.models);
+          }
+
+          var coll = this._originalCollection;
+          var allowedVals = ['ads', 'both', 'others', null];
+          if (_.has(options, 'filterBy')) {
+
+            var cond = options.filterBy;
+            if (!_.isArray(cond)) {
+              cond = [cond];
+            }
+            for (var c in cond) {
+              if (!_.contains(allowedVals, cond[c]))
+                throw Error('Unknown value for the filter: ' + cond[c]);
+            }
+
+            var predicate = function(model) {
+              if (model.attributes.orcid && _.contains(cond, model.attributes.orcid.provenance))
+                return true;
+            };
+            coll = new this.hiddenCollection.constructor(coll.filter(predicate));
+          }
+
+
+          if (_.has(options, 'sortBy') && options.sortBy) {
+            var idx = 0;
+            coll = new this.hiddenCollection.constructor(_.map(coll.sortBy(options.sortBy), function(x) {
+              x.attributes.resultsIndex = idx++;
+              return x;
+            }));
+          }
+
+          this.hiddenCollection.reset(coll.models);
+          this.updatePagination({});
+        }
+      }
     });
     return OrcidExtension(ResultsWidget);
 

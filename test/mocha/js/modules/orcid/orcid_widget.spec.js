@@ -27,57 +27,66 @@ define([
       // it simulates pubsub response
       beforeEach(function (done) {
         minsub = new (MinimalPubsub.extend({
-          request: function(apiQuery) {
-            return {
-              "responseHeader": {
-                "status": 0,
-                "QTime": 2,
-                "params": {
-                  "fl": "id,bibcode,alternate_bibcode,doi",
-                  "indent": "true",
-                  "q": "doi:\"*\" and alternate_bibcode:2015*",
-                  "_": "1427847655704",
-                  "wt": "json",
-                  "rows": "5"
-                }
-              },
-              "response": {
-                "numFound": 2441,
-                "start": 0,
-                "docs": [
-                  {
-                    "alternate_bibcode": [
-                      "2015arXiv150105026H"
-                    ],
-                    "doi": [
-                      "10.1103/PhysRevLett.84.3823"
-                    ],
-                    "id": "5796418",
-                    "bibcode": "test-bibcode"
-                  },
-                  {
-                    "alternate_bibcode": [
-                      "bibcode-foo"
-                    ],
-                    "doi": [
-                      "10.1126/science.276.5309.88"
-                    ],
-                    "id": "1135646",
-                    "bibcode": "1997Sci...276...88V"
-                  },
-                  {
-                    "alternate_bibcode": [
-                      "2015CeMDA.tmp....1D"
-                    ],
-                    "doi": [
-                      "10.1007/s10569-014-9601-4"
-                    ],
-                    "id": "10734037",
-                    "bibcode": "2015CeMDA.121..301D"
+          request: function(apiRequest) {
+
+            var target = apiRequest.get('target');
+            var opts = apiRequest.get('options');
+
+            if (target.indexOf('/orcid-profile') > -1) {
+              return defaultResponse(); // default orcid
+            }
+            else {
+              return {
+                "responseHeader": {
+                  "status": 0,
+                  "QTime": 2,
+                  "params": {
+                    "fl": "id,bibcode,alternate_bibcode,doi",
+                    "indent": "true",
+                    "q": "doi:\"*\" and alternate_bibcode:2015*",
+                    "_": "1427847655704",
+                    "wt": "json",
+                    "rows": "5"
                   }
-                ]
-              }
-            };
+                },
+                "response": {
+                  "numFound": 2441,
+                  "start": 0,
+                  "docs": [
+                    {
+                      "alternate_bibcode": [
+                        "2015arXiv150105026H"
+                      ],
+                      "doi": [
+                        "10.1103/PhysRevLett.84.3823"
+                      ],
+                      "id": "5796418",
+                      "bibcode": "test-bibcode"
+                    },
+                    {
+                      "alternate_bibcode": [
+                        "bibcode-foo"
+                      ],
+                      "doi": [
+                        "10.1126/science.276.5309.88"
+                      ],
+                      "id": "1135646",
+                      "bibcode": "1997Sci...276...88V"
+                    },
+                    {
+                      "alternate_bibcode": [
+                        "2015CeMDA.tmp....1D"
+                      ],
+                      "doi": [
+                        "10.1007/s10569-014-9601-4"
+                      ],
+                      "id": "10734037",
+                      "bibcode": "2015CeMDA.121..301D"
+                    }
+                  ]
+                }
+              };
+            }
           }
         }))({verbose: false});
 
@@ -116,7 +125,13 @@ define([
         });
         var oModule = new OrcidModule();
         oModule.activate(beehive);
-        return beehive.getService('OrcidApi');
+
+        var oApi = beehive.getService('OrcidApi');
+        oApi.saveAccessData({
+          "access_token":"4274a0f1-36a1-4152-9a6b-4246f166bafe",
+          "orcid":"0000-0001-8178-9506"
+        });
+        return oApi;
       };
 
       var defaultResponse = function () {
@@ -347,9 +362,22 @@ define([
         };
       };
 
-      it("Should display records coming from ORCID", function (done) {
-        var widget = _getWidget();
+      it("Should display records coming from ORCID and has methods to filter/sort them", function (done) {
+
+        var orcidMode = true;
+        var user = {
+          isOrcidModeOn: function() {
+            return orcidMode;
+          },
+          getHardenedInstance: function() {
+            return this;
+          }
+        };
+        beehive.addObject('User', user);
+
         var orcidApi = getOrcidApi();
+        sinon.stub(orcidApi, 'hasAccess', function() {return true});
+        var widget = _getWidget();
 
 
         var response = new JsonResponse(orcidApi.transformOrcidProfile(defaultResponse()['orcid-profile']));
@@ -357,12 +385,43 @@ define([
 
         widget.processResponse(response);
 
-        var $w = widget.render().$el
+        var $w = widget.render().$el;
         $('#test').append($w);
 
         expect(widget.collection.models.length).to.eql(3);
         expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
         expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('bibcode-foo');
+
+        orcidMode = true;
+
+        // filter by provenance
+        widget.update({filterBy: 'ads'});
+        expect(widget.collection.models.length).to.eql(1);
+        expect(widget.collection.models[0].get('title')).to.eql('Tecnologias XXX');
+
+        widget.update({filterBy: 'others'});
+        expect(widget.collection.models.length).to.eql(1);
+        expect(widget.collection.models[0].get('title')).to.eql('ADS 2.0');
+
+        widget.update({filterBy: null});
+        expect(widget.collection.models.length).to.eql(1);
+        expect(widget.collection.models[0].get('title')).to.eql('External article');
+
+        widget.update(); // show all
+        expect(widget.collection.models.length).to.eql(3);
+
+        // sort
+        widget.update({sortBy: 'title'});
+        expect(widget.collection.models.length).to.eql(3);
+        expect(widget.collection.models[0].get('title')).to.eql('ADS 2.0');
+        expect(widget.collection.models[1].get('title')).to.eql('External article');
+        expect(widget.collection.models[2].get('title')).to.eql('Tecnologias XXX');
+
+        // sort and filter
+        widget.update({filterBy: ['ads', 'others'], sortBy: 'title'});
+        expect(widget.collection.models[0].get('title')).to.eql('ADS 2.0');
+        expect(widget.collection.models[1].get('title')).to.eql('Tecnologias XXX');
+
         done();
       });
 
@@ -382,7 +441,7 @@ define([
         widget.onShow();
         setTimeout(function() {
 
-          var $w = widget.render().$el
+          var $w = widget.render().$el;
           $('#test').append($w);
 
           expect(widget.collection.models.length).to.eql(3);

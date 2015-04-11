@@ -719,24 +719,28 @@ define([
                 .done(function(recInfo) {
                   expect(recInfo.isCreatedByUs).to.eql(false);
                   expect(recInfo.isCreatedByOthers).to.eql(true);
+                  expect(recInfo.isKnownToAds).to.eql(true);
                 });
 
-              oApi.getRecordInfo({doi: '10.1126/science.276.5309.88'})
+              oApi.getRecordInfo({doi: '10.1126/science.276.5309.88'}) // doi of bibcode-foo
                 .done(function(recInfo) {
                   expect(recInfo.isCreatedByUs).to.eql(false);
                   expect(recInfo.isCreatedByOthers).to.eql(true);
+                  expect(recInfo.isKnownToAds).to.eql(true);
                 });
 
-              oApi.getRecordInfo({doi: '10.1103/physrevlett.84.3823'})
+              oApi.getRecordInfo({doi: '10.1103/physrevlett.84.3823'}) // test-bibcode
                 .done(function(recInfo) {
                   expect(recInfo.isCreatedByUs).to.eql(true);
                   expect(recInfo.isCreatedByOthers).to.eql(false);
+                  expect(recInfo.isKnownToAds).to.eql(true);
                 });
 
-              oApi.getRecordInfo({bibcode: '1997Sci...276...88V'}) // alternate is bibcode-foo
+              oApi.getRecordInfo({bibcode: '1997Sci...276...88V'}) // alternate bibcode of bibcode-foo
                 .done(function(recInfo) {
                   expect(recInfo.isCreatedByUs).to.eql(false);
                   expect(recInfo.isCreatedByOthers).to.eql(true);
+                  expect(recInfo.isKnownToAds).to.eql(true);
                 });
 
               // found by one of the queries, but could not be mapped to bibcode
@@ -746,6 +750,15 @@ define([
                 .done(function(recInfo) {
                   expect(recInfo.isCreatedByUs).to.eql(false);
                   expect(recInfo.isCreatedByOthers).to.eql(true);
+                  expect(recInfo.isKnownToAds).to.eql(false);
+                });
+
+              // non-ADS record
+              oApi.getRecordInfo({bibcode: 'sfasdfsdfsdfsdfsdf'})
+                .done(function(recInfo) {
+                  expect(recInfo.isCreatedByUs).to.eql(false);
+                  expect(recInfo.isCreatedByOthers).to.eql(false);
+                  expect(recInfo.isKnownToAds).to.eql(false);
                 });
 
               done();

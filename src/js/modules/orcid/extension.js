@@ -52,7 +52,7 @@ define([
         }
 
         if (recInfo.isCreatedByUs && recInfo.isCreatedByOthers) {
-          msg.provenance = 'both';
+          msg.provenance = 'ads'; // duplicate, but just to be explicit
         }
         else if (recInfo.isCreatedByUs) {
           msg.provenance = 'ads';
