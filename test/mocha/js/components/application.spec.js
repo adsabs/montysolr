@@ -149,5 +149,31 @@ define([
       });
     });
 
+    it("has getApiAccess", function(done) {
+      var app = new Application();
+      var spy = sinon.spy();
+      var api = {request: function(apiRequest, options) {
+        expect(apiRequest.url()).to.contain('/accounts/bootstrap');
+        options.done(
+          {
+            "username": "user@gmail.com",
+            "scopes": ["user"],
+            "access_token": "ap0MkGjroS1zzijLlk9fV2UKXdRDo5nzUueTNaog",
+            "token_type": "Bearer",
+            "csrf": "1428969367##8460e442cb2984810486bf959048a05d7e7d9e78",
+            "expire_in": "2500-01-01T00:00:00",
+            "refresh_token": "KKGJp56UlpKgfHUuNNNJvj3XgepWlkTfKKtqmpkM"
+          });
+      }};
+      app.getBeeHive().addService('Api', api);
+      var spy = sinon.spy(app, 'onBootstrap');
+      app.getApiAccess({reconnect: true})
+        .done(function() {
+          expect(spy.called).to.eql(true);
+          expect(api.access_token).to.eql('Bearer:ap0MkGjroS1zzijLlk9fV2UKXdRDo5nzUueTNaog');
+          done();
+        })
+    })
+
   });
 });

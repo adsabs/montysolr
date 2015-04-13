@@ -26,18 +26,21 @@ define([
         // set the API key
         if (data.access_token) {
           var api = this.getBeeHive().getService('Api');
-          if (api.access_token) {
+          if (data.access_token) {
             console.warn('Redefining access_token: ' + api.access_token);
+            api.access_token = data.token_type + ':' + data.access_token;
+            api.refresh_token = data.refresh_token;
+            api.expires_in = data.expires_in;
           }
-          api.access_token = data.token_type + ':' + data.access_token;
-          api.refresh_token = data.refresh_token;
-          api.expires_in = data.expires_in;
 
           //set csrf token into AppStorage
-          this.getBeeHive().getObject("AppStorage").set("csrf", data.csrf);
+          var appStorage = this.getBeeHive().getObject("AppStorage");
+          if (appStorage && data.csrf) {
+            appStorage.set("csrf", data.csrf);
+          }
 
           var user = this.getBeeHive().getObject("User");
-          if (data.username !== "anonymous@adslabs.org") {
+          if (user && data.username !== "anonymous@adslabs.org") {
             //it's a logged in user
             user.setUser(data.username);
           }
@@ -74,4 +77,4 @@ define([
 
 
 
-})
+});

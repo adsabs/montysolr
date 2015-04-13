@@ -99,12 +99,6 @@ define([
       if (query){
         data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
       }
-      else if (data){
-        data = data;
-      }
-      else if (!data){
-        data = undefined;
-      }
 
       var u = this.url + (request.get('target') || '');
       u = u.substring(0, this.url.length-2) + u.substring(this.url.length-2, u.length).replace('//', '/');

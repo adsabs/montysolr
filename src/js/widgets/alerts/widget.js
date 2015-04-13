@@ -53,25 +53,21 @@ define([
       template: WidgetTemplate,
 
       events: {
-        'click #alertBox button.close': 'close',
-        'click button[data-dismiss=modal]' : 'closeModal'
-
+        'click #alertBox button.close': 'close'
       },
-
-      closeModal : function(){
-        //manually close the modal, for some reason just the close markup
-        //only works some of the time
-        this.$(".modal").modal('hide');
-        $('body').removeClass('modal-open');
-        $('.modal-backdrop').remove();
-     },
 
       modelEvents: {
         "change": 'render'
       },
 
       close: function() {
-        this.model.set('msg', null);
+        if (this.model.get('modal')) {
+          this.$el.find('#alertBox').modal('hide');
+          this.model.set('msg', null, {silent: true});
+        }
+        else {
+          this.model.set('msg', null);
+        }
       },
 
       render: function() {
@@ -140,9 +136,6 @@ define([
 
       showModal: function() {
         this.$el.find('#alertBox').modal('show');
-      },
-      closeModal: function() {
-        this.$el.find('#alertBox').modal('hide');
       }
     });
 
@@ -166,11 +159,7 @@ define([
 
       clearView : function(){
         //to prevent re-rendering in inopportune moments
-        this.view.$el.empty();
-      },
-
-      closeModal: function() {
-        this.view.closeModal();
+        this.view.close();
       },
 
       alert: function(feedback) {
