@@ -6,3 +6,23 @@
     height: 100px;
   }
 }
+
+
+div[data-widget="AlertsWidget"]{
+  position: relative;
+
+  .s-alerts {
+    z-index: @z-index-4;
+    width: 84%;
+    display: inline-block;
+    margin-top: 30px;
+    position: absolute;
+    left: 8%;
+    font-size: 18px;
+  }
+
+  .alert {
+    box-shadow : 2px 2px 2px @default-box-shadow-color;
+  }
+}
+

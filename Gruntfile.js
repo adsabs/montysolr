@@ -422,15 +422,10 @@ module.exports = function(grunt) {
       }
     },
 
-    // concatenates all javascript into one big minified file (of limited 
-    // use for now)
+    // minifying files we need to minify ourselves
     uglify: {
-      options: {
-        banner: "/*! <%= pkg.name %> <%= grunt.template.today('yyyy-mm-dd') %> */\n"
-      },
-      build: {
-        src: 'dist/js/**/*.js',
-        dest: 'dist/<%= pkg.name %>.min.js'
+      bumblebee_minify_files : {
+        files : {"dist/libs/backbone/backbone-min.js": "dist/libs/backbone/backbone.js"}
       }
     },
 
@@ -454,7 +449,7 @@ module.exports = function(grunt) {
             'http://localhost:<%= local.port || 8000 %>/test/mocha/coverage.html?bbbSuite=discovery-suite'
           ],
           threshold : 0,
-          globalThreshold : 76,
+          globalThreshold : 77,
           log : true,
           logErrors: true,
           moduleThreshold : 80,
@@ -496,7 +491,10 @@ module.exports = function(grunt) {
             "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i've already started)
             "mixins/feedback_handling.js": 35,
             "mixins/discovery_bootstrap.js": 1,
-            "widgets/navbar/widget.js": 53
+            "widgets/navbar/widget.js": 53,
+            "widgets/success/view.js": 60,
+            "widgets/authentication/widget.js": 68,
+            "widgets/user_settings/widget.js": 75
 
           }
         }
@@ -711,7 +709,8 @@ module.exports = function(grunt) {
       'requirejs:release', 'requirejs:release_css',
       'hash_require:js', 'hash_require:css',
       'exec:git_describe', 'copy:keep_original',
-      'assemble'
+      'assemble',
+      'uglify'
   ]);
 
 };

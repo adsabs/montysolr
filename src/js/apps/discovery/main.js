@@ -17,11 +17,13 @@ define(['config', 'module', 'analytics'], function(config, module, analytics) {
   require([
       'router',
       'js/components/application',
-      'js/mixins/discovery_bootstrap'
+      'js/mixins/discovery_bootstrap',
+      'js/mixins/api_access'
     ],
     function(Router,
       Application,
-      DiscoveryBootstrap
+      DiscoveryBootstrap,
+      ApiAccess
       ) {
 
       // at the beginning, we don't know anything about ourselves...

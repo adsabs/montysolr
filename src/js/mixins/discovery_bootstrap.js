@@ -67,9 +67,6 @@ define([
         dynConf.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
       }
 
-
-
-
       var defer = $.Deferred();
 
       // this is the application dynamic config
@@ -164,6 +161,10 @@ define([
       var api = beehive.getService("Api");
       var conf = this.getObject('DynamicConfig');
 
+      // set the config into the appstorage
+      // TODO: find a more elegant solution
+      this.getBeeHive().getObject("AppStorage").setConfig(conf);
+
       var complain = function(x) {
         throw new Error("Ooops. Check you config! There is no " + x + " component @#!")
       };
@@ -211,50 +212,7 @@ define([
 
         }
       });
-
-
-    },
-
-    /**
-     * After bootstrap receives all data, this routine should decide what to do with
-     * them
-     */
-    onBootstrap: function(data) {
-      // set the API key
-      if (data.access_token) {
-        var api = this.getBeeHive().getService('Api');
-        if (api.access_token) {
-          console.warn('Redefining access_token: ' + api.access_token);
-        }
-        api.access_token = data.token_type + ':' + data.access_token;
-        api.refresh_token = data.refresh_token;
-        api.expires_in = data.expires_in;
-      }
-    },
-
-    getApiAccess: function(options) {
-      var api = this.getBeeHive().getService('Api');
-      var redirect_uri = location.origin + location.pathname;
-      var self = this;
-      var defer = $.Deferred();
-      api.request(new ApiRequest({
-          query: new ApiQuery({redirect_uri: redirect_uri}),
-          target: this.bootstrapUrls ? this.bootstrapUrls[0] : '/bootstrap'}),
-         {
-          done: function (data) {
-            if (options.reconnect) {
-              self.onBootstrap(data);
-            }
-            defer.resolve(data);
-          },
-          fail: function () {
-            defer.reject(arguments);
-          },
-          type: 'GET'
-        });
-      return defer;
     }
-
 
   };
 

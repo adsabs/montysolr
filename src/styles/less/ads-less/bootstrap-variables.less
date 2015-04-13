@@ -25,7 +25,8 @@
 
 //extra colors
 @brand-primary-faded:   lighten(@brand-primary, 20%);
-
+@darker-background : lighten(@gray-lighter, 2%);
+@border-default-color: darken(@gray-lighter, 3%);
 
 
 //== Scaffolding
@@ -104,7 +105,7 @@
 @line-height-small:         1.5;
 
 @border-radius-base:        1px;
-@border-radius-large:       3px;
+@border-radius-large:       4px;
 @border-radius-small:       1px;
 
 //** Global color for active items (e.g., navs or dropdowns).
@@ -406,7 +407,7 @@
 @nav-tabs-justified-active-link-border-color:     @body-bg;
 
 //== Pills
-@nav-pills-border-radius:                   @border-radius-base;
+@nav-pills-border-radius:                   @border-radius-large;
 @nav-pills-active-link-hover-bg:            @component-active-bg;
 @nav-pills-active-link-hover-color:         @component-active-color;
 
@@ -463,21 +464,26 @@
 //
 //## Define colors for form feedback states and, by default, alerts.
 
-@state-success-text:             #3c763d;
+
+//== Form states and alerts
+//
+//## Define colors for form feedback states and, by default, alerts.
+
+@state-success-text:             darken(@brand-success, 15%);
 @state-success-bg:               #dff0d8;
-@state-success-border:           darken(spin(@state-success-bg, -10), 5%);
+@state-success-border:           darken(@state-success-bg, 3%);
 
-@state-info-text:                #31708f;
+@state-info-text:                darken(@brand-info, 10%);
 @state-info-bg:                  #d9edf7;
-@state-info-border:              darken(spin(@state-info-bg, -10), 7%);
+@state-info-border:              darken(@state-info-bg, 3%);
 
-@state-warning-text:             #8a6d3b;
+@state-warning-text:             darken(@brand-warning, 25%);
 @state-warning-bg:               #fcf8e3;
-@state-warning-border:           darken(spin(@state-warning-bg, -10), 5%);
+@state-warning-border:           darken(@state-warning-text, 3%);
 
-@state-danger-text:              #a94442;
+@state-danger-text:              darken(@brand-danger, 10%);
 @state-danger-bg:                #f2dede;
-@state-danger-border:            darken(spin(@state-danger-bg, -10), 5%);
+@state-danger-border:            darken(@state-danger-bg, 3%);
 
 
 //== Tooltips
@@ -588,7 +594,7 @@
 //## Define alert colors, border radius, and padding.
 
 @alert-padding:               15px;
-@alert-border-radius:         @border-radius-base;
+@alert-border-radius:         @border-radius-large;
 @alert-link-font-weight:      bold;
 
 @alert-success-bg:            @state-success-bg;
@@ -667,7 +673,7 @@
 @panel-footer-bg:             #f5f5f5;
 
 @panel-default-text:          @gray-dark;
-@panel-default-border:        #ddd;
+@panel-default-border:        @border-default-color;
 @panel-default-heading-bg:    #f5f5f5;
 
 @panel-primary-text:          #fff;

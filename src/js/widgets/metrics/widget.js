@@ -556,7 +556,6 @@ define([
       rows : 100
     },
 
-
     activate : function(beehive){
       _.bindAll(this, "setCurrentQuery", "processResponse");
       this.pubsub = beehive.Services.get('PubSub');

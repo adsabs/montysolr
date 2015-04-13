@@ -12,7 +12,7 @@ define([
   Alerts
   ) {
 
-  describe("Export Widget (alerts_widget.spec.js)", function () {
+  describe("Alerts Widget (alerts_widget.spec.js)", function () {
 
     var minsub;
     beforeEach(function (done) {
@@ -42,7 +42,6 @@ define([
 
     it("displays messages", function(done) {
       var widget = _getWidget();
-      expect(widget.pubsub).to.be.undefined;
 
       var $w = widget.render().$el;
       $('#test').append($w);
@@ -120,7 +119,7 @@ define([
 
       setTimeout(function() {
         expect($w.find('#alertBox a').is(':visible')).to.be.true;
-        widget.closeModal();
+        $w.find('button.close').click();
         setTimeout(function() {
           expect($w.find('#alertBox a').is(':visible')).to.be.false;
           done();

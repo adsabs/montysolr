@@ -66,6 +66,9 @@ define([
   });
 
   var MasterView = Marionette.ItemView.extend({
+
+      className : "s-master-page-manager",
+
       constructor: function(options) {
         options = options || {};
         if (!options.collection)
@@ -91,7 +94,7 @@ define([
           model.attributes.numAttach += 1;
 
           //scroll up automatically
-          window.scrollTo(0,0);
+//          window.scrollTo(0,0);
         }
         else {
           if (model.attributes.object.view.$el.parent().length > 0) {

@@ -8,7 +8,8 @@ define([
     'js/mixins/dependon',
     'js/components/api_response',
     'js/components/api_query',
-    'js/components/api_feedback'
+    'js/components/api_feedback',
+    'js/mixins/hardened',
   ],
   function(
     _,
@@ -18,7 +19,8 @@ define([
     Mixin,
     ApiResponse,
     ApiQuery,
-    ApiFeedback
+    ApiFeedback,
+    Hardened
     ) {
 
     var Api = GenericModule.extend({
@@ -73,19 +75,29 @@ define([
       },
       getNumOutstandingRequests: function() {
         return this.outstandingRequests;
+      },
+
+      hardenedInterface : {
+        request : "make a request to the API"
       }
+
     });
-
-
 
     Api.prototype.request = function(request, options) {
 
       options = _.extend({}, options, request.get('options'));
 
-      var self = this;
-      var query = request.get('query');
+      var self = this,
+        data,
+       query = request.get('query');
       if (query && !(query instanceof ApiQuery)) {
         throw Error("Api.query must be instance of ApiQuery");
+      }
+
+      //can pass in query parameter (instance of ApiQuery) or just pass data directly in the data parameter
+      //if you pass in an api query, it overrides data, otherwise just pass in data for the ajax request as expected
+      if (query){
+        data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
       }
 
       var u = this.url + (request.get('target') || '');
@@ -99,22 +111,29 @@ define([
         type: 'GET',
         url: u,
         dataType: 'json',
-        data: options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url() || "{}",
+        data: data,
         contentType: 'application/x-www-form-urlencoded',
         headers: {"X-BB-Api-Client-Version": this.clientVersion},
         context: {request: request, api: self },
         timeout: this.defaultTimeoutInMs,
-        cache: true // do not generate _ parameters (let browser cache responses)
+        cache: true, // do not generate _ parameters (let browser cache responses),
+        //need this so that cross domain cookies will work!
+        xhrFields: {
+          withCredentials: true
+        }
       };
 
       if (this.access_token) {
         opts.headers['Authorization'] = this.access_token;
       }
 
+      //extend, rather than replace, the headers with user-supplied headers if any
+      _.extend(opts.headers, options.headers);
+
       // one potential problem is that 'options' will override
-      // whatever is set above (so if sb wants to shoot himself/herself,
+      // whatever is set above (other than headers) (so if sb wants to shoot himself/herself,
       // we gave them the weapon... ;-))
-      _.extend(opts, options);
+      _.extend(opts, _.omit(options, "headers"));
 
       this.outstandingRequests++;
 
@@ -129,6 +148,9 @@ define([
     };
 
     _.extend(Api.prototype, Mixin.BeeHive);
+    _.extend(Api.prototype, Hardened);
+
 
     return Api
   });
+

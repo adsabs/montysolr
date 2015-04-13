@@ -1,0 +1,80 @@
+define([
+    'underscore',
+    'backbone',
+    'js/components/api_query',
+    'js/components/api_request'
+  ],
+  function(
+    _,
+    Backbone,
+    ApiQuery,
+    ApiRequest
+    ){
+
+    /*
+    * this simple mixin contacts the api (getApiAccess), and if the {reconnect: true} option
+    * is passed to getApiAccess, will save the relevant data.
+    * */
+
+    return {
+
+      /**
+       * After bootstrap receives all data, this routine should decide what to do with
+       * them
+       */
+      onBootstrap: function (data) {
+        // set the API key
+        if (data.access_token) {
+          var api = this.getBeeHive().getService('Api');
+          if (data.access_token) {
+            console.warn('Redefining access_token: ' + api.access_token);
+            api.access_token = data.token_type + ':' + data.access_token;
+            api.refresh_token = data.refresh_token;
+            api.expires_in = data.expires_in;
+          }
+
+          //set csrf token into AppStorage
+          var appStorage = this.getBeeHive().getObject("AppStorage");
+          if (appStorage && data.csrf) {
+            appStorage.set("csrf", data.csrf);
+          }
+
+          var user = this.getBeeHive().getObject("User");
+          if (user && data.username !== "anonymous@adslabs.org") {
+            //it's a logged in user
+            user.setUser(data.username);
+          }
+        }
+
+      },
+
+      getApiAccess: function (options) {
+        options = options || {};
+        var api = this.getBeeHive().getService('Api');
+        var redirect_uri = location.origin + location.pathname;
+        var self = this;
+        var defer = $.Deferred();
+        api.request(new ApiRequest({
+            query: new ApiQuery({redirect_uri: redirect_uri}),
+            target: this.bootstrapUrls ? this.bootstrapUrls[0] : '/accounts/bootstrap'}),
+          {
+            done: function (data) {
+              if (options.reconnect) {
+                self.onBootstrap(data);
+              }
+              defer.resolve(data);
+            },
+            fail: function () {
+              defer.reject(arguments);
+            },
+            type: 'GET'
+          });
+        return defer;
+      }
+
+    }
+
+
+
+
+});

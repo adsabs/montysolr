@@ -1,6 +1,6 @@
 define([], function() {
   "use strict";
-  return {
+  var config = {
 
     /**
      * The url to the API services, if you develop locally,
@@ -83,9 +83,13 @@ define([], function() {
       *  orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
       */
      orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
-     orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
+     orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2',
 
 
+     // google recaptcha
+     recaptchaKey : "6LfE6AITAAAAALdSy2qxVW4TBqy5RdmREiv-AwlJ"
 
   }
+
+  return config
 });

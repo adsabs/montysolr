@@ -45,13 +45,15 @@ define([
   'jquery',
   'backbone',
   'module',
-  'js/components/beehive'
+  'js/components/beehive',
+  'js/mixins/api_access'
 ], function(
   _,
   $,
   Backbone,
   module,
-  BeeHive
+  BeeHive,
+  ApiAccess
   ) {
 
 
@@ -560,6 +562,6 @@ define([
   // give it subclassing functionality
   Application.extend = Backbone.Model.extend;
 
-  return Application;
+  return Application.extend(ApiAccess);
 
 });

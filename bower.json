@@ -22,7 +22,9 @@
     "fontawesome": "~4.3.0",
     "d3-cloud": "~1.0.5",
     "nvd3": "git://github.com/novus/nvd3#~1.1.15-beta",
-    "persist-js": "~0.3.0"
+    "persist-js": "~0.3.0",
+    "backbone-validation": "~0.11.3",
+    "backbone.stickit": "~0.8.0"
   },
   "devDependencies": {
     "chai": "~1.8.0",

@@ -181,6 +181,30 @@ define([
       expect(spy.thisValues[0]).to.have.ownProperty('api', 'request');
     });
 
+    describe("Testing request options", function() {
+
+      var ajaxSpy;
+      beforeEach(function() {
+        ajaxSpy = sinon.spy($, 'ajax');
+      });
+      afterEach(function() {
+        ajaxSpy.restore();
+      });
+      it("Should set appropriate options", function() {
+        var api = new Api({url: '/api/1'});
+        var q = new ApiQuery({q: 'foo'});
+        var spy = sinon.spy();
+        expect(api.request(new ApiRequest({target: 'search', query: q}),
+          {done: spy})).to.be.OK;
+        expect(ajaxSpy.lastCall.args[0].cache).to.eql(true);
+        expect(ajaxSpy.lastCall.args[0].contentType).to.eql('application/x-www-form-urlencoded');
+        expect(ajaxSpy.lastCall.args[0].xhrFields).to.eql({
+          withCredentials: true
+        });
+      });
+    });
+
+
     var validResponse = '{\
       "responseHeader":{\
         "status":0,\

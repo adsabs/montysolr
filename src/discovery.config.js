@@ -40,6 +40,7 @@ require.config({
         },
         objects: {
           User: 'js/components/user',
+          Session: 'js/components/session',
           DynamicConfig: 'discovery.vars',
           HistoryManager: 'js/components/history_manager',
           MasterPageManager: 'js/page_managers/master',
@@ -53,6 +54,11 @@ require.config({
         LandingPage: 'js/wraps/landing_page_manager',
         SearchPage: 'js/wraps/results_page_manager',
         DetailsPage: 'js/wraps/details_page_manager',
+        AuthenticationPage: 'js/wraps/authentication_page_manager',
+        SettingsPage: 'js/wraps/user_settings_page_manager',
+
+        Authentication: 'js/widgets/authentication/widget',
+        UserSettings: 'js/widgets/user_settings/widget',
 
         NavbarWidget: 'js/widgets/navbar/widget',
         AlertsWidget: 'js/widgets/alerts/widget',
@@ -70,7 +76,6 @@ require.config({
         BubbleChart : 'js/widgets/bubble_chart/widget',
 
         Metrics :  'js/widgets/metrics/widget',
-
         OrcidBigWidget: 'js/modules/orcid/widget/widget',
 
         AuthorFacet: 'js/wraps/author_facet',
@@ -144,8 +149,10 @@ require.config({
     // for development use
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
+    'google-recaptcha' : '//www.google.com/recaptcha/api.js?&render=explicit',
     'persist-js': 'libs/persist-js/src/persist',
-
+    'backbone-validation': 'libs/backbone-validation/backbone-validation',
+    'backbone.stickit' : 'libs/backbone.stickit/backbone.stickit',
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
     'chai': '../bower_components/chai/chai',
@@ -159,6 +166,13 @@ require.config({
   },
 
   shim: {
+
+    'backbone.stickit' : {
+      deps : ['backbone']
+    },
+    'backbone-validation' : {
+      deps : ['backbone']
+    },
     'bootstrap' : {
       deps: ['jquery']
     },
@@ -248,5 +262,37 @@ require.config({
         }
       });
     });
+
+    //set validation callbacks used by authentication and user settings widgets
+    require(['backbone-validation'], function(){
+
+      //this allows for instant validation of form fields using the backbone-validation plugin
+      _.extend(Backbone.Validation.callbacks, {
+        valid: function (view, attr, selector) {
+          var $el = view.$('input[name=' + attr + ']'),
+            $group = $el.closest('.form-group');
+
+          $group.removeClass('has-error').addClass("has-success");
+          $group.find(".icon-success").removeClass("hidden");
+          $group.find('.help-block').html('').addClass('no-show');
+
+        },
+        invalid: function (view, attr, error, selector) {
+          var $el = view.$('[name=' + attr + ']');
+          $group = $el.closest('.form-group');
+
+          $group.removeClass("has-success");
+          $group.find(".icon-success").addClass("hidden");
+
+          if (view.submit === true){
+            //only show error states if there has been a submit event
+            $group.addClass('has-error');
+            $group.find('.help-block').html(error).removeClass('no-show');
+          }
+        }
+      });
+    })
+
+
   }
 });

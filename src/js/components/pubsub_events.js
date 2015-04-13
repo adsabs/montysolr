@@ -96,7 +96,6 @@ define([], function() {
      */
     FEEDBACK: '[FC]-FeedBack',
 
-
     /**
      * A message from the router requesting showing citizens of the
      * city
@@ -110,16 +109,16 @@ define([], function() {
      */
     GET_QTREE: '[FC]-GetQTree',
 
-    NAVIGATE : '[Router]-Navigate-Without-Trigger',
+    NAVIGATE : '[Router]-Navigate-With-Trigger',
 
     /*for custom widget-to-widget events*/
-
     CUSTOM_EVENT : '[PubSub]-Custom-Event',
-
 
     ARIA_ANNOUNCEMENT : "[PubSub]-Aria-Announcement",
 
+    /*anything to do with changing the state of the user, including session events*/
     USER_ANNOUNCEMENT : "[PubSub]-User-Announcement",
+
 
     /**
      * A message/action that should be displayed to the user (on prominent)

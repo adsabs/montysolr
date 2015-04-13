@@ -31,11 +31,14 @@ define([
       defaults : {
         type: 'info',
         msg: undefined,
+        title: undefined,
         events: undefined,
-        modal: false
+        modal: false,
+        //for non-modal alerts so they will
+        //only show for ~5 seconds
+        fade: true
       }
     });
-
 
     var delegateEventSplitter = /^(\S+)\s*(.*)$/;
     
@@ -58,7 +61,13 @@ define([
       },
 
       close: function() {
-        this.model.set('msg', null);
+        if (this.model.get('modal')) {
+          this.$el.find('#alertBox').modal('hide');
+          this.model.set('msg', null, {silent: true});
+        }
+        else {
+          this.model.set('msg', null);
+        }
       },
 
       render: function() {
@@ -75,7 +84,6 @@ define([
           });
           return;
         }
-
         Marionette.ItemView.prototype.render.apply(this, arguments);
       },
 
@@ -123,13 +131,11 @@ define([
         if (this.model.get('modal')) {
           this.showModal();
         }
+
       },
 
       showModal: function() {
         this.$el.find('#alertBox').modal('show');
-      },
-      closeModal: function() {
-        this.$el.find('#alertBox').modal('hide');
       }
     });
 
@@ -144,11 +150,16 @@ define([
       },
 
       activate: function (beehive) {
-        //pass
+        _.bindAll(this, ["clearView"]);
+        //listen to navigate event and close widget
+        this.pubsub = beehive.getService("PubSub");
+        this.pubsub.subscribe(this.pubsub.NAVIGATE, this.clearView);
+
       },
 
-      closeModal: function() {
-        this.view.closeModal();
+      clearView : function(){
+        //to prevent re-rendering in inopportune moments
+        this.view.close();
       },
 
       alert: function(feedback) {
@@ -156,6 +167,7 @@ define([
         this.model.set({
           events: feedback.events,
           msg: feedback.msg,
+          title: feedback.title,
           type: feedback.type,
           modal: feedback.modal,
           promise: promise
