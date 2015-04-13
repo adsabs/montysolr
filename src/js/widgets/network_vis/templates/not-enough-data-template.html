@@ -1,1 +1,12 @@
-There wasn't enough data returned by your search to form a visualization.
+<div class="col-xs-12">
+    <p>  There wasn't enough data returned by your search to form a visualization.</p>
+
+    {{#if cachedQuery}}
+    <button class="btn btn-default load-author-network" data-query="{{cachedQuery}}">
+        <i class="fa fa-arrow-left"></i>
+        Go back to previous author network. ({{cachedQuery}})
+    </button>
+    {{/if}}
+</div>
+
+

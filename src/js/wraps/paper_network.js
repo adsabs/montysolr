@@ -140,7 +140,7 @@ define([
           .attr("width", that.config.width)
           .attr("height", that.config.height)
           .append("g")
-          .attr("transform", "translate(" + that.config.width / 2 + "," + that.config.height / 2.7 + ")");
+          .attr("transform", "translate(" + that.config.width / 2 + "," + that.config.height / 2 + ")");
 
         this.cachedVals.arc = d3.svg.arc()
           .innerRadius(that.config.innerRadius)

@@ -63,7 +63,10 @@ WordCloud
 
 .s-vis-item-format {
 
-  margin-bottom: 30px;
+  background: @gray-lightest;
+  padding: 15px 5px;
+  .lh-box-shadow(2px 2px 2px @default-box-shadow-color);
+  margin-bottom: 20px;
 
 }
 
@@ -289,7 +292,6 @@ Year, Citation and Reference Graphs
 
 .load-author-network {
   margin-top: 20px;
-  margin-bottom: 20px;
 }
 
 .s-vis-center-col {
@@ -322,6 +324,7 @@ Year, Citation and Reference Graphs
 .node-path {
   cursor: pointer;
   fill-opacity: .8;
+  .lh-transition(all, .3s, linear)
 }
 .node-path:hover {
   fill-opacity: 1;
@@ -352,6 +355,7 @@ Year, Citation and Reference Graphs
   stroke-opacity: .4;
   fill: none;
   cursor: pointer;
+  .lh-transition(all, .3s, linear)
 }
 
 .author .link:hover {
@@ -387,9 +391,6 @@ Year, Citation and Reference Graphs
   fill: darken(@brand-warning, 15%);
 }
 
-.s-network-chart{
-    min-height: 900px;
-}
 
 .s-network-filter-container {
 
@@ -401,6 +402,7 @@ Year, Citation and Reference Graphs
 .s-connector-node {
     text-anchor: middle;
     font-size: 25px;
+    cursor: move;
 }
 
 
@@ -425,6 +427,18 @@ Year, Citation and Reference Graphs
     margin: 25px 0;
   }
 
+}
+
+.s-network-container {
+  .axis  {
+    stroke-width: 2px;
+  }
+}
+
+.s-network-widget {
+  @media (min-width: @screen-md-min){
+    min-height: 1200px;
+  }
 }
 
 
@@ -484,9 +498,6 @@ Year, Citation and Reference Graphs
     }
   }
 
-  .s-network-container {
-   min-height: 1000px;
-  }
   .s-network-graph-div {
     margin-left: 0;
   }

@@ -100,10 +100,10 @@ define([
       serializeData : function(){
         return {
           currentQuery : Marionette.getOption(this, "query"),
-          networkType : Marionette.getOption(this, "networkType")
+          networkType : Marionette.getOption(this, "networkType"),
+          cachedQuery : Marionette.getOption(this, "cachedQuery")
         }
       },
-
 
       getData : function(){
 
@@ -161,6 +161,10 @@ define([
           var fullGraph = Marionette.getOption(this, "graphData").fullGraph
           var data = [];
           var nameDict = {};
+
+          /*id is how you tie an entry in the summary graph with an entry in the full graph,
+          * otherwise it is not used, it is assigned by louvain community detector in python script
+          * */
 
           var ids = _.pluck(summaryGraph.nodes, "id");
           var names = _.pluck(summaryGraph.nodes, "node_name");
@@ -224,6 +228,31 @@ define([
 
         var data = this.getData();
 
+        var oneYear = true;
+        //if data is only from a single year, tell the user that and return
+        _.each(data, function(d){
+            if (d.values.length !== 1){
+              oneYear = false;
+            }
+        });
+
+        if (oneYear){
+          var singleYear = data[0].values[0].year;
+          this.$(".time-series-container").html("Not enough data to show a graph: All papers are from the year " + singleYear);
+          return
+        }
+
+        var allX = [];
+        var allY = [];
+        _.each(data, function(group){
+          _.each(group.values, function(entry){
+            allX.push(entry.year);
+            allY.push(entry.amount);
+          });
+        });
+
+        allX = _.uniq(allX);
+
         var margin = {top: 20, right: 80, bottom: 30, left: 50},
           width = 960 - margin.left - margin.right,
           height = 500 - margin.top - margin.bottom;
@@ -237,14 +266,21 @@ define([
         var xAxis = d3.svg.axis()
           .scale(x)
           .orient("bottom")
+          //specify explicitly, otherwise can get repeats for some weird reason
           .tickFormat(d3.format("0f"))
+          .ticks(5)
+
+          if (allX.length <= 10){
+            xAxis.tickValues(allX)
+          }
 
         var yAxis = d3.svg.axis()
           .scale(y)
+          .tickFormat(d3.format("d"))
           .orient("left");
 
         var line = d3.svg.line()
-          .interpolate("basis")
+          .interpolate("bundle")
           .x(function(d) { return x(d.year); })
           .y(function(d) { return y(d.amount); });
 
@@ -258,26 +294,16 @@ define([
           .domain([0, 1, 2, 3, 4, 5, 6])
           .range(["hsla(282, 80%, 52%, 1)", "hsla(1, 80%, 51%, 1)", "hsla(42, 97%, 48%, 1)", "hsla(152, 80%, 40%, 1)", "hsla(193, 80%, 48%, 1)", "hsla(220, 80%, 56%, 1)", "hsla(250, 69%, 47%, 1)"]);
 
-        var allX = [];
-        var allY = [];
-        _.each(data, function(group){
-
-          _.each(group.values, function(entry){
-            allX.push(entry.year);
-            allY.push(entry.amount);
-          })
-
-        })
         x.domain(d3.extent(allX));
         y.domain([0, _.max(allY)]);
 
         svg.append("g")
-          .attr("class", "x axis")
+          .attr("class", "axis")
           .attr("transform", "translate(0," + height + ")")
           .call(xAxis);
 
         svg.append("g")
-          .attr("class", "y axis")
+          .attr("class", "axis")
           .call(yAxis);
 
         var groups = svg.selectAll(".group")
@@ -383,11 +409,11 @@ define([
 
       //user has requested author network for current author
       forwardNewQueryRequest : function(e){
-        var query = "author:\"" + $(e.target).data("query") + "\"";
 
         //show loading template
         this.ui.graphContainer.html(loadingTemplate());
-        this.trigger("new-network-requested", query);
+
+        this.trigger("new-network-requested", $(e.target).data("query"));
       },
 
       changeRows : function(e) {
@@ -409,21 +435,30 @@ define([
         var graphViewToUse;
 
         // do nothing if there is no data
+       var cachedQ;
+        try {
+          cachedQ = this.model.get("cachedQuery").get("q")[0];
+        }
+        catch(e){
+          //ignore, there will be no cached query
+        }
 
         if (!this.model.get("graphData") || _.isEmpty(this.model.get("graphData"))) {
           this.$(".network-metadata").html("");
-          this.$(".network-container").html(notEnoughDataTemplate());
+          this.$(".network-container").html(notEnoughDataTemplate({cachedQuery : cachedQ}));
           return
         }
         //it's a paper network with no summary info
         else if (!this.model.get("graphData").summaryGraph && !this.model.get("graphData").root) {
           //maybe later show something if we just have the fullGraph
           this.$(".network-metadata").html("");
-          this.$(".network-container").html(notEnoughDataTemplate());
+          this.$(".network-container").html(notEnoughDataTemplate({cachedQuery : cachedQ }));
           return
 
         }
+        //all the data the graph view will need
         this.graphModel = new GraphModel({graphData: this.model.get("graphData")});
+
         this.filterView = new FilterView({collection: Marionette.getOption(this, "filterCollection"), networkType: Marionette.getOption(this, "networkType")});
         this.listenTo(this.filterView, "filter:initiated", function () {
           //forward to controller
@@ -441,7 +476,8 @@ define([
         this.ui.detailsContainerHome.append(new DefaultDetailsView({
             graphData: this.model.get("graphData"),
             query: this.model.get("query"),
-            networkType : Marionette.getOption(this, "networkType")
+            networkType : Marionette.getOption(this, "networkType"),
+            cachedQuery : cachedQ
           }).render().el);
 
         //set the home tab as default
@@ -501,7 +537,8 @@ define([
           data.name = d.name;
           data.groupColor = d.parent.color;
           data.inFilter = Marionette.getOption(this, "filterCollection").get(d.name) ? true : false;
-          data.dataQuery = d.name
+          //make the query that will be issued when user clicks "view network for this person"
+          data.dataQuery = "author:\"" +  d.name + "\"";
 
           this.ui.detailsContainerSelected.empty().append(authorDetailsTemplate(data));
 
@@ -604,7 +641,10 @@ define([
           //current max
           max : undefined,
           //when this changes, make a new request
-          userVal: undefined
+          userVal: undefined,
+
+          //keep record of former query so user can return
+          cachedQuery : undefined
         }
      }
     });
@@ -624,7 +664,7 @@ define([
         },
         "change input[name=show-link]" : function(e){
           this.model.set("linkLayer", e.target.checked);
-        },
+        }
       },
 
       modelEvents: {
@@ -716,9 +756,7 @@ define([
 
         svg.on("dblclick.zoom", null);
 
-
         svg.attr("transform", "translate(" + that.config.width / 2 + "," + (that.config.height / 2.1) + ")");
-
 
         var partition = d3.layout.partition()
           .value(function (d) {
@@ -756,8 +794,8 @@ define([
 
         g2.append("circle")
           .attr("r", that.config.radius)
-          .attr("fill", "#fff");
-
+          .attr("fill", "#fff")
+          .style("cursor", "move");
 
         var containers = g2.selectAll("g")
           .data(partition.nodes(graphData.root))
@@ -781,6 +819,10 @@ define([
             } else {
               return true
             }
+          })
+          .style("cursor", function(d){
+            if (d.depth == 0)
+            return "move"
           })
           .style("fill", function (d) {
             if (d.depth == 0) {
@@ -1126,6 +1168,8 @@ define([
           //keep track of selection state
           selectedEntity: undefined,
           cachedEntity: undefined,
+
+          query: undefined,
           linkLayer: false,
           mode: "occurrences"
         }
@@ -1160,7 +1204,7 @@ define([
           showDetailGraphView: options.showDetailGraphView
         });
 
-       this.listenTo(this.view, "new-network-requested", this.requestDifferentQuery);
+        this.listenTo(this.view, "new-network-requested", this.requestDifferentQuery);
         this.listenTo(this.view, "filter:initiated", this.broadcastFilteredQuery);
         this.listenTo(this.view, "close", this.broadcastClose);
 
@@ -1185,25 +1229,49 @@ define([
       //allows you to view network for another author
       requestDifferentQuery : function(newQuery){
 
-        var query = this.getCurrentQuery().clone();
-        query.unlock();
+        //cache the current query
+        this.model.set("cachedQuery", this.getCurrentQuery());
+
+        //make a new query, otherwise facet parameters remain
+
+        var query = new ApiQuery();
         query.set("q", newQuery);
+        query.set("rows", this.initialRowsRequest);
 
         var request = new ApiRequest({
           target: Marionette.getOption(this, "endpoint"),
           query: query
         });
+
+        //update the current widget query
+        this.setCurrentQuery(query);
+
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
 
       },
 
       activate: function (beehive) {
-        _.bindAll(this, "setCurrentQuery", "processResponse");
+        _.bindAll(this, "setOriginalQuery", "processResponse");
         this.pubsub = beehive.Services.get('PubSub');
         //custom dispatchRequest function goes here
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setOriginalQuery);
         //custom handleResponse function goes here
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      },
+
+      //cache this so that the "broadcastFilteredResponse" still works even if user is looking at a
+      //different network
+      setOriginalQuery: function(query) {
+
+        //clear the "cachedQuery" because it's a new search cycle
+        this.model.set("cachedQuery", undefined);
+
+        this._originalQuery = query;
+        this.setCurrentQuery(query);
+      },
+
+      getOriginalQuery : function(){
+        return this._originalQuery;
       },
 
       resetWidget: function () {
@@ -1240,7 +1308,7 @@ define([
         //so the earlier state of the widget is not preserved
         this.model.set({graphData: {}});
 
-        data = jsonResponse.toJSON();
+        var data = jsonResponse.toJSON();
         // let container view know how many bibcodes we have
         this.model.set({graphData : data.data,
           numFound: parseInt(data.msg.numFound),
@@ -1251,6 +1319,8 @@ define([
         this.model.trigger("newMetadata");
       },
 
+
+      //filter the original query
       broadcastFilteredQuery: function () {
         var filterCollection = this.filterCollection,
           data = this.model.get("graphData").root,
@@ -1289,7 +1359,7 @@ define([
         }
 
         names = "author:(" + finalFQString + ")";
-        var newQuery = this.getCurrentQuery().clone();
+        var newQuery = this.getOriginalQuery().clone();
         newQuery.unlock();
 
         updater.updateQuery(newQuery, "fq", "limit", names);
@@ -1300,6 +1370,10 @@ define([
       broadcastClose: function () {
         this.resetWidget();
         this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+      },
+
+      testing : {
+        detailView : DefaultDetailsView
       }
 
     });
