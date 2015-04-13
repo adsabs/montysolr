@@ -778,10 +778,11 @@ define([
         var out = {
           isCreatedByUs: false,
           isCreatedByOthers: false,
+          isKnownToAds: false,
           provenance: null
         };
         var self = this;
-        _.each(data, function(value, key, obj) {
+        _.each(_.pick(data, 'bibcode', 'doi', 'alternate_bibcode'), function(value, key, obj) {
           if (_.isArray(value)) {
             for (var v in value) {
               self._updateRec(key + ':' + v, out)
@@ -802,6 +803,9 @@ define([
           }
           else {
             out.isCreatedByOthers = true;
+          }
+          if (this.db[k].idx > -1) {
+            out.isKnownToAds = true;
           }
           out.putcode = this.db[k].putcode;
         }
