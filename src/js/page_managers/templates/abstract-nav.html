@@ -1,43 +1,48 @@
-<nav class="s-abstract-nav-col">
-    <div class="s-nav-header s-view-nav"> <i class="icon-list"></i>   View </div>
+<nav class="s-abstract-nav-col s-nav-container">
+    <div class="s-nav-header s-view-nav">view   <i class="icon-list"></i></div>
 
     {{#each view}}
 
     <a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}}  data-bypass>
-        <div class="abstract-nav s-abstract-nav {{#if this.isSelected}} s-abstract-nav-active {{/if}} {{#unless this.isActive}} s-abstract-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
+        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}} {{#unless this.isActive}} s-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
+            <span class="s-content">
             {{this.title}}
             {{#if this.showCount}}
             <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
             {{/if}}
+            </span>
         </div>
     </a>
 
     {{/each}}
 
 
-    <div class="s-nav-header s-export-nav"><i class="icon-export"></i> Export </div>
+    <div class="s-nav-header s-export-nav">export <i class="icon-export"></i> </div>
 
     <a href="#" data-bypass>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive">
+        <div class="abstract-nav s-nav s-nav-inactive">
             in BibTex
             <span class="num-items"></span>
         </div>
-        <div class="abstract-nav s-abstract-nav s-abstract-nav-inactive">
+        <div class="abstract-nav s-nav s-nav-inactive">
              in Endnote
             <span class="num-items"></span>
         </div>
     </a>
 
-    <div class="s-nav-header s-analyze-nav"> <i class="icon-explore"></i> Explore  </div>
+    <div class="s-nav-header s-analyze-nav">explore   <i class="icon-explore"></i></div>
 
     {{#each explore}}
 
     <a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}}  data-bypass>
-    <div class="abstract-nav s-abstract-nav {{#if this.isSelected}} s-abstract-nav-active {{/if}} {{#unless this.isActive}} s-abstract-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
-        {{this.title}}
+    <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}} {{#unless this.isActive}} s-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
+        <span class="s-content">
+         {{this.title}}
         {{#if this.showCount}}
-        <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
+
+       <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
         {{/if}}
+      </span>
     </div>
     </a>
 

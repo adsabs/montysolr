@@ -42,7 +42,6 @@ define([
 
     it("displays messages", function(done) {
       var widget = _getWidget();
-      expect(widget.pubsub).to.be.undefined;
 
       var $w = widget.render().$el;
       $('#test').append($w);

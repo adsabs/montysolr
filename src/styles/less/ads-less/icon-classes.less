@@ -25,7 +25,6 @@
   top: 3px;
   &:before {
     content: @fa-var-angle-down;
-
   }
 
 }
@@ -198,6 +197,7 @@
 .icon-success {
   .fa;
   .fa-lg;
+  color: @brand-success;
   &:before {
     content: @fa-var-check;
   }
@@ -214,6 +214,15 @@
   .fa;
   &:before{
     content: @fa-var-refresh;
+  }
+}
+
+.icon-danger{
+  .fa;
+  .fa-lg;
+  color: @brand-danger;
+  &:before {
+    content: @fa-var-exclamation-triangle;
   }
 }
 

@@ -133,13 +133,23 @@ define([
         }
       },
 
+      //this is used by the
+      setConfig : function(conf){
+        this.set("dynamicConfig", conf);
+     },
+
+      getConfigCopy : function(){
+        return JSON.parse(JSON.stringify(this.get("dynamicConfig")));
+      },
+
       hardenedInterface:  {
         getNumSelectedPapers: 'getNumSelectedPapers',
         isPaperSelected: 'isPaperSelected',
         hasSelectedPapers: 'hasSelectedPapers',
         getSelectedPapers: 'getSelectedPapers',
         getCurrentQuery: 'getCurrentQuery',
-        hasCurrentQuery: 'hasCurrentQuery'
+        hasCurrentQuery: 'hasCurrentQuery',
+        getConfigCopy : 'get read-only copy of dynamic config'
       }
     }
   );

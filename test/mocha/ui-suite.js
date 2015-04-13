@@ -2,7 +2,7 @@ define([], function() {
 
   var tests  = [
       '/page_managers/all_tests.spec.js',
-
+      '/widgets/authentication_widget.spec.js',
       '/widgets/abstract_widget.spec.js',
       '/widgets/alerts_widget.spec.js',
       '/widgets/api_query_widget.spec.js',
@@ -38,9 +38,9 @@ define([], function() {
       '/widgets/search_bar_widget.spec.js',
       '/widgets/sort_widget.spec.js',
 
-
     //TBD 24/09/14 '/widgets/similar_widget.spec.js',
       '/widgets/tabs_widget.spec.js',
+      '/widgets/user_settings_widget.spec.js',
       '/widgets/wordcloud_widget.spec.js',
       '/widgets/year_graph_facet_widget.spec.js',
       '/widgets/hello_world_widget.spec.js'

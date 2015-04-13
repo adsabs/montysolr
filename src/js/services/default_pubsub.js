@@ -300,7 +300,6 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
     // Copied and modified version of the BB trigger - we deal with errors
     // and optionally execute stuff asynchronously
     triggerHandleErrors: function(name) {
-
       // almost the same as BB impl, but we call local triggerEvents
       // that do error handling
       if (!this._events) return this;

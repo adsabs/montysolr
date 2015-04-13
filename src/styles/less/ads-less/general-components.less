@@ -1,0 +1,112 @@
+/* this is to ensure a full length background for widgets that need it */
+html {
+  height:100%;
+}
+
+body {
+  height: 100%;
+}
+
+#app-container{
+  height: 100%;
+}
+
+#body-template-container{
+  height: 100%
+}
+
+.s-master-page-manager{
+  height: 100%;
+}
+
+@sidenav-background : #fff;
+.s-nav-container {
+
+  //sticky to the side
+  margin-left: -15px;
+  padding: 0 0 99999px 0;
+  margin-bottom: -99999px;
+  position: relative;
+  z-index: @z-index-0;
+
+  background-color: @sidenav-background;
+
+  a {
+    color :@text-color;
+    &:hover {
+      text-decoration: none !important;
+    }
+    &:focus {
+      text-decoration: none !important;
+    }
+  }
+  border-right: 1px solid darken(@sidenav-background, 15%);
+
+}
+
+.s-nav {
+  padding: 10px 0 10px 17%;
+  .lh-transition(all, .5s, ease-out);
+  border-left: 5px solid @sidenav-background;
+
+  &:hover {
+    background-color: @gray-lighter;
+    border-left: 5px solid @gray;
+
+  }
+
+  .s-content{
+    position: relative;
+  }
+
+}
+
+.s-nav-active {
+  border-left: 5px solid @brand-primary-faded;
+  color: @brand-primary-faded;
+  &:hover {
+    background-color: @sidenav-background;
+    border-left: 5px solid @brand-primary-faded;
+  }
+}
+
+.s-nav-inactive {
+  color: lighten(@gray-light, 15%);
+}
+
+.s-nav-inactive:hover {
+  cursor: not-allowed;
+  background-color: @sidenav-background;
+  border-left: 5px solid @sidenav-background;
+}
+
+//put at the top of the nav. it identifies the page group
+.s-nav-top-title{
+  border-bottom: 1px solid @gray-lighter;
+padding:1%;
+text-align: center;
+overflow: auto;
+margin-bottom:20px;
+
+  h2 {
+  font-size: 22px;
+  }
+}
+
+/*header is for sub-section titles*/
+
+.s-nav-header{
+  font-weight: 300;
+  font-size: 24px;
+  padding: 7% 7% 7% 8%;
+  font-variant: small-caps;
+
+  i {
+    font-size: .8em;
+    float: left;
+    margin-top: 10px;
+    margin-right: 3%;
+  }
+
+
+}

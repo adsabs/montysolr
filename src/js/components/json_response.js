@@ -4,7 +4,14 @@
  * (e.g. solr_response)
  */
 
-define(['underscore', 'backbone', 'js/components/api_query'], function(_, Backbone, ApiQuery) {
+define(['underscore',
+  'backbone',
+  'js/components/api_query',
+], function(
+            _,
+            Backbone,
+            ApiQuery
+  ) {
 
 
   var JSONResponse = function(attributes, options) {

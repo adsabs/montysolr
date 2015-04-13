@@ -4,7 +4,9 @@ define([
     'js/components/api_query',
     'js/mixins/dependon',
     'hbs!./404',
-    'js/components/api_feedback'
+    'js/components/api_feedback',
+    'js/components/api_request',
+    'js/components/api_targets'
 
   ],
   function (
@@ -13,7 +15,10 @@ define([
     ApiQuery,
     Dependon,
     ErrorTemplate,
-    ApiFeedback
+    ApiFeedback,
+    ApiRequest,
+    ApiTargets
+
     ) {
 
     "use strict";
@@ -33,17 +38,19 @@ define([
         }
       },
 
-
       routes: {
         "": "index",
         'index/(:query)': 'index',
         "search/(:query)": 'search',
         'abs/:bibcode(/)(:subView)': 'view',
-        'user/(:view)/*(:subView)': 'userPage',
+        'user/orcid*(:subView)' : 'orcidPage',
+        'user/account(/)(:subView)' : 'authenticationPage',
+        'user/account/verify/(:subView)/(:token)' : 'routeToVerifyPage',
+        'user/settings(/)(:subView)' : 'settingsPage',
+
         //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
-
 
       index: function (query) {
         this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
@@ -83,14 +90,107 @@ define([
         this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');
       },
 
-      userPage: function(view, subView) {
-        if (view == 'orcid') {
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page', subView);
+
+      routeToVerifyPage : function(subView, token){
+
+        var failMessage, failTitle, route, done, request, type,
+          that = this;
+
+        if (subView == "register") {
+          failTitle = "Registration failed.";
+          failMessage = "<p>Please try again, or contact <b> adshelp@cfa.harvard.edu for support </b></p>";
+          route = ApiTargets.VERIFY + "/" + token;
+
+          done = function(reply) {
+            //user has been logged in already by server
+            //request bootstrap
+            this.getApiAccess({reconnect : true}).done(function(){
+              //redirect to index page
+              that.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+              //call alerts widget
+              var title = "Welcome to ADS";
+              var msg = "<p>You have been successfully registered with the username</p> <p><b>"+ reply.email +"</b></p>";
+              that.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+            }).fail(function(){
+              //fail function defined below
+              fail();
+            });
+
+          };
         }
-        else {
-          // TODO:rca - for me: generate warning, or handle the error
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'landing-page');
+        else if (subView == "change-email") {
+            failTitle = "Attempt to change email failed";
+            failMessage = "Please try again, or contact adshelp@cfa.harvard.edu for support";
+            route = ApiTargets.VERIFY + "/" + token;
+
+          done = function(reply) {
+            //user has been logged in already
+            //request bootstrap
+            this.getApiAccess({reconnect : true}).done(function(){
+                //redirect to index page
+                this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+                //call alerts widget
+                var title = "Email has been changed.";
+                var msg = "Your new ADS email is <b>" + reply.email + "</b>";
+                this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+              }).fail(function(){
+                 //fail function defined below
+                 fail();
+              });
+          };
         }
+        else if (subView == "reset-password") {
+
+          done = function() {
+            //route to reset-password-2 form
+            //set the token so that session can use it in the put request with the new password
+            this.getBeeHive().getObject("Session").setChangeToken(token);
+            this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: "reset-password-2"});
+          };
+
+          failMessage = "Reset password token was invalid.";
+          route = ApiTargets["RESET_PASSWORD"] + "/" + token;
+          type = "GET";
+
+        }
+        function fail() {
+          //redirect to index page
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+          //call alerts widget
+          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title: failTitle, msg: failMessage, modal : true, type : "danger"}));
+        };
+
+         request = new ApiRequest({
+            target : route,
+           options : {
+             type : type || "GET",
+             context : this,
+             done : done,
+             fail : fail
+           }
+          });
+
+          this.getBeeHive().getService("Api").request(request);
+        },
+
+      orcidPage :function(){
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page');
+      },
+
+      authenticationPage: function(subView){
+        //possible subViews: "login", "register", "reset-password"
+        if (subView && !_.contains(["login", "register", "reset-password-1", "reset-password-2"], subView)){
+            throw new Error("that isn't a subview that the authentication page knows about")
+        }
+         this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
+      },
+
+      settingsPage : function(subView){
+        //possible subViews: "token", "password", "email", "preferences"
+        if (subView && !_.contains(["token", "password", "email", "preferences"], subView)){
+          throw new Error("that isn't a subview that the settings page knows about")
+        }
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'settings-page', {subView: subView});
       },
 
       noPageFound : function() {
@@ -112,6 +212,7 @@ define([
     });
 
     _.extend(Router.prototype, Dependon.BeeHive);
+
     return Router;
 
   });
