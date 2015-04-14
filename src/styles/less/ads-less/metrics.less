@@ -1,22 +1,25 @@
-@media screen {
 
 .s-metrics-svg {
-  height: 340px !important;
+  height: 345px !important;
 }
 
-
 .s-metrics-title {
+
+  margin-bottom: 10px;
   padding: 1px 2%;
-  background-color: lighten(@brand-info, 33%);
-  margin-right: -1px;
+  background-color: lighten(@gray-lighter, 2%);
+  border-bottom: 3px solid darken(@gray-lighter, 6%);
 
   h3 {
-    margin: 8px 0;
-    font-size: 20px;
+    margin: 6px 0;
+    font-size: 28px;
+    font-weight: 300;
   }
 }
 
-
+  .s-metrics-section {
+    min-height: 460px;
+  }
 
 .s-metrics-table, .s-metrics-graph {
 
@@ -77,7 +80,7 @@
 
 
 .s-graph-tab {
-  float:left;
+  display:inline-block;
   width: 15%;
   font-size: 14px;
   margin: 0 10px 20px 0;
@@ -85,7 +88,7 @@
   cursor: pointer;
   font-weight: 600;
   padding: 5px;
-  border-bottom: 2px solid #fff;
+  border-bottom: 3px solid #fff;
 
 
   &:first-of-type {
@@ -93,7 +96,7 @@
   }
 
   &:hover {
-    border-bottom: 2px solid lighten(@brand-primary-faded, 30%);
+    border-bottom: 3px solid lighten(@brand-primary-faded, 30%);
   ;
   }
 
@@ -102,7 +105,7 @@
 }
 
 .s-graph-tab.active{
-  border-bottom: 2px solid @brand-primary-faded;
+  border-bottom: 3px solid @brand-primary-faded;
   color:  @brand-primary-faded;
 }
 
@@ -142,102 +145,7 @@
   .box-shadow(2px 2px 2px @gray-light)
 }
 
-}
-
-/* print stylesheet */
-
-@media print {
-
-  .s-results-control-row-container {
-    display :none;
-  }
-
-  .s-results-control-row {
-    display : none;
-  }
-
-  .s-metrics-metadata {
-    display:none
-  }
-
-  .s-large-close {
-    display : none;
-  }
-
-
-  .s-search-bar-full-width-container {
-    display : none
-  }
-
-  .s-metrics-table {
-    font-size : 10px;
-    width : 300px;
-    float: left;
-    padding: 0;
-    margin: 0;
-
-    td:nth-of-type(2) * {
-      display:none
-
-    }
-  }
-
-  .s-metrics-title {
-    clear:both;
-  }
-
-  .s-metrics-graph {
-    width: 600px;
-    float : left;
-    padding: 0 0 0 20px;
-    margin: 0;
-  }
-
-  .s-metrics-svg {
-
-    height : 350px;
-
-  }
-
-  .s-graph-tab {
-    display: none;
-  }
-
-  .s-metrics-title {
-    h3 {
-      font-size: 14px;
-      margin: 5px;
-      border-bottom: 2px solid @brand-primary;
-    }
-  }
-
-  .s-main-content-container {
-    width: 100%;
-    border: 0px;
-  }
-
-  .s-stable-search-bar-height {
-    height: 0px;
-  }
-
-  .navbar-inverse {
-    height: 0px;
-
-  }
-
- #body-template-container {
-    visibility: hidden;
-  }
-
- div[data-widget=Metrics]{
-   visibility: visible !important;
-   width: 150%;
-   position: relative;
-   top: -60px;
-   left: -180px;
- }
 
 
 
 
-}
