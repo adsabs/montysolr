@@ -4,11 +4,10 @@
     {{#if normalizedGraphData}}
     <div class="graph-tab s-graph-tab active {{#unless normalizedGraphData}} no-show {{/unless}}" data-tab="total">Total</div>
     <div class="graph-tab s-graph-tab {{#unless normalizedGraphData}} no-show {{/unless}}" data-tab="normalized">Normalized</div>
-
     {{/if}}
-    </div>
+    <div class="s-svg-container" >
     <svg class="s-metrics-svg"></svg>
-
+    </div>
 </div>
 
 
