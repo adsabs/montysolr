@@ -246,5 +246,7 @@ miscellanea
 
 Bumblebee is developed by ADS, some devs use WebStorm - the open-source license was kindly provided by JetBrains.
 
-[logo]: http://www.jetbrains.com/webstorm/documentation/docs/logo_webstorm.png "WebStorm"
+
+[![WebStorm](http://www.jetbrains.com/webstorm/documentation/docs/logo_webstorm.png)](http://www.jetbrains.com/webstorm)
+
 
