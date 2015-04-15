@@ -1,23 +1,49 @@
-
-<div class="s-vis-top-row">
-    <div class="s-vis-center-col">
-        <div class="one">
+<div class="container-fluid">
+<div class="row s-control-row">
+        <div class="col-sm-5">
             <div class="network-metadata s-network-metadata"></div>
         </div>
-        <div class="two">
+        <div class="col-sm-6">
             <div class="network-filter-container s-network-filter-container"></div>
         </div>
-        <div class="three">
-            <span><i class="icon-help pull-left fa-3x" data-toggle="popover" title="<b>About This Network Visualization</b>" data-content="{{helpText}}" ></i></span>
-
+        <div class="col-sm-1">
             <div class="s-large-close close-widget close">x</div>
-
-    </div>
+         </div>
 </div>
+     <div class="network-container s-network-container row">
+         <div class="col-md-7 graph-container">
 
- <div>
+         </div>
+         <div class="col-md-5 details-container">
 
-     <div class="network-container s-network-container">
+             <!--tabs-->
+
+             <div role="tabpanel">
+
+                 <!-- Nav tabs -->
+                 <ul class="nav nav-tabs" role="tablist">
+                     <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Summary</a></li>
+                     <li role="presentation"><a href="#selected-item" aria-controls="profile" role="tab" data-toggle="tab">Detail </a></li>
+                 </ul>
+
+                 <!-- Tab panes -->
+                 <div class="tab-content">
+                     <div role="tabpanel" class="tab-pane active" id="home"></div>
+                     <div role="tabpanel" class="tab-pane" id="selected-item">
+                         <br/>
+                         <br/>
+                         <b>No item selected</b>
+                         <p> Click on a section in the visualization on the left to see the papers
+                         associated with an author or group of authors.</p>
+                     </div>
+
+                 </div>
+
+             </div>
+
+
+
+         </div>
 
      </div>
  </div>

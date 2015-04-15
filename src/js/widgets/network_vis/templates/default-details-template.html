@@ -1,0 +1,56 @@
+{{#compare networkType "author"}}
+<h3><span class="s-light-font">Author Network for Query</span> {{currentQuery}}</h3>
+
+<p>This network visualization finds groups of authors within your search results.
+    You can click on the segments to view the papers connected with a group or a particular author.
+</p>
+
+<h5>Group Activity Over Time (measured in papers published)</h5>
+ <div class="time-series-container">
+ <svg viewBox="0 0 960 500"></svg>
+ </div>
+
+<br/>
+<div>
+    <a href="http://adsabs.github.io/help/actions/visualize/#author-network" target="_blank">Learn more about the author network.</a>
+</div>
+
+
+{{#if cachedQuery}}
+<button class="btn btn-default load-author-network" data-query="{{cachedQuery}}">
+    <i class="fa fa-arrow-left"></i>
+    Go back to previous author network ({{cachedQuery}})
+</button>
+{{else}}
+<!--only show this for first time view of network-->
+
+<p>If you are interested in seeing the author network for another author, you can do that directly
+    by clicking on the author in the ring visualization, then clicking the button at the top.</p>
+
+<p>You can zoom and drag the visualization to reposition it.</p>
+
+{{/if}}
+
+
+
+
+</div>
+
+{{/compare}}
+
+
+{{#compare networkType "paper"}}
+<h3><span class="s-light-font">Paper Network for Query</span> {{currentQuery}}</h3>
+
+<p>The segments of the visualization to the left represent groups of papers from your result set which cite similar papers. </p>
+
+<h5>Group Activity Over Time (measured in papers published)</h5>
+<div class="time-series-container">
+    <svg viewBox="0 0 960 500"></svg>
+</div>
+
+<br/>
+<p>Click on a group to learn more about the papers within the group, as well as the papers cited by those papers.</p>
+<a href="http://adsabs.github.io/help/actions/visualize/#paper-network" target="_blank">Learn more about the paper network.</a>
+
+{{/compare}}

@@ -63,7 +63,10 @@ WordCloud
 
 .s-vis-item-format {
 
-  margin-bottom: 30px;
+  background: @gray-lightest;
+  padding: 15px 5px;
+  .lh-box-shadow(2px 2px 2px @default-box-shadow-color);
+  margin-bottom: 20px;
 
 }
 
@@ -262,10 +265,24 @@ Year, Citation and Reference Graphs
 .s-selected-items-container {
   position : relative;
   left : -4%;
-
-
 }
 
+.s-control-row {
+  border-bottom: 1px solid @gray-lighter;
+  padding-bottom: 15px;
+}
+
+.details-container .line {
+  stroke-opacity: .8
+}
+
+.details-container text {
+  font-size: 20px;
+}
+
+.graph-container {
+  border-right: 1px solid @gray-lighter;
+}
 
 .s-detail-top-row {
   padding : 3%;
@@ -273,19 +290,12 @@ Year, Citation and Reference Graphs
   right: 2px;
 }
 
-.s-vis-top-row {
-  padding: 1%;
-  border-radius: @border-radius-base;
-  .clearfix;
-  background-color: #fff;
-
+.load-author-network {
+  margin-top: 20px;
 }
 
-.s-vis-col {
-  width : 50%;
-  float: left;
-}
 .s-vis-center-col {
+
   div.one {
     width: 30%;
     display: inline-block;
@@ -314,6 +324,7 @@ Year, Citation and Reference Graphs
 .node-path {
   cursor: pointer;
   fill-opacity: .8;
+  .lh-transition(all, .3s, linear)
 }
 .node-path:hover {
   fill-opacity: 1;
@@ -339,18 +350,12 @@ Year, Citation and Reference Graphs
   position: relative;
 }
 
-.paper-description {
-  background: white;
-  overflow: auto;
-  height: 240px;
-  position: relative;
-  top: 17px;
-}
 .link {
   stroke:@gray-dark;
   stroke-opacity: .4;
   fill: none;
   cursor: pointer;
+  .lh-transition(all, .3s, linear)
 }
 
 .author .link:hover {
@@ -386,9 +391,6 @@ Year, Citation and Reference Graphs
   fill: darken(@brand-warning, 15%);
 }
 
-.s-network-chart{
-    min-height: 900px;
-}
 
 .s-network-filter-container {
 
@@ -400,6 +402,7 @@ Year, Citation and Reference Graphs
 .s-connector-node {
     text-anchor: middle;
     font-size: 25px;
+    cursor: move;
 }
 
 
@@ -412,35 +415,32 @@ Year, Citation and Reference Graphs
 
 .s-view-in-ads-button {
   text-align: center;
-  padding-top: 25px;
-  div {
-    margin-bottom: 4px;
-  }
+  padding-top: 10px;
+
 }
 
 .s-network-control-panel {
-  position: absolute;
-  left: 3%;
   padding-left: 2%;
-  padding-top: 1%;
-  width: 30%;
-
+  margin-bottom: 11px;
+  height: 15px;
   input[type=checkbox]{
     margin: 25px 0;
   }
 
 }
 
-.s-network-graph-div{
-  display: inline-block;
-  width: 89%;
-  margin-left:10%
+.s-network-container {
+  .axis  {
+    stroke-width: 2px;
+  }
 }
 
-.s-network-container{
-  position: relative;
-  width:1000px;
+.s-network-widget {
+  @media (min-width: @screen-md-min){
+    min-height: 1200px;
+  }
 }
+
 
 .s-filter-names-container{
   display: inline-block;
@@ -465,31 +465,9 @@ Year, Citation and Reference Graphs
 }
 
 .author-detail-header {
-  background: white;
-  width: 200px;
   position: relative;
-  left: 55px;
-  text-align: center;
   h5 {
     padding-bottom: 5px;
-  }
-}
-.author-detail-header h6 {
-  margin: 0;
-}
-
-.s-network-detail-area {
-  .unselectable;
-  top: 237px;
-  width: 330px;
-  left: 42%;
-  position: absolute;
-  font-size: 12px;
-  //to prevent bleeding over onto the visualization
-  border-radius: 90px;
-
-  ul {
-    margin: 0;
   }
 }
 
@@ -500,9 +478,8 @@ Year, Citation and Reference Graphs
     fill-opacity:1;
   }
 
-  .s-paper-network-detail-container {
-    background-color: #fff;
-    border-left: 3px solid @gray;
+  .s-network-detail-container {
+    border-left: 1px solid @gray-lighter;
     min-height: 600px;
     .lh-border-radius(none);
     .instructions {
@@ -511,12 +488,8 @@ Year, Citation and Reference Graphs
       text-align: center;
     }
   }
-  .s-network-graph-div {
-  display:inline-block;
-  width: 55% !important;
-  vertical-align: top;
-   }
-  .s-paper-network-detail-container {
+
+  .s-network-detail-container {
     display:inline-block;
     width: 44% !important;
     vertical-align: top;
@@ -525,12 +498,6 @@ Year, Citation and Reference Graphs
     }
   }
 
-  .s-paper-network-link-data-header{
-    background-color: @gray-lighter;
-  }
-  .s-network-container {
-    width: 100%;
-  }
   .s-network-graph-div {
     margin-left: 0;
   }
@@ -553,10 +520,14 @@ Year, Citation and Reference Graphs
 }
 
 .s-group-title {
-  padding: 2%;
-  h3 {
-    color : black;
-  }
+  padding: 1%;
+  margin-bottom: 30px;
+}
+
+.graph-container .s-network-loader{
+  position: relative;
+  left: 45%;
+  top: 200px;
 }
 
 .s-network-widget .icon-help {
@@ -565,13 +536,24 @@ Year, Citation and Reference Graphs
 
 .s-network-rows {
   width: 67px;
+  display:inline;
 }
 
 .s-network-metadata, .s-network-filter-container {
 
   padding: 1%;
-  background-color: @gray-lightest;
   height: 100px;
+
+}
+.author-detail-header{
+
+  padding : 10px 0;
+
+  .filter-add, .filter-remove {
+    position: absolute;
+    top: 10px;
+    right: 0px;
+  }
 
 }
 

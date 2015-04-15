@@ -27,6 +27,9 @@ define([
      *
      * @param beehive (hardened version)
      */
+
+    className : "s-tabs-widget",
+
     activate: function(beehive) {
       var children = [];
       var hardenedBee;

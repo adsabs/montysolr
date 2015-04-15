@@ -10,7 +10,7 @@ define([
 
   describe("Network Visualization Widget (network_widget.spec.js)", function () {
 
-    var testDataSmall, testDataLarge, testDataEmpty, networkWidget;
+    var testDataSmall, testDataLarge, testDataEmpty;
 
     testDataSmall = {"data": {"fullGraph": {"links": [
       {"source": 10, "target": 15, "value": 13.509433962264154},
@@ -1689,16 +1689,25 @@ define([
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
     $("#test").append(networkWidget.view.el);
 
+    var apiQuery = new ApiQuery({q: "star"})
+
     //this should show not enough data template
-    networkWidget.processResponse(new JsonResponse(testDataSmall));
+    var j = new JsonResponse(testDataSmall);
+    j.setApiQuery(apiQuery);
+    networkWidget.processResponse(j);
     expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
 
+    var j = new JsonResponse(testDataEmpty);
+    j.setApiQuery(apiQuery);
     //this should also show not enough data template
-    networkWidget.processResponse(new JsonResponse(testDataEmpty));
+    networkWidget.processResponse(j);
     expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
 
+
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
     //this should show a donut chart with hidden link layer, representing the data
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    networkWidget.processResponse(j);
 
     expect($("#test").find(".link").length).to.eql(testDataLarge.data.link_data.length);
 
@@ -1714,7 +1723,12 @@ define([
   it("allows you to click to view more data about a node or a group", function () {
 
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+    networkWidget.processResponse(j);
     $("#test").append(networkWidget.view.el);
 
     // this would be the result of a click on group 1
@@ -1736,17 +1750,20 @@ define([
     networkWidget.view.graphView.model.set("selectedEntity", accomazziNode);
     expect($("#test").find(".paper-description li").length).to.eql(25);
 
-    //and this should remove the center div
-    networkWidget.view.graphView.model.set("selectedEntity", undefined);
-
-    expect($("#test").find(".paper-description").length).to.eql(0);
 
   });
 
   it("has a filter capability that allows you to add or remove groups or individual nodes, and submit as a filter", function () {
 
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+
+    networkWidget.setOriginalQuery(apiQuery);
+    networkWidget.processResponse(j);
     $("#test").append(networkWidget.view.el);
 
     // this would be the result of a click on group 1
@@ -1805,7 +1822,12 @@ define([
     var citationRatio = citation1 / citation2;
 
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+    networkWidget.processResponse(j);
+
     $("#test").append(networkWidget.view.el);
 
     var group1Path = $("#test").find("g.node-containers:not(.author-node)").eq(1).find("path").eq(0)[0];
@@ -1823,8 +1845,12 @@ define([
     var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
     $("#test").append(networkWidget.view.el);
 
-    var minsub = new MinimalPubsub({verbose: false});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
+    var apiQuery = new ApiQuery({q: "star"})
+    var j = new JsonResponse(testDataLarge);
+    j.setApiQuery(apiQuery);
+
+    networkWidget.processResponse(j);
+
     expect(networkWidget.resetWidget).to.be.instanceof(Function);
 
     expect(networkWidget.view.graphView.$el.children().length).not.be.eql(0);
@@ -1834,22 +1860,6 @@ define([
     expect(networkWidget.view.graphView.$el.children().length).to.be.eql(0);
     expect(networkWidget.model.get('data')).to.be.undefined;
     expect(_.keys(networkWidget.view.graphView._listeningTo).length).to.be.eql(0);
-  });
-
-  it("has a help popover that is accessible by hovering over the question mark icon", function () {
-
-    var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
-    $("#test").append(networkWidget.view.el);
-
-    var minsub = new MinimalPubsub({verbose: false});
-    networkWidget.processResponse(new JsonResponse(testDataLarge));
-
-    //it uses the standard bootstrap popover, you just need to make sure the data-content attribute is correct
-    expect(networkWidget.view.$(".icon-help").attr("data-content")).to.eql("test");
-    expect($("div.popover").length).to.eql(0);
-
-    networkWidget.view.$(".icon-help").mouseover();
-    expect($("div.popover").length).to.eql(1);
   });
 
   it("should allow the user to request a different number of documents", function (done) {
@@ -1897,6 +1907,395 @@ define([
     }, 800);
 
   });
+
+    it("should render a graph that shows the time distribution of the papers published by the various groups", function(){
+
+      //a simplified version of the data the author network gets
+     var graphData = { "root": {
+       "children": [
+         {
+           "children": [
+             {
+               "papers": [
+                 "2000A&AS..143...41K",
+                 "1998ASPC...52..132K"
+               ]
+
+             },
+             {
+
+               "papers": [
+                 "2005JASIS..56..111K"
+               ]
+             },
+             {
+               "papers": [
+                 "2010ASPC..434..155K"
+               ]
+             }
+           ]
+         },
+         {
+           "children": [
+             {
+               "papers": [
+                 "1985AJ.....90.1665B",
+                 "1984BAAS...16..457B"
+               ]
+             },
+             {
+               "papers": [
+                 "1985AJ.....90.1665K",
+                 "1984BAAS...16..457K"
+               ]
+             }
+           ]
+         }
+       ]}
+     };
+
+
+      var detailsView = new NetworkWidget.prototype.testing.detailView({
+        networkType : "author",
+        cachedQuery : "fakeCached",
+        currentQuery : new ApiQuery({q: "fake"}),
+        graphData : graphData
+      });
+
+      var processed = detailsView.getData();
+
+      expect(processed).to.eql([
+        {
+          "name": 0,
+          "values": [
+            {
+              "year": 1998,
+              "amount": 1
+            },
+            {
+              "year": 1999,
+              "amount": 0
+            },
+            {
+              "year": 2000,
+              "amount": 1
+            },
+            {
+              "year": 2001,
+              "amount": 0
+            },
+            {
+              "year": 2002,
+              "amount": 0
+            },
+            {
+              "year": 2003,
+              "amount": 0
+            },
+            {
+              "year": 2004,
+              "amount": 0
+            },
+            {
+              "year": 2005,
+              "amount": 1
+            },
+            {
+              "year": 2006,
+              "amount": 0
+            },
+            {
+              "year": 2007,
+              "amount": 0
+            },
+            {
+              "year": 2008,
+              "amount": 0
+            },
+            {
+              "year": 2009,
+              "amount": 0
+            },
+            {
+              "year": 2010,
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "name": 1,
+          "values": [
+            {
+              "year": 1984,
+              "amount": 2
+            },
+            {
+              "year": 1985,
+              "amount": 2
+            }
+          ]
+        }
+      ]);
+
+//a simplified version of the data that the paper network gets
+
+      var graphData =   {
+        "fullGraph": {
+          "nodes": [
+            {
+              "group": 0,
+              "node_name": "2004AJ....128.1078R"
+            },
+            {
+              "group": 1,
+              "node_name": "2014arXiv1406.4542H"
+            },
+            {
+              "group": 1,
+              "node_name": "2009arad.workE..32A"
+            },
+            {
+              "group": 0,
+              "node_name": "1999ApJ...517L..23G"
+            },
+            {
+              "group": 1,
+              "node_name": "1998ASPC..153..277E"
+            },
+            {
+              "group": 1,
+              "node_name": "2007ASPC..377...36E"
+            },
+            {
+              "group": 1,
+              "node_name": "2006cs........6079H"
+            },
+            {
+
+              "group": 1,
+              "node_name": "2007arXiv0709.0896K"
+
+            },
+            {
+              "group": 0,
+              "node_name": "2003ASPC..295...51M"
+            }
+          ]
+        },
+        "summaryGraph": {
+          "nodes": [
+            {
+              "id": 0,
+              "node_name": 1
+            },
+            {
+              "id": 1,
+              "node_name": 3
+            }
+          ]
+        }
+      };
+
+      //now test the paper network graph, which is generated differently
+
+      var detailsView = new NetworkWidget.prototype.testing.detailView({
+        networkType : "paper",
+        cachedQuery : "fakeCached",
+        currentQuery : new ApiQuery({q: "fake"}),
+        graphData : graphData
+      });
+
+      var processed = detailsView.getData();
+
+      expect(processed).to.eql([
+        {
+          "name": 0,
+          "values": [
+            {
+              "year": 1999,
+              "amount": 1
+            },
+            {
+              "year": 2000,
+              "amount": 0
+            },
+            {
+              "year": 2001,
+              "amount": 0
+            },
+            {
+              "year": 2002,
+              "amount": 0
+            },
+            {
+              "year": 2003,
+              "amount": 1
+            },
+            {
+              "year": 2004,
+              "amount": 1
+            }
+          ]
+        },
+        {
+          "name": 2,
+          "values": [
+            {
+              "year": 1998,
+              "amount": 1
+            },
+            {
+              "year": 1999,
+              "amount": 0
+            },
+            {
+              "year": 2000,
+              "amount": 0
+            },
+            {
+              "year": 2001,
+              "amount": 0
+            },
+            {
+              "year": 2002,
+              "amount": 0
+            },
+            {
+              "year": 2003,
+              "amount": 0
+            },
+            {
+              "year": 2004,
+              "amount": 0
+            },
+            {
+              "year": 2005,
+              "amount": 0
+            },
+            {
+              "year": 2006,
+              "amount": 1
+            },
+            {
+              "year": 2007,
+              "amount": 2
+            },
+            {
+              "year": 2008,
+              "amount": 0
+            },
+            {
+              "year": 2009,
+              "amount": 1
+            },
+            {
+              "year": 2010,
+              "amount": 0
+            },
+            {
+              "year": 2011,
+              "amount": 0
+            },
+            {
+              "year": 2012,
+              "amount": 0
+            },
+            {
+              "year": 2013,
+              "amount": 0
+            },
+            {
+              "year": 2014,
+              "amount": 1
+            }
+          ]
+        }
+      ]);
+
+    })
+
+    it("should allow the user to hop to another author network from that author's detail page, while providing a back button", function(){
+
+      var networkWidget = new NetworkWidget({networkType: "author", endpoint: "author-network", helpText: "test"});
+      $("#test").append(networkWidget.view.el);
+
+      var minsub = new (MinimalPubsub.extend({
+        request: function (apiRequest) {
+          return undefined;
+        }
+      }))({verbose: false});
+
+      networkWidget.activate(minsub.beehive.getHardenedInstance());
+
+      networkWidget.pubsub.publish = sinon.spy();
+
+      var apiQuery = new ApiQuery({q: "star"})
+      var j = new JsonResponse(testDataLarge);
+      j.setApiQuery(apiQuery);
+
+      networkWidget.setOriginalQuery(apiQuery);
+
+      networkWidget.processResponse(j);
+
+      expect($(".details-container h3").text()).to.eql('Author Network for Query star');
+      //there is no cached query, so no back button
+      expect($(".load-author-network").length).to.eql(0);
+
+      //setting selected as "Murray, S"
+      var selected = d3.selectAll(".author-node")[0][0];
+      networkWidget.view.graphModel.set("selectedEntity", selected);
+
+
+      $("#test").find(".load-author-network").click();
+
+      expect(networkWidget.pubsub.publish.callCount).to.eql(1);
+      expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-Execute-Request");
+      expect(networkWidget.pubsub.publish.args[0][1].toJSON().query.toJSON()).to.eql({
+        "q": [
+          "author:\"Murray, S\""
+        ],
+        "rows": [
+          300
+        ]
+      });
+
+      //it's cached the older query
+      expect(networkWidget.model.get("cachedQuery").toJSON()).to.eql({
+        "q": [
+          "star"
+        ]
+      });
+
+      var apiQuery = new ApiQuery({q: "\"Murray, S\""})
+      var j = new JsonResponse(testDataLarge);
+      j.setApiQuery(apiQuery);
+
+      networkWidget.processResponse(j);
+
+      expect($(".details-container h3").text()).to.eql('Author Network for Query "Murray, S"');
+
+      //now, back button should be visible
+      expect($(".load-author-network").length).to.eql(1);
+      expect($(".load-author-network").data()).to.eql({query: "star"})
+
+      //click it
+      $(".load-author-network").click();
+
+      expect(networkWidget.pubsub.publish.callCount).to.eql(2);
+      expect(networkWidget.pubsub.publish.args[1][0]).to.eql("[PubSub]-Execute-Request");
+      expect(networkWidget.pubsub.publish.args[1][1].toJSON().query.toJSON()).to.eql(
+        {
+          "q": [
+            "star"
+          ],
+          "rows": [
+            300
+          ]
+        }
+      );
+
+    });
+
 
 });
 

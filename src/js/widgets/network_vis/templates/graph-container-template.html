@@ -1,18 +1,17 @@
-<div class="network-detail-area s-network-detail-area"></div>
-
-
 <div class="s-network-control-panel">
     <div class="detail-panel s-detail-panel">
-        <h4>Size wedges based on:</h4>
-        <label>
-            <input type="radio" name="mode" value="size" checked> Author Occurrences
+        <h4 style="display:inline-block">Size wedges based on:</h4>
+        <div class="btn-group network-sizes" data-toggle="buttons">
+        <label class="btn btn-primary active">
+            <input type="radio" name="mode" value="size" checked autocomplete="off"> Author Occurrences
         </label>
-        <label>
-            <input type="radio" name="mode" value="citation_count"> Paper Citations
-        </label><br/>
-        <label>
-            <input type="radio" name="mode" value="read_count"> Paper Downloads
+        <label class="btn btn-primary">
+            <input type="radio" name="mode" value="citation_count" autocomplete="off"> Paper Citations
         </label>
+        <label class="btn btn-primary">
+            <input type="radio" name="mode" value="read_count" autocomplete="off"> Paper Downloads
+        </label>
+        </div>
         <br/>
         <label>
             <input type="checkbox" name="show-link" value="true"> View Link Overlay
@@ -21,10 +20,11 @@
 </div>
 
 <div class="s-network-graph-div">
-    <svg class="network-chart s-network-chart">
+    <svg class="network-chart s-network-chart" viewBox="0 0 900 900">
     </svg>
 
 </div>
+
 
 
 

@@ -1,4 +1,5 @@
 // Main config file for the Discovery application
+// Main config file for the Discovery application
 require.config({
 
 
@@ -174,7 +175,7 @@ require.config({
       deps : ['backbone']
     },
     'bootstrap' : {
-      deps: ['jquery']
+      deps: ['jquery', 'jquery-ui']
     },
     // This is required to ensure Backbone works as expected within the AMD
     // environment.
@@ -210,7 +211,7 @@ require.config({
     },
 
     'jquery-ui' : {
-      deps: ['jquery', 'bootstrap']
+      deps: ['jquery']
     },
 
     'sprintf': {
