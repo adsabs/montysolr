@@ -3,14 +3,17 @@ bumblebee
 
 [![Build Status](https://travis-ci.org/adsabs/bumblebee.svg?branch=master)](https://travis-ci.org/adsabs/bumblebee)
 
-Bumblebee is an interface to Astrophysics Data System (https://ui.adsabs.harvard.edu) - we have built it to expose our search system and other components of the ADS ecosystem. 
+Bumblebee is a platform for building UI interface(s) - it was designed for Astrophysics Data System (https://ui.adsabs.harvard.edu) and its API.
 
-**Bumblebee can be used as a search front-end for any SOLR application. However it is NOT A GOOD IDEA to expose SOLR directly to the internet traffic.** If in doubt, try these projects:
+Bumblebee uses Backbone, jQuery, and Bootstrap and you will find here many custom components/widgets. **Our main 'discovery' application is essentially a very advanced front-end for any SOLR. However, be warned that your SOLR instance should to be protected against abuse*. If you don't know how, use these projects:
 
-  - http://github.com/adsabs/adsws (our API middle-layer)
+  - http://github.com/adsabs/adsws (our own API middle-layer)
   - http://github.com/adsabs/solr-service (micro-service which exposes SOLR)
 
-To get Bumblebee up and running on your machine, follow one of these instructions:
+Installation
+============
+
+To get Bumblebee up and running on your machine, follow *one* of these instructions:
 
 
 dev setup - vagrant (virtualbox)
@@ -77,8 +80,7 @@ Yes, you can develop even on Windows! ;-)
 Configuration
 =============
 
-The web application loads its config from local modules and from remote urls
-(if configured to do so). The most important config files are:
+You need to review/update configuration. The web application loads its config from local modules and from remote urls (if configured to do so). The most important config files are:
 
   * ./src/js/discovery.config.js
 
@@ -97,6 +99,21 @@ The web application loads its config from local modules and from remote urls
 
     The application can also load config from remote urls (during startup) if
     configured to do so in src/js/discoverry.vars.js >> 'bootstrapUrls'
+
+
+Deployment
+==========
+
+Bumblebee contains set of components alongside with (mini) applications. To deploy stuff, you need to make a release and expose it through a webserver. During deployment, bumblebee will minify CSS, JS and also add MD5 hashes to the libraries.
+
+```bash
+ cd bumblebee
+ grunt release
+ grunt test:release # optional step - run tests against the assembled release
+ cp -r dist /my/web/root # copy the release into a webserver
+``` 
+
+
 
 
 Developing for bumblebee
@@ -225,3 +242,9 @@ miscellanea
 - you can see the search being routed to the SOLR api by accessing: http://localhost:port/api/1/search, for instance:
   http://localhost:port/api/1/search?q=kurtz 
        
+
+
+Bumblebee is developed by ADS, some devs use WebStorm - the open-source license was kindly provided by JetBrains.
+
+[logo]: http://www.jetbrains.com/webstorm/documentation/docs/logo_webstorm.png "WebStorm"
+
