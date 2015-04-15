@@ -251,9 +251,9 @@ define([
                       "work-external-identifier": [
                         {
                           "work-external-identifier-id": {
-                            "value": "bibcode-foo"
+                            "value": "10.1126/science.276.5309.88"
                           },
-                          "work-external-identifier-type": "bibcode"
+                          "work-external-identifier-type": "doi"
                         }
                       ]
                     },
@@ -390,7 +390,7 @@ define([
 
         expect(widget.collection.models.length).to.eql(3);
         expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
-        expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('bibcode-foo');
+        expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('1997sci...276...88v'); // found through doi, alternate_bibcode:bibcode-foo
 
         orcidMode = true;
 
@@ -446,7 +446,7 @@ define([
 
           expect(widget.collection.models.length).to.eql(3);
           expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
-          expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('bibcode-foo');
+          expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql(''); // since we don't make api resolution, bibcode cannot be found
 
           done();
         }, 200);

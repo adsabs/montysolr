@@ -798,16 +798,18 @@ define([
       _updateRec: function(k, out) {
         k = k.toLowerCase();
         if (this.db[k]) {
-          if (this.db[k].isAds) {
+          var v = this.db[k];
+          if (v.isAds) {
             out.isCreatedByUs = true;
           }
           else {
             out.isCreatedByOthers = true;
           }
-          if (this.db[k].idx > -1) {
+          if (v.idx > -1) {
             out.isKnownToAds = true;
           }
-          out.putcode = this.db[k].putcode;
+          out.putcode = v.putcode;
+          out.bibcode = v.bibcode;
         }
       },
 
@@ -903,6 +905,7 @@ define([
                     if (orcidRec.idx == -1 && db[key] && db[key].idx > -1) {
                       _.extend(orcidRec, db[key]); // update empty rec with real data
                     }
+                    orcidRec.bibcode = bibcode;
                     db[key] = orcidRec;
                   });
                 });
