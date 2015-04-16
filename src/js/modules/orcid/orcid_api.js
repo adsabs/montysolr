@@ -54,7 +54,8 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/mixins/hardened',
-    'js/components/api_targets'
+    'js/components/api_targets',
+    'js/components/api_query_updater'
   ],
   function (
     _,
@@ -68,7 +69,8 @@ define([
     ApiQuery,
     ApiRequest,
     HardenedMixin,
-    ApiTargets
+    ApiTargets,
+    ApiQueryUpdater
     ) {
 
 
@@ -84,6 +86,7 @@ define([
         this.checkInterval = 3600 * 1000;
         this.virgin = true;
         this.maxQuerySize = 512;
+        this.queryUpdater = new ApiQueryUpdater('orcid_api');
       },
 
       activate: function (beehive) {
@@ -889,7 +892,7 @@ define([
                 var ps = query[j].split(':');
                 if (!q[ps[0]])
                   q[ps[0]] = [];
-                q[ps[0]].push(ps[1]);
+                q[ps[0]].push(self.queryUpdater.quoteIfNecessary(ps[1]));
               }
               whereClauses.push(self._checkOrcidIdsInAds(self._buildQuery(q)));
             }
@@ -939,7 +942,12 @@ define([
         var parts = _.map(query, function(values, field) {
           if (values.length == 0)
             return '';
-          return field + ':(' + values.join(' OR ') + ')';
+          if (field == 'doi') {
+            return '(' + _.map(values, function(x) {return 'doi:'+x}).join(' OR ') + ')';
+          }
+          else {
+            return field + ':(' + values.join(' OR ') + ')';
+          }
         }).filter(function(x) {return x.length});
         return new ApiQuery({'q': parts.join(' OR ')});
       },
