@@ -707,8 +707,8 @@ define([
 
               expect(oApi._checkOrcidIdsInAds.called).to.eql(true);
               expect(oApi._checkOrcidIdsInAds.calledTwice).to.eql(true);
-              expect(oApi._checkOrcidIdsInAds.args[0][0].get('q')).eql(["alternate_bibcode:(bibcode-foo OR test-bibcode)"]);
-              expect(oApi._checkOrcidIdsInAds.args[1][0].get('q')).eql(["bibcode:(bibcode-foo OR test-bibcode)"]);
+              expect(oApi._checkOrcidIdsInAds.args[0][0].get('q')).eql(["alternate_bibcode:(\"bibcode-foo\" OR \"test-bibcode\")"]);
+              expect(oApi._checkOrcidIdsInAds.args[1][0].get('q')).eql(["bibcode:(\"bibcode-foo\" OR \"test-bibcode\")"]);
 
 
               expect(recInfo.isCreatedByUs).to.eql(true);
