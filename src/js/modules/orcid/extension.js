@@ -97,6 +97,10 @@ define([
               recInfo.done(function(rInfo) {
                 //console.log('ready: ' + d.bibcode + JSON.stringify(rInfo));
                 d.orcid = self._getOrcidInfo(rInfo);
+                // enhance the ORCID record with an identifier
+                // the bibcode, if there, was discovered from our api
+                if (!d.identifier && rInfo.bibcode)
+                  d.identifier = rInfo.bibcode;
               });
             }
 
