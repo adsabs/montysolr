@@ -59,8 +59,8 @@ define([
 
       //have to put all ids for widgets on the abstract page that need loading views here
 
-      ids.push(this.getApp().__widgets.get("ShowRecommender").pubsub.getPubSubKey().getId());
-      ids.push(this.getApp().__widgets.get("ShowResources").pubsub.getPubSubKey().getId());
+      ids.push(this.getApp().getWidget("ShowRecommender").pubsub.getCurrentPubSubKey().getId());
+      ids.push(this.getApp().getWidget("ShowResources").pubsub.getCurrentPubSubKey().getId());
 
       // remove alerts from previous searches
       this.getAlerter().alert(new ApiFeedback({
@@ -120,7 +120,6 @@ define([
         });
         return; // do not bother with the rest
       }
-
 
       // too many results
       if (feedback.numFound > 1000) {
