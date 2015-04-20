@@ -94,11 +94,23 @@ function(
 
       $(".show-login").click();
 
-      expect(publishStub.args[1]).to.eql([
+      expect(publishStub.args[2]).to.eql([
         "[Router]-Navigate-With-Trigger",
         "authentication-page",
         {
           "subView": "login"
+        }
+      ]);
+
+      a.setSubView("login");
+
+      $(".show-reset-password-1").click();
+
+      expect(publishStub.args[3]).to.eql([
+        "[Router]-Navigate-With-Trigger",
+        "authentication-page",
+        {
+          "subView": "reset-password-1"
         }
       ]);
 
@@ -173,6 +185,49 @@ function(
 
       $("#test").find("button[type=submit]").click();
       expect(triggerStub.callCount).to.eql(1);
+
+
+    });
+
+
+    it("should show proper success views", function(){
+
+
+
+    });
+
+    it("should be able to handle the user announcement", function(){
+
+      //testing only a single view-- is this ok?
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {}
+      }))({verbose: false});
+
+      var hardened = minsub.beehive.getHardenedInstance();
+      sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
+
+      var a = new AuthenticationWidget({test: true});
+
+      a.activate(hardened);
+      $("#test").append(a.view.render().el);
+
+      a.resetAll = sinon.spy();
+
+      minsub.publish(minsub.USER_ANNOUNCEMENT, "register_success");
+
+      //all user announcements cause the 3 auth models to reset
+      expect(a.resetAll.callCount).to.eql(1);
+
+      //check presence of register success view
+      expect($(".s-form-container").text().trim()).to.eql('Registration Successful\n    \n    \n         Check your email for further instructions.');
+
+      debugger;
+
+
+      minsub.publish(minsub.USER_ANNOUNCEMENT, "reset_password_1_success");
+
+      expect($(".s-form-container").text().trim()).to.eql('Password Reset Successful\n    \n    \n         Check your email for further instructions.');
+
 
 
     });

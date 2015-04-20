@@ -88,7 +88,7 @@ define([
 
         });
 
-        for (i = 0; i < subViews.length; i++ ){
+        for (var i = 0; i < subViews.length; i++ ){
 
           expect(publishStub.args[i]).to.eql([ "[Router]-Navigate-With-Trigger", "settings-page",  { "subView": subViews[i]} ]);
 
@@ -208,21 +208,60 @@ define([
 
     var minsub = new (MinSub.extend({
       request: function (apiRequest) {}
-    }))({verbose: false});
+    }))({verbose: false})
+
+    var fakeSession = new Session();
+
+    fakeSession.logout = sinon.spy();
+    fakeSession.getRecaptchaKey = function(){return "foo"};
+
+    fakeSession.postData =  sinon.spy();
+
+    minsub.beehive.addObject("Session", fakeSession)
 
     var hardened = minsub.beehive.getHardenedInstance();
-    var postDataSpy = sinon.spy();
 
-    sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}, postData: postDataSpy}})
+    UserSettings.prototype.resetModels = sinon.spy();
 
     var u = new UserSettings();
+
     u.activate(hardened);
-    u.getUserData = sinon.stub();
+    u.getUserData = sinon.spy();
+    u.pubsub.subscribeOnce = sinon.spy();
+    sinon.stub(u.pubsub, "publish");
     $("#test").append(u.view.render().el);
 
-    minsub.publish(minsub.USER_ANNOUNCEMENT, "data_post_successful", "TOKEN");
+    minsub.publish(minsub.USER_ANNOUNCEMENT, "data_post_successful", "CHANGE_PASSWORD");
 
-    expect(u.getUserData.callCount).to.eql(1);
+    //this also fetches data
+    expect(u.resetModels.callCount).to.eql(1);
+
+    expect($("#test").find(".content-container").text().trim()).to.eql("Password Changed\n    \n    \n         Next time you log in, please use your new password");
+
+
+    expect(fakeSession.logout.callCount).to.eql(0);
+
+    u.subViewModels.changeEmailModel.set("email", "fakeEmail");
+
+    minsub.publish(minsub.USER_ANNOUNCEMENT, "data_post_successful", "CHANGE_EMAIL");
+
+    expect(u.pubsub.subscribeOnce.args[0][0]).to.eql("[Router]-Navigate-With-Trigger");
+
+
+    //call the callback that will be called on navigate
+    u.pubsub.subscribeOnce.args[0][1]();
+
+
+    expect(u.pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
+
+    expect(u.pubsub.publish.args[0][1].msg).to.eql("Please check <b>fakeEmail</b> for further instructions")
+
+
+
+
+
+
+    expect(fakeSession.logout.callCount).to.eql(1);
 
   });
 

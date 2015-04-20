@@ -382,7 +382,6 @@ define([
       if (options.test)
         window.grecaptcha = null;
 
-
     },
 
     navigateToLoginForm : function(){
