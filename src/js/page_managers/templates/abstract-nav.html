@@ -1,23 +1,23 @@
 <nav class="s-abstract-nav-col s-nav-container">
-    <div class="s-nav-header s-view-nav">View   <i class="icon-list"></i></div>
+    <div class="s-nav-header s-view-nav">view   <i class="icon-list"></i></div>
 
     {{#each view}}
 
     <a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}}  data-bypass>
-        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}} {{#unless this.isActive}} s-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
+    <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}} {{#unless this.isActive}} s-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
             <span class="s-content">
             {{this.title}}
             {{#if this.showCount}}
             <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
             {{/if}}
             </span>
-        </div>
+    </div>
     </a>
 
     {{/each}}
 
 
-    <div class="s-nav-header s-export-nav">Export <i class="icon-export"></i> </div>
+    <div class="s-nav-header s-export-nav">export <i class="icon-export"></i> </div>
 
     <a href="#" data-bypass>
         <div class="abstract-nav s-nav s-nav-inactive">
@@ -25,12 +25,12 @@
             <span class="num-items"></span>
         </div>
         <div class="abstract-nav s-nav s-nav-inactive">
-             in Endnote
+            in Endnote
             <span class="num-items"></span>
         </div>
     </a>
 
-    <div class="s-nav-header s-analyze-nav">Explore   <i class="icon-explore"></i></div>
+    <div class="s-nav-header s-analyze-nav">explore   <i class="icon-explore"></i></div>
 
     {{#each explore}}
 
