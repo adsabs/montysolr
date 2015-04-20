@@ -6,6 +6,7 @@ define([
   ){
 
   //some functions to be used by form views which auto-validate
+
   var formFunctions = {
     //for the view
     //call in onRender method to activate the recaptcha

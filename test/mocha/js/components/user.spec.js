@@ -86,7 +86,7 @@ define([
      var hardened = u.getHardenedInstance();
      expect(hardened.__facade__).equals(true);
      expect(hardened.handleCallbackError).to.be.undefined;
-     expect(_.keys(hardened)).to.eql(["completeLogIn", "completeLogOut", "isLoggedIn", "postData", "getUserData", "getUserName", "isOrcidModeOn", "setOrcidMode", "setUser", "__facade__", "mixIn"]);
+     expect(_.keys(hardened)).to.eql(["completeLogIn", "completeLogOut", "isLoggedIn", "postData", "putData", "getUserData", "getUserName", "isOrcidModeOn", "setOrcidMode", "setUser", "__facade__", "mixIn"]);
 
    });
 
@@ -186,6 +186,19 @@ define([
      expect(request.toJSON().options.type).to.eql("POST");
      expect(request.toJSON().options.data).to.eql('{"old_password":"foo","new_password1":"goo","new_password_2":"goo"}');
      expect(request.toJSON().options.context).to.eql(u);
+
+
+     u.putData("TOKEN")
+
+     var request2 = requestStub.args[1][0];
+
+     expect(request2).to.be.instanceof(ApiRequest);
+     expect(request2.toJSON().target).to.eql("accounts/token");
+     expect(request2.toJSON().options.type).to.eql("PUT");
+     expect(request2.toJSON().options.data).to.eql(undefined);
+     expect(request2.toJSON().options.context).to.eql(u);
+
+
 
      requestStub.restore();
 

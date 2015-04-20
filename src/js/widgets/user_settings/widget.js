@@ -108,8 +108,6 @@ define([
       //manually close the modal, for some reason just the close markup
       //only works some of the time
       this.$(".modal").modal('hide');
-      $('body').removeClass('modal-open');
-      $('.modal-backdrop').remove();
       FormFunctions.triggerSubmit.apply(this, arguments);
 
     },
@@ -213,7 +211,9 @@ define([
   var ChangeTokenView, ChangeTokenModel;
 
   ChangeTokenModel = FormModel.extend({
-    target : "TOKEN"
+    target : "TOKEN",
+    /*otherwise submit will call the user's "postData" method*/
+    PUT : true
   });
 
   ChangeTokenView = FormView.extend({
@@ -368,7 +368,6 @@ define([
     showConfirmModal: function(){
       this.$(".confirm-modal").modal();
     },
-
 
     showView : function(model){
       if (!model){
@@ -532,7 +531,12 @@ define([
    submitForm : function(model){
      var user = this.beehive.getObject("User");
      var target = model.target;
-     user.postData(target, model.toJSON());
+     if (model.PUT){
+       user.putData(target, model.toJSON());
+     }
+     else {
+       user.postData(target, model.toJSON());
+     }
    },
 
    // this function puts the data from user object into the correct models

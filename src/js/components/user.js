@@ -199,11 +199,11 @@ define([
       this.composeRequest(target, "GET");
     },
 
-    /*post data to endpoint: accessible through facade (1 of 3)*/
+    /*post data to endpoint: accessible through facade*/
     postData: function (target, data) {
       //make sure it has a callback to access later
       if (!this.callbacks[target]){
-        throw new Error("a post request was made that doesn't have a success callback");
+        throw new Error("a POST request was made that doesn't have a success callback");
       }
       if (this.additionalParameters[target]){
         _.extend(data, this.additionalParameters[target]);
@@ -211,7 +211,19 @@ define([
       return this.composeRequest(target, "POST", data);
     },
 
-    /*return read-only copy of user model(s) for widgets: accessible through facade(2 of 3)*/
+    /*PUT data to pre-existing endpoint: accessible through facade */
+    putData: function (target, data) {
+      //make sure it has a callback to access later
+      if (!this.callbacks[target]){
+        throw new Error("a PUT request was made that doesn't have a success callback");
+      }
+      if (this.additionalParameters[target]){
+        _.extend(data, this.additionalParameters[target]);
+      }
+      return this.composeRequest(target, "PUT", data);
+    },
+
+    /*return read-only copy of user model(s) for widgets: accessible through facade */
     getUserData : function(target){
       var data = {}, collection;
       if (target){
@@ -310,6 +322,7 @@ define([
       completeLogOut: "clear user object",
       isLoggedIn: "whether the user is logged in",
       postData: "POST new values to user endpoint (params: endpoint, data)",
+      putData: "PUT new values to endpoint (params: endpoing, data)",
       getUserData: "get a copy of user data currently in the model for an endpoint, or all user data (params: optional endpoint)",
       getUserName: "get the user's email before the @",
       isOrcidModeOn : "figure out if user has Orcid mode activated",
