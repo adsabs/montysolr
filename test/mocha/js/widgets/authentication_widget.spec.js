@@ -190,12 +190,6 @@ function(
     });
 
 
-    it("should show proper success views", function(){
-
-
-
-    });
-
     it("should be able to handle the user announcement", function(){
 
       //testing only a single view-- is this ok?
@@ -220,9 +214,6 @@ function(
 
       //check presence of register success view
       expect($(".s-form-container").text().trim()).to.eql('Registration Successful\n    \n    \n         Check your email for further instructions.');
-
-      debugger;
-
 
       minsub.publish(minsub.USER_ANNOUNCEMENT, "reset_password_1_success");
 
