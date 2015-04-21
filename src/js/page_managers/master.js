@@ -94,7 +94,10 @@ define([
           model.attributes.numAttach += 1;
 
           //scroll up automatically
-//          window.scrollTo(0,0);
+          window.scrollTo(0,0);
+          //fix the search bar back into its default spot
+          $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion");
+          $(".s-quick-add").removeClass("hidden");
         }
         else {
           if (model.attributes.object.view.$el.parent().length > 0) {

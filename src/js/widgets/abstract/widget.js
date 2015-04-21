@@ -98,11 +98,12 @@ define([
 
       className : "s-abstract-metadata",
 
-      initialize: function () {
-        this.listenTo(this.model, "change", this.render)
+      modelEvents : {
+        "change" : "render"
       },
 
       template: abstractTemplate,
+
       events: {
         "click #toggle-aff": "toggleAffiliation",
         "click #toggle-more-authors": "toggleMoreAuthors",
@@ -146,6 +147,8 @@ define([
       },
 
       onRender : function(){
+        console.timeEnd("absStart")
+
         this.$(".icon-help").popover({trigger : "hover", placement : "right", html :true});
       }
 
@@ -175,32 +178,44 @@ define([
       },
 
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,pubdate,doi,pub_raw'
+        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,pubdate,doi,pub_raw',
+        rows: 40
       },
 
+      onNewQuery: function (apiQuery) {
 
-      onNewQuery: function () {
-        this._docs = {};
+        //only empty docs array if it truly is a new query
+        var newQueryJSON = apiQuery.toJSON();
+
+        var currentStreamlined = _.pick(this.getCurrentQuery().toJSON(), _.keys(newQueryJSON))
+        if (JSON.stringify(newQueryJSON) != JSON.stringify(currentStreamlined)){
+          this._docs = {};
+        }
+      },
+
+      dispatchRequest : function(apiQuery){
+        this.setCurrentQuery(apiQuery);
+        BaseWidget.prototype.dispatchRequest.apply(this, arguments);
       },
 
       onDisplayDocuments: function (apiQuery) {
-        var q = apiQuery.clone();
-        var bibcode = q.get('q');
+
+        var bibcode = apiQuery.get('q');
         if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
           bibcode = bibcode[0].replace('bibcode:', '');
         }
         if (this._docs[bibcode]) { // we have already loaded it
-          this._current = bibcode;
           this.model.set(this._docs[bibcode]);
+          this._current = bibcode;
           // let other widgets know details
           this.trigger('page-manager-event', 'broadcast-payload', {
               title: this._docs[bibcode].title,
-              bibcode: bibcode,
-             //used for the
+              bibcode: bibcode
           });
         }
         else {
-          if (q.has('__show')) return; // cycle protection
+          if (apiQuery.has('__show')) return; // cycle protection
+          var q = apiQuery.clone();
           q.set('__show', bibcode);
           this.dispatchRequest(q);
         }
@@ -223,19 +238,16 @@ define([
       },
 
       processResponse: function (apiResponse) {
-        var q = apiResponse.getApiQuery();
-        this.setCurrentQuery(q);
-
         var r = apiResponse.toJSON();
-        var d, self = this;
+        var d;
         if (r.response && r.response.docs) {
           _.each(r.response.docs, function (doc) {
             //add doi link
             if (doc.doi){
-              doc.doi = {doi: doc.doi,  href: self.adsUrlRedirect("doi", doc.doi)}
+              doc.doi = {doi: doc.doi,  href: this.adsUrlRedirect("doi", doc.doi)}
             }
-            d = self.model.parse(doc, this.maxAuthors);
-            self._docs[d.bibcode] = d;
+            d = this.model.parse(doc, this.maxAuthors);
+            this._docs[d.bibcode] = d;
           }, this);
 
           if (apiResponse.has('responseHeader.params.__show')) {

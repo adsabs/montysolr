@@ -5,31 +5,6 @@
 }
 
 
-.s-child-facet-item-closed {
-  display:inline-block;
-  width: 8px;
-  color: @brand-warning;
-  margin-left: 2px;
-  cursor: pointer;
-  z-index:1;
-  margin-top: -10px;
-  margin-bottom: -10px;
-  .icon-item-closed;
-}
-
-
-.s-child-facet-item-open {
-  display: inline-block;
-  width: 12px;
-  left: -13%;
-  color: darken(@brand-warning, 25%);
-  margin-top: -10px;
-  margin-bottom: -10px;
-  cursor: pointer;
-  z-index:1;
-  .icon-item-open;
-
-}
 
 .item-open {
   .s-item-open
@@ -42,10 +17,26 @@
 //rules for item open and closed styling
 .s-tree {
   .item-open {
-    .s-child-facet-item-open;
+    display: inline-block;
+    width: 12px;
+    color: @brand-warning;
+    left: -13%;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    cursor: pointer;
+    z-index:1;
+    .icon-item-open;
   }
   .item-closed {
-    .s-child-facet-item-closed;
+    display:inline-block;
+    width: 8px;
+    color: @brand-warning;
+    margin-left: 2px;
+    cursor: pointer;
+    z-index:1;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    .icon-item-closed;
   }
 
   position: relative;
@@ -101,7 +92,7 @@
 
 .s-widget .item-caret:hover {
 
-  color: darken(@brand-warning, 5%);
+  color: darken(@brand-warning, 20%);
   cursor: pointer;
 }
 

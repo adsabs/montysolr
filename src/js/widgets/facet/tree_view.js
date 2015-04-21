@@ -49,14 +49,12 @@ define(['underscore',
       var val;
       val = this.model.get("count")
       this.$(".facet-amount:first").html("&nbsp;(" + this.formatNum(val) + ")" );
-      this.$(".item-caret").addClass("draw-attention-text")
 
     },
 
     onMouseLeave: function(e){
       e.stopPropagation();
       this.$(".facet-amount").empty();
-      this.$("i.item-caret").removeClass("draw-attention-text")
     },
 
 

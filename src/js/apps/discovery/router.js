@@ -78,18 +78,22 @@ define([
       },
 
       view: function (bibcode, subPage) {
-        if (bibcode){
-          this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
 
-          if (!subPage) {
-            return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page', bibcode);
-          }
-          else {
-            var navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
-            return this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, bibcode);
-          }
+        console.time("absStart")
+        var navigateString;
+
+        if (bibcode) {
+          this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
         }
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');
+
+        if (!subPage) {
+            navigateString = 'abstract-page';
+        }
+          else {
+            navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
+        }
+
+         this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, bibcode);
       },
 
 

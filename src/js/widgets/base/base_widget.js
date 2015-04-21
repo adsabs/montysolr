@@ -122,7 +122,7 @@ define([
      * Default callback to be called by PubSub on 'INVITING_REQUEST'
      */
     dispatchRequest: function (apiQuery) {
-      this._dispatchRequest(apiQuery);
+     this._dispatchRequest(apiQuery);
     },
 
     _dispatchRequest: function(apiQuery) {

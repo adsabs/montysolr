@@ -42,6 +42,9 @@ define(['backbone',
 
       },
 
+      dispatchRequest : function(apiQuery, data){
+         this._dispatchRequest(apiQuery, data);
+      },
 
       _dispatchRequest: function (apiQuery, data) {
         var q = this.customizeQuery(apiQuery);
@@ -262,7 +265,7 @@ define(['backbone',
             p.before();
           }
           if (p && p.runQuery) {
-            this._dispatchRequest(q, {collection: collection, view: view});
+            this.dispatchRequest(q, {collection: collection, view: view});
           }
         }
         else if (ev.substring(ev.length-20) == 'itemview:itemClicked') {
