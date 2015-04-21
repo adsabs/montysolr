@@ -32,7 +32,7 @@ define([
       RESET_PASSWORD: 'accounts/reset-password',
       CHANGE_PASSWORD: 'accounts/change-password',
       CHANGE_EMAIL: 'accounts/change-email',
-      RECOMMENDER : 'recommender'
+      RECOMMENDER : 'recommender',
       GRAPHICS: 'graphics'
     };
   });

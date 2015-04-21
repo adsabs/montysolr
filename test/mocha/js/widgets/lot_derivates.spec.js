@@ -85,7 +85,7 @@ define([
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
       expect($w.find("label").length).to.equal(20);
 
-      expect($w.find(".s-list-description").text()).to.eql("List of papers referenced by");
+      expect($w.find(".s-list-description").text()).to.eql("Papers referenced by");
 
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 
@@ -104,7 +104,7 @@ define([
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
       expect($w.find("label").length).to.equal(20);
 
-      expect($w.find(".s-list-description").text()).to.eql("List of papers also read by those who read");
+      expect($w.find(".s-list-description").text()).to.eql("Papers also read by those who read");
 
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 
@@ -123,7 +123,7 @@ define([
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(20);
 
-      expect($w.find(".s-list-description").text()).to.eql("List of papers in the same volume as");
+      expect($w.find(".s-list-description").text()).to.eql("Papers in the same volume as");
 
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 

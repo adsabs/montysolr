@@ -188,7 +188,7 @@ define([
 
       $(".graphics-container").click();
 
-      expect(g.pubsub.publish.args[0][0]).to.eql("[Router]-Navigate-Without-Trigger");
+      expect(g.pubsub.publish.args[0][0]).to.eql("[Router]-Navigate-With-Trigger");
       expect(g.pubsub.publish.args[0][1]).to.eql("ShowGraphics");
 
       //if there are no images, it should render as an empty widget

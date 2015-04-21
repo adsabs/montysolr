@@ -99,6 +99,13 @@
 
 .s-show-details-container {
   margin-top: 15px;
+  .icon-details {
+    margin-top: -8px;
+  }
+
+  .icon-hide-details {
+    margin-top: -8px;
+  }
 }
 
 .s-results-title {
@@ -308,13 +315,13 @@ li.article-author {
   font-weight: 300;
   font-size: 20px;
   color: @brand-primary-faded;
-  margin-left: 2%;
+  margin-bottom: 6px;
 }
 
 .s-article-title {
   font-size: 22px;
-  margin: 0 5% 20px 2%;
-  font-weight: 500;
+  margin: 0 5% 20px 0;
+  font-weight: 400;
 
 }
 
@@ -322,15 +329,18 @@ li.article-author {
 .s-details-container {
   text-align: right;
   i.icon-details {
-    position: relative;
-    font-size:1.8em;
+    //this has to be positioned absolutely for some reason
+    //otherwise it has a weirdly tall height that can't be reduced
+    position: absolute;
+    left: 57%;
+    top: -7px;
     .s-icon-hover;
   }
 
   i.icon-hide-details {
-    position: relative;
-    left: -2%;
-    font-size:1.8em;
+    position: absolute;
+    left: 48%;
+    top: -7px;
     .s-icon-hover;
   }
 }

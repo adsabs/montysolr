@@ -482,10 +482,6 @@ define(['underscore',
 
       onApiRequestFailure: function( jqXHR, textStatus, errorThrown ) {
 
-        //ignore 404s from graphics endpoint
-       if (jqXHR.status === 404 && jqXHR.target.split("/")[0] === "graphics")
-        return
-
         var qm = this.qm;
         var query = this.request.get('query');
         if (qm.debug) {

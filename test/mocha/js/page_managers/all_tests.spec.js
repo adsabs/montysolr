@@ -255,7 +255,7 @@ define([
 
           //testing back button
           var view = pageManager.show();
-          expect(view.$el.find('.s-back-button-container').html()).to.eql('<a href="#search/q=bibcode%3Afoo" class="back-button"> <i class="fa fa-arrow-left"></i> Back to results</a>');
+          expect(view.$el.find('.s-back-button-container').html()).to.eql('<a href="#search/q=bibcode%3Afoo" class="back-button btn btn-sm btn-default"> <i class="fa fa-arrow-left"></i> Back to results</a>');
 
 
 
