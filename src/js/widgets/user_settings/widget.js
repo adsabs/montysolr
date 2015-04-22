@@ -87,6 +87,12 @@ define([
         pattern: "email",
         msg: "(A valid email is required)"
       },
+      "confirm-email" : {
+        required: true,
+        pattern: "email",
+        equalTo: 'email',
+        msg: "(A valid email is required)"
+      },
       password: {
         required: true,
         pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
@@ -109,7 +115,6 @@ define([
       //only works some of the time
       this.$(".modal").modal('hide');
       FormFunctions.triggerSubmit.apply(this, arguments);
-
     },
 
     //for the view
@@ -133,6 +138,11 @@ define([
 
     bindings: {
       "input[name=email]": {observe: "email",
+        setOptions: {
+          validate: true
+        }
+      },
+      "input[name=confirm-email]": {observe: "confirm-email",
         setOptions: {
           validate: true
         }
@@ -311,7 +321,12 @@ define([
     },
 
     renderHeading : function(){
-      this.$(".heading-container").html(this.headingTemplate(this.model.toJSON()))
+      //take only username
+
+      var username = this.model.get("user");
+      username = username ? username.split("@")[0] : undefined;
+
+      this.$(".heading-container").html(this.headingTemplate({user: username}))
     },
 
     onRender : function(){

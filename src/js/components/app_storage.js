@@ -133,7 +133,7 @@ define([
         }
       },
 
-      //this is used by the
+      //this is used by the auth and user settings widgets
       setConfig : function(conf){
         this.set("dynamicConfig", conf);
      },
@@ -149,7 +149,9 @@ define([
         getSelectedPapers: 'getSelectedPapers',
         getCurrentQuery: 'getCurrentQuery',
         hasCurrentQuery: 'hasCurrentQuery',
-        getConfigCopy : 'get read-only copy of dynamic config'
+        getConfigCopy : 'get read-only copy of dynamic config',
+        set : 'set a value into app storage',
+        get : 'get a val from app storage'
       }
     }
   );

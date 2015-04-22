@@ -3,7 +3,7 @@
     </legend>
     <div class="panel-body">
         <div class="form-group">
-            <label class="control-label">Current email address:</label>
+            <label class="control-label">Current email address:&nbsp;&nbsp; </label>
             <p class="form-control-static">{{user}}</p>
 
         </div>
@@ -11,6 +11,13 @@
             <label for="email" class="control-label"> New email address </label>
             <span class="help-block no-show s-help-block"></span>
             <input type="email" class="form-control" name="email" id="email">
+            <span class="icon-success form-control-feedback hidden" aria-hidden="true"></span>
+        </div>
+
+        <div class="form-group has-feedback">
+            <label for="email" class="control-label"> Confirm new email address </label>
+            <span class="help-block no-show s-help-block"></span>
+            <input type="email" class="form-control" name="confirm-email" id="confirm-email">
             <span class="icon-success form-control-feedback hidden" aria-hidden="true"></span>
         </div>
 
