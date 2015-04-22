@@ -27,7 +27,7 @@ define([
         if (data.access_token) {
           var api = this.getBeeHive().getService('Api');
           if (data.access_token) {
-            console.warn('Redefining access_token: ' + api.access_token);
+            console.warn('Redefining access_token: ' + data.access_token);
             api.access_token = data.token_type + ':' + data.access_token;
             api.refresh_token = data.refresh_token;
             api.expires_in = data.expires_in;
@@ -40,7 +40,7 @@ define([
           }
 
           var user = this.getBeeHive().getObject("User");
-          if (user && data.username !== "anonymous@adslabs.org") {
+          if (user && !data.anonymous) {
             //it's a logged in user
             user.setUser(data.username);
           }

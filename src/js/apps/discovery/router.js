@@ -6,7 +6,8 @@ define([
     'hbs!./404',
     'js/components/api_feedback',
     'js/components/api_request',
-    'js/components/api_targets'
+    'js/components/api_targets',
+    'js/mixins/api_access'
 
   ],
   function (
@@ -17,7 +18,8 @@ define([
     ErrorTemplate,
     ApiFeedback,
     ApiRequest,
-    ApiTargets
+    ApiTargets,
+    ApiAccessMixin
 
     ) {
 
@@ -106,11 +108,11 @@ define([
             //request bootstrap
             this.getApiAccess({reconnect : true}).done(function(){
               //redirect to index page
-              that.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+              that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
               //call alerts widget
               var title = "Welcome to ADS";
               var msg = "<p>You have been successfully registered with the username</p> <p><b>"+ reply.email +"</b></p>";
-              that.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+              that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
             }).fail(function(){
               //fail function defined below
               fail();
@@ -128,11 +130,11 @@ define([
             //request bootstrap
             this.getApiAccess({reconnect : true}).done(function(){
                 //redirect to index page
-                this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+                that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
                 //call alerts widget
                 var title = "Email has been changed.";
                 var msg = "Your new ADS email is <b>" + reply.email + "</b>";
-                this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+                that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
               }).fail(function(){
                  //fail function defined below
                  fail();
@@ -211,7 +213,7 @@ define([
 
     });
 
-    _.extend(Router.prototype, Dependon.BeeHive);
+    _.extend(Router.prototype, Dependon.BeeHive, ApiAccessMixin);
 
     return Router;
 
