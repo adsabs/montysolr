@@ -43,7 +43,13 @@ define(['backbone',
       },
 
       dispatchRequest : function(apiQuery, data){
-         this._dispatchRequest(apiQuery, data);
+        this.reset();
+        this._dispatchRequest(apiQuery, data);
+
+      },
+
+      reset : function(){
+        this._paginators = {};
       },
 
       _dispatchRequest: function (apiQuery, data) {

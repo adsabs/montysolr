@@ -79,7 +79,6 @@ define([
 
       view: function (bibcode, subPage) {
 
-        console.time("absStart")
         var navigateString;
 
         if (bibcode) {

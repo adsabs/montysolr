@@ -147,8 +147,6 @@ define([
       },
 
       onRender : function(){
-        console.timeEnd("absStart")
-
         this.$(".icon-help").popover({trigger : "hover", placement : "right", html :true});
       }
 
