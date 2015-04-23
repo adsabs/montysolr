@@ -212,8 +212,16 @@ define([
 
     loginFail : function(xhr, status, errorThrown){
       var pubsub = this.getPubSub();
-      var error =  xhr.responseJSON && xhr.responseJSON.error ?  xhr.responseJSON.error : "error unknown";
-
+      var error;
+      if (xhr.responseJSON && xhr.responseJSON.error ){
+        error = xhr.responseJSON.error
+      }
+      else if (xhr.responseJSON && xhr.responseJSON.message){
+        error = xhr.responseJSON.message;
+      }
+      else {
+        error = "error unknown";
+      }
       var message = 'Log in was unsuccessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
       pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_fail");
