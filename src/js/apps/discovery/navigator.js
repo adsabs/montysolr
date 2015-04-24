@@ -165,12 +165,11 @@ define([
             .done(function(data) {
               alerter.alert(new ApiFeedback({
                 code: ApiFeedback.CODES.ALERT,
-                msg: 'The query has been saved. You can insert the following snippet in a webpage: <br/>' +
-                  + '<img src="' + ApiTargets.MYADS_STORAGE + '/query2svg/' + data.qid + '"></img><br/>' +
-                  '<textarea rows="10" cols="50">' +
+                msg: 'The query has been saved. You can insert the following snippet in a webpage: <br/>' + '<img src="' + ApiTargets.MYADS_STORAGE + '/query2svg/' + data.qid + '"></img><br/>' +
+                  '<br/><textarea rows="10" cols="50">' +
                   '<a href="' + location.protocol + '//' + location.host + location.pathname +
                   '#execute-query/' + data.qid + '"><img src="' + ApiTargets.MYADS_STORAGE + '/query2svg/' + data.qid + '"></img>' +
-                  '"</a>' +
+                  '</a>' +
                   '</textarea>'
                 ,
                 modal: true
