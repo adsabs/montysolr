@@ -48,6 +48,13 @@ define([], function() {
      */
     EXECUTE_REQUEST: '[PubSub]-Execute-Request',
 
+
+    /**
+     * Called from the router, the QID will be passed; the query needs to be
+     * loaded and executed
+     */
+    EXECUTE_STORED_QUERY: '[PubSub]-Execute-Stored-Query',
+
     /**
      * Published by FC's - typically Mediator - when a response has been retrieved
      * for a given ApiRequest.

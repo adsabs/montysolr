@@ -43,7 +43,8 @@ define([
       routes: {
         "": "index",
         'index/(:query)': 'index',
-        "search/(:query)": 'search',
+        'search/(:query)': 'search',
+        'execute-query/(:query)': 'executeQuery',
         'abs/:bibcode(/)(:subView)': 'view',
         'user/orcid*(:subView)' : 'orcidPage',
         'user/account(/)(:subView)' : 'authenticationPage',
@@ -75,6 +76,10 @@ define([
         else {
           this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
         }
+      },
+
+      executeQuery: function(queryId) {
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'execute-query', queryId);
       },
 
       view: function (bibcode, subPage) {

@@ -11,7 +11,9 @@ define([
     'js/components/api_feedback',
     'js/components/api_query_updater',
     'js/components/json_response',
-    'js/components/api_query'
+    'js/components/api_query',
+    'js/components/api_request',
+    'js/components/api_targets'
   ],
   function (
     $,
@@ -21,7 +23,9 @@ define([
     ApiFeedback,
     ApiQueryUpdater,
     JsonResponse,
-    ApiQuery
+    ApiQuery,
+    ApiRequest,
+    ApiTargets
     ) {
 
     "use strict";
@@ -136,6 +140,67 @@ define([
           }
           app.getObject('MasterPageManager').show('SearchPage',
             ['ExportWidget'].concat(searchPageAlwaysVisible.slice(1)));
+        });
+
+        this.set('export-query', function() {
+          var api = app.getService('Api');
+          var q = app.getObject('AppStorage').getCurrentQuery();
+          var alerter = app.getController('AlertsController');
+
+          // TODO: modify filters (move them to the main q)
+          q = new ApiQuery({query: q.url()});
+
+          //save the query / obtain query id
+          api.request(new ApiRequest({
+            query: q,
+            target: ApiTargets.MYADS_STORAGE + '/query',
+            options: {
+              done: function(){},
+              type: 'POST',
+              xhrFields: {
+                withCredentials: false
+              }
+            }
+          }))
+            .done(function(data) {
+              alerter.alert(new ApiFeedback({
+                code: ApiFeedback.CODES.ALERT,
+                msg: 'The query has been saved. You can insert the following snippet in a webpage: <br/>' +
+                  + '<img src="' + ApiTargets.MYADS_STORAGE + '/query2svg/' + data.qid + '"></img><br/>' +
+                  '<textarea rows="10" cols="50">' +
+                  '<a href="' + location.protocol + '//' + location.host + location.pathname +
+                  '#execute-query/' + data.qid + '"><img src="' + ApiTargets.MYADS_STORAGE + '/query2svg/' + data.qid + '"></img>' +
+                  '"</a>' +
+                  '</textarea>'
+                ,
+                modal: true
+              }));
+            });
+        });
+
+        this.set('execute-query', function(endPoint, queryId) {
+          var api = app.getService('Api');
+          api.request(new ApiRequest({
+            target: ApiTargets.MYADS_STORAGE + '/query/' + queryId,
+            options: {
+              done: function(data){
+                var q = new ApiQuery().load(JSON.parse(data.query).query);
+                self.pubsub.publish(self.pubSubKey, self.pubsub.START_SEARCH, q);
+              },
+              fail: function() {
+                var alerter = app.getController('AlertsController');
+                alerter.alert(new ApiFeedback({
+                  code: ApiFeedback.CODES.ERROR,
+                  msg: 'The query with the given UUID cannot be found'
+                }));
+                self.get('index-page').execute();
+              },
+              type: 'GET',
+              xhrFields: {
+                withCredentials: false
+              }
+            }
+          }))
         });
 
         this.set('orcid-page', function(view, targetRoute) {
