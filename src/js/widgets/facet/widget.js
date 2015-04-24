@@ -39,19 +39,15 @@ define(['backbone',
 
         this._extractor = undefined;
         this._preprocessor = undefined;
-
       },
 
+      //called in response to "inviting_request"
       dispatchRequest : function(apiQuery, data){
-        this.reset();
-        this._dispatchRequest(apiQuery, data);
-
+         this._paginators = {};
+         this._dispatchRequest(apiQuery, data);
       },
 
-      reset : function(){
-        this._paginators = {};
-      },
-
+      //called by widgets as well (don't need to reset paginators)
       _dispatchRequest: function (apiQuery, data) {
         var q = this.customizeQuery(apiQuery);
         data = data || {};
@@ -271,7 +267,7 @@ define(['backbone',
             p.before();
           }
           if (p && p.runQuery) {
-            this.dispatchRequest(q, {collection: collection, view: view});
+            this._dispatchRequest(q, {collection: collection, view: view});
           }
         }
         else if (ev.substring(ev.length-20) == 'itemview:itemClicked') {

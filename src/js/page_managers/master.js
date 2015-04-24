@@ -81,16 +81,27 @@ define([
       },
 
       collectionEvents : {
-        "change:isSelected" : "onSelectedChange",
-        "change:options": "onSelectedChange"
+        "change:isSelected" : "changeManager",
+        "change:options": "changeWithinManager"
       },
 
-      onSelectedChange: function(model) {
+      //transition between page managers
+      changeManager: function(model, opts){
+
+        var within = (opts.flag == "within");
+
         if (model.attributes.isSelected) {
           // call the subordinate page-manager
           var res = model.attributes.object.show.apply(model.attributes.object, model.attributes.options);
 
-          this.$el.append(res.el);
+          if (this.notFirst && !within){
+            //only show transitions for subsequent pages
+            this.$el.append(res.$el.addClass("fade-in"));
+          }
+          else if (!within) {
+            this.$el.append(res.el);
+            this.notFirst = true;
+          }
           model.attributes.numAttach += 1;
 
           //scroll up automatically
@@ -106,6 +117,11 @@ define([
           }
         }
         this.render();
+      },
+
+      //transition widgets within a manager
+      changeWithinManager : function(model){
+        this.changeManager(model, {flag: "within"})
       },
 
       render: function() {
