@@ -50,8 +50,8 @@ define([
       activate: function (beehive) {
         this.setBeeHive(beehive);
         this.pubsub = beehive.Services.get('PubSub');
-        _.bindAll(this, 'onDisplayDocuments', 'processResponse', 'onUserAnnouncement');
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.onDisplayDocuments);
+        _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement');
+        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
 
         this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
@@ -70,9 +70,9 @@ define([
         }
       },
 
-      onDisplayDocuments: function(apiQuery) {
-        this.reset();
-        ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
+      dispatchRequest: function(apiQuery) {
+          this.reset();
+          ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
       },
 
       checkDetails: function(){

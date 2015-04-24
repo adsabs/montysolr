@@ -16,7 +16,8 @@ define(['underscore',
     'js/components/api_query_updater',
     'js/components/api_feedback',
     'js/components/json_response',
-    'js/components/api_targets'
+    'js/components/api_targets',
+    'js/components/api_query'
   ],
   function(
     _,
@@ -29,7 +30,8 @@ define(['underscore',
     ApiQueryUpdater,
     ApiFeedback,
     JsonResponse,
-    ApiTargets
+    ApiTargets,
+    ApiQuery
     ) {
 
 
@@ -47,6 +49,7 @@ define(['underscore',
         this.shortDelayInMs = _.isNumber(options.shortDelayInMs) ? options.shortDelayInMs : 10;
         this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 100;
         this.monitoringDelayInMs = _.isNumber(options.monitoringDelayInMs) ? options.monitoringDelayInMs : 200;
+        this.mostRecentQuery = new ApiQuery();
       },
 
       _getNewCache: function(options) {
@@ -77,15 +80,24 @@ define(['underscore',
 
       getQTree: function(apiQuery, senderKey) {
         var apiRequest = new ApiRequest({'query': apiQuery, 'target': ApiTargets.QTREE});
-        var api = this.getBeeHive().getService('Api');
-
         this._executeRequest(apiRequest, senderKey);
       },
 
       /**
-       * Happens at the beginnng of the new search cycle. This is the 'race started' signal
+       * Happens at the beginning of the new search cycle. This is the 'race started' signal
        */
       startSearchCycle: function(apiQuery, senderKey) {
+
+        //ignore repeat queries unless they are initiated from the search box
+        if ((JSON.stringify(apiQuery.toJSON()) == JSON.stringify(this.mostRecentQuery.toJSON())) &&
+          (this.app.getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget")){
+          //simply navigate to search results page, widgets are already stocked with data
+           this.app.getService('Navigator').navigate('results-page');
+           return
+        }
+
+        this.mostRecentQuery = apiQuery;
+
         if (this.debug) {
           console.log('[QM]: received query:',
             this.app ? (this.app.getPluginOrWidgetName(senderKey.getId()) || senderKey.getId()) : senderKey.getId(),

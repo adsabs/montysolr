@@ -95,9 +95,10 @@ define([
       activate: function (beehive) {
         this.pubsub = beehive.Services.get('PubSub');
 
-        _.bindAll(this, 'onStartSearch', 'onDisplayDocuments', 'processResponse');
+        _.bindAll(this, 'onStartSearch', 'dispatchRequest', 'processResponse');
         this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onStartSearch);
-        this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
+        //using the standard base widget dispatch request
+        this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.dispatchRequest);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
@@ -105,12 +106,9 @@ define([
         this.reset();
       },
 
-      onDisplayDocuments: function(apiQuery) {
-        BaseWidget.prototype.dispatchRequest.call(this, apiQuery);
-      },
-
       processResponse: function (apiResponse) {
         var q = apiResponse.getApiQuery();
+        this.setCurrentQuery(q);
 
         var docs = this.extractDocs(apiResponse);
 

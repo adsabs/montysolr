@@ -257,7 +257,7 @@ define([
         qm.startSearchCycle(new ApiQuery({'q': 'foo'}), key);
 
         expect(qm._cache.size).to.be.eql(0);
-        expect(qm.reset.called).to.be.true;
+        expect(qm.reset.callCount).to.eql(1);
         expect(qm.__searchCycle.initiator).to.be.eql(key.getId());
         expect(qm.__searchCycle.waiting[key.getId()]).to.be.defined;
         expect(pubSpy.lastCall.args[0]).to.be.eql(PubSubEvents.INVITING_REQUEST);
@@ -269,7 +269,26 @@ define([
           done();
         }, 5);
 
+
+        //if the queries match, the mediator checks to see if the query came from the search widget
+        qm.app = {getPluginOrWidgetName : function(){return false}, getService : sinon.spy(function(){return {navigate: sinon.spy()}})}
+        qm.startSearchCycle(new ApiQuery({'q': 'foo'}), key);
+
+        //same query, shouldn't have an effect other than navigation
+        expect(qm.reset.callCount).to.eql(1);
+        expect(qm.app.getService.callCount).to.eql(1);
+
+
+
+
+
+
+
+
+
       });
+
+
 
       it("responds to EXECUTE_REQUEST signal", function(done) {
         var x = createTestQM();

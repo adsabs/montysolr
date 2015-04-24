@@ -39,10 +39,15 @@ define(['backbone',
 
         this._extractor = undefined;
         this._preprocessor = undefined;
-
       },
 
+      //called in response to "inviting_request"
+      dispatchRequest : function(apiQuery, data){
+         this._paginators = {};
+         this._dispatchRequest(apiQuery, data);
+      },
 
+      //called by widgets as well (don't need to reset paginators)
       _dispatchRequest: function (apiQuery, data) {
         var q = this.customizeQuery(apiQuery);
         data = data || {};
