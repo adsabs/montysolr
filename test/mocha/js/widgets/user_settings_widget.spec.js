@@ -80,7 +80,7 @@ define([
         //get widget to render
         u.setSubView("email");
 
-        var subViews = ["preferences", "email", "password", "token", "delete"];
+        var subViews = ["preferences",  "password", "token", "delete"];
 
         _.each(subViews,function(href){
 
@@ -283,7 +283,7 @@ define([
 
       setTimeout(function(){
         expect($(".modal").hasClass("in")).to.be.true;
-        expect($(".modal-body").text().trim()).to.eql("You are leaving an unsubmitted form. The data you have entered will be lost.");
+        expect($(".modal-body p").text().trim()).to.eql("You are leaving an unsubmitted form. The data you have entered will be lost.");
         $("button[data-dismiss]").click();
         $(".modal-backdrop").remove();
         done();

@@ -135,8 +135,7 @@ define([
       },
 
       showModal: function() {
-        //move outside of body: this prevents css z-index errors
-        this.$el.find('#alertBox').appendTo("body").modal('show');
+        this.$el.find('#alertBox').modal('show');
       }
     });
 

@@ -34,7 +34,7 @@ define([
       minsub.beehive.addObject("User", u);
 
 
-      var profileInfo = {"orcid-bio":{"personal-details": {"family-name": {"value" : "Chyla"}, "given-names": {"value": "Roman"}}}}
+      var profileInfo = {"orcid-identifier": {"uri": "foo"}, "orcid-bio":{"personal-details": {"family-name": {"value" : "Chyla"}, "given-names": {"value": "Roman"}}}}
 
       minsub.beehive.addService('OrcidApi', {
         hasAccess: function() {return true},
