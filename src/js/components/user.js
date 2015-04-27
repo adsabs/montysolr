@@ -143,11 +143,6 @@ define([
     },
 
     handleFailedGET : function(jqXHR, status, errorThrown){
-      // sanity check : if user target is unauthorized, the user isn't actually logged in, so clear the model
-      // not sure if this gets all cases
-      if (jqXHR.target === "USER" && jqXHR.status === 401){
-        this.completeLogOut();
-      }
       this.getPubSub().publish(this.pubsub.USER_ANNOUNCEMENT, "data_get_unsuccessful", jqXHR.target);
     },
 
@@ -298,6 +293,8 @@ define([
     completeLogIn : function(){
         //fetch all user data
         var targets = this.collection.pluck("target");
+        //don't get data from user endpoint, it's no longer supported
+        targets = _.without(targets, "USER");
         _.each(targets, function(e){
           this.fetchData(e);
         }, this);

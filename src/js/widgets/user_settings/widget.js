@@ -111,9 +111,6 @@ define([
     triggerSubmit : function(){
       this.model.unset("user");
 
-      //manually close the modal, for some reason just the close markup
-      //only works some of the time
-      this.$(".modal").modal('hide');
       FormFunctions.triggerSubmit.apply(this, arguments);
     },
 
@@ -156,6 +153,8 @@ define([
 
     onRender : function(){
       this.activateValidation();
+      //move the modal to the outer edges of the html so the formatting isnt screwed up
+      this.$('.modal.confirm-change-email').appendTo("body");
     }
 
   });
@@ -344,6 +343,12 @@ define([
       model = this.collection.findWhere({active : true});
       //uses the active nav model to find the current view's model
       currentModel = this.getCurrentModel(model);
+
+
+      //if page requested is current page, just return
+      if (model.get("href") == this.potentialSubPage){
+        return
+      }
 
      //check the vals that we're validating, not just everything that might be in the model
     var changedVals = _.values(_.pick(currentModel.attributes, _.keys(currentModel.validation)));
