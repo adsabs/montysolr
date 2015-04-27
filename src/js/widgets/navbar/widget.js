@@ -120,10 +120,10 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-      _.bindAll(this, ["handleUserAnnouncement", "getOrcidUsername"]);
+      _.bindAll(this, ["handleUserAnnouncement", "getOrcidUserInfo"]);
       this.pubsub = beehive.getService("PubSub");
       this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
-      this.pubsub.subscribe(this.pubsub.APP_STARTED, this.getOrcidUsername);
+      this.pubsub.subscribe(this.pubsub.APP_STARTED, this.getOrcidUserInfo);
 
       this.setInitialVals();
     },
@@ -162,7 +162,7 @@ define([
       this.model.set("currentUser",  user.getUserName());
     },
 
-    getOrcidUsername: function () {
+    getOrcidUserInfo: function () {
       var orcidApi = this.getBeeHive().getService("OrcidApi");
       //get the orcid username if applicable
       if (this.model.get("orcidLoggedIn")) {
@@ -174,6 +174,7 @@ define([
           that.model.set("orcidFirstName", firstName);
           that.model.set("orcidLastName", lastName);
           that.model.set("orcidQueryName", lastName + ', ' + firstName);
+          that.model.set("orcidURI", info["orcid-identifier"]["uri"]);
         })
       }
     },
@@ -191,7 +192,7 @@ define([
         this.model.set({orcidModeOn: user.isOrcidModeOn(), orcidLoggedIn: orcidApi.hasAccess()});
 
         if (this.model.get("orcidLoggedIn")) {
-          this.getOrcidUsername();
+          this.getOrcidUserInfo();
         }
       }
 

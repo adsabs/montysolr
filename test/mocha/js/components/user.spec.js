@@ -27,7 +27,6 @@ define([
 
      sinon.stub(User.prototype, "broadcastChange");
      sinon.stub(User.prototype, "broadcastReset");
-     var logoutStub = sinon.stub(User.prototype, "completeLogOut");
 
      var u = new User();
      u.pubsub = {publish : function(){}};
@@ -44,14 +43,7 @@ define([
      expect(u.isLoggedIn()).to.be.true;
 
      expect(fetchStub.args[0][0]).to.eql("TOKEN");
-     expect(fetchStub.args[1][0]).to.eql("USER");
 
-     //will automatically log user out if the request to user endpoint returns status 401
-     u.handleFailedGET({target : "USER", status : 401 });
-
-     expect(logoutStub.callCount).to.eql(1);
-
-     logoutStub.restore();
 
      User.prototype.broadcastChange.restore();
      User.prototype.broadcastReset.restore();
