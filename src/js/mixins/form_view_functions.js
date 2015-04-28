@@ -12,6 +12,9 @@ define([
     //call in onRender method to activate the recaptcha
     //otherwise it won't work
     activateRecaptcha: function (sitekey) {
+      if (!sitekey){
+        return
+      }
       var that = this;
       //for testing, ignore
       if (window.grecaptcha) {
