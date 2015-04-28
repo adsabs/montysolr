@@ -31,61 +31,52 @@
             please follow this link to access non-javascript version of this
             website:
             <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a></p>
-            <p>Btw: you are missing lots of fun. That other website of ours
-                is seryiousli dump.</p>
+
         </noscript>
 
-        <div style="width:60%; margin:0 auto;font-family: courier;margin-top:10%;">
-            <div id="loader">
-                <span id="loadee"></span>
-                <span id="pacman"></span>
+
+        <div class="ads-facts" style="width:80%; margin:auto; padding-top: 100px;">
+
+            <div> <h3><i class="fa fa-2x fa-spinner fa-pulse"></i>  <i>Loading ADS Interface...</i></h3></div>
+
+            <h4 style="margin-top:50px"></h4>
+
+            <div class="tip-container">
+
             </div>
+
+
+
+
         </div>
+
+
     </div>
 </div>
+
+<script>
+
+    var facts = [
+        {title: "First Author Search", tip: "To limit your search to papers in which the author appears in the first author position, use a caret. For example, <b>author:\"^Kurtz,M\"</b>"},
+        {title: "Explore Your Results", tip: "To glean new insight into your search results, click on the \"explore\" button on the search results page and check out the metrics graphs and other visualizations."},
+        {title:"Quickly Skim Abstracts", tip: "You can view the abstracts right in the search results page by clicking the \'show details\" button on the results page."},
+        {title: "Claim Your Papers in ORCID", tip: "ADS allows you to add papers to your ORCID profile. Click on the button on the top navigation to get started. "}
+
+    ];
+
+    var random = facts[Math.floor(facts.length * Math.random())];
+
+    document.querySelector(".ads-facts h4").textContent = "ADS Quick Tip: " + random.title;
+    document.querySelector(".tip-container").innerHTML = random.tip;
+
+
+
+</script>
 
 <!-- start the discovery application -->
 <script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
 <script>
-    var food = [
-        'Please stand by, Bumblebee is comiiiiinng to get you!!!',
-        'This message is your typical annoying "stand by, please"...',
-        'Hold you breath, 95% of you (+/- 2.57854%) can manage long enough for Bumblebee to load...',
-        'Wait! Stop all your film downloads! Bumblebee needs bandwidth!'
-    ];
-    var eat = function(msg) {
-        var el = document.getElementById("loadee");
-        if (!el) return;
-        if (msg) {
-            el.textContent = msg;
-            var x = document.createElement('img');
-            x.src = "styles/img/pacman.gif";
-            document.getElementById('pacman').appendChild(x);
-        }
-        var img = document.getElementById('pacman').getElementsByTagName('img')[0];
-        var loader = document.getElementById("loader");
-        var t = el.textContent;
 
-        if (!t.length) {
-            selfDestruct(5);
-            return;
-        }
-        el.textContent = t.substring(0, t.length - 1).trim();
-        setTimeout(function() {eat()}, 500);
-    };
-    var selfDestruct = function(counter) {
-        var el = document.getElementById("loadee");
-        if (!el) return;
-        if (counter < 0)
-            location.reload();
-        el.textContent = "Thousand Sad Pandas, we have run out of delaying tactics....ehm, cough... " +
-                "nice weather outside, isn't it? (This application will self-destruct in: " + counter + "s.)"
-        setTimeout(function() {selfDestruct(counter-1)}, 1000);
-    };
-    function getRandomInt (min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    eat(food[getRandomInt(0, food.length-1)]);
 
 </script>
 
