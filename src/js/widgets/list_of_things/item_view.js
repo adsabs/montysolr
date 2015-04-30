@@ -30,7 +30,6 @@ define([
         if (options) {
           _.defaults(options, _.pick(this, ['model', 'collectionEvents', 'modelEvents']));
         }
-
         _.bindAll(this, 'resetToggle');
 
         return Marionette.ItemView.prototype.constructor.apply(this, arguments);
