@@ -96,6 +96,7 @@ define([
       var processResponse = sinon.spy(widget, 'processResponse');
 
       widget.activate(minsub.beehive.getHardenedInstance());
+      debugger;
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
       expect(onDisplayDocuments.callCount).to.be.eql(1);

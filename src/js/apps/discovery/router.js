@@ -86,6 +86,7 @@ define([
 
       view: function (bibcode, subPage) {
 
+<<<<<<< HEAD
         // check we are using the canonical bibcode and redirect to it if necessary
         var q, req, self;
         self = this;
@@ -112,6 +113,18 @@ define([
         }});
 
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
+=======
+          if (!subPage) {
+            return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page', "#abs/"+bibcode+"/abstract");
+          }
+          else {
+            var navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
+            return this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, "#abs/"+bibcode+"/"+subPage);
+          }
+        }
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');
+      },
+>>>>>>> added routes for abstract page, changed discovery mediators method of showing loading views
 
 
   routeToVerifyPage : function(subView, token){

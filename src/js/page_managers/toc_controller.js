@@ -55,8 +55,10 @@ define([
           self.broadcast('page-manager-message', event, data);
         }
         else if (event == 'widget-selected') {
-          widgetId = data;
-          this.pubsub.publish(this.pubsub.NAVIGATE, this.widgetId ? this.widgetId + ':' + widgetId : widgetId);
+          var idAttribute = data.idAttribute,
+              href = data.href;
+
+          this.pubsub.publish(this.pubsub.NAVIGATE, idAttribute, href);
         }
         else if (event == 'broadcast-payload'){
           self.broadcast('page-manager-message', event, data);

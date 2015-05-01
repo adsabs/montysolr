@@ -55,12 +55,12 @@ define([
 
     handlers[ApiFeedback.CODES.BIBCODE_DATA_REQUESTED] = function(feedback){
 
-      var ids = [];
+      //list of widgets on the abstract page that do not need loading views
+      var noLoadingView = ["TOCWidget", "AlertsWidget", "SearchWidget", "ShowAbstract"];
 
-      //have to put all ids for widgets on the abstract page that need loading views here
+      var widgets = _.omit(this.getApp().getWidget("DetailsPage").widgets, noLoadingView);
 
-      ids.push(this.getApp().getWidget("ShowRecommender").pubsub.getCurrentPubSubKey().getId());
-      ids.push(this.getApp().getWidget("ShowResources").pubsub.getCurrentPubSubKey().getId());
+      var ids = _.map(_.values(widgets), function(w){return w.pubsub.getCurrentPubSubKey().getId()});
 
       // remove alerts from previous searches
       this.getAlerter().alert(new ApiFeedback({

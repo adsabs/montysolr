@@ -91,7 +91,8 @@ define([
           return false;
         }
         else if (idAttribute !== $(".s-nav-active").attr("data-widget-id")) {
-          this.trigger('page-manager-event', 'widget-selected', idAttribute);
+          var href = $(e.currentTarget).attr("href");
+          this.trigger('page-manager-event', 'widget-selected', {idAttribute: idAttribute, href : href});
           this.collection.selectOne(idAttribute);
         }
         return false;
