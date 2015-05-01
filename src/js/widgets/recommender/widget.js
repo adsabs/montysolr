@@ -48,22 +48,16 @@ define([
       //clear the current collection
       this.collection.reset();
       var bibcode = apiQuery.get('q');
-      var self = this;
       if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
         bibcode = bibcode[0].replace('bibcode:', '');
-        this.loadBibcodeData(bibcode).done(function() {
-          //right now this is being ignored by the toc widget
-          self.trigger('page-manager-event', 'widget-ready', {'isActive': true});
-        });
+        this.loadBibcodeData(bibcode);
       }
     },
 
     loadBibcodeData : function(bibcode){
 
-      this.deferredObject =  $.Deferred();
-
       if (bibcode === this._bibcode){
-        this.deferredObject.resolve();
+        self.trigger('page-manager-event', 'widget-ready', {'isActive': true});
       }
       else {
         this._bibcode = bibcode;
@@ -73,14 +67,14 @@ define([
         });
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
       }
-      return this.deferredObject.promise();
     },
 
     processResponse : function(data){
       data = data.toJSON();
       if (data.recommendations){
         this.collection.reset(data.recommendations);
-        this.deferredObject.resolve();
+        //right now this is being ignored by the toc widget
+        this.trigger('page-manager-event', 'widget-ready', {'isActive': true});
       }
     }
   });
