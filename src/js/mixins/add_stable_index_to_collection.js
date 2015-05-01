@@ -50,6 +50,8 @@ define(['underscore'], function (_) {
       var s = _.isArray(start) ? start[0] : parseInt(start);
       _.each(docs, function (d) {
         d.resultsIndex = s;
+        //non zero-indexed
+        d.indexToShow = s + 1;
         s += 1;
       });
       return docs;
