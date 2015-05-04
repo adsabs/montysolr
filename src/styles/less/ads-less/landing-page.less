@@ -17,7 +17,7 @@
   .row;
   text-align: center;
   height: 150px;
-  background: url("../img/landing_background.png") top center repeat;
+  background: url("../img/star_background.jpg") top center repeat;
 
   .slide-background;
 
@@ -28,7 +28,7 @@
     font-weight:300;
     display: inline-block;
     color: white;
-    font-size: 40px;
+    font-size: 45px;
     .animated;
     .fadeInUp;
   }
@@ -65,8 +65,6 @@
     font-size: 24px;
   }
 
-
-
 }
 
 .s-landing-section-2 {
@@ -77,21 +75,25 @@
 
 .s-landing-section-3 {
 
-  padding: 100px 0;
   font-size: 1.2em;
   margin: 0 -15px;
-  background: url("../img/landing_background.png") top center repeat fixed;
+  background: url("../img/star_background.jpg") top center repeat fixed;
+  color: white;
+  h2 {
+    color: white;
+  }
+
   a {
     color: @brand-info;
-    &:hover{
-      color: darken(@brand-info, 10%)
+    &:hover {
+      color: darken(@brand-info, 10)
     }
   }
 
-  h2 {
-    color:white;
+  .s-transparent-background {
+    background-color: hsla(308, 100%, 0%, 0.30);
+    padding: 100px 0;
   }
-
 
 
   .s-bumble-rocket {
