@@ -205,12 +205,13 @@ define([
         this.set("visualization-closed", this.get("results-page"));
 
 
-        this.set('abstract-page', function() {
+        this.set('abstract-page', function(pageName, bibcode) {
           app.getWidget("TOCWidget").collection.selectOne("ShowAbstract");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowAbstract'].concat(detailsPageAlwaysVisible)
           );
-          //this.route = '#abs/' + app.getWidget('ShowAbstract').getCurrentQuery().url();
+          if (bibcode)
+            this.route = '#abs/' + bibcode;
         });
         this.set('ShowAbstract', function(){self.get('abstract-page').execute()});
         this.set('ShowCitations', function() {

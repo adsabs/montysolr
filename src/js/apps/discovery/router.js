@@ -7,7 +7,8 @@ define([
     'js/components/api_feedback',
     'js/components/api_request',
     'js/components/api_targets',
-    'js/mixins/api_access'
+    'js/mixins/api_access',
+    'js/components/api_query_updater'
 
   ],
   function (
@@ -19,7 +20,8 @@ define([
     ApiFeedback,
     ApiRequest,
     ApiTargets,
-    ApiAccessMixin
+    ApiAccessMixin,
+    ApiQueryUpdater
 
     ) {
 
@@ -30,6 +32,7 @@ define([
       initialize : function(options){
         options = options || {};
         this.history = options.history;
+        this.queryUpdater = new ApiQueryUpdater('Router');
       },
 
       activate: function (beehive) {
@@ -79,20 +82,33 @@ define([
 
       view: function (bibcode, subPage) {
 
-        var navigateString;
+        // check we are using the canonical bibcode and redirect to it if necessary
+        var q, req, self;
+        self = this;
+        q = new ApiQuery({'q': 'identifier:' + this.queryUpdater.quoteIfNecessary(bibcode), 'fl': 'bibcode'});
+        req = new ApiRequest({query: q, target: ApiTargets.SEARCH, options: {
+          done: function(resp) {
+            var navigateString;
+            if (resp.response && resp.response.docs && resp.response.docs[0]) {
+              bibcode = resp.response.docs[0].bibcode;
+              self.pubsub.publish(self.pubsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
+            }
+            if (!subPage) {
+              navigateString = 'abstract-page';
+            }
+            else {
+              navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
+            }
+            self.pubsub.publish(self.pubsub.NAVIGATE, navigateString, bibcode);
+          },
+          fail: function() {
+            console.log('Cannot identify page to load, bibcode: ' + bibcode);
+            self.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+          }
+        }});
 
-        if (bibcode) {
-          this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
-        }
+        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
 
-        if (!subPage) {
-            navigateString = 'abstract-page';
-        }
-          else {
-            navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
-        }
-
-         this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, bibcode);
       },
 
 

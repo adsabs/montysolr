@@ -101,6 +101,7 @@ define([
         var w = _getWidget();
 
         var oApi = minsub.beehive.getService('OrcidApi');
+        sinon.spy(w.widget, 'mergeADSAndOrcidData');
 
         oApi.updateOrcid = function(action, data) {
           expect(action).to.eql(expectedAction);
@@ -117,6 +118,8 @@ define([
         expect(w.widget.view.children.findByIndex(0).$el.find('.orcid-view').length).to.eql(0);
 
         w.widget.view.children.findByIndex(0).$el.find('.orcid-update').click();
+        expect(w.widget.mergeADSAndOrcidData.called).to.eql(true);
+
         expectedAction = 'delete';
         w.widget.view.children.findByIndex(0).$el.find('.orcid-delete').click();
 
@@ -170,6 +173,33 @@ define([
         expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(0);
         expect(w.widget.view.children.findByIndex(1).$el.find('.orcid-update').length).to.eql(1);
 
+        done();
+      });
+
+      it("merges ADS data before sending them to orcid", function(done) {
+        var w = _getWidget();
+        var widget = w.widget;
+        widget.pubsub = sinon.spy();
+
+        var model = widget.model;
+        widget.mergeADSAndOrcidData(model);
+        expect(widget.pubsub.called).to.eql(false);
+
+        model.set('bibcode', 'foo');
+        var s = widget.beehive.getService;
+        widget.beehive.getService = function() {return {}};
+
+        widget.mergeADSAndOrcidData(model);
+        expect(widget.pubsub.called).to.eql(false);
+
+        model.set('bibcode', null);
+        model.set('identifier', 'foo');
+
+        widget.pubsub.publish = sinon.spy();
+        widget.mergeADSAndOrcidData(model);
+
+        expect(widget.pubsub.publish.called).to.eql(true);
+        expect(widget.pubsub.publish.lastCall.args[1].get('query').get('q')).to.eql(['identifier:foo']);
         done();
       });
     })

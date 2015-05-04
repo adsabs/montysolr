@@ -373,11 +373,9 @@ define([
 
         var out = {
           "work-type": self._getOrcidWorkType(adsWork),
-          "url": (adsWork.doi && adsWork.doi[0])
-            ? LinkGeneratorMixin.adsUrlRedirect("doi", adsWork.doi[0])
-            : LinkGeneratorMixin.adsUrlRedirect("webrecord", adsWork.bibcode) // TODO : in item_view model DOI is missing
+          "url": LinkGeneratorMixin.adsUrlRedirect("webrecord", adsWork.bibcode)
         };
-        var ids = ['bibcode', 'id'];
+        var ids = ['bibcode', 'id', 'doi'];
         _.each(ids, function(fldName) {
           if (adsWork[fldName]) {
             if (!out["work-external-identifiers"]) out["work-external-identifiers"] = {"work-external-identifier": []};

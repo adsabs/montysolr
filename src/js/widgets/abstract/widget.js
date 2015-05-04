@@ -200,7 +200,7 @@ define([
 
         var bibcode = apiQuery.get('q');
         if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
-          bibcode = bibcode[0].replace('bibcode:', '');
+          bibcode = bibcode[0].replace('bibcode:', '').toLowerCase();
         }
         if (this._docs[bibcode]) { // we have already loaded it
           this.model.set(this._docs[bibcode]);
@@ -245,7 +245,7 @@ define([
               doc.doi = {doi: doc.doi,  href: this.adsUrlRedirect("doi", doc.doi)}
             }
             d = this.model.parse(doc, this.maxAuthors);
-            this._docs[d.bibcode] = d;
+            this._docs[d.bibcode.toLowerCase()] = d;
           }, this);
 
           if (apiResponse.has('responseHeader.params.__show')) {
