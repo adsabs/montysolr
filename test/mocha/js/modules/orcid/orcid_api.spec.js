@@ -565,6 +565,12 @@ define([
                             "work-external-identifier-id": {
                               "value": 1
                             }
+                          },
+                          {
+                            "work-external-identifier-type": "DOI",
+                            "work-external-identifier-id": {
+                              "value": "doifoo"
+                            }
                           }
                         ]
                       },
