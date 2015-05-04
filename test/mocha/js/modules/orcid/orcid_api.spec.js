@@ -551,7 +551,7 @@ define([
                   "orcid-work": [
                     {
                       "work-type": "JOURNAL_ARTICLE",
-                      "url": "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/doifoo",
+                      "url": "https://ui.adsabs.harvard.edu/#abs/bibcode",
                       "work-external-identifiers": {
                         "work-external-identifier": [
                           {
