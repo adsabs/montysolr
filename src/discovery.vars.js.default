@@ -8,9 +8,9 @@ define([], function() {
      * to //localhost:5000/v1 - but since our API allows for
      * limited number of cross-site requests (from origin
      * of 'http://localhost:8000' you can also use the production
-     * API of //api.adslabs.org/v1/
+     * API of //api.adsabs.harvard.edu/v1/
      */
-    apiRoot: '//api.adslabs.org/v1/',
+    apiRoot: '//api.adsabs.harvard.edu/v1/',
 
     /**
      * The url for orcid proxy, which adds the application token and

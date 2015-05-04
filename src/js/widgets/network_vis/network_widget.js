@@ -1238,6 +1238,10 @@ define([
         var query = new ApiQuery();
         query.set("q", newQuery);
         query.set("rows", this.initialRowsRequest);
+        //default setting sort to "date desc" since that is presumably what users will be used to
+        //this isn't perfect (it might override the original query's sorted value)
+        //but probably no one will notice
+         query.set("sort", "date desc");
 
         var request = new ApiRequest({
           target: Marionette.getOption(this, "endpoint"),
@@ -1246,7 +1250,6 @@ define([
 
         //update the current widget query
         this.setCurrentQuery(query);
-
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
 
       },
@@ -1266,7 +1269,6 @@ define([
 
         //clear the "cachedQuery" because it's a new search cycle
         this.model.set("cachedQuery", undefined);
-
         this._originalQuery = query;
         this.setCurrentQuery(query);
       },
