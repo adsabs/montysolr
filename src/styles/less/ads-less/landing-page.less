@@ -3,58 +3,34 @@
 
 .s-landing-page-layout {
 
-  background: darken(@brand-primary, 10%);
-
   margin-left: -15px;
   margin-right: -15px;
   padding-left: 15px;
   padding-right: 15px;
+  background-color: lighten(@navbar-inverse-bg, 6%);
 
-  @media(min-width: @screen-sm-min) {
-
-  background: url('../img/7419293528_befed97b29_b.jpg');
-  background-attachment: fixed;
-   .lh-background-size(cover);
-
-  }
-
-
+  color: #ffffff;
 
 }
 
 .s-landing-section-1 {
   .row;
   text-align: center;
-  //for browsers that dont support vh
-  min-height: 234px;
-  height: 30vh;
+  height: 150px;
+  background: url("../img/landing_background.png") top center repeat;
+
+  .slide-background;
+
 
 
   h1 {
 
-    color: #ffffff;
     font-weight:300;
     display: inline-block;
-
-  }
-
-  @media(max-width: @screen-xs-max){
-
-    .lh-background-image(linear-gradient(to right, #7474BF 0%, #348AC7 100%));
-
-  }
-
-
-  @media (min-width: @screen-sm-min) {
-
-
-  h1 {
-        font-size: 54px;
-        margin: 0;
-
-      }
-
-
+    color: white;
+    font-size: 40px;
+    .animated;
+    .fadeInUp;
   }
 
 }
@@ -74,13 +50,14 @@
   font-weight: 200;
   line-height: 1.5;
   font-weight:300;
-  margin-top:2%;
-    color: #fff;
   letter-spacing: 1px;
+  .fadeIn;
+  .animated;
 
   p {
     padding: 0;
-    margin-top: 40px;
+    margin-top: 20px;
+    margin-bottom: 0;
   }
 
   @media (min-width :@screen-sm-min) {
@@ -94,21 +71,27 @@
 
 .s-landing-section-2 {
   background-color: white;
-  //for browsers that dont support vh
-  height: 546px;
-  height: 70vh;
-  padding-top: 44px;
-
-
-
+  min-height: 700px;
+  padding-top: 100px;
 }
 
 .s-landing-section-3 {
 
   padding: 100px 0;
   font-size: 1.2em;
-  background-color: darken(@gray-lightest, 6%);
   margin: 0 -15px;
+  background: url("../img/landing_background.png") top center repeat fixed;
+  a {
+    color: @brand-info;
+    &:hover{
+      color: darken(@brand-info, 10%)
+    }
+  }
+
+  h2 {
+    color:white;
+  }
+
 
 
   .s-bumble-rocket {
@@ -160,26 +143,22 @@
 
 
 .s-landing-section-4 {
-
+  color: @text-color;
+  background-color: white;
   min-height: 730px;
-  background-color: fade(@brand-primary, 25%);
   font-size: 24px;
   text-align: center;
   margin: 0 -15px;
-
-
 }
 
 .s-description {
   font-size: 1.6em;
-  color: white;
   padding: 15px;
   text-align: center;
 
 }
 
 .s-team {
-  color : white;
   font-weight: 500;
   font-size: 1.2em;
   margin-top: 50px;
@@ -189,38 +168,10 @@
   .s-title {
     font-style: italic;
     font-weight: 300;
-    color: @gray-lighter;
-  }
-
-
-
+}
 
 }
 
-
-.s-landing-section-5 {
-  padding: 5px;
-  color: @gray;
-  background-color: hsla(0, 0%, 0%, 0.6);
-  position: absolute;
-  right: -15px;
-  bottom: 0px;
-  left: -15px;
-
-  a {
-    color: @gray-light;
-  }
-}
-
-
-
-
-.s-bumble-rocket {
-  max-width: 130px;
-  position: relative;
-  top: -22px;
-
-}
 
 
 .s-landing-page-layout {
