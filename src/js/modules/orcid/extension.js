@@ -130,7 +130,7 @@ define([
         var self = this;
         var api = self.beehive.getService('Api');
         var promise = $.Deferred();
-        if (!api && !self.pubsub) {
+        if (!(api && self.pubsub)) {
           promise.resolve(model);
           return promise.promise();
         }
