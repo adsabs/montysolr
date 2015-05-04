@@ -883,9 +883,8 @@ define([
 
       //trigger show event, should prompt dispatchRequest
       metricsWidget.onShow();
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
 
-      setTimeout(function() {
-        expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
 
         sinon.spy(metricsWidget.pubsub, "publish");
 
@@ -895,10 +894,9 @@ define([
         setTimeout(function(){
           expect(metricsWidget.pubsub.publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
           expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
-          expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 1 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
+          expect($("#test").find(".metrics-metadata").text().trim()).to.eql("Loading data...");
           done();
         }, 1000)
-      }, 500);
 
 
     });

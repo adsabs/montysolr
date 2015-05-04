@@ -417,6 +417,7 @@ define([
       },
 
       changeRows : function(e) {
+        e.preventDefault();
         var num = parseInt(this.$(".network-rows").val());
         this.$(".network-metadata").html(loadingTemplate);
         if (num){

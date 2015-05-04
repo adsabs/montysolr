@@ -16,7 +16,8 @@ define([
   'hbs!./templates/reads_table',
   'bootstrap',
   'js/components/api_feedback',
-  'js/components/api_targets'
+  'js/components/api_targets',
+  'hbs!../network_vis/templates/loading-template'
 ], function (
   Marionette,
   nvd3,
@@ -35,8 +36,16 @@ define([
   ReadsTableTemplate,
   bs,
   ApiFeedback,
-  ApiTargets
+  ApiTargets,
+  loadingTemplate
   ) {
+
+
+  /* config */
+
+  var maxAllowed = 1000;
+
+  /* end config */
 
   var TableModel = Backbone.Model.extend({
 
@@ -273,7 +282,7 @@ define([
     },
 
     updateMax : function() {
-      var m = _.min([300, this.get("numFound")]);
+      var m = _.min([maxAllowed, this.get("numFound")]);
       if (m == 1)
         m = 0;
       this.set("max", m);
@@ -316,9 +325,12 @@ define([
     },
 
     changeRows : function(e) {
+      e.preventDefault();
       var num = parseInt(this.$(".metrics-rows").val());
+      //render the loading tempalte
       if (num){
         this.model.set("userVal", _.min([this.model.get("max"), num]));
+        this.$(".s-metrics-metadata").html(loadingTemplate());
       }
     },
 
@@ -382,6 +394,8 @@ define([
     },
 
     processResponse: function (response) {
+
+      //it's bibcodes from the search endpoint
       if (response instanceof ApiResponse){
         var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode});
         var options = {

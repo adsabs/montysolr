@@ -1894,7 +1894,7 @@ define([
     //trigger show event, should prompt dispatchRequest
     networkWidget.onShow();
 
-    expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 1000 papers.\n\nChange to first  papers (max is 1000).\n Submit');
+    expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 1000 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
     sinon.spy(networkWidget.pubsub, "publish");
     $("#test").find(".network-metadata input").val("400");
     $("#test").find(".network-metadata button.submit-rows").trigger("click");
@@ -1902,7 +1902,7 @@ define([
     setTimeout(function () {
         expect(networkWidget.pubsub.publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
         expect(networkWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([400]);
-        expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 400 papers.\n\nChange to first  papers (max is 1000).\n Submit');
+        expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 400 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
         done();
     }, 800);
 
