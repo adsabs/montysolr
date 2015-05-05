@@ -2256,6 +2256,9 @@ define([
         ],
         "rows": [
           300
+        ],
+        "sort": [
+          "date desc"
         ]
       });
 
@@ -2281,6 +2284,8 @@ define([
       //click it
       $(".load-author-network").click();
 
+      //it's going to add a "date desc" sort parameter
+
       expect(networkWidget.pubsub.publish.callCount).to.eql(2);
       expect(networkWidget.pubsub.publish.args[1][0]).to.eql("[PubSub]-Execute-Request");
       expect(networkWidget.pubsub.publish.args[1][1].toJSON().query.toJSON()).to.eql(
@@ -2290,7 +2295,10 @@ define([
           ],
           "rows": [
             300
-          ]
+          ],
+            "sort" : [
+              "date desc"
+            ]
         }
       );
 
