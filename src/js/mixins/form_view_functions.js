@@ -5,32 +5,11 @@ define([
 
   ){
 
+
+
   //some functions to be used by form views which auto-validate
-
   var formFunctions = {
-    //for the view
-    //call in onRender method to activate the recaptcha
-    //otherwise it won't work
-    activateRecaptcha: function (sitekey) {
-      if (!sitekey){
-        return
-      }
-      var that = this;
-      //for testing, ignore
-      if (window.grecaptcha) {
-        grecaptcha.render(this.$(".g-recaptcha")[0],
-          {
-            sitekey: sitekey, callback: function (response) {
-            that.model.set("g-recaptcha-response", response)
-          }
-          }
-        )
-      }
-      else {
-        console.warn("grecaptcha global variable not found");
-      }
 
-    },
     //for the view
     //checks whether to show a green submit button on model change
     checkValidationState: function () {

@@ -1,6 +1,6 @@
 define([
     'js/widgets/authentication/widget',
-    'js/bugutils/minimal_pubsub',
+    'js/bugutils/minimal_pubsub'
   ],
 
 function(
@@ -21,8 +21,16 @@ function(
         request: function (apiRequest) {}
       }))({verbose: false});
 
+
       var hardened = minsub.beehive.getHardenedInstance();
-      sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
+      sinon.stub(hardened, "getObject", function(object){
+        if (object == "DynamicConfig"){
+          return {getRecaptchaKey : function(){return "foo"}}
+          }
+          else if (object == "RecaptchaManager"){
+            return  {activateRecaptcha : function(){}}
+          }
+      })
 
       var a = new AuthenticationWidget({test: true});
       a.activate(hardened);
@@ -56,8 +64,14 @@ function(
       }))({verbose: false});
 
       var hardened = minsub.beehive.getHardenedInstance();
-      sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
-
+      sinon.stub(hardened, "getObject", function(object){
+        if (object == "DynamicConfig"){
+          return {getRecaptchaKey : function(){return "foo"}}
+        }
+        else if (object == "RecaptchaManager"){
+          return  {activateRecaptcha : function(){}}
+        }
+      })
       var a = new AuthenticationWidget({test: true});
 
       a.activate(hardened);
@@ -124,8 +138,14 @@ function(
       }))({verbose: false});
 
       var hardened = minsub.beehive.getHardenedInstance();
-      sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
-
+      sinon.stub(hardened, "getObject", function(object){
+        if (object == "DynamicConfig"){
+          return {getRecaptchaKey : function(){return "foo"}}
+        }
+        else if (object == "RecaptchaManager"){
+          return  {activateRecaptcha : function(){}}
+        }
+      })
       var a = new AuthenticationWidget({test: true});
 
       a.activate(hardened);
@@ -198,8 +218,14 @@ function(
       }))({verbose: false});
 
       var hardened = minsub.beehive.getHardenedInstance();
-      sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
-
+      sinon.stub(hardened, "getObject", function(object){
+        if (object == "DynamicConfig"){
+          return {getRecaptchaKey : function(){return "foo"}}
+        }
+        else if (object == "RecaptchaManager"){
+          return  {activateRecaptcha : function(){}}
+        }
+      })
       var a = new AuthenticationWidget({test: true});
 
       a.activate(hardened);
@@ -218,7 +244,6 @@ function(
       minsub.publish(minsub.USER_ANNOUNCEMENT, "reset_password_1_success");
 
       expect($(".s-form-container").text().trim()).to.eql('Password Reset Successful\n    \n    \n         Check your email for further instructions.');
-
 
 
     });

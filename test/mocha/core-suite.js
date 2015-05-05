@@ -23,6 +23,7 @@ define([], function() {
       '/components/history_manager.spec.js',
       '/components/user.spec.js',
       '/components/session.spec.js',
+      '/components/recaptcha_manager.spec.js',
 
       '/components/discovery_mediator.spec.js',
       '/components/alerts_mediator.spec.js',

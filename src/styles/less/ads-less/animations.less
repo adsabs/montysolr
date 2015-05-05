@@ -12,27 +12,13 @@
   .lh-animation(pulseActivePrimaryFaded 2s linear 0s 1 alternate)
 }
 
-.lh-keyframes(~'fadeOut, 0% {opacity: 1; height:auto} 100% {opacity: 0; height:0 }');
 
 
-.fade-out{
-  .lh-animation(fadeOut 2s 5s linear forwards);
-
-}
-
-.lh-keyframes(~'fadeIn, 0% {opacity: 0} 100% {opacity: 1 }');
-
-
-.fade-in{
-  .lh-animation(fadeIn .2s 0s linear);
-}
-
-
-.lh-keyframes(~'slideBackground, 0% {background-position: 0 0 } 100% {background-position:  0 100%}');
+.lh-keyframes(~'slideBackground, 0% {background-position: 0 0 } 100% {background-position:  0 -80%}');
 
 
 .slide-background{
-  .lh-animation(slideBackground 2s ease-out forwards);
+  .lh-animation(slideBackground .8s ease-out forwards);
 }
 
 /* from animate.css */
