@@ -147,6 +147,8 @@ define([
 
       it("when displaying a record, it can handle the 'pending' state", function(done) {
         var w = _getWidget();
+        var spy = sinon.spy();
+        w.widget.on('orcid-update-finished', spy);
 
         var oApi = minsub.beehive.getService('OrcidApi');
         var d = $.Deferred();
@@ -162,6 +164,7 @@ define([
 
         // widgets are in the 'loading' state
         expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(1);
+        expect(spy.called).to.eql(false);
 
         // simulate the data has arrived
         d.resolve({
@@ -169,9 +172,10 @@ define([
           isCreatedByOthers: true
         });
 
-        // the widget is display orcid actions
+        // the widget displays orcid actions
         expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(0);
         expect(w.widget.view.children.findByIndex(1).$el.find('.orcid-update').length).to.eql(1);
+        expect(spy.called).to.eql(true);
 
         done();
       });

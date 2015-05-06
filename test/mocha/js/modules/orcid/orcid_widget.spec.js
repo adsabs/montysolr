@@ -82,6 +82,12 @@ define([
                       ],
                       "id": "10734037",
                       "bibcode": "2015CeMDA.121..301D"
+                    },
+                    {
+                      "doi": [
+                          "10.1126/duplica.276.5309.88"
+                      ],
+                      "bibcode": "dup-bibcode"
                     }
                   ]
                 }
@@ -426,8 +432,6 @@ define([
       });
 
       it("should load ORCID when onShow is called", function(done) {
-
-
         var orcidApi = getOrcidApi();
         orcidApi.saveAccessData({access: true});
         orcidApi.getUserProfile = function() {
@@ -451,6 +455,87 @@ define([
           done();
         }, 200);
       });
+
+      it("should know how to de-duplicate records", function() {
+        var data = {
+          "responseHeader": {
+            "params": {
+              "orcid": "0000-0001-8178-9506"
+            }
+          },
+          "response": {
+            "numFound": 2,
+            "start": 0,
+            "docs": [
+              {
+                "bibcode": "dup-bibcode",
+                "putcode": "469257",
+                "title": "Tecnologias XXX",
+                "visibility": "PUBLIC",
+                "formattedDate": "2014/11",
+                "pub": "El Profesional de la Informacion",
+                "abstract": null,
+                "author": [],
+                "source_name": "nasa ads"
+              },
+              {
+                "doi": "10.1126/duplica.276.5309.88",
+                "putcode": "469256",
+                "title": "Tecnologias XXX",
+                "visibility": "PUBLIC",
+                "formattedDate": "2014/11",
+                "pub": "El Profesional de la Informacion",
+                "abstract": null,
+                "author": [],
+                "source_name": "external source"
+              }
+            ]
+          }
+        };
+
+        var orcidMode = true;
+        var user = {
+          isOrcidModeOn: function() {
+            return orcidMode;
+          },
+          getHardenedInstance: function() {
+            return this;
+          }
+        };
+        beehive.addObject('User', user);
+
+        var orcidApi = getOrcidApi();
+        sinon.stub(orcidApi, 'hasAccess', function() {return true});
+        var widget = _getWidget();
+
+        var response = new JsonResponse(data);
+        response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
+
+        widget.processResponse(response);
+
+        var $w = widget.render().$el;
+        $('#test').append($w);
+
+        expect(widget.collection.models.length).to.eql(1);
+        expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('dup-bibcode');
+        expect(widget.view.children.findByIndex(0).$el.find('span.s-orcid-source').text().trim()).to.eql('(nasa ads; external source)');
+
+        // pretend we are being called after the update
+        widget.hiddenCollection.add({
+          "doi": "10.1126/duplica.276.5309.88",
+          "putcode": "469256",
+          "title": "Tecnologias XXX",
+          "visibility": "PUBLIC",
+          "formattedDate": "2014/11",
+          "pub": "El Profesional de la Informacion",
+          "abstract": null,
+          "author": [],
+          "source_name": "external source"
+        });
+        widget.update();
+        expect(widget.hiddenCollection.models.length).to.eql(1);
+        expect(widget.hiddenCollection.models[0].attributes.source_name).to.eql("nasa ads; external source");
+      })
     });
 
   });
