@@ -839,7 +839,9 @@ define([
                       "pub": "El Profesional de la Informacion",
                       "abstract": null,
                       "author": [],
-                      "identifier": "test-bibcode"
+                      "identifier": "test-bibcode",
+                      "source_name": "nasa ads",
+                      "source_date": 1424194783005
                     },
                     {
                       "bibcode": "bibcode-foo",
@@ -850,7 +852,9 @@ define([
                       "pub": "foo",
                       "abstract": null,
                       "author": [],
-                      "identifier": "bibcode-foo"
+                      "identifier": "bibcode-foo",
+                      "source_name": "Roman Chyla",
+                      "source_date": 1422645668284
                     }
                   ]
                 }

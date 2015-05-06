@@ -48,6 +48,8 @@ define([
         this.view.template = ContainerTemplate;
         this.view.model.set({"mainResults": true}, {silent : true});
         this.listenTo(this.collection, "reset", this.checkDetails);
+
+        this.on('orcid-update-finished', this.mergeDuplicateRecords);
       },
 
 
@@ -59,6 +61,104 @@ define([
         this.on('orcidAction:delete', function(model) {
           this.collection.remove(model);
         });
+      },
+
+
+      /**
+       * Go through all the recs and remove the ones that are duplicates
+       * (we'll keep the ADS version, and indicate the provenance of the
+       * removed record)
+       *
+       * This func is called after the resolution of the bibcodes, so you
+       * can expect to have a canonical bibcode in the 'identifier' field
+       */
+      mergeDuplicateRecords: function(docs) {
+
+
+        var dmap = {};
+        var id, dupsFound, c = 0;
+        if (docs) {
+          _.each(docs, function(doc) {
+            doc._dupIdx = c++;
+            id = doc.identifier;
+            if (id) {
+              id = id.toLowerCase();
+              if (dmap[id]) {
+                dmap[id].push(doc);
+                dupsFound = true;
+              }
+              else {
+                dmap[id] = [doc];
+              }
+            }
+          });
+        }
+        else {
+          this.hiddenCollection.each(function(model) {
+            id = model.get('identifier');
+            model.attributes._dupIdx = c++;
+            if (id) {
+              id = id.toLowerCase();
+              if (dmap[id]) {
+                dmap[id].push(model.attributes);
+                dupsFound = true;
+              }
+              else {
+                dmap[id] = [model.attributes];
+              }
+            }
+          });
+        }
+
+        if (dupsFound) {
+          var toRemove = [], toUpdate = [];
+
+          _.each(dmap, function(value, key) {
+            if (value.length > 1) {
+
+              // decide which record is ours (or pick the first one)
+              var toPick = 0;
+              _.each(value, function(doc, idx) {
+                if (doc['source_name'] && doc['source_name'].toLowerCase() == 'nasa ads') {
+                  toPick = idx;
+                }
+              });
+
+              // update 'provenance' field in the picked record
+              var authoritativeRecord = value[toPick];
+              value.splice(toPick, 1);
+              toUpdate.push(authoritativeRecord._dupIdx);
+              authoritativeRecord['source_name'] = authoritativeRecord['source_name'] || '';
+
+              _.each(value, function(doc) {
+                if (doc['source_name'])
+                  authoritativeRecord['source_name'] += '; ' + doc['source_name'];
+                toRemove.push(doc._dupIdx);
+              });
+
+            }
+          });
+
+          toRemove.sort(function(a, b){return b-a}); // reverse order
+
+          if (docs) { // we are updating the data before they get displayed
+            _.each(toRemove, function(idx) {
+              docs.splice(idx, 1); // will be wasty for large collections
+            })
+          }
+          else { // we are updating the collection (it was already displayed
+            _.each(toUpdate, function(idx) {
+              var model = this.hiddenCollection.models[idx]; // force re-paint
+              model.set('source_name', model.attributes['source_name']);
+            });
+            _.each(toRemove, function(idx) {
+              var model = this.hiddenCollection.models[idx];
+              this.hiddenCollection.remove(model);
+            });
+
+          }
+        }
+
       },
 
 
@@ -130,12 +230,20 @@ define([
 
       /**
        * function to update what we are displaying; it always works with the existing
-    * models - does not fetch new data
-    *
-    * @param sortBy
-    * @param filterBy
-    *  - allowed values are: 'ads', 'both', 'others'
-      */
+       * models - does not fetch new data
+       *
+       * @param sortBy
+       * @param filterBy
+       *  - allowed values are: 'ads', 'both', 'others', null
+       *
+       *    'ads' means the record was created by ADS Orcid client
+       *    'others' that it was created by some other app AND we have
+       *          a bibcode
+       *    'both' - we have a bibcode and it was created by ADS or by
+       *          others
+       *    null - the record was created by an external client and we
+       *           dont have a bibcode for it
+       */
       update: function(options) {
         options = options || {};
 

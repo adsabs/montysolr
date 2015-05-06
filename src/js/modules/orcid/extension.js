@@ -85,11 +85,17 @@ define([
           }
 
           var recInfo;
+          var counter = 0;
 
           _.each(docs, function(d) {
             recInfo = orcidApi.getRecordInfo(d);
             if (recInfo.state() == 'pending') {
+              counter += 1;
               recInfo.done(function(rInfo) {
+                counter -= 1;
+                if (counter == 0) {
+                  self.trigger('orcid-update-finished');
+                }
                 //console.log('pending: ' + d.bibcode + JSON.stringify(rInfo));
                 var actions = self._getOrcidInfo(rInfo);
                 // get the model for this document
@@ -112,8 +118,12 @@ define([
                   d.identifier = rInfo.bibcode;
               });
             }
-
           });
+
+          if (counter == 0) {
+            self.trigger('orcid-update-finished', docs);
+          }
+
           return docs;
         };
 
