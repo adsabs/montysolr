@@ -1,3 +1,6 @@
+/* @keyframes name | duration | timing-function | delay |
+   iteration-count | direction | fill-mode | play-state */
+
 .lh-keyframes(~'pulseActive, 0%,100% {box-shadow: none;} 50% {box-shadow: 0 0 5px #ffb861; background-color:#ffe5b8}');
 
 .draw-attention {
@@ -11,7 +14,6 @@
 .draw-attention-primary-faded {
   .lh-animation(pulseActivePrimaryFaded 2s linear 0s 1 alternate)
 }
-
 
 
 .lh-keyframes(~'slideBackground, 0% {background-position: 0 0 } 100% {background-position:  0 -80%}');
@@ -39,7 +41,7 @@ Copyright (c) 2015 Daniel Eden
   animation-fill-mode: both;
 }
 
-.animated.infinite {
+ .infinite {
   -webkit-animation-iteration-count: infinite;
   animation-iteration-count: infinite;
 }
