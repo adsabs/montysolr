@@ -9,68 +9,54 @@
   padding-right: 15px;
   background-color: lighten(@navbar-inverse-bg, 6%);
 
-  color: #ffffff;
 
 }
 
 .s-landing-section-1 {
   .row;
   text-align: center;
-  height: 150px;
   background: url("../img/star_background.jpg") top center repeat;
+  color: #ffffff;
+
 
   .slide-background;
 
 
-
   h1 {
 
-    font-weight:300;
+    letter-spacing: .09em;
+    font-weight: 300;
     display: inline-block;
     color: white;
-    font-size: 45px;
+    font-size: 54px;
     .animated;
     .fadeInUp;
+    margin-top: 20px;
+    margin-bottom: 20px;
+
   }
 
-}
+  .s-title-wrapper {
+    .lh-background-image(linear-gradient(rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.79) 50%, rgba(255, 255, 255, 0) 100%));
+    padding: 26px;
 
+  }
+}
 
 .s-search-bar-rows-container {
 
   // for the quick add buttons
 
-  .btn-sm{
-    font-size : 16px !important;
+  .btn-sm {
+    font-size: 16px !important;
   }
-
-}
-
-.s-greeting-text {
-  font-weight: 200;
-  line-height: 1.5;
-  font-weight:300;
-  letter-spacing: 1px;
-  .fadeIn;
-  .animated;
-
-  p {
-    padding: 0;
-    margin-top: 20px;
-    margin-bottom: 0;
-  }
-
-  @media (min-width :@screen-sm-min) {
-
-    font-size: 24px;
-  }
-
 }
 
 .s-landing-section-2 {
   background-color: white;
   min-height: 700px;
   padding-top: 100px;
+
 }
 
 .s-landing-section-3 {

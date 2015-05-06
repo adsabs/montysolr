@@ -45,7 +45,8 @@ require.config({
           DynamicConfig: 'discovery.vars',
           HistoryManager: 'js/components/history_manager',
           MasterPageManager: 'js/page_managers/master',
-          AppStorage: 'js/components/app_storage'
+          AppStorage: 'js/components/app_storage',
+          RecaptchaManager : 'js/components/recaptcha_manager'
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'
@@ -150,7 +151,7 @@ require.config({
     // for development use
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
-    'google-recaptcha' : '//www.google.com/recaptcha/api.js?&render=explicit',
+    'google-recaptcha' : '//www.google.com/recaptcha/api.js?&render=explicit&onload=onRecaptchaLoad',
     'persist-js': 'libs/persist-js/src/persist',
     'backbone-validation': 'libs/backbone-validation/backbone-validation',
     'backbone.stickit' : 'libs/backbone.stickit/backbone.stickit',

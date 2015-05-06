@@ -91,7 +91,7 @@ define([
         required: true,
         pattern: "email",
         equalTo: 'email',
-        msg: "(A valid email is required)"
+        msg: "(This email must be valid and match the one above)"
       },
       password: {
         required: true,

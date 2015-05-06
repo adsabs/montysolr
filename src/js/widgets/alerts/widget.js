@@ -131,7 +131,14 @@ define([
         if (this.model.get('modal')) {
           this.showModal();
         }
+        if (this.model.get('fade')){
 
+           setTimeout(function(){
+          //cant use css transitions becase we need display:none afterwards
+          this.$(".alert").fadeOut(2000);
+          },3000);
+
+        }
       },
 
       showModal: function() {
