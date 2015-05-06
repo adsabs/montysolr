@@ -105,7 +105,7 @@ define([
        this.innerChart.append("text")
          .attr("class", "s-label")
          .attr("x", this.width/2 - 20)
-         .attr("y", 228)
+         .attr("y", 212)
          .text(Marionette.getOption(this, "xAxisTitle"));
 
        this.innerChart.append("text")
@@ -352,7 +352,7 @@ define([
      },
 
      addSliderWindows : function(){
-       this.$(".slider-data").html("<input type=\"text\" class=\"show-slider-data-first\"></input> to" +
+       this.$(".slider-data").html("Limit results to papers from <input type=\"text\" class=\"show-slider-data-first\"></input> to" +
          " <input type=\"text\" class=\"show-slider-data-second\"></input>");
     },
 
@@ -364,6 +364,10 @@ define([
        this.$(".slider").slider("values", [val1, val2]);
 
        this.graphChange(val1, val2)
+     },
+
+     addToOnRender : function(){
+       this.$(".s-view-metrics-button-container").append('<button class="btn btn-default btn-sm view-metrics "> View all metrics</button>');
      },
 
      submitFacet: function () {

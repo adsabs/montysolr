@@ -293,6 +293,9 @@ define(['backbone',
         else if (ev == 'containerLogicSelected') {
           this.handleLogicalSelection(arg1);
         }
+        else if (ev== "itemview:navigate") {
+          this.pubsub.publish(this.pubsub.NAVIGATE, arg2);
+        }
       },
 
 

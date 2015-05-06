@@ -69,7 +69,7 @@ define([
           this.route = '#index/' + queryUpdater.clean(q).url();
         });
 
-        this.set('settings-page', function(page, data, key){
+        this.set('settings-page', function(page, data){
           var subView = data.subView;
           subView = subView ? subView : "preferences";
           var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
@@ -89,7 +89,7 @@ define([
           }
         });
 
-        this.set('authentication-page', function(page, data, key){
+        this.set('authentication-page', function(page, data){
           var subView = data.subView;
           subView = subView ? subView : "login";
           var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();

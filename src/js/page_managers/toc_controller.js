@@ -13,15 +13,11 @@ define([
 
       assemble: function() {
         BasicPageManagerController.prototype.assemble.apply(this, arguments);
-        var self = this;
 
-        // listen to every widget we manage
-        var listener = _.bind(self.onPageManagerEvent, self);
-
-        _.each(_.keys(self.widgets), function(w) {
-          self.listenTo(self.widgets[w], "page-manager-event", listener);
-          self.broadcast('page-manager-message', 'new-widget', w);
-        });
+        _.each(_.keys(this.widgets), function(w) {
+          this.listenTo(this.widgets[w], "page-manager-event", _.bind(this.onPageManagerEvent, this, this.widgets[w]));
+          this.broadcast('page-manager-message', 'new-widget', w);
+        }, this);
       },
 
       onDisplayDocuments : function(apiQuery){
@@ -33,7 +29,6 @@ define([
           };
         },
 
-
       /**
        * Listens to and receives signals from managed widgets.
        * It will discover their 'widgetId' and broadcasts the
@@ -43,33 +38,29 @@ define([
        * @param event
        * @param data
        */
-      onPageManagerEvent: function(event, data) {
-        var self = this;
+      onPageManagerEvent: function(widget, event, data) {
         var sender = null; var widgetId = null;
+        data = _.extend(data, {widget : widget });
 
         // try to find/identify sender
         if (data.widget) {
-          _.each(_.pairs(self.widgets), function(w) {
+          _.each(_.pairs(this.widgets), function(w) {
             if (w[1] === data.widget) {
               widgetId = w[0];
               sender = w[1];
             }
           });
-          delete data.widget;
         }
 
         if (event == 'widget-ready' && sender !== null) {
           data["widgetId"] = widgetId;
-          self.broadcast('page-manager-message', event, data);
+          this.broadcast('page-manager-message', event, data);
         }
         else if (event == 'widget-selected') {
-          var idAttribute = data.idAttribute,
-              href = data.href;
-
-          this.pubsub.publish(this.pubsub.NAVIGATE, idAttribute, href);
+          this.pubsub.publish(this.pubsub.NAVIGATE, data.idAttribute, data.href);
         }
         else if (event == 'broadcast-payload'){
-          self.broadcast('page-manager-message', event, data);
+          this.broadcast('page-manager-message', event, data);
         }
 
       },

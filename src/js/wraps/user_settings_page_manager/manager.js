@@ -1,7 +1,7 @@
 define([
-  'js/page_managers/controller',
+  '../../page_managers/toc_controller',
   'js/page_managers/one_column_view',
-  'hbs!js/page_managers/templates/user-settings-layout'
+  'hbs!./user-settings-layout'
 ], function (
   PageManagerController,
   PageManagerView,

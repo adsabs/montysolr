@@ -62,7 +62,7 @@ define([
           if (!(_.filter(_.values(stats), f).length || _.filter(_.values(reads), f).length)) return;
           this._response = apiResponse;
           this.trigger('page-manager-event', 'widget-ready',
-            {numFound: 1, widget: this});
+            {numFound: 1});
         }
         else {
           this.innerWidget.processResponse(apiResponse);
