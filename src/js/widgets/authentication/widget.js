@@ -119,7 +119,7 @@ define([
 
     onRender: function () {
       this.activateValidation();
-      this.activateRecaptcha(Marionette.getOption(this, "recaptchaKey"));
+      this.trigger("activate-recaptcha");
     }
 
   });
@@ -208,7 +208,7 @@ define([
 
     onRender: function () {
       this.activateValidation();
-      this.activateRecaptcha(Marionette.getOption(this, "recaptchaKey"));
+      this.trigger("activateRecaptcha");
     }
 
   });
@@ -328,25 +328,27 @@ define([
 
     showLoginForm: function () {
       var view = new LogInView({model: this.logInModel});
-      this.listenToOnce(view, "submit-form", this.forwardSubmit);
+      view.on("submit-form", this.forwardSubmit, this);
       this.container.show(view);
     },
 
     showRegisterForm: function () {
-      var view = new RegisterView({model: this.registerModel, recaptchaKey : this.recaptchaKey });
-      this.listenToOnce(view, "submit-form", this.forwardSubmit);
+      var view = new RegisterView({model: this.registerModel});
+      view.on("submit-form", this.forwardSubmit, this);
+      view.on("activate-recaptcha", _.bind(this.forwardActivateRecaptcha, this, view));
       this.container.show(view);
     },
 
     showResetPasswordForm1: function () {
-      var view = new ResetPassword1View({model: this.resetPassword1Model, recaptchaKey : this.recaptchaKey });
-      this.listenToOnce(view, "submit-form", this.forwardSubmit);
+      var view = new ResetPassword1View({model: this.resetPassword1Model});
+      view.on("submit-form", this.forwardSubmit, this);
+      view.on("activate-recaptcha", _.bind(this.forwardActivateRecaptcha, this, view));
       this.container.show(view);
     },
 
     showResetPasswordForm2: function () {
       var view = new ResetPassword2View({model: this.resetPassword2Model});
-      this.listenToOnce(view, "submit-form", this.forwardSubmit);
+      view.on("submit-form", this.forwardSubmit, this);
       this.container.show(view);
     },
 
@@ -362,6 +364,10 @@ define([
 
     forwardSubmit : function(viewModel){
       this.trigger("submit-form", viewModel);
+    },
+
+    forwardActivateRecaptcha : function(view){
+      this.trigger("activate-recaptcha", view);
     }
 
   });
@@ -378,6 +384,7 @@ define([
       this.listenTo(this.view, "navigateToLoginForm", this.navigateToLoginForm);
       this.listenTo(this.view, "navigateToRegisterForm", this.navigateToRegisterForm);
       this.listenTo(this.view, "navigateToResetPassword1Form", this.navigateToResetPassword1Form);
+      this.listenTo(this.view, "activate-recaptcha", this.activateRecaptcha);
 
       if (options.test)
         window.grecaptcha = null;
@@ -399,13 +406,8 @@ define([
     activate: function (beehive) {
       this.beehive = beehive;
       this.pubsub = beehive.Services.get('PubSub');
-      _.bindAll(this, ["handleUserAnnouncement", "getReCaptchaKey"]);
+      _.bindAll(this, ["handleUserAnnouncement"]);
       this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
-      this.pubsub.subscribe(this.pubsub.APP_STARTED, this.getReCaptchaKey);
-    },
-
-    getReCaptchaKey : function(){
-      this.view.recaptchaKey = this.beehive.getObject("AppStorage").getConfigCopy().recaptchaKey;
     },
 
     setSubView : function(subView){
@@ -474,6 +476,10 @@ define([
     onShow : function(){
       //force a clearing of the view every time the widget is shown again
       this.view.render();
+    },
+
+    activateRecaptcha : function(view){
+      this.beehive.getObject("RecaptchaManager").activateRecaptcha(view);
     }
 
   });

@@ -130,12 +130,12 @@ define([
 
       /**
        * function to update what we are displaying; it always works with the existing
-       * models - does not fetch new data
-       *
-       * @param sortBy
-       * @param filterBy
-       *  - allowed values are: 'ads', 'both', 'others'
-       */
+    * models - does not fetch new data
+    *
+    * @param sortBy
+    * @param filterBy
+    *  - allowed values are: 'ads', 'both', 'others'
+      */
       update: function(options) {
         options = options || {};
 
