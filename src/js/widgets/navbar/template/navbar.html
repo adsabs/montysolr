@@ -8,9 +8,19 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
+            {{#unless hourly}}
             <a class="navbar-brand s-navbar-brand" href="#"><img class="s-ads-icon" src="styles/img/ads_logo.png" alt="ads icon"/>
                 <h1 class="sr-only"> The Astrophysics Data System</h1>
             </a>
+            {{else}}
+            <div class="s-hourly-warning">
+                <a class="navbar-brand s-navbar-brand" href="#"><i class="icon-danger fa-2x"></i> ADS TEST</a>
+                <span> Nothing you do here will be saved! <br/><a href="https://ui.adsabs.harvard.edu/">I want the real ADS <i class="fa fa-arrow-right"></i></a>
+                </span>
+            </div>
+
+
+            {{/unless}}
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->

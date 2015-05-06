@@ -15,10 +15,6 @@ define([
 
     var grecaptchaDeferred = $.Deferred();
 
-    onRecaptchaLoad = function(){
-      grecaptchaDeferred.resolve();
-    }
-
     var RecaptchaManager = GenericModule.extend({
 
       initialize : function(){

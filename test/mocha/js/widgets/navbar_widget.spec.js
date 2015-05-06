@@ -46,6 +46,11 @@ define([
         }
       });
 
+      minsub.beehive.addObject("AppStorage", {
+        getConfigCopy : function(){return {hourly: false}},
+        getHardenedInstance: function() {return this},
+      });
+
       var n = new NavBarWidget();
       n.activate(minsub.beehive.getHardenedInstance());
       $("#test").append(n.render().el);
@@ -96,7 +101,6 @@ define([
       $("#test").append(n.view.render().el);
       var $w = n.view.$el;
       $w.find('.orcid-sign-in').click();
-      debugger;
 
       expect(signInStub.callCount).to.eql(1);
       expect(setOrcidModeStub.callCount).to.eql(1);

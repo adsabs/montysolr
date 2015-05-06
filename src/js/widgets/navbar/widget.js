@@ -23,7 +23,9 @@ define([
         orcidLoggedIn: false,
         currentUser: undefined,
         orcidFirstName: undefined,
-        orcidLastName: undefined
+        orcidLastName: undefined,
+        //should it show hourly banner?
+        hourly : false
       }
     }
   });
@@ -177,6 +179,10 @@ define([
           that.model.set("orcidURI", info["orcid-identifier"]["uri"]);
         })
       }
+
+      //also set in the "hourly" flag
+      var hourly = this.BeeHive.getObject("AppStorage").getConfigCopy().hourly;
+      this.model.set("hourly", hourly);
     },
 
     handleUserAnnouncement : function(msg, data) {
