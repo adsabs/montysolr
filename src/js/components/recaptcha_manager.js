@@ -15,15 +15,16 @@ define([
 
     var grecaptchaDeferred = $.Deferred();
 
+    // this has to be global
+    onRecaptchaLoad = function(){
+      grecaptchaDeferred.resolve();
+    }
+
     var RecaptchaManager = GenericModule.extend({
 
       initialize : function(){
         this.grecaptchaDeferred = grecaptchaDeferred;
         this.siteKeyDeferred = $.Deferred();
-        //this has to be global
-        onRecaptchaLoad = function(){
-          this.grecaptchaDeferred.resolve();
-        }
         this.when = $.when(this.siteKeyDeferred, this.grecaptchaDeferred);
       },
 
