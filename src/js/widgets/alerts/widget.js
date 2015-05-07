@@ -62,8 +62,10 @@ define([
 
       close: function() {
         if (this.model.get('modal')) {
-          this.$el.find('#alertBox').modal('hide');
-          this.model.set('msg', null, {silent: true});
+          var that = this;
+          this.$el.find('#alertBox').modal('hide').on('hidden.bs.modal', function() {
+            that.model.set('msg', null, {silent: true});
+          });
         }
         else {
           this.model.set('msg', null);
@@ -76,10 +78,10 @@ define([
         }
 
         // this seems to be necessary (at least when the actions happen too fast ... like in unittests)
-        if (this.$el && this.$el.find('#alertBox.modal').length) {
+        if (null && this.$el && this.$el.find('#alertBox.modal').length) {
           var self = this;
           var args = arguments;
-          this.$el.find('#alertBox.modal').modal('hide').one('hidden.bs.modal', function() {
+          this.$el.find('#alertBox.modal').modal('hide').on('hidden.bs.modal', function() {
             Marionette.ItemView.prototype.render.apply(self, args);
           });
           return;

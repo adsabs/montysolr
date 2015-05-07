@@ -13,6 +13,8 @@ define([
     {href : '/export/bibtex' , description : 'BibTEX' , navEvent: 'export-bibtex'},
     {href : '/export/aastex' , description : 'AASTex' , navEvent: 'export-aastex'},
     {href : '/export/endnote' , description : 'EndNote' , navEvent: 'export-endnote'},
+    // deactivated, needs the myads microservice
+    //{href : '/export/query' , description : 'Export Query' , navEvent: 'export-query'}
   ];
 
   var btnType = "btn-primary-faded";
