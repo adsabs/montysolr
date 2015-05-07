@@ -52,9 +52,9 @@ define(['underscore',
         this.mostRecentQuery = new ApiQuery();
       },
 
-      activateCache: function(options) {
-        this._cache = this._getNewCache((options || {}).cache);
-      },
+//      activateCache: function(options) {
+//        this._cache = this._getNewCache((options || {}).cache);
+//      },
 
       _getNewCache: function(options) {
         return new Cache(_.extend({
