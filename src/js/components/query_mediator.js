@@ -39,7 +39,7 @@ define(['underscore',
 
       initialize: function(options) {
         options = options || {};
-        this._cache = this._getNewCache(options.cache);
+        this._cache = null;
         this.debug = options.debug || false;
         this.queryUpdater = new ApiQueryUpdater('QueryMediator');
         this.failedRequestsCache = this._getNewCache();
@@ -50,6 +50,10 @@ define(['underscore',
         this.longDelayInMs = _.isNumber(options.longDelayInMs) ? options.longDelayInMs: 100;
         this.monitoringDelayInMs = _.isNumber(options.monitoringDelayInMs) ? options.monitoringDelayInMs : 200;
         this.mostRecentQuery = new ApiQuery();
+      },
+
+      activateCache: function(options) {
+        this._cache = this._getNewCache((options || {}).cache);
       },
 
       _getNewCache: function(options) {
