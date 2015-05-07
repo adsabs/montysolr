@@ -10,6 +10,7 @@ define([
     'js/components/api_query',
     'js/components/api_feedback',
     'js/mixins/hardened',
+    'js/components/json_response'
   ],
   function(
     _,
@@ -20,7 +21,8 @@ define([
     ApiResponse,
     ApiQuery,
     ApiFeedback,
-    Hardened
+    Hardened,
+    JsonResponse
     ) {
 
     var Api = GenericModule.extend({
@@ -100,7 +102,15 @@ define([
         data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
       }
 
-      var u = this.url + (request.get('target') || '');
+      var target = request.get('target') || '';
+      var u;
+      if (target.startsWith('http')) {
+        u = target;
+      }
+      else {
+        u = this.url + (target.startsWith('/') ? target : '/' + target);
+      }
+
       u = u.substring(0, this.url.length-2) + u.substring(this.url.length-2, u.length).replace('//', '/');
 
       if (!u) {
@@ -119,7 +129,7 @@ define([
         cache: true, // do not generate _ parameters (let browser cache responses),
         //need this so that cross domain cookies will work!
         xhrFields: {
-          withCredentials: true
+          withCredentials: true // TODO: remove this (must be used only by certain widgets!!!)
         }
       };
 
