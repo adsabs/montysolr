@@ -11,6 +11,7 @@ define(['underscore',
     'cache',
     'js/components/generic_module',
     'js/mixins/dependon',
+    'js/mixins/feedback_handling',
     'js/components/api_request',
     'js/components/api_response',
     'js/components/api_query_updater',
@@ -24,7 +25,8 @@ define(['underscore',
     $,
     Cache,
     GenericModule,
-    Mixins,
+    Dependon,
+    FeedbackMixin,
     ApiRequest,
     ApiResponse,
     ApiQueryUpdater,
@@ -367,6 +369,11 @@ define(['underscore',
         if (!(apiRequest instanceof ApiRequest)) {
           throw new Error('Sir, I belive you forgot to send me a valid ApiRequest!');
         }
+        else if (!senderKey){
+          throw new Error("Request executed, but no widget id provided!");
+        }
+        // show the loading view for the widget
+        this._makeWidgetSpin(senderKey.getId());
         return this._executeRequest(apiRequest, senderKey);
       },
 
@@ -444,7 +451,6 @@ define(['underscore',
         }
 
       },
-
 
       onApiResponse: function(data, textStatus, jqXHR ) {
         var qm = this.qm;
@@ -583,6 +589,6 @@ define(['underscore',
 
     });
 
-    _.extend(QueryMediator.prototype, Mixins.BeeHive);
+    _.extend(QueryMediator.prototype, Dependon.BeeHive, FeedbackMixin);
     return QueryMediator;
   });
