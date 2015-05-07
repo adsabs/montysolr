@@ -85,7 +85,7 @@ define([
         done();
       });
 
-      it.skip("has 'activate' and 'activateCache' function - which does the appropriate setup", function(done) {
+      it("has 'activate' and 'activateCache' function - which does the appropriate setup", function(done) {
         var qm = new QueryMediator();
         var pubsub = beehive.Services.get('PubSub');
 
@@ -100,7 +100,7 @@ define([
         expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.START_SEARCH]);
         expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.DELIVERING_REQUEST]);
 
-        expect(qm._cache).to.be.undefined;
+        expect(qm._cache).to.be.null;
         qm.activateCache();
         expect(qm._cache).to.be.defined;
 
@@ -241,6 +241,7 @@ define([
       it("has START_SEARCH signal", function(done) {
         var x = createTestQM();
         var qm = x.qm;
+        qm.activateCache();
 
         sinon.spy(qm, 'startExecutingQueries');
 
@@ -293,6 +294,7 @@ define([
       it("responds to EXECUTE_REQUEST signal", function(done) {
         var x = createTestQM();
         var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
+        qm.activateCache();
 
         var pubsub = x.pubsub;
         var key = pubsub.getPubSubKey();
@@ -323,6 +325,7 @@ define([
       it("responds to GET_QTREE signal", function(done) {
         var x = createTestQM();
         var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
+        qm.activateCache();
 
         var pubsub = x.pubsub;
         var key = pubsub.getPubSubKey();
@@ -462,7 +465,8 @@ define([
 
         var x = createTestQM();
         var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
-
+        qm.activateCache();
+        
         var rk = qm._getCacheKey(req1);
 
         qm._executeRequest(req1, key1);
