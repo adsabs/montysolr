@@ -177,6 +177,27 @@ define([
         expect(w.widget.view.children.findByIndex(1).$el.find('.orcid-update').length).to.eql(1);
         expect(spy.called).to.eql(true);
 
+        // now test errors
+        d = $.Deferred();
+        spy.reset();
+
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({
+          q: "star"
+        }));
+
+        // widgets are in the 'loading' state
+        expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(1);
+        expect(spy.called).to.eql(false);
+
+        // simulate error
+        d.reject();
+
+        // the widget displays orcid actions
+        expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(0);
+        expect(spy.called).to.eql(true);
+
+        // but the style is 'danger'
+        expect(w.widget.view.children.findByIndex(1).$el.find('button.btn-danger').length).to.eql(1);
         done();
       });
 
@@ -189,6 +210,7 @@ define([
         widget.mergeADSAndOrcidData(model);
         expect(widget.pubsub.called).to.eql(false);
 
+        var uSpy = sinon.spy();
         model.set('bibcode', 'foo');
         var s = widget.beehive.getService;
         widget.beehive.getService = function() {return {}};
@@ -204,6 +226,40 @@ define([
 
         expect(widget.pubsub.publish.called).to.eql(true);
         expect(widget.pubsub.publish.lastCall.args[1].get('query').get('q')).to.eql(['identifier:foo']);
+
+
+        // test of the internal logic
+
+        widget.mergeADSAndOrcidData = function() {
+          var d = $.Deferred();
+          d.resolve(widget.model);
+          return d.promise();
+        };
+        widget.beehive.getService = function() {return {
+          updateOrcid: function() {
+            expect(model.get('orcid').pending).to.eql(true);
+            var d = $.Deferred();
+            d.resolve({});
+            return d.promise();
+          }
+        }};
+        widget.once('orcidAction:add', uSpy);
+
+        widget.onAllInternalEvents('itemview:OrcidAction', null, {model: model, action: 'add'});
+        expect(model.get('orcid').actions.add).to.be.defined;
+        expect(uSpy.called).to.eql(true);
+
+        uSpy.reset();
+        widget.once('orcidAction:delete', uSpy);
+        model.attributes.source_name = 'external; NASA ADS';
+        widget.onAllInternalEvents('itemview:OrcidAction', null, {model: model, action: 'delete'});
+        expect(model.attributes.source_name).to.eql('external');
+        expect(uSpy.called).to.eql(false); // when there is still something, keep the rec
+
+        model.attributes.source_name = 'NASA ADS';
+        widget.onAllInternalEvents('itemview:OrcidAction', null, {model: model, action: 'delete'});
+        expect(uSpy.called).to.eql(true);
+
         done();
       });
     })

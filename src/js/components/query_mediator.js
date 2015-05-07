@@ -388,6 +388,10 @@ define(['underscore',
 
           if (resp && resp.promise) { // we have already created ajax request
 
+            if (resp.state() == 'resolved') {
+
+            }
+
             resp.done(function() {
               self._cache.put(requestKey, arguments);
               self.onApiResponse.apply(

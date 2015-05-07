@@ -395,8 +395,8 @@ define([
         $('#test').append($w);
 
         expect(widget.collection.models.length).to.eql(3);
-        expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
-        expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql('1997sci...276...88v'); // found through doi, alternate_bibcode:bibcode-foo
+        expect(widget.view.children.findByIndex(2).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
+        expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('1997sci...276...88v'); // found through doi, alternate_bibcode:bibcode-foo
 
         orcidMode = true;
 
@@ -417,11 +417,11 @@ define([
         expect(widget.collection.models.length).to.eql(3);
 
         // sort
-        widget.update({sortBy: 'title'});
+        widget.update({sortBy: 'identifier'});
         expect(widget.collection.models.length).to.eql(3);
         expect(widget.collection.models[0].get('title')).to.eql('ADS 2.0');
-        expect(widget.collection.models[1].get('title')).to.eql('External article');
-        expect(widget.collection.models[2].get('title')).to.eql('Tecnologias XXX');
+        expect(widget.collection.models[1].get('title')).to.eql('Tecnologias XXX');
+        expect(widget.collection.models[2].get('title')).to.eql('External article');
 
         // sort and filter
         widget.update({filterBy: ['ads', 'others'], sortBy: 'title'});
@@ -449,7 +449,7 @@ define([
           $('#test').append($w);
 
           expect(widget.collection.models.length).to.eql(3);
-          expect(widget.view.children.findByIndex(0).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
+          expect(widget.view.children.findByIndex(2).$el.find('div.identifier').text().trim()).to.eql('test-bibcode');
           expect(widget.view.children.findByIndex(1).$el.find('div.identifier').text().trim()).to.eql(''); // since we don't make api resolution, bibcode cannot be found
 
           done();

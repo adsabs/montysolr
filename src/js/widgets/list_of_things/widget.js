@@ -111,9 +111,7 @@ define([
         this.setCurrentQuery(q);
 
         var docs = this.extractDocs(apiResponse);
-
         var pagination = this.getPaginationInfo(apiResponse, docs);
-
         docs = this.processDocs(apiResponse, docs, pagination);
 
         if (docs && docs.length) {
@@ -216,7 +214,7 @@ define([
         var params = apiResponse.get("response");
         var start = params.start || (paginationInfo.start || 0);
         docs = PaginationMixin.addPaginationToDocs(docs, start);
-        return docs
+        return docs;
       },
 
 
@@ -232,7 +230,7 @@ define([
         var page = _.isNumber(options.page) ? options.page : null;
         var numFound = options.numFound || this.model.get('numFound');
         var numAround = options.numAround || this.model.get('numAround') || 2;
-        var currentQuery = options.currentQuery || this.model.get('currentQuery');
+        var currentQuery = options.currentQuery || this.model.get('currentQuery') || new ApiQuery();
 
         // click to go to another 'page' will skip this
         if (page === null && this.collection.length) {
