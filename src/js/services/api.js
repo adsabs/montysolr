@@ -104,11 +104,11 @@ define([
 
       var target = request.get('target') || '';
       var u;
-      if (target.startsWith('http')) {
+      if (target.indexOf('http') > -1) {
         u = target;
       }
       else {
-        u = this.url + (target.startsWith('/') ? target : '/' + target);
+        u = this.url + ((target.length > 0 && target.indexOf('/') == 0) ? target : (target ? '/' + target : target));
       }
 
       u = u.substring(0, this.url.length-2) + u.substring(this.url.length-2, u.length).replace('//', '/');
