@@ -93,9 +93,7 @@ define([
               counter += 1;
               recInfo.done(function(rInfo) {
                 counter -= 1;
-                if (counter == 0) {
-                  self.trigger('orcid-update-finished');
-                }
+
                 //console.log('pending: ' + d.bibcode + JSON.stringify(rInfo));
                 var actions = self._getOrcidInfo(rInfo);
                 // get the model for this document
@@ -104,6 +102,29 @@ define([
                   if (model) {
                     model.set('orcid', actions); // if not found, we can ignore this update (the view changed already)
                   }
+                }
+
+                if (counter == 0) {
+                  self.trigger('orcid-update-finished');
+                }
+              });
+              recInfo.fail(function(data) {
+                counter -= 1;
+
+                // very likely, the request timed out
+                // keep the actions and let user redo the operation
+                if (self.collection && self.collection.findWhere) {
+                  var model = self.collection.findWhere({bibcode: d.bibcode});
+                  if (model) {
+                    var o = _.extend({}, model.get('orcid') || {});
+                    delete o.pending;
+                    o.error = 'Orcid API reported error';
+                    model.set('orcid', o); //TODO: distinguish different types of errors
+                  }
+                }
+
+                if (counter == 0) {
+                  self.trigger('orcid-update-finished');
                 }
               });
               d.orcid = {pending: true};
@@ -127,11 +148,15 @@ define([
           return docs;
         };
 
-      WidgetClass.prototype.processDocs = function() {
+      WidgetClass.prototype.processDocs = function(apiResponse, docs, pagination) {
         var docs = processDocs.apply(this, arguments);
         var user = this.beehive.getObject('User');
         if (user && user.isOrcidModeOn()){
-          return this.addOrcidInfo(docs);
+          var result = this.addOrcidInfo(docs);
+          if (pagination.numFound != result.length) {
+            _.extend(pagination, this.getPaginationInfo(apiResponse, docs));
+          }
+          return result;
         }
         return docs;
       };
@@ -157,7 +182,10 @@ define([
           req = new ApiRequest({query: q, target: ApiTargets.SEARCH, options: {
             done: function (resp) {
               if (resp.response && resp.response.docs && resp.response.docs[0]) {
-                model.attributes = _.extend(model.attributes, resp.response.docs[0]);
+                var sourceName = model.attributes.source_name || 'unknown';
+                sourceName += '; NASA ADS';
+
+                model.attributes = _.extend(model.attributes, resp.response.docs[0], {source_name: sourceName});
               }
               promise.resolve(model);
             },
@@ -184,16 +212,37 @@ define([
 
             self.mergeADSAndOrcidData(model)
               .done(function(model) {
-                var oldOrcidInfo = model.get('orcid');
+                var oldOrcidInfo = _.clone(model.get('orcid') || {});
                 model.set('orcid', {pending: true});
                 orcidApi.updateOrcid(action, data.model.attributes)
                   .done(function(recInfo) {
+                    if (action == 'delete') {
+                      var parts = model.attributes.source_name.split('; ');
+                      if (parts.indexOf('NASA ADS') > -1) {
+                        parts.splice(parts.indexOf('NASA ADS'), 1);
+                      }
+                      model.attributes.source_name = parts.join('; ');
+                    }
+                    else {
+                      model.set(model.attributes, {silent: true});
+                    }
                     model.set('orcid', self._getOrcidInfo(recInfo));
+
+                    if (action == 'delete' && model.get('source_name')) {
+                      return; // do nothing, we want to keep seeing the record
+                    }
                     self.trigger('orcidAction:' + action, model);
+                  })
+                  .fail(function() {
+                    model.set('orcid', _.extend(oldOrcidInfo, {pending: null, error: 'Error updaing record, please retry'}));
                   })
               })
               .fail(function() {
                 console.log('Failed merging data, we need to handle this error');
+                var o = _.clone(model.get('orcid'));
+                o.error = 'Failed merging ORCID data with ADS data';
+                delete o.pending;
+                model.set('orcid', o);
               });
           };
 

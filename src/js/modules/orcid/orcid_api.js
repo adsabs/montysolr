@@ -33,10 +33,6 @@
  * TODO:
  *  - error handling (discover more error situations and
  *    take care of them; such as duplicated put-codes)
- *  - keep track of write operations and cache ORCID
- *    profile (to avoid refetching it every time)
- *  - provide a more frindly api to query a status of
- *    a document
  *  - wrap write operations into throttling mode? (it is
  *    more efficient to do updates in bulk)
  *
@@ -87,6 +83,7 @@ define([
         this.virgin = true;
         this.maxQuerySize = 512;
         this.queryUpdater = new ApiQueryUpdater('orcid_api');
+        this.orcidApiTimeout = 5000; //5seconds
       },
 
       activate: function (beehive) {
@@ -267,6 +264,9 @@ define([
         this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-profile')
           .done(function(res) {
             ret.resolve(res['orcid-profile']);
+          })
+          .fail(function() {
+            ret.reject(arguments);
           });
         return ret.promise();
       },
@@ -285,6 +285,9 @@ define([
         this.sendData(this.config.apiEndpoint + '/' + this.authData.orcid + '/orcid-works')
           .done(function(res) {
             ret.resolve(res['orcid-profile']['orcid-activities'] ? res['orcid-profile']['orcid-activities']['orcid-works'] : {});
+          })
+          .fail(function() {
+            ret.reject(arguments);
           });
         return ret.promise();
       },
@@ -645,7 +648,8 @@ define([
         var options = {
           type: 'GET',
           url: url,
-          cache: false,
+          cache: this.pending ? true : false, // true = do not generate _ parameters (let browser cache responses)
+          timeout: this.orcidApiTimeout,
           done: function(data) {
             result.resolve(data);
           }
@@ -685,7 +689,10 @@ define([
           options.headers["Accept"] = "application/json";
 
 
-        api.request(new ApiRequest({target: url, query: new ApiQuery(), options: options}));
+        api.request(new ApiRequest({target: url, query: new ApiQuery(), options: options}))
+          .fail(function() {
+            result.reject(arguments);
+          });
         return result.promise();
       },
 
@@ -767,6 +774,9 @@ define([
             .done(function() {
               result.resolve(self._getRecInfo(data));
             })
+            .fail(function() {
+              result.reject(arguments);
+            });
         }
         else {
           result.resolve(self._getRecInfo(data));
@@ -830,7 +840,8 @@ define([
         if (self.pending) { // update is already running
           var tme = setInterval(function() {
             if (self.pending == false) {
-              whenDone.resolve();
+              if (whenDone.state() != 'resolved')
+                whenDone.resolve();
               clearInterval(tme);
             }
           }, 200);
@@ -993,8 +1004,14 @@ define([
               self.getRecordInfo(adsDoc)
                 .done(function(recInfo) {
                   result.resolve(recInfo);
-                });
+                })
+                .fail(function() {
+                  result.reject(arguments);
+                })
             })
+            .fail(function() {
+              result.reject(arguments);
+            });
         }
         else if (action == 'delete') {
           this.deleteWorks(this._extractIdentifiers([adsDoc]))
@@ -1002,8 +1019,14 @@ define([
               self.getRecordInfo(adsDoc)
                 .done(function(recInfo) {
                   result.resolve(recInfo);
-                });
+                })
+                .fail(function() {
+                  result.reject(arguments);
+                })
             })
+            .fail(function() {
+              result.reject(arguments);
+            });
         }
         else if (action == 'add') {
           var recInfo = this.getRecordInfo(adsDoc);
@@ -1013,6 +1036,9 @@ define([
                 recInfo.isCreatedByUs = true;
                 result.resolve(recInfo);
               })
+              .fail(function() {
+                result.reject(arguments);
+              });
           }
           else {
             return this.updateOrcid('update', adsDoc); // not safe to just add
@@ -1039,6 +1065,8 @@ define([
 
         var works = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
         var orcidId = orcidProfile['orcid-identifier']['path'];
+        var firstName = orcidProfile["orcid-bio"] ? orcidProfile["orcid-bio"]["personal-details"]["given-names"]["value"] : null;
+        var lastName = orcidProfile["orcid-bio"] ? orcidProfile["orcid-bio"]["personal-details"]["family-name"]["value"] : null;
 
         function extr(el) {
           if (!el) return null;
@@ -1089,15 +1117,24 @@ define([
           d.author = extractAuthors(w["work-contributors"]);
           d.identifier = pickIdentifier(d, ids);
           d['source_name'] = extr(w['source'] ? w['source']['source-name'] : null);
-          d['source_date'] = extr(w['source'] ? w['source']['source-date'] : null);
+          d['source_date'] = extr(w['source'] ? w['source']['source-date'] : 0);
           //d.orcid = self.getRecordInfo(d);
           docs.push(d);
         });
 
+        // stable order, always by the date (descending)
+        // it is confusing because of the merged duplicates
+        //docs = docs.sort(function(a, b) {
+        //  return b.source_date - a.source_date}
+        //);
+        docs = _.sortBy(docs, function(x) {return x.title});
+
         return {
           responseHeader: {
             params: {
-              orcid: orcidId
+              orcid: orcidId,
+              firstName: firstName,
+              lastName: lastName
             }
           },
           response:{
@@ -1117,7 +1154,13 @@ define([
             self.updateDatabase(profile)
               .done(function() {
                 d.resolve(self.transformOrcidProfile(profile));
-              });
+              })
+              .fail(function() {
+                d.reject(arguments);
+              })
+          })
+          .fail(function() {
+            d.reject(arguments);
           });
         return d.promise();
       },

@@ -823,26 +823,15 @@ define([
               expect(ads).to.eql({
                 "responseHeader": {
                   "params": {
-                    "orcid": "0000-0001-8178-9506"
+                    "orcid": "0000-0001-8178-9506",
+                    "firstName": null,
+                    "lastName": null
                   }
                 },
                 "response": {
                   "numFound": 2,
                   "start": 0,
                   "docs": [
-                    {
-                      "bibcode": "test-bibcode",
-                      "putcode": "469257",
-                      "title": "Tecnologias XXX",
-                      "visibility": "PUBLIC",
-                      "formattedDate": "2014/11",
-                      "pub": "El Profesional de la Informacion",
-                      "abstract": null,
-                      "author": [],
-                      "identifier": "test-bibcode",
-                      "source_name": "nasa ads",
-                      "source_date": 1424194783005
-                    },
                     {
                       "bibcode": "bibcode-foo",
                       "putcode": "466190",
@@ -855,6 +844,19 @@ define([
                       "identifier": "bibcode-foo",
                       "source_name": "Roman Chyla",
                       "source_date": 1422645668284
+                    },
+                    {
+                      "bibcode": "test-bibcode",
+                      "putcode": "469257",
+                      "title": "Tecnologias XXX",
+                      "visibility": "PUBLIC",
+                      "formattedDate": "2014/11",
+                      "pub": "El Profesional de la Informacion",
+                      "abstract": null,
+                      "author": [],
+                      "identifier": "test-bibcode",
+                      "source_name": "nasa ads",
+                      "source_date": 1424194783005
                     }
                   ]
                 }

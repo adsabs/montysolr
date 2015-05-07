@@ -111,7 +111,7 @@ define([
         }
 
         if (dupsFound) {
-          var toRemove = [], toUpdate = [];
+          var toRemove = {}, toUpdate = [];
 
           _.each(dmap, function(value, key) {
             if (value.length > 1) {
@@ -133,29 +133,42 @@ define([
               _.each(value, function(doc) {
                 if (doc['source_name'])
                   authoritativeRecord['source_name'] += '; ' + doc['source_name'];
-                toRemove.push(doc._dupIdx);
+                toRemove[doc._dupIdx] = true;
               });
 
             }
           });
 
-          toRemove.sort(function(a, b){return b-a}); // reverse order
+          var recomputeIndexes = function(models) {
+            var i = 0;
+            _.each(models, function(m) {
+              m.resultsIndex = i++;
+              m.indexToShow = i;
+            });
+          };
+
 
           if (docs) { // we are updating the data before they get displayed
+            toRemove = _.keys(toRemove);
+            toRemove.sort(function(a, b){return b-a}); // reverse order
             _.each(toRemove, function(idx) {
               docs.splice(idx, 1); // will be wasty for large collections
-            })
+            });
+            recomputeIndexes(docs);
           }
           else { // we are updating the collection (it was already displayed
             _.each(toUpdate, function(idx) {
               var model = this.hiddenCollection.models[idx]; // force re-paint
-              model.set('source_name', model.attributes['source_name']);
+              model.set('source_name', model.attributes['source_name'], {silent: true});
             });
-            _.each(toRemove, function(idx) {
-              var model = this.hiddenCollection.models[idx];
-              this.hiddenCollection.remove(model);
+            var newModels = [];
+            this.hiddenCollection.each(function(model) {
+              if (!toRemove[model.attributes._dupIdx])
+                newModels.push(model.attributes);
             });
-
+            recomputeIndexes(newModels);
+            this.hiddenCollection.reset(newModels);
+            this.updatePagination({numFound: newModels.length});
           }
         }
 
@@ -163,7 +176,7 @@ define([
 
 
 
-      processDocs: function(jsonResponse, docs) {
+      processDocs: function(jsonResponse, docs, paginationInfo) {
         var start = 0;
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
         _.each(docs, function(d,i){
@@ -208,23 +221,19 @@ define([
         var oApi = this.getBeeHive().getService('OrcidApi');
         var self = this;
         if (oApi) {
+          console.log('onShow');
 
         if (!oApi.hasAccess())
           return;
 
         oApi.getOrcidProfileInAdsFormat()
-        .done(function(data) {
-          var response = new JsonResponse(data);
-          response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
-          self.processResponse(response);
-        });
-          //get username
-          var that = this;
-          oApi.getUserProfile().done(function(info){
-            var firstName = info["orcid-bio"]["personal-details"]["given-names"]["value"];
-            var lastName = info["orcid-bio"]["personal-details"]["family-name"]["value"];
-            that.model.set("orcidUserName", firstName + " " + lastName);
-          })
+          .done(function(data) {
+            var response = new JsonResponse(data);
+            var params = response.get('responseHeader.params');
+            response.setApiQuery(new ApiQuery(params));
+            self.processResponse(response);
+            self.model.set("orcidUserName", params.firstName + " " + params.lastName);
+          });
         }
       },
 
