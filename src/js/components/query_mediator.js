@@ -372,12 +372,14 @@ define(['underscore',
         else if (!senderKey){
           throw new Error("Request executed, but no widget id provided!");
         }
-        // show the loading view for the widget
-        this._makeWidgetSpin(senderKey.getId());
+
         return this._executeRequest(apiRequest, senderKey);
       },
 
       _executeRequest: function(apiRequest, senderKey) {
+        // show the loading view for the widget
+        this._makeWidgetSpin(senderKey.getId());
+
         var ps = this.getBeeHive().Services.get('PubSub');
         var api = this.getBeeHive().Services.get('Api');
 
@@ -428,7 +430,7 @@ define(['underscore',
           else { // create a new query
 
             var promise = api.request(apiRequest, {
-              done: function() {
+                done: function() {
                 self._cache.put(requestKey, arguments);
                 self.onApiResponse.apply(this, arguments);
               },

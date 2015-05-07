@@ -296,6 +296,8 @@ define([
         var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
         qm.activateCache();
 
+        qm._makeWidgetSpin = sinon.spy();
+
         var pubsub = x.pubsub;
         var key = pubsub.getPubSubKey();
 

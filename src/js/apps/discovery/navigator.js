@@ -118,7 +118,7 @@ define([
         });
 
         this.set('export-bibtex', function() {
-          self.get('export-page').execute('bibtex')});
+        self.get('export-page').execute('bibtex')});
         this.set('export-aastex', function() {self.get('export-page').execute('aastex')});
         this.set('export-endnote', function() {self.get('export-page').execute('endnote')});
         this.set('export-page', function(format) {
@@ -276,7 +276,6 @@ define([
           );
           if (bibcode)
             this.route = '#abs/' + bibcode;
-          this.route = arguments[1];
         });
 
         this.set('ShowAbstract', function(){

@@ -41,15 +41,11 @@ define([
 
     activate: function (beehive) {
       this.pubsub = beehive.Services.get('PubSub');
-      _.bindAll(this, ['onNewQuery', 'processResponse', 'onDisplayDocuments']);
-      this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onNewQuery);
+      _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
       this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
-    onNewQuery: function() {
-      this.model.clear();
-    },
     onDisplayDocuments: function(apiQuery) {
       var bibcode = apiQuery.get('q');
       var self = this;
@@ -69,6 +65,8 @@ define([
         return this.deferredObject.promise();
       }
       else {
+        //it's a new bibcode, so clear the model
+        this.model.clear();
         this._bibcode = bibcode;
         var searchTerm = "bibcode:"+this._bibcode;
         this.deferredObject =  $.Deferred();

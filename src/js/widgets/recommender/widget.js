@@ -23,6 +23,22 @@ define([
 
     template : RecommenderTemplate,
 
+
+    events : {
+      "click .button-toggle" : "toggleList"
+    },
+
+    toggleList : function(){
+
+      this.$(".additional-papers").toggleClass("hidden");
+      if ( this.$(".additional-papers").hasClass("hidden")){
+        this.$(".button-toggle").text("more");
+      }
+      else {
+        this.$(".button-toggle").text("less");
+      }
+    },
+
     onRender : function(){
       this.$(".icon-help").popover({trigger: "hover"});
     },
@@ -45,8 +61,6 @@ define([
     },
 
     onDisplayDocuments: function(apiQuery) {
-      //clear the current collection
-      this.collection.reset();
       var bibcode = apiQuery.get('q');
       if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
         bibcode = bibcode[0].replace('bibcode:', '');
@@ -60,6 +74,8 @@ define([
         this.trigger('page-manager-event', 'widget-ready', {'isActive': true});
       }
       else {
+        //clear the current collection
+        this.collection.reset();
         this._bibcode = bibcode;
         var target = ApiTargets.RECOMMENDER + "/" + bibcode;
         var request =  new ApiRequest({

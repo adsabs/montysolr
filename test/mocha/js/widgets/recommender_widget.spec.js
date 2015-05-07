@@ -96,7 +96,6 @@ define([
       var processResponse = sinon.spy(widget, 'processResponse');
 
       widget.activate(minsub.beehive.getHardenedInstance());
-      debugger;
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
       expect(onDisplayDocuments.callCount).to.be.eql(1);
@@ -105,15 +104,6 @@ define([
       expect(processResponse.callCount).to.be.eql(1);
 
       expect(widget.collection.models.length).to.be.eql(7);
-
-      // the same query should reuse data
-      minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
-
-      expect(widget.collection.models.length).to.be.eql(0);
-      expect(onDisplayDocuments.callCount).to.be.eql(2);
-      expect(loadBibcodeData.callCount).to.be.eql(2);
-      expect(loadBibcodeData.lastCall.args[0]).to.be.eql('foo');
-      expect(processResponse.callCount).to.be.eql(1);
 
     });
 

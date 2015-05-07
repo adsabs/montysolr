@@ -9,6 +9,7 @@ define([
     'js/components/api_targets',
     'js/mixins/api_access',
     'js/components/api_query_updater'
+
   ],
   function (
     $,
@@ -86,7 +87,6 @@ define([
 
       view: function (bibcode, subPage) {
 
-<<<<<<< HEAD
         // check we are using the canonical bibcode and redirect to it if necessary
         var q, req, self;
         self = this;
@@ -113,21 +113,11 @@ define([
         }});
 
         this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
-=======
-          if (!subPage) {
-            return this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page', "#abs/"+bibcode+"/abstract");
-          }
-          else {
-            var navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
-            return this.pubsub.publish(this.pubsub.NAVIGATE, navigateString, "#abs/"+bibcode+"/"+subPage);
-          }
-        }
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'abstract-page');
+
       },
->>>>>>> added routes for abstract page, changed discovery mediators method of showing loading views
 
 
-  routeToVerifyPage : function(subView, token){
+      routeToVerifyPage : function(subView, token){
 
         var failMessage, failTitle, route, done, request, type,
           that = this;
@@ -142,11 +132,11 @@ define([
             //request bootstrap
             this.getApiAccess({reconnect : true}).done(function(){
               //redirect to index page
-              that.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+              that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
               //call alerts widget
               var title = "Welcome to ADS";
               var msg = "<p>You have been successfully registered with the username</p> <p><b>"+ reply.email +"</b></p>";
-              that.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+              that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
             }).fail(function(){
               //fail function defined below
               fail();
@@ -155,24 +145,24 @@ define([
           };
         }
         else if (subView == "change-email") {
-            failTitle = "Attempt to change email failed";
-            failMessage = "Please try again, or contact adshelp@cfa.harvard.edu for support";
-            route = ApiTargets.VERIFY + "/" + token;
+          failTitle = "Attempt to change email failed";
+          failMessage = "Please try again, or contact adshelp@cfa.harvard.edu for support";
+          route = ApiTargets.VERIFY + "/" + token;
 
           done = function(reply) {
             //user has been logged in already
             //request bootstrap
             this.getApiAccess({reconnect : true}).done(function(){
-                //redirect to index page
-                this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
-                //call alerts widget
-                var title = "Email has been changed.";
-                var msg = "Your new ADS email is <b>" + reply.email + "</b>";
-                this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
-              }).fail(function(){
-                 //fail function defined below
-                 fail();
-              });
+              //redirect to index page
+              that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
+              //call alerts widget
+              var title = "Email has been changed.";
+              var msg = "Your new ADS email is <b>" + reply.email + "</b>";
+              that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+            }).fail(function(){
+              //fail function defined below
+              fail();
+            });
           };
         }
         else if (subView == "reset-password") {
@@ -196,18 +186,18 @@ define([
           this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title: failTitle, msg: failMessage, modal : true, type : "danger"}));
         };
 
-         request = new ApiRequest({
-            target : route,
-           options : {
-             type : type || "GET",
-             context : this,
-             done : done,
-             fail : fail
-           }
-          });
+        request = new ApiRequest({
+          target : route,
+          options : {
+            type : type || "GET",
+            context : this,
+            done : done,
+            fail : fail
+          }
+        });
 
-          this.getBeeHive().getService("Api").request(request);
-        },
+        this.getBeeHive().getService("Api").request(request);
+      },
 
       orcidPage :function(){
         this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page');
@@ -216,9 +206,9 @@ define([
       authenticationPage: function(subView){
         //possible subViews: "login", "register", "reset-password"
         if (subView && !_.contains(["login", "register", "reset-password-1", "reset-password-2"], subView)){
-            throw new Error("that isn't a subview that the authentication page knows about")
+          throw new Error("that isn't a subview that the authentication page knows about")
         }
-         this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
       },
 
       settingsPage : function(subView){
@@ -247,7 +237,7 @@ define([
 
     });
 
-    _.extend(Router.prototype, Dependon.BeeHive);
+    _.extend(Router.prototype, Dependon.BeeHive, ApiAccessMixin);
 
     return Router;
 

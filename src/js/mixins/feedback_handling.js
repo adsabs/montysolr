@@ -22,8 +22,14 @@ define([
     //for an individual widget
     _makeWidgetSpin: function(id){
 
-      // turn ids into a list of widgets
-      var widget = this.getWidgets([id]);
+      try {
+        // turn ids into a list of widgets
+        var widget = this.getWidgets([id]);
+      }
+      catch (e){
+        console.warn("widgets unavailable, possibly because this is a test");
+        return
+      }
 
       // activate loading state
       if (widget && widget.length > 0) {
@@ -33,14 +39,25 @@ define([
       var self = this;
       var pubsub = this.getApp().getService('PubSub');
 
-      pubsub.once(pubsub.DELIVERING_RESPONSE + id, function() {
+      try {
+        pubsub.once(pubsub.DELIVERING_RESPONSE + id, function() {
           self.changeWidgetsState(self.getWidgets([id]), {state: WidgetStates.RESET});
         });
+      } catch(e){
+        console.warn("no pubsub, probably a test")
+      }
     },
 
     _makeWidgetsSpin: function(ids) {
       // turn ids into a list of widgets
-      var widgets = this.getWidgets(ids);
+      try {
+        // turn ids into a list of widgets
+        var widgets = this.getWidgets(ids);
+      }
+      catch (e){
+        console.warn("widgets unavailable, possibly because this is a test");
+        return
+      }
 
       // activate loading state
       if (widgets && widgets.length > 0) {
