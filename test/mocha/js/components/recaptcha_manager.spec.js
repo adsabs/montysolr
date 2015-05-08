@@ -5,13 +5,14 @@ define([
   describe("Recaptcha Manager", function(){
 
 
-    it("should have a deferred that is resolved when the sitekey is obtained and the google recaptcha global is loaded", function(){
 
-      var testView = new Backbone.View();
+  it("should have a deferred that is resolved when the sitekey is obtained and the google recaptcha global is loaded", function(done){
 
       var r = new RecaptchaManager();
 
       r.renderRecaptcha = sinon.spy();
+      
+      var testView = new Backbone.View();
 
       r.activateRecaptcha(testView);
 
@@ -22,6 +23,7 @@ define([
 
       expect(r.renderRecaptcha.callCount).to.eql(1);
 
+    done();
 
     })
 

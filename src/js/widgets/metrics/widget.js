@@ -7,6 +7,7 @@ define([
   'js/components/json_response',
   'js/components/api_request',
   'js/components/api_query',
+  'js/mixins/user_change_rows',
   'hbs!./templates/metrics_metadata',
   'hbs!./templates/metrics_container',
   'hbs!./templates/graph_template',
@@ -27,6 +28,7 @@ define([
   JsonResponse,
   ApiRequest,
   ApiQuery,
+  UserChangeMixin,
   MetricsMetadataTemplate,
   MetricsContainer,
   GraphTemplate,
@@ -41,11 +43,6 @@ define([
   ) {
 
 
-  /* config */
-
-  var maxAllowed = 1000;
-
-  /* end config */
 
   var TableModel = Backbone.Model.extend({
 
@@ -274,34 +271,7 @@ define([
   });
 
 
-  var ContainerModel = Backbone.Model.extend({
-
-    initialize : function(){
-      this.on("change:numFound", this.updateMax);
-      this.on("change:rows", this.updateCurrent);
-    },
-
-    updateMax : function() {
-      var m = _.min([maxAllowed, this.get("numFound")]);
-      if (m == 1)
-        m = 0;
-      this.set("max", m);
-    },
-
-    updateCurrent : function(){
-      this.set("current", _.min([this.get("rows"), this.get("numFound")]));
-    },
-
-    defaults : function(){
-      return {
-        rows : undefined,
-        numFound : undefined,
-        current : undefined,
-        max : undefined,
-        userVal: undefined
-      }
-    }
-  });
+  var ContainerModel = UserChangeMixin.Model;
 
   var ContainerView = Marionette.Layout.extend({
 
@@ -309,7 +279,7 @@ define([
       this.renderMetadata();
     },
 
-    //function to just re-render the metadata part at the bottom
+    //function to just re-render the metadata part at the top
     renderMetadata : function(){
       var data = {};
       data.max = this.model.get("max");

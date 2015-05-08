@@ -55,33 +55,46 @@ define([
       expect(new ExportWidget()).to.be.instanceof(BaseWidget);
     });
 
-    it("shows controls when necessary", function(done) {
+    it("shows appropriate templates depending on what data is in the model", function(done) {
       var widget = _getWidget();
       var $w = widget.render().$el;
       $('#test').append($w);
 
-      // export query shows only if there was a query/identifiers
-      expect($w.find('#exportQuery').length).to.be.eql(0);
-      expect($w.find('#exportRecords').length).to.be.eql(0);
+      //shows loading function by default
+      expect($("#test div div").text().trim()).to.eql("Loading data...");
 
-      minsub.publish(minsub.FEEDBACK, minsub.createFeedback({code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
-        query: minsub.createQuery({'q': 'crazy lazy'})}));
-      expect($w.find('#exportQuery').length).to.be.eql(1);
 
-      // should show button to export identifiers
-      widget.model.set('numIdentifiers', 200);
-      widget.model.set('identifiers', ['one', 'two']);
-      expect($w.find('#exportRecords').length).to.be.eql(1);
+      //shows export view if model has "exports"
 
-      // clicking produces actions
-      $w.find('#exportQuery').click();
-      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
+      widget.model.reset();
+      widget.model.set("current", 20);
+      widget.model.set("numFound", 800);
+      widget.model.set("export", "some fake exports");
 
-      widget.reset();
-      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(false);
+      expect($("#test").find("h3").text().trim()).to.eql('Currently viewing 20\n            \n            records in \n                \n                BibTEX\n                \n                \n                \n             format.')
+      expect($("#test textarea").val()).to.eql(" some fake exports");
+      expect($("#test").find(".change-rows").text().trim()).to.eql('');
 
-      $w.find('#exportRecords').click();
-      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
+
+      widget.model.set("query", "foo");
+      widget.view.render();
+
+      //only can change record #s if we have a query
+      expect($("#test").find(".change-rows").text().trim()).to.eql( 'Change to first\n            \n            record(s) (max is 500).\n             Submit');
+
+      //will automatically recalculate the "max" value when numFound changes
+      widget.model.set("numFound", 80);
+
+      widget.view.render();
+
+      expect($("#test").find(".change-rows").text().trim()).to.eql( 'Change to first\n            \n            record(s) (max is 80).\n             Submit');
+
+      //if model has an error, shows that instead of exports
+      widget.model.set("error", "foo");
+
+      expect($("#test div div").hasClass("alert")).to.be.true;
+      expect($("#test div div").text().trim()).to.eql("foo");
+
 
       done();
 
@@ -93,21 +106,15 @@ define([
       $('#test').append($w);
 
       widget.exportRecords('bibtex', ['one', 'two']);
-      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
-      expect($w.find('#exportQuery').length).to.be.eql(0);
-      expect($w.find('#exportRecords').length).to.be.eql(1);
+      expect($("#test textarea").text().indexOf('Takatsuka') > -1).to.eql(true);
+      expect($w.find(".change-rows").length).to.be.eql(0);
 
-      widget.reset();
-      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(false);
+      widget.model.reset();
+      expect($("#test textarea").length).to.eql(0);
 
-      widget.exportQuery('bibtex', minsub.createQuery({'q': 'foo:bar'}));
-      expect(widget.model.get('numFound')).to.be.eql(841359);
-      expect(widget.model.get('maxExport')).to.be.eql(300);
-
-      expect($w.find('#exportData').text().indexOf('Takatsuka') > -1).to.eql(true);
-      expect($w.find('#exportQuery').length).to.be.eql(1);
-      expect($w.find('#exportRecords').length).to.be.eql(1);
     });
+
+
 
     it.skip("catches ctrl-a to select only the contents of the text-area", function() {
 

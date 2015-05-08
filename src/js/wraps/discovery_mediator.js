@@ -60,6 +60,7 @@ define([
 
       if (feedback.query) {
         app.getObject('AppStorage').setCurrentQuery(feedback.query);
+        app.getObject('AppStorage').setCurrentNumFound(feedback.numFound);
       }
       else {
         app.getObject('AppStorage').setCurrentQuery(null);

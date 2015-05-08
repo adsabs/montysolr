@@ -24,7 +24,9 @@
     "nvd3": "git://github.com/novus/nvd3#~1.1.15-beta",
     "persist-js": "~0.3.0",
     "backbone-validation": "~0.11.3",
-    "backbone.stickit": "~0.8.0"
+    "backbone.stickit": "~0.8.0",
+    "zeroclipboard": "~2.2.0",
+    "FileSaver": "*"
   },
   "devDependencies": {
     "chai": "~1.8.0",
