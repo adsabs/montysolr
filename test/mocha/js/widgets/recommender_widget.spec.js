@@ -32,11 +32,12 @@ define([
 
       $("#test").append($w);
 
+      r.deferredObject = $.Deferred();
+
       r.processResponse(new JsonResponse(testData));
 
       expect($w.find("li").length).to.eql(7);
-      expect($w.find("li:first").text().trim()).to.eql('Propagation of Cosmic-Ray Nucleons in the Galaxy;\n        Strong,+');
-      expect($w.find("li:first").attr("title")).to.eql("1998ApJ...509..212S");
+      expect($w.find("li:first").text().trim()).to.eql('Propagation of Cosmic-Ray Nucleons in the Galaxy (Strong,+);');
     });
 
 
@@ -45,6 +46,8 @@ define([
       var r = new RecommenderWidget();
 
       $("#test").append(r.render().el);
+
+      r.deferredObject = $.Deferred();
 
       r.processResponse(new JsonResponse(testData));
 
@@ -58,7 +61,11 @@ define([
       var r = new RecommenderWidget();
 
       $("#test").append(r.render().el);
+
+      r.deferredObject = $.Deferred();
+
       r.processResponse(new JsonResponse(testData));
+      
       expect($("#test").find("i.icon-help").data("content")).to.eql('These recommendations are based on a number of factors, including text similarity, citations, and co-readership information.')
     });
 
@@ -72,8 +79,7 @@ define([
 
       var apiRequest = r.pubsub.publish.args[0][1];
 
-      expect(apiRequest.toJSON().target).to.eql("services/recommender/fakeBibcode");
-      expect(apiRequest.toJSON().query.toJSON()).to.eql({});
+      expect(apiRequest.toJSON().target).to.eql('recommender/fakeBibcode');
     });
 
     it("Communicates through pubsub", function() {
@@ -98,16 +104,6 @@ define([
       expect(processResponse.callCount).to.be.eql(1);
 
       expect(widget.collection.models.length).to.be.eql(7);
-
-      minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'bibcode:foo'}));
-      expect(widget.collection.models.length).to.be.eql(0);
-
-      // the same query should reuse data
-      minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
-      expect(onDisplayDocuments.callCount).to.be.eql(2);
-      expect(loadBibcodeData.callCount).to.be.eql(2);
-      expect(loadBibcodeData.lastCall.args[0]).to.be.eql('foo');
-      expect(processResponse.callCount).to.be.eql(1);
 
     });
 

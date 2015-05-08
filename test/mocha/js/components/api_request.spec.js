@@ -24,9 +24,10 @@ define(['js/components/api_request', 'js/components/multi_params', 'js/component
       expect(r.set('target', 'bar')).to.be.OK;
       expect(r.get('target')).to.eql('bar');
 
-      // it accepts only api query objects
+      // it accepts only api query objects if the query parameter is provided
       var q = new ApiQuery();
       expect(r.get('query')).to.eql(undefined);
+      expect(r.set('query', q)).to.be.OK;
       expect(r.set('query', q)).to.be.OK;
       expect(r.get('query')).to.equal(q);
       expect(function() {r.set('query', 'baz')}).to.throw(Error);

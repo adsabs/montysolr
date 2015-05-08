@@ -145,24 +145,24 @@ define([
           };
         }
         else if (subView == "change-email") {
-            failTitle = "Attempt to change email failed";
-            failMessage = "Please try again, or contact adshelp@cfa.harvard.edu for support";
-            route = ApiTargets.VERIFY + "/" + token;
+          failTitle = "Attempt to change email failed";
+          failMessage = "Please try again, or contact adshelp@cfa.harvard.edu for support";
+          route = ApiTargets.VERIFY + "/" + token;
 
           done = function(reply) {
             //user has been logged in already
             //request bootstrap
             this.getApiAccess({reconnect : true}).done(function(){
-                //redirect to index page
-                that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
-                //call alerts widget
-                var title = "Email has been changed.";
-                var msg = "Your new ADS email is <b>" + reply.email + "</b>";
-                that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
-              }).fail(function(){
-                 //fail function defined below
-                 fail();
-              });
+              //redirect to index page
+              that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
+              //call alerts widget
+              var title = "Email has been changed.";
+              var msg = "Your new ADS email is <b>" + reply.email + "</b>";
+              that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+            }).fail(function(){
+              //fail function defined below
+              fail();
+            });
           };
         }
         else if (subView == "reset-password") {
@@ -186,18 +186,18 @@ define([
           this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title: failTitle, msg: failMessage, modal : true, type : "danger"}));
         };
 
-         request = new ApiRequest({
-            target : route,
-           options : {
-             type : type || "GET",
-             context : this,
-             done : done,
-             fail : fail
-           }
-          });
+        request = new ApiRequest({
+          target : route,
+          options : {
+            type : type || "GET",
+            context : this,
+            done : done,
+            fail : fail
+          }
+        });
 
-          this.getBeeHive().getService("Api").request(request);
-        },
+        this.getBeeHive().getService("Api").request(request);
+      },
 
       orcidPage :function(){
         this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page');
@@ -206,9 +206,9 @@ define([
       authenticationPage: function(subView){
         //possible subViews: "login", "register", "reset-password"
         if (subView && !_.contains(["login", "register", "reset-password-1", "reset-password-2"], subView)){
-            throw new Error("that isn't a subview that the authentication page knows about")
+          throw new Error("that isn't a subview that the authentication page knows about")
         }
-         this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
       },
 
       settingsPage : function(subView){

@@ -1,20 +1,33 @@
 {{#if items}}
 <div>
-    <h4 class="s-right-col-widget-title">Suggested Articles</h4>
+    <h4 class="s-right-col-widget-title">Suggested Articles <i>(this is an experimental feature)</i></h4>
 
-    <i class="icon-help" data-toggle="popover" data-content="These recommendations are based on a number of factors, including text similarity, citations, and co-readership information." ></i>
+    <i class="icon-help pull-right" style="margin-top:7px" data-toggle="popover" data-placement="left" data-content="These recommendations are based on a number of factors, including text similarity, citations, and co-readership information." data-container=".recommender-widget"></i>
 </div>
 
 
 <ul class="list-unstyled">
 
     {{#each items}}
-    <li title="{{bibcode}}">
-        <a href="#abs/{{bibcode}}">{{title}}</a>;
-        <i>{{author}}</i>
-    </li>
+        {{#compare @index 0 operator="<="}}
+        <div>
+            <li>
+                <a href="#abs/{{bibcode}}">{{title}} (<i class="s-author">{{author}}</i>)</a>;
+            </li>
+        </div>
+        {{/compare}}
     {{/each}}
 
+     {{#each items}}
+        {{#compare @index 0 operator=">"}}
+        <div class="hidden additional-papers">
+            <li>
+                <a href="#abs/{{bibcode}}">{{title}} (<i class="s-author">{{author}}</i>)</a>;
+            </li>
+        </div>
+        {{/compare}}
+    {{/each}}
+    <button class="btn btn-xs btn-default button-toggle">more</button>
 </ul>
 
 {{/if}}

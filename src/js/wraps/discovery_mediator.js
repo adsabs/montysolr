@@ -103,7 +103,6 @@ define([
         return; // do not bother with the rest
       }
 
-
       // too many results
       if (feedback.numFound > 1000) {
         var search = app.getWidget('SearchWidget');
@@ -120,10 +119,7 @@ define([
         type: Alerts.TYPE.INFO,
         msg: null}));
 
-      this._makeWidgetsSpin(ids);
-
     };
-
 
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_FINISHED] = function(feedback) {
       return; // not doing anything right now
@@ -279,7 +275,8 @@ define([
         error: feedback.errorThrown,
         errorCode: feedback.error.status,
         destination: target,
-        query: q.toJSON()
+        //not all requests will have a query
+        query: q ? q.toJSON() : undefined
       };
       var app = this.getApp();
       var alerter = this.getAlerter();
@@ -394,26 +391,6 @@ define([
         },
         createFeedback: function(options) {
           return new ApiFeedback(options);
-        },
-
-        _makeWidgetsSpin: function(ids) {
-          // turn ids into a list of widgets
-          var widgets = this.getWidgets(ids);
-
-          // activate loading state
-          if (widgets && widgets.length > 0) {
-            this.changeWidgetsState(widgets, {state: WidgetStates.WAITING});
-          }
-
-          // register handlers which will remove the spinning wheel
-          var self = this;
-          var pubsub = this.getApp().getService('PubSub');
-          _.each(ids, function(k) {
-            var key = k;
-            pubsub.once(pubsub.DELIVERING_RESPONSE + k, function() {
-              self.changeWidgetsState(self.getWidgets([key]), {state: WidgetStates.RESET});
-            })
-          });
         },
 
         reset: function() {

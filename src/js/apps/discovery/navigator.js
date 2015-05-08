@@ -118,7 +118,7 @@ define([
         });
 
         this.set('export-bibtex', function() {
-          self.get('export-page').execute('bibtex')});
+        self.get('export-page').execute('bibtex')});
         this.set('export-aastex', function() {self.get('export-page').execute('aastex')});
         this.set('export-endnote', function() {self.get('export-page').execute('endnote')});
         this.set('export-page', function(format) {
@@ -277,31 +277,40 @@ define([
           if (bibcode)
             this.route = '#abs/' + bibcode;
         });
-        this.set('ShowAbstract', function(){self.get('abstract-page').execute()});
+
+        this.set('ShowAbstract', function(){
+          self.get('abstract-page').execute();
+          this.route = arguments[1];
+        });
         this.set('ShowCitations', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowCitations");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCitations'].concat(detailsPageAlwaysVisible));
+          this.route = arguments[1];
         });
         this.set('ShowReferences', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowReferences");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowReferences'].concat(detailsPageAlwaysVisible));
+          this.route = arguments[1];
         });
         this.set('ShowCoreads', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowCoreads");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCoreads'].concat(detailsPageAlwaysVisible));
+          this.route = arguments[1];
         });
         this.set('ShowTableOfContents', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowTableOfContents");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
+          this.route = arguments[1];
         });
         this.set('ShowSimilar', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowSimilar");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowSimilar'].concat(detailsPageAlwaysVisible));
+          this.route = arguments[1];
         });
         this.set('ShowPaperMetrics', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowPaperMetrics");

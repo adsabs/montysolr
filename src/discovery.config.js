@@ -95,12 +95,11 @@ require.config({
         ShowReferences: 'js/wraps/references',
         ShowCitations : 'js/wraps/citations',
         ShowCoreads : 'js/wraps/coreads',
-        ShowTableOfContents : 'js/wraps/table_of_contents',
-        //ShowSimilar : 'js/widgets/similar/widget',
+        //can't camel case because router only capitalizes first letter
+        ShowTableofcontents : 'js/wraps/table_of_contents',
         ShowResources : 'js/widgets/resources/widget',
-        //ShowRecommender : 'js/widgets/recommender/widget',
+        ShowRecommender : 'js/widgets/recommender/widget',
         ShowPaperMetrics: 'js/wraps/paper_metrics',
-
         TOCWidget: 'js/page_managers/toc_widget'
       },
       plugins: {}
@@ -229,19 +228,19 @@ require.config({
       // register system-wide helper for handlebars
       // http://doginthehat.com.au/2012/02/comparison-block-helper-for-handlebars-templates/#comment-44
 
-      // {{#compare unicorns ponies operator="<"}}
-      // I knew it, unicorns are just low-quality ponies!
-      // {{/compare}}
-      Handlebars.registerHelper('compare', function (lvalue, operator, rvalue, options) {
-        var operators, result;
+      Handlebars.registerHelper('compare', function (lvalue, rvalue, options) {
+        var operators, result, operator;
         if (arguments.length < 3) {
           throw new Error("Handlerbars Helper 'compare' needs 2 parameters");
         }
-        if (options === undefined) {
-          options = rvalue;
-          rvalue = operator;
+
+        if (options === undefined || !options.hash || !options.hash.operator) {
           operator = "===";
         }
+        else {
+          operator = options.hash.operator;
+        }
+
         operators = {
           '==': function (l, r) { return l == r; },
           '===': function (l, r) { return l === r; },
