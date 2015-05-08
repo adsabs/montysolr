@@ -1,7 +1,7 @@
 define([
   'backbone',
   'marionette',
-  'hbs!./templates/abstract-nav',
+  'hbs!./templates/abstract-nav'
 
 ], function(
   Backbone,
@@ -44,6 +44,7 @@ define([
 
 
   var WidgetModel = Backbone.Model.extend({
+
     defaults : function(){
       return {
         bibcode : undefined,
@@ -100,7 +101,7 @@ define([
     },
 
     modelEvents : {
-      "change:bibcode" : "render"
+      "change:bibcode" : "resetActiveStates"
     },
 
     collectionEvents : {
@@ -108,6 +109,22 @@ define([
       "change:isActive" : "render",
       "change:isSelected": "render",
       "change:numFound" : "render"
+    },
+
+    /*
+      every time the bibcode changes (got by subscribing to this.pubsub.DISPLAY_DOCUMENTS)
+      clear the collection of isactive and numfound in the models of the toc widget, so that the next view on
+      the widget will show the appropriate defaults
+     */
+    resetActiveStates : function(){
+      this.collection.each(function(model){
+        var alwaysThere = ["ShowAbstract"];
+        //reset only widgets that aren't ther 100% of the time
+        if (!_.contains(alwaysThere, model.id)){
+        model.set("isActive", false);
+        model.set("numFound", 0);
+        }
+      });
     },
 
     onPageManagerMessage: function(event, data) {

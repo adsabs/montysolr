@@ -219,6 +219,52 @@ define([
         });
 
       });
+
+      it ("has a wrap (details manager) which listens to pubsub.DISPLAY_DOCUMENTS and places the current bibcode in the model of the TOC Widget", function(){
+        var app = new Application({debug: false});
+        delete config.core.objects.Navigator;
+        config.widgets.PageManager = 'js/wraps/details_page_manager';
+
+        app.loadModules(config).done(function() {
+
+          // hack (normally this will not be the usage pattern)
+          var pageManager = app.getWidget("PageManager");
+          pageManager.createView = function (options) {
+            var TV = ThreeColumnView.extend({template: TOCTemplate});
+            return new TV(options)
+          };
+
+          app.activate();
+          pageManager.assemble(app);
+
+          //this info should be cleared at the next pubsub.display_documents
+
+          pageManager.widgets.TOCWidget.collection.get("ShowReferences").set({numFound : 40, isActive: true})
+
+          var pubsub = app.getService('PubSub').getHardenedInstance();
+          pubsub.publish(pubsub.DISPLAY_DOCUMENTS, new ApiQuery({q : "bibcode:foo"}));
+
+          expect(pageManager.widgets.TOCWidget.model.get("bibcode")).to.eql("foo");
+          expect(pageManager.widgets.TOCWidget.collection.get("ShowReferences").get("numFound")).to.eql(0)
+          expect(pageManager.widgets.TOCWidget.collection.get("ShowReferences").get("isActive")).to.eql(false);
+
+
+          //now testing details manager wrap, I'm not sure if this goes here but otherwise coverage fails
+          pageManager.addQuery(new ApiQuery({q : "bibcode:foo"}));
+          expect(pageManager.view.model.get("query")).to.eql('q=bibcode%3Afoo');
+
+          //testing back button
+          var view = pageManager.show();
+          expect(view.$el.find('.s-back-button-container').html()).to.eql('<a href="#search/q=bibcode%3Afoo" class="back-button btn btn-sm btn-default"> <i class="fa fa-arrow-left"></i> Back to results</a>');
+
+
+
+
+
+        })
+
+
+        })
     });
 
     describe("Master page manager", function() {

@@ -571,9 +571,11 @@ define([
           expect(qm.onApiResponse.callCount).to.be.eql(1);
           done();
         }, 5);
-      });
-    });
 
+
+      });
+
+    });
 
     var validResponse = '{\
       "responseHeader":{\
@@ -644,3 +646,5 @@ define([
           "title":["<em>Star</em> Streams"]}}}';
 
 });
+
+

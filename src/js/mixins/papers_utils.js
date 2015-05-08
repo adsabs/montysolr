@@ -131,9 +131,10 @@ define([
           }
         })
       }
+
       data.formattedDate = data.formattedDate || (data.pubdate ? this.formatDate(data.pubdate) : undefined);
       data.shortAbstract = data.abstract? this.shortenAbstract(data.abstract) : undefined;
-      data.details = data.details || {shortAbstract: data.shortAbstract, pub: data.pub};
+      data.details = data.details || {shortAbstract: data.shortAbstract, pub: data.pub, abstract : data.abstract};
       data.num_citations = data["[citations]"] ? data["[citations]"]["num_citations"] : undefined;
 
       if (data.pubdate || data.shortAbstract){

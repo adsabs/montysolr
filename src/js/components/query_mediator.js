@@ -459,7 +459,7 @@ define(['underscore',
 
         // TODO: check the status responses
 
-        var response = (data.responseHeader && data.responseHeader.QTime) ? new ApiResponse(data) : new JsonResponse(data);
+        var response = (data.responseHeader && data.responseHeader.params) ? new ApiResponse(data) : new JsonResponse(data);
 
         response.setApiQuery(this.request.get('query'));
 
@@ -481,6 +481,7 @@ define(['underscore',
       },
 
       onApiRequestFailure: function( jqXHR, textStatus, errorThrown ) {
+
         var qm = this.qm;
         var query = this.request.get('query');
         if (qm.debug) {

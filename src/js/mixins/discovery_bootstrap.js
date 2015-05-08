@@ -209,7 +209,6 @@ define([
         else {
           $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion");
           $(".s-quick-add").removeClass("hidden");
-
         }
       });
     }

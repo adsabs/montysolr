@@ -32,7 +32,7 @@ define([
         return q;
       },
 
-      description : "List of papers in the same volume as"
+      description : "Papers in the same volume as"
 
     });
 

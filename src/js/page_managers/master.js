@@ -106,7 +106,7 @@ define([
 
           //scroll up automatically
           window.scrollTo(0,0);
-          //fix the search bar back into its default spot
+          //and fix the search bar back in its default spot
           $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion");
           $(".s-quick-add").removeClass("hidden");
         }
