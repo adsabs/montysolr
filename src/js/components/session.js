@@ -73,8 +73,7 @@ define([
 
     login: function (data) {
 
-      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
-
+    this.sendRequestWithNewCSRF(function(csrfToken){
       var request = new ApiRequest({
         target : ApiTargets.USER,
         query: new ApiQuery({}),
@@ -90,25 +89,38 @@ define([
           }
         }
       });
-     return this.getBeeHive().getService("Api").request(request);
+      return this.getBeeHive().getService("Api").request(request);
+
+    });
+    },
+
+    /*
+    * every time a csrf token is required, csrf manager will request a new token,
+    * and it allows you to attach callbacks to the promise it returns
+    * */
+    sendRequestWithNewCSRF : function(callback){
+      callback = _.bind(callback, this);
+      this.getBeeHive().getObject("CSRFManager").getCSRF().done(callback);
     },
 
     logout: function () {
 
-      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
+      this.sendRequestWithNewCSRF(function(csrfToken){
 
-      var request = new ApiRequest({
-        target : ApiTargets.LOGOUT,
-        query : new ApiQuery({}),
-        options : {
-          context : this,
-          type : "GET",
-          headers : {'X-CSRFToken' :  csrfToken },
-          contentType : "application/json",
-          done : this.logoutSuccess
-        }
+        var request = new ApiRequest({
+          target : ApiTargets.LOGOUT,
+          query : new ApiQuery({}),
+          options : {
+            context : this,
+            type : "GET",
+            headers : {'X-CSRFToken' :  csrfToken },
+            contentType : "application/json",
+            done : this.logoutSuccess
+          }
+        });
+        return this.getBeeHive().getService("Api").request(request);
+
       });
-      return this.getBeeHive().getService("Api").request(request);
     },
 
     register: function (data) {
@@ -123,22 +135,23 @@ define([
       }
       _.extend(data, {verify_url : base_url + "/#user/account/verify/register" });
 
-      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
+      this.sendRequestWithNewCSRF(function(csrfToken) {
 
-      var request = new ApiRequest({
-        target : ApiTargets.REGISTER,
-        query : new ApiQuery({}),
-        options : {
-          type : "POST",
-          data : JSON.stringify(data),
-          contentType : "application/json",
-          headers : {'X-CSRFToken' :  csrfToken },
-          done : this.registerSuccess,
-          fail : this.registerFail
-        }
+        var request = new ApiRequest({
+          target: ApiTargets.REGISTER,
+          query: new ApiQuery({}),
+          options: {
+            type: "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json",
+            headers: {'X-CSRFToken': csrfToken },
+            done: this.registerSuccess,
+            fail: this.registerFail
+          }
+        });
+        return this.getBeeHive().getService("Api").request(request);
+
       });
-      return this.getBeeHive().getService("Api").request(request);
-
     },
 
     resetPassword1: function(data){
@@ -154,39 +167,43 @@ define([
 
      var email = data.email;
      var data = _.omit(data, "email");
-     var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
 
-      var request = new ApiRequest({
-        target : ApiTargets.RESET_PASSWORD + "/" + email,
-        query : new ApiQuery({}),
-        options : {
-          type : "POST",
-          data : JSON.stringify(data),
-          headers : {'X-CSRFToken' :  csrfToken },
-          contentType : "application/json",
-          done : this.resetPassword1Success,
-          fail : this.resetPassword1Fail
-        }
-    });
-      return this.getBeeHive().getService("Api").request(request);
+     this.sendRequestWithNewCSRF(function(csrfToken){
+       var request = new ApiRequest({
+         target : ApiTargets.RESET_PASSWORD + "/" + email,
+         query : new ApiQuery({}),
+         options : {
+           type : "POST",
+           data : JSON.stringify(data),
+           headers : {'X-CSRFToken' :  csrfToken },
+           contentType : "application/json",
+           done : this.resetPassword1Success,
+           fail : this.resetPassword1Fail
+         }
+       });
+       return this.getBeeHive().getService("Api").request(request);
+     });
+
     },
 
     resetPassword2: function(data){
-      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
 
-      var request = new ApiRequest({
-        target : ApiTargets.RESET_PASSWORD + "/" + this.model.get("resetPasswordToken"),
-        query : new ApiQuery({}),
-        options : {
-          type : "PUT",
-          data : JSON.stringify(data),
-          contentType : "application/json",
-          headers : {'X-CSRFToken' :  csrfToken },
-          done : this.resetPassword2Success,
-          fail : this.resetPassword2Fail
-        }
+      this.sendRequestWithNewCSRF(function(csrfToken){
+        var request = new ApiRequest({
+          target : ApiTargets.RESET_PASSWORD + "/" + this.model.get("resetPasswordToken"),
+          query : new ApiQuery({}),
+          options : {
+            type : "PUT",
+            data : JSON.stringify(data),
+            contentType : "application/json",
+            headers : {'X-CSRFToken' :  csrfToken },
+            done : this.resetPassword2Success,
+            fail : this.resetPassword2Fail
+          }
+        });
+        return this.getBeeHive().getService("Api").request(request);
       });
-      return this.getBeeHive().getService("Api").request(request);
+
     },
 
     setChangeToken : function(token){

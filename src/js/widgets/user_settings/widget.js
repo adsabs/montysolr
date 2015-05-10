@@ -2,7 +2,6 @@ define([
   'marionette',
   'js/widgets/base/base_widget',
   'js/mixins/form_view_functions',
-  'js/components/api_targets',
   'js/widgets/success/view',
   'js/components/api_feedback',
   'hbs!./templates/api_key',
@@ -21,7 +20,6 @@ define([
   Marionette,
   BaseWidget,
   FormFunctions,
-  ApiTargets,
   SuccessView,
   ApiFeedback,
   TokenTemplate,
@@ -548,10 +546,10 @@ define([
      var user = this.beehive.getObject("User");
      var target = model.target;
      if (model.PUT){
-       user.putData(target, model.toJSON());
+       user.putData(target, model.toJSON(), {csrf : true});
      }
      else {
-       user.postData(target, model.toJSON());
+       user.postData(target, model.toJSON(), {csrf : true});
      }
    },
 

@@ -2,41 +2,29 @@ define([
   "js/components/recaptcha_manager"
 ], function(RecaptchaManager){
 
-describe("Recaptcha Manager", function(){
+  describe("Recaptcha Manager", function(){
 
 
+    it("should have a deferred that is resolved when the sitekey is obtained and the google recaptcha global is loaded", function(){
 
-  it("should have a deferred that is resolved when the sitekey is obtained and the google recaptcha global is loaded", function(){
+      var testView = new Backbone.View();
 
+      var r = new RecaptchaManager();
 
-    var testView = new Backbone.View();
+      r.renderRecaptcha = sinon.spy();
 
-    var r = new RecaptchaManager();
+      r.activateRecaptcha(testView);
 
-    r.renderRecaptcha = sinon.spy();
+      expect(r.renderRecaptcha.callCount).to.eql(0);
+      r.siteKeyDeferred.resolve("siteKey");
+//      expect(r.renderRecaptcha.callCount).to.eql(0);
+      r.grecaptchaDeferred.resolve();
 
-    r.activateRecaptcha(testView);
-
-    expect(r.renderRecaptcha.callCount).to.eql(0);
-    r.siteKeyDeferred.resolve("siteKey");
-    expect(r.renderRecaptcha.callCount).to.eql(0);
-    r.grecaptchaDeferred.resolve();
-
-    expect(r.renderRecaptcha.callCount).to.eql(1);
+      expect(r.renderRecaptcha.callCount).to.eql(1);
 
 
-
-
-
+    })
 
   })
-
-
-
-
-
-
-})
-
 
 })

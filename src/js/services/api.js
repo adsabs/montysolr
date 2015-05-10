@@ -150,9 +150,6 @@ define([
         .done(opts.done || this.done)
         .fail(opts.fail || this.fail);
 
-      jqXhr.target = request.get('target');
-
-
       jqXhr = jqXhr.promise(jqXhr);
 
       return jqXhr;
