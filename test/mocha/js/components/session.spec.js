@@ -4,7 +4,7 @@ define([
   'js/services/api',
   'js/components/api_request',
   'js/components/user',
-  'js/components/app_storage'
+  'js/components/csrf_manager'
 
 
 ], function(
@@ -13,7 +13,7 @@ define([
   Api,
   ApiRequest,
   User,
-  AppStorage
+  CSRFManager
   ){
 
 
@@ -40,14 +40,21 @@ define([
       }))({verbose: false});
 
       var api = new Api();
-      var appStorage = new AppStorage({csrf : "fake"});
+      var csrfManager = new CSRFManager();
+      csrfManager.getCSRF = function(){this.deferred = $.Deferred(); return this.deferred.promise()};
+      csrfManager.resolvePromiseWithNewKey = function(){
+        this.deferred.resolve("foo")
+      };
+
       var requestStub = sinon.stub(Api.prototype, "request");
       minsub.beehive.removeService("Api");
       minsub.beehive.addService("Api", api);
-      minsub.beehive.addObject("AppStorage", appStorage);
+      minsub.beehive.addObject("CSRFManager", csrfManager);
       s.activate(minsub.beehive);
 
       s.login({username: "goo", password : "foo", "g-recaptcha-response" : "boo"});
+
+      csrfManager.resolvePromiseWithNewKey();
 
       expect(requestStub.args[0][0]).to.be.instanceof(ApiRequest)
       expect(requestStub.args[0][0].toJSON().target).to.eql("accounts/user");
@@ -58,12 +65,16 @@ define([
 
       s.logout();
 
+      csrfManager.resolvePromiseWithNewKey();
+
       expect(requestStub.args[1][0]).to.be.instanceof(ApiRequest)
       expect(requestStub.args[1][0].toJSON().target).to.eql("accounts/logout");
       expect(requestStub.args[1][0].toJSON().options.type).to.eql("GET");
       expect(requestStub.args[1][0].toJSON().options.done).to.eql(s.logoutSuccess);
 
       s.register({email: "goo@goo.com", password1 : "foo", password2 : "foo", "g-recaptcha-response" : "boo"});
+
+      csrfManager.resolvePromiseWithNewKey();
 
       expect(requestStub.args[2][0]).to.be.instanceof(ApiRequest)
       expect(requestStub.args[2][0].toJSON().target).to.eql("accounts/register");
@@ -74,6 +85,9 @@ define([
       expect(requestStub.args[2][0].toJSON().options.fail).to.eql(s.registerFail);
 
       s.resetPassword1({email: "goo@goo.com", "g-recaptcha-response" : "boo"});
+
+      csrfManager.resolvePromiseWithNewKey();
+
 
       expect(requestStub.args[3][0]).to.be.instanceof(ApiRequest)
       expect(requestStub.args[3][0].toJSON().target).to.eql('accounts/reset-password/goo@goo.com');
@@ -87,6 +101,8 @@ define([
       s.setChangeToken("fakeToken")
 
       s.resetPassword2({password1 : "1Aaaaa", password2 : "1Aaaaa"});
+
+      csrfManager.resolvePromiseWithNewKey();
 
       expect(requestStub.args[4][0]).to.be.instanceof(ApiRequest)
       //test version just uses string  "location.origin", real version will use the actual origin

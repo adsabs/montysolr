@@ -22,7 +22,7 @@ define([
       SERVICE_METRICS: 'metrics',
       MYADS_STORAGE: 'http://localhost:5000',
 
-
+      CSRF : 'accounts/csrf',
       USER: 'accounts/user',
       LOGOUT: 'accounts/logout',
       REGISTER: 'accounts/register',

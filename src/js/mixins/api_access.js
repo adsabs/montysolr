@@ -33,12 +33,6 @@ define([
             api.expires_in = data.expires_in;
           }
 
-          //set csrf token into AppStorage
-          var appStorage = this.getBeeHive().getObject("AppStorage");
-          if (appStorage && data.csrf) {
-            appStorage.set("csrf", data.csrf);
-          }
-
           var user = this.getBeeHive().getObject("User");
           if (user && !data.anonymous) {
             //it's a logged in user

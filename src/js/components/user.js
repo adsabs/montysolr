@@ -195,7 +195,7 @@ define([
     },
 
     /*post data to endpoint: accessible through facade*/
-    postData: function (target, data) {
+    postData: function (target, data, options) {
       //make sure it has a callback to access later
       if (!this.callbacks[target]){
         throw new Error("a POST request was made that doesn't have a success callback");
@@ -203,11 +203,11 @@ define([
       if (this.additionalParameters[target]){
         _.extend(data, this.additionalParameters[target]);
       }
-      return this.composeRequest(target, "POST", data);
+      return this.composeRequest(target, "POST", data, options);
     },
 
     /*PUT data to pre-existing endpoint: accessible through facade */
-    putData: function (target, data) {
+    putData: function (target, data, options) {
       //make sure it has a callback to access later
       if (!this.callbacks[target]){
         throw new Error("a PUT request was made that doesn't have a success callback");
@@ -215,7 +215,7 @@ define([
       if (this.additionalParameters[target]){
         _.extend(data, this.additionalParameters[target]);
       }
-      return this.composeRequest(target, "PUT", data);
+      return this.composeRequest(target, "PUT", data, options);
     },
 
     /*return read-only copy of user model(s) for widgets: accessible through facade */
@@ -246,36 +246,74 @@ define([
         return !!this.collection.get("USER").get("user");
     },
 
-    composeRequest : function (target, method, data, done, fail) {
+    /*
+     * every time a csrf token is required, app storage will request a new token,
+     * so it allows you to attach callbacks to the promise it returns
+     * */
+    sendRequestWithNewCSRF : function(callback){
+      callback = _.bind(callback, this);
+      this.getBeeHive().getObject("CSRFManager").getCSRF().done(callback);
+    },
+
+
+    composeRequest : function (target, method, data, options) {
       var request, endpoint;
       //using "endpoint" to mean the actual url string
       endpoint = ApiTargets[target];
       //get data from the relevant model based on the endpoint
       data = data || undefined;
+      options = options || {};
       //allow caller to provide a done method if desired, otherwise go with the standard ones
-      done = done || (method == "GET" ? this.handleSuccessfulGET : this.handleSuccessfulPOST);
-      fail = fail || (method == "GET" ? this.handleFailedGET : this.handleFailedPOST);
+      //handleSuccessFulPost is currently also being called for "put" method calls; I should change the name
+      var done = options.done || (method == "GET" ? this.handleSuccessfulGET : this.handleSuccessfulPOST);
+      var fail = options.fail || (method == "GET" ? this.handleFailedGET : this.handleFailedPOST);
 
-      var csrfToken = this.getBeeHive().getObject("AppStorage").get("csrf");
+      //it came from a form, needs to have a csrf token
+      if (options.csrf){
 
-      request = new ApiRequest({
-        target : endpoint,
-        options : {
-          context : this,
-          type: method,
-          data: JSON.stringify(data),
-          contentType : "application/json",
-          headers : {'X-CSRFToken' :  csrfToken },
-          done: done,
-          fail : fail,
-          //record the endpoint & data
-          beforeSend: function(jqXHR, settings) {
-            jqXHR.target = target;
-            jqXHR.data = data;
+        this.sendRequestWithNewCSRF(function(csrfToken){
+
+          request = new ApiRequest({
+            target : endpoint,
+            options : {
+              context : this,
+              type: method,
+              data: JSON.stringify(data),
+              contentType : "application/json",
+              headers : {'X-CSRFToken' :  csrfToken },
+              done: done,
+              fail : fail,
+              //record the endpoint & data
+              beforeSend: function(jqXHR, settings) {
+                jqXHR.target = target;
+                jqXHR.data = data;
+              }
+            }
+          });
+          this.getBeeHive().getService("Api").request(request);
+        });
+      }
+
+      else {
+        request = new ApiRequest({
+          target : endpoint,
+          options : {
+            context : this,
+            type: method,
+            data: JSON.stringify(data),
+            contentType : "application/json",
+            done: done,
+            fail : fail,
+            //record the endpoint & data
+            beforeSend: function(jqXHR, settings) {
+              jqXHR.target = target;
+              jqXHR.data = data;
+            }
           }
-        }
-      });
-      this.getBeeHive().getService("Api").request(request);
+        });
+        this.getBeeHive().getService("Api").request(request);
+      }
+
     },
 
     //check if  logged in/logged out state has changed

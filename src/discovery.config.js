@@ -46,7 +46,8 @@ require.config({
           HistoryManager: 'js/components/history_manager',
           MasterPageManager: 'js/page_managers/master',
           AppStorage: 'js/components/app_storage',
-          RecaptchaManager : 'js/components/recaptcha_manager'
+          RecaptchaManager : 'js/components/recaptcha_manager',
+          CSRFManager : "js/components/csrf_manager",
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'

@@ -1,8 +1,8 @@
 /*
-widgets can attach callbacks to a deferred that waits until
-* grecaptcha is loaded from google, and sitekey info is loaded from discovery.vars.js
-*
-* */
+ widgets can attach callbacks to a deferred that waits until
+ * grecaptcha is loaded from google, and sitekey info is loaded from discovery.vars.js
+ *
+ * */
 define([
     'backbone',
     'js/components/generic_module',
@@ -53,14 +53,14 @@ define([
       },
 
       renderRecaptcha :  function(view, siteKey, undefined){
-          grecaptcha.render(view.$(".g-recaptcha")[0],
-            {
-              sitekey: siteKey, callback: function (response) {
-              view.model.set("g-recaptcha-response", response);
-            }
+        grecaptcha.render(view.$(".g-recaptcha")[0],
+          {
+            sitekey: siteKey, callback: function (response) {
+            view.model.set("g-recaptcha-response", response);
+          }
           });
 
-        },
+      },
 
       hardenedInterface: {
         activateRecaptcha : "activateRecaptcha"

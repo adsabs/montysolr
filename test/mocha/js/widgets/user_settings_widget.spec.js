@@ -197,7 +197,7 @@ define([
      $("#test").find("button[type=submit]").click();
 
      expect(postDataSpy.callCount).to.eql(1);
-     expect(JSON.stringify(postDataSpy.args[0])).to.eql('["CHANGE_PASSWORD",{"old_password":"Foooo5","new_password1":"Boooo3","new_password2":"Boooo3"}]');
+     expect(JSON.stringify(postDataSpy.args[0])).to.eql('["CHANGE_PASSWORD",{"old_password":"Foooo5","new_password1":"Boooo3","new_password2":"Boooo3"},{"csrf":true}]');
 
    });
 
