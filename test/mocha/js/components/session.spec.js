@@ -69,7 +69,7 @@ define([
 
       expect(requestStub.args[1][0]).to.be.instanceof(ApiRequest)
       expect(requestStub.args[1][0].toJSON().target).to.eql("accounts/logout");
-      expect(requestStub.args[1][0].toJSON().options.type).to.eql("GET");
+      expect(requestStub.args[1][0].toJSON().options.type).to.eql("POST");
       expect(requestStub.args[1][0].toJSON().options.done).to.eql(s.logoutSuccess);
 
       s.register({email: "goo@goo.com", password1 : "foo", password2 : "foo", "g-recaptcha-response" : "boo"});

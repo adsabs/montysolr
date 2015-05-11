@@ -112,7 +112,7 @@ define([
           query : new ApiQuery({}),
           options : {
             context : this,
-            type : "GET",
+            type : "POST",
             headers : {'X-CSRFToken' :  csrfToken },
             contentType : "application/json",
             done : this.logoutSuccess
