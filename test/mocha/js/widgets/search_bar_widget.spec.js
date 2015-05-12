@@ -185,6 +185,40 @@ define([
 
     });
 
+    it("should have an autocomplete that highlights suggestions and is activated again after the user hits space", function(){
+
+      var s = new SearchBarWidget();
+
+      $("#test").append(s.render().el);
+
+      var $input = $("input.q");
+
+      $input.autocomplete("search", "a");
+
+      var autolist = $("ul.ui-autocomplete").last();
+
+      expect(autolist.css("display")).to.eql("block");
+      expect(autolist.find("a").first().text()).to.eql("Author");
+      expect(autolist.find("a").last().text()).to.eql("Abstract");
+
+      autolist.find("li").first().click();
+      expect($input.val()).to.eql("author:\"\"");
+
+      $input.autocomplete("search", "author:\"foo\" a");
+
+      //should try to autocomplete on only the 'a' just as before
+
+      var autolist = $("ul.ui-autocomplete").last();
+
+      expect(autolist.css("display")).to.eql("block");
+      expect(autolist.find("a").first().text()).to.eql("Author");
+      expect(autolist.find("a").last().text()).to.eql("Abstract");
+
+
+      $("ul.ui-autocomplete").remove();
+
+    })
+
 
 
     it("shows the query builder form on clicking 'Search Form' ", function() {
