@@ -1,4 +1,9 @@
-You are viewing metrics for {{current}} paper(s).
-{{#if max}}Change to first <input type="text" class="metrics-rows metrics-rows form-control s-display-inline"/> paper(s) (max is {{max}}).
+<h5>Currently viewing metrics for {{current}}
+    {{#compare current 1 operator = ">"}}
+     papers.
+    {{else}}
+    paper.
+    {{/compare}}
+ </h5>
+Change to first <input type="text" class="metrics-rows form-control s-display-inline input-sm"/> paper(s) (max is {{max}}).
 <button class="submit-rows btn btn-sm btn-info"> Submit </button>
-{{/if}}

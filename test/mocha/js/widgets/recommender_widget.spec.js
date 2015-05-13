@@ -36,6 +36,8 @@ define([
 
       r.processResponse(new JsonResponse(testData));
 
+      debugger
+
       expect($w.find("li").length).to.eql(7);
       expect($w.find("li:first").text().trim()).to.eql('Propagation of Cosmic-Ray Nucleons in the Galaxy (Strong,+);');
     });

@@ -883,7 +883,7 @@ define([
 
       //trigger show event, should prompt dispatchRequest
       metricsWidget.onShow();
-      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('You are viewing metrics for 2 paper(s).\nChange to first  paper(s) (max is 2).\n Submit');
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n     papers.\n    \n \nChange to first  paper(s) (max is 2).\n Submit');
 
 
         sinon.spy(metricsWidget.pubsub, "publish");

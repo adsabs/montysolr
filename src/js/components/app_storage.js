@@ -49,6 +49,10 @@ define([
         this.set('currentQuery', apiQuery);
       },
 
+      setCurrentNumFound : function(numFound){
+        this.set("numFound", numFound);
+      },
+
       getCurrentQuery: function() {
         return this.get('currentQuery');
       },

@@ -160,7 +160,9 @@ require.config({
     // only for diagnostics/debugging/testing - wont get loaded otherwise
     'sprintf': 'libs/sprintf/sprintf',
     'chai': '../bower_components/chai/chai',
-    'sinon': '../bower_components/sinon/index'
+    'sinon': '../bower_components/sinon/index',
+    'zeroclipboard' : 'libs/zeroclipboard/ZeroClipboard',
+    'filesaver' : 'libs/FileSaver/FileSaver'
 
   },
 
@@ -228,8 +230,11 @@ require.config({
 
   callback: function() {
     require(['hbs/handlebars'], function(Handlebars) {
+
       // register system-wide helper for handlebars
       // http://doginthehat.com.au/2012/02/comparison-block-helper-for-handlebars-templates/#comment-44
+
+      //eg  (where current is a variable): {{#compare current 1 operator=">"}}
 
       Handlebars.registerHelper('compare', function (lvalue, rvalue, options) {
         var operators, result, operator;
@@ -242,6 +247,10 @@ require.config({
         }
         else {
           operator = options.hash.operator;
+        }
+        //it might be being rendered at the beginning,before values have been inserted, so ignore
+        if (lvalue === undefined || rvalue === undefined){
+          return
         }
 
         operators = {

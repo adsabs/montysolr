@@ -1,26 +1,68 @@
 <span class="s-large-close close-widget">x</span>
-<!-- Button trigger modal -->
-{{#if query}}
-<button type="button" id="exportQuery" class="btn btn-primary btn-lg">
-    Export Query
-</button>
-<input type="number" class="userExportVal" value="{{userExportVal}}" min="1" max="{{maxExport}}">
+
+{{#if error}}
+     <div class="alert alert-danger" role="alert"> {{error}}</div>
+{{else}}
+
+    {{#if export}}
+
+        <h3 class="s-light-font">Currently viewing <b>{{current}}</b>
+            {{#compare max 1 operator = ">"}}
+            records in <b>
+                {{#compare format "bibtex"}}
+                BibTEX
+                {{/compare}}
+                {{#compare format "endnote"}}
+                Endnote
+                {{/compare}}
+                {{#compare format "aastex"}}
+                AASTex
+                {{/compare}}
+            </b> format.
+            {{else}}
+            record in <b>
+                {{#compare format "bibtex"}}
+                BibTEX
+                {{/compare}}
+                {{#compare format "endnote"}}
+                Endnote
+                {{/compare}}
+                {{#compare format "aastex"}}
+                AASTex
+                {{/compare}}
+            </b> format.
+            {{/compare}}
+        </h3>
+
+        {{#if query}}
+        <div class="change-rows">
+            Change to first
+            <input type="number" class="form-control user-input s-display-inline input-sm" min="1" max="{{max}}" style="width: 70px"/>
+            record(s) (max is {{max}}).
+            <button class="submit-rows btn btn-sm btn-info"> Submit </button>
+        </div>
+
+        {{/if}}
+
+        <div class="s-spacer-top-large">
+            <button class="btn btn-default-flat s-btn-download btn-download">
+                <i class="fa fa-lg fa-download"></i>
+                Download file
+            </button>
+            &nbsp;&nbsp;
+            <button class="btn btn-default-flat s-btn-clipboard btn-clipboard">
+                <i class="fa fa-lg fa-clipboard"></i>
+                Copy to clipboard
+            </button>
+            <textarea id="exportData" class="s-export-data" > {{export}}</textarea>
+        </div>
+    {{else}}
+        <div style="margin:20px">
+            <i class="fa fa-spinner fa-2x fa-pulse"></i> Loading data...
+        </div>
+    {{/if}}
+
+
 {{/if}}
 
 
-
-
-{{#if numIdentifiers}}
-<button type="button" id="exportRecords" class="btn btn-primary btn-lg">
-    Export {{numIdentifiers}} Records
-</button>
-{{/if}}
-
-<div>
-{{#if msg}}{{msg}}{{/if}}
-</div>
-
-<!-- Exports -->
-{{#if export}}
-<textarea id="exportData" class="pre-scrollable" style="width:100%;height:400px;font-family:courier;">{{export}}</textarea>
-{{/if}}

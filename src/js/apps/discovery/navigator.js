@@ -118,9 +118,17 @@ define([
         });
 
         this.set('export-bibtex', function() {
-        self.get('export-page').execute('bibtex')});
-        this.set('export-aastex', function() {self.get('export-page').execute('aastex')});
-        this.set('export-endnote', function() {self.get('export-page').execute('endnote')});
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+          self.get('export-page').execute('bibtex');
+        });
+        this.set('export-aastex', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+          self.get('export-page').execute('aastex');
+        });
+        this.set('export-endnote', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+          self.get('export-page').execute('endnote');
+        });
         this.set('export-page', function(format) {
           format = format || 'bibtex';
           var storage = app.getObject('AppStorage');
@@ -130,7 +138,7 @@ define([
             widget.exportRecords(format, storage.getSelectedPapers());
           }
           else if(storage.hasCurrentQuery()) {
-            widget.exportQuery(format, storage.getCurrentQuery());
+            widget.exportQuery({format : format,  currentQuery: storage.getCurrentQuery(),  numFound : storage.get("numFound")});
           }
           else {
             var alerts = app.getController('AlertsController');
