@@ -23,265 +23,280 @@ define([
 
     //this is the large version straight from Edwin's api
     var testData = {
-      "all reads": {
-        "Average number of downloads": 51.0,
-        "Average number of reads": 75.0,
-        "Median number of downloads": 51.0,
-        "Median number of reads": 75.0,
-        "Normalized number of downloads": 90.0,
-        "Normalized number of reads": 129.0,
-        "Total number of downloads": 102,
-        "Total number of reads": 150
+      "basic stats": {
+        "average number of downloads": 19.275862068965516,
+        "average number of reads": 63.86206896551724,
+        "median number of downloads": 3.0,
+        "median number of reads": 52.0,
+        "normalized paper count": 7.291269841269841,
+        "number of papers": 30,
+        "recent number of downloads": 78,
+        "recent number of reads": 204,
+        "total number of downloads": 559,
+        "total number of reads": 1852
       },
-      "all stats": {
-        "Average citations": 38.5,
-        "Average refereed citations": 37.0,
-        "H-index": 2,
-        "Median citations": 38.5,
-        "Median refereed citations": 37.0,
-        "Normalized citations": 71.5,
-        "Normalized paper count": 1.5,
-        "Normalized refereed citations": 69.0,
-        "Number of citing papers": 77,
-        "Number of papers": 2,
-        "Refereed citations": 74,
-        "Total citations": 77,
-        "e-index": 8.5,
-        "g-index": 2,
-        "i10-index": 2,
-        "i100-index": 0,
-        "m-index": 2.0,
-        "read10 index": 0,
-        "roq index": 1792.0,
-        "self-citations": 0,
-        "tori index": 3.2
+      "basic stats refereed": {
+        "average number of downloads": 62.0,
+        "average number of reads": 148.0,
+        "median number of downloads": 62.0,
+        "median number of reads": 148.0,
+        "normalized paper count": 0.125,
+        "number of papers": 1,
+        "recent number of downloads": 2,
+        "recent number of reads": 5,
+        "total number of downloads": 62,
+        "total number of reads": 148
       },
-      "citation histogram": {
-        "1980": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "1981": "4:4:4:4:4.0:4.0:4.0:4.0",
-        "1982": "5:5:5:5:4.0:4.0:4.0:4.0",
-        "1983": "5:4:5:4:4.0:3.5:4.0:3.5",
-        "1984": "3:3:3:3:3.0:3.0:3.0:3.0",
-        "1985": "7:7:7:7:7.0:7.0:7.0:7.0",
-        "1986": "4:4:4:4:4.0:4.0:4.0:4.0",
-        "1987": "8:7:8:7:7.5:6.5:7.5:6.5",
-        "1988": "7:7:7:7:7.0:7.0:7.0:7.0",
-        "1989": "1:1:1:1:1.0:1.0:1.0:1.0",
-        "1990": "5:5:5:5:4.5:4.5:4.5:4.5",
-        "1991": "2:2:2:2:2.0:2.0:2.0:2.0",
-        "1992": "2:2:2:2:1.5:1.5:1.5:1.5",
-        "1993": "1:1:1:1:1.0:1.0:1.0:1.0",
-        "1994": "5:5:5:5:4.5:4.5:4.5:4.5",
-        "1995": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "1996": "3:3:3:3:2.5:2.5:2.5:2.5",
-        "1997": "1:1:1:1:1.0:1.0:1.0:1.0",
-        "1998": "2:2:2:2:2.0:2.0:2.0:2.0",
-        "1999": "3:3:3:3:3.0:3.0:3.0:3.0",
-        "2000": "2:1:2:1:2.0:1.0:2.0:1.0",
-        "2001": "1:1:1:1:1.0:1.0:1.0:1.0",
-        "2002": "2:2:2:2:1.5:1.5:1.5:1.5",
-        "2003": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "2004": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "2005": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "2006": "1:1:1:1:1.0:1.0:1.0:1.0",
-        "2007": "1:1:1:1:0.5:0.5:0.5:0.5",
-        "2008": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "2009": "1:1:1:1:1.0:1.0:1.0:1.0",
-        "2010": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "2011": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "2012": "1:1:1:1:1.0:1.0:1.0:1.0",
-        "2013": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "2014": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "type": "citation_histogram"
+      "citation stats": {
+        "average number of citations": 2.125,
+        "average number of refereed citations": 0.375,
+        "median number of citations": 2.0,
+        "median number of refereed citations": 0.0,
+        "normalized number of citations": 6.430555555555555,
+        "normalized number of refereed citations": 1.5833333333333333,
+        "number of citing papers": 15,
+        "number of self-citations": 5,
+        "total number of citations": 17,
+        "total number of refereed citations": 3
       },
-      "metrics series": {
-        "1980": "0:0:0:0:0.0:0:0:0",
-        "1981": "1:2:0:0.472023809524:0.5:343:0:0",
-        "1982": "2:2:0:0.645851606393:0.666666666667:267:0:0",
-        "1983": "2:2:1:1.10189227625:0.5:262:0:0",
-        "1984": "2:2:1:1.22747569666:0.4:221:0:0",
-        "1985": "2:2:1:1.43852512908:0.333333333333:199:0:0",
-        "1986": "2:2:1:1.59290955994:0.285714285714:180:0:0",
-        "1987": "2:2:1:2.00479397183:0.25:176:0:0",
-        "1988": "2:2:1:2.24667667969:0.222222222222:166:0:0",
-        "1989": "2:2:1:2.28667667969:0.2:151:0:0",
-        "1990": "2:2:1:2.59707762952:0.181818181818:146:0:0",
-        "1991": "2:2:1:2.63106455763:0.166666666667:135:0:0",
-        "1992": "2:2:1:2.67899484085:0.153846153846:125:0:0",
-        "1993": "2:2:1:2.7316264198:0.142857142857:118:0:0",
-        "1994": "2:2:1:2.83935637802:0.133333333333:112:0:0",
-        "1995": "2:2:1:2.83935637802:0.125:105:0:0",
-        "1996": "2:2:1:2.88540869527:0.117647058824:99:0:0",
-        "1997": "2:2:1:2.89969440955:0.111111111111:94:0:0",
-        "1998": "2:2:1:2.95326583812:0.105263157895:90:0:0",
-        "1999": "2:2:1:2.98340195637:0.1:86:0:0",
-        "2000": "2:2:1:3.1525748887:0.0952380952381:84:0:0",
-        "2001": "2:2:1:3.16003757527:0.0909090909091:80:0:0",
-        "2002": "2:2:2:3.1837423651:0.0869565217391:77:0:0",
-        "2003": "2:2:2:3.1837423651:0.0833333333333:74:0:0",
-        "2004": "2:2:2:3.1837423651:0.08:71:0:0",
-        "2005": "2:2:2:3.1837423651:0.0769230769231:68:0:0",
-        "2006": "2:2:2:3.19088522224:0.0740740740741:66:0:0",
-        "2007": "2:2:2:3.20199633335:0.0714285714286:63:0:0",
-        "2008": "2:2:2:3.20199633335:0.0689655172414:61:0:0",
-        "2009": "2:2:2:3.21084589088:0.0666666666667:59:0:0",
-        "2010": "2:2:2:3.21084589088:0.0645161290323:57:0:0",
-        "2011": "2:2:2:3.21084589088:0.0625:55:0:0",
-        "2012": "2:2:2:3.21246663642:0.0606060606061:54:0:0",
-        "2013": "2:2:2:3.21246663642:0.0588235294118:52:0:0",
-        "2014": "2:2:2:3.21246663642:0.0571428571429:51:0:0",
-        "type": "metrics_series"
+      "citation stats refereed": {
+        "average number of citations": 1.0,
+        "average number of refereed citations": 0.0,
+        "median number of citations": 1.0,
+        "median number of refereed citations": 0.0,
+        "normalized number of citations": 0.125,
+        "normalized number of refereed citations": 0.0,
+        "number of citing papers": 1,
+        "number of self-citations": 0,
+        "total number of citations": 1,
+        "total number of refereed citations": 0
       },
-      "paper histogram": {
-        "1980": "2:2:1.5:1.5",
-        "type": "publication_histogram"
-      },
-      "reads histogram": {
-        "1996": "0:0:0.0:0.0",
-        "1997": "0:0:0.0:0.0",
-        "1998": "2:2:2.0:2.0",
-        "1999": "7:7:6.0:6.0",
-        "2000": "4:4:4.0:4.0",
-        "2001": "6:6:5.0:5.0",
-        "2002": "15:15:14.5:14.5",
-        "2003": "5:5:5.0:5.0",
-        "2004": "20:20:17.0:17.0",
-        "2005": "4:4:4.0:4.0",
-        "2006": "10:10:9.0:9.0",
-        "2007": "7:7:6.0:6.0",
-        "2008": "15:15:14.0:14.0",
-        "2009": "12:12:9.5:9.5",
-        "2010": "7:7:5.0:5.0",
-        "2011": "12:12:10.5:10.5",
-        "2012": "13:13:9.0:9.0",
-        "2013": "4:4:3.5:3.5",
-        "2014": "7:7:5.0:5.0",
-        "type": "reads_histogram"
-      },
-      "refereed reads": {
-        "Average number of downloads": 51.0,
-        "Average number of reads": 75.0,
-        "Median number of downloads": 51.0,
-        "Median number of reads": 75.0,
-        "Normalized number of downloads": 90.0,
-        "Normalized number of reads": 129.0,
-        "Total number of downloads": 102,
-        "Total number of reads": 150
-      },
-      "refereed stats": {
-        "Average citations": 38.5,
-        "Average refereed citations": 37.0,
-        "H-index": 2,
-        "Median citations": 38.5,
-        "Median refereed citations": 37.0,
-        "Normalized citations": 71.5,
-        "Normalized paper count": 1.5,
-        "Normalized refereed citations": 69.0,
-        "Number of citing papers": 77,
-        "Number of papers": 2,
-        "Refereed citations": 74,
-        "Total citations": 77,
-        "e-index": 8.5,
-        "g-index": 2,
-        "i10-index": 2,
-        "i100-index": 0,
-        "m-index": 2.0,
-        "read10 index": 0,
-        "roq index": 1792.0,
-        "self-citations": 0,
-        "tori index": 3.2
-      }
-    };
+      "histograms": {
+        "citations": {
+          "nonrefereed to nonrefereed": {
+            "2011": 1,
+            "2012": 5,
+            "2013": 3,
+            "2014": 2,
+            "2015": 2
+          },
+          "nonrefereed to nonrefereed normalized": {
+            "2011": 0.1111111111111111,
+            "2012": 2.861111111111111,
+            "2013": 0.9444444444444444,
+            "2014": 0.4444444444444444,
+            "2015": 0.3611111111111111
+          },
+          "nonrefereed to refereed": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 0,
+            "2014": 1,
+            "2015": 0
+          },
+          "nonrefereed to refereed normalized": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 0,
+            "2014": 0.125,
+            "2015": 0
+          },
+          "refereed to nonrefereed": {
+            "2011": 1,
+            "2012": 1,
+            "2013": 0,
+            "2014": 1,
+            "2015": 0
+          },
+          "refereed to nonrefereed normalized": {
+            "2011": 0.25,
+            "2012": 0.3333333333333333,
+            "2013": 0,
+            "2014": 1.0,
+            "2015": 0
+          },
+          "refereed to refereed": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 0,
+            "2014": 0,
+            "2015": 0
+          },
+          "refereed to refereed normalized": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 0,
+            "2014": 0,
+            "2015": 0
+          }
+        },
+        "downloads": {
+          "all downloads": {
 
+            "2010": 16,
+            "2011": 85,
+            "2012": 145,
+            "2013": 80,
+            "2014": 155,
+            "2015": 78
+          },
+          "all downloads normalized": {
+
+            "2010": 1.7777777777777777,
+            "2011": 46.75,
+            "2012": 46.94444444444444,
+            "2013": 23.069444444444443,
+            "2014": 37.361111111111114,
+            "2015": 14.890079365079362
+          },
+          "refereed downloads": {
+
+            "2012": 26,
+            "2013": 18,
+            "2014": 16,
+            "2015": 2
+          },
+          "refereed downloads normalized": {
+
+            "2012": 3.25,
+            "2013": 2.25,
+            "2014": 2.0,
+            "2015": 0.25
+          }
+        },
+        "publications": {
+          "all publications": {
+            "2011": 8,
+            "2012": 6,
+            "2013": 4,
+            "2014": 3,
+            "2015": 9
+          },
+          "all publications normalized": {
+            "2011": 3.166666666666667,
+            "2012": 1.9444444444444444,
+            "2013": 0.5178571428571428,
+            "2014": 0.375,
+            "2015": 1.2873015873015876
+          },
+          "refereed publications": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 1,
+            "2014": 0,
+            "2015": 0
+          },
+          "refereed publications normalized": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 0.125,
+            "2014": 0,
+            "2015": 0
+          }
+        },
+        "reads": {
+          "all reads": {
+
+            "2010": 37,
+            "2011": 368,
+            "2012": 428,
+            "2013": 371,
+            "2014": 444,
+            "2015": 204
+          },
+          "all reads normalized": {
+
+            "2010": 4.111111111111111,
+            "2011": 137.16666666666666,
+            "2012": 126.66666666666666,
+            "2013": 96.9107142857143,
+            "2014": 87.63492063492063,
+            "2015": 37.39801587301587
+          },
+          "refereed reads": {
+
+            "2012": 56,
+            "2013": 57,
+            "2014": 30,
+            "2015": 5
+          },
+          "refereed reads normalized": {
+
+            "2012": 7.0,
+            "2013": 7.125,
+            "2014": 3.75,
+            "2015": 0.625
+          }
+        }
+      },
+      "indicators": {
+        "g": 3,
+        "h": 3,
+        "i10": 0,
+        "i100": 0,
+        "m": 0.6,
+        "read10": 37.39801587301587,
+        "riq": 165,
+        "tori": 0.6887780112044819
+      },
+      "indicators refereed": {
+        "g": 1,
+        "h": 1,
+        "i10": 0,
+        "i100": 0,
+        "m": 0.3333333333333333,
+        "read10": 0.625,
+        "riq": 34,
+        "tori": 0.010416666666666666
+      },
+      "skipped bibcodes": [],
+      "time series": {
+        "g": {
+          "2011": 1,
+          "2012": 2,
+          "2013": 3,
+          "2014": 3,
+          "2015": 3
+        },
+        "h": {
+          "2011": 1,
+          "2012": 1,
+          "2013": 2,
+          "2014": 2,
+          "2015": 2
+        },
+        "i10": {
+          "2011": 0,
+          "2012": 0,
+          "2013": 0,
+          "2014": 0,
+          "2015": 0
+        },
+        "i100": {
+          "2011": 0,
+          "2012": 0,
+          "2013": 0,
+          "2014": 0,
+          "2015": 0
+        },
+        "read10": {
+          "2011": 89.5,
+          "2012": 119.66666666666666,
+          "2013": 96.9107142857143,
+          "2014": 82.19047619047619,
+          "2015": 37.39801587301587
+        },
+        "tori": {
+          "2011": 0.04820261437908496,
+          "2012": 0.15058356676003734,
+          "2013": 0.3394724556489262,
+          "2014": 0.6387780112044817,
+          "2015": 0.6887780112044819
+        }
+      }
+    }
     //the smaller more manageable version
-    var testDataSmall = {
-      "all reads": {
-        "Average number of downloads": 51.0,
-        "Average number of reads": 75.0,
-        "Median number of downloads": 51.0,
-        "Median number of reads": 75.0,
-        "Normalized number of downloads": 90.0,
-        "Normalized number of reads": 129.0,
-        "Total number of downloads": 102,
-        "Total number of reads": 150
-      },
-      "all stats": {
-        "Average citations": 38.5,
-        "Average refereed citations": 37.0,
-        "H-index": 2,
-        "Median citations": 38.5,
-        "Median refereed citations": 37.0,
-        "Normalized citations": 71.5,
-        "Normalized paper count": 1.5,
-        "Normalized refereed citations": 69.0,
-        "Number of citing papers": 77,
-        "Number of papers": 2,
-        "Refereed citations": 74,
-        "Total citations": 77,
-        "e-index": 8.5,
-        "g-index": 2,
-        "i10-index": 2,
-        "i100-index": 0,
-        "m-index": 2.0,
-        "read10 index": 0,
-        "roq index": 1792.0,
-        "self-citations": 0,
-        "tori index": 3.2
-      },
-      "citation histogram": {
-        "1980": "0:0:0:0:0.0:0.0:0.0:0.0",
-        "1981": "4:4:4:4:4.0:4.0:4.0:4.0",
-        "type": "citation_histogram"
-      },
-      "metrics series": {
-        "1980": "0:0:0:0:0.0:0:0:0",
-        "1981": "1:2:0:0.472023809524:0.5:343:0:17",
-        "type": "metrics_series"
-      },
-      "paper histogram": {
-        "1980": "2:2:1.5:1.5",
-        "type": "publication_histogram"
-      },
-      "reads histogram": {
-        "1996": "0:0:0.0:0.0",
-        "1997": "0:0:0.0:0.0",
-        "type": "reads_histogram"
-      },
-      "refereed reads": {
-        "Average number of downloads": 51.0,
-        "Average number of reads": 75.0,
-        "Median number of downloads": 51.0,
-        "Median number of reads": 75.0,
-        "Normalized number of downloads": 90.0,
-        "Normalized number of reads": 129.0,
-        "Total number of downloads": 102,
-        "Total number of reads": 150
-      },
-      "refereed stats": {
-        "Average citations": 38.5,
-        "Average refereed citations": 37.0,
-        "H-index": 2,
-        "Median citations": 38.5,
-        "Median refereed citations": 37.0,
-        "Normalized citations": 71.5,
-        "Normalized paper count": 1.5,
-        "Normalized refereed citations": 69.0,
-        "Number of citing papers": 77,
-        "Number of papers": 2,
-        "Refereed citations": 74,
-        "Total citations": 77,
-        "e-index": 8.5,
-        "g-index": 2,
-        "i10-index": 2,
-        "i100-index": 0,
-        "m-index": 2.0,
-        "read10 index": 0,
-        "roq index": 1792.0,
-        "self-citations": 0,
-        "tori index": 3.2
-      }
-    };
-
+    var testDataSmall = testData;
 
     afterEach(function(){
 
@@ -293,42 +308,63 @@ define([
 
     it("should have a data extractor object that takes metrics data and prepares json for the nvd3 graph", function(){
 
-      var citshist = DataExtractor.plot_citshist({norm : false, citshist_data : testDataSmall["citation histogram"]});
+      var hist = testData.histograms;
 
-      var norm_citshist =  DataExtractor.plot_citshist({norm : true, citshist_data : testDataSmall["citation histogram"]});
+      var citshist = DataExtractor.plot_citshist({norm : false, citshist_data : hist["citations"]});
+      var norm_citshist =  DataExtractor.plot_citshist({norm : true, citshist_data : hist["citations"]});
+      var readshist = DataExtractor.plot_readshist({norm: false, readshist_data : hist["reads"]});
+      var norm_readshist  = DataExtractor.plot_readshist({norm: true, readshist_data : hist["reads"]});
+      var paperhist = DataExtractor.plot_paperhist({norm : true, paperhist_data : hist["publications"]});
+      var norm_paperhist = DataExtractor.plot_paperhist({norm : false, paperhist_data : hist["publications"]});
+      var indexes_data = DataExtractor.plot_series({series_data : testData["time series"]});
 
-      var readshist = DataExtractor.plot_readshist({norm: false, readshist_data : testDataSmall["reads histogram"]});
-
-      var norm_readshist  = DataExtractor.plot_readshist({norm: true, readshist_data : testDataSmall["reads histogram"]});
-
-      var paperhist = DataExtractor.plot_paperhist({norm : true, paperhist_data : testDataSmall["paper histogram"]});
-
-      var norm_paperhist = DataExtractor.plot_paperhist({norm : false, paperhist_data : testDataSmall["paper histogram"]});
-
-      var indexes_data = DataExtractor.plot_series({series_data : testDataSmall["metrics series"]});
-
-      expect(citshist).to.eql([{
-        "key": "Ref. citations to ref. papers",
-        "values": [
-          {
-            "x": "1980",
-            "y": 0
-          },
-          {
-            "x": "1981",
-            "y": 4
-          }
-        ]
-      },
+      expect(citshist).to.eql([
+        {
+          "key": "Ref. citations to ref. papers",
+          "values": [
+            {
+              "x": "2011",
+              "y": 0
+            },
+            {
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 0
+            },
+            {
+              "x": "2014",
+              "y": 0
+            },
+            {
+              "x": "2015",
+              "y": 0
+            }
+          ]
+        },
         {
           "key": "Ref. citations to non ref. papers",
           "values": [
             {
-              "x": "1980",
+              "x": "2011",
+              "y": 1
+            },
+            {
+              "x": "2012",
+              "y": 1
+            },
+            {
+              "x": "2013",
               "y": 0
             },
             {
-              "x": "1981",
+              "x": "2014",
+              "y": 1
+            },
+            {
+              "x": "2015",
               "y": 0
             }
           ]
@@ -337,11 +373,23 @@ define([
           "key": "Non ref. citations to ref. papers",
           "values": [
             {
-              "x": "1980",
+              "x": "2011",
               "y": 0
             },
             {
-              "x": "1981",
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 0
+            },
+            {
+              "x": "2014",
+              "y": 1
+            },
+            {
+              "x": "2015",
               "y": 0
             }
           ]
@@ -350,12 +398,24 @@ define([
           "key": "Non ref. citations to non ref. papers",
           "values": [
             {
-              "x": "1980",
-              "y": 0
+              "x": "2011",
+              "y": 1
             },
             {
-              "x": "1981",
-              "y": 0
+              "x": "2012",
+              "y": 5
+            },
+            {
+              "x": "2013",
+              "y": 3
+            },
+            {
+              "x": "2014",
+              "y": 2
+            },
+            {
+              "x": "2015",
+              "y": 2
             }
           ]
         }
@@ -366,12 +426,24 @@ define([
           "key": "Ref. citations to ref. papers",
           "values": [
             {
-              "x": "1980",
+              "x": "2011",
               "y": 0
             },
             {
-              "x": "1981",
-              "y": 4
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 0
+            },
+            {
+              "x": "2014",
+              "y": 0
+            },
+            {
+              "x": "2015",
+              "y": 0
             }
           ]
         },
@@ -379,11 +451,23 @@ define([
           "key": "Ref. citations to non ref. papers",
           "values": [
             {
-              "x": "1980",
+              "x": "2011",
+              "y": 0.25
+            },
+            {
+              "x": "2012",
+              "y": 0.3333333333333333
+            },
+            {
+              "x": "2013",
               "y": 0
             },
             {
-              "x": "1981",
+              "x": "2014",
+              "y": 1
+            },
+            {
+              "x": "2015",
               "y": 0
             }
           ]
@@ -392,11 +476,23 @@ define([
           "key": "Non ref. citations to ref. papers",
           "values": [
             {
-              "x": "1980",
+              "x": "2011",
               "y": 0
             },
             {
-              "x": "1981",
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 0
+            },
+            {
+              "x": "2014",
+              "y": 0.125
+            },
+            {
+              "x": "2015",
               "y": 0
             }
           ]
@@ -405,12 +501,24 @@ define([
           "key": "Non ref. citations to non ref. papers",
           "values": [
             {
-              "x": "1980",
-              "y": 0
+              "x": "2011",
+              "y": 0.1111111111111111
             },
             {
-              "x": "1981",
-              "y": 0
+              "x": "2012",
+              "y": 2.861111111111111
+            },
+            {
+              "x": "2013",
+              "y": 0.9444444444444444
+            },
+            {
+              "x": "2014",
+              "y": 0.4444444444444444
+            },
+            {
+              "x": "2015",
+              "y": 0.3611111111111111
             }
           ]
         }
@@ -421,12 +529,20 @@ define([
           "key": "Refereed",
           "values": [
             {
-              "x": 1996,
-              "y": 0
+              "x": "2012",
+              "y": 56
             },
             {
-              "x": 1997,
-              "y": 0
+              "x": "2013",
+              "y": 57
+            },
+            {
+              "x": "2014",
+              "y": 30
+            },
+            {
+              "x": "2015",
+              "y": 5
             }
           ]
         },
@@ -434,12 +550,28 @@ define([
           "key": "Non-refereed",
           "values": [
             {
-              "x": 1996,
-              "y": 0
+              "x": "2010",
+              "y": 37
             },
             {
-              "x": 1997,
-              "y": 0
+              "x": "2011",
+              "y": 368
+            },
+            {
+              "x": "2012",
+              "y": 372
+            },
+            {
+              "x": "2013",
+              "y": 314
+            },
+            {
+              "x": "2014",
+              "y": 414
+            },
+            {
+              "x": "2015",
+              "y": 199
             }
           ]
         }
@@ -450,12 +582,20 @@ define([
           "key": "Refereed",
           "values": [
             {
-              "x": 1996,
-              "y": 0
+              "x": "2012",
+              "y": 7
             },
             {
-              "x": 1997,
-              "y": 0
+              "x": "2013",
+              "y": 7.125
+            },
+            {
+              "x": "2014",
+              "y": 3.75
+            },
+            {
+              "x": "2015",
+              "y": 0.625
             }
           ]
         },
@@ -463,12 +603,20 @@ define([
           "key": "Non-refereed",
           "values": [
             {
-              "x": 1996,
-              "y": 0
+              "x": "2012",
+              "y": -119.66666666666666
             },
             {
-              "x": 1997,
-              "y": 0
+              "x": "2013",
+              "y": -89.7857142857143
+            },
+            {
+              "x": "2014",
+              "y": -83.88492063492063
+            },
+            {
+              "x": "2015",
+              "y": -36.77301587301587
             }
           ]
         }
@@ -479,8 +627,24 @@ define([
           "key": "Refereed",
           "values": [
             {
-              "x": 1980,
-              "y": 1.5
+              "x": "2011",
+              "y": 0
+            },
+            {
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 0.125
+            },
+            {
+              "x": "2014",
+              "y": 0
+            },
+            {
+              "x": "2015",
+              "y": 0
             }
           ]
         },
@@ -488,8 +652,24 @@ define([
           "key": "Non-refereed",
           "values": [
             {
-              "x": 1980,
-              "y": 0
+              "x": "2011",
+              "y": 3.166666666666667
+            },
+            {
+              "x": "2012",
+              "y": 1.9444444444444444
+            },
+            {
+              "x": "2013",
+              "y": 0.3928571428571428
+            },
+            {
+              "x": "2014",
+              "y": 0.375
+            },
+            {
+              "x": "2015",
+              "y": 1.2873015873015876
             }
           ]
         }
@@ -500,8 +680,24 @@ define([
           "key": "Refereed",
           "values": [
             {
-              "x": 1980,
-              "y": 2
+              "x": "2011",
+              "y": 0
+            },
+            {
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 1
+            },
+            {
+              "x": "2014",
+              "y": 0
+            },
+            {
+              "x": "2015",
+              "y": 0
             }
           ]
         },
@@ -509,109 +705,189 @@ define([
           "key": "Non-refereed",
           "values": [
             {
-              "x": 1980,
-              "y": 0
+              "x": "2011",
+              "y": 8
+            },
+            {
+              "x": "2012",
+              "y": 6
+            },
+            {
+              "x": "2013",
+              "y": 3
+            },
+            {
+              "x": "2014",
+              "y": 3
+            },
+            {
+              "x": "2015",
+              "y": 9
             }
           ]
         }
       ]);
 
-    //  "metrics series": {
-     //   "1980": "0:0:0:0:0.0:0:0:0",
-     //     "1981": "1:2:0:0.472023809524:0.5:343:0:17",
-     //     "type": "metrics_series"
-
       //checking parsing
       expect(_.findWhere(indexes_data, {key : "h Index"}).values[1].y).to.eql(1);
       expect(_.findWhere(indexes_data, {key : "g Index"}).values[1].y).to.eql(2);
-      expect(_.findWhere(indexes_data, {key : "i10 Index"}).values[1].y).to.eql(0)
-      expect(_.findWhere(indexes_data, {key : "tori Index"}).values[1].y).to.eql(0.5);
-      expect(_.findWhere(indexes_data, {key : "i100 Index"}).values[1].y).to.eql(0)
-      expect(_.findWhere(indexes_data, {key : "read10 Index"}).values[1].y).to.eql(17)
-
-
+      expect(_.findWhere(indexes_data, {key : "i10 Index"}).values[1].y).to.eql(0);
+      expect(_.findWhere(indexes_data, {key : "tori Index"}).values[1].y).to.eql(0.15058356676003734);
+      expect(_.findWhere(indexes_data, {key : "i100 Index"}).values[1].y).to.eql(0);
+      expect(_.findWhere(indexes_data, {key : "read10 Index"}).values[1].y).to.eql(119.66666666666666);
 
       expect(indexes_data).to.eql([
-          {
-            "key": "h Index",
-            "values": [
-              {
-                "x": "1980",
-                "y": 0
-              },
-              {
-                "x": "1981",
-                "y": 1
-              }
-            ]
-          },
-          {
-            "key": "g Index",
-            "values": [
-              {
-                "x": "1980",
-                "y": 0
-              },
-              {
-                "x": "1981",
-                "y": 2
-              }
-            ]
-          },
-          {
-            "key": "i10 Index",
-            "values": [
-              {
-                "x": "1980",
-                "y": 0
-              },
-              {
-                "x": "1981",
-                "y": 0
-              }
-            ]
-          },
-          {
-            "key": "tori Index",
-            "values": [
-              {
-                "x": "1980",
-                "y": 0
-              },
-              {
-                "x": "1981",
-                "y": 0.5
-              }
-            ]
-          },
-          {
-            "key": "i100 Index",
-            "values": [
-              {
-                "x": "1980",
-                "y": 0
-              },
-              {
-                "x": "1981",
-                "y": 0
-              }
-            ]
-          },
-          {
-            "key": "read10 Index",
-            "values": [
-              {
-                "x": "1980",
-                "y": 0
-              },
-              {
-                "x": "1981",
-                "y": 17
-              }
-            ]
-          }
-        ]
-
+        {
+          "key": "h Index",
+          "values": [
+            {
+              "x": "2011",
+              "y": 1
+            },
+            {
+              "x": "2012",
+              "y": 1
+            },
+            {
+              "x": "2013",
+              "y": 2
+            },
+            {
+              "x": "2014",
+              "y": 2
+            },
+            {
+              "x": "2015",
+              "y": 2
+            }
+          ]
+        },
+        {
+          "key": "g Index",
+          "values": [
+            {
+              "x": "2011",
+              "y": 1
+            },
+            {
+              "x": "2012",
+              "y": 2
+            },
+            {
+              "x": "2013",
+              "y": 3
+            },
+            {
+              "x": "2014",
+              "y": 3
+            },
+            {
+              "x": "2015",
+              "y": 3
+            }
+          ]
+        },
+        {
+          "key": "i10 Index",
+          "values": [
+            {
+              "x": "2011",
+              "y": 0
+            },
+            {
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 0
+            },
+            {
+              "x": "2014",
+              "y": 0
+            },
+            {
+              "x": "2015",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "tori Index",
+          "values": [
+            {
+              "x": "2011",
+              "y": 0.04820261437908496
+            },
+            {
+              "x": "2012",
+              "y": 0.15058356676003734
+            },
+            {
+              "x": "2013",
+              "y": 0.3394724556489262
+            },
+            {
+              "x": "2014",
+              "y": 0.6387780112044817
+            },
+            {
+              "x": "2015",
+              "y": 0.6887780112044819
+            }
+          ]
+        },
+        {
+          "key": "i100 Index",
+          "values": [
+            {
+              "x": "2011",
+              "y": 0
+            },
+            {
+              "x": "2012",
+              "y": 0
+            },
+            {
+              "x": "2013",
+              "y": 0
+            },
+            {
+              "x": "2014",
+              "y": 0
+            },
+            {
+              "x": "2015",
+              "y": 0
+            }
+          ]
+        },
+        {
+          "key": "read10 Index",
+          "values": [
+            {
+              "x": "2011",
+              "y": 89.5
+            },
+            {
+              "x": "2012",
+              "y": 119.66666666666666
+            },
+            {
+              "x": "2013",
+              "y": 96.9107142857143
+            },
+            {
+              "x": "2014",
+              "y": 82.19047619047619
+            },
+            {
+              "x": "2015",
+              "y": 37.39801587301587
+            }
+          ]
+        }
+      ]
       );
 
     })
@@ -620,15 +896,11 @@ define([
     it("should have a function that empties the main view", function(){
 
       metricsWidget = new MetricsWidget();
-
       metricsWidget.processResponse(new JsonResponse(testData));
-
       $("#test").append(metricsWidget.view.el);
-
       metricsWidget.resetWidget();
 
       //check to see that the rendered views are inserted
-
       expect($("#test").find((".metrics-graph *")).length).to.eql(0);
       expect($("#test").find((".metrics-table *")).length).to.eql(0);
 
@@ -639,16 +911,13 @@ define([
     it("should have a configurable graph view that can show a bar chart", function(done){
 
       this.timeout(3000);
-
-
       var metricsWidget = new MetricsWidget();
-
       var gModel = new metricsWidget.components.GraphModel();
 
       var graphView = new metricsWidget.components.GraphView({model : gModel });
 
-      graphView.model.set("graphData", DataExtractor.plot_citshist({norm : false, citshist_data : testData["citation histogram"]}));
-      graphView.model.set("normalizedGraphData", DataExtractor.plot_citshist({norm : true, citshist_data : testData["citation histogram"]}));
+      graphView.model.set("graphData", DataExtractor.plot_citshist({norm : false, citshist_data : testData["histograms"]["citations"]}));
+      graphView.model.set("normalizedGraphData", DataExtractor.plot_citshist({norm : true, citshist_data : testData["histograms"]["citations"]}));
 
       $("#test").append(graphView.render().el);
 
@@ -656,21 +925,11 @@ define([
 
       setTimeout(function(){
 
-        //should show 25 bars representing ref to ref citations
-        expect(d3.selectAll("#test g.nv-series-0 rect").filter(function(d){if (d3.select(this).attr("height") > 1 ){return true}})[0].length).to.eql(25);
-
-        //the third of these bars should be shorter than the second
-        expect(parseInt(d3.select("#test g.nv-series-0 rect:nth-of-type(3)").attr("y"))).to.be.lessThan(d3.select("#test g.nv-series-0 rect:nth-of-type(2)").attr("y"))
-
-        //all bars from the third series (non ref to ref) should have a height of 0
-        expect(d3.selectAll("#test g.nv-series-3 rect").filter(function(){if (d3.select(this).attr("height") == 1){return true}})[0].length).to.eql(35);
-
+        expect(d3.selectAll("#test g.nv-series-0 rect")[0].length).to.eql(5);
         $("#test").empty();
-
         done();
 
       }, 2000);
-
 
 
     })
@@ -680,30 +939,21 @@ define([
     it("should have a configurable graph view that can show a line chart", function(done){
 
       this.timeout(3000);
-
       var metricsWidget = new MetricsWidget();
-
       var gModel = new metricsWidget.components.GraphModel({graphType : "line"});
-
       var graphView = new metricsWidget.components.GraphView({model : gModel });
 
-      graphView.model.set("graphData", DataExtractor.plot_series({series_data : testData["metrics series"]}));
+      graphView.model.set("graphData", DataExtractor.plot_series({series_data : testData["time series"]}));
 
-      $("#test").empty();
-
-      $("#test").append(graphView.render().el);
+      $("#test").empty().append(graphView.render().el);
 
       setTimeout(function(){
-
         //should show 6 different lines, so 12 items (nvd3 shows a separate group with a path and a group of circles)
-
         expect($(".nv-group").length).to.eql(12)
 
         done();
 
-
       }, 2500)
-
 
     })
 
@@ -712,22 +962,19 @@ define([
       var metricsWidget = new MetricsWidget();
 
       metricsWidget.processResponse(new JsonResponse(testData));
-
       //checking a single row from each template
       //would there be a way to check the entire rendered html in a non-messy way?
+      expect(metricsWidget.childViews.papersTableView.render().$("td:contains(Number of papers)~td").eq(1).text().trim()).to.eql("30");
+      expect(metricsWidget.childViews.papersTableView.render().$("td:contains(Number of papers)~td").eq(2).text().trim()).to.eql("1");
 
-      expect(metricsWidget.childViews.papersTableView.render().$("td:contains(Number of papers)~td").eq(1).text().trim()).to.eql("2");
-      expect(metricsWidget.childViews.papersTableView.render().$("td:contains(Number of papers)~td").eq(2).text().trim()).to.eql("2");
+      expect(metricsWidget.childViews.readsTableView.render().$("td:contains(Total number of downloads)~td").eq(1).text().trim()).to.eql("559");
+      expect(metricsWidget.childViews.readsTableView.render().$("td:contains(Total number of downloads)~td").eq(2).text().trim()).to.eql("62");
 
-      expect(metricsWidget.childViews.readsTableView.render().$("td:contains(Total number of downloads)~td").eq(1).text().trim()).to.eql("102");
-      expect(metricsWidget.childViews.readsTableView.render().$("td:contains(Total number of downloads)~td").eq(2).text().trim()).to.eql("102");
+      expect(metricsWidget.childViews.citationsTableView.render().$("td:contains(Average refereed citations)~td").eq(1).text().trim()).to.eql("0.4");
+      expect(metricsWidget.childViews.citationsTableView.render().$("td:contains(Average refereed citations)~td").eq(2).text().trim()).to.eql("0");
 
-      expect(metricsWidget.childViews.citationsTableView.render().$("td:contains(Average refereed citations)~td").eq(1).text().trim()).to.eql("37");
-      expect(metricsWidget.childViews.citationsTableView.render().$("td:contains(Average refereed citations)~td").eq(2).text().trim()).to.eql("37");
-
-      expect(metricsWidget.childViews.indicesTableView.render().$("td:contains(i10-index)~td").eq(1).text().trim()).to.eql("2");
-      expect(metricsWidget.childViews.indicesTableView.render().$("td:contains(i10-index)~td").eq(2).text().trim()).to.eql("2");
-
+      expect(metricsWidget.childViews.indicesTableView.render().$("td:contains(i10-index)~td").eq(1).text().trim()).to.eql("0");
+      expect(metricsWidget.childViews.indicesTableView.render().$("td:contains(i10-index)~td").eq(2).text().trim()).to.eql("0");
 
     })
 
@@ -744,12 +991,10 @@ define([
       expect(metricsWidget.childViews.papersGraphView).to.be.instanceof(metricsWidget.components.GraphView);
 
       //they should have the proper data in their models
-      expect(metricsWidget.childViews.citationsGraphView.model.get("graphData")).to.eql(DataExtractor.plot_citshist({norm: false, citshist_data: testData["citation histogram"]}));
-      expect(metricsWidget.childViews.citationsGraphView.model.get("normalizedGraphData")).to.eql(DataExtractor.plot_citshist({norm: true, citshist_data: testData["citation histogram"]}));
-
+      expect(metricsWidget.childViews.citationsGraphView.model.get("graphData")).to.eql(DataExtractor.plot_citshist({norm: false, citshist_data: testData["histograms"]["citations"]}));
+      expect(metricsWidget.childViews.citationsGraphView.model.get("normalizedGraphData")).to.eql(DataExtractor.plot_citshist({norm: true, citshist_data: testData["histograms"]["citations"]}));
 
     })
-
 
     it("should have a container view (marionette layout) that arranges the child views", function(done){
 
@@ -814,7 +1059,7 @@ define([
 
       setTimeout(function() {
         //if the views received the data, the 2 step request process worked
-        expect(metricsWidget.childViews.citationsTableView.model.attributes.medianCitations).to.eql([38.5, 38.5]);
+        expect(metricsWidget.childViews.citationsTableView.model.attributes.medianCitations).to.eql([ 2, 1 ]);
         done();
       }, 5);
     });
