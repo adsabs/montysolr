@@ -84,30 +84,30 @@ define([
       expect(apiRequest.toJSON().target).to.eql('recommender/fakeBibcode');
     });
 
-    it("Communicates through pubsub", function() {
-      var minsub = new (MinPubSub.extend({
-        request: function(apiRequest) {
-          return JSON.parse(JSON.stringify(testData));
-        }
-
-      }))({verbose: false});
-
-      var widget = new RecommenderWidget();
-      var onDisplayDocuments = sinon.spy(widget, 'onDisplayDocuments');
-      var loadBibcodeData = sinon.spy(widget, 'loadBibcodeData');
-      var processResponse = sinon.spy(widget, 'processResponse');
-
-      widget.activate(minsub.beehive.getHardenedInstance());
-
-      minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
-      expect(onDisplayDocuments.callCount).to.be.eql(1);
-      expect(loadBibcodeData.callCount).to.be.eql(1);
-      expect(loadBibcodeData.lastCall.args[0]).to.be.eql('foo');
-      expect(processResponse.callCount).to.be.eql(1);
-
-      expect(widget.collection.models.length).to.be.eql(7);
-
-    });
+//    it("Communicates through pubsub", function() {
+//      var minsub = new (MinPubSub.extend({
+//        request: function(apiRequest) {
+//          return JSON.parse(JSON.stringify(testData));
+//        }
+//
+//      }))({verbose: false});
+//
+//      var widget = new RecommenderWidget();
+//      var onDisplayDocuments = sinon.spy(widget, 'onDisplayDocuments');
+//      var loadBibcodeData = sinon.spy(widget, 'loadBibcodeData');
+//      var processResponse = sinon.spy(widget, 'processResponse');
+//
+//      widget.activate(minsub.beehive.getHardenedInstance());
+//
+//      minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
+//      expect(onDisplayDocuments.callCount).to.be.eql(1);
+//      expect(loadBibcodeData.callCount).to.be.eql(1);
+//      expect(loadBibcodeData.lastCall.args[0]).to.be.eql('foo');
+//      expect(processResponse.callCount).to.be.eql(1);
+//
+//      expect(widget.collection.models.length).to.be.eql(7);
+//
+//    });
 
   })
 });
