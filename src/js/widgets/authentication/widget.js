@@ -35,7 +35,6 @@ define([
 
   FormView = Marionette.ItemView.extend({
 
-    activateRecaptcha : FormFunctions.activateRecaptcha,
     activateValidation: FormFunctions.activateValidation,
     checkValidationState : FormFunctions.checkValidationState,
     triggerSubmit : FormFunctions.triggerSubmit,
@@ -208,7 +207,7 @@ define([
 
     onRender: function () {
       this.activateValidation();
-      this.trigger("activateRecaptcha");
+      this.trigger("activate-recaptcha");
     }
 
   });
