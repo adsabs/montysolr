@@ -6,8 +6,10 @@ define([
     'hbs!./templates/search_form_template',
     'js/components/query_builder/plugin',
     'js/components/api_feedback',
+    './autocomplete',
     'bootstrap', // if bootstrap is missing, jQuery events get propagated
-    'analytics'
+    'analytics',
+    'jquery-ui'
   ],
   function (
     Marionette,
@@ -17,11 +19,15 @@ define([
     SearchFormTemplate,
     QueryBuilderPlugin,
     ApiFeedback,
+    autocompleteArray,
     bootstrap,
-    analytics
+    analytics,
+    jqueryUI
     ) {
 
-    // XXX:rca - to be removed
+
+    // following functions are used for the autocomplete
+
     $.fn.selectRange = function (start, end) {
       if (!end) end = start;
       return this.each(function () {
@@ -37,6 +43,52 @@ define([
         }
       });
     };
+
+    function setInputSelection(input, startPos, endPos) {
+      input.focus();
+      if (typeof input.selectionStart != "undefined") {
+        input.selectionStart = startPos;
+        input.selectionEnd = endPos;
+      } else if (document.selection && document.selection.createRange) {
+        // IE branch
+        input.select();
+        var range = document.selection.createRange();
+        range.collapse(true);
+        range.moveEnd("character", endPos);
+        range.moveStart("character", startPos);
+        range.select();
+      }
+    }
+
+    function getSelectedText() {
+      var text = "";
+      if (window.getSelection) {
+        text = window.getSelection().toString();
+      } else if (document.selection && document.selection.type != "Control") {
+        text = document.selection.createRange().text;
+      }
+      return text;
+    }
+
+    //splits the part of the text that the autocomplete cares about
+    function findActiveAndInactive(textString){
+
+      var split = _.filter(textString.split(/\s+/), function(x){
+        if (x) return true;
+      });
+
+      var toReturn =  {active: split[split.length - 1]};
+
+      if (split.length > 1){
+        split.pop();
+        toReturn.inactive =split.join(" ");
+      }
+      else {
+        toReturn.inactive = "";
+      }
+      return toReturn;
+    };
+
 
     var SearchBarView = Marionette.ItemView.extend({
 
@@ -71,13 +123,112 @@ define([
       },
 
       onRender: function () {
-        this.$("#search-form-container").append(SearchFormTemplate);
 
-        //        I think this is not acting perfectly if people hover and then enter text into
-        // the input field without clicking.
-        //        this.$("#field-options div").hoverIntent(this.tempFieldInsert, this.tempFieldClear);
+        this.$("#search-form-container").append(SearchFormTemplate);
         this.$("#search-gui").append(this.queryBuilder.$el);
-      },
+
+        var $input = this.$("input.q");
+
+        $input.autocomplete({
+          minLength: 1,
+          autoFocus : true,
+          //default delay is 300
+          delay : 0,
+          source:  function( request, response ) {
+            var toMatch, matcher, toReturn;
+
+            toMatch = findActiveAndInactive(request.term.trim()).active;
+            if (!toMatch)
+                return
+            //testing each entry's "match" var in autocomplete array against the toMatch segment
+            //then returning a uniqued array of matches
+            matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(toMatch), "i");
+            toReturn  = $.grep(autocompleteArray, function (item) {
+                return matcher.test(item.match);
+              });
+            toReturn = _.uniq(toReturn, false, function(item){
+                return item.label
+              });
+            response(toReturn);
+          },
+
+          /* insert a suggestion: requires autofocus:true
+           * to be set if you want to show by default without user
+           * keyboard navigation or mouse hovering
+           * */
+          focus: function( event, ui ) {
+
+            var val = $input.val().replace(/^\s+/,"");
+              suggest = ui.item.value;
+
+            var exists, toMatch, confirmedQuery, splitQuery;
+
+            var currentlySelected = getSelectedText();
+            //might be moving down the autocomplete list
+            if (currentlySelected){
+              exists = val.slice(0, val.length - currentlySelected.length)
+            }
+            else {
+              exists = val;
+            }
+
+            splitQuery = findActiveAndInactive(exists);
+
+            toMatch = splitQuery.active,
+            confirmedQuery = splitQuery.inactive;
+
+            if (confirmedQuery){
+              //suggestedQ will be inserted if user accepts it
+              $input.data("ui-autocomplete").suggestedQ = confirmedQuery + " " + ui.item.value + ui.item.end;
+            }
+            else {
+              $input.data("ui-autocomplete").suggestedQ = ui.item.value + ui.item.end;
+            }
+
+            // only insert text if the words match from the beginning
+            // not, for instance, if user typed "refereed" and the matching string is "property:refereed"
+            if ( suggest.indexOf(toMatch) == 0 ) {
+
+              var text, rest, all;
+
+              text = confirmedQuery ? confirmedQuery + " " + toMatch : toMatch;
+              rest = suggest.slice(toMatch.length);
+              all = text + rest;
+
+              $input.val(all);
+              setInputSelection($input[0], text.length, all.length);
+
+            }
+            else {
+             $input.val(exists);
+            }
+
+            return false;
+          },
+
+          //re-insert actual text w/ optional addition of autocompleted stuff
+          select : function( event, ui ){
+            $input.val( $input.data("ui-autocomplete").suggestedQ);
+            //move cursor before final " or )
+            if (ui.item.end){
+              $input.selectRange($input.val().length - 1);
+            }
+            return false;
+          }
+
+        }).data("ui-autocomplete")._renderItem = function( ul, item ) {
+          if (item.desc){
+            return $( "<li>" )
+              .append( "<a>" + item.label + "<span class=\"s-auto-description\">&nbsp;&nbsp;" + item.desc + "</span></a>" )
+              .appendTo( ul );
+          }
+          else {
+            return $( "<li>" )
+              .append( "<a>" + item.label + "</a>" )
+              .appendTo( ul );
+          }
+        };
+       },
 
       events: {
         "click #field-options button" : "tempFieldInsert",
@@ -167,38 +318,36 @@ define([
 
       tempFieldInsert: function (e) {
         e.preventDefault();
-        var currentVal, newVal, df;
-
-        //        this.unsetAddField();
+        var currentVal, newVal, df, punc, $target;
 
         currentVal = this.getFormVal();
         this.priorVal = currentVal;
+        $target = $(e.target);
 
-        df = $(e.target).attr("data-field");
+        df = $target.attr("data-field");
+        punc = $target.attr("data-punc");
 
-        if (df.split("-")[0] === "operator") {
-          //cache it for mouseleave events
-          if (currentVal !== "") {
-            newVal = df.split("-")[1] + "(" + currentVal + ")";
-          } else {
-            newVal = df.split("-")[1] + "( )";
-          }
-          this.setFormVal(newVal);
-
-        } else {
-
+        if (punc){
           //checking if first author
-          if (df === "first-author") {
+          if (df == "first-author") {
             newVal = currentVal + " author:\"^\"";
-          } else {
+          } else if (punc == "\"") {
             newVal = currentVal + " " + df + ":\"\"";
           }
+          else if (punc == "("){
+            newVal = currentVal + " " + df + ":()";
+          }
           this.setFormVal(newVal);
+          this.$(".q").focus();
+          this.$(".q").selectRange(this.$(".q").val().length - 1);
         }
 
-        this.$(".q").focus();
-        this.$(".q").selectRange(this.$(".q").val().length - 1);
-
+        else {
+          //only 'year'
+          newVal = currentVal + " " + df + ":";
+          this.setFormVal(newVal);
+          this.$(".q").focus();
+        }
         //figure out if clear button needs to be there
         this.toggleClear();
       },

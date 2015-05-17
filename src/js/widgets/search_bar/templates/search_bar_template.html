@@ -4,23 +4,16 @@
     <div class="col-sm-12 s-quick-add" aria-label="quick add fields">
              <div id="expanded-search-form" class="unselectable">
                  <div id="field-options">
-                     <button class="btn btn-link btn-sm" data-field="author">Author</button>
-
-                     <button class="btn btn-link btn-sm"  data-field="first-author">First Author</button>
-
-                     <button class="btn btn-link btn-sm"  data-field="title">Title</button>
-
+                     <span class="s-field-options">Insert field:</span>
+                     <button class="btn btn-link btn-sm" data-field="author" data-punc='"'>Author</button>
+                     <button class="btn btn-link btn-sm"  data-field="first-author" data-punc='"'>First Author</button>
+                     <button class="btn btn-link btn-sm"  data-field="title" data-punc='"'>Title</button>
                      <button class="btn btn-link btn-sm"  data-field="year">Year</button>
-
-                     <button class="btn btn-link btn-sm"  data-field="bibstem">Publication</button>
-
-                     <button class="btn btn-link btn-sm"  data-field="full">Fulltext</button>
-
-                     <button class="btn btn-link btn-sm"  data-field="operator-trending">Trending(...)</button>
-
-                     <button class="btn btn-link btn-sm"  data-field="operator-useful">Useful(...)</button>
-
-                     <button class="btn btn-link btn-sm"  data-field="operator-instructive">Instructive(...)</button>
+                     <button class="btn btn-link btn-sm"  data-field="bibstem" data-punc='"'>Publication</button>
+                     <button class="btn btn-link btn-sm"  data-field="full" data-punc="(">Fulltext</button>
+                     <!--<button class="btn btn-link btn-sm"  data-field="operator-trending">Trending(...)</button>-->
+                     <!--<button class="btn btn-link btn-sm"  data-field="operator-useful">Useful(...)</button>-->
+                     <!--<button class="btn btn-link btn-sm"  data-field="operator-instructive">Instructive(...)</button>-->
                  </div>
              </div>
          </div>
@@ -36,7 +29,7 @@
                          </div>
                          <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
                      </div>
-                     <input type="text" class="form-control q" name="q" autofocus value={{currentQueryVal}}>
+                     <input type="text" class="form-control q" name="q" autofocus autocomplete="off" value={{currentQueryVal}}>
                      <i class="icon-clear s-clear-control"></i>
                   <span class="input-group-btn">
                        <button type="submit" class= "btn btn-primary search-submit s-search-submit" aria-label="submit"><i class="fa fa-search"></i></button>
