@@ -7,7 +7,7 @@
     {{#if export}}
 
         <h3 class="s-light-font">Currently viewing <b>{{current}}</b>
-            {{#compare max 1 operator = ">"}}
+            {{#compare current 1 operator = ">"}}
             records in <b>
                 {{#compare format "bibtex"}}
                 BibTEX

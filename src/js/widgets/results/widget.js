@@ -53,7 +53,6 @@ define([
         _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-
         this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
       },
 

@@ -102,6 +102,11 @@ define(['underscore',
            return
         }
 
+        //we have to clear selected records in app storage here too
+        if ( this.getBeeHive().getObject("AppStorage")){
+          this.getBeeHive().getObject("AppStorage").clearSelectedPapers();
+        }
+
         this.mostRecentQuery = apiQuery;
 
         if (this.debug) {
@@ -179,7 +184,6 @@ define(['underscore',
         if (!this.hasBeeHive()) return;
 
         cycle.running = true;
-
 
         var data;
         var beehive = this.getBeeHive();

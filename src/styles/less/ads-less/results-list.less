@@ -221,9 +221,15 @@
 
   //represents an individual entry
   .s-display-block {
+    padding-bottom: 1em;
+    margin-bottom : .2em;
+    border-left: 5px solid #fff;
+    .lh-transition(border-left .5s);
 
-    padding-bottom : 1.2em;
+  }
 
+  .s-display-block.chosen{
+    border-left: 5px solid @brand-success;
   }
 
 }
@@ -350,3 +356,5 @@ li.article-author {
   padding-left: 5.2%;
   margin-bottom: 40px;
 }
+
+

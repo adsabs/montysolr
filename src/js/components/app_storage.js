@@ -68,11 +68,15 @@ define([
        * @returns {*}
        */
       hasSelectedPapers: function() {
-        return this.has('selectedPapers');
+        return !!_.keys(this.get('selectedPapers')).length;
       },
 
       getSelectedPapers: function() {
         return _.keys(this.get('selectedPapers') || {});
+      },
+
+      clearSelectedPapers : function(){
+         this.set("selectedPapers", {});
       },
 
       addSelectedPapers: function(identifiers) {
@@ -151,6 +155,7 @@ define([
         isPaperSelected: 'isPaperSelected',
         hasSelectedPapers: 'hasSelectedPapers',
         getSelectedPapers: 'getSelectedPapers',
+        clearSelectedPapers: 'clearSelectedPapers',
         getCurrentQuery: 'getCurrentQuery',
         hasCurrentQuery: 'hasCurrentQuery',
         getConfigCopy : 'get read-only copy of dynamic config',
