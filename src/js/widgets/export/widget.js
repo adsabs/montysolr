@@ -247,8 +247,8 @@ define([
 
       exportRecords: function(format, recs) {
         if (!_.isArray(recs)) throw new Error('Identifiers must be an array');
-        if (recs.length <= 0) throw new Error('Do you want to export nothing? Let me be!');
-        this.model.set('numIdentifiers', recs.length);
+        if (recs.length <= 0) console.warn('Do you want to export nothing? Let me be!');
+        this.model.set('current', recs.length);
         this.model.set('format', format);
         this.model.set('identifiers');
         this._getExports(format, recs);

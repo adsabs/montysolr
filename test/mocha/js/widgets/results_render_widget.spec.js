@@ -371,10 +371,6 @@ define([
         var $w = widget.render().$el;
         $("#test").append($w);
 
-        expect(widget.collection.models[0].get('chosen')).to.eql(true);
-        expect(widget.collection.models[1].get('chosen')).to.eql(undefined);
-
-
         // select a paper and observe it gets into the storage
         expect(s.isPaperSelected('1993sfgi.conf..324C')).to.eql(false);
         $w.find('input[value="1993sfgi.conf..324C"]').click();

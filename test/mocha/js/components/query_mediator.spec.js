@@ -39,7 +39,6 @@ define([
         this.server = sinon.fakeServer.create();
         this.server.autoRespond = false;  // when true, all sorts of evil things happen
 
-
         this.server.respondWith(function(req) {
           req.respond(getNextCode(req.url), { "Content-Type": "application/json" }, validResponse);
         });
@@ -61,6 +60,7 @@ define([
 
         this.urlCodes = urlCodes;
         beehive = new BeeHive();
+        beehive.addObject("AppStorage", {clearSelectedPapers : sinon.spy()})
         var api = new Api();
         sinon.spy(api, 'request');
         beehive.addService('Api', api);
@@ -255,6 +255,8 @@ define([
 
         qm._cache.put('foo', 'bar');
 
+        expect(beehive.getObject("AppStorage").clearSelectedPapers.callCount).to.eql(0);
+
         qm.startSearchCycle(new ApiQuery({'q': 'foo'}), key);
 
         expect(qm._cache.size).to.be.eql(0);
@@ -266,6 +268,7 @@ define([
         expect(qm.monitorExecution.called).to.be.false;
         setTimeout(function() {
           expect(qm.startExecutingQueries.called).to.be.true;
+          expect(beehive.getObject("AppStorage").clearSelectedPapers.callCount).to.eql(1);
           expect(qm.monitorExecution.called).to.be.true;
           done();
         }, 5);
@@ -278,14 +281,6 @@ define([
         //same query, shouldn't have an effect other than navigation
         expect(qm.reset.callCount).to.eql(1);
         expect(qm.app.getService.callCount).to.eql(1);
-
-
-
-
-
-
-
-
 
       });
 
