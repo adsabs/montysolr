@@ -23,14 +23,17 @@ define([
         this.setBeeHive(beehive);
         _.bindAll(this, "onPaperSelection");
         var pubsub = beehive.getService('PubSub');
-        var key = pubsub.getPubSubKey();
-        pubsub.subscribe(key, pubsub.PAPER_SELECTION, this.onPaperSelection);
+        this.key = pubsub.getPubSubKey();
+        pubsub.subscribe(this.key, pubsub.PAPER_SELECTION, this.onPaperSelection);
+        this.pubsub = pubsub;
       },
 
       initialize: function() {
         var that = this;
         this.on('change:selectedPapers', function(model) {
-          that._updateNumSelected();
+          this._updateNumSelected();
+          if (this.pubsub)
+              this.pubsub.publish(this.key, this.pubsub.STORAGE_PAPER_UPDATE, this.getNumSelectedPapers());
         });
       },
 

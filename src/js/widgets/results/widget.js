@@ -50,10 +50,11 @@ define([
       activate: function (beehive) {
         this.setBeeHive(beehive);
         this.pubsub = beehive.Services.get('PubSub');
-        _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement');
+        _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement', 'onStoragePaperUpdate');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
         this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
+        this.pubsub.subscribe(this.pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperUpdate)
       },
 
       onUserAnnouncement: function(key, val){
@@ -173,7 +174,6 @@ define([
           d.details.abstract = d.abstract;
           d.details.shortAbstract = d.abstract? self.shortenAbstract(d.abstract) : undefined;
 
-
           if (appStorage && appStorage.isPaperSelected(d.identifier)) {
             d.chosen = true;
           }
@@ -183,6 +183,26 @@ define([
 
         docs = this.parseLinksData(docs);
         return docs;
+      },
+
+      onStoragePaperUpdate : function(){
+        if (this.hasBeeHive() && this.getBeeHive().hasObject('AppStorage')) {
+          appStorage = this.getBeeHive().getObject('AppStorage');
+        }
+        this.collection.each(function(m){
+          if (appStorage.isPaperSelected(m.get("identifier"))) {
+            m.set("chosen", true);
+          } else {
+            m.set("chosen", false);
+          }
+        });
+        this.hiddenCollection.each(function(m){
+          if (appStorage.isPaperSelected(m.get("identifier"))) {
+            m.set("chosen", true);
+          } else {
+            m.set("chosen", false);
+          }
+        });
       }
     });
 

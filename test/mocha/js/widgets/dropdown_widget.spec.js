@@ -7,11 +7,12 @@ define([
 
   describe("Dropdown Widget (UI Widget)", function () {
 
-    var widget, publish;
+    afterEach(function () {
+      $("#test").empty();
+    })
 
 
-    beforeEach(function () {
-
+    it("should be a dropdown that shows a list of links ", function () {
 
       var links = [
         {href: '/test', description: 'Author Network', navEvent: 'show-author-network'}
@@ -19,44 +20,83 @@ define([
       ];
 
       var btnType = "btn-primary-faded";
-
       var dropdownTitle = "Visualize";
 
-      DropdownWidget.prototype.emitNavigateEvent = sinon.stub();
-
       widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle });
-
-
       $("#test").append(widget.render().el);
-
-    })
-
-    afterEach(function () {
-
-      $("#test").empty();
-    })
-
-
-    it("should be a dropdown that shows a list of links ", function () {
 
       expect($("#test").find("li:first").text().trim()).to.eql("Author Network");
       expect($("#test").find("li:first a").attr("href")).to.eql("/test");
-
 
     })
 
 
     it("should emit a NAVIGATE event with the proper parameter", function () {
 
+      var links = [
+        {href: '/test', description: 'Author Network', navEvent: 'show-author-network'}
+
+      ];
+
+      var btnType = "btn-primary-faded";
+      var dropdownTitle = "Visualize";
+
+      widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle });
+
+      widget.pubsub = {publish : sinon.spy()};
+
+      $("#test").append(widget.render().el);
 
       $("#test").find("li:first").click();
 
-
-      expect(widget.emitNavigateEvent.calledOnce).to.be.true;
+      expect(widget.pubsub.publish.calledOnce).to.be.true;
 
       //it should be passed the model that was clicked, so it can publish the name
+      expect(widget.pubsub.publish.args[0][1]).to.eql("show-author-network");
+      expect(widget.pubsub.publish.args[0][2]).to.eql({onlySelected: false});
 
-      expect(widget.emitNavigateEvent.args[0][0]).to.eql(widget.collection.models[0]);
+
+    })
+
+    it("should allow the user to do bulk action to all records or selected records if records are selected", function(){
+
+      var links = [
+        {href: '/test', description: 'Author Network', navEvent: 'show-author-network'}
+
+      ];
+
+      var btnType = "btn-primary-faded";
+      var dropdownTitle = "Visualize";
+
+      widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle, selectedOption : true  });
+
+      widget.pubsub = {publish : sinon.spy()};
+
+      $("#test").append(widget.render().el);
+
+      //signal that papers are available
+      widget.onStoragePaperChange(5);
+
+      $("#test").find("li:first").click();
+
+      expect(widget.pubsub.publish.calledOnce).to.be.true;
+      expect(widget.pubsub.publish.args[0][1]).to.eql('show-author-network');
+
+      expect(widget.pubsub.publish.args[0][2]).to.eql({onlySelected: true});
+
+      $("input[name=papers-Visualize]").click();
+      $("#test").find("li:first").click();
+
+      expect(widget.pubsub.publish.callCount).to.eql(2);
+      expect(widget.pubsub.publish.args[0][1]).to.eql('show-author-network');
+      expect(widget.pubsub.publish.args[1][2]).to.eql({onlySelected: false});
+
+
+      //now the user decides that even though there are selected docs, he/she wants to see all of them
+
+
+
+
 
 
     })

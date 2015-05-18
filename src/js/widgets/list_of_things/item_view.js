@@ -17,14 +17,7 @@ define([
 
     var ItemView = Marionette.ItemView.extend({
       tagName: "li",
-      className: function() {
-        if (this.model.get('chosen')) {
-          return "col-sm-12 s-display-block chosen";
-        }
-        return "col-sm-12 s-display-block";
-      },
       template: ItemTemplate,
-
       constructor: function (options) {
         var self = this;
         if (options) {
@@ -61,7 +54,8 @@ define([
       modelEvents: {
         "change:visible": 'render',
         "change:showDetails" : 'render',
-        "change:orcid": 'render'
+        "change:orcid": 'render',
+        "change:chosen": 'render'
       },
 
       collectionEvents: {
@@ -80,15 +74,14 @@ define([
       },
 
       toggleSelect: function () {
+        var isChosen = !this.model.get('chosen');
 
         this.trigger('toggleSelect',
-          {
-            selected: !this.model.get('chosen'),
+          {selected: isChosen,
             data : this.model.attributes }
         );
+        this.model.set("chosen", isChosen);
 
-        this.$el.toggleClass("chosen");
-        this.model.set('chosen', this.model.get('chosen') ? false : true);
       },
 
       resetToggle: function(){

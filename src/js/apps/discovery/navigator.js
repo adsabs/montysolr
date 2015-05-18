@@ -117,26 +117,51 @@ define([
           publishFeedback({code: ApiFeedback.CODES.UNMAKE_SPACE});
         });
 
-        this.set('export-bibtex', function() {
+        this.set('export-bibtex', function(format, options) {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          self.get('export-page').execute('bibtex');
+          self.get('export-page').execute('bibtex', options);
         });
-        this.set('export-aastex', function() {
+        this.set('export-aastex', function(format, options) {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          self.get('export-page').execute('aastex');
+          self.get('export-page').execute('aastex', options);
         });
-        this.set('export-endnote', function() {
+        this.set('export-endnote', function(format, options) {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          self.get('export-page').execute('endnote');
+          self.get('export-page').execute('endnote', options);
         });
-        this.set('export-page', function(format) {
+        this.set("export-classic", function(format, options){
+          self.get('export-page').execute('classic', options);
+        })
+        this.set('export-page', function(format, options) {
+
           format = format || 'bibtex';
           var storage = app.getObject('AppStorage');
           var widget = app.getWidget('ExportWidget');
 
-          if (storage.hasSelectedPapers()) {
+          //classic is a special case, it opens in a new tab
+          if (format == "classic"){
+            if (options.onlySelected && storage.hasSelectedPapers()) {
+              widget.openClassicExports({bibcodes: storage.getSelectedPapers()});
+            }
+            else {
+              widget.openClassicExports({currentQuery : storage.getCurrentQuery()});
+            }
+            return
+          }
+
+          // only selected records requested
+          if (options.onlySelected && storage.hasSelectedPapers()) {
             widget.exportRecords(format, storage.getSelectedPapers());
           }
+          //all records specifically requested
+          else if (options.onlySelected === false && storage.hasCurrentQuery()){
+            widget.exportQuery({format : format,  currentQuery: storage.getCurrentQuery(),  numFound : storage.get("numFound")});
+          }
+          // no request for selected or not selected, show selected
+          else if (options.onlySelected === undefined && storage.hasSelectedPapers()){
+            widget.exportRecords(format, storage.getSelectedPapers());
+          }
+          //no selected, show all papers
           else if(storage.hasCurrentQuery()) {
             widget.exportQuery({format : format,  currentQuery: storage.getCurrentQuery(),  numFound : storage.get("numFound")});
           }
@@ -146,6 +171,7 @@ define([
             this.get('results-page')();
             return;
           }
+
           app.getObject('MasterPageManager').show('SearchPage',
             ['ExportWidget'].concat(searchPageAlwaysVisible.slice(1)));
         });

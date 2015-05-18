@@ -99,13 +99,6 @@
 
 .s-show-details-container {
   margin-top: 15px;
-  .icon-details {
-    margin-top: -8px;
-  }
-
-  .icon-hide-details {
-    margin-top: -8px;
-  }
 }
 
 .s-results-title {
@@ -224,11 +217,9 @@
     padding-bottom: 1em;
     margin-bottom : .2em;
     border-left: 5px solid #fff;
-    .lh-transition(border-left .5s);
-
   }
 
-  .s-display-block.chosen{
+ .chosen{
     border-left: 5px solid @brand-success;
   }
 
@@ -268,6 +259,9 @@ li.article-author {
     padding: 10%;
   }
   .lh-box-shadow(2px 2px 2px lighten(@gray-lightest, 5%));
+  button {
+    color: @text-color !important;
+  }
 
 }
 
@@ -358,3 +352,19 @@ li.article-author {
 }
 
 
+.s-results-list {
+  input[type="checkbox"]{
+    width: 14px;
+    height: 14px;
+  }
+
+  label {
+    margin-bottom: 0px;
+  }
+}
+
+.show-details{
+  .icon-details {
+    margin-top: -8px;
+  }
+}

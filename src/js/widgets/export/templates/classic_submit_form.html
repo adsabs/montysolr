@@ -1,0 +1,7 @@
+<form action="http://adsabs.harvard.edu/cgi-bin/nph-abs_connect" target="_blank" method="post">
+    <input type="hidden" name="nr_to_return" value="500"/>
+
+    {{#each bibcodes}}
+    <input type="hidden" name="bibcode" value="{{this}}"/>
+    {{/each}}
+</form>

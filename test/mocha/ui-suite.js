@@ -31,10 +31,10 @@ define([], function() {
       '/widgets/navbar_widget.spec.js',
       '/widgets/network_widget.spec.js',
       '/widgets/paper_network_widget.spec.js',
+      '/widgets/query_info_widget.spec.js',
       '/widgets/reads_graph_facet_widget.spec.js',
        '/widgets/recommender_widget.spec.js',
       '/widgets/resources_widget.spec.js',
-
       '/widgets/results_render_widget.spec.js',
       '/widgets/search_bar_widget.spec.js',
       '/widgets/sort_widget.spec.js',

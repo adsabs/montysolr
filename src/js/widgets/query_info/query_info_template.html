@@ -1,26 +1,24 @@
-<div class="btn-group">
-     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-         {{#if numFound}}
-         <b>{{numFound}}</b> results ... {{/if}}
-         <span class="caret"></span>
-     </button>
-     <div class="dropdown-menu" role="menu">
-         <br> <b>Query:</b> <em>{{currentQuery}}</em>
-         {{#if facets}}
-         <br/><b>Filter: </b> <em>{{facets}}</em>
-         {{/if}}
+<div class="num-found"><b>{{numFound}}</b> <span class="s-light-font">search results</span>
+</div>
+<div class="currently-selected">
+<b>{{selected}}</b> <span class="s-light-font">currently selected</span>
+        {{#compare selected 0 operator=">"}}
+            <button class="btn btn-xs btn-default clear-selected"> x clear</button>
+        {{/compare}}
+</div>
 
-         {{#if sort}}
-         <p><b>Sort: </b>{{sort}} </p>
-         {{/if}}
-
-         {{#if citations}}
-         <p><b>Total Citations:</b> {{citations.sum}}</p>
-
-         <p><b>Citation Stats:</b> <br> mu={{citations.mean}}, <br> stdev={{citations.stddev}},<br> max={{citations.max}},<br> min={{citations.min}}, <br> missingCount={{citations.missing}},
-         </p>
-         </div>
-         {{/if}}
-     </div>
-     </div>
- </div>
+{{#if fq}}
+    <div class="active-filters">
+        <b>Active Filters:</b>
+             {{#unless showFilter}}
+                <button class="btn btn-xs btn-default show-filter">show</button>
+            {{else}}
+                <div class="s-filter-div">
+                    {{#each fq}}
+                        {{this}}
+                    {{/each}}
+                </div>
+                <button class="btn btn-xs btn-default hide-filter">hide</button>
+            {{/unless}}
+    </div>
+{{/if}}
