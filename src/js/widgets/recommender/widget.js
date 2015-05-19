@@ -55,14 +55,10 @@ define([
 
     activate: function (beehive) {
 
-      /*
-      * hiding this widget for now
-      * */
-//
-//      this.pubsub = beehive.Services.get('PubSub');
-//      _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
-//      this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
-//      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      this.pubsub = beehive.Services.get('PubSub');
+      _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
+      this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
+      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
     onDisplayDocuments: function(apiQuery) {
