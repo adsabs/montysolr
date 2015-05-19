@@ -110,6 +110,11 @@ var DataExtractor = {};
       returnArray.push(transformedArray);
     });
 
+    //normalize read10 data by dividing it by 10
+    returnArray[5] = _.map(returnArray[5], function(obj){
+      return {x : obj.x, y: obj.y/10 }
+    });
+
     return [
       {key: "h Index", values: returnArray[0]},
       {key: "g Index", values: returnArray[1]},
