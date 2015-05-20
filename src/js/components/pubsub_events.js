@@ -151,7 +151,11 @@ define([], function() {
     /**
      * Is triggered when user selects/deselects records
      */
-    PAPER_SELECTION: "[User]-Paper-Selection"
+    PAPER_SELECTION: "[User]-Paper-Selection",
+    /*
+    * is triggered by app storage itself when list of selected papers changes
+    * */
+    STORAGE_PAPER_UPDATE: "[User]-Paper-Update"
 
 };
 

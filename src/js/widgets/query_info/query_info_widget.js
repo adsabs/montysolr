@@ -18,82 +18,76 @@ define(['marionette',
            FormatMixin
     ) {
 
-    var queryModel = Backbone.Model.extend({
+    var QueryModel = Backbone.Model.extend({
 
       defaults: {
-        currentQuery: undefined,
-        numFound: undefined,
-        currentSort: undefined,
-        citations: undefined
+        numFound: 0,
+        selected: 0,
+        fq: undefined
       }
     })
 
-    var queryDisplayView = Backbone.View.extend({
+    var QueryDisplayView = Marionette.ItemView.extend({
 
-   	  className : "query-info-widget",
+   	  className : "query-info-widget s-query-info-widget",
+      template: queryInfoTemplate,
+      serializeData : function(){
+        var data = this.model.toJSON();
+        data.numFound = this.formatNum(data.numFound);
+        data.selected = this.formatNum(data.selected);
+        return data;
+      },
 
-      initialize: function(options) {
-        this.model = new queryModel();
+      modelEvents : {
+        "change" : "render"
       },
 
       events : {
-        "click #show-more-query-data" : "toggleAdditionalInfo"
-      },
-
-      toggleAdditionalInfo : function(ev){
-        var $add = $("#additional-query-data");
-        var $button = $("#show-more-query-data");
-        $add.toggleClass("hide");
-
-        if ($add.hasClass("hide")){
-          $button.html(("<i class=\"fa fa-plus fa-lg\"></i>"))
+        "click .show-filter" : function(){
+          this.model.set("showFilter", true);
+        },
+        "click .hide-filter" : function(){
+          this.model.set("showFilter", false);
+        },
+        "click .clear-selected" : function(){
+          this.trigger("clear-selected");
         }
-        else {
-          $button.html("<i class=\"fa fa-minus fa-lg\"></i>")
-        }
-
-      },
-
-      render: function() {
-        var json = this.model.toJSON();
-        json.numFound = json.numFound ? this.formatNum(json.numFound) : 0;
-
-        if (json.citations){
-
-          _.each(json.citations, function(v,k){
-            json.citations[k] = parseInt(v)
-          })
-
-          json.citations.sum = json.citations.sum ? this.formatNum(json.citations.sum) : 0;
-        }
-
-        this.$el.html(this.template(json))
-        return this
-      },
-
-      template: queryInfoTemplate
+      }
     })
 
-    _.extend(queryDisplayView.prototype, FormatMixin)
+    _.extend(QueryDisplayView.prototype, FormatMixin)
 
     var Widget = BaseWidget.extend({
 
-      defaultQueryArguments: {
-        stats: 'true',
-        'stats.field': 'citation_count'
+      initialize: function(options) {
+        this.model = new QueryModel();
+        this.view = new QueryDisplayView({model : this.model});
+        this.view.on("clear-selected", this.clearSelected, this);
+        BaseWidget.prototype.initialize.call(this, options)
       },
 
-      initialize: function(options) {
-        this.view = new queryDisplayView();
-        BaseWidget.prototype.initialize.call(this, options)
+      activate: function(beehive) {
+        this.beehive = beehive;
+        _.bindAll(this);
+        this.pubsub = beehive.getService('PubSub');
+        var pubsub = this.pubsub;
+
+        pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
+        pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+      },
+
+      onStoragePaperChange : function(numSelected){
+       this.model.set("selected", numSelected);
+      },
+
+      clearSelected : function(){
+        this.beehive.getObject("AppStorage").clearSelectedPapers();
       },
 
       processResponse: function(apiResponse) {
         var q = apiResponse.getApiQuery();
         var numFound = apiResponse.get("response.numFound");
-
-        this.view.model.set("currentQuery", q.get("q"));
-
         var filters = [];
         _.each(q.keys(), function(k) {
           if (k.substring(0,2) == 'fq') {
@@ -104,15 +98,8 @@ define(['marionette',
             });
           }
         });
-        this.view.model.set("facets", filters);
-        this.view.model.set("sort", q.get("sort"));
+        this.view.model.set("fq", filters);
         this.view.model.set("numFound", numFound);
-        this.view.model.set("citations", apiResponse.get('stats.stats_fields.citation_count'));
-        this.view.render();
-
-        this.view.$("#info-changeable").fadeIn()
-
-
       }
 
     })

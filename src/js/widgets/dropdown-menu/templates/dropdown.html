@@ -1,6 +1,16 @@
 <!-- Single button -->
-    <button type="button" class="btn {{btnType}} dropdown-toggle button-shadow" data-toggle="dropdown" aria-expanded="false">
+    <button type="button" class="btn {{btnType}} dropdown-toggle button-shadow" aria-expanded="false">
        <i class="{{iconClass}}"></i> {{dropdownTitle}} <span class="caret"></span>
     </button>
-    <ul class="dropdown-menu {{#if pullRight}}pull-right{{/if}}" role="menu">
-    </ul>
+    <div class="dropdown-menu {{#if pullRight}}pull-right{{/if}}" role="menu">
+        {{#if selectedOption }}
+            {{#if selectedPapers}}
+                <div class="s-divider-bottom">
+                    <label><input class="papers" type="radio" {{#if onlySelected }} checked {{/if}} name="papers-{{dropdownTitle}}" value="selected"/> selected papers</label>
+                    <label><input class="papers" type="radio" {{#unless onlySelected}} checked {{/unless}} name="papers-{{dropdownTitle}}" value="all"/> all papers</label>
+                </div>
+            {{/if}}
+        {{/if}}
+        <ul class="link-container s-link-container">
+        </ul>
+    </div>

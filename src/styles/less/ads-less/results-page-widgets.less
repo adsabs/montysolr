@@ -44,13 +44,24 @@
 }
 
 
-.dropdown-menu  {
-  ul {
-    .list-unstyled;
+.s-dropdown-widget {
+  .dropdown-menu  {
+    font-size: 16px;
+    ul {
+      .list-unstyled;
+    }
+    li {
+      padding: 4px 10%;
+    }
+    a {
+      cursor: pointer;
+    }
+
+    label {
+      font-weight: 300;
+    }
   }
-  a {
-    cursor: pointer;
-  }
+
 }
 
 
@@ -67,4 +78,14 @@
   .input-sm;
   display: inline;
   width: 30%
+}
+
+
+.s-query-info-widget {
+  font-size: 18px;
+
+  .s-filter-div {
+    font-size: @font-size-base;
+    font-weight: 300;
+  }
 }

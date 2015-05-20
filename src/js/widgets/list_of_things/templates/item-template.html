@@ -1,8 +1,9 @@
+<div class="col-sm-12 s-display-block {{#if chosen}} chosen {{/if}}">
 <div class="row s-top-row">
     <div class="col-sm-1 col-xs-2 s-checkbox-col s-top-row-col">
         <label>
             {{indexToShow}}
-            <input type="checkbox" value={{identifier}} name="identifier" {{#if chosen}}checked{{/if}}>
+            <input type="checkbox" value={{identifier}} name="identifier" {{#if chosen}} checked {{/if}}>
         </label>
     </div>
     <div class="col-sm-3 col-xs-5 s-top-row-col identifier s-identifier">
@@ -211,4 +212,5 @@
 
     </div>
 
+</div>
 </div>

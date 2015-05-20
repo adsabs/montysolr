@@ -61,8 +61,23 @@ define([
       setSelected: function (e) {
         e.preventDefault();
         this.model.set("selected", true);
+
       },
       template: dropdownItemTemplate
+    });
+
+    var ContainerModel = Backbone.Model.extend({
+      defaults : function(){
+        return {
+          // should we show the option to export only selected?
+          "selectedOption" : false,
+          //are there currently selected papers?
+          "selectedPapers" : false,
+          //should we only export selected? this is changed by the radio
+          //by default it is true if the above two vals are true
+          "onlySelected" : true
+        }
+      }
     });
 
     var DropdownView = Marionette.CompositeView.extend({
@@ -71,14 +86,24 @@ define([
         options = options || {};
       },
 
-      className : "btn-group",
+      modelEvents : {
+        "change" : "render"
+      },
+
+      collectionEvents : {
+        "change:selected" : function(){
+          this.$el.removeClass("open");
+        }
+      },
+
+      className : "btn-group s-dropdown-widget",
 
       itemView: DropdownItemView,
-      itemViewContainer: ".dropdown-menu",
+      itemViewContainer: ".link-container",
       template: dropdownTemplate,
 
       serializeData: function () {
-        var data = {};
+        var data = this.model.toJSON();
         //what color should the button be?
         data.btnType = Marionette.getOption(this, "btnType") || "btn-default";
         data.dropdownTitle = Marionette.getOption(this, "dropdownTitle");
@@ -87,9 +112,23 @@ define([
         data.pullRight = Marionette.getOption(this, "rightAlign");
 
         return data
-      }
-    });
+      },
 
+      events : {
+        "change input.papers" : function(e){
+          var $t = $(e.target);
+          $t.attr("value") == "all" ? this.model.set("onlySelected", false): this.model.set("onlySelected", true);
+        }
+
+      },
+
+      onRender : function(){
+      this.$(".dropdown-toggle").on('click', function (e) {
+          $(this).parent().toggleClass('open');
+        });
+      }
+
+    });
 
     var DropdownWidget = BaseWidget.extend({
 
@@ -98,24 +137,32 @@ define([
         if (!options.links) {
           throw new Error("Dropdown menu will be empty!")
         }
-
+        //selectedOption: do we want the option to switch from showing all papers vs showing selected papers?
+        this.model = new ContainerModel({selectedOption : options.selectedOption });
         this.collection = new DropdownCollection(options.links);
-        this.view = new DropdownView(_.extend({collection: this.collection}, options));
+        this.view = new DropdownView(_.extend({collection: this.collection, model : this.model}, options));
         this.listenTo(this.collection, "change:selected", this.emitNavigateEvent);
-      },
 
-      emitNavigateEvent: function (model, value) {
-        //checking to make sure selected == true
-        if (value) {
-          this.pubsub.publish(this.pubsub.NAVIGATE, model.get("navEvent"));
-        }
-        //for now, just set it to false, but later listen to nav event to remove
-        model.set("selected", false);
       },
 
       activate: function (beehive) {
+        _.bindAll(this);
         this.pubsub = beehive.Services.get('PubSub');
+        this.pubsub.subscribe(this.pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
+      },
+
+      onStoragePaperChange : function(numSelected){
+        numSelected ? this.model.set("selectedPapers", true) : this.model.set("selectedPapers", false);
+      },
+
+      emitNavigateEvent: function (model, value) {
+        var onlySelected = (this.model.get("selectedOption") && this.model.get("selectedPapers")  && this.model.get("onlySelected"));
+        if (value) {
+          this.pubsub.publish(this.pubsub.NAVIGATE, model.get("navEvent"), {"onlySelected" : onlySelected });
+        }
+        model.set("selected", false);
       }
+
     });
 
     return DropdownWidget

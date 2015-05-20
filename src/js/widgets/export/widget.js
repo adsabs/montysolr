@@ -10,6 +10,7 @@ define([
     'js/components/api_query',
     'hbs!./templates/export_template',
     "hbs!../network_vis/templates/loading-template",
+    "hbs!./templates/classic_submit_form",
     'js/components/api_feedback',
     'jquery',
     'jquery-ui',
@@ -24,6 +25,7 @@ define([
     ApiQuery,
     WidgetTemplate,
     LoadingTemplate,
+    ClassicFormTemplate,
     ApiFeedback,
     $,
     $ui,
@@ -32,7 +34,6 @@ define([
     ZeroClipboard,
     FileSaver
     ){
-
 
     //modified from userChangeRows mixin
     var ExportModel = Backbone.Model.extend({
@@ -227,8 +228,7 @@ define([
       /*
       * takes an apiQuery, gets bibcodes, then requests them from
       * the export endpoint
-      *
-      * */
+      */
 
       initiateQueryBasedRequest : function(apiQuery){
         var self = this;
@@ -254,6 +254,28 @@ define([
         this._getExports(format, recs);
       },
 
+      //special case, will eventually be removed
+      openClassicExports : function(options){
+        if (options.bibcodes){
+           var $form =  $(ClassicFormTemplate({bibcodes: options.bibcodes}));
+          $form.submit();
+        }
+        else if (options.currentQuery ) {
+          var q = options.currentQuery.clone();
+          q.set("rows", this.model.get("defaultMax"));
+          q.set("fl", "bibcode");
+          this._executeApiRequest(q)
+            .done(function(apiResponse) {
+              // export documents by their ids
+              var ids = _.map(apiResponse.get('response.docs'), function(d) {return d.bibcode});
+              var $form =  $(ClassicFormTemplate({ bibcodes: ids }));
+              $form.submit();
+            });
+        }
+        else {
+          throw new Error("can't export with no bibcodes or query");
+        }
+      },
 
       /**
        * Fetches data from the export api and saves into the model
