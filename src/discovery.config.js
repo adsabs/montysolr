@@ -103,6 +103,7 @@ require.config({
         ShowResources : 'js/widgets/resources/widget',
         ShowRecommender : 'js/widgets/recommender/widget',
         ShowPaperMetrics: 'js/wraps/paper_metrics',
+        ShowPaperExport : 'js/wraps/paper_export',
         TOCWidget: 'js/page_managers/toc_widget'
       },
       plugins: {}

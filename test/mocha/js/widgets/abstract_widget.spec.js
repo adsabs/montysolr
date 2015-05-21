@@ -52,7 +52,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         aw.activate(minsub.beehive.getHardenedInstance());
 
 
-        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'foo'}));
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
 
         expect(spy.callCount).to.eql(1);
         expect(aw._docs['foo'].hasAffiliation).to.equal(2);
@@ -65,12 +65,12 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect(aw._docs['foo'].authorAffExtra).to.eql([]);
 
         aw.maxAuthors = 1;
-        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'foo'}));
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
         expect(spy.callCount).to.eql(1); // it is not loaded again
 
         delete aw._docs['foo'];
 
-        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'foo'}));
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
         expect(spy.callCount).to.eql(2);
         expect(aw._docs['foo'].hasAffiliation).to.eql(2);
         expect(aw._docs['foo'].hasMoreAuthors).to.eql(1);

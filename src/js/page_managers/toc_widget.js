@@ -21,7 +21,9 @@ define([
         isActive : false,
         isSelected: false,
         numFound : 0,
-        showCount: true
+        showCount: true,
+        //arg to pass to widget
+        arg : undefined
       }
     }
   });
@@ -88,13 +90,21 @@ define([
       "click a" : function(e){
        var $t  = $(e.currentTarget);
         var idAttribute = $t.find("div").attr("data-widget-id");
+        //it's inactive
         if ($t.find("div").hasClass("s-nav-inactive")){
           return false;
         }
+        //it's active
         else if (idAttribute !== $(".s-nav-active").attr("data-widget-id")) {
           var href = $(e.currentTarget).attr("href");
-          this.trigger('page-manager-event', 'widget-selected', {idAttribute: idAttribute, href : href});
-          this.collection.selectOne(idAttribute);
+          if (idAttribute.indexOf("__") > -1){
+            //currently only used by export
+            var widgetName = idAttribute.split("__")[0];
+            this.trigger('page-manager-event', 'widget-selected', {idAttribute: widgetName , href : href});
+          }
+          else {
+            this.trigger('page-manager-event', 'widget-selected', {idAttribute: idAttribute, href : href});
+          }
         }
         return false;
       }
@@ -105,7 +115,6 @@ define([
     },
 
     collectionEvents : {
-      "add": "render",
       "change:isActive" : "render",
       "change:isSelected": "render",
       "change:numFound" : "render"
@@ -117,25 +126,39 @@ define([
       the widget will show the appropriate defaults
      */
     resetActiveStates : function(){
+      var alwaysThere = ["ShowAbstract", "ShowPaperExport__bibtex", "ShowPaperExport__aastex", "ShowPaperExport__endnote", "ShowPaperExport__classic" ];
       this.collection.each(function(model){
-        var alwaysThere = ["ShowAbstract"];
-        //reset only widgets that aren't ther 100% of the time
+        //abstract and all export options
+        //reset only widgets that aren't there 100% of the time
         if (!_.contains(alwaysThere, model.id)){
         model.set("isActive", false);
         model.set("numFound", 0);
+        }
+        else {
+          model.set("isActive", true);
         }
       });
     },
 
     onPageManagerMessage: function(event, data) {
       if (event == 'new-widget') {
-        //this.collection.set([new WidgetData({widgetData: arguments[1]})]);
+        //building the toc collection
         var widgetId = arguments[1]; var parent = this.$el.parent();
-        if (parent.data(widgetId.toLowerCase())) {
-          var title = widgetId; var path = '';
-          var defs = _.clone(parent.data(widgetId.toLowerCase()));
-          defs.id = widgetId;
-          this.collection.add(defs);
+        var tocData = parent.data(widgetId.toLowerCase());
+        if (tocData) {
+          var toAdd = _.extend(_.clone(tocData), {id : widgetId });
+          this.collection.add(toAdd);
+        }
+        //right now this handles export widget
+        else {
+          //id consists of widgetId + arg param
+          var pairs = _.pairs(parent.data());
+          var widgetList = _.where(pairs, function(v){return  v[0].split("__") && (v[0].split("__")[0] == widgetId.toLowerCase()) });
+          _.each(widgetList, function(w){
+            //arg is the identifying factor-- joining with double underscore so it can be split later
+            var toAdd = _.extend(_.clone(w[1]), { id : widgetId+ "__" +  w[0].split("__")[1]});
+            this.collection.add(toAdd);
+          }, this);
         }
       }
       else if (event == 'widget-ready') {

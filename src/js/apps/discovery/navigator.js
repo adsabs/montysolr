@@ -148,7 +148,6 @@ define([
             }
             return
           }
-
           // only selected records requested
           if (options.onlySelected && storage.hasSelectedPapers()) {
             widget.exportRecords(format, storage.getSelectedPapers());
@@ -239,7 +238,6 @@ define([
         this.set('orcid-page', function(view, targetRoute) {
 
           var orcidApi = app.getService('OrcidApi');
-
           // traffic from Orcid - user has authorized our access
           if (orcidApi.hasExchangeCode() && !orcidApi.hasAccess()) {
             orcidApi.getAccessData(orcidApi.getExchangeCode())
@@ -271,7 +269,6 @@ define([
           else {
             self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'index-page');
           }
-
         });
 
         this.set('show-author-network', function() {
@@ -290,6 +287,7 @@ define([
           app.getObject('MasterPageManager').show('SearchPage',
             ['PaperNetwork'].concat(searchPageAlwaysVisible.slice(1)));
         });
+
         this.set('show-bubble-chart', function() {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
@@ -304,6 +302,7 @@ define([
 
 
         this.set('abstract-page', function(pageName, bibcode) {
+          //set left hand nav panel correctly
           app.getWidget("TOCWidget").collection.selectOne("ShowAbstract");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowAbstract'].concat(detailsPageAlwaysVisible)
@@ -317,49 +316,60 @@ define([
           this.route = arguments[1];
         });
         this.set('ShowCitations', function() {
+          //set left hand nav panel correctly
           app.getWidget("TOCWidget").collection.selectOne("ShowCitations");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCitations'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowReferences', function() {
+          //set left hand nav panel correctly
           app.getWidget("TOCWidget").collection.selectOne("ShowReferences");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowReferences'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowCoreads', function() {
+          //set left hand nav panel correctly
           app.getWidget("TOCWidget").collection.selectOne("ShowCoreads");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCoreads'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowTableOfContents', function() {
+          //set left hand nav panel correctly
           app.getWidget("TOCWidget").collection.selectOne("ShowTableOfContents");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowSimilar', function() {
+          //set left hand nav panel correctly
           app.getWidget("TOCWidget").collection.selectOne("ShowSimilar");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowSimilar'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowPaperMetrics', function() {
+          //set left hand nav panel correctly
           app.getWidget("TOCWidget").collection.selectOne("ShowPaperMetrics");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowPaperMetrics'].concat(detailsPageAlwaysVisible));
+        });
+        this.set("ShowPaperExport", function(funcName, href){
+          var format = href.split("/").reverse()[0];
+          //set left hand nav panel correctly
+          app.getWidget("TOCWidget").collection.selectOne("ShowPaperExport__" + format);
+          app.getWidget("ShowPaperExport").exportRecordForAbstract(format);
+          app.getObject('MasterPageManager').show('DetailsPage',
+            ['ShowPaperExport'].concat(detailsPageAlwaysVisible));
+          this.route = arguments[1];
         });
         this.set('ShowGraphics', function() {
           app.getWidget("TOCWidget").collection.selectOne("ShowGraphics");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowGraphics'].concat(detailsPageAlwaysVisible));
         });
-
-        this.set('abstract-page:bibtex', function() { app.getObject('MasterPageManager').show('DetailsPage')});
-        this.set('abstract-page:endnote', function() { app.getObject('MasterPageManager').show('DetailsPage')});
-        this.set('abstract-page:metrics', function() { app.getObject('MasterPageManager').show('DetailsPage')});
       }
 
 

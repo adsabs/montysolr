@@ -213,14 +213,14 @@ define([
           expect(spy.callCount).to.be.eql(1);
 
           // it has to be selected and contain numcount
-          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-nav-active')).to.be.true;
+          //the navigator is what actually selects the nav so I removed that test
           expect($(pageManager.view.$el.find('div[data-widget-id="ShowReferences"] span').eq(1)).text().trim()).to.eql('(841359)');
           done();
         });
 
       });
 
-      it ("has a wrap (details manager) which listens to pubsub.DISPLAY_DOCUMENTS and places the current bibcode in the model of the TOC Widget", function(){
+      it ("has a wrap (details manager) which listens to pubsub.DISPLAY_DOCUMENTS and places the current bibcode in the model of the TOC Widget", function(done){
         var app = new Application({debug: false});
         delete config.core.objects.Navigator;
         config.widgets.PageManager = 'js/wraps/details_page_manager';
@@ -258,8 +258,18 @@ define([
           expect(view.$el.find('.s-back-button-container').html()).to.eql('<a href="#search/q=bibcode%3Afoo" class="back-button btn btn-sm btn-default"> <i class="fa fa-arrow-left"></i> Back to results</a>');
 
 
+          //testing toc widget reset
+          pageManager.widgets.TOCWidget.resetActiveStates();
+          setTimeout(function(){
+            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-active")).to.be.true;
+            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-active")).to.be.false;
 
+            pageManager.widgets.TOCWidget.collection.selectOne("ShowReferences");
+            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-active")).to.be.false;
+            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-active")).to.be.true;
+            done();
 
+          }, 1000)
 
         })
 

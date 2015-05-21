@@ -1070,7 +1070,7 @@ define([
 
           //show link layer
           var interval;
-          d3.select(".link-container").style("display", "block")
+          d3.select(this.$(".link-container")[0]).style("display", "block")
             .selectAll(".link")
             .call(function(selection){
               interval = 3000/selection[0].length;
@@ -1080,9 +1080,8 @@ define([
         }
         else {
           //hide it
-
           this.model.set("selectedEntity", this.model.get("cachedEntity"));
-          d3.select(".link-container").style("display", "none");
+          d3.select(this.$(".link-container")[0]).style("display", "none");
         }
       },
 

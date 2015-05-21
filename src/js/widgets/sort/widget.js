@@ -55,7 +55,6 @@ define(['marionette',
       },
 
       addDefault : function(attributeKey, value){
-
         _.each(this.get(attributeKey), function(d){
           if(d.value === value){
             d.default = true
@@ -75,7 +74,7 @@ define(['marionette',
       template: SortTemplate,
 
       events: {
-        "click .choose-sort": "changeSort",
+        "click button.sort-options": "changeSort",
         "click .dropdown-menu label": "preventClose"
       },
 
@@ -125,16 +124,14 @@ define(['marionette',
 
       changeSort: function (ev) {
         var newVal, current;
-        ev.preventDefault();
 
         current = this.getCurrentSortVal();
-        newVal = this.$("input[name=sort-options]:checked").attr("value");
+        newVal = this.$(ev.target).data("value");
         var order = this.$("input[name=order-options]:checked").attr("value");
 
         newVal += " ";
         newVal += order;
 
-        //console.log('BANG!');
         if (newVal !== current) {
           this.trigger("sortChange", newVal)
         }

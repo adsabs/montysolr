@@ -27,7 +27,6 @@ define([
       }
     });
 
-
     var DropdownCollection = Backbone.Collection.extend({
 
       initialize: function (models, options) {
@@ -87,7 +86,8 @@ define([
       },
 
       modelEvents : {
-        "change" : "render"
+        "change:selectedOption" : "render",
+        "change:selectedPapers" : "render"
       },
 
       collectionEvents : {
@@ -110,7 +110,6 @@ define([
         data.iconClass = Marionette.getOption(this, "iconClass");
         //whether to right align the dropdown
         data.pullRight = Marionette.getOption(this, "rightAlign");
-
         return data
       },
 
@@ -118,15 +117,12 @@ define([
         "change input.papers" : function(e){
           var $t = $(e.target);
           $t.attr("value") == "all" ? this.model.set("onlySelected", false): this.model.set("onlySelected", true);
+        },
+
+        "click .dropdown-menu label": function(e){
+         e.stopPropagation();
         }
-
-      },
-
-      onRender : function(){
-      this.$(".dropdown-toggle").on('click', function (e) {
-          $(this).parent().toggleClass('open');
-        });
-      }
+    }
 
     });
 
