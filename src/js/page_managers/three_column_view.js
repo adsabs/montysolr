@@ -23,7 +23,6 @@ define([
           right : "open",
           user_left: null,
           user_right: null,
-          largerThanTablet : true
         }
       }
     });
@@ -53,8 +52,6 @@ define([
       },
 
       onRender : function(){
-        var self = this;
-
         this.$("#results-control-row")
           .append(controlRowTemplate());
 
@@ -63,7 +60,6 @@ define([
         this.displayLeftColumn(this.options.displayLeftColumn);
         this.displayRightColumn(this.options.displayRightColumn);
         this.displayMiddleColumn(this.options.displayMiddleColumn);
-
       },
 
       onShow : function() {

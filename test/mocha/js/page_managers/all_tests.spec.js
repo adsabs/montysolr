@@ -196,6 +196,9 @@ define([
 
           abstract.processResponse(r);
 
+          app.getWidget("TOCWidget").resetActiveStates();
+
+
           // the navigation must turn active
           expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-nav-inactive')).to.be.false;
           expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-nav-inactive')).to.be.true;

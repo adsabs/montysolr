@@ -257,7 +257,7 @@ define([
         }
 
         this.trigger('page-manager-event', 'widget-ready',
-          {numFound: apiResponse.get("response.numFound"), widget: this});
+          {numFound: apiResponse.get("response.numFound")});
 
       }
 

@@ -58,7 +58,7 @@ require.config({
         SearchPage: 'js/wraps/results_page_manager',
         DetailsPage: 'js/wraps/details_page_manager',
         AuthenticationPage: 'js/wraps/authentication_page_manager',
-        SettingsPage: 'js/wraps/user_settings_page_manager',
+        SettingsPage: 'js/wraps/user_settings_page_manager/manager',
 
         Authentication: 'js/widgets/authentication/widget',
         UserSettings: 'js/widgets/user_settings/widget',

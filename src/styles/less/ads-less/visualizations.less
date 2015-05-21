@@ -81,6 +81,12 @@ WordCloud
 Year, Citation and Reference Graphs
 */
 
+
+.s-view-metrics-button-container {
+ .pull-right;
+  margin-right: 10px;
+}
+
 .change-scale {
   label {
     display: inline-block;
@@ -163,25 +169,10 @@ Year, Citation and Reference Graphs
 
 .s-chart {
   pointer-events: all;
-  width: 100%;
-  height: 100%;
-  min-height: 280px;
-  max-width: 400px;
-  display: block;
-  margin:auto;
-  margin-bottom: 35px;
-
-  //increase the min-height for large screens
-  //to keep the svg aspect ratio the same
-  //is there a better way to do this?
-
-  @media (min-width: 1300px){
-    min-height: 320px;
-  }
-  @media (min-width: 1500px){
-    min-height: 400px;
-  }
-
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 #citation-graph .chart {
@@ -201,10 +192,20 @@ Year, Citation and Reference Graphs
 .s-label {
   font: 14px sans-serif;
   text-anchor: middle;
+  font-weight: 300;
 }
 
 .show-slider-data-first, .show-slider-data-second {
-  width: 35%;
+  .form-control;
+  .input-sm;
+  display: inline;
+  width: 55px;
+}
+
+.slider-data {
+  position: relative;
+  top: -15px;
+  left: 12px;
 }
 
 .ui-slider {
@@ -736,8 +737,6 @@ rect.selection {
 
   div.active {
     border: 4px solid @brand-warning;
-
-
   }
 }
 .journal-name-key text, .journal-name-key rect {
@@ -749,3 +748,11 @@ text.journal-selected{
   font-weight: bold;
 }
 
+.s-svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    vertical-align: middle;
+    overflow: hidden;
+}

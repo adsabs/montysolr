@@ -179,10 +179,10 @@ define([
 
             if (confirmedQuery){
               //suggestedQ will be inserted if user accepts it
-              $input.data("ui-autocomplete").suggestedQ = confirmedQuery + " " + ui.item.value + ui.item.end;
+              $input.data("ui-autocomplete").suggestedQ = confirmedQuery + " " + ui.item.value;
             }
             else {
-              $input.data("ui-autocomplete").suggestedQ = ui.item.value + ui.item.end;
+              $input.data("ui-autocomplete").suggestedQ = ui.item.value;
             }
 
             // only insert text if the words match from the beginning
@@ -210,7 +210,8 @@ define([
           select : function( event, ui ){
             $input.val( $input.data("ui-autocomplete").suggestedQ);
             //move cursor before final " or )
-            if (ui.item.end){
+            var final = ui.item.value.split("").reverse()[0];
+            if ( final == '"' || final == ")" ){
               $input.selectRange($input.val().length - 1);
             }
             return false;

@@ -130,8 +130,7 @@ define([
         this.trigger('page-manager-event', 'widget-ready',
           {numFound: apiResponse.has("response.numFound")
             ? apiResponse.get("response.numFound")
-            : this.hiddenCollection.length,
-            widget: this});
+            : this.hiddenCollection.length});
       },
 
       extractDocs: function(apiResponse) {
@@ -156,7 +155,6 @@ define([
 
         // compute which documents should be made visible
         var showRange = [page*perPage, ((page+1)*perPage)-1];
-
 
         // means that we were fetching the missing documents (to fill gaps in the collection)
         var fillingGaps = q.has('__fetch_missing');
@@ -207,7 +205,6 @@ define([
         return pageData;
       },
 
-
       processDocs: function(apiResponse, docs, paginationInfo) {
         if (!apiResponse.has('response')) return [];
         var params = apiResponse.get("response");
@@ -216,13 +213,11 @@ define([
         return docs;
       },
 
-
       defaultQueryArguments: {
         fl: 'id',
         rows : 10,
         start : 0
       },
-
 
       updatePagination: function(options) {
         var perPage = options.perPage || this.model.get('perPage');

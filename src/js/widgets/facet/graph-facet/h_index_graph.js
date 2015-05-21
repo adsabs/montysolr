@@ -139,7 +139,7 @@ define(['./base_graph',
         this.innerChart.append("text")
           .attr("class", "s-label")
           .attr("x", this.width/2 - 20)
-          .attr("y", 220)
+          .attr("y", 180)
           .text(Marionette.getOption(this, "xAxisTitle"));
 
         this.innerChart.append("text")

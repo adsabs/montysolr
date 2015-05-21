@@ -78,7 +78,7 @@ define([
 
       minsub.publish(minsub.STORAGE_PAPER_UPDATE, 10);
 
-      expect($(".currently-selected").text().trim()).to.eql('10 currently selected\n        \n             x clear all\n        \n      select all on this page');
+      expect($(".currently-selected").text().trim()).to.eql("10 currently selected\n        \n              x clear all\n        \n      select all on this page");
 
       expect(s.clearSelectedPapers.callCount).to.eql(0);
 

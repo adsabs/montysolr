@@ -174,11 +174,10 @@ define([
        */
       broadcast: function(){
         var args = arguments;
-        var self = this;
-        _.each(_.keys(self.widgets), function(w) {
-          var widget = self.widgets[w];
+        _.each(_.keys(this.widgets), function(w) {
+          var widget = this.widgets[w];
           widget.trigger.apply(widget, args);
-        });
+        }, this);
       }
 
     });

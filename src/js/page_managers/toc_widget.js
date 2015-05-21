@@ -1,13 +1,27 @@
 define([
   'backbone',
   'marionette',
-  'hbs!./templates/abstract-nav'
+  /*default template is abstract nav, other instances will need to provide their own*/
+  'hbs!./templates/abstract-nav',
 
 ], function(
   Backbone,
   Marionette,
   tocNavigationTemplate
   ){
+
+  /*
+  * widget to coordinate the showing of other widgets within the framework of a TOC page manager
+  * mark up in the page manager looks like this:
+  *
+  * <div data-widget="TOCWidget"
+   data-ShowAbstract='{"title": "Abstract", "path":"abstract", "showCount": false, "isSelected":true, "category":"view"}'
+   data-ShowCitations='{"title": "Citations", "path":"citations", "category":"view"}'
+   data-ShowReferences='{"title": "References", "path":"references", "category":"view"}'
+   ...etc...
+   />
+   the toc controller will call a navigate event when the toc widget emits a "widget-selected" event
+  * */
 
 
   var WidgetData = Backbone.Model.extend({
