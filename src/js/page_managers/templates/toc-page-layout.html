@@ -25,15 +25,18 @@
                          data-ShowReferences='{"title": "References", "path":"references", "category":"view"}'
                          data-ShowCoreads='{"title": "Co-Reads", "path":"coreads","category":"view", "showCount": false}'
                          data-ShowTableOfContents='{"title": "Volume Content", "path":"tableofcontents", "category":"view", "showCount": false}'
-                         data-ShowSimilar='{"title": "Similar Papers", "path":"similar" data-debug="true", "category":"view"}'
+                         data-ShowSimilar='{"title": "Similar Papers", "path":"similar", "category":"view"}'
                          data-ShowGraphics='{"title": "Graphics", "path":"graphics", "showCount": false, "category":"view"}'
                          data-ShowPaperMetrics='{"title": "Metrics", "path":"metrics", "showCount": false, "category":"explore"}'
-                         />
+                         data-ShowPaperExport__bibtex='{"title": "in BibTEX", "path":"export/bibtex", "category":"export"}'
+                         data-ShowPaperExport__aastex='{"title": "in AASTex", "path":"export/aastex", "category":"export"}'
+                         data-ShowPaperExport__endnote='{"title": "in Endnote", "path":"export/endnote", "category":"export"}'
+
+                    />
                 </div>
             </div>
             <div class="col-sm-7 s-middle-column" id="middle-column">
                 <div class="main-content-container s-main-content-container">
-
                     <div id="abstract-title-container" class="s-abstract-title-container"></div>
                     <div id="current-subview">
                         <div data-widget="ShowAbstract"/>
@@ -43,7 +46,8 @@
                         <div data-widget="ShowTableOfContents"/>
                         <div data-widget="ShowSimilar" data-debug="true"/>
                         <div data-widget="ShowPaperMetrics"/>
-                        <div data-widget="ShowGraphics"></div>
+                        <div data-widget="ShowGraphics"/>
+                        <div data-widget="ShowPaperExport"></div>
                     </div>
                 </div>
             </div>
@@ -53,11 +57,12 @@
                     <div data-widget="ShowResources"/>
                </div>
                 <div class="s-right-col-widget-container">
-                <div data-widget="ShowRecommender"/>
-                </div>
-                <div class="s-right-col-widget-container">
                     <div data-widget="ShowGraphicsSidebar"/>
                 </div>
+                <div class="s-right-col-widget-container">
+                <div data-widget="ShowRecommender"/>
+                </div>
+
             </div>
 
 

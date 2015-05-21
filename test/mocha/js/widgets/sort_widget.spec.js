@@ -35,9 +35,7 @@ define([
 
 
       it("should display the name of the current sort on the button", function(){
-
         expect($("#test").find("#sort-button").text().trim()).to.eql("Current Sort: Relevancy")
-
       });
 
 
@@ -64,17 +62,13 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star'}));
 
         expect($("#test").find("#sort-button").text().trim()).to.eql("Current Sort: Relevancy");
-
-        expect($("#test").find("input[name=sort-options]:checked").val()).to.eql("classic_factor");
-
+        expect($("#test").find("button.sort-options:first").data("value")).to.eql("classic_factor");
         expect($("#test").find("input[name=order-options]:checked").val()).to.eql("desc");
-
 
       });
 
 
       it("should parse the api query and, if it has a sort parameter, render that as the default sort", function(){
-
 
         var minsub = new (MinimalPubSub.extend({
           request: function(apiRequest) {
@@ -100,8 +94,7 @@ define([
         });
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star', 'sort': 'citation_count asc'}));
 
-        expect($("#test").find("input[name=sort-options]:checked").val()).to.eql("citation_count");
-
+        expect($("#test").find("button:first").text().trim()).to.eql("Current Sort: Citation Count Asc");
         expect($("#test").find("input[name=order-options]:checked").val()).to.eql("asc");
 
 
@@ -139,10 +132,9 @@ define([
         $("input[value=date]").attr('checked', true);
         $("input[value=desc]").attr('checked', false);
         $("input[value=asc]").attr('checked', true);
-        w.view.$("input[value=date]").click();
         w.view.$("input[value=asc]").click();
 
-        w.view.$("button.choose-sort").click();
+        $("button.sort-options[data-value='date']").click()
 
         expect(pubSubStub.lastCall.args[1].get("sort")[0]).to.eql("date asc");
 

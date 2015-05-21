@@ -27,11 +27,9 @@ define([
       onDisplayDocuments : function(apiQuery){
 
         var bibcode = apiQuery.get('q');
-        var self = this;
         if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
           bibcode = bibcode[0].replace('bibcode:', '');
           this.widgets.TOCWidget.model.set("bibcode", bibcode);
-
           };
         },
 

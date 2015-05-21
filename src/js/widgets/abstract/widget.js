@@ -199,15 +199,18 @@ define([
       onDisplayDocuments: function (apiQuery) {
 
         var bibcode = apiQuery.get('q');
-        if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
-          bibcode = bibcode[0].replace('bibcode:', '').toLowerCase();
-        }
-        if (this._docs[bibcode]) { // we have already loaded it
-          this.model.set(this._docs[bibcode]);
-          this._current = bibcode;
+          if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
+            //redefine bibcode
+            var bibcode = bibcode[0].replace('bibcode:', '');
+            //make a lower case version: not sure why necessary
+            var lowerCaseBibcode = bibcode.toLowerCase();
+           }
+        if (this._docs[lowerCaseBibcode]) { // we have already loaded it
+          this.model.set(this._docs[lowerCaseBibcode]);
+          this._current = lowerCaseBibcode;
           // let other widgets know details
           this.trigger('page-manager-event', 'broadcast-payload', {
-              title: this._docs[bibcode].title,
+              title: this._docs[lowerCaseBibcode].title,
               bibcode: bibcode
           });
         }
