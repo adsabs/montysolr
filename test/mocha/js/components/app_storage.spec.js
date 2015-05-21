@@ -77,6 +77,10 @@ define([
       s.activate(minsub.beehive);
       minsub.publish(minsub.PAPER_SELECTION, 'foo');
       expect(s.getSelectedPapers()).to.eql(['foo'])
+
+      //should be able to re-add foo in bulk selection and not have it toggled off
+      minsub.publish(minsub.BULK_PAPER_SELECTION, ['foo', 'boo', 'goo']);
+      expect(s.getSelectedPapers()).to.eql(['foo', 'boo', 'goo']);
     });
 
   });

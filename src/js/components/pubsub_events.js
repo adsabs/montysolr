@@ -152,6 +152,9 @@ define([], function() {
      * Is triggered when user selects/deselects records
      */
     PAPER_SELECTION: "[User]-Paper-Selection",
+
+    //instead of toggling, adds all papers
+    BULK_PAPER_SELECTION: "[User]-Bulk-Paper-Selection",
     /*
     * is triggered by app storage itself when list of selected papers changes
     * */

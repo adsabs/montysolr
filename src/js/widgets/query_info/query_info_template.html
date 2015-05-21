@@ -1,11 +1,13 @@
-<div class="num-found"><b>{{numFound}}</b> <span class="s-light-font">search results</span>
+<div class="num-found s-divider-bottom"><b>{{numFound}}</b> <span class="s-light-font">search results</span>
 </div>
 <div class="currently-selected">
 <b>{{selected}}</b> <span class="s-light-font">currently selected</span>
         {{#compare selected 0 operator=">"}}
-            <button class="btn btn-xs btn-default clear-selected"> x clear</button>
+            <button class="btn btn-xs btn-default clear-selected"> x clear all</button>
         {{/compare}}
+    <button class="btn btn-default btn-xs page-bulk-add"> <i class="fa fa-plus"></i> select all on this page</button>
 </div>
+
 
 {{#if fq}}
     <div class="active-filters">
