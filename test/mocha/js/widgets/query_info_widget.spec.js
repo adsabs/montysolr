@@ -74,11 +74,11 @@ define([
 
       $("#test").append(w.render().el);
 
-      expect($(".currently-selected").text().trim()).to.eql('0 currently selected');
+      expect($(".currently-selected").text().trim()).to.eql('0 currently selected\n        \n      select all on this page');
 
       minsub.publish(minsub.STORAGE_PAPER_UPDATE, 10);
 
-      expect($(".currently-selected").text().trim()).to.eql('10 currently selected\n        \n             x clear');
+      expect($(".currently-selected").text().trim()).to.eql('10 currently selected\n        \n             x clear all\n        \n      select all on this page');
 
       expect(s.clearSelectedPapers.callCount).to.eql(0);
 

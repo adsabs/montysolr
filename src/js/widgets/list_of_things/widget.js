@@ -146,7 +146,6 @@ define([
       getPaginationInfo: function(apiResponse, docs) {
         var q = apiResponse.getApiQuery();
 
-
         // this information is important for calcullation of pages
         var numFound = apiResponse.get("response.numFound");
         var perPage =  this.model.get('perPage') || (q.has("rows") ? q.get('rows')[0] : 10);

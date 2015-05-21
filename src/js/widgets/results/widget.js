@@ -50,11 +50,12 @@ define([
       activate: function (beehive) {
         this.setBeeHive(beehive);
         this.pubsub = beehive.Services.get('PubSub');
-        _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement', 'onStoragePaperUpdate');
+        _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement', 'onStoragePaperUpdate', 'onCustomEvent');
         this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
         this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
         this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
-        this.pubsub.subscribe(this.pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperUpdate)
+        this.pubsub.subscribe(this.pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperUpdate);
+        this.pubsub.subscribe(this.pubsub.CUSTOM_EVENT, this.onCustomEvent);
       },
 
       onUserAnnouncement: function(key, val){
@@ -67,6 +68,13 @@ define([
           if (val)
             this.addOrcidInfo(docs);
           this.view.collection.reset(docs);
+        }
+      },
+
+      onCustomEvent : function(event){
+        if (event == "add-all-on-page"){
+          var bibs = this.collection.pluck("bibcode");
+          this.pubsub.publish(this.pubsub.BULK_PAPER_SELECTION, bibs);
         }
       },
 

@@ -21,10 +21,12 @@ define([
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
-        _.bindAll(this, "onPaperSelection");
+        _.bindAll(this, "onPaperSelection", "onBulkPaperSelection");
         var pubsub = beehive.getService('PubSub');
         this.key = pubsub.getPubSubKey();
         pubsub.subscribe(this.key, pubsub.PAPER_SELECTION, this.onPaperSelection);
+        pubsub.subscribe(this.key, pubsub.BULK_PAPER_SELECTION, this.onBulkPaperSelection);
+
         this.pubsub = pubsub;
       },
 
@@ -142,6 +144,10 @@ define([
         else {
           this.addSelectedPapers(data);
         }
+      },
+
+      onBulkPaperSelection : function(bibs){
+        this.addSelectedPapers(bibs);
       },
 
       //this is used by the auth and user settings widgets

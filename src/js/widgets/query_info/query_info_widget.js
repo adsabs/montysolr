@@ -51,6 +51,9 @@ define(['marionette',
         },
         "click .clear-selected" : function(){
           this.trigger("clear-selected");
+        },
+        "click .page-bulk-add" : function(){
+          this.trigger("page-bulk-add");
         }
       }
     })
@@ -63,6 +66,7 @@ define(['marionette',
         this.model = new QueryModel();
         this.view = new QueryDisplayView({model : this.model});
         this.view.on("clear-selected", this.clearSelected, this);
+        this.view.on("page-bulk-add", this.triggerBulkAdd, this);
         BaseWidget.prototype.initialize.call(this, options)
       },
 
@@ -83,6 +87,10 @@ define(['marionette',
 
       clearSelected : function(){
         this.beehive.getObject("AppStorage").clearSelectedPapers();
+      },
+
+      triggerBulkAdd : function(){
+        this.pubsub.publish(this.pubsub.CUSTOM_EVENT, "add-all-on-page");
       },
 
       processResponse: function(apiResponse) {
