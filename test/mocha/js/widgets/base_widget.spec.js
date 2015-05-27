@@ -74,12 +74,11 @@ define([
 
       });
 
-      it("has the activate, getView, and close methods necessary for most/all ui widgets", function(){
+      it("has the activate and close methods necessary for most/all ui widgets", function(){
         var widget = new BaseWidget();
 
         expect(widget.activate).to.be.instanceof(Function);
         expect(widget.close).to.be.instanceof(Function);
-        expect(widget.getView).to.be.instanceof(Function);
         expect(widget.render).to.be.instanceof(Function);
       });
 

@@ -37,7 +37,7 @@ define([
         }
       },
 
-      exportRecordForAbstract : function(format){
+      setSubView : function(format){
         this.exportRecords(format, [this.bibcode]);
       },
 

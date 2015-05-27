@@ -43,13 +43,16 @@ define([
          *
          */
 
-        var pubsub = this.pubsub;
         var self = this;
         var queryUpdater = new ApiQueryUpdater('navigator');
 
         var publishFeedback = function(data) {
           self.pubsub.publish(self.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data))
         };
+
+       var publishPageChange = function(pageName){
+         self.pubsub.publish(self.pubSubKey, self.pubsub.PAGE_CHANGE, pageName);
+       };
 
         var searchPageAlwaysVisible = [
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
@@ -63,30 +66,69 @@ define([
           'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'AlertsWidget', 'ShowGraphicsSidebar'
         ];
 
+        function redirectIfNotSignedIn(){
+          var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
+          if (!loggedIn){
+            //redirect to authentication page
+            app.getService("Navigator").navigate("authentication-page");
+            return true;
+          }
+          else {
+            return false;
+          }
+        };
+
         this.set('index-page', function() {
           app.getObject('MasterPageManager').show('LandingPage');
           var q = app.getObject('AppStorage').getCurrentQuery();
           this.route = '#index/' + queryUpdater.clean(q).url();
         });
 
-        this.set('settings-page', function(page, data){
-          var subView = data.subView;
-          subView = subView ? subView : "preferences";
-          var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
 
-          if (!loggedIn){
-            //redirect to authentication page
-            app.getObject('MasterPageManager').show("AuthenticationPage",
-              ['Authentication', 'AlertsWidget']);
-            app.getWidget("Authentication").setSubView("login");
-            this.route = "#user/account/login"
-          }
-          else {
-            app.getWidget("UserSettings").setSubView(subView);
-            this.route = "#user/settings/"+subView;
-            app.getObject('MasterPageManager').show("SettingsPage",
-              ['UserSettings', 'AlertsWidget']);
-          }
+
+
+        //request for the widget
+        this.set("UserSettings", function(page, data){
+          if (redirectIfNotSignedIn())
+            return;
+          var subView = data.subView || "token";
+          //set left hand nav panel correctly and tell the view what to show
+          app.getWidget("SettingsPage").setActive("UserSettings",  subView);
+          app.getObject('MasterPageManager').show("SettingsPage",
+            ['UserSettings', 'AlertsWidget', "UserNavbarWidget"]);
+
+          this.route = "#user/settings/"+subView;
+          publishPageChange("settings-page");
+
+        });
+
+        //request for the widget
+        this.set("UserPreferences", function(page, data){
+          if (redirectIfNotSignedIn())
+            return;
+          //set left hand nav panel correctly and tell the view what to show
+          app.getWidget("SettingsPage").setActive("UserPreferences");
+          app.getObject('MasterPageManager').show("SettingsPage",
+            ['UserPreferences', 'AlertsWidget', "UserNavbarWidget"]);
+
+          this.route = "#user/settings/preferences";
+          publishPageChange("settings-page");
+
+        });
+
+        this.set("libraries-page", function(){
+          app.getObject('MasterPageManager').show("LibrariesPage",
+            []);
+          publishPageChange("libraries-page");
+
+        });
+
+
+        this.set("home-page", function(){
+          app.getObject('MasterPageManager').show("HomePage",
+            []);
+          publishPageChange("home-page");
+
         });
 
         this.set('authentication-page', function(page, data){
@@ -117,26 +159,14 @@ define([
           publishFeedback({code: ApiFeedback.CODES.UNMAKE_SPACE});
         });
 
-        this.set('export-bibtex', function(format, options) {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          self.get('export-page').execute('bibtex', options);
-        });
-        this.set('export-aastex', function(format, options) {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          self.get('export-page').execute('aastex', options);
-        });
-        this.set('export-endnote', function(format, options) {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          self.get('export-page').execute('endnote', options);
-        });
-        this.set("export-classic", function(format, options){
-          self.get('export-page').execute('classic', options);
-        })
-        this.set('export-page', function(format, options) {
+        this.set('export', function(nav, options) {
 
-          format = format || 'bibtex';
+          var format = options.format || 'bibtex';
           var storage = app.getObject('AppStorage');
           var widget = app.getWidget('ExportWidget');
+
+          //first, open central panel
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
 
           //classic is a special case, it opens in a new tab
           if (format == "classic"){
@@ -272,7 +302,6 @@ define([
         });
 
         this.set('show-author-network', function() {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
             ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
         });
@@ -303,7 +332,7 @@ define([
 
         this.set('abstract-page', function(pageName, bibcode) {
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowAbstract");
+          app.getWidget("DetailsPage").setActive("ShowAbstract");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowAbstract'].concat(detailsPageAlwaysVisible)
           );
@@ -317,56 +346,55 @@ define([
         });
         this.set('ShowCitations', function() {
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowCitations");
+          app.getWidget("DetailsPage").setActive("ShowCitations");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCitations'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowReferences', function() {
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowReferences");
+          app.getWidget("DetailsPage").setActive("ShowReferences");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowReferences'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowCoreads', function() {
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowCoreads");
+          app.getWidget("DetailsPage").setActive("ShowCoreads");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCoreads'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowTableOfContents', function() {
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowTableOfContents");
+          app.getWidget("DetailsPage").setActive("ShowTableOfContents");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowSimilar', function() {
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowSimilar");
+          app.getWidget("DetailsPage").setActive("ShowSimilar");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowSimilar'].concat(detailsPageAlwaysVisible));
           this.route = arguments[1];
         });
         this.set('ShowPaperMetrics', function() {
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowPaperMetrics");
+          app.getWidget("DetailsPage").setActive("ShowPaperMetrics");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowPaperMetrics'].concat(detailsPageAlwaysVisible));
         });
-        this.set("ShowPaperExport", function(funcName, href){
-          var format = href.split("/").reverse()[0];
+        this.set("ShowPaperExport", function(funcName, data){
+          var format = data.subView;
           //set left hand nav panel correctly
-          app.getWidget("TOCWidget").collection.selectOne("ShowPaperExport__" + format);
-          app.getWidget("ShowPaperExport").exportRecordForAbstract(format);
+          app.getWidget("DetailsPage").setActive("ShowPaperExport", format);
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowPaperExport'].concat(detailsPageAlwaysVisible));
-          this.route = arguments[1];
+//          this.route = data.href;
         });
         this.set('ShowGraphics', function() {
-          app.getWidget("TOCWidget").collection.selectOne("ShowGraphics");
+          app.getWidget("DetailsPage").setActive("ShowGraphics");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowGraphics'].concat(detailsPageAlwaysVisible));
         });

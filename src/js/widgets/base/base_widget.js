@@ -227,14 +227,6 @@ define([
       this.view.close();
     },
 
-    getView: function () {
-      if (!this.view) {
-        throw new Error("This widget doesn't have a view");
-      } else {
-        return this.view
-      }
-    },
-
     /**
      * Convention inside Backbone and Marionette is to return 'this'
      * - since 'this' usually refers to a 'View', we'll return the

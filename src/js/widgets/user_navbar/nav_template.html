@@ -1,0 +1,21 @@
+<ul class="nav nav-pills user-pill-nav s-user-pill-nav">
+
+    <li role="presentation"  {{#compare page "home-page"}} class="active" {{/compare}} >
+        <a href="#/user/home">
+            <i class="fa fa-user"></i> My Home Page
+        </a>
+    </li>
+    <li role="presentation" {{#compare page "libraries-page"}} class="active" {{/compare}}>
+        <a href="#/user/libraries">
+            <i class="fa fa-book"></i> ADS Libraries
+        </a>
+    </li>
+    <li role="presentation" {{#compare page "settings-page"}} class="active" {{/compare}}>
+        <a href="#/user/settings"><i class="fa fa-cog">
+            </i> Customize Settings
+        </a>
+    </li>
+    <li class="pull-right" style="margin-top: 10px;">
+        <span class="s-light-font">Welcome back, </span><b>{{user}}</b>
+    </li>
+</ul>

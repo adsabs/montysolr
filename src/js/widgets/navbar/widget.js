@@ -61,9 +61,6 @@ define([
       "click .register": function () {
         this.trigger("navigate-register")
       },
-      "click .settings": function () {
-        this.trigger("navigate-settings")
-      },
       "click code": function (e) {
         this.trigger('search-author');
       }
@@ -140,7 +137,7 @@ define([
         this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page", {subView: "register"});
       },
      "navigate-settings" : function() {
-       this.pubsub.publish(this.pubsub.NAVIGATE, "settings-page");
+       this.pubsub.publish(this.pubsub.NAVIGATE, "UserPreferences");
      },
       "logout" : function() {
         //log the user out of both the session and orcid

@@ -54,6 +54,9 @@ define([
         'user/account/verify/(:subView)/(:token)' : 'routeToVerifyPage',
         'user/settings(/)(:subView)' : 'settingsPage',
 
+        'user/libraries' : 'librariesPage',
+        'user/home' : 'homePage',
+
         //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
@@ -213,10 +216,24 @@ define([
 
       settingsPage : function(subView){
         //possible subViews: "token", "password", "email", "preferences"
-        if (subView && !_.contains(["token", "password", "email", "preferences"], subView)){
-          throw new Error("that isn't a subview that the settings page knows about")
+        if (_.contains(["token", "password", "email", "delete"], subView)){
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'UserSettings', {subView: subView});
         }
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'settings-page', {subView: subView});
+        else if ("preferences" == subView || !subView){
+          //show preferences if no subview provided
+          this.pubsub.publish(this.pubsub.NAVIGATE, 'UserPreferences');
+        }
+        else {
+          throw new Error("did not recognize user page");
+        }
+      },
+
+      librariesPage : function(subView){
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'libraries-page', {subView: subView});
+      },
+
+      homePage : function(subView){
+        this.pubsub.publish(this.pubsub.NAVIGATE, 'home-page', {subView: subView});
       },
 
       noPageFound : function() {

@@ -1,33 +1,33 @@
 define([
     "marionette",
-    "hbs!./templates/toc-page-layout",
     './controller',
-    './three_column_view'
+    './toc_widget'
   ],
   function (Marionette,
-            pageTemplate,
-            BasicPageManagerController
+            BasicPageManagerController,
+            TOCWidget
     ) {
+
+    /*
+    * need to provide a toc template for the toc view when you inherit from this
+    * */
 
     var PageManagerController = BasicPageManagerController.extend({
 
       assemble: function() {
         BasicPageManagerController.prototype.assemble.apply(this, arguments);
 
+        //initiate the TOC view
+        this.widgets.tocWidget = new TOCWidget({template : Marionette.getOption(this, "TOCTemplate")});
+        //insert the TOC nav view into its slot
+        this.view.$(".nav-container").append(this.widgets.tocWidget.render().el);
+
         _.each(_.keys(this.widgets), function(w) {
           this.listenTo(this.widgets[w], "page-manager-event", _.bind(this.onPageManagerEvent, this, this.widgets[w]));
           this.broadcast('page-manager-message', 'new-widget', w);
         }, this);
+
       },
-
-      onDisplayDocuments : function(apiQuery){
-
-        var bibcode = apiQuery.get('q');
-        if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
-          bibcode = bibcode[0].replace('bibcode:', '');
-          this.widgets.TOCWidget.model.set("bibcode", bibcode);
-          };
-        },
 
       /**
        * Listens to and receives signals from managed widgets.
@@ -57,12 +57,24 @@ define([
           this.broadcast('page-manager-message', event, data);
         }
         else if (event == 'widget-selected') {
-          this.pubsub.publish(this.pubsub.NAVIGATE, data.idAttribute, data.href);
+          console.log("publish!")
+          this.pubsub.publish(this.pubsub.NAVIGATE, data.idAttribute, {subView: data.subView, href: data.href });
         }
         else if (event == 'broadcast-payload'){
           this.broadcast('page-manager-message', event, data);
         }
 
+      },
+
+      setActive : function(widgetName, subView){
+        //now inform the widget of the subView to show
+        if (subView && this.widgets[widgetName].setSubView instanceof Function){
+          this.widgets[widgetName].setSubView(subView);
+        }
+        if (subView){
+          widgetName = widgetName + "__" + subView;
+        }
+        this.widgets.tocWidget.collection.selectOne(widgetName);
       },
 
       onClose: function () {

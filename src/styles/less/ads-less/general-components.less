@@ -29,6 +29,8 @@ body {
   margin-bottom: -99999px;
   position: relative;
   background-color: @sidenav-background;
+  margin-top: -21px;
+  border-right: 1px solid darken(@sidenav-background, 15%);
 
   a {
     color :@text-color;
@@ -39,9 +41,19 @@ body {
       text-decoration: none !important;
     }
   }
-  border-right: 1px solid darken(@sidenav-background, 15%);
+
+  /*optional heading to stick at the very top*/
+  .s-nav-top-title {
+    padding: 15px 8%;
+    margin-bottom: 0px !important;
+    border-bottom: 1px solid rgb(239, 239, 239);
+    font-size: 18px;
+    font-weight: 300;
+    color: @brand-primary-faded;
+  }
 
 }
+
 
 .s-nav {
   padding: 8px 0 8px 17%;
@@ -49,7 +61,7 @@ body {
   border-left: 5px solid @sidenav-background;
 
   &:hover {
-    background-color: @gray-lighter;
+    background-color: lighten(@gray-lighter, 4%);
     border-left: 5px solid @gray;
 
   }
@@ -64,9 +76,10 @@ body {
   border-left: 5px solid @brand-primary-faded;
   color: @brand-primary-faded;
   &:hover {
-    background-color: @sidenav-background;
+    background-color:lighten(@brand-primary, 60%);
     border-left: 5px solid @brand-primary-faded;
   }
+  background-color: lighten(@brand-primary, 60%);
 }
 
 .s-nav-inactive {

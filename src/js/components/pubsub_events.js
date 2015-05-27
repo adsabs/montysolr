@@ -118,6 +118,13 @@ define([], function() {
 
     NAVIGATE : '[Router]-Navigate-With-Trigger',
 
+    /*
+    * so navigator can notify interested widgets about a change
+    * from search page to user page, for instance-- navigator cannot
+    * to this since it listens to many events including widget-show events
+    * */
+    PAGE_CHANGE: '[Navigator]Page-Changed',
+
     /*for custom widget-to-widget events*/
     CUSTOM_EVENT : '[PubSub]-Custom-Event',
 
