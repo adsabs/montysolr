@@ -1,25 +1,26 @@
 define([
   'backbone',
-  'marionette',
-  /*default template is abstract nav, other instances will need to provide their own*/
-  'hbs!./templates/abstract-nav',
+  'marionette'
 
 ], function(
   Backbone,
-  Marionette,
-  tocNavigationTemplate
+  Marionette
   ){
 
   /*
   * widget to coordinate the showing of other widgets within the framework of a TOC page manager
-  * mark up in the page manager looks like this:
+  * You need to provide a template with a nav that looks like this: (with the data attributes
+  * corresponding to the widgets in the main page manager template)
   *
-  * <div data-widget="TOCWidget"
+  * <nav data-widget="TOCWidget"
    data-ShowAbstract='{"title": "Abstract", "path":"abstract", "showCount": false, "isSelected":true, "category":"view"}'
    data-ShowCitations='{"title": "Citations", "path":"citations", "category":"view"}'
    data-ShowReferences='{"title": "References", "path":"references", "category":"view"}'
    ...etc...
-   />
+   >
+
+   toc widget listens to "new-widget" event and, if it can find teh corresponding data in the markup,
+   adds an entry to its nav
    the toc controller will call a navigate event when the toc widget emits a "widget-selected" event
   * */
 
@@ -36,8 +37,8 @@ define([
         isSelected: false,
         numFound : 0,
         showCount: true,
-        //arg to pass to widget
-        arg : undefined
+        alwaysThere : false
+
       }
     }
   });
@@ -71,61 +72,73 @@ define([
 
   var TocNavigationView = Marionette.ItemView.extend({
 
-    constructor: function(options) {
+    initialize : function(options){
       options = options || {};
-      if (!options.collection)
-        options.collection = new WidgetCollection();
 
-      if (!options.model)
-        options.model = new WidgetModel();
-
-      Marionette.ItemView.prototype.constructor.call(this, options);
+      this.collection = options.collection || new WidgetCollection();
+      this.model = options.model || new WidgetModel();
       this.on("page-manager-message", this.onPageManagerMessage);
+      if (!options.template){
+        //for testing
+        this.template = function(){return ""};
+      }
+
     },
 
+    //or else controller will detach, and then never put it back
+    noDetach : true,
+
     serializeData : function(){
-      var data = {},
+      var data = this.model.toJSON(),
+          col = this.collection.toJSON(),
           groupedCollectionJSON;
 
-      data = _.extend(data, this.model.toJSON());
-
-      groupedCollectionJSON = _.groupBy(this.collection.toJSON(), function(object){
-        return object.category;
-      });
-
-      data = _.extend(data, groupedCollectionJSON);
+      //if any entries from the data has a "category" param, group by that, otherwise, just return it
+      if (_.find(col, function(c){ return c.category !== undefined; })){
+        groupedCollectionJSON = _.groupBy(this.collection.toJSON(), function(object){
+          return object.category;
+        });
+        data = _.extend(data, groupedCollectionJSON);
+      }
+      else {
+        data = _.extend(data, col);
+      }
 
       return data;
     },
 
-    template : tocNavigationTemplate,
-
     events : {
-      "click a" : function(e){
-       var $t  = $(e.currentTarget);
-        var idAttribute = $t.find("div").attr("data-widget-id");
+      "click a": "navigateToPage"
+    },
+
+    navigateToPage :  function (e) {
+        var $t = $(e.currentTarget), idAttribute = $t.find("div").attr("data-widget-id");
+
         //it's inactive
-        if ($t.find("div").hasClass("s-nav-inactive")){
+        if ($t.find("div").hasClass("s-nav-inactive")) {
           return false;
         }
         //it's active
-        else if (idAttribute !== $(".s-nav-active").attr("data-widget-id")) {
-          var href = $(e.currentTarget).attr("href");
-          if (idAttribute.indexOf("__") > -1){
-            //currently only used by export
-            var widgetName = idAttribute.split("__")[0];
-            this.trigger('page-manager-event', 'widget-selected', {idAttribute: widgetName , href : href});
+        else if (idAttribute !== this.$(".s-nav-active").attr("data-widget-id")) {
+          var href = $t.attr("href"),
+              subView,
+              splitName = idAttribute.indexOf("__") > -1 ? idAttribute.split("__") : undefined;
+
+          if (splitName){
+            idAttribute = splitName[0];
+            subView = splitName[1];
           }
-          else {
-            this.trigger('page-manager-event', 'widget-selected', {idAttribute: idAttribute, href : href});
-          }
+
+          //click triggers event that is shared by the navigator, which is responsible for updating the nav view to
+          //the correct view
+          this.trigger('page-manager-event', 'widget-selected', {idAttribute: idAttribute, subView: subView, href: href});
         }
-        return false;
-      }
+      return false;
     },
 
     modelEvents : {
-      "change:bibcode" : "resetActiveStates"
+      "change:bibcode" : "resetActiveStates",
+      "change" : "render"
     },
 
     collectionEvents : {
@@ -140,11 +153,10 @@ define([
       the widget will show the appropriate defaults
      */
     resetActiveStates : function(){
-      var alwaysThere = ["ShowAbstract", "ShowPaperExport__bibtex", "ShowPaperExport__aastex", "ShowPaperExport__endnote", "ShowPaperExport__classic" ];
       this.collection.each(function(model){
         //abstract and all export options
         //reset only widgets that aren't there 100% of the time
-        if (!_.contains(alwaysThere, model.id)){
+        if (!model.get("alwaysThere")){
         model.set("isActive", false);
         model.set("numFound", 0);
         }
@@ -157,24 +169,26 @@ define([
     onPageManagerMessage: function(event, data) {
       if (event == 'new-widget') {
         //building the toc collection
-        var widgetId = arguments[1]; var parent = this.$el.parent();
-        var tocData = parent.data(widgetId.toLowerCase());
+        var widgetId = arguments[1];
+        var $nav = this.$("nav");
+        var tocData = $nav.data(widgetId.toLowerCase());
         if (tocData) {
-          var toAdd = _.extend(_.clone(tocData), {id : widgetId });
+          var toAdd = _.extend(_.clone(tocData), {id: widgetId });
           this.collection.add(toAdd);
         }
-        //right now this handles export widget
         else {
           //id consists of widgetId + arg param
-          var pairs = _.pairs(parent.data());
-          var widgetList = _.where(pairs, function(v){return  v[0].split("__") && (v[0].split("__")[0] == widgetId.toLowerCase()) });
-          _.each(widgetList, function(w){
+          var pairs = _.pairs($nav.data());
+          var widgetList = _.where(pairs, function (v) {
+            return  v[0].split("__") && (v[0].split("__")[0] == widgetId.toLowerCase())
+          });
+          _.each(widgetList, function (w) {
             //arg is the identifying factor-- joining with double underscore so it can be split later
-            var toAdd = _.extend(_.clone(w[1]), { id : widgetId+ "__" +  w[0].split("__")[1]});
+            var toAdd = _.extend(_.clone(w[1]), { id: widgetId + "__" + w[0].split("__")[1]});
             this.collection.add(toAdd);
           }, this);
+         }
         }
-      }
       else if (event == 'widget-ready') {
         var model = this.collection.get(data.widgetId);
         _.defaults(data, {isActive: data.numFound ? true : false});
@@ -184,6 +198,11 @@ define([
       }
       else if (event === "broadcast-payload"){
         this.model.set("bibcode", data.bibcode);
+      }
+      else if (event == "dynamic-nav"){
+       //expects object like {links : [{title: x, id : y}]}
+      //insert dynamic nav entries into the nav template
+
       }
     }
 

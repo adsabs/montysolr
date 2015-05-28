@@ -2,6 +2,7 @@ define([], function() {
 
   var tests  = [
       '/page_managers/all_tests.spec.js',
+      '/page_managers/toc_manager_test.spec.js',
       '/widgets/authentication_widget.spec.js',
       '/widgets/abstract_widget.spec.js',
       '/widgets/alerts_widget.spec.js',

@@ -247,14 +247,9 @@ define([
     u.collection.get("USER").set("user", "foo");
     minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
 
-    $("#test").find(".settings").click();
-    expect(publishSpy.callCount).to.eql(3);
-    expect(publishSpy.args[2][0]).to.eql(minsub.pubsub.NAVIGATE);
-    expect(publishSpy.args[2][1]).to.eql("settings-page");
-    expect(publishSpy.args[2][2]).to.eql(undefined);
 
     $("#test").find(".logout").click();
-    expect(publishSpy.callCount).to.eql(3);
+    expect(publishSpy.callCount).to.eql(2);
     //calls session logout method explicitly
 
     expect(s.logout.callCount).to.eql(1);

@@ -47,7 +47,7 @@ require.config({
           MasterPageManager: 'js/page_managers/master',
           AppStorage: 'js/components/app_storage',
           RecaptchaManager : 'js/components/recaptcha_manager',
-          CSRFManager : "js/components/csrf_manager",
+          CSRFManager : "js/components/csrf_manager"
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'
@@ -56,14 +56,18 @@ require.config({
       widgets: {
         LandingPage: 'js/wraps/landing_page_manager',
         SearchPage: 'js/wraps/results_page_manager',
-        DetailsPage: 'js/wraps/details_page_manager',
+        DetailsPage: 'js/wraps/abstract_page_manager/abstract_page_manager',
         AuthenticationPage: 'js/wraps/authentication_page_manager',
-        SettingsPage: 'js/wraps/user_settings_page_manager/manager',
+        SettingsPage: 'js/wraps/user_settings_page_manager/user_page_manager',
+        LibrariesPage: 'js/wraps/libraries_page_manager/libraries_page_manager',
+        HomePage: 'js/wraps/home_page_manager/home_page_manager',
 
         Authentication: 'js/widgets/authentication/widget',
         UserSettings: 'js/widgets/user_settings/widget',
+        UserPreferences: 'js/widgets/preferences/widget',
 
         NavbarWidget: 'js/widgets/navbar/widget',
+        UserNavbarWidget: 'js/widgets/user_navbar/widget',
         AlertsWidget: 'js/widgets/alerts/widget',
         SearchWidget: 'js/widgets/search_bar/search_bar_widget',
         Results: 'js/widgets/results/widget',
@@ -103,8 +107,7 @@ require.config({
         ShowResources : 'js/widgets/resources/widget',
         ShowRecommender : 'js/widgets/recommender/widget',
         ShowPaperMetrics: 'js/wraps/paper_metrics',
-        ShowPaperExport : 'js/wraps/paper_export',
-        TOCWidget: 'js/page_managers/toc_widget'
+        ShowPaperExport : 'js/wraps/paper_export'
       },
       plugins: {}
       }

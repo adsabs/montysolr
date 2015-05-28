@@ -154,7 +154,10 @@ define([
       emitNavigateEvent: function (model, value) {
         var onlySelected = (this.model.get("selectedOption") && this.model.get("selectedPapers")  && this.model.get("onlySelected"));
         if (value) {
-          this.pubsub.publish(this.pubsub.NAVIGATE, model.get("navEvent"), {"onlySelected" : onlySelected });
+
+          var args = _.extend({"onlySelected" : onlySelected}, model.get("params"));
+          this.pubsub.publish(this.pubsub.NAVIGATE, model.get("navEvent"), args);
+
         }
         model.set("selected", false);
       }
