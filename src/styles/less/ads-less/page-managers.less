@@ -31,12 +31,6 @@ s-search-bar-motion is applied */
 
     &:hover {
       .lh-box-shadow(1 1px 5px darken(@gray-light, 4%));
-      //      width:150px;
-      //
-      //      .descriptor {
-      //        display: inline-block
-      //      }
-      .button-shadow;
     }
   }
 
@@ -79,15 +73,6 @@ s-search-bar-motion is applied */
 /* Styles for results and abstract page */
 
 
-.s-content-container {
-
-  border-radius: @border-radius-base;
-  background-color: @body-bg;
-  border: 1px solid lighten(@border-light-default-color, 8%);
-  .default-box-shadow;
-
-}
-
 .s-main-content-container{
 
   .clearfix;
@@ -96,6 +81,20 @@ s-search-bar-motion is applied */
   min-height: 600px;
   padding-bottom: 20px;
   position: relative;
+}
+
+//this class is useful if you want to apply  a background to
+//div[data-widget] when the widget doesnt always need the background
+
+.s-inner-div-background {
+  margin-top: 30px;
+
+
+  >div {
+    .s-main-content-container;
+    margin: 0;
+  }
+
 }
 
 .s-dynamic-page-body {

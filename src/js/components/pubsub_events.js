@@ -165,7 +165,10 @@ define([], function() {
     /*
     * is triggered by app storage itself when list of selected papers changes
     * */
-    STORAGE_PAPER_UPDATE: "[User]-Paper-Update"
+    STORAGE_PAPER_UPDATE: "[User]-Paper-Update",
+
+
+    LIBRARY_CHANGE : "[PubSub]-Library-Change"
 
 };
 

@@ -160,25 +160,41 @@
   }
 
 .s-user-pill-nav {
-  background: #fff;
-  margin-left: -15px;
-  margin-right: -15px;
-  margin-top: 0px;
-  padding: 5px 1%;
+  margin: 0 -15px;
+  padding: 0 1%;
   position: relative;
   z-index: @z-index-1;
-  .s-motion-shadow();
+  background-color: lighten(@navbar-inverse-bg, 5%);
+  color: lighten(@navbar-inverse-color, 2%);
+  border-top: 1px solid black;
 
-  li+li{
-    margin-left:2%;
+  li>a{
+    padding: 15px 15px 11px 15px;
+    border-radius: 0;
+    font-size: 18px;
+    background-color: lighten(@navbar-inverse-bg, 5%);
+    border-bottom: 4px solid lighten(@navbar-inverse-bg, 5%);
+    color:lighten(@navbar-inverse-color, 2%);
+
+    &:hover {
+      background-color: lighten(@navbar-inverse-bg, 8%);
+      border-bottom: 4px solid lighten(@navbar-inverse-bg, 8%);
+
+    }
+
   }
 
-  li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus{
-    background-color: @brand-primary-faded !important;
-  }
+  >li.active>a{
+    background-color: lighten(@navbar-inverse-bg, 10%);
+    &:hover {
+      background-color:lighten(@navbar-inverse-bg, 10%);
+      color: lighten(@brand-primary-faded, 10%);
+      border-bottom: 4px solid  @brand-primary-faded;;
 
-  >li>a{
-    padding: 8px 15px;
+    }
+    color: lighten(@brand-primary-faded, 10%);
+    border-bottom: 4px solid @brand-primary-faded;
+
   }
 
 }

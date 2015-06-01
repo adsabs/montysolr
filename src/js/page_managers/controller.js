@@ -103,8 +103,12 @@ define([
         }
         else {
           this.hideAll();
-          // show just those that are requested
-          _.each(arguments, function(widgetName) {
+
+          // show just those that are requested + always show alerts widget
+          var args = [].slice.apply(arguments);
+          args.push("AlertsWidget");
+
+          _.each(args, function(widgetName) {
             if (self.widgets[widgetName]) {
               var widget = self.widgets[widgetName];
 

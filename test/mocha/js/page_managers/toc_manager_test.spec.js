@@ -230,6 +230,40 @@ define([
 
       });
 
+      it("destroys itself properly", function(){
+        var app = new Application({debug: false});
+        delete config.core.objects.Navigator;
+        config.widgets.PageManager = 'js/wraps/abstract_page_manager/abstract_page_manager';
+
+        app.loadModules(config).done(function () {
+
+          // hack (normally this will not be the usage pattern)
+          var pageManager = app.getWidget("PageManager");
+          app.activate();
+          pageManager.assemble(app);
+
+          var view = pageManager.show();
+
+          pageManager.destroy();
+
+          expect(_.isEmpty(pageManager._listeningTo)).to.be.true;
+
+          expect(_.isEmpty(pageManager.widgets)).to.be.true;
+
+          expect(view.isDestroyed).to.be.true;
+
+
+
+
+        });
+
+
+
+
+
+
+      })
+
     })
 
   });

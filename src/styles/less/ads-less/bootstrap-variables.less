@@ -24,7 +24,7 @@
 
 
 //extra colors
-@brand-primary-faded:   lighten(@brand-primary, 20%);
+@brand-primary-faded: lighten(@brand-primary, 20%);
 @darker-background : lighten(@gray-lighter, 2%);
 @border-default-color: darken(@gray-lighter, 3%);
 
@@ -158,7 +158,7 @@
 @btn-success-border:             darken(@btn-success-bg, 10%);
 
 @btn-info-color:                 #fff;
-@btn-info-bg:                    @brand-info;
+@btn-info-bg:                    saturate(@brand-info, 5%);
 @btn-info-border:                darken(@btn-info-bg, 5%);
 
 @btn-danger-color:               #fff;
@@ -471,19 +471,19 @@
 
 @state-success-text:             darken(@brand-success, 15%);
 @state-success-bg:               #dff0d8;
-@state-success-border:           darken(@state-success-bg, 3%);
+@state-success-border:           @brand-success;
 
 @state-info-text:                darken(@brand-info, 10%);
 @state-info-bg:                  #d9edf7;
-@state-info-border:              darken(@state-info-bg, 3%);
+@state-info-border:              @brand-info;
 
 @state-warning-text:             darken(@brand-warning, 25%);
 @state-warning-bg:               #fcf8e3;
-@state-warning-border:           darken(@state-warning-text, 3%);
+@state-warning-border:           @brand-warning;
 
 @state-danger-text:              darken(@brand-danger, 10%);
 @state-danger-bg:                #f2dede;
-@state-danger-border:            darken(@state-danger-bg, 3%);
+@state-danger-border:            @brand-danger;
 
 
 //== Tooltips

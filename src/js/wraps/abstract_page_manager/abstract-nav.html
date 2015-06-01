@@ -6,7 +6,6 @@
      data-ShowTableOfContents='{"title": "Volume Content", "path":"tableofcontents", "category":"view", "showCount": false}'
      data-ShowSimilar='{"title": "Similar Papers", "path":"similar", "category":"view"}'
      data-ShowGraphics='{"title": "Graphics", "path":"graphics", "showCount": false, "category":"view"}'
-     data-ShowPaperMetrics='{"title": "Metrics", "path":"metrics", "showCount": false, "category":"explore"}'
      data-ShowPaperExport__bibtex='{"title": "in BibTEX", "path":"export/bibtex", "category":"export", "alwaysThere":"true"}'
      data-ShowPaperExport__aastex='{"title": "in AASTex", "path":"export/aastex", "category":"export", "alwaysThere":"true"}'
      data-ShowPaperExport__endnote='{"title": "in Endnote", "path":"export/endnote", "category":"export", "alwaysThere":"true"}'
@@ -38,24 +37,6 @@
             <span class="s-content">
             {{this.title}}
             </span>
-    </div>
-    </a>
-
-    {{/each}}
-
-    <div class="s-nav-header s-analyze-nav">explore   <i class="icon-explore"></i></div>
-
-    {{#each explore}}
-
-    <a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}}  >
-    <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}} {{#unless this.isActive}} s-nav-inactive{{/unless}}" data-widget-id="{{this.id}}">
-        <span class="s-content">
-         {{this.title}}
-        {{#if this.showCount}}
-
-       <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
-        {{/if}}
-      </span>
     </div>
     </a>
 

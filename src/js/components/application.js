@@ -278,6 +278,7 @@ define([
      * @private
      */
     _loadModules: function(sectionName, modulePrescription, ignoreErrors) {
+
       var self = this;
       this._checkPrescription(modulePrescription);
 
@@ -293,7 +294,7 @@ define([
       var defer = $.Deferred();
 
       var callback = function () {
-        //console.log('callback', sectionName, arguments)
+        console.timeEnd("startLoading"+sectionName)
         var modules = arguments;
         _.each(implNames, function (name, idx, implList) {
           ret[name] = modules[idx];
@@ -313,6 +314,8 @@ define([
         }
         defer.reject();
       };
+
+      console.time("startLoading"+sectionName)
 
       // start loading the modules
       //console.log('loading', implNames, impls)

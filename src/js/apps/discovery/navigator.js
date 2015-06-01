@@ -50,6 +50,7 @@ define([
           self.pubsub.publish(self.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data))
         };
 
+        //right now, user navbar widget depends on this to show the correct highlighted pill
         var publishPageChange = function(pageName){
           self.pubsub.publish(self.pubSubKey, self.pubsub.PAGE_CHANGE, pageName);
         };
@@ -59,11 +60,11 @@ define([
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
           'ExportDropdown', 'VisualizationDropdown', 'SearchWidget',
-          'Sort', 'AlertsWidget'
+          'Sort'
         ];
 
         var detailsPageAlwaysVisible = [
-          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'AlertsWidget', 'ShowGraphicsSidebar'
+          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'ShowGraphicsSidebar'
         ];
 
         function redirectIfNotSignedIn(){
@@ -85,8 +86,6 @@ define([
         });
 
 
-
-
         //request for the widget
         this.set("UserSettings", function(page, data){
           if (redirectIfNotSignedIn())
@@ -95,7 +94,7 @@ define([
           //set left hand nav panel correctly and tell the view what to show
           app.getWidget("SettingsPage").setActive("UserSettings",  subView);
           app.getObject('MasterPageManager').show("SettingsPage",
-            ['UserSettings', 'AlertsWidget', "UserNavbarWidget"]);
+            ['UserSettings', "UserNavbarWidget"]);
 
           this.route = "#user/settings/"+subView;
           publishPageChange("settings-page");
@@ -109,20 +108,116 @@ define([
           //set left hand nav panel correctly and tell the view what to show
           app.getWidget("SettingsPage").setActive("UserPreferences");
           app.getObject('MasterPageManager').show("SettingsPage",
-            ['UserPreferences', 'AlertsWidget', "UserNavbarWidget"]);
+            ['UserPreferences', "UserNavbarWidget"]);
 
           this.route = "#user/settings/preferences";
           publishPageChange("settings-page");
 
         });
 
-        this.set("libraries-page", function(){
+        this.set("AllLibrariesWidget", function(widget, subView){
+
+          var subView = subView || "libraries";
+
+          app.getWidget("AllLibrariesWidget").setSubView(subView);
           app.getObject('MasterPageManager').show("LibrariesPage",
-            []);
+            ["AllLibrariesWidget", "UserNavbarWidget"]);
+
+          this.route = "#user/libraries/";
           publishPageChange("libraries-page");
 
         });
 
+        this.set("IndividualLibraryWidget", function(widget, data){
+
+          var sub = data.sub, id = data.id;
+
+          if (!_.contains(["library", "admin", "metrics", "export", "visualization"], sub)){
+            throw new Error("no valid subview provided to individual library widget");
+          }
+
+          app.getWidget("IndividualLibraryWidget").setSubView(sub, id);
+          app.getObject('MasterPageManager').show("LibrariesPage",
+            ["IndividualLibraryWidget", "UserNavbarWidget"]);
+
+          var lastSlash = (sub == "library") ? "" : "/admin";
+
+          this.route = "#user/libraries/" + id + lastSlash;
+          publishPageChange("libraries-page");
+
+        });
+
+        this.set("library-export", function(widget, data){
+
+        //first, tell export widget what to show
+        if (data.bibcodes && data.bibcodes.length) {
+
+          app.getWidget("ExportWidget").exportRecords(data.sub, data.bibcodes);
+          //then, set library tab to proper field
+          app.getWidget("IndividualLibraryWidget").setSubView("export");
+
+        }
+        else if (data.id){
+
+          app.getObject("LibraryController").getLibraryRecords(data.id).done(function(bibcodes){
+
+            bibcodes = bibcodes.documents;
+            app.getWidget("ExportWidget").exportRecords(data.sub, bibcodes);
+            //then, set library tab to proper field
+            app.getWidget("IndividualLibraryWidget").setSubView("export", data.id);
+
+          });
+
+        }
+        else {
+          throw new Error("neither an identifying id for library nor the bibcodes themselves were provided to export widget");
+          return
+        }
+
+        //then, show library page manager
+          app.getObject('MasterPageManager').show("LibrariesPage",
+            ["IndividualLibraryWidget", "UserNavbarWidget", "ExportWidget"]);
+
+          publishPageChange("libraries-page");
+
+          this.route = "#user/libraries/" + data.id + "/export/" + data.sub;
+
+        });
+
+        this.set("library-metrics", function(widget, data){
+
+          //first, tell export widget what to show
+          if (data.bibcodes && data.bibcodes.length) {
+
+            app.getWidget("Metrics").showMetricsForListOfBibcodes(data.bibcodes);
+            //then, set library tab to proper field
+            app.getWidget("IndividualLibraryWidget").setSubView("metrics");
+          }
+          else if (data.id){
+
+            app.getObject("LibraryController").getLibraryRecords(data.id).done(function(bibcodes){
+              bibcodes = bibcodes.documents;
+              app.getWidget("Metrics").showMetricsForListOfBibcodes(bibcodes);
+              //then, set library tab to proper field
+              app.getWidget("IndividualLibraryWidget").setSubView("metrics", data.id);
+            });
+
+          }
+          else {
+            throw new Error("neither an identifying id for library nor the bibcodes themselves were provided to export widget");
+            return
+          }
+
+          //then, show library page manager
+          app.getObject('MasterPageManager').show("LibrariesPage",
+            ["IndividualLibraryWidget", "UserNavbarWidget", "Metrics"]);
+
+          this.route = "#user/libraries/" + data.id + "/metrics";
+
+
+          publishPageChange("libraries-page");
+
+        });
 
         this.set("home-page", function(){
           app.getObject('MasterPageManager').show("HomePage",
@@ -139,19 +234,20 @@ define([
           if (loggedIn){
             //redirect to preferences
             app.getObject('MasterPageManager').show("SettingsPage",
-              ['UserSettings', 'AlertsWidget']);
+              ['UserSettings']);
             app.getWidget("UserSettings").setSubView("preferences");
             this.route = "#user/settings/preferences"
           }
           else {
             app.getWidget("Authentication").setSubView(subView);
-            this.route = "#user/account/"+subView;
+            this.route = "#user/account/" + subView;
             app.getObject('MasterPageManager').show("AuthenticationPage",
-              ['Authentication', 'AlertsWidget']);
+              ['Authentication']);
           }
         });
 
         this.set('results-page', function() {
+
           app.getObject('MasterPageManager').show('SearchPage',
             searchPageAlwaysVisible);
           var q = app.getObject('AppStorage').getCurrentQuery();
@@ -294,7 +390,7 @@ define([
           var orcidWidget = app.getWidget('OrcidBigWidget');
           if (orcidWidget) {
             app.getObject('MasterPageManager').show('SearchPage',
-              ['OrcidBigWidget', 'SearchWidget', 'AlertsWidget']);
+              ['OrcidBigWidget', 'SearchWidget']);
           }
           else {
             self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'index-page');
@@ -324,6 +420,8 @@ define([
         });
         this.set('show-metrics', function() {
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+
+          app.getWidget("Metrics").showMetricsForCurrentQuery();
           app.getObject('MasterPageManager').show('SearchPage',
             ['Metrics'].concat(searchPageAlwaysVisible.slice(1)));
         });

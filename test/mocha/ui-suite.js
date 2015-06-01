@@ -24,6 +24,8 @@ define([], function() {
       '/widgets/facet_widget.spec.js',
     //XXX 24/09/14 '/widgets/facet_zoomable_graph_view.spec.js',
       '/widgets/graphics_widgets.spec.js',
+      '/widgets/libraries_all.spec.js',
+      '/widgets/library_individual.spec.js',
       '/widgets/list_of_things_expanding.spec.js',
       '/widgets/list_of_things_widget.spec.js',
       '/widgets/lot_derivates.spec.js',

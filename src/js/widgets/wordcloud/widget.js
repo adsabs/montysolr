@@ -142,13 +142,9 @@ define([
     render: function() {
 
       this.$el.html(WordCloudTemplate({helpText : helpText}));
-
       this.listView.setElement(this.$(".selected-word-list")).render();
-
       //add popover listener
-
       this.$(".icon-help").popover({trigger: "hover", placement: "right", html: true});
-
       return this
     },
 
