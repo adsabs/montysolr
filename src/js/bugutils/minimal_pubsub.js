@@ -102,11 +102,11 @@ define(['underscore', 'backbone',
       this.pubsub.subscribe(this.pubsub.getPubSubKey(), 'all', _.bind(this.logAll, this));
     },
 
-    close: function(){
+    destroy: function(){
       if (this.verbose) {
         console.log('[MinSub]', 'closing');
       }
-      this.beehive.close();
+      this.beehive.destroy();
     },
 
     logAll: function(ev) {

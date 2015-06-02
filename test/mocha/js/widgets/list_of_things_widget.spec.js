@@ -135,7 +135,7 @@ define(['marionette',
         // to the page (and so the most appropriate mechanism is to close
         // the whole widget
 
-        view.close();
+        view.destroy();
         view = new PaginatedView({collection: coll, model: view.model});
 
         $w = $(view.render().el);
@@ -154,7 +154,7 @@ define(['marionette',
         expect($w.find('.details:last').hasClass("sr-only")).to.be.true;
 
 
-        view.close();
+        view.destroy();
 
         done();
       });

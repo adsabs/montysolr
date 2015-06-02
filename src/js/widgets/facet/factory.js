@@ -107,7 +107,7 @@ define([
         maxDisplayNum: 100,
         openByDefault: false,
         showOptions: true,
-        itemView: TreeView,
+        childView: TreeView,
         collection: new TreeView.CollectionClass()
       };
 
@@ -171,8 +171,8 @@ define([
         model: new FacetContainerView.ContainerModelClass({noOptions : true}),
         collection: new FacetCollection(),
         openByDefault: true,
-        itemView: options.graphView,
-        itemViewOptions : viewOptions
+        childView: options.graphView,
+        childViewOptions : viewOptions
       };
 
       var controllerOptions = {

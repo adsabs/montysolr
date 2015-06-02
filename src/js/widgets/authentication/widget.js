@@ -279,7 +279,7 @@ define([
 
   })
 
-  var AuthenticationContainer = Marionette.Layout.extend({
+  var AuthenticationContainer = Marionette.LayoutView.extend({
 
     template: ContainerTemplate,
 

@@ -66,7 +66,7 @@ define([
       });
 
       afterEach(function (done) {
-        minsub.close();
+        minsub.destroy();
         var ta = $('#test');
         if (ta) {
           ta.empty();
@@ -245,19 +245,19 @@ define([
         }};
         widget.once('orcidAction:add', uSpy);
 
-        widget.onAllInternalEvents('itemview:OrcidAction', null, {model: model, action: 'add'});
+        widget.onAllInternalEvents('childview:OrcidAction', null, {model: model, action: 'add'});
         expect(model.get('orcid').actions.add).to.be.defined;
         expect(uSpy.called).to.eql(true);
 
         uSpy.reset();
         widget.once('orcidAction:delete', uSpy);
         model.attributes.source_name = 'external; NASA ADS';
-        widget.onAllInternalEvents('itemview:OrcidAction', null, {model: model, action: 'delete'});
+        widget.onAllInternalEvents('childview:OrcidAction', null, {model: model, action: 'delete'});
         expect(model.attributes.source_name).to.eql('external');
         expect(uSpy.called).to.eql(false); // when there is still something, keep the rec
 
         model.attributes.source_name = 'NASA ADS';
-        widget.onAllInternalEvents('itemview:OrcidAction', null, {model: model, action: 'delete'});
+        widget.onAllInternalEvents('childview:OrcidAction', null, {model: model, action: 'delete'});
         expect(uSpy.called).to.eql(true);
 
         done();

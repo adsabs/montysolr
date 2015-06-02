@@ -43,7 +43,7 @@ define([
 
       /*
       afterEach(function() {
-        minsub.close();
+        minsub.destroy();
         $('#test-area').empty();
         done();
       });

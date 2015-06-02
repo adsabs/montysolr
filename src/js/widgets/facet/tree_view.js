@@ -15,7 +15,7 @@ define(['underscore',
 
     template: TreeViewTemplate,
 
-    itemViewOptions: function(){
+    childViewOptions: function(){
       var count = this.model.get("count");
       return {
         parentCount: count,

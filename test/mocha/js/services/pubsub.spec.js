@@ -19,7 +19,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       expect(p.getPubSubKey()).to.not.be.equal(p.getPubSubKey());
     });
 
-    it('has start/close methods', function() {
+    it('has start/destroy methods', function() {
       var p = new PubSub();
       expect(p.running).to.be.true; // by default, it is ready
       p.running = false;
@@ -30,7 +30,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       expect(p.publish.secondCall.args[1]).to.be.eql(PubSubEvents.OPEN_FOR_BUSINESS);
 
       p.publish.reset();
-      p.close();
+      p.destroy();
       expect(p.running).to.be.false;
       expect(p.publish.firstCall.args[1]).to.be.eql(PubSubEvents.CLOSING_GATES);
       expect(p.publish.secondCall.args[1]).to.be.eql(PubSubEvents.CLOSED_FOR_BUSINESS);
@@ -54,8 +54,8 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       expect(function() {p.unsubscribe({}, 'event', spy)}).to.throw(Error);
       expect(function() {p.unsubscribe('event', spy)}).to.throw(Error);
 
-      // close pubsub and try to use it
-      p.close();
+      // destroy pubsub and try to use it
+      p.destroy();
       expect(function() {p.subscribe(k, 'event', spy);}).to.throw.Error;
 
     });
@@ -272,9 +272,9 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
 
 
       // iface can be redefined
-      hardened = pubsub.getHardenedInstance({start: true, close: true});
+      hardened = pubsub.getHardenedInstance({start: true, destroy: true});
       expect(hardened.start).to.be.defined;
-      expect(hardened.close).to.be.defined;
+      expect(hardened.destroy).to.be.defined;
       expect(hardened.publish).to.be.defined;
       expect(hardened.subscribe).to.be.defined;
 

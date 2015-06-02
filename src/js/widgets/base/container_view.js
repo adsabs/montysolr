@@ -40,7 +40,7 @@ define([
       /**
        * The container nested inside className object
        */
-      itemViewContainer: ".widget-body",
+      childViewContainer: ".widget-body",
 
       /**
        * What to use when there is no collection yet
@@ -70,7 +70,7 @@ define([
 
         options = options || {};
 
-        //this.itemViewOptions = Marionette.getOption(this, "itemViewOptions") || {};
+        //this.childViewOptions = Marionette.getOption(this, "childViewOptions") || {};
         this.openByDefault = Marionette.getOption(this, "openByDefault");
         this.showOptions = Marionette.getOption(this, "showOptions");
 
@@ -80,7 +80,7 @@ define([
         this._states = [];
       },
 
-      itemViewOptions: function (model, index) {
+      childViewOptions: function (model, index) {
         var additionalOptions = Marionette.getOption(this, "additionalItemViewOptions") || {};
         //if this is the initial round, hide fetchnum - displaynum
         if (index < this.displayNum) {

@@ -110,7 +110,7 @@ define(["app", 'backbone', 'jquery', 'underscore'], function(app, Backbone, $, _
 		// If you hit `enter`, we're through editing the item.
 		updateOnEnter: function (e) {
 			if (e.which === app.ENTER_KEY) {
-				this.close();
+				this.destroy();
 			}
 		},
 

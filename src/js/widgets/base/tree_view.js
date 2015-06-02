@@ -42,7 +42,7 @@ define(['marionette', 'hbs!./templates/item-tree'],
         //}
       },
 
-      itemViewContainer: ".item-children",
+      childViewContainer: ".item-children",
 
       /**
        * You will need to provide the template of your choice

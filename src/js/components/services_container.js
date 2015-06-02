@@ -17,7 +17,7 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
       });
     },
 
-    close: function() {
+    destroy : function() {
       for (var service in this._services) {
         this.remove(service);
       }
@@ -36,8 +36,8 @@ define(['js/components/facade', 'js/components/generic_module', 'js/mixins/harde
     remove: function(name, service) {
       if (this._services.hasOwnProperty(name)) {
         var s = this._services[name];
-        if ('close' in s) {
-          s.close();
+        if ('destroy' in s) {
+          s.destroy();
         }
         delete this._services[name];
         return s;

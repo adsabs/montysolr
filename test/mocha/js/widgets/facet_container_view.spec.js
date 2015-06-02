@@ -37,7 +37,7 @@ define([
 
         it("can load more results and page through them (and hide load-more if there is none)", function (done) {
           var view = new FacetContainerView({
-            itemView: BaseItemView,
+            childView: BaseItemView,
             model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
             collection: new FacetCollection(),
             displayNum: 3,
@@ -94,7 +94,7 @@ define([
 
         it("can show multiple logic selection boxes and handle them", function (done) {
           var view = new FacetContainerView({
-            itemView: BaseItemView,
+            childView: BaseItemView,
             model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
             collection: new FacetCollection(),
             displayNum: 3,
@@ -118,7 +118,7 @@ define([
           view.collection.add(new Backbone.Model({title: 'foo2', value: 'bar2'}));
           view.collection.add(new Backbone.Model({title: 'foo3', value: 'bar3'}));
 
-          expect(view.refreshLogicTooltip.callCount).to.be.equal(6);
+          expect(view.refreshLogicTooltip.callCount).to.be.equal(24);
 
           //logic menu is shown only after a selection is made
 

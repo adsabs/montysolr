@@ -50,9 +50,9 @@ define([
           self.pubsub.publish(self.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data))
         };
 
-       var publishPageChange = function(pageName){
-         self.pubsub.publish(self.pubSubKey, self.pubsub.PAGE_CHANGE, pageName);
-       };
+        var publishPageChange = function(pageName){
+          self.pubsub.publish(self.pubSubKey, self.pubsub.PAGE_CHANGE, pageName);
+        };
 
         var searchPageAlwaysVisible = [
           'Results', 'QueryInfo','AuthorFacet', 'DatabaseFacet', 'RefereedFacet',
@@ -148,7 +148,7 @@ define([
             this.route = "#user/account/"+subView;
             app.getObject('MasterPageManager').show("AuthenticationPage",
               ['Authentication', 'AlertsWidget']);
-            }
+          }
         });
 
         this.set('results-page', function() {
@@ -271,12 +271,12 @@ define([
           // traffic from Orcid - user has authorized our access
           if (orcidApi.hasExchangeCode() && !orcidApi.hasAccess()) {
             orcidApi.getAccessData(orcidApi.getExchangeCode())
-            .done(function(data) {
+              .done(function(data) {
                 orcidApi.saveAccessData(data);
                 self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname +
                   ((targetRoute && _.isString(targetRoute)) ? targetRoute : window.location.hash)});
-            })
-            .fail(function() {
+              })
+              .fail(function() {
                 console.warn('Unsuccessful login to ORCID');
                 self.get('index-page').execute();
                 var alerter = app.getController('AlertsController');
@@ -285,7 +285,7 @@ define([
                   msg: 'Error getting OAuth code to access ORCID',
                   modal: true
                 }));
-            });
+              });
             return;
           }
 
@@ -293,8 +293,8 @@ define([
 
           var orcidWidget = app.getWidget('OrcidBigWidget');
           if (orcidWidget) {
-              app.getObject('MasterPageManager').show('SearchPage',
-                ['OrcidBigWidget', 'SearchWidget', 'AlertsWidget']);
+            app.getObject('MasterPageManager').show('SearchPage',
+              ['OrcidBigWidget', 'SearchWidget', 'AlertsWidget']);
           }
           else {
             self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'index-page');
@@ -330,54 +330,46 @@ define([
         this.set("visualization-closed", this.get("results-page"));
 
 
-        this.set('abstract-page', function(pageName, bibcode) {
-          //set left hand nav panel correctly
+        this.set('ShowAbstract', function(id, data){
           app.getWidget("DetailsPage").setActive("ShowAbstract");
           app.getObject('MasterPageManager').show('DetailsPage',
-            ['ShowAbstract'].concat(detailsPageAlwaysVisible)
-          );
-          if (bibcode)
-            this.route = '#abs/' + bibcode;
+            ['ShowAbstract'].concat(detailsPageAlwaysVisible));
+          this.route = data.href;
         });
-
-        this.set('ShowAbstract', function(){
-          self.get('abstract-page').execute();
-          this.route = arguments[1];
-        });
-        this.set('ShowCitations', function() {
+        this.set('ShowCitations', function(id, data) {
           //set left hand nav panel correctly
           app.getWidget("DetailsPage").setActive("ShowCitations");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCitations'].concat(detailsPageAlwaysVisible));
-          this.route = arguments[1];
+          this.route = data.href;
         });
-        this.set('ShowReferences', function() {
+        this.set('ShowReferences', function(id, data ) {
           //set left hand nav panel correctly
           app.getWidget("DetailsPage").setActive("ShowReferences");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowReferences'].concat(detailsPageAlwaysVisible));
-          this.route = arguments[1];
+          this.route = data.href;
         });
-        this.set('ShowCoreads', function() {
+        this.set('ShowCoreads', function(id, data) {
           //set left hand nav panel correctly
           app.getWidget("DetailsPage").setActive("ShowCoreads");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowCoreads'].concat(detailsPageAlwaysVisible));
-          this.route = arguments[1];
+          this.route = data.href;
         });
-        this.set('ShowTableOfContents', function() {
+        this.set('ShowTableOfContents', function(id, data) {
           //set left hand nav panel correctly
           app.getWidget("DetailsPage").setActive("ShowTableOfContents");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowTableOfContents'].concat(detailsPageAlwaysVisible));
-          this.route = arguments[1];
+          this.route = data.href;
         });
-        this.set('ShowSimilar', function() {
+        this.set('ShowSimilar', function(id, data) {
           //set left hand nav panel correctly
           app.getWidget("DetailsPage").setActive("ShowSimilar");
           app.getObject('MasterPageManager').show('DetailsPage',
             ['ShowSimilar'].concat(detailsPageAlwaysVisible));
-          this.route = arguments[1];
+          this.route = data.href;
         });
         this.set('ShowPaperMetrics', function() {
           //set left hand nav panel correctly

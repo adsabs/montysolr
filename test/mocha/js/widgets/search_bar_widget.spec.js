@@ -29,7 +29,7 @@ define([
     });
 
     afterEach(function (done) {
-      minsub.close();
+      minsub.destroy();
       var ta = $('#test');
       if (ta) {
         ta.empty();

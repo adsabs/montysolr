@@ -32,7 +32,7 @@ define([
     });
 
     afterEach(function() {
-      minsub.close();
+      minsub.destroy();
     });
 
 

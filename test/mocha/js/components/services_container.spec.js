@@ -14,7 +14,7 @@ define(['js/components/services_container', 'js/components/generic_module'],
       var sc = new ServicesContainer();
       var test = new GenericModule();
       sinon.stub(test, 'activate');
-      sinon.stub(test, 'close');
+      sinon.stub(test, 'destroy');
 
       expect(sc.add('test', test)).to.be.OK;
       expect(sc.has('test')).to.be.true;
@@ -25,7 +25,7 @@ define(['js/components/services_container', 'js/components/generic_module'],
       expect(sc.remove('test')).to.be.OK;
       expect(sc.has('test')).to.be.false;
 
-      expect(test.close.callCount).to.be.equal(1);
+      expect(test.destroy.callCount).to.be.equal(1);
     });
 
     it("knows how to create unique, write-protected version of itself", function() {

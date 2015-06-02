@@ -98,8 +98,8 @@ define([
 
       className : "btn-group s-dropdown-widget",
 
-      itemView: DropdownItemView,
-      itemViewContainer: ".link-container",
+      childView: DropdownItemView,
+      childViewContainer: ".link-container",
       template: dropdownTemplate,
 
       serializeData: function () {

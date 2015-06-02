@@ -35,7 +35,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
       afterEach(function(){
         $("#test").empty();
-        minsub.close();
+        minsub.destroy();
       });
 
       it("should be a simple widget consisting of Base Widget, an ItemView, and a Backbone Model", function(){

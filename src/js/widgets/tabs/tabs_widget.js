@@ -56,7 +56,7 @@ define([
         this.beforeRender();
       }
       this.trigger("before:render", this);
-      this.trigger("item:before:render", this);
+      this.trigger("before:render", this);
 
       var $tempEl = $(outerTemplate());
       var $nav = $tempEl.find("ul.nav"),
@@ -79,15 +79,15 @@ define([
         this.onRender();
       }
       this.trigger("render", this);
-      this.trigger("item:rendered", this);
+      this.trigger("render", this);
       return this;
 
     },
 
-    onClose: function () {
+    onDestroy: function () {
       _.each(this.tabs, function (t) {
-        if (t.widget.close) {
-          t.widget.close();
+        if (t.widget.destroy) {
+          t.widget.destroy();
         }
         else if (t.widget.remove) {
           t.widget.remove();

@@ -32,7 +32,7 @@ define([
         coll.add(new TreeView.ModelClass({title: 'ooo', value: 'bao' , 'children': []}));
 
         var view = new BaseContainerView({
-          itemView: TreeView,
+          childView: TreeView,
           model: new BaseContainerView.ContainerModelClass({title: "Widget Title"}),
           collection: coll,
           openByDefault:true

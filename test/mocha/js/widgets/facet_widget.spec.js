@@ -58,11 +58,12 @@ define([
         if (ta) {
           ta.empty();
         }
-        minsub.close();
+        minsub.destroy();
         done();
       });
 
       it("should return FacetWidget", function(done) {
+
         var w = new FacetWidget({
           view: new FacetContainerView({
             model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
@@ -236,7 +237,7 @@ define([
             "facet.mincount": "1"
           },
           view: new FacetContainerView({
-            itemView: FacetTreeView,
+            childView: FacetTreeView,
             model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
             collection: new TreeView.CollectionClass(),
             displayNum: 3,
@@ -249,6 +250,7 @@ define([
         });
         sinon.spy(widget, "handleTreeExpansion");
         sinon.spy(widget, "processFacetResponse");
+        debugger
 
         widget.activate(minsub.beehive.getHardenedInstance());
         minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));

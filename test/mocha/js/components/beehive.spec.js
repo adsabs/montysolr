@@ -20,11 +20,11 @@ define(['js/components/generic_module', 'js/mixins/dependon',
       var beehive = new BeeHive();
       var spy = sinon.spy();
       var M = GenericModule.extend({
-        close: spy
+        destroy: spy
       });
       var module = new M();
       beehive.addService('foo', module);
-      beehive.close();
+      beehive.destroy();
       expect(spy.callCount).to.be.equal(1);
     });
 
@@ -38,10 +38,10 @@ define(['js/components/generic_module', 'js/mixins/dependon',
     beforeEach(function(done) {
       beehive = new BeeHive();
       var service1 = new (GenericModule.extend({
-        close: sinon.spy()
+        destroy: sinon.spy()
       }))();
       var service2 = new (GenericModule.extend({
-        close: sinon.spy()
+        destroy: sinon.spy()
       }))();
       beehive.addService('S1', service1);
       beehive.addService('S2', service2);
@@ -49,7 +49,7 @@ define(['js/components/generic_module', 'js/mixins/dependon',
     });
 
     afterEach(function(done) {
-      beehive.close();
+      beehive.destroy();
       beehive = null;
       done();
     });

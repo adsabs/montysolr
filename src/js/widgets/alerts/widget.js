@@ -60,7 +60,7 @@ define([
         "change": 'render'
       },
 
-      close: function() {
+      destroy: function() {
         if (this.model.get('modal')) {
           var that = this;
           this.$el.find('#alertBox').modal('hide').on('hidden.bs.modal', function() {
@@ -168,7 +168,7 @@ define([
 
       clearView : function(){
         //to prevent re-rendering in inopportune moments
-        this.view.close();
+        this.view.destroy();
       },
 
       alert: function(feedback) {

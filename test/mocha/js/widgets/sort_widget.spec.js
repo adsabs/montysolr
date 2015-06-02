@@ -28,7 +28,7 @@ define([
 
       afterEach(function() {
         if (minSub){
-          minSub.close();
+          minSub.destroy();
         }
         $("#test").empty()
       });

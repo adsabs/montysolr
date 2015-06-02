@@ -484,9 +484,9 @@ define([
 
     close : function(){
 
-      this.listView.close();
-      this.view.close();
-      Marionette.Controller.prototype.close.apply(this, arguments);
+      this.listView.destroy();
+      this.view.destroy();
+      Marionette.Controller.prototype.destroy.apply(this, arguments);
     },
 
     setCurrentQuery: function () {

@@ -40,7 +40,7 @@ define([
 
       it("by default it shows nothing", function() {
         var view = new BaseContainerView({
-          itemView: BaseItemView
+          childView: BaseItemView
         });
         var $v = $(view.render().el);
         expect($v.find('.widget-name').length).to.be.equal(1);
@@ -49,7 +49,7 @@ define([
 
 
         var view = new BaseContainerView({
-          itemView: BaseItemView,
+          childView: BaseItemView,
           model: new BaseContainerView.ContainerModelClass({title: "Widget Title"})
         });
         var $v = $(view.render().el);
@@ -59,7 +59,7 @@ define([
       it("to render something, it needs a collection", function() {
 
         var view = new BaseContainerView({
-          itemView: BaseItemView,
+          childView: BaseItemView,
           model: new BaseContainerView.ContainerModelClass({title: "Widget Title"}),
           collection: new Backbone.Collection(null, {model: wModel})
         });
@@ -93,7 +93,7 @@ define([
         c.add(new Backbone.Model({title: 'foo', value: 'baz'}));
 
         var view = new BaseContainerView({
-          itemView: BaseItemView,
+          childView: BaseItemView,
           model: new BaseContainerView.ContainerModelClass({title: "Widget Title"}),
           collection: c,
           openByDefault: true,
@@ -114,7 +114,7 @@ define([
         // we'll render container inside container - the nested one will be collapsed
         // by default
         var view = new BaseContainerView({
-          itemView: BaseContainerView.extend({openByDefault:false}),
+          childView: BaseContainerView.extend({openByDefault:false}),
           model: new BaseContainerView.ContainerModelClass({title: "Widget Title"}),
           collection: c,
           openByDefault: true
@@ -166,7 +166,7 @@ define([
         });
 
         var view = new Modified({
-          itemView: BaseItemView,
+          childView: BaseItemView,
           model: new BaseContainerView.ContainerModelClass({title: "Widget Title"}),
           collection: c,
           openByDefault: true,
