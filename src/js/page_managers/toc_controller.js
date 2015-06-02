@@ -9,8 +9,8 @@ define([
     ) {
 
     /*
-    * need to provide a toc template for the toc view when you inherit from this
-    * */
+     * need to provide a toc template for the toc view when you inherit from this
+     * */
 
     var PageManagerController = BasicPageManagerController.extend({
 
@@ -57,8 +57,7 @@ define([
           this.broadcast('page-manager-message', event, data);
         }
         else if (event == 'widget-selected') {
-          console.log("publish!")
-          this.pubsub.publish(this.pubsub.NAVIGATE, data.idAttribute, {subView: data.subView, href: data.href });
+          this.pubsub.publish(this.pubsub.NAVIGATE, data.idAttribute, data);
         }
         else if (event == 'broadcast-payload'){
           this.broadcast('page-manager-message', event, data);

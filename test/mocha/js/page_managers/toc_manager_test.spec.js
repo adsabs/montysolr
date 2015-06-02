@@ -211,9 +211,11 @@ define([
           view.$("div[data-widget-id=ShowPaperExport__aastex]").click();
 
           expect(spy.args[0][0]).to.eql("ShowPaperExport");
-          expect(spy.args[0][1]).to.eql({subView: "aastex", href: "/abs//export/aastex"});
+          expect(spy.args[0][1]["idAttribute"]).to.eql("ShowPaperExport");
+          expect(spy.args[0][1]["href"]).to.eql("/abs//export/aastex");
 
-          pageManager.widgets.ShowPaperExport.setSubView = sinon.spy();
+
+      pageManager.widgets.ShowPaperExport.setSubView = sinon.spy();
 
           //should both set the toc nav collection properly, and tell the export widget which view to show
           pageManager.setActive("ShowPaperExport", "aastex");

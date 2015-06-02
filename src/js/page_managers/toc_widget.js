@@ -8,11 +8,11 @@ define([
   ){
 
   /*
-  * widget to coordinate the showing of other widgets within the framework of a TOC page manager
-  * You need to provide a template with a nav that looks like this: (with the data attributes
-  * corresponding to the widgets in the main page manager template)
-  *
-  * <nav data-widget="TOCWidget"
+   * widget to coordinate the showing of other widgets within the framework of a TOC page manager
+   * You need to provide a template with a nav that looks like this: (with the data attributes
+   * corresponding to the widgets in the main page manager template)
+   *
+   * <nav data-widget="TOCWidget"
    data-ShowAbstract='{"title": "Abstract", "path":"abstract", "showCount": false, "isSelected":true, "category":"view"}'
    data-ShowCitations='{"title": "Citations", "path":"citations", "category":"view"}'
    data-ShowReferences='{"title": "References", "path":"references", "category":"view"}'
@@ -22,7 +22,7 @@ define([
    toc widget listens to "new-widget" event and, if it can find teh corresponding data in the markup,
    adds an entry to its nav
    the toc controller will call a navigate event when the toc widget emits a "widget-selected" event
-  * */
+   * */
 
 
   var WidgetData = Backbone.Model.extend({
@@ -90,8 +90,8 @@ define([
 
     serializeData : function(){
       var data = this.model.toJSON(),
-          col = this.collection.toJSON(),
-          groupedCollectionJSON;
+        col = this.collection.toJSON(),
+        groupedCollectionJSON;
 
       //if any entries from the data has a "category" param, group by that, otherwise, just return it
       if (_.find(col, function(c){ return c.category !== undefined; })){
@@ -112,27 +112,29 @@ define([
     },
 
     navigateToPage :  function (e) {
-        var $t = $(e.currentTarget), idAttribute = $t.find("div").attr("data-widget-id");
+      var $t = $(e.currentTarget), idAttribute = $t.find("div").attr("data-widget-id");
 
-        //it's inactive
-        if ($t.find("div").hasClass("s-nav-inactive")) {
-          return false;
+      var data = { idAttribute : idAttribute };
+
+      //it's inactive
+      if ($t.find("div").hasClass("s-nav-inactive")) {
+        return false;
+      }
+      //it's active
+      else if (idAttribute !== this.$(".s-nav-active").attr("data-widget-id")) {
+        data.href = $t.attr("href");
+
+        var splitName = idAttribute.indexOf("__") > -1 ? idAttribute.split("__") : undefined;
+
+        if (splitName){
+          data.idAttribute = splitName[0];
+          data.subView = splitName[1];
         }
-        //it's active
-        else if (idAttribute !== this.$(".s-nav-active").attr("data-widget-id")) {
-          var href = $t.attr("href"),
-              subView,
-              splitName = idAttribute.indexOf("__") > -1 ? idAttribute.split("__") : undefined;
 
-          if (splitName){
-            idAttribute = splitName[0];
-            subView = splitName[1];
-          }
-
-          //click triggers event that is shared by the navigator, which is responsible for updating the nav view to
-          //the correct view
-          this.trigger('page-manager-event', 'widget-selected', {idAttribute: idAttribute, subView: subView, href: href});
-        }
+        //click triggers event that is shared by the navigator, which is responsible for updating the nav view to
+        //the correct view
+        this.trigger('page-manager-event', 'widget-selected', data);
+      }
       return false;
     },
 
@@ -148,17 +150,17 @@ define([
     },
 
     /*
-      every time the bibcode changes (got by subscribing to this.pubsub.DISPLAY_DOCUMENTS)
-      clear the collection of isactive and numfound in the models of the toc widget, so that the next view on
-      the widget will show the appropriate defaults
+     every time the bibcode changes (got by subscribing to this.pubsub.DISPLAY_DOCUMENTS)
+     clear the collection of isactive and numfound in the models of the toc widget, so that the next view on
+     the widget will show the appropriate defaults
      */
     resetActiveStates : function(){
       this.collection.each(function(model){
         //abstract and all export options
         //reset only widgets that aren't there 100% of the time
         if (!model.get("alwaysThere")){
-        model.set("isActive", false);
-        model.set("numFound", 0);
+          model.set("isActive", false);
+          model.set("numFound", 0);
         }
         else {
           model.set("isActive", true);
@@ -187,8 +189,8 @@ define([
             var toAdd = _.extend(_.clone(w[1]), { id: widgetId + "__" + w[0].split("__")[1]});
             this.collection.add(toAdd);
           }, this);
-         }
         }
+      }
       else if (event == 'widget-ready') {
         var model = this.collection.get(data.widgetId);
         _.defaults(data, {isActive: data.numFound ? true : false});
@@ -200,8 +202,8 @@ define([
         this.model.set("bibcode", data.bibcode);
       }
       else if (event == "dynamic-nav"){
-       //expects object like {links : [{title: x, id : y}]}
-      //insert dynamic nav entries into the nav template
+        //expects object like {links : [{title: x, id : y}]}
+        //insert dynamic nav entries into the nav template
 
       }
     }

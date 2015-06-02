@@ -96,18 +96,20 @@ define([
         q = new ApiQuery({'q': 'identifier:' + this.queryUpdater.quoteIfNecessary(bibcode), 'fl': 'bibcode'});
         req = new ApiRequest({query: q, target: ApiTargets.SEARCH, options: {
           done: function(resp) {
-            var navigateString;
+            var navigateString, href;
             if (resp.response && resp.response.docs && resp.response.docs[0]) {
               bibcode = resp.response.docs[0].bibcode;
               self.pubsub.publish(self.pubsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
             }
             if (!subPage) {
-              navigateString = 'abstract-page';
+              navigateString = 'ShowAbstract';
+              href = "#abs/" + bibcode + "/abstract"
             }
             else {
               navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
+              href =  "#abs/" + bibcode + "/" + subPage;
             }
-            self.pubsub.publish(self.pubsub.NAVIGATE, navigateString, bibcode);
+            self.pubsub.publish(self.pubsub.NAVIGATE, navigateString, {href : href});
           },
           fail: function() {
             console.log('Cannot identify page to load, bibcode: ' + bibcode);
