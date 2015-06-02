@@ -57,7 +57,7 @@ define(['marionette', 'backbone', 'js/widgets/tabs/tabs_widget'], function (Mari
 
     it("should close (Marionette) or remove (Backbone) all views when it itself is closed", function(done){
 
-     tabs.close();
+     tabs.destroy();
 
      expect(removeCount).to.equal(2);
      done();

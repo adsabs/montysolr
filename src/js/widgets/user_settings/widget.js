@@ -228,7 +228,7 @@ define([
   var UserSettingsView, UserSettings;
 
 
-  UserSettingsView = Marionette.Layout.extend({
+  UserSettingsView = Marionette.LayoutView.extend({
 
     initialize : function(options){
       options = options ||{};
@@ -337,7 +337,6 @@ UserSettings = BaseWidget.extend({
    activate : function(beehive) {
      this.beehive = beehive;
      this.pubsub = beehive.Services.get('PubSub');
-     debugger
 
      _.bindAll(this, ["handleUserAnnouncement", "handleOutsideNavigate"]);
      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);

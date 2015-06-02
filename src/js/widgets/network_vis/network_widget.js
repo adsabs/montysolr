@@ -74,7 +74,7 @@ define([
 
       template: filterContainerTemplate,
 
-      itemViewContainer: ".dropdown-menu",
+      childViewContainer: ".dropdown-menu",
 
       events: {
         "click .apply-filter": "initiateFilter",

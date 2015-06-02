@@ -50,8 +50,8 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
 
     var WidgetView = Marionette.CompositeView.extend({
       template : WidgetTemplate,
-      itemView : ItemView,
-      itemViewContainer: "#api-query-values",
+      childView : ItemView,
+      childViewContainer: "#api-query-values",
       events: {
         'click button#api-query-load': 'loadApiQuery',
         'click button#api-query-add': 'addNewItem',
@@ -131,13 +131,13 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         //console.log('onAll', arguments[0]);
         var event = arguments[0];
 
-        if (event == 'itemview:remove-clicked') {
+        if (event == 'childview:remove-clicked') {
           arguments[2].destroy();
         }
-        else if (event == 'itemview:key-changed') {
+        else if (event == 'childview:key-changed') {
           arguments[2].set('key', arguments[3]);;
         }
-        else if (event == 'itemview:value-changed') {
+        else if (event == 'childview:value-changed') {
           arguments[2].set('value', arguments[3]);;
         }
         else if (event == 'add-new-item') {

@@ -82,15 +82,15 @@ define([
       },
 
       className: "list-of-things",
-      itemView: ItemView,
+      childView: ItemView,
       alreadyRendered: false,
 
       xshowCollection: function(){
         var ItemView;
         this.collection.each(function(item, index){
           if (item.attributes.visible) {
-            ItemView = this.getItemView(item);
-            this.addItemView(item, ItemView, index);
+            ItemView = this.getChildView(item);
+            this.addChild(item, ItemView, index);
           }
         }, this);
       },
@@ -105,7 +105,7 @@ define([
         }
       },
 
-      itemViewContainer: ".results-list",
+      childViewContainer: ".results-list",
       events: {
         "click .show-details": "toggleDetails",
         "click a[data-paginate]": "changePage",

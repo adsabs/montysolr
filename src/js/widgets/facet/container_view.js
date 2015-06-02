@@ -38,16 +38,16 @@ define(['backbone', 'marionette',
 
           this.on('all', function(ev, info) {
             if (ev.indexOf('itemClicked') > -1
-              || ev.indexOf('collection:rendered') > -1
+              || ev.indexOf('render') > -1
               || ev.indexOf('treeClicked') > -1) {
               this.refreshLogicTooltip();
             }
           });
 
-          //this.on("itemview:itemClicked", this.refreshLogicTooltip);
+          //this.on("childview:itemClicked", this.refreshLogicTooltip);
 
           //clear out logic template when collection is reset
-          //this.on("composite:collection:rendered", this.refreshLogicTooltip);
+          //this.on("render:collection", this.refreshLogicTooltip);
 
           // for debugging
           //this.on('all', function(ev) {console.log(ev, arguments)});
@@ -60,10 +60,10 @@ define(['backbone', 'marionette',
       },
 
       //id: "search-results",
-      itemView: BaseItemView,
+      childView: BaseItemView,
       template: WidgetContainerTemplate,
 
-      itemViewContainer:".widget-body",
+      childViewContainer:".widget-body",
 
       events: {
 
@@ -76,7 +76,7 @@ define(['backbone', 'marionette',
 
       },
 
-      itemViewOptions: function (model, index) {
+      childViewOptions: function (model, index) {
 //       merging in options from factory stage
         var additionalOptions = Marionette.getOption(this, "additionalItemViewOptions") || {};
 

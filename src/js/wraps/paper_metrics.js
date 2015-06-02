@@ -72,7 +72,7 @@ define([
       onShow: function() {
         this.innerWidget.resetWidget();
         this.innerWidget.processResponse(this._response);
-        this.innerWidget.childViews.papersGraphView.close();
+        this.innerWidget.childViews.papersGraphView.destroy();
       }
 
     });

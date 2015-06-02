@@ -223,8 +223,8 @@ define([
       return query;
     },
 
-    onClose: function () {
-      this.view.close();
+    onDestroy: function () {
+      this.view.destroy();
     },
 
     /**

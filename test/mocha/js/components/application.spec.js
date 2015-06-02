@@ -41,9 +41,9 @@ define([
       var app = new Application();
       expect(app.getBeeHive()).to.be.defined;
       var beehive = app.getBeeHive();
-      sinon.spy(beehive, 'close');
-      app.close();
-      expect(beehive.close.called).to.be.true;
+      sinon.spy(beehive, 'destroy');
+      app.destroy();
+      expect(beehive.destroy.called).to.be.true;
       done();
     });
 

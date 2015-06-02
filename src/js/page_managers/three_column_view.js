@@ -36,8 +36,8 @@ define([
         this.model = new ResultsStateModel();
       },
 
-      close: function() {
-        Marionette.ItemView.prototype.close.call(this, arguments);
+      destroy: function() {
+        Marionette.ItemView.prototype.destroy.call(this, arguments);
       },
 
       template : pageTemplate,

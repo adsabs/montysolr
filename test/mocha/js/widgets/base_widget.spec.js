@@ -42,7 +42,7 @@ define([
       });
 
       afterEach(function() {
-        minsub.close();
+        minsub.destroy();
       });
 
       it("returns BaseWidget object", function() {
@@ -78,7 +78,7 @@ define([
         var widget = new BaseWidget();
 
         expect(widget.activate).to.be.instanceof(Function);
-        expect(widget.close).to.be.instanceof(Function);
+        expect(widget.destroy).to.be.instanceof(Function);
         expect(widget.render).to.be.instanceof(Function);
       });
 

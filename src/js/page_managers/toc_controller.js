@@ -77,10 +77,10 @@ define([
         this.widgets.tocWidget.collection.selectOne(widgetName);
       },
 
-      onClose: function () {
+      onDestroy: function () {
         this.stopListening();
         this.widgets = {};
-        this.view.close();
+        this.view.destroy();
       }
 
     });

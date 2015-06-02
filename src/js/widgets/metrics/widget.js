@@ -272,7 +272,7 @@ define([
 
   var ContainerModel = UserChangeMixin.Model;
 
-  var ContainerView = Marionette.Layout.extend({
+  var ContainerView = Marionette.LayoutView.extend({
 
     onRender : function(){
       this.renderMetadata();
@@ -344,7 +344,7 @@ define([
       //empty the container view
       _.each(this.view.regions, function(v,k){
         if (this.view[k].currentView)
-          this.view[k].currentView.close();
+          this.view[k].currentView.destroy();
       }, this);
     },
 

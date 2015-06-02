@@ -96,7 +96,7 @@ define(['backbone', 'underscore', 'js/components/generic_module', 'js/components
      * Sends a signal 'pubsub.closing' to all listeners and then
      * immediately shuts down the queue and removes any keys
      */
-    close: function() {
+    destroy : function() {
       this.publish(this.pubSubKey, this.CLOSING_GATES);
       this.off();
       this.publish(this.pubSubKey, this.CLOSED_FOR_BUSINESS);

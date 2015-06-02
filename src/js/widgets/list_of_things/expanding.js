@@ -142,7 +142,7 @@ define([
 
         //console.log(ev);
 
-        if (ev == 'composite:rendered') {
+        if (ev == 'render') {
           this.view.disableShowMore();
           this.view.toggleDetailsControls(false);
         }

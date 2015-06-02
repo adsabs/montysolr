@@ -330,8 +330,8 @@ define([
       return deferred;
     },
 
-    close: function() {
-      this.getBeeHive().close();
+    destroy : function() {
+      this.getBeeHive().destroy();
     },
     activate: function(options) {
       var beehive = this.getBeeHive();

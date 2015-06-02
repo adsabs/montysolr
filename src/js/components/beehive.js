@@ -38,9 +38,9 @@ define([
       this.active = true;
     },
 
-    close: function() {
-      this.Services.close(arguments);
-      this.Objects.close(arguments);
+    destroy : function() {
+      this.Services.destroy(arguments);
+      this.Objects.destroy(arguments);
       this.active = false;
     },
 

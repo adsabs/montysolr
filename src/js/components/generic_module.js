@@ -20,7 +20,7 @@ define(['backbone', 'underscore'], function(Backbone, _) {
   _.extend(Module.prototype, Backbone.Events, {
     className: 'GenericModule',
     initialize: function() {},
-    close: function() {},
+    destroy: function() {},
     activate: function(options) {
       _.extend(this, _.pick(options, moduleOptions));
     }

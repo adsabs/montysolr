@@ -73,7 +73,7 @@ define([
       });
 
       afterEach(function(done) {
-        beehive.close();
+        beehive.destroy();
         beehive = null;
         this.server.restore();
         done();

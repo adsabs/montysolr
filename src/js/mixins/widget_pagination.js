@@ -95,7 +95,7 @@ define(['underscore'], function (_) {
           output['before'] = function() {
             // we'll wait 50 mills after the first item was added to the collection
             // and then show the remaining items
-            view.once('after:item:added', function () {
+            view.once('add:child', function () {
                 var self = this;
                 setTimeout(function () {
                   //console.log('DisplayMore', toDisplay);

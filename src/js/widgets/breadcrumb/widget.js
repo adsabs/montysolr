@@ -51,8 +51,8 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
 
     var WidgetView = Marionette.CompositeView.extend({
       template : WidgetTemplate,
-      itemView : ItemView,
-      itemViewContainer: "#simple-breadcrumb",
+      childView : ItemView,
+      childViewContainer: "#simple-breadcrumb",
       events: {
       }
 
@@ -141,11 +141,11 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         //console.log('onAll', arguments[0]);
         var event = arguments[0];
 
-        if (event == 'itemview:item-click') {
+        if (event == 'childview:item-click') {
           // TODO: destroy all models after this one and issue new query with this request
           arguments[2].destroy();
         }
-        else if (event == 'itemview:item-remove') {
+        else if (event == 'childview:item-remove') {
           arguments[2].destroy();
         }
       },

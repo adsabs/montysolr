@@ -203,7 +203,7 @@ define([
       };
 
       WidgetClass.prototype.onAllInternalEvents = function(ev, arg1, arg2) {
-        if (ev == 'itemview:OrcidAction') {
+        if (ev == 'childview:OrcidAction') {
           var self = this;
           var data = arg2;
           var orcidApi = this.beehive.getService('OrcidApi');

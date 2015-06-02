@@ -270,30 +270,30 @@ define(['backbone',
             this._dispatchRequest(q, {collection: collection, view: view});
           }
         }
-        else if (ev.substring(ev.length-20) == 'itemview:itemClicked') {
+        else if (ev.indexOf("childview:itemClicked") > -1 ) {
           var view = arguments[arguments.length-1];
           this.handleConditionApplied(view.model);
 
         }
-        else if (ev.substring(ev.length-20) == 'itemview:treeClicked') { // hierarchical view
+        else if (ev.indexOf("childview:treeClicked") > -1 ) { // hierarchical view
           var view = arguments[arguments.length-1];
           this.handleConditionApplied(view.model);
         }
         else if (ev.indexOf('treeNodeDisplayed') > -1) {
-          if (this.hierMaxLevels > -1 && ev.split('itemview:').length >= this.hierMaxLevels+1) {
+          if (this.hierMaxLevels > -1 && ev.split('childview:').length >= this.hierMaxLevels+1) {
             return; // ignore further requests
           }
 
           var view = arguments[arguments.length-1];
           this.handleTreeExpansion(view); // see if we need to fetch deeper data
         }
-        else if (ev == 'composite:collection:rendered') {
+        else if (ev == 'render:collection') {
           this.view.displayMore(this.view.displayNum);
         }
         else if (ev == 'containerLogicSelected') {
           this.handleLogicalSelection(arg1);
         }
-        else if (ev== "itemview:navigate") {
+        else if (ev == "childview:navigate") {
           this.pubsub.publish(this.pubsub.NAVIGATE, arg2);
         }
       },
@@ -369,7 +369,6 @@ define(['backbone',
             var paginator = this.findPaginator(q).paginator;
 
             q = q.clone();
-//            value = this.queryUpdater.escapeInclWhitespace(value);
 
             var fieldName = 'q'; // + this.facetField;
             //make default limit to
@@ -392,7 +391,6 @@ define(['backbone',
         var self = this;
 
         if (conditions && _.keys(conditions).length > 0) {
-
 
           conditions = _.values(conditions);
           _.each(conditions, function(c, i, l) {

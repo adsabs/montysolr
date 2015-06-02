@@ -42,8 +42,8 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
 
     var WidgetView = Marionette.CompositeView.extend({
       template : WidgetTemplate,
-      itemView : ItemView,
-      itemViewContainer: "#api-request-values",
+      childView : ItemView,
+      childViewContainer: "#api-request-values",
       events: {
         'click button#api-request-load': 'loadApiRequest',
         'click button#api-request-run': 'runApiRequest',
@@ -109,7 +109,7 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         //console.log('onAll', arguments[0]);
         var event = arguments[0];
 
-        if (event == 'itemview:value-changed') {
+        if (event == 'childview:value-changed') {
           arguments[2].set('value', arguments[3]);;
         }
         else if (event == 'load-api-request') {

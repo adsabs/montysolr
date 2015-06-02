@@ -287,7 +287,7 @@ define([
           }, this);
 
         }
-        else if (ev == "itemview:toggleSelect") {
+        else if (ev == "childview:toggleSelect") {
           this.pubsub.publish(this.pubsub.PAPER_SELECTION, arg2.data.identifier);
         }
       },
