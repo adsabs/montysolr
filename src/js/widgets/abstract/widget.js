@@ -61,7 +61,7 @@ define([
         }
 
         _.each(authorAff, function(el, index){
-          authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"');
+          authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"').replace(/%20/g, "+");
         });
 
         if (authorAff.length > maxAuthors) {
