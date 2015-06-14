@@ -122,7 +122,6 @@ define(['underscore',
         }
         var ps = this.getBeeHive().getService('PubSub');
 
-
         if (this.__searchCycle.running && this.__searchCycle.waiting && _.keys(this.__searchCycle.waiting)) {
           console.error('The previous search cycle did not finish, and there already comes the next!');
         }

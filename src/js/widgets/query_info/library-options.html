@@ -1,0 +1,23 @@
+{{#if libraries}}
+    <div style="margin-top: 8px" class="">
+        <label for="#library-select">to an <b>existing library:</b></label>
+        <select id="library-select" name="library-select" class="form-control input-sm s-library-select">
+            {{#each libraries}}
+            <option value="{{this.id}}">{{this.name}}</option>
+            {{/each}}
+        </select>
+        <button class="btn btn-sm btn-success submit-add-to-library">submit</button>
+    </div>
+    <div style="margin:10px 0 4px 0">
+        OR
+    </div>
+    <label style="width: 200px;font-weight:500">create a new library
+        <input class="form-control input-sm s-display-inline" type="text" name="new-library-name" placeholder="New Library Name"/>
+    </label>
+    <button class="btn btn-sm btn-success submit-create-library"></i>submit</button>
+{{else}}
+    <label style="width:200px;font-weight:500">create a new library
+        <input class="form-control input-sm s-display-inline" type="text" name="new-library-name" placeholder="New Library Name"/>
+    </label>
+    <button class="btn btn-sm btn-success submit-create-library"></i>submit</button>
+{{/if}}

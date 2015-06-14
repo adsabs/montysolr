@@ -6,9 +6,9 @@ define([
   'js/components/api_request',
   'js/components/api_targets',
   'js/components/generic_module',
-   'js/mixins/dependon',
-    'js/mixins/hardened',
-    'js/components/api_feedback'
+  'js/mixins/dependon',
+  'js/mixins/hardened',
+  'js/components/api_feedback'
   ],
  function(
    Backbone,

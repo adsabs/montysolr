@@ -337,7 +337,6 @@ UserSettings = BaseWidget.extend({
    activate : function(beehive) {
      this.beehive = beehive;
      this.pubsub = beehive.Services.get('PubSub');
-
      _.bindAll(this, ["handleUserAnnouncement", "handleOutsideNavigate"]);
      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
      this.pubsub.subscribe(this.pubsub.NAVIGATE, this.handleOutsideNavigate);

@@ -1,26 +1,58 @@
-<div class="num-found s-divider-bottom"><b>{{numFound}}</b> <span class="s-light-font">search results</span>
-</div>
-<div class="currently-selected">
-<b>{{selected}}</b> <span class="s-light-font">currently selected</span>
+<div class="s-right-col-widget-container">
+    <div class="num-found"><b>{{numFound}}</b> <span class="s-light-font">search results</span>
+    </div>
+    <div class="currently-selected">
+    <b>{{selected}}</b> <span class="s-light-font">selected</span>
         {{#compare selected 0 operator=">"}}
-            &nbsp;<button class="btn btn-xs btn-default clear-selected"> x clear all</button>
+        &nbsp;&nbsp;<button class="btn btn-xs btn-default clear-selected"> <i class="fa fa-times"></i> clear all</button>
         {{/compare}}
-    <button class="btn btn-default btn-xs page-bulk-add"> <i class="fa fa-plus"></i> select all on this page</button>
-</div>
-
-
-{{#if fq}}
+        <div>
+            <button class="btn btn-default btn-xs page-bulk-add"> <i class="fa fa-plus"></i> select all on page</button>
+        </div>
+    </div>
+    {{#if fq}}
     <div class="active-filters">
         <b>Active Filters:</b>
-             {{#unless showFilter}}
-                <button class="btn btn-xs btn-default show-filter">show</button>
-            {{else}}
-                <div class="s-filter-div">
-                    {{#each fq}}
-                        {{this}}
-                    {{/each}}
-                </div>
-                <button class="btn btn-xs btn-default hide-filter">hide</button>
-            {{/unless}}
+        {{#unless showFilter}}
+        <button class="btn btn-xs btn-default show-filter">show</button>
+        {{else}}
+        <div class="s-filter-div">
+            {{#each fq}}
+            {{this}}
+            {{/each}}
+        </div>
+        <button class="btn btn-xs btn-default hide-filter">hide</button>
+        {{/unless}}
     </div>
+    {{/if}}
+</div>
+
+{{#if loggedIn}}
+    <div class="s-library-area">
+        <div class="s-library-add-title library-add-title"  type="button" data-toggle="collapse" data-target="#library-console" aria-expanded="false" aria-controls="collapseExample">
+                <i class="fa fa-book fa-lg"></i> Add papers to library
+        </div>
+        <div class="collapse {{#if libraryDrawerOpen }} in {{/if}}" id="library-console">
+            {{#compare selected 0 operator=">"}}
+                add
+                <select class="form-control input-sm s-all-vs-selected" name="all-vs-selected" id="all-vs-selected">
+                    <option value="selected">selected papers only </option>
+                    <option value="all">all results</option>
+                </select>
+                {{else}}
+                add  <b>all results</b> <i class="icon-help" data-toggle="popover" data-content="All papers in your search results will be added, up to 2,000 records. To add only selected papers, click on the checkboxes next to the paper titles."></i>
+                from this query
+            {{/compare}}
+
+           <div class="libraries-container">
+
+           </div>
+
+            <div style="margin-top:6px" class="feedback s-feedback">
+
+            </div>
+
+        </div>
+    </div>
+
 {{/if}}

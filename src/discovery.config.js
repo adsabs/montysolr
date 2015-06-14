@@ -47,7 +47,9 @@ require.config({
           MasterPageManager: 'js/page_managers/master',
           AppStorage: 'js/components/app_storage',
           RecaptchaManager : 'js/components/recaptcha_manager',
-          CSRFManager : "js/components/csrf_manager"
+          CSRFManager : "js/components/csrf_manager",
+          LibraryController : 'js/components/library_controller'
+
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'
@@ -65,6 +67,9 @@ require.config({
         Authentication: 'js/widgets/authentication/widget',
         UserSettings: 'js/widgets/user_settings/widget',
         UserPreferences: 'js/widgets/preferences/widget',
+
+        AllLibrariesWidget : 'js/widgets/libraries_all/widget',
+        IndividualLibraryWidget : 'js/widgets/library_individual/widget',
 
         NavbarWidget: 'js/widgets/navbar/widget',
         UserNavbarWidget: 'js/widgets/user_navbar/widget',

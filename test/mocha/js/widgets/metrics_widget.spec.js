@@ -1053,7 +1053,7 @@ define([
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
       //trigger show event, should prompt dispatchRequest
-      metricsWidget.onShow();
+      metricsWidget.showMetricsForCurrentQuery();
 
       setTimeout(function() {
         //if the views received the data, the 2 step request process worked
@@ -1124,8 +1124,7 @@ define([
       //provide widget with current query
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
-      //trigger show event, should prompt dispatchRequest
-      metricsWidget.onShow();
+      metricsWidget.showMetricsForCurrentQuery();
       expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n     papers.\n    \n \nChange to first  paper(s) (max is 2).\n Submit');
 
 

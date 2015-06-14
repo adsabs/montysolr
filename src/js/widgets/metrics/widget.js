@@ -280,10 +280,13 @@ define([
 
     //function to just re-render the metadata part at the top
     renderMetadata : function(){
-      var data = {};
-      data.max = this.model.get("max");
-      data.current = this.model.get("current");
-      this.$(".metrics-metadata").html(this.metadataTemplate(data));
+      //this is only allowed for query-based requests
+      if (this.model.get("requestRowsAllowed")){
+        var data = {};
+        data.max = this.model.get("max");
+        data.current = this.model.get("current");
+        this.$(".metrics-metadata").html(this.metadataTemplate(data));
+      }
     },
 
     template: MetricsContainer,
@@ -346,6 +349,8 @@ define([
         if (this.view[k].currentView)
           this.view[k].currentView.destroy();
       }, this);
+
+      this.containerModel.clear({silent : true});
     },
 
     //when a user requests a different number of documents
@@ -565,11 +570,30 @@ define([
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
-    //fetch data
-    onShow : function(){
+    showMetricsForCurrentQuery : function(){
       this.resetWidget();
+      this.containerModel.set("requestRowsAllowed", true);
+
       this.dispatchRequest(this.getCurrentQuery());
+    },
+
+    showMetricsForListOfBibcodes : function(bibcodes){
+      this.resetWidget();
+
+      var request =  new ApiRequest({
+        target: ApiTargets.SERVICE_METRICS,
+        query: new ApiQuery({"bibcodes" : bibcodes}),
+        options : {
+          type : "POST",
+          contentType : "application/json"
+        }
+      });
+
+      this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+
     }
+
+
   });
 
   return MetricsWidget;

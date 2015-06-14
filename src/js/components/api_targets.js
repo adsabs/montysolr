@@ -33,6 +33,15 @@ define([
       CHANGE_PASSWORD: 'accounts/change-password',
       CHANGE_EMAIL: 'accounts/change-email',
       RECOMMENDER : 'recommender',
-      GRAPHICS: 'graphics'
+      GRAPHICS: 'graphics',
+
+      //library endpoints
+      //can get info about all libraries, or list of bibcodes associated w/specific lib (libraries/id)
+      //post to /libraries/ to create a library
+      LIBRARIES : "biblib/libraries",
+      //can post, put, and delete changes to individual libs using this endpoint
+      DOCUMENTS : "biblib/documents",
+      PERMISSIONS : "biblib/permissions"
+
     };
   });

@@ -32,6 +32,11 @@ body {
   margin-top: -21px;
   border-right: 1px solid darken(@sidenav-background, 15%);
 
+  .s-main-button-container {
+    width: 137px;
+    padding-top: 30px;
+  }
+
   a {
     color :@text-color;
     &:hover {
@@ -119,5 +124,56 @@ body {
     margin-right: 3%;
   }
 
+}
 
+.s-title-format {
+  margin-bottom: 10px;
+  padding: 1px 2%;
+  background-color: lighten(@gray-lighter, 2%);
+  border-bottom: 3px solid darken(@gray-lighter, 6%);
+
+  h1, h2, h3, h4 {
+    margin: 6px 0;
+    font-size: 28px;
+    font-weight: 300;
+  }
+}
+
+.s-edit-indicator {
+  border-bottom:  1px dashed @brand-primary-faded;
+
+  &:before {
+    .fa;
+    font-size: 18px;
+    margin-right: 8px;
+    color: @brand-primary-faded;
+    content: @fa-var-pencil;
+  }
+}
+
+.btn-primary.btn-inverse {
+  color: @brand-primary;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+.btn-info.btn-inverse {
+  color: @brand-info;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+.btn-success.btn-inverse {
+  color: @brand-success;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+.btn-warning.btn-inverse {
+  color: @brand-warning;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+
+.btn-danger.btn-inverse {
+  color: @brand-danger;
+  background-color: #fff;
+  .lh-box-shadow(none);
 }

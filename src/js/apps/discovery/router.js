@@ -50,11 +50,12 @@ define([
         'execute-query/(:query)': 'executeQuery',
         'abs/:bibcode(/)(:subView)': 'view',
         'user/orcid*(:subView)' : 'orcidPage',
+
         'user/account(/)(:subView)' : 'authenticationPage',
         'user/account/verify/(:subView)/(:token)' : 'routeToVerifyPage',
-        'user/settings(/)(:subView)' : 'settingsPage',
+        'user/settings(/)(:subView)(/)' : 'settingsPage',
 
-        'user/libraries' : 'librariesPage',
+        'user/libraries(/)(:id)(/)(:subView)(/)(:subData)(/)' : 'librariesPage',
         'user/home' : 'homePage',
 
         //"(:query)": 'index',
@@ -230,8 +231,39 @@ define([
         }
       },
 
-      librariesPage : function(subView){
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'libraries-page', {subView: subView});
+      librariesPage : function(id, subView, subData){
+
+        if (id){
+          //individual libraries view
+          var subView = subView || "library";
+          if (_.contains(["library", "admin"], subView )){
+
+            this.pubsub.publish(this.pubsub.NAVIGATE, 'IndividualLibraryWidget', {sub : subView, id : id});
+          }
+          else if(_.contains(["export", "metrics", "visualization"], subView)) {
+
+            subView = "library-" + subView;
+
+            if (subView == "library-export"){
+              this.pubsub.publish(this.pubsub.NAVIGATE, subView, {sub : subData || "bibtex", id : id});
+            }
+            else if (subView == "library-metrics"){
+              this.pubsub.publish(this.pubsub.NAVIGATE, subView, { id : id});
+
+            }
+            else if (subView == "library-visualization"){
+              //not implemented yet
+            }
+
+          }
+          else {
+            throw new Error("did not recognize subview for library view");
+          }
+        }
+        else {
+          //main libraries view
+          this.pubsub.publish(this.pubsub.NAVIGATE, "AllLibrariesWidget", "libraries");
+        }
       },
 
       homePage : function(subView){

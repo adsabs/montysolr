@@ -17,8 +17,19 @@ define([
       assemble: function() {
         BasicPageManagerController.prototype.assemble.apply(this, arguments);
 
-        //initiate the TOC view
-        this.widgets.tocWidget = new TOCWidget({template : Marionette.getOption(this, "TOCTemplate")});
+        if (this.TOCEvents){
+          //initiate the TOC view
+          this.widgets.tocWidget = new TOCWidget(
+            {template : Marionette.getOption(this, "TOCTemplate"),
+            events : Marionette.getOption(this, "TOCEvents") });
+        }
+        else {
+          //initiate the TOC view
+          this.widgets.tocWidget = new TOCWidget({
+            template : Marionette.getOption(this, "TOCTemplate")
+          });
+        }
+
         //insert the TOC nav view into its slot
         this.view.$(".nav-container").append(this.widgets.tocWidget.render().el);
 
@@ -39,6 +50,7 @@ define([
        * @param data
        */
       onPageManagerEvent: function(widget, event, data) {
+        console.log("event", arguments);
         var sender = null; var widgetId = null;
         data = _.extend(data, {widget : widget });
 
@@ -61,6 +73,14 @@ define([
         }
         else if (event == 'broadcast-payload'){
           this.broadcast('page-manager-message', event, data);
+        }
+
+        else if (event == "navigate"){
+          this.pubsub.publish(this.pubsub.NAVIGATE, data.navCommand, data.sub);
+        }
+
+        else if (event == "apply-function"){
+          data.func.apply(this);
         }
 
       },

@@ -100,18 +100,50 @@ select:focus {
   }
 }
 
-.btn-default{
+.btn {
+   border-radius: @border-radius-large;
   .lh-transition(all, .5s);
 }
 
-.btn-default:hover {
-  background-color: #fff;
-  .button-shadow;
+.btn-success, .btn-danger, .btn-info, .btn-warning, .btn-primary, .btn-primary-faded {
+  .lh-box-shadow(1px 1px 4px @gray-light);
+
+  &:hover {
+    .lh-box-shadow(1px 1px 6px @gray);
+  }
 }
 
-.btn-default:focus {
-  background-color: white;
+.btn-success.btn-sm, .btn-info.btn-sm, .btn-danger.btn-sm, .btn-warning.btn-sm, .btn-primary.btn-sm, .btn-primary-faded.btn-sm {
+  .lh-box-shadow(1px 1px 2px @gray-light);
+
+  &:hover {
+    .lh-box-shadow(1px 1px 4px @gray);
+  }
 }
+
+
+.btn-success.btn-sm, .btn-info.btn-xs, .btn-danger.btn-xs, .btn-warning.btn-xs, .btn-primary.btn-xs, .btn-primary-faded.btn-xs {
+  .lh-box-shadow(1px 1px 1px @gray-light);
+
+  &:hover {
+    .lh-box-shadow(1px 1px 2px @gray);
+  }
+}
+
+
+
+.btn-default {
+   &:hover {
+     background-color: #fff;
+     .lh-box-shadow(1px 1px 4px @gray-light);
+   }
+
+  &:focus {
+    background-color: white;
+  }
+}
+
+
 
 .btn-default-flat {
   .btn-default;
@@ -123,14 +155,6 @@ select:focus {
 
 .btn-default-flat:focus{
   background-color: white;
-}
-
-.btn-success:hover {
-  background-color: darken(@brand-success, 5%);
-}
-
-.btn {
-  border-radius: @border-radius-large;
 }
 
 
