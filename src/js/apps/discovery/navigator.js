@@ -214,7 +214,6 @@ define([
 
           this.route = "#user/libraries/" + data.id + "/metrics";
 
-
           publishPageChange("libraries-page");
 
         });
@@ -398,6 +397,7 @@ define([
         });
 
         this.set('show-author-network', function() {
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           app.getObject('MasterPageManager').show('SearchPage',
             ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
         });
