@@ -195,7 +195,7 @@ define(['marionette',
               this.$(".feedback").html(FeedbackTemplate({
                 success : true,
                 name : name,
-                id : data.libraryID,
+                id : response.id,
                 numRecords: response.number_added
               }))
 
@@ -220,7 +220,7 @@ define(['marionette',
                   create: true,
                   success : true,
                   name : data.name,
-                  id : data.libraryID,
+                  id : response.id,
                   numRecords : response.bibcode.length
             }));
             }
