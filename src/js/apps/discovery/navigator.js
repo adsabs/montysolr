@@ -117,9 +117,7 @@ define([
 
         this.set("AllLibrariesWidget", function(widget, subView){
 
-          var subView = subView || "libraries";
-
-          app.getWidget("AllLibrariesWidget").setSubView(subView);
+          app.getWidget("AllLibrariesWidget").setSubView({view : subView });
           app.getObject('MasterPageManager').show("LibrariesPage",
             ["AllLibrariesWidget", "UserNavbarWidget"]);
 
@@ -130,76 +128,55 @@ define([
 
         this.set("IndividualLibraryWidget", function(widget, data){
 
-          var sub = data.sub, id = data.id;
+          var sub = data.sub, id = data.id, publicView = data.publicView || false;
 
           if (!_.contains(["library", "admin", "metrics", "export", "visualization"], sub)){
             throw new Error("no valid subview provided to individual library widget");
           }
 
-          app.getWidget("IndividualLibraryWidget").setSubView(sub, id);
-          app.getObject('MasterPageManager').show("LibrariesPage",
-            ["IndividualLibraryWidget", "UserNavbarWidget"]);
+          if ( publicView ){
 
-          var lastSlash = (sub == "library") ? "" : "/admin";
+            app.getWidget("IndividualLibraryWidget").setSubView({id: id, view : "library", publicView : true});
+            //then, show library page manager
+            app.getObject('MasterPageManager').show("PublicLibrariesPage",
+              ["IndividualLibraryWidget"]);
 
-          this.route = "#user/libraries/" + id + lastSlash;
-          publishPageChange("libraries-page");
+            this.route = "#/public-libraries/" + id ;
+
+          }
+          else {
+
+            app.getWidget("IndividualLibraryWidget").setSubView({ view : sub, id : id });
+            app.getObject('MasterPageManager').show("LibrariesPage",
+              ["IndividualLibraryWidget", "UserNavbarWidget"]);
+            var lastSlash = (sub == "library") ? "" : "/admin";
+            this.route = "#user/libraries/" + id + lastSlash;
+            publishPageChange("libraries-page");
+
+          }
 
         });
 
         this.set("library-export", function(widget, data){
 
-        //first, tell export widget what to show
-        if (data.bibcodes && data.bibcodes.length) {
-
-          app.getWidget("ExportWidget").exportRecords(data.sub, data.bibcodes);
-          //then, set library tab to proper field
-          app.getWidget("IndividualLibraryWidget").setSubView("export");
-
-        }
-        else if (data.id){
-
-          app.getObject("LibraryController").getLibraryRecords(data.id).done(function(bibcodes){
-
-            bibcodes = bibcodes.documents;
-            app.getWidget("ExportWidget").exportRecords(data.sub, bibcodes);
-            //then, set library tab to proper field
-            app.getWidget("IndividualLibraryWidget").setSubView("export", data.id);
-
-          });
-
-        }
-        else {
-          throw new Error("neither an identifying id for library nor the bibcodes themselves were provided to export widget");
-          return
-        }
-
-        //then, show library page manager
-          app.getObject('MasterPageManager').show("LibrariesPage",
-            ["IndividualLibraryWidget", "UserNavbarWidget", "ExportWidget"]);
-
-          publishPageChange("libraries-page");
-
-          this.route = "#user/libraries/" + data.id + "/export/" + data.sub;
-
-        });
-
-        this.set("library-metrics", function(widget, data){
-
           //first, tell export widget what to show
           if (data.bibcodes && data.bibcodes.length) {
 
-            app.getWidget("Metrics").showMetricsForListOfBibcodes(data.bibcodes);
+            app.getWidget("ExportWidget").exportRecords(data.sub, data.bibcodes);
             //then, set library tab to proper field
-            app.getWidget("IndividualLibraryWidget").setSubView("metrics");
+            app.getWidget("IndividualLibraryWidget").updateView({ view : "export", publicView : data.publicView });
+
           }
+          //no bibcodes provided (coming from router)
           else if (data.id){
 
-            app.getObject("LibraryController").getLibraryRecords(data.id).done(function(bibcodes){
+            app.getObject("LibraryController").getLibraryData(data.id).done(function(bibcodes){
+
               bibcodes = bibcodes.documents;
-              app.getWidget("Metrics").showMetricsForListOfBibcodes(bibcodes);
+              app.getWidget("ExportWidget").exportRecords(data.sub, bibcodes);
               //then, set library tab to proper field
-              app.getWidget("IndividualLibraryWidget").setSubView("metrics", data.id);
+              app.getWidget("IndividualLibraryWidget").setSubView({ view : "export", id : data.id, publicView : data.publicView });
+
             });
 
           }
@@ -208,14 +185,60 @@ define([
             return
           }
 
-          //then, show library page manager
-          app.getObject('MasterPageManager').show("LibrariesPage",
-            ["IndividualLibraryWidget", "UserNavbarWidget", "Metrics"]);
+            if (data.publicView){
+              app.getObject('MasterPageManager').show("PublicLibrariesPage",
+                ["IndividualLibraryWidget", "ExportWidget"]);
+              this.route = "/#/public-libraries/" + data.id ;
+            }
 
-          this.route = "#user/libraries/" + data.id + "/metrics";
+            else {
+              //then, show library page manager
+              app.getObject('MasterPageManager').show("LibrariesPage",
+                ["IndividualLibraryWidget", "UserNavbarWidget", "ExportWidget"]);
+              publishPageChange("libraries-page");
+              this.route = "#user/libraries/" + data.id + "/export/" + data.sub;
+            }
 
-          publishPageChange("libraries-page");
+        });
 
+        this.set("library-metrics", function(widget, data){
+
+            //first, tell export widget what to show
+            if (data.bibcodes && data.bibcodes.length) {
+
+              app.getWidget("Metrics").showMetricsForListOfBibcodes(data.bibcodes);
+              //then, set library tab to proper field
+              app.getWidget("IndividualLibraryWidget").updateView({ view : "metrics", publicView : data.publicView });
+            }
+
+            else if (data.id){
+              app.getObject("LibraryController").getLibraryData(data.id).done(function(bibcodes){
+                bibcodes = bibcodes.documents;
+                app.getWidget("Metrics").showMetricsForListOfBibcodes(bibcodes);
+                //then, set library tab to proper field
+                app.getWidget("IndividualLibraryWidget").setSubView({ view : "metrics", id : data.id, publicView : data.publicView });
+              });
+            }
+
+            else {
+              throw new Error("neither an identifying id for library nor the bibcodes themselves were provided to export widget");
+              return
+            }
+
+            if (data.publicView){
+              app.getObject('MasterPageManager').show("PublicLibrariesPage",
+                ["IndividualLibraryWidget", "Metrics"]);
+              this.route = "/#/public-libraries/" + data.id ;
+            }
+
+            else {
+              //then, show library page manager
+              app.getObject('MasterPageManager').show("LibrariesPage",
+                ["IndividualLibraryWidget", "UserNavbarWidget", "Metrics"]);
+
+              this.route = "#user/libraries/" + data.id + "/metrics";
+              publishPageChange("libraries-page");
+            }
         });
 
         this.set("home-page", function(){

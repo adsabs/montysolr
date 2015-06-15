@@ -73,6 +73,7 @@ define([
         expect(widget.getCurrentQuery().toJSON()).to.eql({});
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star isbn:* *:*"}));
         setTimeout(function() {
+<<<<<<< HEAD
           expect(widget.model.get('currentQuery').toJSON()).to.eql({
               "q": [
                 "star isbn:* *:*"
@@ -105,6 +106,8 @@ define([
                 0
               ]
             });
+          expect(widget.model.get('currentQuery').url()).to.eql(
+            'fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0'       );
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
@@ -321,7 +324,7 @@ define([
 
           //checking first record
           expect($w.find(".s-identifier:first").text().trim()).to.eql("2013arXiv1305.3460H");
-          expect($w.find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H");
+          expect($w.find(".s-identifier:first a").attr("href").trim()).to.eql("#abs/2013arXiv1305.3460H/abstract");
           /// expect($w.find(".s-results-links:first").find('div:not(.orcid-actions)').find("a").text().trim()).to.eql("arXiv eprint"); // without .orcid-actions
           expect($w.find("h3:first").text().trim()).to.eql("A bijection for tri-cellular maps");
           expect($w.find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
@@ -329,7 +332,7 @@ define([
 
           //checking last record
           expect($w.find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
-          expect($w.find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M");
+          expect($w.find(".s-identifier:last a").attr("href").trim()).to.eql("#abs/1987sbge.proc...47M/abstract");
           /// expect($w.find(".s-results-links:last").find('div:not(.orcid-actions)').find("a").text().trim()).to.eql("Table of Contents"); // without .orcid-actions
           expect($w.find("h3:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
 

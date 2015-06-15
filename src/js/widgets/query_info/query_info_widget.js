@@ -68,32 +68,33 @@ define(['marionette',
         "click .submit-create-library" : "libraryCreate"
       },
 
-//      libraryAdd : function(){
-//        var data = {};
-//
-//        data.libraryID = this.$("#library-select").val();
-//
-//        if (this.model.get("selected")){
-//          data.recordsToAdd = this.$("#all-vs-selected").val();
-//        } else {
-//          data.recordsToAdd = "all";
-//        }
-//        this.trigger("library-add", data);
-//      },
-//
-//      libraryCreate : function(){
-//        var data = {};
-//
-//        if (this.model.get("selected")){
-//          data.recordsToAdd = this.$("#all-vs-selected").val();
-//        } else {
-//          data.recordsToAdd = "all";
-//        }
-//
-//        data.name = $("input[name='new-library-name']").val().trim();
-//
-//        this.trigger("library-create", data);
-//      },
+
+      libraryAdd : function(){
+        var data = {};
+
+        data.libraryID = this.$("#library-select").val();
+
+        if (this.model.get("selected")){
+          data.recordsToAdd = this.$("#all-vs-selected").val();
+        } else {
+          data.recordsToAdd = "all";
+        }
+        this.trigger("library-add", data);
+      },
+
+      libraryCreate : function(){
+        var data = {};
+
+        if (this.model.get("selected")){
+          data.recordsToAdd = this.$("#all-vs-selected").val();
+        } else {
+          data.recordsToAdd = "all";
+        }
+
+        data.name = $("input[name='new-library-name']").val().trim();
+        this.trigger("library-create", data);
+
+      },
 
       toggleLibraryDrawer : function(){
         this.model.set("libraryDrawerOpen", !this.model.get("libraryDrawerOpen"), {silent : true});
@@ -118,7 +119,7 @@ define(['marionette',
       initialize: function(options) {
         this.model = new QueryModel();
         this.view = new QueryDisplayView({model : this.model});
-        BaseWidget.prototype.initialize.call(this, options)
+        BaseWidget.prototype.initialize.call(this, options);
       },
 
       viewEvents : {
@@ -129,9 +130,18 @@ define(['marionette',
       },
 
       activate: function(beehive) {
+<<<<<<< HEAD
         this.setBeeHive(beehive);
         _.bindAll(this);
         var pubsub = beehive.getService('PubSub');
+=======
+
+        this.beehive = beehive;
+        _.bindAll(this);
+
+        this.pubsub = beehive.getService('PubSub');
+        var pubsub = this.pubsub;
+>>>>>>>  basic library functionality, minus pagination for libraries, mostly working
 
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
@@ -153,8 +163,8 @@ define(['marionette',
        this.model.set("selected", numSelected);
       },
 
-      processLibraryInfo : function(listOfLibraries){
-       this.model.set("libraries", listOfLibraries);
+      processLibraryInfo : function(data){
+       this.model.set("libraries", data);
      },
 
       clearSelected : function(){
@@ -181,13 +191,17 @@ define(['marionette',
               this.$(".feedback").html(FeedbackTemplate({error : true, name : name, id : data.libraryID }))
             }
             else if (status == "success"){
+
+              debugger
+
+              var numAlreadyInLib = response.numBibcodesRequested - parseInt(response.number_added);
               this.$(".feedback").html(FeedbackTemplate({
                 success : true,
                 name : name,
                 id : response.id,
-                numRecords: response.number_added
-              }))
-
+                numRecords: response.number_added,
+                numAlreadyInLib : numAlreadyInLib
+              }));
             }
           })
           .fail();
@@ -195,6 +209,7 @@ define(['marionette',
       },
 
       libraryCreateSubmit : function(data){
+
         var that = this, options = {};
         //are we adding the current query or just the selected bibcodes?
         options.bibcodes = data.recordsToAdd;

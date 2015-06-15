@@ -33,8 +33,8 @@ define([
 
     var fakeLibraryController =   {
       getHardenedInstance : function(){return this},
-      getLibraryMetadata : function(){var d = $.Deferred(); d.resolve(stubMetadata.libraries); return d.promise();},
-      getLibraryRecords : function(id ){ var d =  $.Deferred(); d.resolve(stubData); return d.promise() },
+      getAllMetadata : function(){var d = $.Deferred(); d.resolve(stubMetadata); return d.promise() },
+      getLibraryData : function(id ){ var d =  $.Deferred(); d.resolve(stubData); return d.promise() },
       updateLibraryContents : function(updateData){var d = $.Deferred(); d.resolve(_.extend({name: "Aliens Among Us", id: 1, description: "Are you one of them?", permission : "owner", num_papers : 45, date_created: '2015-04-03 04:30:04', date_last_modified: '2015-04-09 06:30:04'}, updateData )); return d},
       updateLibraryMetadata : sinon.spy(function(updateData){
         var d = $.Deferred();
@@ -62,7 +62,7 @@ define([
 
       $("#test").append(w.render().el);
 
-      w.setSubView("libraries");
+      w.setSubView({view : "libraries"});
 
       //4 entries
       expect($("#test tbody tr").length).to.eql(4);
@@ -88,7 +88,7 @@ define([
 
       $("#test").append(w.render().el);
 
-      w.setSubView("libraries");
+      w.setSubView({view : "libraries"});
 
       //default sort is ascending by title
 

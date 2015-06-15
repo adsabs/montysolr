@@ -35,43 +35,51 @@ define([
       },
 
       activate: function(beehive) {
-        this.setBeeHive(beehive);
+        this.beehive = beehive;
         _.bindAll(this);
-        var pubsub = this.getPubSub();
-        pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.refreshLibrariesSubView);
+        this.pubsub = beehive.getService('PubSub');
+        var pubsub = this.pubsub;
       },
 
-      refreshLibrariesSubView : function(){
-        if (this._subView instanceof LibrariesView && $.contains(document.body, this._subView.el)){
-          this.setSubView("libraries");
-        }
-      },
+      setSubView  : function(data) {
 
-      setSubView  : function(view) {
-        var that = this;
+        var that = this,
+            view = data.view;
+
         switch (view) {
+
           case "libraries":
-            this.getBeeHive().getObject("LibraryController").getLibraryMetadata()
+            this.beehive.getObject("LibraryController").getAllMetadata()
               .done(function(data){
-                that._subView = new LibrariesView({libraries: data});
-                that._subView.on("all", that.handleSubViewEvents);
-                that.view.container.show(that._subView);
-              });
+
+              var subView = new LibrariesView({libraries: data.libraries});
+              subView.on("all", that.handleSubViewEvents);
+              that.view.container.show(subView);
+
+          });
             break;
         }
+
       },
 
       handleSubViewEvents : function (event, arg1, arg2) {
+
         switch (event) {
+
           case "navigate:library":
             //where arg1 = library's id
-            this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {sub : "library", id : arg1});
+            this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", {sub : "library", id : arg1});
             break
         }
 
       }
-    });
+
+
+
+      });
+
 
     return LibrariesWidget
 
-  });
+
+  })

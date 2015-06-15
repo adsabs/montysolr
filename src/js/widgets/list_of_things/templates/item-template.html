@@ -1,4 +1,4 @@
-<div class="col-sm-12 s-display-block {{#if chosen}} chosen {{/if}}">
+<div class="col-sm-12 {{#if chosen}} chosen {{/if}}">
 <div class="row s-top-row">
     <div class="col-sm-1 col-xs-2 s-checkbox-col s-top-row-col">
         <label>
@@ -7,7 +7,7 @@
         </label>
     </div>
     <div class="col-sm-3 col-xs-4 s-top-row-col identifier s-identifier">
-        <a href="#abs/{{identifier}}" aria-label="bibcode">
+        <a href="#abs/{{identifier}}/abstract" aria-label="bibcode">
             {{identifier}}
         </a>
     </div>
@@ -80,7 +80,7 @@
 
     <div class="col-xs-10 col-xs-offset-1">
         {{#if identifier}}
-        <a href="#abs/{{identifier}}">
+        <a href="#abs/{{identifier}}/abstract">
             <h3 class="s-results-title">{{{title}}}</h3>
         </a>
         {{else}}

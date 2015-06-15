@@ -72,6 +72,8 @@ define([
         'user/libraries(/)(:id)(/)(:subView)(/)(:subData)(/)' : 'librariesPage',
         'user/home' : 'homePage',
 
+        'public-libraries/(:id)(/)' : 'publicLibraryPage',
+
         //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
@@ -118,7 +120,6 @@ define([
             }
             if (!subPage) {
               navigateString = 'ShowAbstract';
-              href = "#abs/" + bibcode + "/abstract"
             }
             else {
               navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
@@ -278,6 +279,11 @@ define([
           //main libraries view
           this.routerNavigate("AllLibrariesWidget", "libraries");
         }
+      },
+
+      publicLibraryPage : function (id){
+        //main libraries view
+        this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, sub : "library"});
       },
 
       homePage : function(subView){

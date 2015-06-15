@@ -1,12 +1,15 @@
 define([
+
     "marionette",
     "js/widgets/base/base_widget",
     "./views/library_header",
     "./views/manage_permissions",
     "./views/view_library",
     "hbs!./templates/layout-container"
+
   ],
   function(
+
   Marionette,
   BaseWidget,
   HeaderView,
@@ -17,13 +20,10 @@ define([
     ){
 
 
-
     var ContainerView  = Marionette.LayoutView.extend({
 
       className : "library-widget s-library-widget",
-
       template : ContainerTemplate,
-
       regions : {
         header  : ".header",
         main : ".main"
@@ -36,7 +36,8 @@ define([
       defaults : function(){
         return {
           id : undefined,
-          view : undefined
+          view : undefined,
+          publicView : false
         }
       }
 
@@ -50,18 +51,19 @@ define([
         this.model = new StateModel();
 
         //need access to it persistantly
-        this.bibcodeCollection = new LibraryView.Collection();
+        this.libraryCollection = new LibraryView.Collection();
         this.headerModel = new HeaderView.Model();
 
-        this.listenTo(this.model, "change:id", this.updateHeader);
-
+        //need to change both header and subview
         this.listenTo(this.model, "change:id", this.updateView);
-        this.listenTo(this.model, "change:view", this.updateView);
+        //change only subview
+        this.listenTo(this.model, "change:view", this.updateSubView);
       },
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
         _.bindAll(this);
+<<<<<<< HEAD
       },
 
       updateHeader : function(){
@@ -69,17 +71,56 @@ define([
         var id = this.model.get("id"),
             metadata = this.getBeeHive().getObject("LibraryController").getLibraryMetadata(id)
               .done(function(metadata){
+=======
+        this.pubsub = beehive.getService('PubSub');
 
-                that.headerModel.set(metadata);
-                that.headerModel.set("active", that.model.get("view"));
-                var header = new HeaderView({model : that.headerModel});
-                header.on("all", that.handleHeaderEvents, that);
-                that.view.header.show( header );
-
-              });
       },
 
+      //update header + subview
       updateView : function(){
+>>>>>>>  basic library functionality, minus pagination for libraries, mostly working
+
+        var id = this.model.get("id"), that = this;
+
+        this.beehive.getObject("LibraryController").getLibraryData(id)
+
+          .done(function(data){
+
+            /*
+            * the order of these functions are important,
+            * should go back later and standardize events for views
+            * so that the order doesnt matter
+            * the question is :new view every time header model/collection changes? (like header)
+            * or just have view listen to changes on model/collection? (like library collection view)
+            * */
+
+
+            that.headerModel.set(_.extend(data.metadata,
+              {active : that.model.get("view"),
+                publicView : that.model.get("publicView")}
+            ));
+
+            //need to do in this order or else old views keep reacting to reset events
+            that.updateHeader();
+
+            //replace the old view with the new
+            that.updateSubView();
+
+            that.libraryCollection.reset(data.solr.response.docs);
+
+          });
+
+      },
+
+      updateHeader : function(a){
+
+        var header = new HeaderView({model : this.headerModel});
+        header.on("all", this.handleHeaderEvents, this);
+        this.view.header.show( header );
+
+      },
+
+      updateSubView : function(){
 
         var that = this,
             id = this.model.get("id"),
@@ -88,6 +129,7 @@ define([
         switch (view) {
 
           case "library":
+<<<<<<< HEAD
             //get record data
             this.getBeeHive().getObject("LibraryController").getLibraryRecords(id)
               .done(function(data){
@@ -100,20 +142,24 @@ define([
                 var subView = new LibraryView({collection : that.bibcodeCollection, permission : editRecords });
                 //cache it
                 that._subView = subView;
+=======
+                var permission = that.headerModel.get("permission"),
+                    editRecords = !!_.contains(["write", "admin", "owner"], permission) && !this.model.get("publicView"),
+                    subView = new LibraryView({collection : that.libraryCollection, permission : editRecords });
+
+>>>>>>>  basic library functionality, minus pagination for libraries, mostly working
                 subView.on("all", that.handleLibraryEvents, that);
-                subView.collection.reset(data);
+                subView.vid = _.uniqueId();
                 that.view.main.show(subView);
-              });
             break;
 
           case "admin":
-            var v = new AdminView();
-            v.on("all", that.handleAdminEvents, that);
-            this.view.main.show( v );
+            var subView = new AdminView({ model : this.headerModel });
+            subView.on("all", that.handleAdminEvents, that);
+            this.view.main.show( subView );
             break;
 
           //the following 3 cases insert different widgets, so empty the "main" container
-
           case "export":
             this.view.main.empty();
             break;
@@ -129,17 +175,15 @@ define([
         }
       },
 
-      setSubView  : function(view, id) {
+      setSubView  : function(data) {
 
-        if (id){
-          this.model.set("id", id, {silent : true});
+        this.model.set( "publicView", data.publicView );
+        this.model.set("view", data.view);
+
+        if (data.id) {
+          this.model.set("id", data.id);
         }
 
-        this.model.set("view", view, {silent : true});
-
-        //is there a better way to avoid duplicate updateView calls?
-        this.updateHeader();
-        this.updateView();
       },
 
       handleLibraryEvents : function (event, arg1, arg2){
@@ -154,8 +198,8 @@ define([
           this.getBeeHive().getObject("LibraryController").updateLibraryContents(id, data)
             .done(function(){
               var bibcode = data.bibcode[0],
-                modelToRemove = that.bibcodeCollection.get(bibcode);
-              that.bibcodeCollection.remove(modelToRemove);
+                modelToRemove = that.libraryCollection.get(bibcode);
+                that.libraryCollection.remove(modelToRemove);
             });
           break;
       }
@@ -164,6 +208,27 @@ define([
 
       handleAdminEvents : function (event, arg1, arg2) {
 
+        var that = this;
+
+        switch (event) {
+
+          case "update-public-status":
+
+            var data = {"public": arg1},
+                id = this.model.get("id");
+            this.beehive.getObject("LibraryController")
+              .updateLibraryMetadata(id, data)
+              .done(function(response, status){
+                //re-render the admin view
+                that.headerModel.set("public", response.public);
+
+              })
+              .fail(function(){
+                debugger
+              });
+            break
+
+        }
 
       },
 
@@ -188,9 +253,18 @@ define([
             break;
 
           case "navigate":
+<<<<<<< HEAD
             var pubsub = this.getPubSub();
+=======
+
+            //set the proper view value into the model
+            this.model.set("view", arg1);
+
+>>>>>>>  basic library functionality, minus pagination for libraries, mostly working
             var other = ["export", "metrics", "visualization"];
+            var publicView = this.model.get("publicView");
             if (_.contains(other, arg1)){
+<<<<<<< HEAD
               var command = "library-" + arg1;
               pubsub.publish(pubsub.NAVIGATE, command, {bibcodes : this.bibcodeCollection.pluck("bibcode"), sub : arg2, id : id});
             }
@@ -200,13 +274,25 @@ define([
             break;
           case "delete-library":
             this.getBeeHive().getObject("LibraryController").deleteLibrary(id);
+=======
+
+              var command =  "library-" + arg1;
+              this.pubsub.publish(this.pubsub.NAVIGATE, command, {bibcodes : this.libraryCollection.pluck("bibcode"), sub : arg2, id : id, publicView : publicView});
+            }
+            else {
+              this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", { sub : arg1, id : id, publicView : publicView });
+            }
+            break
+
+          case "delete-library":
+            this.beehive.getObject("LibraryController").deleteLibrary(id, this.headerModel.get("name"));
+>>>>>>>  basic library functionality, minus pagination for libraries, mostly working
             break;
         }
       }
 
 
     });
-
 
     return Library
 

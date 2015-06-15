@@ -4,7 +4,10 @@
             {{#if create}}
             <a href="/#/user/libraries/{{id}}"> Library <b>{{name}}</b></a> was successfully created and {{numRecords}} new records were added.
             {{else}}
-                {{numRecords}} new records were successfully added to  <a href="/#/user/libraries/{{id}}"> library <b>{{name}}</b></a>.
+                {{numRecords}} new records were added to  <a href="/#/user/libraries/{{id}}"> library <b>{{name}}</b></a>.
+                {{#if numAlreadyInLib}}
+                    ({{numAlreadyInLib}} were already in the library).
+                {{/if}}
            {{/if}}
         </div>
 {{/if}}

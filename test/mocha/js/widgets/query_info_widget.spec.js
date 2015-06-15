@@ -150,7 +150,7 @@ define([
       }))({verbose: false});
 
       var fakeLibraryController =   {getHardenedInstance : function(){return this},
-        getLibraryMetadata : function(){return []},
+        getAllMetadata : function(){return $.Deferred().promise()},
         addBibcodesToLib : sinon.spy(function(){ var d = $.Deferred(); d.resolve(); return d.promise()}),
         createLibAndAddBibcodes : sinon.spy(function(){ var d = $.Deferred(); d.resolve(); return d.promise()})
       };

@@ -155,7 +155,6 @@ define([
         tabToShow = subView;
       }
 
-      this.model.set("active", tabToShow);
       this.trigger("navigate", tabToShow, additional);
     },
 

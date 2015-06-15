@@ -1,34 +1,6 @@
-{{#if edit}}
-    <div class="s-library-title">
-            <h2 class="s-edit-indicator edit-indicator" title="edit library title" contenteditable="true" data-param="name">{{name}}</h2>
-            <span class="s-editable-buttons no-show animated">
-                <button class="btn btn-sm btn-success btn-inverse submit-edit" title="submit changes" data-element="{{element}}" data-param="{{param}}">
-                    <i class="fa fa-lg fa-check"></i>
-                </button>
-                <button class="btn btn-sm btn-danger btn-inverse  cancel-edit" title="cancel">
-                    <i class="fa fa-lg fa-times"></i>
-                </button>
-            </span>
-        </div>
-        <div class="s-library-description">
-            <p class="s-edit-indicator edit-indicator" title="edit library description" contenteditable="true" data-param="description">
-                {{#if description }}
-                    {{ description }}
-                {{else}}
-                    (none)
-                {{/if}}
-            </p>
-                <span class="s-editable-buttons no-show animated">
-                    <button class="btn btn-sm  btn-success btn-inverse  submit-edit" title="submit changes" data-element="{{element}}" data-param="{{param}}">
-                        <i class="fa fa-lg fa-check"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger  btn-inverse cancel-edit" title="cancel">
-                        <i class="fa fa-lg fa-times"></i>
-                    </button>
-                </span>
-        </div>
+<!--duplicating some stuff here in the interests of simplicity, maybe that's not ideal?-->
 
-{{else}}
+{{#if publicView}}
 
     <div class="s-library-title">
         <h2>{{name}}</h2>
@@ -43,53 +15,160 @@
         </p>
     </div>
 
-{{/if}}
+    <!-- library info/admin drawer-->
+    <div class="s-library-info">
+        <div class="col-sm-3"><h5>Number of Papers:</h5>{{num_documents}}</div>
+        <div class="col-sm-3"><h5>Date Created:</h5>{{date_created}}</div>
+        <div class="col-sm-3"> <h5>Date Last Modified:</h5>{{date_last_modified}}</div>
+    </div>
 
- <!-- library info/admin drawer-->
+    <!-- tabs -->
+    {{#compare num_documents 0 operator=">"}}
+        <ul class="s-library-nav-tabs">
+            <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
+            <li class="tab s-tab dropdown {{#compare active 'export'}} active {{/compare}}">
+                <a id="dLabel" data-target="#" href="http://example.com" data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
+                    <i class="icon-export"></i> Export
+                    <span class="fa fa-lg fa-caret-down"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                    <li data-tab="export-bibtex">BibTEX</li>
+                    <li data-tab="export-aastex">AASTex</li>
+                    <li data-tab="export-endnote">EndNote</li>
+                </ul>
+            </li>
+            <li class="tab s-tab  {{#compare active 'metrics'}} active {{/compare}}" data-tab="metrics"><i class="icon-explore"></i> Metrics </li>
+            <li class="tab s-tab dropdown  {{#compare active 'visualization'}} active {{/compare}}">
+                <div id="dLabel" data-target="#" href="http://example.com" data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
+                    <i class="fa fa-eye"></i> Visualize
+                    <span class="fa fa-lg fa-caret-down"></span>
+                </div>
+                <ul class="dropdown-menu" role="menu">
+                    <li>Coming soon:</li>
+                    <li data-tab="visualization-authornetwork">Author Network</li>
+                    <li data-tab="visualization-papernetwork">Paper Network</li>
+                    <li data-tab="visualization-wordcloud">Word Cloud</li>
+                    <li data-tab="visualization-bubble">Bubble Chart</li>
 
-<div class="s-library-info">
+                </ul>
+
+            </li>
+        </ul>
+    {{else}}
+        <!-- tab navigation works for only library page and optionally admin -->
+        <ul class="s-library-nav-tabs">
+            <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
+
+            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="icon-export"></i> Export</li>
+            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
+            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
+        </ul>
+    {{/compare}}
+
+
+{{else}}
+<!-- not public -->
+
+    {{#if edit}}
+    <div class="pull-right">
+        <button class="btn btn-default" disabled="disabled"><i class="fa fa-arrow-right"></i> View this library in the ADS Search Results Page</button>
+    </div>
+    <div class="s-library-title">
+        <h2 class="s-edit-indicator edit-indicator" title="edit library title" contenteditable="true" data-param="name">{{name}}</h2>
+                <span class="s-editable-buttons no-show animated">
+                    <button class="btn btn-sm btn-success btn-inverse submit-edit" title="submit changes" data-element="{{element}}" data-param="{{param}}">
+                        <i class="fa fa-lg fa-check"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-inverse  cancel-edit" title="cancel">
+                        <i class="fa fa-lg fa-times"></i>
+                    </button>
+                </span>
+    </div>
+    <div class="s-library-description">
+        <p class="s-edit-indicator edit-indicator" title="edit library description" contenteditable="true" data-param="description">
+            {{#if description }}
+            {{ description }}
+            {{else}}
+            (none)
+            {{/if}}
+        </p>
+        <span class="s-editable-buttons no-show animated">
+            <button class="btn btn-sm  btn-success btn-inverse  submit-edit" title="submit changes" data-element="{{element}}" data-param="{{param}}">
+                <i class="fa fa-lg fa-check"></i>
+            </button>
+            <button class="btn btn-sm btn-danger  btn-inverse cancel-edit" title="cancel">
+                <i class="fa fa-lg fa-times"></i>
+            </button>
+        </span>
+</div>
+
+    {{else}}
+
+    <div class="s-library-title">
+        <h2>{{name}}</h2>
+    </div>
+    <div class="s-library-description">
+        <p>
+            {{#if description }}
+            {{ description }}
+            {{else}}
+            (none)
+            {{/if}}
+        </p>
+    </div>
+
+    {{/if}}
+
+    <!-- library info/admin drawer-->
+
+    <div class="s-library-info">
         <div class="col-sm-3"><h5>Number of Papers:</h5>{{num_documents}}</div>
         <div class="col-sm-3"><h5>Date Created:</h5>{{date_created}}</div>
         <div class="col-sm-3"> <h5>Date Last Modified:</h5>{{date_last_modified}}</div>
         <div class="col-sm-3"><h5>Owner:</h5>{{owner}}</div>
-    <br/>
-    <button class="btn btn-default"  type="button" data-toggle="collapse" data-target="#library-actions" aria-expanded="false" aria-controls="#library-actions">
-        <i class="fa fa-cog"></i> You have <b>{{permission}}</b> privileges. Click here to view your editing options.
-    </button>
-    <div class="collapse" id="library-actions" style="padding-top: 15px">
-        {{#if edit}}
-             <p>
-                To <b>change the title or description</b>  of the library, simply click on the title or description and
-                 type directly into the field.
-            </p>
-        {{/if}}
-        {{#compare permission "read" operator="!=="}}
-            <p>
-                To <b>add papers</b> to this library, perform a search in ADS and look for the  "add to libraries" button on the right.
-            </p>
-            <p>
-                To <b>remove papers</b> from this library, click on the red "x" buttons next to each paper in the library list.
-            </p>
-        {{/compare}}
+        <br/>
         {{#compare permission "read"}}
-            <p>
-                You only have permission to read this library--you cannot add or remove papers from it.
-            </p>
-        {{/compare}}
-        {{#compare permission "owner"}}
-             <p>
-                 To <b>make this library public</b>, click on the "Manage Access" tab below.
-             </p>
-            <p> To <b>delete</b>  this library, click on the button that follows.
-                Once you click this button, the library will be deleted forever!
-            </p>
-            <button class="btn btn-danger btn-sm delete-library"><i class="fa fa-times"></i> Delete this library</button>
-        {{/compare}}
-    </div>
-</div>
+        <br/>
+        <p><i class="fa fa-cog"></i> You can <b>read</b> this library, but cannot alter it in any way. </p>
 
-<!-- tabs -->
-{{#compare num_documents 0 operator=">"}}
+        {{else}}
+
+            <button class="btn btn-default"  type="button" data-toggle="collapse" data-target="#library-actions" aria-expanded="false" aria-controls="#library-actions">
+                <i class="fa fa-cog"></i> You have <b>{{permission}}</b> privileges. View editing options.
+            </button>
+            <div class="collapse" id="library-actions" style="padding-top: 15px">
+                {{#if edit}}
+                <p>
+                    To <b>change the title or description</b>  of the library, simply click on the title or description and
+                    type directly into the field.
+                </p>
+                {{/if}}
+                {{#compare permission "read" operator="!=="}}
+                <p>
+                    To <b>add papers</b> to this library, perform a search in ADS and look for the  "add to libraries" button on the right.
+                </p>
+                <p>
+                    To <b>remove papers</b> from this library, click on the red "x" buttons next to each paper in the library list.
+                </p>
+                {{/compare}}
+
+                {{#compare permission "owner"}}
+                <p>
+                    To <b>make this library public</b>, click on the "Manage Access" tab below.
+                </p>
+                <p> To <b>delete</b>  this library, click on the button that follows.
+                    Once you click this button, the library will be deleted forever!
+                </p>
+                <button class="btn btn-danger btn-sm delete-library"><i class="fa fa-times"></i> Delete this library</button>
+                {{/compare}}
+            </div>
+
+        {{/compare}}
+
+    </div>
+
+    <!-- tabs -->
+    {{#compare num_documents 0 operator=">"}}
     <!-- extended tab navigation should work -->
     <ul class="s-library-nav-tabs">
         <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
@@ -125,7 +204,7 @@
         </li>
     </ul>
 
-{{else}}
+    {{else}}
     <!-- tab navigation works for only library page and optionally admin -->
     <ul class="s-library-nav-tabs">
         <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
@@ -137,5 +216,10 @@
         <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
         <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
     </ul>
-{{/compare}}
+    {{/compare}}
+
+
+{{/if}}
+
+
 
