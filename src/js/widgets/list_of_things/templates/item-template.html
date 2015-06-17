@@ -77,12 +77,8 @@
 
 </div>
 <div class="row">
-    <div class="col-xs-1 s-details-container">
-        {{#if details}}
-        <i class="{{#if showDetails}} icon-hide-details {{else}} icon-details {{/if}} details-control"></i>
-        {{/if}}
-    </div>
-    <div class="col-xs-10">
+
+    <div class="col-xs-10 col-xs-offset-1">
         {{#if identifier}}
         <a href="#abs/{{identifier}}">
             <h3 class="s-results-title">{{{title}}}</h3>
@@ -176,41 +172,42 @@
 </div>
 {{/if}}
 
-<div class="row details {{#unless showDetails}}sr-only {{/unless}}">
-    <div class="col-xs-10 col-xs-offset-1 s-more-info">
-        {{#if details.highlights}}
-        <h4 class="sr-only">Highlights</h4>
-        <ul aria-label="search snippets" class="s-search-snippets">
-            {{#each details.highlights}}
-            <li>{{{this}}}</li>
-            {{/each}}
-        </ul>
-        {{/if}}
-
-        {{#if details.abstract}}
-        <h4 aria-label="read full abstract below"><a href="#abs/{{identifier}}">Abstract</a></h4>
-        {{#if details.shortAbstract}}
-        <!--for screen readers-->
-        <div class="full-abstract sr-only">
-            {{ details.abstract }}
+    <div class="row highlight-row">
+        {{#if showHighlights}}
+        <div class="col-xs-10 col-xs-offset-1 s-more-info">
+                {{#if highlights}}
+                    <h4 class="sr-only">Search Highlights</h4>
+                    <ul aria-label="search snippets" class="s-search-snippets">
+                        {{#each highlights}}
+                        <li>{{{this}}}</li>
+                        {{/each}}
+                    </ul>
+                {{/if}}
         </div>
-        <div class="short-abstract" aria-label="a truncated version of the abstract">
-            {{details.shortAbstract}}
-            <button class="btn btn-xs btn-default show-full-abstract">more</button>
-        </div>
-        <div class="full-abstract hidden">
-            {{ details.abstract }}
-            <button class="btn btn-xs btn-default hide-full-abstract">less</button>
-        </div>
-        {{else}}
-        <!--the abstract is short enough to be shown all at once-->
-        {{details.abstract}}
         {{/if}}
-
-        {{/if}}
-
-
     </div>
 
-</div>
+    <div class="row abstract-row">
+        {{#if showAbstract}}
+        <div class="col-xs-10 col-xs-offset-1 s-more-info">
+                {{#if abstract}}
+                    <h4 aria-label="read full abstract below"><a href="#abs/{{identifier}}">Abstract</a></h4>
+                    {{#if shortAbstract}}
+
+                    <div class="short-abstract" aria-label="a truncated version of the abstract">
+                        {{shortAbstract}}
+                        <button class="btn btn-xs btn-default show-full-abstract">more</button>
+                    </div>
+                    <div class="full-abstract hidden">
+                        {{ abstract }}
+                        <button class="btn btn-xs btn-default hide-full-abstract">less</button>
+                    </div>
+                    {{else}}
+                        <!--the abstract is short enough to be shown all at once-->
+                        {{abstract}}
+                    {{/if}}
+                {{/if}}
+        </div>
+     {{/if}}
+    </div>
 </div>

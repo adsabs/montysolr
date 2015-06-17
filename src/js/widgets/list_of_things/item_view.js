@@ -41,7 +41,6 @@ define([
 
       events: {
         'change input[name=identifier]': 'toggleSelect',
-        'click .details-control' : "toggleDetails",
         'mouseenter .letter-icon': "showLinks",
         'mouseleave .letter-icon': "hideLinks",
         'click .letter-icon': "pinLinks",
@@ -53,7 +52,8 @@ define([
 
       modelEvents: {
         "change:visible": 'render',
-        "change:showDetails" : 'render',
+        "change:showAbstract" : 'render',
+        "change:showHighlights" : 'render',
         "change:orcid": 'render',
         "change:chosen": 'render'
       },
@@ -102,11 +102,6 @@ define([
           this.model.set('chosen', false);
           $checkbox.prop('checked', false);
         }
-      },
-
-      toggleDetails : function(){
-        var newValue = this.model.get("showDetails") ? false : true;
-        this.model.set("showDetails", newValue);
       },
 
       /*

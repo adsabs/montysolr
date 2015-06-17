@@ -560,7 +560,7 @@ define([
 
     defaultQueryArguments : {
       fl : "bibcode",
-      rows : 100
+      rows : 1000
     },
 
     activate : function(beehive){

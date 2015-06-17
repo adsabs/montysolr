@@ -70,7 +70,7 @@ define([
           // display the first batch
           view.displayMore(view.displayNum);
 
-          expect($v.find('button[wtarget="ShowMore"]').text()).to.be.equal('show more');
+          expect($v.find('button[wtarget="ShowMore"]').text()).to.be.equal('more ');
 
           var cc = all.callCount;
 

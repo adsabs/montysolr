@@ -1,13 +1,15 @@
 /**
  * Infinitely growing view of items
  *
+ * ( **** NOT CURRENTLY USED ANYWHERE *** )
+ *
  */
 
 define([
-  'marionette',
-  'backbone',
-  'hbs!./templates/expanding-item-template',
-  'hbs!./templates/expanding-results-container-template',
+    'marionette',
+    'backbone',
+    'hbs!./templates/expanding-item-template',
+    'hbs!./templates/expanding-results-container-template',
   ],
 
   function (Marionette,

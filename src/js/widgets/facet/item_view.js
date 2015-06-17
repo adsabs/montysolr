@@ -14,19 +14,6 @@ define(['underscore', 'js/widgets/base/item_view',
 
     events: {
       'click .widget-item': "onClick",
-      'mouseenter label': "onMouseEnter",
-      'mouseleave label': "onMouseLeave"
-    },
-
-    onMouseEnter : function(){
-      var val;
-      val = this.model.get("count")
-      this.$(".facet-amount").html("&nbsp;(" + this.formatNum(val) + ")" )
-    },
-
-    onMouseLeave : function(){
-      this.$(".facet-amount").empty();
-
     },
 
     onClick: function(ev) {

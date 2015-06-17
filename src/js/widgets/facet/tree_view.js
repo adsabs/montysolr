@@ -39,24 +39,9 @@ define(['underscore',
     events: {
       'click .widget-item': "onClick",
       'click .item-caret ': "toggleChildren",
-      'click .show-more': 'onShowMore',
-      'mouseenter label' : "onMouseEnter",
-      'mouseleave label' : "onMouseLeave"
-    },
-
-    onMouseEnter: function(e){
-      e.stopPropagation();
-      var val;
-      val = this.model.get("count")
-      this.$(".facet-amount:first").html("&nbsp;(" + this.formatNum(val) + ")" );
+      'click .show-more': 'onShowMore'
 
     },
-
-    onMouseLeave: function(e){
-      e.stopPropagation();
-      this.$(".facet-amount").empty();
-    },
-
 
     onClick: function (ev) {
       ev.stopPropagation();
