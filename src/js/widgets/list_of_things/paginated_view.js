@@ -45,7 +45,11 @@ define([
         return {
           mainResults: false,
           title : undefined,
-          showDetails : false
+          //assuming there will always be abstracts
+          showAbstract: "closed",
+          //often they won't exist
+          showHighlights: false,
+          pagination: true,
         }
       }
     });
@@ -106,14 +110,36 @@ define([
       },
 
       childViewContainer: ".results-list",
+
       events: {
-        "click .show-details": "toggleDetails",
+        "click .show-highlights": "toggleHighlights",
+        "click .show-abstract": "toggleAbstract",
         "click a[data-paginate]": "changePage",
         "input .per-page": "changePerPage"
       },
 
+      toggleHighlights : function(){
+        if (this.model.get("showHighlights") == "open"){
+          this.model.set("showHighlights", "closed");
+        }
+        else if (this.model.get("showHighlights") == "closed"){
+          this.model.set("showHighlights", "open");
+        }
+      },
+
+      toggleAbstract : function(){
+        if (this.model.get("showAbstract") == "open"){
+          this.model.set("showAbstract", "closed");
+        }
+        else if (this.model.get("showAbstract") == "closed"){
+          this.model.set("showAbstract", "open");
+        }
+      },
+
       modelEvents: {
-        "change": "render"
+        "change": "render",
+        "change:showHighlights" : "toggleChildrenHighlights",
+        "change:showAbstract" : "toggleChildrenAbstracts"
       },
 
       collectionEvents : {
@@ -123,7 +149,12 @@ define([
       template: ResultsContainerTemplate,
 
       resetViewModel : function(){
-        this.model.set("showDetails", false)
+        var defaults = this.model.defaults();
+
+        this.model.set({
+          showAbstract : defaults.showAbstract,
+          showHighlights : defaults.showHighlights
+        });
       },
 
       /**
@@ -131,25 +162,27 @@ define([
        * with details (this place is normally hidden
        * by default)
        */
-      toggleDetails: function () {
-        var newValue = false;
-        if (this.model.has("showDetails")) {
-          var v = this.model.get('showDetails');
-          if ( v === true || v == 'opened') {
-            newValue = 'closed';
-          }
-          else {
-            newValue = 'opened';
-          }
-        }
+      toggleChildrenHighlights : function () {
 
-        // show the proper button
-        this.model.set("showDetails", newValue);
+        var show = this.model.get("showHighlights");
 
-        var itemVal = newValue === 'opened' ? true : false;
+        var itemVal = show === 'open' ? true : false;
+
         this.collection.each(function(m){
           //notify each item view to rerender itself and show/hide details
-          m.set("showDetails", itemVal);
+          m.set("showHighlights", itemVal);
+        });
+      },
+
+      toggleChildrenAbstracts : function () {
+
+        var show = this.model.get("showAbstract");
+
+        var itemVal = show === 'open' ? true : false;
+
+        this.collection.each(function(m){
+          //notify each item view to rerender itself and show/hide details
+          m.set("showAbstract", itemVal);
         });
       },
 

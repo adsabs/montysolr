@@ -24,7 +24,7 @@ define([
     },
 
     /*config*/
-    maxAllowed : 1000,
+    maxAllowed : 2000,
 
     defaults : function(){
       return {

@@ -149,7 +149,7 @@ define(['backbone', 'marionette',
         var $o = this.$('.widget-options.bottom:first');
         var $sm = $o.find("button[wtarget=ShowMore]");
         if (!$sm.length) {
-          $sm = $('<button class="btn btn-xs btn-link" wtarget="ShowMore">show more</button>');
+          $sm = $('<button class="btn btn-xs btn-link" wtarget="ShowMore">more <i class="fa fa-caret-down"></i></button>');
           $o.append($sm);
         }
         return $sm;

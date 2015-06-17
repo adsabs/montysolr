@@ -169,7 +169,6 @@ define([
         var numAround = this.model.get('numAround') || 2;
         var pageData = this._getPageDataDatastruct(q, page, numAround, perPage, numFound);
 
-
         //should we show a "back to first page" button?
         var showFirst = (_.pluck(pageData, "p").indexOf(1) !== -1) ? false : true;
 
@@ -185,8 +184,9 @@ define([
       },
 
       _getPageDataDatastruct: function(q, page, numAround, perPage, numFound) {
-        var pageData = {};
+
         var pageNums = PaginationMixin.generatePageNums(page, numAround, perPage, numFound);
+
         if (pageNums.length > 1) { //only render pagination controls if there are more pages
           //now, finally, generate links for each page number
           var pageData = _.map(pageNums, function (n) {
@@ -295,10 +295,7 @@ define([
       reset: function() {
         this.collection.reset();
         this.hiddenCollection.reset();
-        this.model.set({
-          showDetails : false,
-          pageData: {}
-        })
+        this.model.set(this.model.defaults())
       }
 
     });

@@ -98,16 +98,16 @@
 }
 
 .s-show-details-container {
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .s-results-title {
   margin-top: -3px;
   margin-bottom: 3px;
-  font-size:16px;
+  font-size:17px;
   /*need to investigate why this gets overridden in the case of 2 links*/
-  color: @subtle-brand-primary !important;
-  font-weight: 600;
+  color: darken(@brand-primary, 8%);
+  font-weight: 500;
   line-height: 1.2;
 
 }
@@ -126,7 +126,6 @@
   padding-top : 3px;
 }
 
-
 .s-more-info {
 
   border-left: 6px solid @gray-lighter;
@@ -142,8 +141,9 @@
     margin-bottom: 10px;
 
     em {
-      font-weight: bold;
-      color: mix(@brand-primary, @brand-primary-faded, 30);
+      background-color : lighten(@brand-info, 30%);
+      color: @brand-primary;
+      font-weight: 400;
     }
   }
 
@@ -164,14 +164,13 @@
 
   /* title for abstract*/
   h4 {
-    font-weight: 400;
     font-size: @font-size-base;
     margin: 0px 0 4px 0;
     //targeting only the "Abstract" link
     a{
-      color: @subtle-brand-primary;
+      color: darken(@brand-primary, 8%);
+      font-weight: 500;
     }
-
   }
 
   p {

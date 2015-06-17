@@ -140,19 +140,32 @@ define(['marionette',
 
         $w = $(view.render().el);
         $('#test').append($w);
+
         expect($w.find("label").length).to.equal(10);
 
-        view.toggleDetails();
+        expect($w.find(".abstract-row:first").text().trim()).to.eql("");
 
-        expect($w.find('.details:first').hasClass("hide")).to.be.false;
-        expect($w.find('.details:last').hasClass("hide")).to.be.false;
+        view.model.set("showAbstract", "closed");
 
+        //should set to "open"
+        view.toggleAbstract();
 
-        view.toggleDetails();
+        view.toggleChildrenAbstracts();
 
-        expect($w.find('.details:first').hasClass("sr-only")).to.be.true;
-        expect($w.find('.details:last').hasClass("sr-only")).to.be.true;
+        expect($w.find(".abstract-row:first").text().trim()).to.eql('Abstract\n                    \n                        \n                        In this paper we give a bijective proof for a relation between uni- bi- and tricellular maps of certain topological genus. While this relation can formally be obtained using Matrix-theory as a result of the Schwinger-Dyson equation, we here present a bijection for the corresponding coefficient equation. Our construction is facilitated by repeated application of a certain cutting, the contraction of edges, incident to two vertices and the deletion of certain edges.');
 
+        expect(coll.pluck("showAbstract")[0]).to.eql(true);
+
+        expect(coll.pluck("showHighlights")[0]).to.eql(undefined);
+
+        coll.models[0].set("highlights", ["testhighlight"]);
+
+        view.model.set("showHighlights", "closed");
+
+        //should set to "open"
+        view.toggleHighlights();
+
+        expect($w.find(".highlight-row:first li").text()).to.eql("testhighlight")
 
         view.destroy();
 
@@ -264,7 +277,6 @@ define(['marionette',
         });
         var M = ItemView.extend({});
         sinon.spy(M.prototype, 'toggleSelect');
-        sinon.spy(M.prototype, 'toggleDetails');
         sinon.spy(M.prototype, 'showLinks');
         sinon.spy(M.prototype, 'hideLinks');
         var triggerSpy = sinon.spy();
@@ -275,16 +287,6 @@ define(['marionette',
 
         var $w = view.render().$el;
         $('#test').append($w);
-
-
-        $w.find('input[name=identifier]').trigger('change');
-        expect(view.toggleSelect.callCount).to.be.eql(1);
-        $w.find('.details-control').click();
-        expect(view.toggleDetails.callCount).to.be.eql(1);
-        expect($w.find('.details').hasClass('sr-only')).to.be.false;
-        $w.find('.details-control').click();
-        expect(view.toggleDetails.callCount).to.be.eql(2);
-        expect($w.find('.details').hasClass('sr-only')).to.be.true;
 
         view.showLinks.reset();
         view.hideLinks.reset();

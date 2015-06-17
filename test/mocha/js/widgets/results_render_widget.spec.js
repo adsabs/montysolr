@@ -85,7 +85,7 @@ define([
         var widget = _getWidget();
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         setTimeout(function() {
-          expect(widget.collection.findWhere({"recid": 4189917}).get("details").highlights[0]).to.eql("External triggers of <em>star</em> formation.");
+          expect(widget.collection.findWhere({"recid": 4189917}).get("highlights")[0]).to.eql("External triggers of <em>star</em> formation.");
           done();
         },5);
       });
@@ -197,7 +197,7 @@ define([
       });
 
 
-      it("should render the show details button only if details exist given the paginated docs", function () {
+      it("should render the show snippets button only if highlights exist given the paginated docs", function () {
 
         var widget = _getWidget();
         var responseWithHighlights = new ApiResponse({
@@ -227,17 +227,17 @@ define([
           }});
         responseWithHighlights.setApiQuery(new ApiQuery({start : 0, rows : 25}));
         widget.processResponse(responseWithHighlights);
-        expect(widget.model.get('showDetails')).to.eql('closed');
+        expect(widget.model.get('showHighlights')).to.eql('open');
 
         var $w = widget.render().$el;
         $('#test').append($w);
 
         //expect results button;
-        expect(widget.view.render().$el.find(".show-details").length).to.eql(1);
+        expect(widget.view.render().$el.find(".show-highlights").length).to.eql(1);
 
 
-        widget.model.set('showDetails', false);
-        expect(widget.view.render().$el.find(".show-details").length).to.eql(0);
+        widget.model.set('showHighlights', false);
+        expect(widget.view.render().$el.find(".show-highlights").length).to.eql(0);
 
 
         var responseWithoutHighlights = new ApiResponse({
@@ -268,34 +268,13 @@ define([
         responseWithoutHighlights.setApiQuery(new ApiQuery());
 
         widget.reset();
-        expect(widget.model.get('showDetails')).to.be.false;
+        expect(widget.model.get('showHighlights')).to.be.false;
         widget.processResponse(responseWithoutHighlights);
-        expect(widget.model.get('showDetails')).to.be.false;
+        expect(widget.model.get('showHighlights')).to.be.false;
 
 
       });
 
-
-      it("should show details (if available) when a user clicks on 'show details'", function (done) {
-
-        var widget = _getWidget();
-        minsub.publish(minsub.pubsub.START_SEARCH, new ApiQuery({
-          q: "star"
-        }));
-
-        var $w = widget.render().$el;
-        //$('#scratch').append($w);
-
-        setTimeout(function() {
-          expect($w.find('.details:last').hasClass("sr-only")).to.equal(true);
-
-          $w.find("button.show-details").click();
-          expect($w.find('.details:last').hasClass("sr-only")).to.be.equal(false);
-          $w.find("button.show-details").click();
-          expect($w.find('.details:last').hasClass("sr-only")).to.be.equal(true);
-          done();
-        }, 5);
-      });
 
       it("has a view that displays records for each model in the collection", function(done){
 
@@ -336,27 +315,6 @@ define([
         expect(widget.formatNum(889899)).to.be.eql('889,899');
       });
 
-      it("should have an item view that allows the user to toggle details", function(){
-
-        var widget = new ResultsWidget({perPage: 10});
-        widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.START_SEARCH, new ApiQuery({'q': 'foo:bar'}));
-
-
-        var $w = widget.render().$el;
-        $("#test").append($w);
-
-        $w.find(".details-control").click();
-
-        expect($w.find(".details-control").hasClass("icon-hide-details")).to.be.true;
-        expect($w.find(".details").hasClass("sr-only")).to.be.false;
-
-        $w.find(".details-control").click();
-
-        expect($w.find(".details-control").hasClass("icon-details")).to.be.true;
-
-        expect($w.find(".details").hasClass("sr-only")).to.be.true;
-      });
 
       it("should mark papers as selected", function() {
         var s = new AppStorage();

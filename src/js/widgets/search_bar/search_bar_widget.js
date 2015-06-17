@@ -234,10 +234,8 @@ define([
       events: {
         "click #field-options button" : "tempFieldInsert",
         "keypress .q": function(e){
-          this.highlightFields(e);
           this.setAddField();
         },
-        "blur .q": "unHighlightFields",
         "click #search-form-container": function (e) {
           e.stopPropagation();
         },
@@ -307,14 +305,6 @@ define([
         var $p = $(e.target).parent();
         $p.next().toggleClass("hide");
         $p.toggleClass("search-form-header-active");
-      },
-
-      highlightFields: function () {
-        this.$(".show-form").addClass("draw-attention")
-      },
-
-      unHighlightFields: function () {
-        this.$(".show-form").removeClass("draw-attention")
       },
 
       tempFieldInsert: function (e) {
