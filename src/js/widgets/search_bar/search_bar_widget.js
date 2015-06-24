@@ -249,6 +249,9 @@ define([
             performSearch = true; //perform the search
           }
         });
+
+        this.$('[data-toggle="tooltip"]').tooltip();
+        
        },
 
       events: {
@@ -349,7 +352,7 @@ define([
 
       },
 
-      fieldInsert: function (e) {
+       fieldInsert: function (e) {
         e.preventDefault();
         var newVal,
             currentVal = this.getFormVal(),

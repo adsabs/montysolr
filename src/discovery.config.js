@@ -100,6 +100,7 @@ require.config({
         RefereedFacet: 'js/wraps/refereed_facet',
         VizierFacet: 'js/wraps/vizier_facet',
         GraphTabs : 'js/wraps/graph_tabs',
+        FooterWidget : 'js/widgets/footer/widget',
 
         ShowAbstract: 'js/widgets/abstract/widget',
         ShowGraphics: 'js/widgets/graphics/widget',
