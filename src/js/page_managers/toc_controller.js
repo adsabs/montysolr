@@ -50,14 +50,13 @@ define([
        * @param data
        */
       onPageManagerEvent: function(widget, event, data) {
-        console.log("event", arguments);
-        var sender = null; var widgetId = null;
-        data = _.extend(data, {widget : widget });
 
+        var sender = null; var widgetId = null;
+        
         // try to find/identify sender
-        if (data.widget) {
+        if (widget) {
           _.each(_.pairs(this.widgets), function(w) {
-            if (w[1] === data.widget) {
+            if (w[1] === widget) {
               widgetId = w[0];
               sender = w[1];
             }
