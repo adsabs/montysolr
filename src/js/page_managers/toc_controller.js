@@ -52,7 +52,7 @@ define([
       onPageManagerEvent: function(widget, event, data) {
 
         var sender = null; var widgetId = null;
-        
+
         // try to find/identify sender
         if (widget) {
           _.each(_.pairs(this.widgets), function(w) {
