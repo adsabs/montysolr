@@ -29,18 +29,11 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      var response = new minsub.T.RESPONSE({"responseHeader": {
-          "params": {
-          }
-        },
-          "response": {
-            "numFound": 841359
-          }
-        }
-      );
-      response.setApiQuery(new minsub.T.QUERY({q: "foo", "fq" : "a filter"}));
-
-      minsub.publish(minsub.DELIVERING_RESPONSE, response);
+      minsub.publish(minsub.FEEDBACK, minsub.createFeedback({
+        code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
+        query: new minsub.T.QUERY({q: "foo", "fq" : "a filter"}),
+        numFound: 841359
+      }));
 
       $("#test").append(w.render().el);
 
