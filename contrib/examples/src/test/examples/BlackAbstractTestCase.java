@@ -30,10 +30,7 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 		});*/
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
-		schemaString = getConf("solr/collection1/conf/schema.xml");
-
-		configString = getConf("solr/collection1/conf/solrconfig.xml");
-		initCore(configString, schemaString, getConf("solr/collection1"));
+		
 	}
 	
 	
@@ -108,6 +105,11 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		System.setProperty("solr.solr.home", getExampleHome() + "/solr");
 		
 		envInit();
+		
+		schemaString = getConf("solr/collection1/conf/schema.xml");
+
+    configString = getConf("solr/collection1/conf/solrconfig.xml");
+    initCore(configString, schemaString, getConf("solr/"));
 		
 	}
 	

@@ -621,8 +621,27 @@
     </lst>
   </requestHandler>
   
+  <!-- 
+       An exact copy (needs to be kept in sync!) with the 'aqp' parser
+       below; this is the only way to force solr to use 'aqp' as a default
+       parser for everything (including filter queries).  
+    -->
+  <queryParser name="lucene" class="solr.AdsQParserPlugin">
+    <lst name="defaults">
+       <lst name="virtual-fields">
+          <str name="full">title^2 abstract^2 body keyword ack</str>
+          <str name="abs">title abstract keyword</str>
+       </lst>
+       <str name="aqp.unfieldedSearchField">unfielded_search</str>
+       <str name="aqp.defaultField">unfielded_search</str>
+       <str name="aqp.defaultOperator">AND</str>
+       <str name="aqp.fieldMap">arxiv identifier;</str>
+       <str name="aqp.fieldMapPostAnalysis">pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack</str>
+       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
+    </lst>
+  </queryParser>
+  
   <queryParser name="aqp" class="solr.AdsQParserPlugin">
-    
     <lst name="defaults">
       <!--
        Virtual fields will be translated into real-fields
@@ -633,14 +652,12 @@
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
        </lst>
-       
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        <str name="aqp.defaultField">unfielded_search</str>
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;</str>
        <str name="aqp.fieldMapPostAnalysis">pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
-       
     </lst>
   </queryParser>
   
