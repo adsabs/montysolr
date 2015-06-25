@@ -54,12 +54,6 @@ define([
 
   var LibraryTitleView = Marionette.ItemView.extend({
 
-    initialize : function(options) {
-
-      options = options || {};
-
-    },
-
     template : LibraryHeaderTemplate,
 
     events : {
@@ -69,6 +63,10 @@ define([
       "click li[data-tab]:not(.active)" : "triggerSubviewNavigate",
       "click .delete-library" : "triggerDeleteLibrary"
 
+    },
+
+    modelEvents : {
+      "change:active" : "highlightTab"
     },
 
     formatDate : function(d){
@@ -108,8 +106,8 @@ define([
 
       var $current = $(e.currentTarget),
           buttonsContainer = $current.next();
-          buttonsContainer.removeClass("no-show").addClass("fadeIn");
 
+      buttonsContainer.removeClass("no-show").addClass("fadeIn");
     },
 
     submitEdit : function(e){
@@ -138,12 +136,31 @@ define([
       $buttonContainer.addClass("no-show");
     },
 
-    triggerSubviewNavigate : function(e){
-      var $current = $(e.currentTarget);
-      this.$(".tab.active").removeClass("active");
-      $current.addClass("active");
+  // whenever active tab changes
 
-      var subView  = $current.data("tab");
+    highlightTab : function(){
+
+      this.$(".tab.active").removeClass("active");
+
+      //find the proper tab
+      var activeString = this.model.get("active").split("-")[0];
+
+      var $active = this.$("li[data-tab=" + activeString + "]")
+
+      if ($active.hasClass("tab")){
+        $active.addClass("active");
+      }
+      else {
+        //it's a dropdown, go up a level
+        $active.parents().eq(1).addClass("active");
+      }
+
+    },
+
+    triggerSubviewNavigate : function(e){
+      var $current = $(e.currentTarget),
+          subView  = $current.data("tab");
+
       var tabToShow, additional;
       //dropdowns have multiple sub-options
       if  (subView.indexOf("-") > -1) {
@@ -159,7 +176,6 @@ define([
     },
 
     triggerDeleteLibrary : function(){
-
       this.trigger("delete-library");
     }
 

@@ -3,7 +3,6 @@ define([
     'backbone',
     'js/components/api_query',
     'js/mixins/dependon',
-    'hbs!./404',
     'js/components/api_feedback',
     'js/components/api_request',
     'js/components/api_targets',
@@ -16,7 +15,6 @@ define([
     Backbone,
     ApiQuery,
     Dependon,
-    ErrorTemplate,
     ApiFeedback,
     ApiRequest,
     ApiTargets,
@@ -292,7 +290,7 @@ define([
 
       noPageFound : function() {
         //i will fix this later
-        $("#body-template-container").html(ErrorTemplate())
+        this.pubsub.publish(this.pubsub.NAVIGATE, "404")
       },
 
       // backbone default behaviour is to automatically decodeuri parameters

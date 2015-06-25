@@ -56,8 +56,8 @@ define([
     });
 
 
-   //TODO:alex - pls re-activate
-   it.skip("should allow authenticated user to input selected/all papers into a pre-existing library", function(done){
+
+   it("should allow authenticated user to input selected/all papers into a pre-existing library", function(done){
 
      var w = new QueryInfo();
 
@@ -68,12 +68,11 @@ define([
      }))({verbose: false});
 
      var fakeLibraryController =   {getHardenedInstance : function(){return this},
-       getLibraryMetadata : function(){return []},
-       addBibcodesToLib : sinon.spy(function(){ var d = $.Deferred(); d.resolve(); return d.promise()}),
-       createLibAndAddBibcodes : sinon.spy(function(){ var d = $.Deferred(); d.resolve(); return d.promise()})
+       addBibcodesToLib : sinon.spy(function(){ var d = $.Deferred(); d.resolve({numBibcodesRequested: 3, number_added : 2}); return d.promise()}),
+       createLibAndAddBibcodes : sinon.spy(function(){ var d = $.Deferred(); d.resolve({bibcode :[1,2,3]}); return d.promise()})
      };
 
-     var fakeUser = {getHardenedInstance : function(){return this}, isLoggedIn : function() {return true} }
+     var fakeUser = {getHardenedInstance : function(){return this}, USER_SIGNED_IN : "user_signed_in" };
 
      minsub.beehive.addObject("LibraryController", fakeLibraryController);
 
@@ -105,7 +104,7 @@ define([
 
      expect($("#test #library-console").hasClass("in")).to.be.false;
 
-     minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE);
+     minsub.publish(minsub.USER_ANNOUNCEMENT, fakeUser.USER_SIGNED_IN);
 
      //widget will set loggedIn to true and re-render
      //open the drawer
@@ -126,7 +125,8 @@ define([
 
        expect(fakeLibraryController.addBibcodesToLib.args[0][0]).to.eql({library: "1", bibcodes: "selected"});
 
-       $("#test input[name=new-library-name]").val("fakeName")
+       $("#test input[name=new-library-name]").val("fakeName");
+       $("#test input[name=new-library-name]").trigger("keyup");
 
        $("#test .submit-create-library").click();
 
@@ -139,7 +139,7 @@ define([
 
    });
 
-    it.skip("should allow authenticated user to input selected/all papers into a pre-existing library", function(done){
+    it("should allow authenticated user to input selected/all papers into a pre-existing library", function(done){
 
       var w = new QueryInfo();
 
@@ -150,16 +150,17 @@ define([
       }))({verbose: false});
 
       var fakeLibraryController =   {getHardenedInstance : function(){return this},
-        getAllMetadata : function(){return $.Deferred().promise()},
-        addBibcodesToLib : sinon.spy(function(){ var d = $.Deferred(); d.resolve(); return d.promise()}),
-        createLibAndAddBibcodes : sinon.spy(function(){ var d = $.Deferred(); d.resolve(); return d.promise()})
+        addBibcodesToLib : sinon.spy(function(){ var d = $.Deferred(); d.resolve({numBibcodesRequested: 3, number_added : 2}); return d.promise()}),
+        createLibAndAddBibcodes : sinon.spy(function(){ var d = $.Deferred(); d.resolve({bibcode :[1,2,3]}); return d.promise()})
       };
 
-      var fakeUser = {getHardenedInstance : function(){return this}, isLoggedIn : function() {return true} }
+      var fakeUser = {getHardenedInstance : function(){return this}, USER_SIGNED_IN : "user_signed_in" };
+
+      minsub.beehive.addObject("User", fakeUser)
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
 
-      minsub.beehive.addObject("User", fakeUser)
+      minsub.publish(minsub.USER_ANNOUNCEMENT, fakeUser.USER_SIGNED_IN);
 
       w.activate(minsub.beehive.getHardenedInstance());
 
@@ -172,6 +173,7 @@ define([
           }
         }
       );
+
       response.setApiQuery(new minsub.T.QUERY({q: "foo", "fq" : "a filter"}));
 
 
@@ -187,7 +189,7 @@ define([
 
       expect($("#test #library-console").hasClass("in")).to.be.false;
 
-      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, "USER");
+      minsub.publish(minsub.USER_ANNOUNCEMENT, fakeUser.USER_SIGNED_IN);
 
       //widget will set loggedIn to true and re-render
       //open the drawer
@@ -208,7 +210,9 @@ define([
 
         expect(fakeLibraryController.addBibcodesToLib.args[0][0]).to.eql({library: "1", bibcodes: "selected"});
 
-        $("#test input[name=new-library-name]").val("fakeName")
+        $("#test input[name=new-library-name]").val("fakeName");
+        $("#test input[name=new-library-name]").trigger("keyup");
+
 
         $("#test .submit-create-library").click();
 

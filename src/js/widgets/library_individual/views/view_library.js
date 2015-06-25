@@ -6,7 +6,8 @@ define([
   "hbs!../templates/empty-collection",
   'js/mixins/link_generator_mixin',
   'js/mixins/papers_utils',
-  'js/mixins/formatter'
+  'js/mixins/formatter',
+  'bootstrap'
 
 
 ], function(
@@ -17,9 +18,16 @@ define([
   EmptyCollectionTemplate,
   LinkGeneratorMixin,
   PapersUtilsMixin,
-  FormatMixin
+  FormatMixin,
+  Bootstrap
 
   ){
+
+  //used for sorting
+  function toDate(datestring){
+    var date = datestring.split("-");
+    return new Date(date[0], date[1]);
+  }
 
 
   var LibraryModel = Backbone.Model.extend({
@@ -101,6 +109,7 @@ define([
 
     }
 
+
   });
 
   _.extend(LibraryCollection.prototype, LinkGeneratorMixin);
@@ -134,14 +143,27 @@ define([
 
   });
 
+
+  var LibCollectionModel = Backbone.Model.extend({
+
+    defaults : function(){
+      return {
+        order: "desc", //asc, desc
+        sort: "pubdate", //pubdate, citations, reads
+        page: 1,
+        pagesToShow : undefined
+      }
+    }
+
+  });
+
   var LibraryCollectionView = Marionette.CompositeView.extend({
 
     initialize : function(options){
 
       var options = options || {};
-      //collection will be passed by widget on view creation
-
-//      this.on("all", function(){console.log(this.vid, arguments)})
+      //initialize pagination model
+      this.model = new LibCollectionModel();
 
       this.listenTo(this.collection, "remove", function(){
 
@@ -152,6 +174,125 @@ define([
 
       });
 
+      //disable Marionette's auto sorting
+      this.sort = false;
+
+      //for pagination
+      this.perPage = options.perPage || 50;
+
+      this.setPagesToShow();
+
+    },
+
+    events : {
+      "click button.sort-options" : "changeSort",
+      "click input[name=order-options]" : "changeOrder",
+      "click .pagination a " : "changePage"
+
+    },
+
+    modelEvents : {
+      "change:sort" : "render",
+      "change:order": "render",
+      "change:page" : "render"
+    },
+
+    collectionEvents : {
+      //why is this necessary?? shouldn't marionette do it anyway :( :(
+      "reset" : "render"
+    },
+
+    changePage : function(e){
+      e.preventDefault();
+      var page = $(e.currentTarget).data("page");
+      this.model.set("page", page);
+    },
+
+    changeSort : function(e){
+      e.stopPropagation();
+      var sort = $(e.currentTarget).data("sort");
+      this.model.set("sort", sort);
+    },
+
+    changeOrder : function(e){
+     this.model.set("order", $(e.currentTarget).val());
+    },
+
+    getRecordsToShow : function(){
+
+      var endIndex = this.model.get("page") * this.perPage,
+          startIndex = endIndex - this.perPage,
+          range = _.range(startIndex, endIndex);
+
+      this.filter =  function (child, index) {
+        if (range.indexOf(index) > -1){
+          return true
+        }
+      }
+    },
+
+    setPagesToShow : function(){
+
+      var page = this.model.get("page"),
+          lastPage = Math.ceil(this.collection.length/ this.perPage),
+          pageRange = _.range(page-4, page+4);
+
+      //add first page link if it's missing
+      if (pageRange.indexOf(1) < 0){
+        pageRange.unshift(1);
+      }
+
+      pageRange = _.filter(pageRange, function(p,i){
+        if (p >= 1 && p <= lastPage){
+          return true
+        }
+      });
+
+      var hasRecords = this.collection.length > 1 ? true : false,
+          hasPages = this.collection.length > this.perPage ? true : false;
+
+      this.model.set({pagesToShow : pageRange, hasRecords : hasRecords, hasPages : hasPages});
+
+    },
+
+    onBeforeRender : function(){
+
+      this.reorderCollection();
+      this.collection.sort();
+      //renumber the items
+      this.collection.each(function(m, i ){
+        m.set("indexToShow", i + 1);
+      });
+
+      this.getRecordsToShow();
+      this.setPagesToShow();
+
+    },
+
+    reorderCollection : function(model1, model2) {
+      var sort = this.model.get("sort"),
+        order = this.model.get("order");
+
+      this.collection.comparator = function (model1, model2) {
+
+        if (sort == "num_citations" || sort == "read_count") {
+          if (order == "desc") {
+            return parseInt(model2.get(sort)) - parseInt(model1.get(sort));
+          }
+          else {
+            return parseInt(model1.get(sort)) - parseInt(model2.get(sort));;
+          }
+        }
+        else if (sort == "pubdate") {
+
+          if (order == "asc") {
+            return toDate(model1.get(sort)) - toDate(model2.get(sort));
+          }
+          else {
+            return toDate(model2.get(sort)) - toDate(model1.get(sort));
+          }
+        }
+      }
     },
 
     template : LibraryContainer,
@@ -175,39 +316,11 @@ define([
     emptyView : EmptyLibraryView,
 
     removeRecord : function(view){
+      view.$(".remove-record").html('<i class="fa fa-spinner fa-pulse"></i>');
       var bibcode = view.model.get("bibcode");
       this.trigger("removeRecord", bibcode);
-    },
-
-    //override this method to provide animation
-    removeChildView: function(view) {
-
-      var that = this;
-
-      if (view) {
-        this.triggerMethod('before:remove:child', view);
-
-        view.$el.addClass("animated").addClass("fadeOut");
-
-        setTimeout(function () {
-
-          if (view.destroy) {
-            view.destroy();
-          } else if (view.remove) {
-            view.remove();
-          }
-
-          delete view._parent;
-          that.stopListening(view);
-          that.children.remove(view);
-          that._updateIndices(view, false);
-          that.triggerMethod('remove:child', view);
-          return view;
-
-        }, 750);
-
-      }
     }
+
   });
 
 

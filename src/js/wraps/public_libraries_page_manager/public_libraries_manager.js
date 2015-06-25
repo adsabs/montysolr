@@ -12,7 +12,7 @@ define([
     createView: function(options) {
       options = options || {};
       options.template = PageManagerTemplate;
-      return new PageManagerView({template: PageManagerTemplate, className :  "s-public-libraries-layout",  id : "landing-page-layout"  })
+      return new PageManagerView({template: PageManagerTemplate, className :  "s-public-libraries-layout s-libraries-layout",  id : "landing-page-layout"  })
     }
   });
 

@@ -289,7 +289,10 @@ define([
        */
       _getExports : function(format, identifiers){
 
+
+
         format = format || this.model.get('format') || 'bibtex';
+
         //export endpoints
         var tbl = {
           endnote: 'endnote',

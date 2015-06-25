@@ -11,7 +11,7 @@ define([
   ){
 
 
-  describe("Library Controller (library_controller.spec.js)", function(){
+  describe("Library Controller", function(){
 
 
     var stubMetadata  = {
@@ -29,124 +29,174 @@ define([
     // stub of what will be returned from a GET to /libraries/[library ID]
     var stubLibraryData  = {
       documents : ["bibcode1", "bibcode2", "bibcode3"]
-    };
-
-<<<<<<< HEAD
+    }
 
 
-    it("should offer a hardened interface to widgets with the relevant library CRUD operations", function(){
-=======
-   expect(_.keys(l.getHardenedInstance())).to.eql(
-     [
-       "getAllMetadata",
-       "getLibraryData",
-       "createLibrary",
-       "createLibAndAddBibcodes",
-       "addBibcodesToLib",
-       "deleteLibrary",
-       "updateLibraryContents",
-       "updateLibraryPermissions",
-       "updateLibraryMetadata",
-       "__facade__",
-       "mixIn"
-     ]
-   )
->>>>>>>  basic library functionality, minus pagination for libraries, mostly working
 
-      var l = new LibraryController();
-      expect(_.keys(l.getHardenedInstance())).to.eql(
-        ["getLibraryMetadata",
-          "getLibraryRecords",
-          "createLibrary",
-          "createLibAndAddBibcodes",
-          "addBibcodesToLib",
-          "deleteLibrary",
-          "updateLibraryContents",
-          "updateLibraryPermissions",
-          "updateLibraryMetadata",
-          "__facade__",
-          "mixIn"]
-      )
-    });
+ it("should offer a hardened interface to widgets with the relevant library CRUD operations", function(){
 
-    it("should allow widgets to get information about libraries from /libraries and /libraries/[id]", function(){
+   var l = new LibraryController();
+
+       expect(_.keys(l.getHardenedInstance())).to.eql([
+         "getAllMetadata",
+         "getLibraryData",
+         "createLibrary",
+         "createLibAndAddBibcodes",
+         "addBibcodesToLib",
+         "deleteLibrary",
+         "updateLibraryContents",
+         "updateLibraryMetadata",
+         "isDataLoaded",
+         "__facade__",
+         "mixIn"
+       ]);
+
+     });
+
+    it("should automatically keep the libraries metadata collection in sync throughout different CRUD operations", function(){
 
       var l = new LibraryController();
+
+
       var minsub = new (MinSub.extend({
         request: function() {
           return {some: 'foo'}
         }
       }))({verbose: false});
 
-      l.activate(minsub.beehive.getHardenedInstance());
 
-      //function should request data from the api if it does not exist in the collection
+      l.activate(minsub.beehive);
 
-      var a;
+
+      //all calls to compose request will resolve w/done
+      l.composeRequest = sinon.spy(function(target, method){
+        var d = $.Deferred();
+        //update metadata
+        if (target ==  "biblib/documents/2" && method == "PUT"){
+          d.resolve({name: "nothing sun", id: "2", description: "Where would we be without the sun?", num_documents : 0, permission : "admin", date_created: '2014-01-03 04:30:04', date_last_modified: '2015-01-09 06:30:04'})
+        }
+        //add records
+        else if ( target == "biblib/documents/7" && method == "POST"){
+          d.resolve({ number_added : 4 });
+        }
+
+        else {
+          d.resolve(stubMetadata);
+        }
+        return d.promise();
+      });
+
+
+      //causes library controller to fetch its data
+      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_signed_in");
+
+      expect(l.composeRequest.args[0]).to.eql(["biblib/libraries", "GET"]);
+
+      // actions that can affect the library metadata collection:
+      // add lib, delete lib, update metadata,
+      // change permissions (not implemented yet), add/remove items
+
+      l.createLibrary({name: "fake", bibcodes : ["fake"]});
+
+      //second request to endpoint is POST to de
+      expect(l.composeRequest.args[1]).to.eql(["biblib/libraries", "POST", {
+        "data": {
+          "name": "fake",
+          "bibcodes": [
+            "fake"
+          ]
+        }
+      }]);
+
+      expect(l.composeRequest.args[2]).to.eql(["biblib/libraries", "GET"]);
+
+      l.collection.reset(stubMetadata.libraries);
+
+      expect(l.collection.get(1)).to.be.instanceOf(Backbone.Model);
+
+
+      l.deleteLibrary(1);
+
+      expect(l.composeRequest.args[3]).to.eql(["biblib/documents/1", "DELETE"]);
+
+      //record was removed
+      expect(l.collection.get(1)).to.be.undefined;
+
+
+      l.updateLibraryMetadata(2, {name: "nothing sun"});
+
+      expect(l.composeRequest.args[4]).to.eql([
+        "biblib/documents/2",
+        "PUT",
+        {
+          "data": {
+            "name": "nothing sun"
+          }
+        }
+      ]);
+
+      expect(l.collection.get(2).get("name")).to.eql("nothing sun");
+
+      expect(l.collection.get(7).get("num_documents")).to.eql(4000);
+
+      l.updateLibraryContents(7, {bibcode : [1,2,3,4]})
+
+      expect(l.collection.get(7).get("num_documents")).to.eql(4004);
+
+
+
+    });
+
+    it("should notify widgets of the status of the collection", function(){
+
+      var l = new LibraryController();
+
+      var minsub = new (MinSub.extend({
+        request: function() {
+          return {some: 'foo'}
+        }
+      }))({verbose: false});
+
+      l.activate(minsub.beehive);
+
+      //all calls to compose request will resolve w/done
+      l.composeRequest = sinon.spy(function(target, method){
+        var d = $.Deferred();
+        d.resolve(stubMetadata);
+        return d.promise();
+      });
+
+
+      l.pubsub.publish = sinon.spy();
+
+      expect(l.isDataLoaded()).to.be.false;
+
+      l._fetchAllMetadata();
+
+      expect(l.isDataLoaded()).to.be.true;
+
+      //when collection changed, pubsub event was sent that notifies widgets of
+      //the new collection, what is in it, and what the event was
+
+      expect(JSON.stringify(l.pubsub.publish.args[0].slice(1))).to.eql('["[PubSub]-Library-Change",[{"name":"Aliens Among Us","id":"1","description":"Are you one of them?","permission":"owner","num_documents":300,"date_created":"2015-04-03 04:30:04","date_last_modified":"2015-04-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Everything Sun","id":"2","description":"Where would we be without the sun?","num_documents":0,"permission":"admin","date_created":"2014-01-03 04:30:04","date_last_modified":"2015-01-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Space Travel and You","id":"7","description":"","permission":"write","num_documents":4000,"date_created":"2013-06-03 04:30:04","date_last_modified":"2015-06-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Space Travel and Me","id":"3","description":"interesting","permission":"read","num_documents":400,"date_created":"2012-06-03 05:30:04","date_last_modified":"2015-07-09 06:30:04","public":false,"num_users":1,"title":""}],{"ev":"reset"}]');
+
+    });
+
+    it("should allow widgets to get information from /libraries/[id]", function(){
+
+      var l = new LibraryController();
+
 
       l.composeRequest = sinon.spy(function(){
         var d = $.Deferred();
         d.resolve(stubMetadata);
         return d.promise();
-      })
-
-      var promise1 = l.getAllMetadata().done(
-        function(coll){
-        a = coll;
-        });
-
-
-      var req = l.composeRequest.args[0];
-
-      expect(req[0]).to.eql("biblib/libraries");
-
-      expect(req[1]).to.eql("GET");
-
-      expect(a.libraries).to.eql(
-        [
-          {
-            "name": "Aliens Among Us",
-            "id": "1",
-            "description": "Are you one of them?",
-            "permission": "owner",
-            "num_documents": 300,
-            "date_created": "2015-04-03 04:30:04",
-            "date_last_modified": "2015-04-09 06:30:04"
-          },
-          {
-            "name": "Everything Sun",
-            "id": "2",
-            "description": "Where would we be without the sun?",
-            "num_documents": 0,
-            "permission": "admin",
-            "date_created": "2014-01-03 04:30:04",
-            "date_last_modified": "2015-01-09 06:30:04"
-          },
-          {
-            "name": "Space Travel and You",
-            "id": "7",
-            "description": "",
-            "permission": "write",
-            "num_documents": 4000,
-            "date_created": "2013-06-03 04:30:04",
-            "date_last_modified": "2015-06-09 06:30:04"
-          },
-          {
-            "name": "Space Travel and Me",
-            "id": "3",
-            "description": "interesting",
-            "permission": "read",
-            "num_documents": 400,
-            "date_created": "2012-06-03 05:30:04",
-            "date_last_modified": "2015-07-09 06:30:04"
-          }
-        ]);
-
+      });
 
 
       l.getLibraryData("2");
 
-      var req = l.composeRequest.args[1];
+      var req = l.composeRequest.args[0];
 
       expect(req[0]).to.eql("biblib/libraries/2");
       expect(req[1]).to.eql("GET");
@@ -196,10 +246,10 @@ define([
 
       l.activate(minsub.beehive.getHardenedInstance());
 
-      l.composeRequest = sinon.spy(function(){ var d = $.Deferred();d.resolve();return d.promise()});
+      l.composeRequest = sinon.spy(function(){ var d = $.Deferred();d.resolve(stubMetadata.libraries);return d.promise()});
       l.fetchAllLibraryData = sinon.spy();
 
-      l.getPubSub().publish = sinon.spy();
+      l.pubsub.publish = sinon.spy();
 
       l.createLibrary( {name : "fake library name" });
 
@@ -215,18 +265,13 @@ define([
 
       l.deleteLibrary("4");
 
-
-      expect(l.composeRequest.args[1]).to.eql(["biblib/documents/4", "DELETE"]);
+      expect(l.composeRequest.args[2]).to.eql(["biblib/documents/4", "DELETE"]);
 
       //should result in 1 call to composeRequest and 2 calls to pubsub on successful completion
 
-<<<<<<< HEAD
-      expect(l.getPubSub().publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget"]);
-=======
-      expect(l.pubsub.publish.args[0].slice(1)).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget", "libraries"]);
->>>>>>>  basic library functionality, minus pagination for libraries, mostly working
+      expect(l.pubsub.publish.args[1].slice(1)).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget", "libraries"]);
 
-      expect(JSON.stringify(l.getPubSub().publish.args[1])).to.eql(JSON.stringify([
+      expect(JSON.stringify(l.pubsub.publish.args[2].slice(1))).to.eql(JSON.stringify([
         "[Alert]-Message",
         {
           "code": 0,
@@ -236,103 +281,35 @@ define([
 
     });
 
-    it("should allow widgets to add/delete records from libraries", function(){
 
-      var l = new LibraryController()
-      l.composeRequest = sinon.spy();
-
-      l.updateLibraryContents("3", {bibcode:[1,2,3], action: "add" });
-
-      expect(l.composeRequest.args[0]).to.eql([
-        "biblib/documents/3",
-        "POST",
-        {
-          "data": {
-            "bibcode": [
-              1,
-              2,
-              3
-            ],
-            "action": "add"
-          },
-          "extraArguments": {
-            "numBibcodesRequested": 3
-          }
-        }
-      ]);
-
-    });
-
-    it("should allow widgets to update metadata associated with libraries", function(){
-
-      var l = new LibraryController();
-      l.composeRequest = sinon.spy();
-
-      l.updateLibraryMetadata("3", { name : "foo", description : "boo"});
-
-      expect(l.composeRequest.args[0]).to.eql([
-        "biblib/documents/3",
-        "PUT",
-        {
-          "data": {
-            "name": "foo",
-            "description": "boo"
-          }
-        }
-      ]);
-
-    });
-
-    it("should allow widgets to update permission information associated with libraries", function(){
-
-      var l = new LibraryController();
-      l.composeRequest = sinon.spy();
-
-      l.updateLibraryPermissions("3", {email : "aholachek@foobly.ru", permission : "admin", value : true});
-
-      expect(l.composeRequest.args[0]).to.eql([
-        "biblib/permissions/3",
-        "POST",
-        {
-          "data": {
-            "email": "aholachek@foobly.ru",
-            "permission": "admin",
-            "value": true
-          }
-        }
-      ])
-
-    });
 
     it("should offer convenience methods for interfacing with current query/ app storage, getting relevant bibcodes, and adding those bibcodes to libraries", function(){
 
       var l = new LibraryController();
-      var minsub = new (MinSub.extend({
-        request: function() {
-          return {some: 'foo'}
-        }
-      }))({verbose: false});
 
       l._currentQuery = new MinSub.prototype.T.QUERY();
+
       l._executeApiRequest = sinon.spy(function(){
         var d = $.Deferred();
         d.resolve( new JSONResponse({response : {docs : [{bibcode : "1", bibcode : "2", bibcode : "3"}]}}));
         return d;
       });
 
-      minsub.beehive.addObject('AppStorage', {getSelectedPapers : function(){return ["1", "2", "3"]}});
-      l.activate(minsub.beehive);
+      l.beehive = {getObject : function(){ return {getSelectedPapers : function(){return ["1", "2", "3"]}}}};
 
-      //get bibcodes from current  query
-      var deferred1 =  l._getBibcodes({bibcodes : "all"});
+     //get bibcodes from current  query
+     var deferred1 =  l._getBibcodes({bibcodes : "all"});
 
+     //get bibcodes from app storage
+     var deferred2 = l._getBibcodes({bibcodes : "selected"});
 
-      //get bibcodes from app storage
-      var deferred2 = l._getBibcodes({bibcodes : "selected"});
       var bibs;
 
       deferred2.done(function(b){bibs = b});
+
       expect(bibs).to.eql( ["1", "2", "3"] );
-    })
-  })
-});
+
+    });
+  });
+
+})

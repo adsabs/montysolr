@@ -2,96 +2,20 @@ define([
   "marionette",
   "hbs!../templates/libraries-list-container",
   "hbs!../templates/library-item",
-  "hbs!../templates/no-libraries"
+  "hbs!../templates/no-libraries",
+  "hbs!../templates/loading-libraries",
+
 
 ], function(
   Marionette,
   LibraryContainer,
   LibraryItem,
-  NoLibrariesTemplate
+  NoLibrariesTemplate,
+  LoadingTemplate
 
   ){
 
 
-  var LibraryModel = Backbone.Model.extend({
-
-    defaults : function(){
-      return {
-        name: undefined,
-        description: undefined,
-        id : undefined,
-        permission : undefined,
-        num_papers : 0,
-        date_created : undefined,
-        date_last_modified : undefined
-      }
-    }
-
-  });
-
-
-  var LibraryCollection = Backbone.Collection.extend({
-
-    initialize : function(models, options){
-
-      if (!options.containerModel){
-        throw new Error("didn't provide acccess to the parent model to know what sort val to use")
-      }
-      this.options = options;
-    },
-
-    model : LibraryModel,
-
-    comparator : function(model1, model2){
-
-      var sort = this.options.containerModel.get("sort"),
-          type = this.options.containerModel.get("type"),
-          order = this.options.containerModel.get("order");
-
-      if (type == "string"){
-
-        if (order == "asc"){
-          return model1.get(sort).localeCompare(model2.get(sort));
-        }
-        else {
-          return - model1.get(sort).localeCompare(model2.get(sort));
-        }
-
-      }
-      else if (type == "date"){
-
-        if (order == "asc"){
-          return new Date(model1.get(sort)) - new Date(model2.get(sort));
-        }
-        else {
-          return new Date(model2.get(sort)) - new Date(model1.get(sort));
-        }
-
-      }
-      else if (type == "permission"){
-
-        var permissionHierarchy = ["read", "write", "admin", "owner"];
-
-        if (order == "asc"){
-          return permissionHierarchy.indexOf(model1.get(sort)) - permissionHierarchy.indexOf(model2.get(sort));
-        }
-        else {
-          return permissionHierarchy.indexOf(model2.get(sort)) - permissionHierarchy.indexOf(model1.get(sort));;
-        }
-
-      }
-      else if (type == "int"){
-
-        if (order == "asc"){
-          return model1.get(sort) - model2.get(sort);
-        }
-        else {
-          return model2.get(sort) - model1.get(sort);
-        }
-      }
-    }
-
-  });
 
   var LibraryItemView = Marionette.ItemView.extend({
 
@@ -136,18 +60,6 @@ define([
 
   });
 
-  var LibraryContainerModel = Backbone.Model.extend({
-
-    //this determines initial sort order
-
-    defaults : {
-
-      sort : "name",
-      order: "asc",
-      type: "string"
-    }
-
-  });
 
 
   var LibraryCollectionView = Marionette.CompositeView.extend({
@@ -155,14 +67,6 @@ define([
     initialize : function(options){
 
       var options = options || {};
-
-      if (!options.libraries){
-        throw new Error("Libraries List widget was initialized without library list data-- this is not supported")
-      }
-
-      this.model = new LibraryContainerModel();
-
-      this.collection = new LibraryCollection(options.libraries, {containerModel : this.model});
 
     },
 
@@ -186,8 +90,16 @@ define([
       "click thead button" : "sortCollection"
     },
 
+
     modelEvents :   {
       "change" : function(){
+        this.collection.sort();
+        this.render();
+      }
+    },
+
+    collectionEvents : {
+      "reset" :  function(){
         this.collection.sort();
         this.render();
       }
@@ -208,10 +120,11 @@ define([
 
     render : function(){
 
-      if (!this.collection.length){
+      if ( !this.collection.length  ){
         this.$el.html(NoLibrariesTemplate());
         return this
       }
+
       else {
         return Marionette.CompositeView.prototype.render.apply(this, arguments);
       }

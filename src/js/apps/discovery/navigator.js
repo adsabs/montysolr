@@ -13,8 +13,10 @@ define([
     'js/components/json_response',
     'js/components/api_query',
     'js/components/api_request',
-    'js/components/api_targets'
+    'js/components/api_targets',
+    'hbs!/404'
   ],
+
   function (
     $,
     Backbone,
@@ -25,7 +27,9 @@ define([
     JsonResponse,
     ApiQuery,
     ApiRequest,
-    ApiTargets
+    ApiTargets,
+    ErrorTemplate
+
     ) {
 
     "use strict";
@@ -83,6 +87,11 @@ define([
           app.getObject('MasterPageManager').show('LandingPage');
           var q = app.getObject('AppStorage').getCurrentQuery();
           this.route = '#index/' + queryUpdater.clean(q).url();
+        });
+
+        this.set("404", function(){
+          $("#body-template-container").html(ErrorTemplate());
+          this.route = '#404';
         });
 
 
@@ -149,8 +158,7 @@ define([
             app.getWidget("IndividualLibraryWidget").setSubView({ view : sub, id : id });
             app.getObject('MasterPageManager').show("LibrariesPage",
               ["IndividualLibraryWidget", "UserNavbarWidget"]);
-            var lastSlash = (sub == "library") ? "" : "/admin";
-            this.route = "#user/libraries/" + id + lastSlash;
+            this.route = "#user/libraries/" + id;
             publishPageChange("libraries-page");
 
           }
@@ -159,12 +167,30 @@ define([
 
         this.set("library-export", function(widget, data){
 
+          var widget = app.getWidget("ExportWidget");
+
+          //classic is a special case, it opens in a new tab
+          if (data.sub  == "classic") {
+            if (data.bibcodes && data.bibcodes.length) {
+              widget.openClassicExports({bibcodes: data.bibcodes});
+            }
+            else if (data.id) {
+              app.getObject("LibraryController").getLibraryData(data.id).done(function (bibcodes) {
+                widget.openClassicExports({currentQuery: bibcodes});
+              });
+            }
+            //show library list view (since there is nothing else to show in this tab
+            self.navigate("IndividualLibraryWidget", {sub : "library", id : data.id});
+            return
+          }
+          // if it was a regular export:
+
           //first, tell export widget what to show
           if (data.bibcodes && data.bibcodes.length) {
 
-            app.getWidget("ExportWidget").exportRecords(data.sub, data.bibcodes);
+            widget.exportRecords(data.sub, data.bibcodes);
             //then, set library tab to proper field
-            app.getWidget("IndividualLibraryWidget").updateView({ view : "export", publicView : data.publicView });
+            app.getWidget("IndividualLibraryWidget").setSubView({ view : "export", publicView : data.publicView });
 
           }
           //no bibcodes provided (coming from router)
@@ -173,7 +199,7 @@ define([
             app.getObject("LibraryController").getLibraryData(data.id).done(function(bibcodes){
 
               bibcodes = bibcodes.documents;
-              app.getWidget("ExportWidget").exportRecords(data.sub, bibcodes);
+              widget.exportRecords(data.sub, bibcodes);
               //then, set library tab to proper field
               app.getWidget("IndividualLibraryWidget").setSubView({ view : "export", id : data.id, publicView : data.publicView });
 
@@ -188,7 +214,6 @@ define([
             if (data.publicView){
               app.getObject('MasterPageManager').show("PublicLibrariesPage",
                 ["IndividualLibraryWidget", "ExportWidget"]);
-              this.route = "/#/public-libraries/" + data.id ;
             }
 
             else {
@@ -196,7 +221,6 @@ define([
               app.getObject('MasterPageManager').show("LibrariesPage",
                 ["IndividualLibraryWidget", "UserNavbarWidget", "ExportWidget"]);
               publishPageChange("libraries-page");
-              this.route = "#user/libraries/" + data.id + "/export/" + data.sub;
             }
 
         });
@@ -208,7 +232,7 @@ define([
 
               app.getWidget("Metrics").showMetricsForListOfBibcodes(data.bibcodes);
               //then, set library tab to proper field
-              app.getWidget("IndividualLibraryWidget").updateView({ view : "metrics", publicView : data.publicView });
+              app.getWidget("IndividualLibraryWidget").setSubView({ view : "metrics", publicView : data.publicView });
             }
 
             else if (data.id){
@@ -228,7 +252,6 @@ define([
             if (data.publicView){
               app.getObject('MasterPageManager').show("PublicLibrariesPage",
                 ["IndividualLibraryWidget", "Metrics"]);
-              this.route = "/#/public-libraries/" + data.id ;
             }
 
             else {
@@ -236,7 +259,6 @@ define([
               app.getObject('MasterPageManager').show("LibrariesPage",
                 ["IndividualLibraryWidget", "UserNavbarWidget", "Metrics"]);
 
-              this.route = "#user/libraries/" + data.id + "/metrics";
               publishPageChange("libraries-page");
             }
         });
@@ -281,7 +303,7 @@ define([
           var widget = app.getWidget('ExportWidget');
 
 
-          //classic is a special case, it opens in a new tab
+          // is a special case, it opens in a new tab
           if (format == "classic"){
             if (options.onlySelected && storage.hasSelectedPapers()) {
               widget.openClassicExports({bibcodes: storage.getSelectedPapers()});

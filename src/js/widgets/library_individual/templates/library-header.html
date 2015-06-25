@@ -71,7 +71,7 @@
 
     {{#if edit}}
     <div class="pull-right">
-        <button class="btn btn-default" disabled="disabled"><i class="fa fa-arrow-right"></i> View this library in the ADS Search Results Page</button>
+        <button class="btn btn-default" disabled="true"><i class="fa fa-arrow-right"></i> View this library in the ADS Search Results Page</button>
     </div>
     <div class="s-library-title">
         <h2 class="s-edit-indicator edit-indicator" title="edit library title" contenteditable="true" data-param="name">{{name}}</h2>
@@ -86,11 +86,7 @@
     </div>
     <div class="s-library-description">
         <p class="s-edit-indicator edit-indicator" title="edit library description" contenteditable="true" data-param="description">
-            {{#if description }}
-            {{ description }}
-            {{else}}
-            (none)
-            {{/if}}
+            {{#if description }}{{ description }}{{else}}(none){{/if}}
         </p>
         <span class="s-editable-buttons no-show animated">
             <button class="btn btn-sm  btn-success btn-inverse  submit-edit" title="submit changes" data-element="{{element}}" data-param="{{param}}">
@@ -134,7 +130,7 @@
         {{else}}
 
             <button class="btn btn-default"  type="button" data-toggle="collapse" data-target="#library-actions" aria-expanded="false" aria-controls="#library-actions">
-                <i class="fa fa-cog"></i> You have <b>{{permission}}</b> privileges. View editing options.
+                <i class="fa fa-cog"></i> View editing options (You have <b>{{permission}}</b> privileges)
             </button>
             <div class="collapse" id="library-actions" style="padding-top: 15px">
                 {{#if edit}}
@@ -184,6 +180,8 @@
                 <li data-tab="export-bibtex">BibTEX</li>
                 <li data-tab="export-aastex">AASTex</li>
                 <li data-tab="export-endnote">EndNote</li>
+                <li data-tab="export-classic">ADS Classic</li>
+
             </ul>
         </li>
         <li class="tab s-tab  {{#compare active 'metrics'}} active {{/compare}}" data-tab="metrics"><i class="icon-explore"></i> Metrics </li>
