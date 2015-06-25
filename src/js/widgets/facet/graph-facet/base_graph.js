@@ -96,9 +96,6 @@ define(['marionette',
         if (this.addToOnRender){
           this.addToOnRender()
         }
-        if (this.addChartEventListeners){
-          this.addChartEventListeners();
-        }
       }
     }
 

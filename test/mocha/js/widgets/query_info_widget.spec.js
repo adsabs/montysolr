@@ -35,9 +35,9 @@ define([
         numFound: 841359
       }));
 
+
       $("#test").append(w.render().el);
 
-      expect($("#test").find(".num-found").text().trim()).to.eql('841,359 search results');
       expect($("#test").find(".active-filters").text().trim()).to.eql('Active Filters:\n        \n        show' );
 
       $(".show-filter").click();

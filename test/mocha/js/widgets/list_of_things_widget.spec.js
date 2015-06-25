@@ -172,6 +172,7 @@ define(['marionette',
         done();
       });
 
+
       it("the controller reacts to user actions", function(done) {
 
         var counter = 0;
@@ -252,6 +253,26 @@ define(['marionette',
         expect(widget.collection.models[0].get('resultsIndex')).to.eql(0);
         expect(widget.collection.models[4].get('resultsIndex')).to.eql(4);
       });
+
+      it(" the item view allows the user to view the lsit in a search results page if 'operator' option is true and 'queryOperator' option is set", function() {
+
+        var coll = new PaginatedCollection();
+        var view = new PaginatedView({collection: coll, "operator": true, queryOperator: "citations"});
+        var docs = test1().response.docs;
+
+        _.each(docs, function (d) {
+          view.collection.add(_.clone(d));
+        });
+
+        view.model.set("bibcode", "foo")
+
+        var $w = $(view.render().el);
+        $('#test').append($w);
+
+        expect($("#test .s-operator").html().trim()).to.eql('<i>view this list in a search results page:</i><br>\n            <a href="#search/q=citations(foo)" class="btn btn-sm btn-primary-faded"><i class="fa fa-search"></i> citations(foo)</a>');
+
+      });
+
 
 
       it("the ItemView has user interacting parts", function() {

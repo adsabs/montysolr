@@ -26,6 +26,7 @@ define(['marionette',
            ApiFeedback
     ) {
 
+
     var QueryModel = Backbone.Model.extend({
 
       defaults: {
@@ -233,7 +234,6 @@ define(['marionette',
         switch (feedback.code) {
           case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
             var q = feedback.query.clone();
-            var numFound = feedback.numFound;
             var filters = [];
             _.each(q.keys(), function(k) {
               if (k.substring(0,2) == 'fq') {
@@ -245,9 +245,9 @@ define(['marionette',
               }
             });
             this.view.model.set("fq", filters);
-            this.view.model.set("numFound", numFound);
             break;
         }
+
       }
 
     });

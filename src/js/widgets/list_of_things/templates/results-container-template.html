@@ -36,6 +36,13 @@
     </div>
     {{/if}}
 
+    {{#if operator}}
+        <div class="s-operator">
+            <i>view this list in a search results page:</i><br/>
+            <a href="#search/q={{queryOperator}}({{bibcode}})" class="btn btn-sm btn-primary-faded"><i class="fa fa-search"></i> {{queryOperator}}({{bibcode}})</a>
+         </div>
+    {{/if}}
+
 </div>
 
     <ul class="results-list  s-results-list list-unstyled s-display-block" aria-label="list of results">

@@ -62,11 +62,12 @@ define([
           options.collection = new PaginatedCollection();
         }
         if (!options.view) {
+          //operator instructs view to show a link that has citations:(bibcode) or something similar
           if (options.model) {
-            options.view = new PaginatedView({collection: options.collection, model: options.model});
+            options.view = new PaginatedView({collection: options.collection, model: options.model, operator: this.operator, queryOperator : this.queryOperator });
           }
           else {
-            options.view = new PaginatedView({collection: options.collection});
+            options.view = new PaginatedView({collection: options.collection, operator: this.operator, queryOperator : this.queryOperator });
           }
         }
         options.model = options.view.model;
