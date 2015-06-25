@@ -36,8 +36,6 @@ define([
 
       r.processResponse(new JsonResponse(testData));
 
-      debugger
-
       expect($w.find("li").length).to.eql(7);
       expect($w.find("li:first").text().trim()).to.eql('Propagation of Cosmic-Ray Nucleons in the Galaxy (Strong,+);');
     });
@@ -106,6 +104,14 @@ define([
       expect(processResponse.callCount).to.be.eql(1);
 
       expect(widget.collection.models.length).to.be.eql(7);
+
+      // the same query should reuse data
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
+      expect(widget.collection.models.length).to.be.eql(7);
+      expect(onDisplayDocuments.callCount).to.be.eql(2);
+      expect(loadBibcodeData.callCount).to.be.eql(2);
+      expect(loadBibcodeData.lastCall.args[0]).to.be.eql('foo');
+      expect(processResponse.callCount).to.be.eql(1);
 
     });
 

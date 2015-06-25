@@ -90,14 +90,14 @@ define([
       options = _.extend({}, options, request.get('options'));
       
       var self = this;
-
+      var data;
       var query = request.get('query');
       if (query && !(query instanceof ApiQuery)) {
         throw Error("Api.query must be instance of ApiQuery");
       }
 
       if (query) {
-        var data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
+        data = options.contentType === "application/json" ? JSON.stringify(query.toJSON()) : query.url();
       }
 
       var target = request.get('target') || '';

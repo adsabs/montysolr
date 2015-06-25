@@ -8,7 +8,8 @@ define(['marionette',
     'hbs!./feedback-template',
     'hbs!./library-options',
     'js/mixins/formatter',
-    'bootstrap'
+    'bootstrap',
+    'js/components/api_feedback'
   ],
 
   function(Marionette,
@@ -21,7 +22,8 @@ define(['marionette',
            FeedbackTemplate,
            LibraryOptionsTemplate,
            FormatMixin,
-           Bootstrap
+           Bootstrap,
+           ApiFeedback
     ) {
 
     var QueryModel = Backbone.Model.extend({
@@ -30,16 +32,13 @@ define(['marionette',
         numFound: 0,
         selected: 0,
         fq: undefined,
-
         //for libraries
         libraryDrawerOpen : false,
         //for rendering library select
         libraries : [],
-
         loggedIn : false
-
       }
-    })
+    });
 
     var QueryDisplayView = Marionette.ItemView.extend({
 
@@ -120,7 +119,7 @@ define(['marionette',
         this.$(".libraries-container").html(LibraryOptionsTemplate(this.model.toJSON()));
       }
 
-    })
+    });
 
     _.extend(QueryDisplayView.prototype, FormatMixin);
 
@@ -147,8 +146,7 @@ define(['marionette',
         var pubsub = this.pubsub, that = this;
 
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
-        pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
-        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+        pubsub.subscribe(pubsub.FEEDBACK, this.processFeedback);
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
 
@@ -231,24 +229,28 @@ define(['marionette',
 
       },
 
-      processResponse: function(apiResponse) {
-        var q = apiResponse.getApiQuery();
-        var numFound = apiResponse.get("response.numFound");
-        var filters = [];
-        _.each(q.keys(), function(k) {
-          if (k.substring(0,2) == 'fq') {
-            _.each(q.get(k), function(v) {
-              if (v.indexOf('{!') == -1) {
-                filters.push(v);
+      processFeedback: function(feedback) {
+        switch (feedback.code) {
+          case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
+            var q = feedback.query.clone();
+            var numFound = feedback.numFound;
+            var filters = [];
+            _.each(q.keys(), function(k) {
+              if (k.substring(0,2) == 'fq') {
+                _.each(q.get(k), function(v) {
+                  if (v.indexOf('{!') == -1) {
+                    filters.push(v);
+                  }
+                });
               }
             });
-          }
-        });
-        this.view.model.set("fq", filters);
-        this.view.model.set("numFound", numFound);
+            this.view.model.set("fq", filters);
+            this.view.model.set("numFound", numFound);
+            break;
+        }
       }
 
-    })
+    });
 
     return Widget
 

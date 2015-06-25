@@ -1,5 +1,5 @@
 define([
-  '../../page_managers/toc_controller',
+  'js/page_managers/toc_controller',
   'js/page_managers/three_column_view',
   'hbs!./abstract-page-layout',
   'hbs!./abstract-nav'

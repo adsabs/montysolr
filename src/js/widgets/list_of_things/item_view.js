@@ -81,7 +81,6 @@ define([
             data : this.model.attributes }
         );
         this.model.set("chosen", isChosen);
-
       },
 
       resetToggle: function(){

@@ -260,8 +260,6 @@ define([
           var storage = app.getObject('AppStorage');
           var widget = app.getWidget('ExportWidget');
 
-          //first, open central panel
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
 
           //classic is a special case, it opens in a new tab
           if (format == "classic"){
@@ -273,6 +271,10 @@ define([
             }
             return
           }
+
+          //first, open central panel
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+
           // only selected records requested
           if (options.onlySelected && storage.hasSelectedPapers()) {
             widget.exportRecords(format, storage.getSelectedPapers());
