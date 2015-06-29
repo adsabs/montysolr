@@ -1,0 +1,15 @@
+<div>
+    I'm the new beautiful widget.
+    {{#if msg}}
+    And I have a message for you: <span class="message">{{msg}}</span>
+    {{else}}
+    But I don't have any message for you. <span class="message"></span>
+    {{/if}}
+
+    {{#unless name}}
+    Please tell me your name: <input type="text" value="">
+    <button class="hello">OK</button>
+    {{else}}
+    {{name}}
+    {{/unless}}
+</div>
