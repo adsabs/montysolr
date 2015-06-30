@@ -11,7 +11,7 @@
 define([], function() {
 
   var tests  = [
-    '/widgets/openurl_generator.spec.js'
+    '/mixins/openurl_generator.spec.js'
   ];
   return tests;
 });
