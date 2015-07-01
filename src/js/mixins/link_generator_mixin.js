@@ -87,8 +87,15 @@ var linkGenerator = {
         case "electr":
 
           var electr_link;
-          // Only carry out if there is no open access content available
-          if (!l.access){
+          var scan_available =_.where(link_types, {"type": "gif"}).length > 0;
+
+          // Only create an openURL if the following is true:
+          //   - There is NO open access available
+          //   - There is NO scan available from the ADS
+          //   - The user is authenticated
+          //   - the user HAS a library link server
+
+          if (!l.access && !scan_available && data.user_authenticated && data.user_library_link){
             var openURL = new OpenURLGenerator(data);
             openURL.createOpenURL();
             electr_link = openURL.openURL;
