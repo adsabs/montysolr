@@ -85,13 +85,15 @@ var linkGenerator = {
           links.text.push({openAccess: openAccess, title: "arXiv e-print", link: this.adsUrlRedirect("preprint", bib)});
           break;
         case "electr":
-          // Only carry out if there is no open access content available
-          var electr_link = this.adsUrlRedirect('electr', bib);
 
+          var electr_link;
+          // Only carry out if there is no open access content available
           if (!l.access){
             var openURL = new OpenURLGenerator(data);
             openURL.createOpenURL();
             electr_link = openURL.openURL;
+          } else {
+            electr_link = this.adsUrlRedirect('electr', bib);
           }
 
           links.text.push({openAccess: openAccess, title: "Publisher Article", link: electr_link});
