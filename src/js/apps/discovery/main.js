@@ -26,6 +26,8 @@ define(['config', 'module', 'analytics'], function(config, module, analytics) {
       ApiAccess
       ) {
 
+      Application.prototype.shim();
+
       // at the beginning, we don't know anything about ourselves...
       var debug = window.location.href.indexOf('debug=true') > -1 ? true : false;
 

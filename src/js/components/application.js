@@ -98,6 +98,17 @@ define([
       this.__barbarianRegistry = {};
     },
 
+    /*
+    * code that accounts for browser deficiencies
+    */
+
+    shim : function(){
+
+      if (!window.location.origin) {
+        window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+      }
+    },
+
     /**
      * Purpose of this call is to load dynamically all modules
      * that you pass in a configuration. We'll load them using

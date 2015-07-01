@@ -66,16 +66,11 @@ define([
 
       _.bindAll(this, "completeLogIn", "completeLogOut");
 
-      this.listenTo(this.collection, "change", this.broadcastChange);
+     this.listenTo(this.collection, "change", this.broadcastChange);
      this.listenTo(this.collection, "reset", this.broadcastReset);
 
       //set base url, currently only necessary for change_email endpoint
-      if (!this.test){
-        this.base_url = location.origin;
-      }
-      else {
-        this.base_url = "location.origin"
-      }
+      this.base_url = this.test ? "location.origin" : location.origin;
 
       this.buildAdditionalParameters();
     },
