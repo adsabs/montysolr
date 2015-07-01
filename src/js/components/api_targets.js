@@ -24,14 +24,17 @@ define([
 
       CSRF : 'accounts/csrf',
       USER: 'accounts/user',
+      USER_DATA: 'myads/user-data',
+      OPENURL_CONFIGURATION : 'myads/configuration/link_servers',
+      TOKEN:'accounts/token',
       LOGOUT: 'accounts/logout',
       REGISTER: 'accounts/register',
       VERIFY : 'accounts/verify',
       DELETE: 'accounts/user/delete',
-      TOKEN:'accounts/token',
       RESET_PASSWORD: 'accounts/reset-password',
       CHANGE_PASSWORD: 'accounts/change-password',
       CHANGE_EMAIL: 'accounts/change-email',
+
       RECOMMENDER : 'recommender',
       GRAPHICS: 'graphics',
 

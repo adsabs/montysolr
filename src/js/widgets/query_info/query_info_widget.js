@@ -153,8 +153,8 @@ define(['marionette',
 
       },
 
-      handleUserAnnouncement : function(event){
-        if (event == "user_info_change"){
+      handleUserAnnouncement : function(event, target, arg2){
+        if (event == "user_info_change" && target == "USER"){
           var loggedIn = this.beehive.getObject("User").isLoggedIn();
           this.model.set({ loggedIn: loggedIn});
         }

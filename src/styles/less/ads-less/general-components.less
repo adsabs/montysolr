@@ -61,13 +61,15 @@ body {
 
 
 .s-nav {
-  padding: 8px 0 8px 17%;
+  padding: 8px 0 8px 6%;
   .lh-transition(all, .5s, ease-out);
   border-left: 5px solid @sidenav-background;
+  font-weight: 300;
+  font-size: 16px;
 
   &:hover {
-    background-color: lighten(@gray-lighter, 4%);
-    border-left: 5px solid @gray;
+    background-color: lighten(@gray-lighter, 5%);
+    border-left: 5px solid @gray-light;
 
   }
 
@@ -80,11 +82,12 @@ body {
 .s-nav-active {
   border-left: 5px solid @brand-primary-faded;
   color: @brand-primary-faded;
+  font-weight: 400;
   &:hover {
-    background-color:lighten(@brand-primary, 60%);
+    background-color:lighten(@brand-primary, 63%);
     border-left: 5px solid @brand-primary-faded;
   }
-  background-color: lighten(@brand-primary, 60%);
+  background-color: lighten(@brand-primary, 63%);
 }
 
 .s-nav-inactive {
@@ -112,15 +115,16 @@ body {
 /*header is for sub-section titles*/
 
 .s-nav-header{
-  font-weight: 300;
-  font-size: 24px;
-  padding: 7% 7% 0 8%;
+  font-weight: 500;
+  font-size: 20px;
+  padding: 20px 7% 0;
   font-variant: small-caps;
+  color: @gray-light;
 
   i {
     font-size: .8em;
     float: left;
-    margin-top: 10px;
+    margin-top: 8px;
     margin-right: 3%;
   }
 

@@ -256,12 +256,15 @@ define([
     },
 
     setSubView : function(subView) {
+      debugger
       var View = this.getCurrentViewConstructor(subView);
-      var model = this.getCurrentModel(subView);
-      var viewToShow = new View({model : model});
+      if (View){
+        var model = this.getCurrentModel(subView);
+        var viewToShow = new View({model : model});
 
-      this.listenToOnce(viewToShow, "submit-form", this.forwardSubmit);
-      this.content.show(viewToShow);
+        this.listenToOnce(viewToShow, "submit-form", this.forwardSubmit);
+        this.content.show(viewToShow);
+      }
   },
 
     getCurrentModel : function(name){
@@ -401,9 +404,7 @@ UserSettings = BaseWidget.extend({
      else if (msg === "data_post_unsuccessful"){
        //should show alert
      }
-     else if (msg === "user_info_change"){
-       //refresh all models in the widget
-     }
+
      //clear models, then refill with data from user object
      this.resetModels();
    },

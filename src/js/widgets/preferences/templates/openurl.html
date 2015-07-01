@@ -1,0 +1,38 @@
+{{#if link_server}}
+<div class="current-link-server">
+   <p>Your Library Link Server is set to <b>{{openURLName}}</b>.</p>
+   <button class="btn btn-primary-faded btn-sm {{#if link_server}} collapsed {{/if}}" data-toggle="collapse" data-target="#link-server-container"><i class="toggle-icon"></i> Change Library Link Server</button>
+</div>
+{{/if}}
+
+    <div id="link-server-container" class="{{#if link_server}} collapse {{/if}}">
+        <br/>
+        <form class="form-inline" >
+            <div class="form-group" style="min-width:300px">
+                <label for="set-link-server">Choose Your Institution</label><br/>
+                <select name="set-link-server" id="set-link-server" class="form-control" style="width: 100%">
+                    {{#each openURLConfig}}
+                    <option value="{{this.link}}" {{#compare ../link_server this.link }} selected="selected" {{/compare}} >{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <button class="btn btn-sm btn-success submit">submit</button>
+
+            <br/>
+            <br/>
+            <br/>
+
+            <p> <b>Can't find your institution in the list above?</b>
+            </p>
+            <p>
+                Please contact your electronic resources librarian
+                and request that he or she email adshelp@cfa.harvard.edu with the relevant openurl information.
+            </p>
+            <p>
+                If you are still having difficulties, <b><a href="mailto:adshelp@cfa.harvard.edu">contact us</a></b> for help.
+            </p>
+       </form>
+        <br/>
+
+
+    </div>

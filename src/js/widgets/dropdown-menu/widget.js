@@ -96,7 +96,7 @@ define([
         }
       },
 
-      className : "btn-group s-dropdown-widget",
+      className : "btn-group dropdown-widget s-dropdown-widget",
 
       childView: DropdownItemView,
       childViewContainer: ".link-container",

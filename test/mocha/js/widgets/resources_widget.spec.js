@@ -86,7 +86,30 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
         'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD'
       );
 
-    })
+    });
+
+
+    it("knows about the user's link_server if user is signed in, and adds that to the list of full text links if applicable", function(){
+
+
+      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", "USER_DATA", {link_server:"foo.com"});
+
+      expect(widget.model.get("link_server")).to.eql("foo.com");
+
+      var data =  {
+          fullTextSources : [{openAccess: false, title: "Publisher Article", link: "fakelink", openUrl: true}]
+
+        };
+
+    widget.model.set(data);
+
+    $("#test").append($w);
+
+      expect($("#test").find(".resources-widget a").html().trim()).to.eql('Publisher Article\n            \n            \n                <i class="fa fa-university" data-toggle="tooltip" data-placement="top" title="" data-original-title="This resource is available through your institution."></i>');
+
+      $("#test").empty();
+
+    });
 
   })
 

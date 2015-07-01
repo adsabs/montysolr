@@ -34,7 +34,6 @@ define(['config', 'module', 'analytics'], function(config, module, analytics) {
       // app object will load everything
       var app = new (Application.extend(DiscoveryBootstrap))({'debug': debug, timeout: 30000});
 
-
       // load the objects/widgets/modules (using discovery.config.js)
       var defer = app.loadModules(module.config());
 

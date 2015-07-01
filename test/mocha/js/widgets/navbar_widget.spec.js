@@ -184,7 +184,7 @@ define([
     //lack of username indicates user is logged out
     u.collection.get("USER").set("user", undefined);
 
-    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change");
+    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
 
     expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
 

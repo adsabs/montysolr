@@ -171,7 +171,8 @@ require.config({
     'chai': '../bower_components/chai/chai',
     'sinon': '../bower_components/sinon/index',
     'zeroclipboard' : 'libs/zeroclipboard/ZeroClipboard',
-    'filesaver' : 'libs/FileSaver/FileSaver'
+    'filesaver' : 'libs/FileSaver/FileSaver',
+    'select2' : 'libs/select2/select2'
 
   },
 
@@ -313,8 +314,7 @@ require.config({
           }
         }
       });
-    })
-
+    });
 
   }
 });

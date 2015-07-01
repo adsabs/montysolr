@@ -480,7 +480,6 @@ module.exports = function(grunt) {
             "mixins/dependon.js":61,
             "widgets/facet/tree_view.js":62,
             "widgets/facet/item_view.js":71,
-            //temporary until we add back libraries!
             "widgets/query_info/query_info_widget.js":50,
             "widgets/resources/widget.js":72,
             "wraps/table_of_contents.js":73,
@@ -489,7 +488,7 @@ module.exports = function(grunt) {
             "components/api_feedback.js":77,
             "components/transition.js":77,
             "components/recaptcha_manager.js":49,
-            "components/user.js": 76,
+            "components/user.js": 78,
             "widgets/dropdown-menu/widget.js":78,
             "widgets/list_of_things/paginated_view.js":78,
             "wraps/paper_network.js": 77, // some tests don't run properly in phantomjs,
