@@ -152,6 +152,59 @@ define(['js/mixins/link_generator_mixin'],
       })
 
 
+      it("should determine if an openURL is required and generate it using the OpenURLGenerator mixin", function(){
+
+        /**
+         *
+         * @type {{bibcode: string, first_author: string, year: string, page: string[], pub: string,
+         * pubdate: string, title: *[], volume: string, doi: string[], issue: number, issn: string[]}}
+         *
+         * Test passes a the following logic:
+         *   - user is authenticated
+         *   - journal has NO open access
+         *   - journal has NO scan available from the ADS
+         */
+
+        var stub_meta_data = {
+          "bibcode": "2015MNRAS.451.4686F",
+          "first_author": "Friis, M.",
+          "year": "2015",
+          "page": ["4686-4690"],
+          "pub": "Monthly Notices of the Royal Astronomical Society",
+          "pubdate": "2015-05-00",
+          "title": ["The warm, the excited, and the molecular gas: " +
+          "GRB 121024A shining through its star-forming galaxy"],
+          "volume": "451",
+          "doi": ["10.1093/mnras/stv960"],
+          "issue": 1,
+          "issn": ["0035-8711"]
+        };
+
+        var stub_bibcode = stub_meta_data["bibcode"];
+        var stub_citations = {
+              "num_citations": 62,
+              "num_references": 8
+        };
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
+        ];
+        var stub_property = [
+          "OPENACCESS",
+          "NOT REFEREED",
+          "ADS_SCAN",
+          "TOC",
+          "ARTICLE"
+        ];
+
+
+        // Check that the OpenURLGenerator mixin has been loaded
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_bibcode, stub_meta_data);
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("doi:10.1093/mnras/stv960");
+
+      });
+
     })
 
 

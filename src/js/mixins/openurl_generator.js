@@ -8,6 +8,8 @@ define([], function() {
     var OpenURLGenerator = function (metadata, link_server){
         /**
          * Generates a class that can be used to create an OpenURL and a ContextObject for OpenURLs
+         * OpenURL semantics have been followed using the standard Z39.88-2004, v0.1 and v1.0 should
+         * both be supported, in principle.
          *
          * @param {object} metadata - should contain the docs from a Solr response
          * @param {string} link_server - library link server to be used as the base of the OpenURL
@@ -15,7 +17,8 @@ define([], function() {
 
         // Fixed values
         this.baseURL = link_server;
-        this.metadata = metadata;
+        this.metadata = (metadata !== undefined) ? this.metadata = metadata : {};
+
         this.url_ver = 'Z39.88-2004';
         this.rft_val_fmt = 'info:ofi/fmt:kev:mtx:';
         this.rfr_id = 'info:sid/ADS';
@@ -91,20 +94,29 @@ define([], function() {
              * Parses the metadata of the object and fills all the correct attributes required for making a
              * ContextObject
              */
-            this.rft_spage = this.parseFirstPage(metadata.page);
-            this.rft_issue = metadata.issue || false;
-            this.rft_vol = metadata.volume || false;
-            this.rft_jtitle = metadata.pub || false;
-            this.rft_atitle = metadata.title[0] || false;
-            this.rft_id = this.parseRFTInfo(metadata);
-            var author_name = this.parseAuthor(metadata.first_author);
+
+            console.log('here');
+            console.log(this.metadata);
+
+            this.rft_spage = this.parseFirstPage(this.metadata.page);
+            this.id = this.parseID(this.metadata.doi);
+            this.genre = this.parseGenre(this.metadata.doctype);
+            this.rft_id = this.parseRFTInfo(this.metadata);
+            var author_name = this.parseAuthor(this.metadata.first_author);
             this.rft_aulast = author_name['lastname'];
             this.rft_aufirst = author_name['firstnames'];
-            this.rft_date = metadata.year || false;
-            this.rft_issn = metadata.issn[0] || false;
-            this.id = this.parseID(metadata.doi);
-            this.genre = this.parseGenre(metadata.doctype);
+
+            this.rft_issue = (this.metadata.issue !== undefined) ? this.metadata.issue : false;
+            this.rft_vol = (this.metadata.volume !== undefined) ? this.metadata.volume : false;
+            this.rft_jtitle = (this.metadata.pub !== undefined) ? this.metadata.pub : false;
+            this.rft_date = (this.metadata.year !== undefined) ? this.metadata.year : false;
+            this.rft_atitle = (this.metadata.title !== undefined) ? this.metadata.title[0] : false;
+            this.rft_issn = (this.metadata.issn !== undefined ) ? this.metadata.issn[0] : false;
+
             this.rft_val_fmt += this.genre;
+
+            console.log(this.rft_id);
+
         };
 
         this.createContextObject = function() {
@@ -145,7 +157,6 @@ define([], function() {
                 'id': this.id,
                 'genre': this.genre
             };
-            console.log(this.contextObject);
         };
 
         this.createOpenURL = function() {
@@ -163,12 +174,23 @@ define([], function() {
             for (var key in this.contextObject) {
                 if (this.contextObject.hasOwnProperty(key)) {
 
+                    // Escape if the object is set to false
+                    if (this.contextObject[key] === false) {
+                        continue;
+                    }
+
                     if (this.contextObject[key] instanceof Array) {
                         for (var i=0; i < this.contextObject[key].length; i++){
+
+                            // Escape if this element is set to false
+                            if (this.contextObject[key][i] === false) {
+                                continue;
+                            }
+
                             this.openURL += '&' + key + '=' + this.contextObject[key][i];
-                            console.log(this.contextObject[key][i] + ' ' + key);
                         }
                     } else {
+
                         this.openURL += '&' + key + '=' + this.contextObject[key];
                     }
 

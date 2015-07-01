@@ -1,4 +1,4 @@
-define(["underscore"], function(_){
+define(["underscore", "js/mixins/openurl_generator"], function(_, OpenURLGenerator){
 
 
 var linkGenerator = {
@@ -62,7 +62,7 @@ var linkGenerator = {
 
   },
 
-  getTextAndDataLinks: function (links_data, bib) {
+  getTextAndDataLinks: function (links_data, bib, data) {
 
     var link_types, links = { text : [], data : []};
 
@@ -85,7 +85,16 @@ var linkGenerator = {
           links.text.push({openAccess: openAccess, title: "arXiv e-print", link: this.adsUrlRedirect("preprint", bib)});
           break;
         case "electr":
-          links.text.push({openAccess: openAccess, title: "Publisher Article", link: this.adsUrlRedirect('electr', bib)})
+          // Only carry out if there is no open access content available
+          var electr_link = this.adsUrlRedirect('electr', bib);
+
+          if (!l.access){
+            var openURL = new OpenURLGenerator(data);
+            openURL.createOpenURL();
+            electr_link = openURL.openURL;
+          }
+
+          links.text.push({openAccess: openAccess, title: "Publisher Article", link: electr_link});
           break;
         case "pdf":
           links.text.push({openAccess: openAccess, title: "Publisher PDF", link: this.adsUrlRedirect('article', bib)});

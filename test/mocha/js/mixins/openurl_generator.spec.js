@@ -4,21 +4,6 @@ define(
 
         describe('OpenURL generator function (openurl_generator.spec.js)', function () {
 
-            // Comment out for now
-            /*
-            beforeEach(function () {
-
-                this.minsub = minsub = new (MinimalPubSub.extend({
-                    request: function (apiRequest) {
-                        return TestData();
-                    }
-                }))({verbose: false});
-            });
-
-            afterEach(function () {
-                $("#test").empty();
-            });
-            */
             var stub_meta_data = {
                 "bibcode": "2015MNRAS.451.4686F",
                 "first_author": "Friis, M.",
@@ -41,7 +26,6 @@ define(
                 var first_author = "Han, Hillary S. W.";
 
                 parsed_first_author = openURL.parseAuthor(first_author);
-                console.log(parsed_first_author);
                 expect(parsed_first_author['lastname']).to.eql('Han');
                 expect(parsed_first_author['firstnames']).to.eql('Hillary S. W.');
 
@@ -88,7 +72,12 @@ define(
 
                 expect(doctype_parsed).to.eql('article');
 
+            });
 
+            it('can parse content properly when there is no metadata', function() {
+                var openURL = new OpenURLGenerator();
+                openURL.parseContent();
+                expect(openURL.rft_id).to.eql([false, false]);
             });
 
             it('creates a ContextObject based on the meta-data of the document', function(){
@@ -147,7 +136,6 @@ define(
 
                 // Create the open URL
                 openURL.createOpenURL();
-                console.log(openURL.openURL);
 
                 // Hackish comparison
                 // Split both urls based on the &
@@ -158,6 +146,44 @@ define(
                 }
 
             });
+
+            it('creates an OpenURL hyperlink with no false values', function(){
+
+                var expected_openURL = 'test?' +
+                    'date=2015&' +
+                    'genre=article&' +
+                    'title=Monthly%20Notices%20of%20the%20Royal%20Astronomical%20Society&' +
+                    'sid=ADS&' +
+                    'url_ver=Z39%2E88-2004&' +
+                    'rft_id=info%3Abibcode%2F2015MNRAS.451.4686F&' +
+                    'rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Aarticle&' +
+                    'rft.genre=article&' +
+                    'rft.jtitle=Monthly%20Notices%20of%20the%20Royal%20Astronomical%20Society&' +
+                    'rft.date=2015&' +
+                    'rfr_id=info:sid/ADS';
+
+                var false_meta_data = {
+                    "bibcode": "2015MNRAS.451.4686F",
+                    "year": "2015",
+                    "pub": "Monthly Notices of the Royal Astronomical Society",
+                };
+
+                var openURL = new OpenURLGenerator(false_meta_data);
+
+                // Create the open URL
+                openURL.createOpenURL();
+                expect(openURL.openURL).to.not.contain('false');
+
+                // Hackish comparison
+                // Split both urls based on the &
+                var expected_URL = expected_openURL.replace('test?','').split('&');
+
+                for (var i=0; i < expected_URL.length; i++) {
+                    expect(decodeURIComponent(openURL.openURL)).to.include(decodeURIComponent(expected_URL[i]));
+                }
+
+            });
+
         })
 
   });
