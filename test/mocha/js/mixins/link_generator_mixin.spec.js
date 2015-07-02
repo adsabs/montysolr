@@ -42,14 +42,7 @@ define(['js/mixins/link_generator_mixin'],
           '{"title":"", "type":"electr", "instances":"", "access":""}'
         ];
 
-        var data = {
-          "solr": {
-            "links_data": links_data,
-            "bibcode": "fakeBib"
-          }
-        };
-
-        var output = mixin.getTextAndDataLinks(data);
+        var output = mixin.getTextAndDataLinks(links_data, "fakeBib");
 
         //testing every link type
 
@@ -78,8 +71,7 @@ define(['js/mixins/link_generator_mixin'],
 
       it("should have a parseLinksData method used to add links for a list of results", function(){
 
-        var dataWithLinks = mixin.parseLinksData([{"solr": {
-
+        var dataWithLinks = mixin.parseLinksData([{
           "bibcode": "1993A&A...277..309L",
 
           "[citations]": {
@@ -106,7 +98,7 @@ define(['js/mixins/link_generator_mixin'],
           ],
 
         "orderNum": 5
-        }}]);
+        }]);
 
         expect(JSON.stringify(dataWithLinks[0].links.list)).to.eql('[{"letter":"C","title":"Citations (62)","link":"/#abs/1993A&A...277..309L/citations"},'+
         '{"letter":"R","title":"References (8)","link":"/#abs/1993A&A...277..309L/references"},' +
@@ -181,17 +173,17 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "links_data": [
-            '{"title":"", "type":"article", "instances":"", "access":""}',
-            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-            '{"title":"", "type":"electr", "instances":"", "access":""}'
-          ]
+          "link_server": "test"
         };
 
-        var stub_data = {'solr': stub_meta_data, 'link_server': "test"};
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
+        ];
 
         // Check that an openURL is created
-        var output = mixin.getTextAndDataLinks(stub_data);
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("doi:10.1093/mnras/stv960");
 
       });
@@ -219,17 +211,17 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "links_data": [
-            '{"title":"", "type":"article", "instances":"", "access":""}',
-            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-            '{"title":"", "type":"electr", "instances":"", "access":"open"}'
-          ]
+          "link_server": undefined
         };
 
-        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":"open"}'
+        ];
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_data);
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
       });
 
@@ -255,19 +247,19 @@ define(['js/mixins/link_generator_mixin'],
           "volume": "451",
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
-          "issn": ["0035-8711"],
-          "links_data": [
-            '{"title":"", "type":"article", "instances":"", "access":""}',
-            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-            '{"title":"", "type":"electr", "instances":"", "access":""}',
-            '{"title":"", "type":"gif", "instances":"", "access":"open"}'
-          ]
+          "issn": ["0035-8711"]
         };
 
-        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}',
+          '{"title":"", "type":"gif", "instances":"", "access":"open"}'
+        ];
+        var stub_link_server = undefined;
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_data);
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
 
       });
@@ -294,18 +286,18 @@ define(['js/mixins/link_generator_mixin'],
           "volume": "451",
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
-          "issn": ["0035-8711"],
-          "links_data":[
-            '{"title":"", "type":"article", "instances":"", "access":""}',
-            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-            '{"title":"", "type":"electr", "instances":"", "access":""}'
-          ]
+          "issn": ["0035-8711"]
         };
 
-        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
+        ];
+        var stub_link_server = undefined;
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_data);
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
 
       });
@@ -332,19 +324,19 @@ define(['js/mixins/link_generator_mixin'],
           "volume": "451",
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
-          "issn": ["0035-8711"],
-          "links_data":[
-            '{"title":"", "type":"article", "instances":"", "access":""}',
-            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-            '{"title":"", "type":"electr", "instances":"", "access":""}',
-            '{"title":"", "type":"gif", "instances":"", "access":"open"}'
-          ]
+          "issn": ["0035-8711"]
         };
 
-        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}',
+          '{"title":"", "type":"gif", "instances":"", "access":"open"}'
+        ];
+        var stub_link_server = undefined;
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_data);
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
 
       });
