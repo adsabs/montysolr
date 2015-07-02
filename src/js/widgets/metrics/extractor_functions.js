@@ -49,7 +49,7 @@ var DataExtractor = {};
     if (!options.norm)
       data = [options.readshist_data["refereed reads"], getNonRef(options.readshist_data["refereed reads"], options.readshist_data["all reads"])];
     else
-      data = [options.readshist_data["refereed reads normalized"], getNonRef(options.readshist_data["all reads normalized"], options.readshist_data["refereed reads normalized"])];
+      data = [options.readshist_data["refereed reads normalized"], getNonRef(options.readshist_data["refereed reads normalized"], options.readshist_data["all reads normalized"])];
 
     _.each(data, function (a, index) {
       var transformedArray = [];

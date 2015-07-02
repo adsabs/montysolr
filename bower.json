@@ -14,7 +14,6 @@
     "bootstrap": "~3.1.1",
     "jqueryui": "~1.10.4",
     "d3": "~3.4.6",
-    "jquery-hoverIntent": "*",
     "marionette": "~2.4.0",
     "dsjslib": "https://github.com/monmohan/dsjslib.git#v0.6.6",
     "jQuery-QueryBuilder": "https://github.com/romanchyla/jQuery-QueryBuilder.git#master",

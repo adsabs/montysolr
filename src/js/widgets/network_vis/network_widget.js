@@ -746,7 +746,7 @@ define([
 
         //zoom behavior
         var zoom = d3.behavior.zoom()
-          .scaleExtent([1, 3])
+          .scaleExtent([.7, 3])
           .on("zoom", zoomed);
 
         function zoomed() {
@@ -1354,7 +1354,7 @@ define([
         }).value();
 
         connector = (groupAuthorNames.length && authorNames.length) ? " OR " : "";
-        finalFQString = authorNames.join(" OR ") + connector + groupAuthorNames;
+        finalFQString = authorNames.join(" OR ") + connector + groupAuthorNames.join(" OR ");
 
         if (!finalFQString) {
           return
