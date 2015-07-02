@@ -40,7 +40,6 @@ define(['underscore',
       'click .widget-item': "onClick",
       'click .item-caret ': "toggleChildren",
       'click .show-more': 'onShowMore'
-
     },
 
     onClick: function (ev) {
@@ -55,7 +54,14 @@ define(['underscore',
       if (this.model.children && this.model.children.length == 0) {
         this.trigger('treeNodeDisplayed');
       }
+    },
+
+    serializeData : function(){
+      var data = this.model.toJSON();
+      data.count = this.formatNum(data.count);
+      return data;
     }
+
 
   });
 

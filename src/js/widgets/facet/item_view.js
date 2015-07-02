@@ -13,7 +13,7 @@ define(['underscore', 'js/widgets/base/item_view',
     template: ItemCheckBoxTemplate,
 
     events: {
-      'click .widget-item': "onClick",
+      'click .widget-item': "onClick"
     },
 
     onClick: function(ev) {
@@ -25,7 +25,14 @@ define(['underscore', 'js/widgets/base/item_view',
     onRender : function(){
       var percent = this.model.get("count") / this.model.get("total")
       this.$(".size-graphic").width(percent*100 +"%")
+    },
+
+    serializeData : function(){
+      var data = this.model.toJSON();
+      data.count = this.formatNum(data.count);
+      return data;
     }
+
   });
 
   _.extend(FacetItemView.prototype, FormatMixin)
