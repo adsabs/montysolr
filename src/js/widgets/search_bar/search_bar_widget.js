@@ -25,9 +25,23 @@ define([
     jqueryUI
     ) {
 
+    $.fn.getCursorPosition = function() {
+      var input = this.get(0);
+      if (!input) return; // No (input) element found
+      if ('selectionStart' in input) {
+        // Standard-compliant browsers
+        return input.selectionStart;
+      } else if (document.selection) {
+        // IE
+        input.focus();
+        var sel = document.selection.createRange();
+        var selLen = document.selection.createRange().text.length;
+        sel.moveStart('character', -input.value.length);
+        return sel.text.length - selLen;
+      }
+    };
 
-    // following functions are used for the autocomplete
-
+    //manually highlight a selection of text, or just move the cursor if no end val is given
     $.fn.selectRange = function (start, end) {
       if (!end) end = start;
       return this.each(function () {
@@ -44,22 +58,7 @@ define([
       });
     };
 
-    function setInputSelection(input, startPos, endPos) {
-      input.focus();
-      if (typeof input.selectionStart != "undefined") {
-        input.selectionStart = startPos;
-        input.selectionEnd = endPos;
-      } else if (document.selection && document.selection.createRange) {
-        // IE branch
-        input.select();
-        var range = document.selection.createRange();
-        range.collapse(true);
-        range.moveEnd("character", endPos);
-        range.moveStart("character", startPos);
-        range.select();
-      }
-    }
-
+    //get what is currently selected in the window
     function getSelectedText() {
       var text = "";
       if (window.getSelection) {
@@ -70,7 +69,7 @@ define([
       return text;
     }
 
-    //splits the part of the text that the autocomplete cares about
+    //splits out the part of the text that the autocomplete cares about
     function findActiveAndInactive(textString){
 
       var split = _.filter(textString.split(/\s+/), function(x){
@@ -102,7 +101,7 @@ define([
       className : "s-search-bar-widget",
 
       initialize: function (options) {
-        _.bindAll(this, "tempFieldInsert", "tempFieldClear");
+        _.bindAll(this, "fieldInsert");
         this.queryBuilder = new QueryBuilderPlugin();
       },
 
@@ -128,6 +127,8 @@ define([
         this.$("#search-gui").append(this.queryBuilder.$el);
 
         var $input = this.$("input.q");
+        this.$input = $input;
+        var performSearch = true;
 
         $input.autocomplete({
           minLength: 1,
@@ -135,6 +136,11 @@ define([
           //default delay is 300
           delay : 0,
           source:  function( request, response ) {
+
+            //don't look for a match if the keydown event was a backspace
+            if (!performSearch)
+                  return;
+
             var toMatch, matcher, toReturn;
 
             toMatch = findActiveAndInactive(request.term.trim()).active;
@@ -196,7 +202,7 @@ define([
               all = text + rest;
 
               $input.val(all);
-              setInputSelection($input[0], text.length, all.length);
+              $input.selectRange(text.length, all.length);
 
             }
             else {
@@ -217,7 +223,9 @@ define([
             return false;
           }
 
-        }).data("ui-autocomplete")._renderItem = function( ul, item ) {
+        });
+
+        $input.data("ui-autocomplete")._renderItem = function( ul, item ) {
           if (item.desc){
             return $( "<li>" )
               .append( "<a>" + item.label + "<span class=\"s-auto-description\">&nbsp;&nbsp;" + item.desc + "</span></a>" )
@@ -229,25 +237,33 @@ define([
               .appendTo( ul );
           }
         };
+
+        $input.keydown(function (event) {
+          if (event.keyCode == 8) {
+            performSearch = false; //backspace, do not perform the search
+          } else {
+            performSearch = true; //perform the search
+          }
+        });
        },
 
       events: {
-        "click #field-options button" : "tempFieldInsert",
-        "keypress .q": function(e){
-          this.setAddField();
-        },
+        "click #field-options button" : "fieldInsert",
         "click #search-form-container": function (e) {
           e.stopPropagation();
         },
         "click #search-form-container .title": "toggleFormSection",
         "click .show-form": "onShowForm",
         "submit form[name=main-query]": "submitQuery",
-        "keyup .q" : "toggleClear",
-        "click .icon-clear" : "clearInput"
+        "click .icon-clear" : "clearInput",
+        "keyup .q" : "storeCursorInfo",
+        "select .q" : "storeCursorInfo",
+        "click .q" : "storeCursorInfo"
+
       },
 
       toggleClear : function(){
-        var display = Boolean(this.$(".q").val());
+        var display = Boolean(this.$input.val());
         if (display){
           this.$(".icon-clear").removeClass("hidden");
         }
@@ -257,16 +273,16 @@ define([
       },
 
       clearInput : function(e){
-        this.$(".q").val("");
+        this.$input.val("");
         this.$(".icon-clear").addClass("hidden");
       },
 
       getFormVal: function() {
-        return this.$(".q").val();
+        return this.$input.val();
       },
 
       setFormVal: function(v) {
-        return this.$(".q").val(v);
+        return this.$input.val(v);
       },
 
       onShowForm: function() {
@@ -307,61 +323,54 @@ define([
         $p.toggleClass("search-form-header-active");
       },
 
-      tempFieldInsert: function (e) {
+      //used for the "field insert" function
+      _cursorInfo : {
+        selected : "",
+        startIndex: 0
+      },
+
+      storeCursorInfo : function(e){
+       var selected = getSelectedText();
+       var startIndex = this.$input.getCursorPosition();
+
+       this._cursorInfo = {selected : selected, startIndex : startIndex};
+
+       this.toggleClear();
+
+      },
+
+      fieldInsert: function (e) {
         e.preventDefault();
-        var currentVal, newVal, df, punc, $target;
+        var newVal,
+            currentVal = this.getFormVal(),
+            $target = $(e.target),
+            df = $target.attr("data-field"),
+            punc = $target.attr("data-punc");
 
-        currentVal = this.getFormVal();
-        this.priorVal = currentVal;
-        $target = $(e.target);
+        var startIndex = this._cursorInfo.startIndex,
+            selected = this._cursorInfo.selected;
+            //selected will be "" if user didn't highlight any text
 
-        df = $target.attr("data-field");
-        punc = $target.attr("data-punc");
-
-        if (punc){
-          //checking if first author
           if (df == "first-author") {
-            newVal = currentVal + " author:\"^\"";
+            newVal = " author:\"^" + selected + "\"";
           } else if (punc == "\"") {
-            newVal = currentVal + " " + df + ":\"\"";
+            newVal = df + ":\"" + selected + "\"";
           }
           else if (punc == "("){
-            newVal = currentVal + " " + df + ":()";
+            newVal = df + ":(" + selected + ")";
           }
-          this.setFormVal(newVal);
-          this.$(".q").focus();
-          this.$(".q").selectRange(this.$(".q").val().length - 1);
-        }
+          else if (!punc){
+            //year
+            newVal = df + ":" + selected;
+          }
 
-        else {
-          //only 'year'
-          newVal = currentVal + " " + df + ":";
-          this.setFormVal(newVal);
-          this.$(".q").focus();
-        }
-        //figure out if clear button needs to be there
-        this.toggleClear();
-      },
+          this.setFormVal(currentVal.substr(0, startIndex) +  newVal + currentVal.substr(startIndex + selected.length));
 
-      tempFieldClear: function (e) {
-        if (this.addField === true) {
-          this.$(".q").focus();
-          this.$(".q").selectRange(this.$(".q").val().length - 1);
-          this.addField = false;
-        }
-        else {
-          //assumption that final entry in query bar needs to be cleared
-          this.$(".q").val(this.priorVal);
-          this.priorVal = undefined;
-        }
-      },
+          //put the cursor in the middle of the "" or ()
+          if (!selected) {this.$input.selectRange(startIndex + newVal.length -1)}
 
-      setAddField: function (e) {
-        this.addField = true;
-      },
-
-      unsetAddField : function (e) {
-        this.addField = false;
+         //figure out if clear button needs to be there
+         this.toggleClear();
       },
 
       submitQuery: function(e) {
@@ -380,12 +389,24 @@ define([
 
         // search widget doesn't need to execute queries (but it needs to listen to them)
         this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
+        this.pubsub.subscribe(this.pubsub.NAVIGATE, _.bind(this.focusInput, this));
         this.view.activate(beehive);
       },
 
       defaultQueryArguments: {
         //sort: 'date desc',
         fl: 'id'
+      },
+
+      /*
+      * when users return to index page, we should re-focus on the search bar
+      * */
+
+      focusInput : function(page){
+
+        if (page == "index-page"){
+          this.view.$("input.q").focus();
+        }
       },
 
       handleFeedback: function(feedback) {

@@ -40,24 +40,24 @@ define([
     {value: "useful()" , label : "Useful", desc: "documents frequently cited by the most relevant papers on the topic being researched", match: "useful("},
 
     {value: "property:refereed" , label : "Limit to refereed", desc : "(property:refereed)", match: "refereed"},
-    {value: "property:refereed" , label : "Limit to refereed", desc : "(property:refereed)", match: "property"},
+    {value: "property:refereed" , label : "Limit to refereed", desc : "(property:refereed)", match: "property:refereed"},
 
     {value: "property:notrefereed" , label : "Limit to non-refereed", desc : "(property:notrefereed)", match: "non-refereed" },
-    {value: "property:notrefereed" , label : "Limit to non-refereed", desc : "(property:notrefereed)", match: "property"},
+    {value: "property:notrefereed" , label : "Limit to non-refereed", desc : "(property:notrefereed)", match: "property:notrefereed"},
     {value: "property:notrefereed" , label : "Limit to non-refereed", desc : "(property:notrefereed)", match: "notrefereed"},
 
     {value: "property:eprint" , label : "Limit to eprints", desc : "(property:eprint)", match: "eprint"},
-    {value: "property:eprint" , label : "Limit to eprints", desc : "(property:eprint)", match: "property"},
+    {value: "property:eprint" , label : "Limit to eprints", desc : "(property:eprint)", match: "property:eprint"},
 
     {value: "property:openaccess" , label : "Limit to open access", desc : "(property:openaccess)", match: "open access"},
-    {value: "property:openaccess" , label : "Limit to open access", desc : "(property:openaccess)", match: "property"},
+    {value: "property:openaccess" , label : "Limit to open access", desc : "(property:openaccess)", match: "property:openaccess"},
     {value: "property:openaccess" , label : "Limit to open access", desc : "(property:openaccess)", match: "openaccess"},
 
-    {value: "property:software" , label : "Limit to software", match: "software", desc : "(property:software)"},
-    {value: "property:software" , label : "Limit to software", match: "property", desc : "(property:software)"},
+    {value: "property:software" , label : "Limit to software", desc : "(property:software)", match: "software"},
+    {value: "property:software" , label : "Limit to software", desc : "(property:software)", match: "property:software"},
 
-    {value: "property:inproceedings" , label : "Limit to papers in conference proceedings", match: "conference proceedings", desc : "(property:inproceedings)"},
-    {value: "property:inproceedings" , label : "Limit to papers in conference proceedings", match: "property", desc : "(property:inproceedings)"}
+    {value: "property:inproceedings" , label : "Limit to papers in conference proceedings", desc : "(property:inproceedings)", match: "conference proceedings"},
+    {value: "property:inproceedings" , label : "Limit to papers in conference proceedings", desc : "(property:inproceedings)", match: "property:inproceedings"}
 
 
   ]
