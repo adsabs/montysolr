@@ -62,7 +62,12 @@ var linkGenerator = {
 
   },
 
-  getTextAndDataLinks: function (links_data, bib, data) {
+  getTextAndDataLinks: function (data) {
+
+    var links_data = data.solr.links_data;
+    var bib = data.solr.bibcode;
+
+    console.log(data);
 
     var link_types, links = { text : [], data : []};
 
@@ -88,6 +93,7 @@ var linkGenerator = {
 
           var electr_link;
           var scan_available =_.where(link_types, {"type": "gif"}).length > 0;
+          var link_server = (data.link_server !== undefined) ? data.link_server : false;
 
           // Only create an openURL if the following is true:
           //   - There is NO open access available
@@ -95,8 +101,8 @@ var linkGenerator = {
           //   - The user is authenticated
           //   - the user HAS a library link server
 
-          if (!l.access && !scan_available && data.user_authenticated && data.user_library_link){
-            var openURL = new OpenURLGenerator(data);
+          if (!l.access && !scan_available && link_server){
+            var openURL = new OpenURLGenerator(data.solr);
             openURL.createOpenURL();
             electr_link = openURL.openURL;
           } else {
@@ -167,30 +173,30 @@ var linkGenerator = {
 
     var links = {list : [], data : [], text : []};
 
-    if (data.links_data) {
-      _.extend(links, this.getTextAndDataLinks(data.links_data, data.bibcode));
+    if (data.solr.links_data) {
+      _.extend(links, this.getTextAndDataLinks(data));
     }
 
-    if (data["[citations]"]) {
+    if (data.solr["[citations]"]) {
 
-      var nc = data["[citations]"].num_citations;
-      var nr = data["[citations]"].num_references;
+      var nc = data.solr["[citations]"].num_citations;
+      var nr = data.solr["[citations]"].num_references;
       if (nc >= 1) {
-        links.list.push({letter: "C", title: "Citations (" + nc + ")", link: "/#abs/" + data.bibcode + "/citations" })
+        links.list.push({letter: "C", title: "Citations (" + nc + ")", link: "/#abs/" + data.solr.bibcode + "/citations" })
       }
       if (nr >= 1) {
-        links.list.push({ letter: "R", title: "References (" + nr + ")", link: "/#abs/" + data.bibcode + "/references"})
+        links.list.push({ letter: "R", title: "References (" + nr + ")", link: "/#abs/" + data.solr.bibcode + "/references"})
       }
     }
 
-    if (data.property) {
-      if (_.contains(data.property, "TOC")) {
-        links.list.push({letter: "T", title: "Table of Contents", link: "/#abs/" + data.bibcode + "/tableofcontents"})
+    if (data.solr.property) {
+      if (_.contains(data.solr.property, "TOC")) {
+        links.list.push({letter: "T", title: "Table of Contents", link: "/#abs/" + data.solr.bibcode + "/tableofcontents"})
       }
 
     }
 
-    data.links = links;
+    data.solr.links = links;
 
     return data
 
@@ -198,14 +204,18 @@ var linkGenerator = {
 
   //this function is used as a widget on the abstract page
   parseResourcesData: function (data) {
+    /**
+     * Assuming the following input:
+     * data = {'solr': data, 'link_server': link_server_string}
+     */
 
-    if (data.links_data) {
-      var links = this.getTextAndDataLinks(data.links_data, data.bibcode);
-      data.fullTextSources = links.text;
-      data.dataProducts = links.data;
+    if (data.solr.links_data) {
+      var links = this.getTextAndDataLinks(data);
+      data.solr.fullTextSources = links.text;
+      data.solr.dataProducts = links.data;
     }
 
-    return data;
+    return data.solr;
 
   }
 }

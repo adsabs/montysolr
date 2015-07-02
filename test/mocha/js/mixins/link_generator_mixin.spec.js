@@ -42,7 +42,14 @@ define(['js/mixins/link_generator_mixin'],
           '{"title":"", "type":"electr", "instances":"", "access":""}'
         ];
 
-        var output = mixin.getTextAndDataLinks(links_data, "fakeBib");
+        var data = {
+          "solr": {
+            "links_data": links_data,
+            "bibcode": "fakeBib"
+          }
+        };
+
+        var output = mixin.getTextAndDataLinks(data);
 
         //testing every link type
 
@@ -71,7 +78,7 @@ define(['js/mixins/link_generator_mixin'],
 
       it("should have a parseLinksData method used to add links for a list of results", function(){
 
-        var dataWithLinks = mixin.parseLinksData([{
+        var dataWithLinks = mixin.parseLinksData([{"solr": {
 
           "bibcode": "1993A&A...277..309L",
 
@@ -99,7 +106,7 @@ define(['js/mixins/link_generator_mixin'],
           ],
 
         "orderNum": 5
-        }]);
+        }}]);
 
         expect(JSON.stringify(dataWithLinks[0].links.list)).to.eql('[{"letter":"C","title":"Citations (62)","link":"/#abs/1993A&A...277..309L/citations"},'+
         '{"letter":"R","title":"References (8)","link":"/#abs/1993A&A...277..309L/references"},' +
@@ -154,7 +161,7 @@ define(['js/mixins/link_generator_mixin'],
       it("should determine if an openURL is required and generate it using the OpenURLGenerator mixin", function() {
 
         /**
-         * Test passes a the following logic:
+         * Test passes the following situation:
          *   - user is authenticated
          *   - user has library link service
          *   - journal has NO open access
@@ -174,19 +181,17 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "user_authenticated": true,
-          "user_library_link": "test"
+          "links_data": [
+            '{"title":"", "type":"article", "instances":"", "access":""}',
+            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+            '{"title":"", "type":"electr", "instances":"", "access":""}'
+          ]
         };
 
-        var stub_bibcode = stub_meta_data["bibcode"];
-        var stub_links_data = [
-          '{"title":"", "type":"article", "instances":"", "access":""}',
-          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-          '{"title":"", "type":"electr", "instances":"", "access":""}'
-        ];
+        var stub_data = {'solr': stub_meta_data, 'link_server': "test"};
 
         // Check that an openURL is created
-        var output = mixin.getTextAndDataLinks(stub_links_data, stub_bibcode, stub_meta_data);
+        var output = mixin.getTextAndDataLinks(stub_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("doi:10.1093/mnras/stv960");
 
       });
@@ -194,8 +199,7 @@ define(['js/mixins/link_generator_mixin'],
       it("should not generate an openURL if the article is open access", function() {
 
         /**
-         *
-         * Test passes a the following logic:
+         * Test passes the following situation:
          *   - user is authenticated
          *   - user has library link service
          *   - journal has OPEN access
@@ -215,27 +219,24 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "user_authenticated": true,
-          "user_library_link": "test"
+          "links_data": [
+            '{"title":"", "type":"article", "instances":"", "access":""}',
+            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+            '{"title":"", "type":"electr", "instances":"", "access":"open"}'
+          ]
         };
 
-        var stub_bibcode = stub_meta_data["bibcode"];
-        var stub_links_data = [
-          '{"title":"", "type":"article", "instances":"", "access":""}',
-          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-          '{"title":"", "type":"electr", "instances":"", "access":"open"}'
-        ];
+        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_links_data, stub_bibcode, stub_meta_data);
+        var output = mixin.getTextAndDataLinks(stub_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
       });
 
       it("should not generate an openURL if there is an ADS scan available", function() {
 
         /**
-         *
-         * Test passes a the following logic:
+         * Test passes the following situation:
          *   - user is authenticated
          *   - user has library link service
          *   - journal has NO open access
@@ -255,20 +256,18 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "user_authenticated": true,
-          "user_library_link": "test"
+          "links_data": [
+            '{"title":"", "type":"article", "instances":"", "access":""}',
+            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+            '{"title":"", "type":"electr", "instances":"", "access":""}',
+            '{"title":"", "type":"gif", "instances":"", "access":"open"}'
+          ]
         };
 
-        var stub_bibcode = stub_meta_data["bibcode"];
-        var stub_links_data = [
-          '{"title":"", "type":"article", "instances":"", "access":""}',
-          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-          '{"title":"", "type":"electr", "instances":"", "access":""}',
-          '{"title":"", "type":"gif", "instances":"", "access":"open"}'
-        ];
+        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_links_data, stub_bibcode, stub_meta_data);
+        var output = mixin.getTextAndDataLinks(stub_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
 
       });
@@ -276,8 +275,7 @@ define(['js/mixins/link_generator_mixin'],
       it("should not generate an openURL if user is not authenticated", function() {
 
         /**
-         *
-         * Test passes a the following logic:
+         * Test passes the following situation:
          *   - user is NOT authenticated
          *   - user has library link service
          *   - journal has NO open access
@@ -297,19 +295,17 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "user_authenticated": false,
-          "user_library_link": "test"
+          "links_data":[
+            '{"title":"", "type":"article", "instances":"", "access":""}',
+            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+            '{"title":"", "type":"electr", "instances":"", "access":""}'
+          ]
         };
 
-        var stub_bibcode = stub_meta_data["bibcode"];
-        var stub_links_data = [
-          '{"title":"", "type":"article", "instances":"", "access":""}',
-          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-          '{"title":"", "type":"electr", "instances":"", "access":""}'
-        ];
+        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_links_data, stub_bibcode, stub_meta_data);
+        var output = mixin.getTextAndDataLinks(stub_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
 
       });
@@ -317,8 +313,7 @@ define(['js/mixins/link_generator_mixin'],
       it("should not generate an openURL if the user has no library server for the openURL service", function (){
 
         /**
-         *
-         * Test passes a the following logic:
+         * Test passes the following situation:
          *   - user is authenticated
          *   - user has NO library link service
          *   - journal has NO open access
@@ -338,20 +333,18 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "user_authenticated": true,
-          "user_library_link": false
+          "links_data":[
+            '{"title":"", "type":"article", "instances":"", "access":""}',
+            '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+            '{"title":"", "type":"electr", "instances":"", "access":""}',
+            '{"title":"", "type":"gif", "instances":"", "access":"open"}'
+          ]
         };
 
-        var stub_bibcode = stub_meta_data["bibcode"];
-        var stub_links_data = [
-          '{"title":"", "type":"article", "instances":"", "access":""}',
-          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-          '{"title":"", "type":"electr", "instances":"", "access":""}',
-          '{"title":"", "type":"gif", "instances":"", "access":"open"}',
-        ];
+        var stub_data = {'solr': stub_meta_data, 'link_server': undefined};
 
         // Check that an openURL is NOT created
-        var output = mixin.getTextAndDataLinks(stub_links_data, stub_bibcode, stub_meta_data);
+        var output = mixin.getTextAndDataLinks(stub_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
 
       });
