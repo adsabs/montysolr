@@ -101,15 +101,23 @@ define([
 
     it("should allow the user to click to add fielded search words to search bar", function(done) {
       var widget = _widget();
+      $("#test").append(widget.render().el);
       var $w = widget.render().$el;
 
-      //  can't easily trigger hoverIntent so calling the method directly
-      var e = {};
-      e.preventDefault = function(){};
-      e.target = document.querySelector("#field-options button[data-field=author]");
-
+      //should just insert the field if user hasn't selected anything
       widget.view.$("#field-options button[data-field=author]").click();
       expect($w.find(".q").val().trim()).to.equal("author:\"\"");
+
+      //should insert the field around the selected content if user has selected something
+      $w.find(".q").val("author name");
+
+      $w.find(".q").selectRange(0, 11);
+
+      $w.find(".q").trigger("click");
+
+      widget.view.$("#field-options button[data-field=author]").click();
+      expect($w.find(".q").val().trim()).to.equal("author:\"author name\"");
+
       done();
     });
 
@@ -214,10 +222,25 @@ define([
       expect(autolist.find("a").first().text()).to.eql("Author");
       expect(autolist.find("a").last().text()).to.eql("Abstract");
 
+      //should not autocomplete if the last keypress was a backspace
+
+      $input.val("");
+      $input.autocomplete("close");
+
+      var press =   jQuery.Event("keydown");
+      press.ctrlKey = false;
+      press.which = 8;
+      press.keyCode = 8;
+
+      $input.trigger(press);
+
+      $input.autocomplete("search", "author:\"foo\" a");
+
+      expect(!!$input.find('.ui-autocomplete.ui-widget:visible').length).to.be.false;
 
       $("ul.ui-autocomplete").remove();
 
-    })
+    });
 
 
 

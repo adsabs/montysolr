@@ -479,7 +479,6 @@ module.exports = function(grunt) {
             "widgets/network_vis/network_widget.js":60,
             "mixins/dependon.js":61,
             "widgets/facet/tree_view.js":62,
-            "widgets/search_bar/search_bar_widget.js":65,
             "widgets/facet/item_view.js":71,
             "widgets/resources/widget.js":72,
             "wraps/table_of_contents.js":73,
