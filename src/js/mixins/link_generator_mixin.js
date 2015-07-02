@@ -64,8 +64,6 @@ var linkGenerator = {
 
   getTextAndDataLinks: function (links_data, bib, data) {
 
-    console.log(data);
-
     var link_types, links = { text : [], data : []};
 
     link_types = _.filter(_.map(links_data, function (d) {

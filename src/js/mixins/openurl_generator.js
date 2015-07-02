@@ -1,8 +1,3 @@
-/**
- *
- *
- **/
-
 define([], function() {
 
     var OpenURLGenerator = function (metadata, link_server){
@@ -94,10 +89,6 @@ define([], function() {
              * Parses the metadata of the object and fills all the correct attributes required for making a
              * ContextObject
              */
-
-            console.log('here');
-            console.log(this.metadata);
-
             this.rft_spage = this.parseFirstPage(this.metadata.page);
             this.id = this.parseID(this.metadata.doi);
             this.genre = this.parseGenre(this.metadata.doctype);
@@ -114,9 +105,6 @@ define([], function() {
             this.rft_issn = (this.metadata.issn !== undefined ) ? this.metadata.issn[0] : false;
 
             this.rft_val_fmt += this.genre;
-
-            console.log(this.rft_id);
-
         };
 
         this.createContextObject = function() {
