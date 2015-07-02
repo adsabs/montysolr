@@ -453,7 +453,8 @@ define([
       var data = model.toJSON();
 
       if (model.target === "REGISTER"){
-        //add base_url to data so email redirects to right url
+
+        //add verify_url to data so email redirects to right url
         _.extend(data, {verify_url : location.origin + "/#user/account/verify/" + ApiTargets.REGISTER });
         this.beehive.getObject("Session").register(model.toJSON());
       }
