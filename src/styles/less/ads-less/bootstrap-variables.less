@@ -16,7 +16,7 @@
 @gray-lightest:          lighten(#000, 97%);
 
 
-@brand-primary:        #2252b9;
+@brand-primary:        #1c459b;
 @brand-info:           #47A3C4;
 @brand-success:        #7ab880;
 @brand-warning:        #EE8E29;
@@ -24,7 +24,7 @@
 
 
 //extra colors
-@brand-primary-faded: lighten(@brand-primary, 15%);
+@brand-primary-faded: lighten(@brand-primary, 20%);
 @darker-background : lighten(@gray-lighter, 2%);
 @border-default-color: darken(@gray-lighter, 3%);
 
@@ -39,7 +39,7 @@
 @text-color:            @gray-dark;
 
 //** Global textual link color.
-@link-color:            @brand-primary;
+@link-color:            lighten(@brand-primary, 10%);
 //** Link hover color set via `darken()` function.
 @link-hover-color:      darken(@link-color, 15%);
 

@@ -364,7 +364,11 @@ define([
             selected = this._cursorInfo.selected;
             //selected will be "" if user didn't highlight any text
 
-          if (df == "first-author") {
+          if ( df.indexOf("operator-") > -1) {
+           var operator = df.split("-").reverse()[0];
+           newVal = operator + "(" + selected + ")";
+
+          } else if (df == "first-author") {
             newVal = " author:\"^" + selected + "\"";
           } else if (punc == "\"") {
             newVal = df + ":\"" + selected + "\"";
