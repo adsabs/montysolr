@@ -38,8 +38,9 @@ define([], function() {
       '/mixins/link_generator_mixin.spec.js',
       '/mixins/add_stable_index_to_collection.spec.js',
       '/mixins/page-manager-mixin.spec.js',
-      '/mixins/papers_utils.spec.js'
-
+      '/mixins/papers_utils.spec.js',
+      '/mixins/openurl_generator.spec.js'
+      
   ];
   return tests;
 });
