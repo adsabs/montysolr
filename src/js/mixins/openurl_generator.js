@@ -103,6 +103,7 @@ define([], function() {
             this.rft_date = (this.metadata.year !== undefined) ? this.metadata.year : false;
             this.rft_atitle = (this.metadata.title !== undefined) ? this.metadata.title[0] : false;
             this.rft_issn = (this.metadata.issn !== undefined ) ? this.metadata.issn[0] : false;
+            this.rft_isbn = (this.metadata.isbn !== undefined) ? this.metadata.isbn[0] : false;
 
             this.rft_val_fmt += this.genre;
         };
@@ -132,6 +133,7 @@ define([], function() {
                 'rft.aufirst': this.rft_aufirst,
                 'rft.date': this.rft_date,
                 'rft.issn': this.rft_issn,
+                'rft.isbn': this.rft_isbn,
                 'rft.genre': this.genre,
                 'sid': this.sid,
                 'spage': this.rft_spage,
@@ -143,7 +145,8 @@ define([], function() {
                 'date': this.rft_date,
                 'issn': this.rft_issn,
                 'id': this.id,
-                'genre': this.genre
+                'genre': this.genre,
+                'isbn': this.isbn
             };
         };
 
