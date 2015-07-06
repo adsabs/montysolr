@@ -53,7 +53,7 @@ define(
                 var page_in = ['3460'];
                 var page_expected = '3460';
                 page_parsed = openURL.parseFirstPage(page_in);
-                expect(page_parsed).to.eql(page_expected)
+                expect(page_parsed).to.eql(page_expected);
 
                 var page_in = ['3460-3461'];
                 var page_expected = '3460';
@@ -71,7 +71,7 @@ define(
                 var metadata = {
                     'doi': ["10.1023/A:1014597702936"],
                     'bibcode': 'bibcode'
-                }
+                };
 
                 var openURL = new OpenURLGenerator();
 
@@ -102,6 +102,26 @@ define(
                 var openURL = new OpenURLGenerator();
                 openURL.parseContent();
                 expect(openURL.rft_id).to.eql([false, false]);
+            });
+
+            it('can parse the degree type correctly from a bibcode', function() {
+                /**
+                 * Check that the degree type can be determined from the bibcode
+                 *
+                 */
+                var openURL = new OpenURLGenerator();
+                var phd_bibcode = "2015PhDT........35L";
+                var masters_bibcode = "2015MsT..........1S";
+
+                degree_type = openURL.parseDegree(phd_bibcode);
+                expect(degree_type).to.eql('PhD');
+
+                degree_type = openURL.parseDegree(masters_bibcode);
+                expect(degree_type).to.eql('Masters');
+
+                degree_type = openURL.parseDegree(undefined);
+                expect(degree_type).to.eql(false);
+
             });
 
             it('creates a ContextObject based on the meta-data of the document', function(){
@@ -136,6 +156,7 @@ define(
                 expect(openURL.contextObject['rft.genre']).to.eql('article');
                 expect(openURL.contextObject['rft.issn']).to.eql('0035-8711');
                 expect(openURL.contextObject['rfr_id']).to.eql('info:sid/ADS');
+                expect(openURL.contextObject['rft.degree']).to.eql(false);
                 expect(openURL.contextObject['spage']).to.eql(openURL.contextObject['rft.spage']);
                 expect(openURL.contextObject['volume']).to.eql(openURL.contextObject['rft.volume']);
                 expect(openURL.contextObject['title']).to.eql(openURL.contextObject['rft.jtitle']);
@@ -406,13 +427,12 @@ define(
                     'rft.issn=1050-3390&rft.volume=493&rft.spage=&rft.date=2015&rft.aulast=Dufour' +
                     '&rft.atitle=19th%20European%20Workshop%20on%20White%20Dwarfs&rfr_id=info:sid/ADS';
 
-                // For now have removed rft.degree=PhD - this should be included when doctype is indexed
                 var expected_open_url_5 = 'test?date=2015&genre=article&isbn=9781321674552&' +
                     'title=Photodisintegration%20of%203He%20with%20Double%20Polarizations&aulast=Laskaris' +
                     '&aufirst=&sid=ADS&url_ver=Z39%2E88-2004&rft_id=info%3Abibcode%2F2015PhDT........35L&' +
                     'rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Aarticle&rft.genre=article' +
                     '&rft.atitle=Photodisintegration%20of%203He%20with%20Double%20Polarizations' +
-                    '&rft.isbn=9781321674552&rft.date=2015&rft.aulast=Laskaris&rfr_id=info:sid/ADS';
+                    '&rft.isbn=9781321674552&rft.date=2015&rft.aulast=Laskaris&rfr_id=info:sid/ADS&rft.degree=PhD';
 
                 // If doctype == book, then jtitle and atitle are the same? I do not think this seems logical, and
                 // would just leave jtitle empty.
@@ -451,7 +471,7 @@ define(
                     expected_open_url_7
                 ];
 
-                var expected_URL, openURL, i;
+                var expected_URL, openURL;
 
                 // Check that all the openURLs are created correctly
                 for (var i=0; i < stub_meta_data_list.length; i++) {

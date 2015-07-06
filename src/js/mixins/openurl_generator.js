@@ -84,6 +84,29 @@ define([], function() {
 
         };
 
+        this.parseDegree = function(bibcode) {
+            /**
+             * Parses the degree type from the bibcode given. Currently, we have the following two types
+             * of degrees:
+             *   1. PhD
+             *   2. Masters
+             *
+             * If neither of these degrees are found in the bibcode, it defaults to a false value
+             */
+            var degree;
+            bibcode = (bibcode !== undefined) ? bibcode : '';
+
+            if (bibcode.indexOf('PhDT') != -1){
+                degree = 'PhD';
+            } else if (bibcode.indexOf('MsT') != -1){
+                degree = 'Masters'
+            } else {
+                degree = false;
+            }
+
+            return degree;
+        };
+
         this.parseContent = function() {
             /**
              * Parses the metadata of the object and fills all the correct attributes required for making a
@@ -92,6 +115,7 @@ define([], function() {
             this.rft_spage = this.parseFirstPage(this.metadata.page);
             this.id = this.parseID(this.metadata.doi);
             this.genre = this.parseGenre(this.metadata.doctype);
+            this.rft_degree = this.parseDegree(this.metadata.bibcode);
             this.rft_id = this.parseRFTInfo(this.metadata);
             var author_name = this.parseAuthor(this.metadata.first_author);
             this.rft_aulast = author_name['lastname'];
@@ -135,6 +159,7 @@ define([], function() {
                 'rft.issn': this.rft_issn,
                 'rft.isbn': this.rft_isbn,
                 'rft.genre': this.genre,
+                'rft.degree': this.rft_degree,
                 'sid': this.sid,
                 'spage': this.rft_spage,
                 'volume': this.rft_vol,
