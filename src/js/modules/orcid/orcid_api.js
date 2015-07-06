@@ -418,9 +418,16 @@ define([
           out["work-contributors"] = formatContributors(adsWork.author);
         }
 
-        if (adsWork.pubdate && adsWork.pubdate.length > 0 && adsWork.pubdate.indexOf(' ') > 0) {
-          out['publication-date'] = {
-            "year": adsWork.pubdate.split(' ')[1]
+        if (adsWork.pubdate && adsWork.pubdate.length > 3) {
+          var pts = adsWork.pubdate.split(/\s|-/), _year, _month;
+          _year = parseInt(pts[0]); _month = parseInt(pts[1]);
+          if (_year > 999 && _year < 2050) { // orcid checks \d{4}; and the hi limit? well...(shrug ;))
+            out['publication-date'] = {
+              "year": _year
+            };
+            if (_month > 0 && _month <= 12) {
+              out['publication-date']['month'] = _month;
+            }
           }
         }
 
