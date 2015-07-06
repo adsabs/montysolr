@@ -288,6 +288,9 @@ define([
           .selectAll("text")
           .data(function (d, i) {
             var data = _.pairs(d.label);
+            //take top 4 with highest idf
+                data = _.sortBy(data, function(d){return -d[1]});
+                data = data.slice(0, 5);
             return _.map(data, function (wordList) {
               wordList[2] = d.data.data.id;
               return wordList;
@@ -307,9 +310,7 @@ define([
             return that.scales.initialFontScale(size) + "px";
           })
           .text(function (d, i) {
-            if (i <= 4) {
               return d[0];
-            }
           });
 
         //show and fade labels
