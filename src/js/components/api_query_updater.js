@@ -104,9 +104,24 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
       }
       else {
         existingConditions = [operator]; // first value is always operator
-        if (q.length == 1 && q[0].indexOf(' ') > -1) { //simple string
-          oldConditionAsString = q[0];
-          existingConditions.push(q[0]);
+        if (q.length == 1) { // we got a string, but that string could be a whole phrase
+          if (q[0].indexOf(' ') == -1) { // simple string
+            oldConditionAsString = q[0];
+            existingConditions.push(q[0]);
+          }
+          else {
+
+            oldConditionAsString = q[0];
+            var sillyTest = q[0].toLowerCase();
+            if (sillyTest.indexOf(' and ') > -1 || sillyTest.indexOf(' or ') > -1 || sillyTest.indexOf(' not ') > -1 ||
+              sillyTest.indexOf(' near') > -1 || sillyTest.indexOf('(') > 2) {
+              existingConditions.push('(' + q[0] + ')'); // enclose the expression in brackets, just to be safe
+            }
+            else {
+              existingConditions.push(q[0]);
+            }
+          }
+
         }
         else {
           oldConditionAsString = this.impossibleString;

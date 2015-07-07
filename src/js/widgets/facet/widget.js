@@ -372,7 +372,7 @@ define(['backbone',
 
             var fieldName = 'q'; // + this.facetField;
             //make default limit to
-              this.queryUpdater.updateQuery(q, fieldName, 'limit', value);
+            this.queryUpdater.updateQuery(q, fieldName, 'limit', value);
             //not sure when exclude would ever be useful in this case
             //this.queryUpdater.updateQuery(q, 'q', 'exclude', value);
             this.dispatchNewQuery(paginator.cleanQuery(q));

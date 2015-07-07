@@ -149,14 +149,14 @@ define(['js/widgets/tabs/tabs_widget',
             _.each(_.range(count), function () {
               finalData.push({refereed: true, x: undefined, y: val})
             })
-          })
+          });
 
           _.each(nonRefData, function (d) {
             var val = d.value, count = d.count;
             _.each(_.range(count), function () {
               finalData.push({refereed: false, x: undefined, y: val})
             })
-          })
+          });
 
           if (finalData.length < 2) {
             this.collection.reset({graphData: []});
@@ -171,7 +171,7 @@ define(['js/widgets/tabs/tabs_widget',
           finalData = _.first(finalData, 2000);
 
           finalData = _.map(finalData, function (d, i) {
-            d.x = i + 1
+            d.x = i + 1;
             return d
           });
 
