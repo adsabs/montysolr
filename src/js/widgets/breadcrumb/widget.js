@@ -12,17 +12,27 @@
  * TODO: it needs to react on browser-back/forward
  */
 
-define(['underscore', 'jquery', 'backbone', 'marionette',
-  'js/components/api_query',
-  'js/components/pubsub_events',
-  'hbs!./templates/widget-view',
-  'hbs!./templates/item-view'
+define([
+    'underscore',
+    'jquery',
+    'backbone',
+    'marionette',
+    'js/components/api_query',
+    'js/components/pubsub_events',
+    'hbs!./templates/widget-view',
+    'hbs!./templates/item-view'
+  ],
 
-],
-
-  function(_, $, Backbone, Marionette,
-           ApiQuery, PubSubEvents,
-           WidgetTemplate, ItemTemplate){
+  function(
+    _,
+    $,
+    Backbone,
+    Marionette,
+    ApiQuery,
+    PubSubEvents,
+    WidgetTemplate,
+    ItemTemplate
+    ){
 
     // Model
     var KeyValue = Backbone.Model.extend({ });
@@ -78,10 +88,13 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
         pubsub.subscribe(pubsub.DELIVERING_REQUEST, this.onRequest);
         //pubsub.subscribe('all', this.onAllPubSub);
         this.pubsub = pubsub;
+        this.stack = [];
+        this.N = 0;
+        this.maxSize = 100; // make configurable?
       },
 
       render : function(){
-        this.view.render()
+        this.view.render();
         return this.view.el
       },
 

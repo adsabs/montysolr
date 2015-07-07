@@ -71,6 +71,7 @@ require.config({
         AllLibrariesWidget : 'js/widgets/libraries_all/widget',
         IndividualLibraryWidget : 'js/widgets/library_individual/widget',
 
+        BreadcrumbsWidget: 'js/widgets/filter_visualizer/widget',
         NavbarWidget: 'js/widgets/navbar/widget',
         UserNavbarWidget: 'js/widgets/user_navbar/widget',
         AlertsWidget: 'js/widgets/alerts/widget',

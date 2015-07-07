@@ -1,0 +1,5 @@
+<span class="btn btn-default">
+{{#each this.elements}}
+  <span class="filter-{{this.type}}">{{this.display}}<button class="btn btn-xs btn-link filter-{{this.type}}-remove" value="{{this.value}}"><i class="fa fa-times-circle"></i></button></span>
+{{/each}}
+</span>

@@ -24,7 +24,7 @@ define([], function() {
      * the default config)
      * this can be absolute url; or url relative to the api path
      */
-    bootstrapUrls: ['/bumblebee/bootstrap'],
+    bootstrapUrls: ['/accounts/bootstrap'],
 
     /**
      *  pushState: when true, urls are without hashtag '#'
