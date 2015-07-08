@@ -27,32 +27,32 @@
     {{/if}}
 </div>
 
-{{#if loggedIn}}
-    <div class="s-library-area">
-        <div class="s-library-add-title library-add-title"  type="button" data-toggle="collapse" data-target="#library-console" aria-expanded="false" aria-controls="collapseExample">
-                <i class="fa fa-book fa-lg"></i> Add papers to library &nbsp; <i class="fa fa-lg fa-caret-down"></i>
-        </div>
-        <div class="collapse {{#if libraryDrawerOpen }} in {{/if}}" id="library-console">
-            {{#compare selected 0 operator=">"}}
-                add
-                <select class="form-control input-sm s-all-vs-selected" name="all-vs-selected" id="all-vs-selected">
-                    <option value="selected">selected papers only </option>
-                    <option value="all">all results</option>
-                </select>
-                {{else}}
-                add  <b>all results</b> <i class="icon-help" data-toggle="popover" data-content="All papers in your search results will be added, up to 2,000 records. To add only selected papers, click on the checkboxes next to the paper titles."></i>
-                from this query
-            {{/compare}}
+<!--{{#if loggedIn}}-->
+    <!--<div class="s-library-area">-->
+        <!--<div class="s-library-add-title library-add-title"  type="button" data-toggle="collapse" data-target="#library-console" aria-expanded="false" aria-controls="collapseExample">-->
+                <!--<i class="fa fa-book fa-lg"></i> Add papers to library &nbsp; <i class="fa fa-lg fa-caret-down"></i>-->
+        <!--</div>-->
+        <!--<div class="collapse {{#if libraryDrawerOpen }} in {{/if}}" id="library-console">-->
+            <!--{{#compare selected 0 operator=">"}}-->
+                <!--add-->
+                <!--<select class="form-control input-sm s-all-vs-selected" name="all-vs-selected" id="all-vs-selected">-->
+                    <!--<option value="selected">selected papers only </option>-->
+                    <!--<option value="all">all results</option>-->
+                <!--</select>-->
+                <!--{{else}}-->
+                <!--add  <b>all results</b> <i class="icon-help" data-toggle="popover" data-content="All papers in your search results will be added, up to 2,000 records. To add only selected papers, click on the checkboxes next to the paper titles."></i>-->
+                <!--from this query-->
+            <!--{{/compare}}-->
 
-           <div class="libraries-container">
+           <!--<div class="libraries-container">-->
 
-           </div>
+           <!--</div>-->
 
-            <div style="margin-top:6px" class="feedback s-feedback">
+            <!--<div style="margin-top:6px" class="feedback s-feedback">-->
 
-            </div>
+            <!--</div>-->
 
-        </div>
-    </div>
+        <!--</div>-->
+    <!--</div>-->
 
-{{/if}}
+<!--{{/if}}-->
