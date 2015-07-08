@@ -72,7 +72,6 @@ define(['js/mixins/link_generator_mixin'],
       it("should have a parseLinksData method used to add links for a list of results", function(){
 
         var dataWithLinks = mixin.parseLinksData([{
-
           "bibcode": "1993A&A...277..309L",
 
           "[citations]": {
@@ -109,7 +108,7 @@ define(['js/mixins/link_generator_mixin'],
         '{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"},'+
         '{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},'+
         '{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=PREPRINT"},'+
-        '{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=EJOURNAL"}]');
+        '{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=EJOURNAL","openUrl":false}]');
 
         expect(JSON.stringify(dataWithLinks[0].links.data)).to.eql('[{"title":"SIMBAD objects (10)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=SIMBAD"},'+
         '{"title":"NED objects (3)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=NED"},'+
@@ -145,15 +144,207 @@ define(['js/mixins/link_generator_mixin'],
           }
         });
 
-        expect(JSON.stringify(dataWithLinks.fullTextSources)).to.eql('[{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF"},{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=PREPRINT"},{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=EJOURNAL"}]');
+        expect(JSON.stringify(dataWithLinks.fullTextSources)).to.eql('[{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF"},{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=PREPRINT"},{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=EJOURNAL","openUrl":false}]');
         expect(JSON.stringify(dataWithLinks.dataProducts)).to.eql('[{"title":"SIMBAD objects (10)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=SIMBAD"},{"title":"NED objects (3)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=NED"},{"title":"Archival Data","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=DATA"}]');
 
 
       })
 
+      it("should determine if an openURL is required and generate it using the OpenURLGenerator mixin", function() {
 
+        /**
+         * Test passes the following situation:
+         *   - user is authenticated
+         *   - user has library link service
+         *   - journal has NO open access
+         *   - journal has NO scan available from the ADS
+         */
+
+        var stub_meta_data = {
+          "bibcode": "2015MNRAS.451.4686F",
+          "first_author": "Friis, M.",
+          "year": "2015",
+          "page": ["4686-4690"],
+          "pub": "Monthly Notices of the Royal Astronomical Society",
+          "pubdate": "2015-05-00",
+          "title": ["The warm, the excited, and the molecular gas: " +
+          "GRB 121024A shining through its star-forming galaxy"],
+          "volume": "451",
+          "doi": ["10.1093/mnras/stv960"],
+          "issue": 1,
+          "issn": ["0035-8711"],
+          "link_server": "test"
+        };
+
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
+        ];
+
+        // Check that an openURL is created
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("doi:10.1093/mnras/stv960");
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(true);
+
+      });
+
+      it("should not generate an openURL if the article is open access", function() {
+
+        /**
+         * Test passes the following situation:
+         *   - user is authenticated
+         *   - user has library link service
+         *   - journal has OPEN access
+         *   - journal has NO scan available from the ADS
+         */
+
+        var stub_meta_data = {
+          "bibcode": "2015MNRAS.451.4686F",
+          "first_author": "Friis, M.",
+          "year": "2015",
+          "page": ["4686-4690"],
+          "pub": "Monthly Notices of the Royal Astronomical Society",
+          "pubdate": "2015-05-00",
+          "title": ["The warm, the excited, and the molecular gas: " +
+          "GRB 121024A shining through its star-forming galaxy"],
+          "volume": "451",
+          "doi": ["10.1093/mnras/stv960"],
+          "issue": 1,
+          "issn": ["0035-8711"],
+          "link_server": undefined
+        };
+
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":"open"}'
+        ];
+
+        // Check that an openURL is NOT created
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+
+      });
+
+      it("should not generate an openURL if there is an ADS scan available", function() {
+
+        /**
+         * Test passes the following situation:
+         *   - user is authenticated
+         *   - user has library link service
+         *   - journal has NO open access
+         *   - journal has SCAN available from the ADS
+         */
+
+        var stub_meta_data = {
+          "bibcode": "2015MNRAS.451.4686F",
+          "first_author": "Friis, M.",
+          "year": "2015",
+          "page": ["4686-4690"],
+          "pub": "Monthly Notices of the Royal Astronomical Society",
+          "pubdate": "2015-05-00",
+          "title": ["The warm, the excited, and the molecular gas: " +
+          "GRB 121024A shining through its star-forming galaxy"],
+          "volume": "451",
+          "doi": ["10.1093/mnras/stv960"],
+          "issue": 1,
+          "issn": ["0035-8711"]
+        };
+
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}',
+          '{"title":"", "type":"gif", "instances":"", "access":"open"}'
+        ];
+        var stub_link_server = undefined;
+
+        // Check that an openURL is NOT created
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+
+      });
+
+      it("should not generate an openURL if user is not authenticated", function() {
+
+        /**
+         * Test passes the following situation:
+         *   - user is NOT authenticated
+         *   - user has library link service
+         *   - journal has NO open access
+         *   - journal has NO scan available from the ADS
+         */
+
+        var stub_meta_data = {
+          "bibcode": "2015MNRAS.451.4686F",
+          "first_author": "Friis, M.",
+          "year": "2015",
+          "page": ["4686-4690"],
+          "pub": "Monthly Notices of the Royal Astronomical Society",
+          "pubdate": "2015-05-00",
+          "title": ["The warm, the excited, and the molecular gas: " +
+          "GRB 121024A shining through its star-forming galaxy"],
+          "volume": "451",
+          "doi": ["10.1093/mnras/stv960"],
+          "issue": 1,
+          "issn": ["0035-8711"]
+        };
+
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
+        ];
+        var stub_link_server = undefined;
+
+        // Check that an openURL is NOT created
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+
+      });
+
+      it("should not generate an openURL if the user has no library server for the openURL service", function (){
+
+        /**
+         * Test passes the following situation:
+         *   - user is authenticated
+         *   - user has NO library link service
+         *   - journal has NO open access
+         *   - journal has NO scan available from the ADS
+         */
+
+        var stub_meta_data = {
+          "bibcode": "2015MNRAS.451.4686F",
+          "first_author": "Friis, M.",
+          "year": "2015",
+          "page": ["4686-4690"],
+          "pub": "Monthly Notices of the Royal Astronomical Society",
+          "pubdate": "2015-05-00",
+          "title": ["The warm, the excited, and the molecular gas: " +
+          "GRB 121024A shining through its star-forming galaxy"],
+          "volume": "451",
+          "doi": ["10.1093/mnras/stv960"],
+          "issue": 1,
+          "issn": ["0035-8711"]
+        };
+
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}',
+          '{"title":"", "type":"gif", "instances":"", "access":"open"}'
+        ];
+        var stub_link_server = undefined;
+
+        // Check that an openURL is NOT created
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+
+      });
     })
-
-
-
 })

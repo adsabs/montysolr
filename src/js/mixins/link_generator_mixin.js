@@ -1,4 +1,4 @@
-define(["underscore"], function(_){
+define(["underscore", "js/mixins/openurl_generator"], function(_, OpenURLGenerator){
 
 
 var linkGenerator = {
@@ -62,7 +62,7 @@ var linkGenerator = {
 
   },
 
-  getTextAndDataLinks: function (links_data, bib) {
+  getTextAndDataLinks: function (links_data, bib, data) {
 
     var link_types, links = { text : [], data : []};
 
@@ -85,7 +85,30 @@ var linkGenerator = {
           links.text.push({openAccess: openAccess, title: "arXiv e-print", link: this.adsUrlRedirect("preprint", bib)});
           break;
         case "electr":
-          links.text.push({openAccess: openAccess, title: "Publisher Article", link: this.adsUrlRedirect('electr', bib)})
+
+          var electr_link, openUrl;
+          var scan_available =_.where(link_types, {"type": "gif"}).length > 0;
+
+          data = (data !== undefined) ? data : {};
+          var link_server = (data.link_server !== undefined) ? data.link_server : false;
+
+          // Only create an openURL if the following is true:
+          //   - There is NO open access available
+          //   - There is NO scan available from the ADS
+          //   - The user is authenticated
+          //   - the user HAS a library link server
+
+          if (!l.access && !scan_available && link_server){
+            var openURL = new OpenURLGenerator(data);
+            openURL.createOpenURL();
+            electr_link = openURL.openURL;
+            openUrl = true;
+          } else {
+            electr_link = this.adsUrlRedirect('electr', bib);
+            openUrl = false;
+          }
+
+          links.text.push({openAccess: openAccess, title: "Publisher Article", link: electr_link, openUrl: openUrl});
           break;
         case "pdf":
           links.text.push({openAccess: openAccess, title: "Publisher PDF", link: this.adsUrlRedirect('article', bib)});
@@ -150,7 +173,7 @@ var linkGenerator = {
     var links = {list : [], data : [], text : []};
 
     if (data.links_data) {
-      _.extend(links, this.getTextAndDataLinks(data.links_data, data.bibcode));
+      _.extend(links, this.getTextAndDataLinks(data.links_data, data.bibcode, data));
     }
 
     if (data["[citations]"]) {
@@ -180,9 +203,15 @@ var linkGenerator = {
 
   //this function is used as a widget on the abstract page
   parseResourcesData: function (data) {
+    /**
+     * Assuming the following input:
+     * data = {....,
+     *         ....,
+     *         'link_server': link_server_string}
+     */
 
     if (data.links_data) {
-      var links = this.getTextAndDataLinks(data.links_data, data.bibcode);
+      var links = this.getTextAndDataLinks(data.links_data, data.bibcode, data);
       data.fullTextSources = links.text;
       data.dataProducts = links.data;
     }
