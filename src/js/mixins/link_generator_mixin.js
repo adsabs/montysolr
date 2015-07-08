@@ -86,7 +86,7 @@ var linkGenerator = {
           break;
         case "electr":
 
-          var electr_link;
+          var electr_link, openUrl;
           var scan_available =_.where(link_types, {"type": "gif"}).length > 0;
 
           data = (data !== undefined) ? data : {};
@@ -102,11 +102,13 @@ var linkGenerator = {
             var openURL = new OpenURLGenerator(data);
             openURL.createOpenURL();
             electr_link = openURL.openURL;
+            openUrl = true;
           } else {
             electr_link = this.adsUrlRedirect('electr', bib);
+            openUrl = false;
           }
 
-          links.text.push({openAccess: openAccess, title: "Publisher Article", link: electr_link});
+          links.text.push({openAccess: openAccess, title: "Publisher Article", link: electr_link, openUrl: openUrl});
           break;
         case "pdf":
           links.text.push({openAccess: openAccess, title: "Publisher PDF", link: this.adsUrlRedirect('article', bib)});
