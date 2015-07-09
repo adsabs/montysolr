@@ -72,7 +72,7 @@ define(['backbone', 'marionette',
         "click .widget-name" : "toggleWidget",
         "click .dropdown-toggle": "enableLogic",
         "click .dropdown-menu .close": "closeLogic",
-        "click .logic-container input": "onLogic"
+        "click .logic-container label": "onLogic"
 
       },
 
@@ -168,7 +168,7 @@ define(['backbone', 'marionette',
         ev.stopPropagation();
         //close the logic dropdown
         this.closeLogic();
-        var val = $(ev.target).val();
+        var val = $(ev.currentTarget).find("input").val();
         this.trigger("containerLogicSelected", val);
       },
 
