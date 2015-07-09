@@ -90,7 +90,7 @@ define([
         }));
 
 
-        expect($w.find('#filter-visualizer .btn-default').length).to.equal(2);
+        expect($w.find('#filter-visualizer .filter-topic-group').length).to.equal(2);
         expect($w.find('#filter-visualizer').text().indexOf('Wang, J')).to.be.gt(-1);
 
         minsub.subscribeOnce(minsub.START_SEARCH, function() {
