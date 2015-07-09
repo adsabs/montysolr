@@ -226,11 +226,12 @@ define(
                     "pub": "Monthly Notices of the Royal Astronomical Society",
                 };
 
-                var openURL = new OpenURLGenerator(false_meta_data);
+                var openURL = new OpenURLGenerator(false_meta_data, 'test');
 
                 // Create the open URL
                 openURL.createOpenURL();
                 expect(openURL.openURL).to.not.contain('false');
+                expect(openURL.openURL).to.not.contain('undefined');
 
                 // Hackish comparison
                 // Split both urls based on the &

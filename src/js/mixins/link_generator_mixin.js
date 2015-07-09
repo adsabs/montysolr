@@ -99,7 +99,7 @@ var linkGenerator = {
           //   - the user HAS a library link server
 
           if (!l.access && !scan_available && link_server){
-            var openURL = new OpenURLGenerator(data);
+            var openURL = new OpenURLGenerator(data, link_server);
             openURL.createOpenURL();
             electr_link = openURL.openURL;
             openUrl = true;

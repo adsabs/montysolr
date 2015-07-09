@@ -171,7 +171,7 @@ define([], function() {
                 'issn': this.rft_issn,
                 'id': this.id,
                 'genre': this.genre,
-                'isbn': this.isbn
+                'isbn': this.rft_isbn
             };
         };
 

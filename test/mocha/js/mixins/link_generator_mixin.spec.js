@@ -173,7 +173,7 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "link_server": "test"
+          "link_server": "MyBaseURL"
         };
 
         var stub_links_data = [
@@ -185,6 +185,7 @@ define(['js/mixins/link_generator_mixin'],
         // Check that an openURL is created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("doi:10.1093/mnras/stv960");
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("MyBaseURL");
         expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(true);
 
       });
