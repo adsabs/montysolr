@@ -6,78 +6,140 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
 
     var widget, minsub, $w, sentRequest;
 
-      beforeEach(function(){
-        widget = new ResourcesWidget();
-
-        minsub = new (MinPubSub.extend({
-          request: function(apiRequest) {
-            sentRequest = apiRequest;
-
-            return {
-              "responseHeader": {
-                "status": 0,
-                "QTime": 2,
-                "params": {
-                  "wt": "json",
-                  "q": "bibcode:1984NASCP2349..191B",
-                  "fl": "links_data,[citations],property,bibcode"
-                }
-              },
-              "response": {
-                "numFound": 1,
-                "start": 0,
-                "docs": [
-                  {
-                    "bibcode": "1984NASCP2349..191B",
-
-                    "links_data": [
-                      "{\"title\":\"\", \"type\":\"simbad\", \"instances\":\"2\", \"access\":\"\"}",
-                      "{\"title\":\"\", \"type\":\"ADSlink\", \"instances\":\"\", \"access\":\"open\"}"
-                    ],
-                    "property": [
-                      "OPENACCESS",
-                      "NOT REFEREED",
-                      "ADS_SCAN",
-                      "TOC",
-                      "INPROCEEDINGS"
-                    ],
-                    "[citations]": {
-                      "num_citations": 1,
-                      "num_references": 0
-                    }
-                  }
-                ]
-              }
-            }
-          }
-
-        }))({verbose: false});
-
-        widget.activate(minsub.beehive.getHardenedInstance());
-        $w = widget.render().$el;
-
-    })
 
 
     it("extends from BaseWidget and can communicate with pubsub and its page controller through loadBibcodeData function", function(){
 
+      var restore = ResourcesWidget.prototype.processResponse;
+
+      ResourcesWidget.prototype.processResponse = sinon.spy();
+
+      widget = new ResourcesWidget();
+
+
+      minsub = new (MinPubSub.extend({
+        request: function(apiRequest) {
+          sentRequest = apiRequest;
+
+          return {
+            "responseHeader": {
+              "status": 0,
+              "QTime": 2,
+              "params": {
+                "wt": "json",
+                "q": "bibcode:1984NASCP2349..191B",
+                "fl": "links_data,[citations],property,bibcode"
+              }
+            },
+            "response": {
+              "numFound": 1,
+              "start": 0,
+              "docs": [
+                {
+                  "bibcode": "1984NASCP2349..191B",
+
+                  "links_data": [
+                    "{\"title\":\"\", \"type\":\"simbad\", \"instances\":\"2\", \"access\":\"\"}",
+                    "{\"title\":\"\", \"type\":\"ADSlink\", \"instances\":\"\", \"access\":\"open\"}"
+                  ],
+                  "property": [
+                    "OPENACCESS",
+                    "NOT REFEREED",
+                    "ADS_SCAN",
+                    "TOC",
+                    "INPROCEEDINGS"
+                  ],
+                  "[citations]": {
+                    "num_citations": 1,
+                    "num_references": 0
+                  }
+                }
+              ]
+            }
+          }
+        }
+
+      }))({verbose: false});
+
+      widget.activate(minsub.beehive.getHardenedInstance());
+      $w = widget.render().$el;
+
+
      expect(widget).to.be.instanceof(BaseWidget);
      expect(widget.loadBibcodeData).to.be.instanceof(Function);
      widget.loadBibcodeData("fakeBibcode");
-     expect(sentRequest.get('query').get('q')[0]).to.eql("bibcode:fakeBibcode")
+     expect(sentRequest.get('query').get('q')[0]).to.eql("bibcode:fakeBibcode");
+
+      //why was regular sinon restore call not working?
+      ResourcesWidget.prototype.processResponse = restore;
 
     })
 
-    it("has the LinkGeneratorMixin to parse the links data", function(){
+
+    it("processes received data and renders full text sources as well as data products, if they exist", function(){
+
+      widget = new ResourcesWidget();
+
+      minsub = new (MinPubSub.extend({
+        request: function(apiRequest) {
+          sentRequest = apiRequest;
+
+          return {
+            "responseHeader": {
+              "status": 0,
+              "QTime": 2,
+              "params": {
+                "wt": "json",
+                "q": "bibcode:1984NASCP2349..191B",
+                "fl": "links_data,[citations],property,bibcode"
+              }
+            },
+            "response": {
+              "numFound": 1,
+              "start": 0,
+              "docs": [
+                {
+                  "bibcode": "1984NASCP2349..191B",
+
+                  "links_data": [
+                    "{\"title\":\"\", \"type\":\"simbad\", \"instances\":\"2\", \"access\":\"\"}",
+                    "{\"title\":\"\", \"type\":\"ADSlink\", \"instances\":\"\", \"access\":\"open\"}"
+                  ],
+                  "property": [
+                    "OPENACCESS",
+                    "NOT REFEREED",
+                    "ADS_SCAN",
+                    "TOC",
+                    "INPROCEEDINGS"
+                  ],
+                  "[citations]": {
+                    "num_citations": 1,
+                    "num_references": 0
+                  }
+                }
+              ]
+            }
+          }
+        }
+
+      }))({verbose: false});
+
+      widget.activate(minsub.beehive.getHardenedInstance());
+
+
+      var getMyADSDataSpy = sinon.spy();
+      widget.beehive.getObject = function(){return {getMyADSData : getMyADSDataSpy }};
+
+      $w = widget.render().$el;
 
       expect(widget.parseResourcesData).to.be.instanceof(Function);
       expect(widget.adsUrlRedirect).to.be.instanceof(Function);
 
-    })
-
-    it("processes received data and renders full text sources as well as data products, if they exist", function(){
-
       widget.loadBibcodeData("fakeBibcode");
+
+      //gets link server info
+      expect(getMyADSDataSpy.callCount).to.eql(1);
+
       expect($w.find("ul:first").find("a").attr("href")).to.eql(
         'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD'
       );
@@ -91,10 +153,9 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
 
     it("knows about the user's link_server if user is signed in, and adds that to the list of full text links if applicable", function(){
 
+      widget = new ResourcesWidget();
 
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", "USER_DATA", {link_server:"foo.com"});
-
-      expect(widget.model.get("link_server")).to.eql("foo.com");
+      $w = widget.render().$el;
 
       var data =  {
           fullTextSources : [{openAccess: false, title: "Publisher Article", link: "fakelink", openUrl: true}]

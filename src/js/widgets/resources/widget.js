@@ -26,10 +26,8 @@ define([
     defaults : function(){
 
       return {
-
         fullTextSources : undefined,
-        dataProducts : undefined,
-        link_server : undefined
+        dataProducts : undefined
       }
     }
   });
@@ -37,6 +35,7 @@ define([
 
   var ResourcesView = Marionette.ItemView.extend({
     template : ResourcesTemplate,
+    
     modelEvents: {
       "change": "render"
     },
@@ -60,11 +59,9 @@ define([
     activate: function (beehive) {
       this.beehive = beehive;
       this.pubsub = beehive.Services.get('PubSub');
-      _.bindAll(this, ['processResponse', 'onDisplayDocuments', 'handleUserAnnouncement']);
+      _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
       this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
-
     },
 
     onDisplayDocuments: function(apiQuery) {
@@ -89,26 +86,16 @@ define([
 
     },
 
-    handleUserAnnouncement : function(event, target, model_data){
-
-      var linkServer;
-
-      if (event == "user_info_change" && target == "USER_DATA"){
-          linkServer = model_data["link_server"];
-          this.model.set("link_server", linkServer);
-        }
-      },
 
     processResponse : function(apiResponse){
 
       var data = apiResponse.get("response.docs[0]");
       //get link server info if it exists
-      data.link_server = this.model.get("link_server");
+      data.link_server = this.beehive.getObject("User").getMyADSData("link_server");
       //link mixin
       data = this.parseResourcesData(data);
 
       this.model.set(data);
-
       this.trigger('page-manager-event', 'widget-ready', {'isActive': true});
 
     }

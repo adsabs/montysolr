@@ -165,7 +165,7 @@ define([
 
    });
 
-    it("should allow authenticated user to input selected/all papers into a pre-existing library", function(done){
+    it.skip("should allow authenticated user to input selected/all papers into a pre-existing library", function(done){
 
       var w = new QueryInfo();
 
