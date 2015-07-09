@@ -35,7 +35,7 @@ define([
 
 
       it("should display the name of the current sort on the button", function(){
-        expect($("#test").find("#sort-button").text().trim()).to.eql("Current Sort: Relevancy")
+        expect($("#test").find("#sort-button").text().trim()).to.eql("Sort: Relevancy")
       });
 
 
@@ -61,7 +61,7 @@ define([
 
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star'}));
 
-        expect($("#test").find("#sort-button").text().trim()).to.eql("Current Sort: Relevancy");
+        expect($("#test").find("#sort-button").text().trim()).to.eql("Sort: Relevancy");
         expect($("#test").find("button.sort-options:first").data("value")).to.eql("classic_factor");
         expect($("#test").find("input[name=order-options]:checked").val()).to.eql("desc");
 
@@ -94,7 +94,7 @@ define([
         });
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star', 'sort': 'citation_count asc'}));
 
-        expect($("#test").find("button:first").text().trim()).to.eql("Current Sort: Citation Count Asc");
+        expect($("#test").find("button:first").text().trim()).to.eql("Sort: Citation Count Asc");
         expect($("#test").find("input[name=order-options]:checked").val()).to.eql("asc");
 
 

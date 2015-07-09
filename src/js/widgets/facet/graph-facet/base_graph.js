@@ -33,7 +33,7 @@ define(['marionette',
         top   : 5,
         right : 5,
         bottom: 20,
-        left  : 15
+        left  : 20
       };
       this.fullWidth = 110;
       this.fullHeight = 100;
