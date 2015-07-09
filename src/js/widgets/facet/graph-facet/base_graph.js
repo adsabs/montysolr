@@ -30,13 +30,13 @@ define(['marionette',
       //setting some constants for the graph
       this.bins = 12; //will be around 12, depending on remainders
       this.margin = {
-        top   : 20,
-        right : 10,
-        bottom: 50,
-        left  : 50
+        top   : 5,
+        right : 5,
+        bottom: 20,
+        left  : 15
       };
-      this.fullWidth = 280;
-      this.fullHeight = 200;
+      this.fullWidth = 110;
+      this.fullHeight = 100;
 
       this.width = this.fullWidth - this.margin.left - this.margin.right;
       this.height = this.fullHeight - this.margin.top - this.margin.bottom;
@@ -95,9 +95,6 @@ define(['marionette',
         this.buildSlider();
         if (this.addToOnRender){
           this.addToOnRender()
-        }
-        if (this.addChartEventListeners){
-          this.addChartEventListeners();
         }
       }
     }

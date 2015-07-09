@@ -1,8 +1,17 @@
-define(['js/widgets/tabs/tabs_widget',
+define([
+    'js/widgets/tabs/tabs_widget',
     'js/widgets/facet/factory',
     'js/widgets/facet/graph-facet/year_graph',
-    'js/widgets/facet/graph-facet/h_index_graph'],
-  function (TabsWidget, FacetFactory, YearGraphView, HIndexGraph) {
+    'js/widgets/facet/graph-facet/h_index_graph',
+    'js/mixins/formatter'
+  ],
+  function (
+    TabsWidget,
+    FacetFactory,
+    YearGraphView,
+    HIndexGraph,
+    FormatMixin
+    ) {
 
     return function() {
 
@@ -12,7 +21,8 @@ define(['js/widgets/tabs/tabs_widget',
         defaultQueryArguments: {
           "facet.pivot"   : "property,year",
           "facet"         : "true",
-          "facet.minCount": "1"
+          "facet.minCount": "1",
+
         },
 
         graphViewOptions : {
@@ -112,7 +122,10 @@ define(['js/widgets/tabs/tabs_widget',
         defaultQueryArguments: {
           "facet.pivot": "property,citation_count",
           "facet"      : "true",
-          "facet.limit": "-1"
+          "facet.limit": "-1",
+          "stats": 'true',
+          "stats.field" : 'citation_count'
+
         },
         graphViewOptions : {
           yAxisTitle :  "citations",
@@ -121,6 +134,7 @@ define(['js/widgets/tabs/tabs_widget',
           pastTenseTitle : "cited"
         },
         processResponse      : function (apiResponse) {
+
           this.setCurrentQuery(apiResponse.getApiQuery());
 
           var data = apiResponse.get("facet_counts.facet_pivot.property,citation_count");
@@ -175,8 +189,14 @@ define(['js/widgets/tabs/tabs_widget',
             return d
           });
 
+          var statsCount = FormatMixin.formatNum(apiResponse.get("stats.stats_fields.citation_count.sum"));
+
           this.collection.reset([
-            {graphData: finalData}
+            {
+              graphData: finalData,
+              statsCount : statsCount,
+              title: "citations"
+            }
           ]);
 
         }
@@ -189,7 +209,9 @@ define(['js/widgets/tabs/tabs_widget',
         defaultQueryArguments: {
           "facet.pivot": "property,read_count",
           "facet"      : "true",
-          "facet.limit": "-1"
+          "facet.limit": "-1",
+          "stats": 'true',
+          "stats.field" : 'read_count'
         },
         graphViewOptions : {
           yAxisTitle :  "reads",
@@ -198,6 +220,7 @@ define(['js/widgets/tabs/tabs_widget',
           pastTenseTitle : "read"
         },
         processResponse      : function (apiResponse) {
+
           this.setCurrentQuery(apiResponse.getApiQuery());
 
           var data = apiResponse.get("facet_counts.facet_pivot.property,read_count");
@@ -252,8 +275,14 @@ define(['js/widgets/tabs/tabs_widget',
             return d
           });
 
+          var statsCount = FormatMixin.formatNum(apiResponse.get("stats.stats_fields.read_count.sum"));
+
           this.collection.reset([
-            {graphData: finalData}
+            {
+              graphData: finalData,
+              statsCount: statsCount,
+              title: "reads"
+            }
           ]);
 
         }

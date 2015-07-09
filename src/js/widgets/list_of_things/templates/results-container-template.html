@@ -6,12 +6,12 @@
 
         </div>
 
-        <div class="col-sm-5">
+        <div class="col-sm-6">
 
         </div>
 
 
-        <div class="col-sm-5 sort-container">
+        <div class="col-sm-4 sort-container">
 
         </div>
 
@@ -34,6 +34,13 @@
     <div>
         <h2 class="s-article-title">{{title}}</h2>
     </div>
+    {{/if}}
+
+    {{#if operator}}
+        <div class="s-operator">
+            <i>view this list in a search results page:</i><br/>
+            <a href="#search/q={{queryOperator}}({{bibcode}})" class="btn btn-sm btn-primary-faded"><i class="fa fa-search"></i> {{queryOperator}}({{bibcode}})</a>
+         </div>
     {{/if}}
 
 </div>

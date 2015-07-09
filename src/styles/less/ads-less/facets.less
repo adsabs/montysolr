@@ -76,6 +76,25 @@
 
 }
 
+.s-facet-label {
+  .facet-amount {
+    display: none;
+
+  }
+}
+
+.s-facet-label:hover {
+  .facet-amount {
+    display: inline-block;
+  }
+}
+
+.facet-amount {
+  visibility:hide;
+  &:hover {
+    display:block;
+  }
+}
 
 .s-item-caret {
   position: absolute;
@@ -191,4 +210,15 @@
 
 .s-widget-container {
   position: relative;
+}
+
+
+.graph-facet {
+
+  hr {
+    margin: 10px 0;
+  }
+
+  padding-right: 6%;
+  padding-bottom: 30px;
 }

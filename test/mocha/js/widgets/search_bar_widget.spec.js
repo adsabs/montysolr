@@ -69,7 +69,7 @@ define([
 
     });
 
-    it("should get a new query from FEEDBACK", function(done) {
+    it("should get a new query from FEEDBACK and show the number of results", function(done) {
       var widget = _widget();
       var $w = widget.render().$el;
 
@@ -82,7 +82,9 @@ define([
       setTimeout(function() {
         expect(widget.view.getFormVal()).to.be.eql('foo:bar');
         done();
-      }, 5)
+      }, 5);
+
+      expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">841,359</span></b><span class="s-light-font"> results</span>');
     });
 
     it("should allow the user to open and close a dropdown menu from the search bar", function(done){

@@ -83,6 +83,13 @@ define([
         this.InitialViewClass = Marionette.ItemView.extend({
           template: InitialViewTemplate
         });
+
+        //for instructions on how to view list in results page
+        if (options.operator) {
+          this.model.set("operator", true);
+          this.model.set("queryOperator", options.queryOperator);
+        }
+
       },
 
       className: "list-of-things",

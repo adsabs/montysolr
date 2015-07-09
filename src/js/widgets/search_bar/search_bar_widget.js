@@ -6,6 +6,7 @@ define([
     'hbs!./templates/search_form_template',
     'js/components/query_builder/plugin',
     'js/components/api_feedback',
+    'js/mixins/formatter',
     './autocomplete',
     'bootstrap', // if bootstrap is missing, jQuery events get propagated
     'analytics',
@@ -19,6 +20,7 @@ define([
     SearchFormTemplate,
     QueryBuilderPlugin,
     ApiFeedback,
+    FormatMixin,
     autocompleteArray,
     bootstrap,
     analytics,
@@ -284,7 +286,13 @@ define([
       },
 
       setFormVal: function(v) {
-        return this.$input.val(v);
+        this.$(".q").val(v);
+        this.toggleClear();
+
+      },
+
+      setNumFound : function(numFound){
+          this.$(".num-found-container").html(this.formatNum(numFound));
       },
 
       onShowForm: function() {
@@ -384,6 +392,8 @@ define([
       }
     });
 
+    _.extend(SearchBarView.prototype, FormatMixin);
+
     var SearchBarWidget = BaseWidget.extend({
 
       activate: function (beehive) {
@@ -416,6 +426,7 @@ define([
           case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
             this.setCurrentQuery(feedback.query);
             this.view.setFormVal(feedback.query.get('q').join(' '));
+            this.view.setNumFound(feedback.numFound || 0);
             break;
         }
       },
@@ -438,7 +449,7 @@ define([
           if (query) {
             this.view.setFormVal(query);
             this.view.$(".icon-clear").removeClass("hidden");
-          }else {
+          } else {
             this.view.$(".icon-clear").addClass("hidden");
           }
         });

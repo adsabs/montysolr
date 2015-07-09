@@ -98,11 +98,15 @@
   padding-top: 1%;
   max-height: 40px;
   overflow: hidden;
+
+  button {
+    font-size: 14px;
+  }
 }
 
 .s-clear-control {
   position: absolute;
-  top: 7px;
+  top: 6px;
   right: 15%;
   display: block;
   text-align: center;
@@ -137,4 +141,40 @@
   position: relative;
   top: 2px;
   font-variant: small-caps;
+}
+
+
+.s-num-found {
+  position: absolute;
+  left: 2%;
+  top: 88px;
+  font-size: 16px;
+  display: none;
+}
+
+.s-results-page-layout {
+  .s-num-found {
+    display:block;
+  }
+}
+
+.s-motion-shadow {
+  .s-num-found {
+    position: absolute;
+    left: -20%;
+    top: 8px;
+    font-size: 16px;
+    display:none;
+  }
+
+  .description {
+    display:none;
+  }
+
+}
+
+
+input.q {
+  font-size: 16px;
+  font-weight:300;
 }

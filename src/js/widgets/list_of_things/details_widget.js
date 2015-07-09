@@ -29,6 +29,7 @@ define([
             this.ingestBroadcastedPayload(data);
           }
         });
+
         ListOfThings.prototype.initialize.call(this, options);
       },
 
