@@ -23,6 +23,22 @@ define([
 
  describe("User Object", function(){
 
+   var fakeURLConfig = [
+     {
+       "name": "ohio wesleyan",
+       "link": "ohio_wesleyan.edu"
+     },
+     {
+       "name": "virginia wesleyan",
+       "link": "virginia_wesleyan.edu"
+     },
+     {
+       "name": "wesleyan university",
+       "link": "wesleyan.edu"
+     }
+   ];
+
+
    it("keeps track of the user's signed in/anonymous state based on the content of the 'user' model within its collection, and responds to changes by updating user collection", function(){
 
      sinon.stub(User.prototype, "broadcastChange");
@@ -72,13 +88,29 @@ define([
 
    })
 
-   it("provides a hardened interface with the methods widgets and other objects might need", function(){
+   it("provides a hardened interface with the methods widgets and other objects might need", function() {
 
      var u = new User();
      var hardened = u.getHardenedInstance();
      expect(hardened.__facade__).equals(true);
      expect(hardened.handleCallbackError).to.be.undefined;
-     expect(_.keys(hardened)).to.eql(["completeLogIn", "completeLogOut", "isLoggedIn", "postData", "putData", "getUserData", "getUserName", "isOrcidModeOn", "setOrcidMode", "setUser", "__facade__", "mixIn"]);
+     expect(_.keys(hardened)).to.eql([
+       "completeLogIn",
+       "completeLogOut",
+       "isLoggedIn",
+       "postData",
+       "putData",
+       "getUserData",
+       "getUserName",
+       "isOrcidModeOn",
+       "setOrcidMode",
+       "setUser",
+       "getOpenURLConfig",
+       "setMyADSData",
+       "getMyADSData",
+       "__facade__",
+       "mixIn"
+     ]);
 
    });
 
@@ -102,7 +134,7 @@ define([
 
      u.collection.get("TOKEN").set("access_token", "boo");
 
-     expect(u.pubsub.publish.args[0]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "TOKEN"]);
+     expect(u.pubsub.publish.args[0]).to.eql(["[PubSub]-User-Announcement","user_info_change","TOKEN",{"access_token":"boo","target":"TOKEN"}]);
 
    });
 
@@ -121,7 +153,8 @@ define([
        var minsub = new (MinSub.extend({
          request: function (apiRequest) {
          }
-       }))({verbose: false})
+       }))({verbose: false});
+
 
        var appStorage = new AppStorage({csrf : "fake"});
 
@@ -129,23 +162,29 @@ define([
 
        u.collection.get("USER").set("user", "foobly@gmail.com");
        u.collection.get("TOKEN").set("api_token", "woobly");
+       u.collection.get("USER_DATA").set("openurl", "foo.com");
 
-      expect(u.getUserData()).to.eql({
+       expect(u.getUserData()).to.eql({
         "TOKEN": {
           "api_token": "woobly"
         },
         "USER": {
           "user": "foobly@gmail.com"
-        }
+        },
+        "USER_DATA": {"openurl" : "foo.com"}
       });
 
       expect(u.getUserData("TOKEN")).to.eql( {
         "api_token": "woobly"
       });
 
-       expect(u.getUserName()).to.eql("foobly@gmail.com");
+      expect(u.getUserName()).to.eql("foobly@gmail.com");
 
-       User.prototype.broadcastChange.restore();
+
+      //convenience method
+      expect(u.getMyADSData("openurl")).to.eql({openurl : "foo.com"});
+
+      User.prototype.broadcastChange.restore();
 
      });
 
@@ -191,10 +230,43 @@ define([
      expect(request2.toJSON().options.context).to.eql(u);
 
 
+     u.setMyADSData({link_server : "foo.com"});
+
+     var request3 = requestStub.args[2][0];
+
+     expect(request3.toJSON().target).to.eql("myads/user-data");
+     expect(request3.toJSON().options.type).to.eql("POST");
+
+     expect(request3.toJSON().options.data).to.eql('{"link_server":"foo.com"}' );
+
+
 
      requestStub.restore();
 
+
+
    });
+
+   it("has a method to get OpenURL Config", function(){
+
+     var u = new User();
+
+     var minsub = new (MinSub.extend({
+       request: function (apiRequest) {
+         apiRequest.toJSON().options.done(fakeURLConfig)
+       }
+     }))({verbose: false});
+
+     u.activate(minsub.beehive);
+
+     //returns a promise
+     var returned;
+     u.getOpenURLConfig().done(function(data){
+       returned = data;
+     })
+     expect(returned).to.eql(fakeURLConfig);
+
+   })
 
 
    it("handles both success and failure of GET and POST requests", function(){
@@ -228,7 +300,15 @@ define([
      //should call the proper callback
      u.handleSuccessfulPOST({api_token : "boobly"}, "success", {target : "TOKEN"});
 
-     expect(publishStub.args[2]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "TOKEN"]);
+     expect(publishStub.args[2]).to.eql([
+       "[PubSub]-User-Announcement",
+       "user_info_change",
+       "TOKEN",
+       {
+         "target": "TOKEN",
+         "api_token": "boobly"
+       }
+     ]);
      expect(publishStub.args[3]).to.eql(["[PubSub]-User-Announcement", "data_post_successful", "TOKEN"]);
      //these two events seem redundant for the token endpoint but wont be for endpoints like change_password
      expect(u.collection.get("TOKEN").toJSON()).to.eql({target: "TOKEN", api_token: "boobly"});
@@ -242,15 +322,46 @@ define([
      expect(u.completeLogOut.callCount).to.eql(1);
 
      //the deletion of the account should yield 2 more pubsub calls announcing that token and username have changed:
-     expect(publishStub.args[5]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "TOKEN"]);
-     expect(publishStub.args[6]).to.eql(["[PubSub]-User-Announcement", "user_info_change", "USER"]);
+     expect(publishStub.args[5]).to.eql(["[PubSub]-User-Announcement","user_info_change","TOKEN", {"target":"TOKEN"}]);
+     expect(publishStub.args[6]).to.eql([
+       "[PubSub]-User-Announcement",
+       "user_info_change",
+       "USER",
+       {
+         "target": "USER"
+       }
+     ]);
+     expect(publishStub.args[7]).to.eql([
+       "[PubSub]-User-Announcement",
+       "user_info_change",
+       "USER_DATA",
+       {
+         "target": "USER_DATA"
+       }
+     ]);
+
 
      //post fail
      u.handleFailedPOST({target: "TOKEN", responseJSON : {error : "random error message"}});
 
-     expect(publishStub.args[7]).to.eql(["[PubSub]-User-Announcement", "data_post_unsuccessful", "TOKEN"]);
-     expect(publishStub.args[8][0]).to.eql("[Alert]-Message")
-     expect(publishStub.args[8][1].msg).to.eql("User update was unsuccessful (random error message)");
+     expect(publishStub.args[8]).to.eql(["[PubSub]-User-Announcement", "data_post_unsuccessful", "TOKEN"]);
+     expect(publishStub.args[9][0]).to.eql("[Alert]-Message")
+     expect(publishStub.args[9][1].msg).to.eql("User update was unsuccessful (random error message)");
+
+
+     //user_data
+     u.handleSuccessfulPOST({ link_server : "fakeServer"}, "success", {target : "USER_DATA"});
+
+
+     expect(publishStub.args[10]).to.eql([
+       "[PubSub]-User-Announcement",
+       "user_info_change",
+       "USER_DATA",
+       {
+         "target": "USER_DATA",
+         "link_server": "fakeServer"
+       }
+     ])
 
 
      User.prototype.broadcastChange.restore();

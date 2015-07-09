@@ -89,9 +89,10 @@ define([
 
       options = _.extend({}, options, request.get('options'));
       
-      var self = this;
-      var data;
-      var query = request.get('query');
+      var data,
+          self = this,
+          query = request.get('query');
+
       if (query && !(query instanceof ApiQuery)) {
         throw Error("Api.query must be instance of ApiQuery");
       }
@@ -101,6 +102,7 @@ define([
       }
 
       var target = request.get('target') || '';
+
       var u;
       if (target.indexOf('http') > -1) {
         u = target;

@@ -461,21 +461,25 @@ define([
 
         //make sure not to override an explicit sort if there is one
         if (!query.has("sort")){
-          var queryVal, toMatch, operator;
-          queryVal = query.get("q")[0];
+          var queryVal = query.get("q")[0];
 
-          //citations operator should be sorted by pubdate too
-          toMatch = ["trending(", "instructive(", "useful(", "references("];
-          operator = _.find(toMatch, function(e) {
+          //citations operator should be sorted by pubdate, so it isn't added here
+          var toMatch = ["trending(", "instructive(", "useful(", "references(", "reviews("];
+
+          //if there are multiple, this will just match the first operator
+          var operator = _.find(toMatch, function(e) {
             if (queryVal.indexOf(e) !== -1) {
               return e
             }
           });
 
-          if (operator && operator === "references(" ){
-            query.set("sort", "first_author asc")
+          if (operator == "references("){
+            query.set("sort", "first_author asc");
           }
-          if (!operator) {
+          else if (operator){
+            query.set("sort", "relevancy desc");
+          }
+          else if (!operator) {
             query.set("sort", "date desc");
           }
         }

@@ -159,10 +159,14 @@ define([
       widget.changeDefaultSort(q6);
       expect(q6.get("sort")[0]).to.eql("first_author asc");
 
-      //shouldn't add a sort if there is no sort and the query is an operator other than citations and references
+      //should add "relevancy desc" if the query is an operator (trending, instructive/reviews, useful)
       var q7 = new ApiQuery({q : "trending(star)"});
       widget.changeDefaultSort(q7);
-      expect(q7.get("sort")).to.eql(undefined);
+      expect(q7.get("sort")[0]).to.eql("relevancy desc");
+
+      var q8 = new ApiQuery({q : "reviews(star)"});
+      widget.changeDefaultSort(q8);
+      expect(q8.get("sort")[0]).to.eql("relevancy desc");
 
       done();
     });

@@ -71,7 +71,7 @@ define([
           var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
           if (!loggedIn){
             //redirect to authentication page
-            app.getService("Navigator").navigate("authentication-page");
+            app.getService("Navigator").navigate("authentication-page", {subView : "login"});
             return true;
           }
           else {
@@ -226,9 +226,9 @@ define([
         });
 
         this.set('authentication-page', function(page, data){
-          var subView = data.subView;
-          subView = subView ? subView : "login";
-          var loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
+          var data = data || {},
+              subView = data.subView || login,
+              loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
 
           if (loggedIn){
             //redirect to preferences

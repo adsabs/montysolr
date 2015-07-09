@@ -182,12 +182,12 @@ define([
       this.model.set("hourly", hourly);
     },
 
-    handleUserAnnouncement : function(msg, data) {
+    handleUserAnnouncement : function(msg, arg2, arg3) {
 
       var user = this.getBeeHive().getObject("User");
       var orcidApi = this.getBeeHive().getService("OrcidApi");
 
-      if (msg === "user_info_change" && data === "USER") {
+      if (msg === "user_info_change" && arg2 === "USER") {
         //if user logs out, username will be undefined
         this.model.set("currentUser", this.getBeeHive().getObject("User").getUserName());
       }

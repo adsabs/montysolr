@@ -233,3 +233,22 @@
   .icon-reload;
   color: desaturate(@brand-info, 10%);
 }
+
+//for use with bootstrap collapse plugin
+
+.toggle-icon {
+  .fa;
+  .fa-lg;
+  &:before {
+  content: @fa-var-caret-down;
+  }
+  .lh-transition(transform .5s ease-out);
+}
+
+.collapsed {
+  .toggle-icon {
+    .lh-rotate(-90deg);
+  }
+}
+
+

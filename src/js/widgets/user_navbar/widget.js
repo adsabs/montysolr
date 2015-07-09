@@ -49,9 +49,9 @@ define([
       this.model.set("page", page);
     },
 
-    updateUser : function(event, key ){
+    updateUser : function(event, target ){
 
-      if (event == "user_info_change" && key == "USER"){
+      if (event == "user_info_change" && target == "USER"){
         var userName = this.beehive.getObject("User").getUserName();
         if (userName && userName.indexOf("@") > -1){
           userName = userName.split("@")[0];
