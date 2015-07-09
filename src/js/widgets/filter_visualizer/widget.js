@@ -51,9 +51,10 @@ define([
       },
       onClick: function(ev) {
         ev.preventDefault();
-        this.trigger('filter-event', ev.target.getAttribute('value')
-          ? ev.target.getAttribute('value')
-          : ev.target.parentNode.getAttribute('value'));
+        var $t = $(ev.target);
+        this.trigger('filter-event', $t.attr('value')
+          ? $t.attr('value')
+          : $t.parent().attr('value'));
       }
     });
 
@@ -168,7 +169,7 @@ define([
         var keys = _.keys(data);
 
         _.each(keys, function(k) {
-          if (k.startsWith('fq_')) {
+          if (k.indexOf('fq_') == 0) {
 
             // is this filter in the list of accepted values?
             if (!this.knownFilters[k]) {
@@ -288,7 +289,7 @@ define([
       beautifyOperand: function(filter_name, queryString) {
         var s = queryString;
         // first remove brackets, if any
-        while (s.startsWith('(') && s.endsWith(')')) {
+        while (s.indexOf('(') == 0 && s.indexOf(')') == s.length-1) {
           s = s.substr(1, s.length-2);
         }
 
@@ -400,7 +401,7 @@ define([
        * that back views
        */
       onFilterEvent: function(node, value) {
-        console.log('onFilterEvent', arguments);
+        console.log('onFilterEvent', arguments );
         var newQuery = this.createModifiedQuery(value);
         var ps = this.getBeeHive().getService('PubSub');
         if (ps)
