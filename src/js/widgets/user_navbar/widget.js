@@ -46,9 +46,7 @@ define([
     },
 
     updateCurrentView : function(page){
-
       this.model.set("page", page);
-
     },
 
     updateUser : function(event, key ){

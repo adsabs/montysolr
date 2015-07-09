@@ -163,7 +163,6 @@ define(['backbone', 'marionette',
         this.$(".logic-dropdown").addClass("hide").removeClass("open");
       },
 
-
       onLogic: function(ev) {
         if (ev)
         ev.stopPropagation();

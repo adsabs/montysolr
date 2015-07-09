@@ -61,15 +61,15 @@ require.config({
         DetailsPage: 'js/wraps/abstract_page_manager/abstract_page_manager',
         AuthenticationPage: 'js/wraps/authentication_page_manager',
         SettingsPage: 'js/wraps/user_settings_page_manager/user_page_manager',
-        LibrariesPage: 'js/wraps/libraries_page_manager/libraries_page_manager',
-        HomePage: 'js/wraps/home_page_manager/home_page_manager',
+//        LibrariesPage: 'js/wraps/libraries_page_manager/libraries_page_manager',
+//        HomePage: 'js/wraps/home_page_manager/home_page_manager',
 
         Authentication: 'js/widgets/authentication/widget',
         UserSettings: 'js/widgets/user_settings/widget',
         UserPreferences: 'js/widgets/preferences/widget',
 
-        AllLibrariesWidget : 'js/widgets/libraries_all/widget',
-        IndividualLibraryWidget : 'js/widgets/library_individual/widget',
+//        AllLibrariesWidget : 'js/widgets/libraries_all/widget',
+//        IndividualLibraryWidget : 'js/widgets/library_individual/widget',
 
         NavbarWidget: 'js/widgets/navbar/widget',
         UserNavbarWidget: 'js/widgets/user_navbar/widget',

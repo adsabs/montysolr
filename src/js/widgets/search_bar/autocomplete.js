@@ -35,7 +35,7 @@ define([
     {value: "citations()" , label : "Citations", desc: "Get papers citing your search result set", match: "citations("},
     {value: "references()" , label : "References", desc: "Get papers referenced by your search result set", match: "references("},
 
-    {value: "trending()" , label : "Trending", desc: "the list of documents most read by users who read recent papers on the topic being researched",  match: "trending("},
+    {value: "trending()" , label : "Trending", desc: "the documents most read by users who read recent papers on the topic being researched",  match: "trending("},
     {value: "instructive()" , label : "Instructive", desc : "review articles citing most relevant papers",  match: "instructive("},
     {value: "useful()" , label : "Useful", desc: "documents frequently cited by the most relevant papers on the topic being researched", match: "useful("},
 

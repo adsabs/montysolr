@@ -137,11 +137,13 @@ define([
           delay : 0,
           source:  function( request, response ) {
 
-            //don't look for a match if the keydown event was a backspace
-            if (!performSearch)
-                  return;
-
             var toMatch, matcher, toReturn;
+
+            //don't look for a match if the keydown event was a backspace
+            if (!performSearch){
+              $input.autocomplete("close");
+              return;
+            }
 
             toMatch = findActiveAndInactive(request.term.trim()).active;
             if (!toMatch)
