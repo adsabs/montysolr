@@ -44,7 +44,8 @@ define([
     });
 
     var ItemView = Marionette.ItemView.extend({
-      tagName: 'span',
+      tagName : 'span',
+      className : "filter-topic-group",
       template : ItemTemplate,
       events : {
         'click button' : 'onClick'
