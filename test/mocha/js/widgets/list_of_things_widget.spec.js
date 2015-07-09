@@ -269,7 +269,7 @@ define(['marionette',
         var $w = $(view.render().el);
         $('#test').append($w);
 
-        expect($("#test .s-operator").html().trim()).to.eql('<i>view this list in a search results page:</i><br>\n            <a href="#search/q=citations(foo)" class="btn btn-sm btn-primary-faded"><i class="fa fa-search"></i> citations(foo)</a>');
+        expect($("#test .s-operator").html().trim()).to.eql('view this list in a search results page:<br>\n            <a href="#search/q=citations(bibcode:foo)" class="btn btn-sm btn-primary-faded"><i class="fa fa-search"></i> citations(bibcode:foo)</a>');
 
       });
 
