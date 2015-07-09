@@ -1634,6 +1634,8 @@ define([
 
       it("should have a draw function on the word cloud view that takes care of the word cloud rendering", function(done){
 
+        this.timeout(3000); // this test was often timing out on travis
+
         w = new WordCloud();
         $("#test").append(w.render().el);
 

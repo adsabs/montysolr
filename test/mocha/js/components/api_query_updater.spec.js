@@ -48,6 +48,12 @@ define([
       u.updateQuery(q, 'qx', 'expand', 'bar');
       expect(q.get('qx')).to.be.eql(['(baz OR bar)']);
       expect(u._getExistingVals(q, u._n('qx'))).to.eql(['OR', 'baz', 'bar']);
+
+      q = new ApiQuery({'q': 'ack:foo or ack:bar'});
+      u = new ApiQueryUpdater('q');
+
+      u.updateQuery(q, 'q', 'limit', 'baz');
+      expect(q.get('q')).to.be.eql(['((ack:foo or ack:bar) AND baz)']);
     });
 
     it.skip("can update existing query:add/replace (any field)", function() {
