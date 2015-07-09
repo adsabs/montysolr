@@ -5,15 +5,16 @@
              <div id="expanded-search-form" class="unselectable">
                  <div id="field-options">
                      <span class="s-field-options">insert field:</span>
-                     <button class="btn btn-link btn-sm" data-field="author" data-punc='"'>Author</button>
+                     <button class="btn btn-link btn-sm"  data-field="author"  data-punc='"'>Author</button>
                      <button class="btn btn-link btn-sm"  data-field="first-author" data-punc='"'>First Author</button>
-                     <button class="btn btn-link btn-sm"  data-field="title" data-punc='"'>Title</button>
-                     <button class="btn btn-link btn-sm"  data-field="year">Year</button>
-                     <button class="btn btn-link btn-sm"  data-field="bibstem" data-punc='"'>Publication</button>
-                     <button class="btn btn-link btn-sm"  data-field="full" data-punc="(">Fulltext</button>
-                     <!--<button class="btn btn-link btn-sm"  data-field="operator-trending">Trending(...)</button>-->
-                     <!--<button class="btn btn-link btn-sm"  data-field="operator-useful">Useful(...)</button>-->
-                     <!--<button class="btn btn-link btn-sm"  data-field="operator-instructive">Instructive(...)</button>-->
+                     <button class="btn btn-link btn-sm"  title="limit search to abstract and title fields" data-toggle="tooltip" data-field="abstract" data-punc='"'>Abstract</button>
+                     <button class="btn btn-link btn-sm"  title="e.g. year:1999 or year:1999-2001" data-toggle="tooltip" data-field="year">Year</button>
+                     <button class="btn btn-link btn-sm"  title="search titles, abstract, and text of the articles" data-toggle="tooltip" data-field="full" data-punc="(">Fulltext</button>
+                     <button class="btn btn-link btn-sm"  title="find review articles e.g. reviews(exoplanets)" data-toggle="tooltip" data-field="operator-reviews">Reviews(...)</button>
+                     <button class="btn btn-link btn-sm"  title='find all citing articles e.g. citations(author:"^kurtz,m")' data-toggle="tooltip" data-field="operator-citations">Citations(...)</button>
+                     <button class="btn btn-link btn-sm"  title='find all references e.g. references(1998ApJ...500..525S)' data-toggle="tooltip" data-field="operator-references">References(...)</button>
+
+
                  </div>
              </div>
          </div>
