@@ -81,7 +81,14 @@ define([
         this.listenTo(this.view, 'childview:filter-event', this.onFilterEvent);
         this.knownFilters = {
           'fq_author' : 'Author',
-          'fq_database': 'Database'
+          'fq_database': 'Database',
+          'fq_facets180': 'Refereed',
+          'fq_keyword_facet': 'Keywords',
+          'fq_bibstem_facet': 'Publications',
+          'fq_bibgroup_facet': 'Bibl Groups',
+          'fq_data_facet': 'Data',
+          'fq_vizier_facet': 'Vizier',
+          'fq_grant': 'Grants'
         };
         this.currentQuery = null;
       },
