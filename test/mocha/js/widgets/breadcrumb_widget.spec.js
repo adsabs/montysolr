@@ -2,8 +2,21 @@
  * Created by rchyla on 5/14/14.
  */
 
-define(['js/widgets/breadcrumb/widget', 'js/components/api_query', 'js/services/pubsub', 'js/components/beehive', 'backbone', 'jquery'],
-  function (BreadCrumbWidget, ApiQuery, PubSub, BeeHive, Backbone, $) {
+define([
+    'js/widgets/breadcrumb/widget',
+    'js/components/api_query',
+    'js/services/pubsub',
+    'js/components/beehive',
+    'backbone',
+    'jquery'
+  ],
+  function (
+    BreadCrumbWidget,
+    ApiQuery,
+    PubSub,
+    BeeHive,
+    Backbone,
+    $) {
     describe("BreadCrumb Widget (UI)", function () {
 
       var beehive, pubsub;

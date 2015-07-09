@@ -1,0 +1,20 @@
+
+{{#each this.elements}}
+
+    {{#compare this.type "category"}}
+
+         <h5>{{this.display}}</h5>
+
+    {{else }}
+
+        {{#compare this.type "control"}}
+            <span class="filter-{{this.type}}"><button class="btn btn-xs btn-link filter-{{this.type}}-remove" value="{{this.value}}" title="remove all filters in this category"><i class="fa fa-times-circle"></i></button></span>
+
+        {{else}}
+
+            <span class="filter-{{this.type}}">{{this.display}}<button class="btn btn-xs btn-link filter-{{this.type}}-remove" value="{{this.value}}"><i class="fa fa-times-circle"></i></button></span>
+
+        {{/compare}}
+
+    {{/compare}}
+{{/each}}

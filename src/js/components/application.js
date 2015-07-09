@@ -318,7 +318,7 @@ define([
 
       var errback = function (err) {
         var symbolicName = err.requireModules && err.requireModules[0];
-        console.warn("Error loading impl=" + symbolicName);
+        console.warn("Error loading impl=" + symbolicName, err.requireMap);
         if (ignoreErrors) {
           console.warn("Ignoring error");
           return;

@@ -60,7 +60,7 @@ define([
           'KeywordFacet', 'BibstemFacet', 'BibgroupFacet', 'DataFacet',
           'VizierFacet', 'GrantsFacet', 'GraphTabs', 'QueryDebugInfo',
           'ExportDropdown', 'VisualizationDropdown', 'SearchWidget',
-          'Sort'
+          'Sort', 'BreadcrumbsWidget'
         ];
 
         var detailsPageAlwaysVisible = [
