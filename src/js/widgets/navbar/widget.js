@@ -2,6 +2,7 @@ define([
   'marionette',
   'js/widgets/base/base_widget',
   'hbs!./template/navbar',
+  'hbs!./template/feedback',
   'js/components/api_query_updater',
   'js/components/api_query',
   'bootstrap'
@@ -10,8 +11,10 @@ define([
   Marionette,
   BaseWidget,
   NavBarTemplate,
+  FeedbackTemplate,
   ApiQueryUpdater,
-  ApiQuery
+  ApiQuery,
+  Bootstrap
   ){
 
   var NavView, NavModel, NavWidget;
@@ -33,7 +36,7 @@ define([
 
   NavView = Marionette.ItemView.extend({
 
-    template: NavBarTemplate,
+   template: NavBarTemplate,
 
     modelEvents : {
       change: "render"
@@ -64,7 +67,6 @@ define([
       "click code": function (e) {
         this.trigger('search-author');
       }
-
     },
 
     stopPropagation: function (e) {
@@ -103,6 +105,61 @@ define([
 
         that.render();
       }, 400);
+    },
+
+    onRender : function(){
+
+      var that = this;
+
+      if (!this.formAttached){
+        //attach modal
+        $("body").append(FeedbackTemplate());
+
+        var $modal = $("#feedback-modal");
+
+        function clearForm () {
+          $modal.find(".modal-body").html($(FeedbackTemplate()).find("form"))
+        }
+
+        //make sure to clear the form when the modal closes
+        $modal.on("hidden.bs.modal", clearForm);
+
+        //attach submit handler
+        $(".feedback-form").submit(function(e) {
+          var $form = $(e.target);
+          e.preventDefault();
+          $.ajax({
+            url: "//formspree.io/aholachek@gmail.com",
+            method: "POST",
+            data: $form.serialize(),
+            dataType: 'json',
+
+            beforeSend: function () {
+              $form.find("button[type=submit]")
+                .html('<i class="icon-loading"></i> Sending form...');
+            },
+
+            success: function (data) {
+              $form.find("button[type=submit]")
+                .html('<i class="icon-success"></i> Message sent!');
+
+              setTimeout(function(){
+                $modal.modal("hide");
+              }, 500);
+
+            },
+            error: function (err) {
+              $form.find("button[type=submit]")
+              .addClass("btn-danger")
+              .html('<i class="icon-success"></i> There was an error!')
+
+            }
+          });
+        });
+
+          this.formAttached = true;
+      }
+
     }
 
   });
