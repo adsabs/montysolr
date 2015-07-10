@@ -53,7 +53,7 @@ define([
 
       defaultQueryArguments: {
         hl     : "true",
-        "hl.fl": "title,abstract,ack,body",
+        "hl.fl": "title,abstract,body,ack",
         'hl.maxAnalyzedChars': '150000',
         'hl.requireFieldMatch': 'true',
         'hl.usePhraseHighlighter': 'true',
