@@ -359,8 +359,8 @@ define([
           case 'fq_vizier_facet':
             s = s.replace(/vizier_facet:/g, '');
             break;
-          case 'fq_data_facet':
-            s = s.replace(/data_facet:/g, '');
+          case 'fq_grant':
+            s = s.replace(/grant:/g, '');
             break;
         }
 
@@ -429,21 +429,6 @@ define([
           delete q.fq;
 
         return new ApiQuery(q);
-      },
-
-      /**
-       * Catches and displays ApiQuery that has travelled through the
-       * PubSub queue
-       */
-      onAllPubSub: function() {
-        var event = arguments[0];
-        if (event == this.eventKey) {
-          console.log('[debug:ApiQueryWidget]', arguments[0]);
-          //this.onLoad(arguments[1]);
-          this.view.updateInputBox(arguments[1].url()); // update the input
-        }
-
-
       },
 
 

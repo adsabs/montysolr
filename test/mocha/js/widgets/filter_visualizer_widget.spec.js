@@ -534,5 +534,16 @@ define([
         ]);
       });
 
+      it("can beautify displayed query", function() {
+        var widget = new FilterVisualizerWidget({withoutOperators: true});
+        expect(widget.beautifyOperand('fq_facets180', 'property:foo')).to.eql('foo');
+        expect(widget.beautifyOperand('fq_keyword_facet', 'keyword_facet:foo\\ bar')).to.eql('foo bar');
+        expect(widget.beautifyOperand('fq_bibstem_facet', 'bibstem_facet:foo')).to.eql('foo');
+        expect(widget.beautifyOperand('fq_bibgroup_facet', 'bibgroup_facet:foo')).to.eql('foo');
+        expect(widget.beautifyOperand('fq_data_facet', 'data_facet:foo')).to.eql('foo');
+        expect(widget.beautifyOperand('fq_vizier_facet', 'vizier_facet:foo')).to.eql('foo');
+        expect(widget.beautifyOperand('fq_grant', 'grant:foo')).to.eql('foo');
+      });
+
     });
   });
