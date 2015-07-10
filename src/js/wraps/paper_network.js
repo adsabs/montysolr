@@ -728,9 +728,9 @@ define([
         Array.prototype.push.apply(filterBibcodes, bibcodes);
       });
 
-      bibcodes = "bibcode:(" + filterBibcodes.join(" OR ") + ")";
+      var bibcodes = "bibcode:(" + filterBibcodes.join(" OR ") + ")";
       newQuery.unlock();
-      updater.updateQuery(newQuery, "fq", "limit", bibcodes);
+      this._updateFq(newQuery, bibcodes);
 
       this.resetWidget();
       this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);

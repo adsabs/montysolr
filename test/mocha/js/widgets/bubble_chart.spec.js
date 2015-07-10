@@ -6055,12 +6055,15 @@ define([
         "q": [
           "fake"
         ],
-        "fq": [
-          "(bibcode:( \"2000hst..prop.8482L\" OR \"1999AJ....117..343R\"))"
+        "fq_bubble_chart": [
+          "(bibcode:(2000hst..prop.8482L OR 1999AJ....117..343R))"
         ],
-        "__fq_fq": [
+        "__bubble_chart_fq_bubble_chart": [
           "AND",
-          "bibcode:( \"2000hst..prop.8482L\" OR \"1999AJ....117..343R\")"
+          "bibcode:(2000hst..prop.8482L OR 1999AJ....117..343R)"
+        ],
+        "fq": [
+          "{!type=aqp v=$fq_bubble_chart}"
         ]
       });
 

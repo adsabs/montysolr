@@ -1793,7 +1793,21 @@ define([
     $("#test").find(".apply-filter").click();
     expect(networkWidget.pubsub.publish.called).to.be.true;
     expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
-    expect(networkWidget.pubsub.publish.args[0][1].get("fq")[0]).to.eql('(author:("Accomazzi, A" OR ("Accomazzi, A" OR "Bergstrom, C" OR "Bohlen, E" OR "Demleitner, M" OR "Di Milia, G" OR "Eichhorn, G" OR "Elwell, B" OR "Grant, C" OR "Green, D" OR "Henneken, E" OR "Marsden, B" OR "Martimbeau, N" OR "Murray, S" OR "Rosvall, M" OR "Thompson, D" OR "Williams, G")))');
+    expect(networkWidget.pubsub.publish.args[0][1].toJSON()).to.eql({
+      "q": [
+        "star"
+      ],
+      "fq_visualization_author": [
+        "(author:\"Accomazzi, A\" OR (\"Accomazzi, A\" OR \"Bergstrom, C\" OR \"Bohlen, E\" OR \"Demleitner, M\" OR \"Di Milia, G\" OR \"Eichhorn, G\" OR \"Elwell, B\" OR \"Grant, C\" OR \"Green, D\" OR \"Henneken, E\" OR \"Marsden, B\" OR \"Martimbeau, N\" OR \"Murray, S\" OR \"Rosvall, M\" OR \"Thompson, D\" OR \"Williams, G\"))"
+      ],
+      "__visualization_author_fq_visualization_author": [
+        "AND",
+        "author:\"Accomazzi, A\" OR (\"Accomazzi, A\" OR \"Bergstrom, C\" OR \"Bohlen, E\" OR \"Demleitner, M\" OR \"Di Milia, G\" OR \"Eichhorn, G\" OR \"Elwell, B\" OR \"Grant, C\" OR \"Green, D\" OR \"Henneken, E\" OR \"Marsden, B\" OR \"Martimbeau, N\" OR \"Murray, S\" OR \"Rosvall, M\" OR \"Thompson, D\" OR \"Williams, G\")"
+      ],
+      "fq": [
+        "{!type=aqp v=$fq_visualization_author}"
+      ]
+    });
 
   });
 

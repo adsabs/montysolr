@@ -8,6 +8,7 @@ define([
   'hbs!./templates/wordcloud-template',
   'hbs!./templates/selected-list-template',
   'js/components/api_targets',
+  'js/components/api_query_updater',
   'jquery-ui',
   'bootstrap',
   'd3-cloud'
@@ -19,7 +20,8 @@ define([
              BaseWidget,
              WordCloudTemplate,
              SelectedListTemplate,
-             ApiTargets
+             ApiTargets,
+             ApiQueryUpdater
   ) {
 
 
@@ -33,33 +35,28 @@ define([
   var ListModel = Backbone.Model.extend({
 
     initialize : function(){
-      this.on("selected", function(name){this.add(name)})
-      this.on("unselected", function(name){this.remove(name)})
+      this.on("selected", function(name){this.add(name)});
+      this.on("unselected", function(name){this.remove(name)});
     },
 
     add: function(word){
-      this.get("selectedWords").push(word)
+      this.get("selectedWords").push(word);
       this.trigger("userChange:selectedWords", word)
-
     },
 
     remove: function(word){
       var word = word.trim();
       var l = _.without(this.get("selectedWords"), word);
-      this.set("selectedWords", l)
+      this.set("selectedWords", l);
       this.trigger("userChange:selectedWords", word)
     },
 
     reset : function(){
-
       this.set("selectedWords", []);
-
     },
 
     defaults: {
-
       selectedWords: []
-
     }
 
   });
@@ -78,9 +75,7 @@ define([
 
     render : function(){
       this.$el.html(this.template(this.model.toJSON()));
-
       return this;
-
     },
 
     events : {
@@ -89,7 +84,6 @@ define([
     },
 
     removeWord :function(e){
-
       var word = $(e.target).parent().find(".selected-word").text();
       this.model.remove(word)
     },
@@ -318,7 +312,6 @@ define([
     initialize : function(){
       this.on("change:tfidfData", this.buildWCDict);
       this.on("change:currentSliderVal", this.buildWCDict)
-
     },
 
     defaults: {
@@ -426,6 +419,8 @@ define([
       this.on("all", this.onAllInternalEvents);
       this.listenTo(this.listView, "all", this.onAllInternalEvents);
       this.listenTo(this.view, "close-widget", _.bind(this.closeWidget, this));
+      this.widgetName = 'wordcloud';
+      this.queryUpdater = new ApiQueryUpdater(this.widgetName);
     },
 
     activate: function (beehive) {
@@ -504,8 +499,10 @@ define([
         q = q.clone();
         q.unlock();
 
-        newQ =  q.get("q") + " AND (\"" + filterList.join("\" OR \"") + "\")";
-        q.set("q", newQ);
+        var qu = this.queryUpdater;
+        var newQ = filterList.map(function(x) {return qu.quoteIfNecessary(x)}).join(" OR ");
+
+        this._updateFq(q, newQ);
 
         this.pubsub.publish(this.pubsub.START_SEARCH, q);
       }
@@ -513,6 +510,28 @@ define([
 
     closeWidget: function () {
       this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+    },
+
+    _updateFq: function(q, value) {
+
+      var filterName = 'fq_' + this.widgetName;
+
+      // uncomment if we need adding to the existing conditions
+      q.unset(filterName);
+      this.queryUpdater.updateQuery(q, filterName, 'limit', value);
+
+      var fq = '{!type=aqp v=$' + filterName + '}';
+      var fqs = q.get('fq');
+      if (!fqs) {
+        q.set('fq', [fq]);
+      }
+      else {
+        var i = _.indexOf(fqs, fq);
+        if (i == -1) {
+          fqs.push(fq);
+        }
+        q.set('fq', fqs);
+      }
     }
 
   });
