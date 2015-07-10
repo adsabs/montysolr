@@ -46,10 +46,64 @@ define([
         expect($w.find('#filter-visualizer').text().trim()).to.be.equal("");
       });
 
+      it("displays filters visually (simplified by default)", function (done) {
+
+        var widget = new FilterVisualizerWidget();
+        widget.activate(minsub.beehive.getHardenedInstance());
+        var $w = $(widget.render());
+
+        $('#test').append($w);
+
+        widget.processFeedback(minsub.createFeedback({
+          code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
+          numFound: 100,
+          query: minsub.createQuery({
+            "q": [
+              "star"
+            ],
+            "sort": [
+              "date desc"
+            ],
+            "fq_author": [
+              "((author_facet_hier:\"0/Wang, J\") NOT author_facet_hier:\"0/Chen, H\" NOT author_facet_hier:\"0/Zhang, Z\")"
+            ],
+            "fq": [
+              "{!type=aqp cache=false cost=150 v=$fq_author}",
+              "{!type=aqp v=$fq_database}"
+            ],
+            "__author_facet_hier_fq_author": [
+              "NOT",
+              "(author_facet_hier:\"0/Wang, J\")",
+              "author_facet_hier:\"0/Chen, H\"",
+              "author_facet_hier:\"0/Zhang, Z\""
+            ],
+            "fq_database": [
+              "(database:physics AND database:astronomy)"
+            ],
+            "__database_fq_database": [
+              "AND",
+              "database:physics",
+              "database:astronomy"
+            ]
+          })
+        }));
+
+
+        expect($w.find('#filter-visualizer .filter-topic-group').length).to.equal(5);
+        expect($w.find('#filter-visualizer').text().indexOf('Wang, J')).to.be.gt(-1);
+
+        minsub.subscribeOnce(minsub.START_SEARCH, function() {
+            done()}
+        ); // if this fires, query was issued
+
+        // click on the first
+        $w.find('button.filter-operand-remove:first').click();
+
+      });
 
       it("displays filters visually", function (done) {
 
-        var widget = new FilterVisualizerWidget();
+        var widget = new FilterVisualizerWidget({withoutOperators: false});
         widget.activate(minsub.beehive.getHardenedInstance());
         var $w = $(widget.render());
 
@@ -94,7 +148,6 @@ define([
         expect($w.find('#filter-visualizer').text().indexOf('Wang, J')).to.be.gt(-1);
 
         minsub.subscribeOnce(minsub.START_SEARCH, function() {
-          console.log(arguments);
           done()}
         ); // if this fires, query was issued
 
@@ -104,7 +157,7 @@ define([
       });
 
       it("knows how to deal with queries", function() {
-        var widget = new FilterVisualizerWidget();
+        var widget = new FilterVisualizerWidget({withoutOperators: false});
 
         var q, filters, gui_data, mq;
 
@@ -268,7 +321,7 @@ define([
             filter_value: ["OR", "(author_facet_hier:\"0/Wang, J\")", "author_facet_hier:\"0/Chen, H\"", "author_facet_hier:\"0/Zhang, Z\""]
           },
           {
-            category: 'Database',
+            category: 'Collection',
             filter_name: 'fq_database',
             filter_query: "(database:physics AND database:astronomy)",
             filter_key: '__database_fq_database',
@@ -281,71 +334,76 @@ define([
         ]);
         gui_data = widget.prepareGUIData(filters);
         expect(gui_data).to.eql([
-          {elements:[
-            {
-              "type": "category",
-              "display": "Author",
-              "value": "fq_author|category|Author"
-            },
-            {
-              "type": "operand",
-              "display": "Wang, J",
-              "value": "fq_author|operand|(author_facet_hier:\"0/Wang, J\")"
-            },
-            {
-              "type": "operator",
-              "display": "OR",
-              "value": "fq_author|operator|OR"
-            },
-            {
-              "type": "operand",
-              "display": "Chen, H",
-              "value": "fq_author|operand|author_facet_hier:\"0/Chen, H\""
-            },
-            {
-              "type": "operator",
-              "display": "OR",
-              "value": "fq_author|operator|OR"
-            },
-            {
-              "type": "operand",
-              "display": "Zhang, Z",
-              "value": "fq_author|operand|author_facet_hier:\"0/Zhang, Z\""
-            },
-            {
-              "type": "control",
-              "display": "",
-              "value": "fq_author|control|x"
-            }
-          ]},
-          {elements:[
-            {
-              "type": "category",
-              "display": "Database",
-              "value": "fq_database|category|Database"
-            },
-            {
-              "type": "operand",
-              "display": "physics",
-              "value": "fq_database|operand|database:physics"
-            },
-            {
-              "type": "operator",
-              "display": "AND",
-              "value": "fq_database|operator|AND"
-            },
-            {
-              "type": "operand",
-              "display": "astronomy",
-              "value": "fq_database|operand|database:astronomy"
-            },
-            {
-              "type": "control",
-              "display": "",
-              "value": "fq_database|control|x"
-            }
-          ]}
+          {
+            "elements": [
+              {
+                "type": "category",
+                "display": "Author",
+                "value": "fq_author|category|Author"
+              },
+              {
+                "type": "operand",
+                "display": "Wang, J",
+                "value": "fq_author|operand|(author_facet_hier:\"0/Wang, J\")"
+              },
+              {
+                "type": "operator",
+                "display": "OR",
+                "value": "fq_author|operator|OR"
+              },
+              {
+                "type": "operand",
+                "display": "Chen, H",
+                "value": "fq_author|operand|author_facet_hier:\"0/Chen, H\""
+              },
+              {
+                "type": "operator",
+                "display": "OR",
+                "value": "fq_author|operator|OR"
+              },
+              {
+                "type": "operand",
+                "display": "Zhang, Z",
+                "value": "fq_author|operand|author_facet_hier:\"0/Zhang, Z\""
+              },
+              {
+                "type": "control",
+                "display": "",
+                "value": "fq_author|control|x"
+              }
+            ]
+          },
+          {
+            "elements": [
+              {
+                "type": "category",
+                "display": "Collection",
+                "value": "fq_database|category|Collection"
+              },
+              {
+                "type": "operand",
+                "display": "physics",
+                "value": "fq_database|operand|database:physics"
+              },
+              {
+                "type": "operator",
+                "display": "AND",
+                "value": "fq_database|operator|AND"
+              },
+              {
+                "type": "operand",
+                "display": "astronomy",
+                "value": "fq_database|operand|database:astronomy"
+              },
+              {
+                "type": "control",
+                "display": "",
+                "value": "fq_database|control|x"
+              }
+            ]
+          }
         ]);
+
         widget._saveInfo(q, filters);
         mq = widget.createModifiedQuery('fq_database|operand|database:astronomy');
         expect(mq.toJSON()).to.eql({
@@ -377,6 +435,103 @@ define([
           ]
         });
 
+      });
+
+      it("has can build simpler gui version", function() {
+        var widget = new FilterVisualizerWidget({withoutOperators: true});
+        var gui_data = widget.prepareGUIData([
+          {
+            category: 'Author',
+            filter_name: 'fq_author',
+            filter_query: "((author_facet_hier:\"0/Wang, J\") NOT author_facet_hier:\"0/Chen, H\" NOT author_facet_hier:\"0/Zhang, Z\")",
+            filter_key: '__author_facet_hier_fq_author',
+            filter_value: ["NOT", "(author_facet_hier:\"0/Wang, J\")", "author_facet_hier:\"0/Chen, H\"", "author_facet_hier:\"0/Zhang, Z\""]
+          },
+          {
+            category: 'Collection',
+            filter_name: 'fq_database',
+            filter_query: "(database:physics AND database:astronomy)",
+            filter_key: '__database_fq_database',
+            filter_value: [
+              "AND",
+              "database:physics",
+              "database:astronomy"
+            ]
+          }
+        ]);
+
+        expect(gui_data).to.eql([
+          {
+            "elements": [
+              {
+                "type": "category",
+                "display": "Author",
+                "value": "fq_author|category|Author"
+              },
+              {
+                "type": "operand",
+                "display": "Wang, J",
+                "value": "fq_author|operand|(author_facet_hier:\"0/Wang, J\")"
+              }
+            ]
+          },
+          {
+            "elements": [
+              {
+                "type": "category",
+                "display": "Author",
+                "value": "fq_author|category|Author"
+              },
+              {
+                "type": "operand",
+                "display": "-Chen, H",
+                "value": "fq_author|operand|author_facet_hier:\"0/Chen, H\""
+              }
+            ]
+          },
+          {
+            "elements": [
+              {
+                "type": "category",
+                "display": "Author",
+                "value": "fq_author|category|Author"
+              },
+              {
+                "type": "operand",
+                "display": "-Zhang, Z",
+                "value": "fq_author|operand|author_facet_hier:\"0/Zhang, Z\""
+              }
+            ]
+          },
+          {
+            "elements": [
+              {
+                "type": "category",
+                "display": "Collection",
+                "value": "fq_database|category|Collection"
+              },
+              {
+                "type": "operand",
+                "display": "+physics",
+                "value": "fq_database|operand|database:physics"
+              }
+            ]
+          },
+          {
+            "elements": [
+              {
+                "type": "category",
+                "display": "Collection",
+                "value": "fq_database|category|Collection"
+              },
+              {
+                "type": "operand",
+                "display": "+astronomy",
+                "value": "fq_database|operand|database:astronomy"
+              }
+            ]
+          }
+        ]);
       });
 
     });

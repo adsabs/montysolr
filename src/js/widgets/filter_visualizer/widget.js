@@ -77,22 +77,24 @@ define([
         pubsub.subscribe(pubsub.FEEDBACK, this.processFeedback);
       },
 
-      initialize : function(apiQuery){
+      initialize : function(options){
+        options = _.defaults(options, {withoutOperators: true}); // simplified version by default
         this.collection = new KeyValueCollection({});
         this.view = new WidgetView({collection: this.collection});
         this.listenTo(this.view, 'childview:filter-event', this.onFilterEvent);
         this.knownFilters = {
           'fq_author' : 'Author',
-          'fq_database': 'Database',
-          'fq_facets180': 'Refereed',
+          'fq_database': 'Collection',
+          'fq_facets180': 'Status',
           'fq_keyword_facet': 'Keywords',
-          'fq_bibstem_facet': 'Publications',
-          'fq_bibgroup_facet': 'Bibl Groups',
+          'fq_bibstem_facet': 'Publication',
+          'fq_bibgroup_facet': 'BibGroup',
           'fq_data_facet': 'Data',
           'fq_vizier_facet': 'Vizier',
-          'fq_grant': 'Grants'
+          'fq_grant': 'Grant'
         };
         this.currentQuery = null;
+        this.withoutOperators = options.withoutOperators;
       },
 
 
@@ -241,6 +243,10 @@ define([
        *
        **/
       prepareGUIData: function(filters) {
+
+        if (this.withoutOperators)
+          return this._prepareGUIDataWithoutOperators(filters);
+
         var guiData = [];
         _.each(filters, function(filter) {
           var oneFilter = [];
@@ -276,6 +282,37 @@ define([
         return guiData;
       },
 
+      _prepareGUIDataWithoutOperators: function(filters) {
+        var guiData = [];
+        _.each(filters, function(filter) {
+          var oneFilter = [];
+          oneFilter.push({
+            type: 'category',
+            display: filter.category,
+            value: filter.filter_name + '|category|' + filter.category
+          });
+          var i = 0, operator = filter.filter_value[0], indicator = '';
+          if (operator == 'NOT') {
+            indicator = '-';
+          }
+          else if (operator == 'AND') {
+            indicator = '+';
+          }
+          _.each(filter.filter_value.slice(1), function(operand) {
+            var element = _.clone(oneFilter);
+            var ind = i++ == 0 && operator == 'NOT' ? '' : indicator; // if NOT, the first element is without prefix
+            element.push({
+              type: 'operand',
+              display: ind + this.beautifyOperand(filter.filter_name, operand),
+              value: filter.filter_name + '|operand|' + operand
+            });
+
+            guiData.push({elements: element}); // deep nested because of !hbs
+          }, this);
+        }, this);
+        return guiData;
+      },
+
       /**
        * Returns a simplified version of a query - suitable for display to users
        * In general, this will remove the fields and just keep the value (without
@@ -302,6 +339,28 @@ define([
             break;
           case 'fq_database':
             s = s.replace(/database:/g, '');
+            break;
+          case 'fq_facets180':
+            s = s.replace(/property:/g, '');
+            break;
+          case 'fq_keyword_facet':
+            s = s.replace(/keyword_facet:/g, '');
+            s = s.replace(/\\/g, '');
+            break;
+          case 'fq_bibstem_facet':
+            s = s.replace(/bibstem_facet:/g, '');
+            break;
+          case 'fq_bibgroup_facet':
+            s = s.replace(/bibgroup_facet:/g, '');
+            break;
+          case 'fq_data_facet':
+            s = s.replace(/data_facet:/g, '');
+            break;
+          case 'fq_vizier_facet':
+            s = s.replace(/vizier_facet:/g, '');
+            break;
+          case 'fq_data_facet':
+            s = s.replace(/data_facet:/g, '');
             break;
         }
 
@@ -402,7 +461,6 @@ define([
        * that back views
        */
       onFilterEvent: function(node, value) {
-        console.log('onFilterEvent', arguments );
         var newQuery = this.createModifiedQuery(value);
         var ps = this.getBeeHive().getService('PubSub');
         if (ps)
