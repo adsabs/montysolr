@@ -98,6 +98,33 @@ define([
           ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
       },
 
+      customizeQuery: function (apiQuery) {
+        var q = apiQuery.clone();
+        q.unlock();
+
+        if (this.defaultQueryArguments) {
+          q = this.composeQuery(this.defaultQueryArguments, q);
+        }
+
+        // remove some stupid cases for highlight query
+        var hq = q.get('q')[0];
+        hq = hq.replace(/\b\w+\:\*/g, '');
+        hq = hq.replace(/\*:\*/g, '');
+        hq = hq.trim();
+
+        if (hq == "") {
+          _.each(q.keys(), function(f) {
+            if (f.indexOf('hl.') == 0)
+              q.unset(f);
+          })
+        }
+        else {
+          q.set('hl.q', hq);
+        }
+
+        return q;
+      },
+
       checkDetails: function(){
         var hExists = false;
         for (var i=0; i<this.collection.models.length; i++) {

@@ -71,14 +71,17 @@ define([
         widget.foox = 1;
         expect(widget.collection.length).to.eql(0);
         expect(widget.getCurrentQuery().toJSON()).to.eql({});
-        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star isbn:* *:*"}));
         setTimeout(function() {
           expect(widget.model.get('currentQuery').toJSON()).to.eql({
               "q": [
-                "star"
+                "star isbn:* *:*"
               ],
               "hl": [
                 "true"
+              ],
+              "hl.q": [
+                "star"
               ],
               "hl.fl": [
                 "title,abstract,body,ack"
