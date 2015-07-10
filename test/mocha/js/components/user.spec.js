@@ -107,7 +107,6 @@ define([
        "setUser",
        "getOpenURLConfig",
        "setMyADSData",
-       "getMyADSData",
        "__facade__",
        "mixIn"
      ]);
@@ -180,9 +179,6 @@ define([
 
       expect(u.getUserName()).to.eql("foobly@gmail.com");
 
-
-      //convenience method
-      expect(u.getMyADSData("openurl")).to.eql({openurl : "foo.com"});
 
       User.prototype.broadcastChange.restore();
 

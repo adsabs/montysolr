@@ -5,13 +5,18 @@
     {{#each fullTextSources}}
     <li>
         <a href="{{link}}" target = "_blank">
-        {{title}}
-            {{#if openAccess}}
-                <i class="s-open-access-image" data-toggle="tooltip" data-placement="top" title="This is an open access item."></i>
-            {{/if}}
             {{#if openUrl}}
-                <i class="fa fa-university" data-toggle="tooltip" data-placement="top" title="This resource is available through your institution."></i>
+             Find it at your institution
+            <i class="fa fa-university" data-toggle="tooltip" data-placement="top" title="This resource is available through your institution."></i>
+
+            {{else}}
+
+                {{title}}
+                    {{#if openAccess}}
+                        <i class="s-open-access-image" data-toggle="tooltip" data-placement="top" title="This is an open access item."></i>
+                    {{/if}}
             {{/if}}
+
         </a>
     </li>
     {{/each}}

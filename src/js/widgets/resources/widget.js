@@ -91,7 +91,7 @@ define([
 
       var data = apiResponse.get("response.docs[0]");
       //get link server info if it exists
-      data.link_server = this.beehive.getObject("User").getMyADSData("link_server");
+      data.link_server = this.beehive.getObject("User").getUserData("USER_DATA").link_server;
       //link mixin
       data = this.parseResourcesData(data);
 

@@ -253,21 +253,6 @@ define([
       return this.postData("USER_DATA", data);
     },
 
-    /*
-    * a convenience method for accessing the collection of user data
-    * and only getting the myads data back, either all of it or specific values
-    * */
-
-    getMyADSData : function(keys){
-
-      keys = keys && !_.isArray(keys) ? [keys] : keys;
-      if (keys){
-        return _.pick(this.getUserData("USER_DATA"), keys);
-      }
-      else {
-        return this.getUserData("USER_DATA");
-      }
-    },
 
     /*
     * this function queries the myads open url configuration endpoint
@@ -421,7 +406,6 @@ define([
 
       getOpenURLConfig : "get list of openurl endpoints",
       setMyADSData : "",
-      getMyADSData : ""
     }
 
   });

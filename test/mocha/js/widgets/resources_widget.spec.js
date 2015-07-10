@@ -127,8 +127,8 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
       widget.activate(minsub.beehive.getHardenedInstance());
 
 
-      var getMyADSDataSpy = sinon.spy();
-      widget.beehive.getObject = function(){return {getMyADSData : getMyADSDataSpy }};
+      var getUserDataSpy = sinon.spy(function(){return {link_server : "fake"}});
+      widget.beehive.getObject = function(){return {getUserData : getUserDataSpy }};
 
       $w = widget.render().$el;
 
@@ -138,7 +138,7 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
       widget.loadBibcodeData("fakeBibcode");
 
       //gets link server info
-      expect(getMyADSDataSpy.callCount).to.eql(1);
+      expect(getUserDataSpy.callCount).to.eql(1);
 
       expect($w.find("ul:first").find("a").attr("href")).to.eql(
         'http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1984NASCP2349..191B&link_type=SIMBAD'
@@ -166,7 +166,7 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
 
     $("#test").append($w);
 
-      expect($("#test").find(".resources-widget a").html().trim()).to.eql('Publisher Article\n            \n            \n                <i class="fa fa-university" data-toggle="tooltip" data-placement="top" title="" data-original-title="This resource is available through your institution."></i>');
+      expect($("#test").find(".resources-widget a").html().trim()).to.eql('Find it at your institution\n            <i class="fa fa-university" data-toggle="tooltip" data-placement="top" title="" data-original-title="This resource is available through your institution."></i>' );
 
       $("#test").empty();
 
