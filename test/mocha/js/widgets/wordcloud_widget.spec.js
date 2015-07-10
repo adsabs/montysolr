@@ -1687,7 +1687,18 @@ define([
 
         //clicking submit button
         $(".apply-vis-facet").click();
-        expect(pubsubStub.args[0][1].get("q")).to.eql(["undefined AND (\"fakeA\" OR \"fakeB\")"])
+        expect(pubsubStub.args[0][1].toJSON()).to.eql({
+          "fq_wordcloud": [
+            "(fakeA OR fakeB)"
+          ],
+          "__wordcloud_fq_wordcloud": [
+            "AND",
+            "fakeA OR fakeB"
+          ],
+          "fq": [
+            "{!type=aqp v=$fq_wordcloud}"
+          ]
+        });
       })
     });
 

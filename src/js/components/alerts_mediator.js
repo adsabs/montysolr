@@ -44,6 +44,7 @@ define([
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.ALERT, _.bind(this.onAlert, this));
         pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.onStartSearch, this));
+        this.pubSubKey = pubsub.getPubSubKey();
 
         var widget = this.getWidget();
         if (!widget) {

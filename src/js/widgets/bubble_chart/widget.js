@@ -958,7 +958,8 @@ define([
       this.view = new BubbleView({model: this.model, testing: options.testing});
       this.listenTo(this.view, "filterBibs", this.onFilterBibs);
       this.listenTo(this.view, "destroy", this.broadcastClose);
-
+      this.widgetName = 'bubble_chart';
+      this.queryUpdater = new ApiQueryUpdater(this.widgetName);
     },
 
     activate: function (beehive) {
@@ -990,7 +991,6 @@ define([
 
 
     processResponse: function (apiResponse) {
-
       this.model.reset();
       this.view.reset();
       this.model.set("solrData", apiResponse.get("response.docs"));
@@ -998,23 +998,42 @@ define([
     },
 
     onFilterBibs: function(){
-
-        var updater = new ApiQueryUpdater("fq"),
-        bibs = this.model.get("selectedBibs"),
+      var bibs = this.model.get("selectedBibs"),
         fqString = "",
         newQuery = this.getCurrentQuery().clone();
 
-        if (!bibs.length){
-          return
-        }
-        _.each(bibs, function(b){
-          fqString+= (" OR " + updater.quote(b));
-        });
+      if (!bibs.length){
+        return
+      }
 
-        fqString = 'bibcode:(' + fqString.slice(3) +')';
-        newQuery.unlock();
-        updater.updateQuery(newQuery, "fq", "limit", fqString);
-        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+      var qu = this.queryUpdater;
+      var newQ = 'bibcode:(' + bibs.map(function(x) {return qu.quoteIfNecessary(x)}).join(" OR ") + ')';
+
+      newQuery.unlock();
+      this._updateFq(newQuery, newQ);
+      this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+    },
+
+    _updateFq: function(q, value) {
+
+      var filterName = 'fq_' + this.widgetName;
+
+      // uncomment if we need adding to the existing conditions
+      q.unset(filterName);
+      this.queryUpdater.updateQuery(q, filterName, 'limit', value);
+
+      var fq = '{!type=aqp v=$' + filterName + '}';
+      var fqs = q.get('fq');
+      if (!fqs) {
+        q.set('fq', [fq]);
+      }
+      else {
+        var i = _.indexOf(fqs, fq);
+        if (i == -1) {
+          fqs.push(fq);
+        }
+        q.set('fq', fqs);
+      }
     },
 
 

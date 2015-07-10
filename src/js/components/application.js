@@ -449,7 +449,18 @@ define([
       }, this);
     },
 
+    /**
+     * Given the pubsub key, it finds the name of the widget
+     * (provided the widget is registered with the application)
+     * Returns undefined for other components, such as controllers
+     * objects etc (it searches only plugins and widgets)
+     *
+     * @param psk
+     * @returns {*}
+     */
     getPluginOrWidgetName: function(psk) {
+      if (!_.isString(psk))
+        throw Error('The psk argument must be a string');
       var k;
       if (this.__barbarianRegistry[psk]) {
         k = this.__barbarianRegistry[psk];

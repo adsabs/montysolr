@@ -502,8 +502,8 @@ module.exports = function(grunt) {
             "widgets/authentication/widget.js": 68,
             "widgets/user_settings/widget.js": 75,
             "widgets/library_individual/views/view_library.js": 67,
-            "components/library_controller.js" : 66
-
+            "components/library_controller.js" : 66,
+            "widgets/wordcloud/widget.js": 79
           }
         }
       },

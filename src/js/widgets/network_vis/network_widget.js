@@ -209,7 +209,7 @@ define([
                 skeleton[y] = 0;
               });
 
-              allPapers = _.extend(skeleton, allPapers)
+              var allPapers = _.extend(skeleton, allPapers)
 
               allPapers = _.map(allPapers, function (v, k) {
                 return {year: parseInt(k), amount: v}
@@ -268,7 +268,7 @@ define([
           .orient("bottom")
           //specify explicitly, otherwise can get repeats for some weird reason
           .tickFormat(d3.format("0f"))
-          .ticks(5)
+          .ticks(5);
 
           if (allX.length <= 10){
             xAxis.tickValues(allX)
@@ -610,7 +610,7 @@ define([
         this.$(".network-metadata").html(metadataTemplate(data));
       }
 
-    })
+    });
 
     var ContainerModel = Backbone.Model.extend({
 
@@ -1208,6 +1208,8 @@ define([
         this.listenTo(this.view, "filter:initiated", this.broadcastFilteredQuery);
         this.listenTo(this.view, "close", this.broadcastClose);
 
+        this.widgetName = "visualization_" + options.networkType;
+        this.queryUpdater = new ApiQueryUpdater(this.widgetName);
       },
 
       //when a user requests a different number of documents
@@ -1329,13 +1331,13 @@ define([
           finalFQString, authorNames, groupAuthorNames, connector,
           names;
 
-        var updater = new ApiQueryUpdater("fq");
 
         // get all author names
+        var self = this;
         authorNames = filterCollection.chain().filter(function (n) {
           return !isInt(n.get("name"));
         }).map(function (n) {
-          return updater.quote(n.get("name"))
+          return self.queryUpdater.quote(n.get("name"))
         }).value();
 
         groupAuthorNames = filterCollection.chain().filter(function (n) {
@@ -1347,7 +1349,7 @@ define([
             return n.name == number
           })[0];
           return  _.map(group.children, function (g) {
-            return updater.quote(g.name);
+            return self.queryUpdater.quote(g.name);
           })
         }).map(function (authorList) {
           return "(" + _.sortBy(authorList, function(a){return a}).join(" OR ") + ")"
@@ -1360,11 +1362,11 @@ define([
           return
         }
 
-        names = "author:(" + finalFQString + ")";
+        names = "author:" + finalFQString;
         var newQuery = this.getOriginalQuery().clone();
         newQuery.unlock();
 
-        updater.updateQuery(newQuery, "fq", "limit", names);
+        this._updateFq(newQuery, names);
         this.resetWidget();
         this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
       },
@@ -1372,6 +1374,28 @@ define([
       broadcastClose: function () {
         this.resetWidget();
         this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+      },
+
+      _updateFq: function(q, value) {
+
+        var filterName = 'fq_' + this.widgetName;
+
+        // uncomment if we need adding to the existing conditions
+        q.unset(filterName);
+        this.queryUpdater.updateQuery(q, filterName, 'limit', value);
+
+        var fq = '{!type=aqp v=$' + filterName + '}';
+        var fqs = q.get('fq');
+        if (!fqs) {
+          q.set('fq', [fq]);
+        }
+        else {
+          var i = _.indexOf(fqs, fq);
+          if (i == -1) {
+            fqs.push(fq);
+          }
+          q.set('fq', fqs);
+        }
       },
 
       testing : {

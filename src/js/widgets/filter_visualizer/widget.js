@@ -78,7 +78,11 @@ define([
       },
 
       initialize : function(options){
-        options = _.defaults(options, {withoutOperators: true}); // simplified version by default
+        options = _.defaults(options, {
+          withoutOperators: true,
+          maxNumberOfTokens: 5,
+          maxQueryLen: 100
+        }); // simplified version by default
         this.collection = new KeyValueCollection({});
         this.view = new WidgetView({collection: this.collection});
         this.listenTo(this.view, 'childview:filter-event', this.onFilterEvent);
@@ -91,10 +95,17 @@ define([
           'fq_bibgroup_facet': 'BibGroup',
           'fq_data_facet': 'Data',
           'fq_vizier_facet': 'Vizier',
-          'fq_grant': 'Grant'
+          'fq_grant': 'Grant',
+          'fq_visualization_author': 'Author Network',
+          'fq_visualization_paper': 'Paper Network',
+          'fq_wordcloud': 'Concept Cloud',
+          'fq_bubble_chart': 'Results Graph'
+
         };
         this.currentQuery = null;
         this.withoutOperators = options.withoutOperators;
+        this.maxNumberOfTokens = options.maxNumberOfTokens;
+        this.maxQueryLen = options.maxQueryLen;
       },
 
 
@@ -255,6 +266,18 @@ define([
             display: filter.category,
             value: filter.filter_name + '|category|' + filter.category
           });
+
+          // if there are too many elements, just show one value 'x custom values'
+          if (filter.filter_value.length-1 > this.maxNumberOfTokens || filter.filter_value.join(' ').length > this.maxQueryLen) {
+            oneFilter.push({
+              type: 'control',
+              display: (filter.filter_value.length - 1) + ' custom values',
+              value: filter.filter_name + '|control|x'
+            });
+            guiData.push({elements: oneFilter});
+            return;
+          }
+
           var i = 0, operator = filter.filter_value[0];
           _.each(filter.filter_value.slice(1), function(operand) {
             if (++i > 1) {
@@ -291,6 +314,18 @@ define([
             display: filter.category,
             value: filter.filter_name + '|category|' + filter.category
           });
+
+          // if there are too many elements, just show one value 'x custom values'
+          if (filter.filter_value.length-1 > this.maxNumberOfTokens || filter.filter_value.join(' ').length > this.maxQueryLen) {
+            oneFilter.push({
+              type: 'operand',
+              display: 'custom query',
+              value: filter.filter_name + '|control|x'
+            });
+            guiData.push({elements: oneFilter});
+            return;
+          }
+
           var i = 0, operator = filter.filter_value[0], indicator = '';
           if (operator == 'NOT') {
             indicator = '-';
