@@ -366,6 +366,8 @@ define([
 
         // replace quotes, if any
         s = s.replace(/\\?"/g, '');
+        // *:* to all
+        s = s.replace(/\*:\*/, 'any');
 
         return s;
       },
