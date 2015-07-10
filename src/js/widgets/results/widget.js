@@ -53,7 +53,10 @@ define([
 
       defaultQueryArguments: {
         hl     : "true",
-        "hl.fl": "title,abstract,body",
+        "hl.fl": "title,abstract,body,ack",
+        'hl.maxAnalyzedChars': '150000',
+        'hl.requireFieldMatch': 'true',
+        'hl.usePhraseHighlighter': 'true',
         fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi',
         rows : 25,
         start : 0
