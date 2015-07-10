@@ -263,8 +263,6 @@ define([
 
       minsub.publish(minsub.NAVIGATE, "foo");
 
-      debugger
-
       expect(u.subViewModels.email.toJSON()).to.eql({});
 
 

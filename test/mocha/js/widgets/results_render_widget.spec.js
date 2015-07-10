@@ -73,8 +73,35 @@ define([
         expect(widget.getCurrentQuery().toJSON()).to.eql({});
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         setTimeout(function() {
-          expect(widget.model.get('currentQuery').url()).to.eql(
-            'fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody&q=star&rows=25&start=0'          );
+          expect(widget.model.get('currentQuery').toJSON()).to.eql({
+              "q": [
+                "star"
+              ],
+              "hl": [
+                "true"
+              ],
+              "hl.fl": [
+                "title,abstract,body,ack"
+              ],
+              "hl.maxAnalyzedChars": [
+                "150000"
+              ],
+              "hl.requireFieldMatch": [
+                "true"
+              ],
+              "hl.usePhraseHighlighter": [
+                "true"
+              ],
+              "fl": [
+                "title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi"
+              ],
+              "rows": [
+                25
+              ],
+              "start": [
+                0
+              ]
+            });
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);

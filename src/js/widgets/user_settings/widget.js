@@ -256,7 +256,6 @@ define([
     },
 
     setSubView : function(subView) {
-      debugger
       var View = this.getCurrentViewConstructor(subView);
       if (View){
         var model = this.getCurrentModel(subView);

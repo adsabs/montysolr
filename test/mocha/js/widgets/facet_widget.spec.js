@@ -250,7 +250,6 @@ define([
         });
         sinon.spy(widget, "handleTreeExpansion");
         sinon.spy(widget, "processFacetResponse");
-        debugger
 
         widget.activate(minsub.beehive.getHardenedInstance());
         minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
