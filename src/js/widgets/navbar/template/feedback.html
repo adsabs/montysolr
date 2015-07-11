@@ -1,0 +1,58 @@
+<div class="modal fade" id="feedback-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Feedback Form</h4>
+            </div>
+            <div class="modal-body">
+                <!--adshelp.cfa.harvard.edu-->
+                <form action="//formspree.io/aholachek@gmail.com" method="POST" class="feedback-form">
+
+                    <input type="hidden" name="_subject" value="Bumblebee Feedback" />
+                    <input type="text" name="_gotcha" style="display:none" />
+
+                    <div class="form-group half-width">
+                        <label> Name
+                            <input class="form-control" type="text" name="name">
+                        </label>
+                    </div>
+                    <div class="form-group half-width">
+                        <label> Email
+                            <input class="form-control" type="email" name="_replyto">
+                        </label>
+                    </div>
+                    <div class="form-group">
+
+                        <label>
+                            <input type="radio" name="feedback-type" value="bug" checked="checked"/>
+                            <i class="fa fa-bug"></i> Bug Report
+                        </label>
+                        &nbsp;&nbsp;
+                        <label>
+                            <input type="radio" name="feedback-type" value="comment"/>
+                            <i class="fa fa-comment"></i> Comment
+                        </label>
+
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Feedback <br/>
+                        <textarea rows="8" cols="50" name="comments"></textarea>
+                        </label>
+
+                    </div>
+
+                    <button class="btn btn-success" type="submit" value="Send">Submit form</button>
+                </form>
+
+                <br/>
+                <p>You can also reach us at <b>adshelp [at] cfa.harvard.edu</b></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close without submitting</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

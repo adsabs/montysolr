@@ -228,3 +228,43 @@
   color: white;
   font-weight: 300;
 }
+
+button[data-target="#feedback-modal"]{
+  box-shadow: none;
+  margin-top: 10px;
+  margin-right: 20px;
+
+  &:hover {
+    box-shadow: none;
+  }
+
+}
+
+#feedback-modal {
+
+  .modal-body {
+    padding: 20px 20px 0 20px;
+  }
+
+  input,textarea {
+    //why is this necessary??
+    font-weight: normal;
+  }
+
+  label:last-of-type{
+    width:100%;
+    textarea {
+    width:90%;
+    }
+  }
+
+  .form-group.half-width{
+    width: 49%;
+    display:inline-block;
+    label {
+      width: 84%;
+    }
+  }
+
+
+}
