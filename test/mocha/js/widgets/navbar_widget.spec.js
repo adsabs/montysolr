@@ -18,6 +18,7 @@ define([
   describe("navigation bar widget", function(){
 
     afterEach(function(){
+      $("#feedback-modal").remove();
       $("#test").empty();
     });
 
@@ -256,6 +257,62 @@ define([
     expect(orcidSignOutSpy.callCount).to.eql(1);
 
   });
+
+   it("should have a feedback form modal appended to body only 1x, and triggered from navbar", function(){
+     //not sure why i have to call this when we have afterEach
+     $("#feedback-modal").remove();
+
+     var n = new NavBarWidget();
+     n.view.render();
+
+     expect($("form.feedback-form").length).to.eql(1);
+     $("#test").append(n.view.render().el);
+     expect($("form.feedback-form").length).to.eql(1);
+
+     expect($("#test button[data-target=#feedback-modal]").length).to.eql(1);
+
+
+   });
+
+   it("feedback form should make an ajax request upon submit, display status, and clear itself on close", function(done){
+     $("#feedback-modal").remove();
+     var n = new NavBarWidget();
+     $("#test").append(n.view.render().el);
+
+     $("#feedback-modal").modal("show");
+
+     var server = sinon.fakeServer.create();
+
+     server.respondWith( "POST", "http://formspree.io/adshelp@cfa.harvard.edu",
+       [200, { "Content-Type": "application/json" }, '{}']);
+
+     $("form.feedback-form").find("textarea").val("test comment");
+     $("form.feedback-form").submit();
+
+     expect(server.requests[0].requestBody).to.eql("_subject=Bumblebee+Feedback&_gotcha=&name=&_replyto=&feedback-type=bug&comments=test+comment");
+
+     expect(server.requests[0].url).to.eql("http://formspree.io/adshelp@cfa.harvard.edu");
+
+     server.respond();
+
+     setTimeout(function(){
+
+       //form should be emptied
+       expect($("form.feedback-form textarea").val()).to.eql('');
+
+       //modal should be close
+       expect(  $("#feedback-modal").is(':visible')).to.be.false;
+
+       server.restore();
+
+       done();
+
+
+     }, 1900);
+
+
+
+   });
 
 });
 
