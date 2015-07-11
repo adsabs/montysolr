@@ -138,7 +138,7 @@ define([
 
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START] = function(feedback) {
       var apiRequest = feedback.request;
-      var xhr = feedback.error.jqXHR;
+      var xhr = feedback.error.jqXHR || {}; // when the response comes from cache, it's empty
 
       var app = this.getApp();
       var alerts = this.getAlerter();
@@ -196,10 +196,13 @@ define([
             var msg = '';
             if (xhr.responseJSON && xhr.responseJSON.error && xhr.responseJSON.error.msg) {
               msg = xhr.responseJSON.error.msg;
-              if (msg.indexOf('INVALID_SYNTAX') > -1) {
+              if (msg.indexOf('SyntaxError') > -1) {
                 // what will remain: Syntax Error, cannot parse doi:a* keyword_schema:arXiv:
-                msg = msg.replace('org.apache.solr.search.SyntaxError: INVALID_SYNTAX_CANNOT_PARSE:', '');
+                msg = msg.replace('org.apache.solr.search.SyntaxError:', '');
+                msg = msg.replace('org.apache.solr.common.SolrException:', '');
+                msg = msg.replace('INVALID_SYNTAX_CANNOT_PARSE:', '');
                 msg = msg.replace(': The parser reported a syntax error, antlrqueryparser hates errors!', '');
+                msg = msg.trim();
                 msg = msg.replace('Syntax Error, cannot parse', 'Syntax Error, cannot parse<b>') + '</b>';
               }
             }
@@ -295,6 +298,7 @@ define([
         if (widgets && widgets.length == 0) {
           return; // we can ignore it
         }
+        this.changeWidgetsState(widgets, {state: WidgetStates.RESET});
         this.changeWidgetsState(widgets, {state: WidgetStates.ERRORED});
 
         this._tmp.api_failures = this._tmp.api_failures || {};
