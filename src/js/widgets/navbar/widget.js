@@ -109,8 +109,6 @@ define([
 
     onRender : function(){
 
-      var that = this;
-
       if (!this.formAttached){
         //attach modal
         $("body").append(FeedbackTemplate());
@@ -129,7 +127,7 @@ define([
           var $form = $(e.target);
           e.preventDefault();
           $.ajax({
-            url: "//formspree.io/aholachek@gmail.com",
+            url: "//formspree.io/adshelp@cfa.harvard.edu",
             method: "POST",
             data: $form.serialize(),
             dataType: 'json',
@@ -137,9 +135,9 @@ define([
             beforeSend: function () {
               $form.find("button[type=submit]")
                 .html('<i class="icon-loading"></i> Sending form...');
-            },
-
-            success: function (data) {
+              }
+            })
+            .done(function (data) {
               $form.find("button[type=submit]")
                 .html('<i class="icon-success"></i> Message sent!');
 
@@ -147,19 +145,17 @@ define([
                 $modal.modal("hide");
               }, 500);
 
-            },
-            error: function (err) {
+            })
+            .fail( function (err) {
               $form.find("button[type=submit]")
               .addClass("btn-danger")
-              .html('<i class="icon-success"></i> There was an error!')
+              .html('<i class="icon-danger"></i> There was an error!')
 
-            }
+            })
           });
-        });
 
           this.formAttached = true;
       }
-
     }
 
   });
