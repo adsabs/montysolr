@@ -8,21 +8,6 @@
             <button class="btn btn-default btn-xs page-bulk-add"> <i class="fa fa-plus"></i> select all on page</button>
         </div>
     </div>
-    {{#if fq}}
-    <div class="active-filters">
-        <b>Active Filters:</b>
-        {{#unless showFilter}}
-        <button class="btn btn-xs btn-default show-filter">show</button>
-        {{else}}
-        <div class="s-filter-div">
-            {{#each fq}}
-            {{this}}
-            {{/each}}
-        </div>
-        <button class="btn btn-xs btn-default hide-filter">hide</button>
-        {{/unless}}
-    </div>
-    {{/if}}
 </div>
 
 <!--{{#if loggedIn}}-->

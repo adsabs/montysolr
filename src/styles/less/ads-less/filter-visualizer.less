@@ -16,9 +16,6 @@
 
 .filter-operand i {
   font-size:120%;
-  position:relative;
-  top: -2px;
-  left: -2px;
 }
 
 .filter-control i {
@@ -29,24 +26,51 @@
   top:-1px;
 }
 
-.filter-control-remove {
-  position: relative;
-  top: -28px;
-  right: -18px;
-}
 
 .filter-topic-group {
   display: inline-block;
   border-radius: @border-radius-large;
-  border: 1px solid @gray-lighter;
-  margin:0 4px;
-  padding:0 4px;
+  border: 1px solid darken(@gray-lighter, 5%);
+  margin:0 8px;
+  padding: 4px 15px 4px 5px;
   font-size:14px;
-  box-shadow: 2px 2px 2px rgb(236, 236, 236);
+  .lh-transition(box-shadow, 1s);
+  position:relative;
+
+  &:hover {
+    .lh-box-shadow(2px 2px 2px @gray-lighter);
+
+    button.filter-operand-remove {
+      .lh-box-shadow(2px 2px 2px @gray-lighter);
+      background-color: @gray-light;
+
+    }
+  }
+
+
 
   h5 {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
   }
+
+}
+
+button.filter-operand-remove {
+  position: absolute;
+  top: -10px;
+  right: -10.5%;
+  border-radius: 100%;
+  color: white;
+  background-color: lighten(@gray-light, 8%);
+  border: 1px solid @gray-light;
+  float:right;
+
+
+  &:hover{
+    color: white;
+  }
+
+
 
 }
