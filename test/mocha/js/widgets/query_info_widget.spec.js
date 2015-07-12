@@ -17,35 +17,6 @@ define([
     });
 
 
-    it("should show key information about the query", function(){
-
-      var w = new QueryInfo();
-
-      var minsub = new (MinSub.extend({
-      request: function(apiRequest) {
-        return {some: 'foo'}
-        }
-      }))({verbose: false});
-
-      w.activate(minsub.beehive.getHardenedInstance());
-
-      minsub.publish(minsub.FEEDBACK, minsub.createFeedback({
-        code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
-        query: new minsub.T.QUERY({q: "foo", "fq" : "a filter"}),
-        numFound: 841359
-      }));
-
-
-      $("#test").append(w.render().el);
-
-      expect($("#test").find(".active-filters").text().trim()).to.eql('Active Filters:\n        \n        show' );
-
-      $(".show-filter").click();
-
-      expect($("#test").find(".active-filters").text().trim()).to.eql('Active Filters:\n        \n        \n            \n            a filter\n            \n        \n        hide');
-
-
-    });
 
     it("should listen to updates from app_storage about selected papers, and allow user to clear app storage", function(){
 

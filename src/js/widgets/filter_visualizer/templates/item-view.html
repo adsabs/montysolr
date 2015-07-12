@@ -5,16 +5,11 @@
 
          <h5>{{this.display}}</h5>
 
-    {{else }}
+    {{else}}
 
-        {{#compare this.type "control"}}
-            <span class="filter-{{this.type}}"><button class="btn btn-xs btn-link filter-{{this.type}}-remove" value="{{this.value}}" title="remove all filters in this category"><i class="fa fa-times-circle"></i></button></span>
-
-        {{else}}
-
-            <span class="filter-{{this.type}}">{{this.display}}<button class="btn btn-xs btn-link filter-{{this.type}}-remove" value="{{this.value}}"><i class="fa fa-times-circle"></i></button></span>
+            <span class="filter-{{this.type}}">{{this.display}}</span>
+            <button class="btn btn-xs filter-{{this.type}}-remove" value="{{this.value}}" title="remove this filter"><i class="fa fa-remove"></i></button>
 
         {{/compare}}
 
-    {{/compare}}
 {{/each}}
