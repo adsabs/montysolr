@@ -60,6 +60,7 @@ define(['underscore',
        * Responds to PubSubEvents.NAVIGATE signal
        */
       navigate: function(ev, arg1, arg2) {
+
         if (!this.router || ! (this.router instanceof Backbone.Router)) {
           throw new Error('Navigator must be given \'router\' instance');
         }
@@ -84,11 +85,14 @@ define(['underscore',
           this.handleTransitionError(transition, e, arguments);
         }
 
+        //router can communicate directly with navigator to replace url
+        var replace = arg1 && arg1.replace ? true : false;
+
         if (transition.route) {
           // update the History object
           this.router.navigate(
             transition.route,
-            {trigger: transition.trigger || false, replace: transition.replace || false}
+            {trigger: transition.trigger || false, replace: replace || transition.replace || false}
           );
         }
       },

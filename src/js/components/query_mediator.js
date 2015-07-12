@@ -98,7 +98,7 @@ define(['underscore',
         if ((JSON.stringify(apiQuery.toJSON()) == JSON.stringify(this.mostRecentQuery.toJSON())) &&
           (this.app.getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget")){
           //simply navigate to search results page, widgets are already stocked with data
-           this.app.getService('Navigator').navigate('results-page');
+           this.app.getService('Navigator').navigate('results-page', {replace : true});
            return
         }
 
