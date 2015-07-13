@@ -19,11 +19,14 @@
   border-bottom: 1px solid @gray-lighter;
   padding-top: 35px;
   padding-bottom: 25px;
+  text-align: center;
 
 
 
 .ads-logo {
-  width: 41%;
+  width: 40%;
+  max-width: 500px;
+  min-width: 300px;
 
   @media(max-width: @screen-xs-max){
     width:80%;
@@ -33,10 +36,12 @@
 }
 
   .bumblebee {
-    width:41%;
+    width:13%;
+    position: absolute;  right: 3%;
+    top: -14px;
+    max-width: 185px;
     @media(max-width: @screen-xs-max){
-      width:80%;
-      text-align: center;
+      display:none;
     }
   }
 
