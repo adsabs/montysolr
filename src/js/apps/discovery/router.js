@@ -43,6 +43,21 @@ define([
         }
       },
 
+      /*
+      * if you don't want the navigator to duplicate the route in history,
+      * use this function instead of pubsub.publish(pubsub.NAVIGATE ...)
+      * */
+
+      routerNavigate: function (route, options) {
+
+        var options = options || {};
+        //this tells navigator not to create 2 history entries, which causes
+        //problems with the back button
+        _.extend(options, {replace : true});
+       this.pubsub.publish(this.pubsub.NAVIGATE, route, options);
+
+      },
+
       routes: {
         "": "index",
         'index/(:query)': 'index',
@@ -63,7 +78,7 @@ define([
       },
 
       index: function (query) {
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+        this.routerNavigate('index-page');
       },
 
       search: function (query) {
@@ -110,7 +125,7 @@ define([
               navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
               href =  "#abs/" + bibcode + "/" + subPage;
             }
-            self.pubsub.publish(self.pubsub.NAVIGATE, navigateString, {href : href});
+            self.routerNavigate(navigateString, {href : href});
           },
           fail: function() {
             console.log('Cannot identify page to load, bibcode: ' + bibcode);
@@ -214,17 +229,17 @@ define([
         if (subView && !_.contains(["login", "register", "reset-password-1", "reset-password-2"], subView)){
           throw new Error("that isn't a subview that the authentication page knows about")
         }
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: subView});
+        this.routerNavigate('authentication-page', {subView: subView});
       },
 
       settingsPage : function(subView){
         //possible subViews: "token", "password", "email", "preferences"
         if (_.contains(["token", "password", "email", "delete"], subView)){
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'UserSettings', {subView: subView});
+          this.routerNavigate('UserSettings', {subView: subView});
         }
         else if ("preferences" == subView || !subView){
           //show preferences if no subview provided
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'UserPreferences');
+          this.routerNavigate('UserPreferences');
         }
         else {
           throw new Error("did not recognize user page");
@@ -238,17 +253,17 @@ define([
           var subView = subView || "library";
           if (_.contains(["library", "admin"], subView )){
 
-            this.pubsub.publish(this.pubsub.NAVIGATE, 'IndividualLibraryWidget', {sub : subView, id : id});
+            this.routerNavigate('IndividualLibraryWidget', {sub : subView, id : id});
           }
           else if(_.contains(["export", "metrics", "visualization"], subView)) {
 
             subView = "library-" + subView;
 
             if (subView == "library-export"){
-              this.pubsub.publish(this.pubsub.NAVIGATE, subView, {sub : subData || "bibtex", id : id});
+              this.routerNavigate(subView, {sub : subData || "bibtex", id : id});
             }
             else if (subView == "library-metrics"){
-              this.pubsub.publish(this.pubsub.NAVIGATE, subView, { id : id});
+              this.routerNavigate(subView, { id : id});
 
             }
             else if (subView == "library-visualization"){
@@ -262,12 +277,12 @@ define([
         }
         else {
           //main libraries view
-          this.pubsub.publish(this.pubsub.NAVIGATE, "AllLibrariesWidget", "libraries");
+          this.routerNavigate("AllLibrariesWidget", "libraries");
         }
       },
 
       homePage : function(subView){
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'home-page', {subView: subView});
+        this.routerNavigate('home-page', {subView: subView});
       },
 
       noPageFound : function() {

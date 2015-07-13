@@ -75,7 +75,7 @@ define([
     loadBibcodeData : function(bibcode){
 
       if (bibcode === this._bibcode){
-        self.trigger('page-manager-event', 'widget-ready', {'isActive': true});
+        this.trigger('page-manager-event', 'widget-ready', {'isActive': true});
       }
       else {
         this._bibcode = bibcode;
