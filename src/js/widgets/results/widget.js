@@ -58,7 +58,7 @@ define([
         'hl.requireFieldMatch': 'true',
         'hl.usePhraseHighlighter': 'true',
         fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi',
-        rows : 25,
+        rows : 20,
         start : 0
       },
 

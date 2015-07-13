@@ -104,33 +104,7 @@ define([
 
       expect(fakePubSub.publish.args[5].slice(1)).to.eql(["[Router]-Navigate-With-Trigger", "index-page"]);
       expect(fakePubSub.publish.args[6][1]).to.eql("[Alert]-Message")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     })
-
-
-
-
-
-
-
   })
 
-
-
-
-
-})
+});

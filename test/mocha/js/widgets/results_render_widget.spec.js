@@ -99,7 +99,7 @@ define([
                 "title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi"
               ],
               "rows": [
-                25
+                20
               ],
               "start": [
                 0
