@@ -197,6 +197,10 @@ define([
 
   ChangeTokenView = FormView.extend({
 
+    initialize : function(options){
+      this.listenTo(this.model, "change", this.render);
+    },
+
     template : TokenTemplate,
     className : "change-token"
 
@@ -350,9 +354,13 @@ UserSettings = BaseWidget.extend({
 
   handleOutsideNavigate : function(pageName){
 
-    if (this.modelsHaveData()){
-      this.resetModels();
+    if (pageName  !== "UserSettings"){
+
+      if (this.modelsHaveData()){
+        this.resetModels();
+      }
     }
+
   },
 
   modelsHaveData: function(){

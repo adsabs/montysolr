@@ -227,7 +227,7 @@ define([
 
         this.set('authentication-page', function(page, data){
           var data = data || {},
-              subView = data.subView || login,
+              subView = data.subView || "login",
               loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
 
           if (loggedIn){
