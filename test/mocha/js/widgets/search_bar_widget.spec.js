@@ -162,11 +162,11 @@ define([
       //should add "relevancy desc" if the query is an operator (trending, instructive/reviews, useful)
       var q7 = new ApiQuery({q : "trending(star)"});
       widget.changeDefaultSort(q7);
-      expect(q7.get("sort")[0]).to.eql("relevancy desc");
+      expect(q7.get("sort")[0]).to.eql("score desc");
 
       var q8 = new ApiQuery({q : "reviews(star)"});
       widget.changeDefaultSort(q8);
-      expect(q8.get("sort")[0]).to.eql("relevancy desc");
+      expect(q8.get("sort")[0]).to.eql("score desc");
 
       done();
     });

@@ -484,7 +484,7 @@ define([
             query.set("sort", "first_author asc");
           }
           else if (operator){
-            query.set("sort", "relevancy desc");
+            query.set("sort", "score desc");
           }
           else if (!operator) {
             query.set("sort", "date desc");
