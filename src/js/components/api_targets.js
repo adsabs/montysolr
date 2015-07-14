@@ -20,7 +20,7 @@ define([
       SERVICE_PAPER_NETWORK: 'vis/paper-network',
       SERVICE_WORDCLOUD: 'vis/word-cloud',
       SERVICE_METRICS: 'metrics',
-      MYADS_STORAGE: 'http://localhost:5000',
+      MYADS_STORAGE: 'vault',
 
       CSRF : 'accounts/csrf',
       USER: 'accounts/user',

@@ -230,7 +230,7 @@ define([
 
      var request3 = requestStub.args[2][0];
 
-     expect(request3.toJSON().target).to.eql("myads/user-data");
+     expect(request3.toJSON().target).to.eql("vault/user-data");
      expect(request3.toJSON().options.type).to.eql("POST");
 
      expect(request3.toJSON().options.data).to.eql('{"link_server":"foo.com"}' );
