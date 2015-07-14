@@ -24,8 +24,8 @@ define([
 
       CSRF : 'accounts/csrf',
       USER: 'accounts/user',
-      USER_DATA: 'myads/user-data',
-      OPENURL_CONFIGURATION : 'myads/configuration/link_servers',
+      USER_DATA: 'vault/user-data',
+      OPENURL_CONFIGURATION : 'vault/configuration/link_servers',
       TOKEN:'accounts/token',
       LOGOUT: 'accounts/logout',
       REGISTER: 'accounts/register',
