@@ -87,7 +87,7 @@ define([
      User.prototype.broadcastChange.restore();
      User.prototype.broadcastReset.restore();
 
-   })
+   });
 
    it("provides a hardened interface with the methods widgets and other objects might need", function() {
 
@@ -114,115 +114,119 @@ define([
 
    });
 
-   it('orcid settings reset if the contact with the OrcidApi gives a 401', function() {
+   describe("User Object: remote endpoint interaction", function() {
 
-     var api = new Api();
-     var minsub = new MinSub({verbose: true, Api: api});
+     var minsub;
+     beforeEach(function() {
+       var api = new Api();
+       minsub = new MinSub({verbose: true, Api: api});
+       this.server = sinon.fakeServer.create();
+       this.server.autoRespond = false;
 
-     this.server = sinon.fakeServer.create();
-     this.server.autoRespond = false;
-     this.server.respondWith(/.*/,
+     });
+
+     afterEach(function() {
+       minsub.destroy();
+       this.server.restore();
+     });
+
+     it('orcid settings reset if the contact with the OrcidApi gives a 401', function() {
+
+       this.server.respondWith(/.*/,
          [401, { "Content-Type": "application/json" }, JSON.stringify({"you suck": "YOU FAILED"})]);
 
-     //var minsub = new (MinSub.extend({
-     //  request: function(apiRequest) {}
-     //}))({verbose: false});
+       //var minsub = new (MinSub.extend({
+       //  request: function(apiRequest) {}
+       //}))({verbose: false});
 
-     // Activate the OrcidApi so that the User object can retrieve it from the BeeHive
-     minsub.beehive.addObject('DynamicConfig', {
-            orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
-            orcidApiEndpoint: 'https://api.orcid.org',
-            orcidRedirectUrlBase: 'http://localhost:8000',
-            orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
+       // Activate the OrcidApi so that the User object can retrieve it from the BeeHive
+       minsub.beehive.addObject('DynamicConfig', {
+         orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+         orcidApiEndpoint: 'https://api.orcid.org',
+         orcidRedirectUrlBase: 'http://localhost:8000',
+         orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
+       });
+       var oModule = new OrcidModule();
+       oModule.activate(minsub.beehive);
+       var orcidApi = minsub.beehive.getService('OrcidApi');
+
+       // Lets watch the signOut method and see if it is called
+       sinon.spy(orcidApi, 'signOut');
+
+       // Add the user to the beehive, and activate stuff
+       var user = new User();
+       minsub.beehive.addObject("User", user);
+       user.activate(minsub.beehive);
+
+       // Set some defaults that mimicks that the user is logged in to Orcid
+       user.setOrcidMode(1);
+       orcidApi.authData = {};
+
+       // Lets watch the setOrcidMode method and see if it is called
+       sinon.spy(user, 'setOrcidMode');
+
+       // Publish the event "Application Starting" or "APP_STARTING" to PubSub
+       minsub.publish(minsub.APP_STARTING);
+       this.server.respond();
+
+       // The user object should reset everything
+       expect(orcidApi.signOut.called).to.eql(true);
+       expect(user.setOrcidMode.called).to.eql(true);
+       expect(orcidApi.authData).to.eql(null);
+       expect(user.isOrcidModeOn()).to.eql(0);
+
      });
-     var oModule = new OrcidModule();
-     oModule.activate(minsub.beehive);
-     var orcidApi = minsub.beehive.getService('OrcidApi');
 
-     // Lets watch the signOut method and see if it is called
-     sinon.spy(orcidApi, 'signOut');
+     it('orcid settings do not reset if the contact with the OrcidApi gives anything but a 401', function() {
 
-     // Add the user to the beehive, and activate stuff
-     var user = new User();
-     minsub.beehive.addObject("User", user);
-     user.activate(minsub.beehive);
 
-     // Set some defaults that mimicks that the user is logged in to Orcid
-     user.setOrcidMode(1);
-     orcidApi.authData = {};
-
-     // Lets watch the setOrcidMode method and see if it is called
-     sinon.spy(user, 'setOrcidMode');
-
-     // Publish the event "Application Starting" or "APP_STARTING" to PubSub
-     minsub.publish(minsub.APP_STARTING);
-     this.server.respond();
-
-     // The user object should reset everything
-     expect(orcidApi.signOut.called).to.eql(true);
-     expect(user.setOrcidMode.called).to.eql(true);
-     expect(orcidApi.authData).to.eql(null);
-     expect(user.isOrcidModeOn()).to.eql(0);
-
-     minsub.destroy();
-     this.server.restore();
-
-   });
-
-   it('orcid settings do not reset if the contact with the OrcidApi gives anything but a 401', function() {
-
-     var api = new Api();
-     var minsub = new MinSub({verbose: true, Api: api});
-
-     this.server = sinon.fakeServer.create();
-     this.server.autoRespond = false;
-     this.server.respondWith(/.*/,
+       this.server.respondWith(/.*/,
          [500, { "Content-Type": "application/json" }, JSON.stringify({"you suck": "YOU FAILED"})]);
 
-     //var minsub = new (MinSub.extend({
-     //  request: function(apiRequest) {}
-     //}))({verbose: false});
+       //var minsub = new (MinSub.extend({
+       //  request: function(apiRequest) {}
+       //}))({verbose: false});
 
-     // Activate the OrcidApi so that the User object can retrieve it from the BeeHive
-     minsub.beehive.addObject('DynamicConfig', {
-       orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
-       orcidApiEndpoint: 'https://api.orcid.org',
-       orcidRedirectUrlBase: 'http://localhost:8000',
-       orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
+       // Activate the OrcidApi so that the User object can retrieve it from the BeeHive
+       minsub.beehive.addObject('DynamicConfig', {
+         orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+         orcidApiEndpoint: 'https://api.orcid.org',
+         orcidRedirectUrlBase: 'http://localhost:8000',
+         orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
+       });
+       var oModule = new OrcidModule();
+       oModule.activate(minsub.beehive);
+       var orcidApi = minsub.beehive.getService('OrcidApi');
+
+       // Lets watch the signOut method and see if it is called
+       sinon.spy(orcidApi, 'signOut');
+
+       // Add the user to the beehive, and activate stuff
+       var user = new User();
+       minsub.beehive.addObject("User", user);
+       user.activate(minsub.beehive);
+
+       // Set some defaults that mimicks that the user is logged in to Orcid
+       user.setOrcidMode(1);
+       orcidApi.authData = {};
+
+       // Lets watch the setOrcidMode method and see if it is called
+       sinon.spy(user, 'setOrcidMode');
+
+       // Publish the event "Application Starting" or "APP_STARTING" to PubSub
+       minsub.publish(minsub.APP_STARTING);
+       this.server.respond();
+
+       // The user object should reset everything
+       expect(orcidApi.signOut.called).to.eql(false);
+       expect(user.setOrcidMode.called).to.eql(false);
+       expect(orcidApi.authData).to.eql({});
+       expect(user.isOrcidModeOn()).to.eql(1);
+
      });
-     var oModule = new OrcidModule();
-     oModule.activate(minsub.beehive);
-     var orcidApi = minsub.beehive.getService('OrcidApi');
-
-     // Lets watch the signOut method and see if it is called
-     sinon.spy(orcidApi, 'signOut');
-
-     // Add the user to the beehive, and activate stuff
-     var user = new User();
-     minsub.beehive.addObject("User", user);
-     user.activate(minsub.beehive);
-
-     // Set some defaults that mimicks that the user is logged in to Orcid
-     user.setOrcidMode(1);
-     orcidApi.authData = {};
-
-     // Lets watch the setOrcidMode method and see if it is called
-     sinon.spy(user, 'setOrcidMode');
-
-     // Publish the event "Application Starting" or "APP_STARTING" to PubSub
-     minsub.publish(minsub.APP_STARTING);
-     this.server.respond();
-
-     // The user object should reset everything
-     expect(orcidApi.signOut.called).to.eql(false);
-     expect(user.setOrcidMode.called).to.eql(false);
-     expect(orcidApi.authData).to.eql({});
-     expect(user.isOrcidModeOn()).to.eql(1);
-
-     minsub.destroy();
-     this.server.restore();
 
    });
+
 
    it("broadcasts changes to its collection to interested widgets/other objects", function(){
 
