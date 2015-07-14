@@ -66,8 +66,7 @@ define(['marionette',
 
     events: {
       "click .apply"         : "submitFacet",
-      "blur input[type=text]": "triggerGraphChange",
-      "click .view-metrics" : "forwardNavigationEvent"
+      "blur input[type=text]": "triggerGraphChange"
     },
 
 
@@ -80,10 +79,6 @@ define(['marionette',
 
     },
 
-    forwardNavigationEvent : function(){
-      this.trigger("navigate", "show-metrics");
-    },
-
     onRender: function () {
       if (this.model.get("graphData").length < 2){
         this.$el.html("Too little data to make a useful graph.")
@@ -93,9 +88,6 @@ define(['marionette',
         this.buildGraph();
         this.addSliderWindows();
         this.buildSlider();
-        if (this.addToOnRender){
-          this.addToOnRender()
-        }
       }
     }
 
