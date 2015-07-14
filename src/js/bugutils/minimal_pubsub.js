@@ -81,7 +81,13 @@ define(['underscore', 'backbone',
           }
           var defer = $.Deferred();
           defer.done(function() {
-            context.done.call(context.context, response);
+            if (response && response.state() == 'rejected' && context.fail) {
+              context.fail.call(context.context, response);
+            }
+            else {
+              context.done.call(context.context, response);
+            }
+
           });
           defer.resolve(response);
           return defer.promise();
