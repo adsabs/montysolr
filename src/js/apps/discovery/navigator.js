@@ -231,11 +231,10 @@ define([
               loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
 
           if (loggedIn){
-            //redirect to preferences
-            app.getObject('MasterPageManager').show("SettingsPage",
-              ['UserSettings']);
-            app.getWidget("UserSettings").setSubView("preferences");
-            this.route = "#user/settings/preferences"
+            //redirect to index
+            app.getObject('MasterPageManager').show('LandingPage');
+            var q = app.getObject('AppStorage').getCurrentQuery();
+            this.route = '#index/' + queryUpdater.clean(q).url();
           }
           else {
             app.getWidget("Authentication").setSubView(subView);

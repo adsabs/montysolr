@@ -140,10 +140,12 @@ define(['marionette',
 
       },
 
-      handleUserAnnouncement : function(event, target){
-        if (event == "user_info_change" && target == "USER"){
-          var loggedIn = this.beehive.getObject("User").isLoggedIn();
-          this.model.set({ loggedIn: loggedIn});
+      handleUserAnnouncement : function(event, arg){
+        if (event == "user_signed_in"){
+          this.model.set("loggedIn", true);
+        }
+        else if (event == "user_signed_out"){
+          this.model.set("loggedIn", false);
         }
       },
 

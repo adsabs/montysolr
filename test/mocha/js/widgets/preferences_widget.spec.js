@@ -36,7 +36,7 @@ define([
       };
 
 
-    it("should have a model that contains updated myads data and a colelction of openurl endpoints", function(){
+    it("should have a model that contains updated myads data and a collection of openurl endpoints", function(){
 
       var p = new PreferencesWidget();
 
@@ -79,7 +79,7 @@ define([
         }
         ]);
 
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", "USER_DATA", fakeMyADS);
+      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", fakeMyADS);
 
       expect(p.model.toJSON()).to.eql({
         "link_server": "wesleyan.edu",
@@ -108,7 +108,7 @@ define([
           return d;
 
         },
-        setMyADSData : sinon.spy()
+        setUserData : sinon.spy()
 
         };
 
@@ -117,20 +117,20 @@ define([
       p.activate(minsub.beehive.getHardenedInstance());
 
       minsub.publish(minsub.APP_STARTED);
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", "USER_DATA", fakeMyADS);
+      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", fakeMyADS);
 
       $("#test").append(p.render().el);
 
       expect($("#test .current-link-server").length).to.eql(1);
 
-      expect($(".preferences-widget p:first").text().trim()).to.eql('Your Library Link Server is set to wesleyan university.');
+      expect($(".preferences-widget .openurl-container p:first").text().trim()).to.eql("Your Library Link Server is set to wesleyan university.");
 
       expect($(".preferences-widget select").val()).to.eql('wesleyan.edu');
 
       $(".preferences-widget button.submit").click();
 
       //submits the currently selected institution's url
-      expect(fakeUser.setMyADSData.args[0]).to.eql( [ { link_server : 'wesleyan.edu' } ] );
+      expect(fakeUser.setUserData.args[0]).to.eql( [ { link_server : 'wesleyan.edu' } ] );
 
     });
 
@@ -161,7 +161,7 @@ define([
       p.activate(minsub.beehive.getHardenedInstance());
 
       minsub.publish(minsub.APP_STARTED);
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", "USER_DATA", {
+      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", {
         link_server : undefined,
         anotherVal : "foo"
       } );

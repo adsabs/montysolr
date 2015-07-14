@@ -39,52 +39,57 @@ define([
    ];
 
 
-   it("keeps track of the user's signed in/anonymous state based on the content of the 'user' model within its collection, and responds to changes by updating user collection", function(){
 
-     sinon.stub(User.prototype, "broadcastChange");
-     sinon.stub(User.prototype, "broadcastReset");
+   it("keeps track of the user's signed in/anonymous state based on the content of the 'user' model, and responds to changes by updating user collection", function(){
 
      var u = new User();
-     u.pubsub = {publish : function(){}};
+     u.pubsub = {publish : sinon.spy(), USER_ANNOUNCEMENT : "user_announcement"};
+     u.redirectIfNecessary = sinon.spy();
 
-     var fetchStub = sinon.stub(u, "fetchData");
+     var fetchStub = sinon.stub(u, "fetchData", function(){return $.Deferred().promise();});
+
 
      expect(u.isLoggedIn()).to.eql(false);
 
      u.setUser("foo");
 
-     //automatically logs in user before doing a double check
-
-     expect(u.collection.get("USER").get("user")).to.eql("foo");
+     expect(u.model.get("user")).to.eql("foo");
      expect(u.isLoggedIn()).to.be.true;
 
-     expect(fetchStub.args[0][0]).to.eql("TOKEN");
+     expect(fetchStub.args[0][0]).to.eql("USER_DATA");
+     expect(u.redirectIfNecessary.callCount).to.eql(1);
 
+     expect(u.pubsub.publish.args[0]).to.eql(['user_announcement', 'user_signed_in', 'foo' ] )
 
-     User.prototype.broadcastChange.restore();
-     User.prototype.broadcastReset.restore();
+     fetchStub.restore();
+
    });
 
    it("has a log out method", function(){
 
-     sinon.stub(User.prototype, "broadcastChange");
-     sinon.stub(User.prototype, "broadcastReset");
-
      var u = new User();
-     u.pubsub = {publish : function(){}};
-     var fetchStub = sinon.stub(u, "fetchData");
+     u.pubsub = {publish : sinon.spy(), USER_ANNOUNCEMENT : "user_announcement"};
+     u.redirectIfNecessary = sinon.spy();
+
+     var fetchStub = sinon.stub(u, "fetchData", function(){return $.Deferred().promise();});
+
      u.setUser("foo");
      expect(u.isLoggedIn()).to.eql(true);
 
-     //clears the collection
+     u.userDataModel.set("link_server", "foo");
+
+     //clears the user
      u.completeLogOut();
 
      expect(u.isLoggedIn()).to.eql(false);
-     expect(u.collection.get("USER").get("user")).to.be.undefined;
-     expect(u.collection.get("TOKEN").get("access_token")).to.be.undefined;
+     //clears the user
+     expect(u.model.get("user")).to.be.undefined;
+     expect(u.userDataModel.get("link_server")).to.be.undefined;
 
-     User.prototype.broadcastChange.restore();
-     User.prototype.broadcastReset.restore();
+     expect(u.redirectIfNecessary.callCount).to.eql(2);
+
+     fetchStub.restore();
+
 
    })
 
@@ -94,22 +99,21 @@ define([
      var hardened = u.getHardenedInstance();
      expect(hardened.__facade__).equals(true);
      expect(hardened.handleCallbackError).to.be.undefined;
-     expect(_.keys(hardened)).to.eql([
-       "completeLogIn",
-       "completeLogOut",
+     expect(_.keys(hardened)).to.eql(["setUser",
        "isLoggedIn",
-       "postData",
-       "putData",
-       "getUserData",
        "getUserName",
        "isOrcidModeOn",
        "setOrcidMode",
-       "setUser",
        "getOpenURLConfig",
-       "setMyADSData",
+       "getUserData",
+       "setUserData",
+       "generateToken",
+       "getToken",
+       "deleteAccount",
+       "changePassword",
+       "changeEmail",
        "__facade__",
-       "mixIn"
-     ]);
+       "mixIn"]);
 
    });
 
@@ -131,115 +135,122 @@ define([
 
      u.redirectIfNecessary = sinon.stub();
 
-     u.collection.get("TOKEN").set("access_token", "boo");
+     u.userDataModel.set("link_server", "goo");
 
-     expect(u.pubsub.publish.args[0]).to.eql(["[PubSub]-User-Announcement","user_info_change","TOKEN",{"access_token":"boo","target":"TOKEN"}]);
+     expect(u.pubsub.publish.args[0]).to.eql([
+       "[PubSub]-User-Announcement",
+       "user_info_change",
+       {
+         "link_server": "goo"
+       }
+     ]);
 
    });
 
 
      it("allows widgets to query user data using different methods", function(){
 
-     sinon.stub(User.prototype, "broadcastChange");
+       var s = sinon.stub(User.prototype, "broadcastUserChange");
+       var s2 = sinon.stub(User.prototype, "broadcastUserDataChange");
 
-       var minsub = new (MinSub.extend({
-         request: function (apiRequest) {
-         }
-       }))({verbose: false});
 
        var u = new User();
 
-       var minsub = new (MinSub.extend({
-         request: function (apiRequest) {
-         }
-       }))({verbose: false});
-
-
-       var appStorage = new AppStorage({csrf : "fake"});
-
-       minsub.beehive.addObject("AppStorage", appStorage);
-
-       u.collection.get("USER").set("user", "foobly@gmail.com");
-       u.collection.get("TOKEN").set("api_token", "woobly");
-       u.collection.get("USER_DATA").set("openurl", "foo.com");
+       u.model.set("user", "foobly@gmail.com");
+       u.userDataModel.set("link_server", "woobly");
 
        expect(u.getUserData()).to.eql({
-        "TOKEN": {
-          "api_token": "woobly"
-        },
-        "USER": {
-          "user": "foobly@gmail.com"
-        },
-        "USER_DATA": {"openurl" : "foo.com"}
-      });
-
-      expect(u.getUserData("TOKEN")).to.eql( {
-        "api_token": "woobly"
+       link_server : "woobly"
       });
 
       expect(u.getUserName()).to.eql("foobly@gmail.com");
 
-
-      User.prototype.broadcastChange.restore();
+       s.restore();
+       s2.restore();
 
      });
 
 
-   it("allows widgets to post data to user endpoints", function(){
+   it("allows widgets to post/put data to user endpoints (user data, change email, change password, delete account, get token)", function(){
 
      var u = new User();
 
      var minsub = new (MinSub.extend({
        request: function (apiRequest) {
        }
-     }))({verbose: false})
-
-     var appStorage = new AppStorage({csrf : "fake"});
-
-     minsub.beehive.addObject("AppStorage", appStorage);
+     }))({verbose: false});
 
      var api = new Api();
-     var requestStub = sinon.stub(Api.prototype, "request");
+     var requestStub = sinon.stub(Api.prototype, "request", function(apiRequest){
+
+       if (apiRequest.get("target") == "accounts/token" ){
+
+         apiRequest.get("options").done({access_token : "foo"});
+
+       }else if (apiRequest.get("target") == "vault/user-data"){
+
+         apiRequest.get("options").done({"link_server" : "foo.com"});
+
+       }
+
+     });
      minsub.beehive.removeService("Api");
      minsub.beehive.addService("Api", api);
 
-     u.activate(minsub.beehive);
+     var fakeCSRF = {getCSRF : sinon.spy(function(){
+              var d = $.Deferred();d.resolve("fakeCSRFToken"); return d.promise();
+     })};
 
-     u.postData("CHANGE_PASSWORD", {old_password: "foo", new_password1 : "goo", new_password_2: "goo"});
+     minsub.beehive.addObject("CSRFManager", fakeCSRF);
+
+     u.activate(minsub.beehive)
+
+     var a =  u.changePassword({"old_password":"foo","new_password1":"goo","new_password_2":"goo"});
 
      var request = requestStub.args[0][0];
      expect(request).to.be.instanceof(ApiRequest);
      expect(request.toJSON().target).to.eql("accounts/change-password");
      expect(request.toJSON().options.type).to.eql("POST");
      expect(request.toJSON().options.data).to.eql('{"old_password":"foo","new_password1":"goo","new_password_2":"goo"}');
-     expect(request.toJSON().options.context).to.eql(u);
+     expect(fakeCSRF.getCSRF.callCount).to.eql(1);
+     //returns a promise
+     expect(a.then).to.be.instanceof(Function);
 
 
-     u.putData("TOKEN")
+     u.changeEmail({email : "alex@alex.com", confirm_email: "alex@alex.com", password : "foo"});
 
      var request2 = requestStub.args[1][0];
+     expect(request2.toJSON().target).to.eql("accounts/change-email");
+     expect(request2.toJSON().options.type).to.eql("POST");
+     expect(request2.toJSON().options.data).to.eql('{"email":"alex@alex.com","confirm_email":"alex@alex.com","password":"foo","verify_url":"http://localhost:8000/#user/account/verify/change-email"}');
+     expect(fakeCSRF.getCSRF.callCount).to.eql(2);
 
-     expect(request2).to.be.instanceof(ApiRequest);
-     expect(request2.toJSON().target).to.eql("accounts/token");
-     expect(request2.toJSON().options.type).to.eql("PUT");
-     expect(request2.toJSON().options.data).to.eql(undefined);
-     expect(request2.toJSON().options.context).to.eql(u);
-
-
-     u.setMyADSData({link_server : "foo.com"});
+     var token;
+     var tokenPromise = u.generateToken();
 
      var request3 = requestStub.args[2][0];
+     expect(request3.toJSON().target).to.eql("accounts/token");
+     expect(request3.toJSON().options.type).to.eql("PUT");
+     tokenPromise.done(function(data){token = data});
+     expect(token).to.eql({access_token : "foo"});
+     expect(fakeCSRF.getCSRF.callCount).to.eql(3);
 
-     expect(request3.toJSON().target).to.eql("vault/user-data");
-     expect(request3.toJSON().options.type).to.eql("POST");
+     expect(u.userDataModel.get("link_server")).to.be.undefined;
 
-     expect(request3.toJSON().options.data).to.eql('{"link_server":"foo.com"}' );
+     u.setUserData({link_server : "foo.com"});
+
+     var request4 = requestStub.args[3][0];
+     expect(request4.toJSON().target).to.eql("vault/user-data");
+     expect(request4.toJSON().options.type).to.eql("POST");
+     expect(request4.toJSON().options.data).to.eql('{"link_server":"foo.com"}');
+     //doesn't require csrf token
+     expect(fakeCSRF.getCSRF.callCount).to.eql(3);
 
 
+     //automatically sets returned data into its model
+     expect(u.userDataModel.get("link_server")).to.eql("foo.com")
 
      requestStub.restore();
-
-
 
    });
 
@@ -265,7 +276,7 @@ define([
    })
 
 
-   it("handles both success and failure of GET and POST requests", function(){
+   it("handles the success/failure of GET and POST requests as appropriate, sometimes delegating to widgets", function(){
 
      var u = new User();
 
@@ -274,94 +285,34 @@ define([
        }
      }))({verbose: false});
 
+
+     var api = new Api();
+
+     var requestStub = sinon.stub(Api.prototype, "request", function(apiRequest){
+       apiRequest.toJSON().options.fail( {responseJSON : {error : "OH NO"}}, "400", "error");
+     });
+     minsub.beehive.removeService("Api");
+     minsub.beehive.addService("Api", api);
+
      u.activate(minsub.beehive);
 
-     sinon.stub(User.prototype, "broadcastChange");
-
-     sinon.spy(u, "completeLogOut")
-
-     var publishStub = sinon.stub(u.pubsub, "publish");
+     sinon.stub(u.pubsub, "publish");
 
      u.redirectIfNecessary = sinon.stub();
 
-     //get success
-     u.handleSuccessfulGET({api_token : "foo"}, "success", {target: "TOKEN"});
-     expect(u.collection.get("TOKEN").toJSON()).to.eql({target: "TOKEN", api_token: "foo"});
+     u.fetchData("fakeTarget");
 
-     //get fail
-     u.handleFailedGET({target : "TOKEN"});
-     expect(publishStub.args[1]).to.eql(["[PubSub]-User-Announcement", "data_get_unsuccessful", "TOKEN"]);
-
-     //post success
-     //should call the proper callback
-     u.handleSuccessfulPOST({api_token : "boobly"}, "success", {target : "TOKEN"});
-
-     expect(publishStub.args[2]).to.eql([
-       "[PubSub]-User-Announcement",
-       "user_info_change",
-       "TOKEN",
-       {
-         "target": "TOKEN",
-         "api_token": "boobly"
-       }
-     ]);
-     expect(publishStub.args[3]).to.eql(["[PubSub]-User-Announcement", "data_post_successful", "TOKEN"]);
-     //these two events seem redundant for the token endpoint but wont be for endpoints like change_password
-     expect(u.collection.get("TOKEN").toJSON()).to.eql({target: "TOKEN", api_token: "boobly"});
-
-     //post success to delete endpoint
-     expect(u.completeLogOut.callCount).to.eql(0);
-
-     u.handleSuccessfulPOST({api_token : "boobly"}, "success", {target : "DELETE"});
-     expect(publishStub.args[4]).to.eql(["[PubSub]-User-Announcement", "delete_account_successful", "DELETE"]);
-     //these two events seem redundant for the token endpoint but wont be for endpoints like change_password
-     expect(u.completeLogOut.callCount).to.eql(1);
-
-     //the deletion of the account should yield 2 more pubsub calls announcing that token and username have changed:
-     expect(publishStub.args[5]).to.eql(["[PubSub]-User-Announcement","user_info_change","TOKEN", {"target":"TOKEN"}]);
-     expect(publishStub.args[6]).to.eql([
-       "[PubSub]-User-Announcement",
-       "user_info_change",
-       "USER",
-       {
-         "target": "USER"
-       }
-     ]);
-     expect(publishStub.args[7]).to.eql([
-       "[PubSub]-User-Announcement",
-       "user_info_change",
-       "USER_DATA",
-       {
-         "target": "USER_DATA"
-       }
-     ]);
+     //on fail
+     expect(u.pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
+     expect(u.pubsub.publish.args[0][1].toJSON()).to.eql( {code: 0, msg: "Unable to retrieve information (OH NO)"});
 
 
-     //post fail
-     u.handleFailedPOST({target: "TOKEN", responseJSON : {error : "random error message"}});
+     u.postData("fakeTarget");
 
-     expect(publishStub.args[8]).to.eql(["[PubSub]-User-Announcement", "data_post_unsuccessful", "TOKEN"]);
-     expect(publishStub.args[9][0]).to.eql("[Alert]-Message")
-     expect(publishStub.args[9][1].msg).to.eql("User update was unsuccessful (random error message)");
+     expect(u.pubsub.publish.args[1][0]).to.eql("[Alert]-Message");
+     expect(u.pubsub.publish.args[1][1].toJSON()).to.eql({code: 0, msg: "User update was unsuccessful (OH NO)"});
 
-
-     //user_data
-     u.handleSuccessfulPOST({ link_server : "fakeServer"}, "success", {target : "USER_DATA"});
-
-
-     expect(publishStub.args[10]).to.eql([
-       "[PubSub]-User-Announcement",
-       "user_info_change",
-       "USER_DATA",
-       {
-         "target": "USER_DATA",
-         "link_server": "fakeServer"
-       }
-     ])
-
-
-     User.prototype.broadcastChange.restore();
-
+     requestStub.restore();
 
    });
 

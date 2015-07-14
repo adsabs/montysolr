@@ -237,12 +237,14 @@ define([
 
     handleUserAnnouncement : function(msg, arg2, arg3) {
 
-      var user = this.getBeeHive().getObject("User");
-      var orcidApi = this.getBeeHive().getService("OrcidApi");
+      var orcidApi = this.getBeeHive().getService("OrcidApi"),
+          user = this.getBeeHive().getObject("User");
 
-      if (msg === "user_info_change" && arg2 === "USER") {
-        //if user logs out, username will be undefined
-        this.model.set("currentUser", this.getBeeHive().getObject("User").getUserName());
+      if (msg == "user_signed_in") {
+        this.model.set("currentUser", arg2);
+      }
+      else if (msg == "user_signed_out"){
+        this.model.set("currentUser", undefined);
       }
       else if (msg == 'orcidUIChange') {
         this.model.set({orcidModeOn: user.isOrcidModeOn(), orcidLoggedIn: orcidApi.hasAccess()});

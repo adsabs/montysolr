@@ -32,14 +32,10 @@ define([
             api.refresh_token = data.refresh_token;
             api.expires_in = data.expires_in;
           }
-
-          var user = this.getBeeHive().getObject("User");
-          if (user && !data.anonymous) {
-            //it's a logged in user
-            user.setUser(data.username);
-          }
+          var userObject = this.getBeeHive().getObject("User");
+          var userName = data.anonymous ? undefined : data.username
+          userObject.setUser(userName);
         }
-
       },
 
       getApiAccess: function (options) {

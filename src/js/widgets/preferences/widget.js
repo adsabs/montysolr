@@ -92,19 +92,18 @@ define([
     handleViewEvents : function(event, arg1, arg2){
 
       if (event == "change:link_server"){
-        this.beehive.getObject("User").setMyADSData({link_server : arg1});
+        this.beehive.getObject("User").setUserData({link_server : arg1});
       }
 
     },
 
-    handleUserAnnouncement : function(event, target, model_data){
+    handleUserAnnouncement : function(event, arg2){
 
-      if (event == "user_info_change" && target == "USER_DATA") {
-        this.model.set(model_data);
+      if (event == "user_info_change") {
+        this.model.set(arg2);
       }
 
     }
-
 
   });
 

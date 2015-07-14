@@ -134,9 +134,10 @@
                 <!-- Single button -->
                 <li class="dropdown">
                     <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                        {{currentUser}} <span class="caret"></span>
+                      My Account <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
+                        <li style="padding:15px 10px;">You are signed in as <br/> <b>{{currentUser}}</b></li>
                         <li class="disabled"><a href="#/user/home"> <i class="fa fa-user"></i> My Home Page</a></li>
                         <li class="disabled"><a href="#/user/libraries"> <i class="fa fa-book"></i> ADS Libraries</a></li>
                         <li><a href="#/user/settings"> <i class="fa fa-cog"></i> Customize Settings</a></li>
@@ -155,5 +156,5 @@
         </div>
         <!-- /.navbar-collapse -->
     </div>
-    <!-- /.container-fluid -->
 </nav>
+<!-- /.container-fluid -->

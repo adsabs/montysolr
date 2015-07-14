@@ -66,10 +66,6 @@ define([
 
     /* methods that will be available to widgets */
 
-    //not sure if I need this
-    isLoggedIn: function () {
-      return this.getBeeHive().getObject("User").isLoggedIn();
-    },
 
     login: function (data) {
 
@@ -202,23 +198,17 @@ define([
     /* private methods */
 
     loginSuccess: function (response, status, jqXHR) {
-      var promise, pubsub;
-      //reset auth token by contacting Bootstrap
-      //this will log the user in
-      promise = this.getApiAccess({reconnect: true});
-      //notify interested widgets
-      pubsub = this.getPubSub();
-      promise.done(function(){
-        pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_success");
-      });
-      promise.fail(function(){
-        pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_fail");
-      })
+      //reset auth token by contacting Bootstrap, which will log user in
+      var that = this;
+       this.getApiAccess({reconnect: true}).done(function(){
+         //user has just authenticated themselves using the form, so redirect them to their account
+         that.pubsub.publish(that.pubsub.NAVIGATE, "UserPreferences");
+       });
+      //user object will notify interested widgets when onbootstrap is called
     },
 
     loginFail : function(xhr, status, errorThrown){
-      var pubsub = this.getPubSub();
-      var error;
+      var pubsub = this.getPubSub(), error;
       if (xhr.responseJSON && xhr.responseJSON.error ){
         error = xhr.responseJSON.error
       }
@@ -234,12 +224,10 @@ define([
     },
 
     logoutSuccess : function (response, status, jqXHR) {
+      //redirect to index page
+      this.getPubSub().publish(this.getPubSub().NAVIGATE, "index-page");
       //set session state to logged out
-      var user = this.getBeeHive().getObject("User");
-      user.completeLogOut();
-
-      var pubsub = this.getPubSub();
-      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "logout_success");
+      this.getBeeHive().getObject("User").completeLogOut();
     },
 
     registerSuccess : function (response, status, jqXHR) {
@@ -301,7 +289,6 @@ define([
 
 
     hardenedInterface: {
-      isLoggedIn: "is the user authenticated",
       login: "log the user in",
       logout: "log the user out",
       register: "registers a new user",

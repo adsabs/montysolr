@@ -31,6 +31,10 @@ define([
   *
   * */
 
+
+  var passwordRegex = /(?=.*\d)(?=.*[a-zA-Z]).{5,}/;
+
+
   var FormView, FormModel;
 
   FormView = Marionette.ItemView.extend({
@@ -67,7 +71,7 @@ define([
       },
       password1: {
         required: true,
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(Password isn't valid)"
 
       },
@@ -136,7 +140,7 @@ define([
       },
       password: {
         required: true,
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(A valid password is required)"
       }
     },
@@ -224,14 +228,14 @@ define([
 
       password1: {
         required: true,
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(Password isn't valid)"
 
       },
       password2: {
         required: true,
         equalTo: 'password1',
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(The passwords do not match)"
       }
 
@@ -419,7 +423,7 @@ define([
       this.resetAll();
 
       switch(msg){
-        case "login_success":
+        case "user_signed_in":
           //will immediately redirect
           break;
         case "login_fail":

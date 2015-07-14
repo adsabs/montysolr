@@ -27,7 +27,7 @@ define([
       expect(hardened.handleCallbackError).to.be.undefined;
 
       expect(hardened.start).to.be.undefined;
-      expect(_.keys(hardened)).to.eql(["isLoggedIn", "login", "logout", "register", "resetPassword1", "resetPassword2", "setChangeToken", "__facade__", "mixIn"]);
+      expect(_.keys(hardened)).to.eql(["login", "logout", "register", "resetPassword1", "resetPassword2", "setChangeToken", "__facade__", "mixIn"]);
 
     });
 
@@ -167,27 +167,27 @@ define([
 
       var s = new Session();;
       var u = new User();
-      sinon.stub(u, "completeLogIn");
-      sinon.stub(u, "completeLogOut");
+
+      u.completeLogOut = sinon.stub();
+
       minsub.beehive.addObject("User", u);
 
       s.activate(minsub.beehive);
       sinon.stub(s.pubsub, "publish");
-      var deferred = $.Deferred();
-      sinon.stub(s, "getApiAccess", function(){return deferred.promise()});
+      sinon.stub(s, "getApiAccess", function(){var d = $.Deferred(); d.resolve();return d.promise();});
 
       s.loginSuccess();
 
       expect(s.getApiAccess.callCount).to.eql(1);
-      expect(u.completeLogIn.callCount).to.eql(0);
+      //called once getApiAccess is resolved
+      expect(s.pubsub.publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "UserPreferences"]);
 
-      //now resolve the fake promise returned by getApiAccess;
-      deferred.resolve();
-      expect(s.pubsub.publish.args[0]).to.eql(["[PubSub]-User-Announcement", "login_success"]);
 
       s.logoutSuccess();
-      expect(s.pubsub.publish.args[1]).to.eql(["[PubSub]-User-Announcement", "logout_success"]);
-      //logout is called before logged in to get rid of anything that might have been there previously
+
+      //navigate to index page
+      expect(s.pubsub.publish.args[1]).to.eql(["[Router]-Navigate-With-Trigger", "index-page"]);
+      // scrub the user object
       expect(u.completeLogOut.callCount).to.eql(1);
 
       s.registerSuccess();

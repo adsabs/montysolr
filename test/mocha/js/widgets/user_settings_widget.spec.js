@@ -28,11 +28,16 @@ define([
         request: function (apiRequest) {}
       }))({verbose: false});
 
-      var hardened = minsub.beehive.getHardenedInstance();
-      sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
+      var fakeUser = {getToken : function(){var d = $.Deferred(); d.resolve({access_token : "foo"}); return d }, getHardenedInstance : function(){return this}};
+      var fakeCSRFManager = {getRecaptchaKey : function(){return "foo"}, getHardenedInstance : function(){return this}};
 
-      var u = new UserSettings();
+      minsub.beehive.addObject("User", fakeUser);
+      minsub.beehive.addObject("CSRFManager", fakeCSRFManager);
+
+      var hardened = minsub.beehive.getHardenedInstance();
+
       u.activate(hardened);
+
       $("#test").append(u.view.render().el);
 
       //initial view should be empty
@@ -55,38 +60,20 @@ define([
 
     });
 
-      it("should allow the user to navigate to other options using the side nav", function(){
-
-        var u = new UserSettings();
-
-        $("#test").append(u.render().el );
-
-        var minsub = new (MinSub.extend({
-          request: function (apiRequest) {}
-        }))({verbose: false});
-
-        var hardened = minsub.beehive.getHardenedInstance();
-        sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}});
-
-        var u = new UserSettings();
-
-        u.activate(hardened);
-        var publishStub = sinon.stub(u.pubsub, "publish");
-        $("#test").append(u.view.render().el);
-
-
-      });
-
 
       it("should interactively validate form inputs, only allowing correctly filled forms to be submitted", function(){
 
-        //testing only a single view-- is this ok?
         var minsub = new (MinSub.extend({
           request: function (apiRequest) {}
         }))({verbose: false});
 
+        var fakeUser = {getToken : function(){var d = $.Deferred(); d.resolve({access_token : "foo"}); return d }, changePassword : sinon.spy(), getHardenedInstance : function(){return this}};
+        var fakeCSRFManager = {getRecaptchaKey : function(){return "foo"}, getHardenedInstance : function(){return this}};
+
+        minsub.beehive.addObject("User", fakeUser);
+        minsub.beehive.addObject("CSRFManager", fakeCSRFManager);
+
         var hardened = minsub.beehive.getHardenedInstance();
-        sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}}})
 
         var u = new UserSettings();
         u.activate(hardened);
@@ -141,7 +128,7 @@ define([
         expect($("#test").find("input[name=new_password2]").parent().hasClass("has-error")).to.be.false;
 
         //finally,  fake the g-recaptcha-response
-        u.subViewModels.password.set("g-recaptcha-response", "foo");
+        u.view.content.currentView.model.set("g-recaptcha-response", "foo");
         expect($("#test").find("button[type=submit]").hasClass("btn-success")).to.be.true;
 
         $("#test").find("button[type=submit]").click();
@@ -155,11 +142,15 @@ define([
        request: function (apiRequest) {}
      }))({verbose: false});
 
-     var hardened = minsub.beehive.getHardenedInstance();
-     var postDataSpy = sinon.spy();
-     sinon.stub(hardened, "getObject", function(){return {getRecaptchaKey : function(){return "foo"}, postData: postDataSpy}})
+     var fakeUser = {getToken : function(){var d = $.Deferred(); d.resolve({access_token : "foo"}); return d }, changePassword : sinon.spy(function(){return $.Deferred();}), getHardenedInstance : function(){return this}};
+     var fakeCSRFManager = {getRecaptchaKey : function(){return "foo"}, getHardenedInstance : function(){return this}};
 
+     minsub.beehive.addObject("User", fakeUser);
+     minsub.beehive.addObject("CSRFManager", fakeCSRFManager);
      var u = new UserSettings();
+
+     var hardened = minsub.beehive.getHardenedInstance();
+
      u.activate(hardened);
      $("#test").append(u.view.render().el);
 
@@ -177,12 +168,12 @@ define([
 
      $("#test").find("button[type=submit]").click();
 
-     expect(postDataSpy.callCount).to.eql(1);
-     expect(JSON.stringify(postDataSpy.args[0])).to.eql('["CHANGE_PASSWORD",{"old_password":"Foooo5","new_password1":"Boooo3","new_password2":"Boooo3"},{"csrf":true}]');
+     expect(fakeUser.changePassword.callCount).to.eql(1);
+     expect(JSON.stringify(fakeUser.changePassword.args[0])).to.eql('[{"old_password":"Foooo5","new_password1":"Boooo3","new_password2":"Boooo3"}]');
 
    });
 
-  it("should listen to the USER_ANNOUNCEMENT and re-render with the proper data", function(){
+  it("should listen to the USER_ANNOUNCEMENT to see if user is logged in, and add done callbacks to user methods where appropriate ", function(){
 
     //the widget should respond when different data posts have been successful and show the user
     //the proper information, or else if it failed, offer them the opportunity to redo it
@@ -191,80 +182,41 @@ define([
       request: function (apiRequest) {}
     }))({verbose: false})
 
-    var fakeSession = new Session();
+    var minsub = new (MinSub.extend({
+      request: function (apiRequest) {}
+    }))({verbose: false});
 
-    fakeSession.logout = sinon.spy();
-    fakeSession.getRecaptchaKey = function(){return "foo"};
+    var fakeUser = {
+      generateToken :  function(){ var d = $.Deferred(); d.resolve({access_token : "new_token"}); return d.promise()},
+      getToken : function(){var d = $.Deferred(); d.resolve({access_token : "current_token"}); return d },
+      changePassword : sinon.spy(function(){return $.Deferred();}),
+      getHardenedInstance : function(){return this}
+    };
+    var fakeCSRFManager = {getRecaptchaKey : function(){return "foo"}, getHardenedInstance : function(){return this}};
 
-    fakeSession.postData =  sinon.spy();
-
-    minsub.beehive.addObject("Session", fakeSession)
+    minsub.beehive.addObject("User", fakeUser);
+    minsub.beehive.addObject("CSRFManager", fakeCSRFManager);
+    var u = new UserSettings();
 
     var hardened = minsub.beehive.getHardenedInstance();
 
-    sinon.spy( UserSettings.prototype, "resetModels");
-
-    var u = new UserSettings();
-
     u.activate(hardened);
-    u.getUserData = sinon.spy();
-    u.pubsub.subscribeOnce = sinon.spy();
-    sinon.stub(u.pubsub, "publish");
+
+    u.pubsub.publish(u.pubsub.USER_ANNOUNCEMENT, "user_signed_in", "alex");
+    expect(u.model.get("user")).to.eql("alex");
+
+    u.pubsub.publish(u.pubsub.USER_ANNOUNCEMENT, "user_signed_out");
+    expect(u.model.get("user")).to.be.undefined;
+
     $("#test").append(u.view.render().el);
 
-    minsub.publish(minsub.USER_ANNOUNCEMENT, "data_post_successful", "CHANGE_PASSWORD");
+    u.setSubView("token");
 
-    //this also fetches data
-    expect(u.resetModels.callCount).to.eql(1);
+    expect($("#test .well").text().trim()).to.eql("current_token");
 
-    expect($("#test").find(".content-container").text().trim()).to.eql("Password Changed\n    \n    \n         Next time you log in, please use your new password");
+    $("#test button[type=submit]").click();
 
-    expect(fakeSession.logout.callCount).to.eql(0);
-
-    u.subViewModels.email.set("email", "fakeEmail");
-
-    minsub.publish(minsub.USER_ANNOUNCEMENT, "data_post_successful", "CHANGE_EMAIL");
-
-    expect(u.pubsub.subscribeOnce.args[0][0]).to.eql("[Router]-Navigate-With-Trigger");
-
-    //call the callback that will be called on navigate
-    u.pubsub.subscribeOnce.args[0][1]();
-
-    expect(u.pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
-    expect(u.pubsub.publish.args[0][1].msg).to.eql("Please check <b>fakeEmail</b> for further instructions")
-
-    expect(fakeSession.logout.callCount).to.eql(1);
-
-    UserSettings.prototype.resetModels.restore()
-
-  });
-
-    it("should clear the model on navigate away", function(){
-    //TODO: ask Roman about how to prevent the navigation event by showing confirm modal
-
-      var minsub = new (MinSub.extend({
-        request: function (apiRequest) {}
-      }))({verbose: false});
-
-      var hardened = minsub.beehive.getHardenedInstance();
-
-      var u = new UserSettings();
-      u.activate(hardened);
-
-      u.getUserData = sinon.spy();
-
-      $("#test").append(u.view.render().el);
-
-      u.view.setSubView("email");
-
-      $("#test").find("input#email").val("foo@goo.com").trigger("change");
-
-      expect(u.subViewModels.email.toJSON()).to.eql({ email: 'foo@goo.com' });
-
-      minsub.publish(minsub.NAVIGATE, "foo");
-
-      expect(u.subViewModels.email.toJSON()).to.eql({});
-
+    expect($("#test .well").text().trim()).to.eql("new_token");
 
 
 

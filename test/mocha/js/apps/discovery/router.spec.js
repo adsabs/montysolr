@@ -18,29 +18,21 @@ define([
 
     it("should handle the three verify routes which are contained in email links, passing verify token to servers ", function(){
 
-
       var r = new Router();
-
       r.getApiAccess = sinon.spy(function(){return $.Deferred().promise()});
 
       var beehive = new Beehive();
 
       var fakeApi = new Api();
-
       fakeApi.request = sinon.spy();
-
       beehive.addService("Api", fakeApi);
 
       var fakePubSub = new PubSub();
-
       fakePubSub.publish = sinon.spy()
-
       beehive.addService("PubSub", fakePubSub);
 
       var fakeSession = new Session();
-
       fakeSession.setChangeToken = sinon.spy();
-
       beehive.addObject("Session", fakeSession);
 
       r.activate(beehive.getHardenedInstance());
@@ -52,7 +44,8 @@ define([
       fakeApi.request.args[0][0].get("options").done.call(r, {email:"foo"});
       expect(r.getApiAccess.callCount).to.eql(1);
 
-      fakeApi.request.args[0][0].get("options").fail.call(r);
+
+      fakeApi.request.args[0][0].get("options").fail.call(r, {responseJSON : {error : "fakeError"}});;
       expect(fakePubSub.publish.args[0].slice(1)).to.eql([
         "[Router]-Navigate-With-Trigger",
         "index-page"
@@ -61,6 +54,10 @@ define([
         "[Alert]-Message"
        );
 
+      expect(fakePubSub.publish.args[1][2].toJSON()).to.eql({
+        "code": 0,
+        "msg": " <b>fakeError</b> <br/><p>Please try again, or contact <b> adshelp@cfa.harvard.edu for support </b></p>"
+      })
 
       //2. change email link
       r.execute(r.routeToVerifyPage, ["change-email", "fakeToken2"]);
@@ -72,7 +69,7 @@ define([
 
       expect(r.getApiAccess.callCount).to.eql(2);
 
-      fakeApi.request.args[1][0].get("options").fail.call(r);
+      fakeApi.request.args[1][0].get("options").fail.call(r, {email:"foo"});
 
       expect(fakePubSub.publish.args[2].slice(1)).to.eql([
         "[Router]-Navigate-With-Trigger",
@@ -100,10 +97,11 @@ define([
       ]);
 
 
-      fakeApi.request.args[2][0].get("options").fail.call(r);
+      fakeApi.request.args[2][0].get("options").fail.call(r, {responseJSON : {error : "fakeError"}});
 
       expect(fakePubSub.publish.args[5].slice(1)).to.eql(["[Router]-Navigate-With-Trigger", "index-page"]);
-      expect(fakePubSub.publish.args[6][1]).to.eql("[Alert]-Message")
+      expect(fakePubSub.publish.args[6][1]).to.eql("[Alert]-Message");
+
     })
   })
 

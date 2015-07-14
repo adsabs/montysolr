@@ -174,16 +174,17 @@ define([
 
     $("#test").append(n.view.render().el);
 
-    u.collection.get("USER").set("user", "bumblebee");
+    u.setUser("bumblebee");
 
     expect(n.view.$("li.login").length).to.eql(0);
     expect(n.view.$("li.register").length).to.eql(0);
 
     expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(1);
-    expect(n.view.$(".btn.btn-link.dropdown-toggle").html()).to.eql('\n                        bumblebee <span class="caret"></span>\n                    ');
+    expect(n.view.$(".btn.btn-link.dropdown-toggle").text().trim()).to.eql("My Account");
+    expect(n.view.$(".dropdown-menu:last li:first").text().trim()).to.eql("You are signed in as  bumblebee");
 
     //lack of username indicates user is logged out
-    u.collection.get("USER").set("user", undefined);
+    u.setUser( undefined);
 
     minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
 
@@ -203,6 +204,7 @@ define([
     }))({verbose: false});
 
     var u = new User();
+    u.completeLogIn = function(){};
     u.pubsub = {publish : function(){}, getPubSubKey : function(){}};
     minsub.beehive.addObject("User", u);
 
@@ -244,10 +246,8 @@ define([
     expect(publishSpy.args[1][2].subView).to.eql("register");
     
     //now show navbar in logged in state
-    
-    u.collection.get("USER").set("user", "foo");
-    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
-
+    u.setUser("user", "foo");
+    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_signed_in", "fakeUserName");
 
     $("#test").find(".logout").click();
     expect(publishSpy.callCount).to.eql(2);

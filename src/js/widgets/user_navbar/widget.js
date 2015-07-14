@@ -49,14 +49,17 @@ define([
       this.model.set("page", page);
     },
 
-    updateUser : function(event, target ){
+    updateUser : function(event, arg ){
 
-      if (event == "user_info_change" && target == "USER"){
-        var userName = this.beehive.getObject("User").getUserName();
+      if (event == "user_signed_in"){
+        var userName = arg;
         if (userName && userName.indexOf("@") > -1){
           userName = userName.split("@")[0];
         }
         this.model.set("user", userName);
+      }
+      else if (event == "user_signed_out"){
+        this.model.set("user", undefined);
       }
     },
 
