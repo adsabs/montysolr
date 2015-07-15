@@ -160,6 +160,7 @@ define([
 
         switch(xhr.status) {
           case 401: // unauthorized
+             console.log('here');
           case 404: // for some unknow reason (yet) - 401 comes marked as 404
              // check the Api is working
              app.getApiAccess({reconnect: true})
@@ -294,6 +295,22 @@ define([
       if (n) {
         console.error('Query failed for widget: ' + n, errorDetails);
 
+        if (/orcid/.exec(target) && feedback.error.status == 401) {
+          alerter.alert(new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: 'Your connection with Orcid is no longer valid, it may be that you revoked your token. To continue using this feature, please log back in to Orcid.',
+            modal: true
+          }));
+
+          // Turn off Orcid modes
+          var orcidApi = app.getService('OrcidApi');
+          var user = app.getObject('User');
+          orcidApi.signOut();
+          user.setOrcidMode(0);
+
+          return; // We are done
+        }
+
         var widgets = this.getWidgets([psk.getId()]);
         if (widgets && widgets.length == 0) {
           return; // we can ignore it
@@ -309,7 +326,6 @@ define([
       else {
         if (!feedback.beVerbose) return;
       }
-
 
       // we'll not show messages until search cycle is over
       if (!this._tmp.cycle_started)
