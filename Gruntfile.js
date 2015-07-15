@@ -526,6 +526,30 @@ module.exports = function(grunt) {
           //dest: './coverage/output'
           }
       }
+    },
+
+    'saucelabs-mocha': {
+      all: {
+        options: {
+          urls: ['http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=core-suite')],
+          tunnelTimeout: 5,
+          build: process.env.TRAVIS_JOB_ID,
+          concurrency: 3,
+          browsers: [
+            {
+              browserName: "chrome",
+              platform: "linux"
+            },
+            {
+              browserName: "android",
+              platform: "linux",
+              deviceName: 'Google Nexus 7 HD Emulator',
+              version: '4.4'
+            }
+          ],
+          testname: "Bumblebee tests"
+        }
+      }
     }
 
   });
@@ -573,6 +597,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha');
   grunt.loadNpmTasks("grunt-blanket-mocha");
   grunt.loadNpmTasks('grunt-hash-required');
+  grunt.loadNpmTasks('grunt-saucelabs');
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
@@ -720,5 +745,7 @@ module.exports = function(grunt) {
       'assemble',
       'uglify'
   ]);
+
+  grunt.registerTask("sauce", ['env:dev',  "less", 'express:dev', "saucelabs-mocha"]);
 
 };
