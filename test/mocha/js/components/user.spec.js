@@ -7,8 +7,8 @@ define([
   'js/components/json_response',
   'js/components/api_query',
   'js/services/api',
-  'js/components/app_storage'
-
+  'js/components/app_storage',
+  'js/modules/orcid/module'
 ], function(
   _,
   User,
@@ -18,7 +18,8 @@ define([
   JsonResponse,
   ApiQuery,
   Api,
-  AppStorage
+  AppStorage,
+  OrcidModule
   ){
 
  describe("User Object", function(){
@@ -86,7 +87,7 @@ define([
      User.prototype.broadcastChange.restore();
      User.prototype.broadcastReset.restore();
 
-   })
+   });
 
    it("provides a hardened interface with the methods widgets and other objects might need", function() {
 
@@ -112,6 +113,120 @@ define([
      ]);
 
    });
+
+   describe("User Object: remote endpoint interaction", function() {
+
+     var minsub;
+     beforeEach(function() {
+       var api = new Api();
+       minsub = new MinSub({verbose: true, Api: api});
+       this.server = sinon.fakeServer.create();
+       this.server.autoRespond = false;
+
+     });
+
+     afterEach(function() {
+       minsub.destroy();
+       this.server.restore();
+     });
+
+     it('orcid settings reset if the contact with the OrcidApi gives a 401', function() {
+
+       this.server.respondWith(/.*/,
+         [401, { "Content-Type": "application/json" }, JSON.stringify({"you suck": "YOU FAILED"})]);
+
+       //var minsub = new (MinSub.extend({
+       //  request: function(apiRequest) {}
+       //}))({verbose: false});
+
+       // Activate the OrcidApi so that the User object can retrieve it from the BeeHive
+       minsub.beehive.addObject('DynamicConfig', {
+         orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+         orcidApiEndpoint: 'https://api.orcid.org',
+         orcidRedirectUrlBase: 'http://localhost:8000',
+         orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
+       });
+       var oModule = new OrcidModule();
+       oModule.activate(minsub.beehive);
+       var orcidApi = minsub.beehive.getService('OrcidApi');
+
+       // Lets watch the signOut method and see if it is called
+       sinon.spy(orcidApi, 'signOut');
+
+       // Add the user to the beehive, and activate stuff
+       var user = new User();
+       minsub.beehive.addObject("User", user);
+       user.activate(minsub.beehive);
+
+       // Set some defaults that mimicks that the user is logged in to Orcid
+       user.setOrcidMode(1);
+       orcidApi.authData = {};
+
+       // Lets watch the setOrcidMode method and see if it is called
+       sinon.spy(user, 'setOrcidMode');
+
+       // Publish the event "Application Starting" or "APP_STARTING" to PubSub
+       minsub.publish(minsub.APP_STARTING);
+       this.server.respond();
+
+       // The user object should reset everything
+       expect(orcidApi.signOut.called).to.eql(true);
+       expect(user.setOrcidMode.called).to.eql(true);
+       expect(orcidApi.authData).to.eql(null);
+       expect(user.isOrcidModeOn()).to.eql(0);
+
+     });
+
+     it('orcid settings do not reset if the contact with the OrcidApi gives anything but a 401', function() {
+
+
+       this.server.respondWith(/.*/,
+         [500, { "Content-Type": "application/json" }, JSON.stringify({"you suck": "YOU FAILED"})]);
+
+       //var minsub = new (MinSub.extend({
+       //  request: function(apiRequest) {}
+       //}))({verbose: false});
+
+       // Activate the OrcidApi so that the User object can retrieve it from the BeeHive
+       minsub.beehive.addObject('DynamicConfig', {
+         orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+         orcidApiEndpoint: 'https://api.orcid.org',
+         orcidRedirectUrlBase: 'http://localhost:8000',
+         orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
+       });
+       var oModule = new OrcidModule();
+       oModule.activate(minsub.beehive);
+       var orcidApi = minsub.beehive.getService('OrcidApi');
+
+       // Lets watch the signOut method and see if it is called
+       sinon.spy(orcidApi, 'signOut');
+
+       // Add the user to the beehive, and activate stuff
+       var user = new User();
+       minsub.beehive.addObject("User", user);
+       user.activate(minsub.beehive);
+
+       // Set some defaults that mimicks that the user is logged in to Orcid
+       user.setOrcidMode(1);
+       orcidApi.authData = {};
+
+       // Lets watch the setOrcidMode method and see if it is called
+       sinon.spy(user, 'setOrcidMode');
+
+       // Publish the event "Application Starting" or "APP_STARTING" to PubSub
+       minsub.publish(minsub.APP_STARTING);
+       this.server.respond();
+
+       // The user object should reset everything
+       expect(orcidApi.signOut.called).to.eql(false);
+       expect(user.setOrcidMode.called).to.eql(false);
+       expect(orcidApi.authData).to.eql({});
+       expect(user.isOrcidModeOn()).to.eql(1);
+
+     });
+
+   });
+
 
    it("broadcasts changes to its collection to interested widgets/other objects", function(){
 
@@ -230,7 +345,7 @@ define([
 
      var request3 = requestStub.args[2][0];
 
-     expect(request3.toJSON().target).to.eql("myads/user-data");
+     expect(request3.toJSON().target).to.eql("vault/user-data");
      expect(request3.toJSON().options.type).to.eql("POST");
 
      expect(request3.toJSON().options.data).to.eql('{"link_server":"foo.com"}' );

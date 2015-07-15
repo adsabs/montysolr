@@ -80,6 +80,25 @@ define([
       this.setPubSub(beehive);
       this.key = this.getPubSub().getPubSubKey();
 
+      // Check if the Orcid access was revoked by the user
+      // It will only be considered 'revoked' if a 401 is received by the API handler
+      var checkOrcidToken = function() {
+        var orcidApi = beehive.getService('OrcidApi');
+        var user = beehive.getObject('User');
+
+        // Only run if there is actually authData stored in the user object
+        if (orcidApi.authData !== null) {
+            orcidApi.checkAccessOrcidApiAccess().fail(function() {
+                var status_code = arguments[0][0].status;
+                if (status_code == 401) {
+                    orcidApi.signOut();
+                    user.setOrcidMode(0);
+                }
+            });
+        }
+      };
+      this.getPubSub().subscribe(this.getPubSub().APP_STARTING, checkOrcidToken);
+
       var storage = beehive.getService('PersistentStorage');
       if (storage) {
         var prefs = storage.get('UserPreferences');
@@ -87,6 +106,7 @@ define([
           this.model.set(prefs);
         }
       }
+
     },
 
     /* orcid functions */

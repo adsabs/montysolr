@@ -366,10 +366,6 @@ define([
        this.graphChange(val1, val2)
      },
 
-     addToOnRender : function(){
-       this.$(".s-view-metrics-button-container").append('<button class="btn btn-default btn-sm view-metrics "> View all metrics</button>');
-     },
-
      submitFacet: function () {
        this.model.set("value", this.$(".slider").slider("values").join("-"));
        this.trigger('itemClicked');

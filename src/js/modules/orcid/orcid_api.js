@@ -118,7 +118,7 @@ define([
           null,
           {
             fail: function() {
-              ret.reject();
+              ret.reject(arguments);
             },
             done: function(res) {
               ret.resolve(res);

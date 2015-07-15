@@ -717,7 +717,7 @@ define([
         that = this,
         filterBibcodes = [],
         updater = new ApiQueryUpdater("fq"),
-        newQuery = newQuery = this.getCurrentQuery().clone();
+        newQuery = this.getCurrentQuery().clone();
 
       //get associated bibcodes
       this.filterCollection.each(function (model) {
