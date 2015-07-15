@@ -295,6 +295,8 @@ define([
       if (n) {
         console.error('Query failed for widget: ' + n, errorDetails);
 
+        // If this is an ORCID response and it is an unauthorized response, we will want to tell the user
+        // that they should log back in, and deactivate any ORCID widgets.
         if (/orcid/.exec(target) && feedback.error.status == 401) {
           alerter.alert(new ApiFeedback({
             code: ApiFeedback.CODES.ALERT,
@@ -302,7 +304,7 @@ define([
             modal: true
           }));
 
-          // Turn off Orcid modes
+          // Turn off ORCID modes
           var orcidApi = app.getService('OrcidApi');
           var user = app.getObject('User');
           orcidApi.signOut();
