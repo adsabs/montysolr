@@ -160,7 +160,6 @@ define([
 
         switch(xhr.status) {
           case 401: // unauthorized
-             console.log('here');
           case 404: // for some unknow reason (yet) - 401 comes marked as 404
              // check the Api is working
              app.getApiAccess({reconnect: true})
@@ -328,6 +327,7 @@ define([
       else {
         if (!feedback.beVerbose) return;
       }
+
 
       // we'll not show messages until search cycle is over
       if (!this._tmp.cycle_started)

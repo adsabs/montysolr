@@ -34,7 +34,6 @@ define([
   describe("Discovery mediator (discovery_mediator.spec.js)", function() {
 
     var minsub;
-
     beforeEach(function() {
       var api = new Api();
       minsub = new MinimalPubSub({verbose: true, Api: api});
