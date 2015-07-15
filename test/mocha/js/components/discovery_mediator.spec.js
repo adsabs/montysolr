@@ -34,9 +34,9 @@ define([
   describe("Discovery mediator (discovery_mediator.spec.js)", function() {
 
     var minsub;
-    var api;
+
     beforeEach(function() {
-      api = new Api();
+      var api = new Api();
       minsub = new MinimalPubSub({verbose: true, Api: api});
 
       this.server = sinon.fakeServer.create();
