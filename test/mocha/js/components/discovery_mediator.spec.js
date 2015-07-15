@@ -149,7 +149,7 @@ define([
 
     });
 
-    it("resets ORCID settings when the ORCID API  returns 401, which is passed to the feedback service", function () {
+    it("resets ORCID settings when the ORCID API returns 401, which is passed to the feedback service", function () {
 
       // Stub the behaviour of the application so that we do not have to modify the discovery_mediator.js code
       var app = {
