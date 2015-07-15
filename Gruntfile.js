@@ -534,18 +534,94 @@ module.exports = function(grunt) {
           urls: ['http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=core-suite')],
           tunnelTimeout: 5,
           build: process.env.TRAVIS_JOB_ID,
-          concurrency: 3,
+          concurrency: 5,
+
+          // the logic here is to test browser versions
+          // bbb does not depend on OS specific API's
+          // but it could still happen that certain features
+          // are not working in the same browser (different OS's)
+          // if we discover that, we should add that pair here
+          // Otherwise, we are testing against the 'worst'
+          // OS - which may even by Linux in some cases; e.g.
+          // (for drawing, flash playback etc)
+
           browsers: [
             {
-              browserName: "chrome",
-              platform: "linux"
+              browserName: 'internet explorer',
+              platform: 'Windows 8.1',
+              version: '11.0'
+            },
+
+            {
+              browserName: 'safari',
+              platform: 'OS X 10.6',
+              version: '5.1'
+            },
+            {
+              browserName: 'iphone',
+              platform: 'OS X 10.9',
+              version: '8.0',
+              deviceName: 'iPhone Simulator'
+            },
+            {
+              browserName: 'iphone',
+              platform: 'OS X 10.9',
+              version: '7.0',
+              deviceName: 'iPhone Simulator'
+            },
+
+            {
+              browserName: 'iphone',
+              deviceName: 'iPad Simulator',
+              deviceOrientation: 'portrait',
+              platform: 'OS X 10.9',
+              version: '8.0'
+            },
+            {
+              browserName: 'iphone',
+              deviceName: 'iPad Simulator',
+              deviceOrientation: 'portrait',
+              platform: 'OS X 10.9',
+              version: '7.0'
+            },
+            {
+              browserName: "android",
+              platform: "linux",
+              deviceName: 'Samsung Galaxy S4 Emulator',
+              version: '4.3'
             },
             {
               browserName: "android",
               platform: "linux",
               deviceName: 'Google Nexus 7 HD Emulator',
-              version: '4.4'
+              version: '4.2'
+            },
+            {
+              browserName: "firefox",
+              platform: "linux",
+              version: '39'
+            },
+            {
+              browserName: "firefox",
+              platform: "linux",
+              version: '38'
+            },
+            {
+              browserName: "firefox",
+              platform: "linux",
+              version: '34'
+            },
+            {
+              browserName: "chrome",
+              platform: "linux",
+              version: '43'
+            },
+            {
+              browserName: "chrome",
+              platform: "linux",
+              version: '42'
             }
+
           ],
           testname: "Bumblebee tests"
         }
