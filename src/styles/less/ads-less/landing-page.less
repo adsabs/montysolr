@@ -120,10 +120,12 @@
   }
 
   a {
-    color: @brand-info;
-    &:hover {
-      color: darken(@brand-info, 10)
-    }
+    color: lighten(@brand-info, 15%);
+  }
+  
+  p {
+    font-weight: 300;
+    font-size:18px;
   }
 
   .s-transparent-background {
@@ -148,8 +150,7 @@
     color: white;
     .lh-border-radius(50%);
     display: block;
-    .lh-box-shadow(0 0 15px #FFFFFF);
-    background-color: saturate(@brand-primary, 5%);
+    background-color: saturate(@brand-primary-faded, 5%);
     font-size: 4em;
     text-align: center;
     vertical-align: middle;
@@ -157,13 +158,6 @@
     margin: 0 auto 50px;
   }
 
-  .s-landing-icon.two{
-    background-color: saturate(@brand-success, 5%);
-  }
-
-  .s-landing-icon.three{
-    background-color: saturate(@brand-info, 5%);
-  }
   .s-bottom-line {
     font-size: 1.5em;
     padding-top: 10%;
