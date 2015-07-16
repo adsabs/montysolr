@@ -531,10 +531,15 @@ module.exports = function(grunt) {
     'saucelabs-mocha': {
       all: {
         options: {
+          username: '<%= local.sauce_username || process.env.SAUCE_USERNAME %>',
+          key: '<%= local.sauce_access_key || process.env.SAUCE_ACCESS_KEY %>',
           urls: ['http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=core-suite')],
-          tunnelTimeout: 5,
+          tunnelTimeout: 30,
+          "tunnel-identifier": process.env.TRAVIS_JOB_NUMBER,
           build: process.env.TRAVIS_JOB_ID,
           concurrency: 5,
+          throttled: 5,
+          maxRetries: 1,
 
           // the logic here is to test browser versions
           // bbb does not depend on OS specific API's
@@ -556,33 +561,6 @@ module.exports = function(grunt) {
               browserName: 'safari',
               platform: 'OS X 10.6',
               version: '5.1'
-            },
-            {
-              browserName: 'iphone',
-              platform: 'OS X 10.9',
-              version: '8.0',
-              deviceName: 'iPhone Simulator'
-            },
-            {
-              browserName: 'iphone',
-              platform: 'OS X 10.9',
-              version: '7.0',
-              deviceName: 'iPhone Simulator'
-            },
-
-            {
-              browserName: 'iphone',
-              deviceName: 'iPad Simulator',
-              deviceOrientation: 'portrait',
-              platform: 'OS X 10.9',
-              version: '8.0'
-            },
-            {
-              browserName: 'iphone',
-              deviceName: 'iPad Simulator',
-              deviceOrientation: 'portrait',
-              platform: 'OS X 10.9',
-              version: '7.0'
             },
             {
               browserName: "android",
@@ -620,10 +598,37 @@ module.exports = function(grunt) {
               browserName: "chrome",
               platform: "linux",
               version: '42'
-            }
+            },
+            {
+              browserName: 'iphone',
+              platform: 'OS X 10.9',
+              version: '8.0',
+              deviceName: 'iPhone Simulator'
+            },
+            {
+              browserName: 'iphone',
+              platform: 'OS X 10.9',
+              version: '7.0',
+              deviceName: 'iPhone Simulator'
+            },
 
+            {
+              browserName: 'iphone',
+              deviceName: 'iPad Simulator',
+              deviceOrientation: 'portrait',
+              platform: 'OS X 10.9',
+              version: '8.0'
+            },
+            {
+              browserName: 'iphone',
+              deviceName: 'iPad Simulator',
+              deviceOrientation: 'portrait',
+              platform: 'OS X 10.9',
+              version: '7.0'
+            }
           ],
-          testname: "Bumblebee tests"
+          testname: 'bbb',
+          tags: [grunt.file.read('git-describe').trim()]
         }
       }
     }
@@ -822,6 +827,6 @@ module.exports = function(grunt) {
       'uglify'
   ]);
 
-  grunt.registerTask("sauce", ['env:dev',  "less", 'express:dev', "saucelabs-mocha"]);
+  grunt.registerTask("sauce", ['env:dev',  "less", "exec:git_describe", 'express:dev', "saucelabs-mocha"]);
 
 };
