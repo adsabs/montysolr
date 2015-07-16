@@ -64,10 +64,12 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
       widget.activate(minsub.beehive.getHardenedInstance());
       $w = widget.render().$el;
 
-
      expect(widget).to.be.instanceof(BaseWidget);
      expect(widget.loadBibcodeData).to.be.instanceof(Function);
      widget.loadBibcodeData("fakeBibcode");
+
+     //these fields are required for the link generator mixin
+     expect(sentRequest.get("query").get("fl")[0]).to.eql("links_data,[citations],property,bibcode,first_author,year,page,pub,pubdate,title,volume,doi,issue,issn");
      expect(sentRequest.get('query').get('q')[0]).to.eql("bibcode:fakeBibcode");
 
       //why was regular sinon restore call not working?
@@ -125,7 +127,6 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
       }))({verbose: false});
 
       widget.activate(minsub.beehive.getHardenedInstance());
-
 
       var getUserDataSpy = sinon.spy(function(){return {link_server : "fake"}});
       widget.beehive.getObject = function(){return {getUserData : getUserDataSpy }};

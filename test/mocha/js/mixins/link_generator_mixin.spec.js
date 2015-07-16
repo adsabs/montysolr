@@ -5,20 +5,9 @@ define(['js/mixins/link_generator_mixin'],
       var mixin;
 
       beforeEach(function(){
-
         mixin = LinkGeneratorMixin;
-      })
+      });
 
-
-
-      it("should have a list of fields for the abstract and results page to facilitate link building", function(){
-
-        //added to defaultQueryFields
-
-        expect(mixin.abstractPageFields).to.equal("links_data,[citations],property,bibcode");
-        expect(mixin.resultsPageFields).to.equal("links_data,[citations],property");
-
-      })
 
       it("should have a adsUrlRedirect function used by other functions that takes an identifier and a type, and returns a classic ads url resolver link", function(){
         //this function directly uses Giovanni's logic from beer
