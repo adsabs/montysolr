@@ -56,7 +56,12 @@ define([
         grecaptcha.render(view.$(".g-recaptcha")[0],
           {
             sitekey: siteKey, callback: function (response) {
-            view.model.set("g-recaptcha-response", response);
+            //this might need to be inserted into the model.
+            //or in the case of feedback form, it just needs
+            //to be in the serialized form
+            if (view.model){
+              view.model.set("g-recaptcha-response", response);
+            }
           }
           });
 

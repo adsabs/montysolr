@@ -283,7 +283,7 @@ define([
 
      var server = sinon.fakeServer.create();
 
-     server.respondWith( "POST", "http://formspree.io/adshelp@cfa.harvard.edu",
+     server.respondWith( "POST",  'http://adsws-staging.elasticbeanstalk.com/feedback/slack',
        [200, { "Content-Type": "application/json" }, '{}']);
 
      $("form.feedback-form").find("textarea").val("test comment");
@@ -291,7 +291,7 @@ define([
 
      expect(server.requests[0].requestBody).to.eql("_subject=Bumblebee+Feedback&_gotcha=&name=&_replyto=&feedback-type=bug&comments=test+comment");
 
-     expect(server.requests[0].url).to.eql("http://formspree.io/adshelp@cfa.harvard.edu");
+     expect(server.requests[0].url).to.eql('http://adsws-staging.elasticbeanstalk.com/feedback/slack');
 
      server.respond();
 
@@ -300,15 +300,14 @@ define([
        //form should be emptied
        expect($("form.feedback-form textarea").val()).to.eql('');
 
-       //modal should be close
+       //modal should be closed
        expect(  $("#feedback-modal").is(':visible')).to.be.false;
 
        server.restore();
 
        done();
 
-
-     }, 1900);
+     }, 1800);
 
 
 

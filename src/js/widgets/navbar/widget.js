@@ -113,7 +113,7 @@ define([
         //attach modal
         $("body").append(FeedbackTemplate());
 
-        var $modal = $("#feedback-modal");
+        var $modal = $("#feedback-modal"), that = this;
 
         function clearForm () {
           $modal.find(".modal-body").html($(FeedbackTemplate()).find("form"))
@@ -127,7 +127,7 @@ define([
           var $form = $(e.target);
           e.preventDefault();
           $.ajax({
-            url: "//formspree.io/adshelp@cfa.harvard.edu",
+            url: "//adsws-staging.elasticbeanstalk.com/feedback/slack",
             method: "POST",
             data: $form.serialize(),
             dataType: 'json',
@@ -153,6 +153,10 @@ define([
 
             })
           });
+
+        $modal.on("shown.bs.modal", function(){
+          that.trigger("activate-recaptcha")
+        })
 
           this.formAttached = true;
       }
@@ -202,7 +206,8 @@ define([
       "navigate-to-orcid-link" : "navigateToOrcidLink",
       "user-change-orcid-mode" : "toggleOrcidMode",
       "logout-only-orcid" : "orcidLogout",
-      'search-author': 'searchAuthor'
+      'search-author': 'searchAuthor',
+      'activate-recaptcha' : "activateRecaptcha"
     },
 
     //to set the correct initial values for signed in statuses
@@ -296,6 +301,14 @@ define([
 
     navigateToOrcidLink : function(){
       this.pubsub.publish(this.pubsub.NAVIGATE, "orcid-page")
+    },
+
+    activateRecaptcha : function(){
+      //right now, modal is not part of main view.$el because it has to be inserted at the bottom of the page
+      var view = new Marionette.ItemView({el : "#feedback-modal"})
+      if (this.getBeeHive()){
+        this.getBeeHive().getObject("RecaptchaManager").activateRecaptcha(view);
+      }
     }
 
 
