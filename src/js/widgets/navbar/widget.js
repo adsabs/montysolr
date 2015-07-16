@@ -5,6 +5,8 @@ define([
   'hbs!./template/feedback',
   'js/components/api_query_updater',
   'js/components/api_query',
+  'js/components/api_request',
+  'js/components/api_targets',
   'bootstrap'
 
 ], function(
@@ -14,6 +16,8 @@ define([
   FeedbackTemplate,
   ApiQueryUpdater,
   ApiQuery,
+  ApiRequest,
+  ApiTargets,
   Bootstrap
   ){
 
@@ -109,11 +113,13 @@ define([
 
     onRender : function(){
 
+      var that = this;
+
       if (!this.formAttached){
         //attach modal
         $("body").append(FeedbackTemplate());
 
-        var $modal = $("#feedback-modal"), that = this;
+        var $modal = $("#feedback-modal");
 
         function clearForm () {
           $modal.find(".modal-body").html($(FeedbackTemplate()).find("form"))
@@ -122,41 +128,15 @@ define([
         //make sure to clear the form when the modal closes
         $modal.on("hidden.bs.modal", clearForm);
 
-        //attach submit handler
-        $(".feedback-form").submit(function(e) {
-          var $form = $(e.target);
-          e.preventDefault();
-          $.ajax({
-            url: "//adsws-staging.elasticbeanstalk.com/feedback/slack",
-            method: "POST",
-            data: $form.serialize(),
-            dataType: 'json',
-
-            beforeSend: function () {
-              $form.find("button[type=submit]")
-                .html('<i class="icon-loading"></i> Sending form...');
-              }
-            })
-            .done(function (data) {
-              $form.find("button[type=submit]")
-                .html('<i class="icon-success"></i> Message sent!');
-
-              setTimeout(function(){
-                $modal.modal("hide");
-              }, 500);
-
-            })
-            .fail( function (err) {
-              $form.find("button[type=submit]")
-              .addClass("btn-danger")
-              .html('<i class="icon-danger"></i> There was an error!')
-
-            })
-          });
-
         $modal.on("shown.bs.modal", function(){
-          that.trigger("activate-recaptcha")
-        })
+          that.trigger("activate-recaptcha");
+        });
+
+        //attach submit handler
+        $(".feedback-form").submit(function(e){
+          e.preventDefault();
+          that.trigger("feedback-form-submit", $(e.target), $modal);
+        });
 
           this.formAttached = true;
       }
@@ -202,12 +182,51 @@ define([
        //log out of ORCID too
        this.orcidLogout();
       },
+      "feedback-form-submit" : "submitForm",
        //dealing with orcid
       "navigate-to-orcid-link" : "navigateToOrcidLink",
       "user-change-orcid-mode" : "toggleOrcidMode",
       "logout-only-orcid" : "orcidLogout",
       'search-author': 'searchAuthor',
       'activate-recaptcha' : "activateRecaptcha"
+    },
+
+    submitForm : function($form, $modal){
+
+      function beforeSend () {
+        $form.find("button[type=submit]")
+          .html('<i class="icon-loading"></i> Sending form...');
+      }
+
+      function done (data){
+        $form.find("button[type=submit]")
+          .html('<i class="icon-success"></i> Message sent!');
+
+        setTimeout(function(){
+          $modal.modal("hide");
+        }, 500);
+      }
+
+      function fail (err){
+        $form.find("button[type=submit]")
+          .addClass("btn-danger")
+          .html('<i class="icon-danger"></i> There was an error!')
+      }
+
+      var request = new ApiRequest({
+        target : ApiTargets.FEEDBACK,
+        options : {
+          method: "POST",
+          data: $form.serialize(),
+          dataType: 'json',
+          done: done,
+          fail : fail,
+          beforeSend : beforeSend
+        }
+
+      });
+      this.getBeeHive().getService("Api").request(request);
+
     },
 
     //to set the correct initial values for signed in statuses
@@ -306,9 +325,7 @@ define([
     activateRecaptcha : function(){
       //right now, modal is not part of main view.$el because it has to be inserted at the bottom of the page
       var view = new Marionette.ItemView({el : "#feedback-modal"})
-      if (this.getBeeHive()){
-        this.getBeeHive().getObject("RecaptchaManager").activateRecaptcha(view);
-      }
+       this.getBeeHive().getObject("RecaptchaManager").activateRecaptcha(view);
     }
 
 

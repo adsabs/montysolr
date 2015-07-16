@@ -3,7 +3,8 @@ define([
   'js/bugutils/minimal_pubsub',
   'js/components/user',
   'js/components/session',
-  'js/modules/orcid/orcid_api'
+  'js/modules/orcid/orcid_api',
+  'js/services/api'
 
 ], function(
 
@@ -11,7 +12,8 @@ define([
   MinSub,
   User,
   Session,
-  OrcidApi
+  OrcidApi,
+  Api
 
   ){
 
@@ -142,177 +144,187 @@ define([
 
 //ADS user accounts
 
-  it("should query initial user logged in/logged out state and show the correct options", function(){
+    it("should query initial user logged in/logged out state and show the correct options", function(){
 
-    /*
-    navigation bar queries logged in/logged out state solely on the basis
-     * of whether user.getUserName() returns a name.
-      * */
+      /*
+       navigation bar queries logged in/logged out state solely on the basis
+       * of whether user.getUserName() returns a name.
+       * */
 
-    var minsub = new (MinSub.extend({
-      request: function (apiRequest) {}
-    }))({verbose: false});
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {}
+      }))({verbose: false});
 
-    sinon.stub(User.prototype, "redirectIfNecessary");
-    var u = new User();
+      sinon.stub(User.prototype, "redirectIfNecessary");
+      var u = new User();
 
-    minsub.beehive.addObject("User", u);
+      minsub.beehive.addObject("User", u);
 
-    minsub.beehive.addService('OrcidApi', {
-      hasAccess: function() {return true},
-      getHardenedInstance: function() {return this},
-      getUserProfile : function(){
-        var d = $.Deferred();
-        d.resolve(profileInfo);
-        return d
-      }
+      minsub.beehive.addService('OrcidApi', {
+        hasAccess: function() {return true},
+        getHardenedInstance: function() {return this},
+        getUserProfile : function(){
+          var d = $.Deferred();
+          d.resolve(profileInfo);
+          return d
+        }
+      });
+
+      var n = new NavBarWidget();
+      n.activate(minsub.beehive.getHardenedInstance());
+      u.activate(minsub.beehive);
+
+      $("#test").append(n.view.render().el);
+
+      u.collection.get("USER").set("user", "bumblebee");
+
+      expect(n.view.$("li.login").length).to.eql(0);
+      expect(n.view.$("li.register").length).to.eql(0);
+
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(1);
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").html()).to.eql('\n                        bumblebee <span class="caret"></span>\n                    ');
+
+      //lack of username indicates user is logged out
+      u.collection.get("USER").set("user", undefined);
+
+      minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
+
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
+
+      expect(n.view.$("li.login").length).to.eql(1);
+      expect(n.view.$("li.register").length).to.eql(1);
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
+
     });
 
-    var n = new NavBarWidget();
-    n.activate(minsub.beehive.getHardenedInstance());
-    u.activate(minsub.beehive);
 
-    $("#test").append(n.view.render().el);
+    it("should emit the proper events when user links are clicked", function(){
 
-    u.collection.get("USER").set("user", "bumblebee");
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {}
+      }))({verbose: false});
 
-    expect(n.view.$("li.login").length).to.eql(0);
-    expect(n.view.$("li.register").length).to.eql(0);
+      var u = new User();
+      u.pubsub = {publish : function(){}, getPubSubKey : function(){}};
+      minsub.beehive.addObject("User", u);
 
-    expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(1);
-    expect(n.view.$(".btn.btn-link.dropdown-toggle").html()).to.eql('\n                        bumblebee <span class="caret"></span>\n                    ');
+      var s = new Session();
+      sinon.stub(s, "logout");
 
-    //lack of username indicates user is logged out
-    u.collection.get("USER").set("user", undefined);
+      minsub.beehive.addObject("Session", s);
 
-    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
+      var orcidSignOutSpy = sinon.spy();
 
-    expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
+      minsub.beehive.addService('OrcidApi', {
+        hasAccess: function() {return true},
+        getHardenedInstance: function() {return this},
+        signOut : orcidSignOutSpy,
+        getUserProfile : function(){
+          var d = $.Deferred();
+          d.resolve(profileInfo);
+          return d
+        }
+      });
 
-    expect(n.view.$("li.login").length).to.eql(1);
-    expect(n.view.$("li.register").length).to.eql(1);
-    expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
+      var n = new NavBarWidget();
+      n.activate(minsub.beehive.getHardenedInstance());
+      var publishSpy = sinon.stub(n.pubsub, "publish");
 
-  });
+      $("#test").append(n.view.render().el);
+
+      $("#test").find(".login").click();
+
+      expect(publishSpy.callCount).to.eql(1);
+      expect(publishSpy.args[0][0]).to.eql(minsub.pubsub.NAVIGATE);
+      expect(publishSpy.args[0][1]).to.eql("authentication-page");
+      expect(publishSpy.args[0][2].subView).to.eql("login");
+
+      $("#test").find(".register").click();
+      expect(publishSpy.callCount).to.eql(2);
+      expect(publishSpy.args[1][0]).to.eql(minsub.pubsub.NAVIGATE);
+      expect(publishSpy.args[1][1]).to.eql("authentication-page");
+      expect(publishSpy.args[1][2].subView).to.eql("register");
+
+      //now show navbar in logged in state
+
+      u.collection.get("USER").set("user", "foo");
+      minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
 
 
-  it("should emit the proper events when user links are clicked", function(){
+      $("#test").find(".logout").click();
+      expect(publishSpy.callCount).to.eql(2);
+      //calls session logout method explicitly
 
-    var minsub = new (MinSub.extend({
-      request: function (apiRequest) {}
-    }))({verbose: false});
+      expect(s.logout.callCount).to.eql(1);
+      expect(orcidSignOutSpy.callCount).to.eql(1);
 
-    var u = new User();
-    u.pubsub = {publish : function(){}, getPubSubKey : function(){}};
-    minsub.beehive.addObject("User", u);
-
-    var s = new Session();
-    sinon.stub(s, "logout");
-
-    minsub.beehive.addObject("Session", s);
-
-    var orcidSignOutSpy = sinon.spy();
-
-    minsub.beehive.addService('OrcidApi', {
-      hasAccess: function() {return true},
-      getHardenedInstance: function() {return this},
-      signOut : orcidSignOutSpy,
-      getUserProfile : function(){
-        var d = $.Deferred();
-        d.resolve(profileInfo);
-        return d
-      }
     });
 
-    var n = new NavBarWidget();
-    n.activate(minsub.beehive.getHardenedInstance());
-    var publishSpy = sinon.stub(n.pubsub, "publish");
+    it("should have a feedback form modal appended to body only 1x, and triggered from navbar", function(){
+      //not sure why i have to call this when we have afterEach
+      $("#feedback-modal").remove();
 
-    $("#test").append(n.view.render().el);
+      var n = new NavBarWidget();
+      n.view.render();
 
-    $("#test").find(".login").click();
+      expect($("form.feedback-form").length).to.eql(1);
+      $("#test").append(n.view.render().el);
+      expect($("form.feedback-form").length).to.eql(1);
 
-    expect(publishSpy.callCount).to.eql(1);
-    expect(publishSpy.args[0][0]).to.eql(minsub.pubsub.NAVIGATE);
-    expect(publishSpy.args[0][1]).to.eql("authentication-page");
-    expect(publishSpy.args[0][2].subView).to.eql("login");
-
-    $("#test").find(".register").click();
-    expect(publishSpy.callCount).to.eql(2);
-    expect(publishSpy.args[1][0]).to.eql(minsub.pubsub.NAVIGATE);
-    expect(publishSpy.args[1][1]).to.eql("authentication-page");
-    expect(publishSpy.args[1][2].subView).to.eql("register");
-    
-    //now show navbar in logged in state
-    
-    u.collection.get("USER").set("user", "foo");
-    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
+      expect($("#test button[data-target=#feedback-modal]").length).to.eql(1);
 
 
-    $("#test").find(".logout").click();
-    expect(publishSpy.callCount).to.eql(2);
-    //calls session logout method explicitly
+    });
 
-    expect(s.logout.callCount).to.eql(1);
-    expect(orcidSignOutSpy.callCount).to.eql(1);
+    it("feedback form should make an ajax request upon submit, display status, and clear itself on close", function(done){
+      $("#feedback-modal").remove();
+      var n = new NavBarWidget();
+      $("#test").append(n.view.render().el);
+
+      $("#feedback-modal").modal("show");
+
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {
+        }
+      }))({verbose: false});
+
+      n.setInitialVals = function(){};
+
+      var fakeRecaptchaManager = {getHardenedInstance : function(){return this}, activateRecaptcha: function(){}};
+
+      minsub.beehive.addObject("RecaptchaManager", fakeRecaptchaManager);
+
+      var api = new Api();
+      var requestStub = sinon.stub(Api.prototype, "request", function(apiRequest){
+        apiRequest.toJSON().options.done();
+      });
+      minsub.beehive.removeService("Api");
+      minsub.beehive.addService("Api", api);
+
+      n.activate(minsub.beehive.getHardenedInstance());
+
+      $("form.feedback-form").find("textarea").val("test comment");
+      $("form.feedback-form").submit();
+
+      expect(requestStub.args[0][0].toJSON().target).to.eql("feedback/slack");
+      expect(JSON.stringify(requestStub.args[0][0].toJSON().options)).to.eql('{"method":"POST","data":"_subject=Bumblebee+Feedback&_gotcha=&name=&_replyto=&feedback-type=bug&comments=test+comment","dataType":"json"}');
+
+      setTimeout(function(){
+        //form should be emptied
+        expect($("form.feedback-form textarea").val()).to.eql('');
+        //modal should be closed
+        expect(  $("#feedback-modal").is(':visible')).to.be.false;
+
+        done();
+
+      }, 1800);
+
+      requestStub.restore();
+
+
+
+    });
 
   });
-
-   it("should have a feedback form modal appended to body only 1x, and triggered from navbar", function(){
-     //not sure why i have to call this when we have afterEach
-     $("#feedback-modal").remove();
-
-     var n = new NavBarWidget();
-     n.view.render();
-
-     expect($("form.feedback-form").length).to.eql(1);
-     $("#test").append(n.view.render().el);
-     expect($("form.feedback-form").length).to.eql(1);
-
-     expect($("#test button[data-target=#feedback-modal]").length).to.eql(1);
-
-
-   });
-
-   it("feedback form should make an ajax request upon submit, display status, and clear itself on close", function(done){
-     $("#feedback-modal").remove();
-     var n = new NavBarWidget();
-     $("#test").append(n.view.render().el);
-
-     $("#feedback-modal").modal("show");
-
-     var server = sinon.fakeServer.create();
-
-     server.respondWith( "POST",  'http://adsws-staging.elasticbeanstalk.com/feedback/slack',
-       [200, { "Content-Type": "application/json" }, '{}']);
-
-     $("form.feedback-form").find("textarea").val("test comment");
-     $("form.feedback-form").submit();
-
-     expect(server.requests[0].requestBody).to.eql("_subject=Bumblebee+Feedback&_gotcha=&name=&_replyto=&feedback-type=bug&comments=test+comment");
-
-     expect(server.requests[0].url).to.eql('http://adsws-staging.elasticbeanstalk.com/feedback/slack');
-
-     server.respond();
-
-     setTimeout(function(){
-
-       //form should be emptied
-       expect($("form.feedback-form textarea").val()).to.eql('');
-
-       //modal should be closed
-       expect(  $("#feedback-modal").is(':visible')).to.be.false;
-
-       server.restore();
-
-       done();
-
-     }, 1800);
-
-
-
-   });
-
-});
 
 });

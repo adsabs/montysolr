@@ -64,7 +64,6 @@ define([
             }
           }
           });
-
       },
 
       hardenedInterface: {

@@ -37,6 +37,7 @@ define([
 
       RECOMMENDER : 'recommender',
       GRAPHICS: 'graphics',
+      FEEDBACK : 'feedback/slack',
 
       //library endpoints
       //can get info about all libraries, or list of bibcodes associated w/specific lib (libraries/id)
