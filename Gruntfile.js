@@ -628,7 +628,7 @@ module.exports = function(grunt) {
             }
           ],
           testname: 'bbb',
-          tags: [grunt.file.read('git-describe').trim()]
+          tags: ['<%= grunt.file.read("git-describe").trim() %>']
         }
       }
     }
