@@ -40,7 +40,8 @@
     "grunt-blanket-mocha": "^0.4.1",
     "blanket": "^1.1.6",
     "grunt-hash-required": "^0.1.5",
-    "mocha-phantomjs": "~3.5.2"
+    "mocha-phantomjs": "~3.5.2",
+    "grunt-saucelabs": "~8.6.1"
   },
   "peerDependencies": {
     "bower": "*",

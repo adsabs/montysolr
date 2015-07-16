@@ -6,6 +6,6 @@
   "orcid_oauth_cliend_id": "APP-P5ANJTQRRTMA6GXZ",
   "orcid_oauth_client_secret": "989e54c8-7093-4128-935f-30c19ed9158c",
   "orcid_api_endpoint": "https://api.sandbox.orcid.org",
-  "sauce_username": "romanchyla",
-  "sauce_access_key": "edf9709d-a418-4f2a-8e61-ad05a23059bd"
+  "sauce_username": "",
+  "sauce_access_key": ""
 }
