@@ -49,6 +49,7 @@ define([
 
 
   var ResourcesWidget = BaseWidget.extend({
+
     initialize : function(options){
       options = options || {};
       this.model = new ResourcesModel();
@@ -57,12 +58,14 @@ define([
     },
 
     activate: function (beehive) {
-      this.beehive = beehive;
-      this.pubsub = beehive.Services.get('PubSub');
+      this.beehive = beehive, this.pubsub = beehive.Services.get('PubSub');
       _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
       this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
+
+    //used by the link generator mixin
+    requiredFields : "links_data,[citations],property,bibcode,first_author,year,page,pub,pubdate,title,volume,doi,issue,issn",
 
     onDisplayDocuments: function(apiQuery) {
       var bibcode = apiQuery.get('q');
@@ -79,13 +82,11 @@ define([
       }
       else {
         this._bibcode = bibcode;
-        var searchTerm = "bibcode:"+this._bibcode;
+        var searchTerm = "bibcode:" + this._bibcode;
         //abstractPageFields comes from the LinkGenerator Mixin
-        this.dispatchRequest(new ApiQuery({'q': searchTerm, fl : "links_data,[citations],property,bibcode"}));
+        this.dispatchRequest(new ApiQuery({'q': searchTerm, fl : this.requiredFields }));
       }
-
     },
-
 
     processResponse : function(apiResponse){
 
@@ -94,7 +95,6 @@ define([
       data.link_server = this.beehive.getObject("User").getUserData("USER_DATA").link_server;
       //link mixin
       data = this.parseResourcesData(data);
-
       this.model.set(data);
       this.trigger('page-manager-event', 'widget-ready', {'isActive': true});
 

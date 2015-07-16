@@ -3,9 +3,13 @@ define(["underscore", "js/mixins/openurl_generator"], function(_, OpenURLGenerat
 
 var linkGenerator = {
 
-  abstractPageFields: "links_data,[citations],property,bibcode",
-
-  resultsPageFields: "links_data,[citations],property",
+  /*
+  * requires the following solr fields to work correctly:
+  *
+  * links_data,[citations],property,bibcode,first_author,year
+  * page,pub,pubdate,title,volume,doi,issue,issn
+  *
+  * */
 
   //function that can turn links_data into a list of actual links
 
