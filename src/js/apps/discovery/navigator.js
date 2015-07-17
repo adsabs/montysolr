@@ -232,9 +232,7 @@ define([
 
           if (loggedIn){
             //redirect to index
-            app.getObject('MasterPageManager').show('LandingPage');
-            var q = app.getObject('AppStorage').getCurrentQuery();
-            this.route = '#index/' + queryUpdater.clean(q).url();
+            self.get('index-page').execute();
           }
           else {
             app.getWidget("Authentication").setSubView(subView);

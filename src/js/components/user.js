@@ -317,6 +317,7 @@ define([
 
     //returns a promise
     getToken : function(){
+      debugger
       return this.fetchData("TOKEN");
     },
 

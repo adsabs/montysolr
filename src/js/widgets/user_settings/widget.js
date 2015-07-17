@@ -340,11 +340,14 @@ UserSettings = BaseWidget.extend({
    },
 
    activate : function(beehive) {
+     var that = this;
      this.beehive = beehive;
      this.pubsub = beehive.Services.get('PubSub');
      _.bindAll(this, ["handleUserAnnouncement"]);
      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
-     this.view.getToken = this.beehive.getObject("User").getToken;
+     this.view.getToken = function() {
+       return that.beehive.getObject("User").getToken();
+     }
    },
 
     viewEvents : {
