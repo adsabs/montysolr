@@ -271,7 +271,6 @@ define([
     completeLogOut : function(){
       this.model.clear();
       this.userDataModel.clear();
-      this.pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "logout_success");
     },
 
 
