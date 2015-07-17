@@ -184,6 +184,14 @@ Unit Test Results: 271 specs passed! (6.04s)
 Done, without errors.
 ```
 
+To run test suites against multiple browsers, use Sauce Labs. First edit local-config.js,
+set the sauce_ variables (you should get them from Sauce Labs account)
+
+```bash
+$ grunt sauce # optionally, past name of the test, ie. --testname='mocha/tests.html?bbbSuite=core-suite'
+```
+
+
 If you need to change the way how grunt works, you can edit `local-config.js`
 
   * port_development: when running tests, webserver will start on this port [default: 8000]

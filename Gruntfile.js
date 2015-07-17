@@ -526,6 +526,111 @@ module.exports = function(grunt) {
           //dest: './coverage/output'
           }
       }
+    },
+
+    'saucelabs-mocha': {
+      all: {
+        options: {
+          username: '<%= local.sauce_username || process.env.SAUCE_USERNAME %>',
+          key: '<%= local.sauce_access_key || process.env.SAUCE_ACCESS_KEY %>',
+          urls: ['http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=core-suite')],
+          tunnelTimeout: 30,
+          "tunnel-identifier": process.env.TRAVIS_JOB_NUMBER,
+          build: process.env.TRAVIS_JOB_ID,
+          concurrency: 5,
+          throttled: 5,
+          maxRetries: 1,
+
+          // the logic here is to test browser versions
+          // bbb does not depend on OS specific API's
+          // but it could still happen that certain features
+          // are not working in the same browser (different OS's)
+          // if we discover that, we should add that pair here
+          // Otherwise, we are testing against the 'worst'
+          // OS - which may even by Linux in some cases; e.g.
+          // (for drawing, flash playback etc)
+
+          browsers: [
+            {
+              browserName: 'internet explorer',
+              platform: 'Windows 8.1',
+              version: '11.0'
+            },
+
+            {
+              browserName: 'safari',
+              platform: 'OS X 10.6',
+              version: '5.1'
+            },
+            {
+              browserName: "android",
+              platform: "linux",
+              deviceName: 'Samsung Galaxy S4 Emulator',
+              version: '4.3'
+            },
+            {
+              browserName: "android",
+              platform: "linux",
+              deviceName: 'Google Nexus 7 HD Emulator',
+              version: '4.2'
+            },
+            {
+              browserName: "firefox",
+              platform: "linux",
+              version: '39'
+            },
+            {
+              browserName: "firefox",
+              platform: "linux",
+              version: '38'
+            },
+            {
+              browserName: "firefox",
+              platform: "linux",
+              version: '34'
+            },
+            {
+              browserName: "chrome",
+              platform: "linux",
+              version: '43'
+            },
+            {
+              browserName: "chrome",
+              platform: "linux",
+              version: '42'
+            },
+            {
+              browserName: 'iphone',
+              platform: 'OS X 10.9',
+              version: '8.0',
+              deviceName: 'iPhone Simulator'
+            },
+            {
+              browserName: 'iphone',
+              platform: 'OS X 10.9',
+              version: '7.0',
+              deviceName: 'iPhone Simulator'
+            },
+
+            {
+              browserName: 'iphone',
+              deviceName: 'iPad Simulator',
+              deviceOrientation: 'portrait',
+              platform: 'OS X 10.9',
+              version: '8.0'
+            },
+            {
+              browserName: 'iphone',
+              deviceName: 'iPad Simulator',
+              deviceOrientation: 'portrait',
+              platform: 'OS X 10.9',
+              version: '7.0'
+            }
+          ],
+          testname: 'bbb',
+          tags: ['<%= grunt.file.read("git-describe").trim() %>']
+        }
+      }
     }
 
   });
@@ -573,6 +678,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha');
   grunt.loadNpmTasks("grunt-blanket-mocha");
   grunt.loadNpmTasks('grunt-hash-required');
+  grunt.loadNpmTasks('grunt-saucelabs');
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
@@ -720,5 +826,7 @@ module.exports = function(grunt) {
       'assemble',
       'uglify'
   ]);
+
+  grunt.registerTask("sauce", ['env:dev',  "less", "exec:git_describe", 'express:dev', "saucelabs-mocha"]);
 
 };
