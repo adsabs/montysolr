@@ -39,10 +39,15 @@
 
   display: inline-block;
   position:relative;
-  margin-right: 4%;
   margin-top: 0px;
   margin-bottom: -4px;
   font-size : 1.05em;
+
+
+  //confused why this is necessary
+  @media (min-width: @screen-sm-min){
+    margin-right: 4%;
+  }
 
   i {
     color : darken(@gray-lighter, 2%);
@@ -189,7 +194,7 @@
 
 .s-checkbox-col {
   text-align: right;
-  padding-left: 0;
+  padding: 0;
   label {
 
     .s-light-font;
@@ -284,7 +289,12 @@ li.article-author {
 .s-search-bar-motion {
   .s-back-button-container {
     padding-top: 0;
+
+    @media (max-width: @screen-md-min){
+      display:none;
+    }
   }
+
 }
 
 @media (max-width :@screen-sm-min) {

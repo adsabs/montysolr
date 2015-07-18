@@ -38,7 +38,7 @@
 
     {{#if operator}}
         <div class="s-operator">
-            <a href="#search/q={{queryOperator}}(bibcode:{{bibcode}})" class="btn btn-sm btn-primary-faded"><i class="fa fa-search"></i> view this list in a search results page</a>
+            <a href="#search/q={{queryOperator}}(bibcode:{{bibcode}})" class="btn btn-default"><i class="fa fa-search"></i> view this list in a search results page</a>
          </div>
     {{/if}}
 
@@ -47,25 +47,25 @@
     <ul class="results-list  s-results-list list-unstyled s-display-block" aria-label="list of results">
     </ul>
 
-{{#if pagination}}
-    <div class="">
+    {{#if pagination}}
+    <div class="row">
         <div class="col-sm-12 pagination-controls s-pagination-controls">
-            <div class="col-sm-5 col-sm-offset-2">
+            <div class="col-xs-5 col-xs-offset-1">
                 <ul class="pagination">
                     {{#if showFirst}}
-                        <li><a href="search/{{../currentQuery}}" data-paginate = "1" data-bypass>&laquo;</a></li>
+                    <li><a href="search/{{../currentQuery}}" data-paginate = "1" data-bypass>&laquo;</a></li>
                     {{/if}}
                     {{#each pageData}}
-                        <li {{#if this.current}} class="active" {{/if}} >
-                        <a href="{{this.link}}" data-bypass  data-paginate = "{{this.p}}" >{{this.p}} </a>
-                        </li>
+                    <li {{#if this.current}} class="active" {{/if}} >
+                    <a href="{{this.link}}"  data-paginate = "{{this.p}}" >{{this.p}} </a>
+                    </li>
                     {{/each}}
                 </ul>
             </div>
-            <div class="col-sm-5 s-per-page-controls">
-                Show <input class="per-page" type="text" placeholder="{{perPage}}"/> per page
+            <div class="col-xs-6 s-per-page-controls">
+                <span style="text-align:right">Show <input class="per-page" type="text" placeholder="{{perPage}}"/> per page</span>
             </div>
         </div>
     </div>
-{{/if}}
+    {{/if}}
 
