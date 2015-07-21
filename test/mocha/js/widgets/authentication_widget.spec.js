@@ -71,12 +71,12 @@ function(
         else if (object == "RecaptchaManager"){
           return  {activateRecaptcha : function(){}}
         }
-      })
+      });
       var a = new AuthenticationWidget({test: true});
 
       a.activate(hardened);
 
-      var publishStub = sinon.stub(a.pubsub, "publish");
+      var publishStub = sinon.stub(a.getPubSub(), "publish");
 
       $("#test").append(a.view.render().el);
 
@@ -132,7 +132,6 @@ function(
 
     it("should interactively validate form inputs, only allowing correctly filled forms to be submitted", function(){
 
-      //testing only a single view-- is this ok?
       var minsub = new (MinSub.extend({
         request: function (apiRequest) {}
       }))({verbose: false});
@@ -166,10 +165,12 @@ function(
       expect($("#test").find("input[name=email]").parent().hasClass("has-success")).to.be.true;
       expect($("#test").find("input[name=email]").parent().hasClass("has-error")).to.be.false;
 
-      $("#test").find("input[name=password1]").val("1aaaa");
+      // password is too short by 1 letter
+      $("#test").find("input[name=password1]").val("1aaa");
       $("#test").find("input[name=password1]").trigger("change");
       expect($("#test").find("input[name=password1]").parent().hasClass("has-success")).to.be.false;
       expect($("#test").find("input[name=password1]").parent().hasClass("has-error")).to.be.false;
+
 
       $("#test").find("input[name=password1]").val("1Aaaaa");
       $("#test").find("input[name=password1]").trigger("change");
@@ -225,7 +226,7 @@ function(
         else if (object == "RecaptchaManager"){
           return  {activateRecaptcha : function(){}}
         }
-      })
+      });
       var a = new AuthenticationWidget({test: true});
 
       a.activate(hardened);

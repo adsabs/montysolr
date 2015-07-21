@@ -64,13 +64,13 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
-        this.pubsub = beehive.Services.get('PubSub');
+        var pubsub = beehive.getService('PubSub');
         _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement', 'onStoragePaperUpdate', 'onCustomEvent');
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-        this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
-        this.pubsub.subscribe(this.pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperUpdate);
-        this.pubsub.subscribe(this.pubsub.CUSTOM_EVENT, this.onCustomEvent);
+        pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+        pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
+        pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperUpdate);
+        pubsub.subscribe(pubsub.CUSTOM_EVENT, this.onCustomEvent);
       },
 
       onUserAnnouncement: function(key, val){
@@ -89,7 +89,8 @@ define([
       onCustomEvent : function(event){
         if (event == "add-all-on-page"){
           var bibs = this.collection.pluck("bibcode");
-          this.pubsub.publish(this.pubsub.BULK_PAPER_SELECTION, bibs);
+          var pubsub = this.getPubSub();
+          pubsub.publish(pubsub.BULK_PAPER_SELECTION, bibs);
         }
       },
 
@@ -229,8 +230,13 @@ define([
       },
 
       onStoragePaperUpdate : function(){
+        var appStorage = null;
         if (this.hasBeeHive() && this.getBeeHive().hasObject('AppStorage')) {
           appStorage = this.getBeeHive().getObject('AppStorage');
+        }
+        else {
+          console.warn('AppStorage object disapperared!');
+          return;
         }
         this.collection.each(function(m){
           if (appStorage.isPaperSelected(m.get("identifier"))) {

@@ -9,6 +9,7 @@ define([
   'hbs!./templates/container',
   'hbs!./templates/reset-password-1',
   'hbs!./templates/reset-password-2',
+  'js/components/user',
   'backbone-validation',
   'backbone.stickit',
   'google-recaptcha'
@@ -22,7 +23,8 @@ define([
              RegisterTemplate,
              ContainerTemplate,
              ResetPassword1Template,
-             ResetPassword2Template
+             ResetPassword2Template,
+             User
   ) {
   /*
   *
@@ -30,6 +32,10 @@ define([
   * gets a success or fail message from pubsub
   *
   * */
+
+
+  var passwordRegex = /(?=.*\d)(?=.*[a-zA-Z]).{5,}/;
+
 
   var FormView, FormModel;
 
@@ -67,7 +73,7 @@ define([
       },
       password1: {
         required: true,
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(Password isn't valid)"
 
       },
@@ -136,7 +142,7 @@ define([
       },
       password: {
         required: true,
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(A valid password is required)"
       }
     },
@@ -224,14 +230,14 @@ define([
 
       password1: {
         required: true,
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(Password isn't valid)"
 
       },
       password2: {
         required: true,
         equalTo: 'password1',
-        pattern : /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/,
+        pattern : passwordRegex,
         msg: "(The passwords do not match)"
       }
 
@@ -387,27 +393,32 @@ define([
 
       if (options.test)
         window.grecaptcha = null;
-
-    },
-
-    navigateToLoginForm : function(){
-      this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page", {subView : "login"});
-    },
-
-    navigateToRegisterForm : function(){
-      this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page",{subView : "register" });
-    },
-
-    navigateToResetPassword1Form : function(){
-      this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page", {subView : "reset-password-1"});
     },
 
     activate: function (beehive) {
-      this.beehive = beehive;
-      this.pubsub = beehive.Services.get('PubSub');
+      this.setBeeHive(beehive);
+      var pubsub = beehive.getService('PubSub');
       _.bindAll(this, ["handleUserAnnouncement"]);
-      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
+      pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
     },
+
+    navigateToLoginForm : function(){
+      this._navigate({subView : "login"});
+    },
+
+    navigateToRegisterForm : function(){
+      this._navigate({subView : "register" });
+    },
+
+    navigateToResetPassword1Form : function(){
+      this._navigate({subView : "reset-password-1"});
+    },
+
+    _navigate: function(opts) {
+      var pubsub = this.getPubSub();
+      pubsub.publish(pubsub.NAVIGATE, "authentication-page", opts);
+    },
+
 
     setSubView : function(subView){
       this.stateModel.set("subView", subView);
@@ -419,7 +430,7 @@ define([
       this.resetAll();
 
       switch(msg){
-        case "login_success":
+        case User.prototype.USER_SIGNED_IN:
           //will immediately redirect
           break;
         case "login_fail":
@@ -452,24 +463,24 @@ define([
 
       var data = model.toJSON();
 
-      if (model.target === "REGISTER"){
+      if (model.target == "REGISTER"){
 
         //add verify_url to data so email redirects to right url
         _.extend(data, {verify_url : location.origin + "/#user/account/verify/" + ApiTargets.REGISTER });
-        this.beehive.getObject("Session").register(model.toJSON());
+        this.getBeeHive().getObject("Session").register(model.toJSON());
       }
 
-      else if (model.target === "USER"){
-        this.beehive.getObject("Session").login(model.toJSON());
+      else if (model.target == "USER"){
+        this.getBeeHive().getObject("Session").login(model.toJSON());
       }
 
-      else if (model.target === "RESET_PASSWORD" && model.method === "POST"){
+      else if (model.target == "RESET_PASSWORD" && model.method === "POST"){
         //add base_url to data so email redirects to right url
-        this.beehive.getObject("Session").resetPassword1(data);
+        this.getBeeHive().getObject("Session").resetPassword1(data);
       }
 
-      else if (model.target === "RESET_PASSWORD" && model.method === "PUT"){
-        this.beehive.getObject("Session").resetPassword2(data);
+      else if (model.target == "RESET_PASSWORD" && model.method === "PUT"){
+        this.getBeeHive().getObject("Session").resetPassword2(data);
       }
     },
 
@@ -479,7 +490,7 @@ define([
     },
 
     activateRecaptcha : function(view){
-      this.beehive.getObject("RecaptchaManager").activateRecaptcha(view);
+      this.getBeeHive().getObject("RecaptchaManager").activateRecaptcha(view);
     }
 
   });

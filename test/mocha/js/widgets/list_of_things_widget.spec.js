@@ -212,7 +212,7 @@ define(['marionette',
         done();
       });
 
-      it("has a pagination view and model that handle displaying and transmitting pagination state and changes", function(){
+      it("has a pagination view and model that handle displaying and transmitting pagination state and changes", function(done){
 
         var widget = new ListOfThings({pagination: {perPage: 5}});
         //widget.activate(minsub.beehive.getHardenedInstance());
@@ -252,6 +252,8 @@ define(['marionette',
         expect($w.find(".pagination li:last").text().trim()).to.eql("3");
         expect(widget.collection.models[0].get('resultsIndex')).to.eql(0);
         expect(widget.collection.models[4].get('resultsIndex')).to.eql(4);
+
+        done();
       });
 
       it(" the item view allows the user to view the lsit in a search results page if 'operator' option is true and 'queryOperator' option is set", function() {

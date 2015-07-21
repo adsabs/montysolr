@@ -337,9 +337,18 @@ define([
       Marionette.bindEntityEvents(this, this.view, Marionette.getOption(this, "viewEvents"));
     },
 
+    activate : function(beehive){
+      this.setBeeHive(beehive);
+      _.bindAll(this, "setCurrentQuery", "processResponse");
+      var pubsub = beehive.getService('PubSub');
+      pubsub.subscribe(pubsub.INVITING_REQUEST, this.setCurrentQuery);
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+    },
+
     closeWidget: function () {
       this.resetWidget();
-      this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+      var pubsub = this.getPubSub();
+      pubsub.publish(pubsub.NAVIGATE, "results-page");
     },
 
     resetWidget: function () {
@@ -364,7 +373,8 @@ define([
         target : ApiTargets.SEARCH,
         query : query
       });
-      this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+      var pubsub = this.getPubSub();
+      pubsub.publish(pubsub.EXECUTE_REQUEST, request);
     },
 
     processResponse: function (response) {
@@ -386,7 +396,8 @@ define([
         // let container view know how many bibcodes we have
         this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
                               "rows":  parseInt(response.get("responseHeader.params.rows"))});
-        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+        var pubsub = this.getPubSub();
+        pubsub.publish(pubsub.EXECUTE_REQUEST, request);
       }
       //it's from the metrics endpoint
       else if (response instanceof JsonResponse ) {
@@ -399,8 +410,9 @@ define([
 
         // for now, metrics api returns errors as 200 messages, so we have to detect it
         if ((response.msg && response.msg.indexOf('Unable to get results') > -1) || (response.status == 500)) {
+          var pubsub = this.getPubSub();
           this.closeWidget();
-          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({
+          pubsub.publish(pubsub.ALERT, new ApiFeedback({
             code: ApiFeedback.CODES.ALERT,
             msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please try with different search parameters.',
             modal: true
@@ -564,13 +576,6 @@ define([
       rows : 1000
     },
 
-    activate : function(beehive){
-      _.bindAll(this, "setCurrentQuery", "processResponse");
-      this.pubsub = beehive.Services.get('PubSub');
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
-      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-    },
-
     showMetricsForCurrentQuery : function(){
       this.resetWidget();
       this.containerModel.set("requestRowsAllowed", true);
@@ -589,12 +594,9 @@ define([
           contentType : "application/json"
         }
       });
-
-      this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
-
+      var pubsub = this.getPubSub();
+      pubsub.publish(pubsub.EXECUTE_REQUEST, request);
     }
-
-
   });
 
   return MetricsWidget;

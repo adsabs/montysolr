@@ -60,6 +60,7 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
         }
         else if (_.isString(p) || _.isNumber(p) || _.isBoolean(p) || _.isDate(p) || _.isNull(p) || _.isRegExp(p)) { // build getter method
           facade['get' + property.substring(0,1).toUpperCase() + property.substring(1)] = _.bind(function() {return this.ctx[this.name]}, {ctx:objectIn, name:property});
+          facade[property] = p; // copy the value (it is immutable anyways)
         }
         else if (p.hasOwnProperty('__facade__') && p.__facade__) { // exposing internal facade
           facade[property] = p;
@@ -90,6 +91,10 @@ define(['underscore', 'js/components/facade'], function(_, Facade) {
     else {
       facade.__facade__ = true;
     }
+
+    //TODO:rca - shall we use?
+    //if (Object.freeze)
+    //  facade = Object.freeze(facade);
     return facade;
   };
 

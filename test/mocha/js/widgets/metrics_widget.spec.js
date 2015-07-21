@@ -297,10 +297,8 @@ define([
     }
 
     afterEach(function(){
-
       $("#test").empty();
-
-    })
+    });
 
     //first, test Edwin's functions
 
@@ -845,12 +843,12 @@ define([
         ]
       );
 
-    })
+    });
 
 
     it("should have a function that empties the main view", function(){
 
-      metricsWidget = new MetricsWidget();
+      var metricsWidget = new MetricsWidget();
       metricsWidget.processResponse(new JsonResponse(testData));
       $("#test").append(metricsWidget.view.el);
       metricsWidget.resetWidget();
@@ -860,7 +858,7 @@ define([
       expect($("#test").find((".metrics-table *")).length).to.eql(0);
 
 
-    })
+    });
 
 
     it("should have a configurable graph view that can show a bar chart", function(done){
@@ -1073,7 +1071,6 @@ define([
       }))({verbose: false});
 
       var metricsWidget = new MetricsWidget();
-
       metricsWidget.activate(minsub.beehive.getHardenedInstance());
 
       $("#test").append(metricsWidget.view.render().el);
@@ -1085,14 +1082,14 @@ define([
       expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n     papers.\n    \n \nChange to first  paper(s) (max is 2).\n Submit');
 
 
-        sinon.spy(metricsWidget.pubsub, "publish");
+        sinon.spy(metricsWidget.getPubSub(), "publish");
 
         $("#test").find(".metrics-metadata input").val("1");
         $("#test").find(".metrics-metadata button.submit-rows").trigger("click");
 
         setTimeout(function(){
-          expect(metricsWidget.pubsub.publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
-          expect(metricsWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
+          expect(metricsWidget.getPubSub().publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
+          expect(metricsWidget.getPubSub().publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
           expect($("#test").find(".metrics-metadata").text().trim()).to.eql("Loading data...");
           done();
         }, 1000)

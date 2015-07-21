@@ -140,8 +140,7 @@ define([
 
       routeToVerifyPage : function(subView, token){
 
-        var failMessage, failTitle, route, done, request, type,
-          that = this;
+        var failMessage, failTitle, route, done, request, type, that = this;
 
         if (subView == "register") {
           failTitle = "Registration failed.";
@@ -182,7 +181,7 @@ define([
               that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
             }).fail(function(){
               //fail function defined below
-              fail();
+              this.apply(fail, arguments);
             });
           };
         }
@@ -200,11 +199,12 @@ define([
           type = "GET";
 
         }
-        function fail() {
+        function fail(jqXHR, status, errorThrown) {
           //redirect to index page
           this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+          var error = (jqXHR.responseJSON && jqXHR.responseJSON.error) ? jqXHR.responseJSON.error : "error unknown";
           //call alerts widget
-          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title: failTitle, msg: failMessage, modal : true, type : "danger"}));
+          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title: failTitle, msg: " <b>" + error + "</b> <br/>" + failMessage, modal : true, type : "danger"}));
         };
 
         request = new ApiRequest({

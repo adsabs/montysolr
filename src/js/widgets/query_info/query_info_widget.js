@@ -129,10 +129,9 @@ define(['marionette',
       },
 
       activate: function(beehive) {
-        this.beehive = beehive;
+        this.setBeeHive(beehive);
         _.bindAll(this);
-        this.pubsub = beehive.getService('PubSub');
-        var pubsub = this.pubsub;
+        var pubsub = beehive.getService('PubSub');
 
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
@@ -140,10 +139,13 @@ define(['marionette',
 
       },
 
-      handleUserAnnouncement : function(event, target){
-        if (event == "user_info_change" && target == "USER"){
-          var loggedIn = this.beehive.getObject("User").isLoggedIn();
-          this.model.set({ loggedIn: loggedIn});
+      handleUserAnnouncement : function(event, arg){
+        var user = this.getBeeHive().getObject('User');
+        if (event == user.USER_SIGNED_IN){
+          this.model.set("loggedIn", true);
+        }
+        else if (event == user.USER_SIGNED_OUT){
+          this.model.set("loggedIn", false);
         }
       },
 
@@ -156,11 +158,12 @@ define(['marionette',
      },
 
       clearSelected : function(){
-        this.beehive.getObject("AppStorage").clearSelectedPapers();
+        this.getBeeHive().getObject("AppStorage").clearSelectedPapers();
       },
 
       triggerBulkAdd : function(){
-        this.pubsub.publish(this.pubsub.CUSTOM_EVENT, "add-all-on-page");
+        var pubsub = this.getPubSub();
+        pubsub.publish(pubsub.CUSTOM_EVENT, "add-all-on-page");
       },
 
       libraryAddSubmit : function(data){
@@ -172,7 +175,7 @@ define(['marionette',
         var name = _.findWhere(this.model.get("libraries"), {id : data.libraryID }).name;
 
         //this returns a promise
-        this.beehive.getObject("LibraryController").addBibcodesToLib(options)
+        this.getBeeHive().getObject("LibraryController").addBibcodesToLib(options)
           .done(function(response, status){
             if (status == "error"){
               this.$(".feedback").html(FeedbackTemplate({error : true, name : name, id : data.libraryID }))
@@ -196,7 +199,8 @@ define(['marionette',
         //are we adding the current query or just the selected bibcodes?
         options.bibcodes = data.recordsToAdd;
         options.name = data.name;
-        this.beehive.getObject("LibraryController").createLibAndAddBibcodes(options)
+        //XXX:rca - to decide
+        this.getBeeHive().getObject("LibraryController").createLibAndAddBibcodes(options)
           .done(function(response, status){
             if (status == "error"){
               this.$(".feedback").html(FeedbackTemplate({ error : true, name : data.name, create : true }));

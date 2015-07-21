@@ -7,7 +7,7 @@ define([
   'js/components/api_query',
   'bootstrap'
 
-], function(
+], function (
   Marionette,
   BaseWidget,
   NavBarTemplate,
@@ -15,7 +15,7 @@ define([
   ApiQueryUpdater,
   ApiQuery,
   Bootstrap
-  ){
+  ) {
 
   var NavView, NavModel, NavWidget;
 
@@ -28,7 +28,7 @@ define([
         orcidFirstName: undefined,
         orcidLastName: undefined,
         //should it show hourly banner?
-        hourly : false
+        hourly: false
       }
     }
   });
@@ -36,9 +36,9 @@ define([
 
   NavView = Marionette.ItemView.extend({
 
-   template: NavBarTemplate,
+    template: NavBarTemplate,
 
-    modelEvents : {
+    modelEvents: {
       change: "render"
     },
 
@@ -80,13 +80,13 @@ define([
 
     orcidSignIn: function () {
       this.model.set("orcidModeOn", true);
-     //need to explicitly trigger to widget that this has changed
-     //otherwise it will be ignored, since it can also be changed
-     //from outside
-       this.trigger("user-change-orcid-mode");
+      //need to explicitly trigger to widget that this has changed
+      //otherwise it will be ignored, since it can also be changed
+      //from outside
+      this.trigger("user-change-orcid-mode");
     },
 
-    changeOrcidMode : function() {
+    changeOrcidMode: function () {
       var that = this;
       //allow animation to run before rerendering
       setTimeout(function () {
@@ -107,15 +107,15 @@ define([
       }, 400);
     },
 
-    onRender : function(){
+    onRender: function () {
 
-      if (!this.formAttached){
+      if (!this.formAttached) {
         //attach modal
         $("body").append(FeedbackTemplate());
 
         var $modal = $("#feedback-modal");
 
-        function clearForm () {
+        function clearForm() {
           $modal.find(".modal-body").html($(FeedbackTemplate()).find("form"))
         }
 
@@ -123,7 +123,7 @@ define([
         $modal.on("hidden.bs.modal", clearForm);
 
         //attach submit handler
-        $(".feedback-form").submit(function(e) {
+        $(".feedback-form").submit(function (e) {
           var $form = $(e.target);
           e.preventDefault();
           $.ajax({
@@ -135,26 +135,26 @@ define([
             beforeSend: function () {
               $form.find("button[type=submit]")
                 .html('<i class="icon-loading"></i> Sending form...');
-              }
-            })
+            }
+          })
             .done(function (data) {
               $form.find("button[type=submit]")
                 .html('<i class="icon-success"></i> Message sent!');
 
-              setTimeout(function(){
+              setTimeout(function () {
                 $modal.modal("hide");
               }, 500);
 
             })
-            .fail( function (err) {
+            .fail(function (err) {
               $form.find("button[type=submit]")
-              .addClass("btn-danger")
-              .html('<i class="icon-danger"></i> There was an error!')
+                .addClass("btn-danger")
+                .html('<i class="icon-danger"></i> There was an error!')
 
             })
-          });
+        });
 
-          this.formAttached = true;
+        this.formAttached = true;
       }
     }
 
@@ -173,36 +173,45 @@ define([
     activate: function (beehive) {
       this.setBeeHive(beehive);
       _.bindAll(this, ["handleUserAnnouncement", "getOrcidUserInfo"]);
-      this.pubsub = beehive.getService("PubSub");
-      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
-      this.pubsub.subscribe(this.pubsub.APP_STARTED, this.getOrcidUserInfo);
-
+      var pubsub = beehive.getService("PubSub");
+      pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
+      pubsub.subscribe(pubsub.APP_STARTED, this.getOrcidUserInfo);
       this.setInitialVals();
     },
 
 
-    viewEvents : {
+    viewEvents: {
       //dealing with authentication/user
-      "navigate-login" : function(){
-        this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page", {subView: "login"});
+      "navigate-login": function () {
+        this._navigate("authentication-page", {subView: "login"});
       },
-      "navigate-register" : function(){
-        this.pubsub.publish(this.pubsub.NAVIGATE, "authentication-page", {subView: "register"});
+      "navigate-register": function () {
+        this._navigate("authentication-page", {subView: "register"});
       },
-     "navigate-settings" : function() {
-       this.pubsub.publish(this.pubsub.NAVIGATE, "UserPreferences");
-     },
-      "logout" : function() {
+      "navigate-settings": function () {
+        this._navigate("UserPreferences");
+      },
+
+      "logout": function () {
         //log the user out of both the session and orcid
         this.getBeeHive().getObject("Session").logout();
-       //log out of ORCID too
-       this.orcidLogout();
+        //log out of ORCID too
+        this.orcidLogout();
       },
-       //dealing with orcid
-      "navigate-to-orcid-link" : "navigateToOrcidLink",
-      "user-change-orcid-mode" : "toggleOrcidMode",
-      "logout-only-orcid" : "orcidLogout",
+      //dealing with orcid
+      "navigate-to-orcid-link": "navigateToOrcidLink",
+      "user-change-orcid-mode": "toggleOrcidMode",
+      "logout-only-orcid": "orcidLogout",
       'search-author': 'searchAuthor'
+    },
+
+    navigateToOrcidLink: function () {
+      this._navigate("orcid-page");
+    },
+
+    _navigate: function (page, opts) {
+      var pubsub = this.getPubSub();
+      pubsub.publish(pubsub.NAVIGATE, page, opts)
     },
 
     //to set the correct initial values for signed in statuses
@@ -211,7 +220,7 @@ define([
       var orcidApi = this.getBeeHive().getService("OrcidApi");
       var hasAccess = orcidApi.hasAccess();
       this.model.set({orcidModeOn: user.isOrcidModeOn() && hasAccess, orcidLoggedIn: hasAccess});
-      this.model.set("currentUser",  user.getUserName());
+      this.model.set("currentUser", user.getUserName());
     },
 
     getOrcidUserInfo: function () {
@@ -231,20 +240,22 @@ define([
       }
 
       //also set in the "hourly" flag
-      var hourly = this.BeeHive.getObject("AppStorage").getConfigCopy().hourly;
+      var hourly = this.getBeeHive().getObject("AppStorage").getConfigCopy().hourly;
       this.model.set("hourly", hourly);
     },
 
-    handleUserAnnouncement : function(msg, arg2, arg3) {
+    handleUserAnnouncement: function (msg, arg2, arg3) {
 
-      var user = this.getBeeHive().getObject("User");
-      var orcidApi = this.getBeeHive().getService("OrcidApi");
+      var orcidApi = this.getBeeHive().getService("OrcidApi"),
+        user = this.getBeeHive().getObject("User");
 
-      if (msg === "user_info_change" && arg2 === "USER") {
-        //if user logs out, username will be undefined
-        this.model.set("currentUser", this.getBeeHive().getObject("User").getUserName());
+      if (msg == user.USER_SIGNED_IN) {
+        this.model.set("currentUser", arg2);
       }
-      else if (msg == 'orcidUIChange') {
+      else if (msg == user.USER_SIGNED_OUT) {
+        this.model.set("currentUser", undefined);
+      }
+      else if (msg == user.ORCID_UI_CHANGE) {
         this.model.set({orcidModeOn: user.isOrcidModeOn(), orcidLoggedIn: orcidApi.hasAccess()});
 
         if (this.model.get("orcidLoggedIn")) {
@@ -257,7 +268,7 @@ define([
     //we don't want to respond to changes from pubsub or user object with this,
     //only changes that the user has initiated using the navbar widget,
     //otherwise things will be toggled incorrectly
-    toggleOrcidMode : function() {
+    toggleOrcidMode: function () {
       var user = this.getBeeHive().getObject('User'),
         orcidApi = this.getBeeHive().getService("OrcidApi");
 
@@ -273,7 +284,8 @@ define([
     },
 
     searchAuthor: function () {
-      this.pubsub.publish(this.pubsub.START_SEARCH, new ApiQuery(
+      var pubsub = this.getPubSub();
+      pubsub.publish(pubsub.START_SEARCH, new ApiQuery(
         {
           'q': 'author:' + this.qUpdater.quote(this.model.get("orcidQueryName"))
         }));
@@ -292,12 +304,7 @@ define([
     orcidLogout: function () {
       this.getBeeHive().getService("OrcidApi").signOut();
       this.getBeeHive().getObject("User").setOrcidMode(false);
-    },
-
-    navigateToOrcidLink : function(){
-      this.pubsub.publish(this.pubsub.NAVIGATE, "orcid-page")
     }
-
 
   });
 

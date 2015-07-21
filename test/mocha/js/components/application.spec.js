@@ -166,11 +166,15 @@ define([
           });
       }};
       app.getBeeHive().addService('Api', api);
+      var fakeUser = {setUser : sinon.spy()};
+      app.getBeeHive().addObject("User", fakeUser);
       var spy = sinon.spy(app, 'onBootstrap');
       app.getApiAccess({reconnect: true})
         .done(function() {
           expect(spy.called).to.eql(true);
           expect(api.access_token).to.eql('Bearer:ap0MkGjroS1zzijLlk9fV2UKXdRDo5nzUueTNaog');
+          //every time onbootstrap is called, update the user object with username/undefined to show that user is anonymous
+          expect(fakeUser.setUser.args[0]).to.eql(["user@gmail.com"]);
           done();
         })
     })

@@ -231,11 +231,8 @@ define([
               loggedIn = app.getBeeHive().getObject("User").isLoggedIn();
 
           if (loggedIn){
-            //redirect to preferences
-            app.getObject('MasterPageManager').show("SettingsPage",
-              ['UserSettings']);
-            app.getWidget("UserSettings").setSubView("preferences");
-            this.route = "#user/settings/preferences"
+            //redirect to index
+            self.get('index-page').execute();
           }
           else {
             app.getWidget("Authentication").setSubView(subView);
