@@ -848,8 +848,13 @@ define([
 
     it("should have a function that empties the main view", function(){
 
+<<<<<<< HEAD
       var metricsWidget = new MetricsWidget();
       metricsWidget.processResponse(new JsonResponse(testData));
+=======
+      metricsWidget = new MetricsWidget();
+      metricsWidget.processMetrics(testData);
+>>>>>>> using pubsub now for metrics widget
       $("#test").append(metricsWidget.view.el);
       metricsWidget.resetWidget();
 
@@ -914,7 +919,7 @@ define([
 
       var metricsWidget = new MetricsWidget();
 
-      metricsWidget.processResponse(new JsonResponse(testData));
+      metricsWidget.processMetrics(testData);
       //checking a single row from each template
       //would there be a way to check the entire rendered html in a non-messy way?
       expect(metricsWidget.childViews.papersTableView.render().$("td:contains(Number of papers)~td").eq(1).text().trim()).to.eql("30");
@@ -953,7 +958,7 @@ define([
 
       var metricsWidget = new MetricsWidget();
 
-      metricsWidget.processResponse(new JsonResponse(testData));
+      metricsWidget.processMetrics(testData);
 
       //check to see that the rendered views are inserted
 
@@ -964,41 +969,38 @@ define([
 
       done();
 
+    });
 
-    })
 
-
-    it("should request data from pubsub, then send that data to the metrics endpoint, then render the graph", function(done){
-
+    it("should request data from pubsub, then send that data to the metrics endpoint using the Api, then render the graph", function(done){
 
       var metricsWidget = new MetricsWidget();
 
       var minsub = new (MinimalPubSub.extend({
         request: function(apiRequest) {
-          if (apiRequest.toJSON().target === ApiTargets.SEARCH){
+          if (apiRequest.toJSON().target === ApiTargets.SEARCH) {
             return {
-              "responseHeader":{
-                "status":0,
-                "QTime":1,
-                "params":{
-                  "fl":"bibcode",
-                  "indent":"true",
+              "responseHeader": {
+                "status": 0,
+                "QTime": 1,
+                "params": {
+                  "fl": "bibcode",
+                  "indent": "true",
                   "rows": 200,
-                  "wt":"json",
-                  "q":"bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
-              "response":{"numFound":2,"start":0,"docs":[
+                  "wt": "json",
+                  "q": "bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
+              "response": {"numFound": 2, "start": 0, "docs": [
                 {
-                  "bibcode":"1980ApJS...44..489B"},
+                  "bibcode": "1980ApJS...44..489B"},
                 {
-                  "bibcode":"1980ApJS...44..137K"}]
+                  "bibcode": "1980ApJS...44..137K"}
+              ]
               }};
           }
-          //just to be explicit
-          else if (apiRequest.toJSON().target === ApiTargets.SERVICE_METRICS){
+          else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS) {
             return testData;
           }
-        }
-      }))({verbose: false});
+        }}))({verbose: false, hardenedApi : true});
 
       metricsWidget.activate(minsub.beehive.getHardenedInstance());
 
@@ -1068,7 +1070,7 @@ define([
             return testData;
           }
         }
-      }))({verbose: false});
+      }))({verbose: false, hardenedApi : true});
 
       var metricsWidget = new MetricsWidget();
       metricsWidget.activate(minsub.beehive.getHardenedInstance());
@@ -1081,8 +1083,7 @@ define([
       metricsWidget.showMetricsForCurrentQuery();
       expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n     papers.\n    \n \nChange to first  paper(s) (max is 2).\n Submit');
 
-
-        sinon.spy(metricsWidget.getPubSub(), "publish");
+      sinon.spy(metricsWidget.getPubSub(), "publish");
 
         $("#test").find(".metrics-metadata input").val("1");
         $("#test").find(".metrics-metadata button.submit-rows").trigger("click");
@@ -1092,7 +1093,7 @@ define([
           expect(metricsWidget.getPubSub().publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
           expect($("#test").find(".metrics-metadata").text().trim()).to.eql("Loading data...");
           done();
-        }, 1000)
+        }, 1000);
 
 
     });

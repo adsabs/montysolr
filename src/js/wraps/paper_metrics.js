@@ -1,78 +1,111 @@
 
 define([
-    'underscore',
-    'jquery',
+
     'js/widgets/metrics/widget',
-    'js/widgets/base/base_widget',
     'js/components/api_query',
-    'js/components/json_response'
+
   ],
 
   function (
-    _,
-    $,
     MetricsWidget,
-    BaseWidget,
-    ApiQuery,
-    JsonResponse
+    ApiQuery
     ) {
 
-    var Widget = BaseWidget.extend({
-      initialize : function(options) {
-        // other widgets can send us data through page manager
+    var Widget = MetricsWidget.extend({
+
+
+      initialize : function(options){
+
         this.on('page-manager-message', function(event, data){
           if (event === "broadcast-payload"){
             this.ingestBroadcastedPayload(data);
           }
         });
-        BaseWidget.prototype.initialize.call(this, options);
-        this.innerWidget = new MetricsWidget();
-        this.view = this.innerWidget.view;
+        MetricsWidget.prototype.initialize.apply(this, arguments);
+
+
+      activate : function(beehive){
+      _.bindAll(this, "setCurrentQuery", "processResponse");
+      var pubsub = beehive.getService("PubSub");
+      //this will have to be changed later
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+    },
+
+    ingestBroadcastedPayload: function(data) {
+        var bibcode = data.bibcode;
+        var self = this;
+        this.containerModel.set("title", data.title);
+        this.getMetrics([bibcode]).done(function(data) {
+          //check to see that there is at least 1 read/citation
+          if (self.hasReads(data) || self.hasCitations(data)){
+            self.trigger('page-manager-event', 'widget-ready', {isActive: true, widget : self});
+          }
+          });
       },
 
-      activate: function(beehive) {
+      hasCitations : function(data){
+        return data["citation stats"]["total number of citations"] > 0;
+      },
+
+      hasReads : function(data){
+         return  data["basic stats"]["total number of reads"] > 0;
+      },
+
+      activate : function(beehive){
         _.bindAll(this, "setCurrentQuery", "processResponse");
-        var pubsub = beehive.getService('PubSub');
+        var pubsub = beehive.getService("PubSub");
+        //this will have to be changed later
+        this.pubsub = pubsub;
         pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
-        this.innerWidget.setBeeHive(beehive);
       },
 
-      ingestBroadcastedPayload: function(data) {
-        if (data.bibcode) {
-          var q = new ApiQuery({'q': 'bibcode:' + data.bibcode});
-          this.innerWidget.setCurrentQuery(q);
-          this.innerWidget.onShow();
-        }
-      },
+      insertViews: function (data) {
+        //render the container view
+        this.view.render({title : this.containerModel.get("title")});
+        this.view.$("#indices").hide();
+        this.view.$("#papers").hide();
+        this.view.$(".metrics-metadata").hide();
 
-      render: function() {
-        var ret = this.innerWidget.render();
-        this.el = ret.el;
-        return ret;
-      },
-
-      processResponse: function(apiResponse) {
-
-        if (apiResponse instanceof JsonResponse) {
-          // decide if it is worth showing it
-          var stats = _.values(apiResponse.attributes["all stats"]);
-          var reads = _.values(apiResponse.attributes["all reads"]);
-          if (!(stats && reads)) return;
-          var f = function(x) {return x > 2};
-          if (!(_.filter(_.values(stats), f).length || _.filter(_.values(reads), f).length)) return;
-          this._response = apiResponse;
-          this.trigger('page-manager-event', 'widget-ready',
-            {numFound: 1});
+        //attach table views
+        if (this.hasReads(data)){
+          this.view.readsTable.show(this.childViews.readsTableView);
+          this.view.readsGraph.show(this.childViews.readsGraphView);
         }
         else {
-          this.innerWidget.processResponse(apiResponse);
+          this.view.$(this.view.readsTable.el).html("No reads found for this article.");
         }
+        if (this.hasCitations(data)){
+          this.view.citationsTable.show(this.childViews.citationsTableView);
+          this.view.citationsGraph.show(this.childViews.citationsGraphView);
+        }
+        else {
+          this.view.$(this.view.citationsTable.el).html("No citations found for this article.");
+        }
+        //some table rows need to be hidden
+        this.view.$(".hidden-abstract-page").hide();
       },
 
-      onShow: function() {
-        this.innerWidget.resetWidget();
-        this.innerWidget.processResponse(this._response);
-        this.innerWidget.childViews.papersGraphView.destroy();
+      processMetrics : function (response){
+        //how is the json response formed? need to figure out why attributes is there
+        response = response.attributes ? response.attributes : response;
+        // for now, metrics api returns errors as 200 messages, so we have to detect it
+        if ((response.msg && response.msg.indexOf('Unable to get results') > -1) || (response.status == 500)) {
+          this.closeWidget();
+          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please try with different search parameters.',
+            modal: true
+          }));
+          return;
+        }
+        this.containerModel.set("data", response);
+      },
+
+      renderGraphs : function(){
+        var data = this.containerModel.get("data");
+        this.createTableViews(data);
+        this.createGraphViews(data);
+        this.insertViews(data);
       }
 
     });

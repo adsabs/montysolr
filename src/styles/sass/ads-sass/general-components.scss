@@ -84,10 +84,10 @@ $sidenav-background : #fff;
   color: $brand-primary-faded;
   font-weight: 400;
   &:hover {
-    background-color:lighten($brand-primary, 63%);
+    background-color:lighten($brand-primary, 60%);
     border-left: 5px solid $brand-primary-faded;
   }
-  background-color: lighten($brand-primary, 63%);
+  background-color: lighten($brand-primary, 60%);
 }
 
 .s-nav-inactive {

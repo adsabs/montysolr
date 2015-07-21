@@ -4,13 +4,12 @@
 }
 
 .s-metrics-title {
-
   @extend  .s-title-format;
 }
+  margin: 6px 2%;
 
-  .s-metrics-section {
-    min-height: 460px;
-  }
+
+}
 
 .s-metrics-table, .s-metrics-graph {
 
@@ -21,8 +20,8 @@
     padding: 0% 2%;
 
   }
-
 }
+
 
 .s-metrics-table {
   font-size : 14px;
@@ -37,9 +36,7 @@
   }
 
   @media(min-width: $screen-sm-min){
-
     width: 33%;
-
   }
 
   th {
@@ -53,19 +50,21 @@
   }
 
   tr td:nth-of-type(3), tr td:nth-of-type(4) {
-
       text-align: right;
-
   }
 
+}
+
+.s-abstract-content {
+  .s-metrics-table, .s-metrics-graph {
+    width: 100%;
+  }
 }
 
 .s-metrics-graph {
 
   @media(min-width: $screen-sm-min){
-
     width: 66%;
-
   }
 }
 
@@ -112,6 +111,10 @@
   input {
     width: 60px;
   }
+}
+
+.s-metrics-metadata:empty {
+  padding:0;
 }
 
 

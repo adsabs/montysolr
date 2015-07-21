@@ -128,6 +128,11 @@
 
 .s-abstract-content {
   padding: 1% 0;
+
+  .s-large-close {
+    //to prevent widgets from navigating back to main page
+    display: none;
+  }
 }
 
 .s-abstract-page-layout {
