@@ -44,7 +44,8 @@ define(['js/components/facade', 'underscore'], function(Facade, _) {
       var facade = new Facade(interface, imp );
 
       expect(facade.private).to.be.undefined;
-      expect(facade.valueX).to.be.undefined;
+      expect(facade.valueX).to.be.eql('foo');
+      facade.valueX = 'bar'; // only local value will be changed
       expect(facade.getValueX()).to.be.equal('foo');
       expect(facade.start({foo: 'bar'})).to.be.eql(imp);
       expect(facade.stop({foo: 'baz'})).to.be.eql(imp);

@@ -1,76 +1,74 @@
 define([
   "marionette",
-  "hbs!./nav_template"
-], function(
-  Marionette,
-  NavTemplate
-  ){
+  "hbs!./nav_template",
+  'js/mixins/dependon'
+], function (Marionette, NavTemplate, Dependon) {
 
   var NavModel = Backbone.Model.extend({
 
-    defaults : function(){
+    defaults: function () {
       return {
-        "page" : undefined,
-        "userName" : undefined
+        "page": undefined,
+        "userName": undefined
       }
     }
-  })
+  });
 
   var NavView = Marionette.ItemView.extend({
 
-    template : NavTemplate,
+    template: NavTemplate,
 
-    modelEvents : {
-      "change" : "render"
+    modelEvents: {
+      "change": "render"
     }
 
   });
 
   var NavWidget = Marionette.Controller.extend({
 
-    initialize :function(options){
+    initialize: function (options) {
       options = options || {};
       this.model = new NavModel();
-      this.view = new NavView({model : this.model});
+      this.view = new NavView({model: this.model});
     },
 
     activate: function (beehive) {
-      this.beehive = beehive;
-      this.pubsub = beehive.Services.get('PubSub');
+      this.setBeeHive(beehive);
+      var pubsub = beehive.getService('PubSub');
 
       _.bindAll(this);
 
       //custom dispatchRequest function goes here
-      this.pubsub.subscribe(this.pubsub.PAGE_CHANGE, this.updateCurrentView);
-      this.pubsub.subscribe(this.pubsub.USER_ANNOUNCEMENT, this.updateUser)
+      pubsub.subscribe(pubsub.PAGE_CHANGE, this.updateCurrentView);
+      pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.updateUser)
     },
 
-    updateCurrentView : function(page){
+    updateCurrentView: function (page) {
       this.model.set("page", page);
     },
 
-    updateUser : function(event, arg ){
-
-      if (event == "user_signed_in"){
+    updateUser: function (event, arg) {
+      var user = this.getBeeHive().getObject('User');
+      if (event == user.USER_SIGNED_IN) {
         var userName = arg;
-        if (userName && userName.indexOf("@") > -1){
+        if (userName && userName.indexOf("@") > -1) {
           userName = userName.split("@")[0];
         }
         this.model.set("user", userName);
       }
-      else if (event == "user_signed_out"){
+      else if (event == user.USER_SIGNED_OUT) {
         this.model.set("user", undefined);
       }
     },
 
-    render : function(){
+    render: function () {
       this.view.render();
       return this.view.el;
     }
 
 
-  })
+  });
 
-  return NavWidget
+  return _.extend(NavWidget.prototype, Dependon.BeeHive);
 
-})
+});

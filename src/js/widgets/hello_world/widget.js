@@ -167,9 +167,10 @@ define([
        * @param beehive
        */
       activate: function (beehive) {
-        this.pubsub = beehive.Services.get('PubSub');
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, _.bind(this.onRequest, this));
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, _.bind(this.onResponse, this));
+        this.setBeeHive(beehive); // most widgets will hold reference, to query BeeHive later...
+        var pubsub = beehive.getService('PubSub');
+        pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.onRequest, this));
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, _.bind(this.onResponse, this));
       },
 
       // triggered externally (e.g. by an user submitting a query)

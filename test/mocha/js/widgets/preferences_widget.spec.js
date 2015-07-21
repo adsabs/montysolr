@@ -1,11 +1,12 @@
 define([
     "js/widgets/preferences/widget",
     "js/bugutils/minimal_pubsub",
-
+    "js/components/user"
   ],
   function(
     PreferencesWidget,
-    MinSub
+    MinSub,
+    User
     ){
 
   describe("Preferences Widget (UI Widget)", function(){
@@ -55,8 +56,9 @@ define([
           d.resolve(fakeURLConfig);
           return d;
 
-        }
-      }
+        },
+        USER_INFO_CHANGE: User.prototype.USER_INFO_CHANGE
+      };
 
       minsub.beehive.addObject("User", fakeUser);
 
@@ -79,7 +81,7 @@ define([
         }
         ]);
 
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", fakeMyADS);
+      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, fakeMyADS);
 
       expect(p.model.toJSON()).to.eql({
         "link_server": "wesleyan.edu",
@@ -108,8 +110,8 @@ define([
           return d;
 
         },
-        setUserData : sinon.spy()
-
+        setUserData : sinon.spy(),
+        USER_INFO_CHANGE: User.prototype.USER_INFO_CHANGE
         };
 
       minsub.beehive.addObject("User", fakeUser);
@@ -117,7 +119,7 @@ define([
       p.activate(minsub.beehive.getHardenedInstance());
 
       minsub.publish(minsub.APP_STARTED);
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", fakeMyADS);
+      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, fakeMyADS);
 
       $("#test").append(p.render().el);
 
@@ -161,7 +163,7 @@ define([
       p.activate(minsub.beehive.getHardenedInstance());
 
       minsub.publish(minsub.APP_STARTED);
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", {
+      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, {
         link_server : undefined,
         anotherVal : "foo"
       } );

@@ -36,7 +36,7 @@ define([
          user : undefined
        }
      }
-   })
+   });
 
   UserDataModel = Backbone.Model.extend({
 
@@ -88,7 +88,7 @@ define([
 
       this.model.set("isOrcidModeOn", val);
       if (_.has(this.persistentModel.changedAttributes(), "isOrcidModeOn")){
-        this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, "orcidUIChange", this.persistentModel.get("isOrcidModeOn"));
+        this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, this.ORCID_UI_CHANGE, this.persistentModel.get("isOrcidModeOn"));
       }
       this._persistModel();
     },
@@ -110,12 +110,12 @@ define([
 
     // finally, check if logged in, might have to redirect to auth page/settings page
     broadcastUserDataChange : function(model){
-      this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, "user_info_change", this.userDataModel.toJSON());
+      this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, this.USER_INFO_CHANGE, this.userDataModel.toJSON());
     },
 
     broadcastUserChange : function(){
       //user has signed in or out
-      var message = this.model.get("user") ? "user_signed_in" : "user_signed_out";
+      var message = this.model.get("user") ? this.USER_SIGNED_IN : this.USER_SIGNED_OUT;
       this.getPubSub().publish(this.getPubSub().USER_ANNOUNCEMENT, message, this.model.get("user"));
       this.redirectIfNecessary();
     },
@@ -389,12 +389,21 @@ define([
       getToken : "GET from token endpoint",
       deleteAccount : "POST to delete account endpoint",
       changePassword : "POST to change password endpoint",
-      changeEmail : "POST to change email endpoint"
+      changeEmail : "POST to change email endpoint",
+      USER_SIGNED_IN: 'constant',
+      USER_SIGNED_OUT: 'constant',
+      USER_INFO_CHANGE: 'constant',
+      ORCID_UI_CHANGE: 'constant'
     }
 
   });
 
-  _.extend(User.prototype, Hardened, Dependon.BeeHive, Dependon.App, Dependon.PubSub);
+  _.extend(User.prototype, Hardened, Dependon.BeeHive, Dependon.App, Dependon.PubSub, {
+    USER_SIGNED_IN: 'user_signed_in',
+    USER_SIGNED_OUT: 'user_signed_out',
+    USER_INFO_CHANGE: 'user_info_change',
+    ORCID_UI_CHANGE: 'user_ui_change'
+  });
 
   return User;
 

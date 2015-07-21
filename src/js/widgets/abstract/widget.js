@@ -166,13 +166,14 @@ define([
       },
 
       activate: function (beehive) {
-        this.pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
+        var pubsub = beehive.getService('PubSub');
 
         _.bindAll(this, ['onNewQuery', 'dispatchRequest', 'processResponse', 'onDisplayDocuments']);
-        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onNewQuery);
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-        this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
+        pubsub.subscribe(pubsub.START_SEARCH, this.onNewQuery);
+        pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+        pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       },
 
       defaultQueryArguments: {
@@ -225,14 +226,14 @@ define([
       onAllInternalEvents: function(ev) {
         if ((ev == 'next' || ev == 'prev') && this._current) {
           var keys = _.keys(this._docs);
-
+          var pubsub = this.getPubSub();
           var curr = _.indexOf(keys, this._current);
           if (curr > -1) {
             if (ev == 'next' && curr+1 < keys.length) {
-              this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, keys[curr+1]);
+              pubsub.publish(pubsub.DISPLAY_DOCUMENTS, keys[curr+1]);
             }
             else if (curr-1 > 0) {
-              this.pubsub.publish(this.pubsub.DISPLAY_DOCUMENTS, keys[curr-1]);
+              pubsub.publish(pubsub.DISPLAY_DOCUMENTS, keys[curr-1]);
             }
           }
         }
@@ -264,7 +265,5 @@ define([
     });
 
     _.extend(AbstractWidget.prototype, LinkGeneratorMixin);
-
-
     return AbstractWidget;
   });

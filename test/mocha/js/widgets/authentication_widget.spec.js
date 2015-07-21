@@ -71,12 +71,12 @@ function(
         else if (object == "RecaptchaManager"){
           return  {activateRecaptcha : function(){}}
         }
-      })
+      });
       var a = new AuthenticationWidget({test: true});
 
       a.activate(hardened);
 
-      var publishStub = sinon.stub(a.pubsub, "publish");
+      var publishStub = sinon.stub(a.getPubSub(), "publish");
 
       $("#test").append(a.view.render().el);
 
@@ -226,7 +226,7 @@ function(
         else if (object == "RecaptchaManager"){
           return  {activateRecaptcha : function(){}}
         }
-      })
+      });
       var a = new AuthenticationWidget({test: true});
 
       a.activate(hardened);

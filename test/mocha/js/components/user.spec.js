@@ -21,7 +21,7 @@ define([
   AppStorage
   ){
 
- describe("User Object", function(){
+ describe("User Object (user.spec.js)", function(){
 
    var fakeURLConfig = [
      {
@@ -59,7 +59,7 @@ define([
      expect(fetchStub.args[0][0]).to.eql("USER_DATA");
      expect(u.redirectIfNecessary.callCount).to.eql(1);
 
-     expect(u.pubsub.publish.args[0]).to.eql(['user_announcement', 'user_signed_in', 'foo' ] )
+     expect(u.pubsub.publish.args[0]).to.eql(['user_announcement', u.USER_SIGNED_IN, 'foo' ] )
 
      fetchStub.restore();
 
@@ -91,7 +91,7 @@ define([
      fetchStub.restore();
 
 
-   })
+   });
 
    it("provides a hardened interface with the methods widgets and other objects might need", function() {
 
@@ -99,7 +99,7 @@ define([
      var hardened = u.getHardenedInstance();
      expect(hardened.__facade__).equals(true);
      expect(hardened.handleCallbackError).to.be.undefined;
-     expect(_.keys(hardened)).to.eql(["setUser",
+     expect(hardened).to.include.keys("setUser",
        "isLoggedIn",
        "getUserName",
        "isOrcidModeOn",
@@ -113,7 +113,12 @@ define([
        "changePassword",
        "changeEmail",
        "__facade__",
-       "mixIn"]);
+       "mixIn",
+       "USER_SIGNED_IN",
+       "USER_SIGNED_OUT",
+       "USER_INFO_CHANGE",
+       "ORCID_UI_CHANGE"
+     );
 
    });
 

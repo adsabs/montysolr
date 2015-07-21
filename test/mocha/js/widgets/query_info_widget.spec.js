@@ -1,14 +1,16 @@
 define([
   "js/widgets/query_info/query_info_widget",
   "js/bugutils/minimal_pubsub",
-  "js/components/app_storage"
+  "js/components/app_storage",
+  'js/components/user'
 ], function(
   QueryInfo,
   MinSub,
-  AppStorage
+  AppStorage,
+  User
   ){
 
-  describe("Query Info Widget", function(){
+  describe("Query Info Widget (query_info_widget.spec.js)", function(){
 
     afterEach(function(){
 
@@ -54,6 +56,7 @@ define([
     });
 
 
+   //TODO:alex - pls re-activate
    it.skip("should allow authenticated user to input selected/all papers into a pre-existing library", function(done){
 
      var w = new QueryInfo();
@@ -102,7 +105,7 @@ define([
 
      expect($("#test #library-console").hasClass("in")).to.be.false;
 
-     minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change");
+     minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE);
 
      //widget will set loggedIn to true and re-render
      //open the drawer
@@ -184,7 +187,7 @@ define([
 
       expect($("#test #library-console").hasClass("in")).to.be.false;
 
-      minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
+      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, "USER");
 
       //widget will set loggedIn to true and re-render
       //open the drawer

@@ -94,13 +94,14 @@ define([
       },
 
       activate: function (beehive) {
-        this.pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
+        var pubsub = beehive.getService('PubSub');
 
         _.bindAll(this, 'onStartSearch', 'dispatchRequest', 'processResponse');
-        this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onStartSearch);
+        pubsub.subscribe(pubsub.START_SEARCH, this.onStartSearch);
         //using the standard base widget dispatch request
-        this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.dispatchRequest);
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+        pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.dispatchRequest);
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
       onStartSearch: function(apiQuery) {
@@ -257,6 +258,7 @@ define([
       },
 
       onAllInternalEvents: function(ev, arg1, arg2) {
+
         if (ev === "pagination:change"){
           this.updatePagination({perPage: arg1});
         }
@@ -264,7 +266,7 @@ define([
           return this.updatePagination({page: arg1-1});
         }
         else if (ev === 'show:missing') {
-
+          var pubsub = this.getPubSub();
           // TODO: show spinning wheel?? (we could do it from the template)
           _.each(arg1, function(gap) {
             var numFound = this.model.get('numFound');
@@ -283,13 +285,14 @@ define([
             //console.log('we have to retrieve new data' + JSON.stringify(arg1));
 
             if (req) {
-              this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
+              pubsub.publish(pubsub.EXECUTE_REQUEST, req);
             }
           }, this);
 
         }
         else if (ev == "childview:toggleSelect") {
-          this.pubsub.publish(this.pubsub.PAPER_SELECTION, arg2.data.identifier);
+          var pubsub = this.getPubSub();
+          pubsub.publish(pubsub.PAPER_SELECTION, arg2.data.identifier);
         }
       },
 

@@ -480,7 +480,7 @@ module.exports = function(grunt) {
             "mixins/dependon.js":61,
             "widgets/facet/tree_view.js":62,
             "widgets/facet/item_view.js":71,
-            "widgets/query_info/query_info_widget.js":47,
+            "widgets/query_info/query_info_widget.js":46,
             "widgets/resources/widget.js":72,
             "wraps/table_of_contents.js":73,
             "bugutils/minimal_pubsub.js":74,

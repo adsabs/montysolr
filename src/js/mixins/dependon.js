@@ -18,16 +18,19 @@ define(['underscore'], function(_) {
     BeeHive: {
       // called by parents (app) to give modules access
       setBeeHive: function(brundibar) {
-        this.BeeHive = brundibar;
+        this.__beehive = brundibar;
       },
       getBeeHive: function() {
-        return this.BeeHive;
+        return this.__beehive;
       },
       hasBeeHive: function() {
-        if (this.BeeHive && (this.BeeHive.active || (this.BeeHive.__facade__ && this.BeeHive.getActive()))) {
+        if (this.__beehive && (this.__beehive.active || (this.__beehive.__facade__ && this.__beehive.getActive()))) {
           return true;
         }
         return false;
+      },
+      getPubSub: function() {
+        return this.__beehive.getService('PubSub');
       }
 
     },

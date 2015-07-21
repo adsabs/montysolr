@@ -56,7 +56,7 @@ define(['backbone',
           this.registerCallback(qid, this.processFacetResponse, {collection: data.collection || this.collection, view: data.view || this.view});
           var req = this.composeRequest(q);
           if (req) {
-            this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+            this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, req);
           }
         }
       },
@@ -294,7 +294,7 @@ define(['backbone',
           this.handleLogicalSelection(arg1);
         }
         else if (ev == "childview:navigate") {
-          this.pubsub.publish(this.pubsub.NAVIGATE, arg2);
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, arg2);
         }
       },
 
@@ -335,7 +335,7 @@ define(['backbone',
 
         var req = this.composeRequest(q);
         if (req) {
-          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+          this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, req);
           setTimeout(function() {
             if (children.length == 0) {
               view.triggerMethod('NoMoreDataOnThisLevel');

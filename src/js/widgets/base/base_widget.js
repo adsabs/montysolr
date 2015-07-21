@@ -96,13 +96,14 @@ define([
      * @param beehive
      */
     activate: function (beehive) {
-      this.pubsub = beehive.Services.get('PubSub');
+      this.setBeeHive(beehive);
+      var pubsub = beehive.getService('PubSub');
 
       //custom dispatchRequest function goes here
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.dispatchRequest);
+      pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
 
       //custom handleResponse function goes here
-      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
     /**
@@ -114,8 +115,8 @@ define([
     dispatchNewQuery: function(apiQuery) {
       // remove the arguments that are useful only to this widget
       _.each(this.defaultQueryArguments, function(v,k) {apiQuery.unset(k)});
-
-      this.pubsub.publish(this.pubsub.START_SEARCH, apiQuery);
+      var pubsub = this.getPubSub();
+      pubsub.publish(pubsub.START_SEARCH, apiQuery);
     },
 
     /**
@@ -130,7 +131,8 @@ define([
       if (q) {
         var req = this.composeRequest(q);
         if (req) {
-          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, req);
+          var pubsub = this.getPubSub();
+          pubsub.publish(pubsub.DELIVERING_REQUEST, req);
         }
       }
 

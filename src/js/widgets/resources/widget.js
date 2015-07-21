@@ -57,11 +57,11 @@ define([
     },
 
     activate: function (beehive) {
-      this.beehive = beehive;
-      this.pubsub = beehive.Services.get('PubSub');
+      this.setBeeHive(beehive);
+      var pubsub = beehive.getService('PubSub');
       _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
-      this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
-      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
     onDisplayDocuments: function(apiQuery) {
@@ -90,8 +90,9 @@ define([
     processResponse : function(apiResponse){
 
       var data = apiResponse.get("response.docs[0]");
+      //TODO:rca - this is fragile
       //get link server info if it exists
-      data.link_server = this.beehive.getObject("User").getUserData("USER_DATA").link_server;
+      data.link_server = this.getBeeHive().getObject("User").getUserData("USER_DATA").link_server;
       //link mixin
       data = this.parseResourcesData(data);
 

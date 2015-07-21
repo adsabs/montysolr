@@ -61,7 +61,7 @@ define([
 
       var n = new NavBarWidget();
       n.activate(minsub.beehive.getHardenedInstance());
-      minsub.publish(minsub.USER_ANNOUNCEMENT, 'orcidUIChange');
+      minsub.publish(minsub.USER_ANNOUNCEMENT, u.ORCID_UI_CHANGE);
 
       $("#test").append(n.render().el);
 
@@ -129,14 +129,14 @@ define([
       u.setOrcidMode(true);
       var n = new NavBarWidget();
       n.activate(minsub.beehive.getHardenedInstance());
-      n.pubsub.publish = sinon.spy();
+      n.getPubSub().publish = sinon.spy();
       $("#test").append(n.render().el);
 
       //show active view
       $("#test").find('.orcid-sign-in').click();
 
       $("#test").find('.orcid-link').click();
-      expect(n.pubsub.publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "orcid-page"]);
+      expect(n.getPubSub().publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "orcid-page", undefined]);
 
     });
 
@@ -186,7 +186,7 @@ define([
     //lack of username indicates user is logged out
     u.setUser( undefined);
 
-    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_info_change", "USER");
+    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, u.USER_INFO_CHANGE, "USER");
 
     expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
 
@@ -228,7 +228,7 @@ define([
 
     var n = new NavBarWidget();
     n.activate(minsub.beehive.getHardenedInstance());
-    var publishSpy = sinon.stub(n.pubsub, "publish");
+    var publishSpy = sinon.stub(n.getPubSub(), "publish");
 
     $("#test").append(n.view.render().el);
 
@@ -247,7 +247,7 @@ define([
     
     //now show navbar in logged in state
     u.setUser("user", "foo");
-    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, "user_signed_in", "fakeUserName");
+    minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, u.USER_SIGNED_IN, "fakeUserName");
 
     $("#test").find(".logout").click();
     expect(publishSpy.callCount).to.eql(2);
