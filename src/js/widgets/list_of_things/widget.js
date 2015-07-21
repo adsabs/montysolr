@@ -150,7 +150,7 @@ define([
         // this information is important for calcullation of pages
         var numFound = apiResponse.get("response.numFound");
         var perPage =  this.model.get('perPage') || (q.has("rows") ? q.get('rows')[0] : 10);
-        var start = q.has("start") ? q.get('start')[0] : 0;
+        var start = this.model.get("start");
 
         // compute the page number of this request
         var page = PaginationMixin.getPageVal(start, perPage);
@@ -224,9 +224,11 @@ define([
       updatePagination: function(options) {
         var perPage = options.perPage || this.model.get('perPage');
         var page = _.isNumber(options.page) ? options.page : null;
+        var start = this.getPageStart(page, perPage, numFound);
         var numFound = options.numFound || this.model.get('numFound');
         var numAround = options.numAround || this.model.get('numAround') || 2;
         var currentQuery = options.currentQuery || this.model.get('currentQuery') || new ApiQuery();
+
 
         // click to go to another 'page' will skip this
         if (page === null && this.collection.length) {
@@ -242,6 +244,7 @@ define([
         var showFirst = (_.pluck(pageData, "p").indexOf(1) !== -1) ? false : true;
 
         this.model.set({
+          start: start,
           perPage: perPage,
           page: page,
           numFound: numFound,
@@ -251,7 +254,6 @@ define([
           showRange: showRange,
           showFirst: showFirst
         });
-
 
         this.hiddenCollection.showRange(showRange[0], showRange[1]);
         this.collection.reset(this.hiddenCollection.getVisibleModels());

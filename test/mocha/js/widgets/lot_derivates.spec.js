@@ -42,6 +42,8 @@ define([
           _.each(q.keys(), function(k) {
             ret.responseHeader.params[k] = q.get(k)[0];
           });
+          //but widget is currently checking in the response.start not the responseheader
+          ret.response.start = q.get("start")[0];
           //_.extend(ret.responseHeader.params, q.toJSON());
           return ret;
         }

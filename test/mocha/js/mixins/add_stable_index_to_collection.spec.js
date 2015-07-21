@@ -74,7 +74,7 @@ define([
     it("should have a getPageVal method that returns the page number given a starting index and number of records per Page", function(){
 
       expect(PaginationMixin.getPageVal(10, 20)).to.eql(0);
-      expect(PaginationMixin.getPageVal(10, 5)).to.eql(1);
+      expect(PaginationMixin.getPageVal(10, 5)).to.eql(2);
       expect(PaginationMixin.getPageVal(11, 5)).to.eql(2);
       expect(PaginationMixin.getPageVal(11, 2)).to.eql(5);
     });

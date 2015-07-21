@@ -19,11 +19,9 @@ define([
       beforeEach(function (done) {
         minsub = new (MinimalPubsub.extend({
           request: function (apiRequest) {
-            if (this.requestCounter % 2 === 0) {
-              return Test2();
-            } else {
-              return Test1();
-            }
+             var fakeSolrResponse = this.requestCounter % 2 == 0 ? Test2() : Test1();
+             fakeSolrResponse.response.start = apiRequest.get("query").get("start")[0];
+            return fakeSolrResponse;
           }
         }))({verbose: false});
 
