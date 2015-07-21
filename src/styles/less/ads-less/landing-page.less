@@ -102,7 +102,9 @@
   background: @darker-background;
 
   .s-content-container {
-    margin: 20px 30px;
+    @media(min-width: @screen-sm-min) {
+      margin: 15px;
+    }
     height: 680px;
   }
 
