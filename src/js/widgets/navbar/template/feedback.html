@@ -6,7 +6,6 @@
                 <h4 class="modal-title">Feedback Form</h4>
             </div>
             <div class="modal-body">
-                <!--adshelp.cfa.harvard.edu-->
                 <form class="feedback-form">
 
                     <input type="hidden" name="_subject" value="Bumblebee Feedback" />
@@ -36,15 +35,16 @@
 
                     </div>
 
-
                     <div class="form-group">
                         <label>Feedback <br/>
                         <textarea rows="8" cols="50" name="comments"></textarea>
                         </label>
 
                     </div>
-
-                    <button class="btn btn-success" type="submit" value="Send">Submit form</button>
+                    <div class="form-group">
+                        <div class="g-recaptcha"></div>
+                    </div>
+                    <button class="btn btn-success" type="submit" value="Send">Submit</button>
                 </form>
 
                 <br/>
