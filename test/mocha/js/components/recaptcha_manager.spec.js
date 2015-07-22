@@ -1,6 +1,10 @@
 define([
-  "js/components/recaptcha_manager"
-], function(RecaptchaManager){
+  "js/components/recaptcha_manager",
+  'js/bugutils/minimal_pubsub'
+], function(
+  RecaptchaManager,
+  MinSub
+  ){
 
   describe("Recaptcha Manager", function(){
 
@@ -24,6 +28,41 @@ define([
       expect(r.renderRecaptcha.callCount).to.eql(1);
 
     done();
+
+    });
+
+    it("listens to APP_STARTED and requests the recaptcha key", function(){
+
+      var r = new RecaptchaManager();
+
+      var key;
+
+      var minsub = new (MinSub.extend({
+        request: function(apiRequest) {
+        }
+
+      }))({verbose: false});
+
+      var fakeAppStorage = {getConfigCopy : function(){return {recaptchaKey : "here_is_a_fake_key"}}};
+
+      minsub.beehive.addObject("AppStorage", fakeAppStorage);
+
+      r.activate(minsub.beehive);
+
+      r.siteKeyDeferred.done(function(data){
+
+        key = data;
+      });
+
+      minsub.publish(minsub.APP_STARTED);
+
+      //evidence that recaptcha manager successfully retrieved config variable recaptcha key
+
+      expect(key).to.eql("here_is_a_fake_key");
+
+
+
+
 
     })
 
