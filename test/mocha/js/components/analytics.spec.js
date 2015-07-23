@@ -24,9 +24,16 @@ define([
 
     it("should handle load errors caused by Ghostery", function(done) {
 
+      /**
+       * the async loading is ridiculously slow (ie. times out after 15s)
+       * in chrome
+       */
+      this.timeout(50000);
+
       require(['js/components/analytics'], function(analytics) {
-        setTimeout(function() {
-          expect(analytics.loaded).to.eql(false);
+
+        expect(analytics.promise).to.be.defined;
+        analytics.promise.fail(function() {
 
           expect(window.GoogleAnalyticsObject).to.be.defined;
           expect(window.GoogleAnalyticsObject).to.eql('ga');
@@ -40,8 +47,13 @@ define([
           var a = require('js/components/analytics');
           a('bar');
           expect(window[window.GoogleAnalyticsObject].q[3][0]).to.eql('bar');
+
+          for (var i=0; i<100; i++) {
+            a(i);
+          }
+          expect(window[window.GoogleAnalyticsObject].q.length).to.eql(53);
           done();
-        }, 500);
+        });
 
       });
 

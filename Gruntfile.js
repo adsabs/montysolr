@@ -358,6 +358,12 @@ module.exports = function(grunt) {
             dest: 'src/libs/nvd3/',
             expand: true,
             flatten: true
+          },
+          {
+            src: ['bower_components/requirejs-plugins/src/*.js'],
+            dest: 'src/libs/requirejs-plugins/',
+            expand: true,
+            flatten: true
           }
         ]
       },

@@ -149,6 +149,7 @@ require.config({
     'jquery': 'libs/jquery/jquery',
     'backbone': 'libs/backbone/backbone',
     'hbs': 'libs/require-handlebars-plugin/hbs',
+    'async': 'libs/requirejs-plugins/async',
     'marionette' : 'libs/marionette/backbone.marionette',
     'backbone.wreqr' : 'libs/backbone.wreqr/lib/backbone.wreqr',
     'backbone.eventbinder' : 'libs/backbone.eventbinder/backbone.eventbinder',

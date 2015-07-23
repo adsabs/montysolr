@@ -26,7 +26,8 @@
     "backbone.stickit": "~0.8.0",
     "zeroclipboard": "~2.2.0",
     "FileSaver": "*",
-    "select2": "~4.0.0"
+    "select2": "~4.0.0",
+    "requirejs-plugins": "~1.0.3"
   },
   "devDependencies": {
     "chai": "~1.8.0",
