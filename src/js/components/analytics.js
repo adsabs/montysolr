@@ -31,7 +31,10 @@ define(['require', 'analytics_config'], function (require, config) {
   // object after it loads. This allows us to add events to `window[gaName]` even
   // before the library has fully loaded.
   require(['google-analytics'], function(ga) {
-    //console.log('ga was loaded');
+    Analytics.loaded = true;
+  }, function(err) {
+    console.warn('google-analytics could not be loaded (Ghostery trickery?)', err);
+    Analytics.loaded = false;
   });
 
   return Analytics;

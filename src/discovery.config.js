@@ -174,7 +174,8 @@ require.config({
     'sinon': '../bower_components/sinon/index',
     'zeroclipboard' : 'libs/zeroclipboard/ZeroClipboard',
     'filesaver' : 'libs/FileSaver/FileSaver',
-    'select2' : 'libs/select2/select2'
+    'select2' : 'libs/select2/select2',
+    'squire': '../bower_components/squire/src/Squire'
 
   },
 
