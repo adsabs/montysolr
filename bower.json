@@ -35,7 +35,8 @@
     "mocha": "~2.1.0",
     "sinon": "http://sinonjs.org/releases/sinon-1.9.0.js",
     "es5-shim": "~4.0.3",
-    "sprintf": "~1.0.2"
+    "sprintf": "~1.0.2",
+    "squire": "~0.2.0"
   },
   "resolutions": {
     "d3": "~3.4.6"
