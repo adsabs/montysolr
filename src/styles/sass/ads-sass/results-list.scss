@@ -333,7 +333,7 @@ li.article-author {
 }
 
 
-.s-results-list {
+.s-results-widget {
   input[type="checkbox"]{
     width: 14px;
     height: 14px;
@@ -342,7 +342,14 @@ li.article-author {
   label {
     margin-bottom: 0px;
   }
-}
+
+
+  #select-all-docs {
+    position: relative;
+    top: 25px;
+    left: 77%;
+    }
+  }
 
 .show-details{
   .icon-details {

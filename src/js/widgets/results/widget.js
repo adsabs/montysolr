@@ -48,7 +48,23 @@ define([
           }
         };
         this.model.set(this.model.defaults(), {silent : true});
+
+
+        //also need to add an event listener for the "toggle all" action
+        this.view.toggleAll = function(e){
+          var flag = e.target.checked ? "add" : "remove";
+          this.trigger("toggle-all", flag);
+        }
+
+        _.extend(this.view.events, {'click input#select-all-docs': 'toggleAll'});
+
+        this.view.delegateEvents();
+
+        //this must come after the event delegation!
         this.listenTo(this.collection, "reset", this.checkDetails);
+        //finally, listen to this event on the view
+        this.listenTo(this.view, "toggle-all", this.triggerBulkAction);
+
       },
 
       defaultQueryArguments: {
@@ -71,6 +87,7 @@ define([
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.onUserAnnouncement);
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperUpdate);
         pubsub.subscribe(pubsub.CUSTOM_EVENT, this.onCustomEvent);
+
       },
 
       onUserAnnouncement: function(key, val){
@@ -140,7 +157,7 @@ define([
           this.model.set("showHighlights", 'open'); // default is to be open
         }
         else {
-          this.view.model.set("showHighlights", false); // will make it non-clickable
+          this.model.set("showHighlights", false); // will make it non-clickable
         }
       },
 
@@ -252,7 +269,17 @@ define([
             m.set("chosen", false);
           }
         });
+        if (this.collection.where({"chosen": true}).length == 0){
+          //make sure the "selectAll" button is unchecked
+          this.view.$("input#select-all-docs")[0].checked = false;
+        }
+      },
+
+      triggerBulkAction : function(flag){
+        var bibs = this.collection.pluck("bibcode");
+        this.pubsub.publish(this.pubsub.BULK_PAPER_SELECTION, flag, bibs);
       }
+
     });
 
     _.extend(ResultsWidget.prototype, LinkGenerator);

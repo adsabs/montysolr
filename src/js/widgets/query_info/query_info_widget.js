@@ -57,8 +57,7 @@ define(['marionette',
       },
 
       triggers : {
-        "click .clear-selected" : "clear-selected",
-        "click .page-bulk-add" : "page-bulk-add"
+        "click .clear-selected" : "clear-selected"
       },
 
       events : {
@@ -66,7 +65,6 @@ define(['marionette',
         "change #all-vs-selected" : "recordAllVsSelected",
         "change #library-select" : "recordLibrarySelection",
         "keyup .new-library-name": "recordNewLibraryName",
-
         "click .library-add-title" : "toggleLibraryDrawer",
         "click .submit-add-to-library" : "libraryAdd",
         "click .submit-create-library" : "libraryCreate"
@@ -143,7 +141,6 @@ define(['marionette',
 
       viewEvents : {
         "clear-selected" : "clearSelected",
-        "page-bulk-add" : "triggerBulkAdd",
         "library-add" : "libraryAddSubmit",
         "library-create" : "libraryCreateSubmit"
       },
@@ -188,6 +185,7 @@ define(['marionette',
         var pubsub = this.getPubSub();
         pubsub.publish(pubsub.CUSTOM_EVENT, "add-all-on-page");
       },
+
 
       libraryAddSubmit : function(data){
         var options = {}, that = this;

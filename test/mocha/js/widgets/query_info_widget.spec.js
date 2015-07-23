@@ -39,17 +39,11 @@ define([
       w.activate(minsub.beehive.getHardenedInstance());
 
       $("#test").append(w.render().el);
-
-      expect($(".currently-selected").text().trim()).to.eql('0 selected\n        \n        \n              select all on page');
-
+      expect($(".currently-selected").text().trim()).to.eql('0 selected papers');
       minsub.publish(minsub.STORAGE_PAPER_UPDATE, 10);
-
-      expect($(".currently-selected").text().trim().split(/\n/)[0]).to.eql('10 selected');
-
+      expect($(".currently-selected").text().trim().split(/\n/)[0]).to.eql('10 selected papers');
       expect(s.clearSelectedPapers.callCount).to.eql(0);
-
       $("#test").find(".clear-selected").click();
-
       expect(s.clearSelectedPapers.callCount).to.eql(1);
 
 

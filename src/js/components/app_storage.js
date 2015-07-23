@@ -143,8 +143,13 @@ define([
         }
       },
 
-      onBulkPaperSelection : function(bibs){
-        this.addSelectedPapers(bibs);
+      onBulkPaperAction : function(flag, bibs){
+        if (flag == "add"){
+          this.addSelectedPapers(bibs);
+        }
+        else if (flag == "remove"){
+          this.removeSelectedPapers(bibs);
+        }
       },
 
       //this is used by the auth and user settings widgets

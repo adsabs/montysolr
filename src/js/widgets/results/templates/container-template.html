@@ -1,10 +1,13 @@
+<div class="s-results-widget">
 <div class="row s-list-controls">
 
     <div class="s-results-border-bottom">
 
         <div class="col-sm-1">
-
-            <button class="btn btn-default btn-expand left-expand hidden-xs" title="hide left column" aria-label="hide left column"><i></i></button>
+            <label for="#select-all-docs" class="sr-only">
+               select all on this page
+            </label>
+            <input title="select all on this page" type="checkbox" id="select-all-docs"/>
         </div>
 
         <div class="col-sm-6">
@@ -28,12 +31,13 @@
         </div>
 
 
-        <div class="col-sm-4 sort-container">
+        <div class="col-sm-3 sort-container">
 
         </div>
 
-        <div class="col-sm-1">
-            <button class="btn btn-default btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
+        <div class="col-sm-2">
+            <button class="btn btn-default btn-sm btn-expand left-expand hidden-xs" title="hide left column" aria-label="hide left column"><i></i></button>
+            <button class="btn btn-default btn-sm btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
         </div>
 
     </div>
@@ -75,3 +79,4 @@
     </div>
 {{/if}}
 
+</div>
