@@ -1700,12 +1700,13 @@ define([
           ]
         });
       })
+
+      it("doesnt allow to request more than max_rows", function() {
+        var w = new WordCloud();
+        var q = w.customizeQuery(new ApiQuery({'q': 'foo:bar', 'rows': 3000}));
+        expect(q.get('rows')).to.be.eql([150]);
+      });
     });
 
-    it("doesnt allow to request more than max_rows", function() {
-      var w = new WordCloud();
-      var q = w.customizeQuery(new ApiQuery({'q': 'foo:bar', 'rows': 3000}));
-      expect(q.get('rows')).to.be.eql([150]);
-    });
 
 });
