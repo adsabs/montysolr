@@ -41,7 +41,7 @@ define([
   // object after it loads. This allows us to add events to `window[gaName]` even
   // before the library has fully loaded.
   var defer = $.Deferred();
-  require(['async!google-analytics'], function(ga) {
+  require(['google-analytics'], function(ga) {
     defer.resolve();
   }, function(err) {
     console.warn('google-analytics could not be loaded; we will work just fine without it', err);
