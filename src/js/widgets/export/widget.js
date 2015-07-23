@@ -271,7 +271,10 @@ define([
               // export documents by their ids
               var ids = _.map(apiResponse.get('response.docs'), function(d) {return d.bibcode});
               var $form =  $(ClassicFormTemplate({ bibcodes: ids }));
+              //firefox requires form to actually be in the dom when it is submitted
+              $("body").append($form);
               $form.submit();
+              $form.remove();
             });
         }
         else {
