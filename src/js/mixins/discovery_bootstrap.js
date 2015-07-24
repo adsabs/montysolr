@@ -64,7 +64,7 @@ define([
       var dynConf = this.getObject('DynamicConfig');
 
       if (results) {
-        dynConf.pskToExecuteFirst = results.pubsub.getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
+        dynConf.pskToExecuteFirst = results.getPubSub().getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
       }
 
       var defer = $.Deferred();

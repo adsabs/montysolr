@@ -69,6 +69,8 @@ define([
 
   });
 
-  return _.extend(NavWidget.prototype, Dependon.BeeHive);
+  _.extend(NavWidget.prototype, Dependon.BeeHive);
+
+  return NavWidget;
 
 });
