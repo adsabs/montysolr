@@ -1025,7 +1025,7 @@ define([
       var minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
           this.counter = this.counter || 0;
-          if (apiRequest.toJSON().target === ApiTargets.SEARCH && this.counter == 0) {
+          if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter == 0) {
             this.counter++;
             return {
               "responseHeader": {
@@ -1045,7 +1045,7 @@ define([
               ]
               }}
           }
-          else if (apiRequest.toJSON().target === ApiTargets.SEARCH && this.counter > 1){
+          else if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter > 1){
             return {
               "responseHeader": {
                 "status": 0,
@@ -1065,7 +1065,7 @@ define([
               }}
           }
           //just to be explicit
-          else if (apiRequest.toJSON().target === ApiTargets.SERVICE_METRICS ) {
+          else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS ) {
             this.counter++;
             return testData;
           }

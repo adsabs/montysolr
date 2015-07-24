@@ -237,7 +237,7 @@ define([
           });
         });
 
-        
+
         this.set("library-metrics", function(widget, data){
 
             //first, tell export widget what to show
@@ -544,7 +544,6 @@ define([
           app.getWidget("DetailsPage").done(function(w) {
             w.setActive(id, format);
           });
-//          this.route = data.href;
         });
         this.set('ShowGraphics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);
