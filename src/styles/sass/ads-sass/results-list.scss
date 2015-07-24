@@ -2,8 +2,6 @@
 // results list css
 
 
-
-
 .per-page {
   @extend .form-inline;
   @extend .form-control;
@@ -92,6 +90,7 @@
 
 .s-show-details-container {
   margin-top: 20px;
+  padding-left: 2%;
 }
 
 .s-results-title {
@@ -239,6 +238,7 @@ li.article-author {
   font-weight: 400;
 }
 
+
 .s-sort-widget {
   .dropdown-menu {
     padding: 10%;
@@ -347,7 +347,7 @@ li.article-author {
   #select-all-docs {
     position: relative;
     top: 25px;
-    left: 77%;
+    left: 5px;
     }
   }
 

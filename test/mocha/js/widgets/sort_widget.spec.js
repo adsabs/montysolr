@@ -62,7 +62,7 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: 'star'}));
 
         expect($("#test").find("#sort-button").text().trim()).to.eql("Sort: Relevancy");
-        expect($("#test").find("button.sort-options:first").data("value")).to.eql("classic_factor");
+        expect($("#test").find("li.sort-options button:first").data("value")).to.eql("classic_factor");
         expect($("#test").find("input[name=order-options]:checked").val()).to.eql("desc");
 
       });
@@ -134,7 +134,7 @@ define([
         $("input[value=asc]").attr('checked', true);
         w.view.$("input[value=asc]").click();
 
-        $("button.sort-options[data-value='date']").click()
+        $("button[data-value='date']").parent().click();
 
         expect(w.getPubSub().publish.lastCall.args[1].get("sort")[0]).to.eql("date asc");
 

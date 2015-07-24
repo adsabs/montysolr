@@ -171,7 +171,7 @@ define([
           events: feedback.events,
           msg: feedback.msg,
           title: feedback.title,
-          type: feedback.type,
+          type: feedback.type || "info",
           modal: feedback.modal,
           promise: promise
         });

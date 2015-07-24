@@ -160,9 +160,21 @@ select:focus {
   background-color: white;
 }
 
-
+//so styling will still be nice when the dropdown
+//menu is a div, not an ul
 .dropdown-menu {
   min-width: 200px;
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  li:not(.divider) {
+    padding: 6px;
+  }
+
+  li.divider {
+    margin: 5px 0;
+  }
 }
 
 .nav a {

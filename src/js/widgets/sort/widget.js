@@ -28,8 +28,8 @@ define(['marionette',
           {value: "read_count", title: "Popularity" }],
 
           orderOptions : [
-            {value: "desc", title: "Descending", default: true},
-            {value: "asc", title: "Ascending"}]
+            {value: "desc", title: "Descending", default: true, faIcon: "fa-sort-numeric-desc"},
+            {value: "asc", title: "Ascending",  faIcon: "fa-sort-numeric-asc"}]
         }
       },
 
@@ -74,8 +74,13 @@ define(['marionette',
       template: SortTemplate,
 
       events: {
-        "click button.sort-options": "changeSort",
+        "change input[name=order-options]": "showInfo",
+        "click  li.sort-options": "changeSort",
         "click .dropdown-menu label": "preventClose"
+      },
+
+      showInfo : function(){
+        this.$(".instructions").removeClass("hidden");
       },
 
       preventClose : function(e){
@@ -123,10 +128,10 @@ define(['marionette',
       },
 
       changeSort: function (ev) {
-        var newVal, current;
+        var newVal, current, button;
 
         current = this.getCurrentSortVal();
-        newVal = this.$(ev.target).data("value");
+        newVal = this.$(ev.currentTarget).find("button").data("value");
         var order = this.$("input[name=order-options]:checked").attr("value");
 
         newVal += " ";

@@ -11,10 +11,19 @@
 .s-results-control-row {
   padding-bottom:  1%;
   background-color:  $results-page-background;
+  div[data-widget="ExportDropdown"]{
+    margin-right: 4%;
+  }
+
+  .s-sort-widget {
+    position: relative;
+    left: -3%;
+  }
 
   .s-results-action-buttons {
     .btn-group{
-      margin-left: 8px;
+      position: relative;
+      top: 6px;
     }
 
     >.btn {
@@ -34,19 +43,39 @@
 }
 
 
-.s-dropdown-widget {
-  .dropdown-menu  {
-    padding: 10%;
-    ul {
-      @extend .list-unstyled;
+
+
+//had to add back styles since dropdowns are using a div
+//rather than an ul as bootstrap expects
+.s-sort-widget .dropdown-menu, .s-dropdown-widget .dropdown-menu {
+
+  padding: 10px;
+
+  li {
+    &:hover {
+      background-color: darken($gray-lightest, 2%);
+      cursor: pointer;
     }
-    li {
-      padding: 6px;
+    a {
+      color: $brand-primary;
     }
-    label {
-      font-weight: 300;
+    a:hover {
+      text-decoration: none;
+    }
+    .btn-link {
+      color: $brand-primary;
+    }
+    .btn-link:hover {
+      text-decoration: none;
     }
   }
+  label {
+    font-weight: 300;
+  }
+  .dropdown-menu {
+    padding: 10%;
+  }
+
 }
 
 .export-start-val {
@@ -61,6 +90,49 @@
   @extend .input-sm;
   display: inline;
   width: 30%
+
+}
+
+.s-sort-widget {
+  
+  li:first-of-type:hover {
+    background-color: white;
+  }
+
+  @include box-shadow(2px 2px 2px lighten($gray-lightest, 5%));
+
+  #sort-button {
+    color: @text-color !important;
+  }
+
+  .btn-link {
+    padding: 0;
+    display: block;
+  }
+
+  .s-instructions {
+    margin-top: 5px;
+    padding: 2%;
+    color: lighten($brand-info, 5%);
+  }
+}
+
+
+.s-dropdown-widget {
+
+  .export-start-val {
+    .form-control;
+    .input-sm;
+    display: inline;
+    width: 30%
+  }
+
+  .export-end-val {
+    .form-control;
+    .input-sm;
+    display: inline;
+    width: 30%
+  }
 }
 
 .s-query-info-widget {
