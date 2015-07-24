@@ -181,10 +181,6 @@ define(['marionette',
             counter++;
             var q = apiRequest.get('query');
             var ret = test1();
-            if (counter % 2 == 0){
-
-            }
-
             _.each(q.keys(), function(k) {
               ret.responseHeader.params[k] = q.get(k)[0];
             });
