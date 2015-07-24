@@ -13,15 +13,3 @@
 <div>
     <div data-widget="FooterWidget"/>
 </div>
-
-<script>
-    //put script here that need to be run only once and registered
-    // on all 'pages'
-    $("body").on("click", "button.toggle-menu", function(e){
-        var $button = $(e.target),
-                $sidebar =  $button.parents().eq(1).find(".nav-container");
-        $sidebar.toggleClass("show");
-        var text = $sidebar.hasClass("show") ? '  <i class="fa fa-close"></i> Close Menu' : ' <i class="fa fa-bars"></i> Show Menu';
-        $button.html(text);
-    });
-</script>

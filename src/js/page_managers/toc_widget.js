@@ -1,7 +1,9 @@
 define([
+  'backbone',
   'marionette'
-],
-  function(
+
+], function(
+  Backbone,
   Marionette
   ){
 
@@ -133,11 +135,6 @@ define([
         //the correct view
         this.trigger('page-manager-event', 'widget-selected', data);
       }
-
-      //finally, close the mobile menu, which might be open
-      this.$el.parent(".nav-container").removeClass("show");
-      $("button.toggle-menu").html(' <i class="fa fa-bars"></i> Show Menu');
-
       return false;
     },
 

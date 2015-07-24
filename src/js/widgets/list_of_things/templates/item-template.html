@@ -1,25 +1,25 @@
 <div class="col-sm-12 s-display-block {{#if chosen}} chosen {{/if}}">
 <div class="row s-top-row">
-    <div class="col-xs-1 s-checkbox-col s-top-row-col">
+    <div class="col-sm-1 col-xs-2 s-checkbox-col s-top-row-col">
         <label>
             {{indexToShow}}
             <input type="checkbox" value={{identifier}} name="identifier" {{#if chosen}} checked {{/if}}>
         </label>
     </div>
-    <div class="hidden-xs hidden-sm col-md-3 s-top-row-col identifier s-identifier">
+    <div class="col-sm-3 col-xs-4 s-top-row-col identifier s-identifier">
         <a href="#abs/{{identifier}}" aria-label="bibcode">
             {{identifier}}
         </a>
     </div>
-    <div class="col-xs-2 col-md-2 col-md-offset-0 s-top-row-col" aria-label="date published">
-       {{formattedDate}}
+    <div class="col-sm-2 s-top-row-col" aria-label="date published">
+        {{formattedDate}}
     </div>
-    <div class="col-xs-3 col-sm-4 col-md-2 s-top-row-col" title="citation count">
+    <div class="col-sm-2 col-xs-6 s-top-row-col" title="citation count">
         {{#if num_citations}}
         <a href="#abs/{{bibcode}}/citations">cited: {{num_citations}}</a>
         {{/if}}
     </div>
-    <div class="col-xs-4 col-sm-4 pull-right">
+    <div class="col-sm-4">
         <div class="s-results-links">
             {{#if links}}
             <div class="letter-icon s-letter-icon">
