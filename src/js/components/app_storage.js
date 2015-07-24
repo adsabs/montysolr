@@ -21,7 +21,7 @@ define([
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
-        _.bindAll(this, "onPaperSelection", "onBulkPaperSelection");
+        _.bindAll(this, "onPaperSelection", "onBulkPaperAction");
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.PAPER_SELECTION, this.onPaperSelection);
         pubsub.subscribe(pubsub.BULK_PAPER_SELECTION, this.onBulkPaperSelection);
