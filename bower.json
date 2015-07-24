@@ -21,12 +21,13 @@
     "fontawesome": "~4.3.0",
     "d3-cloud": "~1.0.5",
     "nvd3": "git://github.com/novus/nvd3#~1.1.15-beta",
-    "persist-js": "~0.3.0",
+    "persist-js": "https://github.com/jeremydurham/persist-js.git#~0.3.0",
     "backbone-validation": "~0.11.3",
     "backbone.stickit": "~0.8.0",
     "zeroclipboard": "~2.2.0",
     "FileSaver": "*",
-    "select2": "~4.0.0"
+    "select2": "~4.0.0",
+    "requirejs-plugins": "~1.0.3"
   },
   "devDependencies": {
     "chai": "~1.8.0",
@@ -35,7 +36,8 @@
     "mocha": "~2.1.0",
     "sinon": "http://sinonjs.org/releases/sinon-1.9.0.js",
     "es5-shim": "~4.0.3",
-    "sprintf": "~1.0.2"
+    "sprintf": "~1.0.2",
+    "squire": "~0.2.0"
   },
   "resolutions": {
     "d3": "~3.4.6"

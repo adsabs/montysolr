@@ -10,9 +10,10 @@
  *  - which widgets to load (for this application)
  *  - which environmental variables are used
  *        (and how to bootstrap run-time values)
+ *
  */
 
-define(['config', 'module', 'analytics'], function(config, module, analytics) {
+define(['config', 'module'], function(config, module) {
 
   require([
       'router',

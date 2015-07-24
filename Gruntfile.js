@@ -72,6 +72,15 @@ module.exports = function(grunt) {
       }
     },
 
+    // Safari browser (v6) gets broken by Ghostery, the only solution that works
+    // is to serve google-analytics locally; this is out of necessity!
+    curl: {
+      'google-analytics': {
+        src: 'http://www.google-analytics.com/analytics.js',
+        dest: 'src/libs/g.js'
+      }
+    },
+
     // Task to minify modules/css; it should run only after files were
     // copied over to the 'dist' folder
     requirejs: {
@@ -358,6 +367,12 @@ module.exports = function(grunt) {
             dest: 'src/libs/nvd3/',
             expand: true,
             flatten: true
+          },
+          {
+            src: ['bower_components/requirejs-plugins/src/*.js'],
+            dest: 'src/libs/requirejs-plugins/',
+            expand: true,
+            flatten: true
           }
         ]
       },
@@ -501,7 +516,8 @@ module.exports = function(grunt) {
             "widgets/success/view.js": 60,
             "widgets/library_individual/views/view_library.js": 67,
             "components/library_controller.js" : 66,
-            "widgets/wordcloud/widget.js": 79
+            "widgets/wordcloud/widget.js": 79,
+            "components/analytics.js": 72
           }
         }
       },
@@ -677,10 +693,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-blanket-mocha");
   grunt.loadNpmTasks('grunt-hash-required');
   grunt.loadNpmTasks('grunt-saucelabs');
+  grunt.loadNpmTasks('grunt-curl');
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-    ['install-dependencies', 'bower-setup', 'less', '_conditional_copy', 'copy:libraries']);
+    ['install-dependencies', 'bower-setup', 'less', '_conditional_copy', 'copy:libraries', 'curl:google-analytics']);
 
   grunt.registerTask('_conditional_copy', function() {
     if (!grunt.file.exists('src/discovery.vars.js')) {
@@ -690,6 +707,10 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('assemble', 'Prepares release for distribution', function() {
+    // Purpose of this task is to generate a release ready configuration
+    // with paths that point to the proper locations; to do that we generate
+    // new jsmap file and also copy few files
+
     var chalk = require('chalk');
     var src = 'dist/discovery.config.original.js';
     var jsMap = grunt.file.readJSON('dist/jsmap.json');
@@ -715,7 +736,7 @@ module.exports = function(grunt) {
       throw new Error('I cant find paths section, and refuse to continue for fear of breaking somehting');
     }
 
-    // modify the jsMap, remove .js
+    // modify the jsMap, remove .js suffix
     var newMap = {};
     for (var name in jsMap) {
       newMap[name.replace('.js', '')] = jsMap[name].replace('.js', '');
@@ -728,11 +749,12 @@ module.exports = function(grunt) {
     require.config = function(c) {
       paths = c.paths;
     };
+
     console.log('Going to eval ' + tgt + '...');
     eval(config);
     require.config = oldc;
 
-    // for these guys, we'll do manual update
+    // add version identifier to the file names
     paths['config'] = paths['config'] + '.' + version;
     paths['main'] = newMap['js/apps/discovery/main'];
     paths['router'] = newMap['js/apps/discovery/router'];
@@ -742,7 +764,7 @@ module.exports = function(grunt) {
       paths[k] = newMap[k];
     }
 
-    // certain libraries are fetched from CDN and other locations
+    // override certain libraries (they are always fetched from CDN and other locations)
     paths['jquery'] = '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min'; //code.jquery.com/jquery-2.0.3.min.js';
     paths['jquery-ui'] = '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min'; //code.jquery.com/ui/1.10.4/jquery-ui.min.js';
     paths['bootstrap'] = '//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min';
@@ -755,7 +777,12 @@ module.exports = function(grunt) {
     paths['nvd3'] = 'libs/nvd3/nv.d3.min';
     paths['persist-js'] = 'libs/persist-js/persist-all-min';
 
-    // and replace the string
+    // in development we use google-analytics, but for production we'll serve it
+    // ourselves (because of silly Ghostery breaking Safari browsers)
+    grunt.file.write('dist/libs/g.' + version + '.js', grunt.file.read('dist/libs/g.js'));
+    paths['google-analytics'] = 'libs/g.' + version;
+
+    // build the configuration
     var firstPart = config.substring(0, m.index);
     var lastPart = config.substring(m.index + m[0].length, config.length);
     var newConfig = firstPart + 'paths: ' + JSON.stringify(paths, null, '  ') + ',\n' + m[0].replace('paths', 'oldpaths') + lastPart;

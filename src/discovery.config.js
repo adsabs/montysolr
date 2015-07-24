@@ -149,6 +149,7 @@ require.config({
     'jquery': 'libs/jquery/jquery',
     'backbone': 'libs/backbone/backbone',
     'hbs': 'libs/require-handlebars-plugin/hbs',
+    'async': 'libs/requirejs-plugins/async',
     'marionette' : 'libs/marionette/backbone.marionette',
     'backbone.wreqr' : 'libs/backbone.wreqr/lib/backbone.wreqr',
     'backbone.eventbinder' : 'libs/backbone.eventbinder/backbone.eventbinder',
@@ -174,7 +175,8 @@ require.config({
     'sinon': '../bower_components/sinon/index',
     'zeroclipboard' : 'libs/zeroclipboard/ZeroClipboard',
     'filesaver' : 'libs/FileSaver/FileSaver',
-    'select2' : 'libs/select2/select2'
+    'select2' : 'libs/select2/select2',
+    'squire': '../bower_components/squire/src/Squire'
 
   },
 

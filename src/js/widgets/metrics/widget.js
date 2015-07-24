@@ -573,7 +573,7 @@ define([
 
     defaultQueryArguments : {
       fl : "bibcode",
-      rows : 1000
+      rows : 300
     },
 
     showMetricsForCurrentQuery : function(){

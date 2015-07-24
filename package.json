@@ -41,7 +41,8 @@
     "blanket": "^1.1.6",
     "grunt-hash-required": "^0.1.5",
     "mocha-phantomjs": "~3.5.2",
-    "grunt-saucelabs": "~8.6.1"
+    "grunt-saucelabs": "~8.6.1",
+    "grunt-curl": "~2.2.0"
   },
   "peerDependencies": {
     "bower": "*",

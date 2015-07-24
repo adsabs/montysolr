@@ -16,6 +16,7 @@ define([], function() {
       '/components/api_request.spec.js',
       '/components/query_mediator.spec.js',
       '/components/services_container.spec.js',
+      //'/components/analytics.spec.js', // too slow
       '/components/application.spec.js',
       '/components/api_query_updater.spec.js',
       '/components/api_feedback.spec.js',
