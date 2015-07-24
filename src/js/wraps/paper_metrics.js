@@ -1,9 +1,7 @@
 
 define([
-
     'js/widgets/metrics/widget',
     'js/components/api_feedback'
-
   ],
 
   function (
@@ -13,7 +11,6 @@ define([
 
     var Widget = MetricsWidget.extend({
 
-
       initialize : function(options){
 
         this.on('page-manager-message', function(event, data){
@@ -22,9 +19,10 @@ define([
           }
         });
         MetricsWidget.prototype.initialize.apply(this, arguments);
-
+      },
 
       activate : function(beehive){
+        this.setBeeHive(beehive);
       _.bindAll(this, "setCurrentQuery", "processResponse");
       var pubsub = beehive.getService("PubSub");
       //this will have to be changed later
@@ -49,14 +47,6 @@ define([
 
       hasReads : function(data){
          return  data["basic stats"]["total number of reads"] > 0;
-      },
-
-      activate : function(beehive){
-        _.bindAll(this, "setCurrentQuery", "processResponse");
-        var pubsub = beehive.getService("PubSub");
-        //this will have to be changed later
-        this.pubsub = pubsub;
-        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
       insertViews: function (data) {
