@@ -85,15 +85,9 @@ define([
     activate: function (beehive) {
       this.setBeeHive(beehive);
       var pubsub = this.getPubSub();
-      _.bindAll(this, ['onNewQuery', 'processResponse', 'onDisplayDocuments']);
-      pubsub.subscribe(pubsub.START_SEARCH, this.onNewQuery);
+      _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
       pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
       pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
-    },
-
-    onNewQuery: function() {
-      //so we don't show old data if the new data hasn't returned
-      this.model.clear();
     },
 
     onDisplayDocuments: function(apiQuery) {
@@ -151,6 +145,8 @@ define([
         //was there data for the bibcode? if not, reject the deferred
         //response.get("Error") throws an uncaught error, not very convenient
        if (response.toJSON()["Error"]) {
+         //so we don't show old data if the new data hasn't returned
+         this.model.clear();
          var error = response.get("Error");
          return this.deferredObject.reject(error);
        }
