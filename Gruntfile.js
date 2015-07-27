@@ -5,7 +5,7 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     // if you create 'local-config.json' some variables can be overriden there
-    local: grunt.file.readJSON('local-config.json'),
+    local: grunt.file.exists('local-config.json') ? grunt.file.readJSON('local-config.json') : {},
 
     // Wipe out previous builds and test reporting.
     clean: {
