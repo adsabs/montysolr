@@ -148,10 +148,12 @@ define([
       if (!(response instanceof ApiResponse)){
         //it's from the graphics service
 
-        //was there data for the bibcode?
-        if (response.attributes.Error){
-          return
-        }
+        //was there data for the bibcode? if not, reject the deferred
+        //response.get("Error") throws an uncaught error, not very convenient
+       if (response.toJSON()["Error"]) {
+         var error = response.get("Error");
+         return this.deferredObject.reject(error);
+       }
 
         var graphics = {};
         _.each(response.get("figures"), function(dict){

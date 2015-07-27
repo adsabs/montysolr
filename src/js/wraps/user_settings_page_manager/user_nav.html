@@ -11,7 +11,7 @@
 
     {{#each preferences}}
         <a href="/abs/{{../bibcode}}/{{this.path}}"  >
-        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}}" data-widget-id="{{this.id}}">
+        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-selected {{/if}}" data-widget-id="{{this.id}}">
                 <span class="s-content">
                 {{this.title}}
                 {{#if this.showCount}}
@@ -28,7 +28,7 @@
 
         <!--{{#each notifications}}-->
             <!--<a href="/abs/{{../bibcode}}/{{this.path}}" {{#unless this.isActive}} aria-disabled="true" {{/unless}} >-->
-            <!--<div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}} {{#unless this.isActive}} s-nav-inactive {{/unless}}" data-widget-id="{{this.id}}">-->
+            <!--<div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-selected {{/if}} {{#unless this.isActive}} s-nav-inactive {{/unless}}" data-widget-id="{{this.id}}">-->
                         <!--<span class="s-content">-->
                         <!--{{this.title}}-->
                         <!--{{#if this.showCount}}-->
@@ -45,7 +45,7 @@
     {{#each settings}}
 
         <a href="/abs/{{../bibcode}}/{{this.path}}" >
-        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-active {{/if}}" data-widget-id="{{this.id}}">
+        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-selected {{/if}}" data-widget-id="{{this.id}}">
                 <span class="s-content">
                 {{this.title}}
                 {{#if this.showCount}}

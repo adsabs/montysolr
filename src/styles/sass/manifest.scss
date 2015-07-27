@@ -20,7 +20,7 @@ $fa-font-path : '../../../bower_components/fontawesome/fonts';
 @import 'ads-sass/animations';
 @import 'ads-sass/utility';
 
-/* Import Bumblebee-specific modules (alphabetical order) */
+/* Import Bumblebee-specific modules */
 @import 'ads-sass/any-page';
 @import 'ads-sass/abstract-page-widgets';
 @import 'ads-sass/bootstrap-overrides';
@@ -41,6 +41,7 @@ $fa-font-path : '../../../bower_components/fontawesome/fonts';
 @import 'ads-sass/query-builder';
 @import 'ads-sass/results-list';
 @import 'ads-sass/results-page-widgets';
+@import 'ads-sass/sidebar';
 @import 'ads-sass/search-bar';
 @import 'ads-sass/visualizations';
 @import 'ads-sass/landing-page';

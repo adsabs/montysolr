@@ -117,7 +117,7 @@ define([
       $("#test").empty();
     });
 
-    it("requests graphics data from graphics endpoint and title data from search endpoint", function(){
+    it("requests graphics data from graphics endpoint and title data from search endpoint, then resolves/rejects deferred for toc widget", function(){
 
       var g = new GraphicsWidget();
 
@@ -129,6 +129,7 @@ define([
             return titleData
           }
           else {
+            debugger
             graphicsRequest = request;
             return testData;
 
@@ -137,12 +138,40 @@ define([
 
       g.activate(minsub.beehive.getHardenedInstance());
 
-      g.loadBibcodeData("fakeBibcode");
+      var eventSpy = sinon.spy();
+
+      g.on("page-manager-event", eventSpy);
+
+      g.onDisplayDocuments(new minsub.createQuery({q : "bibcode:fakeBibcode"}));
 
       expect(graphicsRequest.get("target")).to.eql("graphics/fakeBibcode");
       expect(graphicsRequest.get("query").toJSON()).to.eql({})
       expect(apiRequest.get("target")).to.eql("search/query");
       expect(apiRequest.get("query").toJSON().q).to.eql(["bibcode:fakeBibcode"]);
+
+
+      expect(eventSpy.args[0][0]).to.eql("widget-ready");
+      expect(eventSpy.args[0][1].isActive).to.eql(true);
+      expect(eventSpy.callCount).to.eql(1);
+
+
+      minsub.request =  function(request) {
+        if (request.get("target") == "search/query"){
+          apiRequest = request;
+          return titleData
+        }
+        else {
+          graphicsRequest = request;
+          return {Error: "no info found"};
+
+        }
+      };
+
+      g.onDisplayDocuments(new minsub.createQuery({q : "bibcode:fakeBibcode2"}));
+
+      //did not send a "widget ready" event
+      expect(eventSpy.callCount).to.eql(1);
+
 
     });
 

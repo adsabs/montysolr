@@ -168,12 +168,12 @@ define([
           //testing toc widget reset
           pageManager.widgets.tocWidget.resetActiveStates();
           setTimeout(function () {
-            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-active")).to.be.true;
-            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-active")).to.be.false;
+            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-selected")).to.be.true;
+            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-selected")).to.be.false;
 
             pageManager.widgets.tocWidget.collection.selectOne("ShowReferences");
-            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-active")).to.be.false;
-            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-active")).to.be.true;
+            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-selected")).to.be.false;
+            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-selected")).to.be.true;
             done();
 
           }, 1000)
