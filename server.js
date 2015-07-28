@@ -14,7 +14,7 @@ var url = require('url');
 var needle = require('needle');
 var querystring = require('querystring');
 
-var search_re = /\/v?1\/search$/;
+var search_re = /\/v?1\/search\/query$/;
 var qtree_re = /\/v?1\/qtree$/;
 var bootstrap_re = /\/v?1\/bumblebee\/bootstrap$/;
 
@@ -100,7 +100,7 @@ app.use('/api', function (req, res, next) {
     r.pathname = r.pathname.replace(/\/\/+/, '/');
 
   if (r.pathname.match(search_re)) {
-    // optionally swith endpoints
+    end.pathname = '/solr/select';
   }
   else if(r.pathname.match(qtree_re)) {
     end.pathname = '/solr/qtree';

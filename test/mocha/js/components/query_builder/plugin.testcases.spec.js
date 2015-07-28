@@ -126,16 +126,58 @@ define(['underscore',
         testQ('(x AND (y AND z)', '(x AND (y AND z)');
       });
 
-      it("all supported indexes", function (done) {
-        testQ('title:foo', 'title:foo');
+      it("supports fields that we have", function (done) {
+        this.timeout(5000);
+        testQ('_version_:1', '_version_:1');
+        testQ('abstract:foo', 'abstract:foo');
+        testQ('ack:foo', 'ack:foo');
+        testQ('aff:foo', 'aff:foo');
+        testQ('alternate_bibcode:foo', 'alternate_bibcode:foo');
+        testQ('alternate_title:foo', 'alternate_title:foo');
+        testQ('arxiv_class:foo', 'arxiv_class:foo');
         testQ('author:foo', 'author:foo');
-        testQ('keyword:foo', 'keyword:foo');
+        testQ('author_facet:foo', 'author_facet:foo');
+        testQ('bibgroup:foo', 'bibgroup:foo');
+        testQ('body:foo', 'body:foo');
+        testQ('citation:foo', 'citation:foo');
+        testQ('citation_count:0', 'citation_count:0');
+        testQ('comment:foo', 'comment:foo');
+        testQ('copyright:foo', 'copyright:foo');
+        testQ('data:foo', 'data:foo');
+        testQ('database:foo', 'database:foo');
+        testQ('date:2012', 'date:2012');
+        testQ('doctype:foo', 'doctype:foo');
+        testQ('doi:foo', 'doi:foo');
+        testQ('eid:foo', 'eid:foo');
+        testQ('email:foo', 'email:foo');
+        testQ('facility:foo', 'facility:foo');
         testQ('full:foo', 'full:foo');
-        // TBD: add more
-
+        testQ('grant:foo', 'grant:foo');
+        testQ('id:0', 'id:0');
+        testQ('identifier:foo', 'identifier:foo');
+        testQ('indexstamp:0001', 'indexstamp:0001');
+        testQ('issn:foo', 'issn:foo');
+        testQ('isbn:foo', 'isbn:foo');
+        testQ('issue:foo', 'issue:foo');
+        testQ('keyword:foo', 'keyword:foo');
+        testQ('lang:foo', 'lang:foo');
+        testQ('orcid:foo', 'orcid:foo');
+        testQ('page:foo', 'page:foo');
+        testQ('property:foo', 'property:foo');
+        testQ('pub:foo', 'pub:foo');
+        testQ('pubdate:2012', 'pubdate:2012');
+        testQ('read_count:0', 'read_count:0');
+        //testQ('reader:foo', 'reader:foo');
+        //testQ('recid:foo', 'recid:foo');
+        testQ('reference:foo', 'reference:foo');
+        testQ('simbid:0', 'simbid:0');
+        testQ('thesis:foo', 'thesis:foo');
+        testQ('title:foo', 'title:foo');
+        testQ('vizier:foo', 'vizier:foo');
+        testQ('volume:foo', 'volume:foo');
+        testQ('year:2012', 'year:2012');
         done();
       });
-
 
     });
   });

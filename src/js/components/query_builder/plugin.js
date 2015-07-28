@@ -207,7 +207,7 @@ define([
                 ]);
               }
             },
-            {id: 'instructive()', label: 'instructive()', type: 'string', placeholder: '(any valid query)',
+            {id: 'reviews()', label: 'reviews()', type: 'string', placeholder: '(any valid query)',
               operators: functionOperators,
               input: function($rule, filter) {
                 return this.createFunctionInputs([
@@ -241,7 +241,91 @@ define([
             },
             {id: 'black_hole', label: 'literal', type: 'string',
               operators: functionOperators, createOperatorIfNecessary: true
-            }
+            },
+
+            {id: '_version_', label: 'Version', type: 'string', placeholder: 'xxx',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'ack', label: 'Acknowledgements', type: 'string', placeholder: 'ADS',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'aff', label: 'Affiliation', type: 'string', placeholder: 'Harvard',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'alternate_bibcode', label: 'Alternate Bibcode', type: 'string', placeholder: '# secondary identifier of a paper',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'alternate_title', label: 'Alternate Title', type: 'string', placeholder: '# title automatically searches both fields',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'arxiv_class', label: 'Arxiv category', type: 'string', placeholder: 'phys',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'author_facet', label: 'Author Facet', type: 'string', placeholder: '1/Einstein, A./Einstein, Albert',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'bibgroup', label: 'Bibgroup', type: 'string', placeholder: '# bibliographic group',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'body', label: 'Body', type: 'string', placeholder: '# the main text (body) of the article, no acknowledgements/references',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'citation', label: 'Citation', type: 'string', placeholder: '# for special cases, use citations() instead',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'citation_count', label: 'Citation count', type: 'string', placeholder: 'citation_count:[0 TO 100]',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'comment', label: 'Comment', type: 'string', placeholder: '# reserved for internal notes',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'copyright', label: 'Copyright', type: 'string', placeholder: '# copyright notes (free text)',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'data', label: 'Data', type: 'string', placeholder: '# reserved for librarians',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'database', label: 'Database', type: 'string', placeholder: 'physics',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'date', label: 'Date', type: 'string', placeholder: '# must follow date format, e.g. 1976-01-02T00:30:00Z',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'doctype', label: 'Document Type', type: 'string', placeholder: 'book',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'doi', label: 'DOI', type: 'string', placeholder: '010.1038/srep04183',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'eid', label: 'Electronic ID', type: 'string', placeholder: '# internal use',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'email', label: 'Email', type: 'string', placeholder: '# author email, if published',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'facility', label: 'Facility', type: 'string', placeholder: 'CERN',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'grant', label: 'Grant ID', type: 'string', placeholder: 'NNX12AG54G',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'id', label: 'ID', type: 'string', placeholder: '1',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'identifier', label: 'Identifier', type: 'string', placeholder: '# bibcode, eid, doi or other ids',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'indexstamp', label: 'Indexstamp', type: 'string', placeholder: '# reserved for internal use',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'isbn', label: 'ISBN', type: 'string', placeholder: '',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'issn', label: 'ISSN', type: 'string', placeholder: '',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'issue', label: 'Issue', type: 'string', placeholder: '1',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'lang', label: 'Language', type: 'string', placeholder: '# internal use',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'orcid', label: 'ORCID', type: 'string', placeholder: '0000-0001-8178-9506',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'page', label: 'Page', type: 'string', placeholder: '2',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'property', label: 'Property', type: 'string', placeholder: '# internal use',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'pub', label: 'Publication', type: 'string', placeholder: 'apj',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'pubdate', label: 'Publ. Date', type: 'string', placeholder: '2014-08',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'read_count', label: 'Times read', type: 'string', placeholder: '[10 TO 20]',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'reference', label: 'Reference', type: 'string', placeholder: '# internal, use references() instead',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'simbid', label: 'SIMBAD Id', type: 'string', placeholder: '# internal use',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'thesis', label: 'Thesis', type: 'string', placeholder: '',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'vizier', label: 'Vizier', type: 'string', placeholder: '',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'volume', label: 'Volume', type: 'string', placeholder: 'v1',
+              operators: singleTokenOperators, createOperatorIfNecessary: true},
+            {id: 'year', label: 'Year', type: 'string', placeholder: '2015',
+              operators: singleTokenOperators, createOperatorIfNecessary: true}
+
           ],
           extend: {
             createFunctionInputs: function(profiles) {
@@ -379,7 +463,8 @@ define([
       getQuery: function(rules) {
         if (!rules)
           rules = this.getRules();
-
+        if (_.isEmpty(rules))
+          return '';
         var query = this.rulesTranslator.buildQuery(rules);
 
         return query || '';
@@ -473,7 +558,12 @@ define([
        */
       isDirty: function() {
         try {
-          if (this._rules && this.getQuery(this._rules) != this.getQuery()) {
+          var formQ = this.getQuery();
+
+          if (formQ == '')
+            return false;
+
+          if (this._rules && this.getQuery(this._rules) != formQ) {
             return true;
           }
         }

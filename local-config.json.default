@@ -2,7 +2,7 @@
   "port_development": 8000,
   "port_production": 8000,
   "api_endpoint": "http://localhost:3000/api/1",
-  "solr_endpoint": "http://adswhy.cfa.harvard.edu:9000/solr/select",
+  "solr_endpoint": "http://localhost:8984/solr/select",
   "orcid_oauth_cliend_id": "APP-P5ANJTQRRTMA6GXZ",
   "orcid_oauth_client_secret": "989e54c8-7093-4128-935f-30c19ed9158c",
   "orcid_api_endpoint": "https://api.sandbox.orcid.org",
