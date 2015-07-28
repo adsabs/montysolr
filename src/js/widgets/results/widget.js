@@ -49,7 +49,6 @@ define([
         };
         this.model.set(this.model.defaults(), {silent : true});
 
-
         //also need to add an event listener for the "toggle all" action
         this.view.toggleAll = function(e){
           var flag = e.target.checked ? "add" : "remove";

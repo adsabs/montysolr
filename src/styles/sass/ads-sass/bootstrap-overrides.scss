@@ -34,7 +34,6 @@ including reset-like things
   box-shadow : 2px 2px 2px $default-box-shadow-color;
 }
 
-
 input:focus {
   border: 1px solid fade($brand-primary, 70%) !important;
   box-shadow: none !important;
@@ -187,10 +186,6 @@ select:focus {
   font-weight: 300;
 }
 
-.panel-body {
-  margin: 2%;
-}
-
 .has-feedback .form-control-feedback {
   top: 31px;
 }
@@ -200,7 +195,7 @@ select:focus {
 .disabled{
   cursor: not-allowed;
 }
-.disabled > a{
+.disabled {
   pointer-events: none;
 }
 

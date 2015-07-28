@@ -102,8 +102,12 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   background: $darker-background;
 
   .s-content-container {
-    margin: 20px 30px;
-    height: 680px;
+
+    @media(min-width: $screen-sm-min) {
+      margin: 15px;
+    }
+   min-height: 680px;
+
   }
 
 }
@@ -172,8 +176,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 }
 
 
-
-
 .s-landing-section-4 {
   color: $text-color;
   background-color: white;
@@ -200,10 +202,9 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   .s-title {
     font-style: italic;
     font-weight: 300;
-}
+  }
 
 }
-
 
 
 .s-landing-page-layout {

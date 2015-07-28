@@ -4,7 +4,8 @@ define([
     'js/components/beehive',
     'js/bugutils/minimal_pubsub',
     'js/components/api_query',
-    './test_json/test1'
+    './test_json/test1',
+    'js/components/api_feedback'
   ],
   function(
       $,
@@ -12,7 +13,8 @@ define([
       BeeHive,
       MinimalPubSub,
       ApiQuery,
-      Test
+      Test,
+      ApiFeedback
     ) {
 
 
@@ -81,10 +83,33 @@ define([
       minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'foo:bar'}));
       setTimeout(function() {
         expect(widget.view.getFormVal()).to.be.eql('foo:bar');
+        expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">841,359</span></b><span class="s-light-font"> results</span>');
         done();
       }, 5);
 
-      expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">841,359</span></b><span class="s-light-font"> results</span>');
+
+    });
+
+    it("puts query in bar even when the search cycle failed", function(done){
+
+
+      var widget = _widget();
+      var $w = widget.render().$el;
+
+      //puts query in the search bar even when feedback is error
+      var feedback = {
+        request : minsub.createRequest({'query': minsub.createQuery({'q': 'fakeQuery'})}),
+        //"search cycle failed to start"
+        code : -3
+      };
+
+      minsub.publish(minsub.FEEDBACK, feedback);
+      setTimeout(function() {
+        expect(widget.view.getFormVal()).to.be.eql('fakeQuery');
+        expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">0</span></b><span class="s-light-font"> results</span>');
+        done();
+      }, 5);
+
     });
 
     it("should allow the user to open and close a dropdown menu from the search bar", function(done){

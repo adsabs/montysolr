@@ -433,11 +433,20 @@ define([
 
       handleFeedback: function(feedback) {
         switch (feedback.code) {
+
           case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
             this.setCurrentQuery(feedback.query);
             this.view.setFormVal(feedback.query.get('q').join(' '));
             this.view.setNumFound(feedback.numFound || 0);
             break;
+          case ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START:
+            //still want search bar to reflect failed search (from form widgets)
+            var q = feedback.request.get("query").get("q").join(' ');
+            this.setCurrentQuery(q);
+            this.view.setFormVal(q);
+            this.view.setNumFound(0);
+            break;
+
         }
       },
 

@@ -1,5 +1,14 @@
 .s-form-widget {
 
+  .panel-default {
+    .lh-box-shadow(2px 2px 2px @default-box-shadow-color);
+  }
+
+
+  .panel-body {
+    margin: 2%;
+  }
+
   label {
     font-weight: 400;
     font-size: 1.2em;

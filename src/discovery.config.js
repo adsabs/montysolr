@@ -73,6 +73,7 @@ require.config({
         UserNavbarWidget: 'js/widgets/user_navbar/widget',
         AlertsWidget: 'js/widgets/alerts/widget',
         SearchWidget: 'js/widgets/search_bar/search_bar_widget',
+        FormAccordionWidget : 'js/widgets/form_accordion/widget',
         Results: 'js/widgets/results/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',

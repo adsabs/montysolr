@@ -1,0 +1,69 @@
+@import '../../../bower_components/fontawesome/less/font-awesome';
+@import '../../../bower_components/lesshat/build/lesshat-prefixed.less';
+@import (css) '../../../bower_components/select2/dist/css/select2.css';
+
+
+/* Import Bootstrap source */
+@import '../../../bower_components/bootstrap/less/bootstrap';    // This will import the entire Bootstrap base
+
+/* Import nvd3 css */
+
+@import (css) '../css/modified_nv.d3.css';
+
+
+/* Import Bootstrap variable overrides */
+
+@import 'ads-less/bootstrap-variables';
+
+
+/* Import Bumblebee-specific less files (alphabetical order) */
+@import 'ads-less/accordion_form';
+@import 'ads-less/any-page';
+@import 'ads-less/abstract-page-widgets';
+@import 'ads-less/ads-mixins';
+@import 'ads-less/ads-variables';
+@import 'ads-less/animations.less';
+@import 'ads-less/bootstrap-overrides';
+@import 'ads-less/export';
+@import 'ads-less/facets';
+@import 'ads-less/filter-visualizer';
+@import 'ads-less/footer';
+@import 'ads-less/general-components';
+@import 'ads-less/icon-classes';
+@import 'ads-less/jquery-ui-overrides.less';
+@import 'ads-less/landing-page.less';
+@import 'ads-less/library.less';
+@import 'ads-less/metrics';
+@import 'ads-less/miscellaneous';
+@import 'ads-less/navbar';
+@import 'ads-less/orcid.less';
+@import 'ads-less/page-managers';
+@import 'ads-less/query-builder';
+@import 'ads-less/results-list';
+@import 'ads-less/results-page-widgets';
+@import 'ads-less/search-bar';
+@import 'ads-less/sidebar';
+@import 'ads-less/utility';
+@import 'ads-less/visualizations';
+@import 'ads-less/landing-page.less';
+@import 'ads-less/user-styles.less';
+@import 'ads-less/visualizations.less';
+
+@fa-font-path:       "../../libs/fontawesome";
+
+
+/* To add a new less file (say you have made a new widget that needs
+new styling, add the file to the ads-less folder, and make sure
+to put the following lines at the top:
+
+//import these files so the fonts, mixins, and global variables can be used
+@import '../../../../bower_components/fontawesome/less/font-awesome';
+@import '../../../../bower_components/lesshat/build/lesshat-prefixed.less';
+@import 'general';
+
+Then, add an import statement to this manifest file
+
+*/
+
+
+

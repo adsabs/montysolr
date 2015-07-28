@@ -24,6 +24,7 @@ define([], function() {
     //TBD 24/09/14 '/widgets/facet_hier_widget.spec.js',
       '/widgets/facet_widget.spec.js',
       '/widgets/filter_visualizer_widget.spec.js',
+      '/widgets/form_accordion_widget.spec.js',
     //XXX 24/09/14 '/widgets/facet_zoomable_graph_view.spec.js',
       '/widgets/graphics_widgets.spec.js',
       '/widgets/libraries_all.spec.js',
