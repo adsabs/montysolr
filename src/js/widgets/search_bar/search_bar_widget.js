@@ -119,7 +119,7 @@ define([
       },
 
       onBuilderChange: function() {
-        if (this.queryBuilder.isDirty()) {
+        if (this.queryBuilder.isDirty(this.getFormVal())) {
           var newQuery = this.queryBuilder.getQuery();
           this.setFormVal(newQuery);
         }
@@ -306,7 +306,12 @@ define([
 
         var formVal = this.getFormVal();
         if (formVal.trim().length > 0) {
-          this.queryBuilder.updateQueryBuilder(formVal);
+          if (this.queryBuilder.isDirty(this.getFormVal()) || _.isEmpty(this.queryBuilder.getRules())) {
+            this.queryBuilder.updateQueryBuilder(formVal);
+          }
+          else {
+            this.queryBuilder.setRules(this.queryBuilder.getRules());
+          }
         }
         else { // display a default form
           this.queryBuilder.setRules({
@@ -513,6 +518,11 @@ define([
           this.view.setFormVal(queryString);
         }
         this.view.$el.find('.show-form').click();
+      },
+
+      onDestroy: function () {
+        this.view.queryBuilder.destroy();
+        this.view.destroy();
       }
     });
 

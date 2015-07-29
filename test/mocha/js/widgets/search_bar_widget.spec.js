@@ -20,7 +20,7 @@ define([
 
   describe("Search Bar UI Widget (search_bar_widget.spec.js)", function() {
 
-    var minsub;
+    var minsub, widget;
     beforeEach(function (done) {
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
@@ -31,6 +31,9 @@ define([
     });
 
     afterEach(function (done) {
+      if (widget)
+        widget.onDestroy();
+
       minsub.destroy();
       var ta = $('#test');
       if (ta) {
@@ -40,7 +43,7 @@ define([
     });
 
     var _widget = function() {
-      var widget = new SearchBarWidget();
+      widget = new SearchBarWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
       return widget;
     };

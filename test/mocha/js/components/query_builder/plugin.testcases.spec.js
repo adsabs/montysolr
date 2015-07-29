@@ -126,7 +126,7 @@ define(['underscore',
         testQ('(x AND (y AND z)', '(x AND (y AND z)');
       });
 
-      it("supports fields that we have", function (done) {
+      it.skip("supports fields that we have", function (done) {
         this.timeout(5000);
         testQ('_version_:1', '_version_:1');
         testQ('abstract:foo', 'abstract:foo');
@@ -176,6 +176,12 @@ define(['underscore',
         testQ('vizier:foo', 'vizier:foo');
         testQ('volume:foo', 'volume:foo');
         testQ('year:2012', 'year:2012');
+        done();
+      });
+
+      it("understands funcitons", function(done) {
+        testQ('pos(james AND jim, 1,    2)', 'pos(james AND jim, 1, 2)');
+        testQ('pos(james AND jim, 1)', 'pos(james AND jim, 1)');
         done();
       });
 
