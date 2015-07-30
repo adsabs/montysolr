@@ -118,16 +118,17 @@ define([
         this.render();
       },
       "keyup input" : "checkDisabled",
-      "click button[type=submit]" : "submitForm"
+      "click button[type=submit]" : "submitForm",
+      "click button.parse" : "parseReference"
     },
 
     onRender : function(e){
       this.$("#pub-input").autocomplete({ source : AutocompleteData, minLength : 2 , autoFocus : true });
     },
 
-    checkDisabled : function(e){
+    checkDisabled : function(){
       //require at least 1 character to be in at least 1 input field
-      var fields= this.$("input").map(function(){
+      var fields= this.$("input:not(.parse-reference)").map(function(){
         return $(this).val();
       }).get();
 
@@ -139,9 +140,40 @@ define([
       }
     },
 
+    parseReference : function(){
+     var str = $("input.parse-reference").val();
+     if (str){
+       try {
+         var match = str.match(/^.+\s*(\d{4}),\s*(\w{2,5}),\s*(\d{1,5}),\s*(\d{1,4})\s*$/);
+
+         this.$("#year-input").val(match[1]);
+         this.$("#pub-input").val(match[2]);
+         this.$("#volume-input").val(match[3]);
+         this.$("#page-input").val(match[4]);
+
+         this.checkDisabled();
+
+         var btnClass = "btn-success";
+
+       } catch (e){
+         console.log("couldn't parse");
+         var btnClass = "btn-danger";
+
+       }
+
+       this.$("button.parse").removeClass("btn-info").addClass(btnClass);
+
+       setTimeout(function(){
+         this.$("button.parse").removeClass(btnClass).addClass("btn-info");
+       }, 1000);
+
+     }
+
+    },
+
     submitForm : function(e){
 
-     var terms = this.$("input").map(function(){
+     var terms = this.$("input:not(.parse-reference)").map(function(){
        var $t = $(this);
        $t.val() ? toReturn = $t.data("term") + ":" + $t.val() : toReturn =  undefined;
        return toReturn;

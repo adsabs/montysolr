@@ -58,7 +58,7 @@ define([
 
       var paperView = f.view.regionManager._regions["paper-form"].currentView;
 
-      f.view.$("#headingTwo").click()
+      f.view.$("#headingTwo").click();
 
       expect(paperView.$("button[type=submit]").prop("disabled")).to.be.true;
 
@@ -77,6 +77,54 @@ define([
       FormWidget.prototype.submitForm = s;
 
     });
+
+    it("paper view should be able to parse basic journal article references", function(){
+
+      var s = FormWidget.prototype.submitForm;
+      FormWidget.prototype.submitForm = sinon.spy();
+
+      var f = new FormWidget();
+      $("#test").append(f.render().el);
+      f.onShow();
+
+      var paperView = f.view.regionManager._regions["paper-form"].currentView;
+
+      f.view.$("#headingTwo").click();
+
+      expect(paperView.$("button[type=submit]").prop("disabled")).to.be.true;
+
+      paperView.$("input.parse-reference").val("Martín, E. L., Rebolo, R., & Zapatero Osorio, M. R. 1996,      ApJ,469,706");
+      paperView.$("button.parse").click();
+
+      expect(paperView.$("button[type=submit]").prop("disabled")).to.be.false;
+
+      paperView.$("button[type=submit]").click();
+
+      expect( FormWidget.prototype.submitForm.args[0][0]).to.eql('bibstem:ApJ year:1996 volume:469 page:706');
+
+      $("#test").empty();
+
+      //now enter in unparseable string
+
+      var f = new FormWidget();
+      $("#test").append(f.render().el);
+      f.onShow();
+
+      var paperView = f.view.regionManager._regions["paper-form"].currentView;
+
+      f.view.$("#headingTwo").click();
+
+      expect(paperView.$("button[type=submit]").prop("disabled")).to.be.true;
+
+      paperView.$("input.parse-reference").val("foobly");
+      paperView.$("button.parse").click();
+
+      expect(paperView.$("button[type=submit]").prop("disabled")).to.be.true;
+
+      FormWidget.prototype.submitForm = s;
+
+    });
+
 
     it("should have a topic view", function(){
 
