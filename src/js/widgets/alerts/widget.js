@@ -58,7 +58,11 @@ define([
       },
 
       close : function(){
+        var that = this;
         this.$(".alert").addClass("fadeOutUp");
+        setTimeout(function(){
+          that.$(".alert").css("display", "none");
+        },900);
       },
 
       destroy: function() {
