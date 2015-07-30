@@ -123,7 +123,7 @@ define([
     },
 
     onRender : function(e){
-      this.$("#pub-input").autocomplete({ source : AutocompleteData, minLength : 2 , autoFocus : true });
+      this.$("#pub-input").autocomplete({ source : AutocompleteData, minLength : 1 , autoFocus : true });
     },
 
     checkDisabled : function(){
