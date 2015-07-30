@@ -1,7 +1,6 @@
 define([], function() {
 
   var tests  = [
-      '/widgets/search_bar_widget.spec.js',
       '/components/query_builder/plugin.spec.js',
       '/components/query_builder/rules_translator.spec.js',
       '/components/query_builder/translation_query2ui.spec.js',
