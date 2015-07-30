@@ -184,7 +184,10 @@
   padding-left: 0;
   label {
     @extend .s-light-font;
-  }
+    padding: 0;
+    z-index: @z-index-2;
+}
+
 }
 
 .s-open-access {
