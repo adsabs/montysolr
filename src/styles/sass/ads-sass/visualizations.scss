@@ -417,9 +417,14 @@ $group-circle-active : lighten($brand-warning, 10%);
 }
 
 .s-network-widget {
-  @media (min-width: $screen-md-min){
-    min-height: 1200px;
+  @media (min-width: $screen-md-min) {
+   min-height: 1200px;
+  .time-series-container {
+    .line {
+      stroke-width: 4px;
+    }
   }
+
 }
 
 
