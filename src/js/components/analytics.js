@@ -35,7 +35,6 @@ define([
 
   // Immediately add a pageview event to the queue.
   window[gaName]("create", config.googleTrackingCode, config.googleTrackingOptions);
-  window[gaName]("send", "pageview");
 
   // Asynchronously load Google Analytics, letting it take over our `window[gaName]`
   // object after it loads. This allows us to add events to `window[gaName]` even

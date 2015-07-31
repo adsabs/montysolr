@@ -371,6 +371,7 @@ define([
 
         activate: function() {
           FeedbackMediator.prototype.activate.apply(this, arguments);
+<<<<<<< HEAD
           var pubsub = this.getPubSub();
           pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
           pubsub.subscribe(pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
@@ -446,12 +447,17 @@ define([
             qm.startSearchCycle.apply(qm, arguments);
 
           }, this))
+=======
+          this.pubsub.subscribe(this.pubSubKey, this.pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
+          this.pubsub.subscribe(this.pubSubKey, this.pubsub.APP_EXIT, _.bind(this.onAppExit, this));
+>>>>>>> Hotfix: sending too many events, closes #535
         },
 
         onNewCycle: function() {
           this.reset();
         },
 
+<<<<<<< HEAD
         onPageChange: function(msg) {
           msg = msg.replace('Switching to: ', '');
           this._currentPage = msg;
@@ -464,6 +470,8 @@ define([
           return this._currentPage || 'LandingPage';
         },
 
+=======
+>>>>>>> Hotfix: sending too many events, closes #535
         onAppExit: function(data) {
           console.log('App exit requested to: ' + data);
           //TODO:rca - save the application history and persist it
