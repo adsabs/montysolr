@@ -193,7 +193,7 @@ define([
       },
 
       "click .close" : function(){
-          this.trigger("close");
+          this.trigger("close-widget");
         }
     },
 
@@ -958,6 +958,7 @@ define([
       this.view = new BubbleView({model: this.model, testing: options.testing});
       this.listenTo(this.view, "filterBibs", this.onFilterBibs);
       //this.listenTo(this.view, "destroy", this.broadcastClose);
+      this.listenTo(this.view, "close-widget", this.closeWidget);
       this.widgetName = 'bubble_chart';
       this.queryUpdater = new ApiQueryUpdater(this.widgetName);
     },
@@ -1000,7 +1001,6 @@ define([
 
     onFilterBibs: function(){
       var bibs = this.model.get("selectedBibs"),
-        fqString = "",
         newQuery = this.getCurrentQuery().clone();
 
       if (!bibs.length){
@@ -1038,8 +1038,13 @@ define([
     },
 
 
+<<<<<<< HEAD
     broadcastClose: function () {
       this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+=======
+    closeWidget: function () {
+      this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+>>>>>>> fixed issue with left column graphs, changed language about popularity/recent reads to be clearer
     }
 
   });

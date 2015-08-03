@@ -25,7 +25,7 @@ define(['marionette',
           {value: "classic_factor", title: "Relevancy", default: true },
           {value: "date", title: "Publication Date" },
           {value: "citation_count", title: "Citation Count" },
-          {value: "read_count", title: "Popularity" }],
+          {value: "read_count", title: "Recent Reads" }],
 
           orderOptions : [
             {value: "desc", title: "Descending", default: true, faIcon: "fa-sort-numeric-desc"},

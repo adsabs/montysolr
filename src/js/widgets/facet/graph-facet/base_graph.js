@@ -57,18 +57,13 @@ define(['marionette',
     template: FacetGraphTemplate,
 
     insertLegend : function(){
-      var graphVars = {}
-      if (this.graphTitle){
-        graphVars.graphTitle = this.graphTitle;
-      }
-      this.$(".graph-legend").html(this.legendTemplate(graphVars));
+      this.$(".graph-legend").html(this.legendTemplate({yAxisTitle : this.yAxisTitle}));
     },
 
     events: {
       "click .apply"         : "submitFacet",
       "blur input[type=text]": "triggerGraphChange"
     },
-
 
     pulseApplyButton : function(){
       this.$(".apply").addClass("draw-attention-primary-faded");
@@ -88,6 +83,9 @@ define(['marionette',
         this.buildGraph();
         this.addSliderWindows();
         this.buildSlider();
+        if (this.addToOnRender){
+          this.addToOnRender();
+        }
       }
     }
 

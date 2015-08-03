@@ -1,6 +1,6 @@
 <div class="pull-right s-view-metrics-button-container"></div>
 {{#if statsCount}}
-    total number of {{title}} : <b>{{statsCount}}</b>
+    {{statsDescription}} : <b>{{statsCount}}</b>
     <hr/>
 {{/if}}
 <div class="graph-legend"></div>
@@ -12,10 +12,7 @@
 <div style="position: relative;top: 30px;">
     <div class="slider s-slider"></div>
     <div class="graph-controls row">
-        <div class="slider-data col-sm-8">
-        </div>
-        <div class="col-sm-4">
-            <button class="apply btn btn-sm btn-info">Apply</button>
+        <div class="slider-data col-sm-12">
         </div>
 </div>
 

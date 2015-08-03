@@ -21,14 +21,13 @@ define([
         defaultQueryArguments: {
           "facet.pivot"   : "property,year",
           "facet"         : "true",
-          "facet.minCount": "1",
+          "facet.minCount": "1"
 
         },
 
         graphViewOptions : {
           yAxisTitle :  "article count",
           xAxisTitle : "years",
-          graphTitle: "Years"
         },
 
         processResponse      : function (apiResponse) {
@@ -130,7 +129,6 @@ define([
         graphViewOptions : {
           yAxisTitle :  "citations",
           xAxisTitle : "number of records",
-          graphTitle: "Citation",
           pastTenseTitle : "cited"
         },
         processResponse      : function (apiResponse) {
@@ -195,7 +193,7 @@ define([
             {
               graphData: finalData,
               statsCount : statsCount,
-              title: "citations"
+              statsDescription : "total number of citations"
             }
           ]);
 
@@ -214,9 +212,8 @@ define([
           "stats.field" : 'read_count'
         },
         graphViewOptions : {
-          yAxisTitle :  "reads",
+          yAxisTitle :  "recent reads",
           xAxisTitle : "number of records",
-          graphTitle: "Reads",
           pastTenseTitle : "read"
         },
         processResponse      : function (apiResponse) {
@@ -281,7 +278,7 @@ define([
             {
               graphData: finalData,
               statsCount: statsCount,
-              title: "reads"
+              statsDescription : "total recent (90 day) reads"
             }
           ]);
 
@@ -292,7 +289,7 @@ define([
       return new TabsWidget({tabs: [
         {title: "Years", widget: yearGraphWidget, id: "year-facet", default: true},
         {title: "Citations", widget: citationGraphWidget, id: "citations-facet"},
-        {title: "Reads", widget: readsGraphWidget, id: "reads-facet"}
+        {title: "Recent Reads", widget: readsGraphWidget, id: "reads-facet"}
       ]
       });
     }

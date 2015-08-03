@@ -108,7 +108,6 @@
   font-weight: 500;
 }
 
-
 .s-highlight-list {
   padding: 20px 0px 0px 10px
 }
@@ -246,11 +245,21 @@ li.article-author {
   }
   box-shadow : 2px 2px 2px lighten($gray-lightest, 5%);
   #sort-button {
+  color: $text-color !important;
+  #sort-button {
     color: $text-color !important;
   }
   .btn-link {
     padding: 3px 5px;
     display: block;
+  }
+
+
+ a.help-link {
+    padding:0;
+   i {
+     font-size: 1.5em;
+   }
   }
 }
 

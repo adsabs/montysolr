@@ -54,11 +54,9 @@ WordCloud
 }
 
 .s-wordcloud-widget {
-
   margin-top: 30px;
   font-weight: 300;
 }
-
 
 .s-vis-item-format {
 
@@ -90,7 +88,6 @@ Year, Citation and Reference Graphs
   label {
     display: inline-block;
     width: 20%
-
   }
 }
 
@@ -246,8 +243,6 @@ Year, Citation and Reference Graphs
 
 
 //group circle color vars
-
-
 $group-circle-default : lighten($brand-info, 20%);
 $group-circle-hover : saturate(darken($group-circle-default, 10%), 20%);
 $group-circle-active : lighten($brand-warning, 10%);

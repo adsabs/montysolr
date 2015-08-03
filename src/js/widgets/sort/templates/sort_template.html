@@ -15,9 +15,15 @@
         </li>
         <li class="divider"></li>
            {{#each sortOptions}}
-         <li class="sort-options">
-             <button class="btn btn-link" data-value="{{this.value}}">{{this.title}}</button>
-         </li>
-        {{/each}}
+             <li class="sort-options">
+                 <button class="btn btn-link sort-options" data-value="{{this.value}}">{{this.title}}</button>
+             </li>
+            {{/each}}
+            <li style="height:30px">
+              <a  title="Click to open a page that explains sort options in a new tab."
+                  href="//adsabs.github.io/help/actions/sort/" target="_blank" class="pull-right help-link">
+                  <i class=" fa-2x icon-help"></i>
+              </a>
+            </li>
     </ul>
 </div>
