@@ -1,6 +1,10 @@
 
 .s-metrics-svg {
   height: 345px !important;
+
+  .disabled{
+    pointer-events: all;
+  }
 }
 
 .s-metrics-title {
