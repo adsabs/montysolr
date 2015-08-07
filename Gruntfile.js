@@ -645,6 +645,23 @@ module.exports = function(grunt) {
           tags: ['<%= grunt.file.read("git-describe").trim() %>']
         }
       }
+    },
+
+    intern: {
+      local: {
+        options: {
+          runType: 'runner', // defaults to 'client'
+          config: 'test/intern-local',
+          reporters: [ 'Console', 'Lcov' ]
+        }
+      },
+      remote: {
+        options: {
+          runType: 'runner', // defaults to 'client'
+          config: 'test/intern-remote',
+          reporters: [ 'Console', 'Lcov' ]
+        }
+      }
     }
 
   });
@@ -694,6 +711,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-hash-required');
   grunt.loadNpmTasks('grunt-saucelabs');
   grunt.loadNpmTasks('grunt-curl');
+  grunt.loadNpmTasks('intern');
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
@@ -853,5 +871,9 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask("sauce", ['env:dev',  "less", "exec:git_describe", 'express:dev', "saucelabs-mocha"]);
+
+  grunt.registerTask("testfunc", ["testfunc:local"]);
+  grunt.registerTask("testfunc:local", ['env:dev',  "less", "exec:git_describe", 'express:dev', "intern:local"]);
+  grunt.registerTask("testfunc:remote", ['env:dev',  "less", "exec:git_describe", 'express:dev', "intern:remote"]);
 
 };
