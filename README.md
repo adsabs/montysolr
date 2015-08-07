@@ -256,5 +256,4 @@ Bumblebee is developed by ADS, some devs use WebStorm - the open-source license 
 
 
 [![WebStorm](http://www.jetbrains.com/webstorm/documentation/docs/logo_webstorm.png)](http://www.jetbrains.com/webstorm)
-
-
+[![Analytics](https://ga-beacon.appspot.com/UA-37369750-9/adsabs/bumblebee?flat)](https://github.com/igrigorik/ga-beacon)
