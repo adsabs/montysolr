@@ -15,7 +15,8 @@ define([
   'jquery-querybuilder',
   'js/components/generic_module',
   'js/components/query_builder/rules_translator',
-  'js/components/api_query'
+  'js/components/api_query',
+  'js/mixins/dependon'
   ],
 
   function(
@@ -25,7 +26,8 @@ define([
   jQueryQueryBuilderPlugin,
   GenericModule,
   RulesTranslator,
-  ApiQuery
+  ApiQuery,
+  Dependon
   ) {
 
     var QueryBuilder = GenericModule.extend({
@@ -529,8 +531,9 @@ define([
       _.extend(getter.prototype, {
 
         activate: function(beehive) {
-          this.pubsub = beehive.Services.get('PubSub');
-          this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, _.bind(this.getResponse, this));
+          this.setBeeHive(beehive);
+          var pubsub = this.getPubSub();
+          pubsub.subscribe(pubsub.DELIVERING_RESPONSE, _.bind(this.getResponse, this));
         },
 
         /**
@@ -543,7 +546,7 @@ define([
          */
         getQTree: function(query) {
           this.promise = $.Deferred();
-          this.pubsub.publish(this.pubsub.GET_QTREE, new ApiQuery({'q': query}));
+          this.getPubSub().publish(this.getPubSub().GET_QTREE, new ApiQuery({'q': query}));
           return this.promise;
         },
 
@@ -562,7 +565,7 @@ define([
             this.promise.resolve(qtree);
           }
         }
-      });
+      }, Dependon.BeeHive);
 
       return new getter(beehive);
     };

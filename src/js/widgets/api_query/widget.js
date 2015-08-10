@@ -2,17 +2,28 @@
  * Created by rchyla on 3/19/14.
  */
 
-define(['underscore', 'jquery', 'backbone', 'marionette',
+define([
+  'underscore',
+  'jquery',
+  'backbone',
+  'marionette',
   'js/components/api_query',
   'js/components/pubsub_events',
   'hbs!./templates/widget-view',
-  'hbs!./templates/item-view'
-
-],
-
-  function(_, $, Backbone, Marionette,
-           ApiQuery, PubSubEvents,
-           WidgetTemplate, ItemTemplate){
+  'hbs!./templates/item-view',
+  'js/mixins/dependon'
+  ],
+  function(
+    _,
+    $,
+    Backbone,
+    Marionette,
+    ApiQuery,
+    PubSubEvents,
+    WidgetTemplate,
+    ItemTemplate,
+    Dependon
+    ){
 
     // Model
     var KeyValue = Backbone.Model.extend({ });
@@ -180,9 +191,9 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        * @param beehive
        */
       activate: function(beehive) {
-        var pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
         pubsub.subscribe('all', _.bind(this.onAllPubSub, this));
-        this.pubsub = pubsub;
       },
 
       /**
@@ -205,13 +216,14 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        * @param ApiQuery
        */
       onRun: function(apiQuery) {
-        if (this.pubsub) {
-          this.pubsub.publish(this.pubsub.START_SEARCH, apiQuery);
+        if (this.hasPubSub()) {
+          this.getPubSub().publish(this.getPubSub().START_SEARCH, apiQuery);
         }
       }
 
     });
 
+    _.extend(WidgetController.prototype, Dependon.BeeHive);
     return WidgetController;
   });
 

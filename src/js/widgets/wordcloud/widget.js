@@ -427,27 +427,23 @@ define([
 
       _.bindAll(this, "setCurrentQuery", "processResponse");
 
-      this.pubsub = beehive.Services.get('PubSub');
+      this.setBeeHive(beehive);
+      var pubsub = this.getPubSub();
 
       //custom dispatchRequest function goes here
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
+      pubsub.subscribe(pubsub.INVITING_REQUEST, this.setCurrentQuery);
 
       //custom handleResponse function goes here
-      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
     //fetch data
     onShow: function () {
-
       var request = new ApiRequest({
-
         target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
         query: this.customizeQuery(this.getCurrentQuery())
       });
-
-      this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
-
+      this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
     },
 
     customizeQuery: function (apiQuery) {
@@ -466,15 +462,11 @@ define([
     },
 
     processResponse: function (data) {
-
       data = data.toJSON();
-
       this.model.set("tfidfData", data);
-
     },
 
     close : function(){
-
       this.listView.destroy();
       this.view.destroy();
       Marionette.Controller.prototype.destroy.apply(this, arguments);
@@ -503,13 +495,12 @@ define([
         var newQ = filterList.map(function(x) {return qu.quoteIfNecessary(x)}).join(" OR ");
 
         this._updateFq(q, newQ);
-
-        this.pubsub.publish(this.pubsub.START_SEARCH, q);
+        this.getPubSub().publish(this.getPubSub().START_SEARCH, q);
       }
     },
 
     closeWidget: function () {
-      this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+      this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
     },
 
     _updateFq: function(q, value) {

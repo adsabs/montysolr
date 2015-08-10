@@ -47,12 +47,12 @@ define([
         var queryUpdater = new ApiQueryUpdater('navigator');
 
         var publishFeedback = function(data) {
-          self.pubsub.publish(self.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data))
+          self.getPubSub().publish(self.getPubSub().FEEDBACK, new ApiFeedback(data))
         };
 
         //right now, user navbar widget depends on this to show the correct highlighted pill
         var publishPageChange = function(pageName){
-          self.pubsub.publish(self.pubSubKey, self.pubsub.PAGE_CHANGE, pageName);
+          self.getPubSub().publish(self.getPubSub().PAGE_CHANGE, pageName);
         };
 
         var searchPageAlwaysVisible = [

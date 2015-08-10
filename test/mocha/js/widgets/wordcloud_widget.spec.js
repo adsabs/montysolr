@@ -1678,16 +1678,15 @@ define([
         $("#test").append(w.render().el);
 
         w.model.set("tfidfData", fakeWordCloudData);
-        w.pubsub = {publish : function(){}};
-        var pubsubStub = sinon.stub(w.pubsub, "publish");
-
+        var spy = sinon.spy();
+        w.getPubSub = function() {return {publish : spy}};
         //for testing
         w.getCurrentQuery = function(){return new ApiQuery()};
         w.listView.model.set("selectedWords",["fakeA", "fakeB"]);
 
         //clicking submit button
         $(".apply-vis-facet").click();
-        expect(pubsubStub.args[0][1].toJSON()).to.eql({
+        expect(spy.args[0][1].toJSON()).to.eql({
           "fq_wordcloud": [
             "(fakeA OR fakeB)"
           ],
@@ -1699,7 +1698,7 @@ define([
             "{!type=aqp v=$fq_wordcloud}"
           ]
         });
-      })
+      });
 
       it("doesnt allow to request more than max_rows", function() {
         var w = new WordCloud();

@@ -24,11 +24,12 @@ define([
 
       manager.activate(minsub.beehive.getHardenedInstance());
       expect(manager.getHardenedInstance().getCSRF).to.be.instanceof(Function);
-      manager.pubsub.publish = sinon.spy();
+      sinon.spy(manager.getPubSub(), "publish");
+
       //it's a promise
       expect(manager.getCSRF().then).to.be.instanceof(Function);
-      expect(manager.pubsub.publish.args[0][1]).to.eql("[PubSub]-Execute-Request");
-      expect((manager.pubsub.publish.args[0][2]).get("target")).to.eql("accounts/csrf");
+      expect(manager.getPubSub().publish.args[0][0]).to.eql("[PubSub]-Execute-Request");
+      expect((manager.getPubSub().publish.args[0][1]).get("target")).to.eql("accounts/csrf");
 
     });
 
@@ -36,7 +37,7 @@ define([
 
       var manager = new CSRFManager();
 
-      manager.pubsub = {publish : function(){}}
+      manager.getPubSub = function(){return {publish : function(){}}};
 
       var promise = manager.getCSRF();
 

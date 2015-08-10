@@ -82,11 +82,12 @@ define([
     },
 
     activate: function (beehive) {
-      this.pubsub = beehive.Services.get('PubSub');
+      this.setBeeHive(beehive);
+      var pubsub = this.getPubSub();
       _.bindAll(this, ['onNewQuery', 'processResponse', 'onDisplayDocuments']);
-      this.pubsub.subscribe(this.pubsub.START_SEARCH, this.onNewQuery);
-      this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
-      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      pubsub.subscribe(pubsub.START_SEARCH, this.onNewQuery);
+      pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
     onNewQuery: function() {
@@ -120,7 +121,7 @@ define([
           target: ApiTargets.GRAPHICS + "/" + this._bibcode,
           query : new ApiQuery()
         });
-        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+        this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
 
         //now ask for the title if it's the main widget
         if (!Marionette.getOption(this, "sidebar")){
@@ -133,7 +134,7 @@ define([
             target: ApiTargets.SEARCH,
             query: query
           });
-          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+          this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
         }
         return this.deferredObject.promise();
       }
@@ -175,7 +176,7 @@ define([
     },
 
     triggerShowGrid : function(){
-      this.pubsub.publish(this.pubsub.NAVIGATE, "ShowGraphics");
+      this.getPubSub().publish(this.getPubSub().NAVIGATE, "ShowGraphics");
     }
 
   });

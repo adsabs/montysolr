@@ -72,12 +72,13 @@ define([
     it("extends from BaseWidget and can communicate with pubsub and its page controller through loadBibcodeData function", function() {
 
       var r = new RecommenderWidget();
-      r.pubsub = {DELIVERING_REQUEST : "foo", publish : sinon.spy()}
+      var spy = sinon.spy();
+      r.getPubSub = function(){return {DELIVERING_REQUEST : "foo", publish : spy}};
 
       expect(r.loadBibcodeData).to.be.instanceof(Function);
       r.loadBibcodeData("fakeBibcode");
 
-      var apiRequest = r.pubsub.publish.args[0][1];
+      var apiRequest = r.getPubSub().publish.args[0][1];
 
       expect(apiRequest.toJSON().target).to.eql('recommender/fakeBibcode');
     });

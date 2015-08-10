@@ -14,7 +14,8 @@ define([
     'marionette',
     'js/components/api_response',
     'hbs!./templates/widget-view',
-    'js/components/pubsub_events'
+    'js/components/pubsub_events',
+    'js/mixins/dependon'
   ],
 
   function(
@@ -24,7 +25,8 @@ define([
     Marionette,
     ApiResponse,
     WidgetTemplate,
-    PubSubEvents
+    PubSubEvents,
+    Dependon
     ){
 
     var Model = Backbone.Model.extend({ });
@@ -122,9 +124,9 @@ define([
        * @param beehive
        */
       activate: function(beehive) {
-        var pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
         pubsub.subscribe('all', _.bind(this.onAllPubSub, this));
-        this.pubsub = pubsub;
       },
 
       /**
@@ -146,12 +148,14 @@ define([
        * @param model
        */
       onRun: function(model) {
-        if (this.pubsub) {
-          this.pubsub.publish(this.pubsub.DELIVERING_RESPONSE, model.R);
+        if (this.hasPubSub()) {
+          this.getPubSub().publish(this.getPubSub().DELIVERING_RESPONSE, model.R);
         }
       }
 
     });
+
+    _.extend(WidgetController.prototype, Dependon.BeeHive);
 
     return WidgetController;
   });

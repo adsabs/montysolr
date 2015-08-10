@@ -6,7 +6,15 @@
  * This module contains a set of utilities that can be added to classes
  * to give them certain functionality
  */
-define(['underscore'], function(_) {
+define([
+  'underscore',
+  'js/components/pubsub_events',
+  'js/components/pubsub_key'
+  ], function(
+  _,
+  PubSubEvents,
+  PubSubKey
+  ) {
   var Mixin = {
 
     /*
@@ -18,9 +26,14 @@ define(['underscore'], function(_) {
     BeeHive: {
       // called by parents (app) to give modules access
       setBeeHive: function(brundibar) {
+        if (_.isEmpty(brundibar))
+          throw new Error('Huh? Empty Beehive? Trying to be funny?');
+
         this.__beehive = brundibar;
       },
       getBeeHive: function() {
+        if (!this.hasBeeHive())
+          throw new Error('The BeeHive is inactivate (or dead :<})');
         return this.__beehive;
       },
       hasBeeHive: function() {
@@ -29,40 +42,74 @@ define(['underscore'], function(_) {
         }
         return false;
       },
-      getPubSub: function() {
-        return this.__beehive.getService('PubSub');
-      }
 
-    },
-
-    /*
-     * PubSub is the publish/subscribe queue used by our components
-     * to send messages to/from.
-     */
-    PubSub: {
-      setPubSub: function(beehive) {
-        this.pubsub = beehive.getService('PubSub').getHardenedInstance();
-      },
+      /**
+       * Method which returns a masked instance of PubSub (unless the PubSub
+       * is already a hardened instance; which carries its own key)
+       *
+       * You can call pubsub.publish() without having to supply the pubsub key
+       * (which is what most controllers want to do; there are only some
+       * exceptions to this rule; ie. query-mediator). If you need to get
+       * access to the full PubSub (and you have it inside BeeHive) then do
+       * this.getBeeHive().getService('PubSub')
+       */
       getPubSub: function() {
-        return this.pubsub;
+        if (!this.hasBeeHive())
+          throw new Error('The BeeHive is inactive (or dead >:})');
+
+        if (!this.__ctx)
+          this.__ctx = {};
+
+        if (this.__ctx.pubsub)
+          return this.__ctx.pubsub;
+
+        var pubsub = this.__beehive.getService('PubSub');
+
+        if (pubsub && pubsub.__facade__)
+          return pubsub;
+
+        // build a unique key for this instance
+        this.__ctx.pubsub = {
+          _key: pubsub.getPubSubKey(),
+          _exec: function(name, args) {
+            args = _.toArray(args);
+
+            if (args[0] instanceof PubSubKey)
+              throw Error("You have given us a PubSub key, this.publish() method does not need it.");
+
+            args.unshift(this._key);
+            pubsub[name].apply(pubsub, args);
+          },
+          publish: function() { this._exec('publish', arguments) },
+          subscribe: function() { this._exec('subscribe', arguments) },
+          subscribeOnce: function() { this._exec('subscribeOnce', arguments) },
+          unpublish: function() { this._exec('unpublish', arguments) },
+          getCurrentPubSubKey: function() {return this._key}
+        };
+        _.extend(this.__ctx.pubsub, PubSubEvents);
+
+        return this.__ctx.pubsub;
       },
+
       hasPubSub: function() {
-        if (this.pubsub) {
-          return true;
-        }
+        if (this.hasBeeHive())
+          return _.isObject(this.__beehive.getService('PubSub'));
         return false;
       }
+
     },
 
     App: {
       setApp: function(app) {
-        this.app = app;
+        if (_.isUndefined(app))
+          throw new Error('App object cannot be empty');
+        this.__app = app;
       },
       getApp: function() {
-        return this.app;
+        return this.__app;
       },
       hasApp: function() {
-        return this.app ? true : false;
+        return _.isEmpty(this.__app) ? false : true;
       }
     }
   };

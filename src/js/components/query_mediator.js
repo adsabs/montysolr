@@ -73,14 +73,13 @@ define(['underscore',
        */
       activate: function(beehive, app) {
         this.setBeeHive(beehive);
-        var pubsub = beehive.Services.get('PubSub');
-        this.pubSubKey = pubsub.getPubSubKey();
+        this.setApp(app);
 
-        pubsub.subscribe(this.pubSubKey, pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
-        pubsub.subscribe(this.pubSubKey, pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
-        pubsub.subscribe(this.pubSubKey, pubsub.EXECUTE_REQUEST, _.bind(this.executeRequest, this));
-        pubsub.subscribe(this.pubSubKey, pubsub.GET_QTREE, _.bind(this.getQTree, this));
-        this.app = app;
+        var pubsub = this.getPubSub();
+        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
+        pubsub.subscribe(pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
+        pubsub.subscribe(pubsub.EXECUTE_REQUEST, _.bind(this.executeRequest, this));
+        pubsub.subscribe(pubsub.GET_QTREE, _.bind(this.getQTree, this));
       },
 
 
@@ -96,10 +95,10 @@ define(['underscore',
 
         //ignore repeat queries unless they are initiated from the search box
         if ((JSON.stringify(apiQuery.toJSON()) == JSON.stringify(this.mostRecentQuery.toJSON())) &&
-          (this.app.getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget")){
+          (this.hasApp() && this.getApp().getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget")){
           //simply navigate to search results page, widgets are already stocked with data
-           this.app.getService('Navigator').navigate('results-page', {replace : true});
-           return
+           this.getApp().getService('Navigator').navigate('results-page', {replace : true});
+           return;
         }
 
         //we have to clear selected records in app storage here too
@@ -111,7 +110,7 @@ define(['underscore',
 
         if (this.debug) {
           console.log('[QM]: received query:',
-            this.app ? (this.app.getPluginOrWidgetName(senderKey.getId()) || senderKey.getId()) : senderKey.getId(),
+            this.hasApp() ? (this.getApp().getPluginOrWidgetName(senderKey.getId()) || senderKey.getId()) : senderKey.getId(),
             apiQuery.url()
           );
         }
@@ -120,7 +119,7 @@ define(['underscore',
           console.error('[QM] : received empty query (huh?!)');
           return;
         }
-        var ps = this.getBeeHive().getService('PubSub');
+        var ps = this.getPubSub();
 
         if (this.__searchCycle.running && this.__searchCycle.waiting && _.keys(this.__searchCycle.waiting)) {
           console.error('The previous search cycle did not finish, and there already comes the next!');
@@ -141,7 +140,7 @@ define(['underscore',
         q.unset('fl');
 
         q.lock();
-        ps.publish(this.pubSubKey, ps.INVITING_REQUEST, q);
+        ps.publish(ps.INVITING_REQUEST, q);
 
         // give widgets some time to submit their requests
         var self = this;
@@ -187,7 +186,7 @@ define(['underscore',
         var data;
         var beehive = this.getBeeHive();
         var api = beehive.getService('Api');
-        var ps = beehive.getService('PubSub');
+        var ps = this.getPubSub();
 
         if (!(ps && api)) return; // application is gone
 
@@ -227,7 +226,7 @@ define(['underscore',
               numFound = response.response.numFound;
             }
 
-            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+            ps.publish(ps.FEEDBACK, new ApiFeedback({
               code: ApiFeedback.CODES.SEARCH_CYCLE_STARTED,
               query: cycle.query,
               request: data.request,
@@ -256,7 +255,7 @@ define(['underscore',
                     if (cycle.finished) return;
 
                     if (_.isEmpty(cycle.inprogress)) {
-                      ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+                      ps.publish(ps.FEEDBACK, new ApiFeedback({
                         code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
                         cycle: cycle
                       }));
@@ -278,7 +277,7 @@ define(['underscore',
           })
           .fail(function(jqXHR, textStatus, errorThrown) {
             self.__searchCycle.error = true;
-            ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+            ps.publish(ps.FEEDBACK, new ApiFeedback({
               code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
               cycle: cycle,
               request: this.request,
@@ -294,14 +293,14 @@ define(['underscore',
         if (!this.hasBeeHive()) return; // app is closed
 
         var self = this;
-        var ps = this.getBeeHive().getService('PubSub');
+        var ps = this.getPubSub();
         if (!ps) return; // application is gone
 
         this.__searchCycle.monitor += 1;
 
         if (this.__searchCycle.monitor > 100) {
           console.warn('Stopping monitoring of queries, it is running too long');
-          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+          ps.publish(ps.FEEDBACK, new ApiFeedback({
             code: ApiFeedback.CODES.SEARCH_CYCLE_STOP_MONITORING,
             cycle: this.__searchCycle
           }));
@@ -312,7 +311,7 @@ define(['underscore',
 
           if (this.__searchCycle.finished) return; // it was already signalled
 
-          ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+          ps.publish(ps.FEEDBACK, new ApiFeedback({
             code: ApiFeedback.CODES.SEARCH_CYCLE_FINISHED,
             cycle: this.__searchCycle
           }));
@@ -326,7 +325,7 @@ define(['underscore',
 
         var total = lenToDo + lenDone + lenInProgress + lenFailed;
 
-        ps.publish(self.pubSubKey, ps.FEEDBACK, new ApiFeedback({
+        ps.publish(ps.FEEDBACK, new ApiFeedback({
           code: ApiFeedback.CODES.SEARCH_CYCLE_PROGRESS,
           msg: (lenToDo / total),
           total: total,
@@ -349,7 +348,7 @@ define(['underscore',
       receiveRequests: function(apiRequest, senderKey) {
         if (this.debug)
           console.log('[QM]: received request:',
-            this.app ? (this.app.getPluginOrWidgetName(senderKey.getId()) || senderKey.getId()) : senderKey.getId(),
+            this.hasApp() ? (this.getApp().getPluginOrWidgetName(senderKey.getId()) || senderKey.getId()) : senderKey.getId(),
             apiRequest.url()
           );
 
@@ -383,8 +382,8 @@ define(['underscore',
         // show the loading view for the widget
         this._makeWidgetSpin(senderKey.getId());
 
-        var ps = this.getBeeHive().Services.get('PubSub');
-        var api = this.getBeeHive().Services.get('Api');
+        var ps = this.getPubSub();
+        var api = this.getBeeHive().getService('Api');
 
         var requestKey = this._getCacheKey(apiRequest);
         var maxTry = this.failedRequestsCache.getSync(requestKey) || 0;
@@ -468,11 +467,11 @@ define(['underscore',
 
         if (qm.debug)
           console.log('[QM]: sending response:',
-            qm.app ? (qm.app.getPluginOrWidgetName(this.key.getId()) || this.key.getId()) : this.key.getId(),
+            qm.hasApp() ? (qm.getApp().getPluginOrWidgetName(this.key.getId()) || this.key.getId()) : this.key.getId(),
             data
           );
 
-        var pubsub = qm.getBeeHive().Services.get('PubSub');
+        var pubsub = qm.getBeeHive().getService('PubSub'); // we cant use getPubSub() as we are sending the key
 
         if (pubsub)
           pubsub.publish(this.key, pubsub.DELIVERING_RESPONSE+this.key.getId(), response);
@@ -509,7 +508,7 @@ define(['underscore',
           text: textStatus
         });
 
-        var pubsub = qm.getBeeHive().Services.get('PubSub');
+        var pubsub = qm.getBeeHive().getService('PubSub');
         if (pubsub)
           pubsub.publish(this.key, pubsub.FEEDBACK, feedback);
 
@@ -595,6 +594,6 @@ define(['underscore',
 
     });
 
-    _.extend(QueryMediator.prototype, Dependon.BeeHive, FeedbackMixin);
+    _.extend(QueryMediator.prototype, Dependon.BeeHive, Dependon.App, FeedbackMixin);
     return QueryMediator;
   });

@@ -126,34 +126,35 @@ define([
 
       var s = new Session();
       var beehive = minsub.beehive.getHardenedInstance();
-      s.pubsub =  beehive.Services.get('PubSub');
-      sinon.stub(s.pubsub, "publish");
+      s.activate(minsub.beehive);
 
+      var pubsub = s.getPubSub();
+      sinon.stub(pubsub, "publish");
       var fakeXHR = {responseJson : {error :"no account"}};
 
       s.loginFail(fakeXHR);
 
-      expect(s.pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
-      expect(s.pubsub.publish.args[0][1].msg).to.eql("Log in was unsuccessful (error unknown)");
-      expect(s.pubsub.publish.args[1]).to.eql(["[PubSub]-User-Announcement", "login_fail"]);
+      expect(pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
+      expect(pubsub.publish.args[0][1].msg).to.eql("Log in was unsuccessful (error unknown)");
+      expect(pubsub.publish.args[1]).to.eql(["[PubSub]-User-Announcement", "login_fail"]);
 
       s.registerFail(fakeXHR);
 
-      expect(s.pubsub.publish.args[2][0]).to.eql("[Alert]-Message");
-      expect(s.pubsub.publish.args[2][1].msg).to.eql('Registration was unsuccessful (error unknown)');
-      expect(s.pubsub.publish.args[3]).to.eql(["[PubSub]-User-Announcement", "register_fail"]);
+      expect(pubsub.publish.args[2][0]).to.eql("[Alert]-Message");
+      expect(pubsub.publish.args[2][1].msg).to.eql('Registration was unsuccessful (error unknown)');
+      expect(pubsub.publish.args[3]).to.eql(["[PubSub]-User-Announcement", "register_fail"]);
 
       s.resetPassword1Fail(fakeXHR);
 
-      expect(s.pubsub.publish.args[4][0]).to.eql("[Alert]-Message");
-      expect(s.pubsub.publish.args[4][1].msg).to.eql("password reset step 1 was unsucessful (error unknown)")
-      expect(s.pubsub.publish.args[5]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_fail"]);
+      expect(pubsub.publish.args[4][0]).to.eql("[Alert]-Message");
+      expect(pubsub.publish.args[4][1].msg).to.eql("password reset step 1 was unsucessful (error unknown)")
+      expect(pubsub.publish.args[5]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_fail"]);
 
       s.resetPassword2Fail(fakeXHR);
 
-      expect(s.pubsub.publish.args[6][0]).to.eql("[Alert]-Message");
-      expect(s.pubsub.publish.args[6][1].msg).to.eql("password reset step 2 was unsucessful (error unknown)");
-      expect(s.pubsub.publish.args[7]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_fail"]);
+      expect(pubsub.publish.args[6][0]).to.eql("[Alert]-Message");
+      expect(pubsub.publish.args[6][1].msg).to.eql("password reset step 2 was unsucessful (error unknown)");
+      expect(pubsub.publish.args[7]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_fail"]);
 
 
     });
@@ -165,7 +166,7 @@ define([
         }
       }))({verbose: false});
 
-      var s = new Session();;
+      var s = new Session();
       var u = new User();
 
       u.completeLogOut = sinon.stub();
@@ -173,31 +174,31 @@ define([
       minsub.beehive.addObject("User", u);
 
       s.activate(minsub.beehive);
-      sinon.stub(s.pubsub, "publish");
+      sinon.stub(s.getPubSub(), "publish");
       sinon.stub(s, "getApiAccess", function(){var d = $.Deferred(); d.resolve();return d.promise();});
 
       s.loginSuccess();
 
       expect(s.getApiAccess.callCount).to.eql(1);
       //called once getApiAccess is resolved
-      expect(s.pubsub.publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "UserPreferences"]);
+      expect(s.getPubSub().publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "UserPreferences"]);
 
 
       s.logoutSuccess();
 
       //navigate to index page
-      expect(s.pubsub.publish.args[1]).to.eql(["[Router]-Navigate-With-Trigger", "index-page"]);
+      expect(s.getPubSub().publish.args[1]).to.eql(["[Router]-Navigate-With-Trigger", "index-page"]);
       // scrub the user object
       expect(u.completeLogOut.callCount).to.eql(1);
 
       s.registerSuccess();
-      expect(s.pubsub.publish.args[2]).to.eql(["[PubSub]-User-Announcement", "register_success"]);
+      expect(s.getPubSub().publish.args[2]).to.eql(["[PubSub]-User-Announcement", "register_success"]);
 
       s.resetPassword1Success();
-      expect(s.pubsub.publish.args[3]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_success"]);
+      expect(s.getPubSub().publish.args[3]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_success"]);
 
       s.resetPassword2Success();
-      expect(s.pubsub.publish.args[4]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_success"]);
+      expect(s.getPubSub().publish.args[4]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_success"]);
 
     });
 

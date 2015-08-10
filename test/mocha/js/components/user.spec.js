@@ -44,7 +44,8 @@ define([
    it("keeps track of the user's signed in/anonymous state based on the content of the 'user' model, and responds to changes by updating user collection", function(){
 
      var u = new User();
-     u.pubsub = {publish : sinon.spy(), USER_ANNOUNCEMENT : "user_announcement"};
+     var mock = {publish : sinon.spy(), USER_ANNOUNCEMENT : "user_announcement"};
+     u.getPubSub = function(){return mock};
      u.redirectIfNecessary = sinon.spy();
 
      var fetchStub = sinon.stub(u, "fetchData", function(){return $.Deferred().promise();});
@@ -60,7 +61,7 @@ define([
      expect(fetchStub.args[0][0]).to.eql("USER_DATA");
      expect(u.redirectIfNecessary.callCount).to.eql(1);
 
-     expect(u.pubsub.publish.args[0]).to.eql(['user_announcement', u.USER_SIGNED_IN, 'foo' ] )
+     expect(u.getPubSub().publish.args[0]).to.eql(['user_announcement', u.USER_SIGNED_IN, 'foo' ] )
 
      fetchStub.restore();
 
@@ -69,7 +70,9 @@ define([
    it("has a log out method", function(){
 
      var u = new User();
-     u.pubsub = {publish : sinon.spy(), USER_ANNOUNCEMENT : "user_announcement"};
+     var mock = {publish : sinon.spy(), USER_ANNOUNCEMENT : "user_announcement"};
+     u.getPubSub = function(){return mock};
+
      u.redirectIfNecessary = sinon.spy();
 
      var fetchStub = sinon.stub(u, "fetchData", function(){return $.Deferred().promise();});
@@ -249,13 +252,13 @@ define([
      minsub.beehive.addObject("AppStorage", appStorage);
      u.activate(minsub.beehive);
 
-     sinon.stub(u.pubsub, "publish");
+     sinon.stub(u.getPubSub(), "publish");
 
      u.redirectIfNecessary = sinon.stub();
 
      u.userDataModel.set("link_server", "goo");
 
-     expect(u.pubsub.publish.args[0]).to.eql([
+     expect(u.getPubSub().publish.args[0]).to.eql([
        "[PubSub]-User-Announcement",
        "user_info_change",
        {
@@ -414,21 +417,21 @@ define([
 
      u.activate(minsub.beehive);
 
-     sinon.stub(u.pubsub, "publish");
+     sinon.stub(u.getPubSub(), "publish");
 
      u.redirectIfNecessary = sinon.stub();
 
      u.fetchData("fakeTarget");
 
      //on fail
-     expect(u.pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
-     expect(u.pubsub.publish.args[0][1].toJSON()).to.eql( {code: 0, msg: "Unable to retrieve information (OH NO)"});
+     expect(u.getPubSub().publish.args[0][0]).to.eql("[Alert]-Message");
+     expect(u.getPubSub().publish.args[0][1].toJSON()).to.eql( {code: 0, msg: "Unable to retrieve information (OH NO)"});
 
 
      u.postData("fakeTarget");
 
-     expect(u.pubsub.publish.args[1][0]).to.eql("[Alert]-Message");
-     expect(u.pubsub.publish.args[1][1].toJSON()).to.eql({code: 0, msg: "User update was unsuccessful (OH NO)"});
+     expect(u.getPubSub().publish.args[1][0]).to.eql("[Alert]-Message");
+     expect(u.getPubSub().publish.args[1][1].toJSON()).to.eql({code: 0, msg: "User update was unsuccessful (OH NO)"});
 
      requestStub.restore();
 

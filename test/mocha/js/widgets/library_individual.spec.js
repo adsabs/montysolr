@@ -1,6 +1,6 @@
 define([
   "js/widgets/library_individual/widget",
-  "js/bugutils/minimal_pubsub",
+  "js/bugutils/minimal_pubsub"
 
 ], function(
 
@@ -10,7 +10,7 @@ define([
   ){
 
 
-  describe("Library Widget (UI Widget)", function(){
+  describe("Library Widget (library_individual.spec.js)", function(){
 
 
     var stubMetadata  = {
@@ -57,10 +57,10 @@ define([
       }))({verbose: false});
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
-
       w.activate(minsub.beehive.getHardenedInstance());
 
-      w.pubsub.publish = sinon.spy();
+      var spy = sinon.spy();
+      w.getPubSub = function() {return {publish : spy}};
 
       $("#test").append(w.render().el);
 
@@ -117,7 +117,8 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      w.pubsub.publish = sinon.spy();
+      var spy = sinon.spy();
+      w.getPubSub = function() {return {publish : spy, NAVIGATE: minsub.NAVIGATE}};
 
       $("#test").append(w.render().el);
 
@@ -131,7 +132,7 @@ define([
 
       $("#test .tab[data-tab=admin]").click();
 
-      expect(w.pubsub.publish.args[0]).to.eql([
+      expect(spy.args[0]).to.eql([
         "[Router]-Navigate-With-Trigger",
         "IndividualLibraryWidget",
         {
@@ -142,7 +143,7 @@ define([
 
       $("#test li[data-tab=export-bibtex]").click();
 
-      expect(w.pubsub.publish.args[1]).to.eql([
+      expect(spy.args[1]).to.eql([
         "[Router]-Navigate-With-Trigger",
         "library-export",
         {
@@ -159,7 +160,7 @@ define([
 
       $("#test .tab[data-tab=metrics]").click();
 
-      expect(w.pubsub.publish.args[2]).to.eql([
+      expect(spy.args[2]).to.eql([
         "[Router]-Navigate-With-Trigger",
         "library-metrics",
         {
@@ -176,7 +177,7 @@ define([
 
       $("#test li[data-tab=visualization-authornetwork]").click();
 
-      expect(w.pubsub.publish.args[3]).to.eql([
+      expect(spy.args[3]).to.eql([
         "[Router]-Navigate-With-Trigger",
         "library-visualization",
         {

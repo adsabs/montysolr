@@ -21,11 +21,12 @@ define([
     },
 
     activate: function (beehive) {
-      this.pubsub = beehive.getHardenedInstance().Services.get('PubSub');
+      this.setBeeHive(beehive);
       this.debug = beehive.getDebug(); // XXX:rca - think of st better
       this.view = this.createView({debug : this.debug, widgets: this.widgets});
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, _.bind(this.addQuery, this));
-      this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, _.bind(this.onDisplayDocuments, this));
+      var pubsub = this.getPubSub();
+      pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.addQuery, this));
+      pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, _.bind(this.onDisplayDocuments, this));
 
     },
 

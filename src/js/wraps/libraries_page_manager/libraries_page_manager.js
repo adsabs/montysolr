@@ -24,10 +24,10 @@ define([
       "click button.create-library" : function(){
         function createLib(){
           var that = this;
-          this.beehive.getObject("LibraryController")
+          this.getBeeHive().getObject("LibraryController")
             .createLibrary()
             .done(function(data){
-              that.pubsub.publish(that.pubsub.NAVIGATE, "IndividualLibraryWidget", {sub: "library", id : data.id});
+              that.getPubSub().publish(that.getPubSub().NAVIGATE, "IndividualLibraryWidget", {sub: "library", id : data.id});
             });
         }
         this.trigger("page-manager-event", "apply-function", {func : createLib});
@@ -45,13 +45,6 @@ define([
       });
 
 
-    },
-
-    activate: function (beehive) {
-      this.beehive = beehive;
-      this.pubsub = beehive.getHardenedInstance().Services.get('PubSub');
-      this.view = this.createView({debug : this.debug, widgets: this.widgets});
-      this.debug = beehive.getDebug(); // XXX:rca - think of st better
     }
 
   });

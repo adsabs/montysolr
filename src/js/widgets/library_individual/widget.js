@@ -60,17 +60,14 @@ define([
       },
 
       activate: function(beehive) {
-        this.beehive = beehive;
+        this.setBeeHive(beehive);
         _.bindAll(this);
-        this.pubsub = beehive.getService('PubSub');
-        var pubsub = this.pubsub;
-
       },
 
       updateHeader : function(){
         var that = this;
         var id = this.model.get("id"),
-            metadata = this.beehive.getObject("LibraryController").getLibraryMetadata(id)
+            metadata = this.getBeeHive().getObject("LibraryController").getLibraryMetadata(id)
               .done(function(metadata){
 
                 that.headerModel.set(metadata);
@@ -92,7 +89,7 @@ define([
 
           case "library":
             //get record data
-            this.beehive.getObject("LibraryController").getLibraryRecords(id)
+            this.getBeeHive().getObject("LibraryController").getLibraryRecords(id)
               .done(function(data){
                 data = _.map(data.documents, function(d){
                   return {bibcode : d}
@@ -154,7 +151,7 @@ define([
           //from library list view
           var data = {bibcode : [arg1], action : "remove"},
               id = this.model.get("id");
-          this.beehive.getObject("LibraryController").updateLibraryContents(id, data)
+          this.getBeeHive().getObject("LibraryController").updateLibraryContents(id, data)
             .done(function(){
               var bibcode = data.bibcode[0],
                 modelToRemove = that.bibcodeCollection.get(bibcode);
@@ -178,7 +175,7 @@ define([
 
           case "updateVal":
             //from header view
-            this.beehive.getObject("LibraryController")
+            this.getBeeHive().getObject("LibraryController")
               .updateLibraryMetadata(id, arg1)
               .done(function(data){
                 //make a new view
@@ -191,17 +188,18 @@ define([
             break;
 
           case "navigate":
+            var pubsub = this.getPubSub();
             var other = ["export", "metrics", "visualization"];
             if (_.contains(other, arg1)){
               var command = "library-" + arg1;
-              this.pubsub.publish(this.pubsub.NAVIGATE, command, {bibcodes : this.bibcodeCollection.pluck("bibcode"), sub : arg2, id : id});
+              pubsub.publish(pubsub.NAVIGATE, command, {bibcodes : this.bibcodeCollection.pluck("bibcode"), sub : arg2, id : id});
             }
             else {
-              this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", { sub : arg1, id : id });
+              pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", { sub : arg1, id : id });
             }
-            break
+            break;
           case "delete-library":
-            this.beehive.getObject("LibraryController").deleteLibrary(id);
+            this.getBeeHive().getObject("LibraryController").deleteLibrary(id);
             break;
         }
       }

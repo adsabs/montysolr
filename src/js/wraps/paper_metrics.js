@@ -32,9 +32,9 @@ define([
 
       activate: function(beehive) {
         _.bindAll(this, "setCurrentQuery", "processResponse");
-        this.pubsub = beehive.Services.get('PubSub');
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
-        this.innerWidget.pubsub = this.pubsub;
+        var pubsub = beehive.getService('PubSub');
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+        this.innerWidget.setBeeHive(beehive);
       },
 
       ingestBroadcastedPayload: function(data) {

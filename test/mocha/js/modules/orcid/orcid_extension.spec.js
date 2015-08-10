@@ -204,28 +204,25 @@ define([
       it("merges ADS data before sending them to orcid", function(done) {
         var w = _getWidget();
         var widget = w.widget;
-        widget.pubsub = sinon.spy();
+        var spy = sinon.spy();
+        sinon.spy(widget.getPubSub(), 'publish');
 
         var model = widget.model;
         widget.mergeADSAndOrcidData(model);
-        expect(widget.pubsub.called).to.eql(false);
+        expect(widget.getPubSub().publish.called).to.eql(false);
 
-        var uSpy = sinon.spy();
         model.set('bibcode', 'foo');
-        var s = widget.beehive.getService;
-        widget.beehive.getService = function() {return {}};
-
         widget.mergeADSAndOrcidData(model);
-        expect(widget.pubsub.called).to.eql(false);
+        expect(widget.getPubSub().publish.called).to.eql(false);
 
         model.set('bibcode', null);
         model.set('identifier', 'foo');
 
-        widget.pubsub.publish = sinon.spy();
+        w.getPubSub = function() {return {publish : spy}};
         widget.mergeADSAndOrcidData(model);
 
-        expect(widget.pubsub.publish.called).to.eql(true);
-        expect(widget.pubsub.publish.lastCall.args[1].get('query').get('q')).to.eql(['identifier:foo']);
+        expect(widget.getPubSub().publish.called).to.eql(true);
+        expect(widget.getPubSub().publish.lastCall.args[1].get('query').get('q')).to.eql(['identifier:foo']);
 
 
         // test of the internal logic
@@ -235,7 +232,7 @@ define([
           d.resolve(widget.model);
           return d.promise();
         };
-        widget.beehive.getService = function() {return {
+        widget.getBeeHive().getService = function() {return {
           updateOrcid: function() {
             expect(model.get('orcid').pending).to.eql(true);
             var d = $.Deferred();
@@ -243,6 +240,7 @@ define([
             return d.promise();
           }
         }};
+        var uSpy = sinon.spy();
         widget.once('orcidAction:add', uSpy);
 
         widget.onAllInternalEvents('childview:OrcidAction', null, {model: model, action: 'add'});

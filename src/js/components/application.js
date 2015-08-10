@@ -85,7 +85,6 @@ define([
 
   _.extend(Application.prototype, {
 
-
     initialize: function(config, options) {
       // these are core (elevated access)
       this.__beehive = new BeeHive();
@@ -335,6 +334,7 @@ define([
       return this._setTimeout(defer).promise();
     },
 
+
     _setTimeout: function(deferred) {
       setTimeout(function () {
         if (deferred.state() != 'resolved') {
@@ -344,9 +344,12 @@ define([
       return deferred;
     },
 
+
     destroy : function() {
       this.getBeeHive().destroy();
     },
+
+
     activate: function(options) {
       var beehive = this.getBeeHive();
       var self = this;
@@ -356,7 +359,7 @@ define([
       beehive.activate(beehive);
 
       // controllers receive application itself and elevated beehive object
-      // all of the must succeed; we don't catch errors
+      // all of them must succeed; we don't catch errors
       _.each(this.getAllControllers(), function(el) {
         if (self.debug) {console.log('application: controllers: ' + el[0] + '.activate(beehive, app)')};
         var plugin = el[1];
@@ -390,9 +393,11 @@ define([
           var plugin = el[1];
           if ('activate' in plugin) {
             var children = plugin.activate(hardenedBee = beehive.getHardenedInstance());
-            self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'plugin:' + el[0];
-            if (children) {
-              self._registerBarbarianChildren('plugin', el[0], children);
+            if (hardenedBee.hasService('PubSub')) {
+              self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'plugin:' + el[0];
+              if (children) {
+                self._registerBarbarianChildren('plugin', el[0], children);
+              }
             }
           }
         }
@@ -408,9 +413,11 @@ define([
           var children;
           if ('activate' in plugin) {
             children = plugin.activate(hardenedBee = beehive.getHardenedInstance());
-            self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'widget:' + el[0];
-            if (children) {
-              self._registerBarbarianChildren('widget', el[0], children);
+            if (hardenedBee.hasService('PubSub')) {
+              self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'widget:' + el[0];
+              if (children) {
+                self._registerBarbarianChildren('widget', el[0], children);
+              }
             }
           }
         }
@@ -422,6 +429,7 @@ define([
 
       this.__activated = true;
     },
+
 
     /**
      * I think the analogy is getting over-stretched; it is true that the author of this application
@@ -449,6 +457,7 @@ define([
       }, this);
     },
 
+
     /**
      * Given the pubsub key, it finds the name of the widget
      * (provided the widget is registered with the application)
@@ -470,6 +479,7 @@ define([
       }
       return k;
     },
+
 
     getPluginOrWidgetByPubSubKey: function(psk) {
       var k = this.getPluginOrWidgetName(psk);
@@ -579,14 +589,11 @@ define([
       });
       return rets;
     }
-
-
   });
 
 
   // give it subclassing functionality
   Application.extend = Backbone.Model.extend;
-
   return Application.extend(ApiAccess);
 
 });

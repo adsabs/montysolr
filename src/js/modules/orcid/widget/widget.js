@@ -54,7 +54,6 @@ define([
 
 
       activate: function (beehive) {
-        this.pubsub = beehive.Services.get('PubSub');
         this.setBeeHive(beehive);
 
         _.bindAll(this, 'processResponse');

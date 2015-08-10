@@ -40,11 +40,9 @@ define([
       activate: function(beehive, app) {
         this.setBeeHive(beehive);
         this.setApp(app);
-        this.setPubSub(beehive);
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.ALERT, _.bind(this.onAlert, this));
         pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.onStartSearch, this));
-        this.pubSubKey = pubsub.getPubSubKey();
 
         var widget = this.getWidget();
         if (!widget) {
@@ -72,10 +70,10 @@ define([
             if (_.isObject(result) && result.action) {
               switch (result.action) {
                 case Alerts.ACTION.TRIGGER_FEEDBACK:
-                  self.pubsub.publish(self.pubsub.FEEDBACK, new ApiFeedback(result.arguments));
+                  self.getPubSub().publish(self.getPubSub().FEEDBACK, new ApiFeedback(result.arguments));
                   break;
                 case Alerts.ACTION.CALL_PUBSUB:
-                  self.pubsub.publish(result.signal, result.arguments);
+                  self.getPubSub().publish(result.signal, result.arguments);
                   break;
                 default:
                   throw new Exception('Unknow action type:' + result);
@@ -107,7 +105,7 @@ define([
       }
     });
 
-    _.extend(AlertsMediator.prototype, Dependon.BeeHive, Dependon.App, Dependon.PubSub);
+    _.extend(AlertsMediator.prototype, Dependon.BeeHive, Dependon.App);
     _.extend(AlertsMediator.prototype, Hardened);
 
     return AlertsMediator;

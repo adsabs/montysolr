@@ -29,15 +29,14 @@ define([
       },
 
       activate: function (beehive) {
-        this.beehive = beehive;
-        this.pubsub = beehive.Services.get('PubSub');
-        this.key = this.pubsub.getPubSubKey();
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
         _.bindAll(this, [ "getRecaptchaKey"]);
-        this.pubsub.subscribe(this.key, this.pubsub.APP_STARTED, this.getRecaptchaKey);
+        pubsub.subscribe(pubsub.APP_STARTED, this.getRecaptchaKey);
       },
 
       getRecaptchaKey : function(){
-        siteKey = this.beehive.getObject("AppStorage").getConfigCopy().recaptchaKey;
+        var siteKey = this.getBeeHive().getObject("AppStorage").getConfigCopy().recaptchaKey;
         this.siteKeyDeferred.resolve(siteKey);
       },
 

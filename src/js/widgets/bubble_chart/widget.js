@@ -963,12 +963,13 @@ define([
     },
 
     activate: function (beehive) {
+      this.setBeeHive(beehive);
       _.bindAll(this, "setCurrentQuery", "processResponse");
-      this.pubsub = beehive.Services.get('PubSub');
+      var pubsub = this.getPubSub();
       //custom dispatchRequest function goes here
-      this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setCurrentQuery);
+      pubsub.subscribe(pubsub.INVITING_REQUEST, this.setCurrentQuery);
       //custom handleResponse function goes here
-      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
     //fetch data
@@ -986,7 +987,7 @@ define([
         query: query
       });
 
-      this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+      this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
     },
 
 
@@ -1011,7 +1012,7 @@ define([
 
       newQuery.unlock();
       this._updateFq(newQuery, newQ);
-      this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+      this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
     },
 
     _updateFq: function(q, value) {
@@ -1038,11 +1039,11 @@ define([
 
 
     broadcastClose: function () {
-      this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+      this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
     }
 
-  })
+  });
 
   return BubbleChart
 
-})
+});

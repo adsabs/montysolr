@@ -18,13 +18,6 @@ define([
       options = options || {};
       options.template = options.template || PageManagerTemplate;
       return new PageManagerView({template: PageManagerTemplate, className :  "s-home-layout s-100-height",  id : "home-layout"  })
-    },
-
-    activate: function (beehive) {
-      this.beehive = beehive;
-      this.pubsub = beehive.getHardenedInstance().Services.get('PubSub');
-      this.view = this.createView({debug : this.debug, widgets: this.widgets});
-      this.debug = beehive.getDebug(); // XXX:rca - think of st better
     }
 
   });

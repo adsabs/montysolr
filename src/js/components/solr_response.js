@@ -8,8 +8,17 @@
  */
 
 
-define(['js/components/json_response', 'js/components/solr_params',
-  'backbone', 'underscore', 'jquery'], function(JsonResponse, SolrParams, Backbone, _, $) {
+define([
+  'js/components/json_response',
+  'js/components/solr_params',
+  'backbone',
+  'underscore',
+  'jquery'], function(
+  JsonResponse,
+  SolrParams,
+  Backbone,
+  _,
+  $) {
 
 
   var SolrResponse = JsonResponse.extend({

@@ -38,7 +38,6 @@ define(['underscore',
         options = options || {};
         this.router = options.router;
         this.catalog = new TransitionCatalog(); // catalog of nagivation points (later we can build FST)
-        this.pubsub = null;
       },
 
       /**
@@ -49,11 +48,8 @@ define(['underscore',
        */
       activate: function(beehive) {
         this.setBeeHive(beehive);
-        var pubsub = beehive.Services.get('PubSub');
-        this.pubSubKey = pubsub.getPubSubKey();
-
-        pubsub.subscribe(this.pubSubKey, pubsub.NAVIGATE, _.bind(this.navigate, this));
-        this.pubsub = pubsub;
+        var pubsub = this.getPubSub();
+        pubsub.subscribe(pubsub.NAVIGATE, _.bind(this.navigate, this));
       },
 
       /**
@@ -99,13 +95,13 @@ define(['underscore',
 
       handleMissingTransition: function() {
         console.error("Cannot handle 'navigate' event: " + JSON.stringify(arguments));
-        this.pubsub.publish(this.pubSubKey, this.pubsub.BIG_FIRE, 'navigation-error', arguments);
+        this.getPubSub().publish(this.getPubSub().BIG_FIRE, 'navigation-error', arguments);
       },
 
       handleTransitionError: function(transition, error, args) {
         console.error("Error while executing transition", transition, args);
         console.error(error.stack);
-        this.pubsub.publish(this.pubSubKey, this.pubsub.CITY_BURNING, 'navigation-error', arguments);
+        this.getPubSub().publish(this.getPubSub().CITY_BURNING, 'navigation-error', arguments);
       },
 
       /**

@@ -69,8 +69,6 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-      this.setPubSub(beehive);
-      this.key = this.getPubSub().getPubSubKey();
 
       // Check if the Orcid access was revoked by the user
       // It will only be considered 'revoked' if a 401 is received by the API handler
@@ -315,10 +313,10 @@ define([
         //publish alert
         function alertSuccess (){
           var message = "Please check <b>" + new_email+ "</b> for further instructions";
-          this.pubsub.publish(this.pubsub.ALERT,  new ApiFeedback({code: 0, msg: message, type : "success", title: "Success", modal: true}));
+          this.getPubSub().publish(this.getPubSub().ALERT,  new ApiFeedback({code: 0, msg: message, type : "success", title: "Success", modal: true}));
         };
         //need to do it this way so the alert doesnt get lost after page is changed
-        this.pubsub.subscribeOnce(this.pubsub.NAVIGATE, _.bind(alertSuccess, this));
+        this.getPubSub().subscribeOnce(this.getPubSub().NAVIGATE, _.bind(alertSuccess, this));
         this.getBeeHive().getObject("Session").logout();
       };
 
@@ -336,7 +334,6 @@ define([
 
     //returns a promise
     getToken : function(){
-      debugger
       return this.fetchData("TOKEN");
     },
 
@@ -418,7 +415,7 @@ define([
 
   });
 
-  _.extend(User.prototype, Hardened, Dependon.BeeHive, Dependon.App, Dependon.PubSub, {
+  _.extend(User.prototype, Hardened, Dependon.BeeHive, Dependon.App, {
     USER_SIGNED_IN: 'user_signed_in',
     USER_SIGNED_OUT: 'user_signed_out',
     USER_INFO_CHANGE: 'user_info_change',

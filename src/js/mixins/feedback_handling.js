@@ -15,10 +15,6 @@ define([
 
   var Mixin = {
 
-    getApp: function() {
-      return this.app;
-    },
-
     //for an individual widget
     _makeWidgetSpin: function(id){
 

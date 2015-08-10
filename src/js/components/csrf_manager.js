@@ -8,25 +8,27 @@ define([
     'js/components/generic_module',
     'js/mixins/hardened',
     "js/components/api_request",
-    "js/components/api_targets"
+    "js/components/api_targets",
+    'js/mixins/dependon'
   ],
   function(
     Backbone,
     GenericModule,
     Hardened,
     ApiRequest,
-    ApiTargets
+    ApiTargets,
+    Dependon
     ) {
 
 
     var CSRFManager = GenericModule.extend({
 
       activate: function (beehive) {
-        this.beehive = beehive;
-        this.pubsub = beehive.Services.get('PubSub');
-        this.key = this.pubsub.getPubSubKey();
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
+
         _.bindAll(this, ["resolvePromiseWithNewKey"]);
-        this.pubsub.subscribe(this.key, this.pubsub.DELIVERING_RESPONSE, this.resolvePromiseWithNewKey);
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.resolvePromiseWithNewKey);
       },
 
      getCSRF : function(){
@@ -36,7 +38,8 @@ define([
          target : ApiTargets.CSRF
        });
 
-       this.pubsub.publish(this.key, this.pubsub.EXECUTE_REQUEST, request);
+       var pubsub = this.getPubSub();
+       pubsub.publish(pubsub.EXECUTE_REQUEST, request);
        return this.deferred.promise();
      },
 
@@ -52,7 +55,7 @@ define([
 
     });
 
-    _.extend(CSRFManager.prototype, Hardened);
+    _.extend(CSRFManager.prototype, Hardened, Dependon.BeeHive);
 
     return CSRFManager;
 

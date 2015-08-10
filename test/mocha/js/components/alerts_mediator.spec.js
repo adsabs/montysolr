@@ -111,7 +111,7 @@ define([
       expect(spy.called).to.be.true;
 
       // actions
-      sinon.spy(x.m.pubsub, 'publish');
+      sinon.spy(x.m.getPubSub(), 'publish');
       promise = x.m.onAlert(new ApiFeedback({
         msg: 'this is <a href="foo">html</a> message',
         events: {
@@ -122,7 +122,7 @@ define([
         }
       }));
       $w.find('#alertBox a').click();
-      expect(x.m.pubsub.publish.called).to.be.true;
+      expect(x.m.getPubSub().publish.called).to.be.true;
 
     });
 

@@ -25,8 +25,17 @@
  * callbacks.
  **/
 
-define(['backbone', 'underscore', 'js/components/generic_module', 'js/components/pubsub_key'],
-  function(Backbone, _, GenericModule, PubSubKey) {
+define([
+    'backbone',
+    'underscore',
+    'js/components/generic_module',
+    'js/components/pubsub_key'
+  ],
+  function(
+    Backbone,
+    _,
+    GenericModule,
+    PubSubKey) {
 
     // unfortunately, these methods are not part of the BB.Events class
     // so we have to duplicate them iff we want to provide a queue which

@@ -41,22 +41,22 @@ define([
       var btnType = "btn-primary-faded";
       var dropdownTitle = "Visualize";
 
-      widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle });
+      var widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle });
 
-      widget.pubsub = {publish : sinon.spy()};
+      var spy = sinon.spy();
+      widget.getPubSub = function(){return {publish : spy}};
 
       $("#test").append(widget.render().el);
 
       $("#test").find("li:first").click();
 
-      expect(widget.pubsub.publish.calledOnce).to.be.true;
+      expect(widget.getPubSub().publish.calledOnce).to.be.true;
 
       //it should be passed the model that was clicked, so it can publish the name
-      expect(widget.pubsub.publish.args[0][1]).to.eql("show-author-network");
-      expect(widget.pubsub.publish.args[0][2]).to.eql({onlySelected: false});
+      expect(spy.args[0][1]).to.eql("show-author-network");
+      expect(spy.args[0][2]).to.eql({onlySelected: false});
 
-
-    })
+    });
 
     it("should allow the user to do bulk action to all records or selected records if records are selected", function(){
 
@@ -68,9 +68,11 @@ define([
       var btnType = "btn-primary-faded";
       var dropdownTitle = "Visualize";
 
-      widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle, selectedOption : true  });
+      var widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle, selectedOption : true  });
 
-      widget.pubsub = {publish : sinon.spy()};
+      var spy = sinon.spy();
+      widget.getPubSub = function() {return {publish : spy}};
+
 
       $("#test").append(widget.render().el);
 
@@ -79,17 +81,17 @@ define([
 
       $("#test").find("li:first").click();
 
-      expect(widget.pubsub.publish.calledOnce).to.be.true;
-      expect(widget.pubsub.publish.args[0][1]).to.eql('show-author-network');
+      expect(widget.getPubSub().publish.calledOnce).to.be.true;
+      expect(widget.getPubSub().publish.args[0][1]).to.eql('show-author-network');
 
-      expect(widget.pubsub.publish.args[0][2]).to.eql({onlySelected: true});
+      expect(widget.getPubSub().publish.args[0][2]).to.eql({onlySelected: true});
 
       $("input[name=papers-Visualize]").click();
       $("#test").find("li:first").click();
 
-      expect(widget.pubsub.publish.callCount).to.eql(2);
-      expect(widget.pubsub.publish.args[0][1]).to.eql('show-author-network');
-      expect(widget.pubsub.publish.args[1][2]).to.eql({onlySelected: false});
+      expect(widget.getPubSub().publish.callCount).to.eql(2);
+      expect(widget.getPubSub().publish.args[0][1]).to.eql('show-author-network');
+      expect(widget.getPubSub().publish.args[1][2]).to.eql({onlySelected: false});
 
 
       //now the user decides that even though there are selected docs, he/she wants to see all of them
