@@ -57,10 +57,6 @@ module.exports = function(grunt) {
       convert_dsjslib: {
         cmd: 'node node_modules/requirejs/bin/r.js -convert src/libs/dsjslib src/libs/dsjslib'
       },
-      //this has to go into css folder
-      move_jqueryuicss : {
-        cmd : 'cp -r bower_components/jqueryui/themes/smoothness/ src/styles/css/'
-      },
       latest_commit: {
         cmd: 'git rev-parse --short=7 --verify HEAD | cat > git-latest-commit'
       },
@@ -443,6 +439,7 @@ module.exports = function(grunt) {
         files : {"dist/libs/backbone/backbone-min.js": "dist/libs/backbone/backbone.js"}
       }
     },
+
 
     less: {
       development: {
@@ -839,7 +836,7 @@ module.exports = function(grunt) {
   grunt.registerTask('test:server', ['env:dev', 'express:dev', 'watch:server']);
   // run tests locally
   grunt.registerTask('test:local', ['env:dev', 'watch:local_testing']);
-  grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib', 'exec:move_jqueryuicss']);
+  grunt.registerTask('bower-setup', ['clean:bower', 'bower', 'exec:convert_dsjslib']);
   grunt.registerTask('coverage', ['env:dev', 'express:dev', 'blanket_mocha:full']);
 
   grunt.registerTask('release',
