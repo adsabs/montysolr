@@ -172,7 +172,6 @@ define(['backbone',
         var view = info.view;
         var paginator = info.paginator;
 
-
         if (paginator.getCycle() <= 1) {
           collection.reset(facetCollection.slice(0, view.maxDisplayNum));
         }

@@ -1,34 +1,35 @@
 {{# if noneSelected}}
-<div class="logic-container">
-	<i>To filter your search, select one or more items.</i>
+    <div class="logic-container">
+	    <i>To filter your search, select one or more items.</i>
+    </div>
 
 {{else}}
-{{#if single}}
-<div class="logic-container">
-		{{#each logic }}
-		<label>
-			<input name="operator" value="{{this}}" type="radio"> {{this}}
-		</label>
-	{{/each}}
-</div>
-{{/if}}
+        {{#if single}}
+            <div class="logic-container">
+                    {{#each logic }}
+                        <label>
+                            <input name="operator" value="{{this}}" type="radio"> {{this}}
+                        </label>
+                {{/each}}
+            </div>
+        {{/if}}
 
 
-{{#if fullSet}}
-<div class="logic-container">
-	<i>You have selected all results. Try selecting only one entry.</i>
-</div>
+        {{#if fullSet}}
+            <div class="logic-container">
+                <i>You have selected all results. Try selecting only one entry.</i>
+            </div>
 
-{{/if}}
+        {{/if}}
 
-{{#if multiLogic}}
-<div class="logic-container">
-	{{#each logic }}
-		<label>
-			<input name="operator" value="{{this}}" type="radio"> {{this}}
-		</label>
-	{{/each}}
-</div>	               
-{{/if}}
+        {{#if multiLogic}}
+            <div class="logic-container">
+                {{#each logic }}
+                    <label>
+                        <input name="operator" value="{{this}}" type="radio"> {{this}}
+                    </label>
+                {{/each}}
+            </div>
+        {{/if}}
 
 {{/if}}
