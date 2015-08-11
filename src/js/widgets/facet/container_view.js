@@ -36,21 +36,14 @@ define(['backbone', 'marionette',
             throw new Error('logicOptions should be null or an object with single/multiple keys and arrays of strings inside');
           }
 
-          this.on('all', function(ev, info) {
+          this.on('all', function (ev, info) {
             if (ev.indexOf('itemClicked') > -1
-              || ev.indexOf('render') > -1
-              || ev.indexOf('treeClicked') > -1) {
+              || ev.indexOf('treeClicked') > -1
+              || ev == "render:collection" )  {
               this.refreshLogicTooltip();
             }
           });
 
-          //this.on("childview:itemClicked", this.refreshLogicTooltip);
-
-          //clear out logic template when collection is reset
-          //this.on("render:collection", this.refreshLogicTooltip);
-
-          // for debugging
-          //this.on('all', function(ev) {console.log(ev, arguments)});
         }
 
         //show only tiny loading indicators, the widget_state_handling mixin will use this flag
@@ -70,7 +63,6 @@ define(['backbone', 'marionette',
         "click .widget-options.top": "onClickOptions",
         "click .widget-options.bottom": "onClickOptions",
         "click .widget-name" : "toggleWidget",
-        "click .dropdown-toggle": "enableLogic",
         "click .dropdown-menu .close": "closeLogic",
         "click .logic-container label": "onLogic"
 
@@ -105,10 +97,6 @@ define(['backbone', 'marionette',
         }
         else {
           this.disableShowMore();
-        }
-        if (this.logicOptions) {
-          this.refreshLogicTooltip();
-          this.closeLogic();
         }
       },
 
@@ -160,7 +148,7 @@ define(['backbone', 'marionette',
         if (e){
           e.stopPropagation();
         }
-        this.$(".logic-dropdown").addClass("hide").removeClass("open");
+        this.$(".logic-dropdown").addClass("hidden");
       },
 
       onLogic: function(ev) {
@@ -172,37 +160,26 @@ define(['backbone', 'marionette',
         this.trigger("containerLogicSelected", val);
       },
 
-      refreshLogicTooltip: function(){
+      refreshLogicTooltip: function(arg1){
 
         var selected = this.$(".widget-item:checked");
-        var numSelected = selected.length;
 
-        if (numSelected >= 1) {
-          //highlight filter
-          this.$(".logic-dropdown").removeClass("hide");
-          //highlight caret
-          this.$("i.main-caret").addClass("active-style");
-
-        }
-        else {
-          //unhighlight filter
-          this.$(".logic-dropdown").removeClass("open").addClass("hide");
-
-          //unhighlight caret
-          this.$("i.main-caret").removeClass("active-style");
+        if (selected.length == 0) {
+          this.$(".logic-dropdown").addClass("hidden");
+          return;
         }
 
-        //open the dropdown
-        if (numSelected === 1) {
+        //open the tooltip for single or multi logic
+        this.$(".logic-dropdown").removeClass("hidden");
+
+        if  (selected.length == 1) {
           this.$(".dropdown-menu").html(FacetTooltipTemplate({
             single: true,
             logic: this.logicOptions.single
           }));
 
-          this.$(".dropdown").addClass("open");
-
         }
-        else if (numSelected > 1) {
+        else if (selected.length > 1) {
           var multiLogic = this.logicOptions.multiple;
           if (multiLogic === "fullSet") {
             /*any multiple selection automatically grabs the full set */
@@ -217,17 +194,8 @@ define(['backbone', 'marionette',
             }))
 
           }
-          this.$(".dropdown").addClass("open");
-        }
-        else {
-
-          this.$(".dropdown-menu").html(FacetTooltipTemplate({
-            noneSelected: true
-          }));
-          this.$(".dropdown").removeClass("open");
         }
       }
-
 
     });
 

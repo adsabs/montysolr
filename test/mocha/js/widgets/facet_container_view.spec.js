@@ -118,17 +118,19 @@ define([
           view.collection.add(new Backbone.Model({title: 'foo2', value: 'bar2'}));
           view.collection.add(new Backbone.Model({title: 'foo3', value: 'bar3'}));
 
-          expect(view.refreshLogicTooltip.callCount).to.be.equal(24);
+          expect(view.refreshLogicTooltip.callCount).to.be.equal(0);
+
+          view.trigger("render:collection");
+
+          expect(view.refreshLogicTooltip.callCount).to.be.equal(1);
+
+
 
           //logic menu is shown only after a selection is made
 
-          expect(view.$(".logic-dropdown").hasClass("hide")).to.be.true;
+          expect(view.$(".logic-dropdown").hasClass("hidden")).to.be.true;
           $v.find(".widget-item:first").click();
-          expect(view.$(".logic-dropdown").hasClass("hide")).to.be.false;
-
-
-
-
+          expect(view.$(".logic-dropdown").hasClass("hidden")).to.be.false;
 
           expect($v.find('.logic-container').is(':visible')).to.be.true;
           expect($v.find('.logic-container > label:eq(0) > input').val()).to.eql('limit to');
@@ -150,9 +152,7 @@ define([
           expect($v.find('.logic-container > label:eq(1) > input').val()).to.eql('or');
           expect($v.find('.logic-container > label:eq(2) > input').val()).to.eql('exclude');
 
-          // resetting the collection should close the tooltip
-          view.collection.reset();
-          expect($v.find('.logic-container').is(':visible')).to.be.false;
+
           done();
         });
 

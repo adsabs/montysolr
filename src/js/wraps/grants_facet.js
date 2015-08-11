@@ -23,8 +23,6 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
       //XXX:rca - hack ; this logic is triggerd multiple times
       // we need to prevent that
 
-      var self = this;
-
       if (conditions && _.keys(conditions).length > 0) {
 
 
@@ -43,8 +41,15 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
         else if (operator == 'or') {
           this.queryUpdater.updateQuery(q, fieldName, 'expand', conditions);
         }
-        else if (operator == 'exclude' || operator == 'not') {
-          this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+
+        else if (operator == 'exclude' ) {
+          if (q.get(fieldName)) {
+            this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+          }
+          else {
+            conditions.unshift('*:*');
+            this.queryUpdater.updateQuery(q, fieldName, 'exclude', conditions);
+          }
         }
 
         var fq = '{!type=aqp cache=false cost=150 v=$' + fieldName + '}';
