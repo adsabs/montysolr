@@ -5,6 +5,35 @@ s-search-bar-motion is applied */
   @extend .border-default-light;
 }
 
+
+.loading-screen {
+  height: 100vh;
+  padding-top: 30vh;
+  text-align:center;
+  font-size: 3em;
+  font-weight: 300;
+}
+
+.logo__astrophysics {
+  font-weight: 500;
+  letter-spacing: .03em;
+  color: $gray-light;
+}
+
+.logo__data-system {
+  letter-spacing: 0.09em;
+  position: relative;
+  top: -20px;
+  color: lighten($gray-light, 12%);
+
+}
+
+.loading-screen__loading {
+  position: relative;
+  top: -40px;
+  font-size: .5em;
+}
+
 .hidden-col{
   width: 0 ;
   padding: 0 ;
@@ -19,7 +48,6 @@ s-search-bar-motion is applied */
   .descriptor {
     display: none;
   }
-
 
   //show in desktops
   @media (min-width : $screen-sm-min){

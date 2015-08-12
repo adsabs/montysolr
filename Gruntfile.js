@@ -37,7 +37,7 @@ module.exports = function(grunt) {
       individual: {
         src: [],
         options: {
-          
+
         }
       },
       ignore_semicolons: {
@@ -81,7 +81,7 @@ module.exports = function(grunt) {
     // copied over to the 'dist' folder
     requirejs: {
       baseUrl: 'dist/js', // this is needed just for the 'stupid' list task
-      release: {
+      release_individual: {
         options: {
           baseUrl: 'dist/js',
           allowSourceOverwrites: true,
@@ -93,6 +93,55 @@ module.exports = function(grunt) {
           wrap: true,
           preserveLicenseComments: false,
           dir: 'dist/js',
+          uglify2: {
+            output: {
+              beautify: false
+            },
+            warnings: true,
+            mangle: false
+          }
+        }
+      },
+      release_concatenated : {
+        options: {
+          baseUrl: 'dist/',
+          wrapShim: true,
+          include : (function(){
+
+            var s = grunt.file.read("src/discovery.config.js"),
+                require = {config : function(s){return s}},
+                bumblebeeConfig = eval(s).config['js/apps/discovery/main'];
+
+            function getPaths(obj) {
+              var paths = [];
+
+              function pushPaths(config_obj) {
+               for (var k in config_obj) {
+                 var v = config_obj[k];
+                 if (v instanceof Object) {
+                   pushPaths(v);
+                 } else {
+                   paths.push(v);
+                 }
+               }
+              };
+
+              pushPaths(obj);
+              return paths;
+            }
+
+            return getPaths(bumblebeeConfig);
+
+          }()),
+          allowSourceOverwrites: true,
+          out: "dist/concatenated_bumblebee.js",
+          name: "js/apps/discovery/main",
+          keepBuildDir: true,
+          mainConfigFile : "dist/discovery.config.js",
+          generateSourceMaps: false,
+          findNestedDependencies: true,
+          wrap: true,
+          preserveLicenseComments: false,
           uglify2: {
             output: {
               beautify: false
@@ -312,7 +361,7 @@ module.exports = function(grunt) {
     },
 
     // modify the html based on the instructions inside the html code
-    // this can be useful to modify links to css, minified version 
+    // this can be useful to modify links to css, minified version
     // of javascript etc...
     processhtml: {
       release: {
@@ -413,7 +462,7 @@ module.exports = function(grunt) {
       }
     },
 
-    // compress whatever we have in the dist and 
+    // compress whatever we have in the dist and
     // store it along-side with it (nginx can serve
     // such content automatically)
     compress: {
@@ -443,12 +492,29 @@ module.exports = function(grunt) {
     },
 
     sass: {
-      options: {
-        sourceMap: true
+        options: {
+          sourceMap: true
+        },
+        dist: {
+          files: {
+            'src/styles/css/styles.css' : 'src/styles/sass/manifest.scss'
+          }
+        }
       },
+
+    /* for changing the name of the data-main file in dist/index */
+
+    'string-replace': {
       dist: {
-        files: {
-          'src/styles/css/styles.css' : 'src/styles/sass/manifest.scss'
+        files: [{
+          src: 'dist/index.html',
+          dest: 'dist/index.html'
+        }],
+        options: {
+          replacements: [{
+            pattern: 'data-main="./discovery.config"',
+            replacement: 'data-main="./concatenated_bumblebee.js"'
+          }]
         }
       }
     },
@@ -687,9 +753,6 @@ module.exports = function(grunt) {
   // Basic environment config
   grunt.loadNpmTasks('grunt-env');
 
-  // Grunt BBB tasks.
-  grunt.loadNpmTasks('grunt-bbb-requirejs'); // we use 'list' target only, requirejs will get overriden
-
 
   // Grunt contribution tasks.
   require('load-grunt-tasks')(grunt);
@@ -844,7 +907,8 @@ module.exports = function(grunt) {
   grunt.registerTask('release',
     [ 'setup',
       'clean:release', 'copy:release',
-      'requirejs:release', 'requirejs:release_css',
+      'string-replace:dist',
+      'requirejs:release_individual', 'requirejs:release_concatenated','requirejs:release_css',
       'hash_require:js', 'hash_require:css',
       'exec:git_describe', 'copy:keep_original',
       'assemble',

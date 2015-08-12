@@ -32,7 +32,6 @@ define([
 
     var QueryBuilder = GenericModule.extend({
 
-
       initialize: function(options) {
 
         this._rules = null;
@@ -78,7 +77,6 @@ define([
 
             "operator_is_wildcard": "starts with",
             "operator_is_not_wildcard": "doesn't start with",
-
 
             "operator_is_phrase": "has phrase",
             "operator_is_wildphrase": "has wildcard",
@@ -574,16 +572,16 @@ define([
 
       _checkRulesConstraints: function(uiRules) {
         /*if (uiRules.field) {
-          var m;
-          if (m = this.operatorMap[uiRules.field]) {
-            if (m[uiRules.operator]) {
-              uiRules.operator = m[uiRules.operator];
-            }
-            else {
-              throw new Error("Operator mapping is missing a value for:" + JSON.stringify(uiRules) + ' we have: ' + JSON.stringify(m));
-            }
-          }
-        }*/
+         var m;
+         if (m = this.operatorMap[uiRules.field]) {
+         if (m[uiRules.operator]) {
+         uiRules.operator = m[uiRules.operator];
+         }
+         else {
+         throw new Error("Operator mapping is missing a value for:" + JSON.stringify(uiRules) + ' we have: ' + JSON.stringify(m));
+         }
+         }
+         }*/
 
         if (uiRules.rules) {
           _.each(uiRules.rules, function(r) {

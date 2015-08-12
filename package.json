@@ -44,6 +44,8 @@
     "grunt-saucelabs": "~8.6.1",
     "intern": "~3.0.0",
     "load-grunt-tasks": "^3.2.0",
+    "grunt-saucelabs": "~8.6.1",
+    "grunt-string-replace": "^1.2.0",
     "mocha-phantomjs": "~3.5.2",
     "needle": "~0.7.1",
     "requirejs": "^2.1.13"

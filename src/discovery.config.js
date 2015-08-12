@@ -1,11 +1,21 @@
 // Main config file for the Discovery application
-// Main config file for the Discovery application
 require.config({
 
 
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
-  deps: window.bbbTest ? [window.bbbTest.testLoader ? window.bbbTest.testLoader : '../test/test-loader' ] : [ 'js/apps/discovery/main'],
+  deps: (function(){
+
+    if (typeof window !== "undefined" && window.bbbTest){
+      return  [window.bbbTest.testLoader ? window.bbbTest.testLoader : '../test/test-loader' ];
+    }
+    else {
+      return [ 'js/apps/discovery/main'];
+    }
+
+  }()),
+
+
   waitSeconds: 15,
 
   // Configuration we want to make available to modules of ths application
@@ -182,11 +192,16 @@ require.config({
   },
 
   hbs : {
-    'templateExtension' : 'html'
-
+    'templateExtension' : 'html',
+    helpers: false
   },
 
   shim: {
+
+    "Backbone": {
+      deps: ["backbone"],
+      exports: "Backbone"
+    },
 
     'backbone.stickit' : {
       deps : ['backbone']
@@ -201,10 +216,8 @@ require.config({
     // environment.
     'backbone': {
       // These are the two hard dependencies that will be loaded first.
-      deps: ['jquery', 'underscore'],
+      deps: ['jquery', 'underscore']
 
-      // This maps the global `Backbone` object to `require('backbone')`.
-      exports: 'Backbone'
     },
 
     marionette : {
@@ -217,8 +230,8 @@ require.config({
     },
 
     'jquery-querybuilder': {
-      deps: ['jquery'],
-      exports: 'QueryBuilder'
+      deps: ['jquery']
+
     },
 
     'd3-cloud' : {
@@ -244,6 +257,7 @@ require.config({
   },
 
   callback: function() {
+
     require(['hbs/handlebars'], function(Handlebars) {
 
       // register system-wide helper for handlebars
