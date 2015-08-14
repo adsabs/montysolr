@@ -54,10 +54,11 @@ define([
     },
 
     activate: function (beehive) {
-      this.pubsub = beehive.Services.get('PubSub');
+      this.setBeeHive(beehive);
+      var pubsub = this.getPubSub();
       _.bindAll(this, ['processResponse', 'onDisplayDocuments']);
-      this.pubsub.subscribe(this.pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
-      this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+      pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
+      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
     onDisplayDocuments: function(apiQuery) {
@@ -81,7 +82,7 @@ define([
         var request =  new ApiRequest({
           target:target
         });
-        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
       }
     },
 

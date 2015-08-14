@@ -17,7 +17,8 @@ define([
     'module',
     'js/components/api_targets',
     "zeroclipboard",
-     "filesaver"
+     "filesaver",
+    'js/mixins/dependon'
   ],
   function(
     Marionette,
@@ -32,7 +33,8 @@ define([
     WidgetConfig,
     ApiTargets,
     ZeroClipboard,
-    FileSaver
+    FileSaver,
+    Dependon
     ){
 
     //modified from userChangeRows mixin
@@ -170,7 +172,7 @@ define([
 
       activate: function (beehive) {
         _.bindAll(this, "processResponse");
-        this.pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
       },
 
       viewEvents: {
@@ -315,7 +317,8 @@ define([
         req.set('options', reqOptions);
 
         if (req) {
-          this.pubsub.subscribeOnce(this.pubsub.DELIVERING_RESPONSE, _.bind(function(exports) {
+          var pubsub = this.getPubSub();
+          pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, _.bind(function(exports) {
             if (exports && exports.has('export')) {
               this.model.set('export', exports.get('export'));
             }
@@ -324,7 +327,7 @@ define([
             }
           }, this));
 
-          this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
+          pubsub.publish(pubsub.EXECUTE_REQUEST, req);
         }
         else {
           throw new Error('Well, this is unexpected behaviour! Who wrote this software?');
@@ -338,10 +341,11 @@ define([
         var req = this.composeRequest(apiQuery);
         var defer = $.Deferred();
         if (req) {
-          this.pubsub.subscribeOnce(this.pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
+          var pubsub = this.getPubSub();
+          pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
             defer.resolve(data);
           }), this);
-          this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
+          pubsub.publish(pubsub.EXECUTE_REQUEST, req);
         }
         else {
           throw new Error('Well, this is unexpected behaviour! Who wrote this software?');
@@ -350,8 +354,10 @@ define([
       },
 
       closeWidget: function () {
-        this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
       }
     });
+
+    _.extend(ExportWidget.prototype, Dependon.BeeHive);
     return ExportWidget;
   });

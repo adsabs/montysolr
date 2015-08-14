@@ -2,7 +2,17 @@
  * Created by rchyla on 3/18/14.
  */
 
-define(['js/components/facade', 'js/components/generic_module', 'js/mixins/hardened', 'underscore'], function(Facade, GenericModule, Hardened, _) {
+define([
+  'js/components/facade',
+  'js/components/generic_module',
+  'js/mixins/hardened',
+  'underscore'
+  ],
+  function(
+  Facade,
+  GenericModule,
+  Hardened,
+  _) {
   var Services = GenericModule.extend({
     initialize: function(options) {
       this._services = _.has(options, 'services') ? _.clone(options['services']) : {};

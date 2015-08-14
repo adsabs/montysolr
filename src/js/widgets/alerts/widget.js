@@ -154,10 +154,10 @@ define([
 
       activate: function (beehive) {
         _.bindAll(this, ["clearView"]);
+        this.setBeeHive(beehive);
         //listen to navigate event and close widget
-        this.pubsub = beehive.getService("PubSub");
-        this.pubsub.subscribe(this.pubsub.NAVIGATE, this.clearView);
-
+        var pubsub = this.getPubSub();
+        pubsub.subscribe(pubsub.NAVIGATE, this.clearView);
       },
 
       clearView : function(){

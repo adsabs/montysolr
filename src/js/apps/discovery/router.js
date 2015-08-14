@@ -37,8 +37,7 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
-        this.pubsub = beehive.Services.get('PubSub');
-        if (!this.pubsub) {
+        if (!this.hasPubSub()) {
           throw new Exception("Ooops! Who configured this #@$%! There is no PubSub service!")
         }
       },
@@ -54,7 +53,7 @@ define([
         //this tells navigator not to create 2 history entries, which causes
         //problems with the back button
         _.extend(options, {replace : true});
-       this.pubsub.publish(this.pubsub.NAVIGATE, route, options);
+       this.getPubSub().publish(this.getPubSub().NAVIGATE, route, options);
 
       },
 
@@ -85,23 +84,23 @@ define([
         if (query) {
           try {
             var q= new ApiQuery().load(query);
-            this.pubsub.publish(this.pubsub.START_SEARCH, q);
+            this.getPubSub().publish(this.getPubSub().START_SEARCH, q);
           }
           catch (e) {
             console.error('Error parsing query from a string: ', query, e);
-            this.pubsub.publish(this.pubsub.BIG_FIRE, new ApiFeedback({
+            this.getPubSub().publish(this.getPubSub().BIG_FIRE, new ApiFeedback({
               code: ApiFeedback.CODES.CANNOT_ROUTE,
               reason: 'Cannot parse query',
               query: query}));
           }
         }
         else {
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, 'index-page');
         }
       },
 
       executeQuery: function(queryId) {
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'execute-query', queryId);
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, 'execute-query', queryId);
       },
 
       view: function (bibcode, subPage) {
@@ -115,7 +114,7 @@ define([
             var navigateString, href;
             if (resp.response && resp.response.docs && resp.response.docs[0]) {
               bibcode = resp.response.docs[0].bibcode;
-              self.pubsub.publish(self.pubsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
+              self.getPubSub().publish(self.getPubSub().DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
             }
             if (!subPage) {
               navigateString = 'ShowAbstract';
@@ -129,11 +128,11 @@ define([
           },
           fail: function() {
             console.log('Cannot identify page to load, bibcode: ' + bibcode);
-            self.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+            self.getPubSub().publish(this.getPubSub().NAVIGATE, 'index-page');
           }
         }});
 
-        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, req);
+        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, req);
 
       },
 
@@ -152,11 +151,11 @@ define([
             //request bootstrap
             this.getApiAccess({reconnect : true}).done(function(){
               //redirect to index page
-              that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
+              that.getPubSub().publish(that.getPubSub().NAVIGATE, 'index-page');
               //call alerts widget
               var title = "Welcome to ADS";
               var msg = "<p>You have been successfully registered with the username</p> <p><b>"+ reply.email +"</b></p>";
-              that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+              that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
             }).fail(function(){
               //fail function defined below
               fail();
@@ -174,11 +173,11 @@ define([
             //request bootstrap
             this.getApiAccess({reconnect : true}).done(function(){
               //redirect to index page
-              that.pubsub.publish(that.pubsub.NAVIGATE, 'index-page');
+              that.getPubSub().publish(that.getPubSub().NAVIGATE, 'index-page');
               //call alerts widget
               var title = "Email has been changed.";
               var msg = "Your new ADS email is <b>" + reply.email + "</b>";
-              that.pubsub.publish(that.pubsub.ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
+              that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({code: 0, title : title, msg: msg, modal : true, type : "success"}));
             }).fail(function(){
               //fail function defined below
               this.apply(fail, arguments);
@@ -191,7 +190,7 @@ define([
             //route to reset-password-2 form
             //set the token so that session can use it in the put request with the new password
             this.getBeeHive().getObject("Session").setChangeToken(token);
-            this.pubsub.publish(this.pubsub.NAVIGATE, 'authentication-page', {subView: "reset-password-2"});
+            this.getPubSub().publish(this.getPubSub().NAVIGATE, 'authentication-page', {subView: "reset-password-2"});
           };
 
           failMessage = "Reset password token was invalid.";
@@ -201,10 +200,10 @@ define([
         }
         function fail(jqXHR, status, errorThrown) {
           //redirect to index page
-          this.pubsub.publish(this.pubsub.NAVIGATE, 'index-page');
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, 'index-page');
           var error = (jqXHR.responseJSON && jqXHR.responseJSON.error) ? jqXHR.responseJSON.error : "error unknown";
           //call alerts widget
-          this.pubsub.publish(this.pubsub.ALERT, new ApiFeedback({code: 0, title: failTitle, msg: " <b>" + error + "</b> <br/>" + failMessage, modal : true, type : "danger"}));
+          this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({code: 0, title: failTitle, msg: " <b>" + error + "</b> <br/>" + failMessage, modal : true, type : "danger"}));
         };
 
         request = new ApiRequest({
@@ -221,7 +220,7 @@ define([
       },
 
       orcidPage :function(){
-        this.pubsub.publish(this.pubsub.NAVIGATE, 'orcid-page');
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, 'orcid-page');
       },
 
       authenticationPage: function(subView){

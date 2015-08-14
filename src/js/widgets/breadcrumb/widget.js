@@ -20,7 +20,8 @@ define([
     'js/components/api_query',
     'js/components/pubsub_events',
     'hbs!./templates/widget-view',
-    'hbs!./templates/item-view'
+    'hbs!./templates/item-view',
+    'js/mixins/dependon'
   ],
 
   function(
@@ -31,7 +32,8 @@ define([
     ApiQuery,
     PubSubEvents,
     WidgetTemplate,
-    ItemTemplate
+    ItemTemplate,
+    Dependon
     ){
 
     // Model
@@ -82,12 +84,12 @@ define([
       },
 
       activate: function(beehive) {
+        this.setBeeHive(beehive);
         _.bindAll(this, "onNewQuery", "onRequest", "onResponse", "onAllPubSub");
-        var pubsub = beehive.Services.get('PubSub');
+        var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.START_SEARCH, this.onNewQuery);
         pubsub.subscribe(pubsub.DELIVERING_REQUEST, this.onRequest);
         //pubsub.subscribe('all', this.onAllPubSub);
-        this.pubsub = pubsub;
         this.stack = [];
         this.N = 0;
         this.maxSize = 100; // make configurable?
@@ -111,7 +113,7 @@ define([
         if (q) {
           console.log('NEW REQUEST', q);
           // remember who initiated the new-query
-          pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE+key.getId(), this.onResponse);
+          this.getPubSub().subscribeOnce(this.getPubSub().DELIVERING_RESPONSE+key.getId(), this.onResponse);
           this.listening = false;
         }
       },
@@ -183,9 +185,9 @@ define([
         });
         return pairs;
       }
-
-
     });
+
+    _.extend(WidgetController.prototype, Dependon.BeeHive);
 
     return WidgetController;
   });

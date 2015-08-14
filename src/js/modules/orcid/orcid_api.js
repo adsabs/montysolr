@@ -88,7 +88,6 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
-        this.pubsub = this.getBeeHive().getService('PubSub').getHardenedInstance();
 
         var config = beehive.getObject('DynamicConfig');
         this.config = {};
@@ -145,7 +144,7 @@ define([
        * user back to us
        */
       signIn: function (targetRoute) {
-        this.pubsub.publish(this.pubsub.APP_EXIT, {
+        this.getPubSub().publish(this.getPubSub().APP_EXIT, {
           type: 'orcid',
           url: this.config.loginUrl
             + "&redirect_uri=" + encodeURIComponent(this.config.redirectUrlBase +

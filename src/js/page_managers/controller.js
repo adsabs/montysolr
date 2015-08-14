@@ -5,7 +5,8 @@ define([
     'hbs!./templates/results-control-row',
     'js/widgets/base/base_widget',
     './three_column_view',
-    './view_mixin'
+    './view_mixin',
+    'js/mixins/dependon'
   ],
   function (_,
             Marionette,
@@ -13,7 +14,8 @@ define([
             controlRowTemplate,
             BaseWidget,
             ThreeColumnView,
-            PageManagerViewMixin
+            PageManagerViewMixin,
+            Dependon
             ) {
 
     var PageManagerController = BaseWidget.extend({
@@ -25,6 +27,21 @@ define([
         this.assembled = false;
         _.extend(this, _.pick(options, ['debug', 'widgetId']));
       },
+
+
+      /**
+       * Necessary step: during activation we'll collect list of widgets
+       * that were referenced by the template (and store them for future
+       * reference)
+       *
+       * @param beehive
+       */
+      activate: function (beehive) {
+        this.setBeeHive(beehive);
+        this.debug = beehive.getDebug(); // XXX:rca - think of st better
+        this.view = this.createView({debug : this.debug, widgets: this.widgets});
+      },
+
 
       setWidgetId: function(n) {
         this.widgetId = n;
@@ -39,19 +56,6 @@ define([
        */
       createView: function(options) {
         return new ThreeColumnView(options);
-      },
-
-      /**
-       * Necessary step: during activation we'll collect list of widgets
-       * that were referenced by the template (and store them for future
-       * reference)
-       *
-       * @param beehive
-       */
-      activate: function (beehive) {
-        this.pubsub = beehive.getHardenedInstance().Services.get('PubSub');
-        this.debug = beehive.getDebug(); // XXX:rca - think of st better
-        this.view = this.createView({debug : this.debug, widgets: this.widgets});
       },
 
       /**
@@ -188,6 +192,15 @@ define([
 
     });
 
-    _.extend(PageManagerController.prototype, PageManagerViewMixin);
+    _.extend(PageManagerController.prototype, PageManagerViewMixin, Dependon.BeeHive, {
+      // override the pubsub - we give every child the same (hardened)
+      // instance of pubsub
+      getPubSub: function() {
+        if (this._ps && this.hasPubSub())
+          return this._ps;
+        this._ps = this.getBeeHive().getHardenedInstance().getService('PubSub');
+        return this._ps;
+      }
+    });
     return PageManagerController;
   });

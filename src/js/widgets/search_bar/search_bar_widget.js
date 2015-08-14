@@ -10,7 +10,8 @@ define([
     './autocomplete',
     'bootstrap', // if bootstrap is missing, jQuery events get propagated
     'analytics',
-    'jquery-ui'
+    'jquery-ui',
+    'js/mixins/dependon'
   ],
   function (
     Marionette,
@@ -24,7 +25,8 @@ define([
     autocompleteArray,
     bootstrap,
     analytics,
-    jqueryUI
+    jqueryUI,
+    Dependon
     ) {
 
     $.fn.getCursorPosition = function() {
@@ -108,12 +110,12 @@ define([
       },
 
       activate: function(beehive) {
+        this.setBeeHive(beehive);
         this.queryBuilder.setQTreeGetter(QueryBuilderPlugin.buildQTreeGetter(beehive));
         var that = this;
         this.queryBuilder.attachHeartBeat(function() {
           that.onBuilderChange();
         });
-        this.beehive = beehive;
       },
 
       onBuilderChange: function() {
@@ -168,7 +170,7 @@ define([
            * */
           focus: function( event, ui ) {
 
-            var val = $input.val().replace(/^\s+/,"");
+            var val = $input.val().replace(/^\s+/,""),
               suggest = ui.item.value;
 
             var exists, toMatch, confirmedQuery, splitQuery;
@@ -399,17 +401,18 @@ define([
       }
     });
 
-    _.extend(SearchBarView.prototype, FormatMixin);
+    _.extend(SearchBarView.prototype, FormatMixin, Dependon.BeeHive);
 
     var SearchBarWidget = BaseWidget.extend({
 
       activate: function (beehive) {
-        this.pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
 
         // search widget doesn't need to execute queries (but it needs to listen to them)
-        this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
-        this.pubsub.subscribe(this.pubsub.NAVIGATE, _.bind(this.focusInput, this));
-        this.view.activate(beehive);
+        pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
+        pubsub.subscribe(pubsub.NAVIGATE, _.bind(this.focusInput, this));
+        this.view.activate(beehive.getHardenedInstance()); // XXX:rca - this sucks
       },
 
       defaultQueryArguments: {
@@ -493,7 +496,7 @@ define([
       },
 
       navigate: function (newQuery) {
-        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+        this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
       },
 
       openQueryAssistant: function(queryString) {
@@ -503,5 +506,7 @@ define([
         this.view.$el.find('.show-form').click();
       }
     });
+
+    _.extend(SearchBarWidget.prototype, Dependon.BeeHive);
     return SearchBarWidget;
   });

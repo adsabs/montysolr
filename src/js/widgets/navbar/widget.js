@@ -157,7 +157,7 @@ define([
     activate: function (beehive) {
       this.setBeeHive(beehive);
       _.bindAll(this, ["handleUserAnnouncement", "getOrcidUserInfo"]);
-      var pubsub = beehive.getService("PubSub");
+      var pubsub = this.getPubSub();
       pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
       pubsub.subscribe(pubsub.APP_STARTED, this.getOrcidUserInfo);
       this.setInitialVals();
@@ -192,7 +192,7 @@ define([
       'activate-recaptcha' : "activateRecaptcha"
     },
 
-    submitForm : function($form, $modal){
+    submitForm : function($form, $modal) {
 
       function beforeSend () {
         $form.find("button[type=submit]")

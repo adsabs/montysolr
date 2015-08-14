@@ -1225,7 +1225,7 @@ define([
           target: Marionette.getOption(this, "endpoint"),
           query: query
         });
-        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
       },
 
       //allows you to view network for another author
@@ -1251,17 +1251,19 @@ define([
 
         //update the current widget query
         this.setCurrentQuery(query);
-        this.pubsub.publish(this.pubsub.EXECUTE_REQUEST, request);
+        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
 
       },
 
       activate: function (beehive) {
+        this.setBeeHive(beehive);
+
         _.bindAll(this, "setOriginalQuery", "processResponse");
-        this.pubsub = beehive.Services.get('PubSub');
+        var pubsub = this.getPubSub();
         //custom dispatchRequest function goes here
-        this.pubsub.subscribe(this.pubsub.INVITING_REQUEST, this.setOriginalQuery);
+        pubsub.subscribe(pubsub.INVITING_REQUEST, this.setOriginalQuery);
         //custom handleResponse function goes here
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
       //cache this so that the "broadcastFilteredResponse" still works even if user is looking at a
@@ -1304,7 +1306,7 @@ define([
           query: query
         });
 
-        this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, request);
+        this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
       },
 
       processResponse: function (jsonResponse) {
@@ -1368,12 +1370,12 @@ define([
 
         this._updateFq(newQuery, names);
         this.resetWidget();
-        this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+        this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
       },
 
       broadcastClose: function () {
         this.resetWidget();
-        this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
       },
 
       _updateFq: function(q, value) {

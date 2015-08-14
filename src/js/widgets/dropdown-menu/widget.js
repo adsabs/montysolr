@@ -143,8 +143,9 @@ define([
 
       activate: function (beehive) {
         _.bindAll(this);
-        this.pubsub = beehive.Services.get('PubSub');
-        this.pubsub.subscribe(this.pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
+        pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
       },
 
       onStoragePaperChange : function(numSelected){
@@ -156,7 +157,7 @@ define([
         if (value) {
 
           var args = _.extend({"onlySelected" : onlySelected}, model.get("params"));
-          this.pubsub.publish(this.pubsub.NAVIGATE, model.get("navEvent"), args);
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, model.get("navEvent"), args);
 
         }
         model.set("selected", false);

@@ -10,7 +10,8 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/components/api_query_updater',
-    'js/components/api_targets'
+    'js/components/api_targets',
+    'js/mixins/dependon'
   ],
 
   function (
@@ -18,7 +19,8 @@ define([
     ApiQuery,
     ApiRequest,
     ApiQueryUpdater,
-    ApiTargets
+    ApiTargets,
+    Dependon
     ) {
 
     return function(WidgetClass) {
@@ -28,12 +30,12 @@ define([
       var onAllInternalEvents = WidgetClass.prototype.onAllInternalEvents;
 
       WidgetClass.prototype.activate = function(beehive) {
+        this.setBeeHive(beehive);
         activate.apply(this, arguments);
         var orcidApi = beehive.getService('OrcidApi');
         //if (!orcidApi) {
         //  throw new Error('OrcidApi is missing');
         //}
-        this.beehive = beehive; // TODO:rca - use beehive mixin
       };
 
       WidgetClass.prototype._getOrcidInfo = function(recInfo) {
@@ -78,7 +80,7 @@ define([
         WidgetClass.prototype.addOrcidInfo = function(docs) {
           var self = this;
           // add orcid info to the documents
-          var orcidApi = this.beehive.getService('OrcidApi');
+          var orcidApi = this.getBeeHive().getService('OrcidApi');
 
           if (!orcidApi || !orcidApi.hasAccess()) {
             return docs;
@@ -150,7 +152,7 @@ define([
 
       WidgetClass.prototype.processDocs = function(apiResponse, docs, pagination) {
         var docs = processDocs.apply(this, arguments);
-        var user = this.beehive.getObject('User');
+        var user = this.getBeeHive().getObject('User');
         if (user && user.isOrcidModeOn()){
           var result = this.addOrcidInfo(docs);
           if (pagination.numFound != result.length) {
@@ -163,12 +165,12 @@ define([
 
       WidgetClass.prototype.mergeADSAndOrcidData = function(model) {
         var self = this;
-        var api = self.beehive.getService('Api');
+        //var api = self.getBeeHive().getService('Api');
         var promise = $.Deferred();
-        if (!(api && self.pubsub)) {
-          promise.resolve(model);
-          return promise.promise();
-        }
+        //if (!(api && self.hasPubSub())) {
+        //  promise.resolve(model);
+        //  return promise.promise();
+        //}
 
         if (model.get('bibcode')) { // no need to do anything
           promise.resolve(model);
@@ -193,12 +195,12 @@ define([
               promise.fail();
             }
           }});
+          self.getPubSub().publish(self.getPubSub().EXECUTE_REQUEST, req);
         }
         else {
           promise.resolve(model);
         }
 
-        self.pubsub.publish(self.pubsub.EXECUTE_REQUEST, req);
         return promise.promise();
       };
 
@@ -206,7 +208,7 @@ define([
         if (ev == 'childview:OrcidAction') {
           var self = this;
           var data = arg2;
-          var orcidApi = this.beehive.getService('OrcidApi');
+          var orcidApi = this.getBeeHive().getService('OrcidApi');
 
           var update = function(action, model) {
 

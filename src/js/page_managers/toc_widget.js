@@ -150,7 +150,7 @@ define([
     },
 
     /*
-     every time the bibcode changes (got by subscribing to this.pubsub.DISPLAY_DOCUMENTS)
+     every time the bibcode changes (got by subscribing to pubsub.DISPLAY_DOCUMENTS)
      clear the collection of isactive and numfound in the models of the toc widget, so that the next view on
      the widget will show the appropriate defaults
      */

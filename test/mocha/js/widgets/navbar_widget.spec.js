@@ -92,7 +92,7 @@ define([
       var a = new OrcidApi();
 
       var signInStub = sinon.stub(a, "signIn");
-      u.pubsub = {publish : function(){}, getPubSubKey : function(){}};
+
       var setOrcidModeStub = sinon.stub(u, "setOrcidMode");
       minsub.beehive.addObject("User", u);
       minsub.beehive.addService("OrcidApi", a);
@@ -205,7 +205,10 @@ define([
 
       var u = new User();
       u.completeLogIn = function(){};
-      u.pubsub = {publish : function(){}, getPubSubKey : function(){}};
+
+      var spy = sinon.spy();
+      u.getPubSub = function() {return {publish : spy}};
+
       minsub.beehive.addObject("User", u);
 
       var s = new Session();

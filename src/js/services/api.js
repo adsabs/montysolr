@@ -37,7 +37,6 @@ define([
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
-        this.pubSubKey = null; // will be initialized once needed
       },
 
       done: function( data, textStatus, jqXHR ) {
@@ -50,22 +49,19 @@ define([
 
         console.error('API call failed:', JSON.stringify(this.request.url()), jqXHR.status, errorThrown);
 
-        var pubsub = this.api.hasBeeHive() ? this.api.getBeeHive().getService('PubSub') : null;
+        var pubsub = this.api.hasBeeHive() ? this.api.getPubSub() : null;
         if (pubsub) {
-          if (!this.api.pubSubKey)
-            this.api.pubSubKey = pubsub.getPubSubKey();
-
           var feedback = new ApiFeedback({
             code:ApiFeedback.CODES.API_REQUEST_ERROR,
             msg:textStatus,
             request: this.request,
             error: jqXHR,
-            psk: this.key || this.api.pubSubKey,
+            psk: this.key || this.api.getPubSub().getCurrentPubSubKey(),
             errorThrown: errorThrown,
             text: textStatus,
             beVerbose: true
           });
-          pubsub.publish(this.api.pubSubKey, pubsub.FEEDBACK, feedback);
+          pubsub.publish(pubsub.FEEDBACK, feedback);
         }
         else {
           if (this.api)
@@ -78,11 +74,9 @@ define([
       getNumOutstandingRequests: function() {
         return this.outstandingRequests;
       },
-
       hardenedInterface : {
         request : "make a request to the API"
       }
-
     });
 
     Api.prototype.request = function(request, options) {

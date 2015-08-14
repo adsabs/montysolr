@@ -74,7 +74,7 @@ define([
        “navigateToPage”, which takes the data-widget-id value and  splits it if it has a “__”,
        and then triggers widget-selected with the widget name and optional param
        7.	TOC controller catches “widget-selected” event which then emits
-       this.pubsub.publish(this.pubsub.NAVIGATE, data.idAttribute, data);
+       pubsub.publish(pubsub.NAVIGATE, data.idAttribute, data);
        where data consists of data.href (in case the navigator wants to change the route) and data.arg
        (to identify the subview)
        8.	any widget that has multiple views needs to have a “setSubView” function for toc manager to tell it the right view so that

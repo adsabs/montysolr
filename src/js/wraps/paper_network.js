@@ -733,7 +733,7 @@ define([
       this._updateFq(newQuery, bibcodes);
 
       this.resetWidget();
-      this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+      this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
     };
 
     return function () {

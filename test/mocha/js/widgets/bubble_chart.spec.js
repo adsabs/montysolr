@@ -5847,12 +5847,12 @@ define([
       }))({verbose: false});
 
       bubble.activate(minsub.beehive.getHardenedInstance());
-      sinon.stub(bubble.pubsub, "publish");
+      sinon.stub(bubble.getPubSub(), "publish");
 
       bubble.onShow();
 
-      expect(bubble.pubsub.publish.args[0][0]).to.eql('[PubSub]-New-Request');
-      expect(bubble.pubsub.publish.args[0][1].get("query").toJSON()).to.eql({
+      expect(bubble.getPubSub().publish.args[0][0]).to.eql('[PubSub]-New-Request');
+      expect(bubble.getPubSub().publish.args[0][1].get("query").toJSON()).to.eql({
         "q": [
           "fake"
         ],
@@ -6045,13 +6045,13 @@ define([
       }))({verbose: false});
 
       bubble.activate(minsub.beehive.getHardenedInstance());
-      sinon.spy(bubble.pubsub, "publish");
+      sinon.spy(bubble.getPubSub(), "publish");
 
       bubble.model.set("selectedBibs", ["2000hst..prop.8482L","1999AJ....117..343R" ]);
       bubble.view.$(".submit").click();
 
-      expect(bubble.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
-      expect(bubble.pubsub.publish.args[0][1].toJSON()).to.eql({
+      expect(bubble.getPubSub().publish.args[0][0]).to.eql("[PubSub]-New-Query");
+      expect(bubble.getPubSub().publish.args[0][1].toJSON()).to.eql({
         "q": [
           "fake"
         ],

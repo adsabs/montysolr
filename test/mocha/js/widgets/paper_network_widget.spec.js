@@ -19039,13 +19039,13 @@ define([
 
       paperNetwork.setCurrentQuery(new ApiQuery({q: "original search"}));
       paperNetwork.activate(minsub.beehive.getHardenedInstance());
-      paperNetwork.pubsub.publish = sinon.stub();
+      sinon.stub(paperNetwork.getPubSub(), 'publish');
 
       $("#test").find(".apply-filter").click();
 
-      expect(paperNetwork.pubsub.publish.called).to.be.true;
-      expect(paperNetwork.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
-      expect(paperNetwork.pubsub.publish.args[0][1].toJSON()).to.eql({
+      expect(paperNetwork.getPubSub().publish.called).to.be.true;
+      expect(paperNetwork.getPubSub().publish.args[0][0]).to.eql("[PubSub]-New-Query");
+      expect(paperNetwork.getPubSub().publish.args[0][1].toJSON()).to.eql({
         "q": [
           "original search"
         ],

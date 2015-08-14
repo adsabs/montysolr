@@ -30,11 +30,11 @@ define([
         if (child.view && child.view.showCols) {
           child.view.showCols({right: false, left: false});
           // open the view again
-          this.pubsub.once(this.pubsub.START_SEARCH,
+          this.getPubSub().once(this.getPubSub().START_SEARCH,
             _.once(function() {child.view.showCols({right:true})}));
         }
       }
-      this.pubsub.once(this.pubsub.DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
+      this.getPubSub().once(this.getPubSub().DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
         if(this._tmp.callOnce[psk.getId()]) {
           return;
         }
@@ -169,7 +169,7 @@ define([
                  api.request(apiRequest, {done: function() {
                    // we've recovered - restart the search cycle
                    app.getController('QueryMediator').resetFailures();
-                   self.pubsub.publish(self.pubSubKey, self.pubsub.START_SEARCH, apiRequest.get('query'));
+                   self.getPubSub().publish(self.getPubSub().START_SEARCH, apiRequest.get('query'));
                  }, fail: function() {
                    alerts.alert(new ApiFeedback({
                      msg: "I'm sorry, you don't have access rights to query: " + apiRequest.get('target'),
@@ -245,7 +245,7 @@ define([
                   response.setApiQuery(req.request.get('query'));
                   cycle.done[key] = cycle.inprogress[key];
                   delete cycle.inprogress[key];
-                  self.pubsub.publish(self.pubSubKey, self.pubsub.DELIVERING_RESPONSE+key, response);
+                  self.getPubSub().publish(self.getPubSub().DELIVERING_RESPONSE+key, response);
                   cycle.running = false;
                   app.getController('QueryMediator').startExecutingQueries();
                   return; // we are done!
@@ -366,9 +366,10 @@ define([
 
         activate: function() {
           FeedbackMediator.prototype.activate.apply(this, arguments);
-          this.pubsub.subscribe(this.pubSubKey, this.pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
-          this.pubsub.subscribe(this.pubSubKey, this.pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
-          this.pubsub.subscribe(this.pubSubKey, this.pubsub.APP_EXIT, _.bind(this.onAppExit, this));
+          var pubsub = this.getPubSub();
+          pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
+          pubsub.subscribe(pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
+          pubsub.subscribe(pubsub.APP_EXIT, _.bind(this.onAppExit, this));
         },
 
         onNewCycle: function() {

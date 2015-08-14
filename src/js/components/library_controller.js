@@ -5,8 +5,8 @@ define([
     'js/mixins/hardened',
     'js/components/api_targets',
     'js/components/api_request',
-    'js/components/api_feedback'
-
+    'js/components/api_feedback',
+    'js/mixins/dependon'
   ],
   function(
     Backbone,
@@ -14,7 +14,8 @@ define([
     Hardened,
     ApiTargets,
     ApiRequest,
-    ApiFeedback
+    ApiFeedback,
+    Dependon
     ) {
 
     var LibraryModel = Backbone.Model.extend({
@@ -49,13 +50,13 @@ define([
       },
 
       activate: function (beehive) {
-        this.beehive = beehive;
-        this.pubsub = beehive.Services.get('PubSub');
-        this.key = this.pubsub.getPubSubKey();
+        this.setBeeHive(beehive);
 
-        this.pubsub.subscribe(this.key, this.pubsub.START_SEARCH, _.bind(this.updateCurrentQuery, this));
+        var pubsub = this.getPubSub();
+
+        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.updateCurrentQuery, this));
         //get info about libraries after app starts
-        this.pubsub.subscribe(this.key, this.pubsub.APP_STARTED, _.bind(this.fetchAllLibraryData, this));
+        pubsub.subscribe(pubsub.APP_STARTED, _.bind(this.fetchAllLibraryData, this));
 
       },
 
@@ -65,7 +66,7 @@ define([
 
       //announce the updated summary data to interested widgets
       onCollectionChange : function(){
-        this.pubsub.publish(this.key, this.pubsub.LIBRARY_CHANGE, this.collection.toJSON());
+        this.getPubSub().publish(this.getPubSub().LIBRARY_CHANGE, this.collection.toJSON());
       },
 
       updateCurrentQuery : function(apiQuery){
@@ -118,7 +119,7 @@ define([
             }
           });
 
-          this.beehive.getService("Api").request(request);
+          this.getBeeHive().getService("Api").request(request);
 
         return deferred;
 
@@ -126,16 +127,17 @@ define([
 
       _executeApiRequest: function(apiQuery){
 
+        var pubsub = this.getPubSub();
         var req = new ApiRequest({
           target: ApiTargets.SEARCH,
           query: apiQuery
         });
         var defer = $.Deferred();
-        this.pubsub.subscribeOnce(this.key, this.pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
+        pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
           defer.resolve(data);
         }), this);
 
-        this.pubsub.publish(this.key, this.pubsub.EXECUTE_REQUEST, req);
+        pubsub.publish(pubsub.EXECUTE_REQUEST, req);
 
         return defer;
       },
@@ -164,7 +166,7 @@ define([
         }
         else if (options.bibcodes == "selected"){
 
-          var bibs = this.beehive.getObject("AppStorage").getSelectedPapers();
+          var bibs = this.getBeeHive().getObject("AppStorage").getSelectedPapers();
           deferred.resolve(bibs);
         }
         else {
@@ -258,13 +260,14 @@ define([
 
        var promise  = this.composeRequest(endpoint, "DELETE")
           .done(function(){
-            that.pubsub.publish(that.key, that.pubsub.NAVIGATE, "AllLibrariesWidget");
+            var pubsub = that.getPubSub();
+            pubsub.publish(pubsub.NAVIGATE, "AllLibrariesWidget");
             var message = "Library <b>" + name + "</b> was successfully deleted";
-            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "success"}));
+            pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "success"}));
           })
           .fail(function(){
             var message = "Library <b>" + name + "</b> could not be deleted";
-            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+            that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
           });
 
         return promise;
@@ -340,7 +343,7 @@ define([
 
     });
 
-    _.extend(LibraryController.prototype, Hardened);
+    _.extend(LibraryController.prototype, Hardened, Dependon.BeeHive);
 
     return LibraryController;
 

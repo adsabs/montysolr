@@ -11,7 +11,7 @@ define([
   ){
 
 
-  describe("Library Controller", function(){
+  describe("Library Controller (library_controller.spec.js)", function(){
 
 
     var stubMetadata  = {
@@ -29,36 +29,31 @@ define([
     // stub of what will be returned from a GET to /libraries/[library ID]
     var stubLibraryData  = {
       documents : ["bibcode1", "bibcode2", "bibcode3"]
-    }
+    };
 
 
 
- it("should offer a hardened interface to widgets with the relevant library CRUD operations", function(){
+    it("should offer a hardened interface to widgets with the relevant library CRUD operations", function(){
 
-   var l = new LibraryController();
-
-
-   expect(_.keys(l.getHardenedInstance())).to.eql(
-     ["getLibraryMetadata",
-       "getLibraryRecords",
-       "createLibrary",
-       "createLibAndAddBibcodes",
-       "addBibcodesToLib",
-       "deleteLibrary",
-       "updateLibraryContents",
-       "updateLibraryPermissions",
-       "updateLibraryMetadata",
-       "__facade__",
-       "mixIn"]
-
-   )
-
- });
+      var l = new LibraryController();
+      expect(_.keys(l.getHardenedInstance())).to.eql(
+        ["getLibraryMetadata",
+          "getLibraryRecords",
+          "createLibrary",
+          "createLibAndAddBibcodes",
+          "addBibcodesToLib",
+          "deleteLibrary",
+          "updateLibraryContents",
+          "updateLibraryPermissions",
+          "updateLibraryMetadata",
+          "__facade__",
+          "mixIn"]
+      )
+    });
 
     it("should allow widgets to get information about libraries from /libraries and /libraries/[id]", function(){
 
       var l = new LibraryController();
-
       var minsub = new (MinSub.extend({
         request: function() {
           return {some: 'foo'}
@@ -211,7 +206,7 @@ define([
       l.composeRequest = sinon.spy(function(){ var d = $.Deferred();d.resolve();return d.promise()});
       l.fetchAllLibraryData = sinon.spy();
 
-      l.pubsub.publish = sinon.spy();
+      l.getPubSub().publish = sinon.spy();
 
       l.createLibrary({data : {name : "fake library name" }});
 
@@ -231,9 +226,9 @@ define([
 
       //should result in 1 call to composeRequest and 2 calls to pubsub on successful completion
 
-      expect(l.pubsub.publish.args[0].slice(1)).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget"]);
+      expect(l.getPubSub().publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget"]);
 
-      expect(JSON.stringify(l.pubsub.publish.args[1].slice(1))).to.eql(JSON.stringify([
+      expect(JSON.stringify(l.getPubSub().publish.args[1])).to.eql(JSON.stringify([
         "[Alert]-Message",
         {
           "code": 0,
@@ -267,7 +262,7 @@ define([
 
     it("should allow widgets to update metadata associated with libraries", function(){
 
-      var l = new LibraryController()
+      var l = new LibraryController();
       l.composeRequest = sinon.spy();
 
       l.updateLibraryMetadata("3", { name : "foo", description : "boo"});
@@ -287,7 +282,7 @@ define([
 
     it("should allow widgets to update permission information associated with libraries", function(){
 
-      var l = new LibraryController()
+      var l = new LibraryController();
       l.composeRequest = sinon.spy();
 
       l.updateLibraryPermissions("3", {email : "aholachek@foobly.ru", permission : "admin", value : true});
@@ -309,40 +304,32 @@ define([
     it("should offer convenience methods for interfacing with current query/ app storage, getting relevant bibcodes, and adding those bibcodes to libraries", function(){
 
       var l = new LibraryController();
+      var minsub = new (MinSub.extend({
+        request: function() {
+          return {some: 'foo'}
+        }
+      }))({verbose: false});
 
       l._currentQuery = new MinSub.prototype.T.QUERY();
-
       l._executeApiRequest = sinon.spy(function(){
         var d = $.Deferred();
         d.resolve( new JSONResponse({response : {docs : [{bibcode : "1", bibcode : "2", bibcode : "3"}]}}));
         return d;
       });
 
-      l.beehive = {getObject : function(){ return {getSelectedPapers : function(){return ["1", "2", "3"]}}}};
+      minsub.beehive.addObject('AppStorage', {getSelectedPapers : function(){return ["1", "2", "3"]}});
+      l.activate(minsub.beehive);
 
-     //get bibcodes from current  query
-     var deferred1 =  l._getBibcodes({bibcodes : "all"});
+      //get bibcodes from current  query
+      var deferred1 =  l._getBibcodes({bibcodes : "all"});
 
 
-     //get bibcodes from app storage
-     var deferred2 = l._getBibcodes({bibcodes : "selected"});
-
+      //get bibcodes from app storage
+      var deferred2 = l._getBibcodes({bibcodes : "selected"});
       var bibs;
 
       deferred2.done(function(b){bibs = b});
-
       expect(bibs).to.eql( ["1", "2", "3"] );
-
-
-
-
-
     })
-
-
-
-
   })
-
-
-})
+});

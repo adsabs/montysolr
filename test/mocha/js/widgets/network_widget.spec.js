@@ -1677,11 +1677,11 @@ define([
     minsub.publish(minsub.START_SEARCH, q);
 
     expect(networkWidget.getCurrentQuery().get("q")).to.eql(q.get("q"));
-    networkWidget.pubsub.publish = sinon.stub();
+    sinon.stub(networkWidget.getPubSub(), "publish");
 
     networkWidget.onShow();
-    expect(networkWidget.pubsub.publish.calledOnce).to.be.true;
-    expect(networkWidget.pubsub.publish.args[0][1].url()).to.eql('author-network?q=star&rows=300');
+    expect(networkWidget.getPubSub().publish.calledOnce).to.be.true;
+    expect(networkWidget.getPubSub().publish.args[0][1].url()).to.eql('author-network?q=star&rows=300');
   });
 
   it("renders a pie/sunburst chart if the data is large enough", function () {
@@ -1788,12 +1788,12 @@ define([
 
     networkWidget.setCurrentQuery(new ApiQuery({q: "original search"}));
     networkWidget.activate(minsub.beehive.getHardenedInstance());
-    networkWidget.pubsub.publish = sinon.stub();
+    sinon.stub(networkWidget.getPubSub(), 'publish');
 
     $("#test").find(".apply-filter").click();
-    expect(networkWidget.pubsub.publish.called).to.be.true;
-    expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-New-Query");
-    expect(networkWidget.pubsub.publish.args[0][1].toJSON()).to.eql({
+    expect(networkWidget.getPubSub().publish.called).to.be.true;
+    expect(networkWidget.getPubSub().publish.args[0][0]).to.eql("[PubSub]-New-Query");
+    expect(networkWidget.getPubSub().publish.args[0][1].toJSON()).to.eql({
       "q": [
         "star"
       ],
@@ -1909,13 +1909,13 @@ define([
     networkWidget.onShow();
 
     expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 1000 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
-    sinon.spy(networkWidget.pubsub, "publish");
+    sinon.spy(networkWidget.getPubSub(), "publish");
     $("#test").find(".network-metadata input").val("400");
     $("#test").find(".network-metadata button.submit-rows").trigger("click");
 
     setTimeout(function () {
-        expect(networkWidget.pubsub.publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
-        expect(networkWidget.pubsub.publish.args[0][1].get("query").toJSON().rows).to.eql([400]);
+        expect(networkWidget.getPubSub().publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
+        expect(networkWidget.getPubSub().publish.args[0][1].get("query").toJSON().rows).to.eql([400]);
         expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 400 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
         done();
     }, 800);
@@ -2241,7 +2241,8 @@ define([
 
       networkWidget.activate(minsub.beehive.getHardenedInstance());
 
-      networkWidget.pubsub.publish = sinon.spy();
+      networkWidget.getPubSub().publish = function(){};
+      sinon.spy(networkWidget.getPubSub(), 'publish');
 
       var apiQuery = new ApiQuery({q: "star"})
       var j = new JsonResponse(testDataLarge);
@@ -2262,9 +2263,9 @@ define([
 
       $("#test").find(".load-author-network").click();
 
-      expect(networkWidget.pubsub.publish.callCount).to.eql(1);
-      expect(networkWidget.pubsub.publish.args[0][0]).to.eql("[PubSub]-Execute-Request");
-      expect(networkWidget.pubsub.publish.args[0][1].toJSON().query.toJSON()).to.eql({
+      expect(networkWidget.getPubSub().publish.callCount).to.eql(1);
+      expect(networkWidget.getPubSub().publish.args[0][0]).to.eql("[PubSub]-Execute-Request");
+      expect(networkWidget.getPubSub().publish.args[0][1].toJSON().query.toJSON()).to.eql({
         "q": [
           "author:\"Murray, S\""
         ],
@@ -2300,9 +2301,9 @@ define([
 
       //it's going to add a "date desc" sort parameter
 
-      expect(networkWidget.pubsub.publish.callCount).to.eql(2);
-      expect(networkWidget.pubsub.publish.args[1][0]).to.eql("[PubSub]-Execute-Request");
-      expect(networkWidget.pubsub.publish.args[1][1].toJSON().query.toJSON()).to.eql(
+      expect(networkWidget.getPubSub().publish.callCount).to.eql(2);
+      expect(networkWidget.getPubSub().publish.args[1][0]).to.eql("[PubSub]-Execute-Request");
+      expect(networkWidget.getPubSub().publish.args[1][1].toJSON().query.toJSON()).to.eql(
         {
           "q": [
             "star"

@@ -9,7 +9,7 @@ define([
 
   ){
 
-  describe("Libraries Home Widget (UI Widget)", function(){
+  describe("Libraries Home Widget (libraries.spec.js)", function(){
 
 
     afterEach(function(){

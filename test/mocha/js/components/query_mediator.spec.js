@@ -60,7 +60,7 @@ define([
 
         this.urlCodes = urlCodes;
         beehive = new BeeHive();
-        beehive.addObject("AppStorage", {clearSelectedPapers : sinon.spy()})
+        beehive.addObject("AppStorage", {clearSelectedPapers : sinon.spy()});
         var api = new Api();
         sinon.spy(api, 'request');
         beehive.addService('Api', api);
@@ -90,15 +90,14 @@ define([
         var pubsub = beehive.Services.get('PubSub');
 
         sinon.stub(pubsub, 'subscribe');
-        qm.activate(beehive);
+        qm.activate(beehive, {});
 
         expect(qm.hasBeeHive()).to.be.true;
         expect(qm.getBeeHive()).to.be.equal(beehive);
-        expect(qm.pubSubKey).to.be.instanceof(PubSubKey);
 
         expect(pubsub.subscribe.callCount).to.be.eql(4);
-        expect(pubsub.subscribe.args[0].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.START_SEARCH]);
-        expect(pubsub.subscribe.args[1].slice(0,2)).to.be.eql([qm.pubSubKey, pubsub.DELIVERING_REQUEST]);
+        expect(pubsub.subscribe.args[0].slice(1,2)).to.be.eql([pubsub.START_SEARCH]);
+        expect(pubsub.subscribe.args[1].slice(1,2)).to.be.eql([pubsub.DELIVERING_REQUEST]);
 
         expect(qm._cache).to.be.null;
         qm.activateCache();
@@ -109,7 +108,7 @@ define([
 
       it("should mediate between modules; passing data back and forth", function(done) {
         var qm = new QueryMediator({'debug': debug});
-        qm.activate(beehive);
+        qm.activate(beehive, {});
 
         this.server.autoRespond = true;
         // install spies into pubsub and api
@@ -275,12 +274,12 @@ define([
 
 
         //if the queries match, the mediator checks to see if the query came from the search widget
-        qm.app = {getPluginOrWidgetName : function(){return false}, getService : sinon.spy(function(){return {navigate: sinon.spy()}})}
+        qm.setApp({getPluginOrWidgetName : function(){return false}, getService : sinon.spy(function(){return {navigate: sinon.spy()}})});
         qm.startSearchCycle(new ApiQuery({'q': 'foo'}), key);
 
         //same query, shouldn't have an effect other than navigation
         expect(qm.reset.callCount).to.eql(1);
-        expect(qm.app.getService.callCount).to.eql(1);
+        expect(qm.getApp().getService.callCount).to.eql(1);
 
       });
 
@@ -369,7 +368,7 @@ define([
         sinon.spy(qm, 'tryToRecover');
         sinon.spy(qm, 'getQTree');
 
-        qm.activate(beehive);
+        qm.activate(beehive, {});
         return {qm: qm, key1: key1, key2:key2, req1: req1, req2:req2, q1:q1, q2:q2,
           pubsub:pubsub, api:api}
       };

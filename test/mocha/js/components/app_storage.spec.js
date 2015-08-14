@@ -29,6 +29,8 @@ define([
 
     it("basket related funcs", function() {
       var s = new AppStorage();
+      var minsub = new MinimalPubsub();
+      s.activate(minsub.beehive);
 
       expect(s.hasSelectedPapers).to.be.defined;
       expect(s.getSelectedPapers).to.be.defined;
@@ -60,6 +62,8 @@ define([
 
     it("hardened iface", function() {
       var s = new AppStorage();
+      var minsub = new MinimalPubsub();
+      s.activate(minsub.beehive);
       var h = s.getHardenedInstance();
       s.addSelectedPapers(['foo', 'bar']);
       expect(h.getSelectedPapers()).to.eql(['foo', 'bar']);

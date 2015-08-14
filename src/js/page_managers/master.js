@@ -146,8 +146,9 @@ define([
     },
 
     activate: function(beehive) {
-      this.pubsub = beehive.getHardenedInstance().getService('PubSub');
-      this.pubsub.subscribe(this.pubsub.ARIA_ANNOUNCEMENT, this.handleAriaAnnouncement);
+      this.setBeeHive(beehive);
+      var pubsub = this.getPubSub();
+      pubsub.subscribe(pubsub.ARIA_ANNOUNCEMENT, this.handleAriaAnnouncement);
     },
 
     assemble: function(app) {
@@ -182,7 +183,7 @@ define([
           this.hideAll();
         }
 
-        this.pubsub.publish(this.pubsub.ARIA_ANNOUNCEMENT, pageManager);
+        this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
 
         pm.set({'id': pageManager, 'isSelected': true, options: options});
       }

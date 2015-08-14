@@ -7,13 +7,22 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
   'js/components/api_query',
   'js/components/pubsub_events',
   'hbs!./templates/widget-view',
-  'hbs!./templates/item-view'
-
+  'hbs!./templates/item-view',
+  'js/mixins/dependon'
 ],
 
-  function(_, $, Backbone, Marionette,
-           ApiRequest, ApiQuery, PubSubEvents,
-           WidgetTemplate, ItemTemplate){
+  function(
+    _,
+    $,
+    Backbone,
+    Marionette,
+    ApiRequest,
+    ApiQuery,
+    PubSubEvents,
+    WidgetTemplate,
+    ItemTemplate,
+    Dependon
+    ){
 
     // Model
     var KeyValue = Backbone.Model.extend({ });
@@ -180,9 +189,9 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        * @param beehive
        */
       activate: function(beehive) {
-        var pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
         pubsub.subscribe('all', _.bind(this.onAllPubSub, this));
-        this.pubsub = pubsub;
       },
 
       /**
@@ -211,13 +220,14 @@ define(['underscore', 'jquery', 'backbone', 'marionette',
        * @param model
        */
       onRun: function(apiRequest) {
-        if (this.pubsub) {
-          this.pubsub.publish(this.pubsub.DELIVERING_REQUEST, apiRequest);
+        if (this.hasPubSub()) {
+          this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, apiRequest);
         }
       }
 
     });
 
+    _.extend(WidgetController.prototype, Dependon.BeeHive);
     return WidgetController;
   });
 

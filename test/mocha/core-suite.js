@@ -4,6 +4,7 @@ define([], function() {
       '/apps/discovery/router.spec.js',
 
       '/components/app_storage.spec.js',
+      '/components/csrf_manager.spec.js',
       '/components/multi_params.spec.js',
       '/components/solr_params.spec.js',
       '/components/api_query.spec.js',

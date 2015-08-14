@@ -61,7 +61,6 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-      this.setPubSub(beehive);
     },
 
     /* methods that will be available to widgets */
@@ -202,7 +201,8 @@ define([
       var that = this;
        this.getApiAccess({reconnect: true}).done(function(){
          //user has just authenticated themselves using the form, so redirect them to their account
-         that.pubsub.publish(that.pubsub.NAVIGATE, "UserPreferences");
+         var pubsub = that.getPubSub();
+         pubsub.publish(pubsub.NAVIGATE, "UserPreferences");
        });
       //user object will notify interested widgets when onbootstrap is called
     },
@@ -246,7 +246,7 @@ define([
 
     resetPassword1Success :function(response, status, jqXHR){
       var pubsub = this.getPubSub();
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_1_success");
+      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "reset_password_1_success");
     },
 
     resetPassword1Fail: function(xhr, status, errorThrown){
@@ -254,7 +254,7 @@ define([
       var error = (xhr.responseJSON && xhr.responseJSON.error)  ? xhr.responseJSON.error : "error unknown";
       var message = 'password reset step 1 was unsucessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_1_fail");
+      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "reset_password_1_fail");
     },
 
     resetPassword2Success :function(response, status, jqXHR){
@@ -284,7 +284,7 @@ define([
       var error = (xhr.responseJSON && xhr.responseJSON.error)  ? xhr.responseJSON.error : "error unknown";
       var message = 'password reset step 2 was unsucessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
-      pubsub.publish(this.pubsub.USER_ANNOUNCEMENT, "reset_password_2_fail");
+      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "reset_password_2_fail");
     },
 
 
@@ -299,9 +299,7 @@ define([
 
   });
 
-  _.extend(Session.prototype, Dependon.BeeHive, Dependon.PubSub);
-  _.extend(Session.prototype, Hardened);
-  _.extend(Session.prototype, ApiAccess);
+  _.extend(Session.prototype, Dependon.BeeHive, Hardened, ApiAccess);
 
   return Session;
 

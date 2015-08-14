@@ -71,9 +71,6 @@ define([
         expect(app.getWidget('ApiResponse')).to.not.be.equal(app.getWidget('ApiResponse2'));
         expect(app.getPlugin('Test')).to.be.defined;
 
-        expect(app.getWidget('ApiResponse').pubsub).to.be.defined;
-        expect(app.getPlugin('Test').pubsub).to.be.defined;
-
         done();
       });
 
@@ -115,11 +112,11 @@ define([
         var w1 = app.getWidget('ApiResponse');
         var w2 = app.getWidget('ApiResponse2');
 
-        expect(app.getPluginOrWidgetByPubSubKey(w1.pubsub.getCurrentPubSubKey().getId())).to.be.eql(w1);
-        expect(app.getPluginOrWidgetByPubSubKey(w2.pubsub.getCurrentPubSubKey().getId())).to.be.eql(w2);
+        expect(app.getPluginOrWidgetByPubSubKey(w1.getPubSub().getCurrentPubSubKey().getId())).to.be.eql(w1);
+        expect(app.getPluginOrWidgetByPubSubKey(w2.getPubSub().getCurrentPubSubKey().getId())).to.be.eql(w2);
 
         expect(app.getPluginOrWidgetByPubSubKey('foo')).to.be.undefined;
-        delete app.__barbarianRegistry[w1.pubsub.getPubSubKey()];
+        delete app.__barbarianRegistry[w1.getPubSub().getCurrentPubSubKey()];
         expect(function() {app.getPluginOrWidgetByPubSubKey('foo')}).to.throw.Error;
 
         done();

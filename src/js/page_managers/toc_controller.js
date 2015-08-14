@@ -68,14 +68,14 @@ define([
           this.broadcast('page-manager-message', event, data);
         }
         else if (event == 'widget-selected') {
-          this.pubsub.publish(this.pubsub.NAVIGATE, data.idAttribute, data);
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, data.idAttribute, data);
         }
         else if (event == 'broadcast-payload'){
           this.broadcast('page-manager-message', event, data);
         }
 
         else if (event == "navigate"){
-          this.pubsub.publish(this.pubsub.NAVIGATE, data.navCommand, data.sub);
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, data.navCommand, data.sub);
         }
 
         else if (event == "apply-function"){

@@ -149,10 +149,11 @@ define(['marionette',
 
       activate: function (beehive) {
         _.bindAll(this, "handleFeedback");
-        this.pubsub = beehive.Services.get('PubSub');
+        this.setBeeHive(beehive);
+        var pubsub = this.getPubSub();
 
         // widget doesn't need to execute queries (but it needs to listen to them)
-        this.pubsub.subscribe(this.pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
+        pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
       },
 
       onAll: function (ev, data) {
@@ -165,7 +166,7 @@ define(['marionette',
       submitQuery: function (data) {
         var apiQuery = this.getCurrentQuery();
         apiQuery.set("sort", data);
-        this.pubsub.publish(this.pubsub.START_SEARCH, apiQuery);
+        this.getPubSub().publish(this.getPubSub().START_SEARCH, apiQuery);
       },
 
       handleFeedback: function(feedback) {

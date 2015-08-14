@@ -26,9 +26,10 @@ define([
       },
 
       activate: function(beehive) {
+        this.setBeeHive(beehive);
         _.bindAll(this, "setCurrentQuery", "processResponse");
-        this.pubsub = beehive.Services.get('PubSub');
-        this.pubsub.subscribe(this.pubsub.DELIVERING_RESPONSE, this.processResponse);
+        var pubsub = this.getPubSub();
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
       ingestBroadcastedPayload: function(data) {

@@ -86,13 +86,19 @@ define(['underscore', 'backbone',
           defer.resolve(response);
           return defer.promise();
         }});
-      this.beehive.addObject('QueryMediator', new QueryMediator({
+      this.beehive.activate(this.beehive);
+
+      // add Query-mediator; it is using an app object, so we'll feed it
+      // a fake one
+      var qM = new QueryMediator({
         recoveryDelayInMs: 0,
         shortDelayInMs: 0,
         longDelayInMs: 0,
         monitoringDelayInMs: 5
-      }));
-      this.beehive.activate();
+      });
+      qM.activate(this.beehive, {}); // fake application object
+      this.beehive.addObject('QueryMediator', qM);
+
       this.key = this.pubsub.getPubSubKey();
       this.listen();
       _.extend(this, options);

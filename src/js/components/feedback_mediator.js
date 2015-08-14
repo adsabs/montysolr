@@ -12,26 +12,26 @@ define([
     'jquery',
     'cache',
     'js/components/generic_module',
-    'js/mixins/dependon',
     'js/components/api_request',
     'js/components/api_response',
     'js/components/api_query_updater',
     'js/components/api_feedback',
     'js/components/pubsub_key',
-    'js/mixins/feedback_handling'
+    'js/mixins/feedback_handling',
+    'js/mixins/dependon'
   ],
   function(
     _,
     $,
     Cache,
     GenericModule,
-    Mixins,
     ApiRequest,
     ApiResponse,
     ApiQueryUpdater,
     ApiFeedback,
     PubSubKey,
-    FeedbackHandlingMixin
+    FeedbackHandlingMixin,
+    Dependon
     ) {
 
 
@@ -64,13 +64,9 @@ define([
         throw new Error('This controller absolutely needs access to the app');
 
       this.setBeeHive(beehive);
-      var pubsub = beehive.Services.get('PubSub');
-      this.pubSubKey = pubsub.getPubSubKey();
-
-      pubsub.subscribe(this.pubSubKey, pubsub.FEEDBACK, _.bind(this.receiveFeedback, this));
-
-      this.app = app;
-      this.pubsub = pubsub;
+      this.setApp(app);
+      var pubsub = this.getPubSub();
+      pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.receiveFeedback, this));
     },
 
 
@@ -203,8 +199,7 @@ define([
 
   });
 
-  _.extend(ErrorMediator.prototype, Mixins.BeeHive);
-  _.extend(ErrorMediator.prototype, FeedbackHandlingMixin);
+  _.extend(ErrorMediator.prototype, Dependon.BeeHive, Dependon.App, FeedbackHandlingMixin);
 
   return ErrorMediator;
 });

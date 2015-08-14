@@ -105,10 +105,10 @@ define([
 
 
         if (window.mochaPhantomJS){
-          return
+          return;
         }
 
-        minsub = new (MinimalPubSub.extend({
+        var minsub = new (MinimalPubSub.extend({
           request: function(apiRequest) {
             return {
               "responseHeader":{
@@ -125,7 +125,7 @@ define([
 
         w.activate(minsub.beehive.getHardenedInstance());
 
-        var pubSubStub = sinon.stub(w.pubsub, "publish");
+        sinon.spy(w.getPubSub(), 'publish');
 
         // simulate the click (works in phantomjs)
         $("input[value=classic_factor]").attr('checked', false);
@@ -136,7 +136,7 @@ define([
 
         $("button.sort-options[data-value='date']").click()
 
-        expect(pubSubStub.lastCall.args[1].get("sort")[0]).to.eql("date asc");
+        expect(w.getPubSub().publish.lastCall.args[1].get("sort")[0]).to.eql("date asc");
 
       })
 

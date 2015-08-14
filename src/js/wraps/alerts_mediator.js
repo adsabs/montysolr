@@ -41,7 +41,8 @@ define([
       },
 
       publishFeedback: function(data) {
-        this.getBeeHive().getService('PubSub').publish(this.pubSubKey, self.pubsub.FEEDBACK, new ApiFeedback(data));
+        var pubsub = this.getPubSub();
+        pubsub.publish(pubsub.FEEDBACK, new ApiFeedback(data));
       }
 
 

@@ -15,7 +15,7 @@ define([
     },
 
     activate: function (beehive) {
-      this.pubsub = beehive.getHardenedInstance().Services.get('PubSub');
+      this.setBeeHive(beehive);
       this.debug = beehive.getDebug(); // XXX:rca - think of st better
       this.view = this.createView({debug : this.debug, widgets: this.widgets});
     }
