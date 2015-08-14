@@ -42,15 +42,6 @@ define([
         this.view = this.createView({debug : this.debug, widgets: this.widgets});
       },
 
-      // override the pubsub - we give every child the same (hardened)
-      // instance of pubsub
-      getPubSub: function() {
-        if (this._ps && this.hasPubSub())
-          return this._ps;
-        this._ps = this.getBeeHive().getHardenedInstance().getService('PubSub');
-        return this._ps;
-      },
-
 
       setWidgetId: function(n) {
         this.widgetId = n;
@@ -201,6 +192,15 @@ define([
 
     });
 
-    _.extend(PageManagerController.prototype, PageManagerViewMixin, Dependon.BeeHive);
+    _.extend(PageManagerController.prototype, PageManagerViewMixin, Dependon.BeeHive, {
+      // override the pubsub - we give every child the same (hardened)
+      // instance of pubsub
+      getPubSub: function() {
+        if (this._ps && this.hasPubSub())
+          return this._ps;
+        this._ps = this.getBeeHive().getHardenedInstance().getService('PubSub');
+        return this._ps;
+      }
+    });
     return PageManagerController;
   });

@@ -15,7 +15,9 @@ define([
     'js/components/api_response',
     'js/components/api_query',
     'hbs!/test/mocha/js/page_managers/master-manager',
-    'hbs!/test/mocha/js/page_managers/simple'
+    'hbs!/test/mocha/js/page_managers/simple',
+    'js/components/beehive',
+    'js/services/pubsub'
   ],
   function( _,
     $,
@@ -33,7 +35,9 @@ define([
     ApiResponse,
     ApiQuery,
     MasterTemplate,
-    SimpleTemplate
+    SimpleTemplate,
+    Beehive,
+    PubSub
     ){
 
     describe("PageManager (all_tests.spec.js)", function () {
@@ -70,6 +74,19 @@ define([
         it("should create page manager object", function() {
           expect(new PageManagerController()).to.be.instanceof(BaseWidget);
         });
+
+        it("should give children the same pubsub instance", function() {
+          var beehive = new Beehive();
+          beehive.addService('PubSub', new PubSub());
+          beehive.activate()
+          var pm = new PageManagerController();
+
+          pm.activate(beehive);
+
+          expect(pm.getPubSub()).to.eql(pm.getPubSub());
+          expect(pm.getPubSub().__facade__).to.be.true;
+        });
+
 
         it("assembles the page view", function(done) {
           var app = new Application({debug: false});
