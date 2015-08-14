@@ -6,19 +6,22 @@
 define([
     'backbone',
     'js/components/generic_module',
-    'js/mixins/hardened'
+    'js/mixins/hardened',
+    'js/mixins/dependon'
   ],
   function(
     Backbone,
     GenericModule,
-    Hardened) {
+    Hardened,
+    Dependon
+    ) {
 
     var grecaptchaDeferred = $.Deferred();
 
     // this has to be global
     onRecaptchaLoad = function(){
       grecaptchaDeferred.resolve();
-    }
+    };
 
     var RecaptchaManager = GenericModule.extend({
 
@@ -71,7 +74,7 @@ define([
 
     });
 
-    _.extend(RecaptchaManager.prototype, Hardened);
+    _.extend(RecaptchaManager.prototype, Hardened, Dependon.BeeHive);
 
     return RecaptchaManager;
 
