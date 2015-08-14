@@ -175,6 +175,7 @@ define([
         //any preprocessing before adding the resultsIndex is done here
         docs = _.map(docs, function (d) {
           d.identifier = d.bibcode;
+          d.encodedIdentifier = encodeURIComponent(d.identifier);
           var h = {};
 
           if (_.keys(highlights).length) {

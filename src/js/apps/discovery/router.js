@@ -301,7 +301,7 @@ define([
       _extractParameters: function(route, fragment) {
         var params = route.exec(fragment).slice(1);
         return _.map(params, function(param) {
-          return param ? ((param.indexOf('%26C') > -1) ? param : decodeURIComponent(param)) : null;
+          return param ? ((param.indexOf('%26') > -1 && param.indexOf('&') > -1 ) ? param : decodeURIComponent(param)) : null;
         });
       }
 
