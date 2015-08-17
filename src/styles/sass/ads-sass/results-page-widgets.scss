@@ -197,7 +197,7 @@
   }
 
   .s-library-area {
-    @extend .s-content-container;
+    .s-ads-card;
     background-color: white;
     margin-bottom: 20px;
   }

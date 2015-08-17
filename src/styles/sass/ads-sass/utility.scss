@@ -65,7 +65,7 @@
 
   &:hover {
     border: 1px solid $gray;
-    box-shadow: 0px 0px 4px darken($default-box-shadow-color, 10%);
+    box-shadow: 0px 0px 4px darken($gray, 5%);
     opacity: 1
   }
 }
@@ -208,4 +208,9 @@
 .s-divider-bottom {
   border-bottom: 1px solid darken($gray-lighter, 5%);
   margin-bottom: 5px;
+}
+
+
+.s-light-font {
+  font-weight: 300 !important;
 }

@@ -1,0 +1,57 @@
+.s-message-control-row {
+  text-align: center;
+
+  pre {
+    text-align: left;
+    height: 100px;
+  }
+}
+
+
+div[data-widget="AlertsWidget"] {
+  position: relative;
+
+  .s-alerts {
+    z-index: @z-index-4;
+    width: 84%;
+    display: inline-block;
+    margin-top: 80px;
+    position: absolute;
+    left: 8%;
+    font-size: 18px;
+    border-radius: @border-radius-large;
+  }
+
+}
+
+.s-tabs-widget {
+
+  .nav-tabs>li>a {
+    padding: 5px 10px 10px 10px !important;
+    color: @text-color;
+  }
+
+  .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+    h5 {
+      color: @brand-primary-faded;
+    }
+    border: @border-light-default;
+    border-bottom: none;
+    cursor: default;
+
+  }
+
+  .tab-content {
+    .s-ads-card();
+    border-top : none;
+    .lh-box-shadow(2px 2px 5px @gray-lighter);
+    position: relative;
+    top: -10px;
+    border-bottom-left-radius: @border-radius-base;
+    border-bottom-right-radius: @border-radius-base;
+    background-color: white;
+  }
+
+
+}
+

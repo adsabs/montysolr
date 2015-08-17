@@ -98,7 +98,6 @@ s-search-bar-motion is applied */
 .s-main-content-container{
 
   @extend .clearfix;
-
   @extend  .s-content-container;
   min-height: 600px;
   padding-bottom: 20px;
@@ -250,19 +249,14 @@ overriding bootstrap col widths
 
   .col-sm-3 {
     width : 23%;
-
   }
 
   .col-sm-7 {
-
   width : 62.333333%
-
   }
 
   .col-sm-2 {
-
   width : 14.666667%;
-
   }
 }
 
@@ -272,6 +266,5 @@ overriding bootstrap col widths
   .s-search-bar-rows-container {
     position: relative;
     left: -1.5%;
-
   }
 }
