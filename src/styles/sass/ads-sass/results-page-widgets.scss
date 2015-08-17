@@ -43,8 +43,6 @@
 }
 
 
-
-
 //had to add back styles since dropdowns are using a div
 //rather than an ul as bootstrap expects
 .s-sort-widget .dropdown-menu, .s-dropdown-widget .dropdown-menu {
@@ -99,10 +97,10 @@
     background-color: white;
   }
 
-  @include box-shadow(2px 2px 2px lighten($gray-lightest, 5%));
+  box-shadow : 2px 2px 2px lighten($gray-lightest, 5%);
 
   #sort-button {
-    color: @text-color !important;
+    color: $text-color !important;
   }
 
   .btn-link {
@@ -121,15 +119,15 @@
 .s-dropdown-widget {
 
   .export-start-val {
-    .form-control;
-    .input-sm;
+    @extend .form-control;
+    @extend .input-sm;
     display: inline;
     width: 30%
   }
 
   .export-end-val {
-    .form-control;
-    .input-sm;
+    @extend .form-control;
+    @extend .input-sm;
     display: inline;
     width: 30%
   }
@@ -197,7 +195,7 @@
   }
 
   .s-library-area {
-    .s-ads-card;
+    @extend .s-content-container;
     background-color: white;
     margin-bottom: 20px;
   }

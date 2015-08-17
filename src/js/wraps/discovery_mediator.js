@@ -81,28 +81,28 @@ define([
 
         var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
         this.getAlerter().alert(new ApiFeedback({
-            type: Alerts.TYPE.ALERT,
-            msg: msg,
-            events: {
-              'click a#query-assistant': 'query-assistant'
-            }
-        }))
-        .done(function(name) {
-          if (name == 'query-assistant') {
-            var q = newQuery.get('q').join(' ');
-            app.getWidget('SearchWidget')
-              .done(function(widget) {
-                if (q) {
-                  widget.openQueryAssistant(q);
-                  analytics('send', 'event', 'interaction', 'click', 'query-helper');
-                }
-                else {
-                  widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                  analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
-                }
-              });
+          type: Alerts.TYPE.ALERT,
+          msg: msg,
+          events: {
+            'click a#query-assistant': 'query-assistant'
           }
-        });
+        }))
+          .done(function(name) {
+            if (name == 'query-assistant') {
+              var q = newQuery.get('q').join(' ');
+              app.getWidget('SearchWidget')
+                .done(function(widget) {
+                  if (q) {
+                    widget.openQueryAssistant(q);
+                    analytics('send', 'event', 'interaction', 'click', 'query-helper');
+                  }
+                  else {
+                    widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                    analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
+                  }
+                });
+            }
+          });
         return; // do not bother with the rest
       }
 
@@ -164,30 +164,30 @@ define([
         switch(xhr.status) {
           case 401: // unauthorized
           case 404: // for some unknow reason (yet) - 401 comes marked as 404
-             // check the Api is working
-             app.getApiAccess({reconnect: true})
-               .done(function() {
-                 // the access_token was refreshed, test the query
-                 var api = app.getService('Api');
-                 api.request(apiRequest, {done: function() {
-                   // we've recovered - restart the search cycle
-                   app.getController('QueryMediator').resetFailures();
-                   self.getPubSub().publish(self.getPubSub().START_SEARCH, apiRequest.get('query'));
-                 }, fail: function() {
-                   alerts.alert(new ApiFeedback({
-                     msg: "I'm sorry, you don't have access rights to query: " + apiRequest.get('target'),
-                     modal: true
-                   }));
-                 }});
-               })
-               .fail(function() {
-                 alerts.alert(new ApiFeedback({
-                   code: ApiFeedback.CODES.DANGER,
-                   msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...please retry later.',
-                   modal: true
-                 }));
-               });
-              return;
+            // check the Api is working
+            app.getApiAccess({reconnect: true})
+              .done(function() {
+                // the access_token was refreshed, test the query
+                var api = app.getService('Api');
+                api.request(apiRequest, {done: function() {
+                  // we've recovered - restart the search cycle
+                  app.getController('QueryMediator').resetFailures();
+                  self.getPubSub().publish(self.getPubSub().START_SEARCH, apiRequest.get('query'));
+                }, fail: function() {
+                  alerts.alert(new ApiFeedback({
+                    msg: "I'm sorry, you don't have access rights to query: " + apiRequest.get('target'),
+                    modal: true
+                  }));
+                }});
+              })
+              .fail(function() {
+                alerts.alert(new ApiFeedback({
+                  code: ApiFeedback.CODES.DANGER,
+                  msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...please retry later.',
+                  modal: true
+                }));
+              });
+            return;
             break;
         }
 
@@ -218,23 +218,23 @@ define([
                 'click a#query-assistant': 'query-assistant'
               }
             }))
-            .done(function (name) {
-              if (name == 'query-assistant') {
+              .done(function (name) {
+                if (name == 'query-assistant') {
 
-                var app = self.getApp();
-                app.getWidget('SearchWidget').done(function(widget) {
-                  var q = apiQuery.get('q').join(' ');
-                  if (q) {
-                    widget.openQueryAssistant(q);
-                    analytics('send', 'event', 'interaction', 'click', 'query-assistant');
-                  }
-                  else {h
-                    widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                    analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
-                  }
-                });
-              }
-            });
+                  var app = self.getApp();
+                  app.getWidget('SearchWidget').done(function(widget) {
+                    var q = apiQuery.get('q').join(' ');
+                    if (q) {
+                      widget.openQueryAssistant(q);
+                      analytics('send', 'event', 'interaction', 'click', 'query-assistant');
+                    }
+                    else {h
+                      widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                      analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
+                    }
+                  });
+                }
+              });
             return; // stop here
           }
           else if (xhr.status == 500) { // server errors; some are recoverable
@@ -371,7 +371,6 @@ define([
 
         activate: function() {
           FeedbackMediator.prototype.activate.apply(this, arguments);
-<<<<<<< HEAD
           var pubsub = this.getPubSub();
           pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
           pubsub.subscribe(pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
@@ -412,14 +411,14 @@ define([
               catch (e){
 
               }
-              }
+            }
 
             //ignore repeated queries (if the widgets are loaded with data)
             if (storage && storage.hasCurrentQuery() &&
               apiQuery.url() == storage.getCurrentQuery().url() &&
               app.getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget" &&
               app.getWidgetRefCount('Results') >= 1
-            ) {
+              ) {
               //simply navigate to search results page, widgets are already stocked with data
               if (app.hasService('Navigator')) {
                 app.getService('Navigator').navigate('results-page', {replace: true});
@@ -447,17 +446,12 @@ define([
             qm.startSearchCycle.apply(qm, arguments);
 
           }, this))
-=======
-          this.pubsub.subscribe(this.pubSubKey, this.pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
-          this.pubsub.subscribe(this.pubSubKey, this.pubsub.APP_EXIT, _.bind(this.onAppExit, this));
->>>>>>> Hotfix: sending too many events, closes #535
         },
 
         onNewCycle: function() {
           this.reset();
         },
 
-<<<<<<< HEAD
         onPageChange: function(msg) {
           msg = msg.replace('Switching to: ', '');
           this._currentPage = msg;
@@ -470,8 +464,6 @@ define([
           return this._currentPage || 'LandingPage';
         },
 
-=======
->>>>>>> Hotfix: sending too many events, closes #535
         onAppExit: function(data) {
           console.log('App exit requested to: ' + data);
           //TODO:rca - save the application history and persist it
@@ -487,11 +479,11 @@ define([
                   'click #alertBox button#okOrcid': 'OK'
                 }
               }))
-              .done(function(resp) {
-                if (resp == 'OK') {
-                  window.location = data.url
-                }
-              })
+                .done(function(resp) {
+                  if (resp == 'OK') {
+                    window.location = data.url
+                  }
+                })
             }
             else {
               window.location = data.url;

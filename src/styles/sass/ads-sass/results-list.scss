@@ -101,7 +101,6 @@
   color: darken($brand-primary, 8%);
   font-weight: 500;
   line-height: 1.2;
-
 }
 
 .s-results-authors {
@@ -185,9 +184,8 @@
   label {
     @extend .s-light-font;
     padding: 0;
-    z-index: @z-index-2;
-}
-
+    z-index: $z-index-2;
+  }
 }
 
 .s-open-access {

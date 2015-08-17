@@ -9,22 +9,18 @@
 
 .s-metrics-title {
   @extend  .s-title-format;
-}
   margin: 6px 2%;
-
 }
+
 
 .s-metrics-table, .s-metrics-graph {
 
   @media(min-width: $screen-sm-min){
-
     display: inline-block;
     vertical-align: top;
     padding: 0% 2%;
-
   }
 }
-
 
 .s-metrics-table {
   font-size : 14px;

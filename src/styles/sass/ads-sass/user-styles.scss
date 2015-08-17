@@ -1,9 +1,8 @@
 .s-form-widget {
 
   .panel-default {
-    .default-box-shadow();
+    box-shadow : 2px 2px 2px $default-box-shadow-color;
   }
-
 
   .panel-body {
     margin: 2%;

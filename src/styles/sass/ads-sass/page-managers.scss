@@ -99,6 +99,7 @@ s-search-bar-motion is applied */
 
   @extend .clearfix;
   @extend  .s-content-container;
+
   min-height: 600px;
   padding-bottom: 20px;
   position: relative;
@@ -221,6 +222,7 @@ Styles for Abstract Page
 */
 .s-right-col-widget-container {
   @extend .s-content-container;
+
   padding: 5%;
   margin-bottom: 10px;
 
