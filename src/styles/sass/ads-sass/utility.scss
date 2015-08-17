@@ -1,4 +1,5 @@
 
+
 .no-padding-right {
   padding-right: 0px !important;
 }
@@ -203,4 +204,9 @@
 .s-divider-bottom {
   border-bottom: 1px solid darken($gray-lighter, 5%);
   margin-bottom: 5px;
+}
+
+
+.s-light-font {
+  font-weight: 300 !important;
 }

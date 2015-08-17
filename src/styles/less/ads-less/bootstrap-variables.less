@@ -25,8 +25,11 @@
 
 //extra colors
 @brand-primary-faded: lighten(@brand-primary, 20%);
-@darker-background : lighten(@gray-lighter, 2%);
-@border-default-color: darken(@gray-lighter, 3%);
+@subtle-brand-primary : desaturate(@brand-primary, 40%);
+
+@darker-background : @gray-lighter;
+@disabled-color : mix(@gray-light, @gray-lighter);
+@border-default-color: darken(@gray-lighter, 6%);
 
 
 //== Scaffolding
