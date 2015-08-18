@@ -50,6 +50,7 @@ define([
           //often they won't exist
           showHighlights: false,
           pagination: true,
+          start: 0
         }
       }
     });

@@ -148,9 +148,9 @@ define([
         var q = apiResponse.getApiQuery();
 
         // this information is important for calcullation of pages
-        var numFound = apiResponse.get("response.numFound");
+        var numFound = apiResponse.get("response.numFound") || 0;
         var perPage =  this.model.get('perPage') || (q.has("rows") ? q.get('rows')[0] : 10);
-        var start = this.model.get("start");
+        var start = this.model.get("start") || 0;
 
         // compute the page number of this request
         var page = PaginationMixin.getPageVal(start, perPage);
@@ -301,7 +301,7 @@ define([
       reset: function() {
         this.collection.reset();
         this.hiddenCollection.reset();
-        this.model.set(this.model.defaults())
+        this.model.clear(this.model.defaults())
       }
 
     });

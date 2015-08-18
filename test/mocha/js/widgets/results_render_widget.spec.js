@@ -300,7 +300,7 @@ define([
         responseWithoutHighlights.setApiQuery(new ApiQuery());
 
         widget.reset();
-        expect(widget.model.get('showHighlights')).to.be.false;
+        expect(widget.model.get('showHighlights')).to.be.undefined;
         widget.processResponse(responseWithoutHighlights);
         expect(widget.model.get('showHighlights')).to.be.false;
 
