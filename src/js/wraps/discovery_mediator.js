@@ -225,7 +225,7 @@ define([
                   search.openQueryAssistant(q);
                   analytics('send', 'event', 'interaction', 'click', 'query-assistant');
                 }
-                else {
+                else {h
                   search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
                   analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
                 }
