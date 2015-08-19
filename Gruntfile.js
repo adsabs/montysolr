@@ -134,7 +134,7 @@ module.exports = function(grunt) {
 
           }()),
           allowSourceOverwrites: true,
-          out: "dist/concatenated_bumblebee.js",
+          out: "dist/bumblebee_app.js",
           name: "js/apps/discovery/main",
           keepBuildDir: true,
           mainConfigFile : "dist/discovery.config.js",
@@ -459,8 +459,34 @@ module.exports = function(grunt) {
             return dest + src.replace('/src/', '/');
           }
         }]
-      }
-    },
+      },
+
+      //give the concatenated file a cache busting hash
+      bumblebee_app : {
+        files : [{
+          src: ["dist/bumblebee_app.js"],
+          dest: "dist/",
+          expand: true,
+          rename : function(dest, src){
+
+            var gitDescribe = grunt.file.read('git-describe').trim();
+
+            // find out what version of bbb we are going to assemble
+            var tagInfo = gitDescribe.split('-');
+            var version;
+            if (tagInfo.length == 1) {
+              version = tagInfo[0]; // the latest tag is also the latest commit (we'll use tagname v1.x.x)
+            }
+            else {
+              version = tagInfo[2]; // use commit number instead of a tag
+              return "dist/bumblebee_app." + version + ".js";
+            }
+
+          }
+
+        }]
+        }
+      },
 
     // compress whatever we have in the dist and
     // store it along-side with it (nginx can serve
@@ -513,7 +539,7 @@ module.exports = function(grunt) {
         options: {
           replacements: [{
             pattern: 'data-main="./discovery.config"',
-            replacement: 'data-main="./concatenated_bumblebee.js"'
+            replacement: 'data-main="./bumblebee_app.js"'
           }]
         }
       }
@@ -859,7 +885,7 @@ module.exports = function(grunt) {
     var indexHtml = grunt.file.read('dist/index.original.html');
 
     // first the js path
-    var newHtml = indexHtml.replace('discovery.config', 'discovery.config.' + version);
+    var newHtml = indexHtml.replace('bumblebee_app', 'bumblebee_app.' + version);
     // then also the css
     for (var css in cssMap) {
       newHtml = newHtml.replace(css, cssMap[css]);
@@ -907,10 +933,11 @@ module.exports = function(grunt) {
   grunt.registerTask('release',
     [ 'setup',
       'clean:release', 'copy:release',
+      'exec:git_describe',
       'string-replace:dist',
       'requirejs:release_individual', 'requirejs:release_concatenated','requirejs:release_css',
       'hash_require:js', 'hash_require:css',
-      'exec:git_describe', 'copy:keep_original',
+      'copy:keep_original', 'copy:bumblebee_app',
       'assemble',
       'uglify'
   ]);
