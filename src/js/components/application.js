@@ -432,15 +432,44 @@ define([
     },
 
     getWidget: function(name) {
-      return this._getOrCreateBarbarian('widget', name);
+      var w = this._getOrCreateBarbarian('widget', name);
+      this.__barbarianInstances['widget:' + name].counter++;
+      return w;
+    },
+
+    returnWidget: function(name) {
+      return this.__barbarianInstances['widget:' + name].counter--;
+      this._killBarbarian('widget:' + name);
+      return this.__barbarianInstances['plugin:' + name].counter;
     },
 
     hasPlugin: function(name) {
       return this.__plugins.has(name);
     },
 
+    /**
+     * Increase the plugin counter and return the instance
+     * (already activated, with proper beehive in place)
+     *
+     * @param name
+     * @return {*}
+     */
     getPlugin: function(name) {
-      return this._getOrCreateBarbarian('plugin', name);
+      var p = this._getOrCreateBarbarian('plugin', name);
+      this.__barbarianInstances['plugin:' + name].counter++;
+      return p;
+    },
+
+    /**
+     * Decrease the instance counter; when we reach zero
+     * the plugin will be destroyed automatically
+     *
+     * @param name
+     */
+    returnPlugin: function(name) {
+      this.__barbarianInstances['plugin:' + name].counter--;
+      this._killBarbarian('plugin:' + name);
+      return this.__barbarianInstances['plugin:' + name].counter;
     },
 
     /**
@@ -532,7 +561,8 @@ define([
       this.__barbarianInstances[symbolicName] = {
         parent: instance,
         children: childNames,
-        beehive: hardenedBee
+        beehive: hardenedBee,
+        counter: 0
       }
     },
 
@@ -563,14 +593,29 @@ define([
     },
 
 
-    _killBarbarian: function(symbolicName) {
+    /**
+     * Remove/destroy the instance - but only if the counter reaches zero (or if the
+     * force parameter is true) - that means that the children are exterminated together
+     * with their parents. this is to avoid polluting the memory, because every child
+     * has a name of the parent. So if the parent is not used by anyone, then the
+     * counter is zero
+     *
+     * @param symbolicName
+     * @param force
+     * @private
+     */
+    _killBarbarian: function(symbolicName, force) {
       var b = this.__barbarianInstances[symbolicName];
 
       if (!b) return;
+      b.counter -= 1;
+
+      if (b.counter > 0 && force !== true) // keep it alive, it is referenced somewhere else
+        return;
 
       if (b.children) {
         _.each(b.children, function(childName) {
-          this._killBarbarian(childName);
+          this._killBarbarian(childName, true);
         }, this)
       }
 
@@ -582,6 +627,8 @@ define([
       if (b.beehive && b.beehive.hasService('PubSub')) {
         this.getService('PubSub').unsubscribe(b.beehive.getService('PubSub').getCurrentPubSubKey());
       }
+
+
       b.parent.destroy();
 
       delete this.__barbarianInstances[symbolicName];

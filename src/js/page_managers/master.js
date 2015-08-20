@@ -15,7 +15,8 @@ define([
   'js/page_managers/controller',
   'hbs!./templates/aria-announcement',
   'hbs!./templates/master-page-manager',
-  'marionette'
+  'marionette',
+  'js/mixins/dependon'
 
 ], function(
   BaseWidget,
@@ -23,7 +24,8 @@ define([
   PageManagerController,
   AriaAnnouncementTemplate,
   MasterPageManagerTemplate,
-  Marionette
+  Marionette,
+  Dependon
   ){
 
   var WidgetData = Backbone.Model.extend({
@@ -152,40 +154,33 @@ define([
     },
 
     assemble: function(app) {
+      this.setApp(app);
       PageManagerController.prototype.assemble.call(this, app);
-      this.discoverPageManagers(app);
-      //for widgets like navbar and footer that are persistent
-      //this.insertStaticWidgets(app);
     },
 
-    discoverPageManagers: function(app) {
-      var self = this;
-      var a = app;
-      _.each([app.getAllModules, app.getAllPlugins, app.getAllWidgets], function(c) {
-        _.each(c.call(a), function(m) {
-          if (m[1] instanceof PageManagerController && m[1] !== self && m[1].assemble) {
-            self.collection.add({'id': m[0], 'object': m[1]});
-            m[1].assemble(a);
-          }
-        });
-      });
-    },
 
     show: function(pageManager, options) {
       //this.model.set('numCalled', this.model.attributes.numCalled+1, {silent: true});
 
-      var pm = this.collection.get(pageManager);
-      if (pm && pm.get('object')) {
+      var app = this.getApp();
+      var pm = app.getWidget(pageManager); // will throw error if not there
 
+      if (pm && pm.assemble) {
         this.currentChild = pageManager;
 
-        if (!pm.attributes.isSelected) {
+        if (!this.collection.find({'id': pageManager}))
+          this.collection.add({'id': pageManager});
+
+        var coll = this.collection.find({id: pageManager});
+
+        if (!coll.attributes.isSelected) {
           this.hideAll();
         }
 
         this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
 
-        pm.set({'id': pageManager, 'isSelected': true, options: options});
+        pm.assemble(app);
+        coll.set({'isSelected': true, options: options, object: pm});
       }
       else {
         console.error('eeeek, you want me to display: ' + pageManager + ' (but I cant, cause there is no such Page!)')
@@ -196,12 +191,24 @@ define([
       return this.collection.get(this.currentChild).get('object'); // brittle?
     },
 
+    /**
+     * Return the instances that are under our control and are
+     * not active any more
+     */
     hideAll: function() {
       _.each(this.collection.models, function(model) {
         if (model.attributes.isSelected) {
-          model.set('isSelected', false);
+          var pManager = model.get('object');
+          var app = this.getApp();
+          if (app) {
+            app.returnWidget(model.get('id'));
+          }
+          else if (pManager) {
+            pManager.destroy();
+          }
+          model.set('isSelected', false, 'object', null);
         }
-      });
+      }, this);
     },
 
     handleAriaAnnouncement: function(msg) {
@@ -222,6 +229,7 @@ define([
 
   });
 
+  _.extend(MasterPageManager.prototype, Dependon.App);
   return MasterPageManager;
 
 });

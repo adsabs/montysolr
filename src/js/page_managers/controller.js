@@ -76,6 +76,11 @@ define([
         _.extend(that.widgets, that.getWidgetsFromTemplate(that.view.$el));
 
         _.each(_.keys(that.widgets), function(widgetName) {
+          if (!app.hasWidget(widgetName)) {
+            delete that.widgets[widgetName];
+            return;
+          }
+
           var widget = app.getWidget(widgetName);
           if (widget) {
             // maybe it is a page-manager (this is a security hole though!)
@@ -84,10 +89,6 @@ define([
             }
             $(that.widgets[widgetName]).empty().append(widget.render().el);
             that.widgets[widgetName] = widget;
-          }
-          else {
-            console.warn("Widget " + widgetName + " is not available (ignoring it)");
-            delete that.widgets[widgetName];
           }
         });
       },
