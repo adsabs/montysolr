@@ -166,21 +166,33 @@ define([
       var pm = app._getWidget(pageManager); // will throw error if not there
 
       if (pm && pm.assemble) {
-        this.currentChild = pageManager;
 
         if (!this.collection.find({'id': pageManager}))
           this.collection.add({'id': pageManager});
-
         var coll = this.collection.find({id: pageManager});
 
+        // assemble the new page manager (while the old one is still in place)
+        pm.assemble(app);
+
+        // hide those that are visible
         if (!coll.attributes.isSelected) {
           this.hideAll();
         }
 
+        // activate the new PM
+        var previousPM = this.currentChild;
+        this.currentChild = pageManager;
+        coll.set({'isSelected': true, options: options, object: pm});
+
+        // send notification
         this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
 
-        pm.assemble(app);
-        coll.set({'isSelected': true, options: options, object: pm});
+        // disassemble the old one (behind the scenes)
+        if (previousPM) {
+          var oldPm = this.collection.find({id: previousPM});
+          if (oldPm && oldPm.object)
+            oldPm.get('object').disAssemble(app);
+        }
       }
       else {
         console.error('eeeek, you want me to display: ' + pageManager + ' (but I cant, cause there is no such Page!)')
@@ -191,11 +203,19 @@ define([
       return this.collection.get(this.currentChild).get('object'); // brittle?
     },
 
+    hideAll: function() {
+      _.each(this.collection.models, function(model) {
+        if (model.attributes.isSelected) {
+          model.set('isSelected', false);
+        }
+      });
+    },
+
     /**
      * Return the instances that are under our control and are
      * not active any more
      */
-    hideAll: function() {
+    disAssemble: function() {
       _.each(this.collection.models, function(model) {
         if (model.attributes.isSelected) {
           var pManager = model.get('object');

@@ -15,7 +15,11 @@ define([
     var PageManagerController = BasicPageManagerController.extend({
 
       assemble: function() {
+        if (this.assembled)
+          return;
+
         BasicPageManagerController.prototype.assemble.apply(this, arguments);
+
 
         if (this.TOCEvents){
           //initiate the TOC view

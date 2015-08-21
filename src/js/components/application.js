@@ -740,6 +740,9 @@ define([
         b.parent.setBeeHive({fake: 'one'});
 
       delete b;
+
+      if (this.debug)
+        console.log('Destroyed: ' + symbolicName);
     },
 
 
