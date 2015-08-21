@@ -57,7 +57,6 @@ define([
       this._tmp.cycle_started = true;
 
       var app = this.getApp();
-      app.getService('Navigator').navigate('results-page');
 
       if (feedback.query) {
         app.getObject('AppStorage').setCurrentQuery(feedback.query);
@@ -67,6 +66,7 @@ define([
         app.getObject('AppStorage').setCurrentQuery(null);
       }
 
+      app.getService('Navigator').navigate('results-page');
 
       if (feedback.request && feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
@@ -89,16 +89,18 @@ define([
         }))
         .done(function(name) {
           if (name == 'query-assistant') {
-            var search = app.getWidget('SearchWidget');
             var q = newQuery.get('q').join(' ');
-            if (q) {
-              search.openQueryAssistant(q);
-              analytics('send', 'event', 'interaction', 'click', 'query-helper');
-            }
-            else {
-              search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-              analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
-            }
+            app.getWidget('SearchWidget')
+              .done(function(widget) {
+                if (q) {
+                  widget.openQueryAssistant(q);
+                  analytics('send', 'event', 'interaction', 'click', 'query-helper');
+                }
+                else {
+                  widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                  analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
+                }
+              });
           }
         });
         return; // do not bother with the rest
@@ -106,10 +108,11 @@ define([
 
       // too many results
       if (feedback.numFound > 1000) {
-        var search = app.getWidget('SearchWidget');
-        if (search && search.view && search.view.highlightFields)
+        app.getWidget('SearchWidget').done(function(widget) {
           // make the search form pulsate little bit
-          search.view.highlightFields();
+          if (widget.view && widget.view.highlightFields)
+            search.view.highlightFields();
+        });
       }
 
       // retrieve ids of all components that wait for a query
@@ -219,16 +222,17 @@ define([
               if (name == 'query-assistant') {
 
                 var app = self.getApp();
-                var search = app.getWidget('SearchWidget');
-                var q = apiQuery.get('q').join(' ');
-                if (q) {
-                  search.openQueryAssistant(q);
-                  analytics('send', 'event', 'interaction', 'click', 'query-assistant');
-                }
-                else {h
-                  search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                  analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
-                }
+                app.getWidget('SearchWidget').done(function(widget) {
+                  var q = apiQuery.get('q').join(' ');
+                  if (q) {
+                    widget.openQueryAssistant(q);
+                    analytics('send', 'event', 'interaction', 'click', 'query-assistant');
+                  }
+                  else {h
+                    widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                    analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
+                  }
+                });
               }
             });
             return; // stop here
@@ -352,12 +356,13 @@ define([
 
     handlers[ApiFeedback.CODES.QUERY_ASSISTANT] = function(feedback) {
       var app = this.getApp();
-      var search = app.getWidget('SearchWidget');
-      var q = null;
-      if (feedback.query) {
-        q = feedback.query.get('q').join(' ');
-      }
-      search.openQueryAssistant(q);
+      app.getWidget('SearchWidget').done(function(widget) {
+        var q = null;
+        if (feedback.query) {
+          q = feedback.query.get('q').join(' ');
+        }
+        widget.openQueryAssistant(q);
+      });
     };
 
     return function() {
@@ -370,6 +375,45 @@ define([
           pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
           pubsub.subscribe(pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
           pubsub.subscribe(pubsub.APP_EXIT, _.bind(this.onAppExit, this));
+
+          pubsub.subscribeOnce(pubsub.APP_STARTING, _.bind(this.onAppStarting, this));
+        },
+
+        onAppStarting: function() {
+          // get the unwrapped version of PubSub
+          var pubsub = this.getBeeHive().getService('PubSub');
+          var qm = this.getApp().getController('QueryMediator');
+
+          // remove the handler of START_SEARCH - we'll do it in place of search-mediator
+          pubsub.unsubscribe(qm.getPubSub().getCurrentPubSubKey(), pubsub.START_SEARCH);
+
+          // insert our own handler
+          this.getPubSub().subscribe(pubsub.START_SEARCH, _.bind(function() {
+            var pubsub = this.getPubSub();
+            var app = this.getApp();
+
+            if (!pubsub)
+              return; // gone
+
+            var qm = app.getController('QueryMediator');
+
+            if (!qm)
+              return; // gone
+
+            var mpm = app.getObject('MasterPageManager');
+            var widget;
+
+            if (this.getCurrentPage() !== 'SearchPage') {
+              widget = app._getWidget('SearchPage');
+              widget.assemble(app);
+            }
+
+            qm.startSearchCycle.apply(qm, arguments);
+
+            if (widget)
+              app.returnWidget(widget);
+
+          }, this))
         },
 
         onNewCycle: function() {
@@ -378,9 +422,14 @@ define([
 
         onPageChange: function(msg) {
           msg = msg.replace('Switching to: ', '');
+          this._currentPage = msg;
           analytics('send', 'pageview', {
             page: msg
           });
+        },
+
+        getCurrentPage: function() {
+          return this._currentPage || 'LandingPage';
         },
 
         onAppExit: function(data) {

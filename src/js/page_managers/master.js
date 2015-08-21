@@ -163,7 +163,7 @@ define([
       //this.model.set('numCalled', this.model.attributes.numCalled+1, {silent: true});
 
       var app = this.getApp();
-      var pm = app.getWidget(pageManager); // will throw error if not there
+      var pm = app._getWidget(pageManager); // will throw error if not there
 
       if (pm && pm.assemble) {
         this.currentChild = pageManager;

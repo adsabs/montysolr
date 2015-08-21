@@ -81,7 +81,7 @@ define([
             return;
           }
 
-          var widget = app.getWidget(widgetName);
+          var widget = app._getWidget(widgetName);
           if (widget) {
             // maybe it is a page-manager (this is a security hole though!)
             if (widget.assemble) {

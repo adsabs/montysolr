@@ -432,15 +432,61 @@ define([
     },
 
     getWidget: function(name) {
+      var defer = $.Deferred();
+      var self = this;
+
+      var w = {};
+      if (arguments.length > 1) {
+        w = {};
+        _.each(arguments, function(x) {
+          if (!x) return;
+          try {
+            w[x] = self._getWidget(x);
+          }
+          catch (er) {
+            console.error('Error loading: ' + x);
+            _.each(w, function(val, key) {
+              self.returnWidget(key);
+              delete w[key];
+            });
+            throw er;
+          }
+        })
+      }
+      else if (name) {
+        w = this._getWidget(name);
+      }
+
+      setTimeout(function() {
+        defer.done(function(widget) {
+          if (_.isArray(name)) {
+            _.each(name, function(x) {
+              self.returnWidget(x);
+            })
+          }
+          else {
+            self.returnWidget(name);
+          }
+        });
+      }, 1);
+
+      defer.resolve(w);
+      return defer.promise();
+    },
+
+    _getWidget: function(name) {
       var w = this._getOrCreateBarbarian('widget', name);
       this.__barbarianInstances['widget:' + name].counter++;
       return w;
     },
 
     returnWidget: function(name) {
-      return this.__barbarianInstances['widget:' + name].counter--;
-      this._killBarbarian('widget:' + name);
-      return this.__barbarianInstances['plugin:' + name].counter;
+      var ds = this.__barbarianInstances['widget:' + name];
+      if (ds) {
+        ds.counter--;
+        this._killBarbarian('widget:' + name);
+        return ds.counter;
+      }
     },
 
     hasPlugin: function(name) {
@@ -455,9 +501,52 @@ define([
      * @return {*}
      */
     getPlugin: function(name) {
-      var p = this._getOrCreateBarbarian('plugin', name);
+      var defer = $.Deferred();
+      var self = this;
+
+      var w = {};
+      if (arguments.length > 1) {
+        w = {};
+        _.each(arguments, function(x) {
+          if (!x) return;
+          try {
+            w[x] = self._getPlugin(x);
+          }
+          catch (er) {
+            console.error('Error loading: ' + x);
+            _.each(w, function(val, key) {
+              self.returnPlugin(key);
+              delete w[key];
+            });
+            throw er;
+          }
+        })
+      }
+      else if (name) {
+        w = this._getPlugin(name);
+      }
+
+      setTimeout(function() {
+        defer.done(function(widget) {
+          if (_.isArray(name)) {
+            _.each(name, function(x) {
+              self.returnPlugin(x);
+            })
+          }
+          else {
+            self.returnPlugin(name);
+          }
+        });
+      }, 1);
+
+      defer.resolve(w);
+      return defer.promise();
+    },
+
+    _getPlugin: function(name) {
+      var w = this._getOrCreateBarbarian('plugin', name);
       this.__barbarianInstances['plugin:' + name].counter++;
-      return p;
+      return w;
     },
 
     /**
@@ -503,6 +592,17 @@ define([
         return this._getBarbarian(k);
 
       throw new Error('Eeeek, thisis unexpectEED bEhAvjor! Cant find barbarian with ID: ' + psk);
+    },
+
+    getPskOfPluginOrWidget: function(symbolicName) {
+      var parts = symbolicName.split(':');
+      var psk;
+      if (this._isBarbarianAlive(symbolicName)) {
+        var b = this._getBarbarian(symbolicName);
+        if (b.getCurrentPubSubKey)
+          return b.getCurrentPubSubKey().getId();
+      }
+      return psk;
     },
 
     /**
@@ -608,7 +708,6 @@ define([
       var b = this.__barbarianInstances[symbolicName];
 
       if (!b) return;
-      b.counter -= 1;
 
       if (b.counter > 0 && force !== true) // keep it alive, it is referenced somewhere else
         return;
@@ -633,7 +732,7 @@ define([
 
       delete this.__barbarianInstances[symbolicName];
       if ('setBeeHive' in b.parent)
-        b.parent.setBeeHive(null);
+        b.parent.setBeeHive({fake: 'one'});
 
       delete b;
     },
@@ -647,12 +746,32 @@ define([
       return _.pairs(this.__modules.container);
     },
 
-    getAllPlugins: function() {
-      return _.pairs(this.__plugins.container);
+    getAllPlugins: function(key) {
+      key = key || 'plugin:';
+      var defer = $.Deferred();
+      var w = [];
+      _.each(this.__barbarianInstances, function(val, k) {
+        if (k.indexOf(key) > -1)
+          w.unshift(k.replace(key, ''));
+      });
+
+      var getter = key.indexOf('plugin:') > -1 ? this.getPlugin : this.getWidget;
+      getter.apply(this, w).
+        done(function(widget) {
+          var out = [];
+          if (w.length > 1) {
+            out = _.pairs(widget);
+          }
+          else if (w.length == 1) {
+            out = [[w[0], widget]];
+          }
+          defer.resolve(out);
+        });
+      return defer.promise();
     },
 
     getAllWidgets: function() {
-      return _.pairs(this.__widgets.container);
+      return this.getAllPlugins('widget:');
     },
 
     getAllServices: function() {
@@ -674,8 +793,15 @@ define([
     triggerMethodOnAll: function(funcName, options) {
       this.triggerMethod(this.getAllControllers(), 'controllers', funcName, options);
       this.triggerMethod(this.getAllModules(), 'modules', funcName, options);
-      this.triggerMethod(this.getAllPlugins(), 'plugins', funcName, options);
-      this.triggerMethod(this.getAllWidgets(), 'widgets', funcName, options);
+      var self = this;
+      this.getAllPlugins().done(function(plugins) {
+        if (plugins.length)
+          self.triggerMethod(plugins, 'plugins', funcName, options);
+      });
+      this.getAllWidgets().done(function(widgets) {
+        if (widgets.length)
+          self.triggerMethod(widgets, 'widgets', funcName, options);
+      });
       this.triggerMethod(this.getBeeHive().getAllServices(), 'BeeHive:services', funcName, options);
       this.triggerMethod(this.getBeeHive().getAllObjects(), 'BeeHive:objects', funcName, options);
     },

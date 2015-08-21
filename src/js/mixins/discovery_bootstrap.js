@@ -60,12 +60,7 @@ define([
     bootstrap: function() {
       // XXX:rca - solve this better, through config
       var beehive = this.getBeeHive();
-      var results = this.getWidget('Results');
       var dynConf = this.getObject('DynamicConfig');
-
-      if (results) {
-        dynConf.pskToExecuteFirst = results.getPubSub().getCurrentPubSubKey().getId(); // TODO: get psk from the app (do not look inside widget)
-      }
 
       var defer = $.Deferred();
 

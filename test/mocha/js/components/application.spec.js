@@ -102,24 +102,35 @@ define([
       var defer = app.loadModules(config);
 
       defer.done(function() {
-        expect(app.getAllWidgets().length).to.be.equal(2);
-        expect(app.getAllPlugins().length).to.be.equal(1);
+        app._getWidget('ApiResponse');
+        app._getWidget('ApiResponse2');
+        app._getPlugin('Test');
+
+        app.getAllWidgets().done(function(w) {
+          expect(w.length).to.be.eql(2);
+        });
+        app.getAllPlugins().done(function(w) {
+          expect(w.length).to.be.eql(1);
+        });
 
         expect(app.isActivated()).to.be.equal(false);
         app.activate();
         expect(app.isActivated()).to.be.equal(true);
 
-        var w1 = app.getWidget('ApiResponse');
-        var w2 = app.getWidget('ApiResponse2');
+        app.getWidget('ApiResponse', 'ApiResponse2').done(
+          function(w) {
+            var w1 = w.ApiResponse;
+            var w2 = w.ApiResponse2;
 
-        expect(app.getPluginOrWidgetByPubSubKey(w1.getPubSub().getCurrentPubSubKey().getId())).to.be.eql(w1);
-        expect(app.getPluginOrWidgetByPubSubKey(w2.getPubSub().getCurrentPubSubKey().getId())).to.be.eql(w2);
+            expect(app.getPluginOrWidgetByPubSubKey(w1.getPubSub().getCurrentPubSubKey().getId())).to.be.eql(w1);
+            expect(app.getPluginOrWidgetByPubSubKey(w2.getPubSub().getCurrentPubSubKey().getId())).to.be.eql(w2);
 
-        expect(app.getPluginOrWidgetByPubSubKey('foo')).to.be.undefined;
-        delete app.__barbarianRegistry[w1.getPubSub().getCurrentPubSubKey()];
-        expect(function() {app.getPluginOrWidgetByPubSubKey('foo')}).to.throw.Error;
+            expect(app.getPluginOrWidgetByPubSubKey('foo')).to.be.undefined;
+            delete app.__barbarianRegistry[w1.getPubSub().getCurrentPubSubKey()];
+            expect(function() {app.getPluginOrWidgetByPubSubKey('foo')}).to.throw.Error;
 
-        done();
+            done();
+        });
       });
     });
 
@@ -130,12 +141,17 @@ define([
       defer.done(function() {
         var counter = 0;
         var args = [];
-        _.each(app.getAllWidgets(), function(w) {
+        _.each(app.getAllControllers(), function(w) {
           w[1].foox = function(options) {
             counter += 1;
             args.push(options);
           }
         });
+
+        app._getWidget('ApiResponse').foox = function(options) {
+          counter += 1;
+          args.push(options);
+        };
 
         expect(counter).to.be.equal(0);
         app.triggerMethodOnAll('foox', 'foo');
@@ -174,7 +190,29 @@ define([
           expect(fakeUser.setUser.args[0]).to.eql(["user@gmail.com"]);
           done();
         })
-    })
+    });
+
+    it("uses reference counters to get rid of objects", function() {
+      var app = new Application();
+      var defer = app.loadModules(config);
+
+      defer.done(function() {
+        var counter = 0;
+        app.getWidget('ApiResponse')
+          .done(function(widget) {
+            expect(widget.getBeeHive).to.be.defined;
+            expect(widget.getPubSub).to.be.defined;
+            expect(app.__barbarianInstances['widget:' + 'ApiResponse'].counter).to.eql(1);
+          });
+
+
+        setTimeout(function() {
+          expect(app.__barbarianInstances['widget:' + 'ApiResponse']).to.be.undefined;
+          done();
+        }, 10)
+
+      });
+    });
 
   });
 });
