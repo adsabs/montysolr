@@ -199,12 +199,15 @@ define([
       _.each(this.collection.models, function(model) {
         if (model.attributes.isSelected) {
           var pManager = model.get('object');
-          var app = this.getApp();
-          if (app) {
-            app.returnWidget(model.get('id'));
+
+          if (pManager.disAssemble) {
+            pManager.disAssemble(this.getApp());
           }
-          else if (pManager) {
+          else if (pManager.destroy) {
             pManager.destroy();
+          }
+          else {
+            throw new Error('Contract breach, no way to get ridd of the widget/page manager');
           }
           model.set('isSelected', false, 'object', null);
         }

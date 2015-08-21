@@ -22,6 +22,7 @@ define([
 
       initialize: function (options) {
         this.widgets = {};
+        this.widgetDoms = {};
         this.initialized = false;
         this.widgetId = null;
         this.assembled = false;
@@ -73,10 +74,11 @@ define([
         this.view.render();
 
         var that = this;
-        _.extend(that.widgets, that.getWidgetsFromTemplate(that.view.$el));
+        _.extend(that.widgetDoms, that.getWidgetsFromTemplate(that.view.$el));
 
-        _.each(_.keys(that.widgets), function(widgetName) {
+        _.each(_.keys(that.widgetDoms), function(widgetName) {
           if (!app.hasWidget(widgetName)) {
+            delete that.widgetDoms[widgetName];
             delete that.widgets[widgetName];
             return;
           }
@@ -87,10 +89,24 @@ define([
             if (widget.assemble) {
               widget.assemble(app);
             }
-            $(that.widgets[widgetName]).empty().append(widget.render().el);
+            $(that.widgetDoms[widgetName]).empty().append(widget.render().el);
             that.widgets[widgetName] = widget;
           }
         });
+      },
+
+      disAssemble: function(app) {
+
+        _.each(_.keys(this.widgets), function(widgetName) {
+          var widget = this.widgets[widgetName];
+          if (widget.disAssemble)
+            widget.disAssemble();
+          app.returnWidget(widgetName);
+          $(this.widgetDoms[widgetName]).empty();
+          delete this.widgets[widgetName];
+          delete this.widgetDoms[widgetName];
+        }, this);
+        this.assembled = false;
       },
 
       /**
@@ -152,7 +168,7 @@ define([
         // hide all widgets that are under our control
         _.each(this.widgets, function(w) {
           if (w.noDetach)
-              return
+              return;
           if ('detach' in w && _.isFunction(w.detach)) {
             w.detach();
           }

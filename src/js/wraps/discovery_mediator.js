@@ -30,11 +30,11 @@ define([
         if (child.view && child.view.showCols) {
           child.view.showCols({right: false, left: false});
           // open the view again
-          this.getPubSub().once(this.getPubSub().START_SEARCH,
+          this.getBeeHive().getService('PubSub').once(this.getPubSub().START_SEARCH,
             _.once(function() {child.view.showCols({right:true})}));
         }
       }
-      this.getPubSub().once(this.getPubSub().DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
+      this.getBeeHive().getService('PubSub').once(this.getPubSub().DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
         if(this._tmp.callOnce[psk.getId()]) {
           return;
         }

@@ -121,7 +121,7 @@ define([
           app.getObject('MasterPageManager').show("SettingsPage",
             ['UserPreferences', "UserNavbarWidget"]);
           app.getWidget("SettingsPage").done(function(widget) {
-              widget.setActive("UserPreferences",  subView);
+              widget.setActive("UserPreferences");
             });
 
           this.route = "#user/settings/preferences";
@@ -534,15 +534,19 @@ define([
           showDetail([id].concat(detailsPageAlwaysVisible), id);
           this.route = data.href;
         });
-        this.set('ShowPaperMetrics', function(id) {
+        this.set('ShowPaperMetrics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);
         });
-        this.set("ShowPaperExport", function(funcName, data){
+        this.set("ShowPaperExport", function(id, data){
           var format = data.subView;
-          showDetail([id].concat(detailsPageAlwaysVisible), id);
+          app.getObject('MasterPageManager').show('DetailsPage',
+            [id].concat(detailsPageAlwaysVisible));
+          app.getWidget("DetailsPage").done(function(w) {
+            w.setActive(id, format);
+          });
 //          this.route = data.href;
         });
-        this.set('ShowGraphics', function(id) {
+        this.set('ShowGraphics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);
         });
       }

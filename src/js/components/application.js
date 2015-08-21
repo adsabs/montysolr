@@ -599,8 +599,8 @@ define([
       var psk;
       if (this._isBarbarianAlive(symbolicName)) {
         var b = this._getBarbarian(symbolicName);
-        if (b.getCurrentPubSubKey)
-          return b.getCurrentPubSubKey().getId();
+        if (b.getPubSub && b.getPubSub().getCurrentPubSubKey)
+          return b.getPubSub().getCurrentPubSubKey().getId();
       }
       return psk;
     },
@@ -627,11 +627,11 @@ define([
 
       var constructor = (cat == 'plugin') ? this.__plugins.get(name) : this.__widgets.get(name);
       var instance = new constructor();
-      var hardenedBee, children;
+      var hardenedBee = this.getBeeHive().getHardenedInstance(), children;
 
       if ('activate' in instance) {
         if (this.debug) {console.log('application: ' + symbolicName + '.activate(beehive)')}
-        children = instance.activate(hardenedBee = this.getBeeHive().getHardenedInstance());
+        children = instance.activate(hardenedBee);
       }
 
       this._registerBarbarian(symbolicName, instance, children, hardenedBee);
@@ -652,6 +652,9 @@ define([
       if ('getBeeHive' in instance) {
         this.__barbarianRegistry[instance.getBeeHive().getService('PubSub').getCurrentPubSubKey().getId()] = symbolicName;
       }
+      else {
+        this.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = symbolicName;
+      }
 
       var childNames = [];
       if (children) {
@@ -662,7 +665,8 @@ define([
         parent: instance,
         children: childNames,
         beehive: hardenedBee,
-        counter: 0
+        counter: 0,
+        psk: hardenedBee.getService('PubSub').getCurrentPubSubKey()
       }
     },
 
@@ -723,10 +727,11 @@ define([
           delete this.__barbarianRegistry[key];
       }, this);
 
-      if (b.beehive && b.beehive.hasService('PubSub')) {
-        this.getService('PubSub').unsubscribe(b.beehive.getService('PubSub').getCurrentPubSubKey());
+      // unsubscribe this widget from pubsub (don't rely on the widget
+      // doing the right thing)
+      if (b.psk) {
+        this.getService('PubSub').unsubscribe(b.psk);
       }
-
 
       b.parent.destroy();
 
