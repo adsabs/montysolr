@@ -54,7 +54,8 @@ define([
           perPage: 20,
           numFound: undefined,
           currentQuery: undefined,
-          start: 0
+          start: 0,
+          pageData: undefined
         };
         options.pagination = _.defaults(options.pagination || {}, defaultPagination);
 
@@ -301,7 +302,7 @@ define([
       reset: function() {
         this.collection.reset();
         this.hiddenCollection.reset();
-        this.model.clear(this.model.defaults())
+        this.model.set(this.model.defaults());
       }
 
     });
