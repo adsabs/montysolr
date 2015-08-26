@@ -1,0 +1,131 @@
+/* this is to ensure a full length background for widgets that need it */
+html {
+  height:100%;
+}
+
+body {
+  height: 100%;
+}
+
+#app-container{
+  height: 100%;
+  position: relative;
+}
+
+#body-template-container{
+  height: 100%
+}
+
+.s-master-page-manager{
+  height: 100%;
+}
+
+
+.s-title-format {
+  margin-bottom: 10px;
+  padding: 1px 2%;
+  background-color: lighten(@gray-lighter, 2%);
+  border-bottom: 3px solid darken(@gray-lighter, 6%);
+
+  h1, h2, h3, h4 {
+    margin: 6px 0;
+    font-size: 28px;
+    font-weight: 300;
+  }
+}
+
+.s-edit-indicator {
+  border-bottom:  1px dashed @brand-primary-faded;
+
+  &:before {
+    .fa;
+    font-size: 18px;
+    margin-right: 8px;
+    color: @brand-primary-faded;
+    content: @fa-var-pencil;
+  }
+}
+
+.btn-primary.btn-inverse {
+  color: @brand-primary;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+.btn-info.btn-inverse {
+  color: @brand-info;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+.btn-success.btn-inverse {
+  color: @brand-success;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+.btn-warning.btn-inverse {
+  color: @brand-warning;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+
+.btn-danger.btn-inverse {
+  color: @brand-danger;
+  background-color: #fff;
+  .lh-box-shadow(none);
+}
+
+.s-tab {
+  display:inline-block;
+  text-align: center;
+  width: 180px;
+  font-size: 20px;
+  margin-top: 20px;
+  cursor: pointer;
+  font-weight: 300;
+  padding: 5px;
+  border-bottom: 3px solid @transparent;
+
+  &:hover {
+    border-bottom: 4px solid lighten(@brand-primary-faded, 30%);
+  }
+  a {
+    width: 180px;
+    display: inline-block;
+    color : @text-color;
+    &:hover {
+      text-decoration: none;
+    }
+    &:focus{
+      text-decoration: none;
+    }
+  }
+  .lh-transition(all, .5s);
+
+  .dropdown-menu {
+    li {
+      padding: 5px 20px;
+      text-align: left;
+
+      &:hover {
+        background-color: @gray-lighter;
+      }
+    }
+
+  }
+
+}
+
+.s-tab.active{
+  border-bottom: 4px solid @brand-primary-faded;
+  color:  @brand-primary-faded;
+  a {
+    color:  @brand-primary-faded;
+  }
+}
+
+.s-tab.s-disabled {
+  color: @gray-light;
+  &:hover{
+    border-bottom: 4px solid @body-bg;
+  }
+  cursor: default;
+}

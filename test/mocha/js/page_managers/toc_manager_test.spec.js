@@ -82,6 +82,7 @@ define([
        * */
 
       it("assembles the page view", function (done) {
+        this.timeout(3000);
         var app = new Application({debug: false});
         delete config.core.objects.Navigator;
         config.widgets.PageManager = 'js/wraps/abstract_page_manager/abstract_page_manager';
@@ -113,13 +114,13 @@ define([
           app._getWidget("TOCWidget").resetActiveStates();
 
           // the navigation must turn active
-          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-nav-inactive')).to.be.false;
-          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-nav-inactive')).to.be.true;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]>div').hasClass('s-nav-inactive')).to.be.false;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]>div').hasClass('s-nav-inactive')).to.be.true;
 
           // simulated late arrival
           references.processResponse(r);
-          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-nav-inactive')).to.be.false;
-          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"]').hasClass('s-nav-inactive')).to.be.false;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]>div').hasClass('s-nav-inactive')).to.be.false;
+          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences>div"]').hasClass('s-nav-inactive')).to.be.false;
 
           // click on the link (NAVIGATE event should be triggered)
           var pubsub = app.getService('PubSub').getHardenedInstance();
@@ -130,7 +131,7 @@ define([
 
           // it has to be selected and contain numcount
           //the navigator is what actually selects the nav so I removed that test
-          expect($(pageManager.view.$el.find('div[data-widget-id="ShowReferences"] span').eq(1)).text().trim()).to.eql('(841359)');
+          expect(pageManager.view.$el.find('[data-widget-id="ShowReferences"] span').eq(1).text().trim()).to.eql('(841359)');
           done();
         });
 
@@ -169,12 +170,12 @@ define([
           pageManager.widgets.tocWidget.resetActiveStates();
           setTimeout(function () {
             //not selected until it is explicitly selected, as below
-            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-selected")).to.be.false;
-            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-selected")).to.be.false;
+            expect(view.$("[data-widget-id='ShowAbstract']>div").hasClass("s-nav-selected")).to.be.false;
+            expect(view.$("[data-widget-id='ShowReferences]>div']").hasClass("s-nav-selected")).to.be.false;
 
             pageManager.widgets.tocWidget.collection.selectOne("ShowReferences");
-            expect(view.$("div[data-widget-id='ShowAbstract']").hasClass("s-nav-selected")).to.be.false;
-            expect(view.$("div[data-widget-id='ShowReferences']").hasClass("s-nav-selected")).to.be.true;
+            expect(view.$("[data-widget-id='ShowAbstract']>div").hasClass("s-nav-selected")).to.be.false;
+            expect(view.$("[data-widget-id='ShowReferences']>div").hasClass("s-nav-selected")).to.be.true;
             done();
 
           }, 1000)
@@ -209,7 +210,7 @@ define([
 
           pageManager.widgets.tocWidget.resetActiveStates();
 
-          view.$("div[data-widget-id=ShowPaperExport__aastex]").click();
+          view.$("a[data-widget-id=ShowPaperExport__aastex]").click();
 
           expect(spy.args[0][0]).to.eql("ShowPaperExport");
           expect(spy.args[0][1]["idAttribute"]).to.eql("ShowPaperExport");

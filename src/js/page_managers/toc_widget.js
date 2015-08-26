@@ -10,15 +10,19 @@ define([
   /*
    * widget to coordinate the showing of other widgets within the framework of a TOC page manager
    * You need to provide a template with a nav that looks like this: (with the data attributes
-   * corresponding to the widgets in the main page manager template)
+   * corresponding to NAV EVENTS in the navigator.js file, e.g.
    *
-   * <nav data-widget="TOCWidget"
-   data-ShowAbstract='{"title": "Abstract", "path":"abstract", "showCount": false, "isSelected":true, "category":"view"}'
-   data-ShowCitations='{"title": "Citations", "path":"citations", "category":"view"}'
-   data-ShowReferences='{"title": "References", "path":"references", "category":"view"}'
-   ...etc...
-   >
-
+   * this.set('ClassicSearchForm', function() {
+   * app.getObject('MasterPageManager').show('LandingPage', ["ClassicSearchForm"]);
+   * });
+   *
+   * MUST have a navConfig object: e.g.
+   *   navConfig : {
+   *   UserPreferences : {"title": "User Preferences", "path":"user/settings/preferences","category":"preferences" },
+   *    UserSettings__email : {"title": "Change Email", "path":"user/settings/email","category":"settings"},
+   *    }
+   *
+   *
    toc widget listens to "new-widget" event and, if it can find teh corresponding data in the markup,
    adds an entry to its nav
    the toc controller will call a navigate event when the toc widget emits a "widget-selected" event
@@ -56,6 +60,10 @@ define([
         }
       });
       s.set("isSelected", true);
+    },
+
+    comparator : function(m){
+      return m.get("order");
     }
   });
 
@@ -101,9 +109,8 @@ define([
         data = _.extend(data, groupedCollectionJSON);
       }
       else {
-        data = _.extend(data, col);
+        data = _.extend(data, {tabs : col});
       }
-
       return data;
     },
 
@@ -112,7 +119,7 @@ define([
     },
 
     navigateToPage :  function (e) {
-      var $t = $(e.currentTarget), idAttribute = $t.find("div").attr("data-widget-id");
+      var $t = $(e.currentTarget), idAttribute = $t.attr("data-widget-id");
 
       var data = { idAttribute : idAttribute };
 
@@ -144,6 +151,7 @@ define([
     },
 
     collectionEvents : {
+      "add" : "render",
       "change:isActive" : "render",
       "change:isSelected": "render",
       "change:numFound" : "render"
@@ -176,22 +184,26 @@ define([
     onPageManagerMessage: function(event, data) {
       if (event == 'new-widget') {
         //building the toc collection
-        var widgetId = arguments[1];
-        var $nav = this.$("nav");
-        var tocData = $nav.data(widgetId.toLowerCase());
-        if (tocData) {
-          var toAdd = _.extend(_.clone(tocData), {id: widgetId });
+
+        var widgetId = arguments[1],
+            tocData = Marionette.getOption(this, "navConfig");
+
+        var widgetData = tocData[widgetId];
+
+        if (widgetData) {
+          var toAdd = _.extend(_.clone(widgetData), {id: widgetId });
           this.collection.add(toAdd);
         }
+
         else {
+          //it might be a widget name + subview in the form ShowExport__bibtex
           //id consists of widgetId + arg param
-          var pairs = _.pairs($nav.data());
-          var widgetList = _.where(pairs, function (v) {
-            return  v[0].split("__") && (v[0].split("__")[0] == widgetId.toLowerCase())
+          var widgetsWithSubViews = _.pick(tocData, function (v, k) {
+            return  k.split("__") && (k.split("__")[0] == widgetId)
           });
-          _.each(widgetList, function (w) {
+          _.each(widgetsWithSubViews, function (v,k) {
             //arg is the identifying factor-- joining with double underscore so it can be split later
-            var toAdd = _.extend(_.clone(w[1]), { id: widgetId + "__" + w[0].split("__")[1]});
+            var toAdd = _.extend(_.clone(v), { id: k });
             this.collection.add(toAdd);
           }, this);
         }

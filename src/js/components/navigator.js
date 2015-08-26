@@ -1,4 +1,5 @@
 /**
+/**
  * Created by rchyla on 3/10/14.
  */
 
@@ -80,11 +81,12 @@ define(['underscore',
         catch (e) {
           this.handleTransitionError(transition, e, arguments);
         }
+        this.route = "#modern-form";
 
         //router can communicate directly with navigator to replace url
         var replace = arg1 && arg1.replace ? true : false;
 
-        if (transition.route) {
+        if (typeof(transition.route) !== "undefined") {
           // update the History object
           this.router.navigate(
             transition.route,

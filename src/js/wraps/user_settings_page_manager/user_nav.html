@@ -1,22 +1,15 @@
-<nav class=" s-nav-container"
-     data-UserPreferences='{"title": "User Preferences", "path":"user/settings/preferences","category":"preferences" }'
-     data-UserSettings__email='{"title": "Change Email", "path":"user/settings/email","category":"settings"}'
-     data-UserSettings__password='{"title": "Change Password", "path":"user/settings/password","category":"settings"}'
-     data-UserSettings__token='{"title": "API Token", "path":"user/settings/token","category":"settings"}'
-     data-UserSettings__delete='{"title": "Delete Account", "path":"user/settings/delete","category":"settings"}'
->
+
+<nav>
+
     <h2 class="s-nav-top-title"><i class="fa fa-cog"></i> Customize Settings</h2>
 
     <div class="s-nav-header s-view-nav">user preferences</div>
 
     {{#each preferences}}
-        <a href="/abs/{{../bibcode}}/{{this.path}}"  >
-        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-selected {{/if}}" data-widget-id="{{this.id}}">
+        <a href="/abs/{{../bibcode}}/{{this.path}}" data-widget-id="{{this.id}}"  >
+        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-selected {{/if}}">
                 <span class="s-content">
                 {{this.title}}
-                {{#if this.showCount}}
-                <span class="num-items"> {{#if this.numFound}}({{this.numFound}}){{/if}}</span>
-                {{/if}}
                 </span>
         </div>
         </a>
@@ -44,8 +37,8 @@
 
     {{#each settings}}
 
-        <a href="/abs/{{../bibcode}}/{{this.path}}" >
-        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-selected {{/if}}" data-widget-id="{{this.id}}">
+        <a href="/abs/{{../bibcode}}/{{this.path}}" data-widget-id="{{this.id}}">
+        <div class="abstract-nav s-nav {{#if this.isSelected}} s-nav-selected {{/if}}">
                 <span class="s-content">
                 {{this.title}}
                 {{#if this.showCount}}
@@ -60,5 +53,3 @@
 
 
 </nav>
-
-

@@ -76,7 +76,6 @@ $sidenav-background : #fff;
   .s-content{
     position: relative;
   }
-
 }
 
 .s-nav-active {
@@ -224,7 +223,8 @@ $sidenav-background : #fff;
   cursor: pointer;
   font-weight: 300;
   padding: 5px;
-  border-bottom: 3px solid #fff;
+  border-bottom: 3px solid transparent;
+;
 
   &:hover {
     border-bottom: 4px solid lighten($brand-primary-faded, 30%);
@@ -251,9 +251,7 @@ $sidenav-background : #fff;
         background-color: $gray-lighter;
       }
     }
-
   }
-
 }
 
 .s-tab.active{

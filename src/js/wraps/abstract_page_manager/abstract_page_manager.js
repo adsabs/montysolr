@@ -57,6 +57,20 @@ define([
         bibcode = bibcode[0].replace('bibcode:', '');
         this.widgets.tocWidget.model.set("bibcode", bibcode);
       };
+    },
+    
+    navConfig : {
+      ShowAbstract : {"title": "Abstract", "path":"abstract", "showCount": false, "isSelected":true, "category":"view","alwaysThere":"true"},
+      ShowCitations : {"title": "Citations", "path":"citations", "category":"view"},
+      ShowReferences : {"title": "References", "path":"references", "category":"view"},
+      ShowCoreads : {"title": "Co-Reads", "path":"coreads","category":"view", "showCount": false},
+      ShowTableOfContents : {"title": "Volume Content", "path":"tableofcontents", "category":"view", "showCount": false},
+      ShowSimilar : {"title": "Similar Papers", "path":"similar", "category":"view"},
+      ShowGraphics : {"title": "Graphics", "path":"graphics", "showCount": false, "category":"view"},
+      ShowPaperMetrics : {"title": "Metrics", "path":"metrics", "showCount": false, "category":"view"},
+      ShowPaperExport__bibtex : {"title": "in BibTEX", "path":"export/bibtex", "category":"export", "alwaysThere":"true"},
+      ShowPaperExport__aastex : {"title": "in AASTex", "path":"export/aastex", "category":"export", "alwaysThere":"true"},
+      ShowPaperExport__endnote : {"title": "in Endnote", "path":"export/endnote", "category":"export", "alwaysThere":"true"}
     }
 
 

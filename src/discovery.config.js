@@ -65,7 +65,7 @@ require.config({
         }
       },
       widgets: {
-        LandingPage: 'js/wraps/landing_page_manager',
+        LandingPage: 'js/wraps/landing_page_manager/landing_page_manager',
         SearchPage: 'js/wraps/results_page_manager',
         DetailsPage: 'js/wraps/abstract_page_manager/abstract_page_manager',
         AuthenticationPage: 'js/wraps/authentication_page_manager',
@@ -82,8 +82,9 @@ require.config({
         NavbarWidget: 'js/widgets/navbar/widget',
         UserNavbarWidget: 'js/widgets/user_navbar/widget',
         AlertsWidget: 'js/widgets/alerts/widget',
+        ClassicSearchForm: 'js/widgets/classic_form/widget',
         SearchWidget: 'js/widgets/search_bar/search_bar_widget',
-        //FormAccordionWidget : 'js/widgets/form_accordion/widget',
+        PaperSearchForm:'js/widgets/paper_search_form/widget',
         Results: 'js/widgets/results/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',

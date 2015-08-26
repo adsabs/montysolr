@@ -1,10 +1,9 @@
 define([
     "marionette",
-    "hbs!./templates/landing-page-layout",
     'js/widgets/base/base_widget'
   ],
-  function (Marionette,
-            pageTemplate
+  function (
+    Marionette
             ) {
 
     var OneColumnView = Marionette.ItemView.extend({
@@ -14,7 +13,6 @@ define([
         this.widgets = options.widgets;
       },
 
-      template : pageTemplate,
 
       onRender : function(){
         var self = this;

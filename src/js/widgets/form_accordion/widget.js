@@ -1,7 +1,7 @@
 define([
   "js/widgets/base/base_widget",
   "js/components/api_query",
-   "./topterms",
+   "./../paper_search_form/topterms",
   "hbs!./templates/form_container",
   "hbs!./templates/author_form",
   "hbs!./templates/paper_form",

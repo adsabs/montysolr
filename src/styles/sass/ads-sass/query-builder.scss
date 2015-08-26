@@ -30,10 +30,10 @@
 
 /* GROUPS */
 .rules-group-container {
-  border: 1px dashed #66afe9;
+  border: 2px solid $gray-lighter;
 }
 .rules-group-header {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 .rules-group-header input[name$=_cond] {
   display: none;
@@ -47,10 +47,7 @@
 }
 .rule-container {
 }
-.rule-container.has-error {
-  background: #fdd;
-  border-color: #f99;
-}
+
 .rule-container > div:not(.rule-header) {
   display: inline-block;
   margin: 0 5px 0 0;
@@ -63,9 +60,12 @@
 .rule-value-container label {
   margin-bottom: 0;
 }
-.rule-value-container label.block {
-  display: block;
+
+.rule-value-container {
+  //why is a style="display:block" being added?
+  display: inline-block !important;
 }
+
 .rule-container select,
 .rule-container input[type=text],
 .rule-container input[type=number] {
@@ -132,14 +132,42 @@
 
 
 .query-builder .btn:active,.query-builder .btn.active {
-  color: #66afe9;
-  background-color: white;
+  color: #fff;
+  background-color: @brand-primary-faded;
 }
 
-.query-builder > .rules-group-container > .rules-group-header > .btn-group > .btn-primary {
+.query-builder>.group-options{
   display: none;
 }
 
-div.query-builder > .rules-group-container {
-  border: 1px solid white;
+.query-builder .logic-buttons {
+  margin: 10px 2%;
 }
+
+div.query-builder > .rules-group-container {
+
+  border: none;
+
+  //applied to all nested rules
+  .rules-group-container {
+    margin-left: 5%;
+  }
+}
+
+.query-builder .rule-container {
+  padding: 10px;
+}
+
+
+.query-builder button {
+  .lh-box-shadow(none) !important;
+
+}
+
+.query-builder {
+  .btn-primary-faded.active {
+    background-color: $brand-primary;
+  }
+}
+
+

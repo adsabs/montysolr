@@ -84,14 +84,34 @@ define([
         };
 
         this.set('index-page', function() {
-          app.getObject('MasterPageManager').show('LandingPage');
-          var q = app.getObject('AppStorage').getCurrentQuery();
-          this.route = '#index/' + queryUpdater.clean(q).url();
+          app.getWidget("LandingPage").setActive("SearchWidget");
+          app.getObject('MasterPageManager').show('LandingPage', ["SearchWidget"]);
+          this.route = "";
+
         });
+
+        this.set('SearchWidget', function() {
+          self.get('index-page').execute();
+        });
+
 
         this.set("404", function(){
           $("#body-template-container").html(ErrorTemplate());
           this.route = '#404';
+        });
+
+
+        this.set('ClassicSearchForm', function() {
+          app.getWidget("LandingPage").setActive("ClassicSearchForm");
+          app.getObject('MasterPageManager').show('LandingPage', ["ClassicSearchForm"]);
+          this.route = "#classic-form";
+
+        });
+
+        this.set('PaperSearchForm', function() {
+          app.getWidget("LandingPage").setActive("PaperSearchForm");
+          app.getObject('MasterPageManager').show('LandingPage', ['PaperSearchForm']);
+          this.route = "#paper-form";
         });
 
 
