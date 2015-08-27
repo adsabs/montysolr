@@ -520,6 +520,10 @@ define([
         this.view.$el.find('.show-form').click();
       },
 
+      onShow : function(){
+        this.view.$("input[name=q]").focus();
+      },
+
       onDestroy: function () {
         this.view.queryBuilder.destroy();
         this.view.destroy();

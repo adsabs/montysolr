@@ -94,6 +94,10 @@ define([
 
       this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
 
+    },
+
+    onShow : function(){
+      this.view.$("input#pub-input").focus();
     }
 
   });
