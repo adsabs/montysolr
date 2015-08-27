@@ -9,26 +9,28 @@
  */
 
 define([
-  'underscore',
-  'bootstrap',
-  'jquery',
-  'jquery-querybuilder',
-  'js/components/generic_module',
-  'js/components/query_builder/rules_translator',
-  'js/components/api_query',
-  'js/mixins/dependon'
+    'underscore',
+    'bootstrap',
+    'jquery',
+    'jquery-querybuilder',
+    'js/components/generic_module',
+    'js/components/query_builder/rules_translator',
+    'js/components/api_query',
+    'hbs!./templates/group_template',
+    'hbs!./templates/rule_template'
   ],
 
   function(
-  _,
-  Bootstrap,
-  $,
-  jQueryQueryBuilderPlugin,
-  GenericModule,
-  RulesTranslator,
-  ApiQuery,
-  Dependon
-  ) {
+    _,
+    Bootstrap,
+    $,
+    jQueryQueryBuilderPlugin,
+    GenericModule,
+    RulesTranslator,
+    ApiQuery,
+    GroupTemplate,
+    RuleTemplate
+    ) {
 
     var QueryBuilder = GenericModule.extend({
 
@@ -89,10 +91,11 @@ define([
             "operator_trending()": "Find Trending Papers",
             "operator_instructive()": "Find Instructive Papers",
 
-            delete_rule: ' ',
-            delete_group: '',
-            add_rule: ' ',
-            add_group: ' '
+            delete_rule: 'remove',
+            delete_group: 'group',
+            add_rule: 'term',
+            add_group: 'group'
+
 
           },
           operators: [
@@ -395,7 +398,7 @@ define([
               var l = this.settings.conditions.length, cond;
               for (var i=0; i < l; i++) {
                 cond = this.settings.conditions[i];
-                conditions.push('<label class="btn btn-xs btn-primary ' + (this.settings.default_condition == cond ? 'active' : '') + '"><input type="radio" name="'+ group_id +'_cond" value="' + cond + '"' + (this.settings.default_condition == cond ? 'checked' : '') + '>'+ (this.lang[cond.toLowerCase() + '_condition'] || cond) +'</label>');
+                conditions.push('<label class="btn btn-xs btn-primary-faded logic-button ' + (this.settings.default_condition == cond ? 'active' : '') + '"><input type="radio" name="'+ group_id +'_cond" value="' + cond + '"' + (this.settings.default_condition == cond ? 'checked' : '') + '>'+ (this.lang[cond.toLowerCase() + '_condition'] || cond) +'</label>');
               }
               conditions = conditions.join('\n');
 
@@ -422,23 +425,15 @@ define([
             },
 
             getRuleTemplate: function(rule_id) {
-              var h = '\
-<li id="'+ rule_id +'" class="rule-container" '+ (this.settings.sortable ? 'draggable="true"' : '') +'> \
-  <div class="rule-header"> \
-    <div class="btn-group pull-left"> \
-      <button type="button" class="btn btn-xs btn-danger" data-delete="rule"><i class="glyphicon glyphicon-remove"></i> '+ this.lang.delete_rule +'</button> \
-    </div> \
-  </div> \
-  '+ (this.settings.sortable ? '<div class="drag-handle"><i class="glyphicon glyphicon-sort"></i></div>' : '') +' \
-  <div class="rule-filter-container"></div> \
-  <div class="rule-operator-container"></div> \
-  <div class="rule-value-container"></div> \
-</li>';
-
-              return h;
+              return RuleTemplate({
+                rule_id : rule_id,
+                sortable: this.settings.sortable,
+                deleteRule : this.lang.delete_rule
+              });
             }
           }
         });
+
 
         // prevent the form from being closed
         this.$el.on('click.queryBuilder', '[data-delete=rule]', function(ev) {
