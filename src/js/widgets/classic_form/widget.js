@@ -208,12 +208,14 @@ define([
 
     submitForm : function(queryDict){
 
-      var newQuery = new ApiQuery({
-        q: queryDict.q,
-        fq: queryDict.fq,
+      var newQuery = {
+        q: queryDict.q.join(" "),
         sort: "date desc"
-      });
+      };
 
+      if (queryDict.fq.length) newQuery.fq = queryDict.fq.join(" ");
+
+      newQuery = new ApiQuery(newQuery);
       this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
 
     }
