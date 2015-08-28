@@ -361,7 +361,7 @@ define([
 
       fieldInsert: function (e) {
         e.preventDefault();
-        var newVal,
+        var newVal, operator,
           currentVal = this.getFormVal(),
           $target = $(e.target),
           df = $target.attr("data-field"),
@@ -372,8 +372,19 @@ define([
         //selected will be "" if user didn't highlight any text
 
         if ( df.indexOf("operator-") > -1) {
-          var operator = df.split("-").reverse()[0];
-          newVal = operator + "(" + selected + ")";
+          operator = df.split("-").reverse()[0];
+          punc = "(";
+          if (selected){
+            newVal = operator + "(" + selected + ")";
+          }
+          else {
+            //enclose the full query, set it in and return
+            newVal = operator + "(" + currentVal + ")";
+            currentVal = "";
+            this.setFormVal(newVal);
+            this.toggleClear();
+            return
+          }
 
         } else if (df == "first-author") {
           newVal = " author:\"^" + selected + "\"";
@@ -388,10 +399,20 @@ define([
           newVal = df + ":" + selected;
         }
 
-        this.setFormVal(currentVal.substr(0, startIndex) +  newVal + currentVal.substr(startIndex + selected.length));
+        if (selected) {
+          this.setFormVal(currentVal.substr(0, startIndex) +  newVal + currentVal.substr(startIndex + selected.length));
+        }
+         else { //append to the end
+          var newString = currentVal + " " + newVal;
+          this.setFormVal( newString );
 
-        //put the cursor in the middle of the "" or ()
-        if (!selected) {this.$input.selectRange(startIndex + newVal.length -1)}
+          if (punc){
+            this.$input.selectRange( newString.length -1);
+          }
+          else {
+            this.$input.selectRange( newString.length );
+          }
+        }
 
         //figure out if clear button needs to be there
         this.toggleClear();

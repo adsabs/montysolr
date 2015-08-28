@@ -135,6 +135,13 @@ define([
       widget.view.$("#field-options button[data-field=author]").click();
       expect($w.find(".q").val().trim()).to.equal("author:\"author name\"");
 
+      widget.view._cursorInfo.selected = undefined;
+
+      widget.view.$("#field-options button[data-field=operator-citations]").click();
+
+      expect($w.find(".q").val().trim()).to.equal("citations(author:\"author name\")");
+
+
       done();
     });
 
