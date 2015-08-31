@@ -15,54 +15,73 @@
     <div class="col-sm-2 s-top-row-col" aria-label="date published">
         {{formattedDate}}
     </div>
-    <div class="col-sm-2 col-xs-6 s-top-row-col" title="citation count">
+    <div class="col-xs-3 col-sm-4 col-md-2 s-top-row-col s-citation-link" title="citation count">
         {{#if num_citations}}
         <a href="#abs/{{encodedIdentifier}}/citations">cited: {{num_citations}}</a>
         {{/if}}
     </div>
     <div class="col-sm-4">
         <div class="s-results-links">
+
             {{#if links}}
-            <div class="letter-icon s-letter-icon">
 
-                <button class="btn-link {{#if links.text}} active-link s-active-link {{/if}}"
-                        aria-disabled="{{#if links.text}} false {{else}} true {{/if}}">
-                    <i class="s-text-icon" aria-label="quick access to full text links"></i>
-                </button>
-                {{#if links.text}}
-                <ul class="hidden list-unstyled link-details s-link-details" role="menu">
+                <div class="letter-icon s-letter-icon">
 
-                    {{#each links.text}}
-                    <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}"
-                        target="_blank">{{this.title}}</a></li>
-                    {{/each}}
-                </ul>
-                {{/if}}
+                    {{#if links.text}}
+
+                        <a href="{{links.text.[0].link}}" target="_blank" class="btn-link active-link s-active-link" aria-disabled="false">
+                            <i class="s-text-icon" aria-label="quick access to full text links"></i>
+                        </a>
+                        <ul class="hidden list-unstyled link-details s-link-details" role="menu">
+
+                            {{#each links.text}}
+                            <li><a {{#if this.openAccess}} class="s-open-access"{{/if}} href="{{this.link}}"
+                                target="_blank">{{this.title}}</a></li>
+                            {{/each}}
+                        </ul>
+
+                    {{else}}
+
+                        <a href="#" class="btn-link disabled" aria-disabled="true">
+                            <i class="s-text-icon" aria-label="quick access to full text links"></i>
+                        </a>
+
+                    {{/if}}
+
             </div>
-            <div class="letter-icon s-letter-icon">
 
-                <button class="btn-link {{#if links.list}} active-link s-active-link {{/if}}"
-                        aria-disabled="{{#if links.list}} false {{else}} true{{/if}}">
-                    <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
-                </button>
+            <div class="letter-icon s-letter-icon">
 
                 {{#if links.list}}
+
+                <a href="{{links.list.[0].link}}" class="btn-link active-link s-active-link" aria-disabled="false">
+                    <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
+                </a>
+
                 <ul class="hidden list-unstyled list-unstyled link-details s-link-details" role="menu">
 
                     {{#each links.list}}
                     <li><a href="{{this.link}}">{{this.title}}</a></li>
                     {{/each}}
                 </ul>
+
+                {{else}}
+
+                    <a href="#" class="btn-link disabled" aria-disabled="true">
+                        <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
+                    </a>
+
                 {{/if}}
+
             </div>
             <div class="letter-icon s-letter-icon">
 
-                <button class="btn-link  {{#if links.data}} active-link s-active-link {{/if}}"
-                        aria-disabled="{{#if links.data}} false {{else}} true  {{/if}}">
-                    <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
-                </button>
-
                 {{#if links.data}}
+
+                <a href="{{links.data.[0].link}}" target="_blank"  class="btn-link active-link s-active-link" aria-disabled="false">
+                    <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
+                </a>
+
                 <ul class="hidden list-unstyled link-details s-link-details" role="menu">
 
                     {{#each links.data}}
@@ -70,7 +89,15 @@
                         >{{this.title}}</a></li>
                     {{/each}}
                 </ul>
+
+                {{else}}
+
+                    <a href="#" class="btn-link disabled" aria-disabled="true">
+                        <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
+                    </a>
+
                 {{/if}}
+
             </div>
             {{/if}}
       </div>

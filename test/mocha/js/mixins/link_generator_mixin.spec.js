@@ -89,9 +89,7 @@ define(['js/mixins/link_generator_mixin'],
         "orderNum": 5
         }]);
 
-        expect(JSON.stringify(dataWithLinks[0].links.list)).to.eql('[{"letter":"C","title":"Citations (62)","link":"/#abs/1993A&A...277..309L/citations"},'+
-        '{"letter":"R","title":"References (8)","link":"/#abs/1993A&A...277..309L/references"},' +
-        '{"letter":"T","title":"Table of Contents","link":"/#abs/1993A&A...277..309L/tableofcontents"}]');
+        expect(JSON.stringify(dataWithLinks[0].links.list)).to.eql('[{"letter":"C","title":"Citations (62)","link":"#abs/1993A&A...277..309L/citations"},{"letter":"R","title":"References (8)","link":"#abs/1993A&A...277..309L/references"},{"letter":"T","title":"Table of Contents","link":"#abs/1993A&A...277..309L/tableofcontents"}]');
 
         expect(JSON.stringify(dataWithLinks[0].links.text)).to.eql('[{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},'+
         '{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"},'+

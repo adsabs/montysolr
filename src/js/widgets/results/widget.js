@@ -166,6 +166,7 @@ define([
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
         var highlights = apiResponse.has("highlighting") ? apiResponse.get('highlighting') : {};
         var self = this;
+        var link_server = this.beehive.getObject("User").getUserData("USER_DATA").link_server;
 
         var appStorage = null;
         if (this.hasBeeHive() && this.getBeeHive().hasObject('AppStorage')) {
@@ -174,6 +175,9 @@ define([
 
         //any preprocessing before adding the resultsIndex is done here
         docs = _.map(docs, function (d) {
+          //used by link generator mixin
+          d.link_server = link_server;
+
           d.identifier = d.bibcode;
           d.encodedIdentifier = encodeURIComponent(d.identifier);
           var h = {};

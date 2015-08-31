@@ -16,20 +16,19 @@
 //icons for links
 
 .s-icon-draw-attention {
-  color: darken($brand-info, 5%) !important;
+  color: lighten($brand-primary-faded, 10%) !important;
 }
 
 .s-link-details {
   position: absolute;
-  top: 23px;
+  top: 18px;
   background-color: white;
   @extend .ads-container;
   padding: 8px 10px;
   z-index: $z-index-4;
   margin-left: -8%;
-  min-width: 140px;
+  min-width: 180px;
   font-weight:normal;
-
 }
 
 .s-letter-icon {
@@ -41,9 +40,11 @@
   margin-bottom: -4px;
   font-size : 1.05em;
 
+
   i {
     color : darken($gray-lighter, 2%);
     cursor: default;
+    font-size : 17px;
   }
 
   .s-active-link {
@@ -85,7 +86,11 @@
 
 .s-top-row {
   font-weight: 300;
-  font-size : 14px;
+  margin-bottom: 6px;
+
+  .s-citation-link {
+    color: @brand-primary;
+  }
 }
 
 .s-show-details-container {
@@ -105,7 +110,8 @@
 
 .s-results-authors {
   padding-left: .5%;
-  font-weight: 500;
+  font-size:16px;
+
 }
 
 .s-highlight-list {
@@ -193,10 +199,6 @@
 
 .s-results-list {
 
-  .icon-more-info {
-    font-size: 1.1em;
-  }
-
   label {
     font-weight: initial
   }
@@ -204,6 +206,8 @@
   //represents an individual entry
   li>div {
     padding-bottom: 1em;
+  .s-display-block {
+    padding-bottom: 1.1em;
     border-left: 5px solid #fff;
   }
 
@@ -236,6 +240,7 @@ li.article-author {
   padding-left: 2px;
   padding-right: 2px;
   font-weight: 400;
+  font-size: 16px;
 }
 
 
@@ -294,9 +299,6 @@ li.article-author {
     font-weight:500;
   }
 
-  .s-top-row {
-    font-size  : 14px;
-  }
 
   .s-results-authors{
     font-size: 14px;

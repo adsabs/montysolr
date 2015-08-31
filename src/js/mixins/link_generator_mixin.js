@@ -50,7 +50,7 @@ var linkGenerator = {
   },
   /*
    *   Takes data--a json object from apiResponse--and augments it with a "links"
-   *   object.  I used mostly Giovanni's logic here as well. This is to be called
+   *   object. This is used for item views in the results widget. This is to be called
    *   by the processData method of a widget.
    *
    */
@@ -192,16 +192,16 @@ var linkGenerator = {
       var nc = data["[citations]"].num_citations;
       var nr = data["[citations]"].num_references;
       if (nc >= 1) {
-        links.list.push({letter: "C", title: "Citations (" + nc + ")", link: "/#abs/" + data.bibcode + "/citations" })
+        links.list.push({letter: "C", title: "Citations (" + nc + ")", link: "#abs/" + data.bibcode + "/citations" })
       }
       if (nr >= 1) {
-        links.list.push({ letter: "R", title: "References (" + nr + ")", link: "/#abs/" + data.bibcode + "/references"})
+        links.list.push({ letter: "R", title: "References (" + nr + ")", link: "#abs/" + data.bibcode + "/references"})
       }
     }
 
     if (data.property) {
       if (_.contains(data.property, "TOC")) {
-        links.list.push({letter: "T", title: "Table of Contents", link: "/#abs/" + data.bibcode + "/tableofcontents"})
+        links.list.push({letter: "T", title: "Table of Contents", link: "#abs/" + data.bibcode + "/tableofcontents"})
       }
 
     }
