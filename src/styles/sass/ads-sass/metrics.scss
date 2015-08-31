@@ -9,7 +9,7 @@
 
 .s-metrics-title {
   @extend  .s-title-format;
-  margin: 6px 2%;
+  margin: 6px 0;
 }
 
 
@@ -24,6 +24,8 @@
 
 .s-metrics-table {
   font-size : 14px;
+  position: relative;
+  top: 10px;
   /*
   I don't understand why I have to specify this
   the width from the parent div is also being applied to the table
@@ -134,6 +136,9 @@
 }
 
 
-
+.s-graph-view {
+  position: relative;
+  top: 20px;
+}
 
 
