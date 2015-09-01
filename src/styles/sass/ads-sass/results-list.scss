@@ -19,6 +19,15 @@
   color: lighten($brand-primary-faded, 10%) !important;
 }
 
+.s-expand-label {
+  font-weight: 300;
+  position: relative;
+  top: 14px;
+  display: inline-block;
+  padding: 5px;
+  float: right;
+}
+
 .s-link-details {
   position: absolute;
   top: 18px;
