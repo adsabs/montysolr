@@ -63,14 +63,14 @@ define([
       },
 
       activate: function(beehive) {
-        this.beehive = beehive;
+        this.setBeeHive(beehive);
         _.bindAll(this);
         var pubsub = beehive.getService('PubSub');
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.onLibraryChange);
       },
 
       onLibraryChange : function(collectionJSON, info){
-        //only need to update if items were ADDED to current library (from query info widget)
+
 
          if (info.ev == "change" &&
               info.id ==  this.model.get("id") &&
@@ -103,8 +103,8 @@ define([
 
         var id = this.model.get("id"),
               that = this,
-              pubsub = beehive.getService('PubSub'),
-              LibraryController = that.beehive.getObject("LibraryController");
+              pubsub = this.getBeeHive().getService('PubSub'),
+              LibraryController = this.getBeeHive().getObject("LibraryController");
 
         if (!LibraryController.isDataLoaded()){
           //wait for LIBRARY_CHANGE event
@@ -157,7 +157,7 @@ define([
         var that = this,
             id = this.model.get("id"),
             view = this.model.get("view"),
-            LibraryController = that.beehive.getObject("LibraryController");
+            LibraryController = that.getBeeHive().getObject("LibraryController");
 
         if (!id || !view){
           return
@@ -240,7 +240,7 @@ define([
           //from library list view
           var data = {bibcode : [arg1], action : "remove"},
               id = this.model.get("id");
-          this.beehive.getObject("LibraryController").updateLibraryContents(id, data)
+          this.getBeeHive().getObject("LibraryController").updateLibraryContents(id, data)
             .done(function(){
               var bibcode = data.bibcode[0],
                 modelToRemove = that.libraryCollection.get(bibcode);
@@ -260,7 +260,7 @@ define([
           case "update-public-status":
             var data = {"public": arg1},
                 id = this.model.get("id");
-            this.beehive.getObject("LibraryController")
+            this.getBeeHive().getObject("LibraryController")
               .updateLibraryMetadata(id, data)
               .done(function(response, status){
                 //re-render the admin view
@@ -275,13 +275,13 @@ define([
       handleHeaderEvents : function (event, arg1, arg2) {
 
         var that = this, id = this.model.get("id"),
-            pubsub = beehive.getService('PubSub');
+            pubsub = this.getBeeHive().getService('PubSub');
 
         switch (event) {
 
           case "updateVal":
             //from header view
-            this.beehive.getObject("LibraryController")
+            this.getBeeHive().getObject("LibraryController")
               .updateLibraryMetadata(id, arg1)
               .done(function(data){
                 //make a new view
@@ -310,7 +310,7 @@ define([
             break
 
           case "delete-library":
-            this.beehive.getObject("LibraryController").deleteLibrary(id, this.headerModel.get("name"));
+            this.getBeeHive().getObject("LibraryController").deleteLibrary(id, this.headerModel.get("name"));
             break;
         }
       }

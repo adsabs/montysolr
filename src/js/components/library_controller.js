@@ -5,7 +5,8 @@ define([
     'js/mixins/hardened',
     'js/components/api_targets',
     'js/components/api_request',
-    'js/components/api_feedback'
+    'js/components/api_feedback',
+    'js/mixins/dependon'
 
   ],
   function(
@@ -14,7 +15,8 @@ define([
     Hardened,
     ApiTargets,
     ApiRequest,
-    ApiFeedback
+    ApiFeedback,
+    Dependon
     ) {
 
 
@@ -52,16 +54,23 @@ define([
       initialize : function(){
         //store all metadata entries here
         this.collection = new LibraryCollection();
+      },
 
-        var pubsub = this.getBeeHive().get("PubSub");
+      activate: function (beehive) {
+        this.setBeeHive(beehive)
+        pubsub = beehive.Services.get('PubSub');
+        this.key = pubsub.getPubSubKey();
+
+        pubsub.subscribe(this.key, pubsub.START_SEARCH, _.bind(this.updateCurrentQuery, this));
+        pubsub.subscribe(this.key, pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
 
         /*
-        * the three events that come from changing a collection:
-        * -change if a model's contents were changed
-        * -add if models were added
-        * -reset if the entire collection was reset
-        * -remove when a model is removed (library deleted)
-        * */
+         * the three events that come from changing a collection:
+         * -change if a model's contents were changed
+         * -add if models were added
+         * -reset if the entire collection was reset
+         * -remove when a model is removed (library deleted)
+         * */
         _.each(["change", "add", "reset", "remove"], function(ev){
 
           this.listenTo(this.collection, ev, function(arg1, arg2){
@@ -75,16 +84,6 @@ define([
           });
 
         }, this);
-
-      },
-
-      activate: function (beehive) {
-        this.beehive = beehive;
-        pubsub = beehive.Services.get('PubSub');
-        this.key = pubsub.getPubSubKey();
-
-        pubsub.subscribe(this.key, pubsub.START_SEARCH, _.bind(this.updateCurrentQuery, this));
-        pubsub.subscribe(this.key, pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
 
       },
 
@@ -133,7 +132,7 @@ define([
             }
           });
 
-          this.beehive.getService("Api").request(request);
+          this.getBeeHive().getService("Api").request(request);
 
         return deferred;
 
@@ -179,7 +178,7 @@ define([
         }
         else if (options.bibcodes == "selected"){
 
-          var bibs = this.beehive.getObject("AppStorage").getSelectedPapers();
+          var bibs = this.getBeeHive.getObject("AppStorage").getSelectedPapers();
           deferred.resolve(bibs);
         }
         else {
@@ -239,7 +238,7 @@ define([
 
         var that = this;
 
-        var  endpoint = ApiTargets["LIBRARIES"];
+        var endpoint = ApiTargets["LIBRARIES"];
         return this.composeRequest(endpoint, "POST", {data : data})
           .done(function(data){
             //refresh collection
@@ -407,7 +406,7 @@ define([
 
     });
 
-    _.extend(LibraryController.prototype, Hardened);
+    _.extend(LibraryController.prototype, Hardened, Dependon.BeeHive);
 
     return LibraryController;
 

@@ -128,7 +128,7 @@ define([
       },
 
       activate: function(beehive) {
-        this.beehive = beehive;
+        this.setBeeHive(beehive);
         _.bindAll(this);
         this.pubsub = beehive.getService('PubSub');
         this.pubsub.subscribe(this.pubsub.LIBRARY_CHANGE, this.updateCollection);
