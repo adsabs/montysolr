@@ -17,7 +17,7 @@ define([
     TOCTemplate : TOCTemplate,
 
     TOCEvents :  _.extend(TOCView.prototype.events, {
-      "click a[href='/#/user/libraries']" : function(){
+      "click a[href='#/user/libraries']" : function(){
         this.trigger("page-manager-event", "navigate", {navCommand : "AllLibrariesWidget" , sub : "libraries"});
       },
 

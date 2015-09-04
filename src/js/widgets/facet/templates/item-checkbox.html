@@ -1,17 +1,17 @@
-    {{#if hier}}
-    <i class="item-closed facet-caret " aria-label="toggle"></i>
-    {{/if}}
+{{#if hier}}
+<i class="item-closed facet-caret " aria-label="toggle"></i>
+{{/if}}
 
     <label class="s-facet-label">
         <input type="checkbox" class="widget-item" value="{{value}}">
         <span class="size-graphic-container">
             <span class="size-graphic">&nbsp;{{{title}}}<span class="facet-amount">&nbsp;({{count}})</span></span>
         </span>
-    </label>
+</label>
 
-    {{#if more}}
-    <div class="facet-body">
-        <div class="child-facets"></div>
-        <button class="btn btn-xs btn-link show-more hide">more</button>
-    </div>
-    {{/if}}
+{{#if more}}
+<div class="facet-body">
+    <div class="child-facets"></div>
+    <button class="btn btn-xs btn-link show-more hide">more</button>
+</div>
+{{/if}}

@@ -5,8 +5,6 @@ define(['marionette',
     'js/components/api_query',
     'js/widgets/base/base_widget',
     'hbs!./query_info_template',
-    'hbs!./feedback-template',
-    'hbs!./library-options',
     'js/mixins/formatter',
     'bootstrap',
     'js/components/api_feedback'
@@ -19,8 +17,6 @@ define(['marionette',
            ApiQuery,
            BaseWidget,
            queryInfoTemplate,
-           FeedbackTemplate,
-           LibraryOptionsTemplate,
            FormatMixin,
            Bootstrap,
            ApiFeedback
@@ -35,7 +31,10 @@ define(['marionette',
         libraryDrawerOpen : false,
         //for rendering library select
         libraries : [],
-        loggedIn : false
+        loggedIn : false,
+        feedback : undefined,
+        newLibraryName : undefined,
+        selectedLibrary : undefined
       }
     });
 
@@ -53,7 +52,8 @@ define(['marionette',
       modelEvents : {
         "change:selected" : "render",
         "change:loggedIn" : "render",
-        "change:libraries" : "renderLibraries"
+        "change:libraries" : "render",
+        "change:feedback" : "render"
       },
 
       triggers : {
@@ -63,37 +63,62 @@ define(['marionette',
 
       events : {
 
+        "change #all-vs-selected" : "recordAllVsSelected",
+        "change #library-select" : "recordLibrarySelection",
+        "keyup .new-library-name": "recordNewLibraryName",
+
         "click .library-add-title" : "toggleLibraryDrawer",
         "click .submit-add-to-library" : "libraryAdd",
         "click .submit-create-library" : "libraryCreate"
       },
 
-//      libraryAdd : function(){
-//        var data = {};
-//
-//        data.libraryID = this.$("#library-select").val();
-//
-//        if (this.model.get("selected")){
-//          data.recordsToAdd = this.$("#all-vs-selected").val();
-//        } else {
-//          data.recordsToAdd = "all";
-//        }
-//        this.trigger("library-add", data);
-//      },
-//
-//      libraryCreate : function(){
-//        var data = {};
-//
-//        if (this.model.get("selected")){
-//          data.recordsToAdd = this.$("#all-vs-selected").val();
-//        } else {
-//          data.recordsToAdd = "all";
-//        }
-//
-//        data.name = $("input[name='new-library-name']").val().trim();
-//
-//        this.trigger("library-create", data);
-//      },
+      recordLibrarySelection : function(e){
+        this.model.set("selectedLibrary", $(e.currentTarget).val());
+      },
+
+      recordNewLibraryName : function(e){
+        this.model.set("newLibraryName", $(e.currentTarget).val());
+      },
+
+      recordAllVsSelected : function(e){
+        this.model.set("selectedVsAll", $(e.currentTarget).val());
+      },
+
+      libraryAdd : function(){
+
+        //show loading view
+        this.$(".submit-add-to-library").html('<i class="fa fa-spinner fa-pulse"></i>');
+
+        var data = {};
+
+        //we have the selected library in the model but only if there was a select event, so query DOM
+        data.libraryID = this.$("#library-select").val();
+
+        if (this.model.get("selected")){
+          data.recordsToAdd = this.$("#all-vs-selected").val();
+        } else {
+          data.recordsToAdd = "all";
+        }
+        this.trigger("library-add", data);
+      },
+
+      libraryCreate : function(){
+
+        //show loading view
+        this.$(".submit-create-library").html('<i class="fa fa-spinner fa-pulse"></i>');
+
+        var data = {};
+
+        if (this.model.get("selected")){
+          data.recordsToAdd = this.$("#all-vs-selected").val();
+        } else {
+          data.recordsToAdd = "all";
+        }
+
+        data.name = this.model.get("newLibraryName").trim();
+        this.trigger("library-create", data);
+
+      },
 
       toggleLibraryDrawer : function(){
         this.model.set("libraryDrawerOpen", !this.model.get("libraryDrawerOpen"), {silent : true});
@@ -101,11 +126,6 @@ define(['marionette',
 
       onRender : function(){
         this.$(".icon-help").popover({trigger: "hover", placement: "right", html: true});
-        this.renderLibraries();
-      },
-
-      renderLibraries : function(){
-        this.$(".libraries-container").html(LibraryOptionsTemplate(this.model.toJSON()));
       }
 
     });
@@ -118,7 +138,7 @@ define(['marionette',
       initialize: function(options) {
         this.model = new QueryModel();
         this.view = new QueryDisplayView({model : this.model});
-        BaseWidget.prototype.initialize.call(this, options)
+        BaseWidget.prototype.initialize.call(this, options);
       },
 
       viewEvents : {
@@ -129,9 +149,12 @@ define(['marionette',
       },
 
       activate: function(beehive) {
+
         this.setBeeHive(beehive);
         _.bindAll(this);
-        var pubsub = beehive.getService('PubSub');
+
+        this.pubsub = beehive.getService('PubSub');
+        var pubsub = this.pubsub;
 
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
@@ -153,8 +176,8 @@ define(['marionette',
        this.model.set("selected", numSelected);
       },
 
-      processLibraryInfo : function(listOfLibraries){
-       this.model.set("libraries", listOfLibraries);
+      processLibraryInfo : function(data){
+       this.model.set("libraries", data);
      },
 
       clearSelected : function(){
@@ -167,7 +190,8 @@ define(['marionette',
       },
 
       libraryAddSubmit : function(data){
-        var options = {};
+        var options = {}, that = this;
+
         options.library = data.libraryID;
         //are we adding the current query or just the selected bibcodes?
         options.bibcodes = data.recordsToAdd;
@@ -177,46 +201,71 @@ define(['marionette',
         //this returns a promise
         this.getBeeHive().getObject("LibraryController").addBibcodesToLib(options)
           .done(function(response, status){
-            if (status == "error"){
-              this.$(".feedback").html(FeedbackTemplate({error : true, name : name, id : data.libraryID }))
-            }
-            else if (status == "success"){
-              this.$(".feedback").html(FeedbackTemplate({
+              var numAlreadyInLib = response.numBibcodesRequested - parseInt(response.number_added);
+              that.model.set("feedback", {
                 success : true,
                 name : name,
-                id : response.id,
-                numRecords: response.number_added
-              }))
+                id : data.libraryID,
+                numRecords: response.number_added,
+                numAlreadyInLib : numAlreadyInLib
+              });
 
-            }
           })
-          .fail();
-
+          .fail(function(response){
+            that.model.set("feedback", {
+                success : false,
+                name : name,
+                id : data.libraryID,
+                error: JSON.parse(arguments[0].responseText).error
+            });
+          });
       },
 
       libraryCreateSubmit : function(data){
-        var that = this, options = {};
+
+        var options = {}, that = this;
         //are we adding the current query or just the selected bibcodes?
         options.bibcodes = data.recordsToAdd;
         options.name = data.name;
         //XXX:rca - to decide
         this.getBeeHive().getObject("LibraryController").createLibAndAddBibcodes(options)
           .done(function(response, status){
-            if (status == "error"){
-              this.$(".feedback").html(FeedbackTemplate({ error : true, name : data.name, create : true }));
-            }
-            else if (status == "success"){
-              this.$(".feedback").html(FeedbackTemplate({
+
+            //reset library add name (in input field)
+            that.model.set("newLibraryName", undefined);
+
+            that.model.set("feedback", {
                   create: true,
                   success : true,
                   name : data.name,
                   id : response.id,
                   numRecords : response.bibcode.length
-            }));
-            }
+            });
           })
-          .fail();
+          .fail(function(response){
 
+           that.model.set("feedback", {
+              success : false,
+              name : data.name,
+              create : true,
+              error: JSON.parse(arguments[0].responseText).error
+            });
+          });
+      },
+
+      processResponse: function(apiResponse) {
+        var q = apiResponse.getApiQuery();
+        var filters = [];
+        _.each(q.keys(), function(k) {
+          if (k.substring(0,2) == 'fq') {
+            _.each(q.get(k), function(v) {
+              if (v.indexOf('{!') == -1) {
+                filters.push(v);
+              }
+            });
+          }
+        });
+        this.view.model.set("fq", filters);
       }
 
     });

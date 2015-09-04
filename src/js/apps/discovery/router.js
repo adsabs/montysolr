@@ -3,7 +3,6 @@ define([
     'backbone',
     'js/components/api_query',
     'js/mixins/dependon',
-    'hbs!./404',
     'js/components/api_feedback',
     'js/components/api_request',
     'js/components/api_targets',
@@ -16,7 +15,6 @@ define([
     Backbone,
     ApiQuery,
     Dependon,
-    ErrorTemplate,
     ApiFeedback,
     ApiRequest,
     ApiTargets,
@@ -72,6 +70,8 @@ define([
         'user/libraries(/)(:id)(/)(:subView)(/)(:subData)(/)' : 'librariesPage',
         'user/home' : 'homePage',
 
+        'public-libraries/(:id)(/)' : 'publicLibraryPage',
+
         //"(:query)": 'index',
         '*invalidRoute': 'noPageFound'
       },
@@ -118,7 +118,6 @@ define([
             }
             if (!subPage) {
               navigateString = 'ShowAbstract';
-              href = "#abs/" + bibcode + "/abstract"
             }
             else {
               navigateString = "Show"+ subPage[0].toUpperCase() + subPage.slice(1);
@@ -280,13 +279,18 @@ define([
         }
       },
 
+      publicLibraryPage : function (id){
+        //main libraries view
+        this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, sub : "library"});
+      },
+
       homePage : function(subView){
         this.routerNavigate('home-page', {subView: subView});
       },
 
       noPageFound : function() {
         //i will fix this later
-        $("#body-template-container").html(ErrorTemplate())
+        this.pubsub.publish(this.pubsub.NAVIGATE, "404")
       },
 
       // backbone default behaviour is to automatically decodeuri parameters

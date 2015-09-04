@@ -1,3 +1,61 @@
-<div class="library-list-container">
+<div class="s-library-actions">
+    {{#if hasRecords}}
+            <div class="btn-group sort-widget s-sort-widget">
+                <!-- Single button -->
+                <button type="button" class="btn btn-default dropdown-toggle btn-responsive" id="sort-button" data-toggle="dropdown" aria-label="sort options">
+                    Sort: <b>
+                    {{#compare sort "pubdate"}} Publication Date {{/compare}}
+                    {{#compare sort "num_citations"}} Citation Count{{/compare}}
+                    {{#compare sort "read_count"}} Read Count{{/compare}}
+                    {{order}}</b>
+                    <span class="caret">
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <label><input type="radio" value="desc"  name="order-options" {{#compare order "desc"}}checked="checked" {{/compare}} > Descending <i class="fa fa-sort-numeric-desc"></i></label>
+                        <label><input type="radio" value="asc"  name="order-options" {{#compare order "asc"}}checked="checked" {{/compare}} > Ascending <i class="fa fa-sort-numeric-asc"></i> </label>
 
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <button class="btn btn-link sort-options  {{#compare sort 'pubdate'}} hidden {{/compare}}" data-sort="pubdate">Publication Date</button>
+                        <button class="btn btn-link sort-options  {{#compare sort 'num_citations'}} hidden {{/compare}}" data-sort="num_citations">Citation Count</button>
+                        <button class="btn btn-link sort-options  {{#compare sort 'read_count'}} hidden {{/compare}}" data-sort="read_count">Read Count</button>
+
+                    </li>
+                </ul>
+            </div>
+    {{/if}}
+    {{#if hasPages}}
+
+            <nav class="pull-right">
+                <ul class="pagination">
+
+                    {{#each pagesToShow}}
+                    <li {{#compare ../page this}} class="active" {{/compare}} ><a href="#" data-page="{{this}}">{{this}}</a></li>
+                    {{/each}}
+                </ul>
+            </nav>
+    {{/if}}
+
+</div>
+<hr/>
+
+
+<ul class="library-list-container s-library-list-container">
+
+</ul>
+
+<hr/>
+<div class="clearfix">
+    {{#if hasPages}}
+    <nav class="pull-right">
+        <ul class="pagination">
+
+            {{#each pagesToShow}}
+            <li {{#compare ../page this}} class="active" {{/compare}} ><a href="#" data-page="{{this}}">{{this}}</a></li>
+            {{/each}}
+        </ul>
+    </nav>
+    {{/if}}
 </div>

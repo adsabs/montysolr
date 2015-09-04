@@ -55,7 +55,7 @@ define([
       this.persistentModel = new PersistentUserModel();
       this.model = new UserModel();
       this.listenTo(this.model, "change:user", this.broadcastUserChange);
-      //each entry in the collection corresponds to an target
+      //each entry in the collection corresponds to a target
       this.userDataModel = new UserDataModel();
       this.listenTo(this.userDataModel, "change", this.broadcastUserDataChange);
 
@@ -146,17 +146,33 @@ define([
       this.additionalParameters = additional;
     },
 
-    handleFailedPOST : function(jqXHR, status, errorThrown){
-      var pubsub = this.getPubSub();
-      var error = (jqXHR.responseJSON && jqXHR.responseJSON.error) ? jqXHR.responseJSON.error : "error unknown";
-      var message = 'User update was unsuccessful (' + error + ')';
+    handleFailedPOST : function(jqXHR, status, errorThrown, target){
+      var pubsub = this.getPubSub(), error;
+
+      if (jqXHR.responseJSON && jqXHR.responseJSON.error){
+        error = jqXHR.responseJSON.error;
+      } else if (jqXHR.responseText){
+        error = jqXHR.responseText;
+      } else {
+        error = "error unknown";
+      }
+
+      var message = 'Unable to update information for endpoint ' + target + ' (' + error + ')' ;
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
     },
 
-    handleFailedGET :  function(jqXHR, status, errorThrown){
-      var pubsub = this.getPubSub();
-      var error = (jqXHR.responseJSON && jqXHR.responseJSON.error) ? jqXHR.responseJSON.error : "error unknown";
-      var message = 'Unable to retrieve information (' + error + ')';
+    handleFailedGET :  function(jqXHR, status, errorThrown, target){
+      var pubsub = this.getPubSub(), error;
+
+      if (jqXHR.responseJSON && jqXHR.responseJSON.error){
+        error = jqXHR.responseJSON.error;
+      } else if (jqXHR.responseText){
+        error = jqXHR.responseText;
+      } else {
+        error = "error unknown";
+      }
+
+      var message = 'Unable to retrieve information for endpoint ' + target + ' (' + error + ')' ;
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
     },
 
@@ -214,8 +230,10 @@ define([
       //will have a default fail message for get requests or put/post requests
       function fail(){
         var toCall = method == "GET" ? that.handleFailedGET : that.handleFailedPOST;
-        toCall.apply(that, arguments);
-        deferred.resolve.apply(undefined, arguments);
+        var argsWithTarget = [].slice.apply(arguments);
+        argsWithTarget.push(target);
+        toCall.apply(that, argsWithTarget);
+        deferred.fail.apply(undefined, arguments);
       }
 
       //it came from a form, needs to have a csrf token

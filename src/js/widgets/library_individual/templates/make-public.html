@@ -1,0 +1,34 @@
+
+
+    {{#if public}}
+
+    <h3><i class="fa fa-lg fa-unlock"></i> This Library is Public</h3>
+
+    <div class="s-permissions-list-container">
+
+        <p><b>Public libraries</b> are available for all to read.</p>
+        <p><b>Private libraries</b> are visible to only you and any collaborators.</p>
+
+         <p> The public address of this library is <a target="_blank" href="/#/public-libraries/{{id}}">{{host}}/#/public-libraries/{{id}}</a></p>
+         <p><button class="btn btn-danger btn-inverted public-button make-private"><i class="fa fa-lg fa-lock"></i> Make this library private. </button></p>
+
+    </div>
+
+    {{else}}
+
+        <h3> <i class="fa fa-lg fa-lock"></i> This Library is Private</h3>
+
+        <div class="s-permissions-list-container">
+
+            <p><b>Public libraries</b> are available for all to read.</p>
+            <p><b>Private libraries</b> are visible to only you and any collaborators.</p>
+
+            <p>
+              <button class="btn btn-success btn-inverted  public-button make-public"><i class="fa fa-lg fa-unlock"></i> Make this library public. </button>
+            </p>
+    </div>
+
+    {{/if}}
+
+
+</div>

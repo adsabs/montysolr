@@ -18,13 +18,16 @@
 
 .library-container {
 
+  .s-header {
+    min-height: 300px;
+  }
+
   .s-content-container;
   margin-top: 30px;
-  padding-left: 3%;
+  padding: 20px 3.7%;
   margin-left: -15px;
 
 }
-
 
 //styles specific to metadata/all libraries widget
 .s-all-libraries-widget {
@@ -45,6 +48,31 @@
 
 //styles specific to individual library widget
 .s-library-widget {
+
+  .s-library-actions {
+    padding: 10px 0%;
+  }
+
+  .s-library-item {
+    list-style: none;
+
+    >div {
+      margin-bottom: 16px;
+    }
+  }
+
+  .s-library-list-container {
+    .clearfix;
+    padding-left: 0;
+    position: relative;
+    left: -5.7%;
+    margin-top: 12px;
+  }
+
+  .s-permissions-list-container, .s-public-container {
+    border:  @border-light-default;
+    padding: 1%;
+  }
 
   .s-editable-buttons {
     margin-left: 40px;
@@ -109,6 +137,7 @@
 
   .s-library-info {
     padding: 10px 0;
+    .clearfix;
     margin-top: 10px;
     .s-spacer-top;
     border-top: @border-light-default;
@@ -117,6 +146,10 @@
     p:first-of-type {
       display: inline-block;
       margin-right: 25px;
+    }
+
+    div.col-sm-3 {
+      padding-left:0;
     }
 
   }
@@ -133,6 +166,7 @@
 
 }
 
+
 .s-libraries-layout {
 
   .s-export {
@@ -141,6 +175,37 @@
 
   .close-widget {
     display: none;
+  }
+
+}
+
+.s-public-libraries-layout {
+
+  .s-public-lib-descriptor {
+    padding: 1px;
+    background-color: lighten(@navbar-inverse-bg, 10%);
+    color: white;
+    margin-left: -15px;
+    margin-right: -15px;
+    text-align: center;
+
+    h3 {
+      font-weight: 300;
+      color: #fff;
+      font-size:28px;
+    }
+  }
+
+  .s-header {
+    min-height: 243px;
+  }
+
+  .library-detail-view {
+    margin-left: 0 !important;
+  }
+
+  .s-library-title h2 {
+    font-size: 48px;
   }
 
 }
