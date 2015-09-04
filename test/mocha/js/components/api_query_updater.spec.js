@@ -15,7 +15,7 @@ define([
       expect(function(){new ApiQueryUpdater()}).to.throw.Error;
     });
 
-    it("supports limit/exclude operations", function() {
+    it("supports limit/exclude/replace operations", function() {
       var q = new ApiQuery({'q': 'bar'});
       var u = new ApiQueryUpdater('q');
 
@@ -54,6 +54,10 @@ define([
 
       u.updateQuery(q, 'q', 'limit', 'baz');
       expect(q.get('q')).to.be.eql(['((ack:foo or ack:bar) AND baz)']);
+
+      u.updateQuery(q, 'q', 'replace', 'foox');
+      expect(q.get('q')).to.be.eql(['foox']);
+      expect(u._getExistingVals(q, u._n('q'))).to.eql(['AND', 'foox']);
     });
 
     it.skip("can update existing query:add/replace (any field)", function() {
@@ -141,6 +145,23 @@ define([
       expect(q.get('__q_q')).to.eql(['AND', 'bar', 'baz']);
       expect(q2.get('__q_q')).to.eql(undefined);
       expect(q2.url()).to.be.eql('q=(bar+AND+baz)');
+    });
+
+    it("can wrap in quotes (if necessary)", function() {
+      var q = new ApiQuery({'q': 'bar'});
+      var u = new ApiQueryUpdater('q');
+
+      expect(u.quoteIfNecessary('this that')).to.eql('"this that"');
+      expect(u.quoteIfNecessary('"this that"')).to.eql('"this that"');
+      expect(u.quoteIfNecessary('"this "that"')).to.eql('"this \\"that"');
+      expect(u.quoteIfNecessary('"this that')).to.eql('"\\"this that"');
+      expect(u.quoteIfNecessary('this that"')).to.eql('"this that\\""');
+
+      expect(u.quote('this that')).to.eql('"this that"');
+      expect(u.quote('"this that"')).to.eql('"\\"this that\\""');
+      expect(u.quote('"this "that"')).to.eql('"\\"this \\"that\\""');
+      expect(u.quote('"this that')).to.eql('"\\"this that"');
+      expect(u.quote('this that"')).to.eql('"this that\\""');
     });
 
   });
