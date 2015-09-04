@@ -57,12 +57,11 @@ define([
       },
 
       activate: function (beehive) {
-        this.setBeeHive(beehive)
-        pubsub = beehive.Services.get('PubSub');
-        this.key = pubsub.getPubSubKey();
+        this.setBeeHive(beehive.getHardenedInstance())
+        pubsub = this.getBeeHive().getService('PubSub');
 
-        pubsub.subscribe(this.key, pubsub.START_SEARCH, _.bind(this.updateCurrentQuery, this));
-        pubsub.subscribe(this.key, pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
+        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.updateCurrentQuery, this));
+        pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
 
         /*
          * the three events that come from changing a collection:
@@ -76,10 +75,10 @@ define([
           this.listenTo(this.collection, ev, function(arg1, arg2){
             if (ev == "change" && arg1 instanceof Backbone.Model ){
               //a single model changed, widgets might want to know which one
-              pubsub.publish(this.key, pubsub.LIBRARY_CHANGE, this.collection.toJSON(), {ev: ev, id: arg1.id});
+              pubsub.publish(pubsub.LIBRARY_CHANGE, this.collection.toJSON(), {ev: ev, id: arg1.id});
             }
             else {
-              pubsub.publish(this.key, pubsub.LIBRARY_CHANGE, this.collection.toJSON(),  {ev: ev});
+              pubsub.publish(pubsub.LIBRARY_CHANGE, this.collection.toJSON(),  {ev: ev});
             }
           });
 
@@ -145,11 +144,11 @@ define([
           query: apiQuery
         });
         var defer = $.Deferred();
-        pubsub.subscribeOnce(this.key, pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
+        pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
           defer.resolve(data);
         }), this);
 
-        pubsub.publish(this.key, pubsub.EXECUTE_REQUEST, req);
+        pubsub.publish(pubsub.EXECUTE_REQUEST, req);
 
         return defer;
       },
@@ -178,7 +177,7 @@ define([
         }
         else if (options.bibcodes == "selected"){
 
-          var bibs = this.getBeeHive.getObject("AppStorage").getSelectedPapers();
+          var bibs = this.getBeeHive().getObject("AppStorage").getSelectedPapers();
           deferred.resolve(bibs);
         }
         else {
@@ -257,14 +256,14 @@ define([
             //delete library from internal representation
             that.collection.remove(id);
             //take care of ui
-            that.pubsub.publish(that.key, that.pubsub.NAVIGATE, "AllLibrariesWidget", "libraries");
+            that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").NAVIGATE, "AllLibrariesWidget", "libraries");
             var message = "Library <b>" + name + "</b> was successfully deleted";
-            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "success"}));
+            that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "success"}));
           })
          .fail(function(jqXHR){
            var error = JSON.parse(jqXHR.responseText).error
             var message = "Library <b>" + name + "</b> could not be deleted : (" + error + ")";
-            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+            that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
           });
 
         return promise;
@@ -296,7 +295,7 @@ define([
           .fail(function(jqXHR){
             var error = JSON.parse(jqXHR.responseText).error
             var message = "Library <b>" +  that.collection.get(id).title + "</b> could not be updated: (" + error +")";
-            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+            that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
           });
 
       },
@@ -317,7 +316,7 @@ define([
 //          .fail(function(jqXHR){
 //            var error = JSON.parse(jqXHR.responseText).error;
 //            var message = "Library <b>" +  that.collection.get(id).title + "</b> could not be updated: ("  + error + ")";
-//            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+//            that.getBeeHive().getService("PubSub").publish(that.key, that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
 //          });
 //
 //      },
@@ -334,7 +333,7 @@ define([
           .fail(function(jqXHR){
             var error = JSON.parse(jqXHR.responseText).error;
             var message = "Library <b>" +  that.collection.get(id).get("name") + "</b> could not be updated: (" + error + ")";
-            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+            that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
           });
 
       },
@@ -351,7 +350,7 @@ define([
         return that.updateLibraryContents(data.library, { bibcode : bibcodes, action : "add" })
           .fail(function(){
             var message = "Library <b>" +  that.collection.get(data.library).title + "</b> could not be updated";
-            that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+            that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
           });
 
       });
@@ -376,7 +375,7 @@ define([
          var createLibraryPromise = that.createLibrary(data)
          .fail(function(){
            var message = "Library <b>" +  name+ "</b> could not be created";
-           that.pubsub.publish(that.key, that.pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+           that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
          });
 
          return createLibraryPromise

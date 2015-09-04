@@ -102,21 +102,21 @@ define([
 
       //sort by num papers (desc)
 
-      $("#test thead td").eq(3).find("button").click();
-      $("#test thead td").eq(3).find("button").click();
+      $("#test thead th").eq(3).find("button").click();
+      $("#test thead th").eq(3).find("button").click();
 
       expect($("#test tbody td:nth-of-type(4)").map(function(e){return this.textContent}).get()).to.eql(  [ '4000', '400', '300', '0' ] );
 
       //sort by permission
 
-      $("#test thead td").eq(4).find("button").click();
+      $("#test thead th").eq(4).find("button").click();
 
       expect($("#test tbody td:nth-of-type(5)").map(function(e){return this.textContent}).get()).to.eql(["read", "write", "admin", "owner"]);
 
       //sort by date last modified (desc)
 
-      $("#test thead td").eq(5).find("button").click();
-      $("#test thead td").eq(5).find("button").click();
+      $("#test thead th").eq(5).find("button").click();
+      $("#test thead th").eq(5).find("button").click();
 
       expect($("#test tbody td:nth-of-type(6)").map(function(e){return this.textContent}).get()).to.eql(["6/4/15 7:57p", "6/3/14 7:57p", "6/2/13 7:57p", "6/1/12 7:57p"]);
 

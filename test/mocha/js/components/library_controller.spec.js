@@ -147,12 +147,12 @@ define([
 
     });
 
-    it("should notify widgets of the status of the collection", function(){
+    it("should notify widgets of the status of the collection", function() {
 
       var l = new LibraryController();
 
       var minsub = new (MinSub.extend({
-        request: function() {
+        request: function () {
           return {some: 'foo'}
         }
       }))({verbose: false});
@@ -160,14 +160,13 @@ define([
       l.activate(minsub.beehive);
 
       //all calls to compose request will resolve w/done
-      l.composeRequest = sinon.spy(function(target, method){
+      l.composeRequest = sinon.spy(function (target, method) {
         var d = $.Deferred();
         d.resolve(stubMetadata);
         return d.promise();
       });
 
-
-      l.pubsub.publish = sinon.spy();
+      l.getBeeHive().getService("PubSub").publish = sinon.spy();
 
       expect(l.isDataLoaded()).to.be.false;
 
@@ -178,7 +177,7 @@ define([
       //when collection changed, pubsub event was sent that notifies widgets of
       //the new collection, what is in it, and what the event was
 
-      expect(JSON.stringify(l.pubsub.publish.args[0].slice(1))).to.eql('["[PubSub]-Library-Change",[{"name":"Aliens Among Us","id":"1","description":"Are you one of them?","permission":"owner","num_documents":300,"date_created":"2015-04-03 04:30:04","date_last_modified":"2015-04-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Everything Sun","id":"2","description":"Where would we be without the sun?","num_documents":0,"permission":"admin","date_created":"2014-01-03 04:30:04","date_last_modified":"2015-01-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Space Travel and You","id":"7","description":"","permission":"write","num_documents":4000,"date_created":"2013-06-03 04:30:04","date_last_modified":"2015-06-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Space Travel and Me","id":"3","description":"interesting","permission":"read","num_documents":400,"date_created":"2012-06-03 05:30:04","date_last_modified":"2015-07-09 06:30:04","public":false,"num_users":1,"title":""}],{"ev":"reset"}]');
+      expect(JSON.stringify(l.getBeeHive().getService("PubSub").publish.args[0])).to.eql('["[PubSub]-Library-Change",[{"name":"Aliens Among Us","id":"1","description":"Are you one of them?","permission":"owner","num_documents":300,"date_created":"2015-04-03 04:30:04","date_last_modified":"2015-04-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Everything Sun","id":"2","description":"Where would we be without the sun?","num_documents":0,"permission":"admin","date_created":"2014-01-03 04:30:04","date_last_modified":"2015-01-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Space Travel and You","id":"7","description":"","permission":"write","num_documents":4000,"date_created":"2013-06-03 04:30:04","date_last_modified":"2015-06-09 06:30:04","public":false,"num_users":1,"title":""},{"name":"Space Travel and Me","id":"3","description":"interesting","permission":"read","num_documents":400,"date_created":"2012-06-03 05:30:04","date_last_modified":"2015-07-09 06:30:04","public":false,"num_users":1,"title":""}],{"ev":"reset"}]');
 
     });
 
@@ -249,7 +248,7 @@ define([
       l.composeRequest = sinon.spy(function(){ var d = $.Deferred();d.resolve(stubMetadata.libraries);return d.promise()});
       l.fetchAllLibraryData = sinon.spy();
 
-      l.pubsub.publish = sinon.spy();
+      l.getBeeHive().getService("PubSub").publish = sinon.spy();
 
       l.createLibrary( {name : "fake library name" });
 
@@ -269,9 +268,9 @@ define([
 
       //should result in 1 call to composeRequest and 2 calls to pubsub on successful completion
 
-      expect(l.pubsub.publish.args[1].slice(1)).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget", "libraries"]);
+      expect(l.getBeeHive().getService("PubSub").publish.args[1]).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget", "libraries"]);
 
-      expect(JSON.stringify(l.pubsub.publish.args[2].slice(1))).to.eql(JSON.stringify([
+      expect(JSON.stringify(l.getBeeHive().getService("PubSub").publish.args[2])).to.eql(JSON.stringify([
         "[Alert]-Message",
         {
           "code": 0,
@@ -295,7 +294,7 @@ define([
         return d;
       });
 
-      l.beehive = {getObject : function(){ return {getSelectedPapers : function(){return ["1", "2", "3"]}}}};
+      l.getBeeHive = function(){return {getObject : function(){ return {getSelectedPapers : function(){return ["1", "2", "3"]}}}}};
 
      //get bibcodes from current  query
      var deferred1 =  l._getBibcodes({bibcodes : "all"});

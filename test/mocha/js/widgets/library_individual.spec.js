@@ -415,7 +415,9 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      w.pubsub.publish = sinon.spy();
+      var spy = sinon.spy();
+
+      w.getBeeHive().getService("PubSub").publish = spy;
 
       $("#test").append(w.render().el);
 
