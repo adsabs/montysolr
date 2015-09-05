@@ -35,10 +35,6 @@ define([
 
   var ResourcesView = Marionette.ItemView.extend({
     template : ResourcesTemplate,
-    
-    modelEvents: {
-      "change": "render"
-    },
 
     className : "resources-widget",
 
@@ -97,8 +93,14 @@ define([
       data.link_server = this.getBeeHive().getObject("User").getUserData("USER_DATA").link_server;
       //link mixin
       data = this.parseResourcesData(data);
-      this.model.set(data);
+
+      //the lack of "clear" before was allowing older attributes to hang on, showing outdated data
+      this.model.clear().set(data);
+      //only 1 render required
+      this.view.render();
+
       this.trigger('page-manager-event', 'widget-ready', {'isActive': true});
+
 
     }
 
