@@ -1,0 +1,66 @@
+/*
+A place for any variables that might be of interest to more than
+one widget or view
+*/
+
+
+$results-page-background : $darker-background;
+
+$default-box-shadow-color : darken($gray-lighter, 5%);
+
+$default-box-shadow :  2px 2px 2px $default-box-shadow-color;
+
+$border-default : 1px solid $border-default-color;
+
+$border-light-default: 1px solid #dddddd;
+
+$border-light-default-color: #dddddd;
+
+/* Social Media Colors */
+
+$facebook-color : rgb(59,89,153);
+
+$twitter-color : rgb(64,153,255);
+
+$mendeley-color : rgb(60,30,33);
+
+$sciencewise-color: rgb(179, 27, 27);
+
+/* Z Index Values */
+
+$z-index-negative : -1;
+
+$z-index-0 : 0;
+
+$z-index-1 : 1;
+
+$z-index-2 : 2;
+
+$z-index-3 : 3;
+
+$z-index-4 : 4;
+
+$z-index-max : 5;
+
+
+/*Easy way to get a transparent color*/
+
+$transparent : hsla(0, 0, 0, 0);
+
+
+/* Colors to represent refereed and nonrefereed items */
+
+$refereed  : lighten($brand-primary-faded, 5%);
+
+$nonrefereed : lighten($brand-success, 5%);
+
+$vis-color-3 : $brand-warning;
+
+$vis-color-4 : $brand-danger;
+
+
+$subtle-brand-primary : desaturate($brand-primary, 40%);
+
+$disabled-color : mix($gray-light, $gray-lighter);
+
+

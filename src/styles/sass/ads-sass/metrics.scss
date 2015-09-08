@@ -5,7 +5,7 @@
 
 .s-metrics-title {
 
-  .s-title-format;
+  @extend  .s-title-format;
 }
 
   .s-metrics-section {
@@ -14,7 +14,7 @@
 
 .s-metrics-table, .s-metrics-graph {
 
-  @media(min-width: @screen-sm-min){
+  @media(min-width: $screen-sm-min){
 
     display: inline-block;
     vertical-align: top;
@@ -36,7 +36,7 @@
     width: 100%;
   }
 
-  @media(min-width: @screen-sm-min){
+  @media(min-width: $screen-sm-min){
 
     width: 33%;
 
@@ -62,7 +62,7 @@
 
 .s-metrics-graph {
 
-  @media(min-width: @screen-sm-min){
+  @media(min-width: $screen-sm-min){
 
     width: 66%;
 
@@ -87,16 +87,16 @@
   }
 
   &:hover {
-    border-bottom: 3px solid lighten(@brand-primary-faded, 30%);
+    border-bottom: 3px solid lighten($brand-primary-faded, 30%);
   }
 
-  .lh-transition(all, .5s);
+  transition : all, .5s;
 
 }
 
 .s-graph-tab.active{
-  border-bottom: 3px solid @brand-primary-faded;
-  color:  @brand-primary-faded;
+  border-bottom: 3px solid $brand-primary-faded;
+  color:  $brand-primary-faded;
 }
 
 
@@ -110,16 +110,12 @@
   padding: 3%;
 
   input {
-
     width: 60px;
-
   }
 }
 
 
 /* nvd3 overrides */
-
-
 .nvtooltip h3 {
   font-size: 16px;
   font-weight: bold;
@@ -130,9 +126,9 @@
   text-align: left;
 }
 
-.nvtooltip{
-  .ads-container;
-  .box-shadow(2px 2px 2px @gray-light)
+.nvtooltip {
+  @extend .ads-container;
+  box-shadow: 2px 2px 2px $gray-light;
 }
 
 

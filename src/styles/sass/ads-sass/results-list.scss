@@ -5,10 +5,10 @@
 
 
 .per-page {
-  .form-inline;
-  .form-control;
-  .input-sm;
-  .lh-border-radius(@border-radius-base);
+  @extend .form-inline;
+  @extend .form-control;
+  @extend .input-sm;
+  border-radius : $border-radius-base;
   margin: 0px;
   display: inline-block;
   width: 32%;
@@ -18,17 +18,16 @@
 //icons for links
 
 .s-icon-draw-attention {
-  color: darken(@brand-info, 5%) !important;
-
+  color: darken($brand-info, 5%) !important;
 }
 
 .s-link-details {
   position: absolute;
   top: 23px;
   background-color: white;
-  .ads-container;
+  @extend .ads-container;
   padding: 8px 10px;
-  z-index: @z-index-4;
+  z-index: $z-index-4;
   margin-left: -8%;
   min-width: 140px;
   font-weight:normal;
@@ -45,7 +44,7 @@
   font-size : 1.05em;
 
   i {
-    color : darken(@gray-lighter, 2%);
+    color : darken($gray-lighter, 2%);
     cursor: default;
   }
 
@@ -53,34 +52,29 @@
 
     i {
       cursor: pointer !important;
-      color : @brand-primary;
-
+      color : $brand-primary;
     }
-
   }
 }
 
 .s-data-icon {
   font-size: 1.1em;
-  .icon-data;
-
+  @extend .icon-data;
 }
 
 .s-list-icon {
   font-size: 1.1em;
-  .icon-list;
-
-
+  @extend .icon-list;
 }
 
 .s-text-icon {
   font-size: 1.1em;
-  .icon-text;
+  @extend .icon-text;
 }
 
 
 .s-identifier a {
-  color: @gray-dark;
+  color: $gray-dark;
 }
 
 .just-authors {
@@ -89,7 +83,6 @@
 
 .s-result-item-buffer {
   margin-top: 10px;
-
 }
 
 .s-top-row {
@@ -106,7 +99,7 @@
   margin-bottom: 3px;
   font-size:17px;
   /*need to investigate why this gets overridden in the case of 2 links*/
-  color: darken(@brand-primary, 8%);
+  color: darken($brand-primary, 8%);
   font-weight: 500;
   line-height: 1.2;
 
@@ -128,7 +121,7 @@
 
 .s-more-info {
 
-  border-left: 6px solid @gray-lighter;
+  border-left: 6px solid $gray-lighter;
   padding: 0 0 0 2%;
   margin-left: 10.4%;
   margin-top: 10px;
@@ -141,8 +134,8 @@
     margin-bottom: 10px;
 
     em {
-      background-color : lighten(@brand-info, 30%);
-      color: @brand-primary;
+      background-color : lighten($brand-info, 30%);
+      color: $brand-primary;
       font-weight: 400;
     }
   }
@@ -159,16 +152,17 @@
 
   blockquote {
     margin: 0em 1em;
-    padding:.5em .5em;
-    font-size: 1em}
+    padding:.5em 5em;
+    font-size: 1em
+  }
 
   /* title for abstract*/
   h4 {
-    font-size: @font-size-base;
+    font-size: $font-size-base;
     margin: 0px 0 4px 0;
     //targeting only the "Abstract" link
     a{
-      color: darken(@brand-primary, 8%);
+      color: darken($brand-primary, 8%);
       font-weight: 500;
     }
   }
@@ -176,7 +170,6 @@
   p {
     font-weight: 300;
   }
-
 
 
   i.s-no-data {
@@ -191,14 +184,12 @@
   text-align: right;
   padding-left: 0;
   label {
-
-    .s-light-font;
-
+    @extend .s-light-font;
   }
 }
 
 .s-open-access {
-  color: darken(saturate(@brand-success, 10%), 15%) !important;
+  color: darken(saturate($brand-success, 10%), 15%) !important;
 }
 
 .s-results-list {
@@ -218,7 +209,7 @@
   }
 
  .chosen{
-    border-left: 5px solid @brand-success;
+    border-left: 5px solid $brand-success;
   }
 
 }
@@ -252,9 +243,9 @@ li.article-author {
   .dropdown-menu {
     padding: 10%;
   }
-  .lh-box-shadow(2px 2px 2px lighten(@gray-lightest, 5%));
+  box-shadow : 2px 2px 2px lighten($gray-lightest, 5%);
   #sort-button {
-    color: @text-color !important;
+    color: $text-color !important;
   }
   .btn-link {
     padding: 3px 5px;
@@ -268,8 +259,8 @@ li.article-author {
   margin: 0 15px 10px 15px;
   margin-left: 15px;
   margin-right: 15px;
-  border-bottom: @border-light-default;
-  .clearfix;
+  border-bottom: $border-light-default;
+  @extend .clearfix;
   padding-bottom: 15px;
 }
 
@@ -286,7 +277,7 @@ li.article-author {
   }
 }
 
-@media (max-width :@screen-sm-min) {
+@media (max-width :$screen-sm-min) {
 
   .s-results-title {
     font-size: 16px;
@@ -306,7 +297,7 @@ li.article-author {
 .s-list-description {
   font-weight: 300;
   font-size: 20px;
-  color: @brand-primary-faded;
+  color: $brand-primary-faded;
   margin-bottom: 6px;
 }
 
@@ -325,13 +316,13 @@ li.article-author {
     //otherwise it has a weirdly tall height that can't be reduced
     position: absolute;
     left: 57%;
-    .s-icon-hover;
+    @extend .s-icon-hover;
   }
 
   i.icon-hide-details {
     position: absolute;
     left: 48%;
-    .s-icon-hover;
+    @extend .s-icon-hover;
   }
 }
 

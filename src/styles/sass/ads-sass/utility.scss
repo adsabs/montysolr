@@ -46,38 +46,38 @@
 }
 
 .s-large-close {
-  background-color: @body-bg;
+  background-color: $body-bg;
   font-weight: bold;
   font-size: 4em;
   display: inline-block;
-  color: @text-color;
+  color: $text-color;
   width: 1.2em;
   height: 1.2em;
-  padding-left: .3em;
-  border: 1px solid @gray-light;
-  .lh-border-radius(50px);
+  padding-left: 3em;
+  border: 1px solid $gray-light;
+  border-radius : 50px;
   line-height: 1;
-  z-index: @z-index-4;
+  z-index: $z-index-4;
   float: right;
   cursor: pointer;
   position:relative;
-  opacity: .8;
+  opacity:  .8;
 
   &:hover {
-    border: 1px solid @gray;
-    .lh-box-shadow(0px 0px 4px darken(@default-box-shadow-color, 10%));
+    border: 1px solid $gray;
+    box-shadow: 0px 0px 4px darken($default-box-shadow-color, 10%);
     opacity: 1
   }
 }
 
 .s-disabled {
-  color : lighten(@gray-light, 10%);
+  color : lighten($gray-light, 10%);
 }
 
 .s-darker-background {
   min-height: 100%;
   height:100%;
-  background-color: @darker-background;
+  background-color: $darker-background;
   overflow-y: hidden;
 }
 
@@ -120,7 +120,7 @@
 
 .s-loading {
   opacity: 1;
-  z-index : @z-index-3;
+  z-index : $z-index-3;
   background-color: white;
   position: absolute;
   top: 0px;
@@ -129,57 +129,41 @@
   right: 0px;
 
   &:before {
-    .fa;
-    .fa-pulse;
-    .fa-2x;
-    color: lighten(@brand-primary-faded, 10%);
-    content : @fa-var-spinner;
+    @extend .fa;
+    @extend .fa-pulse;
+    @extend .fa-2x;
+    color: lighten($brand-primary-faded, 10%);
+    content : $fa-var-spinner;
     position: absolute;
     top: 50%;
     right: 50%;
-    z-index: @z-index-4;
+    z-index: $z-index-4;
 
   }
 }
 
 //for smaller widgets that just need a tiny loading image
 .s-loading.s-small{
-  .s-loading;
+
   &:before{
-    .fa;
-    .fa-pulse;
-    color: lighten(@brand-primary-faded, 10%);
-    content : @fa-var-spinner;
+    @extend .fa;
+    @extend .fa-pulse;
+    color: lighten($brand-primary-faded, 10%);
+    content : $fa-var-spinner;
     position: absolute;
     top: 50%;
     right: 50%;
-    z-index: @z-index-4;
+    z-index: $z-index-4;
   }
 }
 
-//move up the loader image gif for lists of results
+//a few alterations for list of results loading overlay
 .list-of-things {
   .s-loading {
     opacity: .5;
-    z-index : @z-index-max;
-    background-color: white;
-    position: absolute;
-    top: 0px;
-    left:0px;
-    bottom: 0px;
-    right: 0px;
-
+    z-index : $z-index-max;
     &:before {
-      .fa;
-      .fa-spin;
-      .fa-2x;
-      color: lighten(@brand-primary-faded, 10%);
-      content : @fa-var-cog;
-      position: absolute;
       top: 10%;
-      right: 50%;
-      z-index: @z-index-4;
-
     }
   }
 }
@@ -187,7 +171,7 @@
 //success template with just checkmark
 .s-success {
     opacity: 1;
-    z-index : @z-index-3;
+    z-index : $z-index-3;
     background-color: white;
     position: absolute;
     top: 0px;
@@ -196,14 +180,14 @@
     right: 0px;
 
     &:before {
-      .fa;
-      .fa-3x;
-      color: @brand-success;
-      content : @fa-var-check;
+      @extend .fa;
+      @extend .fa-3x;
+      color: $brand-success;
+      content : $fa-var-check;
       position: absolute;
       top: 50%;
       right: 50%;
-      z-index: @z-index-4;
+      z-index: $z-index-4;
 
     }
 }
@@ -212,7 +196,6 @@
 .s-light-font {
   font-weight: 300;
 }
-
 
 .s-spacer-top-large {
   margin-top: 40px;
@@ -223,6 +206,6 @@
 }
 
 .s-divider-bottom {
-  border-bottom: 1px solid darken(@gray-lighter, 5%);
+  border-bottom: 1px solid darken($gray-lighter, 5%);
   margin-bottom: 5px;
 }

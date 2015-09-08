@@ -1,0 +1,256 @@
+/*put this class on an icon if a hover should indicate interactivity */
+.s-icon-hover {
+  &:hover {
+    color: $gray-dark;
+  }
+}
+
+.s-item-closed {
+  color: $gray-light;
+  @extend .fa;
+  @extend .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: $fa-var-angle-right;
+  }
+}
+
+.s-item-open {
+  color: $gray-light;
+  @extend .fa;
+  @extend .fa-2x;
+  position: relative;
+  top: 3px;
+  &:before {
+    content: $fa-var-angle-down;
+  }
+}
+
+// to indicate that column expands
+
+.paginate-left-icon {
+  @extend .fa;
+  @extend .fa-lg;
+  &:before {
+    content: $fa-var-arrow-circle-left;
+  }
+}
+
+.paginate-right-icon {
+  @extend .fa;
+  @extend .fa-lg;
+  &:before {
+    content: $fa-var-arrow-circle-right;
+  }
+
+}
+
+//for query builder, alias from glyphicon to font awesome, so it doesn't barf
+
+.glyphicon-plus {
+  @extend .fa;
+  @extend .fa-lg;
+  &:before {
+    content: $fa-var-plus;
+  }
+
+}
+
+.glyphicon-plus-sign {
+  @extend .fa;
+  @extend .fa-lg;
+  &:before {
+    content: $fa-var-plus-circle;
+  }
+
+}
+
+.glyphicon-remove {
+  @extend .fa;
+  @extend .fa-lg;
+  &:before {
+    content: $fa-var-minus;
+  }
+}
+
+
+//currently used for facets
+
+.s-filter-image {
+  @extend .fa;
+  &:before {
+    content: $fa-var-filter;
+  }
+}
+
+//carets
+
+.icon-item-open {
+  @extend .fa;
+  @extend .fa-2x;
+  &:before {
+    content: $fa-var-angle-down;
+  }
+}
+
+.icon-item-closed {
+
+  @extend .fa;
+  @extend .fa-2x;
+  &:before {
+    content: $fa-var-angle-right;
+  }
+}
+
+.icon-visualize {
+  @extend .fa;
+  &:before {
+    content: $fa-var-eye;
+  }
+}
+
+.icon-export {
+  @extend .fa;
+  &:before {
+    content: $fa-var-share-square-o;
+  }
+}
+
+.icon-explore {
+  @extend .fa;
+  &:before {
+    content: $fa-var-bar-chart-o;
+  }
+}
+
+.icon-help {
+  @extend .fa;
+  &:before {
+    content: $fa-var-question-circle;
+  }
+  font-size: 1.3em;
+  color: $gray-light;
+
+  &:hover {
+    color: $gray-dark;
+  }
+
+}
+
+
+.icon-details {
+   cursor: pointer;
+  @extend .item-closed;
+  color: $gray-light;
+}
+
+.icon-hide-details {
+  @extend .item-open;
+  cursor: pointer;
+  color: $gray-light;
+}
+
+/* indicates change of state, or movement, like applying a filter, a new search, something like that*/
+.icon-go {
+  @extend .fa;
+  cursor: pointer;
+  &:before {
+    content: $fa-var-arrow-circle-right;
+  }
+}
+
+.icon-list {
+  @extend .fa;
+  &:before {
+    content: $fa-var-list-ul;
+  }
+}
+
+.icon-data {
+  @extend .fa;
+  &:before {
+    content: $fa-var-database;
+  }
+}
+
+.icon-text {
+  @extend .fa;
+  &:before {
+    content: $fa-var-file-text-o;
+  }
+}
+
+.icon-success {
+  @extend .fa;
+  @extend .fa-lg;
+  color: $brand-success;
+  &:before {
+    content: $fa-var-check;
+  }
+}
+
+.icon-clear {
+  @extend .fa;
+  &:before{
+    content: $fa-var-times;
+  }
+}
+
+.icon-reload {
+  @extend .fa;
+  &:before{
+    content: $fa-var-refresh;
+  }
+}
+
+.icon-danger{
+  @extend .fa;
+  @extend .fa-lg;
+  color: $brand-danger;
+  &:before {
+    content: $fa-var-exclamation-triangle;
+  }
+}
+
+.icon-success-c {
+  @extend .icon-success;
+  color : desaturate($brand-success, 10%);
+}
+
+.icon-clear-c{
+  @extend .icon-clear;
+  color: desaturate($brand-danger, 10%);
+}
+
+.icon-reload-c{
+  @extend .icon-reload;
+  color: desaturate($brand-info, 10%);
+}
+
+//for use with bootstrap collapse plugin
+
+.toggle-icon {
+  @extend .fa;
+  @extend .fa-lg;
+  &:before {
+  content: $fa-var-caret-down;
+  }
+  transition : transform .5s ease-out;
+}
+
+.collapsed {
+  .toggle-icon {
+    transform : rotate(-90deg);
+  }
+}
+
+
+.icon-loading {
+  @extend .fa;
+  @extend .fa-lg;
+  @extend .fa-pulse;
+  &:before{
+    content: $fa-var-spinner;
+  }
+}

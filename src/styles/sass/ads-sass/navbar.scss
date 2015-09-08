@@ -3,7 +3,7 @@
 //otherwise dropdown buttons are mis-styled
 //and won't match the actual links
 .navbar-nav .btn-link {
-  color: @navbar-inverse-color;
+  color: $navbar-inverse-color;
   &:hover, &:focus  {
     text-decoration: none !important;
     color: #fff;
@@ -12,7 +12,7 @@
 
 //to vertically align
  .navbar-nav .dropdown-toggle, .navbar-nav .dropdown{
-    height: @navbar-height;
+    height: $navbar-height;
   }
 
 
@@ -21,7 +21,7 @@
 
   .dropdown-menu>li>a{
     padding-left: 0;
-    font-size:@font-size-base;
+    font-size:$font-size-base;
   }
 
   .btn-link {
@@ -29,7 +29,7 @@
   }
 
   >button{
-    height:@navbar-height;
+    height:$navbar-height;
   }
 }
 
@@ -68,7 +68,7 @@
     }
 
     .btn-link {
-      color: @brand-primary;
+      color: $brand-primary;
       padding-left: 0px;
     }
 
@@ -103,7 +103,7 @@
     padding: 2px;
     width: 60px;
     height: 30px;
-    background-color: @gray-light;
+    background-color: $gray-light;
     -webkit-border-radius: 60px;
     -moz-border-radius: 60px;
     -ms-border-radius: 60px;
@@ -120,7 +120,7 @@
   }
   input.cmn-toggle-round + label:before {
     right: 1px;
-    background-color: @gray-light;
+    background-color: $gray-light;
     -webkit-border-radius: 60px;
     -moz-border-radius: 60px;
     -ms-border-radius: 60px;
@@ -139,16 +139,16 @@
     -ms-border-radius: 100%;
     -o-border-radius: 100%;
     border-radius: 100%;
-    -webkit-box-shadow: 0 2px 5px @gray-dark;
-    -moz-box-shadow: 0 2px 5px @gray-dark;
-    box-shadow: 0 2px 5px @gray-dark;
+    -webkit-box-shadow: 0 2px 5px $gray-dark;
+    -moz-box-shadow: 0 2px 5px $gray-dark;
+    box-shadow: 0 2px 5px $gray-dark;
     -webkit-transition: margin 0.4s;
     -moz-transition: margin 0.4s;
     -o-transition: margin 0.4s;
     transition: margin 0.4s;
   }
   input.cmn-toggle-round:checked + label:before {
-    background-color: @brand-success;
+    background-color: $brand-success;
   }
   input.cmn-toggle-round:checked + label:after {
     margin-left: 30px;
@@ -165,48 +165,48 @@
   margin: 0 -15px;
   padding: 0 1%;
   position: relative;
-  z-index: @z-index-1;
-  background-color: lighten(@navbar-inverse-bg, 5%);
-  color: lighten(@navbar-inverse-color, 2%);
+  z-index: $z-index-1;
+  background-color: lighten($navbar-inverse-bg, 5%);
+  color: lighten($navbar-inverse-color, 2%);
   border-top: 1px solid black;
 
   li>a{
     padding: 15px 15px 11px 15px;
     border-radius: 0;
     font-size: 18px;
-    background-color: lighten(@navbar-inverse-bg, 5%);
-    border-bottom: 4px solid lighten(@navbar-inverse-bg, 5%);
-    color:lighten(@navbar-inverse-color, 2%);
+    background-color: lighten($navbar-inverse-bg, 5%);
+    border-bottom: 4px solid lighten($navbar-inverse-bg, 5%);
+    color:lighten($navbar-inverse-color, 2%);
 
     &:hover {
-      background-color: lighten(@navbar-inverse-bg, 8%);
-      border-bottom: 4px solid lighten(@navbar-inverse-bg, 8%);
+      background-color: lighten($navbar-inverse-bg, 8%);
+      border-bottom: 4px solid lighten($navbar-inverse-bg, 8%);
 
     }
 
   }
 
   >li.active>a{
-    background-color: lighten(@navbar-inverse-bg, 10%);
+    background-color: lighten($navbar-inverse-bg, 10%);
     &:hover {
-      background-color:lighten(@navbar-inverse-bg, 10%);
-      color: lighten(@brand-primary-faded, 10%);
-      border-bottom: 4px solid  @brand-primary-faded;;
+      background-color:lighten($navbar-inverse-bg, 10%);
+      color: lighten($brand-primary-faded, 10%);
+      border-bottom: 4px solid  $brand-primary-faded;;
 
     }
-    color: lighten(@brand-primary-faded, 10%);
-    border-bottom: 4px solid @brand-primary-faded;
+    color: lighten($brand-primary-faded, 10%);
+    border-bottom: 4px solid $brand-primary-faded;
 
   }
 
 }
 
 .s-hourly-warning {
-  color: darken(@brand-danger, 20%) !important;
+  color: darken($brand-danger, 20%) !important;
 
 
   .navbar-brand{
-    color: darken(@brand-danger, 20%) !important;
+    color: darken($brand-danger, 20%) !important;
     padding : 12.5px 15px;
     font-weight: bold;
     height: 30px;
@@ -214,8 +214,8 @@
 
   padding: 2%;
   width: 418px;
-  border-left: 8px solid darken(@brand-danger, 10%);
-  background-color: lighten(@brand-danger, 20%);
+  border-left: 8px solid darken($brand-danger, 10%);
+  background-color: lighten($brand-danger, 20%);
 
 }
 

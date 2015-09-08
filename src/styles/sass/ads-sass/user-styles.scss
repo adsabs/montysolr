@@ -7,7 +7,7 @@
   }
 
   .s-user-help {
-    color: @gray-light;
+    color: $gray-light;
     height: 52px;
   }
 
@@ -70,7 +70,7 @@
   }
 
   form {
-    border: 1px solid @gray-lighter;
+    border: 1px solid $gray-lighter;
     padding: 4%;
   }
 }

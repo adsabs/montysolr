@@ -1,0 +1,61 @@
+
+.border-default {
+  border-bottom : $border-default;
+}
+
+.border-default-light {
+  border-bottom: $border-light-default;
+}
+
+.default-box-shadow {
+box-shadow : $default-box-shadow;
+}
+
+.ads-corners {
+  border-radius: $border-radius-large;
+  box-shadow: 0 1px 5px $gray-lighter;
+}
+
+.ads-container {
+  padding: 5px;
+  background-color: white;
+  border: $border-light-default;
+}
+
+.s-motion-shadow {
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, .2);
+  background-color: rgba(255, 255, 255, 0.97);
+  border-bottom: 1px solid #ddd;
+}
+
+
+.s-light-font {
+  font-weight: 300 !important;
+}
+
+.x-remove {
+  cursor: pointer;
+  color : $gray;
+  @extend .fa;
+  @extend  .fa-lg;
+  &:before {
+    content: $fa-var-xing;
+  }
+
+  &:hover {
+    color: $gray-dark;
+  }
+}
+
+.button-hover-shadow:hover {
+  box-shadow: 1px 1px 4px $gray-light;
+}
+
+.s-content-container {
+
+  background-color: $body-bg;
+  border: $border-light-default;
+  box-shadow:2px 2px 5px  #E6E6E6;
+  border-radius: $border-radius-base;
+
+}
