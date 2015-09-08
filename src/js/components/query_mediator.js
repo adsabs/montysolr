@@ -101,8 +101,10 @@ define(['underscore',
         if ((JSON.stringify(apiQuery.toJSON()) == JSON.stringify(this.mostRecentQuery.toJSON())) &&
           (this.hasApp() && this.getApp().getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget")){
           //simply navigate to search results page, widgets are already stocked with data
-           this.getApp().getService('Navigator').navigate('results-page', {replace : true});
-           return;
+          if (this.getApp().hasService('Navigator')) {
+            this.getApp().getService('Navigator').navigate('results-page', {replace: true});
+            return;
+          }
         }
 
         //we have to clear selected records in app storage here too
