@@ -1,6 +1,7 @@
 $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
 
+
 .s-landing-page-layout {
   margin-left: -15px;
   margin-right: -15px;
@@ -9,7 +10,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 }
 
 .s-starry-background-wrapper {
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, .7)), url("../img/background.jpg");
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, .7)), url("../img/background.jpg");
   margin: 0 -15px;
 
 }
@@ -24,15 +25,27 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
 
 .ads-logo {
+<<<<<<< HEAD:src/styles/sass/ads-sass/landing-page.scss
 
-  width: 20%;
+
+ width: 20%;
   max-width: 380px;
   min-width: 200px;
 
   @media(max-width: $screen-xs-max){
     width:80%;
     float:none !important;
+=======
+  color: @gray-lighter;
+  font-weight: 100;
+  text-transform: lowercase;
+  font-size:54px;
+  margin:0 0 20px 0;
+  b {
+    font-weight: 300;
+>>>>>>> title image converted to text for better accessibility:src/styles/less/ads-less/landing-page.less
   }
+
 }
 
   .bumblebee {
@@ -72,7 +85,8 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 .s-landing-tabs {
 
   .s-tab {
-    font-size: 20px;
+    font-size: 22px;
+    border-bottom: 8px transparent;
     a {
       letter-spacing: .15em;
     }
@@ -106,13 +120,15 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     svg {
       transform : scale(1.3);
     }
+    border-bottom: 8px solid $brand-primary-faded;
+
   }
 
   z-index: 2;
   text-align: center;
   height: 117px;
   position: relative;
-  top: -34px;
+  top: -42px;
 
   .modern-search {
     position: relative;
