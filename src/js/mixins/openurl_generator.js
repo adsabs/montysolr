@@ -148,6 +148,9 @@ define([], function() {
                 'rfr_id': this.rfr_id,
                 'rft_val_fmt': this.rft_val_fmt,
                 'rft_id': this.rft_id,
+                'issn': this.rft_issn,
+                'id': this.id,
+                'isbn': this.rft_isbn,
                 'rft.spage': this.rft_spage,
                 'rft.issue': this.rft_issue,
                 'rft.volume': this.rft_vol,
@@ -168,10 +171,7 @@ define([], function() {
                 'aulast': this.rft_aulast,
                 'aufirst': this.rft_aufirst,
                 'date': this.rft_date,
-                'issn': this.rft_issn,
-                'id': this.id,
-                'genre': this.genre,
-                'isbn': this.rft_isbn
+                'genre': this.genre
             };
         };
 

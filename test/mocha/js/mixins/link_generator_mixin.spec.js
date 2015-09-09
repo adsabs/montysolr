@@ -334,7 +334,7 @@ define(['js/mixins/link_generator_mixin'],
 
       });
 
-      it("should not generate an openURL at all if there is no DOI", function (){
+      it("should not generate an openURL at all if there is no DOI/ISSN/ISBN", function (){
         /**
          * Test passes the following situation
          *   - user is authenticated
@@ -354,7 +354,6 @@ define(['js/mixins/link_generator_mixin'],
           "GRB 121024A shining through its star-forming galaxy"],
           "volume": "451",
           "issue": 1,
-          "issn": ["0035-8711"],
           "link_server": "MyBaseUrl"
         };
 
@@ -364,10 +363,32 @@ define(['js/mixins/link_generator_mixin'],
           '{"title":"", "type":"electr", "instances":"", "access":""}'
         ];
 
+
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
         expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+
+        // Check that an openURL IS created
+        var identifierList = ['isbn', 'issn', 'doi'];
+        for (var i=0; i < identifierList.length; ++i){
+
+          var tempIdentifiers = identifierList.slice(0);
+          tempIdentifiers.splice(i,1);
+
+          stub_meta_data[identifierList[i]] = 'fake'
+          var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+          expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain(identifierList[i]);
+          tempIdentifiers.forEach(function (value){
+            expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain(value);
+            expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain(value);
+          });
+
+          expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(true);
+
+          stub_meta_data[identifierList[i]] = undefined
+
+        }
 
       });
     })

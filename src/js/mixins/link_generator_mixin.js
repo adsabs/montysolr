@@ -95,7 +95,12 @@ var linkGenerator = {
 
           data = (data !== undefined) ? data : {};
           var link_server = (data.link_server !== undefined) ? data.link_server : false;
+
+          // Determine if the article has any identifiers
           var article_doi = (data.doi !== undefined) ? true : false;
+          var article_issn = (data.issn !== undefined) ? true : false;
+          var article_isbn = (data.isbn !== undefined) ? true : false;
+          var article_identifier = (article_doi || article_issn || article_isbn);
 
           // Only create an openURL if the following is true:
           //   - The article HAS a DOI
@@ -104,7 +109,7 @@ var linkGenerator = {
           //   - The user is authenticated
           //   - the user HAS a library link server
 
-          if (!l.access && !scan_available && link_server && article_doi){
+          if (!l.access && !scan_available && link_server && article_identifier){
             var openURL = new OpenURLGenerator(data, link_server);
             openURL.createOpenURL();
             electr_link = openURL.openURL;
