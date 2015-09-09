@@ -40,7 +40,7 @@ define([
       sinon.spy(m, 'alert');
       sinon.spy(m, 'onAlert');
       var app = {
-        getWidget: function(name) {
+        _getWidget: function(name) {
           if (name == 'AlertsWidget')
             return widget;
         },
@@ -74,7 +74,8 @@ define([
 
     it("fails when message cannot be displayed", function() {
       var x = _getM();
-      x.app.getWidget = function() {};
+      x.app._getWidget = function() {};
+      x.m._widget = null;
       var promise = x.m.alert(new ApiFeedback({msg: 'foo'}));
       expect(promise.state()).to.be.eql('rejected');
     });

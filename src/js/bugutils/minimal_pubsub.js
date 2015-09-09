@@ -64,6 +64,7 @@ define(['underscore', 'backbone',
         console.log('[MinSub]', 'starting');
       }
       this.requestCounter = 0;
+      this.fakeApp = {getPskOfPluginOrWidget: sinon.stub().returns(null)};
       this.beehive = new BeeHive();
       this.pubsub = new PubSub();
       this.pubsub.debug = true;
@@ -96,7 +97,7 @@ define(['underscore', 'backbone',
         longDelayInMs: 0,
         monitoringDelayInMs: 5
       });
-      qM.activate(this.beehive, {}); // fake application object
+      qM.activate(this.beehive, this.fakeApp); // fake application object
       this.beehive.addObject('QueryMediator', qM);
 
       this.key = this.pubsub.getPubSubKey();

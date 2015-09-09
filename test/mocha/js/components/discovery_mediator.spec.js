@@ -66,7 +66,8 @@ define([
     var _getM = function() {
       var mediator = new DiscoveryMediator();
       var app = {
-        getWidget: sinon.stub().returns({})
+        getWidget: sinon.stub().returns({}),
+        getPskOfPluginOrWidget: sinon.stub().returns(null)
       };
       mediator.activate(minsub.beehive, app);
 
