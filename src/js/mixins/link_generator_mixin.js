@@ -95,14 +95,16 @@ var linkGenerator = {
 
           data = (data !== undefined) ? data : {};
           var link_server = (data.link_server !== undefined) ? data.link_server : false;
+          var article_doi = (data.doi !== undefined) ? true : false;
 
           // Only create an openURL if the following is true:
+          //   - The article HAS a DOI
           //   - There is NO open access available
           //   - There is NO scan available from the ADS
           //   - The user is authenticated
           //   - the user HAS a library link server
 
-          if (!l.access && !scan_available && link_server){
+          if (!l.access && !scan_available && link_server && article_doi){
             var openURL = new OpenURLGenerator(data, link_server);
             openURL.createOpenURL();
             electr_link = openURL.openURL;
