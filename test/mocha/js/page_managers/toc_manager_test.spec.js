@@ -89,7 +89,7 @@ define([
         app.loadModules(config).done(function () {
 
           // hack (normally this will not be the usage pattern)
-          var pageManager = app.getWidget("PageManager");
+          var pageManager = app._getWidget("PageManager");
 
           app.activate();
           pageManager.assemble(app);
@@ -103,14 +103,14 @@ define([
           pageManager.show('SearchWidget', 'ShowAbstract', 'TOCWidget');
 
           // deliver data to the widget for display
-          var abstract = app.getWidget('ShowAbstract');
-          var references = app.getWidget('ShowReferences');
+          var abstract = app._getWidget('ShowAbstract');
+          var references = app._getWidget('ShowReferences');
           var r = new ApiResponse(testData());
           r.setApiQuery(new ApiQuery({q: 'foo'}));
 
           abstract.processResponse(r);
 
-          app.getWidget("TOCWidget").resetActiveStates();
+          app._getWidget("TOCWidget").resetActiveStates();
 
           // the navigation must turn active
           expect(pageManager.view.$el.find('[data-widget-id="ShowAbstract"]').hasClass('s-nav-inactive')).to.be.false;
@@ -144,7 +144,7 @@ define([
         app.loadModules(config).done(function () {
 
           // hack (normally this will not be the usage pattern)
-          var pageManager = app.getWidget("PageManager");
+          var pageManager = app._getWidget("PageManager");
           app.activate();
           pageManager.assemble(app);
 
@@ -191,7 +191,7 @@ define([
         app.loadModules(config).done(function () {
 
           // hack (normally this will not be the usage pattern)
-          var pageManager = app.getWidget("PageManager");
+          var pageManager = app._getWidget("PageManager");
           app.activate();
           pageManager.assemble(app);
 
@@ -238,7 +238,7 @@ define([
         app.loadModules(config).done(function () {
 
           // hack (normally this will not be the usage pattern)
-          var pageManager = app.getWidget("PageManager");
+          var pageManager = app._getWidget("PageManager");
           app.activate();
           pageManager.assemble(app);
 

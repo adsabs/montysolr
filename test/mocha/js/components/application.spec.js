@@ -192,7 +192,7 @@ define([
         })
     });
 
-    it("uses reference counters to get rid of objects", function() {
+    it("uses reference counters to get rid of objects", function(done) {
       var app = new Application();
       var defer = app.loadModules(config);
 

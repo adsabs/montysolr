@@ -487,6 +487,7 @@ define([
         this._killBarbarian('widget:' + name);
         return ds.counter;
       }
+      return -1;
     },
 
     hasPlugin: function(name) {
@@ -556,9 +557,13 @@ define([
      * @param name
      */
     returnPlugin: function(name) {
-      this.__barbarianInstances['plugin:' + name].counter--;
-      this._killBarbarian('plugin:' + name);
-      return this.__barbarianInstances['plugin:' + name].counter;
+      var ds = this.__barbarianInstances['plugin:' + name];
+      if (ds) {
+        ds.counter--;
+        this._killBarbarian('plugin:' + name);
+        return ds.counter;
+      }
+      return -1;
     },
 
     /**
