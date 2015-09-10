@@ -78,7 +78,7 @@ define([
         it("should give children the same pubsub instance", function() {
           var beehive = new Beehive();
           beehive.addService('PubSub', new PubSub());
-          beehive.activate()
+          beehive.activate();
           var pm = new PageManagerController();
 
           pm.activate(beehive);
@@ -88,20 +88,14 @@ define([
         });
 
 
-        it("assembles the page view", function(done) {
+        it("assembles/disassembles the page view", function(done) {
           var app = new Application({debug: false});
           delete config.core.objects.Navigator;
           config.widgets.PageManager = 'js/wraps/abstract_page_manager/abstract_page_manager';
 
           app.loadModules(config).done(function() {
 
-            // hack (normally this will not be the usage pattern)
             var pageManager = app._getWidget("PageManager");
-            pageManager.createView = function(options) {
-              var TV = ThreeColumnView.extend({template: ThreeColSearchResultsTemplate});
-              return new TV(options);
-            };
-
             app.activate();
             pageManager.assemble(app);
 
@@ -112,6 +106,15 @@ define([
             expect($w.find('[data-widget="ShowAbstract"]').children().length).to.be.equal(1);
             expect($w.find('[data-widget="SearchWidget"]').children().length).to.be.equal(1);
 
+            // normally called by master page-manager
+            expect(pageManager.assembled).to.eql(true);
+            expect(app.__widgets['widget:SearchWidget']).to.be.defined;
+
+            pageManager.disAssemble(app);
+            expect(app.returnWidget('PageManager')).to.eql(0);
+            expect(pageManager.assembled).to.eql(false);
+
+            expect(app.__widgets['widget:SearchWidget']).to.be.undefined;
             done();
           });
         });
@@ -309,6 +312,21 @@ define([
             expect(masterPageManager.view.$el.find('[data-widget="SearchWidget"] input.q').val()).to.be.equal('foo');
             expect(masterPageManager.view.$el.find('[data-widget="AuthorFacet"]').length).to.be.equal(0);
 
+            var firstChild = masterPageManager.getCurrentActiveChild();
+            sinon.spy(firstChild, 'disAssemble');
+            expect(firstChild.widgets.SearchWidget).to.be.defined;
+            masterPageManager.show('SecondPageManager');
+            expect(firstChild.widgets.SearchWidget).to.be.undefined;
+            expect(firstChild.disAssemble.called).to.eql(true);
+
+            // would happen only if the master is nested
+            _.each(masterPageManager.collection.models, function(model) {
+              expect(model.get('object')).to.not.eql(null);
+            });
+            masterPageManager.disAssemble();
+            _.each(masterPageManager.collection.models, function(model) {
+              expect(model.get('object')).to.eql(null);
+            });
             done();
           });
         });

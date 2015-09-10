@@ -112,7 +112,7 @@ define([
           $(".s-quick-add").removeClass("hidden");
         }
         else {
-          if (model.attributes.object.view.$el.parent().length > 0) {
+          if (model.attributes.object && model.attributes.object.view.$el.parent().length > 0) {
             model.attributes.object.view.$el.detach();
             model.attributes.numDetach += 1;
           }
@@ -182,7 +182,6 @@ define([
         // activate the new PM
         var previousPM = this.currentChild;
         this.currentChild = pageManager;
-        coll.set({'isSelected': true, options: options, object: pm});
 
         // send notification
         this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
@@ -190,9 +189,11 @@ define([
         // disassemble the old one (behind the scenes)
         if (previousPM) {
           var oldPm = this.collection.find({id: previousPM});
-          if (oldPm && oldPm.object)
+          if (oldPm && oldPm.get('object'))
             oldPm.get('object').disAssemble(app);
         }
+
+        coll.set({'isSelected': true, options: options, object: pm});
       }
       else {
         console.error('eeeek, you want me to display: ' + pageManager + ' (but I cant, cause there is no such Page!)')
@@ -229,8 +230,9 @@ define([
           else {
             throw new Error('Contract breach, no way to get ridd of the widget/page manager');
           }
-          model.set('isSelected', false, 'object', null);
         }
+        model.set({'isSelected': false, 'object': null});
+        this.assembled = false;
       }, this);
     },
 
