@@ -163,41 +163,48 @@ define([
       //this.model.set('numCalled', this.model.attributes.numCalled+1, {silent: true});
 
       var app = this.getApp();
-      var pm = app._getWidget(pageManager); // will throw error if not there
 
-      if (pm && pm.assemble) {
+      if (!this.collection.find({'id': pageManager}))
+        this.collection.add({'id': pageManager});
+      var coll = this.collection.find({id: pageManager});
 
-        if (!this.collection.find({'id': pageManager}))
-          this.collection.add({'id': pageManager});
-        var coll = this.collection.find({id: pageManager});
-
-        // assemble the new page manager (while the old one is still in place)
-        pm.assemble(app);
-
-        // hide those that are visible
-        if (!coll.attributes.isSelected) {
-          this.hideAll();
-        }
-
-        // activate the new PM
-        var previousPM = this.currentChild;
-        this.currentChild = pageManager;
-
-        // send notification
-        this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
-
-        // disassemble the old one (behind the scenes)
-        if (previousPM) {
-          var oldPm = this.collection.find({id: previousPM});
-          if (oldPm && oldPm.get('object'))
-            oldPm.get('object').disAssemble(app);
-        }
-
-        coll.set({'isSelected': true, options: options, object: pm});
+      var pm;
+      if (coll.get('object')) {
+        pm = coll.get('object');
       }
       else {
-        console.error('eeeek, you want me to display: ' + pageManager + ' (but I cant, cause there is no such Page!)')
+        pm = app._getWidget(pageManager); // will throw error if not there
+        coll.set('object', pm);
       }
+
+      if (pm && pm.assemble) {
+        // assemble the new page manager (while the old one is still in place)
+        pm.assemble(app);
+      }
+      else {
+        console.error('eeeek, ' + pageManager + ' has no assemble() method!');
+      }
+
+      // hide those that are visible
+      if (!coll.attributes.isSelected) {
+        this.hideAll();
+      }
+
+      // activate the new PM
+      coll.set({'isSelected': true, options: options, object: pm});
+
+      var previousPM = this.currentChild;
+      this.currentChild = pageManager;
+
+      // disassemble the old one (behind the scenes)
+      if (previousPM && previousPM != pageManager) {
+        var oldPm = this.collection.find({id: previousPM});
+        if (oldPm && oldPm.get('object'))
+          oldPm.get('object').disAssemble(app);
+      }
+
+      // send notification
+      this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
     },
 
     getCurrentActiveChild: function() {
