@@ -312,12 +312,12 @@ define([
             expect(masterPageManager.view.$el.find('[data-widget="SearchWidget"] input.q').val()).to.be.equal('foo');
             expect(masterPageManager.view.$el.find('[data-widget="AuthorFacet"]').length).to.be.equal(0);
 
-            var firstChild = masterPageManager.getCurrentActiveChild();
-            sinon.spy(firstChild, 'disAssemble');
-            expect(firstChild.widgets.SearchWidget).to.be.defined;
-            masterPageManager.show('SecondPageManager');
-            expect(firstChild.widgets.SearchWidget).to.be.undefined;
-            expect(firstChild.disAssemble.called).to.eql(true);
+            var secondChild = masterPageManager.getCurrentActiveChild();
+            sinon.spy(secondChild, 'disAssemble');
+            expect(_.keys(secondChild.widgets).length).to.gt(0);
+            masterPageManager.show('FirstPageManager');
+            expect(_.keys(secondChild.widgets).length).to.eql(0);
+            expect(secondChild.disAssemble.called).to.eql(true);
 
             // would happen only if the master is nested
             _.each(masterPageManager.collection.models, function(model) {
