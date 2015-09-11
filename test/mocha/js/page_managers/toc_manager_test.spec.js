@@ -251,16 +251,7 @@ define([
           expect(_.isEmpty(pageManager.widgets)).to.be.true;
 
           expect(view.isDestroyed).to.be.true;
-
-
-
-
         });
-
-
-
-
-
 
       })
 
