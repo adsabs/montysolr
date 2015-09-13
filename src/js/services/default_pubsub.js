@@ -252,6 +252,10 @@ define([
 
     },
 
+    getCurrentPubSubKey: function() {
+      return this.pubSubKey;
+    },
+
     /*
      * getPubSubKey() -> PubSubKey
      *

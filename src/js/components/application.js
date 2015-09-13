@@ -634,12 +634,20 @@ define([
       var instance = new constructor();
       var hardenedBee = this.getBeeHive().getHardenedInstance(), children;
 
+
+      // we'll monitor all new pubsub instances (created by the widget) - we don't want to rely
+      // on widgets to do the right thing (and tells us what children they made)
+
+      var pubsub = this.getService('PubSub');
+      var existingSubscribers = _.keys(pubsub._issuedKeys);
+
       if ('activate' in instance) {
         if (this.debug) {console.log('application: ' + symbolicName + '.activate(beehive)')}
         children = instance.activate(hardenedBee);
       }
 
-      this._registerBarbarian(symbolicName, instance, children, hardenedBee);
+      var newSubscribers = _.without(_.keys(pubsub._issuedKeys), _.keys(pubsub._issuedKeys));
+      this._registerBarbarian(symbolicName, instance, children, hardenedBee, newSubscribers);
       return instance;
     },
 
@@ -651,7 +659,7 @@ define([
       return this.__barbarianInstances[symbolicName].parent;
     },
 
-    _registerBarbarian: function(symbolicName, instance, children, hardenedBee) {
+    _registerBarbarian: function(symbolicName, instance, children, hardenedBee, illegitimateChildren) {
       this._killBarbarian(symbolicName);
 
       if ('getBeeHive' in instance) {
@@ -666,15 +674,33 @@ define([
         childNames = this._registerBarbarianChildren(symbolicName, children);
       }
 
+      if (illegitimateChildren){
+        _.each(illegitimateChildren, function(childKey) {
+          if(this.__barbarianRegistry[childKey]) // already declared
+            delete illegitimateChildren[childKey]
+        }, this)
+      }
+
       this.__barbarianInstances[symbolicName] = {
         parent: instance,
         children: childNames,
         beehive: hardenedBee,
         counter: 0,
-        psk: hardenedBee.getService('PubSub').getCurrentPubSubKey()
+        psk: hardenedBee.getService('PubSub').getCurrentPubSubKey(),
+        bastards: illegitimateChildren // no, i'm not mean, i'm French
       }
     },
 
+    /**
+     *
+     * @param prefix
+     *  (String) the name of the father
+     * @param children
+     *  (Object) where keys are the 'strings' (names) and values are
+     *  instances (of the widgets)
+     * @return {Array}
+     * @private
+     */
     _registerBarbarianChildren: function(prefix, children) {
       var childrenNames = [];
       _.each(children, function(child, key) {
@@ -734,8 +760,25 @@ define([
 
       // unsubscribe this widget from pubsub (don't rely on the widget
       // doing the right thing)
+      var pubsub = this.getService('PubSub');
       if (b.psk) {
-        this.getService('PubSub').unsubscribe(b.psk);
+        pubsub.unsubscribe(b.psk);
+      }
+
+      // painstaikingly discover undeclared children and unsubscribe them
+      if (b.bastards) {
+        var kmap = {};
+        _.each(b.bastards, function(psk) {
+          kmap[psk] = 1;
+        }, this);
+
+        _.each(pubsub._events, function(val, evName) {
+          _.each(val, function(v) {
+            if (v.ctx.getId && kmap[v.ctx.getId()]) {
+              //pubsub.unsubscribe(v.ctx);
+            }
+          }, this);
+        }, this);
       }
 
       b.parent.destroy();
@@ -826,6 +869,10 @@ define([
         if (funcName in obj) {
           if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + '.' + funcName + '()')};
           obj[funcName].call(obj, options);
+        }
+        else if (_.isFunction(funcName)) {
+          if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + ' customCallback()')};
+          funcName.call(obj, msg + ":" + el[0], options);
         }
       });
       return rets;
