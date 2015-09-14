@@ -997,7 +997,7 @@ define([
 
         this.scales.color = d3.scale.ordinal()
           .domain([0, 1, 2, 3, 4, 5, 6])
-          .range(["hsla(282, 80%, 52%, 1)", "hsla(1, 80%, 51%, 1)", "hsla(42, 97%, 48%, 1)", "hsla(152, 80%, 40%, 1)", "hsla(193, 80%, 48%, 1)", "hsla(220, 80%, 56%, 1)", "hsla(250, 69%, 47%, 1)"]);
+          .range(["hsla(282, 60%, 52%, 1)", "hsla(349, 61%, 47%, 1)", "hsla(26, 95%, 67%, 1)", "hsla(152, 60%, 40%, 1)", "hsla(193, 64%, 61%, 1)", "hsla(220, 70%, 56%, 1)", "hsla(250, 50%, 47%, 1)"]);
 
         var sizes = [], citation_counts = [], read_counts = [];
 
