@@ -766,7 +766,7 @@ define([
       }
 
       // painstaikingly discover undeclared children and unsubscribe them
-      if (b.bastards) {
+      if (b.bastards && false) { // deactivate, it causes problems
         var kmap = {};
         _.each(b.bastards, function(psk) {
           kmap[psk] = 1;
@@ -775,7 +775,7 @@ define([
         _.each(pubsub._events, function(val, evName) {
           _.each(val, function(v) {
             if (v.ctx.getId && kmap[v.ctx.getId()]) {
-              //pubsub.unsubscribe(v.ctx);
+              pubsub.unsubscribe(v.ctx);
             }
           }, this);
         }, this);

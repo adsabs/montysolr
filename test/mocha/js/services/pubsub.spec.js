@@ -115,6 +115,7 @@ define(['js/components/generic_module', 'js/services/pubsub', 'js/components/pub
       // now unsubscribe all callbacks
       pubsub.unsubscribe(module1.key);
       pubsub.unsubscribe(module2.key);
+      expect(_.keys(pubsub._events).length).to.eql(0);
       pubsub.publish(module1.key, 'event');
 
       // test it worked
