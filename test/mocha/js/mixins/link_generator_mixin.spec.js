@@ -202,7 +202,7 @@ define(['js/mixins/link_generator_mixin'],
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
           "issn": ["0035-8711"],
-          "link_server": undefined
+          "link_server": "MyBaseURL"
         };
 
         var stub_links_data = [
@@ -249,7 +249,6 @@ define(['js/mixins/link_generator_mixin'],
           '{"title":"", "type":"electr", "instances":"", "access":""}',
           '{"title":"", "type":"gif", "instances":"", "access":"open"}'
         ];
-        var stub_link_server = undefined;
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
@@ -262,7 +261,7 @@ define(['js/mixins/link_generator_mixin'],
 
         /**
          * Test passes the following situation:
-         *   - user is NOT authenticated
+         *   - user is NOT authenticated (no link server)
          *   - user has library link service
          *   - journal has NO open access
          *   - journal has NO scan available from the ADS
@@ -288,7 +287,6 @@ define(['js/mixins/link_generator_mixin'],
           '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
           '{"title":"", "type":"electr", "instances":"", "access":""}'
         ];
-        var stub_link_server = undefined;
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
@@ -319,21 +317,78 @@ define(['js/mixins/link_generator_mixin'],
           "volume": "451",
           "doi": ["10.1093/mnras/stv960"],
           "issue": 1,
-          "issn": ["0035-8711"]
+          "issn": ["0035-8711"],
+          "link_server": undefined
         };
 
         var stub_links_data = [
           '{"title":"", "type":"article", "instances":"", "access":""}',
           '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
-          '{"title":"", "type":"electr", "instances":"", "access":""}',
-          '{"title":"", "type":"gif", "instances":"", "access":"open"}'
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
         ];
-        var stub_link_server = undefined;
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
         expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
         expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+
+      });
+
+      it("should not generate an openURL at all if there is no DOI/ISSN/ISBN", function (){
+        /**
+         * Test passes the following situation
+         *   - user is authenticated
+         *   - user has a library link service
+         *   - journal has NO open access
+         *   - journal has NO scan available from the ADS
+         *   - journal has NO doi available
+         */
+        var stub_meta_data = {
+          "bibcode": "2015MNRAS.451.4686F",
+          "first_author": "Friis, M.",
+          "year": "2015",
+          "page": ["4686-4690"],
+          "pub": "Monthly Notices of the Royal Astronomical Society",
+          "pubdate": "2015-05-00",
+          "title": ["The warm, the excited, and the molecular gas: " +
+          "GRB 121024A shining through its star-forming galaxy"],
+          "volume": "451",
+          "issue": 1,
+          "link_server": "MyBaseUrl"
+        };
+
+        var stub_links_data = [
+          '{"title":"", "type":"article", "instances":"", "access":""}',
+          '{"title":"", "type":"preprint", "instances":"", "access":"open"}',
+          '{"title":"", "type":"electr", "instances":"", "access":""}'
+        ];
+
+
+        // Check that an openURL is NOT created
+        var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
+        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+
+        // Check that an openURL IS created
+        var identifierList = ['isbn', 'issn', 'doi'];
+        for (var i=0; i < identifierList.length; ++i){
+
+          var tempIdentifiers = identifierList.slice(0);
+          tempIdentifiers.splice(i,1);
+
+          stub_meta_data[identifierList[i]] = 'fake'
+          var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
+          expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain(identifierList[i]);
+          tempIdentifiers.forEach(function (value){
+            expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain(value);
+            expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain(value);
+          });
+
+          expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(true);
+
+          stub_meta_data[identifierList[i]] = undefined
+
+        }
 
       });
     })
