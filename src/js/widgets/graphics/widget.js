@@ -26,7 +26,8 @@ define([
 
       return {
         graphics: undefined,
-        title : undefined
+        title : undefined,
+        linkSentence : undefined
       }
     }
 
@@ -157,7 +158,8 @@ define([
           graphics[dict.figure_label] = dict.images[0];
         },this);
 
-        this.model.set("graphics", graphics);
+      this.model.set({graphics : graphics, linkSentence : response.get("header")});
+
       }
       else {
         var title = response.get("response.docs[0]['title']");
