@@ -6,6 +6,7 @@ import java.util.BitSet;
 import java.util.Random;
 
 import org.apache.solr.common.util.NamedList;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import monty.solr.util.MontySolrAbstractTestCase;
@@ -16,19 +17,21 @@ public class BenchmarkBitSetQParserPlugin extends MontySolrAbstractTestCase {
 	private int indexSize = 10000000;
 	private long maxTime = 60*1000; // max time benchmark is allowed to run
 	private ArrayList<ArrayList<Object>> timerStack = new ArrayList<ArrayList<Object>>();
+	
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
+				+ "/contrib/adsabs/src/test-files/solr/collection1/conf/"
+				+ "schema-minimal.xml";
 
-	public String getSchemaFile() {
-		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
-			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-		});
-		return "schema.xml";
+		configString = MontySolrSetup.getMontySolrHome()
+				+ "/contrib/adsabs/src/test-files/solr/collection1/conf/"
+				+ "bitset-solrconfig.xml";
+		initCore(configString, schemaString, MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1");
 	}
 
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
-		"bitset-solrconfig.xml";
-	}
 
 	@Override
 	public void setUp() throws Exception {

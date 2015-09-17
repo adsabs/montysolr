@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -32,6 +33,10 @@ import org.slf4j.LoggerFactory;
  * author synonyms. But obviously, this could introduce some bugs...
  */
 public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilterFactory implements ResourceLoaderAware {
+
+  public AuthorShortNameUpgradeFilterFactory(Map<String,String> args) {
+    super(args);
+  }
 
   public static final Logger log = LoggerFactory.getLogger(AuthorShortNameUpgradeFilterFactory.class);
 
@@ -92,6 +97,10 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
   	
   	
   	
+    public MakeAllShortNames(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
     	char sep = ',';
     	if (args.containsKey("format") && args.get("format").equals("semicolon")) {
@@ -282,6 +291,10 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
    * 
    */
   public static class MakeShortNames extends NewSynonymFilterFactory.SynonymBuilderFactory {
+
+    public MakeShortNames(Map<String,String> args) {
+      super(args);
+    }
 
     protected SynonymParser getParser(Analyzer analyzer) {
     	

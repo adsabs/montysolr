@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.FieldCache.Floats;
 import org.apache.solr.search.CitationLRUCache;
 
 /**
@@ -19,9 +20,9 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	protected String[] uniqueIdField;
 	protected String boostField;
 	private SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache;
-	private LuceneCacheWrapper<float[]> boostCache;
+	private LuceneCacheWrapper<Floats> boostCache;
 	
-	public SecondOrderCollectorOperatorExpertsCiting(SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache, LuceneCacheWrapper<float[]> boostWrapper) {
+	public SecondOrderCollectorOperatorExpertsCiting(SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache, LuceneCacheWrapper<Floats> boostWrapper) {
 		super();
 		
 		assert cache != null;

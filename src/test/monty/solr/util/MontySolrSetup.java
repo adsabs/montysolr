@@ -86,7 +86,7 @@ public class MontySolrSetup {
 			if ((new File(home)).exists() && System.getProperty("montysolr.ignore.home") != null) {
 				System.err.println("MontySolrSetup: solr.solr.home is set to \'" + home + "\'\n" +
 						           "...ignoring the test setup");
-				return home;
+				return home.replace('\\', '/');
 			}
 			else {
 				System.err.println("MontySolrSetup: solr.solr.home is set to \'" + home + "\'\n" +
@@ -111,10 +111,10 @@ public class MontySolrSetup {
 		File s_level_down = new File(s.getAbsolutePath() + "/solr");
 
 		if (s_level_down.exists())
-			return s_level_down.getAbsolutePath();
+			return s_level_down.getAbsolutePath().replace('\\', '/');
 
 		if (s.exists())
-			return s.getAbsolutePath();
+			return s.getAbsolutePath().replace('\\', '/');
 
 		throw new IllegalStateException(
 				"Cannot determine the folder with solr installation");
@@ -157,7 +157,7 @@ public class MontySolrSetup {
 		while (!new File(base, "contrib/contrib-build.xml").exists()) {
 			base = base.getParentFile();
 		}
-		return base.getAbsolutePath();
+		return base.getAbsolutePath().replace('\\', '/');
 	}
 
 	

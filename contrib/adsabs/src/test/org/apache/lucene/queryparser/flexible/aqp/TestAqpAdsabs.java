@@ -1,18 +1,13 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import monty.solr.util.MontySolrSetup;
-
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
-import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
@@ -28,9 +23,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
-import org.apache.lucene.util.Version;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
@@ -61,19 +53,14 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public void testAnalyzers() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		Analyzer pa = new Analyzer() {
 			@Override
 			protected TokenStreamComponents createComponents(String fieldName,
 					Reader reader) {
 				PatternTokenizer filter;
-				try {
-					filter = new PatternTokenizer(reader, Pattern.compile("\\|"), -1);
-					return new TokenStreamComponents(filter);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return null;
+				filter = new PatternTokenizer(reader, Pattern.compile("\\|"), -1);
+				return new TokenStreamComponents(filter);
 			}
 		};
 		
@@ -90,7 +77,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// note: nothing too much exciting here - the real tests must be done with the 
 		// ADS author query, and for that we will need solr unittests - so for now, just basic stuff
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		
 		assertQueryEquals("author:\"A Einstein\"", null, "author:\"a einstein\"", PhraseQuery.class);
 		// probably, this should construct a different query (a phrase perhaps)
@@ -118,7 +105,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 * @throws Exception
 	 */
 	public void testIdentifiers() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		Query q = null;
 		assertQueryEquals("arXiv:1012.5859", wsa, "arxiv:1012.5859");
 		assertQueryEquals("xfield:10.1086/345794", wsa, "xfield:10.1086/345794");
@@ -145,7 +132,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 * @throws Exception
 	 */
 	public void testDateRanges() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		
 		assertQueryEquals("intitle:\"QSO\" 1995-2000", null, "+intitle:qso +date:[1995 TO 2000]");
 		
@@ -180,7 +167,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 */
 	public void testRanges() throws Exception {
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		
 		assertQueryEquals("[20020101 TO 20030101]", null, "[20020101 TO 20030101]");
 		assertQueryEquals("[20020101 TO 20030101]^0.5", null, "[20020101 TO 20030101]^0.5");
@@ -217,7 +204,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
 	public void testModifiers() throws Exception {
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		
 		assertQueryEquals("jakarta^4 apache", null, "+jakarta^4.0 +apache");
 		assertQueryEquals("\"jakarta apache\"^4 \"Apache Lucene\"", null, "+\"jakarta apache\"^4.0 +\"apache lucene\"");
@@ -288,6 +275,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("this and (one #5)", wsa, "+this +one +5");
 		
 		assertQueryEquals("=5", null, "5");
+		
 		assertQueryEquals("=(request synonyms 5)", null, "+request +synonyms +5");
 		assertQueryEquals("this and (one =5)", null, "+this +one +5");
 		assertQueryEquals("this and (one =5)", wsa, "+this +one +5");
@@ -380,7 +368,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 * @throws Exception
 	 */
 	public void testEscaped() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		assertQueryEquals("\\(1\\+1\\)\\:2", wsa, "(1+1):2", TermQuery.class);
 		assertQueryEquals("th\\*is", wsa, "th*is", TermQuery.class);
 		assertQueryEquals("a\\\\\\\\+b", wsa, "a\\\\+b", TermQuery.class);
@@ -397,7 +385,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 */
 	public void testBasics() throws Exception{
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		KeywordAnalyzer kwa = new KeywordAnalyzer();
 		assertQueryEquals("keyword:\"planets and satellites\"", wsa, "keyword:\"planets and satellites\"", PhraseQuery.class);
 		
@@ -568,7 +556,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
   public void testRegex() throws Exception{
       
-      WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(Version.LUCENE_CURRENT);
+      WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
       assertQueryEquals("/foo$/", wsa, "/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/foo$/", wsa, "keyword:/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/^foo$/", wsa, "keyword:/^foo$/", RegexpQuery.class);
@@ -647,6 +635,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	assertQueryEquals("A B D E", null, "\"a b d e\"");
   	assertQueryEquals("+A B D E", null, "\"a b d e\"");
   	assertQueryEquals("A +B D E", null, "+a +\"b d e\"");
+  	assertQueryEquals("+(A B D E)", null, "\"a b d e\"");
+  	//setDebug(true);
+  	assertQueryEquals("=(A B D E)", null, "+A +B +D +E"); // '=' modifier makes it reject concatenation
   	
   	assertQueryEquals("+foo:z +A B D E", null, "+foo:z +\"a b d e\"");
   	assertQueryEquals("+A B D E +foo:z", null, "+\"a b d e\" +foo:z");

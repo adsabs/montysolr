@@ -52,8 +52,16 @@ public class SecondOrderListOfDocsScorer extends Scorer {
     }
     
     @Override
-    public float freq() throws IOException {
-      return 1.0f;
+    public int freq() throws IOException {
+      return 1;
+    }
+
+    @Override
+    public long cost() {
+      if (this.hits != null) {
+        return this.hits.size();
+      }
+      return 0;
     }
     
   }

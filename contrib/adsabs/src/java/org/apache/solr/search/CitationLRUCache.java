@@ -29,13 +29,19 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.lucene.document.SortedBytesDocValuesField;
 import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DocTermOrds;
+import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.SegmentCommitInfo;
+import org.apache.lucene.index.SortedDocValues;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.DocTerms;
+import org.apache.lucene.search.FieldCache.CacheEntry;
+import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.FixedBitSet;
@@ -109,6 +115,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	// not be necessary as we are going to denormalize 
 	// citation data outside solr and prepare everything there...
 	private boolean incremental = false;
+
+	private boolean reuseCache;
 	
 
 
@@ -122,6 +130,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     
     
     incremental  = "true".equals(((String)args.get("incremental")));
+    reuseCache  = "true".equals(((String)args.get("reuseCache")));
     
     citationFields = new String[0];
     referenceFields = new String[0];
@@ -326,6 +335,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   private boolean isWarming = false;
+
+	private boolean purgeCache;
   public boolean isWarmingOrWarmed() {
   	return isWarming;
   }
@@ -566,7 +577,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     int unknownClasses = 0;
     //boolean foundRequired = false;
     
-    IndexSchema schema = searcher.getCore().getSchema();
+    IndexSchema schema = searcher.getCore().getLatestSchema();
     
     if (schema.getUniqueKeyField() == null) {
     	throw new SolrException(ErrorCode.FORBIDDEN, "Sorry, your schema is missing unique key and thus you probably have many duplicates. I won't continue");
@@ -575,7 +586,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     //String unique = schema.getUniqueKeyField().getName();
     
   	for (String f: listOfFields) {
-  		SchemaField fieldInfo = schema.getField(f);
+  		SchemaField fieldInfo = schema.getField(f.replace(":sorted", ""));
   		FieldType type = fieldInfo.getType();
   		
   		//if (fieldInfo.isRequired()) {
@@ -666,7 +677,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	
   	// load multiple values->idlucene mapping
   	for (String idField: fields.get("intFieldsMV")) {
-			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
+			DocTermOrds unInvertedIndex = new DocTermOrds(reader, liveDocs, idField);
 			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
 			if (termsEnum == null) {
 				continue;
@@ -703,7 +714,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	 *    	- and do something with the pair: (docid, term)
   	 */
 		for (String idField: fields.get("textFieldsMV")) {
-			DocTermOrds unInvertedIndex = new DocTermOrds(reader, idField);
+			DocTermOrds unInvertedIndex = new DocTermOrds(reader, liveDocs, idField);
 			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
 			if (termsEnum == null) {
 				continue;
@@ -731,40 +742,120 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 			}
 		}
 		
+		
   	// load single valued ids 
 		for (String idField: fields.get("textFields")) {
-			DocTerms idMapping = FieldCache.DEFAULT.getTerms(reader, idField);
+			BinaryDocValues idMapping = getCacheReuseExisting(reader, idField);
+			
 			Integer i = 0;
 			BytesRef ret = new BytesRef();
-			while(i < idMapping.size()) {
+			while(i < reader.maxDoc()) {
 				if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
 					//System.out.println("skipping: " + i);
 					i++;
 					continue;
 				}
-			  ret = idMapping.getTerm(i, ret);
+			  idMapping.get(i, ret);
 			  if (ret.length > 0) {
 			    setter.set(docBase, i, ret.utf8ToString()); // in this case, docbase will always be 0
 			  }
 				i++;
 			}
+			if (purgeCache)
+				FieldCache.DEFAULT.purgeByCacheKey(reader.getCoreCacheKey());
 		}
 		for (String idField: fields.get("intFields")) {
-			int[] idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
+			Ints idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
 			Integer i = 0;
-			while(i < idMapping.length) {
+			while(i < reader.maxDoc()) {
 				if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
 					//System.out.println("skipping: " + i);
 					i++;
 					continue;
 				}
-				setter.set(docBase, i, treatIdentifiersAsText ? Integer.toString(idMapping[i]) : idMapping[i]);
+				setter.set(docBase, i, treatIdentifiersAsText ? Integer.toString(idMapping.get(i)) : idMapping.get(i));
 				i++;
 			}
 		}
 
 	}
 
+  private BinaryDocValues getCacheReuseExisting(AtomicReader reader, String idField) throws IOException {
+  	
+  	purgeCache = false;
+  	
+  	Boolean sorted = false;
+  	if (idField.indexOf(':') > -1) {
+  		String[] parts = idField.split(":");
+  		idField = parts[0];
+  		if (parts[1].indexOf("sort") > -1)
+  			sorted = true;
+  	}
+  	
+  	// first try discover if there exists a cache already that we can reuse
+  	// be careful, the cache needs to be populated properly - ie. when a new
+  	// searcher is opened, the warming query should generate these caches;
+  	// otherwise it could happen we grab the old searcher's cache
+  	if (reuseCache) {
+	  	CacheEntry[] caches = FieldCache.DEFAULT.getCacheEntries();
+			if (caches != null) {
+				ArrayList<CacheEntry> potentialCandidates = new ArrayList<CacheEntry>();
+				
+				for (int i=0; i < caches.length; i++) {
+					
+					CacheEntry c = caches[i];
+					String key = c.getFieldName();
+					String readerKey = c.getReaderKey().toString();
+					String segmentCode = readerKey.substring(readerKey.indexOf("(")+1, readerKey.length()-1);
+					
+					if (idField.equals(key) && 
+							(reader.getCoreCacheKey().toString().contains(segmentCode)
+									|| readerKey.contains("SegmentCoreReaders"))) {
+						if (sorted) {
+							if (c.getValue() instanceof SortedDocValues)	potentialCandidates.add(c);
+						}
+						else {
+							potentialCandidates.add(c);
+						}
+					}
+					
+				}
+				
+				if (potentialCandidates.size() == 0) {
+					// pass
+				}
+				else if (potentialCandidates.size() == 1) {
+					CacheEntry ce = potentialCandidates.get(0);
+					Object v = ce.getValue();
+					if (v instanceof BinaryDocValues) {
+						return (BinaryDocValues) v;
+					}
+				}
+				else {
+					log.warn("We cannot unambiguously identify cache entry for: {}, {}", idField, reader.getCoreCacheKey());
+				}
+				
+			}
+  	}
+		
+		BinaryDocValues idMapping;
+		purgeCache = true;
+		
+		// because sorting components will create the cache anyway; we can avoid duplicating data
+		// if we create a cache duplicate, the tests will complain about cache insanity (and rightly so)
+		if (sorted) {
+			idMapping = FieldCache.DEFAULT.getTermsIndex(reader, idField);
+			//System.out.println("creating new sorted: " + idField);
+			//System.out.println("created: " + idMapping);
+		}
+		else {
+		  idMapping = FieldCache.DEFAULT.getTerms(reader, idField, false); // XXX:rca - should we use 'true'?
+		  //System.out.println("creating new: " + idField);
+		  //System.out.println("created: " + idMapping);
+		}
+		return idMapping;
+		
+  }
   //////////////////////// SolrInfoMBeans methods //////////////////////
 
 

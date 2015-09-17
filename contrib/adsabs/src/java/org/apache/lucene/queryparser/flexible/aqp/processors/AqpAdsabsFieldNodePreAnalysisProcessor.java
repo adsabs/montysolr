@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -62,11 +61,31 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
       String field = ((FieldQueryNode) node).getFieldAsString();
       
       // we must detect pubdate:YYYY(-MM-DD) queries, and turn them into range query if necessary
-      if (field.equals("pubdate")){  
+      // ie. rewrite (pub)date fieldquery into termrange query
+      
+      if (field.equals("pubdate")){
+      	
         // first parse the date with the appropriate analyzer
         String value = fieldNode.getTextAsString();
+        boolean dateGuessed = false;
+        
+        if (value.equals("*") && node.getParent() instanceof TermRangeQueryNode) {
+        	QueryNode theOtherNode = null;
+        	for (QueryNode ch: node.getParent().getChildren()) {
+        		if (ch != fieldNode) {
+        			theOtherNode = ch;
+        			break;
+        		}
+        	}
+        	if (theOtherNode != null) {
+        		String theOtherValue = ((FieldQueryNode) theOtherNode).getTextAsString();
+        		value = theOtherValue;
+        		dateGuessed = true;
+        	}
+        }
+        
         Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
-        TokenStream source;
+        TokenStream source = null;
         try {
           source = analyzer.tokenStream(field, new StringReader(value));
           source.reset();
@@ -74,36 +93,63 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
         } catch (IOException e1) {
           throw new RuntimeException(e1);
         }
+        finally {
+        	if (source != null) {
+        		try {
+        			source.close();
+        		} catch (IOException e) {
+        			// ignore
+        		}
+        	}
+        }
         
-        Date date = null;
-        String normalizedDate=null;
+        Date dateWithoutOffset = null;
+        String normalizedDate= source.getAttribute(CharTermAttribute.class).toString();
         try {
-          // get the result, then apply appropriate offset
-          normalizedDate = source.getAttribute(CharTermAttribute.class).toString();
-          date = sdf.parse(normalizedDate);
-          dmp.setNow(date);
+          dateWithoutOffset = sdf.parse(normalizedDate);
+          dmp.setNow(dateWithoutOffset);
           
-          String[] parts = value.split("-|/");
-          if (parts.length == 1) { // just a year
-            date = dmp.parseMath("/YEAR");
-            date = dmp.parseMath("+1YEAR");
-          }
-          else if (parts.length == 2) {
-            date = dmp.parseMath("/MONTH");
-            date = dmp.parseMath("+1MONTH");
-          }
-          else {
-            date = dmp.parseMath("/DAY");
-            date = dmp.parseMath("+1DAY");
-          }
         } catch (ParseException e) {
           throw new QueryNodeException(new MessageImpl(e.getMessage()));
         }
         
-        // when we are called to parse values that are already inside range QNode
+        // if we are already inside TermRangeQuery, we just need
+        // to change the field and value
         if (node.getParent() instanceof TermRangeQueryNode) {
         	fieldNode.setField("date");
-          fieldNode.setValue(normalizedDate);
+        	if (node.getParent().getChildren().get(0) == fieldNode) { // lower bound
+        		if (dateGuessed) {
+        			if (fieldNode.getBegin() > 0) { // user typed '*'
+        				fieldNode.setValue(moveDate(value, dateWithoutOffset, 
+	        				"/YEAR-1000YEAR+1SECOND", "/MONTH-1000YEAR+1SECOND", "/DAY-1000YEAR+1SECOND"));
+        			}
+        			else {
+	        			fieldNode.setValue(moveDate(value, dateWithoutOffset, 
+	        				"/YEAR-1YEAR+1SECOND", "/MONTH-1MONTH+1SECOND", "/DAY-1DAY+1SECOND"));
+        			}
+        		}
+        		else {
+        			fieldNode.setValue(normalizedDate);
+        		}
+        	}
+        	else { // upper bound
+        		if (dateGuessed) {
+        			if (fieldNode.getBegin() > 0) { // user typed '*'
+        				fieldNode.setValue(moveDate(value, dateWithoutOffset, 
+	        				"/YEAR+1000YEAR-1SECOND", "/MONTH+1000YEAR-1SECOND", "/DAY+1000YEAR-1SECOND"));
+        			}
+        			else {
+	        			fieldNode.setValue(moveDate(value, dateWithoutOffset, 
+	        				"/YEAR+1YEAR-1SECOND", "/MONTH+1MONTH-1SECOND", "/DAY+1DAY-1SECOND"));
+        			}
+        		}
+        		else {
+        			fieldNode.setValue(moveDate(value, dateWithoutOffset, 
+        				"/YEAR+1YEAR-1SECOND", "/MONTH+1MONTH-1SECOND", "/DAY+1DAY-1SECOND"));
+        		}
+        		
+        	}
+          
         	return new AqpNonAnalyzedQueryNode(fieldNode);
         }
 
@@ -114,22 +160,55 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
         } catch (CloneNotSupportedException e) {
           throw new QueryNodeException(new MessageImpl(e.getMessage()));
         }
+
+        FieldQueryNode lowerBound = fieldNode;
+        lowerBound.setField("date");
+        lowerBound.setValue(normalizedDate);
         
         upperBound.setField("date");
-        upperBound.setValue(DateField.formatExternal(date));
-        
-        fieldNode.setField("date");
-        fieldNode.setValue(normalizedDate);
+        upperBound.setValue(moveDate(value, dateWithoutOffset, 
+        		"/YEAR+1YEAR", "/MONTH+1MONTH", "/DAY+1DAY"));
         
         
-        return new TermRangeQueryNode(new AqpNonAnalyzedQueryNode(fieldNode), 
-            new AqpNonAnalyzedQueryNode(upperBound), true, false); // not include the lowerBound
+        
+        return new TermRangeQueryNode(
+        		new AqpNonAnalyzedQueryNode(lowerBound), 
+            new AqpNonAnalyzedQueryNode(upperBound), 
+            true, false); // upper bound non-inclusive
       }
         
     }
 	  return node;
 	}
 
+	@SuppressWarnings("deprecation")
+  private String moveDate(
+			String originalDate, 
+			Date parsedDate,
+			String...moveBy) throws QueryNodeException {
+		String[] dateParts = originalDate.split("-|/");
+		Date dateWithOffset = (Date) parsedDate.clone();
+		
+		try {
+			if (dateParts.length == 1) { // just a year
+				assert moveBy.length >= 1;
+				dateWithOffset = dmp.parseMath(moveBy[0]); // "+1YEAR" = move to the next year
+			}
+			else if (dateParts.length == 2) {
+				assert moveBy.length >= 2;
+				dateWithOffset = dmp.parseMath(moveBy[1]); // "+1MONTH"
+			}
+			else {
+				assert moveBy.length == 3;
+				dateWithOffset = dmp.parseMath(moveBy[2]); // "+1DAY"
+			}
+		} catch (ParseException e) {
+			throw new QueryNodeException(new MessageImpl(e.getMessage()));
+		}
+		
+		return DateField.formatExternal(dateWithOffset);
+	}
+	
 	@Override
 	protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
 			throws QueryNodeException {

@@ -39,14 +39,11 @@ public class SecondOrderWeight extends Weight {
   }
 
   @Override
-  public Scorer scorer(AtomicReaderContext context, boolean scoreDocsInOrder,
-      boolean topScorer, Bits acceptDocs) throws IOException {
+  public Scorer scorer(AtomicReaderContext context, Bits acceptDocs) throws IOException {
     int docBase = context.docBase;
     int maxRange = docBase + context.reader().maxDoc();
     List<CollectorDoc> hits = secondOrderCollector.getSubReaderResults(docBase, maxRange);
     if (hits == null || hits.size() == 0) return null;
-
-
     return new SecondOrderListOfDocsScorer(innerWeight, hits, docBase);
   }
 

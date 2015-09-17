@@ -21,24 +21,30 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Iterator;
+
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.request.SolrQueryRequest;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 
-	public String getSchemaFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
 			"schema-citations-transformer.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
+		
+		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
 			"citation-cache-solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
+	
 
 	public void createIndex() throws Exception {
 		
@@ -84,7 +90,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				, "citation", "b9", "citation", "b10"
 				));
 		
-		assertU(commit()); // closes the writer, create a new segment
+		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 		
 		assertU(adoc("id", "5", "bibcode", "b5", "alternate_bibcode", "x5",
 				"reference", "x22", "reference", "b3", "reference", "b4"));
@@ -95,7 +101,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 		assertU(adoc("id", "8", "bibcode", "b8", "alternate_bibcode", "x8",
 				"reference", "x2", "reference", "x22", "reference", "b4"));
 
-		assertU(commit()); // closes the writer, create a new segment
+		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 		
 
 		assertU(adoc("id", "9", "bibcode", "b9",
@@ -104,7 +110,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				"reference", "b2", "reference", "b3", "reference", "b4"));
 		
 		
-		assertU(commit());
+		assertU(commit("waitSearcher", "true"));
 	}
 
 	
@@ -256,12 +262,12 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 			
 			SolrCache cache2 = searcher.getCache(cacheName);
 			CitationLRUCache cache = (CitationLRUCache) searcher.getCache(cacheName);
-			
+			//printCache(cache);
 			
 			assertTrue( cache.equals(cache2));
 			assertTrue( cache2 == cache2 );
 			
-			
+			//printCache(cache);
 			// test ID mapping function
 			assertTrue( cache.get("b0").equals(0));
 			assertTrue( cache.get("b1").equals(1));

@@ -83,7 +83,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
     				newIndividual = (parsedName.get("First") + ","); // we treat it as surname
     			}
     			else {
-    				newIndividual = null; // else it was parsed as title and will be ignored
+    				newIndividual =  (parsedName.get("Title") + ","); // else it was parsed as title (and since it is the only thing we have, let's take it for surname)
     			}
     		}
 

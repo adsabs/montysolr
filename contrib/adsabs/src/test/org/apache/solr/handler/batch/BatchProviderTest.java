@@ -6,17 +6,23 @@ import java.util.List;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.util.AbstractSolrTestCase;
+import org.junit.BeforeClass;
 
 public class BatchProviderTest extends AbstractSolrTestCase {
-	public String getSchemaFile() {
-		return MontySolrSetup.getMontySolrHome()
+	
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
 		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-batch-provider.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
+		
+		configString = MontySolrSetup.getMontySolrHome()
 		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-batch-provider.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
+	
 	
 	@Override
 	public String getSolrHome() {
@@ -40,6 +46,9 @@ public class BatchProviderTest extends AbstractSolrTestCase {
 	
 	protected void checkFile(String file, String... expected) throws IOException {
     List<String> lines = h.getCore().getResourceLoader().getLines(file);
+    //for (String l : lines) {
+    //	System.out.println(l);
+    //}
     for (String t: expected) {
       if (t.substring(0,1).equals("!")) {
         assertFalse("Present: " + t + "\n" + lines, lines.contains(t.substring(1)));

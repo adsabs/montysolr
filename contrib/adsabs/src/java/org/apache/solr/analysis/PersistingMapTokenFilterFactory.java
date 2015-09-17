@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.apache.solr.common.cloud.ZooKeeperException;
 import org.apache.solr.common.util.StrUtils;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoader;
@@ -19,23 +19,30 @@ public abstract class PersistingMapTokenFilterFactory extends TokenFilterFactory
 implements ResourceLoaderAware {
 
   public static final Logger log = LoggerFactory.getLogger(PersistingMapTokenFilterFactory.class);
-  private WriteableSynonymMap synMap = null;
+  protected WriteableSynonymMap synMap = null;
+  protected String outFile;
+  protected String synonyms;
+  protected String syntax;
   
-  public void init(Map<String, String> args) {
-    super.init(args);
+  public PersistingMapTokenFilterFactory(Map<String, String> args) {
+    super(args);
     synMap = createSynonymMap();
+    
+    if (args.containsKey("outFile")) {
+      this.outFile = args.remove("outFile");
+    }
+    if (args.containsKey("synonyms")) {
+      this.synonyms = args.remove("synonyms");
+    }
+    if (args.containsKey("syntax")) {
+      this.syntax = args.remove("syntax");
+    }
   }
   
   public void inform(ResourceLoader loader) {
 
-    String outFile = args.get("outFile");
     if (outFile != null) {
-      args.remove("outFile");
       File outFilePath = new File(outFile);
-      if (outFilePath.isAbsolute() == false) {
-        outFilePath = new File(((SolrResourceLoader) loader).getConfigDir() + outFile);
-      }
-
       if (!outFilePath.exists()) {
         try {
           outFilePath.createNewFile();
@@ -45,15 +52,13 @@ implements ResourceLoaderAware {
         log.warn("We have created " + outFilePath);
       }
       outFile = outFilePath.getAbsolutePath();
-      args.put("outFile", outFile);
-      synMap.setOutput(args.get("outFile"));
+      synMap.setOutput(outFile);
     }
     else {
       log.warn("Missing required argument 'outFile' at: " + this.getClass().getName() 
           + "The synonyms will not be saved to disk");
     }
 
-    String synonyms = args.get("synonyms");
     if (synonyms != null) {
       File outFilePath = new File(synonyms);
       if (outFilePath.isAbsolute() == false) {
@@ -68,7 +73,6 @@ implements ResourceLoaderAware {
   }
 
   public WriteableSynonymMap createSynonymMap() {
-    String syntax = args.get("syntax");
     if (syntax == null) {
       syntax = "explicit";
     }

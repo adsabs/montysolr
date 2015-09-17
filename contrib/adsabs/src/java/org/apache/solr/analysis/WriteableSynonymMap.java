@@ -59,8 +59,8 @@ public abstract class WriteableSynonymMap {
   }
   
   public void put(String k, Set<String> v) {
-    if (outFile == null)
-      return;
+  	if (outFile == null)
+  		return;
     numUpdates++;
     this.map.put(k, v);
   }
@@ -123,7 +123,7 @@ public abstract class WriteableSynonymMap {
   public boolean persist(boolean append) throws IOException {
     Writer writer = getWriter(append);
     if (writer == null) {
-      log.error("Cannot write synonyms, writer object is null.");
+      //log.error("Cannot write synonyms, writer object is null.");
       return false;
     }
 

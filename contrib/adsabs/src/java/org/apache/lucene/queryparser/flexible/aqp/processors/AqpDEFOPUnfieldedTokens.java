@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.antlr.runtime.CharStream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
@@ -99,12 +101,21 @@ import org.apache.lucene.queryparser.flexible.standard.parser.ParseException;
  *
  */
 
-public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
+public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 	
 	public static String PLAIN_TOKEN = "PLAIN_TOKEN";
 	public static String PLAIN_TOKEN_SEPARATOR = " ";
 	public static String PLAIN_TOKEN_CONCATENATED = "PLAIN_TOKEN_CONCATENATED";
+	
+	/*
+	 * Nodes will be considered 'bare' even if they have any of these modifiers
+	 * e.g. +foo will be effectively treated as if it was 'foo'
+	 */
 	private List<String> ignoreModifiers;
+
+	/*
+	 * Dtto as above 
+	 */
 	private List<String> ignoreTModifiers;
 	private List<String> ignoreFields;
 	private List<String> catchQTypes;
@@ -117,7 +128,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	public AqpDEFOPUnfieldedTokens() {
 		ignoreModifiers = Arrays.asList("PLUS", "MINUS");
 		ignoreTModifiers = Arrays.asList("");
-		ignoreFields = null; //Arrays.asList("*");
+		ignoreFields = null; //Arrays.asList("pubdate");
 		catchQTypes = Arrays.asList("QNORMAL", "QTRUNCATED", "QDELIMITER");
 		wildcardQTypes = Arrays.asList("QTRUNCATED");
 		operationMode = null; // null == wait for the request 
@@ -141,16 +152,30 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	
 	public boolean nodeIsWanted(AqpANTLRNode node) {
 		if (node.getTokenLabel().equals("DEFOP")) {
-  		// this will refuse processing of: '=(this that token)'
-			// but the '=' modifier must not be in the list of modifiers to ignore
-			if (node.getParent() != null && node.getParent().getParent() != null) {
-				QueryNode p = node.getParent().getParent();
-				if (p.getChildren().size() > 1 &&
-						!ignoreModifiers.contains(((AqpANTLRNode) p.getChildren().get(0)).getTokenInput())) {
-					return false; 
-				}
-			}
-				
+		  if (node.getParent() != null && node.getParent().getParent() != null) {
+		    QueryNode immediateParent = node.getParent();
+		    QueryNode distantParent = node.getParent().getParent();
+		    
+		    if (!(immediateParent instanceof AqpANTLRNode)) return false;
+		    
+		    AqpANTLRNode distantP = (AqpANTLRNode) distantParent;
+		    AqpANTLRNode immediateP = (AqpANTLRNode) immediateParent;
+		    
+		    if (immediateP.getTokenName().equals("CLAUSE")
+		        && distantP.getTokenName().equals("FIELD") 
+		        && distantP.getChildren().size() == 2
+		        && ((AqpANTLRNode) (distantP.getChildren().get(0))).getTokenInput() != null) {
+		      return false;
+		    }
+		    
+		    if (immediateP.getTokenName().equals("TMODIFIER")
+            && distantP.getTokenName().equals("MODIFIER") 
+            && distantP.getChildren().size() == 2) {
+		      AqpANTLRNode modifier = ((AqpANTLRNode) (distantP.getChildren().get(0)));
+          if (modifier.getTokenName() != null && !ignoreModifiers.contains(modifier.getTokenName()))
+            return false;
+        }
+		  }
 			return true;
 		}
 		return false;
@@ -426,35 +451,63 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 	  return out;
   }
 	
-	private String getStrategy() {
-		
-		String key = "aqp.unfielded.tokens.strategy";
-		
-		Map<String, String> args = getQueryConfigHandler().get(
-    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
-		if (args.containsKey(key)) {
-			return args.get(key);
-		}
-		
-		return "tag";
+	private Boolean isFieldIgnored(String fld) {
+	  return getIgnoredFields().contains(fld);
 	}
 	
+	private Object _getConfigVal(String key) {
+	  Map<String, String> args = getQueryConfigHandler().get(
+	      AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+	  if (args.containsKey(key)) {
+	    return args.get(key);
+	  }
+	  return null;
+	}
+	
+	private String getStrategy() {
+		Object obj = _getConfigVal("aqp.unfielded.tokens.strategy");
+		if (obj == null)
+		  return "tag";
+		return (String) obj;
+	}
+	
+	private Set<String> aqpIgnorableFields = null;
+	private Set<String> getIgnoredFields() {
+	  if (aqpIgnorableFields != null)
+	    return aqpIgnorableFields;
+    Object obj = _getConfigVal("aqp.unfielded.ignore.fields");
+
+    aqpIgnorableFields = new HashSet<String>();
+    if (obj != null) {
+      String[] vals = StringUtils.split((String) obj);
+      for (String v: vals) {
+        aqpIgnorableFields.add(v);
+      }
+    }
+    if (ignoreFields != null) {
+      for (String v: ignoreFields) {
+        aqpIgnorableFields.add(v);
+      }
+    }
+    return aqpIgnorableFields;
+  }
+	
 	private String getNewTokenType() {
-		String key = "aqp.unfielded.tokens.new.type";
-		Map<String, String> args = getQueryConfigHandler().get(
-    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
-		if (args.containsKey(key)) {
-			if (args.get(key).toLowerCase().contains("phrase")) {
-				return "QPHRASE";
-			}
-			else if (args.get(key).toLowerCase().contains("simple")) {
-				return "simple";
-			}
-			else {
-				return "QNORMAL";
-			}
+	  Object obj = _getConfigVal("aqp.unfielded.tokens.new.type");
+		if (obj == null)
+		  return "simple";
+		
+		String m = ((String) obj).toLowerCase();
+		
+		if (m.contains("phrase")) {
+			return "QPHRASE";
 		}
-		return "simple";
+		else if (m.contains("simple")) {
+			return "simple";
+		}
+		else {
+			return "QNORMAL";
+		}
 	}
 	
 
@@ -508,7 +561,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessorPost {
 			
 	    if (modifier == "" || (isFirstInGroup && ignoreModifiers.contains(modifier))) {
 	    	if (tModifier == "" || (isFirstInGroup && ignoreTModifiers.contains(tModifier))) {
-	    		if (field == "" || (isFirstInGroup && (ignoreFields == null || ignoreFields.contains(field)))) {
+	    		if (field == "" || (isFirstInGroup && !isFieldIgnored(field))) {
 	    			if (catchQTypes.contains(qType)) {
 	    				return true;
 	    			}

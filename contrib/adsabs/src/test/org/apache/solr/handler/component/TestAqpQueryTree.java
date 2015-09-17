@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.solr.request.SolrRequestHandler;
+import org.junit.BeforeClass;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
@@ -27,15 +28,19 @@ import monty.solr.util.MontySolrSetup;
 
 public class TestAqpQueryTree extends MontySolrQueryTestCase {
   
-  public String getSchemaFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-minimal.xml";
-  }
-
-  public String getSolrConfigFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-qtree.xml";
-  }
+  
+  @BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
+		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-minimal.xml";
+		
+		configString = MontySolrSetup.getMontySolrHome()
+		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-qtree.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+	}
   
   @Override
   public String getSolrHome() {

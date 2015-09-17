@@ -134,6 +134,12 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 					new StringReader(value));
 			source.reset();
 		} catch (IOException e1) {
+			if (source != null)
+	      try {
+	        source.close();
+        } catch (IOException e) {
+	        // ignore
+        }
 			return new String[0];
 		}
 
@@ -143,9 +149,11 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 			  termAtt = source.getAttribute(CharTermAttribute.class);
 				out.add(termAtt.toString());
 			}
+			source.close();
 		} catch (IOException e) {
 			// pass
 		}
+		
 		
 	  // for now let'd do this
     if (out.size() > 1) {

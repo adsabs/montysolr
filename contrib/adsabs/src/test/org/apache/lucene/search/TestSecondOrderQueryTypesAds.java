@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
@@ -17,6 +18,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.FieldCache.Floats;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.common.SolrException;
@@ -26,25 +28,28 @@ import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SyntaxError;
 import org.junit.BeforeClass;
 
 @SuppressCodecs("SimpleText")
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
-	
-	
-	public String getSchemaFile() {
-		return MontySolrSetup.getMontySolrHome()
-		    + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
-		    + "schema-citations-transformer.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
-		    + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
-		    + "citation-cache-solrconfig.xml";
-	}
-
+  
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    System.setProperty("solr.allow.unsafe.resourceloading", "true");
+    schemaString = MontySolrSetup.getMontySolrHome()
+        + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
+        + "schema-citations-transformer.xml";
+      
+    configString = MontySolrSetup.getMontySolrHome()
+          + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
+          + "citation-cache-solrconfig.xml";
+    
+    initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
+  }
+  
 	private SolrQueryRequest tempReq;
 
 	@Override
@@ -127,17 +132,17 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(cache);
 		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
-		float[] boostConst = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
+		Floats boostConst = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
           "boost_const", false);
-		float[] boost1 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
+		Floats boost1 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
         "boost_1", false);
-		float[] boost2 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
+		Floats boost2 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
         "boost_2", false);
 		
     
-		LuceneCacheWrapper<float[]> boostConstant = LuceneCacheWrapper.getFloatCache("boost_const", boostConst);
-		LuceneCacheWrapper<float[]> boostOne = LuceneCacheWrapper.getFloatCache("boost_1", boost1);
-		LuceneCacheWrapper<float[]> boostTwo = LuceneCacheWrapper.getFloatCache("boost_2", boost2);
+		LuceneCacheWrapper<Floats> boostConstant = LuceneCacheWrapper.getFloatCache("boost_const", boostConst);
+		LuceneCacheWrapper<Floats> boostOne = LuceneCacheWrapper.getFloatCache("boost_1", boost1);
+		LuceneCacheWrapper<Floats> boostTwo = LuceneCacheWrapper.getFloatCache("boost_2", boost2);
 		
   	
   	
@@ -294,7 +299,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   }
 
 	private void testQ2(Object firstQuery, SecondOrderCollector collector,
-	    List<Integer> expectedIds) throws ParseException, IOException {
+	    List<Integer> expectedIds) throws IOException, SyntaxError {
 		SolrQueryRequest r = req("test");
 		try {
 

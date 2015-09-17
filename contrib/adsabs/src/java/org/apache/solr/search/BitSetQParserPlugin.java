@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.zip.DeflaterInputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -22,6 +21,7 @@ import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.solr.common.SolrException;
@@ -45,6 +45,8 @@ import org.apache.solr.update.AddUpdateCommand;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.solr.handler.loader.CSVLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Flexible framework to query SOLR by (a large set)
@@ -55,6 +57,8 @@ import org.apache.solr.handler.loader.CSVLoader;
  */
 public class BitSetQParserPlugin extends QParserPlugin {
 
+	public static final Logger log = LoggerFactory.getLogger(BitSetQParserPlugin.class);
+	
 	public static String NAME = "bitset";
 	private Set<String> allowedFields = new HashSet<String>();
 	private static Map<String, String> cacheMapping = new HashMap<String, String>();
@@ -300,19 +304,30 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
 	    						}
 	    						
-		    					int[] cache;
+		    					Ints cache;
 		    					try {
 		    						cache = FieldCache.DEFAULT.getInts(reader, fieldName, false);
 		    					} catch (IOException e) {
 		    						throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get a cache for field: " + fieldName + "\n" + e.getMessage());
 		    					}
-		    					int i = 0; // lucene docid
-		    					for (int docValue: cache) {
+		    					
+		    					if (cache == null)
+		    						return translatedBitSet;
+		    					
+		    					// suckers, we have to translate whateve integer value into a lucene docid
+		    					log.warn("We are translating values for a field without a cache: {}. Terrible, terrible idea!", fieldName);
+		    					
+		    					int docid = 0; // lucene docid
+		    					int maxDoc = reader.maxDoc();
+		    					int docValue;
+		    					while(docid < maxDoc) {
+		    						docValue = cache.get(docid);
 		    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
-		    							translatedBitSet.set(i);
+		    							translatedBitSet.set(docid);
 		    						}
-		    						i++;
+		    						docid++;
 		    					}
+	    					
 		    					bits = translatedBitSet;
 	    					}
 	    				}

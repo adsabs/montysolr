@@ -14,6 +14,7 @@ import org.apache.solr.handler.batch.BatchProviderDumpIndex;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SolrReturnFields;
 
 /**
  * This class is here only to provide a convenient way to dump
@@ -38,7 +39,7 @@ public class JSONDumper extends JSONWriter {
 		SolrQueryResponse rsp = new SolrQueryResponse();
 		FileWriter writer = new FileWriter(jobFile);
 		
-		ReturnFields returnFields = new ReturnFields( req );
+		ReturnFields returnFields = new SolrReturnFields( req );
     rsp.setReturnFields( returnFields );
     
 		JSONDumper d = new JSONDumper(writer, req, rsp);

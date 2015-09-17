@@ -24,12 +24,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -42,6 +46,7 @@ import org.apache.lucene.analysis.util.*;
 import org.apache.lucene.util.CharsRef;
 import org.apache.lucene.util.IOUtils;
 import org.apache.lucene.util.Version;
+import org.apache.lucene.util.AttributeSource.AttributeFactory;
 import org.apache.solr.common.util.StrUtils;
 
 /**
@@ -59,6 +64,13 @@ import org.apache.solr.common.util.StrUtils;
  * If the LUCENE-4499 gets committed, we can remove these NewSynonym... classes.
  */
 public class NewSynonymFilterFactory extends TokenFilterFactory implements ResourceLoaderAware {
+  protected Map<String,String> args;
+
+  public NewSynonymFilterFactory(Map<String,String> args) {
+    super(args);
+    this.args = args;
+  }
+
   private SynonymMap map;
   private boolean ignoreCase;
   
@@ -71,8 +83,11 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   
   //@Override
   public void inform(ResourceLoader loader) throws IOException {
-    final boolean ignoreCase = getBoolean("ignoreCase", false); 
+    final boolean ignoreCase = getBoolean(args, "ignoreCase", false); 
     this.ignoreCase = ignoreCase;
+    
+    // must set the value back (for use by the inheritting class)
+    args.put("ignoreCase", ignoreCase ? "true" : "false");
 
     String bf = args.get("builderFactory");
     SynonymBuilderFactory builder = loadBuilderFactory(loader, bf != null ? bf : SynonymBuilderFactory.class.getName());
@@ -85,22 +100,32 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
   }
   
   
-  public static class SynonymParser extends SynonymMap.Builder {
+  public static class SynonymParser extends SynonymMap.Parser {
 
-    public SynonymParser(boolean dedup) {
-      super(dedup);
+    public SynonymParser(boolean dedup, Analyzer analyzer) {
+      super(dedup, analyzer);
     }
 
     public void add(Reader in) throws IOException, ParseException {
       throw new IllegalAccessError("You must override this method");
     }
+
+    @Override
+    public void parse(Reader in) throws IOException, ParseException {}
   }
   
   
   public static class SynonymBuilderFactory extends TokenizerFactory implements ResourceLoaderAware {
     
+    protected Map<String,String> args;
+
+    public SynonymBuilderFactory(Map<String,String> args) {
+      super(args);
+      this.args = args;
+    }
+
     @Override
-    public Tokenizer create(Reader input) {
+    public Tokenizer create(AttributeFactory factory, Reader input) {
       // TODO : this could be used to parse the source data (right now Solr and WordNet synonym
       // parser do it
       throw new IllegalAccessError("Not implemented");
@@ -112,7 +137,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       if (synonyms == null)
         throw new IllegalArgumentException("Missing required argument 'synonyms'.");
       
-      CharsetDecoder decoder = IOUtils.CHARSET_UTF_8.newDecoder();
+      CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
       decoder.onMalformedInput(CodingErrorAction.REPORT)
         		 .onUnmappableCharacter(CodingErrorAction.REPORT);
       
@@ -134,7 +159,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     }
     
     protected Analyzer getAnalyzer(ResourceLoader loader) throws IOException {
-      final boolean ignoreCase = getBoolean("ignoreCase", false); 
+      final boolean ignoreCase = getBoolean(args, "ignoreCase", false); 
 
       String tf = args.get("tokenizerFactory");
 
@@ -143,8 +168,8 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       return new Analyzer() {
         @Override
         protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer(Version.LUCENE_40, reader) : factory.create(reader);
-          TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_40, tokenizer) : tokenizer;
+          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer(Version.LUCENE_48, reader) : factory.create(reader);
+          TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_48, tokenizer) : tokenizer;
           return new TokenStreamComponents(tokenizer, stream);
         }
       };
@@ -153,7 +178,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     protected SynonymParser getParser(Analyzer analyzer) {
       
       String format = args.get("format");
-      boolean expand = getBoolean("expand", true);
+      boolean expand = getBoolean(args, "expand", true);
       
       if (format == null || format.equals("solr")) {
         // TODO: expose dedup as a parameter?
@@ -171,11 +196,15 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     
     // (there are no tests for this functionality)
     private TokenizerFactory loadTokenizerFactory(ResourceLoader loader, String cname) throws IOException {
-      TokenizerFactory tokFactory = loader.newInstance(cname, TokenizerFactory.class);
-      tokFactory.setLuceneMatchVersion(luceneMatchVersion);
-      tokFactory.init(args);
-      if (tokFactory instanceof ResourceLoaderAware) {
-        ((ResourceLoaderAware) tokFactory).inform(loader);
+      Class<? extends TokenizerFactory> clazz = loader.findClass(cname, TokenizerFactory.class);
+      TokenizerFactory tokFactory;
+      try {
+        tokFactory = clazz.getConstructor(Map.class).newInstance(new HashMap<String, String>());
+        if (tokFactory instanceof ResourceLoaderAware) {
+          ((ResourceLoaderAware) tokFactory).inform(loader);
+        }
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
       return tokFactory;
     }
@@ -187,15 +216,20 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
 
   }
   
-  private SynonymBuilderFactory loadBuilderFactory(ResourceLoader loader, String cname) throws IOException {
-    SynonymBuilderFactory builderFactory = loader.newInstance(cname, SynonymBuilderFactory.class);
-    builderFactory.setLuceneMatchVersion(luceneMatchVersion);
-    builderFactory.init(args);
-    if (builderFactory instanceof ResourceLoaderAware) {
-      ((ResourceLoaderAware) builderFactory).inform(loader);
-    }
-    return builderFactory;
-  }
+  
+ //(there are no tests for this functionality)
+ private SynonymBuilderFactory loadBuilderFactory(ResourceLoader loader, String cname) throws IOException {
+   Class<? extends SynonymBuilderFactory> clazz = loader.findClass(cname, SynonymBuilderFactory.class);
+   try {
+     SynonymBuilderFactory tokFactory = clazz.getConstructor(Map.class).newInstance(args);
+     if (tokFactory instanceof ResourceLoaderAware) {
+       ((ResourceLoaderAware) tokFactory).inform(loader);
+     }
+     return tokFactory;
+   } catch (Exception e) {
+     throw new RuntimeException(e);
+   }
+ }
   
   
   /*
@@ -216,6 +250,10 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 2: telescope
    */
   public static class AlwaysIncludeOriginal extends SynonymBuilderFactory {
+    public AlwaysIncludeOriginal(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
@@ -239,6 +277,10 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * retain proximity queries and phrases.
    */
   public static class BestEffort extends SynonymBuilderFactory {
+    protected BestEffort(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
@@ -263,6 +305,10 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 4: was
    */
   public static class MultiTokenReplaceNulls extends SynonymBuilderFactory {
+    public MultiTokenReplaceNulls(Map<String,String> args) {
+      super(args);
+    }
+
     protected SynonymParser getParser(Analyzer analyzer) {
       return new NewSolrSynonymParser(true, true, analyzer) {
         @Override
@@ -285,7 +331,12 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 
    */
   public static class BestEffortSearchLowercase extends SynonymBuilderFactory {
-  	boolean inclOrig = false;
+  	private Map<String,String> args;
+    public BestEffortSearchLowercase(Map<String,String> args) {
+      super(args);
+      this.args = args;
+    }
+    boolean inclOrig = false;
     public void inform(ResourceLoader loader) throws IOException {
       args.put("ignoreCase", "false");
       inclOrig = args.containsKey("inclOrig") ? ((String) args.get("inclOrig")).equals("true") : false;
@@ -322,7 +373,12 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
    * 
    */
   public static class BestEffortIgnoreCaseSelectively extends SynonymBuilderFactory {
-  	boolean inclOrig = false;
+  	private Map<String,String> args;
+    public BestEffortIgnoreCaseSelectively(Map<String,String> args) {
+      super(args);
+      this.args = args;
+    }
+    boolean inclOrig = false;
     public void inform(ResourceLoader loader) throws IOException {
       args.put("ignoreCase", "false");
       inclOrig = args.containsKey("inclOrig") ? ((String) args.get("inclOrig")).equals("true") : false;

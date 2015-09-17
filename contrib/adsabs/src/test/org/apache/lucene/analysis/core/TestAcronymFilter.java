@@ -7,18 +7,19 @@ import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.lucene.util.Version;
 import org.apache.solr.analysis.AcronymTokenFilterFactory;
 
 public class TestAcronymFilter extends BaseTokenStreamTestCase {
 	
 	  public void testReplace() throws Exception {
-		    AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory();
-		    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-		    factory.init(new HashMap<String,String>() {{
-		    	put("emitBoth", "false");
-		    	put("prefix", "acr::");
-		    	put("setType", "ACRONYM");
-		    }});
+		    AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory(new HashMap<String,String>() {{
+		      put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+          put("emitBoth", "false");
+          put("prefix", "acr::");
+          put("setType", "ACRONYM");
+        }});
+		    factory.setExplicitLuceneMatchVersion(true);
 		    
 		    TokenStream stream = factory.create(new MockTokenizer(new StringReader("mit MIT"), MockTokenizer.WHITESPACE, false));
 		    assertTokenStreamContents(stream, 
@@ -36,13 +37,13 @@ public class TestAcronymFilter extends BaseTokenStreamTestCase {
 	  
 	  
 	  public void testAdd() throws Exception {
-		    AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory();
-		    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-		    factory.init(new HashMap<String,String>() {{
-		    	put("emitBoth", "true");
-		    	put("prefix", "acr::");
-		    	put("setType", "ACRONYM");
-		    }});
+		    AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory(new HashMap<String,String>() {{
+		      put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
+          put("emitBoth", "true");
+          put("prefix", "acr::");
+          put("setType", "ACRONYM");
+        }});
+		    factory.setExplicitLuceneMatchVersion(true);
 		    
 		    TokenStream stream = factory.create(new MockTokenizer(new StringReader("M MIT"), MockTokenizer.WHITESPACE, false));
 		    assertTokenStreamContents(stream, 

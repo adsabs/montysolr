@@ -8,6 +8,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 
 public class AqpBibcodeProcessor extends QueryNodeProcessorImpl implements
 	QueryNodeProcessor {
@@ -21,7 +22,7 @@ public class AqpBibcodeProcessor extends QueryNodeProcessorImpl implements
 	@Override
 	protected QueryNode postProcessNode(QueryNode node)
 			throws QueryNodeException {
-		if (node instanceof FieldQueryNode) {
+		if (node instanceof FieldQueryNode && !(node instanceof WildcardQueryNode)) {
 			FieldQueryNode n = (FieldQueryNode) node;
 			String input = n.getTextAsString();
 			if (input == null) {

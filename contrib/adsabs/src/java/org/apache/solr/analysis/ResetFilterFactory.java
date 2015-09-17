@@ -16,28 +16,28 @@ public class ResetFilterFactory extends TokenFilterFactory {
     private int[] range;
     private String prefix;
 
-    public void init(Map<String, String> args) {
-	    super.init(args);
+    public ResetFilterFactory(Map<String, String> args) {
+	    super(args);
 	    
 	    incomingType = null;
 	    if (args.containsKey("incomingType")) {
-	      incomingType = args.get("incomingType");
+	      incomingType = args.remove("incomingType");
 	      if (incomingType.equals("null")) incomingType=null;
 	    }
 	    
 	    posIncrement = null;
       if (args.containsKey("posIncrement")) {
-        posIncrement = Integer.parseInt((String)args.get("posIncrement"));
+        posIncrement = Integer.parseInt((String)args.remove("posIncrement"));
       }
       
       outgoingType = null;
       if (args.containsKey("outgoingType")) {
-        outgoingType = (String) args.get("outgoingType");
+        outgoingType = (String) args.remove("outgoingType");
       }
       
       range = new int[]{0, Integer.MAX_VALUE};
       if (args.containsKey("range")) {
-        String r = (String) args.get("range");
+        String r = (String) args.remove("range");
         int i = 0;
         for (String x: r.split(",")) {
           range[i++] = Integer.parseInt(x);
@@ -45,7 +45,11 @@ public class ResetFilterFactory extends TokenFilterFactory {
       }
       prefix = null;
       if (args.containsKey("addPrefix")) {
-        prefix = (String) args.get("addPrefix");
+        prefix = (String) args.remove("addPrefix");
+      }
+      
+      if (!args.isEmpty()) {
+        throw new IllegalArgumentException("Unknown parameter(s): " + args);
       }
 	}
 	  

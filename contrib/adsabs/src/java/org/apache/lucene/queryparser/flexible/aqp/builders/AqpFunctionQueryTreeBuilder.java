@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.queries.function.FunctionQuery;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
@@ -13,6 +12,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.search.Query;
 import org.apache.solr.search.AqpFunctionQParser;
+import org.apache.solr.search.SyntaxError;
 import org.apache.solr.search.ValueSourceParser;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
@@ -32,7 +32,7 @@ public class AqpFunctionQueryTreeBuilder extends QueryTreeBuilder
 	public Query build(QueryNode node) throws QueryNodeException {
 		try {
 			return new FunctionQuery(getValueSourceParser().parse(getParser(node)));
-		} catch (ParseException e) {
+		} catch (SyntaxError e) {
 			throw new QueryNodeException(new MessageImpl(e.getLocalizedMessage()));
 		}
 	}

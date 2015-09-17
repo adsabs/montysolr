@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +38,7 @@ import org.apache.solr.analysis.author.AuthorNormalizeFilter;
 import org.apache.solr.analysis.author.AuthorNormalizeFilterFactory;
 import org.apache.solr.analysis.author.AuthorUtils;
 import org.apache.solr.analysis.author.PythonicAuthorNormalizeFilterFactory;
+import org.apache.solr.analysis.author.PythonicAuthorNormalizerFilter;
 
 /**
  * Looks at the QueryNode(s) and if they are author searches,
@@ -95,27 +98,39 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   
   private QueryNode expandNodes(QueryNode node, NameInfo origNameInfo, int[] level) throws QueryNodeException {
     
-    ArrayList<QueryNode> pl = new ArrayList<QueryNode>();
+    ArrayList<QueryNode> collector = new ArrayList<QueryNode>();
     
     if (!node.isLeaf()) {
       List<QueryNode> children = node.getChildren();
+      boolean changed = false;
       for (int i=0;i<children.size();i++) {
-        doExpansion(origNameInfo, children.get(i), pl, level);
-        children.addAll(i+1, pl);
-        i += pl.size();
-        pl.clear();
+        doExpansion(origNameInfo, children.get(i), collector, level);
+        // interlacing new values right behind the old values
+        // it looks stupid (and is dangerous, true...) but i do it
+        // to make the results more readable (to show expansion right
+        // after the source token)
+        
+        if (collector.size() > 0) {
+        	changed = true;
+        	children.addAll(i+1, collector);
+        	i += collector.size();
+        	collector.clear();
+        }
       }
-      //children.addAll(pl);
+      
+      if (changed)
+      	node.set(children);
+      
     }
     else {
       // now expand the parent
-      doExpansion(origNameInfo, node, pl, level);
+      doExpansion(origNameInfo, node, collector, level);
     }
     
 
-    if (pl.size()>0) {
-      pl.add(0, node);
-      return new GroupQueryNode(new BooleanQueryNode(pl));
+    if (collector.size()>0) {
+      collector.add(0, node);
+      return new GroupQueryNode(new BooleanQueryNode(collector));
     }
     
     return node;
@@ -232,13 +247,16 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   
   private String[] getSynonyms(String origInput) throws IOException {
     Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
-    TokenStream source;
+    TokenStream source = null;
     try {
       source = analyzer.tokenStream("author_short_name_rage", new StringReader(origInput));
       source.reset();
     } catch (IOException e1) {
+    	if (source != null)
+        source.close();
       throw new RuntimeException(e1);
     }
+    
     
     CharTermAttribute termAtt = source.getAttribute(CharTermAttribute.class);
     
@@ -246,11 +264,13 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     while (source.incrementToken()) {
       synonyms.add(termAtt.toString());
     }
+    source.close();
     
     if (synonyms.size()<2) { // the first one is the original
       return null;
     }
     synonyms.remove(0);
+    
     return synonyms.toArray(new String[synonyms.size()]);
   }
   
@@ -271,26 +291,20 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
    * chain, you should always review also this method
    */
   
-  private TokenStreamComponents tsc = null;
-  private ReusableStringReader reader = null;
+  Analyzer authorNameAnalyzer = new Analyzer() {
+      @Override
+       public TokenStreamComponents createComponents(String fieldName, Reader reader) {
+         Tokenizer source = new KeywordTokenizer(reader);
+         TokenStream filter = new PythonicAuthorNormalizerFilter(source);
+         filter = new AuthorNormalizeFilter(filter);
+         return new TokenStreamComponents(source, filter);
+       }
+    };
+    
   private List<String> normalizeAuthorName(String input) throws QueryNodeException {
-  	if (reader == null) { // well, nice try, but it will be always created new...
-  		TokenFilterFactory[] filters = new TokenFilterFactory[2];
-  		TokenizerFactory tokenizer = new KeywordTokenizerFactory();
-  		filters[1] = new AuthorNormalizeFilterFactory();
-  		filters[0] = new PythonicAuthorNormalizeFilterFactory();
-  		reader = new ReusableStringReader();
-    	Tokenizer tk = tokenizer.create( reader );
-      TokenStream ts = tk;
-      for (TokenFilterFactory filter : filters) {
-        ts = filter.create(ts);
-      }
-      tsc = new TokenStreamComponents(tk, ts);
-  	}
-  	
-    TokenStream ts = tsc.getTokenStream();
-    reader.setValue(input);
+    
   	try {
+  	  TokenStream ts = authorNameAnalyzer.tokenStream("foo", input);
 	    ts.reset();
 	    List<String> out = new ArrayList<String>();
 	  	CharTermAttribute termAtt;
@@ -298,6 +312,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
 	  		termAtt = ts.getAttribute(CharTermAttribute.class);
 	  		out.add(termAtt.toString());
 	  	}
+	  	ts.close();
 	  	return out;
     } catch (IOException e) {
 	    throw new QueryNodeException(new MessageImpl("Error parsing: " + input, e));

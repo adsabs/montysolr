@@ -25,6 +25,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
 import org.adsabs.solr.AdsConfig.F;
+import org.junit.BeforeClass;
 
 /**
  * Test for the normalized_text_ascii type
@@ -34,21 +35,25 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
 	
 	
-  @Override
-  public String getSchemaFile() {
-    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-    });
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+  @BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
+					+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
 
-  }
-
-  public String getSolrConfigFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-  }
+		
+		configString = MontySolrSetup.getMontySolrHome()
+			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
+	}
 
 
   public void test() throws Exception {

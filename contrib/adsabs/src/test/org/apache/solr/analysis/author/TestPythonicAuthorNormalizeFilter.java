@@ -3,7 +3,10 @@ package org.apache.solr.analysis.author;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import monty.solr.util.MontySolrAbstractLuceneTestCase;
+
 import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.Tokenizer;
@@ -41,21 +44,24 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
 		compare("Joachim von Lubow", "Joachim von Lubow,", "von Lubow, Joachim");
 		compare("Gerard 't Hooft", "Gerard 't Hooft,", "'t Hooft, Gerard");
 		compare("Pieter J. in 't Veld", "Pieter J. in 't Veld,", "'t Veld, Pieter J. in");
-		compare("first");
-		compare("first;james", "james,");
-		compare("james; first; foo", "james,", "foo,");
+		compare("first", "first,");
+		compare("first;james", "first,", "james,");
+		compare("james; first; foo", "james,", "first,", "foo,");
 		compare("V Maestro", "V Maestro,", "Maestro, V");
 		compare("Maestro, V", "Maestro, V");
 		compare("Maestro, J", "Maestro, J");
 		compare("J Maestro", "J Maestro,", "Maestro, J");
-
 		compare("Alves de Oliveira", "Alves de Oliveira,", "de Oliveira, Alves");
+		
+		// #16 github: honorifics, when the only thing we have, should be treated as surnames
+		compare("goodman", "goodman,");
+		compare("alissa goodman", "alissa goodman,", "goodman, alissa");
 	}
 	
 	public void compare(String input, String... expected) throws Exception {
 		Reader reader = new StringReader(input);
 		Tokenizer tokenizer = new KeywordTokenizer(reader);
-		PythonicAuthorNormalizeFilterFactory factory = new PythonicAuthorNormalizeFilterFactory();
+		PythonicAuthorNormalizeFilterFactory factory = new PythonicAuthorNormalizeFilterFactory(new HashMap<String,String>());
 		TokenStream stream = factory.create(tokenizer);
 		stream.reset();
 		CharTermAttribute termAtt = stream.getAttribute(CharTermAttribute.class);

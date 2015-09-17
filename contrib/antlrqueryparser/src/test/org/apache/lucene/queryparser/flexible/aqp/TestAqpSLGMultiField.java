@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.EmptyTokenizer;
 import org.apache.lucene.analysis.MockAnalyzer;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.TextField;
@@ -175,7 +175,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     q = mfqp.parse("one AND two AND foo:test", null);
     assertEquals("+(b:one^5.0 t:one^10.0) +(b:two^5.0 t:two^10.0) +foo:test",
         q.toString());
-
+    
     q = mfqp.parse("one^3 AND two^4", null);
     assertEquals("+((b:one^5.0 t:one^10.0)^3.0) +((b:two^5.0 t:two^10.0)^4.0)",
         q.toString());
@@ -373,11 +373,23 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
         return stdAnalyzer.createComponents(fieldName, reader);
       }
     }
+    
+    final class EmptyTokenizer extends Tokenizer {
+
+      public EmptyTokenizer(Reader input) {
+        super(input);
+      }
+
+      @Override
+      public boolean incrementToken() {
+        return false;
+      }
+    }
   }
 
   // Uniquely for Junit 3
   public static junit.framework.Test suite() {
     return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiField.class);
   }
-
+  
 }

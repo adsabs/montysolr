@@ -1,202 +1,150 @@
 package org.apache.solr.analysis.author;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
-import org.apache.lucene.analysis.util.ClasspathResourceLoader;
-import org.apache.solr.analysis.WriteableSynonymMap;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
   
   public void testCollector() throws IOException, InterruptedException {
     
-    AuthorCollectorFactory factory = new AuthorCollectorFactory();
     
-    File tmpFile = File.createTempFile("variants", ".tmp");
+    
     Map<String,String> args = new HashMap<String,String>();
-    args.put("outFile", tmpFile.getAbsolutePath());
-    args.put("tokenTypes", AuthorUtils.AUTHOR_TRANSLITERATED);
-    args.put("emitTokens", "false");
+    args.put("tokenTypes", String.format("%s,%s", AuthorUtils.AUTHOR_INPUT, 
+    		AuthorUtils.AUTHOR_TRANSLITERATED));
+    args.put("emitTokens", "true");
     
-    factory.setLuceneMatchVersion(TEST_VERSION_CURRENT);
-    factory.init(args);
-    factory.inform(new ClasspathResourceLoader(getClass()));
+    AuthorCollectorFactory factory = new AuthorCollectorFactory(args);
+    factory.setExplicitLuceneMatchVersion(true);
 
-    AuthorNormalizeFilterFactory normFactory = new AuthorNormalizeFilterFactory();
-    AuthorTransliterationFactory transliteratorFactory = new AuthorTransliterationFactory();
+    AuthorNormalizeFilterFactory normFactory = new AuthorNormalizeFilterFactory(new HashMap<String,String>());
+    AuthorTransliterationFactory transliteratorFactory = new AuthorTransliterationFactory(new HashMap<String,String>());
     
     //create the synonym writer for the test MÜLLER, BILL 
-    TokenStream stream = new PatternTokenizer(new StringReader("MÜLLER, BILL"), Pattern.compile(";"), -1);
+    TokenStream stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
     TokenStream ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     assertTrue(ts instanceof AuthorCollectorFilter);
     ts.reset();
-    while (ts.incrementToken() != false) {
-      //pass
-    }
-    ts.reset();
-
-    WriteableSynonymMap synMap = factory.getSynonymMap();
-    assertTrue(synMap.containsKey("MULLER, BILL"));
-    assertTrue(synMap.containsKey("MUELLER, BILL"));
-    assertSame(synMap.get("MUELLER, BILL"), synMap.get("MULLER, BILL"));
     
-    assertFalse(synMap.containsKey("MÜLLER, BILL"));
-    assertFalse(synMap.containsKey("MÜLLER, B"));
-    assertFalse(synMap.containsKey("MULLER, B"));
-    assertFalse(synMap.containsKey("MUELLER, B"));
-    assertFalse(synMap.containsKey("MÜLLER,"));
-    assertFalse(synMap.containsKey("MUELLER,"));
+    TypeAttribute typeAtt = ts.getAttribute(TypeAttribute.class);
+    CharTermAttribute termAtt = ts.getAttribute(CharTermAttribute.class);
     
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
-    synMap.persist();
-    checkOutput(tmpFile, 
-        "MULLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MULLER\\,\\ B=>MÜLLER\\,\\ B",
-        "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
-        "MUELLER\\,=>MÜLLER\\,",
-        "MULLER\\,=>MÜLLER\\,"
-        );
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
-
-    // call it again
-    // the tokens should not be normalized by our filter
-    stream = new PatternTokenizer(new StringReader("MÜller, Bill"), Pattern.compile(";"), -1);
-    ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
-
-    synMap.clear();
-    assertFalse(synMap.containsKey("MULLER, BILL"));
-
-    ts.reset();
-    while (ts.incrementToken() != false) {
-      //pass
-    }
-    ts.reset();
-
-    assertFalse(synMap.containsKey("MÜLLER, BILL"));
-    assertFalse(synMap.containsKey("MÜller, Bill"));
-    assertTrue(synMap.containsKey("MUEller, Bill"));
-    assertTrue(synMap.containsKey("MUller, Bill"));
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MUller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
-    //clean and redo
-    synMap.clear();
-    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜLLER, WILLIAM BILL;ASCII, NAME;SURNAME, JMÉNO"), Pattern.compile(";"), -1);
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MUEller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
+    
+    assertFalse(ts.incrementToken());
+    ts.close();
+    
+    args.put("emitTokens", "true");
+    args.put("tokenTypes", AuthorUtils.AUTHOR_INPUT);
+    factory = new AuthorCollectorFactory(args);
+    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
     ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     ts.reset();
-    while (ts.incrementToken() != false) {
-      //pass
-    }
-
-    // now test the map is correctly written to disk
-    synMap.persist();
-    checkOutput(tmpFile, 
-        "MULLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MULLER\\,\\ B=>MÜLLER\\,\\ B",
-        "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
-        "MUELLER\\,=>MÜLLER\\,",
-        "MULLER\\,=>MÜLLER\\,",
-        "MUELLER\\,\\ WILLIAM=>MÜLLER\\,\\ WILLIAM",
-        "MULLER\\,\\ WILLIAM=>MÜLLER\\,\\ WILLIAM",
-        "MUELLER\\,\\ WILLIAM\\ BILL=>MÜLLER\\,\\ WILLIAM\\ BILL",
-        "MUELLER\\,\\ WILLIAM\\ B=>MÜLLER\\,\\ WILLIAM\\ B",
-        "MUELLER\\,\\ W\\ B=>MÜLLER\\,\\ W\\ B",
-        "MULLER\\,\\ WILLIAM\\ BILL=>MÜLLER\\,\\ WILLIAM\\ BILL",
-        "MULLER\\,\\ WILLIAM\\ B=>MÜLLER\\,\\ WILLIAM\\ B",
-        "MULLER\\,\\ W\\ B=>MÜLLER\\,\\ W\\ B",
-        "MULLER\\,\\ WILLIAM=>MÜLLER\\,\\ WILLIAM",
-        "!ASCII"
-        );
-
     
-    // now simulate the map was updated and we are closing, it should save itself
-    synMap.put("MULLER, BILL", synMap.get("MULLER, BILL"));
-    tmpFile.delete();
+    typeAtt = ts.getAttribute(TypeAttribute.class);
+    termAtt = ts.getAttribute(CharTermAttribute.class);
     
-    /* works not since the new refactoring
-    tmpFile.delete();
-    assertFalse(tmpFile.canRead());
-    ts = null;
-    synMap = null;
-    factory = null;
-    System.gc();
-    */
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
-    // trick the filter into persisting itself
-    ts.reset();
-    ts.reset();
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
+    
+    assertFalse(ts.incrementToken());
+    ts.close();
+    
+    
+    args.put("emitTokens", "false");
+    args.put("tokenTypes", AuthorUtils.AUTHOR_TRANSLITERATED);
+    factory = new AuthorCollectorFactory(args);
+    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
+    ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     ts.reset();
     
-    checkOutput(tmpFile, 
-        "MULLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MULLER\\,\\ B=>MÜLLER\\,\\ B",
-        "MUELLER\\,\\ BILL=>MÜLLER\\,\\ BILL",
-        "MUELLER\\,\\ B=>MÜLLER\\,\\ B",
-        "MUELLER\\,=>MÜLLER\\,",
-        "MULLER\\,=>MÜLLER\\,",
-        "!ASCII",
-        "!SURNAME\\,\\ J=>SURNAME\\,\\ J",
-        "SURNAME\\,\\ JMENO=>SURNAME\\,\\ JMÉNO"
-        );
+    typeAtt = ts.getAttribute(TypeAttribute.class);
+    termAtt = ts.getAttribute(CharTermAttribute.class);
     
-    // now load the factory and check the synonyms were loaded properly
-    //factory = new AuthorCollectorFactory();
-    //args.put("synonyms", tmpFile.getAbsolutePath());
-    //factory.init(args);
-    //factory.inform(new ClasspathResourceLoader(getClass()));
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
-    synMap = factory.getSynonymMap();
-    synMap.populateMap(Arrays.asList(readFile(tmpFile).split("\n")));
-    assertTrue(synMap.containsKey("MULLER, WILLIAM BILL"));
-    assertTrue(synMap.containsKey("MULLER, WILLIAM"));
-    assertTrue(synMap.containsKey("MULLER, BILL"));
-    assertTrue(synMap.containsKey("MUELLER, BILL"));
-    assertTrue(synMap.containsKey("MUELLER, B"));
-    assertTrue(synMap.containsKey("MUELLER, B"));
-    assertEquals(synMap.get("MULLER, BILL"), new LinkedHashSet(){{add("MÜLLER, BILL");}});
-    assertEquals(synMap.get("MUELLER, BILL"), new LinkedHashSet(){{add("MÜLLER, BILL");}});
-    assertEquals(synMap.get("MULLER,"), new LinkedHashSet(){{add("MÜLLER,");}});
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
-    assertSame(synMap.get("MUELLER, BILL"), synMap.get("MULLER, BILL"));
-    assertSame(synMap.get("MUELLER,"), synMap.get("MUELLER,"));
+    assertFalse(ts.incrementToken());
+    ts.close();
+    
+    
+    args.put("emitTokens", "false");
+    args.put("tokenTypes", "foo");
+    factory = new AuthorCollectorFactory(args);
+    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
+    ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
+    ts.reset();
+    
+    typeAtt = ts.getAttribute(TypeAttribute.class);
+    termAtt = ts.getAttribute(CharTermAttribute.class);
+    
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
+    
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
+    
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
+    
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
+    
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MUller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
+    
+    ts.incrementToken();
+    assertTrue(termAtt.toString().equals("MUEller, Bill"));
+    assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
+    
+    assertFalse(ts.incrementToken());
   }
   
-  private void checkOutput(File tmpFile, String... expected) throws IOException {
-    String fc = readFile(tmpFile);
-    for (String t: expected) {
-      if (t.substring(0,1).equals("!")) {
-        assertFalse("Present: " + t, fc.contains(t.substring(1)));
-      }
-      else {
-        assertTrue("Missing: " + t, fc.contains(t));
-      }
-    }
-  }
-  private String readFile(File tmpFile) throws IOException {
-    FileInputStream in = new FileInputStream(tmpFile);
-    BufferedReader fi = new BufferedReader(new InputStreamReader(new DataInputStream(in), "UTF-8"));
-    StringBuffer out = new StringBuffer();
-    String strLine;
-    while ((strLine = fi.readLine()) != null)   {
-      out.append(strLine);
-      out.append("\n");
-    }
-    return out.toString();
-  }
 
 }

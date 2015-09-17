@@ -17,6 +17,8 @@ package org.apache.lucene.analysis.miscellaneous;
  * limitations under the License.
  */
 
+import java.util.Map;
+
 import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
 import org.apache.lucene.analysis.util.MultiTermAwareComponent;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
@@ -35,7 +37,14 @@ import org.apache.lucene.analysis.TokenStream;
  *
  */
 public class AdsSpecialCharactersFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
-  public AdsSpecialCharactersFilter create(TokenStream input) {
+  public AdsSpecialCharactersFilterFactory(Map<String, String> args) {
+	  super(args);
+    if (!args.isEmpty()) {
+      throw new IllegalArgumentException("Unknown parameters: " + args);
+    }
+  }
+
+	public AdsSpecialCharactersFilter create(TokenStream input) {
     return new AdsSpecialCharactersFilter(input);
   }
 

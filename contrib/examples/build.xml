@@ -162,7 +162,7 @@
 	    
 		<mkdir dir="${build.dir}/${example.name}/solr/lib" />
 		
-		<!-- existence of this folder prevents solr from using tmp (where UI Admin has problems) -->
+		<!-- existence of this folder prevents solr from using tmp (and UI admin going blank) -->
 	  <mkdir dir="${build.dir}/${example.name}/work" />
 		
 		
@@ -221,7 +221,7 @@
     <!-- add selected libraries -->
 		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
       <fileset dir="${montysolr.dependencies.dir}">
-        <include name="**/apache-solr-dataimporthandler*.jar" />
+        <!--<include name="**/apache-solr-dataimporthandler*.jar" />-->
         <include name="**/lucene-join*.jar" />
         <include name="**/lucene-sandbox*.jar" />
       </fileset>
@@ -229,9 +229,7 @@
     <copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
       <fileset dir="${common.dir}/contrib">
         <include name="**/lib/antlr-runtime*.jar" />
-      	<include name="**/lib/drizzle*.jar" />
       	<include name="**/lib/jython-standalone*.jar" />
-      	<include name="**/lib/mongo-java-driver*.jar" />
       </fileset>
     </copy>
 		
@@ -241,11 +239,18 @@
 	    
 		<antcall target="populate-classpath" />
 		
-		<!-- generate the run.sh using default profile (even if that may be wrong for now) --> 
+		<!-- generate the run.sh using default profile (even if that may be wrong for now) -->
+		<ant inheritAll="false" inheritRefs="false" target="generate-run.sh">
+			<property name="ename" value="${example.name}" />
+			<property name="ignore-environment" value="true" />
+			<property name="profile" value="${example.config}" />
+		</ant>
+		<!--	
 		<exec executable="ant" failonerror="true" dir="${basedir}">
 			<arg line="-Dename=${example.name} -Dignore-environment=true -Dprofile=${example.config} -Dtarget=generate-run.sh" />
 			<arg value="run-configured" />
 		</exec>
+		-->
 
 		<delete dir="${build.dir}/${example.name}/solrwar"/>
     <delete dir="${build.dir}/${example.name}/example-DIH"/>

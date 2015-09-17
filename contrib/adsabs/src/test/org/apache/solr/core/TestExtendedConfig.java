@@ -22,24 +22,29 @@ import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
+import org.junit.BeforeClass;
 
 
 public class TestExtendedConfig extends MontySolrAbstractTestCase {
 
-	public String getSchemaFile() {
+	@BeforeClass
+	public static void beforeClass() throws Exception {
 		
-	    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
-	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-	    	});
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+			    MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
+				  +	"schema-minimal.xml";
 		
-		return "schema.xml";
+		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
+					+	"extended-solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
-		"extended-solrconfig.xml";
-	}
+	
 
 
   public void testExtendedConfig() {

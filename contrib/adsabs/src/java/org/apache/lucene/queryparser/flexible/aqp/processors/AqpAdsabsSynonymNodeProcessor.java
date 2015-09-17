@@ -13,6 +13,15 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNod
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.solr.request.SolrQueryRequest;
 
+/**
+ * If the node is {@link AqpAdsabsSynonymQueryNode} we'll check
+ * whether to analyze it. If yes, it will be passed to the normal
+ * analyzer for that given field. If not, then it will be processed
+ * by analyzers of our choice
+ * 
+ * @author rchyla
+ *
+ */
 public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implements
 	QueryNodeProcessor  {
 
@@ -68,6 +77,7 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
 			for (int i=0; i<children.size();i++) {
 				children.set(i, applyNonAnalyzableToAllChildren(children.get(i)));
 			}
+			node.set(children);
 		}
 		return node;
 		

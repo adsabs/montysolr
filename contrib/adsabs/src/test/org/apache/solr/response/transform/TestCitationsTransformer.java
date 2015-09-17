@@ -3,17 +3,23 @@ package org.apache.solr.response.transform;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.solr.util.AbstractSolrTestCase;
+import org.junit.BeforeClass;
 
 public class TestCitationsTransformer extends AbstractSolrTestCase {
-	public String getSchemaFile() {
-		return MontySolrSetup.getMontySolrHome()
+	
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
 		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-citations-transformer.xml";
-	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
+		
+		configString = MontySolrSetup.getMontySolrHome()
 		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-citations-transformer.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
+	
 	
 	@Override
 	public String getSolrHome() {

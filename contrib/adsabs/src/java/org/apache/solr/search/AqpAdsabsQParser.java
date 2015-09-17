@@ -242,7 +242,7 @@ public class AqpAdsabsQParser extends QParser {
 		 */
 	}
 
-	public Query parse() throws ParseException {
+	public Query parse() throws SyntaxError {
 		try {
 			//if (qstr.trim().endsWith(",") && !qstr.trim().endsWith("\\,")) {
 			//  QueryConfigHandler config = qParser.getQueryConfigHandler();
@@ -250,14 +250,10 @@ public class AqpAdsabsQParser extends QParser {
 			//}
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
-			ParseException ex = new ParseException(e.getMessage());
-			ex.setStackTrace(e.getStackTrace());
-			throw ex;
+		  throw new SyntaxError(e);
 		}
 		catch (SolrException e1) {
-			ParseException ex2 = new ParseException(e1.getMessage());
-			ex2.setStackTrace(e1.getStackTrace());
-			throw ex2;
+		  throw new SyntaxError(e1);
 		}
 	}
 

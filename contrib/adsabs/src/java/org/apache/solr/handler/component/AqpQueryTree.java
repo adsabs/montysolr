@@ -16,6 +16,7 @@ import org.apache.solr.search.AqpAdsabsQParser;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.QueryParsing;
+import org.apache.solr.search.SyntaxError;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -84,10 +85,10 @@ public class AqpQueryTree extends SearchComponent {
         }
       }
       
-    } catch (ParseException e) {
-      rsp.add("qtreeError", e.getMessage());
     } catch (QueryNodeParseException e) {
       rsp.add("qtreeError", e.getMessage());
+    } catch (SyntaxError e) {
+	    rsp.add("qtreeError", e.getMessage());
     }
     
     

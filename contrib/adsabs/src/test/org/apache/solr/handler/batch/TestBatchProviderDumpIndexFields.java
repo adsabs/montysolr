@@ -27,7 +27,7 @@ public class TestBatchProviderDumpIndexFields extends BatchProviderTest {
 		SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "q", "title:wall OR title:peace", 
 				"fields", "id,title,floatf");
 		
-		BatchProviderDumpIndexFields provider = new BatchProviderDumpIndexFields();
+		BatchProviderDumpAnalyzedFields provider = new BatchProviderDumpAnalyzedFields();
 		provider.run(req, queue);
 		req.close();
 		
@@ -43,7 +43,7 @@ public class TestBatchProviderDumpIndexFields extends BatchProviderTest {
 		//SortableFloatField f = new SortableFloatField();
 		//String v = f.readableToIndexed("1.0");
 		
-		provider = new BatchProviderDumpIndexFields();
+		provider = new BatchProviderDumpAnalyzedFields();
 		provider.run(req, queue);
 		req.close();
 		

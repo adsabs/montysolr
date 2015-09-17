@@ -63,7 +63,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 
 	@Override
 	protected ValueSource parseValueSource(boolean doConsumeDelimiter)
-	throws ParseException {
+	throws SyntaxError {
 
 		// check if there is a query already built inside our node
 		OriginalInput node = consume();
@@ -76,7 +76,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 		else if (input.substring(0,1).equals("$")) {
 			String val = getParam(input);
 			if (val == null) {
-				throw new ParseException("Missing param " + input + " while parsing function '" + val + "'");
+				throw new SyntaxError("Missing param " + input + " while parsing function '" + val + "'");
 			}
 
 			QParser subParser = subQuery(val, "func");
@@ -130,7 +130,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 	}
 
 
-	public String parseId() throws ParseException {
+	public String parseId() throws SyntaxError {
 		return consumeAsString();
 	}
 
@@ -139,21 +139,21 @@ public class AqpFunctionQParser extends FunctionQParser {
 		return Integer.valueOf(consumeAsString());
 	}
 
-	public Float parseFloat() throws ParseException {
+	public Float parseFloat() throws SyntaxError {
 		String str = consumeAsString();
-		if (argWasQuoted()) throw new ParseException("Expected float instead of quoted string:" + str);
+		if (argWasQuoted()) throw new SyntaxError("Expected float instead of quoted string:" + str);
 		float value = Float.parseFloat(str);
 		return value;
 	}
 
-	public double parseDouble() throws ParseException {
+	public double parseDouble() throws SyntaxError {
 		String str = consumeAsString();
-		if (argWasQuoted()) throw new ParseException("Expected double instead of quoted string:" + str);
+		if (argWasQuoted()) throw new SyntaxError("Expected double instead of quoted string:" + str);
 		double value = Double.parseDouble(str);
 		return value;
 	}
 
-	public List<ValueSource> parseValueSourceList() throws ParseException {
+	public List<ValueSource> parseValueSourceList() throws SyntaxError {
 		List<ValueSource> sources = new ArrayList<ValueSource>(3);
 		while (canConsume()) {
 			sources.add(parseValueSource(true));
@@ -161,7 +161,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 		return sources;
 	}
 
-	public Query parseNestedQuery() throws ParseException {
+	public Query parseNestedQuery() throws SyntaxError {
  		OriginalInput node = consume();
 		QParser parser = subQuery(node.value, null); // use the default parser
 		return parser.getQuery();

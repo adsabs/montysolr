@@ -25,7 +25,7 @@ import org.apache.solr.schema.SchemaField;
  * 
  * #term #termFreq #docFreq
  * 
- * You can dump several fields at one, just
+ * You can dump several fields at once, just
  * separate them by a comma
  * 
  * Parameters:
@@ -38,7 +38,7 @@ public class BatchProviderDumpTermFreqs extends BatchProvider {
 
 		SolrCore core = req.getCore();
 		SolrParams params = req.getParams();
-		IndexSchema schema = core.getSchema();
+		IndexSchema schema = core.getLatestSchema();
 	  String jobid = params.get("jobid");
 	  String workDir = params.get("#workdir");
 	  

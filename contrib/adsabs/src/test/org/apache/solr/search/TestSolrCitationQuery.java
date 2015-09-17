@@ -1,28 +1,42 @@
 package org.apache.solr.search;
 
+import org.junit.BeforeClass;
+
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
+
+import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.FieldCache.CacheEntry;
 
 
 
 public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 
 
-	public String getSchemaFile() {
-		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-		});
-		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf/",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome()
+					+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+		
+		configString = MontySolrSetup.getMontySolrHome()
+					+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
+	
 
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
-		+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+	@Override
+	public void tearDown() throws Exception {
+		FieldCache.DEFAULT.purgeAllCaches();
+		super.tearDown();
 	}
-
 
 	public void testSearch() throws Exception {
 		

@@ -86,7 +86,10 @@
     <path refid="classpath"/>
   	<pathelement location="${build.dir}/classes/test" />
   	<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
-        <include name="**/antlr*complete*.jar"/>
+        <include name="**/antlr*.jar"/>
+  		  <include name="**/ST4*.jar"/>
+  		  <include name="**/stringtemplate*.jar"/>
+  		  <include name="**/gunit*.jar"/>
     </fileset>
   </path>
         	
@@ -115,7 +118,7 @@
 		description="Regenerates grammar; usage -Dgrammar=&lt;name&gt;"/>
 
 	
-	<target name="antlr-generate" >
+	<target name="antlr-generate" depends="resolve">
 		<generate-grammar grammar-name="${aqp.grammar}"
 			 grammar-dir="${aqp.grammars.dir}"
 			 parser-dir="${aqp.parser.dir}"

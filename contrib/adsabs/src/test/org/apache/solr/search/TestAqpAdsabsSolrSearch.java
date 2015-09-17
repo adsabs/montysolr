@@ -7,11 +7,11 @@ import java.io.IOException;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
@@ -19,6 +19,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
+import org.junit.BeforeClass;
 
 
 /**
@@ -44,13 +45,26 @@ import org.apache.lucene.search.spans.SpanPositionRangeQuery;
  */
 public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = getSchemaFile();
+
+		
+		configString = MontySolrSetup.getMontySolrHome()
+			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
+	}
 	
-	@Override
-	public String getSchemaFile() {
-		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-	    		new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-	    				      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-	    	});
+	public static String getSchemaFile() {
 		
 		/*
 		 * For purposes of the test, we make a copy of the schema.xml,
@@ -74,7 +88,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 			File synonymsFile = createTempFile(new String[]{
 					"weak => lightweak",
 					"lensing => mikrolinseneffekt",
-					"pink => pinkish"
+					"pink => pinkish",
+					"stephen, stephens => stephen"
 			});
 			replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 			
@@ -92,10 +107,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		return newConfig.getAbsolutePath();
 	}
 
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome()
-				+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
-	}
 	
 	
 	public void testUnfieldedSearch() throws Exception {
@@ -287,6 +298,55 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testSpecialCases() throws Exception {
 	  
+	  // strange effect of paranthesis - github #23; we want to see this even (inside brackets)
+	  // +(
+	  //   (
+	  //    (
+    //     DisjunctionMaxQuery((((author:stephen, author:stephen,*)) | ((title:stephen title:syn::stephen)))) 
+    //     DisjunctionMaxQuery((((author:murray, author:murray, margaret a author:murray, m a author:hanson, m m author:hanson, margaret m author:murray,*)) | title:murray))
+    //    )~2
+    //   ) 
+	  //   DisjunctionMaxQuery((
+    //    ((author:stephen murray, author:stephen murray,* author:murray, stephen author:murray, stephen * author:murray, stephen * author:murray, s author:murray, s * author:murray, s * author:murray, author:murray,*))
+    //    |title:\"(stephen syn::stephen) murray\"
+    //   ))
+	  //  ) 
+	  // +author_facet_hier:0/Murray, S
+	  
+	  //setDebug(true);
+	  assertQueryEquals(req("defType", "aqp", 
+	      "q", "stephen murray author_facet_hier:\"0/Murray, S\"",
+	      "qf", "abstract title",
+	      "aqp.unfielded.tokens.strategy", "multiply",
+        "aqp.unfielded.tokens.new.type", "simple",
+        "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
+	      ), 
+        "+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S", 
+        BooleanQuery.class
+    );
+	  
+	  assertQueryEquals(req("defType", "aqp", 
+        "q", "((stephen murray)) author_facet_hier:\"0/Murray, S\"",
+        "qf", "title abstract",
+        "aqp.unfielded.tokens.strategy", "multiply",
+        "aqp.unfielded.tokens.new.type", "simple",
+        "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
+        ), 
+        "+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S", 
+        BooleanQuery.class
+    );
+	  assertQueryEquals(req("defType", "aqp", 
+        "q", "=(stephen murray) author_facet_hier:\"0/Murray, S\"",
+        "qf", "title abstract",
+        "aqp.unfielded.tokens.strategy", "multiply",
+        "aqp.unfielded.tokens.new.type", "simple",
+        "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
+        ), 
+        "+(abstract:stephen | title:stephen) +(abstract:murray | title:murray) +author_facet_hier:0/Murray, S", 
+        BooleanQuery.class
+    );
+	  
+	  
 		// virtual fields (their definition is in the solrconfig.xml)
 		assertQueryEquals(req("defType", "aqp", "q", "full:foo"), 
 				"abstract:foo^2.0 body:foo title:foo^2.0 ack:foo keyword:foo", 
@@ -316,8 +376,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		
 		// added ability to interactively tweak queries
-		assertQueryEquals(req("defType", "aqp", "q", "tweak(collector_final_value=ARITHM_MEAN, citations(author:muller))"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
+		assertQueryEquals(req("defType", "aqp", "q", "tweak(collector_final_value=ARITHM_MEAN, citations(author:foo))"), 
+        "SecondOrderQuery(author:foo, author:foo,*, filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
         SecondOrderQuery.class);
     
 		
@@ -512,13 +572,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
      */
     
     // references()
-    assertQueryEquals(req("defType", "aqp", "q", "references(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", SecondOrderQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "references(author:foo)"), 
+        "SecondOrderQuery(author:foo, author:foo,*, filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", SecondOrderQuery.class);
     
     
     // various searches
-    assertQueryEquals(req("defType", "aqp", "q", "all:x OR all:z references(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", BooleanQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "all:x OR all:z references(author:foo OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery((author:foo, author:foo,*) title:body, filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", BooleanQuery.class);
     assertQueryEquals(req("defType", "aqp", "q", "citations((title:(lectures physics) and author:Feynman))"),
         "SecondOrderQuery(+(+title:lectures +title:physics) +(author:feynman, author:feynman,*), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
         SecondOrderQuery.class);
@@ -526,43 +586,43 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     
     
     // citations()
-    assertQueryEquals(req("defType", "aqp", "q", "citations(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", SecondOrderQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "citations(author:foo)"), 
+        "SecondOrderQuery(author:foo, author:foo,*, filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", SecondOrderQuery.class);
     
     
     // useful() - ads classic implementation 
-    assertQueryEquals(req("defType", "aqp", "q", "useful(author:muller)"), 
-        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
+    assertQueryEquals(req("defType", "aqp", "q", "useful(author:foo)"), 
+        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
         SecondOrderQuery.class);
     
-    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
+    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful(author:foo OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitesRAM(cache:citations-cache))", 
         BooleanQuery.class);
     
     
     // useful2() - original implementation 
-    assertQueryEquals(req("defType", "aqp", "q", "useful2(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "useful2(author:foo)"), 
+        "SecondOrderQuery(author:foo, author:foo,*, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
     
-    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful2(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful2(author:foo OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery((author:foo, author:foo,*) title:body, filter=null, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
     
     
     // reviews() - ADS classic impl
-    assertQueryEquals(req("defType", "aqp", "q", "reviews(author:muller)"), 
-        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
+    assertQueryEquals(req("defType", "aqp", "q", "reviews(author:foo)"), 
+        "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
         SecondOrderQuery.class);
     
-    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
+    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews(author:foo OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, filter=null, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, outOfOrder=false, lucene=0.5, adsPart=0.5)), filter=null, collector=SecondOrderCollectorTopN(200, outOfOrder=false)), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
         BooleanQuery.class);
     
     // reviews2() - original impl 
-    assertQueryEquals(req("defType", "aqp", "q", "reviews2(author:muller)"), 
-        "SecondOrderQuery(author:muller, author:muller,*, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "reviews2(author:foo)"), 
+        "SecondOrderQuery(author:foo, author:foo,*, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
     
-    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews2(author:muller OR title:body)"), 
-        "+(all:x all:z) +SecondOrderQuery((author:muller, author:muller,*) title:body, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews2(author:foo OR title:body)"), 
+        "+(all:x all:z) +SecondOrderQuery((author:foo, author:foo,*) title:body, filter=null, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
     
     // classic_relevance() - cr()
     assertQueryEquals(req("defType", "aqp", "q", "classic_relevance(title:foo)"), 

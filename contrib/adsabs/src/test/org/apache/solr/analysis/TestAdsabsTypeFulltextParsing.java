@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.adsabs.solr.AdsConfig.F;
+import org.junit.BeforeClass;
 
 /**
  * Tests that the fulltext is parsed properly, the ads_text type
@@ -106,13 +107,25 @@ import org.adsabs.solr.AdsConfig.F;
 public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 	
 	
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = getSchemaFile();
+
+		
+		configString = MontySolrSetup.getMontySolrHome()
+			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+	}
 	
-  @Override
-  public String getSchemaFile() {
-    makeResourcesVisible(this.solrConfig.getResourceLoader(),
-        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-    });
+  public static String getSchemaFile() {
 
     /*
      * For purposes of the test, we make a copy of the schema.xml,
@@ -169,11 +182,6 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     }
 
     return newConfig.getAbsolutePath();
-  }
-
-  public String getSolrConfigFile() {
-    return MontySolrSetup.getMontySolrHome()
-    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
   }
 
   

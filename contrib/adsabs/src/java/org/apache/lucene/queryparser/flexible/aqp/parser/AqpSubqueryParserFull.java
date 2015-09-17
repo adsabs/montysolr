@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.search.QParser;
+import org.apache.solr.search.SyntaxError;
 
 
 public class AqpSubqueryParserFull extends AqpSubqueryParser {
@@ -47,7 +47,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return query;
   }
   
-  public Query reParse(Query query, QParser qp, Class<?>...types) throws ParseException {
+  public Query reParse(Query query, QParser qp, Class<?>...types) throws SyntaxError {
     parsingLock.lock();
     try {
       parser = qp;
@@ -71,7 +71,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return false;
   }
 
-  protected Query swimDeep(TermQuery query) throws ParseException {
+  protected Query swimDeep(TermQuery query) throws SyntaxError {
     if (parser != null && qtypes != null && isWanted(query)) {
       parser.setString(query.toString());
       Query newQ = parser.parse();
@@ -81,7 +81,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return query;
   }
   
-  protected Query swimDeep(DisjunctionMaxQuery query) throws ParseException {
+  protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
     ArrayList<Query> parts = query.getDisjuncts();
     for (int i=0;i<parts.size();i++) {
       Query oldQ = parts.get(i);
@@ -91,7 +91,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     
   }
   
-  protected Query swimDeep(BooleanQuery query) throws ParseException {
+  protected Query swimDeep(BooleanQuery query) throws SyntaxError {
     List<BooleanClause>clauses = query.clauses();
     for (int i=0;i<clauses.size();i++) {
       BooleanClause c = clauses.get(i);
@@ -101,7 +101,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     return query;
   }
 
-  protected Query swimDeep(Query query) throws ParseException {
+  protected Query swimDeep(Query query) throws SyntaxError {
     if (query instanceof BooleanQuery) {
       return swimDeep((BooleanQuery) query);
     }

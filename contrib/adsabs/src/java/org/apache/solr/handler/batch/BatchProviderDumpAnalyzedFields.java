@@ -24,7 +24,6 @@ import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
-import org.apache.noggit.JSONUtil;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.CommonParams;
@@ -40,13 +39,34 @@ import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.noggit.JSONUtil;
 
 /**
  * Provider that dumps selected fields to disk - it can analyze fields 
- * and show their values (but only for text/string fields).
+ * and show their values as indexed (but only for text/string fields).
+ * 
+ * This method is INEFFICIENT and is to be avoided for normal operations!
+ * 
+ * How it works:
+ * 
+ * 		1. query for all documents that satisfy conditions
+ * 		2. in loop (for every doc):
+ * 				- read selected fields for the current document (stored values)
+ * 				- analyze the values by the appropriate analyzer (for that field)
+ * 			  - collect all tokens, put them inside array
+ *        - put the array into a fake solr doc
+ *        - dump the doc to disk in JSON
+ *        
+ * Tokens that are indexed at the same position are joined by '|'
+ * (eg. "field" : ["foo|fool", "bar", ....])
+ * 
+ * These are the parameters:
+ * 
+ * 		fields: list of fields to dump (comma separated)
+ *    analyze: true/false - whether to dump values as indexed [true]
  */
 
-public class BatchProviderDumpIndexFields extends BatchProvider {
+public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 	
 	private Filter filter = null;
 	
@@ -61,9 +81,9 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 	  String workDir = params.get("#workdir");
 	  
 		SolrCore core = req.getCore();
-		IndexSchema schema = core.getSchema();
+		IndexSchema schema = core.getLatestSchema();
 		final HashMap<String, FieldType> fieldsToLoad = new HashMap<String, FieldType>();
-		final Analyzer analyzer = core.getSchema().getAnalyzer();
+		final Analyzer analyzer = core.getLatestSchema().getAnalyzer();
 
 		String q = params.get(CommonParams.Q, null);
 		if (q == null) {
@@ -96,7 +116,7 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 
 		HashMap<String, String> descr = new HashMap<String, String>();
 		descr.put("query", query.toString());
-		descr.put("indexDir", se.getIndexDir());
+		descr.put("indexDir", se.getPath());
 		descr.put("indexVersion", se.getVersion());
 		descr.put("maxDoc", Integer.toString(se.maxDoc()));
 		descr.put("date", new Date().toString()); 
@@ -196,6 +216,8 @@ public class BatchProviderDumpIndexFields extends BatchProvider {
 										tokens.add(fType.indexedToReadable(termAtt.toString()));
 									}
 								}
+								
+								buffer.close();
 							}
 						}
 					}

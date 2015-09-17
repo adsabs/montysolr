@@ -37,7 +37,7 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
   private final Analyzer analyzer;
   
   public NewWordnetSynonymParser(boolean dedup, boolean expand, Analyzer analyzer) {
-    super(dedup);
+    super(dedup, analyzer);
     this.expand = expand;
     this.analyzer = analyzer;
   }
@@ -89,7 +89,7 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
     int end = line.lastIndexOf('\'');
     
     String text = line.substring(start, end).replace("''", "'");
-    return analyze(analyzer, text, reuse);
+    return analyze(text, reuse);
   }
   
   private void addInternal(CharsRef synset[], int size) {

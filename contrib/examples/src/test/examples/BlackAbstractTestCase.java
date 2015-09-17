@@ -1,6 +1,7 @@
 package examples;
 
 import java.io.File;
+
 import javax.xml.xpath.XPathExpressionException;
 
 import monty.solr.util.MontySolrAbstractTestCase;
@@ -9,6 +10,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.servlet.DirectSolrConnection;
+import org.junit.BeforeClass;
 
 public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 
@@ -20,6 +22,16 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 	private File persistDir = null;
 	private String factoryPropShadow;
 	
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		/*makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
+				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
+			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		});*/
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		
+	}
 	
 	
 	public String getSolrHome() {
@@ -94,6 +106,11 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		
 		envInit();
 		
+		schemaString = getConf("solr/collection1/conf/schema.xml");
+
+    configString = getConf("solr/collection1/conf/solrconfig.xml");
+    initCore(configString, schemaString, getConf("solr/"));
+		
 	}
 	
 	public static String getConf(String conf) {
@@ -113,16 +130,6 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		base = path + ename;
 	}
 	
-	@Override
-	public String getSchemaFile() {
-		return getConf("solr/collection1/conf/schema.xml");
-	}
-
-	
-	@Override
-	public String getSolrConfigFile() {
-		return getConf("solr/collection1/conf/solrconfig.xml");
-	}
 	
 	public void assertQDirect(String query, String body, String expected) {
 		try {

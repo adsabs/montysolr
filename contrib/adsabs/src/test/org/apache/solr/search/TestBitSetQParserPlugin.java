@@ -28,24 +28,30 @@ import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequestBase;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 
-	public String getSchemaFile() {
-		makeResourcesVisible(this.solrConfig.getResourceLoader(),
-				new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
-			MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
-		});
-
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
-		"schema-minimal.xml";
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		
+		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
+			    MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		    });
+				
+		System.setProperty("solr.allow.unsafe.resourceloading", "true");
+		schemaString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
+				  +	"schema-minimal.xml";
+		
+		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
+					+ "bitset-solrconfig.xml";
+		
+		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
+			    + "/example/solr");
 	}
-
-	public String getSolrConfigFile() {
-		return MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
-		"bitset-solrconfig.xml";
-	}
+	
 
 	public void createIndex() {
 		assertU(adoc("id","1","recid","1", "text", "who"));

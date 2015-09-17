@@ -108,9 +108,10 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	    }
 	    
 	    // let adismax know that we want exact search
-	    if (node.getParent() instanceof AqpAdsabsSynonymQueryNode && ((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated() == false) {
-        subQuery = "{!adismax aqp.exact.search=true}" + subQuery;
-      }
+	    if (node.getTag("aqp.exact") != null || 
+	        (node.getParent() instanceof AqpAdsabsSynonymQueryNode && ((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated() == false)) {
+          subQuery = "{!adismax aqp.exact.search=true}" + subQuery;
+        }
 	    
 	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
 	    fValues.add(new OriginalInput(subQuery, -1, -1));
@@ -123,6 +124,9 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	@Override
 	protected QueryNode preProcessNode(QueryNode node)
 			throws QueryNodeException {
+		if (node instanceof AqpAdsabsSynonymQueryNode) {
+		  applyTagToAllChildren(((AqpAdsabsSynonymQueryNode) node).getChild());
+		}
 		return node;
 	}
 
@@ -131,5 +135,17 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 			throws QueryNodeException {
 		return children;
 	}
+	
+	private void applyTagToAllChildren(QueryNode node) {
+
+    if (node instanceof FieldQueryNode) {
+      node.setTag("aqp.exact", true);
+    }
+    if (node.getChildren() != null) {
+      for (QueryNode child : node.getChildren()) {
+        applyTagToAllChildren(child);
+      }
+    }
+  }
 	
 }
