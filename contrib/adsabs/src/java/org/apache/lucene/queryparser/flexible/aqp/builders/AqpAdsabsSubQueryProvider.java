@@ -716,9 +716,7 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+        SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
@@ -727,7 +725,7 @@ AqpFunctionQueryBuilderProvider {
 				SecondOrderQuery outerQuery = new SecondOrderQuery( // references
 						new SecondOrderQuery( // topn
 								new SecondOrderQuery(innerQuery, // classic_relevance
-										new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper)), 
+										new SecondOrderCollectorAdsClassicScoringFormula(referencesWrapper, boostWrapper)), 
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitesRAM(referencesWrapper));
 				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT_NORM);
