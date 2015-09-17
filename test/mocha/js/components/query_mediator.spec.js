@@ -267,7 +267,7 @@ define([
         expect(qm.monitorExecution.called).to.be.false;
         setTimeout(function() {
           expect(qm.startExecutingQueries.called).to.be.true;
-          expect(beehive.getObject("AppStorage").clearSelectedPapers.callCount).to.eql(1);
+          expect(beehive.getObject("AppStorage").clearSelectedPapers.callCount).to.eql(2);
           expect(qm.monitorExecution.called).to.be.true;
           done();
         }, 5);
@@ -284,9 +284,8 @@ define([
             }})});
         qm.startSearchCycle(new ApiQuery({'q': 'foo'}), key);
 
-        //same query, shouldn't have an effect other than navigation
-        expect(qm.reset.callCount).to.eql(1);
-        expect(qm.getApp().getService.callCount).to.eql(1);
+        //same query will get executed
+        expect(qm.reset.callCount).to.eql(2);
 
       });
 

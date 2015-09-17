@@ -202,7 +202,8 @@ define([
           .done(function(widget) {
             expect(widget.getBeeHive).to.be.defined;
             expect(widget.getPubSub).to.be.defined;
-            expect(app.__barbarianInstances['widget:' + 'ApiResponse'].counter).to.eql(1);
+            expect(app.getWidgetRefCount('ApiResponse')).to.eql(1);
+            expect(app.getPluginRefCount('ApiResponse')).to.eql(-1);
           });
 
 

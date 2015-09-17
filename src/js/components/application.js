@@ -437,7 +437,7 @@ define([
         return ds.counter;
       }
       else {
-        return 0;
+        return -1;
       }
     },
 
