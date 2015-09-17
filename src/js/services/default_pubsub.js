@@ -137,7 +137,8 @@ define([
         throw new Error("You tried to subscribe to undefined event. Error between chair and keyboard?");
       }
       this.on(name, callback, key); // the key becomes context
-      this.on(name+key.getId(), callback, key); // this is for individual responses
+      if (name.indexOf(key.getId()) == -1)
+        this.on(name+key.getId(), callback, key); // this is for individual responses
     },
 
     /*
@@ -162,7 +163,8 @@ define([
         throw new Error("You tried to subscribe to undefined event. Error between chair and keyboard?");
       }
       this.once(name, callback, key); // the key becomes context
-      this.once(name+key.getId(), callback, key); // this is for individual responses
+      if (name.indexOf(key.getId()) == -1)
+        this.once(name+key.getId(), callback, key); // this is for individual responses
     },
 
     /*
@@ -191,27 +193,29 @@ define([
       var context = key;
       if (name && callback) {
         this.off(name, callback, context);
+        this.off(name+key.getId(), callback, context);
       }
       else if (name || callback) {
         this.off(name, callback, context);
+        this.off(name+key.getId(), callback, context);
       }
       else { // remove all events of this subscriber
         var names = _.keys(this._events), name, events,ev, i, l, k, j;
+        var toRemove = [];
         for (i = 0, l = names.length; i < l; i++) {
           name = names[i];
           if (events = this._events[name]) {
-            var toRemove = [];
             for (j = 0, k = events.length; j < k; j++) {
               ev = events[j];
               if (ev.context === context) {
-                toRemove.push(ev);
+                toRemove.push({name: name, event: ev});
               }
-            }
-            for (i=0, l = toRemove.length; i < l; i++) {
-              this.off(name, toRemove[i].callback, context);
             }
           }
         }
+        _.each(toRemove, function(x) {
+          this.off(x.name, x.event.callback, x.event.context);
+        }, this);
       }
 
     },
@@ -250,6 +254,10 @@ define([
         return this.triggerHandleErrors.apply(this, args);
       }
 
+    },
+
+    getCurrentPubSubKey: function() {
+      return this.pubSubKey;
     },
 
     /*

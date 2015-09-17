@@ -78,7 +78,7 @@ define([
         it("should give children the same pubsub instance", function() {
           var beehive = new Beehive();
           beehive.addService('PubSub', new PubSub());
-          beehive.activate()
+          beehive.activate();
           var pm = new PageManagerController();
 
           pm.activate(beehive);
@@ -88,20 +88,14 @@ define([
         });
 
 
-        it("assembles the page view", function(done) {
+        it("assembles/disassembles the page view", function(done) {
           var app = new Application({debug: false});
           delete config.core.objects.Navigator;
           config.widgets.PageManager = 'js/wraps/abstract_page_manager/abstract_page_manager';
 
           app.loadModules(config).done(function() {
 
-            // hack (normally this will not be the usage pattern)
-            var pageManager = app.getWidget("PageManager");
-            pageManager.createView = function(options) {
-              var TV = ThreeColumnView.extend({template: ThreeColSearchResultsTemplate});
-              return new TV(options);
-            };
-
+            var pageManager = app._getWidget("PageManager");
             app.activate();
             pageManager.assemble(app);
 
@@ -109,10 +103,18 @@ define([
             expect(_.keys(pageManager.widgets).length).to.be.gt(1);
 
             var $w = pageManager.view.$el;
-            expect($w.find('[data-widget="AuthorFacet"]').children().length).to.be.equal(1);
-            expect($w.find('[data-widget="Results"]').children().length).to.be.equal(1);
-            expect($w.find('[data-widget="GraphTabs"]').children().length).to.be.equal(1);
+            expect($w.find('[data-widget="ShowAbstract"]').children().length).to.be.equal(1);
+            expect($w.find('[data-widget="SearchWidget"]').children().length).to.be.equal(1);
 
+            // normally called by master page-manager
+            expect(pageManager.assembled).to.eql(true);
+            expect(app.__widgets['widget:SearchWidget']).to.be.defined;
+
+            pageManager.disAssemble(app);
+            expect(app.returnWidget('PageManager')).to.eql(0);
+            expect(pageManager.assembled).to.eql(false);
+
+            expect(app.__widgets['widget:SearchWidget']).to.be.undefined;
             done();
           });
         });
@@ -156,20 +158,27 @@ define([
           app.loadModules(config).done(function() {
 
             // hack (normally this will not be the usage pattern)
-            var pageManager = app.getWidget("PageManager");
-            pageManager.createView = function(options) {
-              var TV = OneColumnView.extend({template: OneColumnTemplate});
-              return new TV(options)
-            };
+            var pm = app.__widgets.get('PageManager');
+            app.__widgets.remove('PageManager');
+            app.__widgets.add('PageManager', function() {
+              var x = new pm();
+              x.createView = function(options) {
+                var TV = OneColumnView.extend({template: OneColumnTemplate});
+                return new TV(options)
+              };
+              return x;
+            });
 
-            app.activate();
-            pageManager.assemble(app);
+            app.getWidget("PageManager").done(function(pageManager) {
+              app.activate();
+              pageManager.assemble(app);
 
-            //$('#test').append(pageManager.view.el);
-            var $w = pageManager.view.$el;
-            expect($w.find('[data-widget="SearchWidget"]').children().length).to.be.equal(1);
+              //$('#test').append(pageManager.view.el);
+              var $w = pageManager.view.$el;
+              expect($w.find('[data-widget="SearchWidget"]').children().length).to.be.equal(1);
 
-            done();
+              done();
+            });
           });
 
         });
@@ -184,20 +193,34 @@ define([
 
           app.loadModules(config).done(function() {
 
+            // hack (normally this will not be the usage pattern)
+            var pm = app.__widgets.get('FirstPageManager');
+            app.__widgets.remove('FirstPageManager');
+            app.__widgets.add('FirstPageManager', function() {
+              var x = new pm();
+              x.createView = function(options) {
+                var TV = ThreeColumnView.extend({template: ThreeColSearchResultsTemplate});
+                return new TV(options);
+              };
+              return x;
+            });
+            var pm2 = app.__widgets.get('SecondPageManager');
+            app.__widgets.remove('SecondPageManager');
+            app.__widgets.add('SecondPageManager', function() {
+              var x = new pm2();
+              x.createView = function(options) {
+                var TV = ThreeColumnView.extend({template: TOCTemplate});
+                return new TV(options);
+              };
+              return x;
+            });
+
             var navigator = app.getObject('Navigator');
             navigator.router = new Backbone.Router();
 
-            var firstPageManager = app.getWidget("FirstPageManager");
-            var secondPageManager = app.getWidget("SecondPageManager");
+            var firstPageManager = app._getWidget("FirstPageManager");
+            var secondPageManager = app._getWidget("SecondPageManager");
 
-            firstPageManager.createView = function(options) {
-              var TV = ThreeColumnView.extend({template: ThreeColSearchResultsTemplate});
-              return new TV(options);
-            };
-            secondPageManager.createView = function(options) {
-              var TV = ThreeColumnView.extend({template: TOCTemplate});
-              return new TV(options);
-            };
 
             app.activate();
             firstPageManager.assemble(app);
@@ -208,7 +231,7 @@ define([
 
             navigator.set('show-stuff', function() {
               $body.children().detach();
-              $body.append(app.getWidget('SecondPageManager').show().el);
+              $body.append(app._getWidget('SecondPageManager').show().el);
             });
 
 
@@ -238,21 +261,35 @@ define([
 
           app.loadModules(config).done(function() {
 
+            // hack (normally this will not be the usage pattern)
+            var pm = app.__widgets.get('FirstPageManager');
+            app.__widgets.remove('FirstPageManager');
+            app.__widgets.add('FirstPageManager', function() {
+              var x = new pm();
+              x.createView = function(options) {
+                var TV = ThreeColumnView.extend({template: ThreeColSearchResultsTemplate});
+                return new TV(options);
+              };
+              return x;
+            });
+            var pm2 = app.__widgets.get('SecondPageManager');
+            app.__widgets.remove('SecondPageManager');
+            app.__widgets.add('SecondPageManager', function() {
+              var x = new pm2();
+              x.createView = function(options) {
+                var TV = ThreeColumnView.extend({template: TOCTemplate});
+                return new TV(options);
+              };
+              return x;
+            });
+
             var navigator = app.getObject('Navigator');
             navigator.router = new Backbone.Router();
 
             var masterPageManager = app.getObject('PageManager');
-            var firstPageManager = app.getWidget("FirstPageManager");
-            var secondPageManager = app.getWidget("SecondPageManager");
+            var firstPageManager = app._getWidget("FirstPageManager");
+            var secondPageManager = app._getWidget("SecondPageManager");
 
-            firstPageManager.createView = function(options) {
-              var TV = ThreeColumnView.extend({template: ThreeColSearchResultsTemplate});
-              return new TV(options);
-            };
-            secondPageManager.createView = function(options) {
-              var TV = ThreeColumnView.extend({template: TOCTemplate});
-              return new TV(options);
-            };
 
             app.activate();
             masterPageManager.assemble(app);
@@ -275,9 +312,25 @@ define([
             expect(masterPageManager.view.$el.find('[data-widget="SearchWidget"] input.q').val()).to.be.equal('foo');
             expect(masterPageManager.view.$el.find('[data-widget="AuthorFacet"]').length).to.be.equal(0);
 
+            var secondChild = masterPageManager.getCurrentActiveChild();
+            sinon.spy(secondChild, 'disAssemble');
+            expect(_.keys(secondChild.widgets).length).to.gt(0);
+            masterPageManager.show('FirstPageManager');
+            expect(_.keys(secondChild.widgets).length).to.eql(0);
+            expect(secondChild.disAssemble.called).to.eql(true);
+
+            // would happen only if the master is nested
+            _.each(masterPageManager.collection.models, function(model) {
+              expect(model.get('object')).to.not.eql(null);
+            });
+            masterPageManager.disAssemble();
+            _.each(masterPageManager.collection.models, function(model) {
+              expect(model.get('object')).to.eql(null);
+            });
             done();
           });
         });
+
       });
     });
   });

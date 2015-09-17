@@ -15,7 +15,8 @@ define([
   'js/page_managers/controller',
   'hbs!./templates/aria-announcement',
   'hbs!./templates/master-page-manager',
-  'marionette'
+  'marionette',
+  'js/mixins/dependon'
 
 ], function(
   BaseWidget,
@@ -23,7 +24,8 @@ define([
   PageManagerController,
   AriaAnnouncementTemplate,
   MasterPageManagerTemplate,
-  Marionette
+  Marionette,
+  Dependon
   ){
 
   var WidgetData = Backbone.Model.extend({
@@ -110,7 +112,7 @@ define([
           $(".s-quick-add").removeClass("hidden");
         }
         else {
-          if (model.attributes.object.view.$el.parent().length > 0) {
+          if (model.attributes.object && model.attributes.object.view.$el.parent().length > 0) {
             model.attributes.object.view.$el.detach();
             model.attributes.numDetach += 1;
           }
@@ -152,44 +154,57 @@ define([
     },
 
     assemble: function(app) {
+      this.setApp(app);
       PageManagerController.prototype.assemble.call(this, app);
-      this.discoverPageManagers(app);
-      //for widgets like navbar and footer that are persistent
-      //this.insertStaticWidgets(app);
     },
 
-    discoverPageManagers: function(app) {
-      var self = this;
-      var a = app;
-      _.each([app.getAllModules, app.getAllPlugins, app.getAllWidgets], function(c) {
-        _.each(c.call(a), function(m) {
-          if (m[1] instanceof PageManagerController && m[1] !== self && m[1].assemble) {
-            self.collection.add({'id': m[0], 'object': m[1]});
-            m[1].assemble(a);
-          }
-        });
-      });
-    },
 
     show: function(pageManager, options) {
       //this.model.set('numCalled', this.model.attributes.numCalled+1, {silent: true});
 
-      var pm = this.collection.get(pageManager);
-      if (pm && pm.get('object')) {
+      var app = this.getApp();
 
-        this.currentChild = pageManager;
+      if (!this.collection.find({'id': pageManager}))
+        this.collection.add({'id': pageManager});
+      var coll = this.collection.find({id: pageManager});
 
-        if (!pm.attributes.isSelected) {
-          this.hideAll();
-        }
-
-        this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
-
-        pm.set({'id': pageManager, 'isSelected': true, options: options});
+      var pm;
+      if (coll.get('object')) {
+        pm = coll.get('object');
       }
       else {
-        console.error('eeeek, you want me to display: ' + pageManager + ' (but I cant, cause there is no such Page!)')
+        pm = app._getWidget(pageManager); // will throw error if not there
+        coll.set('object', pm);
       }
+
+      if (pm && pm.assemble) {
+        // assemble the new page manager (while the old one is still in place)
+        pm.assemble(app);
+      }
+      else {
+        console.error('eeeek, ' + pageManager + ' has no assemble() method!');
+      }
+
+      // hide those that are visible
+      if (!coll.attributes.isSelected) {
+        this.hideAll();
+      }
+
+      // activate the new PM
+      coll.set({'isSelected': true, options: options, object: pm});
+
+      var previousPM = this.currentChild;
+      this.currentChild = pageManager;
+
+      // disassemble the old one (behind the scenes)
+      if (previousPM && previousPM != pageManager) {
+        var oldPm = this.collection.find({id: previousPM});
+        if (oldPm && oldPm.get('object'))
+          oldPm.get('object').disAssemble(app);
+      }
+
+      // send notification
+      this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
     },
 
     getCurrentActiveChild: function() {
@@ -202,6 +217,30 @@ define([
           model.set('isSelected', false);
         }
       });
+    },
+
+    /**
+     * Return the instances that are under our control and are
+     * not active any more
+     */
+    disAssemble: function() {
+      _.each(this.collection.models, function(model) {
+        if (model.attributes.isSelected) {
+          var pManager = model.get('object');
+
+          if (pManager.disAssemble) {
+            pManager.disAssemble(this.getApp());
+          }
+          else if (pManager.destroy) {
+            pManager.destroy();
+          }
+          else {
+            throw new Error('Contract breach, no way to get ridd of the widget/page manager');
+          }
+        }
+        model.set({'isSelected': false, 'object': null});
+        this.assembled = false;
+      }, this);
     },
 
     handleAriaAnnouncement: function(msg) {
@@ -222,6 +261,7 @@ define([
 
   });
 
+  _.extend(MasterPageManager.prototype, Dependon.App);
   return MasterPageManager;
 
 });

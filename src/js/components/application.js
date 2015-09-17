@@ -95,6 +95,7 @@ define([
       this.__widgets = new Container();
       this.__plugins = new Container();
       this.__barbarianRegistry = {};
+      this.__barbarianInstances = {};
     },
 
     /*
@@ -236,11 +237,13 @@ define([
         hasKey = _.bind(this.hasWidget, this);
         removeKey = _.bind(function(key) {this.__widgets.remove(key)}, this);
         addKey = _.bind(function(key, module) {this.__widgets.add(key, module)}, this);
+        createInstance = function(key, module) {return module};
       }
       else if (section == 'plugins') {
         hasKey = _.bind(this.hasPlugin, this);
         removeKey = _.bind(function(key) {this.__plugins.remove(key)}, this);
         addKey = _.bind(function(key, module) {this.__plugins.add(key, module)}, this);
+        createInstance = function(key, module) {return module};
       }
       else {
         throw new Error("Unknown section: " + section);
@@ -385,78 +388,197 @@ define([
         }
       });
 
-      // all the rest receive hardened beehive
-      var hardenedBee;
-      _.each(this.getAllPlugins(), function(el) {
-        if (self.debug) {console.log('application: plugins: ' + el[0] + '.activate(beehive)')}
-        try {
-          var plugin = el[1];
-          if ('activate' in plugin) {
-            var children = plugin.activate(hardenedBee = beehive.getHardenedInstance());
-            if (hardenedBee.hasService('PubSub')) {
-              self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'plugin:' + el[0];
-              if (children) {
-                self._registerBarbarianChildren('plugin', el[0], children);
-              }
-            }
-          }
-        }
-        catch (e) {
-          console.error('Error activating:' +el[0]);
-          console.error(e);
-        }
-      });
-      _.each(this.getAllWidgets(), function(el) {
-        if (self.debug) {console.log('application: widget: ' + el[0] + '.activate(beehive)')}
-        try {
-          var plugin = el[1];
-          var children;
-          if ('activate' in plugin) {
-            children = plugin.activate(hardenedBee = beehive.getHardenedInstance());
-            if (hardenedBee.hasService('PubSub')) {
-              self.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = 'widget:' + el[0];
-              if (children) {
-                self._registerBarbarianChildren('widget', el[0], children);
-              }
-            }
-          }
-        }
-        catch (e) {
-          console.error('Error activating:' +el[0]);
-          console.error(e);
-        }
-      });
-
       this.__activated = true;
     },
 
 
-    /**
-     * I think the analogy is getting over-stretched; it is true that the author of this application
-     * loves history, and you could find many analogies...but let me hope that I would never treat
-     * humans in the same way I name variable names and methods :_)
-     *
-     * @param key
-     * @param children
-     * @private
-     */
-    _registerBarbarianChildren: function(category, prefix, children) {
-      _.each(children, function(child, key) {
-        var name = prefix + '-' + (child.name || key);
-        if (this.debug)
-          console.log('adding child object to registry: ' + name);
-        this.__barbarianRegistry[child.beehive.getService('PubSub').getCurrentPubSubKey().getId()] = category + ':' + name;
-        if (category == 'widget') {
-          if (this.hasWidget(name)) throw new Error('There already exists a widget with name: ' + name);
-          this.__widgets.add(name, child.object);
-        }
-        else {
-          if (this.hasPlugin(name)) throw new Error('There already exists a plugin with name: ' + name);
-          this.__plugins.add(name, child.object);
-        }
-      }, this);
+
+    isActivated: function() {
+      return this.__activated || false;
     },
 
+    hasService: function(name) {
+      return this.getBeeHive().hasService(name);
+    },
+    getService: function(name) {
+      return this.getBeeHive().getService(name);
+    },
+
+    hasObject: function(name) {
+      return this.getBeeHive().hasObject(name);
+    },
+    getObject: function(name) {
+      return this.getBeeHive().getObject(name);
+    },
+
+    hasController: function(name) {
+      return this.__controllers.has(name);
+    },
+
+    getController: function(name) {
+      return this.__controllers.get(name);
+    },
+
+    hasModule: function(name) {
+      return this.__modules.has(name);
+    },
+
+    getModule: function(name) {
+      return this.__modules.get(name);
+    },
+
+    hasWidget: function(name) {
+      return this.__widgets.has(name);
+    },
+
+    getWidgetRefCount: function(name, prefix) {
+      var ds = this.__barbarianInstances[(prefix || 'widget:') + name];
+      if (ds) {
+        return ds.counter;
+      }
+      else {
+        return -1;
+      }
+    },
+
+    getWidget: function(name) {
+      var defer = $.Deferred();
+      var self = this;
+
+      var w = {};
+      if (arguments.length > 1) {
+        w = {};
+        _.each(arguments, function(x) {
+          if (!x) return;
+          try {
+            w[x] = self._getWidget(x);
+          }
+          catch (er) {
+            console.error('Error loading: ' + x);
+            _.each(w, function(val, key) {
+              self.returnWidget(key);
+              delete w[key];
+            });
+            throw er;
+          }
+        })
+      }
+      else if (name) {
+        w = this._getWidget(name);
+      }
+
+      setTimeout(function() {
+        defer.done(function(widget) {
+          if (_.isArray(name)) {
+            _.each(name, function(x) {
+              self.returnWidget(x);
+            })
+          }
+          else {
+            self.returnWidget(name);
+          }
+        });
+      }, 1);
+
+      defer.resolve(w);
+      return defer.promise();
+    },
+
+    _getWidget: function(name) {
+      var w = this._getOrCreateBarbarian('widget', name);
+      this.__barbarianInstances['widget:' + name].counter++;
+      return w;
+    },
+
+    returnWidget: function(name) {
+      var ds = this.__barbarianInstances['widget:' + name];
+      if (ds) {
+        ds.counter--;
+        this._killBarbarian('widget:' + name);
+        return ds.counter;
+      }
+      return -1;
+    },
+
+    hasPlugin: function(name) {
+      return this.__plugins.has(name);
+    },
+
+    /**
+     * Increase the plugin counter and return the instance
+     * (already activated, with proper beehive in place)
+     *
+     * @param name
+     * @return {*}
+     */
+    getPlugin: function(name) {
+      var defer = $.Deferred();
+      var self = this;
+
+      var w = {};
+      if (arguments.length > 1) {
+        w = {};
+        _.each(arguments, function(x) {
+          if (!x) return;
+          try {
+            w[x] = self._getPlugin(x);
+          }
+          catch (er) {
+            console.error('Error loading: ' + x);
+            _.each(w, function(val, key) {
+              self.returnPlugin(key);
+              delete w[key];
+            });
+            throw er;
+          }
+        })
+      }
+      else if (name) {
+        w = this._getPlugin(name);
+      }
+
+      setTimeout(function() {
+        defer.done(function(widget) {
+          if (_.isArray(name)) {
+            _.each(name, function(x) {
+              self.returnPlugin(x);
+            })
+          }
+          else {
+            self.returnPlugin(name);
+          }
+        });
+      }, 1);
+
+      defer.resolve(w);
+      return defer.promise();
+    },
+
+    getPluginRefCount: function(name) {
+      return this.getWidgetRefCount(name, 'plugin:');
+    },
+
+    _getPlugin: function(name) {
+      var w = this._getOrCreateBarbarian('plugin', name);
+      this.__barbarianInstances['plugin:' + name].counter++;
+      return w;
+    },
+
+    /**
+     * Decrease the instance counter; when we reach zero
+     * the plugin will be destroyed automatically
+     *
+     * @param name
+     */
+    returnPlugin: function(name) {
+      var ds = this.__barbarianInstances['plugin:' + name];
+      if (ds) {
+        ds.counter--;
+        this._killBarbarian('plugin:' + name);
+        return ds.counter;
+      }
+      return -1;
+    },
 
     /**
      * Given the pubsub key, it finds the name of the widget
@@ -485,78 +607,247 @@ define([
       var k = this.getPluginOrWidgetName(psk);
       if (k === undefined) return undefined;
 
-      var key = k.split(':');
-
-      if (this.__widgets.has(key[1])) {
-        return this.__widgets.get(key[1]);
-      }
-      else if (this.__plugins.has(key[1])) {
-        return this.__plugins.get(key[1]);
-      }
+      if (this._isBarbarianAlive(k))
+        return this._getBarbarian(k);
 
       throw new Error('Eeeek, thisis unexpectEED bEhAvjor! Cant find barbarian with ID: ' + psk);
     },
 
-    isActivated: function() {
-      return this.__activated || false;
+    getPskOfPluginOrWidget: function(symbolicName) {
+      var parts = symbolicName.split(':');
+      var psk;
+      if (this._isBarbarianAlive(symbolicName)) {
+        var b = this._getBarbarian(symbolicName);
+        if (b.getPubSub && b.getPubSub().getCurrentPubSubKey)
+          return b.getPubSub().getCurrentPubSubKey().getId();
+      }
+      return psk;
     },
 
-    hasService: function(name) {
-      return this.getBeeHive().hasService(name);
-    },
-    getService: function(name) {
-      return this.getBeeHive().getService(name);
+    /**
+     * I think the analogy is getting over-stretched; it is true that the author of this application
+     * loves history, and you could find many analogies...but let me hope that I would never treat
+     * humans in the same way I name variable names and methods :_)
+     *
+     * @param category
+     * @param name
+     * @private
+     */
+    _getOrCreateBarbarian: function(cat, name) {
+
+      var symbolicName = cat + ':' + name;
+
+      if ((cat == 'plugin' && !this.hasPlugin(name)) || (cat == 'widget' && !this.hasWidget(name))) {
+          throw new Error('We cannot give you ' + symbolicName + ' (cause there is no constructor for it)');
+      }
+
+      if (this._isBarbarianAlive(symbolicName))
+        return this._getBarbarian(symbolicName);
+
+      var constructor = (cat == 'plugin') ? this.__plugins.get(name) : this.__widgets.get(name);
+      var instance = new constructor();
+      var hardenedBee = this.getBeeHive().getHardenedInstance(), children;
+
+
+      // we'll monitor all new pubsub instances (created by the widget) - we don't want to rely
+      // on widgets to do the right thing (and tells us what children they made)
+
+      var pubsub = this.getService('PubSub');
+      var existingSubscribers = _.keys(pubsub._issuedKeys);
+
+      if ('activate' in instance) {
+        if (this.debug) {console.log('application: ' + symbolicName + '.activate(beehive)')}
+        children = instance.activate(hardenedBee);
+      }
+
+      var newSubscribers = _.without(_.keys(pubsub._issuedKeys), _.keys(pubsub._issuedKeys));
+      this._registerBarbarian(symbolicName, instance, children, hardenedBee, newSubscribers);
+      return instance;
     },
 
-    hasObject: function(name) {
-      return this.getBeeHive().hasObject(name);
-    },
-    getObject: function(name) {
-      return this.getBeeHive().getObject(name);
+    _isBarbarianAlive: function(symbolicName) {
+      return !!this.__barbarianInstances[symbolicName];
     },
 
-    hasController: function(name) {
-      return this.__controllers.has(name);
-    },
-    getController: function(name) {
-      return this.__controllers.get(name);
+    _getBarbarian: function(symbolicName) {
+      return this.__barbarianInstances[symbolicName].parent;
     },
 
-    hasModule: function(name) {
-      return this.__modules.has(name);
-    },
-    getModule: function(name) {
-      return this.__modules.get(name);
+    _registerBarbarian: function(symbolicName, instance, children, hardenedBee, illegitimateChildren) {
+      this._killBarbarian(symbolicName);
+
+      if ('getBeeHive' in instance) {
+        this.__barbarianRegistry[instance.getBeeHive().getService('PubSub').getCurrentPubSubKey().getId()] = symbolicName;
+      }
+      else {
+        this.__barbarianRegistry[hardenedBee.getService('PubSub').getCurrentPubSubKey().getId()] = symbolicName;
+      }
+
+      var childNames = [];
+      if (children) {
+        childNames = this._registerBarbarianChildren(symbolicName, children);
+      }
+
+      if (illegitimateChildren){
+        _.each(illegitimateChildren, function(childKey) {
+          if(this.__barbarianRegistry[childKey]) // already declared
+            delete illegitimateChildren[childKey]
+        }, this)
+      }
+
+      this.__barbarianInstances[symbolicName] = {
+        parent: instance,
+        children: childNames,
+        beehive: hardenedBee,
+        counter: 0,
+        psk: hardenedBee.getService('PubSub').getCurrentPubSubKey(),
+        bastards: illegitimateChildren // no, i'm not mean, i'm French
+      }
     },
 
-    hasWidget: function(name) {
-      return this.__widgets.has(name);
+    /**
+     *
+     * @param prefix
+     *  (String) the name of the father
+     * @param children
+     *  (Object) where keys are the 'strings' (names) and values are
+     *  instances (of the widgets)
+     * @return {Array}
+     * @private
+     */
+    _registerBarbarianChildren: function(prefix, children) {
+      var childrenNames = [];
+      _.each(children, function(child, key) {
+        var name = prefix + '-' + (child.name || key);
+        if (this.debug)
+          console.log('adding child object to registry: ' + name);
+
+
+        if (this._isBarbarianAlive(name)) {
+          throw new Error('Contract breach, there already exists instance with a name: ' + name);
+        }
+
+        if (('getBeeHive' in child)) {
+          var childPubKey = child.getBeeHive().getService('PubSub').getCurrentPubSubKey().getId();
+
+          if (this.__barbarianRegistry[childPubKey])
+            throw new Error('Contract breach, the child of ' + prefix + 'is using the same pub-sub-key');
+
+          this.__barbarianRegistry[childPubKey] = name;
+        }
+
+        childrenNames.unshift(name);
+      }, this);
+      return childrenNames;
     },
-    getWidget: function(name) {
-      return this.__widgets.get(name);
+
+
+    /**
+     * Remove/destroy the instance - but only if the counter reaches zero (or if the
+     * force parameter is true) - that means that the children are exterminated together
+     * with their parents. this is to avoid polluting the memory, because every child
+     * has a name of the parent. So if the parent is not used by anyone, then the
+     * counter is zero
+     *
+     * @param symbolicName
+     * @param force
+     * @private
+     */
+    _killBarbarian: function(symbolicName, force) {
+      var b = this.__barbarianInstances[symbolicName];
+
+      if (!b) return;
+
+      if (b.counter > 0 && force !== true) // keep it alive, it is referenced somewhere else
+        return;
+
+      if (b.children) {
+        _.each(b.children, function(childName) {
+          this._killBarbarian(childName, true);
+        }, this)
+      }
+
+      _.each(this.__barbarianRegistry, function(value, key) {
+        if (value == symbolicName)
+          delete this.__barbarianRegistry[key];
+      }, this);
+
+      // unsubscribe this widget from pubsub (don't rely on the widget
+      // doing the right thing)
+      var pubsub = this.getService('PubSub');
+      if (b.psk) {
+        pubsub.unsubscribe(b.psk);
+      }
+
+      // painstaikingly discover undeclared children and unsubscribe them
+      if (b.bastards && false) { // deactivate, it causes problems
+        var kmap = {};
+        _.each(b.bastards, function(psk) {
+          kmap[psk] = 1;
+        }, this);
+
+        _.each(pubsub._events, function(val, evName) {
+          _.each(val, function(v) {
+            if (v.ctx.getId && kmap[v.ctx.getId()]) {
+              pubsub.unsubscribe(v.ctx);
+            }
+          }, this);
+        }, this);
+      }
+
+      b.parent.destroy();
+
+      delete this.__barbarianInstances[symbolicName];
+      if ('setBeeHive' in b.parent)
+        b.parent.setBeeHive({fake: 'one'});
+
+      delete b;
+
+      if (this.debug)
+        console.log('Destroyed: ' + symbolicName);
     },
-    hasPlugin: function(name) {
-      return this.__plugins.has(name);
-    },
-    getPlugin: function(name) {
-      return this.__plugins.get(name);
-    },
+
 
     getAllControllers: function() {
       return _.pairs(this.__controllers.container);
     },
+
     getAllModules: function() {
       return _.pairs(this.__modules.container);
     },
-    getAllPlugins: function() {
-      return _.pairs(this.__plugins.container);
+
+    getAllPlugins: function(key) {
+      key = key || 'plugin:';
+      var defer = $.Deferred();
+      var w = [];
+      _.each(this.__barbarianInstances, function(val, k) {
+        if (k.indexOf(key) > -1)
+          w.unshift(k.replace(key, ''));
+      });
+
+      var getter = key.indexOf('plugin:') > -1 ? this.getPlugin : this.getWidget;
+      getter.apply(this, w).
+        done(function(widget) {
+          var out = [];
+          if (w.length > 1) {
+            out = _.pairs(widget);
+          }
+          else if (w.length == 1) {
+            out = [[w[0], widget]];
+          }
+          defer.resolve(out);
+        });
+      return defer.promise();
     },
+
     getAllWidgets: function() {
-      return _.pairs(this.__widgets.container);
+      return this.getAllPlugins('widget:');
     },
+
     getAllServices: function() {
       return this.getBeeHive().getAllServices();
     },
+
     getAllObjects: function() {
       return this.getBeeHive().getAllObjects();
     },
@@ -572,8 +863,15 @@ define([
     triggerMethodOnAll: function(funcName, options) {
       this.triggerMethod(this.getAllControllers(), 'controllers', funcName, options);
       this.triggerMethod(this.getAllModules(), 'modules', funcName, options);
-      this.triggerMethod(this.getAllPlugins(), 'plugins', funcName, options);
-      this.triggerMethod(this.getAllWidgets(), 'widgets', funcName, options);
+      var self = this;
+      this.getAllPlugins().done(function(plugins) {
+        if (plugins.length)
+          self.triggerMethod(plugins, 'plugins', funcName, options);
+      });
+      this.getAllWidgets().done(function(widgets) {
+        if (widgets.length)
+          self.triggerMethod(widgets, 'widgets', funcName, options);
+      });
       this.triggerMethod(this.getBeeHive().getAllServices(), 'BeeHive:services', funcName, options);
       this.triggerMethod(this.getBeeHive().getAllObjects(), 'BeeHive:objects', funcName, options);
     },
@@ -585,6 +883,10 @@ define([
         if (funcName in obj) {
           if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + '.' + funcName + '()')};
           obj[funcName].call(obj, options);
+        }
+        else if (_.isFunction(funcName)) {
+          if (self.debug) {console.log('application.triggerMethod: ' + msg + ": " + el[0] + ' customCallback()')};
+          funcName.call(obj, msg + ":" + el[0], options);
         }
       });
       return rets;

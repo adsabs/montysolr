@@ -76,7 +76,11 @@ define(['underscore',
         this.setApp(app);
 
         var pubsub = this.getPubSub();
+
+        // if you run discovery-mediator; this signal may be removed from the
+        // queue (and instead, the discovery mediator will serve the request)
         pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
+
         pubsub.subscribe(pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
         pubsub.subscribe(pubsub.EXECUTE_REQUEST, _.bind(this.executeRequest, this));
         pubsub.subscribe(pubsub.GET_QTREE, _.bind(this.getQTree, this));
@@ -92,14 +96,6 @@ define(['underscore',
        * Happens at the beginning of the new search cycle. This is the 'race started' signal
        */
       startSearchCycle: function(apiQuery, senderKey) {
-
-        //ignore repeat queries unless they are initiated from the search box
-        if ((JSON.stringify(apiQuery.toJSON()) == JSON.stringify(this.mostRecentQuery.toJSON())) &&
-          (this.hasApp() && this.getApp().getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget")){
-          //simply navigate to search results page, widgets are already stocked with data
-           this.getApp().getService('Navigator').navigate('results-page', {replace : true});
-           return;
-        }
 
         //we have to clear selected records in app storage here too
         if ( this.getBeeHive().getObject("AppStorage")){
@@ -190,12 +186,12 @@ define(['underscore',
 
         if (!(ps && api)) return; // application is gone
 
-
-        if (beehive.hasObject('DynamicConfig')) { // pick a request that will be executed first
-          var runtime = beehive.getObject('DynamicConfig');
-          if (runtime.pskToExecuteFirst && cycle.waiting[runtime.pskToExecuteFirst]) {
-            data = cycle.waiting[runtime.pskToExecuteFirst];
-            delete cycle.waiting[runtime.pskToExecuteFirst];
+        var app = this.getApp();
+        var pskToExecuteFirst;
+        if (pskToExecuteFirst = app.getPskOfPluginOrWidget('widget:Results')) { // pick a request that will be executed first
+          if (cycle.waiting[pskToExecuteFirst]) {
+            data = cycle.waiting[pskToExecuteFirst];
+            delete cycle.waiting[pskToExecuteFirst];
           }
         }
         if (!data && cycle.waiting[cycle.initiator]) { // grab the query/request which started the cycle

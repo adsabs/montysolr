@@ -283,6 +283,67 @@ define([
             })
         }
       )
+    },
+
+
+    printPubSubSubscribers: function(printAllKeys) {
+      var pubsub = this.getApp().getService('PubSub');
+      var app = this.getApp();
+
+
+      // collect names of all the objects
+      var objNames = {};
+      app.triggerMethodOnAll(function(name, opts) {
+
+        if (this === pubsub) { // pubsub has its own (root) key
+          objNames[pubsub.pubSubKey.getId()] = name;
+        }
+        else if(this.hasPubSub && this.hasPubSub()) {
+          var ps = this.getPubSub();
+          if (ps.getCurrentPubSubKey) {
+            if (objNames[ps.getCurrentPubSubKey().getId()])
+              console.warn('Redefining key that already exists: ' + ps.getCurrentPubSubKey().getId() + ' ' + objNames[ps.getCurrentPubSubKey().getId()])
+
+            objNames[ps.getCurrentPubSubKey().getId()] = name;
+          }
+        }
+        else {
+          console.warn('Instance without active PubSub: ' + name, this);
+        }
+      });
+
+      if (printAllKeys) {
+        console.log('Printing list of all issued keys to PubSub');
+
+        _.each(_.keys(pubsub._issuedKeys), function (k) {
+          var p;
+          if (pubsub._issuedKeys[k].getId && objNames[pubsub._issuedKeys[k].getId()])
+            p = objNames[pubsub._issuedKeys[k].getId()];
+
+          if (p)
+            console.log(k + '(parent:' + p + ') -> ' + objNames[k]);
+          else
+            console.log(k + ' -> ' + objNames[k]);
+        });
+      }
+
+      var stats = {};
+      console.log('Printing active subscribers to PubSub');
+      _.each(pubsub._events, function(val, key, idx) {
+        console.log(key + ' (' + val.length + ')');
+        _.each(val, function(v) {
+          var x = v.ctx.getId ? objNames[v.ctx.getId()] : 'unknown object';
+          console.log('\t' + x);
+          stats[x] = stats[x] ? stats[x] + 1 : 1;
+          if (x == undefined) {
+            if (!stats['undefined keys'])
+              stats['undefined keys'] = [];
+            stats['undefined keys'].push(key + (v.ctx.getId ? v.ctx.getId() : 'X'));
+          }
+        })
+      });
+
+      console.log(JSON.stringify(stats, null, ' '));
     }
 
   });

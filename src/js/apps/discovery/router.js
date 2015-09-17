@@ -112,10 +112,7 @@ define([
         req = new ApiRequest({query: q, target: ApiTargets.SEARCH, options: {
           done: function(resp) {
             var navigateString, href;
-            if (resp.response && resp.response.docs && resp.response.docs[0]) {
-              bibcode = resp.response.docs[0].bibcode;
-              self.getPubSub().publish(self.getPubSub().DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
-            }
+
             if (!subPage) {
               navigateString = 'ShowAbstract';
             }
@@ -124,6 +121,11 @@ define([
               href =  "#abs/" + bibcode + "/" + subPage;
             }
             self.routerNavigate(navigateString, {href : href});
+
+            if (resp.response && resp.response.docs && resp.response.docs[0]) {
+              bibcode = resp.response.docs[0].bibcode;
+              self.getPubSub().publish(self.getPubSub().DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
+            }
           },
           fail: function() {
             console.log('Cannot identify page to load, bibcode: ' + bibcode);

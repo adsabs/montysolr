@@ -14,8 +14,12 @@ define([
 
     var PageManagerController = BasicPageManagerController.extend({
 
-      assemble: function() {
+      assemble: function(app) {
+        if (this.assembled)
+          return;
+
         BasicPageManagerController.prototype.assemble.apply(this, arguments);
+
 
         if (this.TOCEvents){
           //initiate the TOC view
@@ -50,7 +54,7 @@ define([
        * @param data
        */
       onPageManagerEvent: function(widget, event, data) {
-
+        data = data || {};
         var sender = null; var widgetId = null;
 
         // try to find/identify sender
@@ -70,15 +74,13 @@ define([
         else if (event == 'widget-selected') {
           this.getPubSub().publish(this.getPubSub().NAVIGATE, data.idAttribute, data);
         }
-        else if (event == 'broadcast-payload'){
+        else if (event == 'broadcast-payload') {
           this.broadcast('page-manager-message', event, data);
         }
-
-        else if (event == "navigate"){
+        else if (event == "navigate"){ //XXX:rca - why to almost equal events?
           this.getPubSub().publish(this.getPubSub().NAVIGATE, data.navCommand, data.sub);
         }
-
-        else if (event == "apply-function"){
+        else if (event == "apply-function"){ // XXX:rca - to remove
           data.func.apply(this);
         }
 

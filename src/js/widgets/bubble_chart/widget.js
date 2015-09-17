@@ -957,7 +957,7 @@ define([
       //testing reduces animations to 0
       this.view = new BubbleView({model: this.model, testing: options.testing});
       this.listenTo(this.view, "filterBibs", this.onFilterBibs);
-      this.listenTo(this.view, "destroy", this.broadcastClose);
+      //this.listenTo(this.view, "destroy", this.broadcastClose);
       this.widgetName = 'bubble_chart';
       this.queryUpdater = new ApiQueryUpdater(this.widgetName);
     },

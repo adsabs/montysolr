@@ -25,13 +25,17 @@ define([
       this.debug = beehive.getDebug(); // XXX:rca - think of st better
       this.view = this.createView({debug : this.debug, widgets: this.widgets});
       var pubsub = this.getPubSub();
-      pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.addQuery, this));
       pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, _.bind(this.onDisplayDocuments, this));
 
     },
 
-    // xxx:rca - this is just a quick hack (the best solution would be to have
-    // the page manager re-render view (but only the non-widget parts of it)
+    assemble: function(app) {
+      PageManagerController.prototype.assemble.apply(this, arguments);
+      var storage = app.getObject('AppStorage');
+      if (storage && storage.hasCurrentQuery())
+        this.addQuery(storage.getCurrentQuery());
+    },
+
     addQuery: function(apiQuery) {
       if (this.view.model)
         this.view.model.set('query', apiQuery.url());
@@ -46,7 +50,6 @@ define([
     },
 
     onDisplayDocuments : function(apiQuery){
-
       var bibcode = apiQuery.get('q');
       if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
         bibcode = bibcode[0].replace('bibcode:', '');

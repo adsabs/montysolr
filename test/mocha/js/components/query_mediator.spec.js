@@ -90,7 +90,7 @@ define([
         var pubsub = beehive.Services.get('PubSub');
 
         sinon.stub(pubsub, 'subscribe');
-        qm.activate(beehive, {});
+        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});
 
         expect(qm.hasBeeHive()).to.be.true;
         expect(qm.getBeeHive()).to.be.equal(beehive);
@@ -108,7 +108,7 @@ define([
 
       it("should mediate between modules; passing data back and forth", function(done) {
         var qm = new QueryMediator({'debug': debug});
-        qm.activate(beehive, {});
+        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});
 
         this.server.autoRespond = true;
         // install spies into pubsub and api
@@ -267,19 +267,25 @@ define([
         expect(qm.monitorExecution.called).to.be.false;
         setTimeout(function() {
           expect(qm.startExecutingQueries.called).to.be.true;
-          expect(beehive.getObject("AppStorage").clearSelectedPapers.callCount).to.eql(1);
+          expect(beehive.getObject("AppStorage").clearSelectedPapers.callCount).to.eql(2);
           expect(qm.monitorExecution.called).to.be.true;
           done();
         }, 5);
 
 
         //if the queries match, the mediator checks to see if the query came from the search widget
-        qm.setApp({getPluginOrWidgetName : function(){return false}, getService : sinon.spy(function(){return {navigate: sinon.spy()}})});
+        qm.setApp({
+          getPskOfPluginOrWidget: function(){},
+          getPluginOrWidgetName : function(){return false},
+          hasService: function() {return true;},
+          getService : sinon.spy(function(){
+            return {
+              navigate: sinon.spy()
+            }})});
         qm.startSearchCycle(new ApiQuery({'q': 'foo'}), key);
 
-        //same query, shouldn't have an effect other than navigation
-        expect(qm.reset.callCount).to.eql(1);
-        expect(qm.getApp().getService.callCount).to.eql(1);
+        //same query will get executed
+        expect(qm.reset.callCount).to.eql(2);
 
       });
 
@@ -368,7 +374,7 @@ define([
         sinon.spy(qm, 'tryToRecover');
         sinon.spy(qm, 'getQTree');
 
-        qm.activate(beehive, {});
+        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}, hasService: function(){}});
         return {qm: qm, key1: key1, key2:key2, req1: req1, req2:req2, q1:q1, q2:q2,
           pubsub:pubsub, api:api}
       };

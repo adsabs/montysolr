@@ -49,7 +49,6 @@ require.config({
           RecaptchaManager : 'js/components/recaptcha_manager',
           CSRFManager : "js/components/csrf_manager",
           LibraryController : 'js/components/library_controller'
-
         },
         modules: {
           FacetFactory: 'js/widgets/facet/factory'

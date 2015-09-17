@@ -84,7 +84,10 @@ define([
       },
 
       getWidget: function() {
-        return this.getApp().getWidget(this.widgetName || 'AlertsWidget');
+        if (this._widget)
+          return this._widget;
+        this._widget = this.getApp()._getWidget(this.widgetName || 'AlertsWidget');
+        return this._widget;
       },
 
       alert: function(apiFeedback) {

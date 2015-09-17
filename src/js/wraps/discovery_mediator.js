@@ -30,11 +30,11 @@ define([
         if (child.view && child.view.showCols) {
           child.view.showCols({right: false, left: false});
           // open the view again
-          this.getPubSub().once(this.getPubSub().START_SEARCH,
+          this.getBeeHive().getService('PubSub').once(this.getPubSub().START_SEARCH,
             _.once(function() {child.view.showCols({right:true})}));
         }
       }
-      this.getPubSub().once(this.getPubSub().DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
+      this.getBeeHive().getService('PubSub').once(this.getPubSub().DELIVERING_REQUEST, _.bind(function(apiRequest, psk) {
         if(this._tmp.callOnce[psk.getId()]) {
           return;
         }
@@ -89,16 +89,18 @@ define([
         }))
         .done(function(name) {
           if (name == 'query-assistant') {
-            var search = app.getWidget('SearchWidget');
             var q = newQuery.get('q').join(' ');
-            if (q) {
-              search.openQueryAssistant(q);
-              analytics('send', 'event', 'interaction', 'click', 'query-helper');
-            }
-            else {
-              search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-              analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
-            }
+            app.getWidget('SearchWidget')
+              .done(function(widget) {
+                if (q) {
+                  widget.openQueryAssistant(q);
+                  analytics('send', 'event', 'interaction', 'click', 'query-helper');
+                }
+                else {
+                  widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                  analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
+                }
+              });
           }
         });
         return; // do not bother with the rest
@@ -106,10 +108,11 @@ define([
 
       // too many results
       if (feedback.numFound > 1000) {
-        var search = app.getWidget('SearchWidget');
-        if (search && search.view && search.view.highlightFields)
+        app.getWidget('SearchWidget').done(function(widget) {
           // make the search form pulsate little bit
-          search.view.highlightFields();
+          if (widget.view && widget.view.highlightFields)
+            search.view.highlightFields();
+        });
       }
 
       // retrieve ids of all components that wait for a query
@@ -219,16 +222,17 @@ define([
               if (name == 'query-assistant') {
 
                 var app = self.getApp();
-                var search = app.getWidget('SearchWidget');
-                var q = apiQuery.get('q').join(' ');
-                if (q) {
-                  search.openQueryAssistant(q);
-                  analytics('send', 'event', 'interaction', 'click', 'query-assistant');
-                }
-                else {
-                  search.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                  analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
-                }
+                app.getWidget('SearchWidget').done(function(widget) {
+                  var q = apiQuery.get('q').join(' ');
+                  if (q) {
+                    widget.openQueryAssistant(q);
+                    analytics('send', 'event', 'interaction', 'click', 'query-assistant');
+                  }
+                  else {h
+                    widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
+                    analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
+                  }
+                });
               }
             });
             return; // stop here
@@ -352,12 +356,13 @@ define([
 
     handlers[ApiFeedback.CODES.QUERY_ASSISTANT] = function(feedback) {
       var app = this.getApp();
-      var search = app.getWidget('SearchWidget');
-      var q = null;
-      if (feedback.query) {
-        q = feedback.query.get('q').join(' ');
-      }
-      search.openQueryAssistant(q);
+      app.getWidget('SearchWidget').done(function(widget) {
+        var q = null;
+        if (feedback.query) {
+          q = feedback.query.get('q').join(' ');
+        }
+        widget.openQueryAssistant(q);
+      });
     };
 
     return function() {
@@ -370,6 +375,69 @@ define([
           pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.onNewCycle, this));
           pubsub.subscribe(pubsub.ARIA_ANNOUNCEMENT, _.bind(this.onPageChange, this));
           pubsub.subscribe(pubsub.APP_EXIT, _.bind(this.onAppExit, this));
+
+          pubsub.subscribeOnce(pubsub.APP_STARTING, _.bind(this.onAppStarting, this));
+        },
+
+        onAppStarting: function() {
+          // get the unwrapped version of PubSub
+          var pubsub = this.getBeeHive().getService('PubSub');
+          var qm = this.getApp().getController('QueryMediator');
+
+          // remove the handler of START_SEARCH - we'll do it in place of search-mediator
+          pubsub.unsubscribe(qm.getPubSub().getCurrentPubSubKey(), pubsub.START_SEARCH);
+
+          // insert our own handler
+          this.getPubSub().subscribe(pubsub.START_SEARCH, _.bind(function(apiQuery, senderKey) {
+            var pubsub = this.getPubSub();
+            var app = this.getApp();
+
+            if (!pubsub)
+              return; // gone
+
+            var qm = app.getController('QueryMediator');
+
+            if (!qm)
+              return; // gone
+
+            var mpm = app.getObject('MasterPageManager');
+            var widget;
+
+            var storage = app.getObject('AppStorage');
+
+            //ignore repeated queries (if the widgets are loaded with data)
+            if (storage && storage.hasCurrentQuery() &&
+              apiQuery.url() == storage.getCurrentQuery().url() &&
+              app.getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget" &&
+              app.getWidgetRefCount('Results') >= 1
+            ) {
+              //simply navigate to search results page, widgets are already stocked with data
+              if (app.hasService('Navigator')) {
+                app.getService('Navigator').navigate('results-page', {replace: true});
+                return;
+              }
+            }
+
+            if (this.getCurrentPage() !== 'SearchPage' && app.getWidgetRefCount('Results') <= 0) {
+              // switch immediately to the results page -make widgets listen to the START_SEARCH
+              app.getService('Navigator').navigate('results-page', {replace: false});
+
+              // another way to accomplish the same (however, this has the undesired effect of
+              // search bar temporarily disappearing - as it is snatched from the previous page
+              // and inserted into the other one)
+
+              //widget = app._getWidget('SearchPage');
+              //widget.assemble(app);
+              //setTimeout(function() {
+              //  app.returnWidget('SearchPage');
+              //}, 10000);
+            }
+
+
+
+            qm.startSearchCycle.apply(qm, arguments);
+
+          }, this))
         },
 
         onNewCycle: function() {
@@ -378,9 +446,14 @@ define([
 
         onPageChange: function(msg) {
           msg = msg.replace('Switching to: ', '');
+          this._currentPage = msg;
           analytics('send', 'pageview', {
             page: msg
           });
+        },
+
+        getCurrentPage: function() {
+          return this._currentPage || 'LandingPage';
         },
 
         onAppExit: function(data) {
