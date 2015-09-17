@@ -388,7 +388,7 @@ define([
           pubsub.unsubscribe(qm.getPubSub().getCurrentPubSubKey(), pubsub.START_SEARCH);
 
           // insert our own handler
-          this.getPubSub().subscribe(pubsub.START_SEARCH, _.bind(function() {
+          this.getPubSub().subscribe(pubsub.START_SEARCH, _.bind(function(apiQuery, senderKey) {
             var pubsub = this.getPubSub();
             var app = this.getApp();
 
@@ -403,15 +403,39 @@ define([
             var mpm = app.getObject('MasterPageManager');
             var widget;
 
-            if (this.getCurrentPage() !== 'SearchPage') {
-              widget = app._getWidget('SearchPage');
-              widget.assemble(app);
+            var storage = app.getObject('AppStorage');
+
+            //ignore repeated queries (if the widgets are loaded with data)
+            if (storage && storage.hasCurrentQuery() &&
+              apiQuery.url() == storage.getCurrentQuery().url() &&
+              app.getPluginOrWidgetName(senderKey.getId()) != "widget:SearchWidget" &&
+              app.getWidgetRefCount('Results') >= 1
+            ) {
+              //simply navigate to search results page, widgets are already stocked with data
+              if (app.hasService('Navigator')) {
+                app.getService('Navigator').navigate('results-page', {replace: true});
+                return;
+              }
             }
 
-            qm.startSearchCycle.apply(qm, arguments);
+            if (this.getCurrentPage() !== 'SearchPage' && app.getWidgetRefCount('Results') <= 0) {
+              // switch immediately to the results page -make widgets listen to the START_SEARCH
+              app.getService('Navigator').navigate('results-page', {replace: false});
 
-            if (widget)
-              app.returnWidget(widget);
+              // another way to accomplish the same (however, this has the undesired effect of
+              // search bar temporarily disappearing - as it is snatched from the previous page
+              // and inserted into the other one)
+
+              //widget = app._getWidget('SearchPage');
+              //widget.assemble(app);
+              //setTimeout(function() {
+              //  app.returnWidget('SearchPage');
+              //}, 10000);
+            }
+
+
+
+            qm.startSearchCycle.apply(qm, arguments);
 
           }, this))
         },

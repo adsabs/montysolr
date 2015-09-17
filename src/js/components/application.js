@@ -431,6 +431,16 @@ define([
       return this.__widgets.has(name);
     },
 
+    getWidgetRefCount: function(name, prefix) {
+      var ds = this.__barbarianInstances[(prefix || 'widget:') + name];
+      if (ds) {
+        return ds.counter;
+      }
+      else {
+        return 0;
+      }
+    },
+
     getWidget: function(name) {
       var defer = $.Deferred();
       var self = this;
@@ -542,6 +552,10 @@ define([
 
       defer.resolve(w);
       return defer.promise();
+    },
+
+    getPluginRefCount: function(name) {
+      return this.getWidgetRefCount(name, 'plugin:');
     },
 
     _getPlugin: function(name) {
