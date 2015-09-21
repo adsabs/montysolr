@@ -391,19 +391,27 @@ define([
           this.getPubSub().subscribe(pubsub.START_SEARCH, _.bind(function(apiQuery, senderKey) {
             var pubsub = this.getPubSub();
             var app = this.getApp();
+            var qm, widget, storage;
 
             if (!pubsub)
               return; // gone
 
-            var qm = app.getController('QueryMediator');
+            qm = app.getController('QueryMediator');
 
             if (!qm)
               return; // gone
 
-            var mpm = app.getObject('MasterPageManager');
-            var widget;
+            storage = app.getObject('AppStorage');
 
-            var storage = app.getObject('AppStorage');
+            if (storage && storage.getCurrentQuery() ){
+              try{
+                console.log("URL: ", storage.getCurrentQuery().url());
+
+              }
+              catch (e){
+
+              }
+              }
 
             //ignore repeated queries (if the widgets are loaded with data)
             if (storage && storage.hasCurrentQuery() &&

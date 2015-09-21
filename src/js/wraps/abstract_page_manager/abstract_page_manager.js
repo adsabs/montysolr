@@ -12,6 +12,8 @@ define([
 
   var PageManager = PageManagerController.extend({
 
+    persistentWidgets : ["SearchWidget", "ShowAbstract", "ShowCitations", "ShowReferences", "tocWidget"],
+
     TOCTemplate : TOCTemplate,
 
     createView: function(options) {

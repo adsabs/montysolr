@@ -337,7 +337,7 @@ define([
       var spy = sinon.spy();
       w.getPubSub = function() {return {publish : spy}};
 
-      $("#test").append(w.render().el);
+      $("#test").append(w.getEl());
 
       w.model.set({view : "library", id : "1"});
 
@@ -395,7 +395,7 @@ define([
       var spy = sinon.spy();
       w.getPubSub = function() {return {publish : spy, NAVIGATE: minsub.NAVIGATE}};
 
-      $("#test").append(w.render().el);
+      $("#test").append(w.getEl());
 
       w.model.set({view : "library", id : "1", "publicView" : true});
 
@@ -419,7 +419,7 @@ define([
 
       w.getBeeHive().getService("PubSub").publish = spy;
 
-      $("#test").append(w.render().el);
+      $("#test").append(w.getEl());
 
       w.model.set({view:"library", id : "1"});
 
@@ -524,7 +524,7 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      $("#test").append(w.render().el);
+      $("#test").append(w.getEl());
 
 
       w.model.set({view : "library", id : "1"});
@@ -565,7 +565,7 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      $("#test").append(w.render().el);
+      $("#test").append(w.getEl());
 
 
       w.model.set({view : "library", id : "1"});
@@ -616,7 +616,7 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      $("#test").append(w.render().el);
+      $("#test").append(w.getEl());
 
 
       w.setSubView({id : "1"});

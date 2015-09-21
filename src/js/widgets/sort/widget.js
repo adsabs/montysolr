@@ -158,13 +158,13 @@ define(['marionette',
 
       onAll: function (ev, data) {
         if (ev == "sortChange") {
-          //    find current sort values
-          this.submitQuery(data)
+          //find current sort values
+          this.submitQuery(data);
         }
       },
 
       submitQuery: function (data) {
-        var apiQuery = this.getCurrentQuery();
+        var apiQuery = this.getCurrentQuery().clone();
         apiQuery.set("sort", data);
         this.getPubSub().publish(this.getPubSub().START_SEARCH, apiQuery);
       },
@@ -180,7 +180,7 @@ define(['marionette',
 
       extractSort: function (q) {
 
-        var params, sortVals;
+        var sortVals;
 
         if (q.has('sort')) {
           sortVals = q.get('sort')[0].split(/\s+/);
