@@ -70,7 +70,7 @@ define([
 
       this.$el.html($tempEl.html());
       _.each(this.tabs, function (t) {
-        this.$("#" + t.id).append(t.widget.render().el)
+        this.$("#" + t.id).append(t.widget.getEl());
       }, this);
 
       this.bindUIElements();

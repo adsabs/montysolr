@@ -73,10 +73,10 @@ define([
         this.assembled = true;
         this.view.render();
 
-        var that = this;
+        var that = this, el;
         _.extend(that.widgetDoms, that.getWidgetsFromTemplate(that.view.$el));
 
-        _.each(_.keys(that.widgetDoms), function(widgetName) {
+        _.each(that.widgetDoms, function(widgetDom, widgetName) {
           if (!app.hasWidget(widgetName)) {
             delete that.widgetDoms[widgetName];
             delete that.widgets[widgetName];
@@ -84,15 +84,29 @@ define([
           }
 
           var widget = app._getWidget(widgetName);
+          if (this.persistentWidgets && this.persistentWidgets.indexOf(widgetName) > -1){
+            // this increments the counter so the widget won't be de-referenced when this
+            // page manager is disassembled
+            app._getWidget(widgetName);
+          }
+
           if (widget) {
             // maybe it is a page-manager (this is a security hole though!)
             if (widget.assemble) {
               widget.assemble(app);
             }
-            $(that.widgetDoms[widgetName]).empty().append(widget.render().el);
+
+            //reducing unneccessary rendering
+            if (widget.getEl){
+              el = widget.getEl()
+            }
+            else {
+              el = widget.render().el;
+            }
+            $(that.widgetDoms[widgetName]).empty().append(el);
             that.widgets[widgetName] = widget;
           }
-        });
+        }, this);
       },
 
       disAssemble: function(app) {

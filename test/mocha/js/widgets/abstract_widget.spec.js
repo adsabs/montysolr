@@ -31,6 +31,9 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
           }
         }))({verbose: false});
 
+        var fakeAppStorage = {getHardenedInstance :function(){return this}, getCurrentQuery : function(){return new MinimalPubSub.prototype.T.QUERY()}};
+        minsub.beehive.addObject("AppStorage", fakeAppStorage);
+
       });
 
       afterEach(function(){
@@ -50,7 +53,6 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
         var spy = sinon.spy(aw, 'processResponse');
         aw.activate(minsub.beehive.getHardenedInstance());
-
 
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
 

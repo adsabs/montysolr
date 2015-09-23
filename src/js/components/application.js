@@ -467,6 +467,7 @@ define([
         w = this._getWidget(name);
       }
 
+      // this happens right after the callback
       setTimeout(function() {
         defer.done(function(widget) {
           if (_.isArray(name)) {

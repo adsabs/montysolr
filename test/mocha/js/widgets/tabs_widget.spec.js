@@ -10,9 +10,9 @@ define(['marionette', 'backbone', 'js/widgets/tabs/tabs_widget'], function (Mari
 
     beforeEach(function (done) {
       view1 = new Backbone.View()
-      view1.render = function () {
+      view1.getEl = function () {
         this.$el.html("<p>this is view 1</p>")
-        return this
+        return this.el
       }
 
       view1.remove = function(){
@@ -20,9 +20,9 @@ define(['marionette', 'backbone', 'js/widgets/tabs/tabs_widget'], function (Mari
       }
 
       view2 = new Backbone.View()
-      view2.render = function () {
+      view2.getEl = function () {
         this.$el.html("<p>this is view 2<p/>")
-        return this
+        return this.el
       }
       view2.remove = function(){
         removeCount++

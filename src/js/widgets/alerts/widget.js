@@ -87,7 +87,7 @@ define([
           });
           return;
         }
-        Marionette.ItemView.prototype.render.apply(this, arguments);
+        return Marionette.ItemView.prototype.render.apply(this, arguments);
       },
 
       onRender: function() {

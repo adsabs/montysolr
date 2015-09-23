@@ -98,7 +98,7 @@ define([
       template: SearchBarTemplate,
 
       render : function(){
-        Marionette.ItemView.prototype.render.apply(this, arguments);
+        return Marionette.ItemView.prototype.render.apply(this, arguments);
         this.render = function(){ return this}
       },
 

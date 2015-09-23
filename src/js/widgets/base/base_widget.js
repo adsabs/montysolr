@@ -232,13 +232,27 @@ define([
     /**
      * Convention inside Backbone and Marionette is to return 'this'
      * - since 'this' usually refers to a 'View', we'll return the
-     * view here
+     * view's el here
+     * doesn't render unless it has to
      *
-     * @returns {view}
+     * @returns {view.el}
      */
+    getEl : function(){
+      if ( this.view.el && this.view.$el.children().length ){
+        return this.view.el
+      }
+      else {
+        return this.view.render().el;
+      }
+    },
+    /*
+    *
+    * convenience function for tests, always re-renders
+    *
+    * */
+
     render : function(){
-      this.view.render();
-      return this.view;
+      return this.view.render();
     },
 
 

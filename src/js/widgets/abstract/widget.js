@@ -197,29 +197,53 @@ define([
         BaseWidget.prototype.dispatchRequest.apply(this, arguments);
       },
 
+      //bibcode is already in _docs
+      displayBibcode : function(bibcode){
+
+        bibcode = bibcode.toLowerCase();
+
+        this.model.set(this._docs[bibcode]);
+        this._current = bibcode;
+        // let other widgets know details
+        this.trigger('page-manager-event', 'broadcast-payload', {
+          title: this._docs[bibcode].title,
+          bibcode: bibcode
+        });
+
+      },
+
       onDisplayDocuments: function (apiQuery) {
 
-        var bibcode = apiQuery.get('q');
-          if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
-            //redefine bibcode
-            var bibcode = bibcode[0].replace('bibcode:', '');
-            //make a lower case version: not sure why necessary
-            var lowerCaseBibcode = bibcode.toLowerCase();
-           }
-        if (this._docs[lowerCaseBibcode]) { // we have already loaded it
-          this.model.set(this._docs[lowerCaseBibcode]);
-          this._current = lowerCaseBibcode;
-          // let other widgets know details
-          this.trigger('page-manager-event', 'broadcast-payload', {
-              title: this._docs[lowerCaseBibcode].title,
-              bibcode: bibcode
-          });
+       var currentQuery = this.getBeeHive().getObject("AppStorage").getCurrentQuery(),
+           bibcode =  apiQuery.get('q'),
+           q;
+
+        if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
+          //redefine bibcode
+          var bibcode = bibcode[0].replace('bibcode:', '');
+          //make a lower case version: not sure why necessary
+        }
+        if (this._docs[bibcode.toLowerCase()]) { // we have already loaded it
+         this.displayBibcode(bibcode);
         }
         else {
           if (apiQuery.has('__show')) return; // cycle protection
-          var q = apiQuery.clone();
-          q.set('__show', bibcode);
-          this.dispatchRequest(q);
+
+          /*
+          * widget never got a current query, because it was instantiated after the
+          * current search cycle -- so request all docs for current query
+          * */
+
+           if ( !currentQuery || _.isEmpty(currentQuery.toJSON())) {
+            q = apiQuery.clone();
+          }
+          else {
+              q = currentQuery.clone();
+            }
+
+            q.set('__show', bibcode);
+            this.dispatchRequest(q);
+
         }
       },
 
@@ -241,7 +265,7 @@ define([
 
       processResponse: function (apiResponse) {
         var r = apiResponse.toJSON();
-        var d;
+        var d, bibcode;
         if (r.response && r.response.docs) {
           _.each(r.response.docs, function (doc) {
             //add doi link
@@ -253,7 +277,9 @@ define([
           }, this);
 
           if (apiResponse.has('responseHeader.params.__show')) {
-            this.onDisplayDocuments(apiResponse.getApiQuery());
+
+            bibcode = apiResponse.get('responseHeader.params.__show');
+            this.displayBibcode(bibcode);
           }
         }
 

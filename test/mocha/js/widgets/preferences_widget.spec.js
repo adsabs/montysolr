@@ -121,7 +121,7 @@ define([
       minsub.publish(minsub.APP_STARTED);
       minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, fakeMyADS);
 
-      $("#test").append(p.render().el);
+      $("#test").append(p.getEl());
 
       expect($("#test .current-link-server").length).to.eql(1);
 
@@ -168,7 +168,7 @@ define([
         anotherVal : "foo"
       } );
 
-      $("#test").append(p.render().el);
+      $("#test").append(p.getEl());
 
       expect($("#test .current-link-server").length).to.eql(0);
 
