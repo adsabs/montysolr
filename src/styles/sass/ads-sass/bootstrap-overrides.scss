@@ -31,12 +31,12 @@ including reset-like things
 }
 
 .panel-default {
-  .lh-box-shadow(2px 2px 2px @default-box-shadow-color);
+  box-shadow : 2px 2px 2px $default-box-shadow-color;
 }
 
 
 input:focus {
-  border: 1px solid fade(@brand-primary, 70%) !important;
+  border: 1px solid fade($brand-primary, 70%) !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
   -moz-box-shadow: none !important;
@@ -45,7 +45,7 @@ input:focus {
 }
 
 select:focus {
-  border: 1px solid fade(@brand-primary, 70%) !important;
+  border: 1px solid fade($brand-primary, 70%) !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
   -moz-box-shadow: none !important;
@@ -87,12 +87,12 @@ select:focus {
 }
 
 .btn-primary-faded {
-  background-color : @brand-primary-faded;
-  border :1px solid darken(@brand-primary-faded, 5%);
+  background-color : $brand-primary-faded;
+  border :1px solid darken($brand-primary-faded, 5%);
   color: #fff;
   &:hover {
     color: #fff;
-    background-color: darken(@brand-primary-faded, 5%);
+    background-color: darken($brand-primary-faded, 5%);
   }
 
   &:focus {
@@ -101,41 +101,40 @@ select:focus {
 }
 
 .btn {
-   border-radius: @border-radius-large;
-  .lh-transition(all, .5s);
+   border-radius: $border-radius-large;
+   transition : all, .5s;
 }
 
 .btn-success, .btn-danger, .btn-info, .btn-warning, .btn-primary, .btn-primary-faded {
-  .lh-box-shadow(1px 1px 4px @gray-light);
+   box-shadow : 1px 1px 4px $gray-light;
 
   &:hover {
-    .lh-box-shadow(1px 1px 6px @gray);
+    box-shadow : 1px 1px 6px $gray;
   }
 }
 
 .btn-success.btn-sm, .btn-info.btn-sm, .btn-danger.btn-sm, .btn-warning.btn-sm, .btn-primary.btn-sm, .btn-primary-faded.btn-sm {
-  .lh-box-shadow(1px 1px 2px @gray-light);
+  box-shadow : 1px 1px 2px $gray-light;
 
   &:hover {
-    .lh-box-shadow(1px 1px 4px @gray);
+   box-shadow : 1px 1px 4px $gray;
   }
 }
 
 
 .btn-success.btn-sm, .btn-info.btn-xs, .btn-danger.btn-xs, .btn-warning.btn-xs, .btn-primary.btn-xs, .btn-primary-faded.btn-xs {
-  .lh-box-shadow(1px 1px 1px @gray-light);
+  box-shadow : 1px 1px 1px $gray-light;
 
   &:hover {
-    .lh-box-shadow(1px 1px 2px @gray);
+    box-shadow : 1px 1px 2px $gray;
   }
 }
-
 
 
 .btn-default {
    &:hover {
      background-color: #fff;
-     .lh-box-shadow(1px 1px 4px @gray-light);
+     box-shadow : 1px 1px 4px $gray-light;
    }
 
   &:focus {
@@ -145,12 +144,12 @@ select:focus {
 
 
 .btn-warning:hover {
-  background-color: darken(@brand-warning, 4%);
+  background-color: darken($brand-warning, 4%);
 }
 
 
 .btn-default-flat {
-  .btn-default;
+  @extend .btn-default;
 }
 
 .btn-default-flat:hover{
@@ -193,27 +192,9 @@ select:focus {
   pointer-events: none;
 }
 
-//.dropdown-menu {
-//  -webkit-transform-origin: top;
-//  transform-origin: top;
-//  -webkit-animation-fill-mode: forwards;
-//  animation-fill-mode: forwards;
-//  -webkit-transform: scale(1, 0);
-//  display: block;
-//
-//  transition: all 0.15s ease-out;
-//  -webkit-transition: all 0.15s ease-out;
-//}
-//
-//.open > .dropdown-menu {
-//  -webkit-transform: scale(1, 1);
-//  transform: scale(1, 1);
-//}
-
-
 //only add "btn-responsive" class to normal sized buttons!!!
 
-@media (max-width: @screen-sm-min) {
+@media (max-width: $screen-sm-min) {
   .btn-responsive {
     padding:2px 4px;
     font-size:80%;
@@ -222,7 +203,7 @@ select:focus {
   }
 }
 
-@media (min-width: @screen-sm-min) and (max-width: @screen-md-min) {
+@media (min-width: $screen-sm-min) and (max-width: $screen-md-min) {
   .btn-responsive {
     padding:4px 9px;
     font-size:90%;

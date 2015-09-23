@@ -1,26 +1,13 @@
-.s-fixed-search {
-  position: fixed;
-  top: 0px;
-  display: none;
-  background-color: lighten(@gray-lighter, 3%);
-  z-index: 1000;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  .s-motion-shadow;
-}
-
 
 .s-search-bar-motion {
-  .s-motion-shadow;
-
-  border-bottom: @border-default;
+  @extend .s-motion-shadow;
+  border-bottom: $border-default;
   position: fixed;
   top: 0px;
-  z-index: @z-index-max;
+  z-index: $z-index-max;
   width: 100%;
   height: 60px;
   padding-top: 10px;
-
 }
 
 
@@ -29,7 +16,7 @@
 }
 
 .inactive-style {
-  color: @gray-light
+  color: $gray-light
 }
 
 .search-dropdown {
@@ -49,11 +36,11 @@
 
 #search-dropdown-icon {
   font-size: 16px;
-  color: lighten(@brand-primary, 15%);
+  color: lighten($brand-primary, 15%);
 }
 
 #search-dropdown-icon:hover {
-  color: @brand-primary;
+  color: $brand-primary;
 }
 
 .search-form-header .title {
@@ -61,7 +48,7 @@
 }
 
 .search-form-header .title:hover {
-  color: darken(@brand-primary, 10%)
+  color: darken($brand-primary, 10%)
 
 }
 
@@ -78,11 +65,11 @@
 }
 
 .search-form-header-active .title {
-  color: lighten(@brand-primary, 5%);
+  color: lighten($brand-primary, 5%);
 }
 
 .search-form-header-active .title:hover {
-  color: lighten(@brand-primary, 10%) !important;
+  color: lighten($brand-primary, 10%) !important;
 }
 
 .search-form-section {
@@ -105,19 +92,19 @@
   right: 15%;
   display: block;
   text-align: center;
-  z-index: @z-index-4;
+  z-index: $z-index-4;
   font-size: 1.8em;
-  color: @gray-light;
+  color: $gray-light;
   cursor: pointer;
 
-  @media(min-width: @screen-sm-min) {
+  @media(min-width: $screen-sm-min) {
     right: 12%;
   }
 
-  @media(min-width: @screen-lg-min){
+  @media(min-width: $screen-lg-min){
     right: 8%;
   }
-  .s-icon-hover;
+  @extend .s-icon-hover;
 }
 
 .s-auto-description {
@@ -132,7 +119,7 @@
 
 .s-field-options {
   font-size: 18px;
-  color: @gray-light;
+  color: $gray-light;
   position: relative;
   top: 2px;
   font-variant: small-caps;

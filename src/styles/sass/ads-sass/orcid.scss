@@ -2,14 +2,14 @@
 
 .login-orcid-button, .signout-orcid-button{
   border: 1px solid #D3D3D3;
-  padding: .3em;
+  padding: 3em;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 1px 1px 3px #999;
   cursor: pointer;
   color: #999;
   font-weight: bold;
-  font-size: .8em;
+  font-size: 8em;
   line-height: 24px;
   vertical-align: middle;
 }
@@ -21,24 +21,24 @@
 
 .orcid-id-logo{
   display: block;
-  margin: 0 .5em 0 0;
+  margin: 0 5em 0 0;
   padding: 0;
   float: left;
 }
 
 .orcid-wait {
   &:after {
-    .fa;
-    .fa-spin;
-    .fa-2x;
+    @extend .fa;
+    @extend .fa-spin;
+    @extend .fa-2x;
 
-    content: @fa-var-cog;
-    color: @brand-info;
+    content: $fa-var-cog;
+    color: $brand-info;
   }
 }
 
 .orcid-works {
-  margin-top: .8em;
+  margin-top: 8em;
 
   .s-results-title{
     display: inline;
@@ -52,8 +52,6 @@
     display: inline;
   }
 
-
-
 }
 
 .orcid-action{
@@ -61,9 +59,9 @@
 }
 
 .s-orcid-icon {
-  .fa;
+  @extend .fa;
   &:before {
-    content : @fa-var-user;
+    content : $fa-var-user;
   }
 }
 
@@ -92,7 +90,7 @@
   width: 117px;
 
 i{
-  color: @gray-light;
+  color: $gray-light;
   }
 }
 
@@ -114,5 +112,5 @@ i{
 }
 
 .s-orcid-provenance-others {
-  background-color: @gray-lightest;
+  background-color: $gray-lightest;
 }

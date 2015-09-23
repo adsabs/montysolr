@@ -2,10 +2,8 @@
 s-search-bar-motion is applied */
 .s-stable-search-bar-height {
   min-height: 120px;
-  .border-default-light;
+  @extend .border-default-light;
 }
-
-
 
 .hidden-col{
   width: 0 ;
@@ -24,13 +22,12 @@ s-search-bar-motion is applied */
 
 
   //show in desktops
-  @media (min-width : @screen-sm-min){
+  @media (min-width : $screen-sm-min){
     display: inline-block;
-    .lh-transition(all .5s ease-out);
-
+    transition : all .5s ease-out;
 
     &:hover {
-      .lh-box-shadow(1 1px 5px darken(@gray-light, 4%));
+     box-shadow : 1px 1px 5px darken($gray-light, 4%);
     }
   }
 
@@ -38,36 +35,33 @@ s-search-bar-motion is applied */
 
 .left-expand {
   margin-top: 15px;
-
 }
 
 .left-expand i {
-  color: @gray;
-  .fa;
-  .fa-lg;
+  color: $gray;
+  @extend .fa;
+  @extend .fa-lg;
   &:before {
-    content: @fa-var-angle-double-left;
+    content: $fa-var-angle-double-left;
   }
 
 }
 
 .right-expand {
   margin-top: 15px;
-
 }
 
 .right-expand i {
-  color: @gray;
-  .fa;
-  .fa-lg;
+  color: $gray;
+  @extend .fa;
+  @extend .fa-lg;
   &:before {
-    content: @fa-var-angle-double-right;
+    content: $fa-var-angle-double-right;
   }
 }
 
 .btn-reversed i {
-  .lh-transform(rotate(-180deg))
-
+  transform: rotate(-180deg);
 }
 
 /* Styles for results and abstract page */
@@ -75,9 +69,9 @@ s-search-bar-motion is applied */
 
 .s-main-content-container{
 
-  .clearfix;
+  @extend .clearfix;
 
-  .s-content-container;
+  @extend  .s-content-container;
   min-height: 600px;
   padding-bottom: 20px;
   position: relative;
@@ -91,14 +85,14 @@ s-search-bar-motion is applied */
 
 
   >div {
-    .s-main-content-container;
+    @extend .s-main-content-container;
     margin: 0;
   }
 
 }
 
 .s-dynamic-page-body {
-  background-color:  @results-page-background;
+  background-color:  $results-page-background;
   padding-bottom: 30px;
   min-height: 500px;
 }
@@ -112,38 +106,37 @@ s-search-bar-motion is applied */
 }
 
 
-
 /* Styles just for results page */
 
 
 .s-results-page-layout {
 
   .s-results-column {
-    .lh-transition(width .5s ease-out, padding .5s ease-out)
+    transition : width .5s ease-out, padding .5s ease-out;
   }
   .s-left-col-container {
-    .s-content-container;
+    @extend .s-content-container;
     padding: 10px;
     padding-bottom: 15px;
     min-height: 500px;
     margin-bottom: 25px;
-    .unselectable;
+    @extend .unselectable;
   }
 }
 
 .s-results-middle-column {
-  @media (min-width : @screen-sm-min){
+  @media (min-width : $screen-sm-min){
     float: right;
   }
 
-  @media (min-width : @screen-md-min){
+  @media (min-width : $screen-md-min){
     float: left;
   }
 }
 
 .s-right-column{
 
-  @media(max-width: @screen-sm-max){
+  @media(max-width: $screen-sm-max){
     padding-left: 15px;
     padding-right: 0;
   }
@@ -151,7 +144,7 @@ s-search-bar-motion is applied */
 }
 
 .btn-upside-down i {
-  .lh-transform(rotate(-180deg))
+  transform : rotate(-180deg);
 }
 
 #body-template-container {
@@ -171,25 +164,25 @@ s-search-bar-motion is applied */
 
 .right-col-close {
 
-  .fa;
-  .fa-lg;
+  @extend .fa;
+  @extend .fa-lg;
   &:before{
-    content : @fa-var-chevron-circle-left;
+    content : $fa-var-chevron-circle-left;
   }
 
 }
 
 .right-col-open {
-  .fa;
-  .fa-lg;
+  @extend .fa;
+  @extend .fa-lg;
   &:before{
-    content : @fa-var-chevron-circle-right;
+    content : $fa-var-chevron-circle-right;
   }
 }
 
 
 .navbar h1 {
-  color : @gray-light;
+  color : $gray-light;
   margin: 0;
   padding: 0;
   font-size: 25px;
@@ -200,7 +193,7 @@ s-search-bar-motion is applied */
 Styles for Abstract Page
 */
 .s-right-col-widget-container {
-  .s-content-container;
+  @extend .s-content-container;
   padding: 5%;
   margin-bottom: 10px;
 
@@ -213,13 +206,13 @@ Styles for Abstract Page
   font-weight: 500;
   font-size: 20px;
   font-variant: small-caps;
-  color: @gray-light;
+  color: $gray-light;
   text-transform: lowercase;
 
 }
 
 .s-right-col-widget-title.disabled {
-  color: @gray-lighter;
+  color: $gray-lighter;
 }
 /*
 overriding bootstrap col widths
@@ -228,9 +221,7 @@ overriding bootstrap col widths
 .s-abstract-page-layout {
 
   .col-sm-3 {
-
     width : 23%;
-
 
   }
 

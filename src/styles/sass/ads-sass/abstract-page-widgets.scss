@@ -1,38 +1,38 @@
 
 
 .facebook-icon {
-  .fa;
-  .fa-2x;
-  color: @facebook-color;
+  @extend .fa;
+  @extend .fa-2x;
+  color: $facebook-color;
   &:before {
-    content: @fa-var-facebook-square;
+    content: $fa-var-facebook-square;
   }
 }
 
 .mendeley-icon {
-  .fa;
-  .fa-2x;
-  color: @mendeley-color;
+  @extend .fa;
+  @extend .fa-2x;
+  color: $mendeley-color;
   &:before {
-    content: @fa-var-facebook-square;
+    content: $fa-var-facebook-square;
   }
 
 }
 
 
 .twitter-icon {
-  .fa;
-  .fa-2x;
-  color: @twitter-color;
+  @extend .fa;
+  @extend .fa-2x;
+  color: $twitter-color;
   &:before {
-    content: @fa-var-twitter-square;
+    content: $fa-var-twitter-square;
   }
 
 }
 
 .sciencewise-icon {
 
-  background-color: @sciencewise-color;
+  background-color: $sciencewise-color;
   color: white;
   font-size: 10px;
   width: 41px;
@@ -46,12 +46,12 @@
 }
 
 .s-open-access-image {
-  .fa;
-  .fa-lg;
+  @extend .fa;
+  @extend .fa-lg;
   &:before {
-    content: @fa-var-unlock-alt;
+    content: $fa-var-unlock-alt;
   }
-  color: @brand-success;
+  color: $brand-success;
 }
 
 .s-abstract-title-container {
@@ -71,7 +71,7 @@
 }
 
 .s-abstract-num {
-  font-family: @font-family-sans-serif;
+  font-family: $font-family-sans-serif;
   font-weight: 300;
   font-size: 23px;
 }
@@ -89,14 +89,14 @@
 
 .s-abstract-descriptor {
 
-  background-color: @body-bg;
+  background-color: $body-bg;
 
   h4 {
     font-size: 20px;
   }
 
   &:last-of-type {
-    .border-default;
+    @extend .border-default;
   }
 
 }
@@ -114,10 +114,10 @@
 }
 
 .s-results-pager {
-  background-color: @body-bg;
+  background-color: $body-bg;
   padding-top: 1%;
-  .clearfix;
-  border-top: @border-light-default;
+  @include clearfix;
+  border-top: $border-light-default;
 }
 
 
@@ -142,7 +142,7 @@
 .s-abstract-metadata {
 
   dt {
-    color : @gray;
+    color : $gray;
   }
 }
 
@@ -206,7 +206,7 @@ this messes with the popover
   }
 
   .s-author {
-    color: @text-color !important
+    color: $text-color !important
 
   }
 }
@@ -236,15 +236,15 @@ this messes with the popover
           width: 30%;
           margin-left: 1%;
           margin-bottom: 20px;
-          border: 2px solid @gray-lighter;
-          .lh-border-radius(8px);
-          .lh-transition(box-shadow, .5s, ease-out);
+          border: 2px solid $gray-lighter;
+          border-radius : 8px;
+          transition: box-shadow, .5s, ease-out;
 
           &:hover {
-            .lh-box-shadow(0px 0px 4px @gray-light);
+            box-shadow : 0px 0px 4px $gray-light;
           }
 
-    @media(max-width: @screen-sm-max){
+    @media(max-width: $screen-sm-max){
       width: 97%;
     }
 
@@ -267,7 +267,7 @@ this messes with the popover
   figcaption {
     text-align: center;
     margin-bottom: 10px;
-    color: @gray;
+    color: $gray;
   }
 
 }
@@ -286,12 +286,12 @@ this messes with the popover
   .s-grid-cell {
     margin: 0 4%;
     padding-top: 18px;
-    border: 2px solid @gray-lighter;
-    .lh-border-radius(8px);
-    .lh-transition(box-shadow, .5s, ease-out);
+    border: 2px solid $gray-lighter;
+    border-radius : 8px;
+    transition : box-shadow, .5s, ease-out;
 
     &:hover {
-      .lh-box-shadow(0px 0px 4px @gray-light);
+      box-shadow : 0px 0px 4px $gray-light;
     }
 
   }

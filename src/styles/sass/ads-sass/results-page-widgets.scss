@@ -2,15 +2,15 @@
 
 .s-results-control-row-container {
   padding: 1% 0;
-  background-color: @body-bg;
-  border-bottom: @border-light-default;
-  .lh-box-shadow(0px 2px 2px 1px @gray-lighter);
-  .clearfix;
+  background-color: $body-bg;
+  border-bottom: $border-light-default;
+  box-shadow : 0px 2px 2px 1px $gray-lighter;
+  @extend .clearfix;
 }
 
 .s-results-control-row {
   padding-bottom:  1%;
-  background-color:  @results-page-background;
+  background-color:  $results-page-background;
 
   .s-results-action-buttons {
     .btn-group{
@@ -38,7 +38,7 @@
   .dropdown-menu  {
     padding: 10%;
     ul {
-      .list-unstyled;
+      @extend .list-unstyled;
     }
     li {
       padding: 6px;
@@ -50,15 +50,15 @@
 }
 
 .export-start-val {
-  .form-control;
-  .input-sm;
+  @extend .form-control;
+  @extend .input-sm;
   display: inline;
   width: 30%
 }
 
 .export-end-val {
-  .form-control;
-  .input-sm;
+  @extend .form-control;
+  @extend .input-sm;
   display: inline;
   width: 30%
 }
@@ -84,30 +84,30 @@
 
   .s-library-add-title {
     cursor: pointer;
-    background: @brand-primary-faded;
+    background: $brand-primary-faded;
     color:white;
     font-size: 16px;
     font-weight: 300;
 
     &:hover {
-      background: darken(@brand-primary-faded, 5%);
+      background: darken($brand-primary-faded, 5%);
     }
   }
 
   .s-filter-div {
-    font-size: @font-size-base;
+    font-size: $font-size-base;
     font-weight: 300;
   }
 
   .clear-selected {
     .fa-times {
-      .text-danger;
+      @extend .text-danger;
     }
   }
 
     .page-bulk-add {
       .fa-plus {
-        .text-success;
+        @extend .text-success;
       }
       position: relative;
       top: -3px
@@ -125,7 +125,7 @@
   }
 
   .s-library-area {
-    .s-content-container;
+    @extend .s-content-container;
     background-color: white;
     margin-bottom: 20px;
   }

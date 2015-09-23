@@ -1,16 +1,16 @@
 .s-widget-meta:hover{
   .item-open, .item-closed {
-    color: @gray-dark
+    color: $gray-dark
   }
 }
 
 
 .item-open {
-  .s-item-open
+  @extend .s-item-open;
 }
 
 .item-closed {
-  .s-item-closed
+  @extend .s-item-closed;
 }
 
 //rules for item open and closed styling
@@ -23,7 +23,7 @@
     margin-bottom: -10px;
     cursor: pointer;
     z-index:1;
-    .icon-item-open;
+    @extend .icon-item-open;
   }
   .item-closed {
     display:inline-block;
@@ -33,7 +33,7 @@
     z-index:1;
     margin-top: -10px;
     margin-bottom: -10px;
-    .icon-item-closed;
+    @extend .icon-item-closed;
   }
 
   position: relative;
@@ -60,7 +60,7 @@
 
 .size-graphic {
   display: block;
-  background-color:  lighten(@brand-primary-faded, 35%);
+  background-color:  lighten($brand-primary-faded, 35%);
   overflow-x: visible;
   color: black;
   font-size : 14px;
@@ -70,7 +70,7 @@
 
 .s-facet-selected {
   .size-graphic {
-    background-color:  lighten(@brand-primary-faded, 25%);
+    background-color:  lighten($brand-primary-faded, 25%);
   }
 
 }
@@ -97,7 +97,7 @@
 
 
 .s-item-caret {
-  position: absolute;
+  position: absolute !important;
   left : -10%;
 }
 
@@ -107,7 +107,7 @@
 
 .s-widget .item-caret:hover {
 
-  color: @gray-dark;
+  color: $gray-dark;
   cursor: pointer;
 }
 
@@ -139,7 +139,7 @@
   position: relative;
   top: -33px;
   left: 75%;
-  z-index: @z-index-4;
+  z-index: $z-index-4;
 
   button {
     padding: 0px;
@@ -180,7 +180,7 @@
   height: 15px;
 }
 .s-widget-body .selected {
-  color: @brand-primary
+  color: $brand-primary
 }
 
 
@@ -195,7 +195,7 @@
 
 
 .s-widget h3 {
-  font-size: @font-size-h5;
+  font-size: $font-size-h5;
   display: inline;
   margin-left: 2%
 }

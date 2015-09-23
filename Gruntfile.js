@@ -254,10 +254,12 @@ module.exports = function(grunt) {
       },
 
       styles: {
-        files: ['./src/styles/less/**/*.less'], // which files to watch
-        tasks: ['less', 'express:dev', 'watch:styles'],
+        files: ['./src/styles/sass/ads-sass/*.scss'], // which files to watch
+        tasks: ['sass', 'autoprefixer', 'express:dev', 'watch:styles'],
         options: {
-          livereload: true
+          livereload: {
+            port : 35279
+          }
         }
       }
     },
@@ -440,16 +442,21 @@ module.exports = function(grunt) {
       }
     },
 
-
-    less: {
-      development: {
-        options : {
-          compress: true,
-          yuicompress: true,
-          optimization: 2
-        },
+    sass: {
+      options: {
+        sourceMap: true
+      },
+      dist: {
         files: {
-          'src/styles/css/styles.css': 'src/styles/less/manifest.less'
+          'src/styles/css/styles.css' : 'src/styles/sass/manifest.scss'
+        }
+      }
+    },
+
+    autoprefixer:{
+      dist:{
+        files:{
+          'src/styles/css/styles.css' : 'src/styles/css/styles.css'
         }
       }
     },
@@ -684,35 +691,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-bbb-requirejs'); // we use 'list' target only, requirejs will get overriden
 
 
-
   // Grunt contribution tasks.
-  grunt.loadNpmTasks('grunt-contrib-clean');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-cssmin');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-compress');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-requirejs');
-  grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-express-server');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-exec');
-  grunt.loadNpmTasks('grunt-mocha-phantomjs');
-  grunt.loadNpmTasks('grunt-processhtml');
-  grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-bower-task');
-  grunt.loadNpmTasks('grunt-install-dependencies');
-  grunt.loadNpmTasks('grunt-concurrent');
-  grunt.loadNpmTasks('grunt-mocha');
-  grunt.loadNpmTasks("grunt-blanket-mocha");
-  grunt.loadNpmTasks('grunt-hash-required');
-  grunt.loadNpmTasks('grunt-saucelabs');
-  grunt.loadNpmTasks('grunt-curl');
-  grunt.loadNpmTasks('intern');
+  require('load-grunt-tasks')(grunt);
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-    ['install-dependencies', 'bower-setup', 'less', '_conditional_copy', 'copy:libraries', 'curl:google-analytics']);
+    ['install-dependencies', 'bower-setup', 'sass', '_conditional_copy', 'copy:libraries', 'curl:google-analytics']);
 
   grunt.registerTask('_conditional_copy', function() {
     if (!grunt.file.exists('src/discovery.vars.js')) {
@@ -837,8 +821,8 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['setup' ]);
 
   // starts a web server (automatically reloading)
-  grunt.registerTask('server', ['env:dev',  "less", 'express:dev', 'concurrent:serverTasks']);
-  grunt.registerTask('server:watch', ['env:dev',  "less", 'express:dev', 'watch:server']);
+  grunt.registerTask('server', ['env:dev',  "sass", "autoprefixer",  'express:dev', 'concurrent:serverTasks']);
+  grunt.registerTask('server:watch', ['env:dev',  "sass", "autoprefixer",  'express:dev', 'watch:server']);
   grunt.registerTask('server:release', ['env:release',  'express:release', 'watch:release']);
 
   // runs tests in a web server (automatically reloading)
@@ -867,10 +851,10 @@ module.exports = function(grunt) {
       'uglify'
   ]);
 
-  grunt.registerTask("sauce", ['env:dev',  "less", "exec:git_describe", 'express:dev', "saucelabs-mocha"]);
+  grunt.registerTask("sauce", ['env:dev',  "sass", "autoprefixer", "exec:git_describe", 'express:dev', "saucelabs-mocha"]);
 
   grunt.registerTask("testfunc", ["testfunc:local"]);
-  grunt.registerTask("testfunc:local", ['env:dev',  "less", "exec:git_describe", 'express:dev', "intern:local"]);
-  grunt.registerTask("testfunc:remote", ['env:dev',  "less", "exec:git_describe", 'express:dev', "intern:remote"]);
+  grunt.registerTask("testfunc:local", ['env:dev',  "sass", "autoprefixer", "exec:git_describe", 'express:dev', "intern:local"]);
+  grunt.registerTask("testfunc:remote", ['env:dev',  "sass", "autoprefixer", "exec:git_describe", 'express:dev', "intern:remote"]);
 
 };

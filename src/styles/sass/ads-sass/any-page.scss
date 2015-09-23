@@ -12,32 +12,32 @@ div[data-widget="AlertsWidget"] {
   position: relative;
 
   .s-alerts {
-    z-index: @z-index-4;
+    z-index: $z-index-4;
     width: 84%;
     display: inline-block;
     margin-top: 80px;
     position: absolute;
     left: 8%;
     font-size: 18px;
-    border-radius: @border-radius-large;
+    border-radius: $border-radius-large;
   }
 
 }
 
 .s-footer {
 
-  background-color:  @navbar-inverse-bg;
-  color: @navbar-inverse-color;
+  background-color:  $navbar-inverse-bg;
+  color: $navbar-inverse-color;
   margin-top: 20px;
   padding: 30px 0;
   font-size: 16px;
   font-weight: 300;
   margin: 0 -15px;
   position: relative;
-  z-index: @z-index-4;
+  z-index: $z-index-4;
 
   a {
-    color: @navbar-inverse-color;
+    color: $navbar-inverse-color;
   }
 
   img {
@@ -64,9 +64,9 @@ div[data-widget="AlertsWidget"] {
 
   .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
     color: #595959;
-    background-color: #fffff;
-    border:none;
-    border-left: 1px solid lighten(@gray-lighter, 5%);
+    background-color: $body-bg;
+    border: none;
+    border-left: 1px solid lighten($gray-lighter, 5%);
     border-bottom-color: transparent;
     cursor: default;
 
@@ -74,13 +74,13 @@ div[data-widget="AlertsWidget"] {
 
   .tab-content {
     background-color: white;
-    border: 1px solid lighten(@border-light-default-color, 8%);
+    border: 1px solid lighten($border-light-default-color, 8%);
     border-top : none;
-    .lh-box-shadow(2px 2px 5px @gray-lighter);
+    box-shadow : 2px 2px 5px $gray-lighter;
     position: relative;
     top: -10px;
-    border-bottom-left-radius: @border-radius-base;
-    border-bottom-right-radius: @border-radius-base;
+    border-bottom-left-radius: $border-radius-base;
+    border-bottom-right-radius: $border-radius-base;
     background-color: white;
   }
 
