@@ -1,6 +1,16 @@
 
-define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 'js/bugutils/minimal_pubsub'],
-  function($, ResourcesWidget, BaseWidget, MinPubSub){
+define([
+    'jquery',
+    'js/widgets/resources/widget',
+    'js/widgets/base/base_widget',
+    'js/bugutils/minimal_pubsub'
+  ],
+  function(
+           $,
+           ResourcesWidget,
+           BaseWidget,
+           MinPubSub
+    ){
 
   describe("Resources Widget", function(){
 
@@ -81,8 +91,8 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
       widget = new ResourcesWidget();
 
       widget.model.set({fullTextSources : ["OUTDATED"]});
-
-      widget.beehive = {getObject : function(){ return {getUserData : function(){return {link_server : undefined}}}}};
+      minsub.beehive.addObject("User", {getUserData : function(){return {link_server : undefined }}, getHardenedInstance : function(){return this }} );
+      widget.activate(minsub.beehive.getHardenedInstance());
 
       widget.processResponse(new MinPubSub.prototype.T.RESPONSE(
 

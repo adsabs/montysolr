@@ -1,7 +1,5 @@
 $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
-
-
 .s-landing-page-layout {
   margin-left: -15px;
   margin-right: -15px;
@@ -12,41 +10,26 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 .s-starry-background-wrapper {
   background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, .7)), url("../img/background.jpg");
   margin: 0 -15px;
-
 }
 
 .s-logo-header {
 
   background-attachment: fixed;
-  .row;
+  @extend .row;
   padding-top: 25px;
   padding-bottom: 15px;
   text-align: center;
 
-
-.ads-logo {
-<<<<<<< HEAD:src/styles/sass/ads-sass/landing-page.scss
-
-
- width: 20%;
-  max-width: 380px;
-  min-width: 200px;
-
-  @media(max-width: $screen-xs-max){
-    width:80%;
-    float:none !important;
-=======
-  color: @gray-lighter;
-  font-weight: 100;
-  text-transform: lowercase;
-  font-size:54px;
-  margin:0 0 20px 0;
-  b {
-    font-weight: 300;
->>>>>>> title image converted to text for better accessibility:src/styles/less/ads-less/landing-page.less
+  .ads-logo {
+    color: $gray-lighter;
+    font-weight: 100;
+    text-transform: lowercase;
+    font-size:54px;
+    margin:0 0 20px 0;
+    b {
+      font-weight: 300;
+    }
   }
-
-}
 
   .bumblebee {
     width:13%;
@@ -60,7 +43,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
 
   h2 {
-    color:white;
+    color: white;
     margin-top: 0;
     margin-bottom: 16px;
     font-weight: 100;
@@ -71,16 +54,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     padding: 10px 0 0 0;
   }
 
-  .s-tab {
-    width: 230px;
-    font-size: 24px;
-    text-align: left;
-    border-bottom: 6px solid transparent;
-
-    &.active {
-      border-bottom: 6px solid $brand-primary-faded;
 }
-
 
 .s-landing-tabs {
 
@@ -89,12 +63,9 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     border-bottom: 8px transparent;
     a {
       letter-spacing: .15em;
+      text-align: center;
     }
   }
-
-
-    &:hover {
-      border-bottom: 6px solid lighten($brand-primary-faded, 25%)
 
   .s-tab:not(.active){
     a {
@@ -102,26 +73,17 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     }
   }
 
-
-    &.active:hover {
-      border-bottom: 6px solid $brand-primary-faded;
-
   svg {
     max-height: 90px;
     position: relative;
     top: 8px;
-    transition: transform .5s, fill .5s;
+    transition : transform .5s, fill .5s;
   }
-
 
   .active {
     font-weight: bold;
-    color: lighten($brand-primary-faded, 10%);
-    svg {
-      transform : scale(1.3);
-    }
     border-bottom: 8px solid $brand-primary-faded;
-
+    color: lighten($brand-primary-faded, 10%);
   }
 
   z-index: 2;
@@ -152,7 +114,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     .svg-needs-fill {
       fill:lighten($brand-primary-faded, 10%);
     }
-
   }
 
   &::after {
@@ -163,7 +124,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     height:20px;
     z-index: $z-index-1;
   }
-
 }
 
 .s-search-bar-rows-container {
@@ -178,21 +138,16 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   }
 }
 
-
-
 .s-landing-main {
   min-height: 700px;
   background: $darker-background;
 
-  .s-content-container {
+  .s-ads-card {
     @media(min-width: $screen-sm-min) {
-
       margin: 15px;
     }
    min-height: 680px;
-
   }
-
 }
 
 .s-bumblebee-info {
@@ -219,7 +174,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     background-color: hsla(308, 100%, 0%, 0.30);
     padding: 100px 0;
   }
-
 
   .s-bumble-rocket {
     max-width: 110px;
@@ -251,13 +205,11 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     font-weight: bold;
   }
 
-
   .s-second-action {
     text-align: center;
   }
 
 }
-
 
 .s-landing-section-4 {
   color: $text-color;
@@ -268,12 +220,10 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   margin: 0 -15px;
 }
 
-
 .s-description {
   font-size: 1.6em;
   padding: 15px;
   text-align: center;
-
 }
 
 .s-team {
@@ -282,14 +232,12 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   margin-top: 50px;
   letter-spacing: 2px;
 
-
   .s-title {
     font-style: italic;
     font-weight: 300;
   }
 
 }
-
 
 .s-landing-page-layout {
 
@@ -312,7 +260,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   .s-tab-container {
     box-shadow : 0 2px 2px -1px rgba(0, 0, 0, .2);
   }
-
 
 }
 
@@ -363,15 +310,17 @@ div[data-field=date] {
     padding: 0;
 
     .classic-author-label, .classic-object-label {
-    position: absolute;
-    top: 2px;
+      position: absolute;
+      top: 2px;
     }
 
-   .classic-form__logic-group {
-     position: relative;
-     left: 93px;
+    .classic-form__logic-group {
+      position: relative;
+      left: 93px;
     }
   }
 }
+
+
 
 

@@ -150,9 +150,7 @@ define(['marionette',
         this.setBeeHive(beehive);
         _.bindAll(this);
 
-        this.pubsub = beehive.getService('PubSub');
-        var pubsub = this.pubsub;
-
+        var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);

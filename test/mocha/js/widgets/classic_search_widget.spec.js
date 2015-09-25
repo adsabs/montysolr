@@ -1,8 +1,10 @@
 define([
   "js/widgets/classic_form/widget",
+  'js/bugutils/minimal_pubsub'
 
 ], function(
-    ClassicForm
+    ClassicForm,
+    MinimalPubSub
   ){
 
   describe("Classic Form (UI Widget)", function(){
@@ -18,14 +20,20 @@ define([
 
       var w = new ClassicForm();
 
+      var minsub = new (MinimalPubSub.extend({
+        request: function (apiRequest) {
+          return "";
+        }
+      }))({verbose: false});
+
       var publishSpy = sinon.spy();
-      var fakeBeehive = {Services : {get : function(){return {publish : publishSpy }}}}
-      w.activate(fakeBeehive);
+
+      minsub.beehive.getService("PubSub").publish = publishSpy;
+      w.activate(minsub.beehive.getHardenedInstance());
 
       $("#test").append(w.render().el);
 
       w.onShow();
-
 
       expect($("button[type=submit]").prop("disabled")).to.eql(true);
 
@@ -54,7 +62,7 @@ define([
 
       w.view.$("button[type=submit]").eq(0).click();
 
-      expect(publishSpy.args[0][1].toJSON()).to.eql({
+      expect(publishSpy.args[0][2].toJSON()).to.eql({
         "q": [
           "property:refereed property:article author:(\"Accomazzi,a\" AND \"Kurtz,M\") title:(star OR planet OR \"gliese 581\") abstract:(-hawaii star) bibstem:(apj OR mnras)"
         ],
@@ -90,7 +98,7 @@ define([
 
       w.view.$("button[type=submit]").eq(0).click();
 
-      expect(publishSpy.args[1][1].toJSON()).to.eql({
+      expect(publishSpy.args[1][2].toJSON()).to.eql({
         "q": [
           "property:refereed author:\"Accomazzi,a\" title:(star OR planet OR \"gliese 581\") abstract:(-hawaii star) bibstem:apj"
         ],

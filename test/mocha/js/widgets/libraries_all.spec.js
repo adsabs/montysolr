@@ -9,7 +9,7 @@ define([
 
   ){
 
-  describe("Libraries Home Widget (libraries.spec.js)", function(){
+  describe("Libraries Home Widget (libraries_all.spec.js)", function(){
 
 
     afterEach(function(){
@@ -136,7 +136,7 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      sinon.spy(w.pubsub, "publish");
+      sinon.spy(w.getPubSub(), "publish");
 
       $("#test").append(w.render().el);
 
@@ -146,7 +146,7 @@ define([
 
       $("#test h3.s-library-title:first").click();
 
-      expect(w.pubsub.publish.args[0]).to.eql([
+      expect(w.getPubSub().publish.args[0]).to.eql([
         "[Router]-Navigate-With-Trigger",
         "IndividualLibraryWidget",
         {

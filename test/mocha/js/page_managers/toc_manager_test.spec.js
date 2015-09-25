@@ -169,8 +169,9 @@ define([
           //testing toc widget reset
           pageManager.widgets.tocWidget.resetActiveStates();
           setTimeout(function () {
-            //not selected until it is explicitly selected, as below
-            expect(view.$("[data-widget-id='ShowAbstract']>div").hasClass("s-nav-selected")).to.be.false;
+
+            //default
+            expect(view.$("[data-widget-id='ShowAbstract']>div").hasClass("s-nav-selected")).to.be.true;
             expect(view.$("[data-widget-id='ShowReferences]>div']").hasClass("s-nav-selected")).to.be.false;
 
             pageManager.widgets.tocWidget.collection.selectOne("ShowReferences");

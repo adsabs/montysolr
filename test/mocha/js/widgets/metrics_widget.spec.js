@@ -298,10 +298,6 @@ define([
 
     afterEach(function(){
       $("#test").empty();
-<<<<<<< HEAD
-=======
-
->>>>>>> Tests: cleaned up a bit
     });
 
     //first, test Edwin's functions

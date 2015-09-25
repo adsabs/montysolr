@@ -150,13 +150,11 @@ Year, Citation and Reference Graphs
 }
 
 .s-chart .refereed {
-  pointer-events: all;
   fill: $refereed !important;
-
 }
 
 .s-chart .bar, .s-chart .dot {
-  fill: $nonrefereed;
+  fill: lighten($gray-light, 11%);
 }
 
 .s-chart .x-axis .active text {
@@ -238,9 +236,7 @@ Year, Citation and Reference Graphs
 }
 
 
-
 /* Author network css */
-
 
 //group circle color vars
 $group-circle-default : lighten($brand-info, 20%);
@@ -264,10 +260,6 @@ $group-circle-active : lighten($brand-warning, 10%);
 
 .details-container text {
   font-size: 20px;
-}
-
-.graph-container {
-  border-right: 1px solid $gray-lighter;
 }
 
 .s-detail-top-row {
@@ -301,10 +293,10 @@ $group-circle-active : lighten($brand-warning, 10%);
   margin-bottom: 8px;
 }
 
-
 .center-container {
   fill: white;
 }
+
 .node-path {
   cursor: pointer;
   fill-opacity: .8;
@@ -347,7 +339,6 @@ $group-circle-active : lighten($brand-warning, 10%);
     stroke-width: 6px;
   }
 
-
 .paper {
   .link:hover {
     stroke-opacity: .9;
@@ -361,7 +352,6 @@ $group-circle-active : lighten($brand-warning, 10%);
 .link-background {
   fill: hsla(0, 0%, 100%, .8);
 }
-
 
 .author {
   .link-container {
@@ -397,7 +387,6 @@ $group-circle-active : lighten($brand-warning, 10%);
 .s-view-in-ads-button {
   text-align: center;
   padding-top: 10px;
-
 }
 
 .s-network-control-panel {
@@ -407,7 +396,6 @@ $group-circle-active : lighten($brand-warning, 10%);
   input[type=checkbox]{
     margin: 25px 0;
   }
-
 }
 
 .s-network-container {
@@ -418,44 +406,42 @@ $group-circle-active : lighten($brand-warning, 10%);
 
 .s-network-widget {
   @media (min-width: $screen-md-min) {
-   min-height: 1200px;
-  .time-series-container {
-    .line {
-      stroke-width: 4px;
+    min-height: 1200px;
+    .time-series-container {
+      .line {
+        stroke-width: 4px;
+      }
     }
   }
 
-}
-
-
-.s-filter-names-container{
-  display: inline-block;
-  vertical-align: top;
-  margin: 1% 1% 0 0;
-  padding: 1%;
-  width: 86%;
-  height: 57px;
-  scroll: auto;
-  background-color: white;
-  border: 1px solid $gray-lighter;
-  border-radius: $border-radius-large;
-
-}
-.s-filter-buttons-container {
-  display: inline-block;
-  margin-top: 15px;
-  width: 10%;
-  div {
-    margin-bottom: 10px;
+  .s-filter-names-container {
+    display: inline-block;
+    vertical-align: top;
+    margin: 1% 1% 0 0;
+    padding: 1%;
+    width: 86%;
+    height: 57px;
+    scroll: auto;
+    background-color: white;
+    border: 1px solid $gray-lighter;
+    border-radius: $border-radius-large;
   }
-}
 
-.author-detail-header {
-  position: relative;
-  h5 {
-    padding-bottom: 5px;
+  .s-filter-buttons-container {
+    display: inline-block;
+    margin-top: 15px;
+    width: 10%;
+    div {
+      margin-bottom: 10px;
+    }
   }
-}
+
+  .author-detail-header {
+    position: relative;
+    h5 {
+      padding-bottom: 5px;
+    }
+ }
 
 
 .paper {
@@ -500,6 +486,8 @@ $group-circle-active : lighten($brand-warning, 10%);
   }
 }
 
+}
+
 .paper-network-labels{
   opacity:.8;
   cursor: pointer;
@@ -526,13 +514,11 @@ $group-circle-active : lighten($brand-warning, 10%);
 }
 
 .s-network-metadata, .s-network-filter-container {
-
   padding: 1%;
   height: 100px;
-
 }
-.author-detail-header{
 
+.author-detail-header{
   padding : 10px 0;
 
   .filter-add, .filter-remove {
@@ -540,7 +526,6 @@ $group-circle-active : lighten($brand-warning, 10%);
     top: 10px;
     right: 0px;
   }
-
 }
 
 
@@ -716,6 +701,7 @@ rect.selection {
     border: 4px solid $brand-warning;
   }
 }
+
 .journal-name-key text, .journal-name-key rect {
   cursor : pointer;
 }

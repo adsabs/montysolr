@@ -10,7 +10,7 @@
 
 .s-results-control-row {
   padding-bottom:  1%;
-  background-color:  $results-page-background;
+  background-color:  $darker-background ;
   div[data-widget="ExportDropdown"]{
     margin-right: 4%;
   }
@@ -195,10 +195,9 @@
   }
 
   .s-library-area {
-    @extend .s-content-container;
+    @extend .s-ads-card;
     background-color: white;
     margin-bottom: 20px;
   }
-
 
 }

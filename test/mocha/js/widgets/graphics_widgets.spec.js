@@ -180,7 +180,8 @@ define([
             "thumbnail": "https://s3.amazonaws.com/aasie/images/1538-4357/447/1/L37/10_1086_309555_fg4_tb.gif"
           }
         },
-        "title": "Deep Circulation in Red Giant Stars: A Solution to the Carbon and Oxygen Isotope Puzzles?"
+        "title": "Deep Circulation in Red Giant Stars: A Solution to the Carbon and Oxygen Isotope Puzzles?",
+        "linkSentence": "Every image links to the <a href=\"http://www.astroexplorer.org/\" target=\"_new\">IOP \"Astronomy Image Explorer\"</a> for more detail."
       });
 
 

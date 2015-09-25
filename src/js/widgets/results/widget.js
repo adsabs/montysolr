@@ -166,7 +166,7 @@ define([
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
         var highlights = apiResponse.has("highlighting") ? apiResponse.get('highlighting') : {};
         var self = this;
-        var link_server = this.beehive.getObject("User").getUserData("USER_DATA").link_server;
+        var link_server = this.getBeeHive().getObject("User").getUserData("USER_DATA").link_server;
 
         var appStorage = null;
         if (this.hasBeeHive() && this.getBeeHive().hasObject('AppStorage')) {
@@ -281,7 +281,7 @@ define([
 
       triggerBulkAction : function(flag){
         var bibs = this.collection.pluck("bibcode");
-        this.pubsub.publish(this.pubsub.BULK_PAPER_SELECTION, flag, bibs);
+        this.getPubSub().publish(this.getPubSub().BULK_PAPER_SELECTION, flag, bibs);
       }
 
     });

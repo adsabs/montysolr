@@ -1,9 +1,9 @@
 
 
-@facebook-color : rgb(59,89,153);
-@twitter-color : rgb(64,153,255);
-@mendeley-color : rgb(60,30,33);
-@sciencewise-color: rgb(179, 27, 27);
+$facebook-color : rgb(59,89,153);
+$twitter-color : rgb(64,153,255);
+$mendeley-color : rgb(60,30,33);
+$sciencewise-color: rgb(179, 27, 27);
 
 
 .facebook-icon {
@@ -159,7 +159,8 @@
 
 
 .s-abstract-text {
-  font-size : 1.05em;
+  font-size: 1.1em;
+  line-height: 1.6;
   margin-top: 18px;
 }
 

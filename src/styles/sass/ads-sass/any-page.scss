@@ -1,3 +1,17 @@
+
+//allow for semantic headings without changing the look of the button
+.btn {
+  h1, h2, h3, h4, h5, h6 {
+    color: #fff;
+    font-weight: normal;
+    font-size: 16px;
+    padding: 0;
+    margin: 3px;
+    display: inline;
+  }
+}
+
+
 .s-message-control-row {
   text-align: center;
 
@@ -56,27 +70,27 @@ div[data-widget="AlertsWidget"] {
   }
 }
 
+
 .s-tabs-widget {
 
   .nav-tabs>li>a {
     padding: 5px 10px 10px 10px !important;
+    color: $text-color;
   }
 
   .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
-    color: #595959;
-    background-color: $body-bg;
-    border: none;
-    border-left: 1px solid lighten($gray-lighter, 5%);
-    border-bottom-color: transparent;
+    h5 {
+      color: $brand-primary-faded;
+    }
+    border: $border-light-default;
+    border-bottom: none;
     cursor: default;
 
   }
 
   .tab-content {
-    background-color: white;
-    border: 1px solid lighten($border-light-default-color, 8%);
+    @extend .s-ads-card;
     border-top : none;
-    box-shadow : 2px 2px 5px $gray-lighter;
     position: relative;
     top: -10px;
     border-bottom-left-radius: $border-radius-base;
@@ -84,9 +98,4 @@ div[data-widget="AlertsWidget"] {
     background-color: white;
   }
 
-
-}
-
-h1, h2, h3 {
-  font-weight: 300;
 }

@@ -114,11 +114,7 @@ $sidenav-background : #fff;
 /*header is for sub-section titles*/
 
 .s-nav-header{
-  font-weight: 500;
-  font-size: 20px;
-  padding: 20px 7% 0;
-  font-variant: small-caps;
-  color: $gray-light;
+  @extend .secondary-header;
 
   i {
     font-size: .8em;
@@ -152,6 +148,10 @@ $sidenav-background : #fff;
     color: $brand-primary-faded;
     content: $fa-var-pencil;
   }
+}
+
+.btn-inverse {
+  background-color: #fff;
 }
 
 .btn-primary.btn-inverse {

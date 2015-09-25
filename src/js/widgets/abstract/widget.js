@@ -214,11 +214,13 @@ define([
 
       onDisplayDocuments: function (apiQuery) {
 
-       var currentQuery = this.getBeeHive().getObject("AppStorage").getCurrentQuery(),
-           bibcode =  apiQuery.get('q'),
-           q;
+          var bibcode =  apiQuery.get('q'),
+              q,
+              currentQuery;
 
-        if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
+          currentQuery = this.getBeeHive().getObject("AppStorage") ? this.getBeeHive().getObject("AppStorage").getCurrentQuery() : undefined;
+
+          if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
           //redefine bibcode
           var bibcode = bibcode[0].replace('bibcode:', '');
           //make a lower case version: not sure why necessary

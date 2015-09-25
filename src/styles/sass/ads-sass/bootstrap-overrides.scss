@@ -8,6 +8,12 @@ including reset-like things
 
 */
 
+
+
+h1, h2, h3 {
+  font-weight: 300;
+}
+
 .modal-header {
   min-height: 50px;
 }
@@ -34,28 +40,15 @@ including reset-like things
   box-shadow : 2px 2px 2px $default-box-shadow-color;
 }
 
-input:focus {
-  border: 1px solid fade($brand-primary, 70%) !important;
+textarea:focus, input:focus, select:focus, textarea:active, input:active, select:active {
+  outline: 0;
+  border: 1px solid $brand-info;
   box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow: none !important;
-  -moz-transition: none !important;
-  -webkit-transition: none !important;
-}
-
-select:focus {
-  border: 1px solid fade($brand-primary, 70%) !important;
-  box-shadow: none !important;
-  -webkit-box-shadow: none !important;
-  -moz-box-shadow: none !important;
-  -moz-transition: none !important;
-  -webkit-transition: none !important;
 }
 
 textarea[disabled]{
-  background-color: darken(@gray-lighter, 5%);
+  background-color: darken($gray-lighter, 5%);
 }
-
 
 .btn:active {
   outline: none !important;
@@ -149,7 +142,6 @@ textarea[disabled]{
 .btn-warning:hover {
   background-color: darken($brand-warning, 4%);
 }
-
 
 .btn-default-flat {
   @extend .btn-default;

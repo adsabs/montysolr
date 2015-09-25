@@ -84,9 +84,13 @@ define([
         };
 
         this.set('index-page', function() {
-          app.getWidget("LandingPage").setActive("SearchWidget");
+
           app.getObject('MasterPageManager').show('LandingPage', ["SearchWidget"]);
           this.route = "";
+          //order is important
+          app.getWidget("LandingPage").done(function(widget) {
+            widget.setActive("SearchWidget");
+          });
 
         });
 
@@ -102,15 +106,15 @@ define([
 
 
         this.set('ClassicSearchForm', function() {
-          app.getWidget("LandingPage").setActive("ClassicSearchForm");
           app.getObject('MasterPageManager').show('LandingPage', ["ClassicSearchForm"]);
+          app.getWidget("LandingPage").done(function(widget){widget.setActive("ClassicSearchForm")});
           this.route = "#classic-form";
 
         });
 
         this.set('PaperSearchForm', function() {
-          app.getWidget("LandingPage").setActive("PaperSearchForm");
           app.getObject('MasterPageManager').show('LandingPage', ['PaperSearchForm']);
+          app.getWidget("LandingPage").done(function(widget){widget.setActive("PaperSearchForm");});
           this.route = "#paper-form";
         });
 
@@ -340,7 +344,6 @@ define([
             ['ExportWidget'].concat(searchPageAlwaysVisible.slice(1)));
 
           app.getWidget('ExportWidget').done(function(widget) {
-
 
             //classic is a special case, it opens in a new tab
             if (format == "classic") {

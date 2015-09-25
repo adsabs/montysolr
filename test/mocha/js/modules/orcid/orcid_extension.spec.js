@@ -19,7 +19,8 @@ define([
       beforeEach(function (done) {
         minsub = new (MinimalPubsub.extend({
           request: function (apiRequest) {
-             var fakeSolrResponse = this.requestCounter % 2 == 0 ? Test2() : Test1();
+            var fakeSolrResponse = this.requestCounter % 2 == 0 ? Test2() : Test1();
+            if (apiRequest.get("query").get("start"))
              fakeSolrResponse.response.start = apiRequest.get("query").get("start")[0];
             return fakeSolrResponse;
           }
@@ -216,7 +217,6 @@ define([
         model.set('bibcode', null);
         model.set('identifier', 'foo');
 
-        w.getPubSub = function() {return {publish : spy}};
         widget.mergeADSAndOrcidData(model);
 
         expect(widget.getPubSub().publish.called).to.eql(true);

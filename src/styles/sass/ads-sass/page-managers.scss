@@ -100,7 +100,7 @@ s-search-bar-motion is applied */
 .s-main-content-container{
 
   @extend .clearfix;
-  @extend  .s-content-container;
+  @extend .s-ads-card;
   min-height: 600px;
   padding-bottom: 20px;
   position: relative;
@@ -121,8 +121,7 @@ s-search-bar-motion is applied */
 }
 
 .s-dynamic-page-body {
-  background-color:  $results-page-background;
-  padding-bottom: 30px;
+  background-color:  $darker-background;
   min-height: 500px;
 }
 
@@ -144,7 +143,7 @@ s-search-bar-motion is applied */
     transition : width .5s ease-out, padding .5s ease-out;
   }
   .s-left-col-container {
-    @extend .s-content-container;
+    @extend .s-ads-card;
     padding: 10px;
     padding-bottom: 15px;
     min-height: 500px;
@@ -219,7 +218,7 @@ s-search-bar-motion is applied */
 Styles for Abstract Page
 */
 .s-right-col-widget-container {
-  @extend .s-content-container;
+  @extend .s-ads-card;
   padding: 5%;
   margin-bottom: 10px;
 
@@ -229,11 +228,7 @@ Styles for Abstract Page
 
 }
 .s-right-col-widget-title {
-  font-weight: 500;
-  font-size: 20px;
-  font-variant: small-caps;
-  color: $gray-light;
-  text-transform: lowercase;
+  @extend .secondary-header;
 
 }
 

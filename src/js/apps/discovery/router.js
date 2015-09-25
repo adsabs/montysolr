@@ -293,7 +293,7 @@ define([
 
       publicLibraryPage : function (id){
         //main libraries view
-        this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, sub : "library"});
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, sub : "library"});
       },
 
       homePage : function(subView){
@@ -301,7 +301,7 @@ define([
       },
 
       noPageFound : function() {
-        this.pubsub.publish(this.pubsub.NAVIGATE, "404")
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "404")
       },
 
       // backbone default behaviour is to automatically decodeuri parameters

@@ -17,7 +17,9 @@ define([
     'js/components/query_builder/rules_translator',
     'js/components/api_query',
     'hbs!./templates/group_template',
-    'hbs!./templates/rule_template'
+    'hbs!./templates/rule_template',
+    'js/mixins/dependon'
+
   ],
 
   function(
@@ -29,7 +31,9 @@ define([
     RulesTranslator,
     ApiQuery,
     GroupTemplate,
-    RuleTemplate
+    RuleTemplate,
+    Dependon
+
     ) {
 
     var QueryBuilder = GenericModule.extend({

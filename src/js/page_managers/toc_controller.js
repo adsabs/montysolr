@@ -15,6 +15,11 @@ define([
     var PageManagerController = BasicPageManagerController.extend({
 
       assemble: function(app) {
+
+        if (!this.navConfig){
+        throw new Error("TOC widget is being assembled without navigation configuration (navConfig)");
+        }
+
         if (this.assembled)
           return;
 

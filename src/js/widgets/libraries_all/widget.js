@@ -130,8 +130,7 @@ define([
       activate: function(beehive) {
         this.setBeeHive(beehive);
         _.bindAll(this);
-        this.pubsub = beehive.getService('PubSub');
-        this.pubsub.subscribe(this.pubsub.LIBRARY_CHANGE, this.updateCollection);
+        this.getPubSub().subscribe(this.getPubSub().LIBRARY_CHANGE, this.updateCollection);
       },
 
       updateCollection : function(data){
@@ -159,7 +158,7 @@ define([
 
           case "navigate:library":
             //where arg1 = library's id
-            this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", {sub : "library", id : arg1});
+            this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {sub : "library", id : arg1});
             break
         }
 

@@ -1037,14 +1037,8 @@ define([
       }
     },
 
-
-<<<<<<< HEAD
     broadcastClose: function () {
       this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
-=======
-    closeWidget: function () {
-      this.pubsub.publish(this.pubsub.NAVIGATE, "results-page");
->>>>>>> fixed issue with left column graphs, changed language about popularity/recent reads to be clearer
     }
 
   });

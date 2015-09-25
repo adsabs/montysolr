@@ -78,7 +78,6 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-      this.pubsub = beehive.Services.get('PubSub');
     },
 
     onShow : function(){
@@ -92,7 +91,7 @@ define([
         q: query
       });
 
-      this.pubsub.publish(this.pubsub.START_SEARCH, newQuery);
+      this.getPubSub.publish(this.getPubSub.START_SEARCH, newQuery);
 
     },
 

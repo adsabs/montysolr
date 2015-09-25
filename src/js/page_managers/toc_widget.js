@@ -165,8 +165,8 @@ define([
     resetActiveStates : function(){
       this.collection.each(function(model){
 
-        //nothing is selected at the moment
-        model.set("isSelected", false);
+//        //nothing is selected at the moment
+//        model.set("isSelected", false);
 
         //abstract and all export options
         //reset only widgets that aren't there 100% of the time

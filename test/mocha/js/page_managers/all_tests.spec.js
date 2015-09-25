@@ -188,8 +188,8 @@ define([
         it("swapping of page managers in/out manually", function(done) {
           var app = new Application({debug: false});
           delete config.widgets.PageManager;
-          config.widgets.FirstPageManager = 'js/page_managers/controller';
-          config.widgets.SecondPageManager = 'js/page_managers/toc_controller';
+          config.widgets.FirstPageManager = 'js/wraps/abstract_page_manager/abstract_page_manager';
+          config.widgets.SecondPageManager = 'js/wraps/landing_page_manager/landing_page_manager';
 
           app.loadModules(config).done(function() {
 
@@ -256,8 +256,9 @@ define([
           var app = new Application({debug: false});
           delete config.widgets.PageManager;
           config.core.objects.PageManager = 'js/page_managers/master';
-          config.widgets.FirstPageManager = 'js/page_managers/controller';
-          config.widgets.SecondPageManager = 'js/page_managers/toc_controller';
+          config.widgets.FirstPageManager = 'js/wraps/abstract_page_manager/abstract_page_manager';
+          config.widgets.SecondPageManager = 'js/wraps/landing_page_manager/landing_page_manager';
+
 
           app.loadModules(config).done(function() {
 
