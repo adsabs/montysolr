@@ -16,10 +16,9 @@ define([
 
     className : "s-landing-page-layout",  id : "landing-page-layout",
 
-    createView: function(options) {
-      options = options || {};
-      options.template = options.template || PageManagerTemplate;
-      return new PageManagerView({template: PageManagerTemplate})
+    pageConfig : {
+      template : PageManagerTemplate,
+      view : PageManagerView
     },
 
     navConfig : {

@@ -52,7 +52,7 @@
   color: $text-color;
   width: 1.2em;
   height: 1.2em;
-  padding-left: 3em;
+  padding-left: .3em;
   border: 1px solid $gray-light;
   border-radius : 50px;
   line-height: 1;
@@ -64,7 +64,7 @@
 
   &:hover {
     border: 1px solid $gray;
-    box-shadow: 0px 0px 4px darken($gray, 5%);
+    box-shadow: 0px 0px 6px gray;
     opacity: 1
   }
 }

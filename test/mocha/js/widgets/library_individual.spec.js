@@ -23,12 +23,12 @@ define([
 
     var stubData1  = {
       "documents": [
-      "2015IAUGA..2257982A",
-      "2015IAUGA..2257768A",
-      "2015IAUGA..2257639R"
-    ],
+        "2015IAUGA..2257982A",
+        "2015IAUGA..2257768A",
+        "2015IAUGA..2257639R"
+      ],
       "metadata": {
-      "date_created": "2015-08-06T17:13:10.830175",
+        "date_created": "2015-08-06T17:13:10.830175",
         "date_last_modified": "2015-08-06T19:12:42.261850",
         "description": "My ADS library",
         "id": "ieW0QRG-QSeNNXLjgGNjhg",
@@ -38,123 +38,123 @@ define([
         "owner": "aholachek",
         "permission": "owner",
         "public": true
-    },
+      },
       "solr": {
-      "response": {
-        "docs": [
-          {
-            "[citations]": {
-              "num_citations": 1,
-              "num_references": 0
+        "response": {
+          "docs": [
+            {
+              "[citations]": {
+                "num_citations": 1,
+                "num_references": 0
+              },
+              "abstract": "Whether or not scholarly publications are going through an evolution or revolution, one comforting certainty remains: the NASA Astrophysics Data System (ADS) is here to help the working astronomer and librarian navigate through the increasingly complex communication environment we find ourselves in. Born as a bibliographic database, today's ADS is best described as a an \"aggregator\" of scholarly resources relevant to the needs of researchers in astronomy and physics. In addition to indexing content from a variety of publishers, data and software archives, the ADS enriches its records by text-mining and indexing the full-text articles, enriching its metadata through the extraction of citations and acknowledgments and the ingest of bibliographies and data links maintained by astronomy institutions and data archives. In addition, ADS generates and maintains citation and co-readership networks to support discovery and bibliometric analysis.In this talk I will summarize new and ongoing curation activities and technology developments of the ADS in the face of the ever-changing world of scholarly publishing and the trends in information-sharing behavior of astronomers. Recent curation efforts include the indexing of non-standard scholarly content (such as software packages, IVOA documents and standards, and NASA award proposals); the indexing of additional content (full-text of articles, acknowledgments, affiliations, ORCID ids); and enhanced support for bibliographic groups and data links. Recent technology developments include a new Application Programming Interface which provides access to a variety of ADS microservices, a new user interface featuring a variety of visualizations and bibliometric analysis, and integration with ORCID services to support paper claiming.",
+              "aff": [
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory"
+              ],
+              "author": [
+                "Accomazzi, Alberto",
+                "Kurtz, Michael J.",
+                "Henneken, Edwin",
+                "Grant, Carolyn S.",
+                "Thompson, Donna",
+                "Chyla, Roman",
+                "Holachek, Alexandra",
+                "Sudilovsky, Vladimir",
+                "Elliott, Jonathan",
+                "Murray, Stephen S."
+              ],
+              "bibcode": "2015IAUGA..2257768A",
+              "property": [
+                "ARTICLE",
+                "NOT REFEREED"
+              ],
+              "pub": "IAU General Assembly",
+              "pubdate": "2015-01-00",
+              "title": [
+                "The NASA Astrophysics Data System joins the Revolution"
+              ]
             },
-            "abstract": "Whether or not scholarly publications are going through an evolution or revolution, one comforting certainty remains: the NASA Astrophysics Data System (ADS) is here to help the working astronomer and librarian navigate through the increasingly complex communication environment we find ourselves in. Born as a bibliographic database, today's ADS is best described as a an \"aggregator\" of scholarly resources relevant to the needs of researchers in astronomy and physics. In addition to indexing content from a variety of publishers, data and software archives, the ADS enriches its records by text-mining and indexing the full-text articles, enriching its metadata through the extraction of citations and acknowledgments and the ingest of bibliographies and data links maintained by astronomy institutions and data archives. In addition, ADS generates and maintains citation and co-readership networks to support discovery and bibliometric analysis.In this talk I will summarize new and ongoing curation activities and technology developments of the ADS in the face of the ever-changing world of scholarly publishing and the trends in information-sharing behavior of astronomers. Recent curation efforts include the indexing of non-standard scholarly content (such as software packages, IVOA documents and standards, and NASA award proposals); the indexing of additional content (full-text of articles, acknowledgments, affiliations, ORCID ids); and enhanced support for bibliographic groups and data links. Recent technology developments include a new Application Programming Interface which provides access to a variety of ADS microservices, a new user interface featuring a variety of visualizations and bibliometric analysis, and integration with ORCID services to support paper claiming.",
-            "aff": [
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory"
-            ],
-            "author": [
-              "Accomazzi, Alberto",
-              "Kurtz, Michael J.",
-              "Henneken, Edwin",
-              "Grant, Carolyn S.",
-              "Thompson, Donna",
-              "Chyla, Roman",
-              "Holachek, Alexandra",
-              "Sudilovsky, Vladimir",
-              "Elliott, Jonathan",
-              "Murray, Stephen S."
-            ],
-            "bibcode": "2015IAUGA..2257768A",
-            "property": [
-              "ARTICLE",
-              "NOT REFEREED"
-            ],
-            "pub": "IAU General Assembly",
-            "pubdate": "2015-01-00",
-            "title": [
-              "The NASA Astrophysics Data System joins the Revolution"
-            ]
-          },
-          {
-            "[citations]": {
-              "num_citations": 5,
-              "num_references": 0
+            {
+              "[citations]": {
+                "num_citations": 5,
+                "num_references": 0
+              },
+              "abstract": "This presentation discusses the current curation of archive bibliographies and their indexing in the NASA Astrophysics Data System (ADS). Integration of these bibliographies provides convenient cross-linking of resources between ADS and the data archives, affording greater visibility to both data products and the literature associated with them. There are practical incentives behind this effort: it has been shown that astronomy articles which provide links to on-line datasets have a citation advantage over similar articles which don\u2019t link to data. Additionally, the availability of paper-based metrics makes it possible for archivists and program managers use them in order to assess the impact of an instrument, facility, funding or observing program.The primary data curated by ADS is bibliographic information provided by publishers or harvested by ADS from conference proceeding sites and repositories. This core bibliographic information is then further enriched by ADS via the generation of citations and usage data, and through the aggregation of external bibliographic information. Important sources of such additional information are the metadata describing observing proposals from the major missions and archives, the curated bibliographies for data centers, and the sets of links between archival observations and published papers.While ADS solicits and welcomes the inclusion of this data from US and foreign data centers, the curation of bibliographies, observing proposals and links to data products is left to the archives which host the data and which have the expertise and resources to properly maintain them. In this regard, the role of ADS is one of resource aggregation through crowdsourced curation, providing a lightweight discovery mechanism through its search capabilities. While limited in scope, this level of aggregation can still be quite useful in supporting the discovery and selection of data products associated with publications. For instance, a user can use ADS to find papers which have been classified in the bibliography for HST, Chandra, and Spitzer, which typically yields multi-spectral studies making use of data from NASA\u2019s Great Observatories. I will discuss how curators and institutions can participate in this effort.",
+              "aff": [
+                "Smithsonian Astrophysical Observatory"
+              ],
+              "author": [
+                "Accomazzi, Alberto"
+              ],
+              "bibcode": "2015IAUGA..2257982A",
+              "property": [
+                "ARTICLE",
+                "NOT REFEREED"
+              ],
+              "pub": "IAU General Assembly",
+              "pubdate": "2011-08-00",
+              "title": [
+                "Curation and integration of observational metadata in ADS"
+              ]
             },
-            "abstract": "This presentation discusses the current curation of archive bibliographies and their indexing in the NASA Astrophysics Data System (ADS). Integration of these bibliographies provides convenient cross-linking of resources between ADS and the data archives, affording greater visibility to both data products and the literature associated with them. There are practical incentives behind this effort: it has been shown that astronomy articles which provide links to on-line datasets have a citation advantage over similar articles which don\u2019t link to data. Additionally, the availability of paper-based metrics makes it possible for archivists and program managers use them in order to assess the impact of an instrument, facility, funding or observing program.The primary data curated by ADS is bibliographic information provided by publishers or harvested by ADS from conference proceeding sites and repositories. This core bibliographic information is then further enriched by ADS via the generation of citations and usage data, and through the aggregation of external bibliographic information. Important sources of such additional information are the metadata describing observing proposals from the major missions and archives, the curated bibliographies for data centers, and the sets of links between archival observations and published papers.While ADS solicits and welcomes the inclusion of this data from US and foreign data centers, the curation of bibliographies, observing proposals and links to data products is left to the archives which host the data and which have the expertise and resources to properly maintain them. In this regard, the role of ADS is one of resource aggregation through crowdsourced curation, providing a lightweight discovery mechanism through its search capabilities. While limited in scope, this level of aggregation can still be quite useful in supporting the discovery and selection of data products associated with publications. For instance, a user can use ADS to find papers which have been classified in the bibliography for HST, Chandra, and Spitzer, which typically yields multi-spectral studies making use of data from NASA\u2019s Great Observatories. I will discuss how curators and institutions can participate in this effort.",
-            "aff": [
-              "Smithsonian Astrophysical Observatory"
-            ],
-            "author": [
-              "Accomazzi, Alberto"
-            ],
-            "bibcode": "2015IAUGA..2257982A",
-            "property": [
-              "ARTICLE",
-              "NOT REFEREED"
-            ],
-            "pub": "IAU General Assembly",
-            "pubdate": "2011-08-00",
-            "title": [
-              "Curation and integration of observational metadata in ADS"
-            ]
-          },
-          {
-            "[citations]": {
-              "num_citations": 3,
-              "num_references": 0
-            },
-            "abstract": "Observatory bibliographies have traditionally served to provide a record of accomplishments for the managers' reports. However, by linking the published articles with the individual datasets that they used and present, we have the opportunity to join the bibliographic metadata (including keywords, subjects, objects, data references from other observatories, etc.) with the metadata associated with the observational datasets. This creates a very rich information field that is ripe for far more sophisticated datamining than the two repositories (publications and data) would afford individually.We have been maintaining such an extensive bibliography for the Chandra Data Archive that is complete for the entire mission.The linking is implemented through the use of persistent dataset identifiers (PID). We have used the PID set defined by the NASA Astrophysics Data Centers since their introduction a decade ago, as there were no obvious viable alternatives at the time, but these could readily be translated into more modern PIDs, such as DOI. We welcome the submission of higher level data products (especially those associated with publications) by our users. The bibliography allows seamless data discovery in the literature and the data repository, with the benefit of this wealth of metadata.With PIDs defined for datasets and articles, the next step is obviously to link data across repositories covering multiple missions and different parts of the spectrum.The next enticing possibility is to extend the functionality of the PIDs, allowing them to drill down into complex datasets (and that includes articles) to extract specific bits and pieces, by adding a level of more sophisticated intelligence in data discovery through PIDs.This work has been supported by NASA under contract NAS 8-03060 to the Smithsonian Astrophysical Observatory for operation of the Chandra X-ray Center. It depends critically on the services provided by the ADS, which is funded by NASA Grant NNX12AG54G.",
-            "aff": [
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory",
-              "Smithsonian Astrophysical Observatory"
-            ],
-            "author": [
-              "Rots, Arnold H.",
-              "Winkelman, Sherry",
-              "Accomazzi, Alberto"
-            ],
-            "bibcode": "2015IAUGA..2257639R",
-            "property": [
-              "ARTICLE",
-              "NOT REFEREED"
-            ],
-            "pub": "IAU General Assembly",
-            "pubdate": "2015-09-00",
-            "title": [
-              "Bibliographies and Data Archives: a Rich Data Mining Tool"
-            ]
-          }
-        ],
+            {
+              "[citations]": {
+                "num_citations": 3,
+                "num_references": 0
+              },
+              "abstract": "Observatory bibliographies have traditionally served to provide a record of accomplishments for the managers' reports. However, by linking the published articles with the individual datasets that they used and present, we have the opportunity to join the bibliographic metadata (including keywords, subjects, objects, data references from other observatories, etc.) with the metadata associated with the observational datasets. This creates a very rich information field that is ripe for far more sophisticated datamining than the two repositories (publications and data) would afford individually.We have been maintaining such an extensive bibliography for the Chandra Data Archive that is complete for the entire mission.The linking is implemented through the use of persistent dataset identifiers (PID). We have used the PID set defined by the NASA Astrophysics Data Centers since their introduction a decade ago, as there were no obvious viable alternatives at the time, but these could readily be translated into more modern PIDs, such as DOI. We welcome the submission of higher level data products (especially those associated with publications) by our users. The bibliography allows seamless data discovery in the literature and the data repository, with the benefit of this wealth of metadata.With PIDs defined for datasets and articles, the next step is obviously to link data across repositories covering multiple missions and different parts of the spectrum.The next enticing possibility is to extend the functionality of the PIDs, allowing them to drill down into complex datasets (and that includes articles) to extract specific bits and pieces, by adding a level of more sophisticated intelligence in data discovery through PIDs.This work has been supported by NASA under contract NAS 8-03060 to the Smithsonian Astrophysical Observatory for operation of the Chandra X-ray Center. It depends critically on the services provided by the ADS, which is funded by NASA Grant NNX12AG54G.",
+              "aff": [
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory",
+                "Smithsonian Astrophysical Observatory"
+              ],
+              "author": [
+                "Rots, Arnold H.",
+                "Winkelman, Sherry",
+                "Accomazzi, Alberto"
+              ],
+              "bibcode": "2015IAUGA..2257639R",
+              "property": [
+                "ARTICLE",
+                "NOT REFEREED"
+              ],
+              "pub": "IAU General Assembly",
+              "pubdate": "2015-09-00",
+              "title": [
+                "Bibliographies and Data Archives: a Rich Data Mining Tool"
+              ]
+            }
+          ],
           "numFound": 3,
           "start": 0
-      },
-      "responseHeader": {
-        "QTime": 7,
+        },
+        "responseHeader": {
+          "QTime": 7,
           "params": {
-          "fl": "title,abstract,bibcode,author,aff,links_data,property,[citations],pub,pubdate",
+            "fl": "title,abstract,bibcode,author,aff,links_data,property,[citations],pub,pubdate",
             "fq": "{!bitset}",
             "q": "*:*",
             "rows": "1000",
             "wt": "json"
-        },
-        "status": 0
-      }
-    },
+          },
+          "status": 0
+        }
+      },
       "updates": {
-      "duplicates_removed": 0,
+        "duplicates_removed": 0,
         "num_updated": 0,
         "update_list": []
-    }
-   };
+      }
+    };
 
 
     var stubData2  = {
@@ -467,10 +467,10 @@ define([
         "library-metrics",
         {
           "bibcodes":  [
-        "2015IAUGA..2257639R",
-        "2015IAUGA..2257768A",
-        "2015IAUGA..2257982A"
-      ],
+            "2015IAUGA..2257639R",
+            "2015IAUGA..2257768A",
+            "2015IAUGA..2257982A"
+          ],
           "id": "1",
           "publicView": false,
           "sub" : undefined
@@ -484,11 +484,11 @@ define([
         "[Router]-Navigate-With-Trigger",
         "library-visualization",
         {
-           "bibcodes": [
-        "2015IAUGA..2257639R",
-        "2015IAUGA..2257768A",
-        "2015IAUGA..2257982A"
-        ],
+          "bibcodes": [
+            "2015IAUGA..2257639R",
+            "2015IAUGA..2257768A",
+            "2015IAUGA..2257982A"
+          ],
           "sub": "authornetwork",
           "id": "1",
           "publicView": false
@@ -643,12 +643,7 @@ define([
 
     it.skip("should have and admin view that allows you to alter the permissions of members of a library")
 
-
-
-
-
-
-  })
+  });
 
 
 

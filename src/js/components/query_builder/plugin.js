@@ -414,11 +414,11 @@ define([
       &nbsp;&nbsp;\
     </div> \
     <div class="btn-group"> \
-      <button type="button" class="btn btn-xs btn-success" data-add="rule"><i class="glyphicon glyphicon-plus"></i> '+ this.lang.add_rule +'</button> \
-      <button type="button" class="btn btn-xs btn-success" data-add="group"><i class="glyphicon glyphicon-plus-sign"></i> '+ this.lang.add_group +'</button> \
-      <button type="button" class="btn btn-xs btn-danger" data-delete="group"><i class="glyphicon glyphicon-remove"></i> '+ this.lang.delete_group +'</button> \
+      <button type="button" class="btn btn-xs btn-success" data-add="rule"><i class="fa fa-plus"></i> '+ this.lang.add_rule +'</button> \
+      <button type="button" class="btn btn-xs btn-success" data-add="group"><i class="fa fa-plus-square"></i> '+ this.lang.add_group +'</button> \
+      <button type="button" class="btn btn-xs btn-danger" data-delete="group"><i class="fa fa-minus"></i> '+ this.lang.delete_group +'</button> \
     </div> \
-    '+ (this.settings.sortable ? '<div class="drag-handle"><i class="glyphicon glyphicon-sort"></i></div>' : '') +' \
+    '+ (this.settings.sortable ? '<div class="drag-handle"><i class="fa fa-sort"></i></div>' : '') +' \
   </dt> \
   <dd class=rules-group-body> \
     <ul class=rules-list></ul> \

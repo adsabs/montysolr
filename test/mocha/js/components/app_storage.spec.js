@@ -83,11 +83,9 @@ define([
       expect(s.getSelectedPapers()).to.eql(['foo'])
 
       //should be able to re-add foo in bulk selection and not have it toggled off
-      minsub.publish(minsub.BULK_PAPER_SELECTION, "add", ["foo", "boo", "goo"]);
+      minsub.publish(minsub.BULK_PAPER_SELECTION, ["foo", "boo", "goo"]);
       expect(s.getSelectedPapers()).to.eql(['foo', 'boo', 'goo']);
 
-      minsub.publish(minsub.BULK_PAPER_SELECTION, "remove", ['foo', 'boo', 'goo']);
-      expect(s.getSelectedPapers()).to.eql([]);
 
     });
 

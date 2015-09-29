@@ -21,7 +21,7 @@ define([
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
-        _.bindAll(this, "onPaperSelection", "onBulkPaperAction");
+        _.bindAll(this, "onPaperSelection", "onBulkPaperSelection");
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.PAPER_SELECTION, this.onPaperSelection);
         pubsub.subscribe(pubsub.BULK_PAPER_SELECTION, this.onBulkPaperSelection);
@@ -143,13 +143,8 @@ define([
         }
       },
 
-      onBulkPaperAction : function(flag, bibs){
-        if (flag == "add"){
-          this.addSelectedPapers(bibs);
-        }
-        else if (flag == "remove"){
-          this.removeSelectedPapers(bibs);
-        }
+      onBulkPaperSelection : function(bibs){
+        this.addSelectedPapers(bibs);
       },
 
       //this is used by the auth and user settings widgets

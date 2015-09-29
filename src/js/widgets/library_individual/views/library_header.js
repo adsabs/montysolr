@@ -20,25 +20,25 @@ define([
 
     },
 
-      defaults : function(){
-        return {
-          //admin, libraries,edit,metrics, or vis
-          active : "library",
+    defaults : function(){
+      return {
+        //admin, libraries,edit,metrics, or vis
+        active : "library",
 
-          //from api
-          date_created : undefined,
-          date_last_modified : undefined,
-          description : undefined,
-          id : undefined,
-          name : undefined,
-          num_documents : 0,
-          num_users : 0,
-          permission : "read",
-          owner : undefined,
-          public : false
+        //from api
+        date_created : undefined,
+        date_last_modified : undefined,
+        description : undefined,
+        id : undefined,
+        name : undefined,
+        num_documents : 0,
+        num_users : 0,
+        permission : "read",
+        owner : undefined,
+        public : false
 
-        }
-      },
+      }
+    },
 
     checkEditPermission : function(){
 
@@ -105,7 +105,7 @@ define([
     focusContenteditable : function(e){
 
       var $current = $(e.currentTarget),
-          buttonsContainer = $current.next();
+        buttonsContainer = $current.next();
 
       buttonsContainer.removeClass("no-show").addClass("fadeIn");
     },
@@ -113,9 +113,9 @@ define([
     submitEdit : function(e){
 
       var $current = $(e.currentTarget),
-          $buttonContainer = $current.parent(),
-          $edited = $buttonContainer.prev(),
-          data = {};
+        $buttonContainer = $current.parent(),
+        $edited = $buttonContainer.prev(),
+        data = {};
 
       data[$edited.data("param")] = $edited.text().trim();
 
@@ -128,15 +128,15 @@ define([
     cancelEdit : function(e){
 
       var $current = $(e.currentTarget),
-          $buttonContainer = $current.parent(),
-          $edited = $buttonContainer.prev();
+        $buttonContainer = $current.parent(),
+        $edited = $buttonContainer.prev();
 
       //return the value to original value
       $edited.text(this.model.get($edited.data("param")));
       $buttonContainer.addClass("no-show");
     },
 
-  // whenever active tab changes
+    // whenever active tab changes
 
     highlightTab : function(){
 
@@ -159,7 +159,7 @@ define([
 
     triggerSubviewNavigate : function(e){
       var $current = $(e.currentTarget),
-          subView  = $current.data("tab");
+        subView  = $current.data("tab");
 
       var tabToShow, additional;
       //dropdowns have multiple sub-options
@@ -186,4 +186,4 @@ define([
 
   return LibraryTitleView;
 
-})
+});

@@ -131,6 +131,9 @@ define([
         this.setBeeHive(beehive);
         _.bindAll(this);
         this.getPubSub().subscribe(this.getPubSub().LIBRARY_CHANGE, this.updateCollection);
+
+        //initial data request
+        this.libraryCollection.reset(this.getBeeHive().getObject("LibraryController").getAllMetadata());
       },
 
       updateCollection : function(data){
@@ -164,10 +167,9 @@ define([
 
       }
 
-      });
+    });
 
 
     return LibrariesWidget
-
 
   })

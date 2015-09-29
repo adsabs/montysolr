@@ -236,7 +236,6 @@ define([
           }
 
           d.formattedDate = d.pubdate ? self.formatDate(d.pubdate, {format: 'yy/mm', missing: {day: 'yy/mm', month: 'yy'}}) : undefined;
-
           d.shortAbstract = d.abstract? self.shortenAbstract(d.abstract) : undefined;
 
           if (appStorage && appStorage.isPaperSelected(d.identifier)) {
@@ -281,7 +280,7 @@ define([
 
       triggerBulkAction : function(flag){
         var bibs = this.collection.pluck("bibcode");
-        this.getPubSub().publish(this.getPubSub().BULK_PAPER_SELECTION, flag, bibs);
+        this.getPubSub().publish(this.getPubSub().BULK_PAPER_SELECTION, bibs);
       }
 
     });

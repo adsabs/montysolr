@@ -254,6 +254,12 @@ $sidenav-background : #fff;
   }
 }
 
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+  //no idea why this is necessary
+  background-color: transparent;
+}
+
+
 .s-tab.active{
   border-bottom: 4px solid $brand-primary-faded;
   color:  $brand-primary-faded;

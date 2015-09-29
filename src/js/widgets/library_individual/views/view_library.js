@@ -215,14 +215,14 @@ define([
     },
 
     changeOrder : function(e){
-     this.model.set("order", $(e.currentTarget).val());
+      this.model.set("order", $(e.currentTarget).val());
     },
 
     getRecordsToShow : function(){
 
       var endIndex = this.model.get("page") * this.perPage,
-          startIndex = endIndex - this.perPage,
-          range = _.range(startIndex, endIndex);
+        startIndex = endIndex - this.perPage,
+        range = _.range(startIndex, endIndex);
 
       this.filter =  function (child, index) {
         if (range.indexOf(index) > -1){
@@ -234,8 +234,8 @@ define([
     setPagesToShow : function(){
 
       var page = this.model.get("page"),
-          lastPage = Math.ceil(this.collection.length/ this.perPage),
-          pageRange = _.range(page-4, page+4);
+        lastPage = Math.ceil(this.collection.length/ this.perPage),
+        pageRange = _.range(page-4, page+4);
 
       //add first page link if it's missing
       if (pageRange.indexOf(1) < 0){
@@ -249,7 +249,7 @@ define([
       });
 
       var hasRecords = this.collection.length > 1 ? true : false,
-          hasPages = this.collection.length > this.perPage ? true : false;
+        hasPages = this.collection.length > this.perPage ? true : false;
 
       this.model.set({pagesToShow : pageRange, hasRecords : hasRecords, hasPages : hasPages});
 

@@ -61,14 +61,7 @@ define([
   });
 
 
-
   return ManagePermissionsView
 
 
-
-
-
-
-
-
-})
+});

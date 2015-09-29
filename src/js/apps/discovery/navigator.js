@@ -159,7 +159,7 @@ define([
           app.getObject('MasterPageManager').show("LibrariesPage",
             ["AllLibrariesWidget", "UserNavbarWidget"]);
           app.getWidget("AllLibrariesWidget").done(function(widget) {
-            widget.setSubView(subView);
+            widget.setSubView({view : subView});
           });
 
           this.route = "#user/libraries/";
@@ -176,7 +176,7 @@ define([
 
           if ( publicView ){
             app.getWidget("IndividualLibraryWidget").done(function(widget) {
-              setSubView({id: id, view: "library", publicView: true});
+              widget.setSubView({id: id, view: "library", publicView: true});
               //then, show library page manager
               app.getObject('MasterPageManager').show("PublicLibrariesPage",
                 ["IndividualLibraryWidget"]);
@@ -186,7 +186,7 @@ define([
           else {
 
             app.getWidget("IndividualLibraryWidget").done(function(widget) {
-              setSubView({view: sub, id: id});
+              widget.setSubView({view: sub, id: id});
               app.getObject('MasterPageManager').show("LibrariesPage",
                 ["IndividualLibraryWidget", "UserNavbarWidget"]);
               publishPageChange("libraries-page");

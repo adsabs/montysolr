@@ -200,13 +200,13 @@ define([
       //bibcode is already in _docs
       displayBibcode : function(bibcode){
 
-        bibcode = bibcode.toLowerCase();
+        var lowerCaseBibcode = bibcode.toLowerCase();
 
-        this.model.set(this._docs[bibcode]);
-        this._current = bibcode;
+        this.model.set(this._docs[lowerCaseBibcode]);
+        this._current = lowerCaseBibcode;
         // let other widgets know details
         this.trigger('page-manager-event', 'broadcast-payload', {
-          title: this._docs[bibcode].title,
+          title: this._docs[lowerCaseBibcode].title,
           bibcode: bibcode
         });
 

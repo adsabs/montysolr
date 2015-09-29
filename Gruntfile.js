@@ -420,7 +420,33 @@ module.exports = function(grunt) {
             dest: 'src/libs/requirejs-plugins/',
             expand: true,
             flatten: true
+          },
+
+          {
+            src: ['bower_components/fontawesome/scss/*'],
+            dest: 'src/libs/fontawesome/scss/',
+            expand: true,
+            flatten: true
+          },
+          {
+            src: ['bower_components/fontawesome/fonts/*'],
+            dest: 'src/libs/fontawesome/fonts',
+            expand: true,
+            flatten: true
+          },
+          {
+            src: ['bower_components/jqueryui/themes/smoothness/jquery-ui.min.css'],
+            dest: 'src/libs/jqueryui/',
+            expand: true,
+            flatten: true
+          },
+          {
+            //surely there's a better pattern for recursive file copying?
+            cwd: 'bower_components/bootstrap-sass/assets/stylesheets/',
+            src: ['*', '**'],
+            expand: true
           }
+
         ]
       },
 
@@ -613,7 +639,8 @@ module.exports = function(grunt) {
             "widgets/library_individual/views/view_library.js": 67,
             "components/library_controller.js" : 66,
             "widgets/wordcloud/widget.js": 79,
-            "components/analytics.js": 71
+            "components/analytics.js": 71,
+            "wraps/landing_page_manager/landing_page_manager" : 48
           }
         }
       },
@@ -785,7 +812,7 @@ module.exports = function(grunt) {
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-    ['install-dependencies', 'bower-setup', 'sass', '_conditional_copy', 'copy:libraries', 'curl:google-analytics']);
+    ['install-dependencies', 'bower-setup', '_conditional_copy', 'copy:libraries', 'sass', 'curl:google-analytics']);
 
   grunt.registerTask('_conditional_copy', function() {
     if (!grunt.file.exists('src/discovery.vars.js')) {

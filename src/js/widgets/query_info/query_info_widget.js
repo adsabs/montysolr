@@ -57,7 +57,8 @@ define(['marionette',
       },
 
       triggers : {
-        "click .clear-selected" : "clear-selected"
+        "click .clear-selected" : "clear-selected",
+        "click .page-bulk-add" : "page-bulk-add"
       },
 
       events : {
@@ -142,7 +143,8 @@ define(['marionette',
       viewEvents : {
         "clear-selected" : "clearSelected",
         "library-add" : "libraryAddSubmit",
-        "library-create" : "libraryCreateSubmit"
+        "library-create" : "libraryCreateSubmit",
+        "page-bulk-add" : "triggerBulkAdd",
       },
 
       activate: function(beehive) {
@@ -154,6 +156,9 @@ define(['marionette',
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
+
+        //check if user is signed in (because widget was just instantiated, but app might have been running for a while
+        if (this.getBeeHive().getObject("User").isLoggedIn()) this.model.set("loggedIn", true);
 
       },
 

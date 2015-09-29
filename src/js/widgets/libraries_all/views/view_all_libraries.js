@@ -34,9 +34,9 @@ define([
       }
 
       var year = d.getFullYear().toString().slice(2,4),
-          month = d.getMonth() + 1,
-          day = d.getDay(),
-          time = formatAMPM(d);
+        month = d.getMonth() + 1,
+        day = d.getDay(),
+        time = formatAMPM(d);
 
       return month + "/" + day + "/" + year + " " + time;
 
@@ -65,9 +65,7 @@ define([
   var LibraryCollectionView = Marionette.CompositeView.extend({
 
     initialize : function(options){
-
-      var options = options || {};
-
+      options = options || {};
     },
 
     template : LibraryContainer,

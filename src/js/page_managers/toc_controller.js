@@ -14,6 +14,18 @@ define([
 
     var PageManagerController = BasicPageManagerController.extend({
 
+
+      createView: function(options) {
+
+        if (this.pageConfig){
+          return new this.pageConfig.view(_.extend(options, {template: this.pageConfig.template}));
+        }
+        else {
+          return BasicPageManagerController.prototype.createView.call(this, options);
+        }
+      },
+
+
       assemble: function(app) {
 
         if (!this.navConfig){
@@ -54,6 +66,7 @@ define([
         }, this);
 
       },
+
 
       /**
        * Listens to and receives signals from managed widgets.

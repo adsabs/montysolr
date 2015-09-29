@@ -1,7 +1,7 @@
 .s-form-widget {
 
   .panel-default {
-    box-shadow : 2px 2px 2px $default-box-shadow-color;
+    @extend .s-ads-card;
   }
 
   .panel-body {

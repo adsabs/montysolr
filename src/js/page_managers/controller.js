@@ -116,7 +116,12 @@ define([
           if (widget.disAssemble)
             widget.disAssemble();
           app.returnWidget(widgetName);
-          $(this.widgetDoms[widgetName]).empty();
+          if (!app._isBarbarianAlive("widget:" + widgetName)){
+            $(this.widgetDoms[widgetName]).empty();
+          }
+          else {
+            $(this.widgetDoms[widgetName]).detach();
+          }
           delete this.widgets[widgetName];
           delete this.widgetDoms[widgetName];
         }, this);

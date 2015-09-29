@@ -18,7 +18,10 @@ define([
       options = options || {};
       options.template = options.template || PageManagerTemplate;
       return new PageManagerView({template: PageManagerTemplate, className :  "s-home-layout s-100-height",  id : "home-layout"  })
-    }
+    },
+
+    navConfig : [],
+
 
   });
   return PageManager;

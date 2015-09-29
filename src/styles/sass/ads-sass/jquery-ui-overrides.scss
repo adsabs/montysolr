@@ -72,3 +72,8 @@
   border: 1px solid fade($brand-primary-faded, 20%) !important;
   border-radius: 0 !important;
 }
+.ui-autocomplete .ui-menu-item a.ui-state-hover {
+  background: fade($brand-primary-faded, 20%) !important;
+  border: 1px solid fade($brand-primary-faded, 20%) !important;
+  border-radius: 0 !important;
+}

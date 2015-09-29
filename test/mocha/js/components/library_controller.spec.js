@@ -33,25 +33,25 @@ define([
 
 
 
- it("should offer a hardened interface to widgets with the relevant library CRUD operations", function(){
+    it("should offer a hardened interface to widgets with the relevant library CRUD operations", function(){
 
-   var l = new LibraryController();
+      var l = new LibraryController();
 
-       expect(_.keys(l.getHardenedInstance())).to.eql([
-         "getAllMetadata",
-         "getLibraryData",
-         "createLibrary",
-         "createLibAndAddBibcodes",
-         "addBibcodesToLib",
-         "deleteLibrary",
-         "updateLibraryContents",
-         "updateLibraryMetadata",
-         "isDataLoaded",
-         "__facade__",
-         "mixIn"
-       ]);
+      expect(_.keys(l.getHardenedInstance())).to.eql([
+        "getAllMetadata",
+        "getLibraryData",
+        "createLibrary",
+        "createLibAndAddBibcodes",
+        "addBibcodesToLib",
+        "deleteLibrary",
+        "updateLibraryContents",
+        "updateLibraryMetadata",
+        "isDataLoaded",
+        "__facade__",
+        "mixIn"
+      ]);
 
-     });
+    });
 
     it("should automatically keep the libraries metadata collection in sync throughout different CRUD operations", function(){
 
@@ -256,9 +256,9 @@ define([
         "biblib/libraries",
         "POST",
         {
-            "data": {
-              "name": "fake library name"
-            }
+          "data": {
+            "name": "fake library name"
+          }
         }
       ]);
 
@@ -296,11 +296,11 @@ define([
 
       l.getBeeHive = function(){return {getObject : function(){ return {getSelectedPapers : function(){return ["1", "2", "3"]}}}}};
 
-     //get bibcodes from current  query
-     var deferred1 =  l._getBibcodes({bibcodes : "all"});
+      //get bibcodes from current  query
+      var deferred1 =  l._getBibcodes({bibcodes : "all"});
 
-     //get bibcodes from app storage
-     var deferred2 = l._getBibcodes({bibcodes : "selected"});
+      //get bibcodes from app storage
+      var deferred2 = l._getBibcodes({bibcodes : "selected"});
 
       var bibs;
 

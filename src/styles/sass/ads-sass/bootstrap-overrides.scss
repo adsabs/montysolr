@@ -170,6 +170,10 @@ textarea[disabled]{
   li.divider {
     margin: 5px 0;
   }
+
+  li:hover {
+    background-color: $gray-lighter;
+  }
 }
 
 .nav a {
