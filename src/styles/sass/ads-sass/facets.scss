@@ -2,6 +2,10 @@
   .item-open, .item-closed {
     color: $gray-dark
   }
+  h3 {
+    color: $gray-dark
+  }
+
 }
 
 
@@ -48,7 +52,7 @@
 .size-graphic-container {
   width: 77%;
   display: inline-block;
-  background-color:#fff;
+  background-color: $body-bg;
   height: 19px;
   margin-left: 2px;
   margin-bottom: 4px;
@@ -171,7 +175,7 @@
   x-overflow: hidden;
   y-overflow: hidden;
   padding-left: 8%;
-  padding-top: 5%;
+  padding-top: 11px;
 
 }
 
@@ -195,9 +199,8 @@
 
 
 .s-widget h3 {
-  font-size: $font-size-h5;
-  display: inline;
-  margin-left: 2%
+  @extend .secondary-header;
+  margin: 0 6px;
 }
 
 .s-sort-widget label{

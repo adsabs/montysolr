@@ -11,13 +11,13 @@ define([
   ],
   function(
 
-  Marionette,
-  BaseWidget,
-  HeaderView,
-  AdminView,
-  LibraryView,
-  ContainerTemplate,
-  LoadingTemplate
+    Marionette,
+    BaseWidget,
+    HeaderView,
+    AdminView,
+    LibraryView,
+    ContainerTemplate,
+    LoadingTemplate
 
     ){
 
@@ -72,24 +72,24 @@ define([
       onLibraryChange : function(collectionJSON, info){
 
 
-         if (info.ev == "change" &&
-              info.id ==  this.model.get("id") &&
-            _.findWhere(collectionJSON, {id : info.id}).num_documents > this.headerModel.get("num_documents")
-            ){
-            this.updateWidget();
-          }
-         //record was deleted from within widget, just update metadata
+        if (info.ev == "change" &&
+          info.id ==  this.model.get("id") &&
+          _.findWhere(collectionJSON, {id : info.id}).num_documents > this.headerModel.get("num_documents")
+          ){
+          this.updateWidget();
+        }
+        //record was deleted from within widget, just update metadata
         else if (info.ev == "change" &&  info.id ==  this.model.get("id")){
-            this.syncHeader(collectionJSON);
-          }
-         //this is a bit inexact: reset could have occured because initial library collection was loaded
-         // (in which case we need to update view and sub view)
-         //or it could have been a library added event, which we dont care about
-         //revisit later
+          this.syncHeader(collectionJSON);
+        }
+        //this is a bit inexact: reset could have occured because initial library collection was loaded
+        // (in which case we need to update view and sub view)
+        //or it could have been a library added event, which we dont care about
+        //revisit later
         else if (info.ev == "reset"){
-           this.updateWidget();
-         }
-        },
+          this.updateWidget();
+        }
+      },
 
 
       //called when ID changes
@@ -102,9 +102,9 @@ define([
       switchToNewLib : function(){
 
         var id = this.model.get("id"),
-              that = this,
-              pubsub = this.getBeeHive().getService('PubSub'),
-              LibraryController = this.getBeeHive().getObject("LibraryController");
+          that = this,
+          pubsub = this.getBeeHive().getService('PubSub'),
+          LibraryController = this.getBeeHive().getObject("LibraryController");
 
         if (!LibraryController.isDataLoaded()){
           //wait for LIBRARY_CHANGE event
@@ -143,8 +143,8 @@ define([
 
       syncHeader : function(data){
 
-         var currentLibMetadata = _.findWhere(data, {id : this.model.get("id")});
-         this.headerModel.set(currentLibMetadata);
+        var currentLibMetadata = _.findWhere(data, {id : this.model.get("id")});
+        this.headerModel.set(currentLibMetadata);
         //only needs to render if it's currently in the DOM
         if (this.view.header.currentView && $("body").find(this.view.header.currentView.el).length > 0){
           this.view.header.currentView.render();
@@ -155,9 +155,9 @@ define([
       updateSubView : function(){
 
         var that = this,
-            id = this.model.get("id"),
-            view = this.model.get("view"),
-            LibraryController = that.getBeeHive().getObject("LibraryController");
+          id = this.model.get("id"),
+          view = this.model.get("view"),
+          LibraryController = that.getBeeHive().getObject("LibraryController");
 
         if (!id || !view){
           return
@@ -170,8 +170,8 @@ define([
 
           case "library":
             var permission = that.headerModel.get("permission"),
-                editRecords = !!_.contains(["write", "admin", "owner"], permission) && !this.model.get("publicView"),
-                subView = new LibraryView({collection : that.libraryCollection, permission : editRecords, perPage : Marionette.getOption(this, "perPage") });
+              editRecords = !!_.contains(["write", "admin", "owner"], permission) && !this.model.get("publicView"),
+              subView = new LibraryView({collection : that.libraryCollection, permission : editRecords, perPage : Marionette.getOption(this, "perPage") });
 
             subView.on("all", that.handleLibraryEvents, that);
             that.view.main.show(subView);
@@ -207,10 +207,10 @@ define([
       },
 
       /*
-      * called by the navigator
-      * a change of ID will trigger the function "switchToNewLib"
-      * a change of view will only trigger "updateSubView"
-      * */
+       * called by the navigator
+       * a change of ID will trigger the function "switchToNewLib"
+       * a change of view will only trigger "updateSubView"
+       * */
 
       setSubView  : function(data) {
 
@@ -232,24 +232,24 @@ define([
       },
 
       handleLibraryEvents : function (event, arg1, arg2){
-      var that = this;
+        var that = this;
 
-      switch (event) {
+        switch (event) {
 
-        case "removeRecord":
-          //from library list view
-          var data = {bibcode : [arg1], action : "remove"},
+          case "removeRecord":
+            //from library list view
+            var data = {bibcode : [arg1], action : "remove"},
               id = this.model.get("id");
-          this.getBeeHive().getObject("LibraryController").updateLibraryContents(id, data)
-            .done(function(){
-              var bibcode = data.bibcode[0],
-                modelToRemove = that.libraryCollection.get(bibcode);
+            this.getBeeHive().getObject("LibraryController").updateLibraryContents(id, data)
+              .done(function(){
+                var bibcode = data.bibcode[0],
+                  modelToRemove = that.libraryCollection.get(bibcode);
                 that.libraryCollection.remove(modelToRemove);
-            });
-          break;
-      }
+              });
+            break;
+        }
 
-    },
+      },
 
       handleAdminEvents : function (event, arg1, arg2) {
 
@@ -259,7 +259,7 @@ define([
 
           case "update-public-status":
             var data = {"public": arg1},
-                id = this.model.get("id");
+              id = this.model.get("id");
             this.getBeeHive().getObject("LibraryController")
               .updateLibraryMetadata(id, data)
               .done(function(response, status){
@@ -275,7 +275,7 @@ define([
       handleHeaderEvents : function (event, arg1, arg2) {
 
         var that = this, id = this.model.get("id"),
-            pubsub = this.getBeeHive().getService('PubSub');
+          pubsub = this.getBeeHive().getService('PubSub');
 
         switch (event) {
 
@@ -321,4 +321,4 @@ define([
 
 
 
-})
+  });

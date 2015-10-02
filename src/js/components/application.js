@@ -99,8 +99,8 @@ define([
     },
 
     /*
-    * code that accounts for browser deficiencies
-    */
+     * code that accounts for browser deficiencies
+     */
 
     shim : function(){
 
@@ -175,9 +175,9 @@ define([
             console.error(arguments);
           //throw new Error("We are screwed!"); do not throw errors because then .fail() callbacks cannot be used
         });
-        //.done(function() {
-        //  console.log('DONE loading', this, config);
-        //});
+      //.done(function() {
+      //  console.log('DONE loading', this, config);
+      //});
 
       return bigPromise;
     },
@@ -639,7 +639,7 @@ define([
       var symbolicName = cat + ':' + name;
 
       if ((cat == 'plugin' && !this.hasPlugin(name)) || (cat == 'widget' && !this.hasWidget(name))) {
-          throw new Error('We cannot give you ' + symbolicName + ' (cause there is no constructor for it)');
+        throw new Error('We cannot give you ' + symbolicName + ' (cause there is no constructor for it)');
       }
 
       if (this._isBarbarianAlive(symbolicName))

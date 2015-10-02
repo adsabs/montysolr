@@ -1,0 +1,22 @@
+<div class="group-options">
+    <div class="btn-group logic-buttons"  data-toggle="buttons" >
+        {{{conditions}}}
+     </div>
+    <button type="button" class="btn btn-xs btn-danger btn-inverse" data-delete="group"><i class="fa fa-times"></i> remove group</button>
+
+</div>
+<dl id="{{group_id}}" class="rules-group-container" {{#if sortable}} draggable="true" {{/if}} >
+<dt class="rules-group-header">
+
+<div>
+    <button type="button" class="btn btn-xs btn-success" data-add="rule"><i class="fa fa-plus"></i>  {{addRule}}</button>
+    <button type="button" class="btn btn-xs btn-success" data-add="group"><i class="fa fa-plus-circle"></i> {{addGroup}} </button>
+</div>
+{{#if sortable}}
+    <div class="drag-handle"><i class="fa fa-sort"></i></div>
+{{/if}}
+</dt>
+<dd class=rules-group-body>
+    <ul class=rules-list></ul>
+</dd>
+</dl>

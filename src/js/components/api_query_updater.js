@@ -25,7 +25,7 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
     this.defaultOperator = ' ';
     this.operators = [' ', 'AND', 'OR', 'NOT', 'NEAR'];
     this.defaultMode = 'limit';
-    this.operationModes = ['limit', 'exclude', 'expand'];
+    this.operationModes = ['limit', 'exclude', 'expand', 'replace'];
     this.impossibleString = "\uFFFC\uFFFC\uFFFC";
     _.extend(this, options);
   };
@@ -65,6 +65,11 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
       }
       else if (mode == 'expand') {
         operator = 'OR';
+      }
+      else if (mode == 'replace') {
+        this._closeExistingVals(apiQuery, this._n(field));
+        apiQuery.set(this._n(field), ['AND', queryCondition[0]]);
+        return apiQuery.set(field, queryCondition[0]);
       }
       else {
         throw new Error("Unsupported mode/operator:", mode);
@@ -290,10 +295,20 @@ define(['underscore', 'js/components/api_query'], function (_, ApiQuery) {
           || c == '|' || c == '&' || c == '/' || c == ' ' || c == '\t') {
           needsQuotes = true;
         }
-        if ((c == quoteChar || c == quoteCharEnd) && i>0 && s[i-1] !== '\\') {
+        if ((c == quoteChar || c == quoteCharEnd) && (i==0 || i>0 && s[i-1] !== '\\')) {
           sb.push('\\');
         }
         sb.push(c);
+      }
+
+      // detect presence of quotes in the original string
+      if (onlyIfNecessary == true
+        && sb[0] == '\\' && sb[1] == '"'
+        && sb[sb.length-2] == '\\' && sb[sb.length-1] == '"'
+      ) {
+          sb[0] = '';
+          sb[sb.length-2] = '';
+          return sb.join('');
       }
       if (needsQuotes || onlyIfNecessary == false) {
         return quoteChar + sb.join('') + quoteCharEnd;

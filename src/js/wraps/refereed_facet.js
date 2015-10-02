@@ -3,7 +3,7 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
   return function() {
     var widget = FacetFactory.makeBasicCheckboxFacet({
       facetField: "property",
-      facetTitle: "Refereed Status",
+      facetTitle: "Refereed",
       openByDefault: true,
       defaultQueryArguments: {
         "facet": "true",

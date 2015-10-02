@@ -1,15 +1,10 @@
 .ui-slider-handle {
-
-
-  background-image : linear-gradient(to bottom, lighten($brand-info, 20%) 0%, lighten($brand-info, 20%) 50%, lighten($brand-info, 10%) 50%, lighten($brand-info, 10%) 100% ) !important;
-
+  background-image : linear-gradient(to bottom, lighten($brand-primary-faded, 20%) 0%, lighten($brand-primary-faded, 20%) 50%, lighten($brand-primary-faded, 10%) 50%, lighten($brand-primary-faded, 10%) 100% ) !important;
 }
 
 
 .ui-slider-range {
-
-   background : mix($brand-info, $gray-lightest, 15%) !important;
-
+   background : #fff !important;
 }
 
 .ui-autocomplete {
@@ -20,6 +15,12 @@
   float: left;
   display: none;
   min-width: 160px;
+  max-height: 300px;
+  overflow-y: auto;
+  /* prevent horizontal scrollbar */
+  overflow-x: hidden;
+  /* add padding to account for vertical scrollbar */
+  padding-right: 20px;
   _width: 160px;
   padding: 6px 0;
   margin: 2px 0 0 0;
@@ -67,6 +68,11 @@
 }
 
 .ui-autocomplete .ui-menu-item a.ui-state-focus {
+  background: fade($brand-primary-faded, 20%) !important;
+  border: 1px solid fade($brand-primary-faded, 20%) !important;
+  border-radius: 0 !important;
+}
+.ui-autocomplete .ui-menu-item a.ui-state-hover {
   background: fade($brand-primary-faded, 20%) !important;
   border: 1px solid fade($brand-primary-faded, 20%) !important;
   border-radius: 0 !important;

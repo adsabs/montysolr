@@ -84,14 +84,38 @@ define([
         };
 
         this.set('index-page', function() {
-          app.getObject('MasterPageManager').show('LandingPage');
-          var q = app.getObject('AppStorage').getCurrentQuery();
-          this.route = '#index/' + queryUpdater.clean(q).url();
+
+          app.getObject('MasterPageManager').show('LandingPage', ["SearchWidget"]);
+          this.route = "";
+          //order is important
+          app.getWidget("LandingPage").done(function(widget) {
+            widget.setActive("SearchWidget");
+          });
+
         });
+
+        this.set('SearchWidget', function() {
+          self.get('index-page').execute();
+        });
+
 
         this.set("404", function(){
           $("#body-template-container").html(ErrorTemplate());
           this.route = '#404';
+        });
+
+
+        this.set('ClassicSearchForm', function() {
+          app.getObject('MasterPageManager').show('LandingPage', ["ClassicSearchForm"]);
+          app.getWidget("LandingPage").done(function(widget){widget.setActive("ClassicSearchForm")});
+          this.route = "#classic-form";
+
+        });
+
+        this.set('PaperSearchForm', function() {
+          app.getObject('MasterPageManager').show('LandingPage', ['PaperSearchForm']);
+          app.getWidget("LandingPage").done(function(widget){widget.setActive("PaperSearchForm");});
+          this.route = "#paper-form";
         });
 
 
@@ -135,7 +159,7 @@ define([
           app.getObject('MasterPageManager').show("LibrariesPage",
             ["AllLibrariesWidget", "UserNavbarWidget"]);
           app.getWidget("AllLibrariesWidget").done(function(widget) {
-            widget.setSubView(subView);
+            widget.setSubView({view : subView});
           });
 
           this.route = "#user/libraries/";
@@ -152,7 +176,7 @@ define([
 
           if ( publicView ){
             app.getWidget("IndividualLibraryWidget").done(function(widget) {
-              setSubView({id: id, view: "library", publicView: true});
+              widget.setSubView({id: id, view: "library", publicView: true});
               //then, show library page manager
               app.getObject('MasterPageManager').show("PublicLibrariesPage",
                 ["IndividualLibraryWidget"]);
@@ -162,7 +186,7 @@ define([
           else {
 
             app.getWidget("IndividualLibraryWidget").done(function(widget) {
-              setSubView({view: sub, id: id});
+              widget.setSubView({view: sub, id: id});
               app.getObject('MasterPageManager').show("LibrariesPage",
                 ["IndividualLibraryWidget", "UserNavbarWidget"]);
               publishPageChange("libraries-page");
@@ -237,7 +261,7 @@ define([
           });
         });
 
-        
+
         this.set("library-metrics", function(widget, data){
 
             //first, tell export widget what to show
@@ -320,7 +344,6 @@ define([
             ['ExportWidget'].concat(searchPageAlwaysVisible.slice(1)));
 
           app.getWidget('ExportWidget').done(function(widget) {
-
 
             //classic is a special case, it opens in a new tab
             if (format == "classic") {
@@ -536,6 +559,7 @@ define([
         });
         this.set('ShowPaperMetrics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);
+          this.route = data.href;
         });
         this.set("ShowPaperExport", function(id, data){
           var format = data.subView;
@@ -544,7 +568,6 @@ define([
           app.getWidget("DetailsPage").done(function(w) {
             w.setActive(id, format);
           });
-//          this.route = data.href;
         });
         this.set('ShowGraphics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);

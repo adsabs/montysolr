@@ -1,0 +1,12 @@
+
+<nav class="s-landing-tabs">
+    {{#each tabs}}
+            <li class="s-tab {{#if this.isSelected}} active {{/if}}">
+                <a href="{{this.path}}" data-widget-id="{{this.id}}">
+                    {{{this.svg}}}
+                    {{this.title}}
+                </a>
+            </li>
+    {{/each}}
+
+</nav>

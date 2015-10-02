@@ -1,6 +1,14 @@
 <span class="s-large-close close-widget">x</span>
 <div class="metrics-metadata s-metrics-metadata">
 </div>
+
+     <!--used by widget when it is on the abstract page-->
+    {{#if title}}
+        <div style="padding-left:4%">
+            <h4 class="s-list-description">Metrics for</h4>
+            <h2 class="s-article-title">{{title}}</h2>
+        </div>
+    {{/if}}
 <div class="s-metrics-section" id="papers">
     <div class="s-metrics-title">
         <h3>Papers</h3>

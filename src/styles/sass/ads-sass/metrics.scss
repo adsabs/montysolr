@@ -1,31 +1,31 @@
 
 .s-metrics-svg {
   height: 345px !important;
+
+  .disabled{
+    pointer-events: all;
+  }
 }
 
 .s-metrics-title {
-
   @extend  .s-title-format;
+  margin: 6px 0;
 }
 
-  .s-metrics-section {
-    min-height: 460px;
-  }
 
 .s-metrics-table, .s-metrics-graph {
 
   @media(min-width: $screen-sm-min){
-
     display: inline-block;
     vertical-align: top;
     padding: 0% 2%;
-
   }
-
 }
 
 .s-metrics-table {
   font-size : 14px;
+  position: relative;
+  top: 10px;
   /*
   I don't understand why I have to specify this
   the width from the parent div is also being applied to the table
@@ -37,9 +37,7 @@
   }
 
   @media(min-width: $screen-sm-min){
-
     width: 33%;
-
   }
 
   th {
@@ -53,19 +51,21 @@
   }
 
   tr td:nth-of-type(3), tr td:nth-of-type(4) {
-
       text-align: right;
-
   }
 
+}
+
+.s-abstract-content {
+  .s-metrics-table, .s-metrics-graph {
+    width: 100%;
+  }
 }
 
 .s-metrics-graph {
 
   @media(min-width: $screen-sm-min){
-
     width: 66%;
-
   }
 }
 
@@ -114,6 +114,10 @@
   }
 }
 
+.s-metrics-metadata:empty {
+  padding:0;
+}
+
 
 /* nvd3 overrides */
 .nvtooltip h3 {
@@ -132,6 +136,9 @@
 }
 
 
-
+.s-graph-view {
+  position: relative;
+  top: 20px;
+}
 
 

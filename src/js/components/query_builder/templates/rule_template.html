@@ -1,0 +1,14 @@
+<li id="{{rule_id}}" class="rule-container" {{#if sortable}} draggable="true" {{/if}} >
+        <div class="rule-header">
+            <div class="btn-group pull-right">
+                <button type="button" class="btn btn-xs btn-danger" data-delete="rule"><i class="fa fa-minus"></i> </button>
+            </div>
+        </div>
+         {{#if sortable}}
+            <div class="drag-handle"><i class="fa fa-sort"></i></div>
+        {{/if}}
+
+        <div class="rule-filter-container"></div>
+        <div class="rule-operator-container"></div>
+        <div class="rule-value-container"></div>
+</li>

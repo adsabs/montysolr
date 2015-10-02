@@ -117,7 +117,7 @@ define([
       $("#test").empty();
     });
 
-    it("requests graphics data from graphics endpoint and title data from search endpoint", function(){
+    it("requests graphics data from graphics endpoint and title data from search endpoint, then resolves/rejects deferred for toc widget", function(){
 
       var g = new GraphicsWidget();
 
@@ -137,12 +137,76 @@ define([
 
       g.activate(minsub.beehive.getHardenedInstance());
 
-      g.loadBibcodeData("fakeBibcode");
+      var eventSpy = sinon.spy();
+
+      g.on("page-manager-event", eventSpy);
+
+      g.onDisplayDocuments(new minsub.createQuery({q : "bibcode:fakeBibcode"}));
 
       expect(graphicsRequest.get("target")).to.eql("graphics/fakeBibcode");
       expect(graphicsRequest.get("query").toJSON()).to.eql({})
       expect(apiRequest.get("target")).to.eql("search/query");
       expect(apiRequest.get("query").toJSON().q).to.eql(["bibcode:fakeBibcode"]);
+
+
+      expect(eventSpy.args[0][0]).to.eql("widget-ready");
+      expect(eventSpy.args[0][1].isActive).to.eql(true);
+      expect(eventSpy.callCount).to.eql(1);
+
+      expect(g.model.toJSON()).to.eql({
+        "graphics": {
+          "Figure 1": {
+            "format": "gif",
+            "highres": "http://www.astroexplorer.org/details/10_1086_309555_fg1",
+            "image_id": "10_1086_309555_fg1",
+            "thumbnail": "https://s3.amazonaws.com/aasie/images/1538-4357/447/1/L37/10_1086_309555_fg1_tb.gif"
+          },
+          "Figure 2": {
+            "format": "gif",
+            "highres": "http://www.astroexplorer.org/details/10_1086_309555_fg2",
+            "image_id": "10_1086_309555_fg2",
+            "thumbnail": "https://s3.amazonaws.com/aasie/images/1538-4357/447/1/L37/10_1086_309555_fg2_tb.gif"
+          },
+          "Figure 3": {
+            "format": "gif",
+            "highres": "http://www.astroexplorer.org/details/10_1086_309555_fg3",
+            "image_id": "10_1086_309555_fg3",
+            "thumbnail": "https://s3.amazonaws.com/aasie/images/1538-4357/447/1/L37/10_1086_309555_fg3_tb.gif"
+          },
+          "Figure 4": {
+            "format": "gif",
+            "highres": "http://www.astroexplorer.org/details/10_1086_309555_fg4",
+            "image_id": "10_1086_309555_fg4",
+            "thumbnail": "https://s3.amazonaws.com/aasie/images/1538-4357/447/1/L37/10_1086_309555_fg4_tb.gif"
+          }
+        },
+        "title": "Deep Circulation in Red Giant Stars: A Solution to the Carbon and Oxygen Isotope Puzzles?",
+        "linkSentence": "Every image links to the <a href=\"http://www.astroexplorer.org/\" target=\"_new\">IOP \"Astronomy Image Explorer\"</a> for more detail."
+      });
+
+
+      minsub.request =  function(request) {
+        if (request.get("target") == "search/query"){
+          apiRequest = request;
+          return titleData
+        }
+        else {
+          graphicsRequest = request;
+          return {Error: "no info found"};
+
+        }
+      };
+
+      g.onDisplayDocuments(new minsub.createQuery({q : "bibcode:fakeBibcode2"}));
+
+      //did not send a "widget ready" event
+      expect(eventSpy.callCount).to.eql(1);
+
+      //model has been emptied
+      expect(g.model.toJSON()).to.eql({
+        "title": "Deep Circulation in Red Giant Stars: A Solution to the Carbon and Oxygen Isotope Puzzles?"
+      });
+
 
     });
 
@@ -191,16 +255,6 @@ define([
 
       expect(spy.args[0][0]).to.eql("[Router]-Navigate-With-Trigger");
       expect(spy.args[0][1]).to.eql("ShowGraphics");
-
-      //if there are no images, it should render as an empty widget
-      //there will be no model events after the clearing of onNewQuery if there is no data
-      g.onNewQuery();
-
-      expect($(".graphic-container").length).to.eql(0);
-
-
-
-
 
 
     })

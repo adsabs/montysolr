@@ -1,14 +1,14 @@
-$fa-font-path : '../../../bower_components/fontawesome/fonts';
-@import '../../../bower_components/fontawesome/scss/font-awesome';
-@import '../../../bower_components/select2/dist/css/select2';
-@import '../../../bower_components/jqueryui/themes/smoothness/jquery-ui';
+$fa-font-path : '../../libs/fontawesome/';
+@import '../../libs/fontawesome/scss/font-awesome';
+@import '../../libs/select2/select2';
+@import '../../libs/jqueryui/jquery-ui.min';
 //not sure if we should keep this
-@import '../../../bower_components/animate.css/animate';
+@import '../../libs/animate.css/animate';
 
 @import 'ads-sass/bootstrap-variables';
 
 /* Import Bootstrap source */
-@import '../../../bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+@import '../../libs/bootstrap-sass/_bootstrap';
 
 /* Import nvd3 css */
 
@@ -20,7 +20,7 @@ $fa-font-path : '../../../bower_components/fontawesome/fonts';
 @import 'ads-sass/animations';
 @import 'ads-sass/utility';
 
-/* Import Bumblebee-specific modules (alphabetical order) */
+/* Import Bumblebee-specific modules */
 @import 'ads-sass/any-page';
 @import 'ads-sass/abstract-page-widgets';
 @import 'ads-sass/bootstrap-overrides';
@@ -41,27 +41,11 @@ $fa-font-path : '../../../bower_components/fontawesome/fonts';
 @import 'ads-sass/query-builder';
 @import 'ads-sass/results-list';
 @import 'ads-sass/results-page-widgets';
+@import 'ads-sass/sidebar';
 @import 'ads-sass/search-bar';
 @import 'ads-sass/visualizations';
 @import 'ads-sass/landing-page';
 @import 'ads-sass/user-styles';
 @import 'ads-sass/visualizations';
-
-$fa-font-path:       "../../libs/fontawesome";
-
-
-/* To add a new scss file (say you have made a new widget that needs
-new styling, add the file to the ads folder, and make sure
-to put the following lines at the top:
-
-//import these files so the fonts, mixins, and global variables can be used
-@import '../../../../bower_components/fontawesome/font-awesome';
-@import '../../../../bower_componentshat/buildhat-prefixed';
-@import 'general';
-
-Then, add an import statement to this manifest file
-
-*/
-
 
 

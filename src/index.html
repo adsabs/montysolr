@@ -5,13 +5,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-
     <title>ADS Search</title>
-
     <link rel="stylesheet" href="./styles/css/styles.css" />
-    <!--favicon stuff-->
     <link rel="icon" type="image/png" sizes="32x32" href="./styles/img/favicon.ico">
-
 </head>
 
 <body>
@@ -23,49 +19,26 @@
     <div id="body-template-container">
         <noscript>
             <p></p>
-            <p>Ah, welcome hardcode user. Your client does not speak javascript,
-            please follow this link to access non-javascript version of this
+            <p>Welcome hardcode user. Your client does not speak JavaScript,
+            please follow this link to access a non-JavaScript version of this
             website:
             <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a></p>
-
         </noscript>
 
-        <div class="ads-facts" style="width:50%; margin:auto; padding-top: 100px;">
-
-            <div> <h3 class="animated flash" style="text-align: center"> <i>Loading ADS Interface...</i></h3></div>
-
-            <h4 style="margin-top:50px"></h4>
-
-            <div class="tip-container">
-
+        <div class="loading-screen">
+            <div>
+                <div class="logo__astrophysics">astrophysics</div>
+                <div class="logo__data-system">data system</div>
             </div>
-
-
-        </div>
-
+            <span class="loading-screen__loading">loading...</span>
         </div>
 </div>
 
-<script>
-    var facts = [
-        {title: "First Author Search", tip: "To limit your search to papers in which the author appears in the first author position, use a caret. For example, <b>author:\"^Kurtz,M\"</b>"},
-        {title: "Explore Your Results", tip: "To glean new insight into your search results, click on the \"explore\" button on the search results page and check out the metrics graphs and other visualizations."},
-        {title:"Quickly Skim Abstracts", tip: "You can view the abstracts right in the search results page by clicking the \"show details\" button on the results page."},
-        {title: "Claim Your Papers in ORCID", tip: "ADS allows you to add papers to your ORCID profile. Click on the button on the top navigation to get started. "}
-    ];
-    var random = facts[Math.floor(facts.length * Math.random())];
-    document.querySelector(".ads-facts h4").textContent = "ADS Quick Tip: " + random.title;
-    document.querySelector(".tip-container").innerHTML = random.tip;
-</script>
-
-
 
 <!-- start the discovery application -->
-<script data-main="./discovery.config" src="./libs/requirejs/require.js"></script>
-
+<script data-main="./discovery.config"  src="./libs/requirejs/require.js"></script>
 
 
 </body>
 
 </html>
-

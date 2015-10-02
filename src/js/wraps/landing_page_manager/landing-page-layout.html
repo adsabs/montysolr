@@ -1,8 +1,9 @@
-<div>
-    <section class="s-landing-section-1">
+<div id="landing-page-layout">
+   <div class="s-starry-background-wrapper">
+    <section class="s-logo-header">
         <div>
-            <div class="col-sm-12">
-                <img class="ads-logo" src="/styles/img/ads_logo.png" alt="Astrophysics Data System"/>
+            <div>
+                <img src="styles/img/ads_logo.png" alt="The Astrophysics Data System Logo"/>
             </div>
             <div class="col-sm-6">
             </div>
@@ -10,31 +11,36 @@
         <div >
         </div>
      </section>
-    <!-- search bar row -->
-    <section class="s-search-bar-row s-landing-section-2 row">
+       <div  class="nav-container s-landing-nav-container">
+       </div>
+   </div>
+
+    <section class="s-search-bar-row s-landing-main row">
         <div class="col-sm-12"></div>
-            <div class="s-content-container" style="padding-left:30px;">
-
-
+            <div class="s-ads-card">
                 <div class="search-bar-rows-container s-search-bar-rows-container">
                     <br/>
                     <br/>
                     <div data-widget="SearchWidget"/>
+                    <div data-widget="ClassicSearchForm"/>
+                    <div data-widget="PaperSearchForm"/>
                     <br/>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <h4 class=" s-light-font" style="text-align:center"> This form uses the powerful new <a target="_blank" href="http://adsabs.github.io/help/search/search-syntax/">ADS search syntax</a>.</h4>
                     <div class="row s-message-control-row" id="message-control-row"><span data-widget="AlertsWidgetx"></span></div>
+                    <br/>
                 </div>
+
+                <div>
+                    <div data-widget="FormAccordionWidget"/>
+                </div>
+
         </div>
     </section>
-</div>
+
 
 
 <!-- choice buttons-->
 
-<section class="s-landing-section-3">
+<section class="s-bumblebee-info">
     <div class="s-transparent-background">
         <div class="features-wrapper">
             <div class="col-sm-4">
@@ -82,5 +88,7 @@
         </div>
     </div>
 </section>
+
+</div>
 
 

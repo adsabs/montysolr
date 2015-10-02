@@ -76,7 +76,6 @@ $sidenav-background : #fff;
   .s-content{
     position: relative;
   }
-
 }
 
 .s-nav-active {
@@ -84,10 +83,10 @@ $sidenav-background : #fff;
   color: $brand-primary-faded;
   font-weight: 400;
   &:hover {
-    background-color:lighten($brand-primary, 63%);
+    background-color:lighten($brand-primary, 60%);
     border-left: 5px solid $brand-primary-faded;
   }
-  background-color: lighten($brand-primary, 63%);
+  background-color: lighten($brand-primary, 60%);
 }
 
 .s-nav-inactive {
@@ -115,11 +114,7 @@ $sidenav-background : #fff;
 /*header is for sub-section titles*/
 
 .s-nav-header{
-  font-weight: 500;
-  font-size: 20px;
-  padding: 20px 7% 0;
-  font-variant: small-caps;
-  color: $gray-light;
+  @extend .secondary-header;
 
   i {
     font-size: .8em;
@@ -153,6 +148,10 @@ $sidenav-background : #fff;
     color: $brand-primary-faded;
     content: $fa-var-pencil;
   }
+}
+
+.btn-inverse {
+  background-color: $body-bg;
 }
 
 .btn-primary.btn-inverse {
@@ -224,7 +223,8 @@ $sidenav-background : #fff;
   cursor: pointer;
   font-weight: 300;
   padding: 5px;
-  border-bottom: 3px solid #fff;
+  border-bottom: 3px solid transparent;
+;
 
   &:hover {
     border-bottom: 4px solid lighten($brand-primary-faded, 30%);
@@ -251,10 +251,14 @@ $sidenav-background : #fff;
         background-color: $gray-lighter;
       }
     }
-
   }
-
 }
+
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+  //no idea why this is necessary
+  background-color: transparent;
+}
+
 
 .s-tab.active{
   border-bottom: 4px solid $brand-primary-faded;

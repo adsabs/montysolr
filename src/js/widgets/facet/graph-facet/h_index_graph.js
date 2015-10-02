@@ -113,7 +113,7 @@ define(['./base_graph',
           var d = this.innerChart.selectAll("circle").data(data);
 
           d.enter().append("circle").attr("class", "dot")
-            .attr("r", 4.5)
+            .attr("r", 2)
             .classed('refereed', function(d){
               if (d.refereed){
                 return true
@@ -313,7 +313,7 @@ define(['./base_graph',
 
           d.exit().remove();
 
-          d.enter().append("circle").attr("class", "dot").attr("r", 4.5)
+          d.enter().append("circle").attr("class", "dot").attr("r", 2)
 
           d.classed('refereed', function(d){
             if (d.refereed){

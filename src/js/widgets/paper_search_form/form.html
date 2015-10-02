@@ -1,0 +1,36 @@
+<form>
+    <div class="form-group">
+
+        <label for="pub-input">Publication </label>
+        <button class="btn btn-link" style="top:-3px;position:relative" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            <span class="s-light-font">type publication name to find bibstem  <i class="fa fa-question-circle"/></span>
+        </button>
+        <div class="collapse" id="collapseExample">
+            <div class="well">
+                A bibstem is an abbreviation that the ADS uses to identify a journal.
+                <a href="http://adsabs.harvard.edu/abs_doc/journals1.html#">A full list is available here.</a>
+                The input field below will autocomplete on the 500 most popular journal names, allowing you to type
+                "Astrophysical Journal", for instance, to find the bibstem "AJ".
+            </div>
+        </div>
+        <input type="text" class="form-control" id="pub-input" data-term="bibstem" placeholder="e.g Astrophysical Journal">
+    </div>
+    <div class="form-group">
+        <label for="year-input">Year</label>
+        <input type="text" class="form-control" id="year-input" data-term="year">
+    </div>
+    <div class="form-group">
+        <label for="volume-input">Volume</label>
+        <input type="text" class="form-control" id="volume-input" data-term="volume">
+    </div>
+    <div class="form-group">
+        <label for="page-input">Page</label>
+        <input type="text" class="form-control" id="page-input" data-term = "page">
+    </div>
+    <div class="form-group">
+        <div class="button-div pull-right">
+            <button class="btn clear"><fa class="fa fa-times"></fa> Clear</button>
+            <button class="btn btn-primary author-submit" disabled="true" type="submit"><i class="fa fa-search"></i> Search</button>
+        </div>
+    </div>
+</form>

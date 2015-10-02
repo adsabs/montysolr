@@ -49,13 +49,17 @@
                 <i class="fa fa-lg fa-download"></i>
                 Download file
             </button>
-            &nbsp;&nbsp;
-            <button class="btn btn-default-flat s-btn-clipboard btn-clipboard">
-                <i class="fa fa-lg fa-clipboard"></i>
-                Copy to clipboard
-            </button>
-            <textarea id="exportData" class="s-export-data" disabled>{{export}}</textarea>
-        </div>
+             <button class="btn btn-default-flat" data-toggle="collapse" data-target=".copy-instructions" aria-expanded="false"><i class="fa fa-lg fa-clipboard"></i> How to Copy</button>
+                <div class="copy-instructions collapse">
+                    <br/>
+                    <ol>
+                        <li><b>Click</b> in the box below.</li>
+                        <li><b>Select all</b> by using the keys ctrl + A (PC) or &#8984;cmd + A (Mac).</li>
+                        <li><b>Copy</b> by using the keys ctrl + C (PC) or &#8984;cmd + C (Mac).</li>
+                    </ol>
+                </div>
+            </div>
+            <textarea id="exportData" class="s-export-data" >{{export}}</textarea>
     {{else}}
         <div style="margin:20px">
             <i class="fa fa-spinner fa-2x fa-pulse"></i> Loading data...
@@ -64,5 +68,3 @@
 
 
 {{/if}}
-
-

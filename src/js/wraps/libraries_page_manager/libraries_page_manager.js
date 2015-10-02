@@ -44,8 +44,9 @@ define([
         id : "libraries-layout"
       });
 
+    },
 
-    }
+    navConfig : []
 
   });
   return PageManager;

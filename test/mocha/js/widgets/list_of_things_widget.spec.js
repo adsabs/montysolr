@@ -181,13 +181,11 @@ define(['marionette',
             counter++;
             var q = apiRequest.get('query');
             var ret = test1();
-            if (counter % 2 == 0)
-              ret = test2();
-
             _.each(q.keys(), function(k) {
               ret.responseHeader.params[k] = q.get(k)[0];
             });
-            //_.extend(ret.responseHeader.params, q.toJSON());
+            //but widget is currently checking in the response.start not the responseheader
+            ret.response.start = q.get("start")[0];
             return ret;
           }
         }))({verbose: false});
@@ -202,7 +200,6 @@ define(['marionette',
         // give command to display first 20 docs; since responses are coming in
         // batches of 10; the collection will automatically ask twice
         minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
-
         expect($w.find("label").length).to.equal(20);
 
         // click on next page // this should trigger new request

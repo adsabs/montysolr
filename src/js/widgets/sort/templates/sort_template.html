@@ -7,14 +7,23 @@
     <ul class="dropdown-menu" role="menu">
         <li>
             {{#each orderOptions}}
-            <label><input type="radio" value="{{this.value}}"  name="order-options" {{#if this.default}}checked="checked" {{/if}}> {{this.title}}</label>
+            <label><input type="radio" value="{{this.value}}"  name="order-options" {{#if this.default}}checked="checked" {{/if}}> {{this.title}}&nbsp;&nbsp;<i class="fa {{faIcon}}"></i></label>
             {{/each}}
+            <div class="hidden instructions s-instructions">
+                <i class="fa fa-arrow-circle-down"></i> pick one
+            </div>
         </li>
         <li class="divider"></li>
-         <li>
            {{#each sortOptions}}
-             <button class="btn btn-link sort-options" data-value="{{this.value}}">{{this.title}}</button>
+             <li class="sort-options">
+                 <button class="btn btn-link sort-options" data-value="{{this.value}}">{{this.title}}</button>
+             </li>
             {{/each}}
-         </li>
+            <li style="height:30px">
+              <a  title="Click to open a page that explains sort options in a new tab."
+                  href="//adsabs.github.io/help/actions/sort/" target="_blank" class="pull-right help-link">
+                  <i class=" fa-2x icon-help"></i>
+              </a>
+            </li>
     </ul>
 </div>

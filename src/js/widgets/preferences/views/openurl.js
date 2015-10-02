@@ -19,6 +19,7 @@ define([
     },
 
     serializeData : function(){
+
       var data = this.model.toJSON();
       data.openURLConfig = this.collection.toJSON();
 

@@ -1,16 +1,144 @@
 
-define(['jquery',
+define([
+  'jquery',
   'underscore',
   'js/components/query_builder/rules_translator',
   'js/components/generic_module'
-], function(
+  ], function(
   $,
   _,
   RulesTranslator,
   GenericModule) {
 
-  describe("QueryBuilder - Rule Translator (component)", function () {
+  describe("QueryBuilder - Rule Translator (rules_translator.spec.js)", function () {
 
+      it("from UI to the query string", function() {
+        var t = new RulesTranslator();
+
+        expect(t.buildQuery({
+          "condition": "OR",
+          "rules": [
+            {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "author",
+                  "field": "author",
+                  "type": "string",
+                  "input": "text",
+                  "operator": "contains",
+                  "value": "\"accomazzi,a\" OR \"kurtz,m\""
+                }
+              ]
+            },
+            {
+              "id": "author",
+              "field": "author",
+              "type": "string",
+              "input": "text",
+              "operator": "is",
+              "value": "foo"
+            }
+          ]
+        })).to.eql('(author:("accomazzi,a" OR "kurtz,m")) OR author:foo');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "pos()",
+              "field": "pos()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "complex AND query|1"
+            }
+          ]
+        })).to.eql('pos(complex AND query, 1)');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "pos()",
+              "field": "pos()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "complex AND query|1|10"
+            }
+          ]
+        })).to.eql('pos(complex AND query, 1, 10)');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "trending()",
+              "field": "trending()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "complex AND query"
+            }
+          ]
+        })).to.eql('trending(complex AND query)');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "reviews()",
+              "field": "reviews()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "complex AND query"
+            }
+          ]
+        })).to.eql('reviews(complex AND query)');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "citations()",
+              "field": "citations()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "complex AND query"
+            }
+          ]
+        })).to.eql('citations(complex AND query)');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "references()",
+              "field": "references()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "complex AND query"
+            }
+          ]
+        })).to.eql('references(complex AND query)');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "topn()",
+              "field": "topn()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "10|complex AND query"
+            }
+          ]
+        })).to.eql('topn(10, complex AND query)');
+
+        expect(t.buildQuery({
+          "rules": [
+            {
+              "id": "topn()",
+              "field": "topn()",
+              "type": "string",
+              "operator": "is_function",
+              "value": "10|complex AND query|citation_count desc"
+            }
+          ]
+        })).to.eql('topn(10, complex AND query, citation_count desc)');
+
+      });
 
       it.skip("qtree -> rules", function() {
 

@@ -12,21 +12,22 @@ $gray-darker:            lighten(#000, 13.5%); // #222
 $gray-dark:              lighten(#000, 30%);   // #333
 $gray:                   lighten(#000, 35%); // #555
 $gray-light:             lighten(#000, 60%);   // #999
-$gray-lighter:           lighten(#000, 93.5%); // #eee
-$gray-lightest:          lighten(#000, 97%);
-
+$gray-lighter:           lighten(#000, 91%); // #eee
+$gray-lightest:          lighten(#000, 93%);
 
 $brand-primary:        #1c459b;
-$brand-info:           #47A3C4;
-$brand-success:        #7ab880;
+$brand-info:           #4999df;
+$brand-success:        #54a05c;
 $brand-warning:        #EE8E29;
 $brand-danger:         #E44830;
 
-
 //extra colors
 $brand-primary-faded: lighten($brand-primary, 20%);
-$darker-background : lighten($gray-lighter, 2%);
-$border-default-color: darken($gray-lighter, 3%);
+$subtle-brand-primary : desaturate($brand-primary, 40%);
+
+$darker-background : #E8E8E8;
+$disabled-color : mix($gray-light, $gray-lighter);
+$border-default-color: darken($gray-lighter, 6%);
 
 
 //== Scaffolding
@@ -34,7 +35,7 @@ $border-default-color: darken($gray-lighter, 3%);
 // ## Settings for some of the most global styles.
 
 //** Background color for `<body>`.
-$body-bg:               #fff;
+$body-bg:               #F4F4F4;
 //** Global text color on `<body>`.
 $text-color:            $gray-dark;
 
@@ -148,7 +149,7 @@ $table-border-color:            #ddd;
 $btn-font-weight:                normal;
 
 $btn-default-color:              #333;
-$btn-default-bg:                 #fff;
+$btn-default-bg:                 $body-bg;
 $btn-default-border:             #ccc;
 
 $btn-primary-color:              #fff;
@@ -188,7 +189,7 @@ $btn-border-radius-small:        $border-radius-small !default;
 //##
 
 //** `<input>` background color
-$input-bg:                       #fff;
+$input-bg:                       $body-bg;
 //** `<input disabled>` background color
 $input-bg-disabled:              $gray-lighter;
 
@@ -199,7 +200,7 @@ $input-border:                   #ccc;
 //** `<input>` border radius
 $input-border-radius:            $border-radius-large;
 //** Border color for inputs on focus
-$input-border-focus:             #66afe9;
+$input-border-focus:             $brand-info;
 
 //** Placeholder text color
 $input-color-placeholder:        $gray-light;
@@ -225,7 +226,7 @@ $input-group-addon-border-color: $input-border;
 //## Dropdown menu container and contents.
 
 //** Background for the dropdown menu.
-$dropdown-bg:                    #fff;
+$dropdown-bg:                    $body-bg;
 //** Dropdown menu `border-color`.
 $dropdown-border:                rgba(0,0,0,.15);
 //** Dropdown menu `border-color` **for IE8**.

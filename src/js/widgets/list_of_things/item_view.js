@@ -41,9 +41,13 @@ define([
 
       events: {
         'change input[name=identifier]': 'toggleSelect',
+
+        'focus .letter-icon': "showLinks",
         'mouseenter .letter-icon': "showLinks",
         'mouseleave .letter-icon': "hideLinks",
-        'click .letter-icon': "pinLinks",
+        'focusout .letter-icon': "hideLinks",
+
+        'click .letter-icon button': "linkToFirst",
         //only relevant to results view for the moment
         'click .show-full-abstract' : "showFullAbstract",
         'click .hide-full-abstract' : "hideFullAbstract",
@@ -111,7 +115,6 @@ define([
 
       removeActiveQuickLinkState: function ($node) {
 
-        $node.removeClass("pinned");
         $node.find("i").removeClass("s-icon-draw-attention")
         $node.find(".link-details").addClass("hidden");
         $node.find('ul').attr('aria-expanded', false);
@@ -142,30 +145,13 @@ define([
         }
       },
 
-      pinLinks: function (e) {
-        var $c = $(e.currentTarget);
-
-        if (!$c.find(".active-link").length) {
-          return
-        }
-        $c.toggleClass("pinned");
-        if ($c.hasClass("pinned")) {
-          this.deactivateOtherQuickLinks($c);
-          this.addActiveQuickLinkState($c);
-        }
-        else {
-          this.removeActiveQuickLinkState($c);
-        }
-      },
 
       showLinks: function (e) {
         var $c = $(e.currentTarget);
         if (!$c.find(".active-link").length) {
           return;
         }
-        if ($c.hasClass("pinned")) {
-          return;
-        }
+
         else {
           this.deactivateOtherQuickLinks($c);
           this.addActiveQuickLinkState($c)
@@ -174,9 +160,6 @@ define([
 
       hideLinks: function (e) {
         var $c = $(e.currentTarget);
-        if ($c.hasClass("pinned")) {
-          return
-        }
         this.removeActiveQuickLinkState($c)
       },
 

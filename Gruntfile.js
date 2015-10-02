@@ -37,7 +37,7 @@ module.exports = function(grunt) {
       individual: {
         src: [],
         options: {
-          
+
         }
       },
       ignore_semicolons: {
@@ -81,7 +81,7 @@ module.exports = function(grunt) {
     // copied over to the 'dist' folder
     requirejs: {
       baseUrl: 'dist/js', // this is needed just for the 'stupid' list task
-      release: {
+      release_individual: {
         options: {
           baseUrl: 'dist/js',
           allowSourceOverwrites: true,
@@ -93,6 +93,55 @@ module.exports = function(grunt) {
           wrap: true,
           preserveLicenseComments: false,
           dir: 'dist/js',
+          uglify2: {
+            output: {
+              beautify: false
+            },
+            warnings: true,
+            mangle: false
+          }
+        }
+      },
+      release_concatenated : {
+        options: {
+          baseUrl: 'dist/',
+          wrapShim: true,
+          include : (function(){
+
+            var s = grunt.file.read("src/discovery.config.js"),
+                require = {config : function(s){return s}},
+                bumblebeeConfig = eval(s).config['js/apps/discovery/main'];
+
+            function getPaths(obj) {
+              var paths = [];
+
+              function pushPaths(config_obj) {
+               for (var k in config_obj) {
+                 var v = config_obj[k];
+                 if (v instanceof Object) {
+                   pushPaths(v);
+                 } else {
+                   paths.push(v);
+                 }
+               }
+              };
+
+              pushPaths(obj);
+              return paths;
+            }
+
+            return getPaths(bumblebeeConfig);
+
+          }()),
+          allowSourceOverwrites: true,
+          out: "dist/bumblebee_app.js",
+          name: "js/apps/discovery/main",
+          keepBuildDir: true,
+          mainConfigFile : "dist/discovery.config.js",
+          generateSourceMaps: false,
+          findNestedDependencies: true,
+          wrap: true,
+          preserveLicenseComments: false,
           uglify2: {
             output: {
               beautify: false
@@ -312,7 +361,7 @@ module.exports = function(grunt) {
     },
 
     // modify the html based on the instructions inside the html code
-    // this can be useful to modify links to css, minified version 
+    // this can be useful to modify links to css, minified version
     // of javascript etc...
     processhtml: {
       release: {
@@ -371,7 +420,33 @@ module.exports = function(grunt) {
             dest: 'src/libs/requirejs-plugins/',
             expand: true,
             flatten: true
+          },
+
+          {
+            src: ['bower_components/fontawesome/scss/*'],
+            dest: 'src/libs/fontawesome/scss/',
+            expand: true,
+            flatten: true
+          },
+          {
+            src: ['bower_components/fontawesome/fonts/*'],
+            dest: 'src/libs/fontawesome/fonts',
+            expand: true,
+            flatten: true
+          },
+          {
+            src: ['bower_components/jqueryui/themes/smoothness/jquery-ui.min.css'],
+            dest: 'src/libs/jqueryui/',
+            expand: true,
+            flatten: true
+          },
+          {
+            //surely there's a better pattern for recursive file copying?
+            cwd: 'bower_components/bootstrap-sass/assets/stylesheets/',
+            src: ['*', '**'],
+            expand: true
           }
+
         ]
       },
 
@@ -410,10 +485,36 @@ module.exports = function(grunt) {
             return dest + src.replace('/src/', '/');
           }
         }]
-      }
-    },
+      },
 
-    // compress whatever we have in the dist and 
+      //give the concatenated file a cache busting hash
+      bumblebee_app : {
+        files : [{
+          src: ["dist/bumblebee_app.js"],
+          dest: "dist/",
+          expand: true,
+          rename : function(dest, src){
+
+            var gitDescribe = grunt.file.read('git-describe').trim();
+
+            // find out what version of bbb we are going to assemble
+            var tagInfo = gitDescribe.split('-');
+            var version;
+            if (tagInfo.length == 1) {
+              version = tagInfo[0]; // the latest tag is also the latest commit (we'll use tagname v1.x.x)
+            }
+            else {
+              version = tagInfo[2]; // use commit number instead of a tag
+              return "dist/bumblebee_app." + version + ".js";
+            }
+
+          }
+
+        }]
+        }
+      },
+
+    // compress whatever we have in the dist and
     // store it along-side with it (nginx can serve
     // such content automatically)
     compress: {
@@ -443,12 +544,29 @@ module.exports = function(grunt) {
     },
 
     sass: {
-      options: {
-        sourceMap: true
+        options: {
+          sourceMap: true
+        },
+        dist: {
+          files: {
+            'src/styles/css/styles.css' : 'src/styles/sass/manifest.scss'
+          }
+        }
       },
+
+    /* for changing the name of the data-main file in dist/index */
+
+    'string-replace': {
       dist: {
-        files: {
-          'src/styles/css/styles.css' : 'src/styles/sass/manifest.scss'
+        files: [{
+          src: 'dist/index.html',
+          dest: 'dist/index.html'
+        }],
+        options: {
+          replacements: [{
+            pattern: 'data-main="./discovery.config"',
+            replacement: 'data-main="./bumblebee_app.js"'
+          }]
         }
       }
     },
@@ -521,7 +639,8 @@ module.exports = function(grunt) {
             "widgets/library_individual/views/view_library.js": 67,
             "components/library_controller.js" : 66,
             "widgets/wordcloud/widget.js": 79,
-            "components/analytics.js": 72
+            "components/analytics.js": 71,
+            "wraps/landing_page_manager/landing_page_manager" : 48
           }
         }
       },
@@ -687,16 +806,13 @@ module.exports = function(grunt) {
   // Basic environment config
   grunt.loadNpmTasks('grunt-env');
 
-  // Grunt BBB tasks.
-  grunt.loadNpmTasks('grunt-bbb-requirejs'); // we use 'list' target only, requirejs will get overriden
-
 
   // Grunt contribution tasks.
   require('load-grunt-tasks')(grunt);
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-    ['install-dependencies', 'bower-setup', 'sass', '_conditional_copy', 'copy:libraries', 'curl:google-analytics']);
+    ['install-dependencies', 'bower-setup', '_conditional_copy', 'copy:libraries', 'sass', 'curl:google-analytics']);
 
   grunt.registerTask('_conditional_copy', function() {
     if (!grunt.file.exists('src/discovery.vars.js')) {
@@ -796,7 +912,7 @@ module.exports = function(grunt) {
     var indexHtml = grunt.file.read('dist/index.original.html');
 
     // first the js path
-    var newHtml = indexHtml.replace('discovery.config', 'discovery.config.' + version);
+    var newHtml = indexHtml.replace('bumblebee_app', 'bumblebee_app.' + version);
     // then also the css
     for (var css in cssMap) {
       newHtml = newHtml.replace(css, cssMap[css]);
@@ -844,9 +960,11 @@ module.exports = function(grunt) {
   grunt.registerTask('release',
     [ 'setup',
       'clean:release', 'copy:release',
-      'requirejs:release', 'requirejs:release_css',
+      'exec:git_describe',
+      'string-replace:dist',
+      'requirejs:release_individual', 'requirejs:release_concatenated','requirejs:release_css',
       'hash_require:js', 'hash_require:css',
-      'exec:git_describe', 'copy:keep_original',
+      'copy:keep_original', 'copy:bumblebee_app',
       'assemble',
       'uglify'
   ]);

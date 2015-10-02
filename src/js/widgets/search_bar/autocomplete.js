@@ -26,8 +26,9 @@ define([
     {value: "aff:\"\"" , label : "Affiliation", match: "affiliation"},
     {value: "aff:\"\"" , label : "Affiliation", match: "aff:"},
 
-    {value: "abs:()" , label : "Abstract", match: "abstract"},
-    {value: "abs:()" , label : "Abstract", match: "abs:("},
+    {value: "abs:()" , label : "Search abstract + title + keywords", match: "abs:("},
+
+    {value: "abstract:()" , label : "Abstract", match: "abstract:("},
 
     {value: "title:()" , label : "Title", match: "title:("},
 

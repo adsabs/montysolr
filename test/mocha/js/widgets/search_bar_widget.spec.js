@@ -4,7 +4,8 @@ define([
     'js/components/beehive',
     'js/bugutils/minimal_pubsub',
     'js/components/api_query',
-    './test_json/test1'
+    './test_json/test1',
+    'js/components/api_feedback'
   ],
   function(
       $,
@@ -12,13 +13,14 @@ define([
       BeeHive,
       MinimalPubSub,
       ApiQuery,
-      Test
+      Test,
+      ApiFeedback
     ) {
 
 
   describe("Search Bar UI Widget (search_bar_widget.spec.js)", function() {
 
-    var minsub;
+    var minsub, widget;
     beforeEach(function (done) {
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
@@ -29,6 +31,9 @@ define([
     });
 
     afterEach(function (done) {
+      if (widget)
+        widget.onDestroy();
+
       minsub.destroy();
       var ta = $('#test');
       if (ta) {
@@ -38,7 +43,7 @@ define([
     });
 
     var _widget = function() {
-      var widget = new SearchBarWidget();
+      widget = new SearchBarWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
       return widget;
     };
@@ -81,23 +86,33 @@ define([
       minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'foo:bar'}));
       setTimeout(function() {
         expect(widget.view.getFormVal()).to.be.eql('foo:bar');
+        expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">841,359</span></b><span class="s-light-font"> results</span>');
         done();
       }, 5);
 
-      expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">841,359</span></b><span class="s-light-font"> results</span>');
+
     });
 
-    it("should allow the user to open and close a dropdown menu from the search bar", function(done){
+    it("puts query in bar even when the search cycle failed", function(done){
+
+
       var widget = _widget();
       var $w = widget.render().$el;
-      $('#test').append($w);
 
-      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
-      widget.view.$(".show-form").click();
-      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(true);
-      widget.view.$(".show-form").click();
-      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
-      done();
+      //puts query in the search bar even when feedback is error
+      var feedback = {
+        request : minsub.createRequest({'query': minsub.createQuery({'q': 'fakeQuery'})}),
+        //"search cycle failed to start"
+        code : -3
+      };
+
+      minsub.publish(minsub.FEEDBACK, feedback);
+      setTimeout(function() {
+        expect(widget.view.getFormVal()).to.be.eql('fakeQuery');
+        expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">0</span></b><span class="s-light-font"> results</span>');
+        done();
+      }, 5);
+
     });
 
 
@@ -119,6 +134,13 @@ define([
 
       widget.view.$("#field-options button[data-field=author]").click();
       expect($w.find(".q").val().trim()).to.equal("author:\"author name\"");
+
+      widget.view._cursorInfo.selected = undefined;
+
+      widget.view.$("#field-options button[data-field=operator-citations]").click();
+
+      expect($w.find(".q").val().trim()).to.equal("citations(author:\"author name\")");
+
 
       done();
     });
@@ -250,8 +272,17 @@ define([
 
 
 
-    it("shows the query builder form on clicking 'Search Form' ", function() {
+    it("shows the query builder form on clicking 'Search Form' ", function(done) {
+      var widget = _widget();
+      var $w = widget.render().$el;
+      $('#test').append($w);
 
+      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
+      widget.view.$(".show-form").click();
+      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(true);
+      widget.view.$(".show-form").click();
+      expect( widget.view.$(".input-group-btn").hasClass("open")).to.equal(false);
+      done();
     });
 
     it("in QB form: when rule is removed, the form stays open", function() {
@@ -262,7 +293,51 @@ define([
 
     });
 
-    it("changing operator updates the search input", function() {
+    it("changing function updates the search input", function() {
+      var widget = _widget();
+      var $w = widget.render().$el;
+      $('#test').append($w);
+
+      widget.view.$(".show-form").click();
+
+      // test functions
+      $w.find('.rule-container:first select:nth(0)').val('pos()').trigger('change');
+      expect($w.find('.rule-value-container:first input[name=query]').is(':visible')).to.eql(true);
+      expect($w.find('.rule-value-container:first input[name=start]').is(':visible')).to.eql(true);
+      expect($w.find('.rule-value-container:first input[name=end]').is(':visible')).to.eql(true);
+
+      $w.find('.rule-value-container:first input[name=query]').val('foo').trigger('change');
+      $w.find('.rule-value-container:first input[name=start]').val(10).trigger('change');
+      expect($w.find('.rule-value-container:first input[name$=_value]').val()).to.eql('foo|10');
+
+
+      $w.find('.rule-container:first select:nth(0)').val('citations()').trigger('change');
+      expect($w.find('.rule-value-container:first input[name=query]').is(':visible')).to.eql(true);
+      $w.find('.rule-value-container:first input[name=query]').val('citations').trigger('change');
+      expect($w.find('.rule-value-container:first input[name$=_value]').val()).to.eql('citations');
+
+      $w.find('.rule-container:first select:nth(0)').val('references()').trigger('change');
+      expect($w.find('.rule-value-container:first input[name=query]').is(':visible')).to.eql(true);
+      $w.find('.rule-value-container:first input[name=query]').val('references').trigger('change');
+      expect($w.find('.rule-value-container:first input[name$=_value]').val()).to.eql('references');
+
+      $w.find('.rule-container:first select:nth(0)').val('trending()').trigger('change');
+      expect($w.find('.rule-value-container:first input[name=query]').is(':visible')).to.eql(true);
+      $w.find('.rule-value-container:first input[name=query]').val('trending').trigger('change');
+      expect($w.find('.rule-value-container:first input[name$=_value]').val()).to.eql('trending');
+
+      $w.find('.rule-container:first select:nth(0)').val('reviews()').trigger('change');
+      expect($w.find('.rule-value-container:first input[name=query]').is(':visible')).to.eql(true);
+      $w.find('.rule-value-container:first input[name=query]').val('reviews').trigger('change');
+      expect($w.find('.rule-value-container:first input[name$=_value]').val()).to.eql('reviews');
+
+      $w.find('.rule-container:first select:nth(0)').val('topn()').trigger('change');
+      expect($w.find('.rule-value-container:first input[name=query]').is(':visible')).to.eql(true);
+      expect($w.find('.rule-value-container:first input[name=number]').is(':visible')).to.eql(true);
+      expect($w.find('.rule-value-container:first select[name=sorting]').is(':visible')).to.eql(true);
+      $w.find('.rule-value-container:first input[name=query]').val('foo').trigger('change');
+      $w.find('.rule-value-container:first input[name=number]').val(10).trigger('change');
+      expect($w.find('.rule-value-container:first input[name$=_value]').val()).to.eql('foo|10');
 
     });
 

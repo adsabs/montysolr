@@ -18,6 +18,7 @@ define([], function() {
       '/widgets/bubble_chart.spec.js',
       '/widgets/citation_graph_facet_widget.spec.js',
       '/widgets/dropdown_widget.spec.js',
+      '/widgets/classic_search_widget.spec.js',
       '/widgets/export_widget.spec.js',
       '/widgets/facet_container_view.spec.js',
     //TBD 24/09/14 '/widgets/facet_graph_widget.spec.js',
@@ -50,8 +51,7 @@ define([], function() {
       '/widgets/user_settings_widget.spec.js',
       '/widgets/wordcloud_widget.spec.js',
       '/widgets/year_graph_facet_widget.spec.js',
-      '/widgets/hello_world_widget.spec.js'
-
+      '/widgets/hello_world_widget.spec.js',
   ];
   return tests;
 });

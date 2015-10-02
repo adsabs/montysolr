@@ -20,6 +20,8 @@ define([
         var minsub = new MinSub();
         var toc = new TocController();
 
+        toc.navConfig =  { ShowGraphics : {"title": "Graphics", "path":"graphics", "showCount": false, "category":"view"}};
+
         sinon.spy(toc, 'onPageManagerEvent');
         sinon.spy(toc, 'broadcast');
         var allSpy = sinon.spy();
@@ -42,7 +44,7 @@ define([
         expect(toc.widgets.SearchWidget).to.be.defined;
 
         toc.widgets.SearchWidget.trigger('page-manager-event', 'widget-ready');
-        console.log(JSON.stringify(toc.broadcast.lastCall.args))
+//        console.log(JSON.stringify(toc.broadcast.lastCall.args))
         expect(toc.broadcast.lastCall.args).to.eql(["page-manager-message","widget-ready",{"widgetId":"SearchWidget","isActive":false}]);
 
         toc.widgets.SearchWidget.trigger('page-manager-event', 'widget-selected', {idAttribute: 'foo'});

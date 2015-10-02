@@ -172,7 +172,7 @@ function(
             startIdx = i+1
           }
         }
-        gaps = gaps.slice(Math.min(gaps.length-1, startIdx), endIdx);
+        gaps = gaps.slice(startIdx, endIdx);
         gaps = this._compressGaps(gaps);
 
         // to prevent multiple recursive requests

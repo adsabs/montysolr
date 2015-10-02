@@ -16,9 +16,9 @@ define([
     'jquery-ui',
     'module',
     'js/components/api_targets',
-    "zeroclipboard",
      "filesaver",
     'js/mixins/dependon'
+
   ],
   function(
     Marionette,
@@ -32,7 +32,6 @@ define([
     $ui,
     WidgetConfig,
     ApiTargets,
-    ZeroClipboard,
     FileSaver,
     Dependon
     ){
@@ -88,7 +87,6 @@ define([
       className : "s-export",
 
       ui :  {
-        "triggerCopy" : ".btn-clipboard",
         "triggerDownload" : ".btn-download"
       },
 
@@ -137,26 +135,6 @@ define([
 
       signalCloseWidget: function(ev) {
         this.trigger('close-widget');
-      },
-
-      onRender : function(){
-
-        //set up copy/paste functionality here
-        var that = this;
-        var client = new ZeroClipboard(that.ui.triggerCopy);
-
-        client.on("copy", function (event) {
-          var clipboard = event.clipboardData;
-          clipboard.setData( "text/plain", that.model.get("export"));
-        });
-
-        client.on("aftercopy", function(event){
-          that.ui.triggerCopy.html('<i class="fa fa-lg fa-clipboard"></i> Copied!');
-          setTimeout(function(){
-            that.ui.triggerCopy.html('<i class="fa fa-lg fa-clipboard"></i> Copy to clipboard')
-          }, 1000);
-
-        });
       }
 
     });
@@ -171,7 +149,6 @@ define([
       },
 
       activate: function (beehive) {
-        _.bindAll(this, "processResponse");
         this.setBeeHive(beehive);
       },
 
@@ -271,7 +248,10 @@ define([
               // export documents by their ids
               var ids = _.map(apiResponse.get('response.docs'), function(d) {return d.bibcode});
               var $form =  $(ClassicFormTemplate({ bibcodes: ids }));
+              //firefox requires form to actually be in the dom when it is submitted
+              $("body").append($form);
               $form.submit();
+              $form.remove();
             });
         }
         else {
@@ -288,8 +268,6 @@ define([
        * @private
        */
       _getExports : function(format, identifiers){
-
-
 
         format = format || this.model.get('format') || 'bibtex';
 

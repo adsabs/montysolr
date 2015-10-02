@@ -42,6 +42,8 @@ define([
           }
         }))({verbose: false});
         done();
+
+
       });
 
       afterEach(function (done) {
@@ -53,7 +55,6 @@ define([
         done();
       });
 
-
       it("returns ResultsWidget object", function (done) {
         expect(new ResultsWidget()).to.be.instanceof(ResultsWidget);
         expect(new ResultsWidget()).to.be.instanceof(ListOfThingsWidget);
@@ -62,6 +63,10 @@ define([
 
       var _getWidget = function() {
         var widget = new ResultsWidget();
+
+        var fakeUserObject = {getHardenedInstance : function(){return this}, isOrcidModeOn : function(){return false}, getUserData : function(){ return {link_server :  "foo"}}};
+        minsub.beehive.addObject("User", fakeUserObject);
+
         widget.activate(minsub.beehive.getHardenedInstance());
         return widget;
       };
@@ -110,6 +115,18 @@ define([
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
+      });
+
+      it("provides the openurl linkserver info to each model's data for the link_generator_mixin", function(){
+
+        //each model will interact with the link generator mixin, which expectes the link_server param
+
+        var widget = _getWidget();
+
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
+
+        expect(widget.collection.pluck("link_server")).to.eql(["foo", "foo", "foo", "foo", "foo", "foo", "foo", "foo", "foo", "foo"]);
+
       });
 
 
@@ -311,6 +328,9 @@ define([
       it("has a view that displays records for each model in the collection", function(done){
 
         var widget = new ResultsWidget({perPage: 10});
+
+        var fakeUserObject = {getHardenedInstance : function(){return this}, isOrcidModeOn : function(){return false}, getUserData : function(){ return {link_server :  "foo"}}};
+        minsub.beehive.addObject("User", fakeUserObject);
         widget.activate(minsub.beehive.getHardenedInstance());
 
         var $w = widget.render().$el;
@@ -327,7 +347,6 @@ define([
           /// expect($w.find(".s-results-links:first").find('div:not(.orcid-actions)').find("a").text().trim()).to.eql("arXiv eprint"); // without .orcid-actions
           expect($w.find("h3:first").text().trim()).to.eql("A bijection for tri-cellular maps");
           expect($w.find(".article-author:first").text().trim()).to.eql("Han, Hillary S. W.;");
-
 
           //checking last record
           expect($w.find(".s-identifier:last").text().trim()).to.eql("1987sbge.proc...47M");
@@ -354,6 +373,7 @@ define([
         minsub.beehive.addObject('AppStorage', s);
 
         var widget  = _getWidget();
+        var $w = widget.render().$el;
 
         s.addSelectedPapers('2013arXiv1305.3460H');
         minsub.publish(minsub.START_SEARCH, new ApiQuery({'q': 'foo:bar'}));
@@ -366,9 +386,7 @@ define([
         $w.find('input[value="1993sfgi.conf..324C"]').click();
         expect(s.isPaperSelected('1993sfgi.conf..324C')).to.eql(true);
 
-        // but unselecting through the storage is not propagated back to the model
-        // that happens only on fresh re-render (and I guess we are fine with
-        // that for now)
+
 
       });
     })

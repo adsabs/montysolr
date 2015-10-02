@@ -103,7 +103,7 @@ define([
 
     $.ajax({
       type: "GET",
-      url: "/api/v1/search",
+      url: "/api/v1/search/query",
       data: "q=*:*",
       dataType: "json",
       success: function(data) {

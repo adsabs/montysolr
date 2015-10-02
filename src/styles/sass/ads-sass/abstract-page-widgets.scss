@@ -1,5 +1,11 @@
 
 
+$facebook-color : rgb(59,89,153);
+$twitter-color : rgb(64,153,255);
+$mendeley-color : rgb(60,30,33);
+$sciencewise-color: rgb(179, 27, 27);
+
+
 .facebook-icon {
   @extend .fa;
   @extend .fa-2x;
@@ -128,6 +134,11 @@
 
 .s-abstract-content {
   padding: 1% 0;
+
+  .s-large-close {
+    //to prevent widgets from navigating back to main page
+    display: none;
+  }
 }
 
 .s-abstract-page-layout {
@@ -148,7 +159,8 @@
 
 
 .s-abstract-text {
-  font-size : 1.05em;
+  font-size: 1.1em;
+  line-height: 1.6;
   margin-top: 18px;
 }
 

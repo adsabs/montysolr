@@ -6,11 +6,11 @@
         <th>
 
         </th>
-        <th>
+        <th class="hidden-abstract-page">
             Totals
 
         </th>
-        <th>
+        <th class="hidden-abstract-page">
             Refereed
 
         </th>
@@ -30,12 +30,12 @@
         <td>
             {{ totalNumberOfReads.[0] }}
         </td>
-        <td>
+        <td class="hidden-abstract-page">
             {{ totalNumberOfReads.[1]  }}
         </td>
 
     </tr>
-    <tr>
+    <tr class="hidden-abstract-page">
         <td> Average number of reads </td>
         <td>
             <i class="icon-help" data-toggle="popover" title="<b>Average Number of Reads</b>" data-content="The total number of reads divided by the number of papers."></i>
@@ -43,12 +43,12 @@
         <td>
             {{ averageNumberOfReads.[0] }}
         </td>
-        <td>
+        <td class="hidden-abstract-page">
             {{ averageNumberOfReads.[1] }}
         </td>
 
     </tr>
-<tr>
+ <tr class="hidden-abstract-page">
     <td> Median number of reads </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Median Number of Reads</b>" data-content="The median of the reads distribution."></i>
@@ -56,7 +56,7 @@
     <td>
         {{ medianNumberOfReads.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ medianNumberOfReads.[1] }}
     </td>
 
@@ -70,12 +70,12 @@
     <td>
         {{ totalNumberOfDownloads.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ totalNumberOfDownloads.[1] }}
     </td>
 
 </tr>
-<tr>
+<tr class="hidden-abstract-page">
     <td> Average number of downloads </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Average Number of Downloads</b>" data-content="The total number of downloads divided by the number of papers."></i>
@@ -83,13 +83,13 @@
     <td>
         {{ averageNumberOfDownloads.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ averageNumberOfDownloads.[1]  }}
     </td>
 
 </tr>
 
-<tr>
+<tr class="hidden-abstract-page">
     <td> Median number of downloads </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Median Number of Downloads</b>" data-content="The median of the downloads distribution."></i>
@@ -97,7 +97,7 @@
     <td>
         {{ medianNumberOfDownloads.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ medianNumberOfDownloads.[1] }}
     </td>
 

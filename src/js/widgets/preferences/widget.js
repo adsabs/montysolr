@@ -33,7 +33,6 @@ define([
 
       //forward events
       this.listenTo(openurl, "all", this.forwardEvents);
-
     },
 
     forwardEvents: function () {
@@ -60,26 +59,25 @@ define([
       this.listenTo(this.view, "all", this.handleViewEvents);
 
       BaseWidget.prototype.initialize.apply(this, arguments);
+
     },
 
 
     activate: function (beehive) {
+      var that = this;
       this.setBeeHive(beehive);
       _.bindAll(this);
       var pubsub = beehive.getService('PubSub');
       pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
-      pubsub.subscribe(pubsub.APP_STARTED, this.onAppStarted);
 
-    },
-
-    onAppStarted: function () {
-      var that = this;
-      //XXX:rca - this is what we either have to adopt, xor reject (forever ;))
+      //as soon as preferences widget is activated, get the open url config
       this.getBeeHive().getObject("User").getOpenURLConfig().done(function (config) {
         that.openURLCollection.reset(config);
-      }).fail(function () {
-
       });
+
+      //and the user data from myads
+      this.model.set(this.getBeeHive().getObject("User").getUserData());
+
     },
 
     handleViewEvents: function (event, arg1, arg2) {
@@ -89,6 +87,7 @@ define([
     },
 
     handleUserAnnouncement: function (event, arg2) {
+      //update the user model if it changes
       var user = this.getBeeHive().getObject('User');
       if (event == user.USER_INFO_CHANGE) {
         this.model.set(arg2);

@@ -57,7 +57,8 @@ define([
           return d;
 
         },
-        USER_INFO_CHANGE: User.prototype.USER_INFO_CHANGE
+        USER_INFO_CHANGE: User.prototype.USER_INFO_CHANGE,
+        getUserData : function() {return {}}
       };
 
       minsub.beehive.addObject("User", fakeUser);
@@ -111,8 +112,10 @@ define([
 
         },
         setUserData : sinon.spy(),
-        USER_INFO_CHANGE: User.prototype.USER_INFO_CHANGE
-        };
+        USER_INFO_CHANGE: User.prototype.USER_INFO_CHANGE,
+        getUserData : function() {return {}}
+
+      };
 
       minsub.beehive.addObject("User", fakeUser);
 
@@ -154,7 +157,9 @@ define([
           return d;
 
         },
-        setMyADSData : sinon.spy()
+        setMyADSData : sinon.spy(),
+        getUserData : function() {return {}}
+
 
       };
 
@@ -171,8 +176,6 @@ define([
       $("#test").append(p.getEl());
 
       expect($("#test .current-link-server").length).to.eql(0);
-
-
 
 
     });

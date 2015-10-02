@@ -57,6 +57,8 @@ define([
 
       routes: {
         "": "index",
+        'classic-form' : 'classicForm',
+        'paper-form' : 'paperForm',
         'index/(:query)': 'index',
         'search/(:query)': 'search',
         'execute-query/(:query)': 'executeQuery',
@@ -69,15 +71,23 @@ define([
 
         'user/libraries(/)(:id)(/)(:subView)(/)(:subData)(/)' : 'librariesPage',
         'user/home' : 'homePage',
-
         'public-libraries/(:id)(/)' : 'publicLibraryPage',
-
         //"(:query)": 'index',
+
         '*invalidRoute': 'noPageFound'
       },
 
       index: function (query) {
         this.routerNavigate('index-page');
+      },
+
+      classicForm : function(){
+        this.routerNavigate('ClassicSearchForm');
+      },
+
+      paperForm : function(){
+        this.routerNavigate('PaperSearchForm');
+
       },
 
       search: function (query) {
@@ -283,7 +293,7 @@ define([
 
       publicLibraryPage : function (id){
         //main libraries view
-        this.pubsub.publish(this.pubsub.NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, sub : "library"});
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, sub : "library"});
       },
 
       homePage : function(subView){
@@ -291,8 +301,7 @@ define([
       },
 
       noPageFound : function() {
-        //i will fix this later
-        this.pubsub.publish(this.pubsub.NAVIGATE, "404")
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "404")
       },
 
       // backbone default behaviour is to automatically decodeuri parameters
@@ -301,7 +310,7 @@ define([
       _extractParameters: function(route, fragment) {
         var params = route.exec(fragment).slice(1);
         return _.map(params, function(param) {
-          return param ? ((param.indexOf('%26C') > -1) ? param : decodeURIComponent(param)) : null;
+          return param ? ((param.indexOf('%26') > -1 && param.indexOf('&') > -1 ) ? param : decodeURIComponent(param)) : null;
         });
       }
 

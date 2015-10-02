@@ -193,7 +193,7 @@ define([
       },
 
       "click .close" : function(){
-          this.trigger("close");
+          this.trigger("close-widget");
         }
     },
 
@@ -957,7 +957,7 @@ define([
       //testing reduces animations to 0
       this.view = new BubbleView({model: this.model, testing: options.testing});
       this.listenTo(this.view, "filterBibs", this.onFilterBibs);
-      //this.listenTo(this.view, "destroy", this.broadcastClose);
+      this.listenTo(this.view, "close-widget", this.broadcastClose);
       this.widgetName = 'bubble_chart';
       this.queryUpdater = new ApiQueryUpdater(this.widgetName);
     },
@@ -1000,7 +1000,6 @@ define([
 
     onFilterBibs: function(){
       var bibs = this.model.get("selectedBibs"),
-        fqString = "",
         newQuery = this.getCurrentQuery().clone();
 
       if (!bibs.length){
@@ -1036,7 +1035,6 @@ define([
         q.set('fq', fqs);
       }
     },
-
 
     broadcastClose: function () {
       this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");

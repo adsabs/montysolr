@@ -8,11 +8,11 @@
     <th>
 
     </th>
-    <th>
+    <th class="hidden-abstract-page">
         Totals
 
     </th>
-    <th>
+    <th class="hidden-abstract-page">
         Refereed
 
     </th>
@@ -20,7 +20,7 @@
 </tr>
 </thead>
 
-<tr>
+<tr class="hidden-abstract-page">
 
     <td>
         Number of citing papers
@@ -32,7 +32,7 @@
     <td>
         {{ numberOfCitingPapers.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ numberOfCitingPapers.[1] }}
     </td>
 
@@ -45,12 +45,12 @@
     <td>
         {{ totalCitations.[0]}}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ totalCitations.[1] }}
     </td>
 
 </tr>
-<tr>
+<tr class="hidden-abstract-page">
     <td> Number of self-citations </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Number of Self-Citations</b>" data-content="The number of citing papers that were also in the list from which the metrics were computed."></i>
@@ -64,7 +64,7 @@
 
 </tr>
 
-<tr>
+<tr class="hidden-abstract-page">
     <td> Average citations </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Average Citations</b>" data-content="The total number of citations divided by the number of papers."></i>
@@ -77,7 +77,7 @@
     </td>
 
 </tr>
-<tr>
+<tr class="hidden-abstract-page">
     <td> Median citations </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Median Citations</b>" data-content="The median of the citation distribution."></i>
@@ -99,7 +99,7 @@
     <td>
         {{ normalizedCitations.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ normalizedCitations.[1] }}
     </td>
 
@@ -113,12 +113,12 @@
     <td>
         {{ refereedCitations.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{  refereedCitations.[1] }}
     </td>
 
 </tr>
-<tr>
+<tr class="hidden-abstract-page">
     <td> Average refereed citations  </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Average Refereed Citations</b>" data-content="The average number of citations from refereed publications to all/refereed publications in the list."></i>
@@ -132,7 +132,7 @@
 
 </tr>
 
-<tr>
+<tr class="hidden-abstract-page">
     <td> Median refereed citations  </td>
     <td>
         <i class="icon-help" data-toggle="popover" title="<b>Median Refereed Citations</b>" data-content="The average median of citations from refereed publications to all refereed publications in the list."></i>
@@ -153,7 +153,7 @@
     <td>
         {{ normalizedRefereedCitations.[0] }}
     </td>
-    <td>
+    <td class="hidden-abstract-page">
         {{ normalizedRefereedCitations.[1]  }}
     </td>
 

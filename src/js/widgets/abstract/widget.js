@@ -200,13 +200,13 @@ define([
       //bibcode is already in _docs
       displayBibcode : function(bibcode){
 
-        bibcode = bibcode.toLowerCase();
+        var lowerCaseBibcode = bibcode.toLowerCase();
 
-        this.model.set(this._docs[bibcode]);
-        this._current = bibcode;
+        this.model.set(this._docs[lowerCaseBibcode]);
+        this._current = lowerCaseBibcode;
         // let other widgets know details
         this.trigger('page-manager-event', 'broadcast-payload', {
-          title: this._docs[bibcode].title,
+          title: this._docs[lowerCaseBibcode].title,
           bibcode: bibcode
         });
 
@@ -214,11 +214,13 @@ define([
 
       onDisplayDocuments: function (apiQuery) {
 
-       var currentQuery = this.getBeeHive().getObject("AppStorage").getCurrentQuery(),
-           bibcode =  apiQuery.get('q'),
-           q;
+          var bibcode =  apiQuery.get('q'),
+              q,
+              currentQuery;
 
-        if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
+          currentQuery = this.getBeeHive().getObject("AppStorage") ? this.getBeeHive().getObject("AppStorage").getCurrentQuery() : undefined;
+
+          if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
           //redefine bibcode
           var bibcode = bibcode[0].replace('bibcode:', '');
           //make a lower case version: not sure why necessary

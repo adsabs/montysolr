@@ -1,6 +1,16 @@
 
-define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 'js/bugutils/minimal_pubsub'],
-  function($, ResourcesWidget, BaseWidget, MinPubSub){
+define([
+    'jquery',
+    'js/widgets/resources/widget',
+    'js/widgets/base/base_widget',
+    'js/bugutils/minimal_pubsub'
+  ],
+  function(
+           $,
+           ResourcesWidget,
+           BaseWidget,
+           MinPubSub
+    ){
 
   describe("Resources Widget", function(){
 
@@ -15,7 +25,6 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
       ResourcesWidget.prototype.processResponse = sinon.spy();
 
       widget = new ResourcesWidget();
-
 
       minsub = new (MinPubSub.extend({
         request: function(apiRequest) {
@@ -76,6 +85,56 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
       ResourcesWidget.prototype.processResponse = restore;
 
     })
+
+    it("doesn't hold onto old data after a processResponse", function(){
+
+      widget = new ResourcesWidget();
+
+      widget.model.set({fullTextSources : ["OUTDATED"]});
+      minsub.beehive.addObject("User", {getUserData : function(){return {link_server : undefined }}, getHardenedInstance : function(){return this }} );
+      widget.activate(minsub.beehive.getHardenedInstance());
+
+      widget.processResponse(new MinPubSub.prototype.T.RESPONSE(
+
+        {
+          "responseHeader": {
+            "status": 0,
+            "QTime": 2,
+            "params": {
+              "wt": "json",
+              "q": "bibcode:1984NASCP2349..191B",
+              "fl": "links_data,[citations],property,bibcode"
+            }
+          },
+          "response": {
+            "numFound": 1,
+            "start": 0,
+            "docs": [
+              {
+                "bibcode": "1984NASCP2349..191B",
+
+                "property": [
+                  "OPENACCESS",
+                  "NOT REFEREED",
+                  "ADS_SCAN",
+                  "TOC",
+                  "INPROCEEDINGS"
+                ],
+                "[citations]": {
+                  "num_citations": 1,
+                  "num_references": 0
+                }
+              }
+            ]
+          }
+        }
+
+      ));
+
+
+      expect(widget.model.get("fullTextSources")).to.be.undefined;
+
+    });
 
 
     it("processes received data and renders full text sources as well as data products, if they exist", function(){
@@ -164,6 +223,7 @@ define(['jquery', 'js/widgets/resources/widget', 'js/widgets/base/base_widget', 
         };
 
     widget.model.set(data);
+    widget.view.render();
 
     $("#test").append($w);
 

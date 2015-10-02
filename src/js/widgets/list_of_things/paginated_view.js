@@ -50,6 +50,7 @@ define([
           //often they won't exist
           showHighlights: false,
           pagination: true,
+          start: 0
         }
       }
     });
@@ -197,6 +198,8 @@ define([
         var d = $(e.target).data("paginate");
         this.trigger('pagination:select', d);
         e.preventDefault();
+        //scroll to top in preparation for loading of new records
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
       },
 
       changePerPage: _.debounce(function (e) {

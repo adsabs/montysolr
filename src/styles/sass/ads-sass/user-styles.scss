@@ -1,5 +1,13 @@
 .s-form-widget {
 
+  .panel-default {
+    @extend .s-ads-card;
+  }
+
+  .panel-body {
+    margin: 2%;
+  }
+
   label {
     font-weight: 400;
     font-size: 1.2em;

@@ -5,6 +5,37 @@ s-search-bar-motion is applied */
   @extend .border-default-light;
 }
 
+
+.loading-screen {
+  color: $gray-light;
+  height: 100vh;
+  padding-top: 30vh;
+  text-align:center;
+  font-size: 3.2em;
+  font-weight: 300;
+}
+
+.logo__astrophysics {
+  font-weight: 500;
+  letter-spacing: .03em;
+  color: $gray-light;
+
+}
+
+.logo__data-system {
+  letter-spacing: 0.09em;
+  position: relative;
+  top: -20px;
+  color: lighten($gray-light, 12%);
+
+}
+
+.loading-screen__loading {
+  position: relative;
+  top: -40px;
+  font-size: .5em;
+}
+
 .hidden-col{
   width: 0 ;
   padding: 0 ;
@@ -19,7 +50,6 @@ s-search-bar-motion is applied */
   .descriptor {
     display: none;
   }
-
 
   //show in desktops
   @media (min-width : $screen-sm-min){
@@ -70,8 +100,7 @@ s-search-bar-motion is applied */
 .s-main-content-container{
 
   @extend .clearfix;
-
-  @extend  .s-content-container;
+  @extend .s-ads-card;
   min-height: 600px;
   padding-bottom: 20px;
   position: relative;
@@ -92,8 +121,7 @@ s-search-bar-motion is applied */
 }
 
 .s-dynamic-page-body {
-  background-color:  $results-page-background;
-  padding-bottom: 30px;
+  background-color:  $darker-background;
   min-height: 500px;
 }
 
@@ -115,7 +143,7 @@ s-search-bar-motion is applied */
     transition : width .5s ease-out, padding .5s ease-out;
   }
   .s-left-col-container {
-    @extend .s-content-container;
+    @extend .s-ads-card;
     padding: 10px;
     padding-bottom: 15px;
     min-height: 500px;
@@ -149,10 +177,7 @@ s-search-bar-motion is applied */
 
 #body-template-container {
   min-height: 550px;
-
 }
-
-
 
 #right-col-toggle {
   position: absolute;
@@ -193,7 +218,7 @@ s-search-bar-motion is applied */
 Styles for Abstract Page
 */
 .s-right-col-widget-container {
-  @extend .s-content-container;
+  @extend .s-ads-card;
   padding: 5%;
   margin-bottom: 10px;
 
@@ -203,11 +228,7 @@ Styles for Abstract Page
 
 }
 .s-right-col-widget-title {
-  font-weight: 500;
-  font-size: 20px;
-  font-variant: small-caps;
-  color: $gray-light;
-  text-transform: lowercase;
+  @extend .secondary-header;
 
 }
 
@@ -222,19 +243,14 @@ overriding bootstrap col widths
 
   .col-sm-3 {
     width : 23%;
-
   }
 
   .col-sm-7 {
-
   width : 62.333333%
-
   }
 
   .col-sm-2 {
-
   width : 14.666667%;
-
   }
 }
 
@@ -244,6 +260,5 @@ overriding bootstrap col widths
   .s-search-bar-rows-container {
     position: relative;
     left: -1.5%;
-
   }
 }

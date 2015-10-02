@@ -10,24 +10,24 @@ define([
     MinimalPubsub
   ) {
   describe("AppStorage (app_storage.spec.js)", function () {
-      
 
-    it("should be an Backbone object", function() {
+    it("should be an Backbone object", function () {
       expect(new AppStorage()).to.be.instanceof(Backbone.Model);
     });
 
-
-    it("query related funcs", function() {
+    it("query related funcs", function () {
       var s = new AppStorage();
 
       expect(s.getCurrentQuery).to.be.defined;
       s.setCurrentQuery(new ApiQuery({q: 'foo'}));
       expect(s.hasCurrentQuery()).to.eql(true);
       expect(s.getCurrentQuery()).to.be.instanceof(ApiQuery);
-      expect(function() {s.setCurrentQuery({q: 'foo'})}).to.throw(Error);
+      expect(function () {
+        s.setCurrentQuery({q: 'foo'})
+      }).to.throw(Error);
     });
 
-    it("basket related funcs", function() {
+    it("basket related funcs", function () {
       var s = new AppStorage();
       var minsub = new MinimalPubsub();
       s.activate(minsub.beehive);
@@ -60,7 +60,7 @@ define([
       expect(s.getNumSelectedPapers()).to.eql(0);
     });
 
-    it("hardened iface", function() {
+    it("hardened iface", function () {
       var s = new AppStorage();
       var minsub = new MinimalPubsub();
       s.activate(minsub.beehive);
@@ -75,7 +75,7 @@ define([
       expect(h.isPaperSelected).to.be.defined;
     });
 
-    it("listens to pubsub signals", function() {
+    it("listens to pubsub signals", function () {
       var s = new AppStorage();
       var minsub = new MinimalPubsub();
       s.activate(minsub.beehive);
@@ -83,9 +83,12 @@ define([
       expect(s.getSelectedPapers()).to.eql(['foo'])
 
       //should be able to re-add foo in bulk selection and not have it toggled off
-      minsub.publish(minsub.BULK_PAPER_SELECTION, ['foo', 'boo', 'goo']);
+      minsub.publish(minsub.BULK_PAPER_SELECTION, ["foo", "boo", "goo"]);
       expect(s.getSelectedPapers()).to.eql(['foo', 'boo', 'goo']);
+
+
     });
 
   });
+
 });

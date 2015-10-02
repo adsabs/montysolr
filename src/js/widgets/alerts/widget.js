@@ -58,7 +58,11 @@ define([
       },
 
       close : function(){
+        var that = this;
         this.$(".alert").addClass("fadeOutUp");
+        setTimeout(function(){
+          that.$(".alert").css("display", "none");
+        },900);
       },
 
       destroy: function() {
@@ -171,7 +175,7 @@ define([
           events: feedback.events,
           msg: feedback.msg,
           title: feedback.title,
-          type: feedback.type,
+          type: feedback.type || "info",
           modal: feedback.modal,
           promise: promise
         });

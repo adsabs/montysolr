@@ -102,8 +102,8 @@ define([
 
       composeRequest : function (target, method, options) {
         var request,
-            options = options || {},
-            data = options.data || undefined;
+          options = options || {},
+          data = options.data || undefined;
 
         //using "endpoint" to mean the actual url string
         //get data from the relevant model based on the endpoint
@@ -120,22 +120,22 @@ define([
         }
 
         request = new ApiRequest({
-            target :target,
-            options : {
-              context : this,
-              type: method,
-              data: JSON.stringify(data),
-              contentType : "application/json",
-              done: done,
-              fail : fail
-            }
-          });
+          target :target,
+          options : {
+            context : this,
+            type: method,
+            data: JSON.stringify(data),
+            contentType : "application/json",
+            done: done,
+            fail : fail
+          }
+        });
 
-          this.getBeeHive().getService("Api").request(request);
+        this.getBeeHive().getService("Api").request(request);
 
         return deferred;
 
-        },
+      },
 
       _executeApiRequest: function(apiQuery){
 
@@ -204,12 +204,12 @@ define([
 
 
       /*
-      * public methods
-      *
-      */
+       * public methods
+       *
+       */
 
       isDataLoaded : function(){
-      return this._dataLoaded;
+        return this._dataLoaded;
       },
 
 
@@ -218,9 +218,9 @@ define([
       },
 
       /*
-      * get all records + metadata from an individual library
-      *
-      */
+       * get all records + metadata from an individual library
+       *
+       */
 
       getLibraryData: function(id){
 
@@ -248,10 +248,10 @@ define([
       deleteLibrary : function(id, name){
 
         var that = this,
-            endpoint = ApiTargets["DOCUMENTS"] + "/" + id,
-            name;
+          endpoint = ApiTargets["DOCUMENTS"] + "/" + id,
+          name;
 
-       var promise  = this.composeRequest(endpoint, "DELETE")
+        var promise  = this.composeRequest(endpoint, "DELETE")
           .done(function(){
             //delete library from internal representation
             that.collection.remove(id);
@@ -260,8 +260,8 @@ define([
             var message = "Library <b>" + name + "</b> was successfully deleted";
             that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "success"}));
           })
-         .fail(function(jqXHR){
-           var error = JSON.parse(jqXHR.responseText).error
+          .fail(function(jqXHR){
+            var error = JSON.parse(jqXHR.responseText).error
             var message = "Library <b>" + name + "</b> could not be deleted : (" + error + ")";
             that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
           });
@@ -278,7 +278,7 @@ define([
       updateLibraryContents : function(id, updateData){
 
         var that = this,
-            data = {data : updateData, extraArguments : {numBibcodesRequested : updateData.bibcode.length}};
+          data = {data : updateData, extraArguments : {numBibcodesRequested : updateData.bibcode.length}};
 
         var endpoint = ApiTargets["DOCUMENTS"] + "/" + id;
         return this.composeRequest(endpoint, "POST", data)
@@ -328,7 +328,7 @@ define([
         var endpoint = ApiTargets["DOCUMENTS"] + "/" + id;
         return this.composeRequest(endpoint, "PUT", {data : data})
           .done(function(data){
-              that.collection.get(id).set(data);
+            that.collection.get(id).set(data);
           })
           .fail(function(jqXHR){
             var error = JSON.parse(jqXHR.responseText).error;
@@ -339,50 +339,50 @@ define([
       },
 
       /*fetches bibcodes, then submits them to library endpoint
-      *
-      * @param data e.g. {"library": [library_id], "bibcodes": ["all"/ "selected"]}
-      *
-      */
-     addBibcodesToLib : function(data){
+       *
+       * @param data e.g. {"library": [library_id], "bibcodes": ["all"/ "selected"]}
+       *
+       */
+      addBibcodesToLib : function(data){
 
-       var that = this, promise = this._getBibcodes(data).then(function(bibcodes) {
-        //should return success or fail message
-        return that.updateLibraryContents(data.library, { bibcode : bibcodes, action : "add" })
-          .fail(function(){
-            var message = "Library <b>" +  that.collection.get(data.library).title + "</b> could not be updated";
-            that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
-          });
+        var that = this, promise = this._getBibcodes(data).then(function(bibcodes) {
+          //should return success or fail message
+          return that.updateLibraryContents(data.library, { bibcode : bibcodes, action : "add" })
+            .fail(function(){
+              var message = "Library <b>" +  that.collection.get(data.library).title + "</b> could not be updated";
+              that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+            });
 
-      });
+        });
 
-       return promise
+        return promise
 
-     },
+      },
 
       /* fetch the bibcodes, then POST to the create endpoint with the bibcodes
-      *
-      * @param data: e.g. {bibcodes: ["all"/"selected"], name: "ddddd"}
-      *
-      */
+       *
+       * @param data: e.g. {bibcodes: ["all"/"selected"], name: "ddddd"}
+       *
+       */
 
-     createLibAndAddBibcodes : function(data){
+      createLibAndAddBibcodes : function(data){
 
-       var that = this, promise =  this._getBibcodes(data).then(function(bibcodes){
-         if (!bibcodes){
-           throw new Error("Solr returned no bibcodes, can't put them in the new library");
-         }
-         data.bibcode = bibcodes;
-         var createLibraryPromise = that.createLibrary(data)
-         .fail(function(){
-           var message = "Library <b>" +  name+ "</b> could not be created";
-           that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
-         });
+        var that = this, promise =  this._getBibcodes(data).then(function(bibcodes){
+          if (!bibcodes){
+            throw new Error("Solr returned no bibcodes, can't put them in the new library");
+          }
+          data.bibcode = bibcodes;
+          var createLibraryPromise = that.createLibrary(data)
+            .fail(function(){
+              var message = "Library <b>" +  name+ "</b> could not be created";
+              that.getBeeHive().getService("PubSub").publish(that.getBeeHive().getService("PubSub").ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+            });
 
-         return createLibraryPromise
+          return createLibraryPromise
 
-       });
+        });
 
-       return promise;
+        return promise;
 
       },
 
@@ -397,7 +397,7 @@ define([
 
         deleteLibrary : "deleteLibrary",
         updateLibraryContents : "updateLibraryContents",
-//        updateLibraryPermissions : "updateLibraryPermissions",
+//      updateLibraryPermissions : "updateLibraryPermissions",
         updateLibraryMetadata : "updateLibraryMetadata",
 
         isDataLoaded : "tells if initial load event has happened"

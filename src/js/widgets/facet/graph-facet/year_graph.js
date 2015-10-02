@@ -352,8 +352,10 @@ define([
      },
 
      addSliderWindows : function(){
-       this.$(".slider-data").html("Limit results to papers from <input type=\"text\" class=\"show-slider-data-first\"></input> to" +
-         " <input type=\"text\" class=\"show-slider-data-second\"></input>");
+       this.$(".slider-data").html(
+         "Limit results to papers from <br/> <input type=\"text\" class=\"show-slider-data-first\"></input> to" +
+         " <input type=\"text\" class=\"show-slider-data-second\"></input> <button class=\"apply btn btn-sm btn-primary-faded\">Apply</button>"
+       );
     },
 
      triggerGraphChange: function () {

@@ -119,7 +119,7 @@ define([
       },
 
       onBuilderChange: function() {
-        if (this.queryBuilder.isDirty()) {
+        if (this.queryBuilder.isDirty(this.getFormVal())) {
           var newQuery = this.queryBuilder.getQuery();
           this.setFormVal(newQuery);
         }
@@ -151,16 +151,16 @@ define([
 
             toMatch = findActiveAndInactive(request.term.trim()).active;
             if (!toMatch)
-                return
+              return
             //testing each entry's "match" var in autocomplete array against the toMatch segment
             //then returning a uniqued array of matches
             matcher = new RegExp("^" + $.ui.autocomplete.escapeRegex(toMatch), "i");
             toReturn  = $.grep(autocompleteArray, function (item) {
-                return matcher.test(item.match);
-              });
+              return matcher.test(item.match);
+            });
             toReturn = _.uniq(toReturn, false, function(item){
-                return item.label
-              });
+              return item.label
+            });
             response(toReturn);
           },
 
@@ -187,7 +187,7 @@ define([
             splitQuery = findActiveAndInactive(exists);
 
             toMatch = splitQuery.active,
-            confirmedQuery = splitQuery.inactive;
+              confirmedQuery = splitQuery.inactive;
 
             if (confirmedQuery){
               //suggestedQ will be inserted if user accepts it
@@ -212,7 +212,7 @@ define([
 
             }
             else {
-             $input.val(exists);
+              $input.val(exists);
             }
 
             return false;
@@ -253,8 +253,8 @@ define([
         });
 
         this.$('[data-toggle="tooltip"]').tooltip();
-        
-       },
+
+      },
 
       events: {
         "click #field-options button" : "fieldInsert",
@@ -297,7 +297,7 @@ define([
       },
 
       setNumFound : function(numFound){
-          this.$(".num-found-container").html(this.formatNum(numFound));
+        this.$(".num-found-container").html(this.formatNum(numFound));
       },
 
       onShowForm: function() {
@@ -306,7 +306,12 @@ define([
 
         var formVal = this.getFormVal();
         if (formVal.trim().length > 0) {
-          this.queryBuilder.updateQueryBuilder(formVal);
+          if (this.queryBuilder.isDirty(this.getFormVal()) || _.isEmpty(this.queryBuilder.getRules())) {
+            this.queryBuilder.updateQueryBuilder(formVal);
+          }
+          else {
+            this.queryBuilder.setRules(this.queryBuilder.getRules());
+          }
         }
         else { // display a default form
           this.queryBuilder.setRules({
@@ -345,51 +350,72 @@ define([
       },
 
       storeCursorInfo : function(e){
-       var selected = getSelectedText();
-       var startIndex = this.$input.getCursorPosition();
+        var selected = getSelectedText();
+        var startIndex = this.$input.getCursorPosition();
 
-       this._cursorInfo = {selected : selected, startIndex : startIndex};
+        this._cursorInfo = {selected : selected, startIndex : startIndex};
 
-       this.toggleClear();
+        this.toggleClear();
 
       },
 
-       fieldInsert: function (e) {
+      fieldInsert: function (e) {
         e.preventDefault();
-        var newVal,
-            currentVal = this.getFormVal(),
-            $target = $(e.target),
-            df = $target.attr("data-field"),
-            punc = $target.attr("data-punc");
+        var newVal, operator,
+          currentVal = this.getFormVal(),
+          $target = $(e.target),
+          df = $target.attr("data-field"),
+          punc = $target.attr("data-punc");
 
         var startIndex = this._cursorInfo.startIndex,
-            selected = this._cursorInfo.selected;
-            //selected will be "" if user didn't highlight any text
+          selected = this._cursorInfo.selected;
+        //selected will be "" if user didn't highlight any text
 
-          if ( df.indexOf("operator-") > -1) {
-           var operator = df.split("-").reverse()[0];
-           newVal = operator + "(" + selected + ")";
-
-          } else if (df == "first-author") {
-            newVal = " author:\"^" + selected + "\"";
-          } else if (punc == "\"") {
-            newVal = df + ":\"" + selected + "\"";
+        if ( df.indexOf("operator-") > -1) {
+          operator = df.split("-").reverse()[0];
+          punc = "(";
+          if (selected){
+            newVal = operator + "(" + selected + ")";
           }
-          else if (punc == "("){
-            newVal = df + ":(" + selected + ")";
-          }
-          else if (!punc){
-            //year
-            newVal = df + ":" + selected;
+          else {
+            //enclose the full query, set it in and return
+            newVal = operator + "(" + currentVal + ")";
+            currentVal = "";
+            this.setFormVal(newVal);
+            this.toggleClear();
+            return
           }
 
+        } else if (df == "first-author") {
+          newVal = " author:\"^" + selected + "\"";
+        } else if (punc == "\"") {
+          newVal = df + ":\"" + selected + "\"";
+        }
+        else if (punc == "("){
+          newVal = df + ":(" + selected + ")";
+        }
+        else if (!punc){
+          //year
+          newVal = df + ":" + selected;
+        }
+
+        if (selected) {
           this.setFormVal(currentVal.substr(0, startIndex) +  newVal + currentVal.substr(startIndex + selected.length));
+        }
+         else { //append to the end
+          var newString = currentVal + " " + newVal;
+          this.setFormVal( newString );
 
-          //put the cursor in the middle of the "" or ()
-          if (!selected) {this.$input.selectRange(startIndex + newVal.length -1)}
+          if (punc){
+            this.$input.selectRange( newString.length -1);
+          }
+          else {
+            this.$input.selectRange( newString.length );
+          }
+        }
 
-         //figure out if clear button needs to be there
-         this.toggleClear();
+        //figure out if clear button needs to be there
+        this.toggleClear();
       },
 
       submitQuery: function(e) {
@@ -421,8 +447,8 @@ define([
       },
 
       /*
-      * when users return to index page, we should re-focus on the search bar
-      * */
+       * when users return to index page, we should re-focus on the search bar
+       * */
 
       focusInput : function(page){
 
@@ -433,11 +459,20 @@ define([
 
       handleFeedback: function(feedback) {
         switch (feedback.code) {
+
           case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
             this.setCurrentQuery(feedback.query);
             this.view.setFormVal(feedback.query.get('q').join(' '));
             this.view.setNumFound(feedback.numFound || 0);
             break;
+          case ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START:
+            //still want search bar to reflect failed search (from form widgets)
+            var q = feedback.request.get("query").get("q").join(' ');
+            this.setCurrentQuery(q);
+            this.view.setFormVal(q);
+            this.view.setNumFound(0);
+            break;
+
         }
       },
 
@@ -504,6 +539,15 @@ define([
           this.view.setFormVal(queryString);
         }
         this.view.$el.find('.show-form').click();
+      },
+
+      onShow : function(){
+        this.view.$("input[name=q]").focus();
+      },
+
+      onDestroy: function () {
+        this.view.queryBuilder.destroy();
+        this.view.destroy();
       }
     });
 

@@ -1,13 +1,16 @@
+<div class="s-results-widget">
 <div class="row s-list-controls">
 
     <div class="s-results-border-bottom">
 
-        <div class="col-sm-1">
-
-            <button class="btn btn-default btn-expand left-expand hidden-xs" title="hide left column" aria-label="hide left column"><i></i></button>
+        <div class="col-xs-1 s-checkbox-col">
+            <label for="#select-all-docs" class="sr-only">
+               select all on this page
+            </label>
+            <input title="select all on this page" type="checkbox" id="select-all-docs"/>
         </div>
 
-        <div class="col-sm-6">
+        <div class="col-xs-6">
 
 
             <div class="s-show-details-container">
@@ -15,25 +18,27 @@
                     {{#compare showHighlights "open"}}
                     <button class="btn  btn-info  btn-sm show-highlights"> Hide highlights</button>
                     {{else}}
-                    <button class="btn btn-info btn-inverse btn-sm show-highlights"> Show highlights</button>
+                    <button class="btn btn-info btn-sm btn-inverse show-highlights"> Show highlights</button>
                     {{/compare}}
                 {{/if}}
                 {{#compare showAbstract "open"}}
-                <button class="btn show-abstract btn-primary btn-sm"> Hide abstracts</button>
+                <button class="btn show-abstract btn-sm btn-primary"> Hide abstracts</button>
                 {{else}}
-                <button class="btn show-abstract btn-inverse btn-primary btn-sm"> Show abstracts</button>
+                <button class="btn show-abstract btn-sm btn-inverse btn-primary"> Show abstracts</button>
                 {{/compare}}
             </div>
 
         </div>
 
 
-        <div class="col-sm-4 sort-container">
+        <div class="col-xs-2 sort-container">
 
         </div>
 
-        <div class="col-sm-1">
-            <button class="btn btn-default btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
+        <div class="col-xs-3">
+            <button class="btn btn-default btn-sm btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>
+            <span class="s-expand-label">expand</span>
+            <button class="btn btn-default btn-sm btn-expand left-expand hidden-xs pull-right" title="hide left column" aria-label="hide left column"><i></i></button>
         </div>
 
     </div>
@@ -75,3 +80,4 @@
     </div>
 {{/if}}
 
+</div>

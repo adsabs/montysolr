@@ -31,13 +31,14 @@ define(['underscore'], function (_) {
      * Returns the page number (on which the position falls)
      * It is zero-based count
      *
-     * @param position
+     * @param start (zero indexed start value of record, returned by solr)
      * @param perPage
      * @returns {number}
      */
-    getPageVal: function (position, perPage) {
-      return Math.max(0, Math.ceil(position/perPage)-1);
+    getPageVal: function (start, perPage) {
+      return Math.floor(start/perPage);
     },
+
 
     /**
      * Add 'resultsIndex' attribute into the model.

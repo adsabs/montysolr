@@ -417,6 +417,12 @@ define(['underscore',
             // ignore
             break;
           case 'QIDENTIFIER':
+            ruleNode.setField(qtree.children[0].label);
+            ruleNode.setValue(qtree.children[1].input);
+            ruleNode.setOffset(qtree.children[1].start);
+            ruleNode.setEnd(qtree.children[1].end);
+            ruleNode.setOperator('is');
+            break;
           case 'QCOORDINATE':
           case 'QREGEX':
             throw new Error('Not yet ready for: ' + JSON.stringify(qtree));

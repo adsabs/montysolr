@@ -2,8 +2,6 @@
 // results list css
 
 
-
-
 .per-page {
   @extend .form-inline;
   @extend .form-control;
@@ -18,27 +16,34 @@
 //icons for links
 
 .s-icon-draw-attention {
-  color: darken($brand-info, 5%) !important;
+  color: lighten($brand-primary-faded, 10%) !important;
+}
+
+.s-expand-label {
+  font-weight: 300;
+  position: relative;
+  top: 14px;
+  display: inline-block;
+  padding: 5px;
+  float: right;
 }
 
 .s-link-details {
   position: absolute;
-  top: 23px;
-  background-color: white;
-  @extend .ads-container;
+  top: 18px;
+  @extend .s-ads-card;
   padding: 8px 10px;
   z-index: $z-index-4;
   margin-left: -8%;
-  min-width: 140px;
+  min-width: 160px;
   font-weight:normal;
-
 }
 
 .s-letter-icon {
 
   display: inline-block;
   position:relative;
-  margin-right: 4%;
+  margin-right: 10%;
   margin-top: 0px;
   margin-bottom: -4px;
   font-size : 1.05em;
@@ -46,6 +51,7 @@
   i {
     color : darken($gray-lighter, 2%);
     cursor: default;
+    font-size : 17px;
   }
 
   .s-active-link {
@@ -72,7 +78,6 @@
   @extend .icon-text;
 }
 
-
 .s-identifier a {
   color: $gray-dark;
 }
@@ -87,29 +92,32 @@
 
 .s-top-row {
   font-weight: 300;
-  font-size : 14px;
+  margin-bottom: 6px;
+
+  .s-citation-link {
+    color: $brand-primary;
+  }
 }
 
 .s-show-details-container {
   margin-top: 20px;
+  padding-left: 2%;
 }
 
 .s-results-title {
   margin-top: -3px;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   font-size:17px;
   /*need to investigate why this gets overridden in the case of 2 links*/
-  color: darken($brand-primary, 8%);
+  color: $brand-primary;
   font-weight: 500;
   line-height: 1.2;
-
 }
 
 .s-results-authors {
   padding-left: .5%;
-  font-weight: 500;
+  font-size:16px;
 }
-
 
 .s-highlight-list {
   padding: 20px 0px 0px 10px
@@ -122,7 +130,7 @@
 .s-more-info {
 
   border-left: 6px solid $gray-lighter;
-  padding: 0 0 0 2%;
+  padding: 5px 0 0 2%;
   margin-left: 10.4%;
   margin-top: 10px;
   font-weight: 300;
@@ -134,12 +142,13 @@
     margin-bottom: 10px;
 
     em {
-      background-color : lighten($brand-info, 30%);
+      background-color : lighten($brand-info, 32%);
       color: $brand-primary;
       font-weight: 400;
+      padding: 2px;
+
     }
   }
-
 
   li {
     list-style: none;
@@ -148,7 +157,6 @@
   ul {
     margin-left: -7.3%;
   }
-
 
   blockquote {
     margin: 0em 1em;
@@ -185,6 +193,8 @@
   padding-left: 0;
   label {
     @extend .s-light-font;
+    padding: 0;
+    z-index: $z-index-2;
   }
 }
 
@@ -194,24 +204,23 @@
 
 .s-results-list {
 
-  .icon-more-info {
-    font-size: 1.1em;
-  }
-
   label {
     font-weight: initial
   }
 
   //represents an individual entry
-  li>div {
+  li > div {
     padding-bottom: 1em;
-    border-left: 5px solid #fff;
-  }
+    .s-display-block {
+      padding-bottom: 1.1em;
+      border-left: 5px solid #fff;
+    }
 
- .chosen{
-    border-left: 5px solid $brand-success;
-  }
+    .chosen {
+      border-left: 5px solid $brand-success;
+    }
 
+  }
 }
 
 .s-pagination-controls {
@@ -222,7 +231,6 @@
 .s-per-page-controls {
   padding-left: 5%;
 }
-
 
 .field-options {
   min-width: 120px;
@@ -237,6 +245,7 @@ li.article-author {
   padding-left: 2px;
   padding-right: 2px;
   font-weight: 400;
+  font-size: 16px;
 }
 
 .s-sort-widget {
@@ -244,12 +253,21 @@ li.article-author {
     padding: 10%;
   }
   box-shadow : 2px 2px 2px lighten($gray-lightest, 5%);
+
   #sort-button {
     color: $text-color !important;
   }
   .btn-link {
     padding: 3px 5px;
     display: block;
+  }
+
+
+ a.help-link {
+    padding:0;
+   i {
+     font-size: 1.5em;
+   }
   }
 }
 
@@ -270,7 +288,6 @@ li.article-author {
 }
 
 // get rid of top padding when the search bar is in scroll mode
-
 .s-search-bar-motion {
   .s-back-button-container {
     padding-top: 0;
@@ -282,10 +299,6 @@ li.article-author {
   .s-results-title {
     font-size: 16px;
     font-weight:500;
-  }
-
-  .s-top-row {
-    font-size  : 14px;
   }
 
   .s-results-authors{
@@ -305,9 +318,7 @@ li.article-author {
   font-size: 22px;
   margin: 0 5% 20px 0;
   font-weight: 400;
-
 }
-
 
 .s-details-container {
   text-align: right;
@@ -326,14 +337,12 @@ li.article-author {
   }
 }
 
-
 .s-list-title {
   padding-left: 5.2%;
   margin-bottom: 40px;
 }
 
-
-.s-results-list {
+.s-results-widget {
   input[type="checkbox"]{
     width: 14px;
     height: 14px;
@@ -342,7 +351,12 @@ li.article-author {
   label {
     margin-bottom: 0px;
   }
-}
+
+  #select-all-docs {
+    position: relative;
+    top: 25px;
+    }
+  }
 
 .show-details{
   .icon-details {
@@ -350,7 +364,7 @@ li.article-author {
   }
 }
 
-.s-operator{
+.s-operator {
   font-size : 17px;
   font-weight: 300;
   a {
