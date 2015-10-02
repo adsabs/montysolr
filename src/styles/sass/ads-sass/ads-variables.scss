@@ -3,12 +3,12 @@ A place for any variables that might be of interest to more than
 one widget or view
 */
 
-$border-default-color: $gray-lighter;
+$border-default-color: #D8D8D8;
 $border-default : 1px solid $border-default-color;
 $border-light-color: #dddddd;
 $border-light-default: 1px solid $border-light-color;
-$darker-background : lighten($gray-lighter, 2%);
-$default-box-shadow-color : darken($border-light-color, 2%);
+$darker-background : $gray-lighter;
+$default-box-shadow-color : darken($body-bg, 10%);
 
 /* Social Media Colors */
 
@@ -31,7 +31,7 @@ $z-index-max : 5;
 /* Colors to represent refereed and nonrefereed items */
 
 $refereed  : lighten($brand-primary-faded, 5%);
-$nonrefereed : lighten($brand-info, 10%);
+$nonrefereed : lighten($brand-success, 15%);
 $vis-color-3 : $brand-warning;
 $vis-color-4 : $brand-danger;
 

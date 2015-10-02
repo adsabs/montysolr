@@ -1,5 +1,5 @@
 
-$sidenav-background : #fff;
+$sidenav-background : $body-bg;
 
 .s-nav-button-container {
   border-bottom: 1px solid darken($gray-lighter, 10%);

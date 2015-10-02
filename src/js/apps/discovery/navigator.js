@@ -559,6 +559,7 @@ define([
         });
         this.set('ShowPaperMetrics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);
+          this.route = data.href;
         });
         this.set("ShowPaperExport", function(id, data){
           var format = data.subView;

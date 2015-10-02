@@ -154,7 +154,7 @@ Year, Citation and Reference Graphs
 }
 
 .s-chart .bar, .s-chart .dot {
-  fill: lighten($gray-light, 11%);
+  fill: $nonrefereed !important;
 }
 
 .s-chart .x-axis .active text {
@@ -637,7 +637,7 @@ rect.selection {
   stroke-dasharray: 5px;
   stroke-width: 4px;
   stroke-opacity : 1;
-  fill: fadeout($gray-lighter, 75%);
+  fill: hsla(0,0,83%, .7);
 }
 
 .s-bubble-chart {

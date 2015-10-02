@@ -3,14 +3,14 @@
 .s-results-control-row-container {
   padding: 1% 0;
   background-color: $body-bg;
-  border-bottom: $border-light-default;
-  box-shadow : 0px 2px 2px 1px $gray-lighter;
+  border-bottom: $border-default;
+  box-shadow : 0 1px 6px $default-box-shadow-color;
   @extend .clearfix;
 }
 
 .s-results-control-row {
   padding-bottom:  1%;
-  background-color:  $darker-background ;
+  background-color:  $darker-background;
   div[data-widget="ExportDropdown"]{
     margin-right: 4%;
   }
@@ -96,8 +96,6 @@
   li:first-of-type:hover {
     background-color: white;
   }
-
-  box-shadow : 2px 2px 2px lighten($gray-lightest, 5%);
 
   #sort-button {
     color: $text-color !important;

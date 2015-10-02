@@ -63,7 +63,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 }
 
 .s-landing-nav-container {
-  box-shadow: 0 2px 6px $gray-light;
+  box-shadow: 0 2px 4px $gray-light;
   z-index: 6;
   position: relative;
 }
@@ -85,14 +85,13 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   }
 
   svg {
-    max-height: 90px;
+    max-height: 75px;
     position: relative;
     top: 8px;
     transition : transform .5s, fill .5s;
   }
 
   .active {
-    font-weight: bold;
     border-bottom: 8px solid $brand-primary-faded;
     color: lighten($brand-primary-faded, 10%);
   }
@@ -101,13 +100,13 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   text-align: center;
   height: 117px;
   position: relative;
-  top: -42px;
+  top: -12px;
 
   .modern-search {
     position: relative;
-    top: -18px;
-    width: 111px;
-    left: 40px;
+    top: -14px;
+    width: 102px;
+    left: 38px;
   }
   .svg-needs-stroke {
     stroke: $gray-lighter;

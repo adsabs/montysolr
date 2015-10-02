@@ -81,12 +81,11 @@ define(['underscore',
         catch (e) {
           this.handleTransitionError(transition, e, arguments);
         }
-        this.route = "#modern-form";
 
         //router can communicate directly with navigator to replace url
         var replace = arg1 && arg1.replace ? true : false;
 
-        if (typeof(transition.route) !== "undefined") {
+        if (transition.route) {
           // update the History object
           this.router.navigate(
             transition.route,

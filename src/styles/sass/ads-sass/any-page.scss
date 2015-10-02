@@ -90,12 +90,13 @@ div[data-widget="AlertsWidget"] {
 
   .tab-content {
     @extend .s-ads-card;
+    box-shadow :  0 3px 5px $default-box-shadow-color;
     border-top : none;
     position: relative;
     top: -10px;
     border-bottom-left-radius: $border-radius-base;
     border-bottom-right-radius: $border-radius-base;
-    background-color: white;
+    background-color: $body-bg;
   }
 
 }

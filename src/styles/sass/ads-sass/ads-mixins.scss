@@ -8,7 +8,7 @@
 }
 
 .default-box-shadow {
-  box-shadow : 2px 2px 2px $default-box-shadow-color;
+  box-shadow : 0 0 5px $default-box-shadow-color;
 }
 
 .s-motion-shadow {
@@ -20,7 +20,7 @@
 .s-ads-card {
   background-color: $body-bg;
   border: $border-light-default;
-  box-shadow : 1px 1px 10px $default-box-shadow-color;
+  @extend .default-box-shadow;
   border-radius: $border-radius-base;
 }
 
@@ -28,7 +28,7 @@
   font-weight: 500;
   font-size: 20px;
   font-variant: small-caps;
-  color: darken($gray-light, 5%);
+  color: darken($gray-light, 8%);
   text-transform: lowercase;
   display: inline-block;
 }

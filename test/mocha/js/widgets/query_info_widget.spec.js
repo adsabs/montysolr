@@ -18,7 +18,7 @@ define([
 
     });
 
-    var fakeUser = {getHardenedInstance : function(){return this}, USER_SIGNED_IN : "user_signed_in", isLoggedIn : function(){return true } };
+    var fakeUser = {getHardenedInstance : function(){return this}, USER_SIGNED_IN : "user_signed_in", isLoggedIn : function(){return true }, getUserData : function(){return {} }};
     var fakeLibraryController =   {getHardenedInstance : function(){return this},
       addBibcodesToLib : sinon.spy(function(){ var d = $.Deferred(); d.resolve({numBibcodesRequested: 3, number_added : 2}); return d.promise()}),
       createLibAndAddBibcodes : sinon.spy(function(){ var d = $.Deferred(); d.resolve({bibcode :[1,2,3]}); return d.promise()})
@@ -74,7 +74,7 @@ define([
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
 
-      minsub.beehive.addObject("User", fakeUser)
+      minsub.beehive.addObject("User", fakeUser);
 
       w.activate(minsub.beehive.getHardenedInstance());
 
