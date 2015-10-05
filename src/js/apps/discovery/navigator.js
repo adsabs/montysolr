@@ -1,7 +1,7 @@
 /**
- * The main 'navigation' endpoints (the part executed inside
- * the applicaiton) - this is a companion to the 'router'
- */
+* The main 'navigation' endpoints (the part executed inside
+* the application) - this is a companion to the 'router'
+*/
 
 define([
     'jquery',
@@ -14,7 +14,7 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/components/api_targets',
-    'hbs!/404'
+    'hbs!./../../../404'
   ],
 
   function (
