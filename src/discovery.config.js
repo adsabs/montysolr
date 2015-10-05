@@ -122,7 +122,7 @@ require.config({
         ShowTableofcontents : 'js/wraps/table_of_contents',
         ShowResources : 'js/widgets/resources/widget',
         ShowRecommender : 'js/widgets/recommender/widget',
-        ShowPaperMetrics: 'js/wraps/paper_metrics',
+        ShowMetrics: 'js/wraps/paper_metrics',
         ShowPaperExport : 'js/wraps/paper_export',
 
         IndividualLibraryWidget : 'js/widgets/library_individual/widget',

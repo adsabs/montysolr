@@ -45,6 +45,17 @@ define([
   ) {
 
 
+  //used for processing data
+
+  function limitPlaces(n){
+    var stringNum = n.toString();
+    if (stringNum.indexOf(".") > -1 && stringNum.split(".")[1]){
+      return n.toFixed(1)
+    }
+    return n
+  }
+
+
   var TableModel = Backbone.Model.extend({
 
     defaults: function () {
@@ -350,6 +361,47 @@ define([
       pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
 
+    getMetrics : function(bibcodes){
+
+      var d = $.Deferred(),
+        pubsub = this.getPubSub(),
+        options = {
+          type : "POST",
+          contentType : "application/json"
+        };
+
+      var request =  new ApiRequest({
+        target: ApiTargets.SERVICE_METRICS,
+        query: new ApiQuery({"bibcodes" : bibcodes}),
+        options : options
+      });
+      // so promise can be resolved
+
+      pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, function(response){
+        d.resolve(response.toJSON());
+      });
+
+      pubsub.publish(pubsub.EXECUTE_REQUEST, request);
+      return d.promise();
+    },
+
+    processResponse: function (response) {
+
+      //it's bibcodes from the search endpoint
+      if (response instanceof ApiResponse){
+        var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode})
+        // let container view know how many bibcodes we have
+        this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
+          "rows":  parseInt(response.get("responseHeader.params.rows"))});
+
+        this.getMetrics(bibcodes);
+      }
+      //it's from the metrics endpoint
+      else if (response instanceof JsonResponse ) {
+        this.processMetrics(response);
+      }
+    },
+
     closeWidget: function () {
       this.resetWidget();
       this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
@@ -393,55 +445,48 @@ define([
           }));
           return;
         }
+      if (response["basic stats"]["number of papers"] === 1){
+        this.createTableViews(response, 1);
+        this.createGraphViewsForOnePaper(response);
+        this.insertViewsForOnePaper(response);
+      }
+      else {
         this.createTableViews(response);
         this.createGraphViews(response);
-        this.insertViews();
-    },
-
-    getMetrics : function(bibcodes){
-
-      var d = $.Deferred(),
-          pubsub = this.getPubSub(),
-          options = {
-              type : "POST",
-              contentType : "application/json"
-           };
-
-      var request =  new ApiRequest({
-        target: ApiTargets.SERVICE_METRICS,
-        query: new ApiQuery({"bibcodes" : bibcodes}),
-        options : options
-      });
-      // so promise can be resolved
-
-      pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, function(response){
-        d.resolve(response.toJSON());
-      });
-
-      pubsub.publish(pubsub.EXECUTE_REQUEST, request);
-
-      return d.promise();
-
-    },
-
-    processResponse: function (response) {
-
-      //it's bibcodes from the search endpoint
-      if (response instanceof ApiResponse){
-        var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode})
-
-        // let container view know how many bibcodes we have
-        this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
-          "rows":  parseInt(response.get("responseHeader.params.rows"))});
-
-        this.getMetrics(bibcodes);
-
+        this.insertViews(response);
       }
-      //it's from the metrics endpoint
-      else if (response instanceof JsonResponse ) {
-          this.processMetrics(response);
-        }
+
     },
+
+    createTableViews: function (response, num_bibcodes) {
+
+      var tableData = num_bibcodes === 1 ?  this.createTableDataForOnePaper(response) : this.createTableData(response);
+
+      this.childViews.papersTableView = new TableView({
+        template: PaperTableTemplate,
+        model: new TableModel(tableData.paperModelData)
+      });
+
+      this.childViews.readsTableView = new TableView({
+        template: ReadsTableTemplate,
+        model: new TableModel(tableData.readsModelData)
+      });
+
+      this.childViews.citationsTableView = new TableView({
+        model: new TableModel(tableData.citationsModelData),
+        template: CitationsTableTemplate
+      });
+
+      this.childViews.indicesTableView = new TableView({
+        model: new TableModel(tableData.indicesModelData),
+        template: IndicesTableTemplate
+      });
+
+    },
+
+    /*
+    * functions for >1 bibcode
+    * */
 
     createTableData : function(response){
       var data = {};
@@ -488,14 +533,6 @@ define([
       }
 
 
-      function limitPlaces(n){
-        var stringNum = n.toString();
-        if (stringNum.indexOf(".") > -1 && stringNum.split(".")[1]){
-          return n.toFixed(1)
-        }
-        return n
-      }
-
       //keep to 2 decimal places
       _.each(data, function(table,k){
         _.each(table, function(arr, name){
@@ -506,31 +543,6 @@ define([
       return data;
     },
 
-    createTableViews: function (response) {
-
-      var tableData = this.createTableData(response);
-
-      this.childViews.papersTableView = new TableView({
-        template: PaperTableTemplate,
-        model: new TableModel(tableData.paperModelData)
-      });
-
-      this.childViews.readsTableView = new TableView({
-        template: ReadsTableTemplate,
-        model: new TableModel(tableData.readsModelData)
-      });
-
-      this.childViews.citationsTableView = new TableView({
-        model: new TableModel(tableData.citationsModelData),
-        template: CitationsTableTemplate
-      });
-
-      this.childViews.indicesTableView = new TableView({
-        model: new TableModel(tableData.indicesModelData),
-        template: IndicesTableTemplate
-      });
-
-    },
 
     createGraphViews: function (response) {
 
@@ -560,7 +572,7 @@ define([
       this.childViews.readsGraphView.model.set("normalizedGraphData", this.dataExtractor.plot_readshist({norm: true, readshist_data: hist["reads"]}));
     },
 
-    insertViews: function (views) {
+    insertViews: function () {
 
       //render the container view
       this.view.render();
@@ -577,6 +589,103 @@ define([
       this.view.indicesGraph.show(this.childViews.indicesGraphView);
       this.view.readsGraph.show(this.childViews.readsGraphView);
     },
+
+    /*
+    * functions for 1 bibcode
+    * */
+
+
+    insertViewsForOnePaper: function (data) {
+      //render the container view
+      this.view.render({title : this.containerModel.get("title")});
+      this.view.$("#indices").hide();
+      this.view.$("#papers").hide();
+      this.view.$(".metrics-metadata").hide();
+
+      //attach table views
+      if (this.hasReads(data)){
+        this.view.readsTable.show(this.childViews.readsTableView);
+        this.view.readsGraph.show(this.childViews.readsGraphView);
+      }
+      else {
+        this.view.$(this.view.readsTable.el).html("No reads found for this article.");
+      }
+      if (this.hasCitations(data)){
+        this.view.citationsTable.show(this.childViews.citationsTableView);
+        this.view.citationsGraph.show(this.childViews.citationsGraphView);
+      }
+      else {
+        this.view.$(this.view.citationsTable.el).html("No citations found for this article.");
+      }
+      //some table rows need to be hidden
+      this.view.$(".hidden-abstract-page").hide();
+    },
+
+    createGraphViewsForOnePaper: function (response) {
+
+      var hist = response.histograms;
+
+      //citations graph
+      var citationsModel = new this.GraphModel();
+      this.childViews.citationsGraphView = new this.GraphView({model: citationsModel });
+      this.childViews.citationsGraphView.model.set("graphData", this.dataExtractor.plot_citshist({norm: false, citshist_data: hist["citations"]}));
+      this.childViews.citationsGraphView.model.set("normalizedGraphData", this.dataExtractor.plot_citshist({norm: true, citshist_data: hist["citations"]}));
+
+      //reads graph
+      var readsModel = new this.GraphModel();
+      this.childViews.readsGraphView = new this.GraphView({model: readsModel });
+      this.childViews.readsGraphView.model.set("graphData", this.dataExtractor.plot_readshist({norm: false, readshist_data: hist["reads"]}));
+      this.childViews.readsGraphView.model.set("normalizedGraphData", this.dataExtractor.plot_readshist({norm: true, readshist_data: hist["reads"]}));
+    },
+
+    createTableDataForOnePaper : function(response){
+      var data = {};
+      var generalData = {refereed: response["basic stats refereed"], total: response["basic stats"]};
+      var citationData = {refereed: response["citation stats refereed"], total: response["citation stats"]};
+
+      data.readsModelData = {
+        totalNumberOfReads: [generalData.total["total number of reads"], generalData.refereed["total number of reads"]],
+        averageNumberOfReads: [generalData.total["average number of reads"], generalData.refereed["average number of reads"]],
+        medianNumberOfReads: [generalData.total["median number of reads"], generalData.refereed["median number of reads"]],
+        totalNumberOfDownloads: [generalData.total["total number of downloads"], generalData.refereed["total number of downloads"] ],
+        averageNumberOfDownloads: [generalData.total["average number of downloads"], generalData.refereed["average number of downloads"]],
+        medianNumberOfDownloads: [generalData.total["median number of downloads"], generalData.total["median number of downloads"]]
+      };
+
+      data.citationsModelData = {
+        numberOfCitingPapers: [citationData.total["number of citing papers"], citationData.refereed["number of citing papers"]],
+        totalCitations: [citationData.total["total number of citations"], citationData.refereed["total number of citations"]],
+        numberOfSelfCitations: [citationData.total["number of self-citations"], citationData.refereed["number of self-citations"]],
+        averageCitations: [citationData.total["average number of citations"], citationData.refereed["average number of citations"]],
+        medianCitations: [citationData.total["median number of citations"],citationData.refereed["median number of citations"]],
+        normalizedCitations: [citationData.total["normalized number of citations"], citationData.refereed["normalized number of citations"]],
+        refereedCitations: [citationData.total["total number of refereed citations"], citationData.refereed["total number of refereed citations"]],
+        averageRefereedCitations: [citationData.total["average number of refereed citations"],citationData.refereed["average number of refereed citations"]],
+        medianRefereedCitations: [citationData.total["median number of refereed citations"], citationData.refereed["median number of refereed citations"]],
+        normalizedRefereedCitations: [citationData.total["normalized number of refereed citations"], citationData.refereed["normalized number of refereed citations"]]
+      };
+
+      //keep to 2 decimal places
+      _.each(data, function(table,k){
+        _.each(table, function(arr, name){
+          table[name] = [limitPlaces(arr[0]), limitPlaces(arr[1])];
+        });
+      });
+
+      return data;
+    },
+
+    hasCitations : function(data){
+      return data["citation stats"]["total number of citations"] > 0;
+    },
+
+    hasReads : function(data){
+      return  data["basic stats"]["total number of reads"] > 0;
+    },
+
+    /*
+    * end functions for 1 paper
+    * */
 
     //so I can test these individually
     components: {

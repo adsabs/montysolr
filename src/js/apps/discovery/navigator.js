@@ -564,7 +564,7 @@ define([
           showDetail([id].concat(detailsPageAlwaysVisible), id);
           this.route = data.href;
         });
-        this.set('ShowPaperMetrics', function(id, data) {
+        this.set('ShowMetrics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);
           this.route = data.href;
         });

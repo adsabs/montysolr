@@ -18,7 +18,7 @@
   @media(min-width: $screen-sm-min){
     display: inline-block;
     vertical-align: top;
-    padding: 0% 2%;
+    padding: 0 0 0 2%;
   }
 }
 
@@ -65,7 +65,7 @@
 .s-metrics-graph {
 
   @media(min-width: $screen-sm-min){
-    width: 66%;
+    width: 60%;
   }
 }
 
