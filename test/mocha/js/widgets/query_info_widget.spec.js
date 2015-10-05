@@ -45,7 +45,7 @@ define([
 
       $("#test").append(w.render().el);
 
-      expect($(".currently-selected").text().trim()).to.eql('0 selected\n        \n        \n              select all on page');
+      expect($(".currently-selected").text().trim()).to.eql('0 selected');
 
       minsub.publish(minsub.STORAGE_PAPER_UPDATE, 10);
 

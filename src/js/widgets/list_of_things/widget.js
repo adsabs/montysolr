@@ -302,7 +302,7 @@ define([
       reset: function() {
         this.collection.reset();
         this.hiddenCollection.reset();
-        this.model.set(this.model.defaults());
+        this.model.clear().set(this.model.defaults());
       }
 
     });

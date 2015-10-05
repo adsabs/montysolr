@@ -143,7 +143,11 @@ define([
         }
       },
 
-      onBulkPaperSelection : function(bibs){
+      onBulkPaperSelection : function(bibs, flag){
+        if ( flag == "remove" ) {
+          this.removeSelectedPapers(bibs);
+          return
+        }
         this.addSelectedPapers(bibs);
       },
 

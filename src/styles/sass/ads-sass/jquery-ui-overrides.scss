@@ -15,65 +15,37 @@
   float: left;
   display: none;
   min-width: 160px;
-  max-height: 300px;
-  overflow-y: auto;
-  /* prevent horizontal scrollbar */
-  overflow-x: hidden;
-  /* add padding to account for vertical scrollbar */
-  padding-right: 20px;
   _width: 160px;
-  padding: 6px 0;
+  padding: 4px 0;
   margin: 2px 0 0 0;
   list-style: none;
-  background-color: #ffffff;
-  border-color: #ccc;
-  border-color: rgba(0, 0, 0, 0.2);
-  border-style: solid;
-  border-width: 1px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  -webkit-background-clip: padding-box;
-  -moz-background-clip: padding;
-  background-clip: padding-box;
-  font-weight: 300 !important;
-  font-size: 14px !important;
-  font-family: $font-family-base !important;
   *border-right-width: 2px;
   *border-bottom-width: 2px;
-
+  @extend .s-ads-card;
 
   .ui-menu-item > a.ui-corner-all {
     display: block;
-    padding: 3px 15px;
     clear: both;
-    font-weight: normal;
     line-height: 18px;
+    padding: 5px 15px;
     color: #555555;
     white-space: nowrap;
+    font-size: 16px;
+    font-weight: 300 !important;
+    font-family: $font-family-sans-serif;
+    border-radius: 0;
 
     &.ui-state-hover, &.ui-state-active {
       color: #ffffff;
       text-decoration: none;
       background-color: #0088cc;
       border-radius: 0px;
-      -webkit-border-radius: 0px;
-      -moz-border-radius: 0px;
       background-image: none;
     }
   }
-}
 
-.ui-autocomplete .ui-menu-item a.ui-state-focus {
-  background: fade($brand-primary-faded, 20%) !important;
-  border: 1px solid fade($brand-primary-faded, 20%) !important;
-  border-radius: 0 !important;
-}
-.ui-autocomplete .ui-menu-item a.ui-state-hover {
-  background: fade($brand-primary-faded, 20%) !important;
-  border: 1px solid fade($brand-primary-faded, 20%) !important;
-  border-radius: 0 !important;
+  .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+    border: 1px solid transparent;
+    background: lighten($brand-primary-faded, 38%);
+  }
 }
