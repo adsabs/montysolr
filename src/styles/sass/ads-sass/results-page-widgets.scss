@@ -36,10 +36,6 @@
     width: 200px;
   }
 
-  .query-info-widget div.dropdown-menu {
-    padding: 10px;
-    min-width: 300px;
-  }
 }
 
 
@@ -156,6 +152,14 @@
     color:white;
     font-size: 16px;
     font-weight: 300;
+
+    i.fa-caret-down {
+      float: right;
+      position: relative;
+      left: -8px;
+      top: 4px;
+      font-size: 1.5em;
+    }
 
     &:hover {
       background: darken($brand-primary-faded, 5%);

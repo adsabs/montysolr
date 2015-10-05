@@ -17,12 +17,9 @@
 
                     </li>
                     <li class="divider"></li>
-                    <li>
-                        <button class="btn btn-link sort-options  {{#compare sort 'pubdate'}} hidden {{/compare}}" data-sort="pubdate">Publication Date</button>
-                        <button class="btn btn-link sort-options  {{#compare sort 'num_citations'}} hidden {{/compare}}" data-sort="num_citations">Citation Count</button>
-                        <button class="btn btn-link sort-options  {{#compare sort 'read_count'}} hidden {{/compare}}" data-sort="read_count">Read Count</button>
-
-                    </li>
+                    <li class="{{#compare sort 'pubdate'}} hidden {{/compare}}"><button class="btn btn-link sort-options" data-sort="pubdate">Publication Date</button></li>
+                    <li class="{{#compare sort 'num_citations'}} hidden {{/compare}}"><button class="btn btn-link sort-options" data-sort="num_citations">Citation Count</button></li>
+                    <li class="{{#compare sort 'read_count'}} hidden {{/compare}}"><button class="btn btn-link sort-options" data-sort="read_count">Read Count</button></li>
                 </ul>
             </div>
     {{/if}}
