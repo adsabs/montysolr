@@ -60,6 +60,9 @@ define([
         this.listenTo(this.model, "change:id", this.updateWidget);
         //change only subview
         this.listenTo(this.model, "change:view", this.updateSubView);
+
+        //need to make sure view is rendered at lease 1x before it shows a subview
+        this.view.render();
       },
 
       activate: function(beehive) {
@@ -70,7 +73,6 @@ define([
       },
 
       onLibraryChange : function(collectionJSON, info){
-
 
         if (info.ev == "change" &&
           info.id ==  this.model.get("id") &&

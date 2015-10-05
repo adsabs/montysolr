@@ -221,14 +221,13 @@ define([
               return;
             }
             // if it was a regular export:
-
             //first, tell export widget what to show
             if (data.bibcodes && data.bibcodes.length) {
 
               exportWidget.exportRecords(data.sub, data.bibcodes);
               //then, set library tab to proper field
-              app.getWidget("IndividualLibraryWidget").done(function(ilWidget) {
-                ilWidget.setSubView({view: "export", publicView: data.publicView});
+              app.getWidget("IndividualLibraryWidget").done(function(widget) {
+                widget.setSubView({view: "export", publicView: data.publicView});
               });
 
             }
@@ -238,8 +237,8 @@ define([
                 bibcodes = bibcodes.documents;
                 exportWidget.exportRecords(data.sub, bibcodes);
                 //then, set library tab to proper field
-                app.getWidget("IndividualLibraryWidget").done(function(ilWidget) {
-                  ilWidget.setSubView({
+                app.getWidget("IndividualLibraryWidget").done(function(widget) {
+                  widget.setSubView({
                     view: "export",
                     id: data.id,
                     publicView: data.publicView
@@ -267,17 +266,25 @@ define([
             //first, tell export widget what to show
             if (data.bibcodes && data.bibcodes.length) {
 
-              app.getWidget("Metrics").showMetricsForListOfBibcodes(data.bibcodes);
+              app.getWidget("Metrics").done(function(widget){
+                widget.showMetricsForListOfBibcodes(data.bibcodes);
+              });
               //then, set library tab to proper field
-              app.getWidget("IndividualLibraryWidget").setSubView({ view : "metrics", publicView : data.publicView });
+              app.getWidget("IndividualLibraryWidget").done(function(widget){
+                  widget.setSubView({ view : "metrics", publicView : data.publicView });
+                })
             }
 
             else if (data.id){
               app.getObject("LibraryController").getLibraryData(data.id).done(function(bibcodes){
                 bibcodes = bibcodes.documents;
-                app.getWidget("Metrics").showMetricsForListOfBibcodes(bibcodes);
+                app.getWidget("Metrics").done(function(widget){
+                  widget.showMetricsForListOfBibcodes(bibcodes);
+                })
                 //then, set library tab to proper field
-                app.getWidget("IndividualLibraryWidget").setSubView({ view : "metrics", id : data.id, publicView : data.publicView });
+                app.getWidget("IndividualLibraryWidget").done(function(widget){
+                  widget.setSubView({ view : "metrics", id : data.id, publicView : data.publicView });
+                });
               });
             }
 

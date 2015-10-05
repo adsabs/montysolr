@@ -62,34 +62,34 @@
 
     {{#if feedback}}
 
-    {{#if feedback.success}}
+        {{#if feedback.success}}
 
-    <div class="alert alert-success alert-dismissable" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-        {{#if feedback.create}}
-        <a href="#/user/libraries/{{id}}"> Library <b>{{feedback.name}}</b></a> was successfully created and {{feedback.numRecords}} new records were added.
+        <div class="alert alert-success alert-dismissable" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            {{#if feedback.create}}
+            <a href="#/user/libraries/{{id}}"> Library <b>{{feedback.name}}</b></a> was successfully created and {{feedback.numRecords}} new records were added.
+            {{else}}
+            {{feedback.numRecords}} new records were added to  <a href="#/user/libraries/{{feedback.id}}"> library <b>{{feedback.name}}</b></a>.
+            {{#if feedback.numAlreadyInLib}}
+            ({{feedback.numAlreadyInLib}} were already in the library).
+            {{/if}}
+            {{/if}}
+        </div>
+
         {{else}}
-        {{feedback.numRecords}} new records were added to  <a href="#/user/libraries/{{id}}"> library <b>{{feedback.name}}</b></a>.
-        {{#if feedback.numAlreadyInLib}}
-        ({{feedback.numAlreadyInLib}} were already in the library).
-        {{/if}}
-        {{/if}}
-    </div>
 
-    {{else}}
+        <div class="alert alert-danger alert-dismissable" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            {{#if feedback.create}}
+            <b>{{feedback.name}}</b> was not created, error occured.
+            <em>{{feedback.error}}</em>
+            {{else}}
+            Records were not added to <b>{{feedback.name}}</b>, error occurred.
+            <em>{{feedback.error}}</em>
+            {{/if}}
+        </div>
 
-    <div class="alert alert-danger alert-dismissable" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-        {{#if feedback.create}}
-        <b>{{feedback.name}}</b> was not created, error occured.
-        <em>{{feedback.error}}</em>
-        {{else}}
-        Records were not added to <b>{{feedback.name}}</b>, error occurred.
-        <em>{{feedback.error}}</em>
         {{/if}}
-    </div>
-
-    {{/if}}
 
     {{/if}}
 

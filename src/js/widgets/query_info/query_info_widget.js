@@ -156,7 +156,13 @@ define(['marionette',
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
 
         //check if user is signed in (because widget was just instantiated, but app might have been running for a while
-        if (this.getBeeHive().getObject("User").isLoggedIn()) this.model.set("loggedIn", true);
+        if (this.getBeeHive().getObject("User").isLoggedIn()){
+          // know whether to show library panel
+          this.model.set("loggedIn", true);
+          //fetch list of libraries
+          var libraryData = this.getBeeHive().getObject("LibraryController").getAllMetadata();
+          this.processLibraryInfo(libraryData);
+        }
 
       },
 

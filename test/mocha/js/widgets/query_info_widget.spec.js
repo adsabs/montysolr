@@ -20,6 +20,7 @@ define([
 
     var fakeUser = {getHardenedInstance : function(){return this}, USER_SIGNED_IN : "user_signed_in", isLoggedIn : function(){return true }, getUserData : function(){return {} }};
     var fakeLibraryController =   {getHardenedInstance : function(){return this},
+      getAllMetadata : function(){return []},
       addBibcodesToLib : sinon.spy(function(){ var d = $.Deferred(); d.resolve({numBibcodesRequested: 3, number_added : 2}); return d.promise()}),
       createLibAndAddBibcodes : sinon.spy(function(){ var d = $.Deferred(); d.resolve({bibcode :[1,2,3]}); return d.promise()})
     };
@@ -38,6 +39,8 @@ define([
 
       s.clearSelectedPapers = sinon.spy();
 
+
+      minsub.beehive.addObject("LibraryController", fakeLibraryController);
       minsub.beehive.addObject("AppStorage", s);
       minsub.beehive.addObject("User", fakeUser);
 
