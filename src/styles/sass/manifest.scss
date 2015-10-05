@@ -1,7 +1,7 @@
 $fa-font-path : '../../libs/fontawesome/';
 @import '../../libs/fontawesome/scss/font-awesome';
-@import '../../libs/select2/select2';
 @import '../../libs/jqueryui/jquery-ui.min';
+@import '../../libs/select2/select2';
 //not sure if we should keep this
 @import '../../libs/animate.css/animate';
 
@@ -47,5 +47,4 @@ $fa-font-path : '../../libs/fontawesome/';
 @import 'ads-sass/landing-page';
 @import 'ads-sass/user-styles';
 @import 'ads-sass/visualizations';
-
 

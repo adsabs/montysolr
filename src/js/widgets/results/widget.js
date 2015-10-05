@@ -61,7 +61,8 @@ define([
 
         //this must come after the event delegation!
         this.listenTo(this.collection, "reset", this.checkDetails);
-        //finally, listen to this event on the view
+        //finally, listen
+        // to this event on the view
         this.listenTo(this.view, "toggle-all", this.triggerBulkAction);
 
       },
@@ -250,7 +251,7 @@ define([
       },
 
       onStoragePaperUpdate : function(){
-        var appStorage = null;
+        var appStorage;
         if (this.hasBeeHive() && this.getBeeHive().hasObject('AppStorage')) {
           appStorage = this.getBeeHive().getObject('AppStorage');
         }
@@ -280,7 +281,7 @@ define([
 
       triggerBulkAction : function(flag){
         var bibs = this.collection.pluck("bibcode");
-        this.getPubSub().publish(this.getPubSub().BULK_PAPER_SELECTION, bibs);
+        this.getPubSub().publish(this.getPubSub().BULK_PAPER_SELECTION, bibs ,flag);
       }
 
     });
