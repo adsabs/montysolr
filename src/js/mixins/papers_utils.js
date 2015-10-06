@@ -136,6 +136,8 @@ define([
       data.shortAbstract = data.abstract? this.shortenAbstract(data.abstract) : undefined;
       data.details = data.details || {shortAbstract: data.shortAbstract, pub: data.pub, abstract : data.abstract};
       data.num_citations = data["[citations]"] ? data["[citations]"]["num_citations"] : undefined;
+      data.identifier = data.bibcode;
+      data.encodedIdentifier = encodeURIComponent(data.identifier);
 
       if (data.pubdate || data.shortAbstract){
         data.popover = true;
