@@ -235,13 +235,14 @@ define([
 
       var page = this.model.get("page"),
         lastPage = Math.ceil(this.collection.length/ this.perPage),
-        pageRange = _.range(page-4, page+4);
+        pageRange = _.range(page-2, page+3);
 
       //add first page link if it's missing
       if (pageRange.indexOf(1) < 0){
         pageRange.unshift(1);
       }
 
+      //remove impossible pages
       pageRange = _.filter(pageRange, function(p,i){
         if (p >= 1 && p <= lastPage){
           return true
