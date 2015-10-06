@@ -1420,11 +1420,9 @@
       complete and correct
 
       Example query:
-
-         indexstamp:[2013-03-04T22:01:32.809Z TO *]
-
+         indexstamp:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"]
      -->
-		<field name="indexstamp" type="date" indexed="true" stored="true"
+		<field name="indexstamp" type="tdate" indexed="true" stored="true"
 			default="NOW" multiValued="false" />
 
     <field name="_version_" type="long" indexed="true" stored="true" />

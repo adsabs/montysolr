@@ -220,6 +220,7 @@ public class AqpAdsabsQParser extends QParser {
 		}
 
 		ncm.put("date", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+		ncm.put("indexstamp", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
 
 		// when precision step=0 (ie use the default solr value), then it is Integer.MAX_VALUE
 		for (String field: new String[]{"recid", "pubdate_sort", "citation_count", "classic_factor", "simbid"}) {
