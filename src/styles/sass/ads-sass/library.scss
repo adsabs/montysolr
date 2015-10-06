@@ -152,6 +152,10 @@
       padding-left:0;
     }
 
+    h5 {
+      font-weight: 500;
+    }
+
   }
 
 
@@ -206,6 +210,29 @@
 
   .s-library-title h2 {
     font-size: 48px;
+  }
+
+}
+
+.editable-item {
+
+  position: relative;
+
+  form {
+    position: absolute;
+    top: 0;
+    background-color: $body-bg;
+    display: inline-block;
+
+    input, textarea {
+      width: 280px;
+      display: inline;
+    }
+
+    button {
+      vertical-align: top;
+    }
+
   }
 
 }

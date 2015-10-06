@@ -57,17 +57,17 @@ define([
     template : LibraryHeaderTemplate,
 
     events : {
-      "click *[contenteditable]" : "focusContenteditable",
-      "click .submit-edit" : "submitEdit",
-      "click .cancel-edit" : "cancelEdit",
+      "click .editable-item .toggle-form" : "showForm",
+      "click .editable-item .btn-success" : "submitEdit",
+      "click .editable-item .btn-default" : "cancelEdit",
       "click li[data-tab]:not(.active)" : "triggerSubviewNavigate",
       "click .delete-library" : "triggerDeleteLibrary"
-
     },
 
     modelEvents : {
       "change:active" : "highlightTab"
     },
+
 
     formatDate : function(d){
 
@@ -102,38 +102,34 @@ define([
 
     },
 
-    focusContenteditable : function(e){
-
-      var $current = $(e.currentTarget),
-        buttonsContainer = $current.next();
-
-      buttonsContainer.removeClass("no-show").addClass("fadeIn");
+    showForm: function(e){
+      $(e.target).parents().eq(1).find("form").removeClass("hidden");
     },
 
     submitEdit : function(e){
 
-      var $current = $(e.currentTarget),
-        $buttonContainer = $current.parent(),
-        $edited = $buttonContainer.prev(),
+      e.preventDefault();
+      var $target = $(e.target),
+        $editParent = $target.parent().parent(),
+        $edited = $editParent.find("input").length ?  $editParent.find("input") : $editParent.find("textarea"),
         data = {};
 
-      data[$edited.data("param")] = $edited.text().trim();
-
+      data[$editParent.data("field")] = $edited.val();
       this.trigger("updateVal", data);
-
-      $buttonContainer.html("<i class=\"fa fa-spinner fa-pulse\"></i>");
+      $target.html("<i class=\"fa fa-spinner fa-pulse\"></i>");
 
     },
 
     cancelEdit : function(e){
 
-      var $current = $(e.currentTarget),
-        $buttonContainer = $current.parent(),
-        $edited = $buttonContainer.prev();
+      e.preventDefault();
+      var $target = $(e.currentTarget),
+          $form = $target.parent();
 
-      //return the value to original value
-      $edited.text(this.model.get($edited.data("param")));
-      $buttonContainer.addClass("no-show");
+      $form.find("input").val("");
+      $form.find("textarea").val("");
+      $form.addClass("hidden");
+
     },
 
     // whenever active tab changes

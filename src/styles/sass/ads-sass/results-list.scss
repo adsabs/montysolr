@@ -248,28 +248,6 @@ li.article-author {
   font-size: 16px;
 }
 
-.s-sort-widget {
-  .dropdown-menu {
-    padding: 10%;
-  }
-  box-shadow : 2px 2px 2px lighten($gray-lightest, 5%);
-
-  #sort-button {
-    color: $text-color !important;
-  }
-  .btn-link {
-    padding: 3px 5px;
-    display: block;
-  }
-
-
- a.help-link {
-    padding:0;
-   i {
-     font-size: 1.5em;
-   }
-  }
-}
 
 //only target the results list
 

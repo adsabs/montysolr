@@ -8,10 +8,10 @@
                     {{#compare sort "num_citations"}} Citation Count{{/compare}}
                     {{#compare sort "read_count"}} Read Count{{/compare}}
                     {{order}}</b>
-                    <span class="caret">
+                    <span class="caret"/>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                    <li>
+                    <li class="no-hover-style">
                         <label><input type="radio" value="desc"  name="order-options" {{#compare order "desc"}}checked="checked" {{/compare}} > Descending <i class="fa fa-sort-numeric-desc"></i></label>
                         <label><input type="radio" value="asc"  name="order-options" {{#compare order "asc"}}checked="checked" {{/compare}} > Ascending <i class="fa fa-sort-numeric-asc"></i> </label>
 

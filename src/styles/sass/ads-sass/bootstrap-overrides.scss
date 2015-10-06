@@ -218,3 +218,38 @@ textarea[disabled]{
   }
 }
 
+
+.dropdown-menu {
+
+  li.no-hover-style {
+    &:hover {
+      background-color: $body-bg;
+    }
+  }
+
+  li:not(.divider):not(.no-hover-style) {
+    padding: 10px;
+    border-left: 3px solid $body-bg;
+    &:hover {
+      background-color: darken($gray-lightest, 2%);
+      cursor: pointer;
+      border-left: 3px solid $gray-light;
+    }
+    a {
+      color: $text-color
+    }
+    a:hover {
+      text-decoration: none;
+    }
+    .btn-link {
+      color: $text-color;
+    }
+    .btn-link:hover {
+      text-decoration: none;
+    }
+  }
+  label {
+    font-weight: 300;
+  }
+
+}
