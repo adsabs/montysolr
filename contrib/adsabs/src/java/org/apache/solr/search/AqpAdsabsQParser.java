@@ -180,7 +180,6 @@ public class AqpAdsabsQParser extends QParser {
 
 		// now add the special analyzer that knows to use solr token chains
 		config.set(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER, req.getSchema().getQueryAnalyzer());
-
 		config.set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY, true);
 
 
@@ -193,11 +192,12 @@ public class AqpAdsabsQParser extends QParser {
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(1, new AqpAdsabsSubQueryProvider());
 		config.get(ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG).addProvider(2, new AqpAdsabsFunctionProvider());
 
-
-		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("author", new int[0]);
-		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put("first_author", new int[0]);
-
-
+		if (namedParams.containsKey("aqp.authorFields")) {
+      for (String f: namedParams.get("aqp.authorFields").split(",")) {
+        config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS).put(f, new int[0]);
+      }
+    }
+		
 		if (params.getBool("debugQuery", false) != false) {
 			try {
 				qParser.setDebug(true);

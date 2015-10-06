@@ -642,6 +642,7 @@
        <str name="aqp.dateFields">date,indexstamp</str>
        <str name="aqp.floatFields">read_count,cite_read_boost</str>
        <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid</str>
+       <str name="aqp.authorFields">author,first_author</str>
     </lst>
   </queryParser>
   
@@ -666,6 +667,7 @@
        <str name="aqp.dateFields">date,indexstamp</str>
        <str name="aqp.floatFields">read_count,cite_read_boost</str>
        <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid</str>
+       <str name="aqp.authorFields">author,first_author</str>
     </lst>
   </queryParser>
   

@@ -24,6 +24,7 @@ import java.util.List;
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
@@ -31,6 +32,7 @@ import org.apache.solr.request.SolrQueryRequestBase;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+@SuppressCodecs({"Lucene3x", "SimpleText"})
 public class TestWordCloudComponent extends MontySolrAbstractTestCase {
 
 	@BeforeClass
