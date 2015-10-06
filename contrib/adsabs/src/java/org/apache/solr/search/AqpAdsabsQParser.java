@@ -207,40 +207,33 @@ public class AqpAdsabsQParser extends QParser {
 		}
 
 
-		// this whole sections is necessary for date parsing, i should revisit and clean it
-		// it is a mess
 		HashMap<String, NumericConfig> ncm = new HashMap<String, NumericConfig>();
 		config.set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP, ncm);
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
-		sdf.setTimeZone(DateField.UTC);
+		if (namedParams.containsKey("aqp.floatFields")) {
+      for (String f: namedParams.get("aqp.floatFields").split(",")) {
+        ncm.put(f, new NumericConfig(8, NumberFormat.getNumberInstance(Locale.US), NumericType.FLOAT));
+      }
+    }
 
-		for (String field: new String[]{"read_count", "cite_read_boost"}) {
-			ncm.put(field, new NumericConfig(8, NumberFormat.getNumberInstance(Locale.US), NumericType.FLOAT));
-		}
-
-		ncm.put("date", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
-		ncm.put("indexstamp", new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
-
-		// when precision step=0 (ie use the default solr value), then it is Integer.MAX_VALUE
-		for (String field: new String[]{"recid", "pubdate_sort", "citation_count", "classic_factor", "simbid"}) {
-			ncm.put(field, new NumericConfig(Integer.MAX_VALUE, NumberFormat.getNumberInstance(Locale.US), NumericType.INT));
-		}
-
+		if (namedParams.containsKey("aqp.dateFields")) {
+		  SimpleDateFormat sdf = new SimpleDateFormat(namedParams.containsKey("aqp.dateFormat") 
+		      ? namedParams.get("aqp.dateFormat") : "yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
+		  sdf.setTimeZone(DateField.UTC);
+      for (String f: namedParams.get("aqp.dateFields").split(",")) {
+        ncm.put(f, new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+      }
+    }
+		
+    // when precision step=0 (ie use the default solr value), then it is Integer.MAX_VALUE
+		if (namedParams.containsKey("aqp.intFields")) {
+      for (String f: namedParams.get("aqp.intFields").split(",")) {
+        ncm.put(f, new NumericConfig(Integer.MAX_VALUE, NumberFormat.getNumberInstance(Locale.US), NumericType.INT));
+      }
+    }
 		
 		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS).putAll(defaultConfig.virtualFields);
 		
-		/*
-    config.get(StandardQueryConfigHandler.ConfigurationKeys.FIELD_DATE_RESOLUTION_MAP)
-      .put("date", DateTools.Resolution.MONTH);
-
-		config.getFieldConfig("date").set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG, 
-		    new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
-		FieldConfig ddd = config.getFieldConfig("date");
-
-		config.getFieldConfig("pubdate").set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG, 
-        new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
-		 */
 	}
 
 	public Query parse() throws SyntaxError {
