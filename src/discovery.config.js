@@ -188,7 +188,8 @@ require.config({
     'sinon': '../bower_components/sinon/index',
     'filesaver' : 'libs/FileSaver/FileSaver',
     'select2' : 'libs/select2/select2',
-    'squire': '../bower_components/squire/src/Squire'
+    'squire': '../bower_components/squire/src/Squire',
+    'clipboard': 'libs/clipboard/clipboard'
 
   },
 

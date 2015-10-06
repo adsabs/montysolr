@@ -27,10 +27,8 @@
     "require-handlebars-plugin": "0.8.0",
     "requirejs": "~2.1.8",
     "requirejs-plugins": "~1.0.3",
-    "backbone-validation": "~0.11.3",
-    "backbone.stickit": "~0.8.0",
-    "FileSaver": "*",
-    "select2": "~4.0.0"
+    "select2": "~4.0.0",
+    "clipboard": "~1.4.0"
   },
   "devDependencies": {
     "chai": "~1.8.0",
