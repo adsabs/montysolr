@@ -32,45 +32,12 @@
   }
 
   div.dropdown-menu {
-    padding: 10px;
     width: 200px;
+
   }
 
 }
 
-
-//had to add back styles since dropdowns are using a div
-//rather than an ul as bootstrap expects
-.s-sort-widget .dropdown-menu, .s-dropdown-widget .dropdown-menu {
-
-  padding: 10px;
-
-  li {
-    &:hover {
-      background-color: darken($gray-lightest, 2%);
-      cursor: pointer;
-    }
-    a {
-      color: $brand-primary;
-    }
-    a:hover {
-      text-decoration: none;
-    }
-    .btn-link {
-      color: $brand-primary;
-    }
-    .btn-link:hover {
-      text-decoration: none;
-    }
-  }
-  label {
-    font-weight: 300;
-  }
-  .dropdown-menu {
-    padding: 10%;
-  }
-
-}
 
 .export-start-val {
   @extend .form-control;
@@ -140,6 +107,10 @@
 
   .s-library-area {
     margin-top: 15px;
+    @extend .s-ads-card;
+    background-color: white;
+    margin-bottom: 20px;
+    border: 0px solid transparent;
   }
 
   .s-library-add-title, #library-console {
@@ -152,6 +123,7 @@
     color:white;
     font-size: 16px;
     font-weight: 300;
+
 
     i.fa-caret-down {
       float: right;
@@ -196,10 +168,5 @@
     display: inline;
   }
 
-  .s-library-area {
-    @extend .s-ads-card;
-    background-color: white;
-    margin-bottom: 20px;
-  }
 
 }

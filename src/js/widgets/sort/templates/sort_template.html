@@ -5,7 +5,7 @@
         <span class="caret">
     </button>
     <ul class="dropdown-menu" role="menu">
-        <li>
+        <li class="no-hover-style">
             {{#each orderOptions}}
             <label><input type="radio" value="{{this.value}}"  name="order-options" {{#if this.default}}checked="checked" {{/if}}> {{this.title}}&nbsp;&nbsp;<i class="fa {{faIcon}}"></i></label>
             {{/each}}
@@ -19,7 +19,7 @@
                  <button class="btn btn-link sort-options" data-value="{{this.value}}">{{this.title}}</button>
              </li>
             {{/each}}
-            <li style="height:30px">
+            <li class="no-hover-style" style="height:30px">
               <a  title="Click to open a page that explains sort options in a new tab."
                   href="//adsabs.github.io/help/actions/sort/" target="_blank" class="pull-right help-link">
                   <i class=" fa-2x icon-help"></i>

@@ -341,25 +341,21 @@ define([
 
       w.model.set({view : "library", id : "1"});
 
-      expect($("#test h2.edit-indicator").next().hasClass("no-show")).to.be.true;
 
-      expect($("#test .s-library-title h2").attr("contenteditable")).to.eql('true');
+      expect($("#test .editable-item form").eq(0).hasClass("hidden")).to.be.true;
 
-      //editing title
-      $("#test h2.edit-indicator").click();
+      $("#test .editable-item").eq(0).find(".toggle-form").click();
 
-      expect($("#test h2.edit-indicator").next().hasClass("no-show")).to.be.false;
+      expect($("#test .editable-item form").eq(0).hasClass("hidden")).to.be.false;
 
-      expect($("#test h2.edit-indicator").next().hasClass("fadeIn")).to.be.true;
-
-      $("#test h2.edit-indicator").text("goo");
+      $("#test .editable-item form").eq(0).find("input").val("here is a better, newer title");
 
       expect(fakeLibraryController.updateLibraryMetadata.args[0]).to.eql(undefined);
 
-      $("#test h2.edit-indicator").next().find(".submit-edit").click();
+      $("#test .editable-item form").eq(0).find("button.btn-success").click();
 
       expect(fakeLibraryController.updateLibraryMetadata.args[0][0]).to.eql("1");
-      expect(fakeLibraryController.updateLibraryMetadata.args[0][1]).to.eql({name: "goo"});
+      expect(fakeLibraryController.updateLibraryMetadata.args[0][1]).to.eql({name: "here is a better, newer title"});
 
       //navigating to permissions
 

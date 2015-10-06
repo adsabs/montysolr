@@ -73,30 +73,27 @@
     <div class="pull-right">
         <button class="btn btn-default" disabled="true"><i class="fa fa-arrow-right"></i> View this library in the ADS Search Results Page</button>
     </div>
-    <div class="s-library-title">
-        <h2 class="s-edit-indicator edit-indicator" title="edit library title" contenteditable="true" data-param="name">{{name}}</h2>
-                <span class="s-editable-buttons no-show animated">
-                    <button class="btn btn-sm btn-success btn-inverse submit-edit" title="submit changes" data-element="{{element}}" data-param="{{param}}">
-                        <i class="fa fa-lg fa-check"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger btn-inverse  cancel-edit" title="cancel">
-                        <i class="fa fa-lg fa-times"></i>
-                    </button>
-                </span>
+    <div class="editable-item" data-field="name">
+        <h2>{{name}} <button class="btn btn-link toggle-form"> <i class="fa fa-pencil"></i> edit</button></h2>
+        <form class="hidden">
+            <label  class="sr-only" for="#edit-library-title"> Change title </label>
+            <input class="form-control" type="text" id="edit-library-title" placeholder="{{name}}"/>
+            <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
+            <button class="btn btn-small btn-default"> <i class="fa fa-lg fa-times"></i> cancel</button>
+        </form>
     </div>
-    <div class="s-library-description">
-        <p class="s-edit-indicator edit-indicator" title="edit library description" contenteditable="true" data-param="description">
-            {{#if description }}{{ description }}{{else}}(none){{/if}}
+    <div class="editable-item" data-field="description">
+        <span><b>description</b> <button class="btn btn-link toggle-form"> <i class="fa fa-pencil"></i> edit</button></span>
+        <p>
+           {{#if description }}{{ description }}{{else}}(none) {{/if}}
         </p>
-        <span class="s-editable-buttons no-show animated">
-            <button class="btn btn-sm  btn-success btn-inverse  submit-edit" title="submit changes" data-element="{{element}}" data-param="{{param}}">
-                <i class="fa fa-lg fa-check"></i>
-            </button>
-            <button class="btn btn-sm btn-danger  btn-inverse cancel-edit" title="cancel">
-                <i class="fa fa-lg fa-times"></i>
-            </button>
-        </span>
-</div>
+        <form class="hidden">
+            <label class="sr-only" for="#edit-library-description"> Change description </label>
+            <textarea class="form-control" placeholder="{{description}}" id="edit-library-description"/>
+            <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
+            <button class="btn btn-small btn-default"> <i class="fa fa-lg fa-times"></i> cancel</button>
+        </form>
+    </div>
 
     {{else}}
 
@@ -135,8 +132,7 @@
             <div class="collapse" id="library-actions" style="padding-top: 15px">
                 {{#if edit}}
                 <p>
-                    To <b>change the title or description</b>  of the library, simply click on the title or description and
-                    type directly into the field.
+                    To <b>change the title or description</b>  of the library, click on the edit links above.
                 </p>
                 {{/if}}
                 {{#compare permission "read" operator="!=="}}
