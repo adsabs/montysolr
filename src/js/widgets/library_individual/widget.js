@@ -21,6 +21,9 @@ define([
 
     ){
 
+    var LoadingView = Marionette.ItemView.extend({
+      template : LoadingTemplate
+    });
 
     var ContainerView  = Marionette.LayoutView.extend({
 
@@ -93,7 +96,6 @@ define([
         }
       },
 
-
       //called when ID changes
       updateWidget : function() {
         this.switchToNewLib();
@@ -157,9 +159,9 @@ define([
       updateSubView : function(){
 
         var that = this,
-          id = this.model.get("id"),
-          view = this.model.get("view"),
-          LibraryController = that.getBeeHive().getObject("LibraryController");
+            id = this.model.get("id"),
+            view = this.model.get("view"),
+            LibraryController = that.getBeeHive().getObject("LibraryController");
 
         if (!id || !view){
           return
@@ -176,13 +178,21 @@ define([
               subView = new LibraryView({collection : that.libraryCollection, permission : editRecords, perPage : Marionette.getOption(this, "perPage") });
 
             subView.on("all", that.handleLibraryEvents, that);
-            that.view.main.show(subView);
 
             //check to see if we already have records, if not, fetch them
             if (this.libraryCollection.length == 0 && this.headerModel.get("num_documents") > 0) {
+              //add the loading view
+              that.view.main.show(new LoadingView());
+              //now fetch the data
               LibraryController.getLibraryData(id).done(function (data) {
                 that.libraryCollection.reset(data.solr.response.docs);
+                //remove the loading view
+                that.view.main.show(subView);
               });
+            }
+            else {
+              //just show the view
+              that.view.main.show(subView);
             }
             break;
 
