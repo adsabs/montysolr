@@ -266,12 +266,13 @@ define([
       $("#test").append(u.view.render().el);
 
       u.setSubView("token");
+      debugger
 
-      expect($("#test .well").text().trim()).to.eql("current_token");
+      expect($("#test input").val()).to.eql("current_token");
 
       $("#test button[type=submit]").click();
 
-      expect($("#test .well").text().trim()).to.eql("new_token");
+      expect($("#test input").val()).to.eql("new_token");
     });
 
   });

@@ -2,10 +2,26 @@
     <legend class="panel-heading"> API Token
     </legend>
     <div class="panel-body">
-        <div class="well">
-            {{#if access_token}} {{access_token}} {{else}} No token currently exists {{/if}}
+
+          <div class="input-group">
+              <input type="text" class="form-control" disabled value="{{#if access_token}}{{access_token}}{{else}} No token currently exists {{/if}}" style="cursor:text">
+              <span class="input-group-btn">
+                <button class="btn btn-success" type="submit">Generate a new key</button>
+              </span>
+        </div><!-- /input-group -->
+
+        <div class="description">
+            <br/>
+            <br/>
+            <p> This API token allows you to access ADS data programmatically. For instance, to fetch the first few document
+                ids for the query "star", make the following request: </p>
+           <p>
+               <code> curl -H Authorization:Bearer:[your token here] http://api.adsabs.harvard.edu/v1/search/query?q=star</code>
+            </p>
+            <p> Documentation on how to use the API is available on the <a href="https://github.com/adsabs/adsabs-dev-api#access-settings"> ADS API Github repo.</a></p>
+            <p> <b>Make sure to keep your API key secret to protect it from abuse.</b></p>
+            <p> If your key has been exposed publically (say, by accidentally  being commited to a Github repo) you can generate a new one by clicking on the button above. </p>
         </div>
-        <button class="btn btn-success pull-right" type="submit">Generate a new key</button>
 
 </div>
 
