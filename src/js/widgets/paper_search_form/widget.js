@@ -93,6 +93,8 @@ define([
 
       this.getPubSub.publish(this.getPubSub.START_SEARCH, newQuery);
 
+      analytics('send', 'event', 'interaction', 'paper-form-submit', JSON.stringify(query));
+
     },
 
     onShow : function(){

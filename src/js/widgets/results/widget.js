@@ -14,7 +14,8 @@ define([
     'hbs!./templates/container-template',
     'js/mixins/papers_utils',
     'js/modules/orcid/extension',
-    'js/mixins/dependon'
+    'js/mixins/dependon',
+    'analytics'
   ],
 
   function (
@@ -27,7 +28,9 @@ define([
     ContainerTemplate,
     PapersUtilsMixin,
     OrcidExtension,
-    Dependon
+    Dependon,
+    analytics
+
     ) {
 
     var ResultsWidget = ListOfThingsWidget.extend({
@@ -55,7 +58,15 @@ define([
           this.trigger("toggle-all", flag);
         }
 
-        _.extend(this.view.events, {'click input#select-all-docs': 'toggleAll'});
+        //this event should only be called on Results widget child of list_of_things widget
+        this.view.sendPaginationEvent = function(e){
+          analytics('send', 'event', 'interaction', 'results-list-pagination', $(e.target).data("paginate"));
+        }
+
+        _.extend(this.view.events, {
+          'click input#select-all-docs': 'toggleAll',
+          'click a[data-paginate]' : 'sendPaginationEvent'
+        });
 
         this.view.delegateEvents();
 

@@ -41,13 +41,11 @@ define([
 
       events: {
         'change input[name=identifier]': 'toggleSelect',
-
         'focus .letter-icon': "showLinks",
         'mouseenter .letter-icon': "showLinks",
         'mouseleave .letter-icon': "hideLinks",
         'focusout .letter-icon': "hideLinks",
-
-        'click .letter-icon button': "linkToFirst",
+        'click .letter-icon a' : "emitAnalyticsEvent",
         //only relevant to results view for the moment
         'click .show-full-abstract' : "showFullAbstract",
         'click .hide-full-abstract' : "hideFullAbstract",
@@ -65,6 +63,10 @@ define([
       collectionEvents: {
         "add": "render",
         "change:visible": "render"
+      },
+
+      emitAnalyticsEvent : function(e){
+        analytics('send', 'event', 'interaction', 'letter-link-followed', $(e.target).text());
       },
 
       showFullAbstract : function(){

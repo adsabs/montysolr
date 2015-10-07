@@ -16,10 +16,12 @@ define([
     'js/mixins/add_stable_index_to_collection',
     'hbs!./templates/empty-view-template',
     'hbs!./templates/initial-view-template',
-    './item_view'
+    './item_view',
+    'analytics'
   ],
 
-  function (Marionette,
+  function (
+            Marionette,
             Backbone,
             ApiRequest,
             ApiQuery,
@@ -31,7 +33,8 @@ define([
             WidgetPaginationMixin,
             EmptyViewTemplate,
             InitialViewTemplate,
-            ItemView
+            ItemView,
+            analytics
     ) {
 
 
@@ -140,7 +143,9 @@ define([
           this.model.set("showAbstract", "closed");
         }
         else if (this.model.get("showAbstract") == "closed"){
+
           this.model.set("showAbstract", "open");
+          analytics('send', 'event', 'interaction', 'abstracts-toggled-on');
         }
       },
 

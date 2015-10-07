@@ -1,21 +1,27 @@
 
 
-define(['backbone',
-        'marionette',
+define([
+    'backbone',
+    'marionette',
     'js/components/api_query',
     'js/components/api_request',
     'js/widgets/base/paginated_multi_callback_widget',
     'js/components/paginator',
     'js/mixins/widget_pagination',
-    'js/components/api_query_updater'],
-  function (Backbone,
+    'js/components/api_query_updater',
+    'analytics'
+  ],
+  function (
+            Backbone,
             Marionette,
             ApiQuery,
             ApiRequest,
             PaginatedMultiCallbackWidget,
             Paginator,
             WidgetPagination,
-            ApiQueryUpdater) {
+            ApiQueryUpdater,
+            analytics
+    ) {
 
     var BaseFacetWidget = PaginatedMultiCallbackWidget.extend({
 
@@ -430,6 +436,9 @@ define(['backbone',
           }
 
           this.dispatchNewQuery(paginator.cleanQuery(q));
+
+          analytics('send', 'event', 'interaction', 'facet-applied', JSON.stringify({name : this.facetField, logic : operator, conditions : conditions }));
+
         }
       }
 

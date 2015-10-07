@@ -7,14 +7,18 @@ define(['marionette',
   'js/widgets/base/base_widget',
   'hbs!./templates/sort_template',
   'bootstrap',
-  'js/components/api_feedback'
-], function (Marionette,
+  'js/components/api_feedback',
+  'analytics'
+
+], function (
+  Marionette,
   Backbone,
   $,
   BaseWidget,
   SortTemplate,
   bootstrap,
-  ApiFeedback
+  ApiFeedback,
+  analytics
   ) {
 
     var SortModel = Backbone.Model.extend({
@@ -172,6 +176,9 @@ define(['marionette',
         var apiQuery = this.getCurrentQuery().clone();
         apiQuery.set("sort", data);
         this.getPubSub().publish(this.getPubSub().START_SEARCH, apiQuery);
+
+        analytics('send', 'event', 'interaction', 'sort-applied', data);
+
       },
 
       handleFeedback: function(feedback) {

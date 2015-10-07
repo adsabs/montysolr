@@ -76,9 +76,6 @@ define([
         // b) modifying phrases and/or operators
 
         var newQuery = q.clone();
-
-        analytics('send', 'event', 'display', 'tooltip', 'query-helper');
-
         var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
         this.getAlerter().alert(new ApiFeedback({
           type: Alerts.TYPE.ALERT,
@@ -94,11 +91,9 @@ define([
                 .done(function(widget) {
                   if (q) {
                     widget.openQueryAssistant(q);
-                    analytics('send', 'event', 'interaction', 'click', 'query-helper');
                   }
                   else {
                     widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                    analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
                   }
                 });
             }
@@ -210,8 +205,6 @@ define([
               }
             }
 
-            analytics('send', 'event', 'display', 'tooltip', 'query-assistant');
-
             alerts.alert(new ApiFeedback({
               msg: (msg || 'There is something wrong with the query,') + ' <a id="query-assistant">please use this tool to fix it.</a>',
               events: {
@@ -226,11 +219,9 @@ define([
                     var q = apiQuery.get('q').join(' ');
                     if (q) {
                       widget.openQueryAssistant(q);
-                      analytics('send', 'event', 'interaction', 'click', 'query-assistant');
                     }
-                    else {h
+                    else {
                       widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                      analytics('send', 'event', 'interaction', 'click', 'query-assistant-failed-get-q');
                     }
                   });
                 }

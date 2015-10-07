@@ -6,8 +6,7 @@ define([
     'js/components/api_feedback',
     'js/widgets/widget_states',
     'js/components/alerts',
-    'js/components/api_response',
-    'analytics'
+    'js/components/api_response'
   ],
 
   function (
@@ -17,8 +16,7 @@ define([
     ApiFeedback,
     WidgetStates,
     Alerts,
-    ApiResponse,
-    analytics
+    ApiResponse
     ) {
 
 
