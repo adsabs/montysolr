@@ -9,9 +9,9 @@ define([
     'js/mixins/formatter',
     './autocomplete',
     'bootstrap', // if bootstrap is missing, jQuery events get propagated
-    'analytics',
     'jquery-ui',
-    'js/mixins/dependon'
+    'js/mixins/dependon',
+    'analytics'
   ],
   function (
     Marionette,
@@ -24,9 +24,9 @@ define([
     FormatMixin,
     autocompleteArray,
     bootstrap,
-    analytics,
     jqueryUI,
-    Dependon
+    Dependon,
+    analytics
     ) {
 
     $.fn.getCursorPosition = function() {
@@ -226,10 +226,13 @@ define([
             if ( final == '"' || final == ")" ){
               $input.selectRange($input.val().length - 1);
             }
+
+            analytics('send', 'event', 'interaction', 'autocomplete-used', ui.item.value);
             return false;
+
           }
 
-        });
+      });
 
         $input.data("ui-autocomplete")._renderItem = function( ul, item ) {
           if (item.desc){
@@ -267,8 +270,10 @@ define([
         "click .icon-clear" : "clearInput",
         "keyup .q" : "storeCursorInfo",
         "select .q" : "storeCursorInfo",
-        "click .q" : "storeCursorInfo"
-
+        "click .q" : "storeCursorInfo",
+        "keypress #search-form-container" : function(){
+          analytics('send', 'event', 'interaction', 'querybuilder-keypress');
+        }
       },
 
       toggleClear : function(){
@@ -301,8 +306,6 @@ define([
       },
 
       onShowForm: function() {
-
-        analytics('send', 'event', 'interaction', 'click', 'query-assistant');
 
         var formVal = this.getFormVal();
         if (formVal.trim().length > 0) {
@@ -416,14 +419,45 @@ define([
 
         //figure out if clear button needs to be there
         this.toggleClear();
+
+        analytics('send', 'event', 'interaction', 'field-insert-button-pressed', df);
+
       },
 
       submitQuery: function(e) {
+
+        var fields, fielded, query;
+
         e.preventDefault();
         e.stopPropagation();
 
-        var query = this.getFormVal();
+        query = this.getFormVal();
         this.trigger("start_search", query);
+
+        //let analytics know what type of query it was
+        fields = _.chain(autocompleteArray)
+          .pluck("value")
+          .map(function(b){
+            var m =  b.match(/\w+:|\w+\(/);
+            if (m && m.length) return m[0]
+          })
+          .unique()
+          .value();
+
+        fielded = false;
+
+        _.each(fields, function(f){
+          if (query.indexOf(f) > -1) {
+            fielded = true;
+          }
+         });
+
+        if (fielded){
+          analytics('send', 'event', 'interaction', 'fielded-query-submitted-from-search-bar', query);
+        }
+        else {
+          analytics('send', 'event', 'interaction', 'unfielded-query-submitted-from-search-bar', query);
+        }
       }
     });
 

@@ -7,7 +7,8 @@ define([
   'js/widgets/base/base_widget',
   'hbs!./templates/resources_template',
   'js/mixins/link_generator_mixin',
-  'bootstrap'
+  'bootstrap',
+  'analytics'
 ], function(
   _,
   $,
@@ -17,7 +18,8 @@ define([
   BaseWidget,
   ResourcesTemplate,
   LinkGenerator,
-  Bootstrap
+  Bootstrap,
+  analytics
   ){
 
 
@@ -40,6 +42,14 @@ define([
 
     onRender : function(){
       this.$('[data-toggle="tooltip"]').tooltip();
+    },
+
+    events : {
+      "click a" : "emitAnalyticsEvent"
+    },
+
+    emitAnalyticsEvent : function(e){
+      analytics('send', 'event', 'interaction', 'full-text-link-followed', $(e.target).text().trim());
     }
   });
 

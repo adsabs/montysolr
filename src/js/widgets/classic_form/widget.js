@@ -4,14 +4,16 @@ define([
   "js/components/api_query_updater",
   "hbs!./form",
   "jquery-ui",
-  "js/widgets/paper_search_form/topterms"
+  "js/widgets/paper_search_form/topterms",
+  "analytics"
 ], function(
   BaseWidget,
   ApiQuery,
   ApiQueryUpdater,
   FormTemplate,
   JQueryUI,
-  AutocompleteData
+  AutocompleteData,
+  analytics
   ){
 
   //for autocomplete
@@ -58,6 +60,7 @@ define([
       this.$("button[type=submit]").each(function(){
         $(this).html('<i class="icon-loading"/>  Loading...')
       });
+
     },
 
     serializeClassic : function(){
@@ -216,6 +219,8 @@ define([
 
       newQuery = new ApiQuery(newQuery);
       this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
+
+      analytics('send', 'event', 'interaction', 'classic-form-submit', JSON.stringify(queryDict));
 
     }
 

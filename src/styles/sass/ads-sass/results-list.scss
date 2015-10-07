@@ -101,7 +101,6 @@
 
 .s-show-details-container {
   margin-top: 20px;
-  padding-left: 2%;
 }
 
 .s-results-title {
@@ -204,6 +203,7 @@
 
 .s-results-list {
 
+  padding-left: 2%;
   label {
     font-weight: initial
   }
@@ -221,6 +221,10 @@
     }
 
   }
+}
+
+.s-results-widget .s-results-list {
+  padding-left: 6%;
 }
 
 .s-pagination-controls {
@@ -258,6 +262,7 @@ li.article-author {
   border-bottom: $border-light-default;
   @extend .clearfix;
   padding-bottom: 15px;
+  padding-left: 3.8%;
 }
 
 .s-back-button-container {
@@ -316,7 +321,7 @@ li.article-author {
 }
 
 .s-list-title {
-  padding-left: 5.2%;
+  padding-left: 12.3%;
   margin-bottom: 40px;
 }
 

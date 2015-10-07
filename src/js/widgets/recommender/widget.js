@@ -5,14 +5,16 @@ define([
   'js/components/api_request',
   'js/widgets/base/base_widget',
   'hbs!./templates/recommender_template',
-  'bootstrap'
+  'bootstrap',
+  'analytics'
 ], function(
   Marionette,
   ApiQuery,
   ApiTargets,
   ApiRequest,
   BaseWidget,
-  RecommenderTemplate
+  RecommenderTemplate,
+  analytics
   ){
 
   var RecommenderView = Marionette.ItemView.extend({
@@ -23,9 +25,13 @@ define([
 
     template : RecommenderTemplate,
 
-
     events : {
-      "click .button-toggle" : "toggleList"
+      "click .button-toggle" : "toggleList",
+      "click a" : "emitAnalyticsEvent"
+    },
+
+    emitAnalyticsEvent : function(e){
+      analytics('send', 'event', 'interaction', 'suggested-article-link-followed');
     },
 
     toggleList : function(){

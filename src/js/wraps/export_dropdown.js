@@ -25,6 +25,10 @@ define([
   var rightAlign = true;
   var selectedOption = true;
 
+  function analyticsCallback(){
+    debugger
+  }
+
 
   return function(){
 
@@ -34,7 +38,8 @@ define([
       dropdownTitle : dropdownTitle,
       iconClass: iconClass,
       rightAlign : rightAlign,
-      selectedOption : selectedOption
+      selectedOption : selectedOption,
+      analyticsCallback : analyticsCallback
     });
 
     return Dropdown;
