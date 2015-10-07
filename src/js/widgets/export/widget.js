@@ -17,7 +17,8 @@ define([
     'module',
     'js/components/api_targets',
      "filesaver",
-    'js/mixins/dependon'
+    'js/mixins/dependon',
+    'clipboard'
 
   ],
   function(
@@ -33,7 +34,8 @@ define([
     WidgetConfig,
     ApiTargets,
     FileSaver,
-    Dependon
+    Dependon,
+    Clipboard
     ){
 
     //modified from userChangeRows mixin
@@ -87,7 +89,7 @@ define([
       className : "s-export",
 
       ui :  {
-        "triggerDownload" : ".btn-download"
+        "triggerDownload" : "#btn-download",
       },
 
       template: WidgetTemplate,
@@ -124,7 +126,7 @@ define([
 
         setTimeout(function(){
           that.ui.triggerDownload.html('<i class="fa fa-lg fa-download"></i> Download file');
-        }, 1000);
+        }, 2000);
       },
 
       exportRecords: function(ev) {
@@ -135,6 +137,27 @@ define([
 
       signalCloseWidget: function(ev) {
         this.trigger('close-widget');
+      },
+
+      onRender : function(){
+        var that = this;
+        var cb = new Clipboard("#btn-copy");
+
+        cb.on('success', function(e) {
+          this.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Copied!')
+          e.clearSelection();
+          setTimeout(function(){
+            that.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Copy to Clipboard')
+          }, 2000)
+        });
+
+        cb.on('error', function(e) {
+          //this should only affect safari, execCommand isn't supported
+          this.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Now press Ctrl+C (or Cmd+C for Mac) to copy');
+          setTimeout(function(){
+            that.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Copy to Clipboard')
+          }, 4000);
+        });
       }
 
     });
