@@ -1,44 +1,42 @@
     Example from google analytics help page:
-      ga('send', 'event', [eventCategory], [eventAction], [eventLabel],
+      ga('send', 'event', [eventCategory], [eventAction], [eventLabel], [value (an int, we dont use) right now])
 
 	
     Search and Index Page Interactions
 
-        analytics('send', 'event', 'interaction', 'querybuilder-keypress’); 
+        analytics('send', 'event', 'interaction', 'querybuilder-used', [query]);
 
-        analytics('send', 'event', 'interaction', ‘classic-form-submit’), [query]; 
+        analytics('send', 'event', 'interaction', 'classic-form-submit'), [query]; 
 
-        analytics('send', 'event', 'interaction', ‘paper-form-submit’, [query]); 
+        analytics('send', 'event', 'interaction', 'paper-form-submit', [query]); 
 
-        analytics('send', 'event', 'interaction', ‘field-insert-button-pressed’, [field]); 
+        analytics('send', 'event', 'interaction', 'field-insert-button-pressed', [field]); 
 
-        analytics('send', 'event', 'interaction', ‘autocomplete-used, [term]); 
+        analytics('send', 'event', 'interaction', 'autocomplete-used, [term]); 
  
-        analytics('send', 'event', 'interaction', ‘fielded-query-submitted-from-search-bar’, “[query]”); 
+        analytics('send', 'event', 'interaction', 'fielded-query-submitted-from-search-bar', '[query]'); 
 
-        analytics('send', 'event', 'interaction', ‘unfielded-query-submitted-from-search-bar’ “[query]”);  
+        analytics('send', 'event', 'interaction', 'unfielded-query-submitted-from-search-bar' '[query]');  
  
-        analytics('send', 'event', 'interaction', ‘facet-applied’, “[facet-type:facet-val]”); 
+        analytics('send', 'event', 'interaction', 'facet-applied', '[facet-type:facet-val]'); 
 
-        analytics('send', 'event', 'interaction', ‘sort-applied’, “[sort-type]”); 
+        analytics('send', 'event', 'interaction', 'sort-applied', '[sort-type]'); 
 
 
    Results Page Interactions
 
-        analytics('send', 'event', 'interaction', ‘results-list-pagination’, “[page]”); 
+        analytics('send', 'event', 'interaction', 'results-list-pagination', '[page]'); 
 
-        analytics('send', 'event', 'interaction', ‘abstracts-toggled-on’); 
-	
+        analytics('send', 'event', 'interaction', 'abstracts-toggled-on'); 
 
-
-       analytics('send', 'event', 'interaction', ‘letter-link-followed’, “[link-type]”); 
+        analytics('send', 'event', 'interaction', 'letter-link-followed', '[link-type]');
 
 
-   Abstract Page
+   Abstract Page Interactions
 
-        analytics('send', 'event', 'interaction', ‘full-text-link-followed’, “[link-type]”); 
+        analytics('send', 'event', 'interaction', 'full-text-link-followed', '[link-type]'); 
 
-        analytics('send', 'event', 'interaction', ‘suggested-article-link-followed’, “[link-type]”); 
+        analytics('send', 'event', 'interaction', 'suggested-article-link-followed', '[link-type]'); 
 
 
 
