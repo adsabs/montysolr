@@ -272,7 +272,10 @@ define([
         "select .q" : "storeCursorInfo",
         "click .q" : "storeCursorInfo",
         "keypress #search-form-container" : function(){
-          analytics('send', 'event', 'interaction', 'querybuilder-keypress');
+          //for analytics
+          //this is not exact (might have experimented then closed the builder)
+          // but it's close enough
+          this._queryBuilderUsed = true;
         }
       },
 
@@ -458,6 +461,15 @@ define([
         else {
           analytics('send', 'event', 'interaction', 'unfielded-query-submitted-from-search-bar', query);
         }
+
+        //was querybuilder used?
+        if (this._queryBuilderUsed){
+          analytics('send', 'event', 'interaction', 'querybuilder-used', query);
+
+        }
+
+        //reset
+        this._queryBuilderUsed = false;
       }
     });
 
