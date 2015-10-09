@@ -218,7 +218,7 @@ define([
       $w = widget.render().$el;
 
       var data =  {
-          fullTextSources : [{openAccess: false, title: "Publisher Article", link: "fakelink", openUrl: true}]
+          fullTextSources : [{openAccess: false, title: "Find it at your institution", link: "fakelink", openUrl: true}]
 
         };
 
@@ -227,7 +227,7 @@ define([
 
     $("#test").append($w);
 
-      expect($("#test").find(".resources-widget a").html().trim()).to.eql('Find it at your institution\n            <i class="fa fa-university" data-toggle="tooltip" data-placement="top" title="" data-original-title="This resource is available through your institution."></i>' );
+      expect($("#test").find(".resources-widget a").html().trim()).to.eql('Find it at your institution\n                <i class="fa fa-university" data-toggle="tooltip" data-placement="top" title="" data-original-title="This resource is available through your institution."></i>');
 
       $("#test").empty();
 
