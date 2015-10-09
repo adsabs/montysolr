@@ -63,7 +63,9 @@
                 </ul>
             </div>
             <div class="col-sm-5 s-per-page-controls">
-                Show <input class="per-page" type="text" placeholder="{{perPage}}"/> per page
+                {{#if pageData}}
+                    Show <input class="per-page" type="text" placeholder="{{perPage}}"/> per page
+                {{/if}}
             </div>
         </div>
     </div>

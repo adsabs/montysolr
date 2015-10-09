@@ -4,15 +4,18 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
-    'hbs!./templates/item-template'
+    'hbs!./templates/item-template',
+    'analytics'
   ],
 
-  function (Marionette,
+  function (
+            Marionette,
             Backbone,
             ApiRequest,
             ApiQuery,
             BaseWidget,
-            ItemTemplate
+            ItemTemplate,
+            analytics
     ) {
 
     var ItemView = Marionette.ItemView.extend({

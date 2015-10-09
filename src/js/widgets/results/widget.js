@@ -58,15 +58,11 @@ define([
           this.trigger("toggle-all", flag);
         }
 
-        //this event should only be called on Results widget child of list_of_things widget
-        this.view.sendPaginationEvent = function(e){
-          analytics('send', 'event', 'interaction', 'results-list-pagination', $(e.target).data("paginate"));
-        }
-
         _.extend(this.view.events, {
-          'click input#select-all-docs': 'toggleAll',
-          'click a[data-paginate]' : 'sendPaginationEvent'
+          'click input#select-all-docs': 'toggleAll'
         });
+
+        this.view.resultsWidget = true;
 
         this.view.delegateEvents();
 

@@ -200,11 +200,15 @@ define([
       },
 
       changePage: function (e) {
+        e.preventDefault();
         var d = $(e.target).data("paginate");
         this.trigger('pagination:select', d);
-        e.preventDefault();
         //scroll to top in preparation for loading of new records
         document.body.scrollTop = document.documentElement.scrollTop = 0;
+
+        if (this.resultsWidget){
+          analytics('send', 'event', 'interaction', 'results-list-pagination', d);
+        }
       },
 
       changePerPage: _.debounce(function (e) {
