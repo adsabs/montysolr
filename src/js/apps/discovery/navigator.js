@@ -578,6 +578,8 @@ define([
         });
         this.set('ShowGraphics', function(id, data) {
           showDetail([id].concat(detailsPageAlwaysVisible), id);
+          this.route = data.href;
+
         });
       }
 

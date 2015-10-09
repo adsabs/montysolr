@@ -638,7 +638,7 @@ module.exports = function(grunt) {
             "widgets/success/view.js": 60,
             "widgets/library_individual/views/view_library.js": 67,
             "components/library_controller.js" : 66,
-            "widgets/wordcloud/widget.js": 79,
+            "widgets/wordcloud/widget.js": 78,
             "components/analytics.js": 71,
             "wraps/landing_page_manager/landing_page_manager" : 48
           }
