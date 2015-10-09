@@ -91,11 +91,7 @@ define(['js/mixins/link_generator_mixin'],
 
         expect(JSON.stringify(dataWithLinks[0].links.list)).to.eql('[{"letter":"C","title":"Citations (62)","link":"#abs/1993A&A...277..309L/citations"},{"letter":"R","title":"References (8)","link":"#abs/1993A&A...277..309L/references"},{"letter":"T","title":"Table of Contents","link":"#abs/1993A&A...277..309L/tableofcontents"}]');
 
-        expect(JSON.stringify(dataWithLinks[0].links.text)).to.eql('[{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},'+
-        '{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"},'+
-        '{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},'+
-        '{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=PREPRINT"},'+
-        '{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=EJOURNAL","openUrl":false}]');
+        expect(JSON.stringify(dataWithLinks[0].links.text)).to.eql('[{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=GIF"},{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=ARTICLE"},{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=EJOURNAL"},{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=PREPRINT"}]');
 
         expect(JSON.stringify(dataWithLinks[0].links.data)).to.eql('[{"title":"SIMBAD objects (10)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=SIMBAD"},'+
         '{"title":"NED objects (3)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1993A&A...277..309L&link_type=NED"},'+
@@ -131,7 +127,7 @@ define(['js/mixins/link_generator_mixin'],
           }
         });
 
-        expect(JSON.stringify(dataWithLinks.fullTextSources)).to.eql('[{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF"},{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=PREPRINT"},{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=EJOURNAL","openUrl":false}]');
+        expect(JSON.stringify(dataWithLinks.fullTextSources)).to.eql('[{"openAccess":true,"title":"ADS PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":false,"title":"ADS Scanned Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=GIF"},{"openAccess":true,"title":"Publisher PDF","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=ARTICLE"},{"openAccess":true,"title":"Publisher Article","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=EJOURNAL"},{"openAccess":true,"title":"arXiv e-print","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=PREPRINT"}]');
         expect(JSON.stringify(dataWithLinks.dataProducts)).to.eql('[{"title":"SIMBAD objects (10)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=SIMBAD"},{"title":"NED objects (3)","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=NED"},{"title":"Archival Data","link":"http://adsabs.harvard.edu/cgi-bin/nph-data_query?bibcode=1989RMxAA..18..125C&link_type=DATA"}]');
 
 
@@ -171,9 +167,9 @@ define(['js/mixins/link_generator_mixin'],
 
         // Check that an openURL is created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("doi:10.1093/mnras/stv960");
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain("MyBaseURL");
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(true);
+        expect(_.where(output.text, {title : "Find it at your institution"})[0]["link"]).to.contain("doi:10.1093/mnras/stv960");
+        expect(_.where(output.text, {title : "Find it at your institution"})[0]["link"]).to.contain("MyBaseURL");
+        expect(_.where(output.text, {title : "Find it at your institution"})[0]["openUrl"]).to.eql(true);
 
       });
 
@@ -211,8 +207,8 @@ define(['js/mixins/link_generator_mixin'],
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+        expect(_.where(output.text, {title : "Find it at your institution"}).length).to.eql(0);
+
 
       });
 
@@ -250,8 +246,7 @@ define(['js/mixins/link_generator_mixin'],
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+        expect(_.where(output.text, {title : "Find it at your institution"}).length).to.eql(0);
 
       });
 
@@ -288,8 +283,7 @@ define(['js/mixins/link_generator_mixin'],
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+        expect(_.where(output.text, {title : "Find it at your institution"}).length).to.eql(0);
 
       });
 
@@ -327,8 +321,7 @@ define(['js/mixins/link_generator_mixin'],
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+        expect(_.where(output.text, {title : "Find it at your institution"}).length).to.eql(0);
 
       });
 
@@ -364,8 +357,7 @@ define(['js/mixins/link_generator_mixin'],
 
         // Check that an openURL is NOT created
         var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain("url_ver");
-        expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(false);
+        expect(_.where(output.text, {title : "Find it at your institution"}).length).to.eql(0);
 
         // Check that an openURL IS created
         var identifierList = ['isbn', 'issn', 'doi'];
@@ -376,13 +368,13 @@ define(['js/mixins/link_generator_mixin'],
 
           stub_meta_data[identifierList[i]] = 'fake'
           var output = mixin.getTextAndDataLinks(stub_links_data, stub_meta_data.bibcode, stub_meta_data);
-          expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.contain(identifierList[i]);
+          expect(_.where(output.text, {title : "Find it at your institution"})[0]["link"]).to.contain(identifierList[i]);
           tempIdentifiers.forEach(function (value){
-            expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain(value);
-            expect(_.where(output.text, {title : "Publisher Article"})[0]["link"]).to.not.contain(value);
+            expect(_.where(output.text, {title : "Find it at your institution"})[0]["link"]).to.not.contain(value);
+            expect(_.where(output.text, {title : "Find it at your institution"})[0]["link"]).to.not.contain(value);
           });
 
-          expect(_.where(output.text, {title : "Publisher Article"})[0]["openUrl"]).to.eql(true);
+          expect(_.where(output.text, {title : "Find it at your institution"})[0]["openUrl"]).to.eql(true);
 
           stub_meta_data[identifierList[i]] = undefined
 

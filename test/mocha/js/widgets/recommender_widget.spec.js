@@ -66,7 +66,7 @@ define([
 
       r.processResponse(new JsonResponse(testData));
       
-      expect($("#test").find("i.icon-help").data("content")).to.eql('These recommendations are based on a number of factors, including text similarity, citations, and co-readership information.')
+      expect($("#test").find("i.icon-help").data("content")).to.eql("These recommendations are based on a number of factors, including text similarity, citations, and co-readership information. This feature is still in beta.");
     });
 
     it("extends from BaseWidget and can communicate with pubsub and its page controller through loadBibcodeData function", function() {

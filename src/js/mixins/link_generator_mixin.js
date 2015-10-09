@@ -68,7 +68,9 @@ var linkGenerator = {
 
   getTextAndDataLinks: function (links_data, bib, data) {
 
-    var link_types, links = { text : [], data : []};
+    var link_types, links = { text : [], data : []},
+        scan_available, article_identifier, openURL,
+        archival, single, groups, order;
 
     link_types = _.filter(_.map(links_data, function (d) {
       try {
@@ -90,17 +92,12 @@ var linkGenerator = {
           break;
         case "electr":
 
-          var electr_link, openUrl;
-          var scan_available =_.where(link_types, {"type": "gif"}).length > 0;
+          scan_available =_.where(link_types, {"type": "gif"}).length > 0;
 
-          data = (data !== undefined) ? data : {};
-          var link_server = (data.link_server !== undefined) ? data.link_server : false;
+          data = data || {};
 
           // Determine if the article has any identifiers
-          var article_doi = (data.doi !== undefined) ? true : false;
-          var article_issn = (data.issn !== undefined) ? true : false;
-          var article_isbn = (data.isbn !== undefined) ? true : false;
-          var article_identifier = (article_doi || article_issn || article_isbn);
+          article_identifier = data.doi || data.issn || data.isbn;
 
           // Only create an openURL if the following is true:
           //   - The article HAS a DOI
@@ -109,17 +106,13 @@ var linkGenerator = {
           //   - The user is authenticated
           //   - the user HAS a library link server
 
-          if (!l.access && !scan_available && link_server && article_identifier){
-            var openURL = new OpenURLGenerator(data, link_server);
+          if (!l.access && !scan_available && data.link_server && article_identifier){
+            openURL = new OpenURLGenerator(data, data.link_server);
             openURL.createOpenURL();
-            electr_link = openURL.openURL;
-            openUrl = true;
-          } else {
-            electr_link = this.adsUrlRedirect('electr', bib);
-            openUrl = false;
+            links.text.push({openAccess: openAccess, title: "Find it at your institution", link: openURL.openURL, openUrl: true});
           }
-
-          links.text.push({openAccess: openAccess, title: "Publisher Article", link: electr_link, openUrl: openUrl});
+          //always add the electronic link article, even if there was an openurl added above
+          links.text.push({openAccess: openAccess, title: "Publisher Article", link: this.adsUrlRedirect('electr', bib)});
           break;
         case "pdf":
           links.text.push({openAccess: openAccess, title: "Publisher PDF", link: this.adsUrlRedirect('article', bib)});
@@ -148,16 +141,16 @@ var linkGenerator = {
 
     //get rid of links.data duplicates for the "Archival Data" (but add a parenthesis indicating how many)
     // since I guess the "instances" key isn't working correctly in this case
-     var archival = _.where(links.data, {link :  this.adsUrlRedirect('data', bib) });
+     archival = _.where(links.data, {link :  this.adsUrlRedirect('data', bib) });
     if (archival.length > 1 ){
-      var single = {title : "Archival Data (" + archival.length + ")", link : this.adsUrlRedirect('data', bib)};
+      single = {title : "Archival Data (" + archival.length + ")", link : this.adsUrlRedirect('data', bib)};
       //remove all archival links
       links.data = _.filter(links.data, function(d){if (!d.title.match("Archival Data")){return true }});
       links.data.push(single);
     }
 
     //get rid of text duplicates and default to open access
-    var groups = _.groupBy(links.text, "title");
+    groups = _.groupBy(links.text, "title");
     _.each(groups, function(v,k){
 
       var singleVersion;
@@ -172,6 +165,12 @@ var linkGenerator = {
         links.text.push(singleVersion);
       }
 
+    });
+
+    //finally, sort the links.text
+   order = ["ADS PDF", "ADS Scanned Article", "Find it at your institution", "Publisher PDF", "Publisher Article", "arXiv e-print"];
+   links.text = _.sortBy(links.text, function(l){
+      return order.indexOf(l.title);
     });
 
     return links
