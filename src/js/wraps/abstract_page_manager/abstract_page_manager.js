@@ -67,7 +67,7 @@ define([
       ShowTableOfContents : {"title": "Volume Content", "path":"tableofcontents", "category":"view", "showCount": false},
       ShowSimilar : {"title": "Similar Papers", "path":"similar", "category":"view"},
       ShowGraphics : {"title": "Graphics", "path":"graphics", "showCount": false, "category":"view"},
-      ShowPaperMetrics : {"title": "Metrics", "path":"metrics", "showCount": false, "category":"view"},
+      ShowMetrics : {"title": "Metrics", "path":"metrics", "showCount": false, "category":"view"},
       ShowPaperExport__bibtex : {"title": "in BibTEX", "path":"export/bibtex", "category":"export", "alwaysThere":"true"},
       ShowPaperExport__aastex : {"title": "in AASTex", "path":"export/aastex", "category":"export", "alwaysThere":"true"},
       ShowPaperExport__endnote : {"title": "in Endnote", "path":"export/endnote", "category":"export", "alwaysThere":"true"}

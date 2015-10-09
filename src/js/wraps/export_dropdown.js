@@ -25,11 +25,6 @@ define([
   var rightAlign = true;
   var selectedOption = true;
 
-  function analyticsCallback(){
-    debugger
-  }
-
-
   return function(){
 
     var Dropdown = new DropdownWidget({
@@ -39,7 +34,6 @@ define([
       iconClass: iconClass,
       rightAlign : rightAlign,
       selectedOption : selectedOption,
-      analyticsCallback : analyticsCallback
     });
 
     return Dropdown;

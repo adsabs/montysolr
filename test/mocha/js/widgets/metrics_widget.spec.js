@@ -1094,5 +1094,329 @@ define([
 
 
     });
+
+    it("should render citations and references only for 1 bibcode", function(){
+
+//    same as above but with diff "number of papers" in basic stats
+      var testDataOne =  {
+        "basic stats": {
+          "average number of downloads": 19.275862068965516,
+          "average number of reads": 63.86206896551724,
+          "median number of downloads": 3.0,
+          "median number of reads": 52.0,
+          "normalized paper count": 7.291269841269841,
+          "number of papers": 1,
+          "recent number of downloads": 78,
+          "recent number of reads": 204,
+          "total number of downloads": 559,
+          "total number of reads": 1852
+        },
+        "basic stats refereed": {
+          "average number of downloads": 62.0,
+          "average number of reads": 148.0,
+          "median number of downloads": 62.0,
+          "median number of reads": 148.0,
+          "normalized paper count": 0.125,
+          "number of papers": 1,
+          "recent number of downloads": 2,
+          "recent number of reads": 5,
+          "total number of downloads": 62,
+          "total number of reads": 148
+        },
+        "citation stats": {
+          "average number of citations": 2.125,
+          "average number of refereed citations": 0.375,
+          "median number of citations": 2.0,
+          "median number of refereed citations": 0.0,
+          "normalized number of citations": 6.430555555555555,
+          "normalized number of refereed citations": 1.5833333333333333,
+          "number of citing papers": 15,
+          "number of self-citations": 5,
+          "total number of citations": 17,
+          "total number of refereed citations": 3
+        },
+        "citation stats refereed": {
+          "average number of citations": 1.0,
+          "average number of refereed citations": 0.0,
+          "median number of citations": 1.0,
+          "median number of refereed citations": 0.0,
+          "normalized number of citations": 0.125,
+          "normalized number of refereed citations": 0.0,
+          "number of citing papers": 1,
+          "number of self-citations": 0,
+          "total number of citations": 1,
+          "total number of refereed citations": 0
+        },
+        "histograms": {
+          "citations": {
+            "nonrefereed to nonrefereed": {
+              "2011": 1,
+              "2012": 5,
+              "2013": 3,
+              "2014": 2,
+              "2015": 2
+            },
+            "nonrefereed to nonrefereed normalized": {
+              "2011": 0.1111111111111111,
+              "2012": 2.861111111111111,
+              "2013": 0.9444444444444444,
+              "2014": 0.4444444444444444,
+              "2015": 0.3611111111111111
+            },
+            "nonrefereed to refereed": {
+              "2011": 0,
+              "2012": 0,
+              "2013": 0,
+              "2014": 1,
+              "2015": 0
+            },
+            "nonrefereed to refereed normalized": {
+              "2011": 0,
+              "2012": 0,
+              "2013": 0,
+              "2014": 0.125,
+              "2015": 0
+            },
+            "refereed to nonrefereed": {
+              "2011": 1,
+              "2012": 1,
+              "2013": 0,
+              "2014": 1,
+              "2015": 0
+            },
+            "refereed to nonrefereed normalized": {
+              "2011": 0.25,
+              "2012": 0.3333333333333333,
+              "2013": 0,
+              "2014": 1.0,
+              "2015": 0
+            },
+            "refereed to refereed": {
+              "2011": 0,
+              "2012": 0,
+              "2013": 0,
+              "2014": 0,
+              "2015": 0
+            },
+            "refereed to refereed normalized": {
+              "2011": 0,
+              "2012": 0,
+              "2013": 0,
+              "2014": 0,
+              "2015": 0
+            }
+          },
+          "downloads": {
+            "all downloads": {
+
+              "2010": 16,
+              "2011": 85,
+              "2012": 145,
+              "2013": 80,
+              "2014": 155,
+              "2015": 78
+            },
+            "all downloads normalized": {
+
+              "2010": 1.7777777777777777,
+              "2011": 46.75,
+              "2012": 46.94444444444444,
+              "2013": 23.069444444444443,
+              "2014": 37.361111111111114,
+              "2015": 14.890079365079362
+            },
+            "refereed downloads": {
+
+              "2012": 26,
+              "2013": 18,
+              "2014": 16,
+              "2015": 2
+            },
+            "refereed downloads normalized": {
+
+              "2012": 3.25,
+              "2013": 2.25,
+              "2014": 2.0,
+              "2015": 0.25
+            }
+          },
+          "publications": {
+            "all publications": {
+              "2011": 8,
+              "2012": 6,
+              "2013": 4,
+              "2014": 3,
+              "2015": 9
+            },
+            "all publications normalized": {
+              "2011": 3.166666666666667,
+              "2012": 1.9444444444444444,
+              "2013": 0.5178571428571428,
+              "2014": 0.375,
+              "2015": 1.2873015873015876
+            },
+            "refereed publications": {
+              "2011": 0,
+              "2012": 0,
+              "2013": 1,
+              "2014": 0,
+              "2015": 0
+            },
+            "refereed publications normalized": {
+              "2011": 0,
+              "2012": 0,
+              "2013": 0.125,
+              "2014": 0,
+              "2015": 0
+            }
+          },
+          "reads": {
+            "all reads": {
+
+              "2010": 37,
+              "2011": 368,
+              "2012": 428,
+              "2013": 371,
+              "2014": 444,
+              "2015": 204
+            },
+            "all reads normalized": {
+
+              "2010": 4.111111111111111,
+              "2011": 137.16666666666666,
+              "2012": 126.66666666666666,
+              "2013": 96.9107142857143,
+              "2014": 87.63492063492063,
+              "2015": 37.39801587301587
+            },
+            "refereed reads": {
+
+              "2012": 56,
+              "2013": 57,
+              "2014": 30,
+              "2015": 5
+            },
+            "refereed reads normalized": {
+
+              "2012": 7.0,
+              "2013": 7.125,
+              "2014": 3.75,
+              "2015": 0.625
+            }
+          }
+        },
+        "indicators": {
+          "g": 3,
+          "h": 3,
+          "i10": 0,
+          "i100": 0,
+          "m": 0.6,
+          "read10": 37.39801587301587,
+          "riq": 165,
+          "tori": 0.6887780112044819
+        },
+        "indicators refereed": {
+          "g": 1,
+          "h": 1,
+          "i10": 0,
+          "i100": 0,
+          "m": 0.3333333333333333,
+          "read10": 0.625,
+          "riq": 34,
+          "tori": 0.010416666666666666
+        },
+        "skipped bibcodes": [],
+        "time series": {
+          "g": {
+            "2011": 1,
+            "2012": 2,
+            "2013": 3,
+            "2014": 3,
+            "2015": 3
+          },
+          "h": {
+            "2011": 1,
+            "2012": 1,
+            "2013": 2,
+            "2014": 2,
+            "2015": 2
+          },
+          "i10": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 0,
+            "2014": 0,
+            "2015": 0
+          },
+          "i100": {
+            "2011": 0,
+            "2012": 0,
+            "2013": 0,
+            "2014": 0,
+            "2015": 0
+          },
+          "read10": {
+            "2011": 89.5,
+            "2012": 119.66666666666666,
+            "2013": 96.9107142857143,
+            "2014": 82.19047619047619,
+            "2015": 37.39801587301587
+          },
+          "tori": {
+            "2011": 0.04820261437908496,
+            "2012": 0.15058356676003734,
+            "2013": 0.3394724556489262,
+            "2014": 0.6387780112044817,
+            "2015": 0.6887780112044819
+          }
+        }
+      }
+
+      var minsub = new (MinimalPubSub.extend({
+        request: function (apiRequest) {
+          this.counter = this.counter || 0;
+          if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter == 0) {
+            this.counter++;
+            return {
+              "responseHeader": {
+                "status": 0,
+                "QTime": 1,
+                "params": {
+                  "fl": "bibcode",
+                  "indent": "true",
+                  "wt": "json",
+                  "rows": 200,
+                  "q": "bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
+              "response": {"numFound": 1, "start": 0, "docs": [
+                {
+                  "bibcode": "1980ApJS...44..489B"
+                },
+
+              ]
+              }}
+          }
+          //just to be explicit
+          else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS ) {
+            this.counter++;
+            return JSON.parse(JSON.stringify(testDataOne));
+          }
+        }
+      }))({verbose: false});
+
+      var metricsWidget = new MetricsWidget();
+      metricsWidget.activate(minsub.beehive.getHardenedInstance());
+
+      $("#test").append(metricsWidget.view.render().el);
+
+      //provide widget with current query
+      minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
+
+      metricsWidget.showMetricsForCurrentQuery();
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 1\n    \n    paper.\n    \n \nChange to first  paper(s) (max is 1).\n Submit');
+
+      expect($("#test").find("h3:visible").text()).to.eql("CitationsReads");
+
+
+    })
   })
 });

@@ -3,13 +3,16 @@ define([
   "js/components/api_query",
   "hbs!./form",
   "./topterms",
-  "jquery-ui"
-], function(
+  "jquery-ui",
+  "analytics"
+],
+  function(
   BaseWidget,
   ApiQuery,
   FormTemplate,
   AutocompleteData,
-  JQueryUI
+  JQueryUI,
+  analytics
   ){
 
 
@@ -91,7 +94,7 @@ define([
         q: query
       });
 
-      this.getPubSub.publish(this.getPubSub.START_SEARCH, newQuery);
+      this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
 
       analytics('send', 'event', 'interaction', 'paper-form-submit', JSON.stringify(query));
 
