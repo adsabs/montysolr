@@ -38,6 +38,10 @@ define([
           if (self.hasReads(data) || self.hasCitations(data)){
             self.trigger('page-manager-event', 'widget-ready', {isActive: true, widget : self});
           }
+          if (self._waiting) {
+            self.onShow();
+            self._waiting = false;
+          }
           });
       },
 
@@ -59,6 +63,10 @@ define([
 
       onShow : function(){
         var response = this.containerModel.get("data");
+        if (!response) {
+          this._waiting = true;
+          return
+        }
         this.createTableViews(response, 1);
         this.createGraphViewsForOnePaper(response);
         this.insertViewsForOnePaper(response);

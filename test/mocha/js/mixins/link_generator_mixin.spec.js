@@ -332,6 +332,7 @@ define(['js/mixins/link_generator_mixin'],
 
       });
 
+
       it("should not generate an openURL at all if there is no DOI/ISSN/ISBN", function (){
         /**
          * Test passes the following situation

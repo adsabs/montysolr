@@ -1256,14 +1256,19 @@ define([
       },
 
       activate: function (beehive) {
-        this.setBeeHive(beehive);
 
+        this.setBeeHive(beehive);
         _.bindAll(this, "setOriginalQuery", "processResponse");
         var pubsub = this.getPubSub();
         //custom dispatchRequest function goes here
         pubsub.subscribe(pubsub.INVITING_REQUEST, this.setOriginalQuery);
         //custom handleResponse function goes here
         pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+        //on initialization, store the current query
+        if (this.getBeeHive().getObject("AppStorage")){
+          this.setCurrentQuery(this.getBeeHive().getObject("AppStorage").getCurrentQuery());
+        }
       },
 
       //cache this so that the "broadcastFilteredResponse" still works even if user is looking at a

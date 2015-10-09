@@ -966,10 +966,13 @@ define([
       this.setBeeHive(beehive);
       _.bindAll(this, "setCurrentQuery", "processResponse");
       var pubsub = this.getPubSub();
-      //custom dispatchRequest function goes here
       pubsub.subscribe(pubsub.INVITING_REQUEST, this.setCurrentQuery);
-      //custom handleResponse function goes here
       pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+
+      //on initialization, store the current query
+      if (this.getBeeHive().getObject("AppStorage")) {
+        this.setCurrentQuery(this.getBeeHive().getObject("AppStorage").getCurrentQuery());
+      }
     },
 
     //fetch data

@@ -266,8 +266,6 @@ define([
       $("#test").append(u.view.render().el);
 
       u.setSubView("token");
-      debugger
-
       expect($("#test input").val()).to.eql("current_token");
 
       $("#test button[type=submit]").click();
