@@ -41,7 +41,6 @@ define([
     ) {
 
 
-
     var ListOfThingsWidget = BaseWidget.extend({
       initialize: function (options) {
         options = options || {};
@@ -57,7 +56,10 @@ define([
           start: 0,
           pageData: undefined
         };
+
         options.pagination = _.defaults(options.pagination || {}, defaultPagination);
+
+        this.pagination = options.pagination;
 
         if (!options.collection) {
           options.collection = new PaginatedCollection();
@@ -302,7 +304,7 @@ define([
       reset: function() {
         this.collection.reset();
         this.hiddenCollection.reset();
-        this.model.clear().set(this.model.defaults());
+        this.model.set(_.extend(this.pagination, this.model.defaults()));
       }
 
     });
