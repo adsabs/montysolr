@@ -1,19 +1,22 @@
 
 define([
-    'underscore',
     'js/widgets/list_of_things/details_widget'
   ],
 
-  function (  _,  ListOfThingsWidget) {
+  function (
+    DetailsWidget
+    ) {
 
-    var Widget = ListOfThingsWidget.extend({
-      queryOperator : "citations",
-      sortOrder : "date desc",
-      description : "Papers which cite",
-      operator : true
+    var Citations = function(){
+      var options = {
+        queryOperator : "citations",
+        sortOrder : "date desc",
+        description : "Papers which cite",
+        operator : true
+      }
+      return new DetailsWidget(options);
+    }
 
-    });
-
-    return Widget;
+    return Citations
 
   });

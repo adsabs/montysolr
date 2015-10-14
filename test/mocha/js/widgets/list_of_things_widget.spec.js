@@ -256,14 +256,14 @@ define(['marionette',
       it(" the item view allows the user to view the lsit in a search results page if 'operator' option is true and 'queryOperator' option is set", function() {
 
         var coll = new PaginatedCollection();
-        var view = new PaginatedView({collection: coll, "operator": true, queryOperator: "citations"});
+        var view = new PaginatedView({collection: coll});
         var docs = test1().response.docs;
 
         _.each(docs, function (d) {
           view.collection.add(_.clone(d));
         });
 
-        view.model.set("bibcode", "foo")
+        view.model.set({"bibcode" :  "foo", queryOperator: "citations"})
 
         var $w = $(view.render().el);
         $('#test').append($w);

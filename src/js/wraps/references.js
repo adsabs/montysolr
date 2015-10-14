@@ -1,19 +1,21 @@
 
 define([
-    'underscore',
     'js/widgets/list_of_things/details_widget'
   ],
 
-  function (  _,  ListOfThingsWidget) {
+  function (  DetailsWidget) {
 
-    var Widget = ListOfThingsWidget.extend({
-      queryOperator : "references",
-      sortOrder: "first_author asc",
-      description : "Papers referenced by",
-      //show how to get this info from solr
-      operator : true
-    });
+    var References = function(){
+      var options = {
+        queryOperator : "references",
+        sortOrder: "first_author asc",
+        description : "Papers referenced by",
+        //show how to get this info from solr
+        operator : true
+      }
+      return new DetailsWidget(options);
+    }
 
-    return Widget;
+    return References;
 
   });
