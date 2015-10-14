@@ -1,40 +1,37 @@
-
-    <div class="row s-message-control-row" id="message-control-row">
-        <div data-widget="AlertsWidgetx"/>
+<div class="row">
+    <div class="col-sm-12">
+        <div data-widget="UserNavbarWidget"/>
     </div>
+</div>
+<div class="nav-button-container s-nav-button-container row">
+    <button class="btn btn-primary-faded toggle-menu s-toggle-menu "> <i class="fa fa-bars"></i> Show Menu </button>
+</div>
 
-    <div class="row">
-        <div class="col-sm-12">
-           <div data-widget="UserNavbarWidget"/>
-        </div>
+<div class="row s-darker-background">
+
+    <div class="col-sm-2 nav-container s-nav-container"></div>
+
+    <div class="col-sm-10">
+        <div data-widget="UserSettings"/>
+        <div data-widget="UserPreferences"/>
     </div>
+</div>
 
-    <div class="row s-darker-background">
-
-        <div class="col-sm-2 no-right-padding">
-            <div class="nav-container"></div>
-        </div>
-        <div class="col-sm-10">
-            <div data-widget="UserSettings"/>
-            <div data-widget="UserPreferences"/>
-        </div>
-    </div>
-
-    <!--show this when user enters information and navigates away-->
-    <div class="modal fade confirm-modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Confirm navigation</h4>
-                </div>
-                <div class="modal-body">
-                    <p>You are leaving an unsubmitted form. The data you have entered will be lost. </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default stay-on-form" data-dismiss="modal"> Stay on form</button>
-                    <button type="button" class="btn btn-primary leave-form" data-dismiss="modal"> Leave form</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+<!--show this when user enters information and navigates away-->
+<div class="modal fade confirm-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Confirm navigation</h4>
+            </div>
+            <div class="modal-body">
+                <p>You are leaving an unsubmitted form. The data you have entered will be lost. </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default stay-on-form" data-dismiss="modal"> Stay on form</button>
+                <button type="button" class="btn btn-primary leave-form" data-dismiss="modal"> Leave form</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

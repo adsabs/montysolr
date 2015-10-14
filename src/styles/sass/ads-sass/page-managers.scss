@@ -160,15 +160,6 @@ s-search-bar-motion is applied */
   }
 }
 
-.s-right-column{
-
-  @media(max-width: $screen-sm-max){
-    padding-left: 15px;
-    padding-right: 0;
-  }
-
-}
-
 .btn-upside-down i {
   transform : rotate(-180deg);
 }
@@ -233,25 +224,6 @@ Styles for Abstract Page
 .s-right-col-widget-title.disabled {
   color: $gray-lighter;
 }
-/*
-overriding bootstrap col widths
-*/
-
-.s-abstract-page-layout {
-
-  .col-sm-3 {
-    width : 23%;
-  }
-
-  .col-sm-7 {
-  width : 62.333333%
-  }
-
-  .col-sm-2 {
-  width : 14.666667%;
-  }
-}
-
 
 .s-landing-page-layout {
 
