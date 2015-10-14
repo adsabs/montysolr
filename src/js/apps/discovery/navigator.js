@@ -497,40 +497,40 @@ define([
           }
         });
 
-        this.set('show-author-network', function() {
+        function showResultsPageWidgetWithUniqueUrl (command){
+
+          var q = app.getObject('AppStorage').getCurrentQuery();
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+          var widgetName = _.map(command.split("-").slice(1), function(w){return w[0].toUpperCase() + w.slice(1)}).join("");
           app.getObject('MasterPageManager').show('SearchPage',
-            ['AuthorNetwork'].concat(searchPageAlwaysVisible.slice(1)));
-        });
-        this.set('show-wordcloud', function() {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          app.getObject('MasterPageManager').show('SearchPage',
-            ['WordCloud'].concat(searchPageAlwaysVisible.slice(1)));
+            [widgetName].concat(searchPageAlwaysVisible.slice(1)));
+          this.route =  '#search/' + queryUpdater.clean(q.clone()).url() +
+                        "/" + command.split("-").slice(1).join("-");
+        }
+
+        this.set('show-author-network', function(command) {
+          showResultsPageWidgetWithUniqueUrl.call(this, command);
 
         });
-        this.set('show-paper-network', function() {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          app.getObject('MasterPageManager').show('SearchPage',
-            ['PaperNetwork'].concat(searchPageAlwaysVisible.slice(1)));
+        this.set('show-concept-cloud', function(command) {
+          showResultsPageWidgetWithUniqueUrl.call(this, command);
+
+        });
+        this.set('show-paper-network', function(command) {
+          showResultsPageWidgetWithUniqueUrl.call(this, command);
         });
 
-        this.set('show-bubble-chart', function() {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-          app.getObject('MasterPageManager').show('SearchPage',
-            ['BubbleChart'].concat(searchPageAlwaysVisible.slice(1)));
+        this.set('show-bubble-chart', function(command) {
+          showResultsPageWidgetWithUniqueUrl.call(this, command);
         });
-        this.set('show-metrics', function() {
-          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
-
-          app.getObject('MasterPageManager').show('SearchPage',
-            ['Metrics'].concat(searchPageAlwaysVisible.slice(1)));
+        this.set('show-metrics', function(command) {
+          showResultsPageWidgetWithUniqueUrl.call(this, command);
           app.getWidget("Metrics").done(function(w) {
             w.showMetricsForCurrentQuery();
           });
 
         });
         this.set("visualization-closed", this.get("results-page"));
-
 
         var showDetail = function(pages, toActivate) {
           app.getObject('MasterPageManager').show('DetailsPage',

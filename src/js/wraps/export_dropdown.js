@@ -10,10 +10,10 @@ define([
   //config
 
   var links = [
-    {href : '/export/bibtex' , description : 'in BibTEX' , navEvent: 'export', params : {format: "bibtex"}},
-    {href : '/export/aastex' , description : 'in AASTex' , navEvent: 'export', params : {format: "aastex"}},
-    {href : '/export/endnote' , description : 'in EndNote' , navEvent: 'export', params : {format: "endnote"}},
-    {href : '/export/classic' , description : 'in ADS Classic' , navEvent: 'export', params : {format: "classic"}}
+    { description : 'in BibTEX' , navEvent: 'export', params : {format: "bibtex"}},
+    { description : 'in AASTex' , navEvent: 'export', params : {format: "aastex"}},
+    { description : 'in EndNote' , navEvent: 'export', params : {format: "endnote"}},
+    { description : 'in ADS Classic' , navEvent: 'export', params : {format: "classic"}}
 
     // deactivated, needs the myads microservice
     //{href : '/export/query' , description : 'Export Query' , navEvent: 'export-query'}
