@@ -42,8 +42,8 @@ define([
         if (this.sortOrder){
           q.set("sort", this.sortOrder);
         }
-        if (this.queryOperator) {
-          q.set('q', this.queryOperator + '(' + q.get('q').join(' ') + ')');
+        if (this.model.get("queryOperator")) {
+          q.set('q', this.model.get("queryOperator") + '(' + q.get('q').join(' ') + ')');
         }
         return q;
       },

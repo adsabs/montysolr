@@ -65,7 +65,6 @@ define([
     var ListOfThingsView = Marionette.CompositeView.extend({
 
       constructor: function (options) {
-        var self = this;
         options = options || {};
         if (options) {
           _.defaults(options, _.pick(this, ['model', 'collectionEvents', 'modelEvents']));
@@ -87,12 +86,6 @@ define([
         this.InitialViewClass = Marionette.ItemView.extend({
           template: InitialViewTemplate
         });
-
-        //for instructions on how to view list in results page
-        if (options.operator) {
-          this.model.set("operator", true);
-          this.model.set("queryOperator", options.queryOperator);
-        }
 
       },
 

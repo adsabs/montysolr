@@ -5,16 +5,17 @@ define([
   ],
   function (
     _,
-    ListOfThingsWidget
+    DetailsWidget
     ) {
 
-    var Widget = ListOfThingsWidget.extend({
+    var Widget = DetailsWidget.extend({
+
       customizeQuery: function(apiQuery) {
         var bibcode = this.extractValueFromQuery(apiQuery, 'q', 'bibcode');
         if (!bibcode) {
           return; // ignore
         }
-        var q = ListOfThingsWidget.prototype.customizeQuery.apply(this, arguments);
+        var q = DetailsWidget.prototype.customizeQuery.apply(this, arguments);
 
         if (bibcode[13] == 'E'){ //take first fourteen
           q.set('q', 'bibcode:' + _.first(bibcode, 14).join("")+"*");
@@ -30,11 +31,16 @@ define([
           q.set('q', this.queryOperator + '(' + q.get('q').join(' ') + ')');
         }
         return q;
-      },
-
-      description : "Papers in the same volume as"
+      }
 
     });
 
-    return Widget;
-  });
+    function TOC (){
+      var options =  {description : "Papers in the same volume as"};
+      return new Widget(options);
+    }
+
+    return TOC;
+
+    });
+

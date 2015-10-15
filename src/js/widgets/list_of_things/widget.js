@@ -45,7 +45,6 @@ define([
       initialize: function (options) {
         options = options || {};
 
-
         _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model', 'description']));
 
         var defaultPagination = {
@@ -57,32 +56,23 @@ define([
           pageData: undefined
         };
 
-        options.pagination = _.defaults(options.pagination || {}, defaultPagination);
+        this.pagination = _.defaults(options.pagination || {}, defaultPagination);
 
-        this.pagination = options.pagination;
+        options.collection = options.collection || new PaginatedCollection();
 
-        if (!options.collection) {
-          options.collection = new PaginatedCollection();
-        }
         if (!options.view) {
           //operator instructs view to show a link that has citations:(bibcode) or something similar
-          if (options.model) {
-            options.view = new PaginatedView({collection: options.collection, model: options.model, operator: this.operator, queryOperator : this.queryOperator });
-          }
-          else {
-            options.view = new PaginatedView({collection: options.collection, operator: this.operator, queryOperator : this.queryOperator });
-          }
-        }
-        options.model = options.view.model;
-        options.model.set(options.pagination, {silent: true});
-
-
-        if (options.description){
-          //allow the widget to describe itself at the top of its view
-          options.model.set("description", options.description);
+            options.view = new PaginatedView({collection: options.collection, model: options.model });
         }
 
-        _.extend(this, _.pick(options, ['model', 'view']));
+        options.view.model.set(this.pagination, {silent: true});
+        options.view.model.set({
+                sortOrder : options.sortOrder ? encodeURIComponent(options.sortOrder) :  undefined,
+                queryOperator: options.queryOperator,
+                description: options.description
+              }, {silent : true});
+
+        _.extend(this, {model : options.view.model, view : options.view });
 
         // this is the hidden collection (just to hold data)
         this.hiddenCollection = new PaginatedCollection();

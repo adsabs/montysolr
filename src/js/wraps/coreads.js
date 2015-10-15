@@ -1,17 +1,20 @@
 
 define([
-    'underscore',
     'js/widgets/list_of_things/details_widget'
   ],
 
-  function (  _,  ListOfThingsWidget) {
+  function ( DetailsWidget) {
 
-    var Widget = ListOfThingsWidget.extend({
-      queryOperator : "trending",
-      description : "Papers also read by those who read",
-      operator : true
-    });
+    var CoReads = function(){
+      var options = {
+        queryOperator : "trending",
+        description : "Papers also read by those who read",
+        operator : true
+      };
+      return new DetailsWidget(options);
+    }
 
-    return Widget;
+
+    return CoReads;
 
   });
