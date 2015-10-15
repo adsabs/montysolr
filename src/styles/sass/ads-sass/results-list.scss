@@ -275,6 +275,9 @@ li.article-author {
   .s-back-button-container {
     padding-top: 0;
   }
+  @media (max-width: $screen-md-min){
+       display:none;
+   }
 }
 
 @media (max-width :$screen-sm-min) {

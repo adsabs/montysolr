@@ -59,6 +59,15 @@ define(['config', 'module'], function(config, module) {
           app.start(Router);
           pubsub.publish(pubsub.getCurrentPubSubKey(), pubsub.APP_STARTED);
 
+          $("body").on("click", "button.toggle-menu", function(e){
+                        var $button = $(e.target),
+                             $sidebar =  $button.parents().eq(1).find(".nav-container");
+
+                        $sidebar.toggleClass("show");
+                        var text = $sidebar.hasClass("show") ? '  <i class="fa fa-close"></i> Close Menu' : ' <i class="fa fa-bars"></i> Show Menu';
+                        $button.html(text);
+                      });
+
           var dynConf = app.getObject('DynamicConfig');
           if (dynConf && dynConf.debugExportBBB) {
             console.log('Exposing Bumblebee as global object: window.bbb');

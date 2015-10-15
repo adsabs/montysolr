@@ -2,26 +2,23 @@
 
     <div class="row s-stable-search-bar-height">
         <div class="s-search-bar-full-width-container">
-            <div class="col-sm-2 s-back-button-container">
+            <div class="col-xs-0 col-sm-12 col-md-2 s-back-button-container">
                 {{#if this.query}}
                 <a href="" class="back-button btn btn-sm btn-default"> <i class="fa fa-arrow-left"></i> Back to results</a>
                 {{/if}}
             </div>
-            <div class="col-sm-7 s-search-bar-row" id="search-bar-row" data-widget="SearchWidget"></div>
+            <div class="col-xs-12 col-sm-9 col-md-7 s-search-bar-row" id="search-bar-row" data-widget="SearchWidget"></div>
         </div>
     </div>
-
-    <div class="row s-message-control-row" id="message-control-row">
-        <span data-widget="AlertsWidgetx"></span>
-    </div>
-
+    <div class="row nav-button-container s-nav-button-container">
+       <button class="btn btn-primary-faded toggle-menu s-toggle-menu "> <i class="fa fa-bars"></i> Show Menu </button>
+     </div>
     <div class="row s-dynamic-page-body" id="dynamic-page-body">
         <div class="s-abstract-content">
-            <div class="col-sm-2 s-left-column" id="left-column">
-                <div class="nav-container s-left-col-container">
-                </div>
-            </div>
-            <div class="col-sm-7 s-middle-column" id="middle-column">
+
+            <div class="col-sm-2 nav-container s-nav-container" id="left-column"> </div>
+
+            <div class="col-sm-9 col-md-7 s-middle-column" id="middle-column">
                 <div class="main-content-container s-main-content-container">
                     <div id="abstract-title-container" class="s-abstract-title-container"></div>
                     <div id="current-subview">

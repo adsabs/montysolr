@@ -115,6 +115,12 @@
 #field-options {
   position: relative;
   left: 1.5%;
+  visibility: hidden;
+
+  @media screen and (min-width:$screen-sm-min) {
+    visibility: visible;
+ }
+
 }
 
 .s-field-options {

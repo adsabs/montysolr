@@ -24,7 +24,7 @@ $sidenav-background : $body-bg;
   border-right: 1px solid darken($sidenav-background, 15%);
 
   @media(min-width: $screen-md-min){
-    padding: 15px 0 99999px 0;
+    padding: 0 0 99999px 0;
     margin-bottom: -99999px;
     margin-top: -21px;
   }
@@ -39,7 +39,6 @@ $sidenav-background : $body-bg;
     border-right: 1px solid $gray-lighter;
     margin-top: -7px;
   }
-
 
   .s-main-button-container {
     width: 137px;
@@ -69,8 +68,9 @@ $sidenav-background : $body-bg;
 }
 
 .s-nav-container.show {
-  transform: translate(-15px);
+  transform : translate(-15px);
 }
+
 
 .s-nav {
   padding: 8px 0 8px 6%;
@@ -82,6 +82,7 @@ $sidenav-background : $body-bg;
   &:hover {
     background-color: lighten($gray-lighter, 5%);
     border-left: 5px solid $gray-light;
+
   }
 
   .s-content{
@@ -99,6 +100,17 @@ $sidenav-background : $body-bg;
     border-left: 5px solid $brand-primary-faded;
   }
   background-color: lighten($brand-primary, 58%);
+}
+
+.s-nav-active {
+  border-left: 5px solid $brand-primary-faded;
+  color: $brand-primary-faded;
+  font-weight: 400;
+  &:hover {
+    background-color:lighten($brand-primary, 63%);
+    border-left: 5px solid $brand-primary-faded;
+  }
+  background-color: lighten($brand-primary, 63%);
 }
 
 .s-nav-inactive {
@@ -125,15 +137,13 @@ $sidenav-background : $body-bg;
 
 /*header is for sub-section titles*/
 
-//probably want to use a h1-h6 for this
-
 .s-nav-header{
-  padding: 4%;
   width: 100%;
+  padding: 10px 0 10px 10px;
+  @extend .secondary-header;
   h3 {
+    display: inline;
     @extend .secondary-header;
-    width: 60%;
-    margin:0 2px;
   }
 
   i {
@@ -144,4 +154,3 @@ $sidenav-background : $body-bg;
   }
 
 }
-
