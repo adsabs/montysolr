@@ -74,7 +74,7 @@
         <button class="btn btn-default" disabled="true"><i class="fa fa-arrow-right"></i> View this library in the ADS Search Results Page</button>
     </div>
     <div class="editable-item" data-field="name">
-        <h2>{{name}} <button class="btn btn-link toggle-form"> <i class="fa fa-pencil"></i> edit</button></h2>
+        <h2>{{name}} <button class="btn btn-link toggle-form">edit</button></h2>
         <form class="hidden">
             <label  class="sr-only" for="#edit-library-title"> Change title </label>
             <input class="form-control" type="text" id="edit-library-title" placeholder="{{name}}"/>
@@ -83,7 +83,7 @@
         </form>
     </div>
     <div class="editable-item" data-field="description">
-        <span><b>description</b> <button class="btn btn-link toggle-form"> <i class="fa fa-pencil"></i> edit</button></span>
+        <span><b>description</b> <button class="btn btn-link toggle-form"> edit</button></span>
         <p>
            {{#if description }}{{ description }}{{else}}(none) {{/if}}
         </p>

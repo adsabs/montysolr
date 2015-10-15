@@ -578,7 +578,6 @@ define([
 
       w.libraryCollection.reset(stubData1.solr.response.docs.concat(stubData2.solr.response.docs));
 
-
       expect(w.libraryCollection.length).to.eql(6);
 
       expect($("#test .library-item").length).to.eql(3);
@@ -590,9 +589,6 @@ define([
       expect($("#test .library-item").length).to.eql(3);
 
       expect($("#test .library-item div.identifier").map(function(){return $(this).text().trim()}).get()).to.eql(["2015APS..MAR.L8004M", "2015APS..MAR.L8003E", "2015arXiv150508012D"]);
-
-
-
 
 
     });

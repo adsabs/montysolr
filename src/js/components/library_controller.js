@@ -155,24 +155,42 @@ define([
 
       _getBibcodes : function(options) {
 
-        var deferred = $.Deferred();
+        var deferred = $.Deferred(), that = this;
 
         if (options.bibcodes == "all"){
 
-          var limit = options.limit || 1000;
+          var limit = options.limit || 1000,
+              start = 0,
+              rows = 100,
+              bibcodes = [];
 
-          //fetch bibcodes from solr
           var q = this._currentQuery.clone();
-          q.set("rows", limit);
-          q.set("fl", "bibcode");
+              q.set("rows", 100);
+              q.set("fl", "bibcode");
 
-          this._executeApiRequest(q).done(function(apiResponse){
-            //get bibs here
-            var bibs = _.map(apiResponse.get("response.docs"), function(d){
-              return d.bibcode;
+          function makeRequest(){
+
+            q.set("start", start);
+
+            this._executeApiRequest(q).done(function(apiResponse){
+
+              var bibs = _.map(apiResponse.get("response.docs"), function(d){
+                return d.bibcode;
+              });
+
+              [].push.apply(bibcodes, bibs);
+              start += rows;
+              if (start < limit){
+                makeRequest.call(that);
+              }
+              else {
+                deferred.resolve(bibcodes);
+              }
             });
-            deferred.resolve(bibs);
-          });
+
+          }
+
+          makeRequest.call(this);
 
         }
         else if (options.bibcodes == "selected"){
