@@ -15,6 +15,36 @@ define([
 
   describe("Router", function(){
 
+    it("should handle the search endpoint", function(){
+
+      var r = new Router();
+
+      var beehive = new Beehive();
+
+      var fakePubSub = new PubSub();
+      sinon.spy(fakePubSub, "publish");
+      beehive.addService("PubSub", fakePubSub);
+
+      r.activate(beehive.getHardenedInstance());
+      r.search("q=foo", "metrics");
+
+      expect(fakePubSub.publish.args[0][1]).to.eql("[PubSub]-New-Query");
+      expect(fakePubSub.publish.args[0][2].toJSON()).to.eql({
+        "q": [
+          "foo"
+        ]
+      });
+
+
+      fakePubSub.publish(fakePubSub.pubSubKey, fakePubSub.NAVIGATE, "results-page");
+
+      expect(fakePubSub.publish.args[2][1]).to.eql("[Router]-Navigate-With-Trigger");
+      expect(fakePubSub.publish.args[2][2]).to.eql("show-metrics");
+
+
+
+    })
+
 
     it("should handle the three verify routes which are contained in email links, passing verify token to servers ", function(){
 

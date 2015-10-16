@@ -60,7 +60,7 @@ define([
         'classic-form' : 'classicForm',
         'paper-form' : 'paperForm',
         'index/(:query)': 'index',
-        'search/(:query)': 'search',
+        'search/(:query)/(:widgetName)': 'search',
         'execute-query/(:query)': 'executeQuery',
         'abs/:bibcode(/)(:subView)': 'view',
         'user/orcid*(:subView)' : 'orcidPage',
@@ -90,7 +90,9 @@ define([
 
       },
 
-      search: function (query) {
+      search: function (query, widgetName) {
+        var possibleSearchSubPages = ["metrics", "author-network", "paper-network",
+                                      "concept-cloud", "bubble-chart"];
         if (query) {
           try {
             var q= new ApiQuery().load(query);
@@ -107,7 +109,22 @@ define([
         else {
           this.getPubSub().publish(this.getPubSub().NAVIGATE, 'index-page');
         }
+
+        if (widgetName && possibleSearchSubPages.indexOf(widgetName) > -1){
+          // convention is that a navigate command for search page widget starts with "show-"
+          // waits for the navigate to results page emitted by the discovery_mediator
+          // once the solr search has been received
+          this.getPubSub().subscribeOnce(this.getPubSub().NAVIGATE, _.bind(function(page){
+              if (page == "results-page"){
+                this.getPubSub().publish(this.getPubSub().NAVIGATE, "show-" + widgetName);
+              }
+          }, this));
+        }
+        else if (widgetName && possibleSearchSubPages.indexOf(widgetName) == -1){
+          console.error("Results page subpage not recognized:", widgetName);
+        }
       },
+
 
       executeQuery: function(queryId) {
         this.getPubSub().publish(this.getPubSub().NAVIGATE, 'execute-query', queryId);

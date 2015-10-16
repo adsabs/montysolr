@@ -10,11 +10,11 @@ define([
   //config
 
   var links = [
-    {href : '/results/metrics' , description : 'Citation Metrics' , navEvent: 'show-metrics'},
-    {href : '/results/author-network' , description : 'Author Network' , navEvent: 'show-author-network'},
-    {href : '/results/paper-network' , description : 'Paper Network' , navEvent: 'show-paper-network'},
-    {href : '/results/wordcloud' , description : 'Concept Cloud', navEvent: 'show-wordcloud'},
-    {href : '/results/bubble-chart', description : 'Results Graph', navEvent: 'show-bubble-chart'}
+    { description : 'Citation Metrics' , navEvent: 'show-metrics' },
+    { description : 'Author Network' , navEvent: 'show-author-network' },
+    { description : 'Paper Network' , navEvent: 'show-paper-network' },
+    { description : 'Concept Cloud', navEvent: 'show-concept-cloud' },
+    { description : 'Results Graph', navEvent: 'show-bubble-chart' }
   ];
 
   var btnType = "btn-primary-faded";
