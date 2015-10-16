@@ -185,7 +185,8 @@ define([
     },
 
     events : {
-      "click button.sort-options" : "changeSort",
+      "click .sort-options" : "changeSort",
+      "click li .sort-options" : "changeSort",
       "click input[name=order-options]" : "changeOrder",
       "click .pagination a " : "changePage"
 
@@ -210,7 +211,11 @@ define([
 
     changeSort : function(e){
       e.stopPropagation();
-      var sort = $(e.currentTarget).data("sort");
+      var $currentTarget = $(e.currentTarget);
+      //still a little confused what to do about this, clicks on the li
+      //obviously weren't being propagated to the button -- but the buttons
+      //should be there for accessibility
+      var sort = $currentTarget.data("sort") || $currentTarget.find("button").data("sort") ;
       this.model.set("sort", sort);
     },
 
