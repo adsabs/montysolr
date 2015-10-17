@@ -6,7 +6,8 @@ define([
   'hbs!./templates/container',
   'hbs!./templates/tooltip',
   'js/components/api_targets',
-  "js/components/api_query_updater"
+  "js/components/api_query_updater",
+  "js/components/api_query"
 ], function (
   d3,
   Marionette,
@@ -15,7 +16,8 @@ define([
   ContainerTemplate,
   TooltipTemplate,
   ApiTargets,
-  ApiQueryUpdater
+  ApiQueryUpdater,
+  ApiQuery
   ) {
 
   var BubbleModel = Backbone.Model.extend({
@@ -975,8 +977,40 @@ define([
       }
     },
 
+    //for now, called to show vis for library
+    showVisForListOfBibcodes : function(bibcodes){
+
+      // so "onShow" isn't triggered when we're showing visualizations
+      // in the context of the libraries
+      this._librariesView = true;
+
+      var query = new ApiQuery();
+      query.unlock();
+      query.set("q", "bibcode:(" + bibcodes.join(" OR ") + ")");
+      query.set("rows", 1000);
+      query.set("fl", "title,bibcode,citation_count,read_count,pubdate");
+
+
+      var request = new ApiRequest({
+        target : ApiTargets.SEARCH,
+        query: query,
+        options :  {
+          type : "POST",
+          contentType : "application/json"
+        }
+      });
+
+      this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
+
+    },
+
     //fetch data
     onShow: function () {
+
+      if (this._librariesView){
+        this._librariesView = undefined;
+        return
+      }
 
       var query = this.getCurrentQuery().clone();
       query.unlock();

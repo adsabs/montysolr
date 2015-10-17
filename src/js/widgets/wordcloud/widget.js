@@ -9,6 +9,7 @@ define([
   'hbs!./templates/selected-list-template',
   'js/components/api_targets',
   'js/components/api_query_updater',
+  'js/components/api_query',
   'jquery-ui',
   'bootstrap',
   'd3-cloud'
@@ -21,7 +22,8 @@ define([
              WordCloudTemplate,
              SelectedListTemplate,
              ApiTargets,
-             ApiQueryUpdater
+             ApiQueryUpdater,
+             ApiQuery
   ) {
 
 
@@ -440,11 +442,49 @@ define([
 
     //fetch data
     onShow: function () {
+
+      if (this._librariesView){
+        this._librariesView = undefined;
+        return
+      }
+
       var request = new ApiRequest({
         target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
-        query: this.customizeQuery(this.getCurrentQuery())
+        query: this.customizeQuery(this.getCurrentQuery()),
+        options :  {
+          type : "POST",
+          contentType : "application/json"
+        }
       });
+
       this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
+    },
+
+    //for now, called to show vis for library
+    showVisForListOfBibcodes : function(bibcodes){
+
+      // so "onShow" isn't triggered when we're showing visualizations
+      // in the context of the libraries
+      this._librariesView = true;
+
+      //for the moment, /tvrh endpoint can't handle more than 100 bibs
+      bibcodes = bibcodes.slice(100);
+
+      var query = new ApiQuery();
+      query.unlock();
+      query.set("q", "bibcode:(" + bibcodes.join(" OR ") + ")");
+      query.set("rows", this.max_rows);
+
+      var request = new ApiRequest({
+        target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
+        query: new ApiQuery({ query : JSON.stringify(query.toJSON()) }),
+        options :  {
+          type : "GET",
+          contentType : "application/json"
+        }
+    });
+      this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
+
     },
 
     customizeQuery: function (apiQuery) {

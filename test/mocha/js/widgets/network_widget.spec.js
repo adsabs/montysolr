@@ -1681,7 +1681,8 @@ define([
 
     networkWidget.onShow();
     expect(networkWidget.getPubSub().publish.calledOnce).to.be.true;
-    expect(networkWidget.getPubSub().publish.args[0][1].url()).to.eql('author-network?q=star&rows=300');
+    //query should be double encoded
+    expect(networkWidget.getPubSub().publish.args[0][1].url()).to.eql('author-network?query=%7B%22q%22%3A%5B%22star%22%5D%2C%22rows%22%3A%5B300%5D%7D');
   });
 
   it("renders a pie/sunburst chart if the data is large enough", function () {
@@ -1915,7 +1916,7 @@ define([
 
     setTimeout(function () {
         expect(networkWidget.getPubSub().publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
-        expect(networkWidget.getPubSub().publish.args[0][1].get("query").toJSON().rows).to.eql([400]);
+        expect(networkWidget.getPubSub().publish.args[0][1].get("query").toJSON().query).to.eql(['{"q":["star"],"rows":[400]}']);
         expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 400 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
         done();
     }, 800);
@@ -2265,17 +2266,7 @@ define([
 
       expect(networkWidget.getPubSub().publish.callCount).to.eql(1);
       expect(networkWidget.getPubSub().publish.args[0][0]).to.eql("[PubSub]-Execute-Request");
-      expect(networkWidget.getPubSub().publish.args[0][1].toJSON().query.toJSON()).to.eql({
-        "q": [
-          "author:\"Murray, S\""
-        ],
-        "rows": [
-          300
-        ],
-        "sort": [
-          "date desc"
-        ]
-      });
+      expect(networkWidget.getPubSub().publish.args[0][1].toJSON().query.toJSON().query[0]).to.eql('{"q":["author:\\"Murray, S\\""],"rows":[300],"sort":["date desc"]}');
 
       //it's cached the older query
       expect(networkWidget.model.get("cachedQuery").toJSON()).to.eql({
@@ -2303,19 +2294,7 @@ define([
 
       expect(networkWidget.getPubSub().publish.callCount).to.eql(2);
       expect(networkWidget.getPubSub().publish.args[1][0]).to.eql("[PubSub]-Execute-Request");
-      expect(networkWidget.getPubSub().publish.args[1][1].toJSON().query.toJSON()).to.eql(
-        {
-          "q": [
-            "star"
-          ],
-          "rows": [
-            300
-          ],
-            "sort" : [
-              "date desc"
-            ]
-        }
-      );
+      expect(networkWidget.getPubSub().publish.args[1][1].toJSON().query.toJSON().query[0]).to.eql('{"q":["star"],"rows":[300],"sort":["date desc"]}');
 
     });
 
