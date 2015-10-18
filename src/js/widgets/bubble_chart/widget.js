@@ -393,7 +393,6 @@ define([
 
     rearrangeGraph: function () {
 
-
       this.finalProcess();
       this.resetSelection();
 
@@ -711,7 +710,7 @@ define([
       var key = realSvg.append("g")
         .classed("journal-name-key", true)
         .attr("transform", "translate(" +(function(){return that.config.width + that.config.margin.right + that.config.margin.left}()) + "," +
-          (function(){return that.config.height/2 - that.config.margin.top}()) + ")");
+          (function(){return that.config.height/2 - that.config.margin.top}()) + ")")
 
       key
         .selectAll("rect")
@@ -741,7 +740,7 @@ define([
         .text(function (d) {
           return d
         })
-       .on("click",  isolateCirclesByPub)
+        .on("click",  isolateCirclesByPub);
 
      function isolateCirclesByPub (pubName){
 
@@ -846,6 +845,11 @@ define([
 
       //taking care of selection box
       realSvg.on("mousedown.select", function() {
+
+        //prevent this from hijacking other events on objects other than the graph
+        if  (d3.event.target !== d3.event.currentTarget){
+          return
+        }
 
         isMousePressed = true;
 
