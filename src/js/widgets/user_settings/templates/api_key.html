@@ -13,10 +13,12 @@
         <div class="description">
             <br/>
             <br/>
-            <p> This API token allows you to access ADS data programmatically. For instance, to fetch the first few document
-                ids for the query "star", make the following request: </p>
+            <p> This API token allows you to access ADS data programmatically. For instance, to fetch the first few bibcodes for the query "star", make the following request: </p>
            <p>
-               <code> curl -H Authorization:Bearer:[your token here] http://api.adsabs.harvard.edu/v1/search/query?q=star</code>
+               <code> curl -H Authorization:Bearer:{{#if access_token}}{{access_token}}{{else}}[YOUR TOKEN HERE]{{/if}} "http://api.adsabs.harvard.edu/v1/search/query?q=star&fl=bibcode"</code>
+           </p>
+            <p>
+               <i>(If you've generated a token, you can copy-paste the preceding line directly into your terminal)</i>
             </p>
             <p> Documentation on how to use the API is available on the <a href="https://github.com/adsabs/adsabs-dev-api#access-settings"> ADS API Github repo.</a></p>
             <p> <b>Make sure to keep your API key secret to protect it from abuse.</b></p>

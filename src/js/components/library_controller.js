@@ -87,8 +87,11 @@ define([
       },
 
       handleUserAnnouncement : function(event){
-        if (event == "user_signed_in" || event == "user_signed_out" ){
+        if (event == "user_signed_in"){
           this._fetchAllMetadata();
+        }
+        else if (event == "user_signed_out" ) {
+          this.collection.reset({});
         }
       },
 

@@ -6,6 +6,7 @@
 
   .panel-body {
     margin: 2%;
+    max-width: 900px;
   }
 
   label {
@@ -18,11 +19,6 @@
     color: $gray-light;
     height: 52px;
   }
-
-  .push-form-symbol-down {
-    top:82px;
-  }
-
 
   .btn-link {
     padding-left: 0;
@@ -94,3 +90,5 @@
     left: 1%;
   }
 }
+
+

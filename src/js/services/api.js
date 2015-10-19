@@ -74,8 +74,15 @@ define([
       getNumOutstandingRequests: function() {
         return this.outstandingRequests;
       },
+      //used by api_access.js
+      setVals : function(obj){
+        _.each(obj, function(v,k){
+          this[k] = v;
+        }, this);
+      },
       hardenedInterface : {
-        request : "make a request to the API"
+        request : "make a request to the API",
+        setVals : "set a value on API (such as new access token)"
       }
     });
 

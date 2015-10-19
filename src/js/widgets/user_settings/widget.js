@@ -12,7 +12,16 @@ define([
   'backbone.stickit',
   'bootstrap'
 
-], function (Marionette, BaseWidget, FormFunctions, SuccessView, ApiFeedback, TokenTemplate, EmailTemplate, PasswordTemplate, DeleteAccountTemplate, Bootstrap) {
+], function (Marionette,
+             BaseWidget,
+             FormFunctions,
+             SuccessView,
+             ApiFeedback,
+             TokenTemplate,
+             EmailTemplate,
+             PasswordTemplate,
+             DeleteAccountTemplate,
+             Bootstrap) {
 
   var passwordRegex = /(?=.*\d)(?=.*[a-zA-Z]).{5,}/;
 
@@ -331,6 +340,7 @@ define([
     },
 
     activate: function (beehive) {
+
       var that = this;
       this.setBeeHive(beehive);
       var pubsub = beehive.getService('PubSub');
@@ -339,6 +349,7 @@ define([
       this.view.getToken = function () {
         return that.getBeeHive().getObject("User").getToken();
       }
+
     },
 
     viewEvents: {
@@ -358,10 +369,10 @@ define([
 
     submitForm: function (model) {
 
-      var user = this.getBeeHive().getObject("User"), that = this;
+      var User = this.getBeeHive().getObject("User"), that = this;
 
       if (model instanceof this.config.token.model) {
-        user.generateToken().done(function (data) {
+        User.generateToken().done(function (data) {
           that.model.set("access_token", data.access_token);
           //show new token view with new token
           that.setSubView("token");
@@ -369,15 +380,15 @@ define([
       }
 
       else if (model instanceof this.config.delete.model) {
-        user.deleteAccount();
+        User.deleteAccount();
       }
 
       else if (model instanceof this.config.email.model) {
-        user.changeEmail(model.toJSON());
+        User.changeEmail(model.toJSON());
       }
 
       else if (model instanceof this.config.password.model) {
-        user.changePassword(model.toJSON())
+        User.changePassword(model.toJSON())
           .done(function () {
             that.view.showPasswordSuccessView();
           });

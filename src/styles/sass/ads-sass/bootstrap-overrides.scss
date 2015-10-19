@@ -186,9 +186,6 @@ textarea[disabled]{
   font-weight: 300;
 }
 
-.has-feedback .form-control-feedback {
-  top: 31px;
-}
 
 /*fully disable dropdown links */
 
@@ -232,4 +229,9 @@ textarea[disabled]{
     font-weight: 300;
   }
 
+}
+
+//not sure why this is necessary, bootstrap overrides this somewhere else
+.has-feedback label ~ .form-control-feedback {
+  top: 31px !important;
 }

@@ -23,18 +23,23 @@ define([
        * them
        */
       onBootstrap: function (data) {
-        // set the API key
+        // set the API key and other data from bootstrap
         if (data.access_token) {
-          var api = this.getBeeHive().getService('Api');
-          if (data.access_token) {
-            console.warn('Redefining access_token: ' + data.access_token);
-            api.access_token = data.token_type + ':' + data.access_token;
-            api.refresh_token = data.refresh_token;
-            api.expires_in = data.expires_in;
-          }
+          this.getBeeHive().getService('Api').setVals({
+            access_token : data.token_type + ':' + data.access_token,
+            refresh_token : data.refresh_token,
+            expires_in : data.expires_in
+        });
+
+         console.warn('Redefining access_token: ' + data.access_token);
+
           var userObject = this.getBeeHive().getObject("User");
-          var userName = data.anonymous ? undefined : data.username
+          var userName = data.anonymous ? undefined : data.username;
           userObject.setUser(userName);
+        }
+
+        else {
+          console.warn("bootstrap didn't provide access_token!");
         }
       },
 
