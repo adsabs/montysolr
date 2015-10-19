@@ -676,7 +676,7 @@ rect.selection {
 
   position: relative;
   padding-top: 10px;
-  z-index: $z-index-3;
+  z-index: $z-index-1;
   @extend .clearfix;
   img {
     width: 100%;
@@ -693,7 +693,6 @@ rect.selection {
   }
 
   div:hover{
-    background-color: lighten($brand-warning, 34%);
     border: 4px solid lighten($brand-warning, 25%);
   }
 
