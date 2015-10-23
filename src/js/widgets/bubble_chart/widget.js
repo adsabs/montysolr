@@ -991,9 +991,8 @@ define([
       var query = new ApiQuery();
       query.unlock();
       query.set("q", "bibcode:(" + bibcodes.join(" OR ") + ")");
-      query.set("rows", 1000);
+      query.set("rows", ApiTargets._limits.BubbleChart.default);
       query.set("fl", "title,bibcode,citation_count,read_count,pubdate");
-
 
       var request = new ApiRequest({
         target : ApiTargets.SEARCH,
@@ -1018,7 +1017,7 @@ define([
 
       var query = this.getCurrentQuery().clone();
       query.unlock();
-      query.set("rows", 1000);
+      query.set("rows", ApiTargets._limits.BubbleChart.default);
       query.set("fl", "title,bibcode,citation_count,read_count,pubdate");
       query.unset("hl");
       query.unset("hl.fl");

@@ -1,6 +1,8 @@
 define([
     "marionette",
     "d3",
+    'js/components/api_targets',
+    'js/mixins/user_change_rows',
     "js/components/api_request",
     "js/components/api_query",
     "js/widgets/base/base_widget",
@@ -18,6 +20,8 @@ define([
   ],
   function (Marionette,
             d3,
+            ApiTargets,
+            UserChangeMixin,
             ApiRequest,
             ApiQuery,
             BaseWidget,
@@ -612,42 +616,41 @@ define([
 
     });
 
-    var ContainerModel = Backbone.Model.extend({
+    var ContainerModel = UserChangeMixin.Model.extend({
 
-      initialize : function(){
-        // newMetadata is triggered for every processResponse
-        this.on("newMetadata", function(){
+      initialize : function(options) {
+
+        var options = options  || {};
+        this.on("newMetadata", function () {
           this.updateCurrent();
           this.updateMax();
-          });
-      },
+        });
 
-      updateMax : function() {
-        var m = _.min([this.get("maxRows"), this.get("numFound")]);
-        this.set("max", m);
-      },
+        if (!options.widgetName) {
+          throw new Error("need to configure with widget name so we can get limit/default info from api_targets._limits");
+        }
 
-      updateCurrent : function(){
-        this.set("current", _.min([this.get("rows"), this.get("numFound")]));
-      },
-
-      defaults : function(){
-        return {
+        var defaults = {
           graphData: {},
-          rows : undefined,
-          //stable max, from widget config, normally 1000
-          maxRows : undefined,
-          numFound : undefined,
-          current : undefined,
+          rows: undefined,
+          numFound: undefined,
+          current: undefined,
           //current max
-          max : undefined,
+          max: undefined,
           //when this changes, make a new request
           userVal: undefined,
-
           //keep record of former query so user can return
-          cachedQuery : undefined
+          cachedQuery: undefined
         }
-     }
+
+        _.extend(defaults, ApiTargets._limits[options.widgetName]);
+
+        this.defaults = function () {
+          return defaults
+        }
+
+        this.set(this.defaults());
+      }
     });
 
     var GraphView = Marionette.ItemView.extend({
@@ -1178,10 +1181,8 @@ define([
 
     var NetworkWidget = BaseWidget.extend({
 
-      initialRowsRequest : 300,
-      maxRows : 1000,
-
       initialize: function (options) {
+
         if (!options.endpoint) {
           throw new Error("widget was not configured with an endpoint");
         }
@@ -1189,7 +1190,7 @@ define([
           this.broadcastFilteredQuery = options.broadcastFilteredQuery;
         }
 
-        this.model = new ContainerModel({"maxRows": this.maxRows});
+        this.model = new ContainerModel({widgetName : options.widgetName || "AuthorNetwork"});
         this.listenTo(this.model, "change:userVal", this.requestDifferentRows);
 
         this.filterCollection = new FilterCollection();
@@ -1212,6 +1213,19 @@ define([
         this.queryUpdater = new ApiQueryUpdater(this.widgetName);
       },
 
+      generateApiRequest : function(query) {
+
+        return new ApiRequest({
+          target: Marionette.getOption(this, "endpoint"),
+          query: new ApiQuery({ "query" : JSON.stringify(query.toJSON()) }),
+          options : {
+            type : "POST",
+            contentType : "application/json"
+          }
+        });
+
+      },
+
       //when a user requests a different number of documents
       requestDifferentRows : function(model, rows){
 
@@ -1221,10 +1235,7 @@ define([
         query.unset("hl");
         query.unset("hl.fl");
 
-        var request = new ApiRequest({
-          target: Marionette.getOption(this, "endpoint"),
-          query: new ApiQuery({ "query" : JSON.stringify(query.toJSON()) })
-        });
+        var request = this.generateApiRequest(query);
         this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
       },
 
@@ -1238,16 +1249,13 @@ define([
 
         var query = new ApiQuery();
         query.set("q", newQuery);
-        query.set("rows", this.initialRowsRequest);
+        query.set("rows", this.model.get("default"));
         //default setting sort to "date desc" since that is presumably what users will be used to
         //this isn't perfect (it might override the original query's sorted value)
         //but probably no one will notice
          query.set("sort", "date desc");
 
-        var request = new ApiRequest({
-          target: Marionette.getOption(this, "endpoint"),
-          query: new ApiQuery({ "query" : JSON.stringify(query.toJSON()) })
-        });
+        var request = this.generateApiRequest(query);
 
         //update the current widget query
         this.setCurrentQuery(query);
@@ -1327,21 +1335,11 @@ define([
 
         var query = this.getCurrentQuery().clone();
         query.unlock();
-        query.set("rows", this.initialRowsRequest);
+        query.set("rows", this.model.get("default"));
         query.unset("hl");
         query.unset("hl.fl");
 
-
-        var request = new ApiRequest({
-          target: Marionette.getOption(this, "endpoint"),
-          //endpoint requires you to use "query"
-          //key if you want to send a solr request
-          query : new ApiQuery({ "query" : JSON.stringify(query.toJSON()) }),
-          options : {
-            type : "POST",
-            contentType : "application/json"
-          }
-        });
+        var request = this.generateApiRequest(query);
 
         this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
       },

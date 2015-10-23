@@ -20,7 +20,7 @@ define([
          "indent":"true",
          "q":"\"brown dwarf\"",
          "wt":"json",
-         "rows":"1000"}},
+         "rows":"1500"}},
      "response":{"numFound":14758,"start":0,"docs":[
        {
          "pubdate":"2000-07-00",
@@ -132,7 +132,7 @@ define([
          "indent":"true",
          "q":"planet",
          "wt":"json",
-         "rows":"1000"}},
+         "rows":"1500"}},
      "response":{"numFound":565460,"start":0,"docs":[
        {
          "pubdate":"2015-10-00",
@@ -5720,7 +5720,7 @@ define([
          "indent":"true",
          "q":"\"brown dwarf\"",
          "wt":"json",
-         "rows":"1000"}},
+         "rows":"1500"}},
      "response":{"numFound":14758,"start":0,"docs":[
        {
          "pubdate":"2000-07-00",
@@ -5857,7 +5857,7 @@ define([
           "fake"
         ],
         "rows": [
-          1000
+          1500
         ],
         "fl": [
           "title,bibcode,citation_count,read_count,pubdate"

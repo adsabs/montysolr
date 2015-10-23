@@ -1,5 +1,8 @@
 /**
  * Created by rchyla on 1/20/15
+ *
+ * contains api targets
+ * and any related limits
  */
 
 define([
@@ -45,7 +48,34 @@ define([
       LIBRARIES : "biblib/libraries",
       //can post, put, and delete changes to individual libs using this endpoint
       DOCUMENTS : "biblib/documents",
-      PERMISSIONS : "biblib/permissions"
+      PERMISSIONS : "biblib/permissions",
+
+
+      _limits  : {
+        //use the same name from discovery.config.js
+
+        Metrics : {
+          default : 1000, limit : 2000
+        },
+
+        AuthorNetwork : {
+          default : 400, limit : 1000
+
+        },
+        PaperNetwork : {
+          default : 400, limit : 1000
+
+        },
+        ConceptCloud : {
+          default : 150, limit : 150
+
+        },
+        BubbleChart : {
+          //default == limit
+          default : 1500
+
+        }
+      }
 
     };
   });
