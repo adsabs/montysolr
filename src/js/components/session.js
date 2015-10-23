@@ -204,7 +204,6 @@ define([
          var pubsub = that.getPubSub();
          pubsub.publish(pubsub.NAVIGATE, "UserPreferences");
        });
-      //user object will notify interested widgets when onbootstrap is called
     },
 
     loginFail : function(xhr, status, errorThrown){
@@ -224,10 +223,11 @@ define([
     },
 
     logoutSuccess : function (response, status, jqXHR) {
-      //redirect to index page
-      this.getPubSub().publish(this.getPubSub().NAVIGATE, "index-page");
-      //set session state to logged out
-      this.getBeeHive().getObject("User").completeLogOut();
+      var that = this;
+      this.getApiAccess({reconnect: true}).done(function(){
+        //set session state to logged out
+        that.getBeeHive().getObject("User").completeLogOut();
+      });
     },
 
     registerSuccess : function (response, status, jqXHR) {

@@ -8,7 +8,9 @@ define([
   'js/components/generic_module',
   'js/mixins/dependon',
   'js/mixins/hardened',
-  'js/components/api_feedback'
+  'js/components/api_feedback',
+  'js/mixins/api_access'
+
   ],
  function(
    Backbone,
@@ -17,7 +19,9 @@ define([
    GenericModule,
    Dependon,
    Hardened,
-   ApiFeedback) {
+   ApiFeedback,
+   ApiAccess
+   ) {
 
  var PersistentUserModel, UserModel, UserDataModel, User;
 
@@ -180,22 +184,25 @@ define([
       return this.composeRequest({target: target, method : "GET"});
     },
 
-    /*POST data to endpoint: accessible through facade*/
-    postData: function (target, data, options) {
+    /*
+    * POST data to endpoint: accessible through facade
+    *
+    * */
+    postData: function (target, data) {
 
       if (this.additionalParameters[target]){
         _.extend(data, this.additionalParameters[target]);
       }
-      return this.composeRequest({target : target, method : "POST", data : data, options : options});
+      return this.composeRequest({target : target, method : "POST", data : data });
     },
 
     /*PUT data to pre-existing endpoint: accessible through facade */
-    putData: function (target, data, options) {
+    putData: function (target, data) {
 
       if (this.additionalParameters[target]){
         _.extend(data, this.additionalParameters[target]);
       }
-      return this.composeRequest({target : target, method : "PUT", data : data, options : options });
+      return this.composeRequest({target : target, method : "PUT", data : data });
     },
 
     /*
@@ -213,22 +220,24 @@ define([
 
     composeRequest : function (config) {
 
-      var target = config.target, method = config.method, data = config.data, options = config.options;
+      var target = config.target,
+          method = config.method,
+          data = config.data || {},
+          csrf = data.csrf,
+          //don't want to send this to the endpoint
+          data = _.omit(data, "csrf");
+
       var endpoint = ApiTargets[target],
         that = this,
         deferred = $.Deferred(),
-        request;
+        requestData;
 
-      //get data from the relevant model based on the endpoint
-      data = data || undefined;
-      options = options || {};
-
-      function done(){
+      function done() {
         deferred.resolve.apply(undefined, arguments);
       }
 
       //will have a default fail message for get requests or put/post requests
-      function fail(){
+      function fail() {
         var toCall = method == "GET" ? that.handleFailedGET : that.handleFailedPOST;
         var argsWithTarget = [].slice.apply(arguments);
         argsWithTarget.push(target);
@@ -236,42 +245,33 @@ define([
         deferred.fail.apply(undefined, arguments);
       }
 
+      requestData = {
+        target : endpoint,
+        options : {
+          context : this,
+          type: method,
+          data: !_.isEmpty(data) ? JSON.stringify(data) : undefined,
+          contentType : "application/json",
+          done: done,
+          fail : fail
+        }
+      };
+
       //it came from a form, needs to have a csrf token
-      if (options.csrf){
+      if (csrf){
 
         this.sendRequestWithNewCSRF(function(csrfToken){
-
-          request = new ApiRequest({
-            target : endpoint,
-            options : {
-              context : this,
-              type: method,
-              data: JSON.stringify(data),
-              contentType : "application/json",
-              headers : {'X-CSRFToken' :  csrfToken },
-              done: done,
-              fail : fail
-            }
-          });
-
-          this.getBeeHive().getService("Api").request(request);
+          requestData.options.headers =  {'X-CSRFToken' :  csrfToken };
+          this.getBeeHive().getService("Api").request(new ApiRequest(requestData));
         });
       }
 
       else {
-        request = new ApiRequest({
-          target : endpoint,
-          options : {
-            context : this,
-            type: method,
-            data: JSON.stringify(data),
-            contentType : "application/json",
-            done: done,
-            fail : fail
-          }
-        });
-        this.getBeeHive().getService("Api").request(request);
+
+        this.getBeeHive().getService("Api").request(new ApiRequest(requestData));
+
       }
+
       return deferred;
     },
 
@@ -307,6 +307,8 @@ define([
     completeLogOut : function(){
       this.model.clear();
       this.userDataModel.clear();
+      //navigate to the index page
+      this.getPubSub().publish(this.getPubSub().NAVIGATE, "index-page");
     },
 
 
@@ -315,15 +317,13 @@ define([
     deleteAccount : function(){
       var that = this;
       return this.postData("DELETE", {csrf : true}).done(function(){
-        that.completeLogOut();
-      });
+        that.getApiAccess({reconnect: true}).done(function(){
+          that.completeLogOut();
+        });
+     });
     },
 
     changeEmail : function(data){
-
-      if (JSON.stringify(_.keys(data)) !== '["email","confirm_email","password"]'){
-        throw new Error("changeEmail function wasn't provided with proper information from the form")
-      }
 
       var new_email = data.email;
 
@@ -336,18 +336,18 @@ define([
         //need to do it this way so the alert doesnt get lost after page is changed
         this.getPubSub().subscribeOnce(this.getPubSub().NAVIGATE, _.bind(alertSuccess, this));
         this.getBeeHive().getObject("Session").logout();
-      };
+        };
 
-      return this.postData("CHANGE_EMAIL", data, {csrf : true}).done(_.bind(onDone, this));
+      data = _.extend(data, {csrf : true});
+
+      return this.postData("CHANGE_EMAIL", data).done(_.bind(onDone, this));
     },
 
     changePassword : function(data){
 
-      if (JSON.stringify(_.keys(data)) !== '["old_password","new_password1","new_password_2"]'){
-        throw new Error("changePassword function wasn't provided with proper information from the form");
-      }
+     data = _.extend(data, {csrf : true});
+     return this.postData("CHANGE_PASSWORD", data);
 
-      return this.postData("CHANGE_PASSWORD", data, {csrf : true});
     },
 
     //returns a promise
@@ -356,7 +356,7 @@ define([
     },
 
     generateToken : function(){
-      return this.putData("TOKEN", {}, {csrf : true});
+      return this.putData("TOKEN", {csrf : true});
     },
 
     getUserData : function(){
@@ -433,7 +433,7 @@ define([
 
   });
 
-  _.extend(User.prototype, Hardened, Dependon.BeeHive, Dependon.App, {
+  _.extend(User.prototype, Hardened, Dependon.BeeHive, Dependon.App, ApiAccess, {
     USER_SIGNED_IN: 'user_signed_in',
     USER_SIGNED_OUT: 'user_signed_out',
     USER_INFO_CHANGE: 'user_info_change',

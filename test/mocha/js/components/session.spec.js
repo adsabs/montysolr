@@ -186,19 +186,17 @@ define([
 
       s.logoutSuccess();
 
-      //navigate to index page
-      expect(s.getPubSub().publish.args[1]).to.eql(["[Router]-Navigate-With-Trigger", "index-page"]);
       // scrub the user object
       expect(u.completeLogOut.callCount).to.eql(1);
 
       s.registerSuccess();
-      expect(s.getPubSub().publish.args[2]).to.eql(["[PubSub]-User-Announcement", "register_success"]);
+      expect(s.getPubSub().publish.args[1]).to.eql(["[PubSub]-User-Announcement", "register_success"]);
 
       s.resetPassword1Success();
-      expect(s.getPubSub().publish.args[3]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_success"]);
+      expect(s.getPubSub().publish.args[2]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_success"]);
 
       s.resetPassword2Success();
-      expect(s.getPubSub().publish.args[4]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_success"]);
+      expect(s.getPubSub().publish.args[3]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_success"]);
 
     });
 

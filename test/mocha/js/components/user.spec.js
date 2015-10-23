@@ -324,7 +324,7 @@ define([
 
      minsub.beehive.addObject("CSRFManager", fakeCSRF);
 
-     u.activate(minsub.beehive)
+     u.activate(minsub.beehive);
 
      var a =  u.changePassword({"old_password":"foo","new_password1":"goo","new_password_2":"goo"});
 

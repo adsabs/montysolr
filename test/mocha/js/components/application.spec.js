@@ -1,9 +1,12 @@
 define([
   'js/components/application',
-  'module'
+  'module',
+  'js/services/api'
 ], function(
   Application,
-  module) {
+  module,
+  Api
+  ) {
   describe("Application Scaffolding (application.spec.js)", function () {
 
     var config = null;
@@ -164,8 +167,9 @@ define([
 
     it("has getApiAccess", function(done) {
       var app = new Application();
-      var spy = sinon.spy();
-      var api = {request: function(apiRequest, options) {
+      var api = new Api();
+
+      api.request =  function(apiRequest, options) {
         expect(apiRequest.url()).to.contain('/accounts/bootstrap');
         options.done(
           {
@@ -177,7 +181,8 @@ define([
             "expire_in": "2500-01-01T00:00:00",
             "refresh_token": "KKGJp56UlpKgfHUuNNNJvj3XgepWlkTfKKtqmpkM"
           });
-      }};
+      };
+
       app.getBeeHive().addService('Api', api);
       var fakeUser = {setUser : sinon.spy()};
       app.getBeeHive().addObject("User", fakeUser);
