@@ -263,28 +263,27 @@ define([
 
         this.set("library-metrics", function(widget, data){
 
+          function renderMetrics(bibcodes){
+
+            app.getWidget("Metrics").done(function(widget){
+              widget.showMetricsForListOfBibcodes(bibcodes);
+            });
+            //then, set library tab to proper field
+            app.getWidget("IndividualLibraryWidget").done(function(widget){
+              widget.setSubView({ view : "metrics", publicView : data.publicView, id : data.id });
+            })
+
+          }
+
             //first, tell export widget what to show
             if (data.bibcodes && data.bibcodes.length) {
-
-              app.getWidget("Metrics").done(function(widget){
-                widget.showMetricsForListOfBibcodes(data.bibcodes);
-              });
-              //then, set library tab to proper field
-              app.getWidget("IndividualLibraryWidget").done(function(widget){
-                  widget.setSubView({ view : "metrics", publicView : data.publicView });
-                })
+              renderMetrics(data.bibcodes);
             }
 
             else if (data.id){
               app.getObject("LibraryController").getLibraryData(data.id).done(function(bibcodes){
                 bibcodes = bibcodes.documents;
-                app.getWidget("Metrics").done(function(widget){
-                  widget.showMetricsForListOfBibcodes(bibcodes);
-                })
-                //then, set library tab to proper field
-                app.getWidget("IndividualLibraryWidget").done(function(widget){
-                  widget.setSubView({ view : "metrics", id : data.id, publicView : data.publicView });
-                });
+               renderMetrics(bibcodes);
               });
             }
 
@@ -299,12 +298,56 @@ define([
             }
 
             else {
-              //then, show library page manager
               app.getObject('MasterPageManager').show("LibrariesPage",
                 ["IndividualLibraryWidget", "UserNavbarWidget", "Metrics"]);
 
               publishPageChange("libraries-page");
             }
+        });
+
+        this.set("library-visualization", function(widget, data){
+
+          var widgetName = arguments[1].sub;
+
+          function renderVis(bibcodes){
+
+            app.getWidget(widgetName).done(function(widget){
+              widget.showVisForListOfBibcodes(bibcodes);
+            });
+            //then, set library tab to proper field
+            app.getWidget("IndividualLibraryWidget").done(function(widget){
+              widget.setSubView({ view : "visualization", publicView : data.publicView, id : data.id });
+            })
+
+          }
+
+          //first, tell export widget what to show
+          if (data.bibcodes && data.bibcodes.length) {
+            renderVis(data.bibcodes);
+          }
+
+          else if (data.id){
+            app.getObject("LibraryController").getLibraryData(data.id).done(function(bibcodes){
+            renderVis(bibcodes.documents);
+            });
+          }
+
+          else {
+            throw new Error("neither an identifying id for library nor the bibcodes themselves were provided to export widget");
+            return
+          }
+
+          if (data.publicView){
+            app.getObject('MasterPageManager').show("PublicLibrariesPage",
+              ["IndividualLibraryWidget", widgetName]);
+          }
+
+          else {
+            app.getObject('MasterPageManager').show("LibrariesPage",
+              ["IndividualLibraryWidget", "UserNavbarWidget", widgetName]);
+            publishPageChange("libraries-page");
+
+          }
         });
 
         this.set("home-page", function(){

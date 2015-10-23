@@ -67,7 +67,7 @@
         <div class="alert alert-success alert-dismissable" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
             {{#if feedback.create}}
-            <a href="#/user/libraries/{{id}}"> Library <b>{{feedback.name}}</b></a> was successfully created and {{feedback.numRecords}} new records were added.
+            <a href="#/user/libraries/{{feedback.id}}"> Library <b>{{feedback.name}}</b></a> was successfully created and {{feedback.numRecords}} new records were added.
             {{else}}
             {{feedback.numRecords}} new records were added to  <a href="#/user/libraries/{{feedback.id}}"> library <b>{{feedback.name}}</b></a>.
             {{#if feedback.numAlreadyInLib}}

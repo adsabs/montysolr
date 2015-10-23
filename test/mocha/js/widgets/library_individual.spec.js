@@ -474,7 +474,7 @@ define([
       ]);
 
 
-      $("#test li[data-tab=visualization-authornetwork]").click();
+      $("#test li[data-tab=visualization-AuthorNetwork]").click();
 
       expect(spy.args[3]).to.eql([
         "[Router]-Navigate-With-Trigger",
@@ -485,7 +485,7 @@ define([
             "2015IAUGA..2257768A",
             "2015IAUGA..2257982A"
           ],
-          "sub": "authornetwork",
+          "sub": "AuthorNetwork",
           "id": "1",
           "publicView": false
         }
@@ -499,7 +499,7 @@ define([
 
       expect($("#test li[data-tab=export-bibtex]").length).to.eql(0);
       expect($("#test li[data-tab=metrics]").length).to.eql(0);
-      expect($("#test li[data-tab=visualization-authornetwork]").length).to.eql(0);
+      expect($("#test li[data-tab=visualization-AuthorNetwork]").length).to.eql(0);
 
 
     });

@@ -1223,7 +1223,7 @@ define([
 
         var request = new ApiRequest({
           target: Marionette.getOption(this, "endpoint"),
-          query: query
+          query: new ApiQuery({ "query" : JSON.stringify(query.toJSON()) })
         });
         this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
       },
@@ -1246,7 +1246,7 @@ define([
 
         var request = new ApiRequest({
           target: Marionette.getOption(this, "endpoint"),
-          query: query
+          query: new ApiQuery({ "query" : JSON.stringify(query.toJSON()) })
         });
 
         //update the current widget query
@@ -1297,8 +1297,33 @@ define([
         this.model.set(_.result(this.model, "defaults"), {silent: true});
       },
 
+      //for now, called to show vis for library
+      showVisForListOfBibcodes : function(bibcodes){
+
+        // so "onShow" isn't triggered when we're showing visualizations
+        // in the context of the libraries
+        this._librariesView = true;
+
+        var request =  new ApiRequest({
+          target : Marionette.getOption(this, "endpoint"),
+          query: new ApiQuery({ "bibcodes" : bibcodes }),
+          options : {
+            type : "POST",
+            contentType : "application/json"
+          }
+        });
+
+        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
+
+      },
+
       //fetch data
       onShow: function () {
+
+        if (this._librariesView){
+          this._librariesView = undefined;
+          return
+        }
 
         var query = this.getCurrentQuery().clone();
         query.unlock();
@@ -1306,12 +1331,19 @@ define([
         query.unset("hl");
         query.unset("hl.fl");
 
+
         var request = new ApiRequest({
           target: Marionette.getOption(this, "endpoint"),
-          query: query
+          //endpoint requires you to use "query"
+          //key if you want to send a solr request
+          query : new ApiQuery({ "query" : JSON.stringify(query.toJSON()) }),
+          options : {
+            type : "POST",
+            contentType : "application/json"
+          }
         });
 
-        this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
+        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
       },
 
       processResponse: function (jsonResponse) {
@@ -1329,7 +1361,6 @@ define([
         //so there is a one time render event
         this.model.trigger("newMetadata");
       },
-
 
       //filter the original query
       broadcastFilteredQuery: function () {

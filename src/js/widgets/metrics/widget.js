@@ -726,9 +726,7 @@ define([
       });
 
       this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
-
     }
-
 
   });
 

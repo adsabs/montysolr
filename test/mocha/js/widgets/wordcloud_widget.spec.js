@@ -2,13 +2,16 @@ define([
     'backbone',
     'js/widgets/base/base_widget',
     'js/widgets/wordcloud/widget',
-   'js/components/api_query'
+   'js/components/api_query',
+    'js/bugutils/minimal_pubsub',
+
   ],
   function(
     Backbone,
     BaseWidget,
     WordCloud,
-    ApiQuery
+    ApiQuery,
+    MinimalPubsub
     ){
 
     var w, fakeWordCloudData;
@@ -1583,10 +1586,23 @@ define([
 
       it("should request wordcloud data from pubsub", function(){
 
-        w = new WordCloud();
+        w = new WordCloud({endpoint : "wordcloud-endpoint"});
         $("#test").append(w.render().el);
 
-        w.model.set("tfidfData", fakeWordCloudData);
+        w.setCurrentQuery(new ApiQuery({q : "star"}));
+
+        var minsub = new MinimalPubsub({verbose: false});
+
+        w.activate(minsub.beehive.getHardenedInstance());
+
+        var spy = sinon.spy(w.getPubSub(), "publish");
+
+        w.onShow();
+
+
+        expect(spy.args[0][0]).to.eql("[PubSub]-New-Request");
+        expect(JSON.stringify(spy.args[0][1].toJSON())).to.eql('{"target":"wordcloud-endpoint","query":{"q":["star"],"rows":[150]},"options":{"type":"POST","contentType":"application/json"}}');
+
       });
 
       it("should consist of a controller, a word cloud view, and a list view, (the views have corresponding models)", function(){
@@ -1706,6 +1722,8 @@ define([
         expect(q.get('rows')).to.be.eql([150]);
       });
     });
+
+
 
 
 });

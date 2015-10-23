@@ -61,8 +61,7 @@ WordCloud
 .s-vis-item-format {
 
   background: $gray-lightest;
-  padding: 15px 5px;
-  box-shadow : 2px 2px 2px $default-box-shadow-color;
+  padding: 15px 15px;
   margin-bottom: 20px;
 
 }
@@ -368,8 +367,14 @@ $group-circle-active : lighten($brand-warning, 10%);
   fill: darken($brand-warning, 15%);
 }
 
-.s-network-filter-container {
+.s-network-filter-container, .s-network-metadata form {
   @extend .clearfix;
+  display : none;
+}
+
+//only show on search results page
+.s-results-page-layout .s-network-filter-container , .s-results-page-layout .s-network-metadata form {
+  display : block;
 }
 
 .s-connector-node {
@@ -637,7 +642,7 @@ rect.selection {
   stroke-dasharray: 5px;
   stroke-width: 4px;
   stroke-opacity : 1;
-  fill: hsla(0,0,83%, .7);
+  fill: hsla(0,0,0, .2);
 }
 
 .s-bubble-chart {

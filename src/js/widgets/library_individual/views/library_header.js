@@ -160,9 +160,9 @@ define([
       var tabToShow, additional;
       //dropdowns have multiple sub-options
       if  (subView.indexOf("-") > -1) {
-        tabToShow =  subView.split("-")[0];
+        tabToShow = subView.split("-")[0];
         //this tells other widget which view to show
-        additional  = subView.split("-")[1];
+        additional = subView.split("-")[1];
       }
       else {
         tabToShow = subView;
