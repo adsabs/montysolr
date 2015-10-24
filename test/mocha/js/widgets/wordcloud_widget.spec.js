@@ -1597,8 +1597,7 @@ define([
 
         var spy = sinon.spy(w.getPubSub(), "publish");
 
-        w.onShow();
-
+        w.renderWidgetForCurrentQuery();
 
         expect(spy.args[0][0]).to.eql("[PubSub]-New-Request");
         expect(JSON.stringify(spy.args[0][1].toJSON())).to.eql('{"target":"wordcloud-endpoint","query":{"q":["star"],"rows":[150]},"options":{"type":"POST","contentType":"application/json"}}');

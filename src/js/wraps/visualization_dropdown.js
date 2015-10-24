@@ -18,12 +18,10 @@ define([
   ];
 
   var btnType = "btn-primary-faded";
-
   var dropdownTitle = "Explore";
-
   var iconClass = "icon-explore";
-
   var rightAlign = true;
+  var selectedOption = true;
 
 
   return function(){
@@ -33,7 +31,9 @@ define([
       btnType: btnType,
       dropdownTitle : dropdownTitle,
       iconClass: iconClass,
-      rightAlign : rightAlign
+      rightAlign : rightAlign,
+      selectedOption : selectedOption
+
     });
 
     return VisDropdown;

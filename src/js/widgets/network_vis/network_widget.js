@@ -1306,11 +1306,7 @@ define([
       },
 
       //for now, called to show vis for library
-      showVisForListOfBibcodes : function(bibcodes){
-
-        // so "onShow" isn't triggered when we're showing visualizations
-        // in the context of the libraries
-        this._librariesView = true;
+      renderWidgetForListOfBibcodes : function(bibcodes){
 
         var request =  new ApiRequest({
           target : Marionette.getOption(this, "endpoint"),
@@ -1326,12 +1322,7 @@ define([
       },
 
       //fetch data
-      onShow: function () {
-
-        if (this._librariesView){
-          this._librariesView = undefined;
-          return
-        }
+      renderWidgetForCurrentQuery : function () {
 
         var query = this.getCurrentQuery().clone();
         query.unlock();
@@ -1340,7 +1331,6 @@ define([
         query.unset("hl.fl");
 
         var request = this.generateApiRequest(query);
-
         this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
       },
 

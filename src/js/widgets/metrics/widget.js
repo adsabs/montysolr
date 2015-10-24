@@ -290,13 +290,11 @@ define([
 
     //function to just re-render the metadata part at the top
     renderMetadata : function(){
-      //this is only allowed for query-based requests
-      if (this.model.get("requestRowsAllowed")){
         var data = {};
         data.max = this.model.get("max");
         data.current = this.model.get("current");
+        data.requestRowsAllowed = this.model.get("requestRowsAllowed");
         this.$(".metrics-metadata").html(this.metadataTemplate(data));
-      }
     },
 
     template: MetricsContainer,
@@ -405,6 +403,11 @@ define([
         // let container view know how many bibcodes we have
         this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
           "rows":  parseInt(response.get("responseHeader.params.rows"))});
+
+        //disable option to get more/fewer bibcodes if there's only 1
+        if (parseInt(response.get("response.numFound")) === 1){
+          this.containerModel.set("requestRowsAllowed", false);
+        }
 
         this.getMetrics(bibcodes);
       }
@@ -708,14 +711,13 @@ define([
       ContainerView: ContainerView
     },
 
-    showMetricsForCurrentQuery : function(){
+    renderWidgetForCurrentQuery : function(){
       this.resetWidget();
       this.containerModel.set("requestRowsAllowed", true);
       this.dispatchRequest(this.getCurrentQuery());
     },
 
-    //used by library widget
-    showMetricsForListOfBibcodes : function(bibcodes){
+    renderWidgetForListOfBibcodes : function(bibcodes){
       this.resetWidget();
 
       var request =  new ApiRequest({
@@ -726,6 +728,15 @@ define([
           contentType : "application/json"
         }
       });
+
+      //normally this info would come from apiquery
+      // let container view know how many bibcodes we have
+      this.view.model.set({
+        numFound : bibcodes.length,
+        rows : bibcodes.length
+      });
+
+      this.containerModel.set("requestRowsAllowed", false);
 
       this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
     }

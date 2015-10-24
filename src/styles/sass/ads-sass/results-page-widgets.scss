@@ -79,6 +79,10 @@
 
 .s-dropdown-widget {
 
+  .s-divider-bottom {
+    padding: 10px;
+  }
+
   .export-start-val {
     @extend .form-control;
     @extend .input-sm;

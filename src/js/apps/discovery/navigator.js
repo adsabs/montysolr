@@ -266,7 +266,7 @@ define([
           function renderMetrics(bibcodes){
 
             app.getWidget("Metrics").done(function(widget){
-              widget.showMetricsForListOfBibcodes(bibcodes);
+              widget.renderWidgetForListOfBibcodes(bibcodes);
             });
             //then, set library tab to proper field
             app.getWidget("IndividualLibraryWidget").done(function(widget){
@@ -312,7 +312,7 @@ define([
           function renderVis(bibcodes){
 
             app.getWidget(widgetName).done(function(widget){
-              widget.showVisForListOfBibcodes(bibcodes);
+              widget.renderWidgetForListOfBibcodes(bibcodes);
             });
             //then, set library tab to proper field
             app.getWidget("IndividualLibraryWidget").done(function(widget){
@@ -540,7 +540,11 @@ define([
           }
         });
 
-        function showResultsPageWidgetWithUniqueUrl (command){
+        /*
+        * functions for showing "explore" widgets on results page
+        * */
+
+        function showResultsPageWidgetWithUniqueUrl (command, options){
 
           var q = app.getObject('AppStorage').getCurrentQuery();
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
@@ -549,31 +553,45 @@ define([
             [widgetName].concat(searchPageAlwaysVisible.slice(1)));
           this.route =  '#search/' + queryUpdater.clean(q.clone()).url() +
                         "/" + command.split("-").slice(1).join("-");
+
+          //show selected, need to explicitly tell widget to show bibcodes
+          if (options && options.onlySelected){
+            app.getWidget(widgetName).done(function(w){
+              var selected =  app.getObject('AppStorage').getSelectedPapers();
+              w.renderWidgetForListOfBibcodes(selected);
+            });
+          }
+          else {
+            app.getWidget(widgetName).done(function(w){
+              w.renderWidgetForCurrentQuery();
+            });
+          }
         }
 
-        this.set('show-author-network', function(command) {
-          showResultsPageWidgetWithUniqueUrl.call(this, command);
-
-        });
-        this.set('show-concept-cloud', function(command) {
-          showResultsPageWidgetWithUniqueUrl.call(this, command);
-
-        });
-        this.set('show-paper-network', function(command) {
-          showResultsPageWidgetWithUniqueUrl.call(this, command);
+        this.set('show-author-network', function(command, options) {
+          showResultsPageWidgetWithUniqueUrl.apply(this, arguments);
         });
 
-        this.set('show-bubble-chart', function(command) {
-          showResultsPageWidgetWithUniqueUrl.call(this, command);
+        this.set('show-concept-cloud', function(command, options) {
+          showResultsPageWidgetWithUniqueUrl.apply(this, arguments);
         });
-        this.set('show-metrics', function(command) {
-          showResultsPageWidgetWithUniqueUrl.call(this, command);
-          app.getWidget("Metrics").done(function(w) {
-            w.showMetricsForCurrentQuery();
-          });
 
+        this.set('show-paper-network', function(command, options) {
+          showResultsPageWidgetWithUniqueUrl.apply(this, arguments);
         });
+
+        this.set('show-bubble-chart', function(command, options) {
+          showResultsPageWidgetWithUniqueUrl.apply(this, arguments);
+        });
+        this.set('show-metrics', function(command, options) {
+          showResultsPageWidgetWithUniqueUrl.apply(this, arguments);
+        });
+
         this.set("visualization-closed", this.get("results-page"));
+
+        /*
+        * Below are functions for abstract pages
+        */
 
         var showDetail = function(pages, toActivate) {
           app.getObject('MasterPageManager').show('DetailsPage',

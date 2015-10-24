@@ -982,11 +982,7 @@ define([
     },
 
     //for now, called to show vis for library
-    showVisForListOfBibcodes : function(bibcodes){
-
-      // so "onShow" isn't triggered when we're showing visualizations
-      // in the context of the libraries
-      this._librariesView = true;
+    renderWidgetForListOfBibcodes : function(bibcodes){
 
       var query = new ApiQuery();
       query.unlock();
@@ -996,11 +992,7 @@ define([
 
       var request = new ApiRequest({
         target : ApiTargets.SEARCH,
-        query: query,
-        options :  {
-          type : "POST",
-          contentType : "application/json"
-        }
+        query: query
       });
 
       this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
@@ -1008,12 +1000,7 @@ define([
     },
 
     //fetch data
-    onShow: function () {
-
-      if (this._librariesView){
-        this._librariesView = undefined;
-        return
-      }
+    renderWidgetForCurrentQuery : function () {
 
       var query = this.getCurrentQuery().clone();
       query.unlock();
