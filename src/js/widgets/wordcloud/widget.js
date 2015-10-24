@@ -417,7 +417,7 @@ define([
       this.listView = new ListView();
       this.model = new WordCloudModel();
       this.view = new WordCloudView({model: this.model, listView : this.listView});
-      this.max_rows = options.max_rows || 150;
+      this.max_rows = ApiTargets._limits.ConceptCloud.limit;
       this.on("all", this.onAllInternalEvents);
       this.listenTo(this.listView, "all", this.onAllInternalEvents);
       this.listenTo(this.view, "close-widget", _.bind(this.closeWidget, this));

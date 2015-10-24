@@ -1682,7 +1682,12 @@ define([
     networkWidget.onShow();
     expect(networkWidget.getPubSub().publish.calledOnce).to.be.true;
     //query should be double encoded
-    expect(networkWidget.getPubSub().publish.args[0][1].url()).to.eql('author-network?query=%7B%22q%22%3A%5B%22star%22%5D%2C%22rows%22%3A%5B300%5D%7D');
+    expect(networkWidget.getPubSub().publish.args[0][1].get("query").toJSON()).to.eql({
+      "query": [
+        "{\"q\":[\"star\"],\"rows\":[400]}"
+      ]
+    })
+
   });
 
   it("renders a pie/sunburst chart if the data is large enough", function () {
@@ -2266,7 +2271,7 @@ define([
 
       expect(networkWidget.getPubSub().publish.callCount).to.eql(1);
       expect(networkWidget.getPubSub().publish.args[0][0]).to.eql("[PubSub]-Execute-Request");
-      expect(networkWidget.getPubSub().publish.args[0][1].toJSON().query.toJSON().query[0]).to.eql('{"q":["author:\\"Murray, S\\""],"rows":[300],"sort":["date desc"]}');
+      expect(networkWidget.getPubSub().publish.args[0][1].toJSON().query.toJSON().query[0]).to.eql('{"q":["author:\\"Murray, S\\""],"rows":[400],"sort":["date desc"]}');
 
       //it's cached the older query
       expect(networkWidget.model.get("cachedQuery").toJSON()).to.eql({
@@ -2294,7 +2299,7 @@ define([
 
       expect(networkWidget.getPubSub().publish.callCount).to.eql(2);
       expect(networkWidget.getPubSub().publish.args[1][0]).to.eql("[PubSub]-Execute-Request");
-      expect(networkWidget.getPubSub().publish.args[1][1].toJSON().query.toJSON().query[0]).to.eql('{"q":["star"],"rows":[300],"sort":["date desc"]}');
+      expect(networkWidget.getPubSub().publish.args[1][1].toJSON().query.toJSON().query[0]).to.eql('{"q":["star"],"rows":[400],"sort":["date desc"]}');
 
     });
 

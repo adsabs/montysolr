@@ -339,8 +339,10 @@ define([
     },
 
     initialize: function (options) {
+
       options = options || {};
-      this.containerModel = new ContainerModel();
+
+      this.containerModel = new ContainerModel({widgetName : "Metrics"});
       this.listenTo(this.containerModel, "change:userVal", this.requestDifferentRows);
       this.view = new ContainerView({model : this.containerModel});
       this.childViews = {};
@@ -350,8 +352,13 @@ define([
       this.dataExtractor = DataExtractor;
       this.GraphModel = GraphModel;
       this.GraphView = GraphView;
-    },
 
+      this.defaultQueryArguments =  {
+          fl : "bibcode",
+          rows : this.containerModel.get("default")
+      };
+
+    },
 
     activate : function(beehive){
       this.setBeeHive(beehive);
@@ -420,7 +427,7 @@ define([
           this.view[k].currentView.destroy();
       }, this);
 
-      this.containerModel.clear({silent : true});
+      this.containerModel.clear({silent : true}).set(this.containerModel.defaults(), {silent : true});
     },
 
     //when a user requests a different number of documents
@@ -699,11 +706,6 @@ define([
       GraphView: GraphView,
       GraphModel: GraphModel,
       ContainerView: ContainerView
-    },
-
-    defaultQueryArguments : {
-      fl : "bibcode",
-      rows : 300
     },
 
     showMetricsForCurrentQuery : function(){

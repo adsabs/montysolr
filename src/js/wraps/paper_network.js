@@ -737,6 +737,9 @@ define([
       this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
     };
 
+
+    options.widgetName = "PaperNetwork";
+
     return function () {
       return new NetworkWidget(options);
     };
