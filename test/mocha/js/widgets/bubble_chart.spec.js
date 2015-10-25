@@ -5849,7 +5849,7 @@ define([
       bubble.activate(minsub.beehive.getHardenedInstance());
       sinon.stub(bubble.getPubSub(), "publish");
 
-      bubble.onShow();
+      bubble.renderWidgetForCurrentQuery();
 
       expect(bubble.getPubSub().publish.args[0][0]).to.eql('[PubSub]-New-Request');
       expect(bubble.getPubSub().publish.args[0][1].get("query").toJSON()).to.eql({

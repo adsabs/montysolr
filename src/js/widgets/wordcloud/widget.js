@@ -441,12 +441,7 @@ define([
     },
 
     //fetch data
-    onShow: function () {
-
-      if (this._librariesView){
-        this._librariesView = undefined;
-        return
-      }
+    renderWidgetForCurrentQuery : function() {
 
       var request = new ApiRequest({
         target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
@@ -461,14 +456,10 @@ define([
     },
 
     //for now, called to show vis for library
-    showVisForListOfBibcodes : function(bibcodes){
-
-      // so "onShow" isn't triggered when we're showing visualizations
-      // in the context of the libraries
-      this._librariesView = true;
+    renderWidgetForListOfBibcodes : function(bibcodes){
 
       //for the moment, /tvrh endpoint can't handle more than 100 bibs
-      bibcodes = bibcodes.slice(100);
+      bibcodes = bibcodes.slice(0,100);
 
       var query = new ApiQuery();
       query.unlock();
@@ -479,7 +470,7 @@ define([
         target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
         query: new ApiQuery({ query : JSON.stringify(query.toJSON()) }),
         options :  {
-          type : "GET",
+          type : "POST",
           contentType : "application/json"
         }
     });

@@ -1007,7 +1007,7 @@ define([
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
       //trigger show event, should prompt dispatchRequest
-      metricsWidget.showMetricsForCurrentQuery();
+      metricsWidget.renderWidgetForCurrentQuery();
 
       setTimeout(function() {
         //if the views received the data, the 2 step request process worked
@@ -1077,8 +1077,8 @@ define([
       //provide widget with current query
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
-      metricsWidget.showMetricsForCurrentQuery();
-      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n     papers.\n    \n \nChange to first  paper(s) (max is 2).\n Submit');
+      metricsWidget.renderWidgetForCurrentQuery();
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n    papers.\n    \n\n\n\n\n    Change to first  paper(s) (max is 2).\n     Submit');
 
       sinon.spy(metricsWidget.getPubSub(), "publish");
 
@@ -1411,8 +1411,8 @@ define([
       //provide widget with current query
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
-      metricsWidget.showMetricsForCurrentQuery();
-      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 1\n    \n    paper.\n    \n \nChange to first  paper(s) (max is 1).\n Submit');
+      metricsWidget.renderWidgetForCurrentQuery();
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 1\n    \n    paper.');
 
       expect($("#test").find("h3:visible").text()).to.eql("CitationsReads");
 

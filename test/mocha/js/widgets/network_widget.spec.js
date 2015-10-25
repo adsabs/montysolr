@@ -1679,7 +1679,7 @@ define([
     expect(networkWidget.getCurrentQuery().get("q")).to.eql(q.get("q"));
     sinon.stub(networkWidget.getPubSub(), "publish");
 
-    networkWidget.onShow();
+    networkWidget.renderWidgetForCurrentQuery();
     expect(networkWidget.getPubSub().publish.calledOnce).to.be.true;
     //query should be double encoded
     expect(networkWidget.getPubSub().publish.args[0][1].get("query").toJSON()).to.eql({
@@ -1912,7 +1912,7 @@ define([
     minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
 
     //trigger show event, should prompt dispatchRequest
-    networkWidget.onShow();
+    networkWidget.renderWidgetForCurrentQuery();
 
     expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 1000 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
     sinon.spy(networkWidget.getPubSub(), "publish");

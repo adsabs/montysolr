@@ -1,9 +1,15 @@
+
 <h4>Currently viewing metrics for {{current}}
     {{#compare current 1 operator = ">"}}
-     papers.
+    papers.
     {{else}}
     paper.
     {{/compare}}
- </h4>
-Change to first <input type="text" class="metrics-rows form-control s-display-inline input-sm"/> paper(s) (max is {{max}}).
-<button class="submit-rows btn btn-sm btn-info"> Submit </button>
+</h4>
+
+{{#if requestRowsAllowed}}
+
+    Change to first <input type="text" class="metrics-rows form-control s-display-inline input-sm"/> paper(s) (max is {{max}}).
+    <button class="submit-rows btn btn-sm btn-info"> Submit </button>
+
+{{/if}}
