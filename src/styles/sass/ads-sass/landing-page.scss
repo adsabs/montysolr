@@ -79,9 +79,12 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   top: -45px;
 
   .s-tab {
+    width: 120px;
+    font-size: 18px;
     font-size: 22px;
     border-bottom: 8px transparent;
     a {
+      width: 110px;
       text-align: center;
     }
   }
@@ -97,6 +100,8 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     position: relative;
     top: 8px;
     transition : transform .5s, fill .5s;
+    width: 120px;
+
   }
 
   .active {
@@ -104,12 +109,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     color: lighten($brand-primary-faded, 10%);
   }
 
-  .modern-search {
-    position: relative;
-    top: -14px;
-    width: 91px;
-    left: 47px;
-  }
   .svg-needs-stroke {
     stroke: $gray-lighter;
   }
@@ -137,36 +136,12 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     z-index: $z-index-1;
   }
 
-
-
-  @media(max-width: $screen-sm-min) {
-
-    top: -39px;
-
-
-    .s-tab {
-      width: 120px;
-      font-size: 18px;
-
-      a {
-        width: 120px;
-        svg {
-          width: 120px;
-        }
-      }
-    }
-
     .modern-search {
       position: relative;
       top: -14px;
-      width: 100px;
-      left: 0px;
+      width: 87px;
+      left: 16px;
     }
-
-
-
-
-  }
 
 }
 

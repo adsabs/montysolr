@@ -60,7 +60,7 @@ define([
         'classic-form' : 'classicForm',
         'paper-form' : 'paperForm',
         'index/(:query)': 'index',
-        'search/(:query)/(:widgetName)': 'search',
+        'search/(:query)(/)(:widgetName)': 'search',
         'execute-query/(:query)': 'executeQuery',
         'abs/:bibcode(/)(:subView)': 'view',
         'user/orcid*(:subView)' : 'orcidPage',
