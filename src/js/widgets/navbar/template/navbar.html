@@ -1,4 +1,4 @@
-<nav class="navbar navbar-inverse fluid">
+<nav class="navbar fluid navbar-inverse">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse"
@@ -78,9 +78,9 @@
                 <li class="dropdown orcid-dropdown s-orcid-dropdown">
                     <button class="btn-link" data-toggle="dropdown" aria-expanded="false">
                         <span class="s-orcid-title"> <img src="../../styles/img/orcid_inactive.png"
-                                                          alt="orcid symbol"/>    <span class="caret"></span></button>
+                                                          alt="orcid symbol"/> ORCiD  <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
-                        <li>
+                        <li class="no-hover-style">
                             {{#if orcidLastName}} <div> Signed in to ORCID as <strong>{{orcidFirstName}} {{orcidLastName}}</strong></div> {{/if}}
                             <div class="s-orcid-mode-label"><b>ORCID Mode</b></div>
                             <div class="s-orcid-label-container">
@@ -112,12 +112,12 @@
                 <li class="dropdown orcid-dropdown s-orcid-dropdown">
                     <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
                         <span class="s-orcid-title"> <img src="../../styles/img/orcid_inactive.png"
-                                                          alt="orcid symbol"/>    <span class="caret"></span></button>
+                                                          alt="orcid symbol"/>  ORCiD  <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
-                        <li>
-                            <button class="btn-link orcid-sign-in"> Sign in to ORCID to claim papers in the ADS. </button>
+                        <li class="no-hover-style" >
+                            <button class="btn-link orcid-sign-in"> Sign in to ORCiD to claim papers in the ADS. </button>
                         </li>
-                        <li>
+                        <li class="no-hover-style">
                             This functionality is still experimental.
                         </li>
                     </ul>
@@ -127,14 +127,23 @@
 
                 {{/if}}
 
-                <li><a href="http://adsabs.github.io/help/" target="_blank">Help</a></li>
+                <li class="dropdown">
+                    <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                      <i class="fa fa-graduation-cap"></i> Learn <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li> <a href="https://adsabs.github.io/blog/" target="_blank"> <i class="fa fa-newspaper-o"></i> ADS Blog </a></li>
+                        <li>  <a href="http://adsabs.github.io/help/" target="_blank"> <i class="fa fa-info-circle"></i> ADS Help Pages </a></li>
+                    </ul>
+                </li>
+
 
                 {{#if currentUser}}
 
                 <!-- Single button -->
                 <li class="dropdown">
                     <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                      My Account <span class="caret"></span>
+                     My Account <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="menu">
                         <li class="no-hover-style" style="padding:15px 10px;">You are signed in as <br/> <b>{{currentUser}}</b></li>

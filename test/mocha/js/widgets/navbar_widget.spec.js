@@ -181,18 +181,17 @@ define([
       expect(n.view.$("li.login").length).to.eql(0);
       expect(n.view.$("li.register").length).to.eql(0);
 
-      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(1);
-      expect(n.view.$(".btn.btn-link.dropdown-toggle").text().trim()).to.eql("My Account");
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(2);
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").text().trim()).to.eql('Learn \n                    \n                     My Account');
       expect(n.view.$(".dropdown-menu:last li:first").text().trim()).to.eql("You are signed in as  bumblebee");
 
       //lack of username indicates user is logged out
       u.setUser( undefined);
 
       minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, u.USER_INFO_CHANGE, "USER");
-      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(1);
       expect(n.view.$("li.login").length).to.eql(1);
       expect(n.view.$("li.register").length).to.eql(1);
-      expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(0);
 
     });
 

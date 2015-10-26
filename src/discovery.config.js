@@ -16,7 +16,7 @@ require.config({
   }()),
 
 
-  waitSeconds: 15,
+  waitSeconds: 30,
 
   // Configuration we want to make available to modules of ths application
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
