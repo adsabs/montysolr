@@ -321,17 +321,16 @@ define([
         this.getPubSub().publish(this.getPubSub().NAVIGATE, "404")
       },
 
-      // backbone default behaviour is to automatically decodeuri parameters
-      // however this behaviour breaks our apiquery loading, so we'll detect
-      // this situation and avoid decoding when there are multiple parameters
+
       _extractParameters: function(route, fragment) {
-        var params = route.exec(fragment).slice(1);
-        return _.map(params, function(param) {
-          return param ? ((param.indexOf('%26') > -1 && param.indexOf('&') > -1 ) ? param : decodeURIComponent(param)) : null;
+        return _.map(route.exec(fragment).slice(1), function(param) {
+          //do not decode api queries
+          if (/q\=/.test(param)){return param; }
+          else {
+            return param ? decodeURIComponent(param) : param;
+          }
         });
       }
-
-
     });
 
     _.extend(Router.prototype, Dependon.BeeHive, ApiAccessMixin);
