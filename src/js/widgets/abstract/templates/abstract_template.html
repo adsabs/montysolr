@@ -49,27 +49,24 @@
 <dl class="s-abstract-dl-horizontal">
 
     {{#if pub_raw}}
-    <dt>Publication</dt>
-    <dd>
-        <div id="article-publication">{{{pub_raw}}}</div>
-        {{#if formattedDate}}
-        <div>
-            <dt>Pub Date:</dt> {{formattedDate}}
-        </div>
-        {{/if}}
-
-        {{#if doi}}
-        <div>
-            <dt>DOI:</dt> <a href="{{doi.href}}" target="_blank">{{doi.doi}}</a>
-        </div>
-        {{/if}}
-    </dd>
-    <br/>
+        <dt>Publication</dt>
+        <dd>
+            <div id="article-publication">{{{pub_raw}}}</div>
+        </dd>
     {{/if}}
 
+    {{#if formattedDate}}
+        <dt>Pub Date:</dt>
+        <dd>{{formattedDate}}</dd>
+    {{/if}}
+
+    {{#if doi}}
+      <dt>DOI:</dt>
+      <dd><a href="{{doi.href}}" target="_blank">{{doi.doi}}</a></dd>
+    {{/if}}
 
     <dt >Bibcode</dt>
-    <dd>{{bibcode}} <i class="icon-help" data-toggle="popover" data-content="Bibcode is an identifier of a paper."></i></dd>
+    <dd>{{bibcode}} <i class="icon-help" data-toggle="popover" data-content="The bibcode is assigned by the ADS as a unique identifier for the paper."></i></dd>
 
     {{#if keyword}}
     <div id="keywords">
