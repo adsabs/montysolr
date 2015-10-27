@@ -213,3 +213,9 @@
 .s-light-font {
   font-weight: 300 !important;
 }
+
+.pull-right-sm {
+  @media(min-width: $screen-sm-min){
+    float: right !important;
+  }
+}

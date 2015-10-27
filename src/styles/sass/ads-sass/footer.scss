@@ -18,7 +18,8 @@
     h4 {
       display: inline-block;
       margin-left: 45px;
-      padding-top: 45px;
+      padding-top: 30px;
+      font-weight: 300;
     }
     h4:first-of-type {
       margin-left:0;
@@ -27,16 +28,18 @@
   }
 
   img {
-    width: 120px;
+    width: 80px;
     height: auto;
     margin-bottom: 20px;
     max-width: 120px;
     position: relative;
     top: 12px;
+    margin-left: 2%;
   }
 
   img.smithsonian{
-    width: 100px;
+    width: 67px;
+    margin-right: 2%;
   }
 
   .s-help {
