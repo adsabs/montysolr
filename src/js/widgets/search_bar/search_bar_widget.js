@@ -149,7 +149,7 @@ define([
               return;
             }
 
-            toMatch = findActiveAndInactive(request.term.trim()).active;
+            toMatch = findActiveAndInactive(request.term).active;
             if (!toMatch)
               return
             //testing each entry's "match" var in autocomplete array against the toMatch segment
@@ -250,6 +250,9 @@ define([
         $input.keydown(function (event) {
           if (event.keyCode == 8) {
             performSearch = false; //backspace, do not perform the search
+          }
+          else if (event.keyCode == 32 ){ //space, do not perform the search
+            performSearch = false;
           } else {
             performSearch = true; //perform the search
           }
