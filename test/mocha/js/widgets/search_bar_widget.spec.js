@@ -145,6 +145,24 @@ define([
       done();
     });
 
+    it("lowercases fields to prevent syntax errors", function(){
+
+      var widget = _widget();
+      $("#test").append(widget.render().el);
+      var $w = widget.render().$el;
+
+
+      widget.view.on("start_search", function(query){
+        expect(query).to.eql("author:Accomazzi bib:Apj property:refereed");
+      });
+
+      //should insert the field around the selected content if user has selected something
+      $w.find(".q").val("Author:Accomazzi Bib:Apj property:refereed");
+      $w.find(".search-submit").click();
+
+
+    });
+
     it("adds a default sort value of pubdate if the query doesnt have an operator and doesn't already have a sort", function(done){
 
       var widget = _widget();
