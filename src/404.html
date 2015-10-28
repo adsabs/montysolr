@@ -21,12 +21,38 @@
         });
     </script>
 
+    <style>
+        @keyframes moveAcross
+        {
+            from {
+                left: -75%;
+            }
+            to {
+                left: 75%;
+            }
+        }
+
+        .mobile-bbb {
+            position: relative;
+            width: 40%;
+            animation : moveAcross linear 20s forwards infinite;
+        }
+        p {
+            font-size: 18px;
+        }
+    </style>
+
 </head>
 <body>
 
 <div style="text-align: center;margin-top:10%">
-    <h3>404 Not Found</h3>
-    <img src="styles/img/jetpack.gif" alt="two men with jetpacks">
-    <h3>We couldn't find that page. Would you like to <a href="/">go back to the homepage?</a></h3></div>
+    <img src="styles/img/404_bumblerocket.png" alt="404 error image" class="mobile-bbb"/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <h3>404</h3>
+    <p>We couldn't find that page. Would you like to <a href="/">go back to the homepage?</a></p>
+</div>
 </body>
 </html>
