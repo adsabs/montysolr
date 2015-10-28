@@ -20,25 +20,50 @@
             analytics('send', 'event', 'error', 'automatic_redirect', '500.html');
         });
     </script>
+    <style>
+        @keyframes moveAcross
+        {
+            from {
+                left: -75%;
+            }
+            to {
+                left: 75%;
+            }
+        }
+
+        .mobile-bbb {
+            position: relative;
+            width: 40%;
+            animation : moveAcross linear 20s forwards infinite;
+        }
+        p {
+            font-size: 18px;
+        }
+    </style>
 
 </head>
 <body>
 
 <div style="text-align: center;margin-top:10%">
-    <h3>500 Error</h3>
+
+    <img src="styles/img/500_bumblerocket.png" alt="500 error image" class="mobile-bbb"/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <h2>500</h2>
     <h3>We've made an error.</h3>
     <p>
-        <a href="https://ui.adsabs.harvard.edu/">Try reloading and going to the home page</a>
+        <a href="/">Click here to try going to the home page.</a>
     </p>
     <p>
-       Or try to do a hard refresh of the current page: hold down Cmd/Control key and then the Shift key and press R.
+       Or try to do a hard refresh of the current page: <br/> hold down Cmd (Mac)/Control(Windows) key and then the Shift key and press R.
     </p>
     <p>
-        If neither of the above work, please try back later.
+        If neither of the above work, please try again later.
     </p>
-    <p>
 
-    </p>
 </div>
+
 </body>
 </html>
