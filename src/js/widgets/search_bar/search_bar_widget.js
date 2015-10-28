@@ -435,6 +435,10 @@ define([
         e.stopPropagation();
 
         query = this.getFormVal();
+
+        //replace uppercased fields with lowercase
+        query = query.replace(/([A-Z])\w+:/g, function(letter){return letter.toLowerCase()});
+
         this.trigger("start_search", query);
 
         //let analytics know what type of query it was
@@ -465,7 +469,6 @@ define([
         //was querybuilder used?
         if (this._queryBuilderUsed){
           analytics('send', 'event', 'interaction', 'querybuilder-used', query);
-
         }
 
         //reset
