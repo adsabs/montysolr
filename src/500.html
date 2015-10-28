@@ -20,6 +20,7 @@
             analytics('send', 'event', 'error', 'automatic_redirect', '500.html');
         });
     </script>
+
     <style>
         @keyframes moveAcross
         {
@@ -31,9 +32,15 @@
             }
         }
 
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
         .mobile-bbb {
             position: relative;
             width: 40%;
+            margin-bottom: 40px;
             animation : moveAcross linear 20s forwards infinite;
         }
         p {
@@ -47,11 +54,8 @@
 <div style="text-align: center;margin-top:10%">
 
     <img src="styles/img/500_bumblerocket.png" alt="500 error image" class="mobile-bbb"/>
-    <br/>
-    <br/>
-    <br/>
-    <br/>
-    <h2>500</h2>
+
+    <h1>500</h1>
     <h3>We've made an error.</h3>
     <p>
         <a href="/">Click here to try going to the home page.</a>
