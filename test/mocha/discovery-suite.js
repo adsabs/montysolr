@@ -2,14 +2,16 @@ define([
   './core-suite',
   './ui-suite',
   './qb-suite',
-  './orcid-suite'
+  './orcid-suite',
+  './wraps-suite'
 ], function(
   core,
   ui,
   qb,
-  orcid
+  orcid,
+  wrap
   ) {
 
 
-  return core.concat(ui).concat(qb).concat(orcid);
+  return core.concat(ui).concat(qb).concat(orcid).concat(wrap);
 });

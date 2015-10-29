@@ -86,15 +86,16 @@ define([
         this.set('index-page', function() {
 
           app.getObject('MasterPageManager').show('LandingPage', ["SearchWidget"]);
-          this.route = "";
-          //order is important
           app.getWidget("LandingPage").done(function(widget) {
             widget.setActive("SearchWidget");
           });
-
+          this.route = "";
         });
 
         this.set('SearchWidget', function() {
+          //you must set a route within the function, even if you are calling
+          //another function that sets a route
+          this.route = "";
           self.get('index-page').execute();
         });
 
@@ -183,7 +184,8 @@ define([
             });
             this.route = "#/public-libraries/" + id ;
           }
-          else {
+          //make sure user is signed in
+          else if (!redirectIfNotSignedIn()){
 
             app.getWidget("IndividualLibraryWidget").done(function(widget) {
               widget.setSubView({view: sub, id: id});
@@ -194,6 +196,7 @@ define([
 
             this.route = "#user/libraries/" + id;
           }
+
         });
 
 

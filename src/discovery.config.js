@@ -40,7 +40,7 @@ require.config({
           FeedbackMediator: 'js/wraps/discovery_mediator',
           QueryMediator: 'js/components/query_mediator',
           Diagnostics: 'js/bugutils/diagnostics',
-          AlertsController: 'js/components/alerts_mediator',
+          AlertsController: 'js/wraps/alerts_mediator',
           Orcid: 'js/modules/orcid/module'
         },
         services: {

@@ -255,7 +255,7 @@ define([
 
         alerts.alert(new ApiFeedback({
           code: ApiFeedback.CODES.ALERT,
-          msg: 'The ADS Api is having a bad day, I\'m sorry - server returned error for this request <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
+          msg: 'The ADS Api is having a bad day- the server returned error for this request <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
           modal: true
         }));
       }
@@ -263,8 +263,6 @@ define([
     };
 
     handlers[ApiFeedback.CODES.API_REQUEST_ERROR] = function(feedback) {
-
-      analytics('send', 'event', 'error', 'api-request', feedback.errorThrown);
 
       var req = feedback.request;
       var q = req.get('query');
@@ -279,6 +277,8 @@ define([
       };
       var app = this.getApp();
       var alerter = this.getAlerter();
+
+      analytics('send', 'event', 'error', 'api-request', JSON.stringify(errorDetails));
 
       if (!psk) {
         console.error('We are not going to handle the error (PSK is empty, can\'t identify the component');

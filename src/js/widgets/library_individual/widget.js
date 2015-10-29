@@ -105,29 +105,37 @@ define([
       //reset widget, update header view
       switchToNewLib : function(){
 
-        var id = this.model.get("id"),
-          that = this,
-          pubsub = this.getBeeHive().getService('PubSub'),
-          LibraryController = this.getBeeHive().getObject("LibraryController");
+        var pubsub = this.getBeeHive().getService('PubSub'),
+            LibraryController = this.getBeeHive().getObject("LibraryController"),
+            id = this.model.get("id");
 
+        this.resetWidget();
+
+        //PUBLIC LIBRARY
+        //return--> library data + metadata will be fetched in updateSubView,
+        //which will call createHeader
+
+        //PRIVATE LIBRARY
         if (!LibraryController.isDataLoaded()){
           //wait for LIBRARY_CHANGE event
           return
         }
 
-        this.resetWidget();
+        var metadata = _.findWhere(LibraryController.getAllMetadata(), {id : id});
+        this.createHeader(metadata);
+
+      },
+
+      createHeader : function(metadata){
+
+        var that = this;
 
         //updating header
-        var metadata = _.findWhere(LibraryController.getAllMetadata(), {id : id});
         that.headerModel.set(_.extend(metadata,
-          {active : that.model.get("view"),
-            publicView : that.model.get("publicView")}
+          { active : that.model.get("view"),
+            publicView : that.model.get("publicView")
+          }
         ));
-
-        //if we're requesting a public view but this lib isnt public, redirect to 404
-        if (this.model.get("publicView") && !this.headerModel.get("public")){
-          pubsub.publish(pubsub.NAVIGATE, "404");
-        }
 
         var header = new HeaderView({model : this.headerModel});
         header.on("all", this.handleHeaderEvents, this);
@@ -173,14 +181,15 @@ define([
         switch (view) {
 
           case "library":
-            var permission = that.headerModel.get("permission"),
-              editRecords = !!_.contains(["write", "admin", "owner"], permission) && !this.model.get("publicView"),
-              subView = new LibraryView({collection : that.libraryCollection, permission : editRecords, perPage : Marionette.getOption(this, "perPage") });
+            var public = this.model.get("publicView"),
+                permission = that.headerModel.get("permission"),
+                editRecords = !!_.contains(["write", "admin", "owner"], permission) && !public,
+                subView = new LibraryView({collection : that.libraryCollection, permission : editRecords, perPage : Marionette.getOption(this, "perPage") });
 
             subView.on("all", that.handleLibraryEvents, that);
 
-            //check to see if we already have records, if not, fetch them
-            if (this.libraryCollection.length == 0 && this.headerModel.get("num_documents") > 0) {
+            //check to see if we already have records for a private lib, if not, fetch them
+            if (!public && this.libraryCollection.length == 0 && this.headerModel.get("num_documents") > 0) {
               //add the loading view
               that.view.main.show(new LoadingView());
               //now fetch the data
@@ -188,6 +197,21 @@ define([
                 that.libraryCollection.reset(data.solr.response.docs);
                 //remove the loading view
                 that.view.main.show(subView);
+              });
+            }
+            else if (public){
+              //add the loading view
+              that.view.main.show(new LoadingView());
+              //now fetch the data
+              LibraryController.getLibraryData(id).done(function (data) {
+                //check if public
+                that.createHeader(data.metadata);
+                that.libraryCollection.reset(data.solr.response.docs);
+                //remove the loading view
+                that.view.main.show(subView);
+              }).fail(function(data){
+                debugger
+                that.getPubSub().publish(that.getPubSub().NAVIGATE, "404");
               });
             }
             else {

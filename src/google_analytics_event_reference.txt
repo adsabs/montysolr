@@ -1,5 +1,5 @@
     Example from google analytics help page:
-      ga('send', 'event', [eventCategory], [eventAction], [eventLabel], [value (an int, we dont use) right now])
+      ga('send', 'event', [eventCategory], [eventAction], [eventLabel], [value (an int, we dont use right now])
 
 	
     Search and Index Page Interactions
@@ -40,4 +40,6 @@
 
 
 
+   Errors (incomplete)
 
+        analytics('send', 'event', 'error', 'api-request', [object with error details including the jsonified api query]);
