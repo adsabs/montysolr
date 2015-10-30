@@ -383,6 +383,17 @@ define([
         return !!this.model.get("user");
     },
 
+
+    /*
+     * POST an update to the myads user_data endpoint
+     * (success will automatically update the user object's model of myads data)
+     * */
+
+    setMyADSData : function(data) {
+      return this.postData("USER_DATA", data);
+    },
+
+
     /*
     * this function queries the myads open url configuration endpoint
     * and returns a promise that it resolves with the data
@@ -432,6 +443,7 @@ define([
       deleteAccount : "POST to delete account endpoint",
       changePassword : "POST to change password endpoint",
       changeEmail : "POST to change email endpoint",
+      setMyADSData : "",
       USER_SIGNED_IN: 'constant',
       USER_SIGNED_OUT: 'constant',
       USER_INFO_CHANGE: 'constant',
