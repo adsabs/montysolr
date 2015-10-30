@@ -304,13 +304,24 @@ define([
         var endpoint = ApiTargets["DOCUMENTS"] + "/" + id;
         return this.composeRequest(endpoint, "POST", data)
           .done(function(info){
-            var currentNum = that.collection.get(id).get("num_documents");
-            var newNum = info.number_added ? currentNum + info.number_added : currentNum - info.number_removed;
+            var currentNum = parseInt(that.collection.get(id).get("num_documents"));
+            var newNum;
+            if (_.has(info, "number_added")){
+              newNum = currentNum + parseInt(info.number_added);
+            }
+            else if (_.has(info, "number_removed")) {
+              newNum = currentNum - parseInt(info.number_removed);
+            }
+            else {
+             console.warn("unable to find out whether records were added or removed");
+            }
 
-            that.collection.get(id).set({
-              "num_documents":newNum,
-              "date_last_modified" : new Date().toString()
-            });
+            if (newNum){
+              that.collection.get(id).set({
+                num_documents : newNum,
+                date_last_modified : new Date().toString()
+              });
+            }
 
           })
           .fail(function(jqXHR){

@@ -164,6 +164,7 @@ define([
             LibraryController = that.getBeeHive().getObject("LibraryController");
 
         if (!id || !view){
+          console.warn("library widget's updateSubView called without requisite library id and view name");
           return
         }
 
@@ -181,7 +182,7 @@ define([
             subView.on("all", that.handleLibraryEvents, that);
 
             //check to see if we already have records for a private lib, if not, fetch them
-            if (!public && this.libraryCollection.length == 0 && this.headerModel.get("num_documents") > 0) {
+            if (!public && this.libraryCollection.length == 0 && this.headerModel.get("num_documents") !== 0) {
               //add the loading view
               that.view.main.show(new LoadingView());
               //now fetch the data
