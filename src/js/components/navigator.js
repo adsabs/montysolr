@@ -85,7 +85,7 @@ define(['underscore',
         //router can communicate directly with navigator to replace url
         var replace = arg1 && arg1.replace ? true : false;
 
-        if (transition.route) {
+        if (transition.route || transition.route == "") {
           // update the History object
           this.router.navigate(
             transition.route,

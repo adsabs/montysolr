@@ -102,8 +102,37 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect($w.find(".s-abstract-text").text()).to.match(/In the past twenty years there has been a great amount of growth in radiometric observing methods./);
       });
 
+      it("should request a new bibcode if it can't find it in this._docs", function(){
 
-    })
+        var aw = new AbstractWidget();
+
+        aw._docs["goo"] = "fake";
+
+        aw.activate(minsub.beehive.getHardenedInstance());
+        aw.dispatchRequest = sinon.spy();
+
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:goo'}));
+
+        expect(aw.dispatchRequest.callCount).to.eql(0);
+
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
+
+        expect(aw.dispatchRequest.callCount).to.eql(1);
+        expect(aw.dispatchRequest.args[0][0].toJSON()).to.eql({
+          "q": [
+            "bibcode:foo"
+          ],
+          "__show": [
+            "foo"
+          ]
+        });
+
+      });
+
+
+    });
+
+
 
 
   });

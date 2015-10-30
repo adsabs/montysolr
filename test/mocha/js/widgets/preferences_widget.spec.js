@@ -135,54 +135,20 @@ define([
       $(".preferences-widget button.submit").click();
 
       //submits the currently selected institution's url
-      expect(fakeUser.setUserData.args[0]).to.eql( [ { link_server : 'wesleyan.edu' } ] );
+      expect(fakeUser.setUserData.callCount).to.eql(0);
 
-    });
+      $(".preferences-widget select").val("ohio_wesleyan.edu");
 
-    it("should show a view that allows user to set open url link server", function(){
+      $(".preferences-widget button.submit").click();
 
-      var p = new PreferencesWidget();
+      expect(fakeUser.setUserData.callCount).to.eql(1);
 
-      var minsub = new (MinSub.extend({
-        request: function(apiRequest) {
-          return {some: 'foo'}
-        }
-      }))({verbose: false});
+      expect(fakeUser.setUserData.args[0][0]).to.eql( {link_server: "ohio_wesleyan.edu"});
 
-      var fakeUser = {getHardenedInstance : function(){return this},
-
-        getOpenURLConfig : function(){
-          var d = $.Deferred();
-          d.resolve(fakeURLConfig);
-          return d;
-
-        },
-        setMyADSData : sinon.spy(),
-        getUserData : function() {return {}}
-
-
-      };
-
-      minsub.beehive.addObject("User", fakeUser);
-
-      p.activate(minsub.beehive.getHardenedInstance());
-
-      minsub.publish(minsub.APP_STARTED);
-      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, {
-        link_server : undefined,
-        anotherVal : "foo"
-      } );
-
-      $("#test").append(p.getEl());
-
-      expect($("#test .current-link-server").length).to.eql(0);
 
 
     });
-
 
   });
 
-
-
-  })
+ });

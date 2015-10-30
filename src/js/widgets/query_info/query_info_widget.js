@@ -57,7 +57,7 @@ define(['marionette',
       },
 
       triggers : {
-        "click .clear-selected" : "clear-selected",
+        "click .clear-selected" : "clear-selected"
       },
 
       events : {
@@ -113,7 +113,8 @@ define(['marionette',
           data.recordsToAdd = "all";
         }
 
-        data.name = this.model.get("newLibraryName").trim();
+        data.name = this.model.get("newLibraryName") || "";
+        data.name = data.name.trim();
         this.trigger("library-create", data);
 
       },
@@ -218,6 +219,8 @@ define(['marionette',
                 error: JSON.parse(arguments[0].responseText).error
             });
           });
+
+        this.clearFeedbackWithDelay();
       },
 
       libraryCreateSubmit : function(data){
@@ -250,6 +253,21 @@ define(['marionette',
               error: JSON.parse(arguments[0].responseText).error
             });
           });
+
+      this.clearFeedbackWithDelay();
+
+      },
+
+      clearFeedbackWithDelay : function(){
+
+        var that = this,
+          //ten seconds
+          timeout = 10000;
+
+        setTimeout(function(){
+          that.model.unset("feedback");
+        }, timeout);
+
       },
 
       processResponse: function(apiResponse) {

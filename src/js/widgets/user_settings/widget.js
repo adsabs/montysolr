@@ -350,6 +350,7 @@ define([
         return that.getBeeHive().getObject("User").getToken();
       }
 
+      this.model.set("user", this.getBeeHive().getObject("User").getUserName());
     },
 
     viewEvents: {

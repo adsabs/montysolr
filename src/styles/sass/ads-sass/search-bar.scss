@@ -167,12 +167,20 @@ input.q {
 
 }
 
+.only-show-on-landing {
+  display: none;
+}
+
 .s-landing-page-layout {
 
 
   .s-search-bar-widget {
     max-width: 800px;
     margin: auto;
+  }
+
+  .only-show-on-landing {
+    display: block;
   }
 
 }

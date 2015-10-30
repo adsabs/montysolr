@@ -28,13 +28,17 @@ define([
         }
       }))({verbose: false});
 
+
       var fakeUser = {getToken: function () {
         var d = $.Deferred();
         d.resolve({access_token: "foo"});
         return d
       }, getHardenedInstance: function () {
         return this
-      }};
+      },
+        getUserName : function(){return "fakeName"}
+      };
+
       var fakeCSRFManager = {getRecaptchaKey: function () {
         return "foo"
       }, getHardenedInstance: function () {
@@ -84,7 +88,9 @@ define([
         return d
       }, changePassword: sinon.spy(), getHardenedInstance: function () {
         return this
-      }};
+      },
+        getUserName : function(){return "fakeName"}
+      };
       var fakeCSRFManager = {getRecaptchaKey: function () {
         return "foo"
       }, getHardenedInstance: function () {
@@ -172,7 +178,9 @@ define([
         return $.Deferred();
       }), getHardenedInstance: function () {
         return this
-      }};
+      },
+        getUserName : function(){return "fakeName"}
+      };
       var fakeCSRFManager = {getRecaptchaKey: function () {
         return "foo"
       }, getHardenedInstance: function () {
@@ -240,7 +248,9 @@ define([
           return this
         },
         USER_SIGNED_IN: User.prototype.USER_SIGNED_IN,
-        USER_SIGNED_OUT: User.prototype.USER_SIGNED_OUT
+        USER_SIGNED_OUT: User.prototype.USER_SIGNED_OUT,
+        getUserName : function(){return "fakeName"}
+
       };
       var fakeCSRFManager = {getRecaptchaKey: function () {
         return "foo"

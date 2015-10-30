@@ -44,7 +44,15 @@ define([
     changeLinkServer : function(e){
 
       e.preventDefault();
-      this.trigger("change:link_server",  this.$("#link-server-container select").val())
+      var newVal = this.$("#link-server-container select").val();
+
+      //in the case that someone re-selected their link server a second time
+      if  (newVal === this.model.get("link_server")){
+        //just close the panel
+        this.render();
+        return;
+      }
+      this.trigger("change:link_server", newVal);
 
       var loadingString = '<i class="fa fa-spinner fa-pulse"></i> Loading';
       this.$("#link-server-container .submit").html(loadingString);

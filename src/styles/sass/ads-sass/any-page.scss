@@ -21,23 +21,24 @@
   }
 }
 
-
 div[data-widget="AlertsWidget"] {
-  position: relative;
 
-  .s-alerts {
-    z-index: $z-index-4;
-    width: 84%;
-    display: inline-block;
-    margin-top: 80px;
-    position: absolute;
-    left: 8%;
+  .alert {
+    margin: 0 -15px 0 -15px;
+    margin-bottom: 0 !important;
+    border-radius: 0;
     font-size: 18px;
-    border-radius: $border-radius-large;
+    border: 0px solid transparent !important;
+    padding: 25px;
+    padding-left: 45px;
   }
 
+  button.close {
+    position: relative;
+    top: -11px;
+    left: 3px;
+  }
 }
-
 
 .s-tabs-widget {
 

@@ -363,7 +363,7 @@ define([
      var request4 = requestStub.args[3][0];
      expect(request4.toJSON().target).to.eql("vault/user-data");
      expect(request4.toJSON().options.type).to.eql("POST");
-     expect(request4.toJSON().options.data).to.eql('{"link_server":"foo.com"}');
+     expect(request4.toJSON().options.data).to.eql('{"link_server":"foo.com"}' );
      //doesn't require csrf token
      expect(fakeCSRF.getCSRF.callCount).to.eql(3);
 

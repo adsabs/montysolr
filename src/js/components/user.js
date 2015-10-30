@@ -389,26 +389,33 @@ define([
     * (it is only needed by the preferences widget)
     * */
 
+
     getOpenURLConfig : function(){
+      return this.getSiteConfig('link_servers');
+    },
+
+    getSiteConfig: function(key) {
       var deferred = $.Deferred();
 
       function done (data){
         deferred.resolve(data);
-      }
+      };
+
       function fail(data){
         deferred.reject(data);
-      }
-       var request = new ApiRequest({
-          target : ApiTargets["OPENURL_CONFIGURATION"],
-          options : {
-            type: "GET",
-            done: done,
-            fail: fail
-          }
-        });
+      };
 
-     this.getBeeHive().getService("Api").request(request);
-     return deferred.promise();
+      var request = new ApiRequest({
+        target : key ? ApiTargets["SITE_CONFIGURATION"] + '/' + key : ApiTargets["SITE_CONFIGURATION"],
+        options : {
+          type: "GET",
+          done: done,
+          fail: fail
+        }
+      });
+
+      this.getBeeHive().getService("Api").request(request);
+      return deferred.promise();
     },
 
     hardenedInterface: {

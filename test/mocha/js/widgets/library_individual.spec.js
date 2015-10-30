@@ -303,9 +303,9 @@ define([
 
     var fakeLibraryController =   {
       getHardenedInstance : function(){return this},
-      getAllMetadata : function(){return stubLibraryMetadata},
+      getAllMetadata : sinon.spy(function(){return stubLibraryMetadata}),
       isDataLoaded : function(){return true},
-      getLibraryData : function(id ){ var d =  $.Deferred(); if(id==1){d.resolve(stubData1)} else {d.resolve(stubData2)}; return d.promise() },
+      getLibraryData : sinon.spy(function(id ){ var d =  $.Deferred(); if(id==1){d.resolve(stubData1)} else {d.resolve(stubData2)}; return d.promise() }),
       updateLibraryContents : function(updateData){var d = $.Deferred(); d.resolve(_.extend({name: "Aliens Among Us", id: 1, description: "Are you one of them?", permission : "owner", num_papers : 45, date_created: '2015-04-03 04:30:04', date_last_modified: '2015-04-09 06:30:04'}, updateData )); return d},
       updateLibraryMetadata : sinon.spy(function(updateData){
         var d = $.Deferred();
@@ -339,8 +339,13 @@ define([
 
       $("#test").append(w.getEl());
 
-      w.model.set({view : "library", id : "1"});
+      expect(fakeLibraryController.getLibraryData.callCount).to.eql(0);
+      expect(fakeLibraryController.getAllMetadata.callCount).to.eql(0);
 
+      w.setSubView({view : "library", id : "1"});
+
+      expect(fakeLibraryController.getLibraryData.callCount).to.eql(1);
+      expect(fakeLibraryController.getAllMetadata.callCount).to.eql(1);
 
       expect($("#test .editable-item form").eq(0).hasClass("hidden")).to.be.true;
 
@@ -358,7 +363,6 @@ define([
       expect(fakeLibraryController.updateLibraryMetadata.args[0][1]).to.eql({name: "here is a better, newer title"});
 
       //navigating to permissions
-
       expect($("#test .main .library-detail-view").length).to.eql(1);
       expect($("#test .main .library-admin-view").length).to.eql(0);
 
@@ -366,7 +370,7 @@ define([
 
       //neither above are possible if you dont have admin privileges,
       //the data sent back by stub function will have "read" permisions
-      w.model.set({view : "library", id : "3"});
+      w.setSubView({view : "library", id : "3"});
 
       expect($("#test .s-library-title h2").attr("contenteditable")).to.be.undefined;
 
@@ -374,7 +378,7 @@ define([
 
     });
 
-    it("should display a slightly different header view if the model's attribute publicView is set to true", function(){
+    it("should fetch metadata + library data and display a public view properly", function(){
 
       var w = new LibraryWidget();
 
@@ -393,9 +397,20 @@ define([
 
       $("#test").append(w.getEl());
 
-      w.model.set({view : "library", id : "1", "publicView" : true});
+      expect(fakeLibraryController.getLibraryData.callCount).to.eql(2);
+      expect(fakeLibraryController.getAllMetadata.callCount).to.eql(2);
+
+      w.setSubView({id: "1", view: "library", publicView: true});
+
+      expect(fakeLibraryController.getLibraryData.callCount).to.eql(3);
+      //should grab the metadata from the getLibraryData function rather than getAllMetadata if public library
+      expect(fakeLibraryController.getAllMetadata.callCount).to.eql(2);
+
+
 
     });
+
+    it
 
     it("should allow users to navigate to other subviews (export, metrics, vis, admin)", function(){
 
@@ -417,7 +432,7 @@ define([
 
       $("#test").append(w.getEl());
 
-      w.model.set({view:"library", id : "1"});
+      w.setSubView({view:"library", id : "1"});
 
       //navigating to permissions
 
@@ -493,7 +508,7 @@ define([
 
 
       //none of these options are available if the library has 0 bibcodes
-      w.model.set({view : "library", id : "2"});
+      w.setSubView({view : "library", id : "2"});
 
       //export, metrics, vis disabled
 
@@ -510,6 +525,8 @@ define([
 
       var w = new LibraryWidget();
 
+      $("#test").append(w.render().el);
+
       var minsub = new (MinSub.extend({
         request: function(apiRequest) {
           return {some: 'foo'}
@@ -520,10 +537,7 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      $("#test").append(w.getEl());
-
-
-      w.model.set({view : "library", id : "1"});
+      w.setSubView({view : "library", id : "1"});
 
       //updateView will be called 1x
       expect(LibraryWidget.prototype.updateWidget.callCount).to.eql(1);
@@ -538,7 +552,7 @@ define([
 
       //doesn't have ability to delete records
 
-      w.model.set({view : "library", id : "3"});
+      w.setSubView({view : "library", id : "3"});
 
       expect($("#test .library-item:first").find("button.remove-record").length).to.eql(0);
 
@@ -563,8 +577,7 @@ define([
 
       $("#test").append(w.getEl());
 
-
-      w.model.set({view : "library", id : "1"});
+      w.setSubView({view : "library", id : "1"});
 
       //should be default sorted on pubdate
 
