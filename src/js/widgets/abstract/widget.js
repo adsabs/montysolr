@@ -215,37 +215,22 @@ define([
       onDisplayDocuments: function (apiQuery) {
 
           var bibcode =  apiQuery.get('q'),
-              q,
-              currentQuery;
-
-          currentQuery = this.getBeeHive().getObject("AppStorage") ? this.getBeeHive().getObject("AppStorage").getCurrentQuery() : undefined;
+              q;
+//              currentQuery = this.getBeeHive().getObject("AppStorage") ? this.getBeeHive().getObject("AppStorage").getCurrentQuery() : undefined;
 
           if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
           //redefine bibcode
           var bibcode = bibcode[0].replace('bibcode:', '');
-          //make a lower case version: not sure why necessary
         }
         if (this._docs[bibcode.toLowerCase()]) { // we have already loaded it
          this.displayBibcode(bibcode);
         }
         else {
           if (apiQuery.has('__show')) return; // cycle protection
-
-          /*
-          * widget never got a current query, because it was instantiated after the
-          * current search cycle -- so request all docs for current query
-          * */
-
-           if ( !currentQuery || _.isEmpty(currentQuery.toJSON())) {
             q = apiQuery.clone();
-          }
-          else {
-              q = currentQuery.clone();
-            }
-
             q.set('__show', bibcode);
+           //this will add required fields
             this.dispatchRequest(q);
-
         }
       },
 

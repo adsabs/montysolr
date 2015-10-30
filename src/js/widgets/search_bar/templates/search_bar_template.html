@@ -39,8 +39,57 @@
                  </div> <!-- /form-group-->
              </form>
         </div>
-         <div class="only-show-on-landing">
-             <a href="https://adsabs.github.io/help/search/search-syntax/" target="_blank" style="position:relative;top:70px"> <img class="img-responsive" src="styles/img/basic_instructions.png" alt="an example ADS query"/></a>
+         <div class="col-sm-12 only-show-on-landing" style="margin-top: 40px;">
+
+             <table class="table">
+                 <caption>ADS search basics</caption>
+                 <thead>
+                 <tr>
+                     <th>Field</th>
+                     <th>Syntax</th>
+                     <th>Example</th>
+                 </tr>
+                 </thead>
+                 <tbody>
+                 <tr>
+                     <td>Author</td>
+                     <td>author:"last, first"</td>
+                     <td>author:"huchra, john"</td>
+                 </tr>
+
+                 <tr>
+                     <td>First Author</td>
+                     <td>author:"^last, first"</td>
+                     <td>author:"^huchra, john"</td>
+                 </tr>
+                 <tr>
+                     <td>Abstract + Title</td>
+                     <td>abs:"phrase"</td>
+                     <td>abs:"dark energy"</td>
+                 </tr>
+                 <tr>
+                     <td>Year</td>
+                     <td>year:YYYY</td>
+                     <td>year:2000</td>
+                 </tr>
+                 <tr>
+                     <td>Year Range</td>
+                     <td>year:YYYY-YYYY</td>
+                     <td>year:2000-2005</td>
+                 </tr>
+                 <tr>
+                     <td>Publication</td>
+                     <td>bibstem:"abbrev"</td>
+                     <td>bibstem:ApJ</td>
+                 </tr>
+                 <tr>
+                     <td>Fulltext</td>
+                     <td>full:"phrase"</td>
+                     <td>full:"gravitational waves"</td>
+                 </tr>
+                 </tbody>
+             </table>
+             <a href="https://adsabs.github.io/help/search/search-syntax/" target="_blank">Learn more about the ADS query syntax.</a>
          </div>
          <div class="s-num-found">
           <span class="s-light-font description">Your search returned</span> <b><span class="num-found-container"></span></b><span class="s-light-font"> results</span>

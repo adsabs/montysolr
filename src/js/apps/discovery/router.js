@@ -78,7 +78,6 @@ define([
       },
 
       index: function (query) {
-        debugger
         this.routerNavigate('index-page');
       },
 

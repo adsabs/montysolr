@@ -86,7 +86,7 @@ define([
       getWidget: function() {
         if (this._widget)
           return this._widget;
-        this._widget = this.getApp().getWidget(this.widgetName || 'AlertsWidget');
+        this._widget = this.getApp()._getWidget(this.widgetName || 'AlertsWidget');
         return this._widget;
       },
 

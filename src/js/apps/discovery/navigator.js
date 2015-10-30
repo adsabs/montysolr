@@ -200,7 +200,6 @@ define([
         });
 
 
-
         this.set("library-export", function(widget, data){
 
           if (!(data.bibcodes && data.bibcodes.length || data.id)) {
@@ -261,6 +260,9 @@ define([
               publishPageChange("libraries-page");
             }
           });
+
+          this.route = "#user/libraries/" + data.id;
+
         });
 
 
@@ -306,6 +308,9 @@ define([
 
               publishPageChange("libraries-page");
             }
+
+          this.route = "#user/libraries/" + data.id;
+
         });
 
         this.set("library-visualization", function(widget, data){
@@ -349,8 +354,10 @@ define([
             app.getObject('MasterPageManager').show("LibrariesPage",
               ["IndividualLibraryWidget", "UserNavbarWidget", widgetName]);
             publishPageChange("libraries-page");
-
           }
+
+          this.route = "#user/libraries/" + data.id;
+
         });
 
         this.set("home-page", function(){

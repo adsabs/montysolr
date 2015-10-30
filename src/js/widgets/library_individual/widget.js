@@ -59,12 +59,7 @@ define([
         this.libraryCollection = new LibraryView.Collection();
         this.headerModel = new HeaderView.Model();
 
-        //need to change both header and subview when library changes
-        this.listenTo(this.model, "change:id", this.updateWidget);
-        //change only subview
-        this.listenTo(this.model, "change:view", this.updateSubView);
-
-        //need to make sure view is rendered at lease 1x before it shows a subview
+        //need to make sure view is rendered at least 1x before it shows a subview
         this.view.render();
       },
 
@@ -78,8 +73,8 @@ define([
       onLibraryChange : function(collectionJSON, info){
 
         if (info.ev == "change" &&
-          info.id ==  this.model.get("id") &&
-          _.findWhere(collectionJSON, {id : info.id}).num_documents > this.headerModel.get("num_documents")
+            info.id ==  this.model.get("id") &&
+            _.findWhere(collectionJSON, {id : info.id}).num_documents > this.headerModel.get("num_documents")
           ){
           this.updateWidget();
         }
@@ -105,21 +100,26 @@ define([
       //reset widget, update header view
       switchToNewLib : function(){
 
-        var pubsub = this.getBeeHive().getService('PubSub'),
-            LibraryController = this.getBeeHive().getObject("LibraryController"),
+        var LibraryController = this.getBeeHive().getObject("LibraryController"),
             id = this.model.get("id");
 
-        this.resetWidget();
+        this.libraryCollection.reset();
+        this.view.header.empty();
+        this.view.main.empty();
 
         //PUBLIC LIBRARY
         //return--> library data + metadata will be fetched in updateSubView,
         //which will call createHeader
+        if (this.model.get("publicView")) return;
 
         //PRIVATE LIBRARY
         if (!LibraryController.isDataLoaded()){
           //wait for LIBRARY_CHANGE event
           return
         }
+
+        // could be for any view -- library, export, metrics, etc--so insert
+        // the correct header now
 
         var metadata = _.findWhere(LibraryController.getAllMetadata(), {id : id});
         this.createHeader(metadata);
@@ -141,14 +141,6 @@ define([
         header.on("all", this.handleHeaderEvents, this);
         this.view.header.show( header );
 
-      },
-
-      resetWidget : function(){
-        //empty regions, destroying views to stop events from occuring
-        this.view.header.empty();
-        this.view.main.empty();
-        //empty collection
-        this.libraryCollection.reset();
       },
 
       //respond to library_collection change event
@@ -204,18 +196,18 @@ define([
               that.view.main.show(new LoadingView());
               //now fetch the data
               LibraryController.getLibraryData(id).done(function (data) {
-                //check if public
                 that.createHeader(data.metadata);
                 that.libraryCollection.reset(data.solr.response.docs);
                 //remove the loading view
                 that.view.main.show(subView);
               }).fail(function(data){
-                debugger
+                //the collection wasn't public
                 that.getPubSub().publish(that.getPubSub().NAVIGATE, "404");
               });
             }
             else {
-              //just show the view
+              //just show the view, presumably user is navigating back to list view
+              //after already having been there (for this library)
               that.view.main.show(subView);
             }
             break;
@@ -243,6 +235,7 @@ define([
       },
 
       /*
+       * ****this is the only way to change the state of the view***
        * called by the navigator
        * a change of ID will trigger the function "switchToNewLib"
        * a change of view will only trigger "updateSubView"
@@ -250,21 +243,20 @@ define([
 
       setSubView  : function(data) {
 
-        var view = data.view ? data.view : "library";
+        data.view = data.view ? data.view : "library";
 
         //could contain "view", "id", and/or "publicView"
         this.model.set(data);
 
-        //if we just listened to change events there could be a redundant function (updateSubView)
-        //calls both updateSubView and switchToNewWidget
-
-        if (this.model.changedAttributes().hasOwnProperty("id")){
+        //if id changed, library changed --> need to destroy everything and start again
+        if (this.model.changedAttributes().hasOwnProperty("id")) {
+          //this calls both switchToNewLib and updateSubView
           this.updateWidget();
         }
-        else if (this.model.changedAttributes().hasOwnProperty("view")){
+        else {
+          //just update sub view info
           this.updateSubView();
         }
-
       },
 
       handleLibraryEvents : function (event, arg1, arg2){
@@ -354,7 +346,5 @@ define([
     });
 
     return Library
-
-
 
   });
