@@ -182,7 +182,6 @@ define([
               app.getObject('MasterPageManager').show("PublicLibrariesPage",
                 ["IndividualLibraryWidget"]);
             });
-            this.route = "#/public-libraries/" + id ;
           }
           //make sure user is signed in
           else if (!redirectIfNotSignedIn()){
@@ -194,7 +193,13 @@ define([
               publishPageChange("libraries-page");
             });
 
-            this.route = "#user/libraries/" + id;
+          }
+
+          if (data.publicView) {
+            this.route = "#/public-libraries/" + data.id ;
+          }
+          else {
+            this.route = "#user/libraries/" + data.id;
           }
 
         });
@@ -261,7 +266,12 @@ define([
             }
           });
 
-          this.route = "#user/libraries/" + data.id;
+          if (data.publicView) {
+            this.route = "#/public-libraries/" + data.id ;
+          }
+          else {
+            this.route = "#user/libraries/" + data.id;
+          }
 
         });
 
@@ -309,7 +319,12 @@ define([
               publishPageChange("libraries-page");
             }
 
-          this.route = "#user/libraries/" + data.id;
+          if (data.publicView) {
+            this.route = "#/public-libraries/" + data.id ;
+          }
+          else {
+            this.route = "#user/libraries/" + data.id;
+          }
 
         });
 
@@ -356,7 +371,12 @@ define([
             publishPageChange("libraries-page");
           }
 
-          this.route = "#user/libraries/" + data.id;
+          if (data.publicView) {
+            this.route = "#/public-libraries/" + data.id ;
+          }
+          else {
+            this.route = "#user/libraries/" + data.id;
+          }
 
         });
 
