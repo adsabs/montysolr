@@ -266,10 +266,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     background-color: #fff;
     margin: 0 auto;
 
-    @media(min-width: $screen-sm-min){
-      width:70%;
-    }
-
   }
 
   .s-message-control-row {

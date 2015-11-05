@@ -181,6 +181,31 @@ input.q {
 
   .only-show-on-landing {
     display: block;
+    font-size: 17px;
+    dl {
+      margin-left: 20px;
+    }
+    dd {
+      font-weight:300;
+    }
+    dt {
+      font-weight:500;
+    }
+
+    @media screen and (min-width:$screen-sm-min){
+      dl {
+        margin-left: 0;
+      }
+      dd {
+        margin-bottom: 10px;
+        margin-left: 140px;
+      }
+
+      dt {
+        width: 125px;
+      }
+    }
+
   }
 
 }

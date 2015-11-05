@@ -2,96 +2,109 @@
     <h2 class="sr-only">Search Bar to Enter New Query</h2>
 
     <div class="col-sm-12 s-quick-add" aria-label="quick add fields">
-             <div id="expanded-search-form" class="unselectable">
-                 <div id="field-options">
-                     <span class="s-field-options">insert field:</span>
-                     <button class="btn btn-link btn-sm"  title='search for an author, e.g. author:"Kurtz,M"' data-toggle="tooltip" data-field="author"  data-punc='"'>Author</button>
-                     <button class="btn btn-link btn-sm"  title='search for a first author, e.g. author:"^Kurtz,M"' data-toggle="tooltip" data-field="first-author" data-punc='"'>First Author</button>
-                     <button class="btn btn-link btn-sm"  title="limit search to abstract, title and keyword fields" data-toggle="tooltip" data-field="abs" data-punc='('>Abstract</button>
-                     <button class="btn btn-link btn-sm"  title="e.g. year:1999 or year:1999-2001" data-toggle="tooltip" data-field="year">Year</button>
-                     <button class="btn btn-link btn-sm"  title="search titles, abstract, and text of the articles" data-toggle="tooltip" data-field="full" data-punc="(">Fulltext</button>
-                     <button class="btn btn-link btn-sm"  title="find review articles e.g. reviews(exoplanets)" data-toggle="tooltip" data-field="operator-reviews">Reviews(...)</button>
-                     <button class="btn btn-link btn-sm"  title='find all citing articles e.g. citations(author:"^kurtz,m")' data-toggle="tooltip" data-field="operator-citations">Citations(...)</button>
+        <div id="expanded-search-form" class="unselectable">
+            <div id="field-options">
+                <span class="s-field-options">insert field:</span>
+                <button class="btn btn-link btn-sm" title='search for an author, e.g. author:"Kurtz,M"'
+                        data-toggle="tooltip" data-field="author" data-punc='"'>Author
+                </button>
+                <button class="btn btn-link btn-sm" title='search for a first author, e.g. author:"^Kurtz,M"'
+                        data-toggle="tooltip" data-field="first-author" data-punc='"'>First Author
+                </button>
+                <button class="btn btn-link btn-sm" title="limit search to abstract, title and keyword fields"
+                        data-toggle="tooltip" data-field="abs" data-punc='('>Abstract
+                </button>
+                <button class="btn btn-link btn-sm" title="e.g. year:1999 or year:1999-2001" data-toggle="tooltip"
+                        data-field="year">Year
+                </button>
+                <button class="btn btn-link btn-sm" title="search titles, abstract, and text of the articles"
+                        data-toggle="tooltip" data-field="full" data-punc="(">Fulltext
+                </button>
+                <button class="btn btn-link btn-sm" title="find review articles e.g. reviews(exoplanets)"
+                        data-toggle="tooltip" data-field="operator-reviews">Reviews(...)
+                </button>
+                <button class="btn btn-link btn-sm" title='find all citing articles e.g. citations(author:"^kurtz,m")'
+                        data-toggle="tooltip" data-field="operator-citations">Citations(...)
+                </button>
 
-                 </div>
-             </div>
-         </div>
-     </div>
-     <div class="row">
-         <div class="col-sm-12 search-bar-input-row s-search-bar-input-row">
-             <form name="main-query">
-                 <div class="form-group has-feedback">
-                 <div class="input-group">
-                     <div class="input-group-btn">
-                         <div type="div" class="btn btn-default dropdown-toggle show-form hidden-xs" data-toggle="dropdown">Search Form
-                             <div class="caret"></div>
-                         </div>
-                         <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
-                     </div>
-                     <input type="text" class="form-control q" name="q" autofocus aria-label="Enter your ADS query here" autocomplete="off" value={{currentQueryVal}}>
-                     <i class="icon-clear s-clear-control"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 search-bar-input-row s-search-bar-input-row">
+        <form name="main-query">
+            <div class="form-group has-feedback">
+                <div class="input-group">
+                    <div class="input-group-btn">
+                        <div type="div" class="btn btn-default dropdown-toggle show-form hidden-xs"
+                             data-toggle="dropdown">Search Form
+                            <div class="caret"></div>
+                        </div>
+                        <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
+                    </div>
+                    <input type="text" class="form-control q" name="q" autofocus aria-label="Enter your ADS query here"
+                           autocomplete="off" value={{currentQueryVal}}>
+                    <i class="icon-clear s-clear-control"></i>
                   <span class="input-group-btn">
-                       <button type="submit" class= "btn btn-primary search-submit s-search-submit" aria-label="submit"><i class="fa fa-search"></i></button>
+                       <button type="submit" class="btn btn-primary search-submit s-search-submit" aria-label="submit">
+                           <i class="fa fa-search"></i></button>
                   </span>
 
-                 </div>
-                 <!-- /input-group -->
-                 </div> <!-- /form-group-->
-             </form>
+                </div>
+                <!-- /input-group -->
+            </div>
+            <!-- /form-group-->
+        </form>
+    </div>
+    <div class="only-show-on-landing">
+        <div class="col-sm-12" style="margin-top: 40px;">
+            <hr/>
         </div>
-         <div class="col-sm-12 only-show-on-landing" style="margin-top: 40px;">
+        <div class="col-sm-6">
 
-             <table class="table">
-                 <caption>ADS search basics</caption>
-                 <thead>
-                 <tr>
-                     <th>Field</th>
-                     <th>Syntax</th>
-                     <th>Example</th>
-                 </tr>
-                 </thead>
-                 <tbody>
-                 <tr>
-                     <td>Author</td>
-                     <td>author:"last, first"</td>
-                     <td>author:"huchra, john"</td>
-                 </tr>
+            <dl class="dl-horizontal">
+                <dt>author</dt>
+                <dd>author:"<span class="example-query">huchra, john</span>"</dd>
+                <dt>first author</dt>
+                <dd>author:"^<span class="example-query">huchra, john</span>"</dd>
+                <dt>abstract + title</dt>
+                <dd>abs:"<span class="example-query">dark energy</span>"</dd>
+                <dt>year</dt>
+                <dd>year:<span class="example-query">2000</span></dd>
+                <dt>year range</dt>
+                <dd>year:<span class="example-query">2000-2005</span></dd>
+                <dt>full text</dt>
+                <dd>full:"<span class="example-query">gravitational waves"</span></dd>
+                <dt>publication</dt>
+                <dd>bibstem:<span class="example-query">ApJ</span></dd>
+            </dl>
+        </div>
+        <div class="col-sm-6">
+            <dl class="dl-horizontal">
+                <dt>citations</dt>
+                <dd>citations(<span class="example-query">[query])</span></dd>
+                <dt>references</dt>
+                <dd>references(<span class="example-query">[query])</span></dd>
+                <dt>reviews</dt>
+                <dd>reviews(<span class="example-query">[query])</span></dd>
+                <hr/>
+                <dt>refereed</dt>
+                <dd>property:refereed</dd>
+                <dt>orcid</dt>
+                <dd>orcid:<span class="example-query">[orcid id]</span></dd>
+            </dl>
+        </div>
 
-                 <tr>
-                     <td>First Author</td>
-                     <td>author:"^last, first"</td>
-                     <td>author:"^huchra, john"</td>
-                 </tr>
-                 <tr>
-                     <td>Abstract + Title</td>
-                     <td>abs:"phrase"</td>
-                     <td>abs:"dark energy"</td>
-                 </tr>
-                 <tr>
-                     <td>Year</td>
-                     <td>year:YYYY</td>
-                     <td>year:2000</td>
-                 </tr>
-                 <tr>
-                     <td>Year Range</td>
-                     <td>year:YYYY-YYYY</td>
-                     <td>year:2000-2005</td>
-                 </tr>
-                 <tr>
-                     <td>Publication</td>
-                     <td>bibstem:"abbrev"</td>
-                     <td>bibstem:ApJ</td>
-                 </tr>
-                 <tr>
-                     <td>Fulltext</td>
-                     <td>full:"phrase"</td>
-                     <td>full:"gravitational waves"</td>
-                 </tr>
-                 </tbody>
-             </table>
-             <a href="https://adsabs.github.io/help/search/search-syntax/" target="_blank">Learn more about the ADS query syntax.</a>
-         </div>
-         <div class="s-num-found">
-          <span class="s-light-font description">Your search returned</span> <b><span class="num-found-container"></span></b><span class="s-light-font"> results</span>
-         </div>
+       <div class="col-sm-12">
+           <hr/>
+           <a href="https://adsabs.github.io/help/search/search-syntax/" target="_blank" class="pull-right"> <i class="fa fa-arrow-circle-o-right"></i> learn more about ADS search syntax </a>
        </div>
+
+    </div>
+
+    <div class="s-num-found">
+        <span class="s-light-font description">Your search returned</span> <b><span class="num-found-container"></span></b><span
+            class="s-light-font"> results</span>
+    </div>
+</div>
