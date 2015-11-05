@@ -16,9 +16,9 @@ define([
     {value: "arXiv:" , label : "arXiv ID", match: "arxiv:"},
     {value: "doi:" , label : "DOI", match: "doi:"},
 
-    {value: "full:()" , label : "Full text search", desc: "title, abstract, and body", match: "full:("},
-    {value: "full:()" , label : "Full text search", desc: "itle, abstract, and body", match: "fulltext"},
-    {value: "full:()" , label : "Full text search", desc: "title, abstract, and body", match: "text"},
+    {value: "full:\"\"" , label : "Full text search", desc: "title, abstract, and body", match: "full:"},
+    {value: "full:\"\"" , label : "Full text search", desc: "itle, abstract, and body", match: "fulltext"},
+    {value: "full:\"\"" , label : "Full text search", desc: "title, abstract, and body", match: "text"},
 
     {value: "year:" , label : "Year", match: "year"},
     {value: "year:" , label : "Year Range", desc: "e.g. 1999-2005", match: "year range"},
@@ -26,11 +26,14 @@ define([
     {value: "aff:\"\"" , label : "Affiliation", match: "affiliation"},
     {value: "aff:\"\"" , label : "Affiliation", match: "aff:"},
 
-    {value: "abs:()" , label : "Search abstract + title + keywords", match: "abs:("},
+    {value: "abs:\"\"" , label : "Search abstract + title + keywords", match: "abs:"},
 
-    {value: "abstract:()" , label : "Abstract", match: "abstract:("},
+// hide this one
+//    {value: "abstract:\"\"" , label : "Abstract", match: "abstract:("},
 
-    {value: "title:()" , label : "Title", match: "title:("},
+    {value: "title:\"\"" , label : "Title", match: "title:("},
+
+    {value: "orcid:" , label : "ORCiD identifier", match: "orcid:"},
 
     {value: "citations()" , label : "Citations", desc: "Get papers citing your search result set", match: "citations("},
     {value: "references()" , label : "References", desc: "Get papers referenced by your search result set", match: "references("},

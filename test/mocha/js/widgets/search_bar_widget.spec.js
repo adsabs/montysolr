@@ -253,7 +253,7 @@ define([
 
       expect(autolist.css("display")).to.eql("block");
       expect(autolist.find("a").first().text()).to.eql("Author");
-      expect(autolist.find("a").last().text()).to.eql("Abstract");
+      expect(autolist.find("a").last().text()).to.eql("Search abstract + title + keywords");
 
       autolist.find("li").first().click();
       expect($input.val()).to.eql("author:\"\"");
@@ -266,7 +266,7 @@ define([
 
       expect(autolist.css("display")).to.eql("block");
       expect(autolist.find("a").first().text()).to.eql("Author");
-      expect(autolist.find("a").last().text()).to.eql("Abstract");
+      expect(autolist.find("a").last().text()).to.eql("Search abstract + title + keywords");
 
       //should not autocomplete if the last keypress was a backspace
 
