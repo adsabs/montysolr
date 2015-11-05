@@ -31,9 +31,9 @@ h1, h2, h3 {
 }
 
 .modal-title, .panel-default .panel-heading  {
-    background-color: #fff;
-    font-weight: 300;
-    font-size: 26px;
+  background-color: #fff;
+  font-weight: 300;
+  font-size: 26px;
 }
 
 .panel-default {
@@ -97,12 +97,12 @@ textarea[disabled]{
 }
 
 .btn {
-   border-radius: $border-radius-large;
-   transition : all, .5s;
+  border-radius: $border-radius-large;
+  transition : all, .5s;
 }
 
 .btn-success, .btn-danger, .btn-info, .btn-warning, .btn-primary, .btn-primary-faded {
-   box-shadow : 1px 1px 4px $gray-light;
+  box-shadow : 1px 1px 4px $gray-light;
 
   &:hover {
     box-shadow : 1px 1px 6px $gray;
@@ -113,7 +113,7 @@ textarea[disabled]{
   box-shadow : 1px 1px 2px $gray-light;
 
   &:hover {
-   box-shadow : 1px 1px 4px $gray;
+    box-shadow : 1px 1px 4px $gray;
   }
 }
 
@@ -128,10 +128,10 @@ textarea[disabled]{
 
 
 .btn-default {
-   &:hover {
-     background-color: #fff;
-     box-shadow : 1px 1px 4px $gray-light;
-   }
+  &:hover {
+    background-color: #fff;
+    box-shadow : 1px 1px 4px $gray-light;
+  }
 
   &:focus {
     background-color: white;
@@ -162,9 +162,6 @@ textarea[disabled]{
   ul {
     list-style: none;
     padding-left: 0;
-  }
-  li:not(.divider) {
-    padding: 6px;
   }
 
   li.divider {
@@ -205,7 +202,6 @@ textarea[disabled]{
   }
 
   li:not(.divider):not(.no-hover-style) {
-    padding: 10px;
     border-left: 3px solid $body-bg;
     &:hover {
       background-color: darken($gray-lightest, 2%);
@@ -213,7 +209,9 @@ textarea[disabled]{
       border-left: 3px solid $gray-light;
     }
     a {
-      color: $text-color
+      color: $text-color;
+      padding: 12px;
+      display:block;
     }
     a:hover {
       text-decoration: none;
