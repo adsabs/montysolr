@@ -515,7 +515,7 @@ define([
             options: {
               done: function(data){
                 var q = new ApiQuery().load(JSON.parse(data.query).query);
-                self.pubsub.publish(self.pubSubKey, self.pubsub.START_SEARCH, q);
+                self.getPubSub().publish(self.getPubSub().START_SEARCH, q);
               },
               fail: function() {
                 var alerter = app.getController('AlertsController');
@@ -541,7 +541,7 @@ define([
             orcidApi.getAccessData(orcidApi.getExchangeCode())
               .done(function(data) {
                 orcidApi.saveAccessData(data);
-                self.pubsub.publish(self.pubSubKey, self.pubsub.APP_EXIT, {url: window.location.pathname +
+                self.getPubSub().publish(self.getPubSub().APP_EXIT, {url: window.location.pathname +
                   ((targetRoute && _.isString(targetRoute)) ? targetRoute : window.location.hash)});
               })
               .fail(function() {
@@ -566,7 +566,7 @@ define([
             });
           }
           else {
-            self.pubsub.publish(self.pubSubKey, self.pubsub.NAVIGATE, 'index-page');
+            self.getPubSub().publish(self.getPubSub().NAVIGATE, 'index-page');
           }
         });
 
