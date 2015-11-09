@@ -72,6 +72,7 @@ define([
 
       //as soon as preferences widget is activated, get the open url config
       this.getBeeHive().getObject("User").getOpenURLConfig().done(function (config) {
+        debugger
         that.openURLCollection.reset(config);
       });
 
@@ -86,11 +87,11 @@ define([
       }
     },
 
-    handleUserAnnouncement: function (event, arg2) {
+    handleUserAnnouncement: function (event, data) {
       //update the user model if it changes
       var user = this.getBeeHive().getObject('User');
       if (event == user.USER_INFO_CHANGE) {
-        this.model.set(arg2);
+        this.model.set(data);
       }
     }
 

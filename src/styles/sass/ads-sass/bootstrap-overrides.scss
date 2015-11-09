@@ -208,10 +208,12 @@ textarea[disabled]{
       cursor: pointer;
       border-left: 3px solid $gray-light;
     }
-    a {
-      color: $text-color;
+    &>a,.btn-link {
       padding: 12px;
       display:block;
+    }
+    a {
+      color: $text-color;
     }
     a:hover {
       text-decoration: none;

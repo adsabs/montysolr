@@ -97,18 +97,20 @@ define([
 
       },
 
-      onUserAnnouncement: function(key, val){
-        if (key == "orcidUIChange"){
-          var data = this.view.collection.toJSON();
-          var docs = _.map(data, function(x) {
+      onUserAnnouncement: function(message, data){
+
+        if ( message == "user_info_change" && _.has(data, "isOrcidModeOn") ){
+          var collection = this.view.collection.toJSON();
+          var docs = _.map(collection, function(x) {
             delete x.orcid;
             return x;
           });
-          if (val)
+          if (data.isOrcidModeOn)
             this.addOrcidInfo(docs);
           this.view.collection.reset(docs);
         }
       },
+
 
       onCustomEvent : function(event){
         if (event == "add-all-on-page"){

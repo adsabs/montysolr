@@ -68,7 +68,7 @@ define([
       "click .register": function () {
         this.trigger("navigate-register")
       },
-      "click code": function (e) {
+      "click button.search-author-name": function (e) {
         this.trigger('search-author');
       }
     },
@@ -269,25 +269,25 @@ define([
       this.model.set("hourly", hourly);
     },
 
-    handleUserAnnouncement: function (msg, arg2, arg3) {
+    handleUserAnnouncement: function (msg, data) {
 
       var orcidApi = this.getBeeHive().getService("OrcidApi"),
         user = this.getBeeHive().getObject("User");
 
       if (msg == user.USER_SIGNED_IN) {
-        this.model.set("currentUser", arg2);
+        this.model.set("currentUser", data);
       }
       else if (msg == user.USER_SIGNED_OUT) {
         this.model.set("currentUser", undefined);
       }
-      else if (msg == user.ORCID_UI_CHANGE) {
-        this.model.set({orcidModeOn: user.isOrcidModeOn(), orcidLoggedIn: orcidApi.hasAccess()});
+      else if  (msg == user.USER_INFO_CHANGE && _.has(data, "isOrcidModeOn" )) {
+        //every time this changes, we check for api access status
+        this.model.set({orcidModeOn: data.isOrcidModeOn, orcidLoggedIn: orcidApi.hasAccess()});
 
         if (this.model.get("orcidLoggedIn")) {
           this.getOrcidUserInfo();
         }
       }
-
     },
 
     //we don't want to respond to changes from pubsub or user object with this,

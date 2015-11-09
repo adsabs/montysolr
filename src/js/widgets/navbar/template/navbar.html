@@ -38,11 +38,14 @@
 
                 <li class="dropdown orcid-dropdown s-orcid-dropdown">
                     <button class=" btn-link" data-toggle="dropdown" aria-expanded="false">
-                        <span class="s-orcid-title"> <img src="../../styles/img/orcid-active.svg"
-                                                          alt="orcid symbol"/>    <span class="caret"></span></button>
+                        <span class="s-orcid-title">
+                         <img src="../../styles/img/orcid-active.svg" alt="orcid symbol"/>
+                            ORCID
+                            <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
-                        <li>
-                            {{#if orcidLastName}} <div> Signed in to ORCID as <strong>{{orcidFirstName}} {{orcidLastName}}</strong></div> {{/if}}
+                        <li class="no-hover-style">
+                            {{#if orcidLastName}} <h4> Signed in to ORCID as <br/> <strong>{{orcidFirstName}} {{orcidLastName}}</strong></h4> {{/if}}
+                            <hr/>
                             <div class="s-orcid-mode-label"><b>ORCID Mode</b></div>
                             <div class="s-orcid-label-container">
                                 off
@@ -54,7 +57,9 @@
                             </div>
                         </li>
                         {{#if orcidLastName}}
-                        <li style="clear:both"> Search <code>author:"{{orcidLastName}}, {{orcidFirstName}}"</code> to get started adding papers to your ORCID profile.</li>
+                        <li class="no-hover-style" style="clear:both;padding-bottom:20px;"> <i>Get started adding papers to your profile:</i> <br/>
+                            <button class="btn sm btn-default search-author-name"><i class="fa fa-search"></i> author:"{{orcidLastName}}, {{orcidFirstName}}"</button>
+                        </li>
                         {{else}}
                         <li style="clear:both">You are able to add papers from ADS to ORCID.</li>
                         {{/if}}
@@ -63,7 +68,7 @@
                             <a class="orcid-link" href="#user/orcid" >View my ORCID papers in ADS </a>
                         </li>
                         <li>
-                            <a href={{orcidURI}} target="_blank" >View my ORCID profile page </a>
+                            <a href={{orcidURI}} target="_blank" >View my ORCID profile </a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -78,7 +83,7 @@
                 <li class="dropdown orcid-dropdown s-orcid-dropdown">
                     <button class="btn-link" data-toggle="dropdown" aria-expanded="false">
                         <span class="s-orcid-title"> <img src="../../styles/img/orcid_inactive.png"
-                                                          alt="orcid symbol"/> ORCiD  <span class="caret"></span></button>
+                                                          alt="orcid symbol"/> ORCID  <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
                         <li class="no-hover-style">
                             {{#if orcidLastName}} <div> Signed in to ORCID as <strong>{{orcidFirstName}} {{orcidLastName}}</strong></div> {{/if}}
@@ -92,7 +97,7 @@
                                 on
                             </div>
                         </li>
-                        <li style="clear:both">You have turned off the ORCID view for the ADS search results page, but are still logged in.</li>
+                        <li style="clear:both" class="no-hover-style">You have turned off the ORCID view for the ADS search results page, but are still logged in.</li>
                         <li class="divider"></li>
                         <li>
                             <a class="orcid-link" href="#user/orcid" >My ORCID papers</a>
@@ -112,10 +117,10 @@
                 <li class="dropdown orcid-dropdown s-orcid-dropdown">
                     <button class="dropdown-toggle btn-link" data-toggle="dropdown" aria-expanded="false">
                         <span class="s-orcid-title"> <img src="../../styles/img/orcid_inactive.png"
-                                                          alt="orcid symbol"/>  ORCiD  <span class="caret"></span></button>
+                                                          alt="orcid symbol"/>  ORCID  <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
                         <li class="no-hover-style" >
-                            <button class="btn-link orcid-sign-in"> Sign in to ORCiD to claim papers in the ADS. </button>
+                            <button class="btn-link orcid-sign-in"> Sign in to ORCID to claim papers in the ADS. </button>
                         </li>
                         <li class="no-hover-style">
                             This functionality is still experimental.

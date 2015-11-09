@@ -51,7 +51,7 @@ define([
 
       minsub.beehive.addObject("AppStorage", {
         getConfigCopy : function(){return {hourly: false}},
-        getHardenedInstance: function() {return this},
+        getHardenedInstance: function() {return this}
       });
 
       var n = new NavBarWidget();
@@ -63,21 +63,20 @@ define([
 
       var n = new NavBarWidget();
       n.activate(minsub.beehive.getHardenedInstance());
-      minsub.publish(minsub.USER_ANNOUNCEMENT, u.ORCID_UI_CHANGE);
+      minsub.publish(minsub.USER_ANNOUNCEMENT, u.USER_INFO_CHANGE, {isOrcidModeOn : true});
 
       $("#test").append(n.render().el);
 
+      //orcid signed in, orcid mode on automatically
+
+      expect($(".orcid-dropdown h4").text()).to.eql(" Signed in to ORCID as  Roman Chyla");
+      expect($("input.orcid-mode").is(":checked")).to.eql(true);
+
       //orcid signed in, orcid mode off
 
-      expect($(".orcid-dropdown div:first").text()).to.eql(" Signed in to ORCID as Roman Chyla");
+      n.view.model.set("orcidModeOn", false);
+
       expect($("input.orcid-mode").is(":checked")).to.eql(false);
-
-      //orcid signed in, orcid mode on
-
-      n.view.model.set("orcidModeOn", true);
-
-      expect($(".orcid-dropdown div:first").text()).to.eql(" Signed in to ORCID as Roman Chyla");
-      expect($("input.orcid-mode").is(":checked")).to.eql(true);
 
 
     });

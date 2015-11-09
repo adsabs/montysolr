@@ -79,11 +79,11 @@ define([], function() {
      /**
       * If you have activated Orcid module, these settings
       * are necessary (showing sandbox/testing values):
-      *  orcidClientId: 'APP-P5ANJTQRRTMA6GXZ'
-      *  orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2'
-      */
-     orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
-     orcidApiEndpoint: 'https://api.sandbox.orcid.org/v1.2',
+     */
+       orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+       orcidLoginEndpoint: 'http://sandbox.orcid.org/oauth/authorize',
+       orcidApiEndpoint: '//ecs-staging-elb-2044121877.us-east-1.elb.amazonaws.com/v1/orcid',
+
 
 
      // google recaptcha
