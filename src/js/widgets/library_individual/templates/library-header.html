@@ -69,8 +69,8 @@
 <!-- not public -->
 
     {{#if edit}}
-    <div class="pull-right">
-        <button class="btn btn-default" disabled="true"><i class="fa fa-arrow-right"></i> View this library in the ADS Search Results Page</button>
+    <div class="pull-right" style="position:relative;z-index:1">
+        <button class="btn btn-default bigquery-export"><i class="fa fa-arrow-right"></i> View this library in the ADS Search Results Page</button>
     </div>
     <div class="editable-item" data-field="name">
         <h2>{{name}} <button class="btn btn-link toggle-form">edit</button></h2>
@@ -78,7 +78,7 @@
             <label  class="sr-only" for="#edit-library-title"> Change title </label>
             <input class="form-control" type="text" id="edit-library-title" placeholder="{{name}}"/>
             <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
-            <button class="btn btn-small btn-default"> <i class="fa fa-lg fa-times"></i> cancel</button>
+            <button class="btn btn-small btn-default"> cancel</button>
         </form>
     </div>
     <div class="editable-item" data-field="description">
@@ -90,7 +90,7 @@
             <label class="sr-only" for="#edit-library-description"> Change description </label>
             <textarea class="form-control" placeholder="{{description}}" id="edit-library-description"/>
             <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
-            <button class="btn btn-small btn-default"> <i class="fa fa-lg fa-times"></i> cancel</button>
+            <button class="btn btn-small btn-default">cancel</button>
         </form>
     </div>
 

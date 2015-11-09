@@ -717,7 +717,6 @@ define([
       var graphData = this.model.get("graphData"),
         that = this,
         filterBibcodes = [],
-        updater = new ApiQueryUpdater("fq"),
         newQuery = this.getCurrentQuery().clone();
 
       //get associated bibcodes
@@ -729,9 +728,8 @@ define([
         Array.prototype.push.apply(filterBibcodes, bibcodes);
       });
 
-      var bibcodes = "bibcode:(" + filterBibcodes.join(" OR ") + ")";
       newQuery.unlock();
-      this._updateFq(newQuery, bibcodes);
+      newQuery.set("__bigquery", filterBibcodes);
 
       this.resetWidget();
       this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);

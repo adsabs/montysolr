@@ -1,18 +1,17 @@
 define([
   "js/widgets/base/base_widget",
   "js/components/api_query",
+  'js/components/api_feedback',
   "hbs!./form",
   "./topterms",
-  "jquery-ui",
-  "analytics"
-],
-  function(
+  "jquery-ui"
+], function(
   BaseWidget,
   ApiQuery,
+  ApiFeedback,
   FormTemplate,
   AutocompleteData,
-  JQueryUI,
-  analytics
+  JQueryUI
   ){
 
 
@@ -23,38 +22,46 @@ define([
     className : "paper-search-form",
 
     events: {
-      "click .clear" : function(e){
-        e.preventDefault();
-        this.render();
-      },
-      "keyup input" : "checkDisabled",
-      "click button[type=submit]" : "submitForm",
-      "click button.parse" : "parseReference"
+      "keyup .paper-form input" : "checkPaperFormDisabled",
+      "click .paper-form button[type=submit]" : "submitPaperForm",
+
+      "keyup .bibcode-form textarea" : "checkBibcodeFormDisabled",
+      "click .bibcode-form button[type=submit]" : "submitBibcodeForm"
     },
 
     onRender : function(e){
       this.$("#pub-input").autocomplete({ source : AutocompleteData, minLength : 2 , autoFocus : true });
     },
 
-    checkDisabled : function(){
+    checkPaperFormDisabled : function(){
       //require at least 1 character to be in at least 1 input field
       var fields= this.$("input:not(.parse-reference)").map(function(){
         return $(this).val();
       }).get();
 
       if (fields.join("").match(/\w+/)){
-        this.$("button[type=submit]").prop("disabled", false);
+        this.$(".paper-form button[type=submit]").prop("disabled", false);
       }
       else {
-        this.$("button[type=submit]").prop("disabled", true);
+        this.$(".paper-form button[type=submit]").prop("disabled", true);
       }
     },
 
-    submitForm : function(e){
+    checkBibcodeFormDisabled : function(){
 
-      this.$("button[type=submit]").html('<i class="icon-loading"/>  Loading...')
+      if (this.$(".bibcode-form textarea").val().match(/\w+/)){
+        this.$(".bibcode-form button[type=submit]").prop("disabled", false);
+      }
+      else {
+        this.$(".bibcode-form button[type=submit]").prop("disabled", true);
+      }
+    },
 
-      var terms = this.$("input:not(.parse-reference)").map(function(){
+    submitPaperForm : function(e){
+
+      this.$(".paper-form button[type=submit]").html('<i class="icon-loading"/>  Loading...')
+
+      var terms = this.$(".paper-form input:not(.parse-reference)").map(function(){
         var $t = $(this);
         $t.val() ? toReturn = $t.data("term") + ":" + $t.val() : toReturn =  undefined;
         return toReturn;
@@ -64,8 +71,17 @@ define([
 
       this.trigger("submit", terms.join(" "));
       e.preventDefault();
-    }
+    },
 
+    submitBibcodeForm : function(e){
+      e.preventDefault();
+
+      this.$(".bibcode-form button[type=submit]").html('<i class="icon-loading"/>  Loading...');
+      var terms = this.$(".bibcode-form textarea").val().split(/\s+/);
+      terms = _.filter(terms, function(t){if (t){return t}});
+
+      this.trigger("submit-bigquery", terms);
+    }
 
   });
 
@@ -76,6 +92,7 @@ define([
       options = options || {};
       this.view = new FormView();
       this.listenTo(this.view, "submit", this.submitForm);
+      this.listenTo(this.view, "submit-bigquery", this.submitBigQuery);
 
     },
 
@@ -94,9 +111,28 @@ define([
         q: query
       });
 
-      this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
+      this.getPubSub().publish(this.getPubSub().pubsub.START_SEARCH, newQuery);
 
-      analytics('send', 'event', 'interaction', 'paper-form-submit', JSON.stringify(query));
+    },
+
+    submitBigQuery : function(bibcodes){
+
+      if (!this.getBeeHive().getObject("User").isLoggedIn()){
+        //don't allow form to be submitted, and publish an alert
+
+        this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({
+          code: ApiFeedback.CODES.ALERT,
+          msg: 'This feature is only available to logged-in users due to potential demands on our system. <br/><br/> <a class="btn btn-primary" href="#user/account/login"> <i class="fa fa-sign-in"></i> click here to log in to ADS </a>',
+          modal: true
+        }));
+        return;
+      }
+
+      var newQuery = new ApiQuery({
+        __bigquery : bibcodes
+      });
+
+      this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
 
     },
 

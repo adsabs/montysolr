@@ -9,8 +9,7 @@ define([
     'js/components/api_response',
     'js/components/api_query',
     'js/components/api_feedback',
-    'js/mixins/hardened',
-    'js/components/json_response'
+    'js/mixins/hardened'
   ],
   function(
     _,
@@ -21,8 +20,7 @@ define([
     ApiResponse,
     ApiQuery,
     ApiFeedback,
-    Hardened,
-    JsonResponse
+    Hardened
     ) {
 
     var Api = GenericModule.extend({

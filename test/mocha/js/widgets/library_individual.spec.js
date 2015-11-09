@@ -561,6 +561,42 @@ define([
 
     });
 
+    it("should allow export to the search results page", function(){
+
+      var w = new LibraryWidget();
+
+      var minsub = new (MinSub.extend({
+        request: function(apiRequest) {
+          return {some: 'foo'}
+        }
+      }))({verbose: false});
+
+      minsub.beehive.addObject("LibraryController", fakeLibraryController);
+
+      w.activate(minsub.beehive.getHardenedInstance());
+
+      $("#test").append(w.render().el);
+
+      w.setSubView({view : "library", id : "1"});
+
+      var publishStub = sinon.stub(w.getPubSub(), "publish");
+
+      $("#test").find(".bigquery-export").click();
+
+      expect(publishStub.args[0][0]).to.eql("[PubSub]-New-Query");
+
+      expect(publishStub.args[0][1].toJSON()).to.eql({
+        "__bigquery": [
+          "2015IAUGA..2257639R",
+          "2015IAUGA..2257768A",
+          "2015IAUGA..2257982A"
+        ]
+      });
+
+
+
+    });
+
     it("library list should paginate by and allow sorting based on pubdate/read_count/citation_count", function(){
 
       var w = new LibraryWidget({perPage:3});

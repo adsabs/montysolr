@@ -411,7 +411,15 @@ define([
           app.getObject('MasterPageManager').show('SearchPage',
             searchPageAlwaysVisible);
           var q = app.getObject('AppStorage').getCurrentQuery();
-          this.route = '#search/' + queryUpdater.clean(q).url();
+          var route = '#search/' + queryUpdater.clean(q).url();
+
+          //taking care of inserting bigquery key here, not sure if right place
+          if (q && q.get("__qid")){
+            route += ("&qid=" + q.get("__qid")[0]);
+          }
+
+          this.route = route;
+
           publishFeedback({code: ApiFeedback.CODES.UNMAKE_SPACE});
         });
 
