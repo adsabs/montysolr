@@ -68,8 +68,7 @@ define([
       },
 
       activateDependencies: function(beehive) {
-        var orcidApi, orcidNotifier;
-        orcidApi = beehive.getService('OrcidApi');
+        var orcidApi = beehive.getService('OrcidApi');
 
         if (orcidApi) // already activated
           return;

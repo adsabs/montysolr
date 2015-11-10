@@ -5,7 +5,7 @@
         <span class="caret">
     </button>
     <ul class="dropdown-menu" role="menu">
-        <li class="no-hover-style">
+        <li class="no-hover-style" style="padding: 10px;">
             {{#each orderOptions}}
             <label><input type="radio" value="{{this.value}}"  name="order-options" {{#if this.default}}checked="checked" {{/if}}> {{this.title}}&nbsp;&nbsp;<i class="fa {{faIcon}}"></i></label>
             {{/each}}

@@ -50,12 +50,11 @@ define([
 
      var fetchStub = sinon.stub(u, "fetchData", function(){return $.Deferred().promise();});
 
-
      expect(u.isLoggedIn()).to.eql(false);
 
      u.setUser("foo");
 
-     expect(u.model.get("user")).to.eql("foo");
+     expect(u.userModel.get("user")).to.eql("foo");
      expect(u.isLoggedIn()).to.be.true;
 
      expect(fetchStub.args[0][0]).to.eql("USER_DATA");
@@ -80,15 +79,15 @@ define([
      u.setUser("foo");
      expect(u.isLoggedIn()).to.eql(true);
 
-     u.userDataModel.set("link_server", "foo");
+     u.userModel.set("link_server", "foo");
 
      //clears the user
      u.completeLogOut();
 
      expect(u.isLoggedIn()).to.eql(false);
      //clears the user
-     expect(u.model.get("user")).to.be.undefined;
-     expect(u.userDataModel.get("link_server")).to.be.undefined;
+     expect(u.userModel.get("user")).to.be.undefined;
+     expect(u.userModel.get("link_server")).to.be.undefined;
 
      expect(u.redirectIfNecessary.callCount).to.eql(2);
 
@@ -118,8 +117,7 @@ define([
        "mixIn",
        "USER_SIGNED_IN",
        "USER_SIGNED_OUT",
-       "USER_INFO_CHANGE",
-       "ORCID_UI_CHANGE"
+       "USER_INFO_CHANGE"
      );
 
    });
@@ -256,7 +254,7 @@ define([
 
      u.redirectIfNecessary = sinon.stub();
 
-     u.userDataModel.set("link_server", "goo");
+     u.userModel.set("link_server", "goo");
 
      expect(u.getPubSub().publish.args[0]).to.eql([
        "[PubSub]-User-Announcement",
@@ -277,10 +275,11 @@ define([
 
        var u = new User();
 
-       u.model.set("user", "foobly@gmail.com");
-       u.userDataModel.set("link_server", "woobly");
+       u.userModel.set("user", "foobly@gmail.com");
+       u.userModel.set("link_server", "woobly");
 
        expect(u.getUserData()).to.eql({
+       user : "foobly@gmail.com",
        link_server : "woobly"
       });
 
@@ -356,7 +355,7 @@ define([
      expect(token).to.eql({access_token : "foo"});
      expect(fakeCSRF.getCSRF.callCount).to.eql(3);
 
-     expect(u.userDataModel.get("link_server")).to.be.undefined;
+     expect(u.userModel.get("link_server")).to.be.undefined;
 
      u.setUserData({link_server : "foo.com"});
 
@@ -369,7 +368,7 @@ define([
 
 
      //automatically sets returned data into its model
-     expect(u.userDataModel.get("link_server")).to.eql("foo.com")
+     expect(u.userModel.get("link_server")).to.eql("foo.com")
 
      requestStub.restore();
 
