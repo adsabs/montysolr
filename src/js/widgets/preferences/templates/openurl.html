@@ -1,9 +1,13 @@
-{{#if link_server}}
-<div class="current-link-server">
-   <p>Your Library Link Server is set to <b>{{openURLName}}</b>.</p>
-   <button class="btn btn-primary-faded btn-sm {{#if link_server}} collapsed {{/if}}" data-toggle="collapse" data-target="#link-server-container"><i class="toggle-icon"></i> Change Library Link Server</button>
-</div>
-{{/if}}
+{{#if error}}
+    <p class="text-danger">Sorry, the library link information for your account could not be retrieved. Please try again later.</p>
+{{else}}
+
+    {{#if openURLName}}
+    <div class="current-link-server">
+        <p>Your Library Link Server is set to <b>{{openURLName}}</b>.</p>
+        <button class="btn btn-primary-faded btn-sm {{#if link_server}} collapsed {{/if}}" data-toggle="collapse" data-target="#link-server-container"><i class="toggle-icon"></i> Change Library Link Server</button>
+    </div>
+    {{/if}}
 
     <div id="link-server-container" class="{{#if link_server}} collapse {{/if}}">
         <br/>
@@ -31,8 +35,12 @@
             <p>
                 If you are still having difficulties, <b><a href="mailto:adshelp@cfa.harvard.edu">contact us</a></b> for help.
             </p>
-       </form>
+        </form>
         <br/>
 
 
     </div>
+
+
+{{/if}}
+

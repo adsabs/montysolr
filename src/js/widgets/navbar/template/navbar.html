@@ -45,7 +45,6 @@
                     <ul class="dropdown-menu" role="menu">
                         <li class="no-hover-style">
                             {{#if orcidLastName}} <h4> Signed in to ORCID as <br/> <strong>{{orcidFirstName}} {{orcidLastName}}</strong></h4> {{/if}}
-                            <hr/>
                             <div class="s-orcid-mode-label"><b>ORCID Mode</b></div>
                             <div class="s-orcid-label-container">
                                 off
@@ -57,7 +56,7 @@
                             </div>
                         </li>
                         {{#if orcidLastName}}
-                        <li class="no-hover-style" style="clear:both;padding-bottom:20px;"> <i>Get started adding papers to your profile:</i> <br/>
+                        <li class="no-hover-style" style="clear:both;padding-bottom:20px;"> <i style="padding-bottom:10px;display:block;">Get started adding papers to your profile:</i>
                             <button class="btn sm btn-default search-author-name"><i class="fa fa-search"></i> author:"{{orcidLastName}}, {{orcidFirstName}}"</button>
                         </li>
                         {{else}}
@@ -86,7 +85,7 @@
                                                           alt="orcid symbol"/> ORCID  <span class="caret"></span></button>
                     <ul class="dropdown-menu" role="menu">
                         <li class="no-hover-style">
-                            {{#if orcidLastName}} <div> Signed in to ORCID as <strong>{{orcidFirstName}} {{orcidLastName}}</strong></div> {{/if}}
+                            {{#if orcidLastName}} <h4> Signed in to ORCID as <br/> <strong>{{orcidFirstName}} {{orcidLastName}}</strong></h4> {{/if}}
                             <div class="s-orcid-mode-label"><b>ORCID Mode</b></div>
                             <div class="s-orcid-label-container">
                                 off

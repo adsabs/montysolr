@@ -22,6 +22,11 @@ define([
 
       var data = this.model.toJSON();
       data.openURLConfig = this.collection.toJSON();
+      //probably a server error
+      if (data.openURLConfig.length === 0){
+        data.error = true;
+        return data
+      }
 
       var current = _.findWhere(data.openURLConfig, {link : data.link_server});
       data.openURLName = current ? current.name : "";
