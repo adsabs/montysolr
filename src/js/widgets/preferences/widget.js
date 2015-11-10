@@ -72,7 +72,6 @@ define([
 
       //as soon as preferences widget is activated, get the open url config
       this.getBeeHive().getObject("User").getOpenURLConfig().done(function (config) {
-        debugger
         that.openURLCollection.reset(config);
       });
 
