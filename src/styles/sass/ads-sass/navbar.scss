@@ -16,6 +16,14 @@
   }
 
 
+ .navbar-nav .feedback-button {
+   background-color: $navbar-inverse-bg;
+   border: 2px solid $brand-primary-faded;
+   &:hover {
+   background-color: $brand-primary-faded;
+   }
+ }
+
 //specially for the orcid dropdown
 .nav .s-orcid-dropdown {
 
