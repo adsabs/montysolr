@@ -1064,12 +1064,15 @@ define([
        * @param orcidProfile
        */
       transformOrcidProfile: function(orcidProfile) {
-        var docs = [];
+        var docs = [], works, self = this;
 
-        if (!orcidProfile['orcid-activities'] || !orcidProfile['orcid-activities']['orcid-works'] || !orcidProfile['orcid-activities']['orcid-works']['orcid-work'])
-          return docs;
+        if (!orcidProfile['orcid-activities'] || !orcidProfile['orcid-activities']['orcid-works'] || !orcidProfile['orcid-activities']['orcid-works']['orcid-work']){
+          works = [];
+        }
+        else {
+          works = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
+        }
 
-        var works = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
         var orcidId = orcidProfile['orcid-identifier']['path'];
         var firstName = orcidProfile["orcid-bio"] ? orcidProfile["orcid-bio"]["personal-details"]["given-names"]["value"] : null;
         var lastName = orcidProfile["orcid-bio"] ? orcidProfile["orcid-bio"]["personal-details"]["family-name"]["value"] : null;
@@ -1107,7 +1110,6 @@ define([
           return res;
         }
 
-        var self = this;
         _.each(works, function(w) {
           var d = {};
           var ids = self.getExternalIds(w);
