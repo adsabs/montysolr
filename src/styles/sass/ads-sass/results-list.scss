@@ -130,7 +130,7 @@
 
   border-left: 6px solid $gray-lighter;
   padding: 5px 0 0 2%;
-  margin-left: 10.4%;
+  margin-left: 11.8%;
   margin-top: 10px;
   font-weight: 300;
 
@@ -210,13 +210,10 @@
 
   //represents an individual entry
   li > div {
-    padding-bottom: 1em;
-    .s-display-block {
-      padding-bottom: 1.1em;
-      border-left: 5px solid #fff;
-    }
+    padding:.5em 5.3%;
+    border-left: 5px solid #fff;
 
-    .chosen {
+    &.chosen {
       border-left: 5px solid $brand-success;
     }
 
@@ -224,7 +221,7 @@
 }
 
 .s-results-widget .s-results-list {
-  padding-left: 5%;
+  padding-left: 15px;
 }
 
 .s-pagination-controls {
@@ -256,13 +253,13 @@ li.article-author {
 //only target the results list
 
 .s-results-page-layout .s-results-border-bottom {
+  padding-left: 3.6%;
   margin: 0 15px 10px 15px;
   margin-left: 15px;
   margin-right: 15px;
   border-bottom: $border-light-default;
   @extend .clearfix;
   padding-bottom: 15px;
-  padding-left: 3.2%;
 }
 
 .s-back-button-container {
