@@ -559,14 +559,16 @@ define([
 
           this.route = '#user/orcid';
 
-          if (app.hasWidget('OrcidBigWidget')) {
+
+          if ( app.hasWidget('OrcidBigWidget') && orcidApi.hasAccess() ) {
             app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
-              app.getObject('MasterPageManager').show('SearchPage',
+              app.getObject('MasterPageManager').show('OrcidPage',
                 ['OrcidBigWidget', 'SearchWidget']);
             });
           }
           else {
-            self.getPubSub().publish(self.getPubSub().NAVIGATE, 'index-page');
+            this.route = "";
+            self.get('index-page').execute();
           }
         });
 

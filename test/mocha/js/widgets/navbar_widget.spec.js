@@ -181,7 +181,7 @@ define([
       expect(n.view.$("li.register").length).to.eql(0);
 
       expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(2);
-      expect(n.view.$(".btn.btn-link.dropdown-toggle").text().trim()).to.eql('Learn \n                    \n                     My Account');
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").text().trim()).to.eql('Learn \n                    \n                      Account');
       expect(n.view.$(".dropdown-menu:last li:first").text().trim()).to.eql("You are signed in as  bumblebee");
 
       //lack of username indicates user is logged out
@@ -307,7 +307,7 @@ define([
       $("form.feedback-form").submit();
 
       expect(requestStub.args[0][0].toJSON().target).to.eql("feedback/slack");
-      expect(JSON.stringify(requestStub.args[0][0].toJSON().options)).to.eql('{"method":"POST","data":"_subject=Bumblebee+Feedback&_gotcha=&name=&_replyto=&feedback-type=bug&comments=test+comment","dataType":"json"}');
+      expect(JSON.stringify(requestStub.args[0][0].toJSON().options)).to.eql('{"method":"POST","data":"_subject=Bumblebee+Feedback&_gotcha=&name=&_replyto=&comments=test+comment","dataType":"json"}');
 
       setTimeout(function(){
         //form should be emptied
