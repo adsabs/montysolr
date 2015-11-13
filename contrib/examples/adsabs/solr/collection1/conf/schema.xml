@@ -1132,8 +1132,34 @@
 		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
 			multiValued="true" omitNorms="true"/>
 
-		<field name="orcid" type="normalized_text_ascii" indexed="true" stored="true"
+        <!-- 
+        @api.doc
+        
+        * orcid
+        
+          Virtual field which by default searches in orcid1, orcid2, orcid3
+          
+        * orcid1
+        
+          ORCID identifiers assigned by publishers.
+          
+        * orcid2
+        
+          ORCID claims from users who gave ADS consent to expose their public
+          profiles.
+          
+        * orcid3
+        
+          ORCID claims from users who used Bumblebee claiming interface, but
+          did not give us consent to show their profiles.
+          
+         -->
+		<field name="orcid1" type="normalized_text_ascii" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true"/>
+		<field name="orcid2" type="normalized_text_ascii" indexed="true" stored="true"
+          multiValued="true" omitNorms="true"/>
+        <field name="orcid3" type="normalized_text_ascii" indexed="true" stored="true"
+          multiValued="true" omitNorms="true"/>
 
     <!--
     @api.doc
