@@ -43,8 +43,19 @@ define([
           q.set("sort", this.sortOrder);
         }
         if (this.model.get("queryOperator")) {
-          q.set('q', this.model.get("queryOperator") + '(' + q.get('q').join(' ') + ')');
+          var query = this.model.get("queryOperator") + '(' + q.get('q').join(' ') + ')';
+          //special case for trending aka 'also read'
+          if (this.model.get("queryOperator") === "trending"){
+            //remove the bibcode from the set of returned results by
+            //augmenting the query
+             query += "-"+ q.get("q")[0];
+          }
         }
+        else {
+          //toc widget
+          query = q.get('q');
+        }
+        q.set("q", query);
         return q;
       },
 
