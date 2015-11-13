@@ -410,8 +410,8 @@ define([
             "title": _.isArray(adsWork.title) ? adsWork.title.join(' ') : adsWork.title
           };
         }
-        if (adsWork.abstract) {
-          out["short-description"] = adsWork.abstract;
+        if (adsWork.abstract && _.isString(adsWork.abstract)) {
+          out["short-description"] = adsWork.abstract.substring(0, 5000); // orcid has 5000 max limit
         }
         if (adsWork.author) {
           out["work-contributors"] = formatContributors(adsWork.author);
