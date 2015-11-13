@@ -120,7 +120,6 @@ define([
       widget.activate(minsub.beehive.getHardenedInstance());
 
       var $w = widget.render().$el;
-      //$('#test').append($w);
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(20);
