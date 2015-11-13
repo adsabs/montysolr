@@ -29,7 +29,7 @@ public class AqpBibcodeProcessor extends QueryNodeProcessorImpl implements
 				return node;
 			}
 			// test it is a bibcode (19char long)
-			if (input.length() == 19) {
+			if (input.length() == 19 && input.indexOf('.') > -1) {
 				try {
 					Integer.parseInt(input.substring(0, 4));
 					return new AqpAdsabsIdentifierNode(n.getFieldAsString(), input, n.getBegin(), n.getEnd());

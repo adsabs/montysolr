@@ -466,12 +466,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
       "<str>-</str>" +
       "<str>0000-0002-4110-3511</str></arr>"
       );
-    assertQ(req("q", "orcid:1111-2222-3333-4444"),
+    // this is only present in orcid3
+    assertQ(req("q", "orcid:1111-2222-3333-5555"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
-    // this is only present in orcid3
-    assertQ(req("q", "orcid1:1111-2222-3333-5555"),
+    assertQ(req("q", "orcid3:1111-2222-3333-5555"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
