@@ -434,6 +434,18 @@ define([
               done();
             });
         });
+        it('checks for orcid-api limits', function() {
+          var oApi = getOrcidApi();
+          var test = new Array(5005);
+          for(var i = 0; i <= 5005; i++){
+            test[i] = 'a';
+          };
+
+          var res = oApi.formatOrcidWork({title: ['title'], id:1, bibcode: 'bibcode',
+            abstract: test.join('')});
+
+          expect(res['short-description'].length).to.eql(5000);
+        });
 
         it('properly formats ads papers into orcid-message', function() {
           var oApi = getOrcidApi();
