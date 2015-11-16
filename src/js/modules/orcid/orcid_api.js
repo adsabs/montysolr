@@ -1124,7 +1124,7 @@ define([
           d['abstract'] = extr(w['short-description']);
           d.author = extractAuthors(w["work-contributors"]);
           d.identifier = pickIdentifier(d, ids);
-          d['source_name'] = extr(w['source'] ? w['source']['source-name'] : null);
+          d['source_name'] = extr(w['source'] ? w['source']['source-name'] : 'unknown');
           d['source_date'] = extr(w['source'] ? w['source']['source-date'] : 0);
           //d.orcid = self.getRecordInfo(d);
           docs.push(d);

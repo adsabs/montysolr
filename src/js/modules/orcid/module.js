@@ -58,6 +58,7 @@ define([
           worksUrl: orcidApiEndpoint + '/{0}/orcid-works',
           loginUrl: orcidLoginEndpoint
             + "?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline"
+            + "&show_login=true"
             + "&client_id=" + orcidClientId,
           exchangeTokenUrl: orcidApiEndpoint + '/exchangeOAuthCode'
         };

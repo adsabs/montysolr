@@ -19,8 +19,8 @@ define([
     ApiQuery,
     ApiRequest,
     ApiQueryUpdater,
-    ApiTargets,
-    Dependon
+    ApiTargets
+
     ) {
 
     return function(WidgetClass) {
@@ -153,7 +153,8 @@ define([
       WidgetClass.prototype.processDocs = function(apiResponse, docs, pagination) {
         var docs = processDocs.apply(this, arguments);
         var user = this.getBeeHive().getObject('User');
-        if (user && user.isOrcidModeOn()){
+        //for results list only show if orcidModeOn, for orcid big widget show always
+        if (user && user.isOrcidModeOn() || this.orcidWidget ){
           var result = this.addOrcidInfo(docs);
           if (pagination.numFound != result.length) {
             _.extend(pagination, this.getPaginationInfo(apiResponse, docs));
