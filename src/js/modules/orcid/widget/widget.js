@@ -45,13 +45,27 @@ define([
           });
         };
 
+        _.extend(this.view.events, {
+          "click .search-author-name" : function(){
+            var searchTerm = "author:\"" + this.model.get("orcidLastName") + "," + this.model.get("orcidFirstName") + "\"";
+            this.trigger("search-author-name", searchTerm);
+          }
+        });
+
+        this.view.delegateEvents();
+
         this.view.template = ContainerTemplate;
         this.view.model.set({"mainResults": true}, {silent : true});
         this.listenTo(this.collection, "reset", this.checkDetails);
+        this.listenTo(this.view, "search-author-name", function(searchTerm){
+         var pubsub = this.getPubSub(), query = new ApiQuery({q : searchTerm});
+          pubsub.publish(pubsub.START_SEARCH, query);
+        })
 
         this.on('orcid-update-finished', this.mergeDuplicateRecords);
       },
 
+      orcidWidget : true,
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
@@ -173,8 +187,6 @@ define([
 
       },
 
-
-
       processDocs: function(jsonResponse, docs, paginationInfo) {
         var start = 0;
         var docs = PaginationMixin.addPaginationToDocs(docs, start);
@@ -231,7 +243,10 @@ define([
             var params = response.get('responseHeader.params');
             response.setApiQuery(new ApiQuery(params));
             self.processResponse(response);
-            self.model.set("orcidUserName", params.firstName + " " + params.lastName);
+            self.model.set({orcidUserName : params.firstName + " " + params.lastName,
+                            orcidFirstName : params.firstName,
+                            orcidLastName : params.lastName
+            });
           });
         }
       },

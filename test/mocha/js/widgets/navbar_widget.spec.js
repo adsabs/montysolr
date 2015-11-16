@@ -251,10 +251,12 @@ define([
       minsub.publish(minsub.pubsub.USER_ANNOUNCEMENT, u.USER_SIGNED_IN, "fakeUserName");
 
 
+      n._latestPage = "orcid-page";
       $("#test").find(".logout").click();
-      expect(publishSpy.callCount).to.eql(2);
-      //calls session logout method explicitly
+      expect(publishSpy.callCount).to.eql(3);
+      expect(publishSpy.args[2]).to.eql(["[Router]-Navigate-With-Trigger", "index-page"]);
 
+      //calls session logout method explicitly
       expect(s.logout.callCount).to.eql(1);
       expect(orcidSignOutSpy.callCount).to.eql(1);
 

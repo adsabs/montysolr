@@ -114,3 +114,9 @@ i{
 .s-orcid-provenance-others {
   background-color: $gray-lightest;
 }
+
+
+//no need to show checkboxes here
+div[data-widget="OrcidBigWidget"] .results-list input[type="checkbox"]{
+  visibility:hidden;
+}

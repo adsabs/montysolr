@@ -156,11 +156,17 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-      _.bindAll(this, ["handleUserAnnouncement", "getOrcidUserInfo"]);
+      _.bindAll(this, ["handleUserAnnouncement", "getOrcidUserInfo", "storeLatestPage"]);
       var pubsub = this.getPubSub();
       pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
       pubsub.subscribe(pubsub.APP_STARTED, this.getOrcidUserInfo);
+      pubsub.subscribe(pubsub.NAVIGATE, this.storeLatestPage)
       this.setInitialVals();
+    },
+
+    storeLatestPage : function(page){
+      //to know whether to orcid redirect
+      this._latestPage = page;
     },
 
 
@@ -328,8 +334,18 @@ define([
 
 
     orcidLogout: function () {
+      var pubsub = this.getPubSub();
       this.getBeeHive().getService("OrcidApi").signOut();
+      //ned to set this explicitly since there is no event from the beehive
+      this.model.set("orcidLoggedIn", false);
       this.getBeeHive().getObject("User").setOrcidMode(false);
+
+      debugger
+
+      //finally, redirect if currently on orcid page
+      if (this._latestPage === "orcid-page"){
+        pubsub.publish(pubsub.NAVIGATE, "index-page");
+      }
     },
 
 

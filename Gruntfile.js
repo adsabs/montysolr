@@ -640,7 +640,8 @@ module.exports = function(grunt) {
             "components/library_controller.js" : 66,
             "widgets/wordcloud/widget.js": 78,
             "components/analytics.js": 71,
-            "wraps/landing_page_manager/landing_page_manager" : 48
+            "wraps/landing_page_manager/landing_page_manager" : 48,
+            "modules/orcid/widget/widget.js" : 78
           }
         }
       },

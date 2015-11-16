@@ -4,12 +4,17 @@
     <div class="s-results-border-bottom">
 
         <div class="col-sm-12">
+            <div style="margin:40px 0 40px 6.5%" class="leader-text"> To add to this list, search your name in ADS: <button class="btn sm btn-default search-author-name"><i class="fa fa-search"></i> author:"{{orcidLastName}}, {{orcidFirstName}}"</button></div>
+        </div>
+
+        <div class="col-sm-12">
             {{#if orcidUserName}}
-                <h3 style="margin:40px 6.5%;"> <span class="s-light-font">ORCID Papers for </span><b>{{orcidUserName}}</b></h3>
+                <h3 style="margin:20px 6.5%;"> <span class="s-light-font">ORCID Papers for </span><b>{{orcidUserName}}</b></h3>
             {{else}}
-                <h3 style="margin:40px 6.5%;" class="s-light-font">My ORCID Papers</h3>
+                <h3 style="margin:20px 6.5%;" class="s-light-font">My ORCID Papers</h3>
             {{/if}}
-    </div>
+        </div>
+
 </div>
 </div>
 
