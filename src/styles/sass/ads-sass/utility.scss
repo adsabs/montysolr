@@ -131,7 +131,7 @@
     @extend .fa;
     @extend .fa-pulse;
     @extend .fa-2x;
-    color: lighten($brand-primary-faded, 10%);
+    color: $gray-light;
     content : $fa-var-spinner;
     position: absolute;
     top: 50%;
@@ -147,7 +147,7 @@
   &:before{
     @extend .fa;
     @extend .fa-pulse;
-    color: lighten($brand-primary-faded, 10%);
+    color: $gray-light;
     content : $fa-var-spinner;
     position: absolute;
     top: 50%;

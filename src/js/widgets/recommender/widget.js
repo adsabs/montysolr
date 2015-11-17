@@ -23,6 +23,8 @@ define([
       this.listenTo(this.collection, "reset", this.render);
     },
 
+    smallLoadingIcon : true,
+
     template : RecommenderTemplate,
 
     events : {
