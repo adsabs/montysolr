@@ -39,8 +39,8 @@ define([
 
       customizeQuery: function() {
         var q = ListOfThings.prototype.customizeQuery.apply(this, arguments);
-        if (this.sortOrder){
-          q.set("sort", this.sortOrder);
+        if (Marionette.getOption(this, "sortOrder")){
+          q.set("sort", Marionette.getOption(this, "sortOrder"));
         }
         if (this.model.get("queryOperator")) {
           var query = this.model.get("queryOperator") + '(' + q.get('q').join(' ') + ')';

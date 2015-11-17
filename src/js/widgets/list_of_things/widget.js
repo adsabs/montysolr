@@ -67,6 +67,7 @@ define([
 
         options.view.model.set(this.pagination, {silent: true});
         options.view.model.set({
+              //for the template button that opens search in search results page
                 sortOrder : options.sortOrder ? encodeURIComponent(options.sortOrder) :  undefined,
                 queryOperator: options.queryOperator,
                 description: options.description

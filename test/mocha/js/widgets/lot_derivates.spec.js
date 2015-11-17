@@ -84,7 +84,12 @@ define([
       var $w = widget.render().$el;
       //$('#test').append($w);
 
-      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
+     var query =  widget.customizeQuery( new ApiQuery({'q': 'bibcode:bar'}));
+
+    //should have sort  = author desc
+     expect(query.url()).to.eql("fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=references(bibcode%3Abar)&rows=20&sort=first_author+asc&start=0");
+
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(20);
 
       expect($w.find(".s-list-description").text()).to.eql("Papers referenced by");
@@ -92,6 +97,9 @@ define([
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 
       expect($w.find(".s-article-title").text()).to.eql("foo");
+
+      expect($w.find("a:first").attr("href")).to.eql("#search/q=references(bibcode:)&sort=first_author%20asc");
+
 
 
     });
@@ -102,6 +110,11 @@ define([
 
       var $w = widget.render().$el;
       //$('#test').append($w);
+
+      var query =  widget.customizeQuery( new ApiQuery({'q': 'foo:bar'}));
+
+      //should have sort  = author desc
+      expect(query.url()).to.eql("fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=trending(foo%3Abar)-foo%3Abar&rows=20&start=0");
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
       expect($w.find("label").length).to.equal(20);
