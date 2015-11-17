@@ -92,7 +92,7 @@
 
 .s-top-row {
   font-weight: 300;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 
   .s-citation-link {
     color: $brand-primary;
@@ -195,6 +195,12 @@
     padding: 0;
     z-index: $z-index-2;
   }
+
+  //default hidden for all except results widget
+  input {
+    display : none;
+  }
+
 }
 
 .s-open-access {
@@ -203,6 +209,7 @@
 
 .s-results-list {
 
+
   padding-left: 2%;
   label {
     font-weight: initial
@@ -210,7 +217,7 @@
 
   //represents an individual entry
   li > div {
-    padding:.5em 5.3%;
+    padding:.5em 0;
     border-left: 5px solid #fff;
 
     &.chosen {
@@ -220,8 +227,19 @@
   }
 }
 
+.s-results-widget {
+  //checkbox only visible for results
+  .s-checkbox-col input {
+    display : inline-block;
+  }
+}
+
 .s-results-widget .s-results-list {
   padding-left: 15px;
+}
+
+.s-results-widget li > div {
+  padding-left: 5%;
 }
 
 .s-pagination-controls {

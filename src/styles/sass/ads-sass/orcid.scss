@@ -97,7 +97,7 @@ i{
 .s-results-orcid-container{
   position:relative;
   top: 2px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .s-orcid-success {
@@ -113,10 +113,4 @@ i{
 
 .s-orcid-provenance-others {
   background-color: $gray-lightest;
-}
-
-
-//no need to show checkboxes here
-div[data-widget="OrcidBigWidget"] .results-list input[type="checkbox"]{
-  visibility:hidden;
 }
