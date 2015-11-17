@@ -1,4 +1,10 @@
-define(['js/widgets/facet/factory' ], function ( FacetFactory) {
+define([
+  'js/widgets/facet/factory',
+  'analytics'
+], function (
+  FacetFactory,
+  analytics
+  ) {
 
   return function() {
     var widget = FacetFactory.makeHierarchicalCheckboxFacet({
@@ -67,6 +73,9 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
         q.unset('facet.prefix');
         q.unset('facet');
         this.dispatchNewQuery(paginator.cleanQuery(q));
+
+        analytics('send', 'event', 'interaction', 'facet-applied', JSON.stringify({name : this.facetField, logic : operator, conditions : conditions }));
+
       }
     };
     return widget;
