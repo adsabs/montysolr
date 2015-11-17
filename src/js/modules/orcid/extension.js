@@ -96,8 +96,8 @@ define([
               recInfo.done(function(rInfo) {
                 counter -= 1;
 
-                //console.log('pending: ' + d.bibcode + JSON.stringify(rInfo));
                 var actions = self._getOrcidInfo(rInfo);
+
                 // get the model for this document
                 if (self.collection && self.collection.findWhere) {
                   var model = self.collection.findWhere({bibcode: d.bibcode});
@@ -133,7 +133,6 @@ define([
             }
             else {
               recInfo.done(function(rInfo) {
-                //console.log('ready: ' + d.bibcode + JSON.stringify(rInfo));
                 d.orcid = self._getOrcidInfo(rInfo);
                 // enhance the ORCID record with an identifier
                 // the bibcode, if there, was discovered from our api
@@ -164,30 +163,32 @@ define([
         return docs;
       };
 
+      /**
+       * Enhances the model with ADS metadata (iff we are coming from orcid)
+       * or with Orcid metadata, iff we are coming from ADS. So, it works
+       * both ways and can be used in both the search results views and in
+       * the pure orcid listings
+       *
+       * @param model
+       * @returns {*}
+       */
       WidgetClass.prototype.mergeADSAndOrcidData = function(model) {
         var self = this;
-        //var api = self.getBeeHive().getService('Api');
         var promise = $.Deferred();
-        //if (!(api && self.hasPubSub())) {
-        //  promise.resolve(model);
-        //  return promise.promise();
-        //}
 
-        if (model.get('bibcode')) { // no need to do anything
+        if (model.get('bibcode') && model.get('source_name')) { // no need to do anything
           promise.resolve(model);
           return promise.promise();
         }
 
-        if (model.get('identifier')) {
+        if (model.get('source_name')) { // need to get ADS metadata
           var q, req;
           q = new ApiQuery({'q': 'identifier:' + queryUpdater.quoteIfNecessary(model.get('identifier')),
             'fl': 'title,abstract,bibcode,author,keyword,id,links_data,property,pub,aff,email,volume,pubdate,doi'});
           req = new ApiRequest({query: q, target: ApiTargets.SEARCH, options: {
             done: function (resp) {
               if (resp.response && resp.response.docs && resp.response.docs[0]) {
-                var sourceName = model.attributes.source_name || 'unknown';
-                sourceName += '; NASA ADS';
-
+                var sourceName = model.attributes.source_name ? model.attributes.source_name + '; NASA ADS' : 'NASA ADS';
                 model.attributes = _.extend(model.attributes, resp.response.docs[0], {source_name: sourceName});
               }
               promise.resolve(model);
@@ -198,8 +199,20 @@ define([
           }});
           self.getPubSub().publish(self.getPubSub().EXECUTE_REQUEST, req);
         }
-        else {
-          promise.resolve(model);
+        else { // we have ADS recs, need to extend them with Orcid metadata
+          var oApi = self.getBeeHive().getService('OrcidApi');
+          oApi.getOrcidProfileInAdsFormat()
+            .done(function(docs) {
+              _.each(docs.response.docs, function(d) {
+                if (d.bibcode && d.bibcode == model.attributes.bibcode) {
+                  model.attributes = _.defaults(model.attributes, d);
+                }
+              });
+              promise.resolve(model);
+            })
+            .fail(function() {
+              promise.fail();
+            });
         }
 
         return promise.promise();
