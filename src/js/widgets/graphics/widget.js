@@ -68,7 +68,9 @@ define([
       else {
         return {sampleGraphic : undefined};
       }
-    }
+    },
+
+    smallLoadingIcon : true
 
   });
 
