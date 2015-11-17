@@ -208,9 +208,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"ids_data\": [\"{whatever: here there MAST}\"]" +
 				", \"simbid\": [9000000, 1]" +
 				", \"simbtype\": [\"Galaxy\", \"HII Region\"]" +
-				", \"orcid1\": [\"1111-2222-3333-4444\", \"-\", \"0000-0002-4110-3511\"]" +
-				", \"orcid2\": [\"-\", \"-\", \"0000-0002-4110-3511\"]" +
-				", \"orcid3\": [\"1111-2222-3333-4444\", \"1111-2222-3333-5555\", \"-\"]" +
+				", \"orcid_pub\": [\"1111-2222-3333-4444\", \"-\", \"0000-0002-4110-3511\"]" +
+				", \"orcid_user\": [\"-\", \"-\", \"0000-0002-4110-3511\"]" +
+				", \"orcid_other\": [\"1111-2222-3333-4444\", \"1111-2222-3333-5555\", \"-\"]" +
 				", \"simbad_object_facet_hier\": [\"0/HII Region\", \"1/HII Region/9000000\"]" +
         ", \"doctype\": \"article\"" +
 			"}" +
@@ -450,28 +450,28 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
      * orcid, added 30/12/14; they must correspond to the author array
      * - updated 13/11/15 - orcid field is now a virtual one; and we have
-     *   orcid1,2,3
+     *   orcid_pub,_user,_other
      */
-    assertQ(req("q", "orcid1:1111-2222-3333-4444"),
+    assertQ(req("q", "orcid_pub:1111-2222-3333-4444"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
-    assertQ(req("q", "orcid1:1111*"),
+    assertQ(req("q", "orcid_pub:1111*"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
     assert h.query(req("q", "recid:100"))
-    .contains("<arr name=\"orcid1\">" +
+    .contains("<arr name=\"orcid_pub\">" +
       "<str>1111-2222-3333-4444</str>" +
       "<str>-</str>" +
       "<str>0000-0002-4110-3511</str></arr>"
       );
-    // this is only present in orcid3
+    // this is only present in orcid_other
     assertQ(req("q", "orcid:1111-2222-3333-5555"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
-    assertQ(req("q", "orcid3:1111-2222-3333-5555"),
+    assertQ(req("q", "orcid_other:1111-2222-3333-5555"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );

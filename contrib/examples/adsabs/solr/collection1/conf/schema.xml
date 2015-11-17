@@ -1137,29 +1137,29 @@
         
         * orcid
         
-          Virtual field which by default searches in orcid1, orcid2, orcid3
+          Virtual field which by default searches in orcid_pub, orcid_user, orcid_other
           
-        * orcid1
+        * orcid_pub
         
           ORCID identifiers assigned by publishers.
           
-        * orcid2
+        * orcid_user
         
           ORCID claims from users who gave ADS consent to expose their public
           profiles.
           
-        * orcid3
+        * orcid_other
         
           ORCID claims from users who used Bumblebee claiming interface, but
           did not give us consent to show their profiles.
           
          -->
-		<field name="orcid1" type="normalized_text_ascii" indexed="true" stored="true"
+		<field name="orcid_pub" type="normalized_text_ascii" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true"/>
-		<field name="orcid2" type="normalized_text_ascii" indexed="true" stored="true"
+		<field name="orcid_user" type="normalized_text_ascii" indexed="true" stored="true"
           multiValued="true" omitNorms="true"/>
-        <field name="orcid3" type="normalized_text_ascii" indexed="true" stored="true"
-          multiValued="true" omitNorms="true"/>
+    <field name="orcid_other" type="normalized_text_ascii" indexed="true" stored="true"
+      multiValued="true" omitNorms="true"/>
 
     <!--
     @api.doc
