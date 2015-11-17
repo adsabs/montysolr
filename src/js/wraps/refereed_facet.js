@@ -1,4 +1,10 @@
-define(['js/widgets/facet/factory' ], function ( FacetFactory) {
+define([
+  'js/widgets/facet/factory',
+  'analytics'
+], function (
+  FacetFactory,
+  analytics
+  ) {
 
   return function() {
     var widget = FacetFactory.makeBasicCheckboxFacet({
@@ -86,6 +92,9 @@ define(['js/widgets/facet/factory' ], function ( FacetFactory) {
         }
 
         this.dispatchNewQuery(paginator.cleanQuery(q));
+
+        analytics('send', 'event', 'interaction', 'facet-applied', JSON.stringify({name : this.facetField, logic : operator, conditions : conditions }));
+
       }
     };
     return widget;
