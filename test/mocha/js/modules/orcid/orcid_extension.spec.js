@@ -28,6 +28,15 @@ define([
 
         minsub.beehive.addService('OrcidApi', {
           hasAccess: function() {return true;},
+          getOrcidProfileInAdsFormat: function() {
+            var defer = $.Deferred();
+            defer.resolve({
+              response: {
+                docs: []
+              }
+            })
+            return defer.promise();
+          },
           getRecordInfo: function(data) {
             var defer = $.Deferred();
 
@@ -215,6 +224,7 @@ define([
         expect(widget.getPubSub().publish.called).to.eql(false);
 
         model.set('bibcode', null);
+        model.set('source_name', 'ads');
         model.set('identifier', 'foo');
 
         widget.mergeADSAndOrcidData(model);

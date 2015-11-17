@@ -575,28 +575,29 @@ define([
               }
             });
 
-            if (toRemove.length == 0) {
+            var newWorks = [];
+            if (recsToAdd) {
+              _.each(recsToAdd, function(rec) {
+                newWorks.push(self.formatOrcidWork(rec));
+              })
+            }
+
+            if (toRemove.length == 0 && newWorks.length == 0) {
               deferred.resolve({
                 deleted: 0,
                 added: 0,
-                msg: 'No ADS rec found that could be deleted',
+                msg: 'No ADS rec found that could be deleted/added',
                 totalRecs: orcidWorks["orcid-work"].length,
                 adsTotal: adsWorks.length
               });
               return;
             }
 
-            var newWorks = [];
+            // include the remaining recs from the profile
             _.each(adsWorks, function (work, idx, l) {
               if (toRemove.indexOf(idx) == -1)
                 newWorks.push(work);
             });
-
-            if (recsToAdd) {
-              _.each(recsToAdd, function(rec) {
-                newWorks.push(self.formatOrcidWork(rec));
-              })
-            }
 
             var report = {
               deleted: toRemove.length,
@@ -997,6 +998,8 @@ define([
 
       /**
        * Updates ORCID - this method is made available to widgets
+       *
+       * Returns a promise, with recordInfo
        */
       updateOrcid: function(action, adsDoc) {
         if (!_.isObject(adsDoc)) throw new Error('You are supposed to send simple object');
@@ -1035,20 +1038,25 @@ define([
             });
         }
         else if (action == 'add') {
-          var recInfo = this.getRecordInfo(adsDoc);
-          if (!recInfo.isCreatedByUs && !recInfo.isCreatedByOthers) {
-            this.addWorks([adsDoc])
-              .done(function() {
-                recInfo.isCreatedByUs = true;
-                result.resolve(recInfo);
-              })
-              .fail(function() {
-                result.reject(arguments);
-              });
-          }
-          else {
-            return this.updateOrcid('update', adsDoc); // not safe to just add
-          }
+          this.getRecordInfo(adsDoc)
+            .done(function(recInfo) {
+              if (!recInfo.isCreatedByUs && !recInfo.isCreatedByOthers) {
+                self.addWorks([adsDoc])
+                  .done(function() {
+                    recInfo.isCreatedByUs = true;
+                    result.resolve(recInfo);
+                  })
+                  .fail(function() {
+                    result.reject(arguments);
+                  });
+              }
+              else {
+                return self.updateOrcid('update', adsDoc); // not safe to just add
+              }
+            })
+            .fail(function() {
+              result.fail(arguments);
+            })
         }
         else {
           throw new Error('Unknown action: ' + action);
