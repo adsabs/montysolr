@@ -339,9 +339,6 @@ define([
       //ned to set this explicitly since there is no event from the beehive
       this.model.set("orcidLoggedIn", false);
       this.getBeeHive().getObject("User").setOrcidMode(false);
-
-      debugger
-
       //finally, redirect if currently on orcid page
       if (this._latestPage === "orcid-page"){
         pubsub.publish(pubsub.NAVIGATE, "index-page");

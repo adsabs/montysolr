@@ -13,7 +13,7 @@
   "devDependencies": {
     "almond": "~0.2.9",
     "grunt-autoprefixer":"~0.2.20130806",
-    "blanket": "^1.1.6",
+    "blanket": "1.1.7",
     "express": "~3.4.8",
     "grunt": "~0.4.5",
     "grunt-bbb-requirejs": "0.1.0-alpha.8",
