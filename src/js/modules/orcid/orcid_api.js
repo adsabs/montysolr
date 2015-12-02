@@ -51,7 +51,8 @@ define([
     'js/components/api_request',
     'js/mixins/hardened',
     'js/components/api_targets',
-    'js/components/api_query_updater'
+    'js/components/api_query_updater',
+    'js/components/api_feedback'
   ],
   function (
     _,
@@ -66,7 +67,8 @@ define([
     ApiRequest,
     HardenedMixin,
     ApiTargets,
-    ApiQueryUpdater
+    ApiQueryUpdater,
+    ApiFeedback
     ) {
 
 
@@ -150,6 +152,60 @@ define([
             + "&redirect_uri=" + encodeURIComponent(this.config.redirectUrlBase +
             (targetRoute || '/#/user/orcid'))
         });
+      },
+
+      /*
+      * set ADS data on endpoint /preferences[orcid id]
+      * */
+      setADSUserData : function(data){
+
+        var d = $.Deferred();
+
+        this.sendData(this.getBeeHive().getService("Api").url + ApiTargets.ORCID_PREFERENCES + "/" + this.authData.orcid,
+            data,
+            {
+              type: "POST",
+              fail: function(error) {
+                //feedback
+                var message = "ADS ORCID preferences could not be set"
+                this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
+                d.reject(error);
+              },
+              done: function(res) {
+                d.resolve(res);
+              }
+            });
+
+        return d.promise();
+
+      },
+
+      /*
+       * get ADS data from endpoint /preferences[orcid id]
+       * */
+      getADSUserData : function(){
+
+        var d = $.Deferred();
+
+        this.sendData(this.getBeeHive().getService("Api").url + ApiTargets.ORCID_PREFERENCES + "/" + this.authData.orcid,
+            null,
+            {
+              fail: function(error) {
+                //publish api feedback
+                var message = "ADS ORCID preferences could not be retrieved";
+                this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
+                d.reject(error)
+              },
+              done: function(res) {
+                d.resolve(res);
+              },
+              headers: {
+                "Orcid-Authorization": "Bearer " + this.authData.access_token
+              }
+            });
+
+        return d.promise();
+
       },
 
       /**
@@ -1202,6 +1258,8 @@ define([
         getUserProfile : 'get user profile',
         signIn: 'login',
         signOut: 'logout',
+        getADSUserData : '',
+        setADSUserData : '',
         getRecordInfo: 'provides info about a document',
         updateOrcid: 'the main access point for widgets',
         getOrcidProfileInAdsFormat: 'retrieves the Orcid profile in ADS format',

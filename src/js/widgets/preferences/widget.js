@@ -1,67 +1,71 @@
 define([
   "marionette",
   "js/widgets/base/base_widget",
-  "hbs!./templates/preferences",
-  "./views/openurl"
+  "./views/openurl",
+  "./views/orcid"
 ], function (
   Marionette,
   BaseWidget,
-  PreferencesTemplate,
-  OpenURLView
+  OpenURLView,
+  OrcidView
   ) {
 
   var PreferencesModel = Backbone.Model.extend({
 
+    defaults : function(){
+      return {
+        openURLConfig : undefined,
+        OrcidLoggedIn : undefined,
+
+      }
+    }
 
   });
 
   var PreferencesView = Marionette.LayoutView.extend({
 
-    template: PreferencesTemplate,
+    template: function () {
+      return "<div class=\"content-container\"></div>"
+    },
 
-    className: "preferences-widget s-preferences-widget",
+    className: "s-preferences preferences-widget",
 
     regions: {
-      "openurl": ".openurl-container"
+      content: ".content-container"
     },
 
-    onRender: function () {
-      // for now, just render the subviews, when there are more,
-      // come up with some way to organize them (tabs/accordion/something else)
-      var openurl = new OpenURLView({model: this.model, collection: Marionette.getOption(this, "openURLCollection")});
-      this.getRegion("openurl").show(openurl);
+    setSubView: function (viewConstructor) {
+      //providing all views with a copy of the model
+      var view = new viewConstructor({model: this.model});
+
+      this.getRegion("content").show(view);
 
       //forward events
-      this.listenTo(openurl, "all", this.forwardEvents);
-    },
-
-    forwardEvents: function () {
-      this.trigger.apply(this, arguments);
+      this.listenTo(view, "all", function(){
+        this.trigger.apply(this, arguments)
+      });
     }
 
   });
 
+  /*
+  * the rule is that preferences widget provides sub views with its model,
+  * and widgets do not touch the model-- instead, they emit form submitted events
+  * with a json structure representing the form data
+  * */
 
-  var OpenURLCollection = Backbone.Collection.extend({
-
-
-  });
 
   var PreferencesWidget = BaseWidget.extend({
 
     initialize: function (options) {
       options = options || {};
 
-      this.openURLCollection = new OpenURLCollection();
       this.model = new PreferencesModel();
-
-      this.view = new PreferencesView({model: this.model, openURLCollection: this.openURLCollection });
+      this.view = new PreferencesView({ model: this.model });
       this.listenTo(this.view, "all", this.handleViewEvents);
 
       BaseWidget.prototype.initialize.apply(this, arguments);
-
     },
-
 
     activate: function (beehive) {
       var that = this;
@@ -72,17 +76,86 @@ define([
 
       //as soon as preferences widget is activated, get the open url config
       this.getBeeHive().getObject("User").getOpenURLConfig().done(function (config) {
-        that.openURLCollection.reset(config);
+        that.model.set("openURLConfig", config);
       });
 
       //and the user data from myads
-      this.model.set(this.getBeeHive().getObject("User").getUserData());
+      //add back
+    },
 
+    //translates what comes from toc widget (e.g. userPreferences__orcid) to view name
+    views : {
+      orcid : OrcidView,
+      librarylink : OpenURLView
+    },
+
+    setSubView: function (subView) {
+      if (_.isArray(subView)) {
+        //XXX:figure out why array
+        subView = subView[0];
+      }
+      var viewConstructor = this.views[subView];
+      if (!viewConstructor){
+        console.warn("don't recognize this subview: ", subView );
+        return
+      }
+      this.view.setSubView(viewConstructor);
+
+      this.fetchNecessaryData.apply(this, arguments);
+    },
+
+    fetchNecessaryData : function(subView) {
+
+      var that = this;
+
+      this.model.set("orcidLoggedIn", this.getBeeHive().getService("OrcidApi").hasAccess());
+
+      /*right now only orcid view needs extra data */
+
+      if (subView === "orcid" && this.model.get("orcidLoggedIn") ){
+
+        //get main orcid name
+        var orcidProfile = this.getBeeHive().getService("OrcidApi").getUserProfile();
+        var adsOrcidUserInfo = this.getBeeHive().getService("OrcidApi").getADSUserData();
+
+        //doing it at once so there's no flicker of rapid rendering as different vals change
+        $.when(orcidProfile, adsOrcidUserInfo).done(function(orcid, ads){
+          var data = {userSubmitted : ads};
+          try {
+            var firstName = orcid["orcid-bio"]["personal-details"]["given-names"]["value"];
+            var lastName = orcid["orcid-bio"]["personal-details"]["family-name"]["value"];
+            //unchangeable orcid name
+            data.orcidName =  lastName + ", " + firstName;
+            data.prettyOrcidName = firstName + " " + lastName;
+
+          } catch(e){
+            data.orcidName = "unknown";
+            data.prettyOrcidName = "unknown";
+          }
+          that.model.set(data);
+        });
+
+        }
     },
 
     handleViewEvents: function (event, arg1, arg2) {
-      if (event == "change:link_server") {
+      var that = this;
+
+      if (event === "change:link_server") {
         this.getBeeHive().getObject("User").setUserData({link_server: arg1});
+      }
+
+      else if (event === "orcid-authenticate"){
+        this.getBeeHive().getObject("AppStorage").setStashedNav("UserPreferences", {subView: "orcid"});
+        this.getBeeHive().getService("OrcidApi").signIn();
+      }
+
+      else if (event === "orcid-form-submit"){
+        this.getBeeHive().getService("OrcidApi").setADSUserData(arg1).done(function(){
+          //this will re-render the form
+          that.setSubView("orcid");
+
+        });
       }
     },
 

@@ -89,6 +89,57 @@ define([
 
     });
 
+    it("can stash previous page for redirection purposes", function(){
+
+      var s = new AppStorage();
+      var minsub = new MinimalPubsub();
+
+      var fakeStorage = {
+        set : sinon.spy(),
+        get : sinon.spy(function(){
+          return {
+            stashedNavArgs : ["UserPreferences", "orcid"]
+          }
+        }),
+        unset : sinon.spy()
+      }
+
+
+      minsub.beehive.addService("PersistentStorage", fakeStorage);
+
+      s.activate(minsub.beehive);
+
+      s.setStashedNav("UserPreferences", "orcid");
+
+      expect(fakeStorage.set.callCount).to.eql(1);
+
+      s.getPubSub().publish = sinon.spy();
+
+      s.executeStashedNav("UserPreferences", "orcid");
+
+      expect(fakeStorage.set.callCount).to.eql(1);
+      expect(fakeStorage.get.callCount).to.eql(1);
+
+      expect(s.getPubSub().publish.callCount).to.eql(1);
+
+      expect(s.getPubSub().publish.args[0]).to.eql([
+        "[Router]-Navigate-With-Trigger",
+        {
+          "stashedNavArgs": [
+            "UserPreferences",
+            "orcid"
+          ]
+        }
+      ]);
+
+
+
+
+
+
+
+    });
+
   });
 
 });

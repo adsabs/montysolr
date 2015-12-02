@@ -42,6 +42,9 @@ define([
       GRAPHICS: 'graphics',
       FEEDBACK : 'feedback/slack',
 
+      //store ADS information connected with ORCID here
+      ORCID_PREFERENCES : 'orcid/preferences',
+
       //library endpoints
       //can get info about all libraries, or list of bibcodes associated w/specific lib (libraries/id)
       //post to /libraries/ to create a library

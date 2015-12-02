@@ -14,6 +14,8 @@ define([
 
     template : OpenURLTemplate,
 
+    className : "panel panel-default s-form-container",
+
     onRender : function(){
       this.$("select[name=set-link-server]").select2();
     },
@@ -21,9 +23,8 @@ define([
     serializeData : function(){
 
       var data = this.model.toJSON();
-      data.openURLConfig = this.collection.toJSON();
       //probably a server error
-      if (data.openURLConfig.length === 0){
+      if (!data.openURLConfig || data.openURLConfig.length === 0){
         data.error = true;
         return data
       }
@@ -32,10 +33,6 @@ define([
       data.openURLName = current ? current.name : "";
 
       return data
-    },
-
-    collectionEvents : {
-      "reset" : "render"
     },
 
     modelEvents : {
@@ -70,5 +67,4 @@ define([
 
   return OpenURLView;
 
-
-})
+});

@@ -142,14 +142,16 @@ define([
         this.set("UserPreferences", function(page, data){
           if (redirectIfNotSignedIn())
             return;
+          var subView = data.subView || "librarylink";
           //set left hand nav panel correctly and tell the view what to show
           app.getObject('MasterPageManager').show("SettingsPage",
             ['UserPreferences', "UserNavbarWidget"]);
           app.getWidget("SettingsPage").done(function(widget) {
-              widget.setActive("UserPreferences");
+              widget.setActive("UserPreferences", subView);
             });
 
-          this.route = "#user/settings/preferences";
+          this.route = "#user/settings/" + subView;
+
           publishPageChange("settings-page");
 
         });
@@ -568,8 +570,15 @@ define([
 
           this.route = '#user/orcid';
 
+          if ( orcidApi.hasAccess() ) {
 
-          if ( app.hasWidget('OrcidBigWidget') && orcidApi.hasAccess() ) {
+            //should we redirect back to a certain page now that orcid is authenticated?
+            var appStorage  = self.getBeeHive().getObject('AppStorage');
+            if (appStorage.executeStashedNav()){
+              //don't go to the orcidbigwidget, we are redirecting elsewhere
+              return;
+              }
+
             app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
               app.getObject('MasterPageManager').show('OrcidPage',
                 ['OrcidBigWidget', 'SearchWidget']);
