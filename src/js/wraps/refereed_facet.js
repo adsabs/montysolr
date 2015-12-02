@@ -15,6 +15,7 @@ define([
         "facet": "true",
         "facet.mincount": "1",
         "fl": "id",
+        "facet.field" : "property",
         "facet.query": 'property:refereed',
         'facet.limit': 5
       },

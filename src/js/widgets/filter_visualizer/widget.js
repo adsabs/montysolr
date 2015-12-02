@@ -89,6 +89,7 @@ define([
         this.knownFilters = {
           'fq_author' : 'Author',
           'fq_database': 'Collection',
+          'fq_property' : "Property",
           'fq_facets180': 'Status',
           'fq_keyword_facet': 'Keywords',
           'fq_bibstem_facet': 'Publication',
