@@ -19,7 +19,8 @@ define(['config', 'module'], function(config, module) {
       'router',
       'js/components/application',
       'js/mixins/discovery_bootstrap',
-      'js/mixins/api_access'
+      'js/mixins/api_access',
+      'es5-shim'
     ],
     function(Router,
       Application,

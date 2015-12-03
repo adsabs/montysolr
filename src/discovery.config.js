@@ -190,7 +190,8 @@ require.config({
     'filesaver' : 'libs/FileSaver/FileSaver',
     'select2' : 'libs/select2/select2',
     'squire': '../bower_components/squire/src/Squire',
-    'clipboard': 'libs/clipboard/clipboard'
+    'clipboard': 'libs/clipboard/clipboard',
+    'es5-shim' : 'libs/es5-shim/es5-shim'
 
   },
 
