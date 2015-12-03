@@ -68,7 +68,7 @@ define([
         ];
 
         var detailsPageAlwaysVisible = [
-          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'ShowGraphicsSidebar'
+          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'ShowGraphicsSidebar', 'ShowLibraryAdd'
         ];
 
         function redirectIfNotSignedIn(){

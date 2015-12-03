@@ -131,12 +131,16 @@ define(['marionette',
 
     _.extend(QueryDisplayView.prototype, FormatMixin);
 
-
     var Widget = BaseWidget.extend({
 
+      modelConstructor : QueryModel,
+      viewConstructor : QueryDisplayView,
+
       initialize: function(options) {
+        options = options || {};
+
         this.model = new QueryModel();
-        this.view = new QueryDisplayView({model : this.model});
+        this.view = new QueryDisplayView({model : this.model, template : options.template});
         BaseWidget.prototype.initialize.call(this, options);
       },
 
@@ -194,7 +198,13 @@ define(['marionette',
 
         options.library = data.libraryID;
         //are we adding the current query or just the selected bibcodes?
-        options.bibcodes = data.recordsToAdd;
+        //if it's an abstract page widget, will have this._bibcode val
+        if (this.abstractPage){
+          options.bibcodes = [this._bibcode];
+        }
+        else {
+          options.bibcodes = data.recordsToAdd;
+        }
 
         var name = _.findWhere(this.model.get("libraries"), {id : data.libraryID }).name;
 
@@ -227,7 +237,13 @@ define(['marionette',
 
         var options = {}, that = this;
         //are we adding the current query or just the selected bibcodes?
-        options.bibcodes = data.recordsToAdd;
+        //if it's an abstract page widget, will have this._bibcode val
+        if (this.abstractPage){
+          options.bibcodes = [this._bibcode];
+        }
+        else {
+          options.bibcodes = data.recordsToAdd;
+        }
         options.name = data.name;
         //XXX:rca - to decide
         this.getBeeHive().getObject("LibraryController").createLibAndAddBibcodes(options)
