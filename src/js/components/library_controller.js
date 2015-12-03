@@ -201,6 +201,10 @@ define([
           var bibs = this.getBeeHive().getObject("AppStorage").getSelectedPapers();
           deferred.resolve(bibs);
         }
+        //for abstract widget
+        else if (_.isArray(options.bibcodes)){
+          deferred.resolve(options.bibcodes);
+        }
         else {
           throw new Error("should we add all bibcodes or only selected ones?");
         }

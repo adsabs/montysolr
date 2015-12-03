@@ -125,9 +125,11 @@ require.config({
         ShowRecommender : 'js/widgets/recommender/widget',
         ShowMetrics: 'js/wraps/paper_metrics',
         ShowPaperExport : 'js/wraps/paper_export',
+        ShowLibraryAdd : 'js/wraps/abstract_page_library_add/widget',
 
         IndividualLibraryWidget : 'js/widgets/library_individual/widget',
-        AllLibrariesWidget : 'js/widgets/libraries_all/widget'
+        AllLibrariesWidget : 'js/widgets/libraries_all/widget',
+
 
       },
       plugins: {}
