@@ -84,15 +84,15 @@ You need to review/update configuration. The web application loads its config fr
 
   * ./src/js/discovery.config.js
 
-    This is the require.js configuration, but we keep there also the definition
+    This is the require.js configuration, but we also keep the definition
     of all modules/widgets/plugins that the application should load (or make
-    available). It is in the section: 'js/apps/discovery/main'
+    available) there. It is in the section: 'js/apps/discovery/main'
 
   * src/js/discovery.vars.js
 
-    This is for often changing variables (e.g. what is the main url under which
+    This is for frequently changing variables (e.g. what is the main url under which
     bumblebee is running, or the url to the API services). By default,
-    this file will be created during 'grunt setup' and if already exists, it
+    this file will be created during 'grunt setup' and if it already exists, it
     will NOT be overwritten. Look at 'discovery.vars.js.defaults' for explanation.
 
   * dynamic discovery
@@ -119,7 +119,7 @@ Bumblebee contains set of components alongside with (mini) applications. To depl
 Developing for bumblebee
 ========================
 
-We develop very robust code, with excellent test coverage, however without promises of backward compatibility. Things change dramatically and we are moving fast. Do let no 'getting it right' kill your creativity, IT IS OK TO MAKE MISTAKES!
+We develop very robust code, with excellent test coverage, however without promises of backward compatibility. Things change dramatically and we are moving fast. Do not let 'getting it right' kill your creativity, IT IS OK TO MAKE MISTAKES!
 
 Set your editor to use spaces instead of tabs (width: 2)
 
@@ -220,7 +220,7 @@ To help you get started, explore these:
 
      http://localhost:8000/test/tests.html
 
-documentation
+Documentation
 =============
        
 Look inside the docs folder, mainly:
@@ -231,23 +231,23 @@ Look inside the docs folder, mainly:
 
   
 
-miscellanea
+Miscellanea
 ===========
 
-- you can run server.js from command line.  If you want to connect to our SOLR server, the easiest thing to do is to tunnel to adswhy:9000 like so:
+- You can run server.js from command line.  If you want to connect to our SOLR server, the easiest thing to do is to tunnel to adswhy:9000 like so:
 
   ```bash
   $ ssh -N -f -L 9000:adswhy.cfa.harvard.edu:9000 pogo3.cfa.harvard.edu
   $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src node server.js
 ```
   
-- if you want to debug/edit in place node.js code, use supervisor (you need to install it first)
+- If you want to debug/edit in place node.js code, use supervisor (you need to install it first)
 
   ```bash
   $ env SOLR_ENDPOINT=http://localhost:9000/solr/select HOMEDIR=src supervisor server.js
 ```
 
-- you can see the search being routed to the SOLR api by accessing: http://localhost:port/api/1/search, for instance:
+- You can see the search being routed to the SOLR api by accessing: http://localhost:port/api/1/search, for instance:
   http://localhost:port/api/1/search?q=kurtz 
        
 
