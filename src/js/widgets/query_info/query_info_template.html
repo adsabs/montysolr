@@ -41,16 +41,11 @@
             <div style="margin:10px 0 4px 0">
                 OR
             </div>
-            <label style="width: 200px;font-weight:500">create a new library
-                <input class="form-control input-sm new-library-name s-display-inline" type="text" name="new-library-name" placeholder="New Library Name" value="{{newLibraryName}}"/>
-            </label>
+            {{/if}}
+
+            <label for="#create-new">create a new library </label>
+            <input id="#create-new" class="form-control input-sm new-library-name s-display-inline" type="text" name="new-library-name" placeholder="New Library Name" value="{{newLibraryName}}" style="max-width:188px"/>
             <button class="btn btn-sm btn-success submit-create-library"></i>submit</button>
-            {{else}}
-            <label style="width:200px;font-weight:500"> create a new library
-                <input class="form-control input-sm new-library-name s-display-inline" type="text" name="new-library-name" placeholder="New Library Name" value="{{newLibraryName}}"/>
-                    </label>
-                    <button class="btn btn-sm btn-success submit-create-library"></i>submit</button>
-                {{/if}}
 
         </div>
 
