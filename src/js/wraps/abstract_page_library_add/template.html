@@ -1,14 +1,14 @@
 {{#if loggedIn}}
 <div class="s-library-area">
     <div class="s-library-add-title library-add-title"  type="button" data-toggle="collapse" data-target="#library-console" aria-expanded="false" aria-controls="collapseExample">
-        <i class="fa fa-book fa-lg"></i> Add this paper to library &nbsp; <i class="fa fa-lg fa-caret-down"></i>
+        <i class="fa fa-book fa-lg"></i> Add paper to a library &nbsp; <i class="fa fa-lg fa-caret-down"></i>
     </div>
     <div class="collapse {{#if libraryDrawerOpen }} in {{/if}}" id="library-console">
 
         <div class="libraries-container">
             {{#if libraries}}
             <div style="margin-top: 8px" class="">
-                <label for="#library-select">to an <b>existing library:</b></label>
+                <label for="#library-select">add to an existing library:</label>
                 <select id="library-select" name="library-select" class="form-control input-sm s-library-select">
                     {{#each libraries}}
                     <option value="{{this.id}}" {{#compare id ../selectedLibrary}} selected="true" {{/compare}}>{{this.name}}</option>
@@ -19,16 +19,11 @@
             <div style="margin:10px 0 4px 0">
                 OR
             </div>
-            <label style="width: 200px;font-weight:500">create a new library
-                <input class="form-control input-sm new-library-name s-display-inline" type="text" name="new-library-name" placeholder="New Library Name" value="{{newLibraryName}}"/>
-            </label>
-            <button class="btn btn-sm btn-success submit-create-library"></i>submit</button>
-            {{else}}
-            <label style="width:200px;font-weight:500"> create a new library
-                <input class="form-control input-sm new-library-name s-display-inline" type="text" name="new-library-name" placeholder="New Library Name" value="{{newLibraryName}}"/>
-            </label>
-            <button class="btn btn-sm btn-success submit-create-library"></i>submit</button>
             {{/if}}
+
+            <label for="#create-new">create a new library </label>
+            <input id="#create-new" class="form-control input-sm new-library-name s-display-inline" type="text" name="new-library-name" placeholder="New Library Name" value="{{newLibraryName}}" style="max-width:188px"/>
+            <button class="btn btn-sm btn-success submit-create-library"></i>submit</button>
 
         </div>
 
@@ -45,11 +40,11 @@
     <div class="alert alert-success alert-dismissable" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
         {{#if feedback.create}}
-        <a href="#/user/libraries/{{feedback.id}}"> Library <b>{{feedback.name}}</b></a> was successfully created and {{feedback.numRecords}} new records were added.
+        <a href="#/user/libraries/{{feedback.id}}"> Library <b>{{feedback.name}}</b></a> was successfully created and {{feedback.numRecords}} new record was added.
         {{else}}
-        {{feedback.numRecords}} new records were added to  <a href="#/user/libraries/{{feedback.id}}"> library <b>{{feedback.name}}</b></a>.
+        {{feedback.numRecords}} new record was added to  <a href="#/user/libraries/{{feedback.id}}"> library <b>{{feedback.name}}</b></a>.
         {{#if feedback.numAlreadyInLib}}
-        ({{feedback.numAlreadyInLib}} were already in the library).
+        ({{feedback.numAlreadyInLib}} was already in the library).
         {{/if}}
         {{/if}}
     </div>
@@ -62,7 +57,7 @@
         <b>{{feedback.name}}</b> was not created, error occured.
         <em>{{feedback.error}}</em>
         {{else}}
-        Records were not added to <b>{{feedback.name}}</b>, error occurred.
+        Record was not added to <b>{{feedback.name}}</b>, error occurred.
         <em>{{feedback.error}}</em>
         {{/if}}
     </div>
