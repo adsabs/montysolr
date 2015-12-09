@@ -241,6 +241,14 @@ define([
           .done(function(data) {
             var response = new JsonResponse(data);
             var params = response.get('responseHeader.params');
+
+            // name/surname can be empty
+            params = _.reduce(_.pairs(params), function(p, v) {
+              if (v[1])
+                p[v[0]] = v[1];
+              return p;
+            }, {});
+
             response.setApiQuery(new ApiQuery(params));
             self.processResponse(response);
             self.model.set({orcidUserName : params.firstName + " " + params.lastName,

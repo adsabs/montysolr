@@ -261,8 +261,8 @@ define([
         //set the orcid username into the model
         var that = this;
         orcidApi.getUserProfile().done(function (info) {
-          var firstName = info["orcid-bio"]["personal-details"]["given-names"]["value"];
-          var lastName = info["orcid-bio"]["personal-details"]["family-name"]["value"];
+          var firstName = orcidApi.getOrcidVal(info, "orcid-bio/personal-details/given-names/value", '');
+          var lastName = orcidApi.getOrcidVal(info, "orcid-bio/personal-details/family-name/value", '');
           that.model.set("orcidFirstName", firstName);
           that.model.set("orcidLastName", lastName);
           that.model.set("orcidQueryName", lastName + ', ' + firstName);

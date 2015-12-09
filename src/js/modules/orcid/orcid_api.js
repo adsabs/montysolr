@@ -1066,6 +1066,27 @@ define([
       },
 
       /**
+       * Reads a value from the orcid profile
+       *
+       * @param profile
+       * @param key - str, of 'foo/bar/value'
+       * @param defaultVal - what to return if the value is not found
+       * @returns {*}
+       */
+      getOrcidVal: function(profile, key, defaultVal) {
+        var parts = key.split('/');
+        var pointer = profile;
+        for (var i=0; i<parts.length; i++) {
+          if (pointer[parts[i]]) {
+            pointer = pointer[parts[i]]
+          }
+          else {
+            return defaultVal;
+          }
+        }
+        return pointer;
+      },
+      /**
        * Transfroms ORCID profile into ADS format (ApiResponse) which is easy to
        * ingest for the widgets
        *
@@ -1074,16 +1095,11 @@ define([
       transformOrcidProfile: function(orcidProfile) {
         var docs = [], works, self = this;
 
-        if (!orcidProfile['orcid-activities'] || !orcidProfile['orcid-activities']['orcid-works'] || !orcidProfile['orcid-activities']['orcid-works']['orcid-work']){
-          works = [];
-        }
-        else {
-          works = orcidProfile['orcid-activities']['orcid-works']['orcid-work'];
-        }
+        works = this.getOrcidVal(orcidProfile, 'orcid-activities/orcid-works/orcid-work', []);
 
         var orcidId = orcidProfile['orcid-identifier']['path'];
-        var firstName = orcidProfile["orcid-bio"] ? orcidProfile["orcid-bio"]["personal-details"]["given-names"]["value"] : null;
-        var lastName = orcidProfile["orcid-bio"] ? orcidProfile["orcid-bio"]["personal-details"]["family-name"]["value"] : null;
+        var firstName = this.getOrcidVal(orcidProfile, "orcid-bio/personal-details/given-names/value", null);
+        var lastName = this.getOrcidVal(orcidProfile, "orcid-bio/personal-details/family-name/value", null);
 
         function extr(el) {
           if (!el) return null;
@@ -1188,7 +1204,8 @@ define([
         signOut: 'logout',
         getRecordInfo: 'provides info about a document',
         updateOrcid: 'the main access point for widgets',
-        getOrcidProfileInAdsFormat: 'retrieves the Orcid profile in ADS format'
+        getOrcidProfileInAdsFormat: 'retrieves the Orcid profile in ADS format',
+        getOrcidVal: 'value getter'
       }
     });
 
