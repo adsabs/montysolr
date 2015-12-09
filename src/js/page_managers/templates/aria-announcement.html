@@ -1,10 +1,20 @@
-Now on
-{{#compare page "LandingPage" }}
-  home page
-{{/compare}}
 {{#compare page "SearchPage" }}
- search results page
+<a href="#main-content" id="skip-to-main-content" class="sr-only sr-only-focusable" aria-label="foo">Skip to main content</a>
 {{/compare}}
 {{#compare page "DetailsPage" }}
-article abstract page
+<a href="#main-content"  id="skip-to-main-content" class="sr-only sr-only-focusable">Skip to main content</a>
 {{/compare}}
+
+<div id="aria-announcement-container">
+    Now on
+    {{#compare page "LandingPage" }}
+    home page
+    {{/compare}}
+    {{#compare page "SearchPage" }}
+    search results page
+    {{/compare}}
+    {{#compare page "DetailsPage" }}
+    article abstract page
+    {{/compare}}
+
+</div>

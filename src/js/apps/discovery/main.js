@@ -60,6 +60,7 @@ define(['config', 'module'], function(config, module) {
           app.start(Router);
           pubsub.publish(pubsub.getCurrentPubSubKey(), pubsub.APP_STARTED);
 
+          //some global event handlers, not sure if right place
           $("body").on("click", "button.toggle-menu", function(e){
                         var $button = $(e.target),
                              $sidebar =  $button.parents().eq(1).find(".nav-container");
@@ -67,7 +68,14 @@ define(['config', 'module'], function(config, module) {
                         $sidebar.toggleClass("show");
                         var text = $sidebar.hasClass("show") ? '  <i class="fa fa-close"></i> Close Menu' : ' <i class="fa fa-bars"></i> Show Menu';
                         $button.html(text);
-                      });
+                     });
+          //accessibility: skip to main content
+          $("body").on("click", "#skip-to-main-content", function(e){
+            e.preventDefault();
+
+            $("#main-content").focus();
+
+          });
 
           var dynConf = app.getObject('DynamicConfig');
           if (dynConf && dynConf.debugExportBBB) {

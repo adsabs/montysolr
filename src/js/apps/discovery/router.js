@@ -72,8 +72,6 @@ define([
         'user/libraries(/)(:id)(/)(:subView)(/)(:subData)(/)' : 'librariesPage',
         'user/home' : 'homePage',
         'public-libraries/(:id)(/)' : 'publicLibraryPage',
-        //"(:query)": 'index',
-
         '*invalidRoute': 'noPageFound'
       },
 
