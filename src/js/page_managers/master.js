@@ -245,7 +245,13 @@ define([
 
     handleAriaAnnouncement: function(msg) {
       //template will match the page name with the proper message
-      $("#aria-announcement-container").text(AriaAnnouncementTemplate({page : msg}));
+      //this doesn't work using voiceover when it's inside a div container for some infuriating reason,
+      //the skip to link becomes unfocusable
+      $("a#skip-to-main-content").remove();
+      $("div#aria-announcement-container").remove();
+      $("#app-container").before(AriaAnnouncementTemplate({page : msg}));
+
+
     },
 
     /**
