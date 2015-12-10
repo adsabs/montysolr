@@ -46,7 +46,8 @@ define([
           var d = $.Deferred();
           d.resolve(profileInfo);
           return d
-        }
+        },
+        getOrcidVal: new OrcidApi().getOrcidVal
       });
 
       minsub.beehive.addObject("AppStorage", {
