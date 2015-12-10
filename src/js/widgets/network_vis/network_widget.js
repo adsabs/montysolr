@@ -104,8 +104,8 @@ define([
       serializeData : function(){
         return {
           currentQuery : Marionette.getOption(this, "query"),
-          networkType : Marionette.getOption(this, "networkType"),
-          cachedQuery : Marionette.getOption(this, "cachedQuery")
+          networkType :  Marionette.getOption(this, "networkType"),
+          cachedQuery :  Marionette.getOption(this, "cachedQuery")
         }
       },
 
@@ -398,12 +398,23 @@ define([
             this.graphView.showSelectedEntity(this.graphModel.get("selectedEntity"));
           }
           else {
-            var name = this.graphModel.get("selectedEntity").__data__.name;
-            Marionette.getOption(this, "filterCollection").add({name: name});
+            var papers = [];
+
+            var data = this.graphModel.get("selectedEntity").__data__;
+            if (data.papers){
+              //author
+              papers = data.papers
+            }
+            else {
+              //group
+              _.each(data.children, function(d){
+                [].push.apply(papers, d.papers);
+              });
+            }
+            Marionette.getOption(this, "filterCollection").add({name: data.name, papers : papers});
             //re-render detail sub view
             this.showDetailView(this.graphModel.get("selectedEntity"));
           }
-
         }
       },
 
@@ -866,17 +877,17 @@ define([
             if (!that.model.get("linkLayer")){
               return
             }
-            var thisD = d, lines, otherLabels;
+            var thisD = d;
 
             // get all links, add selected link class
-            lines = d3.selectAll(".link").filter(function (d) {
+            d3.selectAll(".link").filter(function (d) {
               if (d[0] == thisD || d[d.length - 1] == thisD) {
                 return true
               }
             }).classed("selected-link", true);
 
             //add linked label class to nodes connected by a link
-            otherLabels = d3.selectAll(".link").each(function (linkD) {
+             d3.selectAll(".link").each(function (linkD) {
               if (linkD[0] == thisD) {
                 d3.selectAll(".node-label")
                   .filter(function(d){ return d.name == linkD[linkD.length - 1].name})
@@ -1352,47 +1363,14 @@ define([
 
       //filter the original query
       broadcastFilteredQuery: function () {
-        var filterCollection = this.filterCollection,
-          data = this.model.get("graphData").root,
-          finalFQString, authorNames, groupAuthorNames, connector,
-          names;
 
+        var allBibs = _.flatten(this.filterCollection.pluck("papers"));
 
-        // get all author names
-        var self = this;
-        authorNames = filterCollection.chain().filter(function (n) {
-          return !isInt(n.get("name"));
-        }).map(function (n) {
-          return self.queryUpdater.quote(n.get("name"))
-        }).value();
-
-        groupAuthorNames = filterCollection.chain().filter(function (n) {
-          return isInt(n.get("name"));
-        }).map(function (n) {
-          return n.get("name")
-        }).map(function (number) {
-          var group = _.filter(data.children, function (n) {
-            return n.name == number
-          })[0];
-          return  _.map(group.children, function (g) {
-            return self.queryUpdater.quote(g.name);
-          })
-        }).map(function (authorList) {
-          return "(" + _.sortBy(authorList, function(a){return a}).join(" OR ") + ")"
-        }).value();
-
-        connector = (groupAuthorNames.length && authorNames.length) ? " OR " : "";
-        finalFQString = authorNames.join(" OR ") + connector + groupAuthorNames.join(" OR ");
-
-        if (!finalFQString) {
-          return
-        }
-
-        names = "author:" + finalFQString;
-        var newQuery = this.getOriginalQuery().clone();
+        var newQuery = this.getOriginalQuery().clone()
         newQuery.unlock();
 
-        this._updateFq(newQuery, names);
+        newQuery.set("__bigquery", allBibs);
+
         this.resetWidget();
         this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
       },
@@ -1400,28 +1378,6 @@ define([
       broadcastClose: function () {
         this.resetWidget();
         this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
-      },
-
-      _updateFq: function(q, value) {
-
-        var filterName = 'fq_' + this.widgetName;
-
-        // uncomment if we need adding to the existing conditions
-        q.unset(filterName);
-        this.queryUpdater.updateQuery(q, filterName, 'limit', value);
-
-        var fq = '{!type=aqp v=$' + filterName + '}';
-        var fqs = q.get('fq');
-        if (!fqs) {
-          q.set('fq', [fq]);
-        }
-        else {
-          var i = _.indexOf(fqs, fq);
-          if (i == -1) {
-            fqs.push(fq);
-          }
-          q.set('fq', fqs);
-        }
       },
 
       testing : {

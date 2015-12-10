@@ -432,9 +432,7 @@ define([
               //}, 10000);
             }
 
-
-
-            qm.startSearchCycle.apply(qm, arguments);
+          qm.getQueryAndStartSearchCycle.apply(qm, arguments);
 
           }, this))
         },

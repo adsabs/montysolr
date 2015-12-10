@@ -61,7 +61,8 @@ define([
       "click .editable-item .btn-success" : "submitEdit",
       "click .editable-item .btn-default" : "cancelEdit",
       "click li[data-tab]:not(.active)" : "triggerSubviewNavigate",
-      "click .delete-library" : "triggerDeleteLibrary"
+      "click .delete-library" : "triggerDeleteLibrary",
+      "click .bigquery-export" : "triggerStartSearch"
     },
 
     modelEvents : {
@@ -173,6 +174,10 @@ define([
 
     triggerDeleteLibrary : function(){
       this.trigger("delete-library");
+    },
+
+    triggerStartSearch : function(){
+      this.trigger("start-search");
     }
 
   });

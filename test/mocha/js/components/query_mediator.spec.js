@@ -106,6 +106,75 @@ define([
         done();
       });
 
+      it("should be able to get query ids for bigqueries", function(done){
+
+        var qm = new QueryMediator();
+        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});
+        var api = beehive.Services.get('Api');
+        api.request.restore();
+        sinon.stub(api, "request", function(request){
+         var done = request.toJSON().options.done;
+             done({"qid": "fakeQueryID"});
+        });
+
+        var q = new ApiQuery({
+          q : "*:*",
+          __bigquery : ["bib1", "bib2", "bib3"]
+        });
+
+        var startSearch = sinon.stub(qm, "startSearchCycle");
+
+        qm.getQueryAndStartSearchCycle(q, "fakeKey");
+
+        setTimeout(function(){
+          expect(startSearch.args[0][0].toJSON()).to.eql(
+            {
+              "q": [
+                "*:*"
+              ],
+              "__qid": [
+                "fakeQueryID"
+              ]
+            }
+          );
+
+          done();
+        }, 1);
+
+        qm.startSearchCycle.restore();
+
+      });
+
+      it("should be able to take a qid from url-supplied apiQuery and start the search cycle", function(){
+
+        var qm = new QueryMediator();
+        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});
+
+        var q = new ApiQuery({
+          __qid : "fakeQID",
+          q : "foo",
+          fq : "boo"
+        });
+
+        var startSearchCycle = sinon.stub(qm, "startSearchCycle");
+        qm.getQueryAndStartSearchCycle(q, "fakeKey");
+
+        expect(startSearchCycle.args[0][0].toJSON()).to.eql({
+          "__qid": [
+            "fakeQID"
+          ],
+          "q": [
+            "foo"
+          ],
+          "fq": [
+            "boo"
+          ]
+        });
+
+        qm.startSearchCycle.restore();
+
+      });
+
       it("should mediate between modules; passing data back and forth", function(done) {
         var qm = new QueryMediator({'debug': debug});
         qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});

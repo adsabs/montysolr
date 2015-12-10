@@ -1799,21 +1799,8 @@ define([
     $("#test").find(".apply-filter").click();
     expect(networkWidget.getPubSub().publish.called).to.be.true;
     expect(networkWidget.getPubSub().publish.args[0][0]).to.eql("[PubSub]-New-Query");
-    expect(networkWidget.getPubSub().publish.args[0][1].toJSON()).to.eql({
-      "q": [
-        "star"
-      ],
-      "fq_visualization_author": [
-        "(author:\"Accomazzi, A\" OR (\"Accomazzi, A\" OR \"Bergstrom, C\" OR \"Bohlen, E\" OR \"Demleitner, M\" OR \"Di Milia, G\" OR \"Eichhorn, G\" OR \"Elwell, B\" OR \"Grant, C\" OR \"Green, D\" OR \"Henneken, E\" OR \"Marsden, B\" OR \"Martimbeau, N\" OR \"Murray, S\" OR \"Rosvall, M\" OR \"Thompson, D\" OR \"Williams, G\"))"
-      ],
-      "__visualization_author_fq_visualization_author": [
-        "AND",
-        "author:\"Accomazzi, A\" OR (\"Accomazzi, A\" OR \"Bergstrom, C\" OR \"Bohlen, E\" OR \"Demleitner, M\" OR \"Di Milia, G\" OR \"Eichhorn, G\" OR \"Elwell, B\" OR \"Grant, C\" OR \"Green, D\" OR \"Henneken, E\" OR \"Marsden, B\" OR \"Martimbeau, N\" OR \"Murray, S\" OR \"Rosvall, M\" OR \"Thompson, D\" OR \"Williams, G\")"
-      ],
-      "fq": [
-        "{!type=aqp v=$fq_visualization_author}"
-      ]
-    });
+
+    expect(JSON.stringify(networkWidget.getPubSub().publish.args[0][1].toJSON())).to.eql('{"q":["star"],"__bigquery":["2000A&AS..143...41K","1993ASPC...52..132K","2005IPM....41.1395K","2005JASIS..56...36K","2005JASIS..56..111K","2002SPIE.4847..238K","1998ASPC..153..293K","2003AAS...203.2005K","2003lisa.conf..223K","2006ASPC..351..653K","1997AAS...191.1701K","1996AAS...189.0607K","2001SPIE.4477..186K","2002AAS...201.0904K","1993AAS...182.0306K","1998AAS...193.1311K","1998ASPC..145..478K","1997DPS....29.2705K","2007APS..MARU20009K","1999Dlib....5.....K","1995AAS...186.0202K","1996dkcw.proc..123K","2005AAS...207.3405K","2006AAS...20921809K","1999AAS...194.4407K","2007ASPC..377...23K","2000A&AS..143...41K","1993ASPC...52..132K","2005IPM....41.1395K","2005JASIS..56...36K","2005JASIS..56..111K","2002SPIE.4847..238K","2003AAS...203.2005K","2003lisa.conf..223K","2006ASPC..351..653K","1997AAS...191.1701K","2007AAS...211.4730K","1996AAS...189.0607K","2009astro2010P..28K","2002AAS...201.0904K","1993AAS...182.0306K","1998AAS...193.1311K","1998ASPC..145..478K","1997DPS....29.2705K","2007APS..MARU20009K","1999Dlib....5.....K","1995AAS...186.0202K","1996dkcw.proc..123K","2005AAS...207.3405K","2006AAS...20921809K","1999AAS...194.4407K","2007ASPC..377...23K","2000A&AS..143...41K","2005IPM....41.1395K","2005JASIS..56...36K","2005JASIS..56..111K","2002SPIE.4847..238K","2003AAS...203.2005K","2003lisa.conf..223K","2010ASPC..434..155K","2006ASPC..351..653K","1997AAS...191.1701K","2007AAS...211.4730K","1996AAS...189.0607K","2009astro2010P..28K","2002AAS...201.0904K","1998AAS...193.1311K","1998ASPC..145..478K","1997DPS....29.2705K","2007APS..MARU20009K","1999Dlib....5.....K","1995AAS...186.0202K","1996dkcw.proc..123K","2005AAS...207.3405K","2006AAS...20921809K","1999AAS...194.4407K","2007ASPC..377...23K","2000A&AS..143...41K","1993ASPC...52..132K","2005IPM....41.1395K","2005JASIS..56...36K","2005JASIS..56..111K","2002SPIE.4847..238K","2003AAS...203.2005K","2003lisa.conf..223K","2010ASPC..434..155K","2006ASPC..351..653K","1997AAS...191.1701K","2007AAS...211.4730K","1996AAS...189.0607K","2002AAS...201.0904K","1998AAS...193.1311K","1998ASPC..145..478K","1997DPS....29.2705K","2007APS..MARU20009K","1999Dlib....5.....K","1995AAS...186.0202K","1996dkcw.proc..123K","2005AAS...207.3405K","2006AAS...20921809K","1999AAS...194.4407K","2007ASPC..377...23K","2005IPM....41.1395K","2003AAS...203.2005K","2007arXiv0709.0896K","2010ASPC..434..155K","2006ASPC..351..653K","2007AAS...211.4730K","2007APS..MARU20009K","2005AAS...207.3405K","2006AAS...20921809K","2014bbmb.book..243K","2007ASPC..377...23K","2003AAS...203.2005K","2003lisa.conf..223K","2007AAS...211.4730K","2007APS..MARU20009K","2005AAS...207.3405K","2006AAS...20921809K","2007ASPC..377...23K","2005IPM....41.1395K","2005JASIS..56...36K","2005JASIS..56..111K","1999Dlib....5.....K","1999AAS...194.4407K","2003AAS...203.2005K","2003lisa.conf..223K","2007AAS...211.4730K","2007APS..MARU20009K","2006AAS...20921809K","2007ASPC..377...23K","2010ASPC..434..155K","2005JASIS..56..111K","1997DPS....29.2705K","1997DPS....29.2705K","2005JASIS..56..111K","1997DPS....29.2705K","2007AAS...211.4730K","2007AAS...211.4730K","2000A&AS..143...41K","2005IPM....41.1395K","2005JASIS..56...36K","2005JASIS..56..111K","2002SPIE.4847..238K","2003AAS...203.2005K","2003lisa.conf..223K","2010ASPC..434..155K","2006ASPC..351..653K","1997AAS...191.1701K","2007AAS...211.4730K","1996AAS...189.0607K","2009astro2010P..28K","2002AAS...201.0904K","1998AAS...193.1311K","1998ASPC..145..478K","1997DPS....29.2705K","2007APS..MARU20009K","1999Dlib....5.....K","1995AAS...186.0202K","1996dkcw.proc..123K","2005AAS...207.3405K","2006AAS...20921809K","1999AAS...194.4407K","2007ASPC..377...23K"]}');
 
   });
 
@@ -2258,7 +2245,7 @@ define([
 
       networkWidget.processResponse(j);
 
-      expect($(".details-container h3").text()).to.eql('Author Network for Query star');
+      expect($(".details-container h3").text()).to.eql('Author Network');
       //there is no cached query, so no back button
       expect($(".load-author-network").length).to.eql(0);
 
@@ -2286,7 +2273,7 @@ define([
 
       networkWidget.processResponse(j);
 
-      expect($(".details-container h3").text()).to.eql('Author Network for Query "Murray, S"');
+      expect($(".details-container h3").text()).to.eql('Author Network');
 
       //now, back button should be visible
       expect($(".load-author-network").length).to.eql(1);

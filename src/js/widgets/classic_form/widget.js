@@ -202,8 +202,6 @@ define([
     },
 
     onShow : function(){
-      //fresh form
-      this.view.render();
       //set focus to author field
       this.view.$("#classic-author").focus();
     },

@@ -1,17 +1,18 @@
 define([
 
     "marionette",
+    "js/components/api_query",
     "js/widgets/base/base_widget",
     "./views/library_header",
     "./views/manage_permissions",
     "./views/view_library",
     "hbs!./templates/layout-container",
-    "hbs!./templates/loading-library"
-
+    "hbs!./templates/loading-library",
   ],
   function(
 
     Marionette,
+    ApiQuery,
     BaseWidget,
     HeaderView,
     AdminView,
@@ -303,8 +304,10 @@ define([
 
       handleHeaderEvents : function (event, arg1, arg2) {
 
-        var that = this, id = this.model.get("id"),
-          pubsub = this.getBeeHive().getService('PubSub');
+        var that = this,
+            id = this.model.get("id"),
+            pubsub = this.getBeeHive().getService('PubSub'),
+            query;
 
         switch (event) {
 
@@ -341,6 +344,13 @@ define([
           case "delete-library":
             this.getBeeHive().getObject("LibraryController").deleteLibrary(id, this.headerModel.get("name"));
             break;
+          case "start-search":
+
+            var query = new ApiQuery({
+              __bigquery : this.libraryCollection.pluck("bibcode")
+            });
+
+            pubsub.publish(pubsub.START_SEARCH, query);
         }
       }
 

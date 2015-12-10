@@ -79,8 +79,7 @@ define(['underscore',
 
         // if you run discovery-mediator; this signal may be removed from the
         // queue (and instead, the discovery mediator will serve the request)
-        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.startSearchCycle, this));
-
+        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.getQueryAndStartSearchCycle, this));
         pubsub.subscribe(pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
         pubsub.subscribe(pubsub.EXECUTE_REQUEST, _.bind(this.executeRequest, this));
         pubsub.subscribe(pubsub.GET_QTREE, _.bind(this.getQTree, this));
@@ -91,6 +90,56 @@ define(['underscore',
         var apiRequest = new ApiRequest({'query': apiQuery, 'target': ApiTargets.QTREE});
         this._executeRequest(apiRequest, senderKey);
       },
+
+      getQueryAndStartSearchCycle : function(apiQuery, senderKey){
+
+        var that = this,
+            ps = this.getPubSub();
+
+        // checking if it's a new big query
+        if (apiQuery.get("__bigquery")) {
+
+          apiQuery.set("bigquery","bibcode\n" + apiQuery.get("__bigquery").join("\n") );
+          //don't need this anymore
+          apiQuery.unset("__bigquery");
+          //query might have a q, otherwise q is everything
+          if (!apiQuery.get("q")) apiQuery.set("q", "*:*");
+          //bigquery endpoint needs this value set
+          apiQuery.add("fq", "{!bitset}");
+
+          var request = new ApiRequest({
+            target : ApiTargets.MYADS_STORAGE + "/query",
+            query : apiQuery,
+            options : {
+              type : "POST",
+              contentType : "application/json",
+              done : function(response){
+                that.startSearchCycle( new ApiQuery({q : apiQuery.get("q"), "__qid" : response.qid }), senderKey)
+              },
+              fail : function(jqXHR, textStatus, errorThrown){
+                console.warn("bigquery failed:", [].slice.apply(arguments).join(","));
+
+                ps.publish(ps.FEEDBACK, new ApiFeedback({
+                  code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
+                  error: {jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown}
+                }));
+              }
+            }
+          });
+
+          //it needs to be a bigquery, we need to formulate the query
+          this.getBeeHive().getService("Api").request(request);
+
+        }
+        // pre-existing big query--maybe from faceting or url load
+        else if (apiQuery.get("__qid")){
+          this.startSearchCycle.apply(this, arguments);
+        }
+        else {
+          this.startSearchCycle.apply(this, arguments);
+        }
+
+       },
 
       /**
        * Happens at the beginning of the new search cycle. This is the 'race started' signal
@@ -169,11 +218,10 @@ define(['underscore',
        * @param force
        */
       startExecutingQueries: function(force) {
-        if (this.__searchCycle.running) return; // safety barrier
 
         var self = this;
         var cycle = this.__searchCycle;
-
+        if (cycle.running) return; // safety barrier
         if (_.isEmpty(cycle.waiting)) return;
         if (!this.hasBeeHive()) return;
 
@@ -208,7 +256,6 @@ define(['underscore',
         }
 
         // execute the first search (if it succeeds, fire the rest)
-        var requestKey = this._getCacheKey(data.request);
         var firstReqKey = data.key.getId();
         cycle.inprogress[firstReqKey] = data;
 
@@ -238,6 +285,7 @@ define(['underscore',
                 delete cycle.waiting[k];
                 cycle.inprogress[k] = data;
                 var psk = k;
+
                 self._executeRequest.call(self, data.request, data.key)
                   .done(function() {
                     cycle.done[psk] = cycle.inprogress[psk];
@@ -378,6 +426,19 @@ define(['underscore',
         // show the loading view for the widget
         this._makeWidgetSpin(senderKey.getId());
 
+        // for altering widget queries
+        // from regular solr requests to execute_query requests
+        // if bigquery is being used
+        function makeBigQuery(request){
+          var qid = request.get("query").get("__qid")[0];
+         request.set("target", ApiTargets.MYADS_STORAGE + "/execute_query/" + qid);
+        }
+
+        //it's a bigquery
+        if (apiRequest.get("query") && apiRequest.get("query").get("__qid")){
+          makeBigQuery(apiRequest);
+        }
+
         var ps = this.getPubSub();
         var api = this.getBeeHive().getService('Api');
 
@@ -398,10 +459,6 @@ define(['underscore',
           var self = this;
 
           if (resp && resp.promise) { // we have already created ajax request
-
-            if (resp.state() == 'resolved') {
-
-            }
 
             resp.done(function() {
               self._cache.put(requestKey, arguments);
