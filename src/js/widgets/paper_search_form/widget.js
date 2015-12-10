@@ -14,6 +14,16 @@ define([
   JQueryUI
   ){
 
+  var FormModel = Backbone.Model.extend({
+
+    defaults : function(){
+      return {
+        loggedIn : undefined
+      }
+    }
+
+  });
+
 
   var FormView = Marionette.ItemView.extend({
 
@@ -90,7 +100,8 @@ define([
     initialize: function (options) {
 
       options = options || {};
-      this.view = new FormView();
+      this.model = new FormModel();
+      this.view = new FormView({model : this.model });
       this.listenTo(this.view, "submit", this.submitForm);
       this.listenTo(this.view, "submit-bigquery", this.submitBigQuery);
 
@@ -98,11 +109,6 @@ define([
 
     activate: function (beehive) {
       this.setBeeHive(beehive);
-    },
-
-    onShow : function(){
-      //fresh form
-      this.view.render();
     },
 
     submitForm : function(query){
@@ -117,17 +123,6 @@ define([
 
     submitBigQuery : function(bibcodes){
 
-      if (!this.getBeeHive().getObject("User").isLoggedIn()){
-        //don't allow form to be submitted, and publish an alert
-
-        this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({
-          code: ApiFeedback.CODES.ALERT,
-          msg: 'This feature is only available to logged-in users due to potential demands on our system. <br/><br/> <a class="btn btn-primary" href="#user/account/login"> <i class="fa fa-sign-in"></i> click here to log in to ADS </a>',
-          modal: true
-        }));
-        return;
-      }
-
       var newQuery = new ApiQuery({
         __bigquery : bibcodes
       });
@@ -137,6 +132,9 @@ define([
     },
 
     onShow : function(){
+      var loggedIn = this.getBeeHive().getObject("User").isLoggedIn();
+      this.model.set({loggedIn : loggedIn});
+      this.view.render();
       this.view.$("input#pub-input").focus();
     }
 

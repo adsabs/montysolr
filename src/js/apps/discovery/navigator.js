@@ -414,8 +414,9 @@ define([
           var route = '#search/' + queryUpdater.clean(q).url();
 
           //taking care of inserting bigquery key here, not sure if right place
+          //clean(q) above got rid of qid key, reinsert it
           if (q && q.get("__qid")){
-            route += ("&qid=" + q.get("__qid")[0]);
+            route += ("&__qid=" + q.get("__qid")[0]);
           }
 
           this.route = route;

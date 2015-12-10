@@ -80,7 +80,6 @@ define(['underscore',
         // if you run discovery-mediator; this signal may be removed from the
         // queue (and instead, the discovery mediator will serve the request)
         pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.getQueryAndStartSearchCycle, this));
-
         pubsub.subscribe(pubsub.DELIVERING_REQUEST, _.bind(this.receiveRequests, this));
         pubsub.subscribe(pubsub.EXECUTE_REQUEST, _.bind(this.executeRequest, this));
         pubsub.subscribe(pubsub.GET_QTREE, _.bind(this.getQTree, this));
@@ -94,28 +93,36 @@ define(['underscore',
 
       getQueryAndStartSearchCycle : function(apiQuery, senderKey){
 
-        var that = this;
+        var that = this,
+            ps = this.getPubSub();
 
         // checking if it's a new big query
         if (apiQuery.get("__bigquery")) {
 
-          var query = new ApiQuery({
-            q  : '*:*',
-            fq : '{!bitset}',
-            bigquery : "bibcode\n" + apiQuery.get("__bigquery").join("\n")
-          })
+          apiQuery.set("bigquery","bibcode\n" + apiQuery.get("__bigquery").join("\n") );
+          //don't need this anymore
+          apiQuery.unset("__bigquery");
+          //query might have a q, otherwise q is everything
+          if (!apiQuery.get("q")) apiQuery.set("q", "*:*");
+          //bigquery endpoint needs this value set
+          apiQuery.add("fq", "{!bitset}");
 
           var request = new ApiRequest({
             target : ApiTargets.MYADS_STORAGE + "/query",
-            query : query,
+            query : apiQuery,
             options : {
               type : "POST",
               contentType : "application/json",
               done : function(response){
-                that.startSearchCycle( new ApiQuery({q : query.get("q"), "__qid" : response.qid }), senderKey)
+                that.startSearchCycle( new ApiQuery({q : apiQuery.get("q"), "__qid" : response.qid }), senderKey)
               },
-              fail : function(err){
-                console.warn("bigquery failed:", err);
+              fail : function(jqXHR, textStatus, errorThrown){
+                console.warn("bigquery failed:", [].slice.apply(arguments).join(","));
+
+                ps.publish(ps.FEEDBACK, new ApiFeedback({
+                  code: ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START,
+                  error: {jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown}
+                }));
               }
             }
           });
@@ -218,14 +225,6 @@ define(['underscore',
         if (_.isEmpty(cycle.waiting)) return;
         if (!this.hasBeeHive()) return;
 
-        // for altering widget queries
-        // from regular solr requests to execute_query requests
-        // if bigquery is being used
-        function makeBigQuery(request){
-          var qid = request.get("query").get("__qid")[0];
-          data.request.set("target", ApiTargets.MYADS_STORAGE + "/execute_query/" + qid);
-        }
-
         cycle.running = true;
 
         var data;
@@ -260,12 +259,6 @@ define(['underscore',
         var firstReqKey = data.key.getId();
         cycle.inprogress[firstReqKey] = data;
 
-
-        //it's a bigquery
-        if (data.request.get("query").get("__qid")){
-          makeBigQuery(data.request);
-        }
-
         this._executeRequest(data.request, data.key)
           .done(function(response, textStatus, jqXHR) {
             cycle.done[firstReqKey] = data;
@@ -292,9 +285,7 @@ define(['underscore',
                 delete cycle.waiting[k];
                 cycle.inprogress[k] = data;
                 var psk = k;
-                if ( data.request.get("query").get("__qid") ){
-                  makeBigQuery(data.request);
-                }
+
                 self._executeRequest.call(self, data.request, data.key)
                   .done(function() {
                     cycle.done[psk] = cycle.inprogress[psk];
@@ -434,6 +425,19 @@ define(['underscore',
       _executeRequest: function(apiRequest, senderKey) {
         // show the loading view for the widget
         this._makeWidgetSpin(senderKey.getId());
+
+        // for altering widget queries
+        // from regular solr requests to execute_query requests
+        // if bigquery is being used
+        function makeBigQuery(request){
+          var qid = request.get("query").get("__qid")[0];
+         request.set("target", ApiTargets.MYADS_STORAGE + "/execute_query/" + qid);
+        }
+
+        //it's a bigquery
+        if (apiRequest.get("query") && apiRequest.get("query").get("__qid")){
+          makeBigQuery(apiRequest);
+        }
 
         var ps = this.getPubSub();
         var api = this.getBeeHive().getService('Api');

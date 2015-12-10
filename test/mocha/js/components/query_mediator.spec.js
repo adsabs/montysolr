@@ -148,6 +148,7 @@ define([
       it("should be able to take a qid from url-supplied apiQuery and start the search cycle", function(){
 
         var qm = new QueryMediator();
+        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});
 
         var q = new ApiQuery({
           __qid : "fakeQID",

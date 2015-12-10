@@ -38,6 +38,7 @@
     </form>
 
     <form class="bibcode-form col-md-6 clearfix">
+        {{#if loggedIn}}
         <div class="form-group">
             <label for="#bibcode-textarea">List of Bibcodes</label>
             <div class="s-light-font">
@@ -45,13 +46,18 @@
             </div>
             <textarea class="form-control" name="" id="bibcode-textarea" cols="30" rows="12"></textarea>
         </div>
-
         <div class="form-group">
             <div class="button-div pull-right" style="padding-top: 7px;">
                 <button class="btn clear"><fa class="fa fa-times"></fa> Clear</button>
                 <button class="btn btn-primary author-submit" disabled="true" type="submit"><i class="fa fa-search"></i> Search</button>
             </div>
         </div>
+        {{else}}
+        <b>List of Bibcodes Form</b>
+        <div style="padding-top:20px">
+            <a href="#user/account/login" class="btn btn-success"> <i class="fa fa-sign-in"></i> log in to ADS to use this form</a>
+        </div>
+        {{/if}}
     </form>
 
 
