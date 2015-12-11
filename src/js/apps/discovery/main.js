@@ -72,9 +72,6 @@ define(['config', 'module'], function(config, module) {
           //accessibility: skip to main content
           $("body").on("click", "#skip-to-main-content", function(e){
             e.preventDefault();
-
-            $("#main-content").focus();
-
           });
 
           var dynConf = app.getObject('DynamicConfig');
