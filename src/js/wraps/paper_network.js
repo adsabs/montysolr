@@ -718,7 +718,6 @@ define([
         that = this,
         filterBibcodes = [],
         newQuery = this.getCurrentQuery().clone();
-
       //get associated bibcodes
       this.filterCollection.each(function (model) {
         var name = model.get("name");

@@ -227,3 +227,5 @@ Styles for Abstract Page
 .s-right-col-widget-title.disabled {
   color: $gray-lighter;
 }
+
+#main-content:focus { outline: thin $brand-primary-faded dotted !important }

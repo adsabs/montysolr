@@ -1286,7 +1286,7 @@ define([
 
         //on initialization, store the current query
         if (this.getBeeHive().getObject("AppStorage")){
-          this.setCurrentQuery(this.getBeeHive().getObject("AppStorage").getCurrentQuery());
+          this.setOriginalQuery(this.getBeeHive().getObject("AppStorage").getCurrentQuery());
         }
       },
 
@@ -1337,28 +1337,49 @@ define([
 
         var query = this.getCurrentQuery().clone();
         query.unlock();
-        query.set("rows", this.model.get("default"));
-        query.unset("hl");
-        query.unset("hl.fl");
 
-        var request = this.generateApiRequest(query);
-        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
+       //if it's a bigquery, we need the bibcodes first
+        if( query.get("__qid")){
+          query.set("fl", "bibcode");
+          //limit is 1000
+          query.set("rows", "1000");
+          var request = this.composeRequest(query);
+          this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
+        }
+        else {
+          query.set("rows", this.model.get("default"));
+          query.unset("hl");
+          query.unset("hl.fl");
+
+          var request = this.generateApiRequest(query);
+          this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
+        }
+
       },
 
       processResponse: function (jsonResponse) {
-        //force a reset even if the data is the same
-        //so the earlier state of the widget is not preserved
-        this.model.set({graphData: {}});
 
-        var data = jsonResponse.toJSON();
-        // let container view know how many bibcodes we have
-        this.model.set({graphData : data.data,
-          numFound: parseInt(data.msg.numFound),
-          rows: parseInt(data.msg.rows),
-          query: jsonResponse.getApiQuery().get("q")
-        });
-        //so there is a one time render event
-        this.model.trigger("newMetadata");
+        //it's a bigquery response with bibcodes, now request the vis data
+        try {
+          //this raises an error if responseHeader isn't there, should that be changed?
+          var qid = jsonResponse.get("responseHeader.params.__qid");
+          this.renderWidgetForListOfBibcodes(jsonResponse.get("response").docs.map(function(b){return b.bibcode}));
+        }
+        catch(e){
+          //force a reset even if the data is the same
+          //so the earlier state of the widget is not preserved
+          this.model.set({graphData: {}});
+
+          var data = jsonResponse.toJSON();
+          // let container view know how many bibcodes we have
+          this.model.set({graphData : data.data,
+            numFound: parseInt(data.msg.numFound),
+            rows: parseInt(data.msg.rows),
+            query: jsonResponse.getApiQuery().get("q")
+          });
+          //so there is a one time render event
+          this.model.trigger("newMetadata");
+        }
       },
 
       //filter the original query
