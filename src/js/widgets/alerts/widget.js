@@ -166,6 +166,9 @@ define([
 
       clearView : function(){
         //to prevent re-rendering in inopportune moments
+        //WARNING: because this is subscribing to pubsub.navigate, it might be called
+        //right after another recently shown widget triggers an alert
+        
         this.view.destroy();
       },
 

@@ -10,6 +10,7 @@ define([
   'js/components/api_targets',
   'js/components/api_query_updater',
   'js/components/api_query',
+  'js/components/api_feedback',
   'jquery-ui',
   'bootstrap',
   'd3-cloud'
@@ -23,7 +24,8 @@ define([
              SelectedListTemplate,
              ApiTargets,
              ApiQueryUpdater,
-             ApiQuery
+             ApiQuery,
+             ApiFeedback
   ) {
 
 
@@ -443,16 +445,41 @@ define([
     //fetch data
     renderWidgetForCurrentQuery : function() {
 
-      var request = new ApiRequest({
-        target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
-        query: this.customizeQuery(this.getCurrentQuery()),
-        options :  {
-          type : "POST",
-          contentType : "application/json"
-        }
-      });
+      var query = this.getCurrentQuery();
+      var that = this;
 
-      this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
+      //if it's a bigquery, we need the bibcodes first
+      if( query.get("__qid")){
+        //wordcloud endpoint can't handle bigquery right now
+
+        //otherwise modal is being closed AFTER this function is run
+        setTimeout(function(){
+          that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: 'The concept cloud endpoint cannot handle such a large query at this time',
+            modal: true
+          }),1);
+
+        })
+
+        //query.set("fl", "bibcode");
+        ////limit is 1000
+        //query.set("rows", "1000");
+        //this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, this.composeRequest(query));
+      }
+      else {
+        var request = new ApiRequest({
+          target: Marionette.getOption(this, "endpoint") || ApiTargets.SERVICE_WORDCLOUD,
+          query: this.customizeQuery(query),
+          options :  {
+            type : "POST",
+            contentType : "application/json"
+          }
+        });
+
+        this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, request);
+      }
+
     },
 
     //for now, called to show vis for library
@@ -493,9 +520,18 @@ define([
       return q;
     },
 
-    processResponse: function (data) {
-      data = data.toJSON();
-      this.model.set("tfidfData", data);
+    processResponse: function (jsonResponse) {
+
+      //it's a bigquery response with bibcodes, now request the vis data
+      try {
+        //this raises an error if responseHeader isn't there, should that be changed?
+        var qid = jsonResponse.get("responseHeader.params.__qid");
+        this.renderWidgetForListOfBibcodes(jsonResponse.get("response").docs.map(function(b){return b.bibcode}));
+      }
+      catch(e) {
+        data = jsonResponse.toJSON();
+        this.model.set("tfidfData", data);
+      }
     },
 
     close : function(){

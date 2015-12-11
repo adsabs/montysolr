@@ -20,10 +20,7 @@ test/coverage
 test/reports
 test/mocha/sandbox*
 
-src/styles/css
 src/styles/fonts
-src/styles/less/bootstrap_less
-src/styles/less/mixins.less
 
 .idea
 

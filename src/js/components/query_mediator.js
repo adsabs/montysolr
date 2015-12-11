@@ -429,14 +429,11 @@ define(['underscore',
         // for altering widget queries
         // from regular solr requests to execute_query requests
         // if bigquery is being used
-        function makeBigQuery(request){
-          var qid = request.get("query").get("__qid")[0];
-         request.set("target", ApiTargets.MYADS_STORAGE + "/execute_query/" + qid);
-        }
 
         //it's a bigquery
         if (apiRequest.get("query") && apiRequest.get("query").get("__qid")){
-          makeBigQuery(apiRequest);
+          var qid = apiRequest.get("query").get("__qid")[0];
+          apiRequest.set("target", ApiTargets.MYADS_STORAGE + "/execute_query/" + qid);
         }
 
         var ps = this.getPubSub();
