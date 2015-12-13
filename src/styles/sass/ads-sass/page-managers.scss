@@ -228,4 +228,7 @@ Styles for Abstract Page
   color: $gray-lighter;
 }
 
+#app-container {
+  overflow-x: hidden;
+}
 #main-content:focus { outline: thin $brand-primary-faded dotted !important }
