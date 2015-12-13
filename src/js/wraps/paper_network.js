@@ -499,7 +499,7 @@ define([
           shared = _.sortBy(shared, function (s) {
             return (s.percentOne * s.percentTwo);
           }).reverse();
-          data.shared = shared.slice(0, 10);
+          data.shared = shared;
           _.each(data.shared, function (s, i) {
             data.shared[i].percentOne = data.shared[i].percentOne.toFixed(2);
             data.shared[i].percentTwo = data.shared[i].percentTwo.toFixed(2);
