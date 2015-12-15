@@ -53,7 +53,7 @@
             {{/each}}
             <button class="btn btn-primary-faded pull-right add-another-orcid-name"><i class="fa fa-plus"> </i> add a name</button>
 
-            <div class="warning {{#if userSubmitted.authorizedUser}} hidden {{/if}}" style="clear:both;padding-top:15px" >
+            <div class="warning {{#compare userSubmitted.authorizedUser false operator="!=="}} hidden {{/compare}}" style="clear:both;padding-top:15px" >
                     <i class="fa fa-lg fa-warning"></i>
                     To become an ADS-verified user and have the above name data used to enrich your ORCID matches in ADS, you must check the box below.
             </div>
