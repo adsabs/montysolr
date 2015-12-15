@@ -1,10 +1,13 @@
-{{#if error}}
-    <p class="text-danger">Sorry, the library link information for your account could not be retrieved. Please try again later.</p>
-{{else}}
+<div class="panel-heading"> Library Link Server </div>
+
+<div class="panel-body">
+    {{#if error}}
+        <p>Sorry, the library link information for your account could not be retrieved. Please try again later.</p>
+    {{else}}
 
     {{#if openURLName}}
     <div class="current-link-server">
-        <p>Your Library Link Server is set to <b>{{openURLName}}</b>.</p>
+        <p>Your Library Link Server is set to <b>{{{openURLName}}}</b>.</p>
         <button class="btn btn-primary-faded btn-sm {{#if link_server}} collapsed {{/if}}" data-toggle="collapse" data-target="#link-server-container"><i class="toggle-icon"></i> Change Library Link Server</button>
     </div>
     {{/if}}
@@ -16,7 +19,7 @@
                 <label for="set-link-server">Choose Your Institution</label><br/>
                 <select name="set-link-server" id="set-link-server" class="form-control" style="width: 100%">
                     {{#each openURLConfig}}
-                    <option value="{{this.link}}" {{#compare ../link_server this.link }} selected="selected" {{/compare}} >{{this.name}}</option>
+                    <option value="{{this.link}}" {{#compare ../link_server this.link }} selected="selected" {{/compare}} >{{{this.name}}}</option>
                     {{/each}}
                 </select>
             </div>
@@ -38,9 +41,9 @@
         </form>
         <br/>
 
-
     </div>
 
+    {{/if}}
+</div>
 
-{{/if}}
 

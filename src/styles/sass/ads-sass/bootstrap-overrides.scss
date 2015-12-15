@@ -238,3 +238,14 @@ p {
 .has-feedback label ~ .form-control-feedback {
   top: 31px !important;
 }
+
+.well {
+
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #F7F6F6;
+  border: 1px solid #e3e3e3;
+  border-radius: 0px;
+  box-shadow: none;
+}

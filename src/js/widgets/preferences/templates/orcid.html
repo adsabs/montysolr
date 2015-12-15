@@ -1,0 +1,89 @@
+<div class="panel-heading">
+
+    ORCID Settings
+    {{#if orcidLoggedIn}}
+    <h4>You are signed in to ORCID as <b>{{prettyOrcidName}}</b></h4>
+
+    <p> Not you?
+        <button class="btn btn-sm btn-default orcid-authenticate">Sign into ORCID as a different user</button>
+    </p>
+    {{/if}}
+
+</div>
+<div class="panel-body">
+
+    {{#if orcidLoggedIn}}
+
+    <div class="form-group">
+        <h4>1. Your Current Academic Affiliation</h4>
+        <div class="form-group">
+            <label for="#aff-input" class="sr-only">your current academic affiliation</label>
+            <input type="text"
+                   {{#if userSubmitted.currentAffiliation}} value="{{userSubmitted.currentAffiliation}}" {{/if}}
+                   id="aff-input"
+                   class="form-control"
+                   placeholder="e.g. Wesleyan University"
+                   style="width:300px">
+        </div>
+    </div>
+
+    <br>
+    <h4 id="name-variant-header">2. Names Under Which You Have Published</h4>
+    <p class="emphasis-text">
+        if you have published under a different surname, for example,
+        or using a middle name, please add your name variations here
+    </p>
+
+    <div class="form-group well orcid-name-container clearfix" aria-labelledby="#name-variant-header">
+
+        <div class="input-list">
+            <div class="original-orcid-name">
+                <!--this isnt editable-->
+                <label for="original-orcid-name">ORCID name</label>
+                <input class="form-control input-list__input"
+                       type="text"
+                       id="original-orcid-name"
+                       value="{{orcidName}}" disabled>
+            </div>
+            {{#each userSubmitted.nameVariations }}
+            <div class="orcid-name-row">
+                <input class="form-control input-list__input" type="text" placeholder="Last, First Middle"  value="{{this}}">
+                    <button class="btn btn-danger btn-inverse remove-name" title="remove this name"><i class="fa fa-minus-circle"></i></button>
+            </div>
+            {{/each}}
+            <button class="btn btn-primary-faded pull-right add-another-orcid-name"><i class="fa fa-plus"> </i> add a name</button>
+
+            <div class="warning {{#if userSubmitted.authorizedUser}} hidden {{/if}}" style="clear:both;padding-top:15px" >
+                    <i class="fa fa-lg fa-warning"></i>
+                    To become an ADS-verified user and have the above name data used to enrich your ORCID matches in ADS, you must check the box below.
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="form-group">
+        <h4> 3. Permission for ADS to Record and Publish Claims</h4>
+
+        <div class="checkbox">
+            <label class="emphasis-text">
+                <input type="checkbox"
+                       {{#if userSubmitted.authorizedUser}} checked {{/if}}
+                       {{#compare userSubmitted.authorizedUser undefined}} checked  {{/compare}}
+                class="authorized-ads-user">
+                I allow the ADS to record my claims and to make them available publically for auditing and indexing.
+                <br>This makes me an "ADS Verified User" and allows ADS to validate my name(s) against author lists in papers.
+            </label>
+        </div>
+
+    </div>
+
+    <br>
+
+    <button class="submit btn btn-success">submit</button>
+
+    {{else}}
+    <br>
+    <button class="btn btn-success orcid-authenticate">Authenticate with ORCID to view ADS ORCID Settings
+    </button>
+
+    {{/if}}
+</div>

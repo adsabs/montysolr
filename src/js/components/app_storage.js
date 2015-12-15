@@ -160,6 +160,31 @@ define([
         return JSON.parse(JSON.stringify(this.get("dynamicConfig")));
       },
 
+
+    //this is used when authentication requires an interruption in user flow
+    //stashedPage val should be the name of a navigate command
+
+    setStashedNav : function(){
+      var storage  = this.getBeeHive().getService('PersistentStorage');
+      if (storage){
+        storage.set("stashedNavArgs", [].slice.apply(arguments));
+      }
+      else {
+        console.warn("no persistent storage service available");
+      }
+    },
+
+    executeStashedNav : function(){
+      var storage  = this.getBeeHive().getService('PersistentStorage');
+      if (storage){
+        var args = storage.get("stashedNavArgs");
+        if (!args) return false;
+        this.getPubSub().publish.apply(this.getPubSub(), [this.getPubSub().NAVIGATE].concat(args));
+        storage.unset("stashedNav");
+        return true;
+      }
+    },
+
       hardenedInterface:  {
         getNumSelectedPapers: 'getNumSelectedPapers',
         isPaperSelected: 'isPaperSelected',
@@ -170,7 +195,9 @@ define([
         hasCurrentQuery: 'hasCurrentQuery',
         getConfigCopy : 'get read-only copy of dynamic config',
         set : 'set a value into app storage',
-        get : 'get a val from app storage'
+        get : 'get a val from app storage',
+        setStashedNav : 'store a navigation command to be executed later',
+        executeStashedNav : 'execute the stored navigation command'
       }
     }
   );

@@ -262,12 +262,13 @@ define([
         if (_.contains(["token", "password", "email", "delete"], subView)){
           this.routerNavigate('UserSettings', {subView: subView});
         }
-        else if ("preferences" == subView || !subView){
+        else if (_.contains(["librarylink", "orcid"], subView)){
           //show preferences if no subview provided
-          this.routerNavigate('UserPreferences');
+          this.routerNavigate('UserPreferences', {subView : subView});
         }
         else {
-          throw new Error("did not recognize user page");
+          //just default to showing the library link page for now
+          this.routerNavigate('UserPreferences', {subView : undefined});
         }
       },
 

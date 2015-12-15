@@ -220,7 +220,23 @@ dd {
   }
 }
 
+//components for image grid
 
+.grid-cell {
+  border: 2px solid $gray-lighter;
+  border-radius : 8px;
+  @include transition(box-shadow, .5s, ease-out);
+  position:relative;
+
+}
+
+.grid-cell img {
+
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin:auto;
+}
 
 .s-graphics-grid {
 
@@ -240,14 +256,11 @@ dd {
     text-decoration: none;
   }
 
-  .s-grid-cell {
+  .grid-cell {
           display: inline-block;
           width: 30%;
           margin-left: 1%;
           margin-bottom: 20px;
-          border: 2px solid $gray-lighter;
-          border-radius : 8px;
-          transition: box-shadow, .5s, ease-out;
 
           &:hover {
             box-shadow : 0px 0px 4px $gray-light;
@@ -257,7 +270,14 @@ dd {
       width: 97%;
     }
 
-        }
+  }
+
+  img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+  }
 
   figure {
     height: 200px;
@@ -265,13 +285,6 @@ dd {
     position: relative;
   }
 
-  img {
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateY(-50%) translateX(-50%);
-  }
 
   figcaption {
     text-align: center;
@@ -284,25 +297,14 @@ dd {
 .s-graphics-container {
   cursor: pointer;
 
-  img {
-    display: block;
-    margin: 0 auto;
-  }
+
   p {
     text-align: center;
   }
 
-  .s-grid-cell {
+  .grid-cell {
     margin: 0 4%;
     padding-top: 18px;
-    border: 2px solid $gray-lighter;
-    border-radius : 8px;
-    transition : box-shadow, .5s, ease-out;
-
-    &:hover {
-      box-shadow : 0px 0px 4px $gray-light;
-    }
-
   }
 
 }

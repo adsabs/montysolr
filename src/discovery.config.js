@@ -283,10 +283,6 @@ require.config({
         else {
           operator = options.hash.operator;
         }
-        //it might be being rendered at the beginning,before values have been inserted, so ignore
-        if (lvalue === undefined || rvalue === undefined){
-          return
-        }
 
         operators = {
           '==': function (l, r) { return l == r; },

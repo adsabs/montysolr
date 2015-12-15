@@ -60,9 +60,11 @@
                         <li>
                             <a class="orcid-link" href="#user/orcid" >View my ORCID papers in ADS </a>
                         </li>
+                        {{#if orcidURI}}
                         <li>
-                            <a href={{orcidURI}} target="_blank" >View my ORCID profile </a>
+                            <a href="http://orcid.org/{{orcidURI}}" target="_blank" >View my ORCID profile </a>
                         </li>
+                        {{/if}}
                         <li class="divider"></li>
                         <li>
                             <a href="#" class="orcid-logout" >Log out from ORCID in ADS</a>
@@ -95,6 +97,11 @@
                         <li>
                             <a class="orcid-link" href="#user/orcid" >My ORCID papers</a>
                         </li>
+                        {{#if orcidURI}}
+                        <li>
+                            <a href="http://orcid.org/{{orcidURI}}" target="_blank" >View my ORCID profile </a>
+                        </li>
+                        {{/if}}
                         <li class="divider"></li>
                         <li>
                             <a class="orcid-logout" >Log out from ORCID</a>
