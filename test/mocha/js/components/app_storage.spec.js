@@ -101,7 +101,7 @@ define([
             stashedNavArgs : ["UserPreferences", "orcid"]
           }
         }),
-        unset : sinon.spy()
+        remove  : sinon.spy()
       }
 
 

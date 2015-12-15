@@ -159,6 +159,7 @@ define([
       * */
       setADSUserData : function(data){
 
+        var that = this;
         var d = $.Deferred();
 
         this.sendData(this.getBeeHive().getService("Api").url + ApiTargets.ORCID_PREFERENCES + "/" + this.authData.orcid,
@@ -167,8 +168,8 @@ define([
               type: "POST",
               fail: function(error) {
                 //feedback
-                var message = "ADS ORCID preferences could not be set"
-                this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
+                var message = "ADS ORCID preferences could not be set";
+                that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
                 d.reject(error);
               },
               done: function(res) {
@@ -186,6 +187,7 @@ define([
       getADSUserData : function(){
 
         var d = $.Deferred();
+        var that = this;
 
         this.sendData(this.getBeeHive().getService("Api").url + ApiTargets.ORCID_PREFERENCES + "/" + this.authData.orcid,
             null,
@@ -193,7 +195,7 @@ define([
               fail: function(error) {
                 //publish api feedback
                 var message = "ADS ORCID preferences could not be retrieved";
-                this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
+                that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
                 d.reject(error)
               },
               done: function(res) {
