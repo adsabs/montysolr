@@ -2,12 +2,16 @@ define([
   "marionette",
   "js/widgets/base/base_widget",
   "./views/openurl",
-  "./views/orcid"
+  "./views/orcid",
+  "js/components/api_feedback",
+  "hbs!./templates/orcid-form-submit-modal"
 ], function (
   Marionette,
   BaseWidget,
   OpenURLView,
-  OrcidView
+  OrcidView,
+  ApiFeedback,
+  OrcidModalTemplate
   ) {
 
   var PreferencesModel = Backbone.Model.extend({
@@ -15,8 +19,7 @@ define([
     defaults : function(){
       return {
         openURLConfig : undefined,
-        OrcidLoggedIn : undefined,
-
+        OrcidLoggedIn : undefined
       }
     }
 
@@ -79,8 +82,6 @@ define([
         that.model.set("openURLConfig", config);
       });
 
-      //and the user data from myads
-      //add back
     },
 
     //translates what comes from toc widget (e.g. userPreferences__orcid) to view name
@@ -127,15 +128,13 @@ define([
             //unchangeable orcid name
             data.orcidName =  lastName + ", " + firstName;
             data.prettyOrcidName = firstName + " " + lastName;
-
           } catch(e){
             data.orcidName = "unknown";
             data.prettyOrcidName = "unknown";
           }
           that.model.set(data);
         });
-
-        }
+      }
     },
 
     handleViewEvents: function (event, arg1, arg2) {
@@ -152,10 +151,27 @@ define([
 
       else if (event === "orcid-form-submit"){
         this.getBeeHive().getService("OrcidApi").setADSUserData(arg1).done(function(){
+          //show the success modal
+          that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: OrcidModalTemplate(),
+            type: "success",
+            title: "Thanks for submitting your supplemental ORCID information",
+            modal: true
+          }));
+
           //this will re-render the form
           that.setSubView("orcid");
-
-        });
+        }).fail(function(){
+          //show the success modal
+          that.getPubSub().publish(that.getPubSub().ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: "Please try again later.",
+            type: "danger",
+            title: "Your ORCID information was not submitted",
+            modal: true
+          }));
+        })
       }
     },
 

@@ -14,7 +14,8 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/components/api_targets',
-    'hbs!./../../../404'
+    'hbs!./../../../404',
+    'hbs!./templates/orcid-modal-template'
   ],
 
   function (
@@ -28,7 +29,8 @@ define([
     ApiQuery,
     ApiRequest,
     ApiTargets,
-    ErrorTemplate
+    ErrorTemplate,
+    OrcidModalTemplate
 
     ) {
 
@@ -547,47 +549,80 @@ define([
         this.set('orcid-page', function(view, targetRoute) {
 
           var orcidApi = app.getService('OrcidApi');
+          var storage  = app.getService('PersistentStorage');
+
           // traffic from Orcid - user has authorized our access
           if (orcidApi.hasExchangeCode() && !orcidApi.hasAccess()) {
+            //since app will exit, store the information that we're authenticating
+            if (storage){
+              storage.set("orcidAuthenticating", true);
+            }
+            else {
+              console.warn("no persistent storage service available");
+            }
             orcidApi.getAccessData(orcidApi.getExchangeCode())
-              .done(function(data) {
-                orcidApi.saveAccessData(data);
-                self.getPubSub().publish(self.getPubSub().APP_EXIT, {url: window.location.pathname +
-                  ((targetRoute && _.isString(targetRoute)) ? targetRoute : window.location.hash)});
-              })
-              .fail(function() {
-                console.warn('Unsuccessful login to ORCID');
-                self.get('index-page').execute();
-                var alerter = app.getController('AlertsController');
-                alerter.alert(new ApiFeedback({
-                  code: ApiFeedback.CODES.ALERT,
-                  msg: 'Error getting OAuth code to access ORCID',
-                  modal: true
-                }));
-              });
+                .done(function (data) {
+                  orcidApi.saveAccessData(data);
+                  self.getPubSub().publish(self.getPubSub().APP_EXIT, {
+                    url: window.location.pathname +
+                    ((targetRoute && _.isString(targetRoute)) ? targetRoute : window.location.hash)
+                  });
+                })
+                .fail(function () {
+                  console.warn('Unsuccessful login to ORCID');
+                  self.get('index-page').execute();
+                  var alerter = app.getController('AlertsController');
+                  alerter.alert(new ApiFeedback({
+                    code: ApiFeedback.CODES.ALERT,
+                    msg: 'Error getting OAuth code to access ORCID',
+                    modal: true
+                  }));
+                });
             return;
           }
 
           this.route = '#user/orcid';
 
-          if ( orcidApi.hasAccess() ) {
+          if (orcidApi.hasAccess()) {
 
+            if (storage.get("orcidAuthenticating")){
+
+              storage.remove("orcidAuthenticating");
+              // check if we need to trigger modal alert to ask user to fill in necessary data
+              //we only want to show this immediately after user has authenticated with orcid
+              orcidApi.getADSUserData().done(function (data) {
+                    if (!data.hasOwnProperty("authorizedUser")) {
+                      //the form has yet to be filled out by the user
+                      //now tailor the message depending on whether they are signed in to ADS or not
+                      var alerter = app.getController('AlertsController');
+                      alerter.alert(new ApiFeedback({
+                        code: ApiFeedback.CODES.ALERT,
+                        msg: OrcidModalTemplate({adsLoggedIn: self.getBeeHive().getObject("User").isLoggedIn()}),
+                        type: "success",
+                        title: "You are now logged in to ORCID",
+                        modal: true
+                      }));
+                    }// end check if user has already provided data
+                  })
+                  .fail(function(error){
+                    console.warn(error);
+                  });
+            }
             //should we redirect back to a certain page now that orcid is authenticated?
-            var appStorage  = self.getBeeHive().getObject('AppStorage');
-            if (appStorage.executeStashedNav()){
-              //don't go to the orcidbigwidget, we are redirecting elsewhere
-              return;
+            var appStorage = self.getBeeHive().getObject('AppStorage');
+            if (!appStorage.executeStashedNav()) {
+              //go to the orcidbigwidget
+              app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
+                app.getObject('MasterPageManager').show('OrcidPage',
+                    ['OrcidBigWidget', 'SearchWidget']);
+               });
               }
-
-            app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
-              app.getObject('MasterPageManager').show('OrcidPage',
-                ['OrcidBigWidget', 'SearchWidget']);
-            });
-          }
-          else {
-            this.route = "";
-            self.get('index-page').execute();
-          }
+            }
+            else {
+              //just redirect to index page, no orcid access
+              this.route = "";
+              self.get('index-page').execute();
+            }
         });
 
         /*

@@ -180,7 +180,7 @@ define([
         var args = storage.get("stashedNavArgs");
         if (!args) return false;
         this.getPubSub().publish.apply(this.getPubSub(), [this.getPubSub().NAVIGATE].concat(args));
-        storage.remove("stashedNav");
+        storage.remove("stashedNavArgs");
         return true;
       }
     },
