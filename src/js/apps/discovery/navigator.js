@@ -581,8 +581,6 @@ define([
             return;
           }
 
-          this.route = '#user/orcid';
-
           if (orcidApi.hasAccess()) {
 
             if (storage.get("orcidAuthenticating")){
@@ -612,6 +610,7 @@ define([
             var appStorage = self.getBeeHive().getObject('AppStorage');
             if (!appStorage.executeStashedNav()) {
               //go to the orcidbigwidget
+              this.route = '#user/orcid';
               app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
                 app.getObject('MasterPageManager').show('OrcidPage',
                     ['OrcidBigWidget', 'SearchWidget']);
