@@ -114,3 +114,70 @@ i{
 .s-orcid-provenance-others {
   background-color: $gray-lightest;
 }
+
+.orcid-info  {
+
+  h2 {
+    font-size: 22px;
+  }
+
+  .nav-tabs {
+    margin-top: 20px;
+    a {
+      font-size: 22px;
+      font-weight: bold;
+    }
+  }
+
+  .tab-content {
+    margin-bottom: 60px;
+  }
+
+}
+
+.orcid-info__intro {
+  background: linear-gradient(90deg, #709EFF, #97DA9E);
+  margin: 0 -15px;
+  font-size: 20px;
+  padding: 30px 0;
+  font-weight: 300;
+  color: darken($text-color, 10%);
+
+  @extend .clearfix;
+
+ .orcid-logo {
+   max-width: 69px;
+   border: 6px solid #383C41;
+   border-radius: 100%;
+ }
+  ul {
+    display: block;
+    max-width: 500px;
+    padding-left:20px;
+    list-style: none;
+    background-color: rgba(255, 255, 255, 0.37);
+    padding: 20px;
+  }
+
+  .header {
+    h1 {
+      color: #fff;
+      font-weight:400;
+      margin:10px 0 20px 0;
+    }
+
+    }
+}
+
+.orcid-info__instructions {
+  font-size: 16px;
+
+  h3 {
+    font-size: 19px;
+    font-weight:normal;
+  }
+
+  ol {
+    margin-left: -2.5%;
+  }
+}

@@ -546,6 +546,12 @@ define([
           }))
         });
 
+        this.set('orcid-instructions', function(){
+
+          this.route = "#orcid-instructions";
+          app.getObject('MasterPageManager').show('OrcidInstructionsPage');
+        });
+
         this.set('orcid-page', function(view, targetRoute) {
 
           var orcidApi = app.getService('OrcidApi');
@@ -581,8 +587,6 @@ define([
             return;
           }
 
-          this.route = '#user/orcid';
-
           if (orcidApi.hasAccess()) {
 
             if (storage.get("orcidAuthenticating")){
@@ -612,17 +616,18 @@ define([
             var appStorage = self.getBeeHive().getObject('AppStorage');
             if (!appStorage.executeStashedNav()) {
               //go to the orcidbigwidget
+              this.route = '#user/orcid';
               app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
                 app.getObject('MasterPageManager').show('OrcidPage',
                     ['OrcidBigWidget', 'SearchWidget']);
-               });
-              }
+              });
             }
-            else {
-              //just redirect to index page, no orcid access
-              this.route = "";
-              self.get('index-page').execute();
-            }
+          }
+          else {
+            //just redirect to index page, no orcid access
+            this.route = "";
+            self.get('index-page').execute();
+          }
         });
 
         /*
