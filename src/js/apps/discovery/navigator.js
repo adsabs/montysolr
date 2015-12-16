@@ -546,6 +546,12 @@ define([
           }))
         });
 
+        this.set('orcid-instructions', function(){
+
+          this.route = "#orcid-instructions";
+          app.getObject('MasterPageManager').show('OrcidInstructionsPage');
+        });
+
         this.set('orcid-page', function(view, targetRoute) {
 
           var orcidApi = app.getService('OrcidApi');
@@ -614,14 +620,14 @@ define([
               app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
                 app.getObject('MasterPageManager').show('OrcidPage',
                     ['OrcidBigWidget', 'SearchWidget']);
-               });
-              }
+              });
             }
-            else {
-              //just redirect to index page, no orcid access
-              this.route = "";
-              self.get('index-page').execute();
-            }
+          }
+          else {
+            //just redirect to index page, no orcid access
+            this.route = "";
+            self.get('index-page').execute();
+          }
         });
 
         /*

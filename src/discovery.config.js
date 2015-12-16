@@ -71,6 +71,7 @@ require.config({
         AuthenticationPage: 'js/wraps/authentication_page_manager',
         SettingsPage: 'js/wraps/user_settings_page_manager/user_page_manager',
         OrcidPage: 'js/wraps/orcid_page_manager/orcid_page_manager',
+        OrcidInstructionsPage : 'js/wraps/orcid-instructions-page-manager/manager',
 
         LibrariesPage: 'js/wraps/libraries_page_manager/libraries_page_manager',
         HomePage: 'js/wraps/home_page_manager/home_page_manager',
