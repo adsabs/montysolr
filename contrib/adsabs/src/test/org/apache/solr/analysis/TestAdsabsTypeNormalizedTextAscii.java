@@ -64,10 +64,14 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri, R"));
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri,R"));
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri,.R"));
-
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "one-jets")); //6.
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "jets-two"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "three-jets-four"));
+    assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "five jets"));
+    
     assertU(commit());
 
-    assertQ(req("q", "*:*"), "//*[@numFound='6']");
+    assertQ(req("q", "*:*"), "//*[@numFound='10']");
     
     //dumpDoc(null, F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS);
     
@@ -107,6 +111,18 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
       // TODO: I could easily activate this behaviour if we allow ANY field inside AqpDEFOPMarkPlainNodes
       //assertQ(req("q", f + ":cutri,r"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='4']");
       //assertQ(req("q", f + ":cutri,.r"), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='5']");
+      
+      assertQ(req("q", f + ":\"five jets\""), "//*[@numFound='1']");
+      assertQ(req("q", f + ":\"fivejets\""), "//*[@numFound='0']");
+      assertQ(req("q", f + ":\"onejets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='6']");
+      assertQ(req("q", f + ":\"one-jets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='6']");
+      assertQ(req("q", f + ":\"*jets\""), "//*[@numFound='2']", "//doc[1]/str[@name='id'][.='6']"); // curiously also finds 'jets' (id 5.)
+      assertQ(req("q", f + ":\"jets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='9']");
+      assertQ(req("q", f + ":\"jets*\""), "//*[@numFound='2']", "//doc[1]/str[@name='id'][.='7']"); // also 'jets' (id 5.)
+      assertQ(req("q", f + ":\"*jets*\""), "//*[@numFound='4']");
+      
+      // find only 'jets' (where the word stood alone)
+      assertQ(req("q", f + ":\"jets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='9']");
     }
   }
   
