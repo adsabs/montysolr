@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1051px" height="873px" viewBox="0 0 1051 873" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.4.4 (17249) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <radialGradient cx="70.9797664%" cy="80.6179027%" fx="70.9797664%" fy="80.6179027%" r="60.5865312%" id="radialGradient-1">
+            <stop stop-color="#558FFA" offset="0%"></stop>
+            <stop stop-color="#3766D1" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Group" sketch:type="MSLayerGroup" transform="translate(-36.000000, 0.000000)">
+            <g id="Oval-9-+-Rectangle-4" transform="translate(0.000000, 27.000000)" fill="#343434" sketch:type="MSShapeGroup">
+                <circle id="Oval-9" cx="663.709229" cy="422.709229" r="422.709229"></circle>
+                <path d="M208.877549,406.099519 C208.877549,350.876009 253.655229,306.108509 308.874373,306.108509 L336.298225,306.108509 C391.524946,306.108509 436.295049,350.881374 436.295049,406.099519 L436.295049,819.437505 C436.295049,874.661015 391.51737,919.428516 336.298225,919.428516 L308.874373,919.428516 C253.647652,919.428516 208.877549,874.65565 208.877549,819.437505 L208.877549,406.099519 Z" id="Rectangle-4" transform="translate(322.586299, 612.768512) rotate(60.000000) translate(-322.586299, -612.768512) "></path>
+            </g>
+            <g id="Oval-9-+-Rectangle-4" transform="translate(53.000000, 226.468750)"></g>
+            <g id="Rectangle-1-Copy-2-+-Oval-5-+-Group-+-Oval-3-Copy-+-Line-+-Oval-3-Copy-2-Copy-Copy-+-Group-Copy-Copy-Copy-Copy" transform="translate(98.030762, 73.814941)">
+                <g id="Rectangle-1-Copy-2-+-Oval-5-+-Group-+-Oval-3-Copy-+-Line-+-Oval-3-Copy-2-Copy-Copy-+-Group-Copy-Copy-Copy">
+                    <g id="beta-+-strophysics-data-sys-+-Group-+-astrophysics-+-data-system-Copy-+-Group-Copy" transform="translate(0.573908, 0.799805)">
+                        <g id="Group-Copy" transform="translate(0.320772, 0.015481)">
+                            <path d="M752.708345,245.464914 C679.079842,144.123973 540.193822,119.51186 442.497737,190.492221 C344.801652,261.472581 325.291022,401.166597 398.919525,502.507537 C472.548028,603.848478 611.434048,628.460591 709.130133,557.480231 C806.826218,486.49987 826.336848,346.805854 752.708345,245.464914 Z" id="Oval-17" fill="url(#radialGradient-1)" sketch:type="MSShapeGroup"></path>
+                            <text id="a" sketch:type="MSTextLayer" transform="translate(563.236822, 322.229899) rotate(359.000000) translate(-563.236822, -322.229899) " font-family="Helvetica" font-size="490.900263" font-weight="bold" fill="#FFFFFF">
+                                <tspan x="430.159028" y="503.729899">a</tspan>
+                            </text>
+                            <path d="M616.209251,569.671436 C745.790987,591.935788 873.628977,656.335328 871.452824,649.945393 C858.158846,610.909689 887.497289,513.616123 871.452826,460.819904 C846.76675,379.587425 770.746596,284.365284 703.765005,284.365284 C590.276911,284.365284 435.549437,466.405755 404.246824,569.671436 C400.683674,581.426079 486.627516,547.407085 616.209251,569.671436 Z" id="Oval-23" fill-opacity="0.11548913" fill="#000000" sketch:type="MSShapeGroup" transform="translate(640.266557, 467.377131) rotate(133.000000) translate(-640.266557, -467.377131) "></path>
+                            <path d="M569.632967,525.171311 L557.064865,513.142607 C598.958539,469.037359 624.094743,408.893838 624.094743,344.74075 C624.094743,200.396301 502.60309,84.1188286 351.785865,84.1188286 C200.968641,84.1188286 79.4769884,200.396301 79.4769884,344.74075 C79.4769884,489.085199 200.968641,605.362671 351.785865,605.362671 C418.815743,605.362671 481.656253,581.305263 527.739294,541.209583 L540.307396,553.238287 L540.307396,585.314831 C540.307396,585.314831 715.250548,773.46861 747.777069,790.231212 C780.303589,806.993814 830.859435,748.007989 812.616273,725.649712 C794.373111,703.291435 603.147906,525.171311 603.147906,525.171311 L569.632967,525.171311 Z M344.766251,538.419483 C232.938883,538.419483 143.476988,452.797116 143.476988,345.769156 C143.476988,238.741196 232.938883,153.118829 344.766251,153.118829 C456.593619,153.118829 546.055513,238.741196 546.055513,345.769156 C546.055513,452.797116 456.593619,538.419483 344.766251,538.419483 L344.766251,538.419483 Z" id="Shape" fill="#9B9B9B" sketch:type="MSShapeGroup" transform="translate(447.977215, 438.653460) scale(-1, 1) rotate(-15.000000) translate(-447.977215, -438.653460) "></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+            <g id="Rectangle-4-+-Rectangle-1-Copy-2-+-Oval-5-+-Group-+-Oval-3-Copy-+-Line-+-Oval-3-Copy-2-Copy-Copy-+-Group-Copy-Copy-Copy-Copy-+-Oval-17-Copy-2" transform="translate(301.000000, 81.000000)" fill="#FFFFFF" sketch:type="MSShapeGroup">
+                <g id="Rectangle-1-Copy-2-+-Oval-5-+-Group-+-Oval-3-Copy-+-Line-+-Oval-3-Copy-2-Copy-Copy-+-Group-Copy-Copy-Copy-Copy-+-Oval-17-Copy-2" transform="translate(0.225098, 0.973145)">
+                    <path d="M26.4899178,459.152418 C8.51192087,396.378592 7.87299287,327.858276 28.3861603,260.762728 C84.9015121,75.9093417 280.569535,-28.1291915 465.422922,28.3861603 C650.276308,84.9015121 754.314841,280.569535 697.799489,465.422922 C641.284138,650.276308 445.616115,754.314841 260.762728,697.799489 C213.820525,683.447818 172.089829,660.122609 136.876447,630.27973 L162.256087,617.348155 C192.780703,641.201871 228.11627,659.963203 267.376961,671.966401 C439.047665,724.451402 620.756577,627.849277 673.235176,456.199515 C725.713775,284.549752 629.089482,102.852627 457.418778,50.3676255 C285.748075,-2.11737575 104.039163,94.4847497 51.5605639,266.134512 C32.8058613,327.47838 33.0944481,390.105488 49.0460891,447.659475 L26.4899178,459.152418 Z" id="Oval-17-Copy-2" transform="translate(363.092825, 363.092825) rotate(2.000000) translate(-363.092825, -363.092825) "></path>
+                </g>
+            </g>
+            <g id="Oval-9-+-Oval-9" transform="translate(210.000000, 0.000000)" sketch:type="MSShapeGroup">
+                <path d="M176.167818,352.320446 C273.257334,352.320446 351.963937,273.663287 351.963937,176.634764 C351.963937,79.6062406 273.257334,0.949081405 176.167818,0.949081405 C79.0783017,0.949081405 0.371697983,79.6062406 0.371697983,176.634764 C0.371697983,273.663287 79.0783017,352.320446 176.167818,352.320446 Z" id="Oval-9" fill="#343434"></path>
+                <ellipse id="Oval-10" fill="#FFFFFF" cx="183.167818" cy="179.634764" rx="121.820754" ry="121.744224"></ellipse>
+            </g>
+        </g>
+        <g id="orcid-active" sketch:type="MSLayerGroup" transform="translate(217.000000, 43.000000)">
+            <g id="Slice-1">
+                <g id="Page-1">
+                    <image id="orcid_24x24" sketch:type="MSBitmapLayer" x="11.5652174" y="7.71014493" width="246.724638" height="246.724638" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABGdBTUEAA1teXP8meAAAAkVJREFUSA2tVj1rVEEUvbM+FsQtTOGSIoZJsaSx2Q2CayFBf4DpJGlMUEhhof4SFbSwilVCOm20iyGFCYHsgk0IKXzggrIpjPCC8Fgd77nuPCYz+/FM9kEyc8+959z5vLOKBnyrzfqc+qPuGmVmOUx7obEyatMUzLuF6vZbz5eZKus5nbXmjVlj1ApD2oEHdWOlzNJ8dWfTDyr4AI/6GYt/ZFz7vgG2BgdcP+bUDNb2bq7wciwiqFyqSWw7aUib9x8v25v5mU9LNj6bgYzcEb9TeUn4s4ksYViLAbozkQRYczL0ZBg5t5+1RJMJEUjdDc34reNder//UOyj5HOG+51iJHQfFrurORXxdOZ49NqPmhyrC2QTzFxd9kMo7STU+rlFJ+m3wMeAhnbUPedBwLXxB9ROmhkOu9dXm3hMB0fr1Gi9CNzQjrqXKHD2ApDww/4y2aXBAUCC6Sv3JNxPAm1ssu4llgfDEd44fEQ/fh1KkrGLFZ+ms2Pqe/La6e+EDtrrEj5x+VZAO3cCKJ6k3wNhC4wkwaXiuNULWiSIA/Q/gOKFEk2X/21y63jLZ8YFlFwfzWvjFN2uvCJsLo4qNtv9oB2hnvNFW3Qd/frlUpXuX98N3P3uAbSlmq426l+YpS0z7XTI3ty9r68FtraNQTvkJscLte0pKSZ4LFDPXbIVtphvA7cXzsa4LTRhywzQkRI7qoqq6Dk/o09PJYDhPjiwz/L1fXAgJi8RZz+LsHCY675mwLIlckVH+ej3TGCToZ6f92fLX7Eq63IpQMw2AAAAAElFTkSuQmCC"></image>
+                    <g id="Oval-1-+-Rectangle-1-+-Rectangle-2-+-D" sketch:type="MSShapeGroup">
+                        <path d="M133,266 C206.453872,266 266,206.453872 266,133 C266,59.5461282 206.453872,0 133,0 C59.5461282,0 0,59.5461282 0,133 C0,206.453872 59.5461282,266 133,266 L133,266 Z" id="Oval-1" fill="#7AB880"></path>
+                        <g id="Rectangle-1-+-Rectangle-2-+-D" transform="translate(77.101449, 50.115942)" fill="#FFFFFF">
+                            <rect id="Rectangle-1" x="0" y="0" width="23.1304348" height="19.2753623"></rect>
+                            <rect id="Rectangle-2" x="0" y="38.9362334" width="23.1304348" height="111.591875"></rect>
+                            <path d="M140.864348,117.117101 C138.140083,123.953464 134.310749,129.838816 129.376232,134.773333 C124.441714,139.707851 118.504962,143.537184 111.565797,146.261449 C104.626632,148.985714 96.9422644,150.347826 88.5124638,150.347826 L45.9524638,150.347826 L45.9524638,38.8591304 L88.5124638,38.8591304 C96.9422644,38.8591304 104.626632,40.2340925 111.565797,42.984058 C118.504962,45.7340234 124.441714,49.5633571 129.376232,54.4721739 C134.310749,59.3809907 138.140083,65.2534924 140.864348,72.0898551 C143.588613,78.9262178 144.950725,86.4306838 144.950725,94.6034783 C144.950725,102.776273 143.588613,110.280739 140.864348,117.117101 L140.864348,117.117101 Z M123.747826,94.6034783 C123.747826,88.4867327 122.925419,82.9997344 121.28058,78.1423188 C119.635741,73.2849032 117.29702,69.1728671 114.264348,65.806087 C111.231676,62.4393068 107.543693,59.8564341 103.20029,58.0573913 C98.8568865,56.2583485 93.9609934,55.3588406 88.5124638,55.3588406 L66.8469565,55.3588406 L66.8469565,133.848116 L88.5124638,133.848116 C93.9609934,133.848116 98.8568865,132.948608 103.20029,131.149565 C107.543693,129.350522 111.231676,126.76765 114.264348,123.40087 C117.29702,120.034089 119.635741,115.922053 121.28058,111.064638 C122.925419,106.207222 123.747826,100.720224 123.747826,94.6034783 L123.747826,94.6034783 L123.747826,94.6034783 Z" id="D"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
