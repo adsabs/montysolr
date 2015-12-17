@@ -25,3 +25,6 @@ src/styles/fonts
 .idea
 
 .vagrant
+
+src/discovery.vars.js
+.*
