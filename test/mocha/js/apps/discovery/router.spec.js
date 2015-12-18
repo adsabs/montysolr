@@ -35,13 +35,10 @@ define([
         ]
       });
 
-
       fakePubSub.publish(fakePubSub.pubSubKey, fakePubSub.NAVIGATE, "results-page");
 
       expect(fakePubSub.publish.args[2][1]).to.eql("[Router]-Navigate-With-Trigger");
       expect(fakePubSub.publish.args[2][2]).to.eql("show-metrics");
-
-
 
     })
 
