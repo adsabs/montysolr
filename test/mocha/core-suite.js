@@ -2,6 +2,7 @@ define([], function() {
 
   var tests  = [
       '/apps/discovery/router.spec.js',
+      '/apps/discovery/navigator.spec.js',
 
       '/components/app_storage.spec.js',
       '/components/csrf_manager.spec.js',

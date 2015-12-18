@@ -555,13 +555,14 @@ define([
         this.set('orcid-page', function(view, targetRoute) {
 
           var orcidApi = app.getService('OrcidApi');
-          var storage  = app.getService('PersistentStorage');
+          var persistentStorage  = app.getService('PersistentStorage');
+          var appStorage = app.getObject('AppStorage');
 
           // traffic from Orcid - user has authorized our access
-          if (orcidApi.hasExchangeCode() && !orcidApi.hasAccess()) {
+          if (!orcidApi.hasAccess() && orcidApi.hasExchangeCode()) {
             //since app will exit, store the information that we're authenticating
-            if (storage){
-              storage.set("orcidAuthenticating", true);
+            if (persistentStorage){
+              persistentStorage.set("orcidAuthenticating", true);
             }
             else {
               console.warn("no persistent storage service available");
@@ -589,19 +590,20 @@ define([
 
           if (orcidApi.hasAccess()) {
 
-            if (storage.get("orcidAuthenticating")){
+            if (persistentStorage.get("orcidAuthenticating")){
 
-              storage.remove("orcidAuthenticating");
+              persistentStorage.remove("orcidAuthenticating");
               // check if we need to trigger modal alert to ask user to fill in necessary data
               //we only want to show this immediately after user has authenticated with orcid
               orcidApi.getADSUserData().done(function (data) {
-                    if (!data.hasOwnProperty("authorizedUser")) {
+                //don't show modal if we're just going to redirect to the ads-orcid form anyway
+                    if (!data.hasOwnProperty("authorizedUser") && JSON.stringify(appStorage.get("stashedNav")) !== '["UserPreferences",{"subView":"orcid"}]') {
                       //the form has yet to be filled out by the user
                       //now tailor the message depending on whether they are signed in to ADS or not
                       var alerter = app.getController('AlertsController');
                       alerter.alert(new ApiFeedback({
                         code: ApiFeedback.CODES.ALERT,
-                        msg: OrcidModalTemplate({adsLoggedIn: self.getBeeHive().getObject("User").isLoggedIn()}),
+                        msg: OrcidModalTemplate({adsLoggedIn: app.getObject("User").isLoggedIn()}),
                         type: "success",
                         title: "You are now logged in to ORCID",
                         modal: true
@@ -613,14 +615,13 @@ define([
                   });
             }
             //should we redirect back to a certain page now that orcid is authenticated?
-            var appStorage = self.getBeeHive().getObject('AppStorage');
+            //the stashed nav in question currently would only belong to orcid form on user page
+            //calling this function executes it
             if (!appStorage.executeStashedNav()) {
               //go to the orcidbigwidget
               this.route = '#user/orcid';
-              app.getWidget('OrcidBigWidget').done(function (orcidWidget) {
                 app.getObject('MasterPageManager').show('OrcidPage',
                     ['OrcidBigWidget', 'SearchWidget']);
-              });
             }
           }
           else {
