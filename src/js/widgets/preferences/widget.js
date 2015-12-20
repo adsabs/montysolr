@@ -19,7 +19,7 @@ define([
     defaults : function(){
       return {
         openURLConfig : undefined,
-        OrcidLoggedIn : undefined
+        orcidLoggedIn : undefined
       }
     }
 
@@ -76,6 +76,7 @@ define([
       _.bindAll(this);
       var pubsub = beehive.getService('PubSub');
       pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
+      pubsub.subscribe(pubsub.ORCID_ANNOUNCEMENT, this.handleOrcidAnnouncement);
 
       //as soon as preferences widget is activated, get the open url config
       this.getBeeHive().getObject("User").getOpenURLConfig().done(function (config) {
@@ -145,7 +146,6 @@ define([
       }
 
       else if (event === "orcid-authenticate"){
-        this.getBeeHive().getObject("AppStorage").setStashedNav("UserPreferences", {subView: "orcid"});
         this.getBeeHive().getService("OrcidApi").signIn();
       }
 
@@ -180,6 +180,17 @@ define([
       var user = this.getBeeHive().getObject('User');
       if (event == user.USER_INFO_CHANGE) {
         this.model.set(data);
+      }
+    },
+
+    handleOrcidAnnouncement: function (event) {
+      //update the user model if it changes
+      if (event === "login") {
+        this.model.set("orcidLoggedIn", false);
+
+      }
+      else if (event === "logout"){
+        this.model.set("orcidLoggedIn", false);
       }
     }
 

@@ -17,6 +17,15 @@ define([
 
     it("query related funcs", function () {
       var s = new AppStorage();
+      var minsub = new MinimalPubsub();
+      var fakePersistentStorage = {
+        //persistent storage returns jsonified api-query
+        get : sinon.spy(function(arg){if (arg == "currentQuery"){return {q : "planet"}}}),
+        set : sinon.spy(function(){}),
+        getHardenedInstance : function(){return this}
+      };
+      minsub.beehive.addService("PersistentStorage", fakePersistentStorage);
+      s.activate(minsub.beehive);
 
       expect(s.getCurrentQuery).to.be.defined;
       s.setCurrentQuery(new ApiQuery({q: 'foo'}));
@@ -91,34 +100,50 @@ define([
 
     it("can stash previous page for redirection purposes", function(){
 
+
       var s = new AppStorage();
       var minsub = new MinimalPubsub();
 
       var fakeStorage = {
-        set : sinon.spy(),
-        get : sinon.spy(function(){
-          return {
-            stashedNavArgs : ["UserPreferences", "orcid"]
+        //persistent storage returns jsonified api-query
+        get : sinon.spy(function(arg){
+          if (arg == "currentQuery"){
+          return {q : "planet"}
+        }
+          else if (arg === "stashedNavArgs"){
+            return {
+              stashedNavArgs : ["UserPreferences", "orcid"]
+            }
           }
         }),
-        remove  : sinon.spy()
-      }
-
-
+        set : sinon.spy(function(){}),
+        remove : sinon.spy(function(){}),
+        getHardenedInstance : function(){return this}
+      };
       minsub.beehive.addService("PersistentStorage", fakeStorage);
-
       s.activate(minsub.beehive);
 
       s.setStashedNav("UserPreferences", "orcid");
 
-      expect(fakeStorage.set.callCount).to.eql(1);
+      expect(fakeStorage.set.callCount).to.eql(2);
+      expect(fakeStorage.set.args[0]).to.eql([
+        "currentQuery",
+        {
+          "q": [
+            "planet"
+          ]
+        }
+      ]);
+
+      expect(fakeStorage.set.args[1]).to.eql(["stashedNavArgs", "UserPreferences"]);
 
       s.getPubSub().publish = sinon.spy();
 
+      expect(fakeStorage.get.callCount).to.eql(1);
+
       s.executeStashedNav("UserPreferences", "orcid");
 
-      expect(fakeStorage.set.callCount).to.eql(1);
-      expect(fakeStorage.get.callCount).to.eql(1);
+      expect(fakeStorage.get.callCount).to.eql(2);
 
       expect(s.getPubSub().publish.callCount).to.eql(1);
 
@@ -131,6 +156,8 @@ define([
           ]
         }
       ]);
+
+      expect(fakeStorage.remove.calledWith("stashedNavArgs")).to.be.true;
 
 
 

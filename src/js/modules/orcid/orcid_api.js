@@ -152,6 +152,11 @@ define([
             + "&redirect_uri=" + encodeURIComponent(this.config.redirectUrlBase +
             (targetRoute || '/#/user/orcid'))
         });
+        //make sure to redirect to the proper page after sign in
+        this.getPubSub().publish(this.getPubSub().ORCID_ANNOUNCEMENT, "login");
+        var currentPage = this.getBeeHive().getService("HistoryManager").getCurrentNav();
+        this.getBeeHive().getObject("AppStorage").setStashedNav(currentPage);
+
       },
 
       /*
@@ -215,6 +220,7 @@ define([
        */
       signOut: function () {
         this.saveAccessData(null);
+        this.getPubSub().publish(this.getPubSub().ORCID_ANNOUNCEMENT, "logout");
       },
 
       hasExchangeCode: function (searchString) {

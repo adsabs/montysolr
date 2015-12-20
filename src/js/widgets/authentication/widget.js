@@ -1,6 +1,7 @@
 define([
   'marionette',
   'js/widgets/base/base_widget',
+  'js/components/api_feedback',
   'js/mixins/form_view_functions',
   'js/widgets/success/view',
   'js/components/api_targets',
@@ -16,6 +17,7 @@ define([
 
 ], function (Marionette,
              BaseWidget,
+             ApiFeedback,
              FormFunctions,
              SuccessView,
              ApiTargets,
@@ -461,7 +463,8 @@ define([
 
     triggerCorrectSubmit : function(model) {
 
-      var data = model.toJSON();
+      var data = model.toJSON(),
+          that = this;
 
       if (model.target == "REGISTER"){
 
@@ -471,7 +474,21 @@ define([
       }
 
       else if (model.target == "USER"){
-        this.getBeeHive().getObject("Session").login(model.toJSON());
+
+        //only show success message if login initiated from auth widget
+        //(if you showed it every time user logged in, you'd show it
+        //redundantly on start up of bumblebee)
+        this.getBeeHive().getObject("Session").login(model.toJSON()).done(function(){
+          //this currently doesnt work with the way the alerts widget hides itself
+          //after navigate
+          //var pubsub = that.getPubSub();
+          //pubsub.publish(pubsub.ALERT, new ApiFeedback({
+          //  code: ApiFeedback.CODES.ALERT,
+          //  msg: "Logged in to ADS",
+          //  type: "success",
+          //}));
+        });
+
       }
 
       else if (model.target == "RESET_PASSWORD" && model.method === "POST"){

@@ -29,7 +29,6 @@ define([
 
       initialize : function(options){
         options = options || {};
-        this.history = options.history;
         this.queryUpdater = new ApiQueryUpdater('Router');
       },
 
@@ -91,7 +90,6 @@ define([
 
       paperForm : function(){
         this.routerNavigate('PaperSearchForm');
-
       },
 
       search: function (query, widgetName) {

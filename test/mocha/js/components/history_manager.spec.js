@@ -1,37 +1,37 @@
 
 
-define(['js/components/history_manager'], function(HistoryManager){
+define([
+   "js/bugutils/minimal_pubsub",
+  'js/components/history_manager'
+],
+    function(
+        Minsub,
+        HistoryManager
+    ){
 
   describe("History Manager (Component)", function(){
 
-    var manager;
+   it("should record navigation signals and allow the previous and penultimate nav events to be queried", function(){
 
-    beforeEach(function(){
+      var manager = new HistoryManager();
 
-      manager = new HistoryManager();
+     var minsub = new (Minsub.extend({
+       request: function(apiRequest) {
+         return {some: 'foo'}
+       }
+     }))({verbose: false});
 
-    })
+     manager.activate(minsub.beehive.getHardenedInstance());
 
-    it("should return the prior page (rather than prior route) using its getPriorPage function", function(){
+     minsub.publish(minsub.NAVIGATE, "index-page");
 
-      manager.addEntry({page: "landingPage", data:  "fakeQuery", subPage: undefined});
-      manager.addEntry({page: "resultsPage", data:  "fakeQuery", subPage: undefined});
-      manager.addEntry({page: "abstractPage", data:  "fakeBibcode", subPage: "subPage2"});
-      manager.addEntry({page: "abstractPage", data:  "fakeBibcode", subPage: "subPage1"});
+     minsub.publish(minsub.NAVIGATE, "results-page");
 
-      expect(manager.getPriorPage()).to.eql("resultsPage");
+     expect(JSON.stringify(manager.getCurrentNav())).to.eql('["results-page",{}]');
+     expect(JSON.stringify(manager.getPreviousNav())).to.eql('["index-page",{}]');
 
 
-    })
 
-    it("should return the prior page's data value using its getPriorPageVal function", function(){
-
-      manager.addEntry({page: "landingPage", data:  "fakeQuery", subPage: undefined});
-      manager.addEntry({page: "resultsPage", data:  "fakeQuery", subPage: undefined});
-      manager.addEntry({page: "abstractPage", data:  "fakeBibcode", subPage: "subPage2"});
-      manager.addEntry({page: "abstractPage", data:  "fakeBibcode", subPage: "subPage1"});
-
-      expect(manager.getPriorPageVal()).to.eql("fakeQuery");
-    });
+   })
   })
 });

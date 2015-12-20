@@ -283,8 +283,12 @@ define([
 
       redirectIfNecessary : function(){
         var pubsub = this.getPubSub();
+
+        //redirect user to wherever they were before authentication page
         if (this.getBeeHive().getObject("MasterPageManager").currentChild === "AuthenticationPage" && this.isLoggedIn()){
-          pubsub.publish(pubsub.NAVIGATE, "index-page");
+          //so that navigator can redirect to the proper page
+          var previousNav = this.getBeeHive().getService("HistoryManager").getPreviousNav();
+          pubsub.publish.apply(pubsub, [pubsub.NAVIGATE].concat(previousNav));
         }
         else  if (this.getBeeHive().getObject("MasterPageManager").currentChild === "SettingsPage" && !this.isLoggedIn()){
           pubsub.publish(pubsub.NAVIGATE, "authentication-page");
@@ -311,10 +315,7 @@ define([
       //this function is called immediately after the logout is confirmed
       completeLogOut : function(){
         this.userModel.clear();
-        //navigate to the index page
-        this.getPubSub().publish(this.getPubSub().NAVIGATE, "index-page");
       },
-
 
       // publicly accessible
 
