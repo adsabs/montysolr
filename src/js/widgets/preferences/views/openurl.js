@@ -31,12 +31,13 @@ define([
 
       var current = _.findWhere(data.openURLConfig, {link : data.link_server});
       data.openURLName = current ? current.name : "";
+      return data;
 
-      return data
     },
 
     modelEvents : {
-      "change" : "render"
+      "change:link_server" : "render",
+      "change:openURLConfig" : "render"
     },
 
     events : {

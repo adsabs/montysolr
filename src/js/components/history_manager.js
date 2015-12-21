@@ -1,92 +1,52 @@
-define(["underscore"], function (_) {
 
-  var HistoryManager = function () {
-    this.history = []
-  }
+define([
+      'js/components/generic_module',
+      'js/mixins/dependon',
+      'js/mixins/hardened',
+      'js/components/pubsub_key'
+    ],
+    function(
+        GenericModule,
+        Dependon,
+        Hardened,
+        PubSubKey
+    ) {
 
-  _.extend(HistoryManager.prototype, {
+      var History = GenericModule.extend({
 
+        initialize: function () {
+          this._history = [];
+        },
 
-    /*
-     * This will return the prior PAGE--so the history entry before the current
-     * one. If you are on the abstract page and were on the results page before that,
-     * that is what will be returned. Even if you have been on several routes within
-     * the abstract page, these will be ignored and you will be given the
-     * actual page name.
-     *
-     * */
-    getPriorPage       : function () {
+        activate: function (beehive) {
 
-      if (this.history.length <=1){
-        return undefined
-      }
-      var currentPage, p, priorPage;
+          this.setBeeHive(beehive);
+          var pubsub = this.getPubSub();
+          pubsub.subscribe(pubsub.NAVIGATE, _.bind(this.recordNav, this));
 
-      currentPage = _.last(this.history).page;
-      //first, simplify the dict to include only pages, not subpages
-      p = 1;
-      while (p < this.history.length){
+        },
 
-        priorPage = this.history[(this.history.length -1) -p].page
+        recordNav: function () {
+          this._history.push([].slice.apply(arguments));
+        },
 
-        if (priorPage !== currentPage){
-          return priorPage
-        }
-        p+=1
+        getCurrentNav : function(){
+          return this._history[this._history.length-1];
+        },
 
-      }
-      //nothing was found that differs from currentPage
-      return undefined
-    },
-    getPriorPageVal    : function () {
+        getPreviousNav: function(){
+          return this._history[this._history.length-2];
+        },
 
-      if (this.history.length <=1){
-        return undefined
-      }
-
-      var currentPage, p, prior, priorPage;
-
-      currentPage = _.last(this.history).page;
-      //first, simplify the dict to include only pages, not subpages
-      p = 1;
-
-      while (p < this.history.length){
-        prior= this.history[(this.history.length -1) -p]
-        priorPage = prior.page
-
-        if (priorPage !== currentPage){
-          return prior.data
+        hardenedInterface: {
+         getPreviousNav : "",
+         getCurrentNav : "",
         }
 
-        p+=1
-      }
-      return undefined
-    },
+      });
 
-    /*
-     * Unlike get prior page, this will give you whatever the prior
-     * route was, even if it was within the current page.
-     * */
+      _.extend(History.prototype, Dependon.BeeHive, Hardened);
 
-    getPriorRoute : function(){
+      return History;
 
-      var subPage = this.history[this.history.length -1].subPage;
-      var page = this.history[this.history.length -1].page;
-
-      return {page: page, subPage : subPage}
-    },
-
-    getPriorRouteVal : function(){
-
-      return this.history[this.history.length -1].data
-
-    },
-
-    addEntry           : function (item) {
-      this.history.push(item)
-    }
-  })
-
-  return HistoryManager
-
-})
+});

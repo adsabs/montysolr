@@ -20,11 +20,17 @@ define([
   var AppStorage = Backbone.Model.extend({
 
       activate: function(beehive) {
+        var that = this;
         this.setBeeHive(beehive);
         _.bindAll(this, "onPaperSelection", "onBulkPaperSelection");
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.PAPER_SELECTION, this.onPaperSelection);
         pubsub.subscribe(pubsub.BULK_PAPER_SELECTION, this.onBulkPaperSelection);
+        //see if we can load an api query from app storage
+        if (this.getBeeHive().getService("PersistentStorage")){
+          var stashedQuery = this.getBeeHive().getService("PersistentStorage").get("currentQuery");
+          this.setCurrentQuery(new ApiQuery(stashedQuery));
+        }
       },
 
       initialize: function() {
@@ -49,6 +55,9 @@ define([
           throw new Error('You must save ApiQuery instance');
         }
         this.set('currentQuery', apiQuery);
+        //save to storage
+        if (this.getBeeHive().getService("PersistentStorage"))
+              this.getBeeHive().getService("PersistentStorage").set("currentQuery", apiQuery.toJSON());
       },
 
       setCurrentNumFound : function(numFound){
@@ -163,11 +172,12 @@ define([
 
     //this is used when authentication requires an interruption in user flow
     //stashedPage val should be the name of a navigate command
+    //should by called with 1 param: an array of args used for pubsub.navigate command
 
-    setStashedNav : function(){
+    setStashedNav : function(pageInstructions){
       var storage  = this.getBeeHive().getService('PersistentStorage');
       if (storage){
-        storage.set("stashedNavArgs", [].slice.apply(arguments));
+        storage.set("stashedNavArgs", pageInstructions);
       }
       else {
         console.warn("no persistent storage service available");
@@ -179,6 +189,11 @@ define([
       if (storage){
         var args = storage.get("stashedNavArgs");
         if (!args) return false;
+        //it's a results page, so initiate a start search
+        if (args[0] == "results-page" && this.getCurrentQuery()){
+          //this feels hackish, but only easy way to run the stored query
+          this.getPubSub().publish(this.getPubSub().START_SEARCH, this.getCurrentQuery());
+        }
         this.getPubSub().publish.apply(this.getPubSub(), [this.getPubSub().NAVIGATE].concat(args));
         storage.remove("stashedNavArgs");
         return true;

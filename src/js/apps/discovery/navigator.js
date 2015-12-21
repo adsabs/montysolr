@@ -410,10 +410,11 @@ define([
           }
         });
 
-        this.set('results-page', function() {
+        this.set('results-page', function(widget, args) {
 
           app.getObject('MasterPageManager').show('SearchPage',
             searchPageAlwaysVisible);
+          //allowing widgets to override appstorage query (so far only used for orcid redirect)
           var q = app.getObject('AppStorage').getCurrentQuery();
           var route = '#search/' + queryUpdater.clean(q).url();
 

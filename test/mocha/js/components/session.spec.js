@@ -60,8 +60,8 @@ define([
       expect(requestStub.args[0][0].toJSON().target).to.eql("accounts/user");
       expect(requestStub.args[0][0].toJSON().options.type).to.eql("POST");
       expect(requestStub.args[0][0].toJSON().options.data).to.eql('{"username":"goo","password":"foo","g-recaptcha-response":"boo"}');
-      expect(requestStub.args[0][0].toJSON().options.done).to.eql(s.loginSuccess);
-      expect(requestStub.args[0][0].toJSON().options.fail).to.eql(s.loginFail);
+
+
 
       s.logout();
 
@@ -181,8 +181,6 @@ define([
 
       expect(s.getApiAccess.callCount).to.eql(1);
       //called once getApiAccess is resolved
-      expect(s.getPubSub().publish.args[0]).to.eql(["[Router]-Navigate-With-Trigger", "UserPreferences"]);
-
 
       s.logoutSuccess();
 
@@ -190,13 +188,13 @@ define([
       expect(u.completeLogOut.callCount).to.eql(1);
 
       s.registerSuccess();
-      expect(s.getPubSub().publish.args[1]).to.eql(["[PubSub]-User-Announcement", "register_success"]);
+      expect(s.getPubSub().publish.args[0]).to.eql(["[PubSub]-User-Announcement", "register_success"]);
 
       s.resetPassword1Success();
-      expect(s.getPubSub().publish.args[2]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_success"]);
+      expect(s.getPubSub().publish.args[1]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_success"]);
 
       s.resetPassword2Success();
-      expect(s.getPubSub().publish.args[3]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_success"]);
+      expect(s.getPubSub().publish.args[2]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_success"]);
 
     });
 

@@ -64,6 +64,26 @@ define([
             orcidRedirectUrlBase: 'http://localhost:8000',
             orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
           });
+
+          var fakeHistoryManager = {
+            getCurrentNav : function(){
+              return "index-page";
+            },
+            getHardenedInstance : function(){return this}
+          };
+
+          var fakeAppStorage = {
+            getHardenedInstance: function () {
+              return this
+            },
+            setStashedNav : sinon.spy()
+          };
+
+
+          beehive.addService("HistoryManager", fakeHistoryManager);
+          beehive.addObject("AppStorage", fakeAppStorage);
+
+
           var oModule = new OrcidModule();
           oModule.activate(beehive);
           return beehive.getService('OrcidApi');
@@ -75,6 +95,7 @@ define([
           minsub.subscribe(minsub.APP_EXIT, spy);
           oApi.signIn();
           expect(spy.called).to.eql(true);
+          expect(minsub.beehive.getObject("AppStorage").setStashedNav.calledWith("index-page")).to.be.true;
           expect(spy.lastCall.args[0]).to.eql({
             url: "https://api.orcid.org/oauth/authorize?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline&show_login=true&client_id=APP-P5ANJTQRRTMA6GXZ&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F%23%2Fuser%2Forcid",
             type: 'orcid'

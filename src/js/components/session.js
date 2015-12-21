@@ -44,7 +44,6 @@ define([
       var options = options || {};
       //right now, this will only be used if someone forgot their password
       this.model = new SessionModel();
-
       this.test = options.test ? true : undefined;
 
       _.bindAll(this, [
@@ -68,6 +67,9 @@ define([
 
     login: function (data) {
 
+    var d = $.Deferred(),
+        that = this;
+
     this.sendRequestWithNewCSRF(function(csrfToken){
       var request = new ApiRequest({
         target : ApiTargets.USER,
@@ -77,16 +79,24 @@ define([
           data: JSON.stringify(data),
           contentType : "application/json",
           headers : {'X-CSRFToken' :  csrfToken },
-          done : this.loginSuccess,
-          fail : this.loginFail,
+          done : function(){
+            //allow widgets to listen for success or failure
+            d.resolve.apply(arguments);
+            //session response to success
+            that.loginSuccess.apply(arguments);
+          },
+          fail : function(){
+            d.reject.apply(arguments);
+            that.loginFail.apply(arguments);
+          },
           beforeSend: function(jqXHR, settings) {
             jqXHR.session = this;
           }
         }
       });
       return this.getBeeHive().getService("Api").request(request);
-
     });
+      return d.promise();
     },
 
     /*
@@ -200,9 +210,6 @@ define([
       //reset auth token by contacting Bootstrap, which will log user in
       var that = this;
        this.getApiAccess({reconnect: true}).done(function(){
-         //user has just authenticated themselves using the form, so redirect them to their account
-         var pubsub = that.getPubSub();
-         pubsub.publish(pubsub.NAVIGATE, "UserPreferences");
        });
     },
 

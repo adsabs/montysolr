@@ -1,0 +1,10 @@
+
+//widget can publish an alert 
+
+var pubsub = that.getBeeHive().getPubSub();
+         pubsub.publish(pubsub.ALERT, new ApiFeedback({
+           code: ApiFeedback.CODES.ALERT,
+           msg: "Logged in to ADS",
+           type: "success",
+	   modal : true
+         }));

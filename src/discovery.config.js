@@ -41,19 +41,19 @@ require.config({
           QueryMediator: 'js/components/query_mediator',
           Diagnostics: 'js/bugutils/diagnostics',
           AlertsController: 'js/wraps/alerts_mediator',
-          Orcid: 'js/modules/orcid/module'
+          Orcid: 'js/modules/orcid/module',
         },
         services: {
           Api: 'js/services/api',
           PubSub: 'js/services/pubsub',
           Navigator: 'js/apps/discovery/navigator',
-          PersistentStorage: 'js/services/storage'
+          PersistentStorage: 'js/services/storage',
+          HistoryManager: 'js/components/history_manager',
         },
         objects: {
           User: 'js/components/user',
           Session: 'js/components/session',
           DynamicConfig: 'discovery.vars',
-          HistoryManager: 'js/components/history_manager',
           MasterPageManager: 'js/page_managers/master',
           AppStorage: 'js/components/app_storage',
           RecaptchaManager : 'js/components/recaptcha_manager',

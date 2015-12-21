@@ -56,17 +56,18 @@ define([
         this.trigger("navigate-to-orcid-link")
       },
       "click .orcid-logout": function (e) {
-        this.trigger("logout-only-orcid");
         e.preventDefault();
+        this.trigger("logout-only-orcid");
       },
-      "click .logout": function () {
-        this.trigger("logout")
+      "click .logout": function (e) {
+        e.preventDefault();
+        this.trigger("logout");
       },
       "click .login": function () {
-        this.trigger("navigate-login")
+        this.trigger("navigate-login");
       },
       "click .register": function () {
-        this.trigger("navigate-register")
+        this.trigger("navigate-register");
       },
       "click button.search-author-name": function (e) {
         this.trigger('search-author');
@@ -242,7 +243,7 @@ define([
 
     _navigate: function (page, opts) {
       var pubsub = this.getPubSub();
-      pubsub.publish(pubsub.NAVIGATE, page, opts)
+      pubsub.publish(pubsub.NAVIGATE, page, opts);
     },
 
     //to set the correct initial values for signed in statuses

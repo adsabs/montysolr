@@ -378,16 +378,6 @@ define([
       $("button.orcid-authenticate").click();
 
       expect(fakeOrcid.signIn.callCount).to.eql(1);
-      expect(fakeAppStorage.setStashedNav.args[0]).to.eql([
-        "UserPreferences",
-        {
-          "subView": "orcid"
-        }
-      ]);
-
-
-
-
 
 
     });

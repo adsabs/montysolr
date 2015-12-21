@@ -22,7 +22,8 @@ define(['config', 'module'], function(config, module) {
       'js/mixins/api_access',
       'es5-shim'
     ],
-    function(Router,
+    function(
+      Router,
       Application,
       DiscoveryBootstrap,
       ApiAccess
