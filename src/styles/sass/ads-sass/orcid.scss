@@ -136,8 +136,16 @@ i{
 }
 
 .orcid-info__intro {
-  background: linear-gradient(90deg, #6490F9, #88E691);
-  margin: 0 -15px;
+
+  &:after {
+    content: "";
+    height: 10px;
+    width: 100%;
+    background-image: linear-gradient(90deg, #799FFF, #A4F1AB);
+    position: relative;
+    top: 10px;
+  }
+
   font-size: 20px;
   padding: 30px 0;
   font-weight: 300;
@@ -156,14 +164,13 @@ i{
     margin: auto;
     padding-left:20px;
     list-style: none;
-    background-color: rgba(255, 255, 255, 0.37);
-    padding: 20px;
+
   }
 
   .header {
     text-align: center;
     h1 {
-      color: #fff;
+      color: darken($text-color, 10%);
       font-weight:400;
       margin:10px 0 20px 0;
     }
