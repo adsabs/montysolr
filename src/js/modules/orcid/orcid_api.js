@@ -299,12 +299,27 @@ define([
       },
 
       checkAccess: function() {
-        if (!this.hasAccess())
-          throw new Error('You must first obtain access_token before calling this API');
-        if (!this.config.apiEndpoint)
-          throw new Error('OrcidApi was not properly configured; apiEndpoint is missing');
-      },
 
+        var pubsub = this.getPubSub();
+        if (!this.hasAccess()){
+          pubsub.publish(pubsub.ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: " No access_token found",
+            type: "danger",
+            title: "Unable to contact ORCID API",
+            modal : true
+          }));
+        }
+        if (!this.config.apiEndpoint){
+          pubsub.publish(pubsub.ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: "The config variable apiEndpoint is missing",
+            type: "danger",
+            title: "Unable to contact ORCID API",
+            modal : true
+          }));
+        }
+      },
 
       /**
        * ===============================================================================
