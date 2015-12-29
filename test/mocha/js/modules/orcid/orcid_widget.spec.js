@@ -431,6 +431,49 @@ define([
         done();
       });
 
+      it("should allow the user to search in ADS when search button is clicked", function(done){
+
+        var orcidApi = getOrcidApi();
+        orcidApi.saveAccessData({access: true});
+        orcidApi.getUserProfile = function() {
+          var d = $.Deferred();
+          d.resolve(defaultResponse()['orcid-profile']);
+          return d;
+        };
+
+        orcidApi.getADSUserData = sinon.spy(function(){
+          var d = $.Deferred();
+
+          d.resolve({ nameVariations : ["Name, Variation 1", "Name, Variation 2"]});
+          return d.promise();
+
+        });
+
+        var widget = _getWidget();
+        widget.activate(minsub.beehive.getHardenedInstance());
+
+        var publishStub = sinon.stub(widget.getPubSub(), "publish");
+
+        widget.onShow();
+        setTimeout(function() {
+
+          var $w = widget.render().$el;
+          $('#test').append($w);
+
+         $("button.search-author-name").click();
+
+          expect(publishStub.args[0][0]).to.eql("[PubSub]-New-Query");
+          expect(publishStub.args[0][1].toJSON()).to.eql({
+            "q": [
+              "author:(\"Name, Variation 1\" OR \"Name, Variation 2\" OR \"Chyla, Roman\")"
+            ]
+          });
+
+          done();
+        }, 200);
+
+      });
+
       it("should load ORCID when onShow is called", function(done) {
         var orcidApi = getOrcidApi();
         orcidApi.saveAccessData({access: true});

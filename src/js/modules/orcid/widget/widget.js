@@ -38,6 +38,8 @@ define([
         initialize : function(options){
           ListOfThingsWidget.prototype.initialize.apply(this, arguments);
 
+          var that = this;
+
           //now adjusting the List Model
           this.view.getEmptyView = function () {
             return Marionette.ItemView.extend({
@@ -47,9 +49,21 @@ define([
 
           _.extend(this.view.events, {
             "click .search-author-name" : function(){
-              var searchTerm = "author:\"" + this.model.get("orcidLastName") + "," + this.model.get("orcidFirstName") + "\"";
-              this.trigger("search-author-name", searchTerm);
-            }
+              var searchTerm, viewThis = this;
+              var orcidName = this.model.get("orcidLastName") + ", " + this.model.get("orcidFirstName");
+               that.getBeeHive().getService("OrcidApi").getADSUserData().done(function(data){
+                 if (data && data.nameVariations){
+                   data.nameVariations.push(orcidName);
+                   searchTerm = "author:(\"" + data.nameVariations.join("\" OR \"") +  "\")";
+                 }
+                 else {
+                   searchTerm = "author:\"" + orcidName + "\"";
+                 }
+
+                 viewThis.trigger("search-author-name", searchTerm);
+
+               }); //end done function
+            } // end click handler
           });
 
           this.view.delegateEvents();
@@ -86,7 +100,6 @@ define([
          * can expect to have a canonical bibcode in the 'identifier' field
          */
         mergeDuplicateRecords: function(docs) {
-
 
           var dmap = {};
           var id, dupsFound, c = 0;
