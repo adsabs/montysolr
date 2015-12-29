@@ -315,7 +315,8 @@ define([
 
         //use post, although get is also possible
         var reqOptions = {
-          type: 'POST'
+          type: 'POST',
+          contentType : "application/json"
         };
 
         req.set('options', reqOptions);
