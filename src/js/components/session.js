@@ -81,13 +81,13 @@ define([
           headers : {'X-CSRFToken' :  csrfToken },
           done : function(){
             //allow widgets to listen for success or failure
-            d.resolve.apply(arguments);
+            d.resolve.apply(d, arguments);
             //session response to success
-            that.loginSuccess.apply(arguments);
+            that.loginSuccess.apply(that, arguments);
           },
           fail : function(){
-            d.reject.apply(arguments);
-            that.loginFail.apply(arguments);
+            d.reject.apply(d, arguments);
+            that.loginFail.apply(that, arguments);
           },
           beforeSend: function(jqXHR, settings) {
             jqXHR.session = this;
