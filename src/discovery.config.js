@@ -194,7 +194,8 @@ require.config({
     'select2' : 'libs/select2/select2',
     'squire': '../bower_components/squire/src/Squire',
     'clipboard': 'libs/clipboard/clipboard',
-    'es5-shim' : 'libs/es5-shim/es5-shim'
+    'es5-shim' : 'libs/es5-shim/es5-shim',
+    'mathjax' : '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&amp;delayStartupUntil=configured'
 
   },
 
@@ -224,7 +225,6 @@ require.config({
     'backbone': {
       // These are the two hard dependencies that will be loaded first.
       deps: ['jquery', 'underscore']
-
     },
 
     marionette : {
@@ -260,6 +260,26 @@ require.config({
 
     'persist-js': {
       exports: 'Persist'
+    },
+
+    mathjax: {
+        exports: "MathJax",
+        init: function () {
+          MathJax.Hub.Config({
+            HTML: ["input/TeX","output/HTML-CSS"],
+            TeX: { extensions: ["AMSmath.js","AMSsymbols.js"],
+              equationNumbers: { autoNumber: "AMS" } },
+            extensions: ["tex2jax.js"],
+            jax: ["input/TeX","output/HTML-CSS"],
+            tex2jax: { inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+              displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+              processEscapes: true },
+            "HTML-CSS": { availableFonts: ["TeX"],
+              linebreaks: { automatic: true } }
+          });
+          MathJax.Hub.Startup.onload();
+          return MathJax;
+        }
     }
   },
 

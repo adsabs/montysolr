@@ -5,7 +5,8 @@ define([
     'js/components/api_query',
     'js/widgets/base/base_widget',
     'hbs!./templates/item-template',
-    'analytics'
+    'analytics',
+    'mathjax'
   ],
 
   function (
@@ -15,7 +16,8 @@ define([
             ApiQuery,
             BaseWidget,
             ItemTemplate,
-            analytics
+            analytics,
+            MathJax
     ) {
 
     var ItemView = Marionette.ItemView.extend({
@@ -40,6 +42,10 @@ define([
           this.$el.empty();
         }
         return this;
+      },
+
+      onRender : function(){
+        if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
       },
 
       events: {

@@ -12,7 +12,8 @@ define([
     'js/components/api_query',
     'js/mixins/link_generator_mixin',
     'js/mixins/papers_utils',
-    'bootstrap'
+    'mathjax',
+    'bootstrap',
   ],
   function (
     Marionette,
@@ -24,7 +25,10 @@ define([
     abstractTemplate,
     ApiQuery,
     LinkGeneratorMixin,
-    PapersUtils
+    PapersUtils,
+    MathJax,
+    Bootstrap
+
     ) {
 
     var AbstractModel = Backbone.Model.extend({
@@ -148,6 +152,7 @@ define([
 
       onRender : function(){
         this.$(".icon-help").popover({trigger : "hover", placement : "right", html :true});
+        if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
       }
 
     });
