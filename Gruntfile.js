@@ -815,7 +815,13 @@ module.exports = function(grunt) {
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-    ['install-dependencies', 'bower-setup', '_conditional_copy', 'copy:libraries', 'sass', 'curl:google-analytics']);
+    ['install-dependencies',
+      'bower-setup',
+      '_conditional_copy',
+      'copy:libraries',
+      'sass',
+      'curl:google-analytics'
+    ]);
 
   grunt.registerTask('_conditional_copy', function() {
     if (!grunt.file.exists('src/discovery.vars.js')) {
