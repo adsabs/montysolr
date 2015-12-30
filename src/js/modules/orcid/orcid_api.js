@@ -83,7 +83,7 @@ define([
         this.profile = {};
         this.checkInterval = 3600 * 1000;
         this.virgin = true;
-        this.maxQuerySize = 512;
+        this.maxQuerySize = 100;
         this.queryUpdater = new ApiQueryUpdater('orcid_api');
         this.orcidApiTimeout = 5000; //5seconds
       },
