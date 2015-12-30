@@ -17,7 +17,8 @@ define([
     'hbs!./templates/empty-view-template',
     'hbs!./templates/initial-view-template',
     './item_view',
-    'analytics'
+    'analytics',
+    'mathjax'
   ],
 
   function (
@@ -34,7 +35,8 @@ define([
             EmptyViewTemplate,
             InitialViewTemplate,
             ItemView,
-            analytics
+            analytics,
+            MathJax
     ) {
 
 
@@ -86,8 +88,11 @@ define([
         this.InitialViewClass = Marionette.ItemView.extend({
           template: InitialViewTemplate
         });
-
       },
+
+      onRender : function(){
+          if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
+        },
 
       className: "list-of-things",
       childView: ItemView,

@@ -45,6 +45,8 @@ define([
       },
 
       onRender : function(){
+        //this is necessary on every render after the initial one, since the
+        //containe rview also calls mathjax initially
         if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
       },
 
