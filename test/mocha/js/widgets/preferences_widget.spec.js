@@ -37,7 +37,8 @@ define([
       };
 
 
-    it("should have a model that contains updated myads data and a collection of openurl endpoints", function(){
+
+    it("should initialize with correct user vals + should listen to user change events", function(){
 
       var p = new PreferencesWidget();
 
@@ -49,8 +50,10 @@ define([
 
       var fakeUser = {
         getHardenedInstance : function(){return this},
-        getMyADSData : function() {
-          return  fakeMyADS;
+        getUserData : function() {
+          return  {
+            link_server : "minnesota_state.edu"
+          };
         },
         getOpenURLConfig : function(){
           var d = $.Deferred();
@@ -59,7 +62,6 @@ define([
 
         },
         USER_INFO_CHANGE: User.prototype.USER_INFO_CHANGE,
-        getUserData : function() {return {}}
       };
 
       var fakeOrcid = {
@@ -71,8 +73,6 @@ define([
       minsub.beehive.addObject("User", fakeUser);
 
       p.activate(minsub.beehive.getHardenedInstance());
-
-      minsub.publish(minsub.APP_STARTED);
 
       expect(p.model.get("openURLConfig")).to.eql([
         {
@@ -87,11 +87,17 @@ define([
           "name": "wesleyan university",
           "link": "wesleyan.edu"
         }
-        ]);
+      ]);
 
+      expect(p.model.get("link_server")).to.eql("minnesota_state.edu");
+
+      //send new link server info in change event
       minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, fakeMyADS);
 
+      expect(p.model.get("link_server")).to.eql("wesleyan.edu");
+
       expect(JSON.stringify(p.model.toJSON())).to.eql('{"openURLConfig":[{"name":"ohio wesleyan","link":"ohio_wesleyan.edu"},{"name":"virginia wesleyan","link":"virginia_wesleyan.edu"},{"name":"wesleyan university","link":"wesleyan.edu"}],"link_server":"wesleyan.edu","anotherVal":"foo"}');
+
 
     });
 
@@ -349,8 +355,8 @@ define([
 
       var fakeUser = {
         getHardenedInstance : function(){return this},
-        getMyADSData : function() {
-          return  fakeMyADS;
+        getUserData : function() {
+          return  fakeMyADS
         },
         getOpenURLConfig : function() {
           var d = $.Deferred();
