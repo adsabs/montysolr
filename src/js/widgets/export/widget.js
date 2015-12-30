@@ -280,6 +280,9 @@ define([
         else {
           throw new Error("can't export with no bibcodes or query");
         }
+
+        //finally, close export widget and return to results page
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
       },
 
       /**
