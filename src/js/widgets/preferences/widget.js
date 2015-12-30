@@ -83,6 +83,9 @@ define([
         that.model.set("openURLConfig", config);
       });
 
+      //and the user data (which contains user's open url selection)
+      this.model.set(this.getBeeHive().getObject("User").getUserData());
+
     },
 
     //translates what comes from toc widget (e.g. userPreferences__orcid) to view name
