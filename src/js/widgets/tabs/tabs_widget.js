@@ -56,7 +56,6 @@ define([
         this.beforeRender();
       }
       this.trigger("before:render", this);
-      this.trigger("before:render", this);
 
       var $tempEl = $(outerTemplate());
       var $nav = $tempEl.find("ul.nav"),
@@ -70,6 +69,7 @@ define([
 
       this.$el.html($tempEl.html());
       _.each(this.tabs, function (t) {
+        //attaching the html of child widgets
         this.$("#" + t.id).append(t.widget.getEl());
       }, this);
 
@@ -78,7 +78,6 @@ define([
       if (this.onRender) {
         this.onRender();
       }
-      this.trigger("render", this);
       this.trigger("render", this);
       return this;
 
@@ -93,7 +92,15 @@ define([
           t.widget.remove();
         }
       }, this)
+    },
 
+    getEl : function(){
+      if ( this.el && this.$el.children().length ){
+        return this.el
+      }
+      else {
+        return this.render().el;
+      }
     }
 
   });
