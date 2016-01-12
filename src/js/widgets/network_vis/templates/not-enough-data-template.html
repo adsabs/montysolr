@@ -1,5 +1,10 @@
 <div class="col-xs-12">
-    <p>  There wasn't enough data returned by your search to form a visualization.</p>
+    <br>
+    <p>  The network grouping algorithm could not generate group data for your network.</p>
+    <p> This might be because the list of papers was too small or sparse to produce multiple meaningful groups.</p>
+    <p><a href="https://adsabs.github.io/help/actions/visualize/">
+        Learn more about how ADS networks are created and how they can be used.
+    </a></p>
 
     {{#if cachedQuery}}
     <button class="btn btn-default load-author-network" data-query="{{cachedQuery}}">
