@@ -205,13 +205,14 @@ define([
             // now we have to identify the remaining parts
             var filteredKeys = _.filter(keys, function(x) {if (x.indexOf(k) > -1 && x !== k) return true;})
 
-            if (filteredKeys.length != 1) {
-              console.error('We cant identify the parts of:', k, 'found:', filteredKeys)
-              return; // the query is incomplete (or there are too many ambiguous partss), give up
+            if (filteredKeys.length == 1) {
+              oneFilter.filter_key = filteredKeys[0];
+              oneFilter.filter_value = data[filteredKeys[0]];
+            }
+            else {
+              console.warn("no fq metadata available, so presumably query is being loaded from url (if not, there is a problem!) ")
             }
 
-            oneFilter.filter_key = filteredKeys[0];
-            oneFilter.filter_value = data[filteredKeys[0]];
             filters.push(oneFilter);
           }
         }, this);
@@ -307,6 +308,7 @@ define([
       },
 
       _prepareGUIDataWithoutOperators: function(filters) {
+
         var guiData = [];
         _.each(filters, function(filter) {
           var oneFilter = [];
@@ -316,11 +318,14 @@ define([
             value: filter.filter_name + '|category|' + filter.category
           });
 
-          // if there are too many elements, just show one value 'x custom values'
-          if (filter.filter_value.length-1 > this.maxNumberOfTokens || filter.filter_value.join(' ').length > this.maxQueryLen) {
+          // if there are too many elements (or we're missing data bc we loaded from url), just show one value 'x custom values'
+          if ( !filter.filter_value ||
+                filter.filter_value.length-1 > this.maxNumberOfTokens ||
+                filter.filter_value.join(' ').length > this.maxQueryLen
+            ) {
             oneFilter.push({
               type: 'operand',
-              display: 'custom query',
+              display: 'custom filter',
               value: filter.filter_name + '|control|x'
             });
             guiData.push({elements: oneFilter});
