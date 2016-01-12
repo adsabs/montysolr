@@ -117,7 +117,7 @@ define([
         q: query
       });
 
-      this.getPubSub().publish(this.getPubSub().pubsub.START_SEARCH, newQuery);
+      this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
 
     },
 
