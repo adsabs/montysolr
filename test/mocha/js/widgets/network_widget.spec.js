@@ -1701,13 +1701,13 @@ define([
     var j = new JsonResponse(testDataSmall);
     j.setApiQuery(apiQuery);
     networkWidget.processResponse(j);
-    expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
+    expect($("#test").find(".network-container").text().trim()).to.eql('The network grouping algorithm could not generate group data for your network.\n     This might be because the list of papers was too small or sparse to produce multiple meaningful groups.\n    \n        Learn more about how ADS networks are created and how they can be used.')
 
     var j = new JsonResponse(testDataEmpty);
     j.setApiQuery(apiQuery);
     //this should also show not enough data template
     networkWidget.processResponse(j);
-    expect($("#test").find(".network-container").text().trim()).to.eql("There wasn't enough data returned by your search to form a visualization.")
+    expect($("#test").find(".network-container").text().trim()).to.eql('The network grouping algorithm could not generate group data for your network.\n     This might be because the list of papers was too small or sparse to produce multiple meaningful groups.\n    \n        Learn more about how ADS networks are created and how they can be used.')
 
 
     var j = new JsonResponse(testDataLarge);
