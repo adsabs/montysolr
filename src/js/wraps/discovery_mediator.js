@@ -170,15 +170,16 @@ define([
                   self.getPubSub().publish(self.getPubSub().START_SEARCH, apiRequest.get('query'));
                 }, fail: function() {
                   alerts.alert(new ApiFeedback({
-                    msg: "I'm sorry, you don't have access rights to query: " + apiRequest.get('target'),
-                    modal: true
+                    msg: "Sorry, at the moment we can't connect to : " + apiRequest.get('target'),
+                    modal: true,
+                    type: "danger"
                   }));
                 }});
               })
               .fail(function() {
                 alerts.alert(new ApiFeedback({
                   code: ApiFeedback.CODES.DANGER,
-                  msg: 'There is a problem with our API, it does not respond to queries, very sad day for me...please retry later.',
+                  msg: 'Our API is currently not responding to queries. Please try again later.',
                   modal: true
                 }));
               });
