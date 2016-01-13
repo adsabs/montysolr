@@ -83,13 +83,13 @@ define(['underscore',
         }
 
         //router can communicate directly with navigator to replace url
-        var replace = arg1 && arg1.replace ? true : false;
+        var replace = ( transition.replace || arg1 && arg1.replace ) ? true : false;
 
         if (transition.route || transition.route === "") {
           // update the History object
           this.router.navigate(
-            transition.route,
-            {trigger: transition.trigger || false, replace: replace || transition.replace || false}
+              transition.route,
+              { trigger: transition.trigger || false, replace: replace }
           );
         }
       },
