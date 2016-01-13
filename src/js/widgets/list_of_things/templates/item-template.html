@@ -213,18 +213,18 @@
 
     <div class="row abstract-row">
         {{#if showAbstract}}
-        <div class="col-xs-10 col-xs-offset-1 s-more-info">
+        <div class="col-xs-9 col-xs-offset-1 s-more-info">
                 {{#if abstract}}
                     <h4 aria-label="read full abstract below"><a href="#abs/{{identifier}}">Abstract</a></h4>
                     {{#if shortAbstract}}
 
                     <div class="short-abstract" aria-label="a truncated version of the abstract">
                         {{shortAbstract}}
-                        <button class="btn btn-xs btn-default show-full-abstract">more</button>
+                        &nbsp; <button class="btn btn-xs btn-default show-full-abstract">more</button>
                     </div>
                     <div class="full-abstract hidden">
                         {{ abstract }}
-                        <button class="btn btn-xs btn-default hide-full-abstract">less</button>
+                        &nbsp; <button class="btn btn-xs btn-default hide-full-abstract">less</button>
                     </div>
                     {{else}}
                         <!--the abstract is short enough to be shown all at once-->

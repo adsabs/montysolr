@@ -79,7 +79,7 @@
 }
 
 .s-identifier a {
-  color: $gray-dark;
+  color: $text-color;
 }
 
 .just-authors {
@@ -106,16 +106,18 @@
 .s-results-title {
   margin-top: -3px;
   margin-bottom: 4px;
-  font-size:17px;
+  font-size:16px;
   /*need to investigate why this gets overridden in the case of 2 links*/
   color: $brand-primary;
   font-weight: 500;
   line-height: 1.2;
+  letter-spacing: .01em;
+  word-spacing: .05em;
+
 }
 
 .s-results-authors {
   padding-left: .5%;
-  font-size:16px;
 }
 
 .s-highlight-list {
@@ -130,9 +132,8 @@
 
   border-left: 6px solid $gray-lighter;
   padding: 5px 0 0 2%;
-  margin-left: 11.8%;
+  margin-left: 10.8%;
   margin-top: 10px;
-  font-weight: 300;
 
   //for highlights
   .s-search-snippets
@@ -169,15 +170,10 @@
     margin: 0px 0 4px 0;
     //targeting only the "Abstract" link
     a{
-      color: darken($brand-primary, 8%);
+      color: $brand-primary;
       font-weight: 500;
     }
   }
-
-  p {
-    font-weight: 300;
-  }
-
 
   i.s-no-data {
     position: relative;
@@ -209,7 +205,6 @@
 
 .s-results-list {
 
-
   padding-left: 2%;
   label {
     font-weight: initial
@@ -217,7 +212,7 @@
 
   //represents an individual entry
   li > div {
-    padding:.5em 0;
+    padding: .3em 0;
     border-left: 5px solid #fff;
 
     &.chosen {
@@ -264,7 +259,6 @@ li.article-author {
   padding-left: 2px;
   padding-right: 2px;
   font-weight: 400;
-  font-size: 16px;
 }
 
 
