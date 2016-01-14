@@ -85,7 +85,7 @@ define([
         this.virgin = true;
         this.maxQuerySize = 100;
         this.queryUpdater = new ApiQueryUpdater('orcid_api');
-        this.orcidApiTimeout = 5000; //5seconds
+        this.orcidApiTimeout = 30000; //30seconds
       },
 
       activate: function (beehive) {
