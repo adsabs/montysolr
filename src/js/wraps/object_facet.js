@@ -55,7 +55,12 @@ define([
 			this.getSIMBADobjects(identifiers);
 		};
 		var updater = function(model) {
-			var objId = model.get('objid');
+			var v = model.get('value');
+			var objId;
+			if (v.charAt(0)==='1') {
+				var vv = v.split("/");
+				var objId = vv[vv.length-1];
+			}
 			var title = model.get('title');
 			if (objId && objId != title && D[objId.toString()]) {
 			 	model.set('title', D[objId.toString()]['canonical'])
@@ -64,7 +69,7 @@ define([
 		if (this.collection && this.collection.length > 0) {
 			this.collection.each(updater);
 		};
-		this.collection.models.forEach(updater);
+//		this.collection.models.forEach(updater);
         var facetCollection = this.processFacets(apiResponse, facets);
         this.updateCollectionAndView(info, facetCollection);
 	};
