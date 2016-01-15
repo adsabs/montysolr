@@ -161,7 +161,7 @@ define([
 
           case "navigate:library":
             //where arg1 = library's id
-            this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {sub : "library", id : arg1});
+            this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {subView : "library", id : arg1});
             break
         }
 

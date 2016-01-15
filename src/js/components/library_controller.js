@@ -43,9 +43,7 @@ define([
     });
 
     var LibraryCollection = Backbone.Collection.extend({
-
       model : LibraryModel
-
     });
 
 
@@ -192,9 +190,7 @@ define([
             });
 
           }
-
           makeRequest.call(this);
-
         }
         else if (options.bibcodes == "selected"){
 
@@ -225,18 +221,10 @@ define([
 
       },
 
-      _dataLoaded : false,
-
-
       /*
        * public methods
        *
        */
-
-      isDataLoaded : function(){
-        return this._dataLoaded;
-      },
-
 
       getAllMetadata : function(){
         return this.collection.toJSON();
@@ -435,8 +423,6 @@ define([
         updateLibraryContents : "updateLibraryContents",
 //      updateLibraryPermissions : "updateLibraryPermissions",
         updateLibraryMetadata : "updateLibraryMetadata",
-
-        isDataLoaded : "tells if initial load event has happened"
       }
 
     });

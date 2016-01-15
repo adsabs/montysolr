@@ -138,23 +138,21 @@ define([
     highlightTab : function(){
 
       this.$(".tab.active").removeClass("active");
-
       //find the proper tab
       var activeString = this.model.get("active").split("-")[0];
-
-      var $active = this.$("li[data-tab=" + activeString + "]")
+      var $active = this.$("li[data-tab^=" + activeString + "]");
 
       if ($active.hasClass("tab")){
         $active.addClass("active");
       }
       else {
         //it's a dropdown, go up a level
-        $active.parents().eq(1).addClass("active");
+        $active.eq(0).parent().prev().parent().addClass("active");
       }
-
     },
 
     triggerSubviewNavigate : function(e){
+
       var $current = $(e.currentTarget),
         subView  = $current.data("tab");
 

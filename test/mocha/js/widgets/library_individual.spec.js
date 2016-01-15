@@ -171,8 +171,8 @@ define([
         "name": "fake",
         "num_documents": 3,
         "num_users": 1,
-        "owner": "aholachek",
-        "permission": "owner",
+        "owner": "foobar",
+        "permission": "read",
         "public": false
       },
       "solr": {
@@ -299,13 +299,42 @@ define([
       }
     };
 
+    var stubData3  = {
+      "documents": [],
+      "metadata": {
+        "date_created": "2015-08-06T17:13:10.830175",
+        "date_last_modified": "2015-08-06T19:12:42.261850",
+        "description": "My ADS library",
+        "id": "ieW0QRG-QSeNNXLjgGNjhg",
+        "name": "test test tess",
+        "num_documents": 0,
+        "num_users": 1,
+        "owner": "aholachek",
+        "permission": "owner",
+        "public": true
+      },
+      "solr": {
+        "response": {
+          "docs": [],
+          "numFound": 3,
+          "start": 0
+        }
+      },
+
+      "updates": {
+        "duplicates_removed": 0,
+        "num_updated": 0,
+        "update_list": []
+      }
+    };
+
 
 
     var fakeLibraryController =   {
       getHardenedInstance : function(){return this},
       getAllMetadata : sinon.spy(function(){return stubLibraryMetadata}),
       isDataLoaded : function(){return true},
-      getLibraryData : sinon.spy(function(id ){ var d =  $.Deferred(); if(id==1){d.resolve(stubData1)} else {d.resolve(stubData2)}; return d.promise() }),
+      getLibraryData : sinon.spy(function(id ){ var d =  $.Deferred(); if(id==1){d.resolve(stubData1)} else if (id == 2) {d.resolve(stubData2)} else if (id==3){d.resolve(stubData3)}; return d.promise() }),
       updateLibraryContents : function(updateData){var d = $.Deferred(); d.resolve(_.extend({name: "Aliens Among Us", id: 1, description: "Are you one of them?", permission : "owner", num_papers : 45, date_created: '2015-04-03 04:30:04', date_last_modified: '2015-04-09 06:30:04'}, updateData )); return d},
       updateLibraryMetadata : sinon.spy(function(updateData){
         var d = $.Deferred();
@@ -318,7 +347,6 @@ define([
     afterEach(function(){
       $("#test").empty();
     });
-
 
 
     it("should display different header views depending on a person's permissions, allowing admin/owners to edit title/description ", function(){
@@ -342,7 +370,7 @@ define([
       expect(fakeLibraryController.getLibraryData.callCount).to.eql(0);
       expect(fakeLibraryController.getAllMetadata.callCount).to.eql(0);
 
-      w.setSubView({view : "library", id : "1"});
+      w.setSubView({subView : "library", id : "1"});
 
       expect(fakeLibraryController.getLibraryData.callCount).to.eql(1);
       expect(fakeLibraryController.getAllMetadata.callCount).to.eql(1);
@@ -370,9 +398,11 @@ define([
 
       //neither above are possible if you dont have admin privileges,
       //the data sent back by stub function will have "read" permisions
-      w.setSubView({view : "library", id : "3"});
+      w.setSubView({subView : "library", id : "2" });
 
-      expect($("#test .s-library-title h2").attr("contenteditable")).to.be.undefined;
+      //no edit privileges
+      expect($("#test .header h2 button").length).to.eql(0)
+      expect($("#test .header div[data-field=description]").length).to.eql(0)
 
       expect($("#test .tab[data-tab=admin]").length).to.eql(0);
 
@@ -400,12 +430,11 @@ define([
       expect(fakeLibraryController.getLibraryData.callCount).to.eql(2);
       expect(fakeLibraryController.getAllMetadata.callCount).to.eql(2);
 
-      w.setSubView({id: "1", view: "library", publicView: true});
+      w.setSubView({id: "1", subView: "library", publicView: true});
 
       expect(fakeLibraryController.getLibraryData.callCount).to.eql(3);
       //should grab the metadata from the getLibraryData function rather than getAllMetadata if public library
       expect(fakeLibraryController.getAllMetadata.callCount).to.eql(2);
-
 
 
     });
@@ -432,7 +461,7 @@ define([
 
       $("#test").append(w.getEl());
 
-      w.setSubView({view:"library", id : "1"});
+      w.setSubView({subView:"library", id : "1"});
 
       //navigating to permissions
 
@@ -445,11 +474,15 @@ define([
         "[Router]-Navigate-With-Trigger",
         "IndividualLibraryWidget",
         {
-          "sub": "admin",
+          "subView": "admin",
           "id": "1",
           "publicView": false
         }
       ]);
+
+      w.setSubView({ subView : "admin"});
+
+      expect($("li.tab.active").data("tab")).to.eql("admin");
 
       $("#test li[data-tab=export-bibtex]").click();
 
@@ -463,12 +496,16 @@ define([
             "2015IAUGA..2257768A",
             "2015IAUGA..2257982A"
           ],
-          "sub": "bibtex",
+          "subView": "bibtex",
           "id": "1",
           "publicView": false
         }
       ]);
 
+      w.setSubView({ subView : "export"});
+
+
+      expect($("li.tab.active").find(".dropdown-menu li").eq(0).data("tab")).to.eql("export-bibtex");
 
       $("#test .tab[data-tab=metrics]").click();
 
@@ -484,10 +521,13 @@ define([
           ],
           "id": "1",
           "publicView": false,
-          "sub" : undefined
+          "subView" : undefined
         }
       ]);
 
+      w.setSubView({ subView : "metrics"});
+
+      expect($("li.tab.active").data("tab")).to.eql("metrics");
 
       $("#test li[data-tab=visualization-AuthorNetwork]").click();
 
@@ -500,18 +540,21 @@ define([
             "2015IAUGA..2257768A",
             "2015IAUGA..2257982A"
           ],
-          "sub": "AuthorNetwork",
+          "subView": "AuthorNetwork",
           "id": "1",
           "publicView": false
         }
       ]);
 
+      w.setSubView({ subView : "visualization"});
+      expect($("li.tab.active").find(".dropdown-menu li").eq(0).data("tab")).to.eql("visualization-AuthorNetwork");
+
+
 
       //none of these options are available if the library has 0 bibcodes
-      w.setSubView({view : "library", id : "2"});
+      w.setSubView({subView : "library", id : "3"});
 
       //export, metrics, vis disabled
-
       expect($("#test li[data-tab=export-bibtex]").length).to.eql(0);
       expect($("#test li[data-tab=metrics]").length).to.eql(0);
       expect($("#test li[data-tab=visualization-AuthorNetwork]").length).to.eql(0);
@@ -537,7 +580,7 @@ define([
 
       w.activate(minsub.beehive.getHardenedInstance());
 
-      w.setSubView({view : "library", id : "1"});
+      w.setSubView({subView : "library", id : "1"});
 
       //updateView will be called 1x
       expect(LibraryWidget.prototype.updateWidget.callCount).to.eql(1);
@@ -552,12 +595,21 @@ define([
 
       //doesn't have ability to delete records
 
-      w.setSubView({view : "library", id : "3"});
+      w.setSubView({subView : "library", id : "3"});
 
       expect($("#test .library-item:first").find("button.remove-record").length).to.eql(0);
 
-      LibraryWidget.prototype.updateWidget.restore();
+      //should switch collections in and out
+      w.setSubView({subView : "library", id : "1"});
+      expect(JSON.stringify(w.libraryCollection.pluck("bibcode"))).to.eql('["2015IAUGA..2257639R","2015IAUGA..2257768A","2015IAUGA..2257982A"]');
 
+      w.setSubView({subView : "library", id : "2"});
+      expect(JSON.stringify(w.libraryCollection.pluck("bibcode"))).to.eql('["2015arXiv150508012D","2015APS..MAR.L8004M","2015APS..MAR.L8003E"]')
+
+      w.setSubView({subView : "library", id : "1"});
+      expect(JSON.stringify(w.libraryCollection.pluck("bibcode"))).to.eql('["2015IAUGA..2257639R","2015IAUGA..2257768A","2015IAUGA..2257982A"]');
+
+      LibraryWidget.prototype.updateWidget.restore();
 
     });
 
@@ -577,7 +629,7 @@ define([
 
       $("#test").append(w.render().el);
 
-      w.setSubView({view : "library", id : "1"});
+      w.setSubView({subView : "library", id : "1"});
 
       var publishStub = sinon.stub(w.getPubSub(), "publish");
 
@@ -613,7 +665,7 @@ define([
 
       $("#test").append(w.getEl());
 
-      w.setSubView({view : "library", id : "1"});
+      w.setSubView({subView : "library", id : "1"});
 
       //should be default sorted on pubdate
 
@@ -644,7 +696,6 @@ define([
 
     it("should have an admin view that allows you to change the public/private status of your library", function(){
 
-
       var w = new LibraryWidget();
 
       var minsub = new (MinSub.extend({
@@ -659,14 +710,7 @@ define([
 
       $("#test").append(w.getEl());
 
-
-      w.setSubView({id : "1"});
-      //shows library view first
-
-      //now change to admin view
-
-      w.setSubView({view :"admin"});
-
+      w.setSubView({ subView :"admin", id : "1", publicView : false });
 
       $("#test .public-button").click();
 
@@ -676,8 +720,6 @@ define([
           "public": true
         }
       ]);
-
-
 
     });
 
