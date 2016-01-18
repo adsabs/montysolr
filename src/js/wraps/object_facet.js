@@ -99,7 +99,7 @@ define([
             contentType : "application/json"
 		  }
         });
-		pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processFacetResponse);
+//		pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processFacetResponse);
 		pubsub.publish(pubsub.EXECUTE_REQUEST, request);
     };
     return widget;
