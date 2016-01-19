@@ -24,7 +24,7 @@
 
     <!-- tabs -->
     {{#compare num_documents 0 operator=">"}}
-        <ul class="s-library-nav-tabs">
+        <ul class="s-library-nav-tabs" style="position:relative;top:40px;">
             <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
             <li class="tab s-tab dropdown {{#compare active 'export'}} active {{/compare}}">
                 <a data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
@@ -35,6 +35,7 @@
                     <li data-tab="export-bibtex">BibTEX</li>
                     <li data-tab="export-aastex">AASTex</li>
                     <li data-tab="export-endnote">EndNote</li>
+                    <li data-tab="export-classic">ADS Classic</li>
                 </ul>
             </li>
             <li class="tab s-tab  {{#compare active 'metrics'}} active {{/compare}}" data-tab="metrics"><i class="icon-explore"></i> Metrics </li>
@@ -44,14 +45,11 @@
                     <span class="fa fa-lg fa-caret-down"></span>
                 </div>
                 <ul class="dropdown-menu" role="menu">
-                    <li>Coming soon:</li>
-                    <li data-tab="visualization-authornetwork">Author Network</li>
-                    <li data-tab="visualization-papernetwork">Paper Network</li>
-                    <li data-tab="visualization-wordcloud">Word Cloud</li>
-                    <li data-tab="visualization-bubble">Bubble Chart</li>
-
+                    <li data-tab="visualization-AuthorNetwork">Author Network</li>
+                    <li data-tab="visualization-PaperNetwork">Paper Network</li>
+                    <li data-tab="visualization-ConceptCloud">Concept Cloud <small>(currently limited to first 100 records)</small></li>
+                    <!--<li data-tab="visualization-BubbleChart">Bubble Chart</li>-->
                 </ul>
-
             </li>
         </ul>
     {{else}}
@@ -176,7 +174,6 @@
                 <li data-tab="export-aastex">AASTex</li>
                 <li data-tab="export-endnote">EndNote</li>
                 <li data-tab="export-classic">ADS Classic</li>
-
             </ul>
         </li>
         <li class="tab s-tab  {{#compare active 'metrics'}} active {{/compare}}" data-tab="metrics"><i class="icon-explore"></i> Metrics </li>
@@ -189,9 +186,8 @@
                 <li data-tab="visualization-AuthorNetwork">Author Network</li>
                 <li data-tab="visualization-PaperNetwork">Paper Network</li>
                 <li data-tab="visualization-ConceptCloud">Concept Cloud <small>(currently limited to first 100 records)</small></li>
-                <li data-tab="visualization-BubbleChart">Bubble Chart</li>
+                <!--<li data-tab="visualization-BubbleChart">Bubble Chart</li>-->
             </ul>
-
         </li>
     </ul>
 

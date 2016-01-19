@@ -42,7 +42,7 @@ define([
       defaults : function(){
         return {
           id : undefined,
-          view : undefined,
+          subView : undefined,
           publicView : false
         }
       }
@@ -83,13 +83,6 @@ define([
         else if (info.ev == "change" &&  info.id ==  this.model.get("id")){
           this.syncHeader(collectionJSON);
         }
-        //this is a bit inexact: reset could have occured because initial library collection was loaded
-        // (in which case we need to update view and sub view)
-        //or it could have been a library added event, which we dont care about
-        //revisit later
-        else if (info.ev == "reset"){
-          this.updateWidget();
-        }
       },
 
       //called when ID changes
@@ -113,14 +106,9 @@ define([
         //which will call createHeader
         if (this.model.get("publicView")) return;
 
-        //PRIVATE LIBRARY
-        if (!LibraryController.isDataLoaded()){
-          //wait for LIBRARY_CHANGE event
-          return
-        }
-
         // could be for any view -- library, export, metrics, etc--so insert
         // the correct header now
+        //we will re-render when we get library info, but header will be visible for loading time
 
         var metadata = _.findWhere(LibraryController.getAllMetadata(), {id : id});
         this.createHeader(metadata);
@@ -130,10 +118,9 @@ define([
       createHeader : function(metadata){
 
         var that = this;
-
         //updating header
         that.headerModel.set(_.extend(metadata,
-          { active : that.model.get("view"),
+          { active : that.model.get("subView"),
             publicView : that.model.get("publicView")
           }
         ));
@@ -147,28 +134,25 @@ define([
       //respond to library_collection change event
 
       syncHeader : function(data){
-
         var currentLibMetadata = _.findWhere(data, {id : this.model.get("id")});
         this.headerModel.set(currentLibMetadata);
         //only needs to render if it's currently in the DOM
         if (this.view.header.currentView && $("body").find(this.view.header.currentView.el).length > 0){
           this.view.header.currentView.render();
         }
-
       },
 
       updateSubView : function(){
 
         var that = this,
             id = this.model.get("id"),
-            view = this.model.get("view"),
+            view = this.model.get("subView"),
             LibraryController = that.getBeeHive().getObject("LibraryController");
 
         if (!id || !view){
           console.warn("library widget's updateSubView called without requisite library id and view name");
           return
         }
-
         //let header model know
         that.headerModel.set("active", view);
 
@@ -182,22 +166,15 @@ define([
 
             subView.on("all", that.handleLibraryEvents, that);
 
-            //check to see if we already have records for a private lib, if not, fetch them
-            if (!public && this.libraryCollection.length == 0 && this.headerModel.get("num_documents") !== 0) {
-              //add the loading view
+            //collection is  already loaded, just show the view
+            if (this.libraryCollection.length) that.view.main.show(subView);
+
+            //load the collection + then show the view
+            if (this.libraryCollection.length === 0){
+
               that.view.main.show(new LoadingView());
-              //now fetch the data
               LibraryController.getLibraryData(id).done(function (data) {
-                that.libraryCollection.reset(data.solr.response.docs);
-                //remove the loading view
-                that.view.main.show(subView);
-              });
-            }
-            else if (public){
-              //add the loading view
-              that.view.main.show(new LoadingView());
-              //now fetch the data
-              LibraryController.getLibraryData(id).done(function (data) {
+
                 that.createHeader(data.metadata);
                 that.libraryCollection.reset(data.solr.response.docs);
                 //remove the loading view
@@ -206,11 +183,7 @@ define([
                 //the collection wasn't public
                 that.getPubSub().publish(that.getPubSub().NAVIGATE, "404");
               });
-            }
-            else {
-              //just show the view, presumably user is navigating back to list view
-              //after already having been there (for this library)
-              that.view.main.show(subView);
+
             }
             break;
 
@@ -245,13 +218,12 @@ define([
 
       setSubView  : function(data) {
 
-        data.view = data.view ? data.view : "library";
-
-        //could contain "view", "id", and/or "publicView"
+        //data must have {id : X, subview : X, publicView : X}
+        data = _.extend({ subView : "library", publicView : false }, data);
         this.model.set(data);
 
-        //if id changed, library changed --> need to destroy everything and start again
-        if (this.model.changedAttributes().hasOwnProperty("id")) {
+        //if id or publicView changed, library changed --> need to destroy everything and start again
+        if (this.model.changedAttributes().hasOwnProperty("id") ||  this.model.changedAttributes().hasOwnProperty("publicView")) {
           //this calls both switchToNewLib and updateSubView
           this.updateWidget();
         }
@@ -265,7 +237,6 @@ define([
         var that = this;
 
         switch (event) {
-
           case "removeRecord":
             //from library list view
             var data = {bibcode : [arg1], action : "remove"},
@@ -278,7 +249,6 @@ define([
               });
             break;
         }
-
       },
 
       handleAdminEvents : function (event, arg1, arg2) {
@@ -327,17 +297,15 @@ define([
 
           case "navigate":
             //set the proper view value into the model
-            this.model.set("view", arg1);
-
+            this.model.set("subView", arg1);
             var other = ["export", "metrics", "visualization"];
             var publicView = this.model.get("publicView");
             if (_.contains(other, arg1)){
-
               var command =  "library-" + arg1;
-              pubsub.publish(pubsub.NAVIGATE, command, {bibcodes : this.libraryCollection.pluck("bibcode"), sub : arg2, id : id, publicView : publicView});
+              pubsub.publish(pubsub.NAVIGATE, command, {bibcodes : this.libraryCollection.pluck("bibcode"), subView : arg2, id : id, publicView : publicView});
             }
             else {
-              pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", { sub : arg1, id : id, publicView : publicView });
+              pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", { subView : arg1, id : id, publicView : publicView });
             }
             break
 

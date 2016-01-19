@@ -287,21 +287,17 @@ define([
           var subView = subView || "library";
           if (_.contains(["library", "admin"], subView )){
 
-            this.routerNavigate('IndividualLibraryWidget', {sub : subView, id : id});
+            this.routerNavigate('IndividualLibraryWidget', {subView : subView, id : id});
           }
           else if(_.contains(["export", "metrics", "visualization"], subView)) {
 
             subView = "library-" + subView;
 
             if (subView == "library-export"){
-              this.routerNavigate(subView, {sub : subData || "bibtex", id : id});
+              this.routerNavigate(subView, {subView : subData || "bibtex", id : id});
             }
             else if (subView == "library-metrics"){
               this.routerNavigate(subView, { id : id});
-
-            }
-            else if (subView == "library-visualization"){
-              //not implemented yet
             }
 
           }
@@ -317,7 +313,7 @@ define([
 
       publicLibraryPage : function (id){
         //main libraries view
-        this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, sub : "library"});
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {id : id, publicView : true, subView : "library"});
       },
 
       homePage : function(subView){

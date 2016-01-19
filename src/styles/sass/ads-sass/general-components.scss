@@ -113,14 +113,13 @@ body {
 .s-tab {
   display:inline-block;
   text-align: center;
-  width: 180px;
-  font-size: 20px;
+  width: 160px;
+  font-size: 18px;
   margin-top: 20px;
   cursor: pointer;
   font-weight: 300;
   padding: 5px;
   border-bottom: 3px solid transparent;
-;
 
   &:hover {
     border-bottom: 4px solid lighten($brand-primary-faded, 30%);
@@ -158,7 +157,6 @@ body {
 
 .s-tab.active{
   border-bottom: 4px solid $brand-primary-faded;
-  color:  $brand-primary-faded;
   a {
     color:  $brand-primary-faded;
   }

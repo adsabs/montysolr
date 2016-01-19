@@ -46,7 +46,6 @@ define([
         "deleteLibrary",
         "updateLibraryContents",
         "updateLibraryMetadata",
-        "isDataLoaded",
         "__facade__",
         "mixIn"
       ]);
@@ -136,14 +135,9 @@ define([
       ]);
 
       expect(l.collection.get(2).get("name")).to.eql("nothing sun");
-
       expect(l.collection.get(7).get("num_documents")).to.eql(4000);
-
       l.updateLibraryContents(7, {bibcode : [1,2,3,4]})
-
       expect(l.collection.get(7).get("num_documents")).to.eql(4004);
-
-
 
     });
 
@@ -168,11 +162,7 @@ define([
 
       l.getBeeHive().getService("PubSub").publish = sinon.spy();
 
-      expect(l.isDataLoaded()).to.be.false;
-
       l._fetchAllMetadata();
-
-      expect(l.isDataLoaded()).to.be.true;
 
       //when collection changed, pubsub event was sent that notifies widgets of
       //the new collection, what is in it, and what the event was
@@ -262,21 +252,80 @@ define([
         }
       ]);
 
+      var getBibcodesStub = sinon.stub(l, "_getBibcodes", function(){
+        var d = new $.Deferred();
+        d.resolve({
+          bibcodes : [
+              "bib1",
+              "bib2",
+              "bib3"
+          ]
+        });
+        return d.promise();
+      });
+      var createLibrarySpy = sinon.spy(l, "createLibrary");
+
+      l.createLibAndAddBibcodes({});
+
+      expect(JSON.stringify(createLibrarySpy.args[0][0])).to.eql('{"bibcode":{"bibcodes":["bib1","bib2","bib3"]}}');
+
       l.deleteLibrary("4");
 
-      expect(l.composeRequest.args[2]).to.eql(["biblib/documents/4", "DELETE"]);
+      expect(l.composeRequest.args[4]).to.eql(["biblib/documents/4", "DELETE"]);
 
       //should result in 1 call to composeRequest and 2 calls to pubsub on successful completion
 
-      expect(l.getBeeHive().getService("PubSub").publish.args[1]).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget", "libraries"]);
+      expect(l.getBeeHive().getService("PubSub").publish.args[2]).to.eql(["[Router]-Navigate-With-Trigger", "AllLibrariesWidget", "libraries"]);
 
-      expect(JSON.stringify(l.getBeeHive().getService("PubSub").publish.args[2])).to.eql(JSON.stringify([
+      expect(JSON.stringify(l.getBeeHive().getService("PubSub").publish.args[3])).to.eql(JSON.stringify([
         "[Alert]-Message",
         {
           "code": 0,
           "msg": "Library <b>undefined</b> was successfully deleted"
         }
       ]));
+
+      getBibcodesStub.restore();
+      createLibrarySpy.restore();
+
+    });
+
+    it("should allow widgets to add bibcodes to libraries", function(){
+
+      var l = new LibraryController();
+
+      var minsub = new (MinSub.extend({
+        request: function() {
+          return {some: 'foo'}
+        }
+      }))({verbose: false});
+
+      l.activate(minsub.beehive.getHardenedInstance());
+
+      l.composeRequest = sinon.spy(function(){ var d = $.Deferred();d.resolve(stubMetadata.libraries);return d.promise()});
+
+      var getBibcodesStub = sinon.stub(l, "_getBibcodes", function(){
+        var d = new $.Deferred();
+        d.resolve({
+          bibcodes : [
+            "bib1",
+            "bib2",
+            "bib3"
+          ]
+        });
+        return d.promise();
+      });
+
+      var updateLibraryContentsSpy = sinon.spy(l, "updateLibraryContents");
+
+      l.collection.reset(stubMetadata.libraries);
+
+      l.addBibcodesToLib({ library : "7" });
+
+      expect(JSON.stringify(updateLibraryContentsSpy.args[0])).to.eql('["7",{"bibcode":{"bibcodes":["bib1","bib2","bib3"]},"action":"add"}]')
+
+      getBibcodesStub.restore();
+      updateLibraryContentsSpy.restore();
 
     });
 
