@@ -11,7 +11,7 @@ define([
       'js/mixins/add_stable_index_to_collection',
       'js/mixins/link_generator_mixin',
       'js/mixins/formatter',
-      'hbs!./templates/container-template',
+      'hbs!./templates/contafiner-template',
       'js/mixins/papers_utils',
       'js/components/api_query',
       'js/components/json_response',
@@ -250,6 +250,8 @@ define([
             if (!oApi.hasAccess())
               return;
 
+            self.model.set("loading", true);
+
             oApi.getOrcidProfileInAdsFormat()
                 .done(function(data) {
                   var response = new JsonResponse(data);
@@ -264,9 +266,11 @@ define([
 
                   response.setApiQuery(new ApiQuery(params));
                   self.processResponse(response);
-                  self.model.set({orcidUserName : params.firstName + " " + params.lastName,
+                  self.model.set({
+                    orcidUserName : params.firstName + " " + params.lastName,
                     orcidFirstName : params.firstName,
-                    orcidLastName : params.lastName
+                    orcidLastName : params.lastName,
+                    loading: false
                   });
                 });
           }

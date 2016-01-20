@@ -19,7 +19,7 @@ define([
     defaults : function(){
       return {
         openURLConfig : undefined,
-        orcidLoggedIn : undefined
+        orcidLoggedIn : undefined,
       }
     }
 

@@ -1,8 +1,8 @@
 <div class="panel-heading"> Library Link Server </div>
 
 <div class="panel-body">
-    {{#if error}}
-        <p>Sorry, the library link information for your account could not be retrieved. Please try again later.</p>
+    {{#if loading}}
+        <p><i class="icon-loading"></i> Loading...</p>
     {{else}}
 
     {{#if openURLName}}

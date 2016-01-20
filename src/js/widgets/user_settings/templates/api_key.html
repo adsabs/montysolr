@@ -3,8 +3,14 @@
     </legend>
     <div class="panel-body">
 
-          <div class="input-group">
-              <input type="text" class="form-control" disabled value="{{#if access_token}}{{access_token}}{{else}} No token currently exists {{/if}}" style="cursor:text">
+        {{# if loading}}
+
+            <p><i class="icon-loading"></i> Loading...</p>
+
+        {{else }}
+
+        <div class="input-group">
+            <input type="text" class="form-control" disabled value="{{#if access_token}}{{access_token}}{{else}} No token currently exists {{/if}}" style="cursor:text">
               <span class="input-group-btn">
                 <button class="btn btn-success" type="submit">Generate a new key</button>
               </span>
@@ -14,18 +20,21 @@
             <br/>
             <br/>
             <p> This API token allows you to access ADS data programmatically. For instance, to fetch the first few bibcodes for the query "star", make the following request: </p>
-           <p>
-               <code> curl -H 'Authorization: Bearer:{{#if access_token}}{{access_token}}{{else}}[YOUR TOKEN HERE]{{/if}}' 'http://api.adsabs.harvard.edu/v1/search/query?q=star&fl=bibcode'</code>
-           </p>
             <p>
-               <i>(If you've generated a token, you can copy-paste the preceding line directly into your terminal)</i>
+                <code> curl -H 'Authorization: Bearer:{{#if access_token}}{{access_token}}{{else}}[YOUR TOKEN HERE]{{/if}}' 'http://api.adsabs.harvard.edu/v1/search/query?q=star&fl=bibcode'</code>
+            </p>
+            <p>
+                <i>(If you've generated a token, you can copy-paste the preceding line directly into your terminal)</i>
             </p>
             <p> Documentation on how to use the API is available on the <a href="https://github.com/adsabs/adsabs-dev-api#access-settings"> ADS API Github repo.</a></p>
             <p> <b>Make sure to keep your API key secret to protect it from abuse.</b></p>
             <p> If your key has been exposed publically (say, by accidentally  being commited to a Github repo) you can generate a new one by clicking on the button above. </p>
         </div>
 
-</div>
+        {{/if}}
 
     </div>
+
+
+</div>
 </div>

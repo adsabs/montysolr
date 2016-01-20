@@ -269,11 +269,13 @@ define([
           viewModel.set("access_token", this.model.get("access_token"));
         }
         else {
+          viewModel.set("loading", true);
           this.getToken().done(function (data) {
             //keep for next time
             that.model.set("access_token", data.access_token);
             //set in current viewmodel
             viewModel.set("access_token", data.access_token);
+            viewModel.set("loading", false);
           });
         }
       }
