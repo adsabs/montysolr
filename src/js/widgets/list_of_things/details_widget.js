@@ -23,6 +23,8 @@ define([
       },
 
       initialize : function(options) {
+        ListOfThings.prototype.initialize.call(this, options);
+
         // other widgets can send us data through page manager
         this.on('page-manager-message', function(event, data){
           if (event === "broadcast-payload"){
@@ -30,7 +32,11 @@ define([
           }
         });
 
-        ListOfThings.prototype.initialize.call(this, options);
+        //clear the collection when the model is reset with a new bibcode
+        this.listenTo(this.model, "change:bibcode",function(){
+          this.hiddenCollection.reset();
+        });
+
       },
 
       ingestBroadcastedPayload: function(data) {

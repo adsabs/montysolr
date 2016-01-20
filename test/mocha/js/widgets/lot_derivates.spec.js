@@ -66,6 +66,17 @@ define([
       expect(widget.extractValueFromQuery(new ApiQuery({'q': '"bibcode:foo"'}), 'q', 'bibcode')).to.eql('foo');
     });
 
+    it("does not keep old records around in the hiddenCollection whenever the bibcode param is changed in the model", function(){
+
+      var w = new DetailsLoTWidget();
+      w.hiddenCollection.add([{bibcode : 1}, {bibcode : 2}]);
+      expect(JSON.stringify(w.hiddenCollection.toJSON())).to.eql('[{"bibcode":1,"resultsIndex":0,"emptyPlaceholder":false,"visible":false,"actionsVisible":true},{"bibcode":2,"resultsIndex":1,"emptyPlaceholder":false,"visible":false,"actionsVisible":true}]');
+      //this will be triggered by TOC widget on a fresh "display_documents"
+      w.trigger("page-manager-message", "broadcast-payload", {bibcode : 'new bibcode'} );
+      expect(JSON.stringify(w.hiddenCollection.toJSON())).to.eql("[]")
+
+    });
+
     it("Show citations", function(){
       var widget = new CitationWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
