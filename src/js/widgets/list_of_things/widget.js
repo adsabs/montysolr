@@ -90,10 +90,9 @@ define([
       activate: function (beehive) {
         this.setBeeHive(beehive);
         var pubsub = beehive.getService('PubSub');
-
         _.bindAll(this, 'onStartSearch', 'dispatchRequest', 'processResponse');
+
         pubsub.subscribe(pubsub.START_SEARCH, this.onStartSearch);
-        //using the standard base widget dispatch request
         pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.dispatchRequest);
         pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
