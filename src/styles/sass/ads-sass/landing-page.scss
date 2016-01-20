@@ -8,15 +8,15 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 }
 
 .s-starry-background-wrapper {
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, .7)), url("../img/background.jpg");
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, .8)), url("../img/background.jpg");
   margin: 0 -15px;
 }
 
 .s-logo-header {
 
   img {
-    max-width: 500px;
-    margin: 20px;
+    max-width: 400px;
+    margin: 0 20px 10px 0;
     width: 90%;
   }
 
