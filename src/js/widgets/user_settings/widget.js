@@ -187,7 +187,8 @@ define([
 
     defaults: function () {
       return {
-        access_token: undefined
+        access_token: undefined,
+        loading: false
       }
     }
 
@@ -206,7 +207,8 @@ define([
     // a promise could put the token in the model
     // after render has already been called by "show"
     modelEvents: {
-      "change:access_token": "render"
+      "change:access_token": "render",
+      "change:loading" : "render"
     }
 
   });
@@ -269,11 +271,13 @@ define([
           viewModel.set("access_token", this.model.get("access_token"));
         }
         else {
+          viewModel.set("loading", true);
           this.getToken().done(function (data) {
             //keep for next time
             that.model.set("access_token", data.access_token);
             //set in current viewmodel
             viewModel.set("access_token", data.access_token);
+            viewModel.set("loading", false);
           });
         }
       }

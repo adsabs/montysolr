@@ -17,7 +17,63 @@ define([
     });
 
 
-    it("should consist of a Marionette layout that shows the correct subview based on the model with the 'active' attr in its navCollection", function () {
+    //it("should consist of a Marionette layout that shows the correct subview based on the model with the 'active' attr in its navCollection", function () {
+    //
+    //  var u = new UserSettings();
+    //
+    //  $("#test").append(u.render().el);
+    //
+    //  var minsub = new (MinSub.extend({
+    //    request: function (apiRequest) {
+    //    }
+    //  }))({verbose: false});
+    //
+    //
+    //  var fakeUser = {getToken: function () {
+    //    var d = $.Deferred();
+    //    d.resolve({access_token: "foo"});
+    //    return d
+    //  }, getHardenedInstance: function () {
+    //    return this
+    //  },
+    //    getUserName : function(){return "fakeName"}
+    //  };
+    //
+    //  var fakeCSRFManager = {getRecaptchaKey: function () {
+    //    return "foo"
+    //  }, getHardenedInstance: function () {
+    //    return this
+    //  }};
+    //
+    //  minsub.beehive.addObject("User", fakeUser);
+    //  minsub.beehive.addObject("CSRFManager", fakeCSRFManager);
+    //
+    //  var hardened = minsub.beehive.getHardenedInstance();
+    //
+    //  u.activate(hardened);
+    //
+    //  $("#test").append(u.view.render().el);
+    //
+    //  //initial view should be empty
+    //  //the subview is set by the navigator
+    //
+    //  expect($("#test .content-container").html().trim()).to.eql('');
+    //
+    //  u.setSubView("email");
+    //  expect($("#test .content-container").find(".change-email").length).to.eql(1);
+    //
+    //  u.setSubView("password");
+    //  expect($("#test .content-container").find(".change-password").length).to.eql(1);
+    //
+    //  u.setSubView("token");
+    //  expect($("#test .content-container").find(".change-token").length).to.eql(1);
+    //
+    //  u.setSubView("delete");
+    //  expect($("#test .content-container").find(".delete-account").length).to.eql(1);
+    //
+    //});
+
+    it("should show a loading view for the api token", function(done){
 
       var u = new UserSettings();
 
@@ -28,10 +84,16 @@ define([
         }
       }))({verbose: false});
 
-
       var fakeUser = {getToken: function () {
         var d = $.Deferred();
-        d.resolve({access_token: "foo"});
+        setTimeout(function(){
+          //show loading view before promise is resolved
+          expect($("div.panel-body").html().trim()).to.eql('<p><i class="icon-loading"></i> Loading...</p>')
+          d.resolve({access_token: "foo"});
+          //show token
+          expect($("div.panel-body .form-control").val()).to. eql("foo")
+          done();
+        }, 700);
         return d
       }, getHardenedInstance: function () {
         return this
@@ -54,22 +116,9 @@ define([
 
       $("#test").append(u.view.render().el);
 
-      //initial view should be empty
-      //the subview is set by the navigator
-
-      expect($("#test .content-container").html().trim()).to.eql('');
-
-      u.setSubView("email");
-      expect($("#test .content-container").find(".change-email").length).to.eql(1);
-
-      u.setSubView("password");
-      expect($("#test .content-container").find(".change-password").length).to.eql(1);
-
       u.setSubView("token");
-      expect($("#test .content-container").find(".change-token").length).to.eql(1);
 
-      u.setSubView("delete");
-      expect($("#test .content-container").find(".delete-account").length).to.eql(1);
+
 
 
     });

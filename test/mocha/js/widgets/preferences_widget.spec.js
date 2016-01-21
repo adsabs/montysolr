@@ -15,7 +15,6 @@ define([
       $("#test").empty();
     });
 
-
     var fakeURLConfig = [
       {
         "name": "ohio wesleyan",
@@ -33,7 +32,8 @@ define([
 
     var fakeMyADS = {
       link_server : "wesleyan.edu",
-      anotherVal : "foo"
+      anotherVal : "foo",
+      user : "alberto"
       };
 
 
@@ -96,7 +96,7 @@ define([
 
       expect(p.model.get("link_server")).to.eql("wesleyan.edu");
 
-      expect(JSON.stringify(p.model.toJSON())).to.eql('{"openURLConfig":[{"name":"ohio wesleyan","link":"ohio_wesleyan.edu"},{"name":"virginia wesleyan","link":"virginia_wesleyan.edu"},{"name":"wesleyan university","link":"wesleyan.edu"}],"link_server":"wesleyan.edu","anotherVal":"foo"}');
+      expect(JSON.stringify(p.model.toJSON())).to.eql('{"openURLConfig":[{"name":"ohio wesleyan","link":"ohio_wesleyan.edu"},{"name":"virginia wesleyan","link":"virginia_wesleyan.edu"},{"name":"wesleyan university","link":"wesleyan.edu"}],"link_server":"wesleyan.edu","anotherVal":"foo","user":"alberto"}');
 
 
     });
@@ -142,11 +142,13 @@ define([
       p.activate(minsub.beehive.getHardenedInstance());
 
       minsub.publish(minsub.APP_STARTED);
-      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, fakeMyADS);
 
       $("#test").append(p.getEl());
-
       p.setSubView("librarylink");
+
+      expect($("div.panel-body").text().trim()).to.eql("Loading...");
+
+      minsub.publish(minsub.USER_ANNOUNCEMENT, User.prototype.USER_INFO_CHANGE, fakeMyADS);
 
       expect($("#test .current-link-server").length).to.eql(1);
 
@@ -199,6 +201,8 @@ define([
         hasAccess : function(){return true},
         getUserProfile : function(){
           var d = $.Deferred();
+          //before this returns, a loading view is shown
+          expect($(".panel-body").text().trim()).to.eql("Loading...")
           d.resolve({
             "orcid-bio" : { "personal-details" : {"given-names" : {"value" : "Alex"}, "family-name" : {"value" : "Holachek"}}}
           });
@@ -227,7 +231,9 @@ define([
 
       p.setSubView("orcid");
 
-      expect($(".preferences-widget .panel-heading").text()).to.eql('\n\n    ORCID Settings\n    \n    You are signed in to ORCID as Alex Holachek\n\n     Not you?\n        Sign into ORCID as a different user\n    \n    \n\n')
+      //loading view should have been removed
+
+      expect($(".preferences-widget .panel-heading").text().trim()).to.eql('ORCID Settings\n        \n        You are signed in to ORCID as Alex Holachek\n\n         Not you?\n            Sign into ORCID as a different user')
 
       //should be checked by default if we don't pre-fill the data for the form
       expect($(".authorized-ads-user").is(":checked")).to.be.true;

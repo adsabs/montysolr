@@ -74,7 +74,7 @@ define([
           this.listenTo(this.view, "search-author-name", function(searchTerm){
             var pubsub = this.getPubSub(), query = new ApiQuery({q : searchTerm});
             pubsub.publish(pubsub.START_SEARCH, query);
-          })
+          });
 
           this.on('orcid-update-finished', this.mergeDuplicateRecords);
         },
@@ -250,6 +250,8 @@ define([
             if (!oApi.hasAccess())
               return;
 
+            self.model.set("loading", true);
+
             oApi.getOrcidProfileInAdsFormat()
                 .done(function(data) {
                   var response = new JsonResponse(data);
@@ -264,9 +266,11 @@ define([
 
                   response.setApiQuery(new ApiQuery(params));
                   self.processResponse(response);
-                  self.model.set({orcidUserName : params.firstName + " " + params.lastName,
+                  self.model.set({
+                    orcidUserName : params.firstName + " " + params.lastName,
                     orcidFirstName : params.firstName,
-                    orcidLastName : params.lastName
+                    orcidLastName : params.lastName,
+                    loading: false
                   });
                 });
           }

@@ -8,3 +8,4 @@ var pubsub = that.getBeeHive().getPubSub();
            type: "success",
 	   modal : true
          }));
+

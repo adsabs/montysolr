@@ -23,9 +23,9 @@ define([
     serializeData : function(){
 
       var data = this.model.toJSON();
-      //probably a server error
-      if (!data.openURLConfig || data.openURLConfig.length === 0){
-        data.error = true;
+      //either user data or openurl data has yet to load
+      if (!data.openURLConfig || !data.user ){
+        data.loading = true;
         return data
       }
 
@@ -37,6 +37,7 @@ define([
 
     modelEvents : {
       "change:link_server" : "render",
+      "change:user" : "render",
       "change:openURLConfig" : "render"
     },
 

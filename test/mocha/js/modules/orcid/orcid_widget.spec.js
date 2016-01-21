@@ -368,6 +368,14 @@ define([
         };
       };
 
+      it("should display a loading view before orcid profile promise returns", function(){
+
+
+
+
+
+      });
+
       it("Should display records coming from ORCID and has methods to filter/sort them", function (done) {
 
         var orcidMode = true;
@@ -429,6 +437,31 @@ define([
         expect(widget.collection.models[1].get('title')).to.eql('Tecnologias XXX');
 
         done();
+      });
+
+      it("should show a loading view before orcid profile is loaded", function(){
+
+        var orcidApi = getOrcidApi();
+        orcidApi.saveAccessData({access: true});
+        orcidApi.getUserProfile = function() {
+          expect($("#test .s-results-control-row-container").text().trim()).to.eql("Loading...");
+          var d = $.Deferred();
+          d.resolve(defaultResponse()['orcid-profile']);
+          return d;
+        };
+
+        var widget = _getWidget();
+
+        var $w = widget.render().$el;
+        $('#test').append($w);
+
+
+        widget.onShow();
+
+
+        expect($("#test .s-results-control-row-container").text().trim()).to.eql( 'You are signed in to ORCID as Roman Chyla\n            \n                Learn more about using ORCID with ADS.')
+
+
       });
 
       it("should allow the user to search in ADS when search button is clicked", function(done){
