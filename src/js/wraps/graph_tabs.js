@@ -289,7 +289,7 @@ define([
       return new TabsWidget({tabs: [
         {title: "Years", widget: yearGraphWidget, id: "year-facet", default: true},
         {title: "Citations", widget: citationGraphWidget, id: "citations-facet"},
-        {title: "Recent Reads", widget: readsGraphWidget, id: "reads-facet"}
+        {title: "Reads", widget: readsGraphWidget, id: "reads-facet"}
       ]
       });
     }

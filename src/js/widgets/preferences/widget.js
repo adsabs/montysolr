@@ -114,10 +114,11 @@ define([
       var that = this;
 
       this.model.set("orcidLoggedIn", this.getBeeHive().getService("OrcidApi").hasAccess());
-
       /*right now only orcid view needs extra data */
 
       if (subView === "orcid" && this.model.get("orcidLoggedIn") ){
+
+        this.model.set("loading", true);
 
         //get main orcid name
         var orcidProfile = this.getBeeHive().getService("OrcidApi").getUserProfile();
@@ -136,6 +137,7 @@ define([
             data.orcidName = "unknown";
             data.prettyOrcidName = "unknown";
           }
+          data.loading = false;
           that.model.set(data);
         });
       }

@@ -11,7 +11,7 @@ define([
       'js/mixins/add_stable_index_to_collection',
       'js/mixins/link_generator_mixin',
       'js/mixins/formatter',
-      'hbs!./templates/contafiner-template',
+      'hbs!./templates/container-template',
       'js/mixins/papers_utils',
       'js/components/api_query',
       'js/components/json_response',
@@ -74,7 +74,7 @@ define([
           this.listenTo(this.view, "search-author-name", function(searchTerm){
             var pubsub = this.getPubSub(), query = new ApiQuery({q : searchTerm});
             pubsub.publish(pubsub.START_SEARCH, query);
-          })
+          });
 
           this.on('orcid-update-finished', this.mergeDuplicateRecords);
         },

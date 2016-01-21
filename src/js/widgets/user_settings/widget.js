@@ -187,7 +187,8 @@ define([
 
     defaults: function () {
       return {
-        access_token: undefined
+        access_token: undefined,
+        loading: false
       }
     }
 
@@ -206,7 +207,8 @@ define([
     // a promise could put the token in the model
     // after render has already been called by "show"
     modelEvents: {
-      "change:access_token": "render"
+      "change:access_token": "render",
+      "change:loading" : "render"
     }
 
   });
