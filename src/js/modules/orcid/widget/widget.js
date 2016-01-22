@@ -267,6 +267,7 @@ define([
                   response.setApiQuery(new ApiQuery(params));
                   self.processResponse(response);
                   self.model.set({
+                    orcidID : params.orcid,
                     orcidUserName : params.firstName + " " + params.lastName,
                     orcidFirstName : params.firstName,
                     orcidLastName : params.lastName,

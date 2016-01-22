@@ -368,13 +368,6 @@ define([
         };
       };
 
-      it("should display a loading view before orcid profile promise returns", function(){
-
-
-
-
-
-      });
 
       it("Should display records coming from ORCID and has methods to filter/sort them", function (done) {
 
@@ -444,7 +437,7 @@ define([
         var orcidApi = getOrcidApi();
         orcidApi.saveAccessData({access: true});
         orcidApi.getUserProfile = function() {
-          expect($("#test .s-results-control-row-container").text().trim()).to.eql("Loading...");
+          expect($("#test .s-results-control-row-container").text().trim()).to.eql('My ORCID Papers\n        \n        \n        \n             Loading ORCID data...');
           var d = $.Deferred();
           d.resolve(defaultResponse()['orcid-profile']);
           return d;
@@ -459,7 +452,7 @@ define([
         widget.onShow();
 
 
-        expect($("#test .s-results-control-row-container").text().trim()).to.eql( 'You are signed in to ORCID as Roman Chyla\n            \n                Learn more about using ORCID with ADS.')
+        expect($("#test .s-results-control-row-container").text().replace(/\s{2,}/g, "")).to.eql("My ORCID PapersORCID Username: Roman ChylaORCID ID: 0000-0001-8178-9506To share this list of your ORCID papers:You can share this link: https://ui.adsabs.harvard.edu/#search/q=orcid%3A0000-0001-8178-9506&sort=date+descOr searchorcid:0000-0001-8178-9506in the ADS interface at any time.To claim papers in ORCID and add to this list,click here to search your name in ADSFurther instructions on using ORCID with ADS")
 
 
       });

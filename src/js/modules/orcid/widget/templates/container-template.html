@@ -1,44 +1,49 @@
 
-<div class="row s-results-control-row-container" style="text-align: center">
-    <div class="col-sm-10 col-sm-offset-1" >
-        <!--static orcid info-->
-        <div style="margin-top: 20px;">
-            <img src="../../styles/img/ads-orcid.svg" alt="the ORCID logo combined with ADS logo" style="max-width: 150px;"/>
-        </div>
+<div class="row s-results-control-row-container">
+
+
+    <div class="col-sm-8 col-sm-offset-2 " >
+        <br>
+        <h2>
+            <img src="../../styles/img/ads-orcid.svg" alt="orcid-ads logo" style="width:80px;">
+            My ORCID Papers
+        </h2>
         <!--loading user data-->
         {{#if loading}}
-            <p><i class="icon-loading"></i> Loading...</p>
+            <p><i class="icon-loading"></i> Loading ORCID data...</p>
         {{else}}
-            <h3> You are signed in to ORCID as <b>{{orcidUserName}}</b></h3>
-            <p class="leader-text" style="margin-bottom: 0">
-                <a href="#orcid-instructions">Learn more about using ORCID with ADS.</a>
-            </p>
-            <br/>
+       <p>ORCID Username: <b>{{ orcidUserName }}</b></p>
+       <p>ORCID ID: <b>{{orcidID}}</b></p>
+
+         <p><i class="fa fa-info-circle"></i> To share this list of your ORCID papers:
+                    <ul>
+                      <li>
+                         You can share this link: <a href="https://ui.adsabs.harvard.edu/#search/q=orcid%3A{{orcidID}}&sort=date+desc">https://ui.adsabs.harvard.edu/#search/q=orcid%3A{{orcidID}}&sort=date+desc</a>
+                      </li>
+                    <li>
+                        Or search <a href="#search/q=orcid%3A{{orcidID}}&sort=date+desc" class="btn btn-sm btn-default"><i class="fa fa-search"></i> orcid:{{orcidID}} </a> in the ADS interface at any time.
+                    </li>
+                    </ul>
+          </p>
+          <p> <i class="fa fa-info-circle"></i>
+               To claim papers in ORCID and add to this list,
+                    {{#if orcidUserName}}
+                    <button class="btn btn-sm btn-default search-author-name"><i class="fa fa-search"></i> click here to search your name in ADS</button>
+                    {{else}}
+                    search your name in ADS</button>
+                    {{/if}}
+           </p>
+
+        <p> <a href="#orcid-instructions"> <i class="fa fa-arrow-circle-o-right"></i> Further instructions on using ORCID with ADS</a></p>
+        <br>
+        <br>
+
         {{/if}}
 
     </div>
 </div>
 <div class="row s-darker-background">
-    <div class="col-sm-10 col-sm-offset-1 s-main-content-container" style="margin-top:20px;">
-
-        <div class="s-list-controls">
-
-            <div class="s-results-border-bottom">
-
-                <div class="col-sm-12">
-                    {{#unless loading}}
-                        <h3 style="margin:48px 6.5%;"> <span class="s-light-font">My ORCID Papers</h3>
-                        {{#if orcidUserName}}
-                            <div style="margin:-20px 0 20px 6.5%" class="leader-text"> To claim papers in ORCID and add to this list, <button class="btn sm btn-default search-author-name"><i class="fa fa-search"></i> click here to search your name in ADS</button></div>
-                        {{else}}
-                            <div style="margin:-20px 0 20px 6.5%" class="leader-text"> To claim papers in ORCID and add to this list, search your name in ADS</button></div>
-                        {{/if}}
-                    {{/unless}}
-                </div>
-
-            </div>
-        </div>
-
+    <div class="col-sm-10 col-sm-offset-1 s-main-content-container" style="margin-top:20px;padding-top: 20px;">
         <div class="row">
             <ul class="col-sm-12 results-list  s-results-list list-unstyled s-display-block" aria-label="list of results">
             </ul>
