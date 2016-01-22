@@ -459,6 +459,13 @@ define([
           //ignore, there will be no cached query
         }
 
+        //show loading view
+        if (this.model.get("loading")) {
+          this.$(".network-metadata").html("");
+          this.$(".network-container").html(loadingTemplate());
+          return
+        }
+
         if (!this.model.get("graphData") || _.isEmpty(this.model.get("graphData"))) {
           this.$(".network-metadata").html("");
           this.$(".network-container").html(notEnoughDataTemplate({cachedQuery : cachedQ}));
@@ -651,7 +658,8 @@ define([
           //when this changes, make a new request
           userVal: undefined,
           //keep record of former query so user can return
-          cachedQuery: undefined
+          cachedQuery: undefined,
+          loading : true,
         }
 
         _.extend(defaults, ApiTargets._limits[options.widgetName]);
@@ -1304,6 +1312,9 @@ define([
         return this._originalQuery;
       },
 
+      //empty all data
+      //this will show the loading view by default
+      //until new data comes in
       resetWidget: function () {
 
         //close graphView
@@ -1317,7 +1328,15 @@ define([
       },
 
       //for now, called to show vis for library
+      //and for bigquery
       renderWidgetForListOfBibcodes : function(bibcodes){
+
+        //so the earlier state of the widget is not preserved
+        this.resetWidget();
+
+        //force a reset even if the data is the same
+        //so the earlier state of the widget is not preserved
+        this.model.set({ graphData :  {}, loading : true });
 
         var request =  new ApiRequest({
           target : Marionette.getOption(this, "endpoint"),
@@ -1334,6 +1353,10 @@ define([
 
       //fetch data
       renderWidgetForCurrentQuery : function () {
+
+        //force a reset even if the data is the same
+        //so the earlier state of the widget is not preserved
+        this.resetWidget();
 
         var query = this.getCurrentQuery().clone();
         query.unlock();
@@ -1359,27 +1382,25 @@ define([
 
       processResponse: function (jsonResponse) {
 
-        //it's a bigquery response with bibcodes, now request the vis data
         try {
-          //this raises an error if responseHeader isn't there, should that be changed?
+          //it's a bigquery response with bibcodes, now request the vis data
           var qid = jsonResponse.get("responseHeader.params.__qid");
           this.renderWidgetForListOfBibcodes(jsonResponse.get("response").docs.map(function(b){return b.bibcode}));
         }
         catch(e){
-          //force a reset even if the data is the same
-          //so the earlier state of the widget is not preserved
-          this.model.set({graphData: {}});
-
+          //it's from the network endpoint, loading is done
           var data = jsonResponse.toJSON();
           // let container view know how many bibcodes we have
           this.model.set({graphData : data.data,
             numFound: parseInt(data.msg.numFound),
             rows: parseInt(data.msg.rows),
-            query: jsonResponse.getApiQuery().get("q")
+            query: jsonResponse.getApiQuery().get("q"),
+            loading: false
           });
           //so there is a one time render event
           this.model.trigger("newMetadata");
         }
+
       },
 
       //filter the original query
