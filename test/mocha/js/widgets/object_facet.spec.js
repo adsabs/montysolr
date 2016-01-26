@@ -75,8 +75,10 @@ define([
 		window.$w = $w;
 
         minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'foo'}));
+		console.log($w);
 
-        expect($w.find('.message').text()).to.be.eql('The query found: 4 results.');
+        expect($w.find('.widget-body').children().not('.hide').length).to.be.eql(5);
+        expect($w.find('.widget-body').children().filter('.hide').length).to.be.eql(95);
       });
 
 
