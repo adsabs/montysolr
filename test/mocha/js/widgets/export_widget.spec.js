@@ -71,7 +71,7 @@ define([
       widget.model.set("numFound", 800);
       widget.model.set("export", "some fake exports");
 
-      expect($("#test").find("h3").text().trim()).to.eql('Currently viewing 20\n            \n            records in \n                \n                BibTEX\n                \n                \n                \n             format.')
+      expect($("#test").find("h3").text().trim()).to.eql('Currently viewing 20\n            \n            records in \n                \n                BibTeX\n                \n                \n                \n             format.')
       expect($("#test textarea").val()).to.eql("some fake exports");
       expect($("#test").find(".change-rows").text().trim()).to.eql('');
 
