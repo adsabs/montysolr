@@ -1,6 +1,7 @@
 /**
  * Helper class that extends LoT - it is used by widgets that display details
  * of a paper (one identifier search)
+ * so widgets on the abstract page (references, citations, etc)
  */
 
 define([
@@ -37,6 +38,16 @@ define([
           this.hiddenCollection.reset();
         });
 
+      },
+
+      activate : function(beehive){
+
+        ListOfThings.prototype.activate.apply(this, [].slice.apply(arguments));
+        var pubsub = beehive.getService('PubSub');
+        _.bindAll(this, 'dispatchRequest', 'processResponse');
+
+        pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.dispatchRequest);
+        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
       ingestBroadcastedPayload: function(data) {

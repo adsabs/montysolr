@@ -1,6 +1,6 @@
 define([
     'underscore',
-    'js/widgets/list_of_things/widget',
+    'js/widgets/list_of_things/details_widget',
     'js/bugutils/minimal_pubsub',
     '../../widgets/test_json/test1',
     '../../widgets/test_json/test2',
@@ -8,7 +8,7 @@ define([
   ],
   function(
     _,
-    ListOfThingsWidget,
+    DetailsWidget,
     MinimalPubsub,
     Test1,
     Test2,
@@ -83,7 +83,7 @@ define([
       });
 
       var _getWidget = function() {
-        var Widget = OrcidExtension(ListOfThingsWidget);
+        var Widget = OrcidExtension(DetailsWidget);
         var widget = new Widget();
 
         minsub.beehive.addObject('User', {getHardenedInstance: function() {return this}, isOrcidModeOn: function() {return true;}});

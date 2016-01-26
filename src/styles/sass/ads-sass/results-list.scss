@@ -2,16 +2,6 @@
 // results list css
 
 
-.per-page {
-  @extend .form-inline;
-  @extend .form-control;
-  @extend .input-sm;
-  border-radius : $border-radius-base;
-  margin: 0px;
-  display: inline-block;
-  width: 32%;
-}
-
 
 //icons for links
 
@@ -234,12 +224,20 @@
 }
 
 .s-pagination-controls {
-  padding-top: 15px;
-  padding-bottom: 15px;
+  border-top: 1px solid $gray-lighter;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-top: 10px;
 }
 
-.s-per-page-controls {
-  padding-left: 5%;
+
+.per-page-controls {
+  margin: 21px 0;
+}
+
+.per-page-controls input {
+  width:60px;
+  display: inline;
 }
 
 .field-options {
@@ -361,4 +359,15 @@ li.article-author {
   a {
     font-weight:400;
   }
+}
+
+
+.per-page-container {
+  margin: 23px 0 0 6.3%
+}
+
+.per-page--active {
+  font-weight: bold;
+  background-color: $brand-primary;
+  color: white;
 }

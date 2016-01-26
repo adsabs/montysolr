@@ -10,7 +10,8 @@ define(['marionette',
     'js/widgets/list_of_things/widget',
     'js/widgets/base/base_widget',
     'js/bugutils/minimal_pubsub',
-    'js/widgets/list_of_things/item_view'
+    'js/widgets/list_of_things/item_view',
+    'js/widgets/list_of_things/details_widget'
   ],
   function (Marionette,
             Backbone,
@@ -24,7 +25,8 @@ define(['marionette',
             ListOfThings,
             BaseWidget,
             MinPubSub,
-            ItemView
+            ItemView,
+            DetailsWidget
     ) {
 
     describe("ListOfThings (list_of_things_widget.spec.js)", function () {
@@ -190,9 +192,17 @@ define(['marionette',
           }
         }))({verbose: false});
 
+        var fakeUserObject = {getHardenedInstance : function(){return this},
+          isOrcidModeOn : function(){return false},
+          getUserData : function(){ return {link_server :  "foo"}},
+          getLocalStorage : function(){return { perPage : 50 }}
 
-        var widget = new ListOfThings();
+        };
+        minsub.beehive.addObject("User", fakeUserObject);
+
+        var widget = new DetailsWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
+
 
         var $w = widget.render().$el;
         $('#test').append($w);
@@ -200,19 +210,44 @@ define(['marionette',
         // give command to display first 20 docs; since responses are coming in
         // batches of 10; the collection will automatically ask twice
         minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
-        expect($w.find("label").length).to.equal(20);
+        expect($w.find("label").length).to.equal(50);
+        expect($(".s-checkbox-col").text().replace(/\s+/g, " ")).to.eql(" 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 ")
 
         // click on next page // this should trigger new request
-        $w.find('a[data-paginate=2]').click();
-        expect($w.find("label").length).to.equal(20);
+        $w.find('.page-control.next-page').click();
+        expect($(".s-checkbox-col").text().replace(/\s+/g, " ")).to.eql(" 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 ");
 
         done();
       });
 
       it("has a pagination view and model that handle displaying and transmitting pagination state and changes", function(done){
 
-        var widget = new ListOfThings({pagination: {perPage: 5}});
-        //widget.activate(minsub.beehive.getHardenedInstance());
+
+        var minsub = new (MinPubSub.extend({
+          request: function(apiRequest) {
+            var q = apiRequest.get('query');
+            var ret = test1();
+            _.each(q.keys(), function(k) {
+              ret.responseHeader.params[k] = q.get(k)[0];
+            });
+            //but widget is currently checking in the response.start not the responseheader
+            ret.response.start = q.get("start")[0];
+            return ret;
+          }
+        }))({verbose: false});
+
+        var setStorageSpy = sinon.spy();
+
+        var fakeUserObject = {getHardenedInstance : function(){return this},
+          isOrcidModeOn : function(){return false},
+          getUserData : function(){ return {link_server :  "foo"}},
+          getLocalStorage : function(){return { perPage : 25 }},
+          setLocalStorage : setStorageSpy
+        };
+        minsub.beehive.addObject("User", fakeUserObject);
+
+        var widget = new DetailsWidget();
+        widget.activate(minsub.beehive.getHardenedInstance());
 
         var data = test1();
         data.response.numFound = 100;
@@ -227,33 +262,60 @@ define(['marionette',
         var $w = widget.render().$el;
         $('#test').append($w);
 
-        widget.updatePagination({numFound: 100, page : 1, perPage : 5});
-        //console.log(widget.model.attributes);
-        expect($w.find(".pagination li").length).to.eql(5);
-        expect($w.find(".pagination li").filter(function(n){return $(n).text().trim() === "«"}).length).to.eql(0);
-        expect($w.find(".pagination li:first").text().trim()).to.eql("1");
-        expect($w.find(".pagination li:last").text().trim()).to.eql("5");
-        expect(widget.collection.models[0].get('resultsIndex')).to.eql(5);
-        expect(widget.collection.models[4].get('resultsIndex')).to.eql(9);
+        /*
+        * first page
+        * */
+        widget.updatePagination({numFound: 100, page : 0, perPage : 50});
+        //an update in perPage should trigger a call to localstorage
+        expect(setStorageSpy.args[0][0]).to.eql({perPage: 50});
 
-        widget.updatePagination({numFound: 100, page : 4, perPage : 5});
-        expect($w.find(".pagination li:first").text().trim()).to.eql("«");
-        expect($w.find(".pagination li:last").text().trim()).to.eql("7");
-        expect($w.find(".pagination li").length).to.eql(6);
-        expect(widget.collection.models[0].get('resultsIndex')).to.eql(20);
-        expect(widget.collection.models[4].get('resultsIndex')).to.eql(24);
+        expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":50,"numFound":100,"currentQuery":{"q":["foo:bar"]},"pageData":{"perPage":50,"totalPages":2,"currentPage":1,"previousPossible":false,"nextPossible":true},"page":0,"showRange":[0,49]}')
 
-        widget.updatePagination(({numFound: 15, page : 0, perPage : 5}));
-        expect($w.find(".pagination li").length).to.eql(3);
-        expect($w.find(".pagination li:first").text().trim()).to.eql("1");
-        expect($w.find(".pagination li:last").text().trim()).to.eql("3");
+        expect($(".per-page--active").text().trim()).to.eql("50");
+        expect($("input.page-control").val()).to.eql("1");
+
+
+        expect($(".page-control.previous-page").parent().hasClass("disabled")).to.be.true;
+        expect($(".page-control.next-page").parent().hasClass("disabled")).to.be.false;
+
         expect(widget.collection.models[0].get('resultsIndex')).to.eql(0);
         expect(widget.collection.models[4].get('resultsIndex')).to.eql(4);
+
+        /*
+         * 3rd page
+         * */
+
+        widget.updatePagination({numFound: 100, page : 2 , perPage : 25});
+
+        expect($(".per-page--active").text().trim()).to.eql("25");
+        expect($("input.page-control").val()).to.eql("3");
+
+        expect($(".page-control.previous-page").parent().hasClass("disabled")).to.be.false;
+        expect($(".page-control.next-page").parent().hasClass("disabled")).to.be.false;
+
+        expect(widget.collection.models[0].get('resultsIndex')).to.eql(50);
+        expect(widget.collection.models[4].get('resultsIndex')).to.eql(54);
+
+        /*
+         * last page
+         * */
+
+        widget.updatePagination(({numFound: 100, page : 3, perPage : 25}));
+
+        expect($(".page-control.previous-page").parent().hasClass("disabled")).to.be.false;
+        expect($(".page-control.next-page").parent().hasClass("disabled")).to.be.true;
+
+        expect($(".per-page--active").text().trim()).to.eql("25");
+        expect($("input.page-control").val()).to.eql("4");
+
+
+        expect(widget.collection.models[0].get('resultsIndex')).to.eql(75);
+        expect(widget.collection.models[4].get('resultsIndex')).to.eql(79);
 
         done();
       });
 
-      it(" the item view allows the user to view the lsit in a search results page if 'operator' option is true and 'queryOperator' option is set", function() {
+      it("the item view allows the user to view the lsit in a search results page if 'operator' option is true and 'queryOperator' option is set", function() {
 
         var coll = new PaginatedCollection();
         var view = new PaginatedView({collection: coll});

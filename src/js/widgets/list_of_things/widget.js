@@ -18,10 +18,10 @@ define([
     'backbone',
     'js/components/api_request',
     'js/components/api_query',
+    'js/components/api_feedback',
     'js/widgets/base/base_widget',
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
-    'hbs!./templates/pagination-template',
     'js/mixins/add_stable_index_to_collection',
     './model',
     './paginated_view'
@@ -31,10 +31,10 @@ define([
     Backbone,
     ApiRequest,
     ApiQuery,
+    ApiFeedback,
     BaseWidget,
     ItemTemplate,
     ResultsContainerTemplate,
-    PaginationTemplate,
     PaginationMixin,
     PaginatedCollection,
     PaginatedView
@@ -47,16 +47,16 @@ define([
 
         _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model', 'description']));
 
-        var defaultPagination = {
+        //widget.reset will restore these default pagination settings
+        this.pagination = _.defaults(options.pagination || {}, {
           pagination: true,
-          perPage: 20,
+          //default per page : 25
+          perPage: 25,
           numFound: undefined,
           currentQuery: undefined,
           start: 0,
           pageData: undefined
-        };
-
-        this.pagination = _.defaults(options.pagination || {}, defaultPagination);
+        });
 
         options.collection = options.collection || new PaginatedCollection();
 
@@ -87,18 +87,23 @@ define([
 
       },
 
+      //this must be extended by inheriting widgets to listen to display events
       activate: function (beehive) {
+
         this.setBeeHive(beehive);
-        var pubsub = beehive.getService('PubSub');
-        _.bindAll(this, 'onStartSearch', 'dispatchRequest', 'processResponse');
 
-        pubsub.subscribe(pubsub.START_SEARCH, this.onStartSearch);
-        pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.dispatchRequest);
-        pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
-      },
+        //might be a test
+        if (this.getBeeHive().getObject("User") && this.getBeeHive().getObject("User").getLocalStorage ){
+          var perPage = this.getBeeHive().getObject("User").getLocalStorage().perPage;
+          if (perPage){
+            //set the pagination perPage value to whatever is in local storage,
+            //otherwise it will be the default val from the initialize function
+            this.pagination.perPage = perPage;
+            this.model.set(this.pagination);
+          }
 
-      onStartSearch: function(apiQuery) {
-        this.reset();
+        }
+
       },
 
       processResponse: function (apiResponse) {
@@ -140,7 +145,7 @@ define([
       getPaginationInfo: function(apiResponse, docs) {
         var q = apiResponse.getApiQuery();
 
-        // this information is important for calcullation of pages
+        // this information is important for calculation of pages
         var numFound = apiResponse.get("response.numFound") || 0;
         var perPage =  this.model.get('perPage') || (q.has("rows") ? q.get('rows')[0] : 10);
         var start = this.model.get("start") || 0;
@@ -160,14 +165,9 @@ define([
           }
         }
 
-        // compute paginations (to be inserted into navigation)
-        var numAround = this.model.get('numAround') || 2;
-        var pageData = this._getPageDataDatastruct(q, page, numAround, perPage, numFound);
+        var pageData = this._getPaginationData( page, perPage, numFound);
 
-        //should we show a "back to first page" button?
-        var showFirst = (_.pluck(pageData, "p").indexOf(1) !== -1) ? false : true;
-
-        return {
+       return {
           numFound: numFound,
           perPage: perPage,
           start: start,
@@ -178,26 +178,20 @@ define([
         }
       },
 
-      _getPageDataDatastruct: function(q, page, numAround, perPage, numFound) {
+    /*
+    * data for the page numbers template at the bottom
+    * */
+      _getPaginationData: function(page,  perPage, numFound) {
 
-        var pageNums = PaginationMixin.generatePageNums(page, numAround, perPage, numFound);
-
-        if (pageNums.length > 1) { //only render pagination controls if there are more pages
-          //now, finally, generate links for each page number
-          var pageData = _.map(pageNums, function (n) {
-            n.start = PaginationMixin.getPageStart(n.p, perPage);
-            n.end = PaginationMixin.getPageEnd(n.p, perPage);
-            n.perPage = perPage;
-
-            var baseQ = q.clone();
-            baseQ.set("start", n.start+1); // solr is 1-based
-            baseQ.set("rows", perPage);
-            n.link = baseQ.url();
-            n.p = n.p + 1; // make page nums 1-based
-            return n;
-          }, this);
-        }
-        return pageData;
+        //page is zero indexed
+        return {
+          //copying this here for convenience
+          perPage : perPage,
+          totalPages: Math.ceil(numFound/perPage),
+          currentPage : page + 1,
+          previousPossible : page > 0,
+          nextPossible : (page + 1) * perPage < numFound
+        };
       },
 
       processDocs: function(apiResponse, docs, paginationInfo) {
@@ -210,18 +204,52 @@ define([
 
       defaultQueryArguments: {
         fl: 'id',
-        rows : 10,
         start : 0
       },
 
       updatePagination: function(options) {
+
+        //if someone has selected perPage, save it in to localStorage
         var perPage = options.perPage || this.model.get('perPage');
-        var page = _.isNumber(options.page) ? options.page : null;
-        var start = this.getPageStart(page, perPage, numFound);
+        if (options.hasOwnProperty("perPage") && _.contains([25, 50, 100], options.perPage)){
+          this.getBeeHive().getObject("User").setLocalStorage({ perPage : options.perPage });
+          console.log("set user's page preferences in localStorage: " + options.perPage);
+        }
+
         var numFound = options.numFound || this.model.get('numFound');
-        var numAround = options.numAround || this.model.get('numAround') || 2;
         var currentQuery = options.currentQuery || this.model.get('currentQuery') || new ApiQuery();
 
+        //page is zero indexed! so 0 == page 1, etc
+        var page;
+        //if someone is changing the # of records per page,
+        // take them back to first page to prevent confusion
+        if (options.perPage && !options.hasOwnProperty("page")) options.page = 0;
+        if (options.page !== undefined){
+
+          //validate page
+          //which should be a zero-indexed integer
+          if (options.hasOwnProperty("page") && (!_.isNumber(options.page) || isNaN(options.page) ) ){
+            //raise an error
+            var pubsub = this.getPubSub();
+            pubsub.publish(pubsub.ALERT, new ApiFeedback({
+              code: ApiFeedback.CODES.ALERT,
+              msg: "Please enter a page number between " + 1 + " and " + Math.ceil(numFound/perPage),
+              type: "danger",
+              modal : true
+            }));
+            return
+          }
+          //if number is too high or too low, set it to max allowed
+          else if (options.page < 0){ page = 0 }
+          else if (options.page > Math.ceil(numFound/perPage) -1 ) { page = Math.ceil(numFound/perPage) -1 }
+          else { page = parseInt(options.page) }
+
+        }
+        else {
+          page = null
+        }
+
+        var start = this.getPageStart(page, perPage, numFound);
 
         // click to go to another 'page' will skip this
         if (page === null && this.collection.length) {
@@ -232,33 +260,34 @@ define([
           page = PaginationMixin.getPageVal(this.model.get('start'), perPage);
         }
 
-        var pageData = this._getPageDataDatastruct(currentQuery, page, numAround, perPage, numFound);
+        var pageData = this._getPaginationData( page,  perPage, numFound);
         var showRange = [page*perPage, (page*perPage)+perPage-1];
-        var showFirst = (_.pluck(pageData, "p").indexOf(1) !== -1) ? false : true;
 
         this.model.set({
           start: start,
           perPage: perPage,
           page: page,
           numFound: numFound,
-          numAround: numAround,
           pageData: pageData,
           currentQuery: currentQuery,
-          showRange: showRange,
-          showFirst: showFirst
+          showRange: showRange
         });
 
         this.hiddenCollection.showRange(showRange[0], showRange[1]);
         this.collection.reset(this.hiddenCollection.getVisibleModels());
+
+        //finally, scroll back to top
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
+
       },
 
       onAllInternalEvents: function(ev, arg1, arg2) {
 
-        if (ev === "pagination:change"){
+        if (ev === "pagination:changePerPage"){
           this.updatePagination({perPage: arg1});
         }
         else if (ev === "pagination:select") {
-          return this.updatePagination({page: arg1-1});
+          return this.updatePagination({page: arg1});
         }
         else if (ev === 'show:missing') {
           var pubsub = this.getPubSub();

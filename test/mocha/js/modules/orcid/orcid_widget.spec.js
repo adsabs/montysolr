@@ -118,6 +118,7 @@ define([
 
       var _getWidget = function () {
         var widget = new OrcidWidget();
+
         widget.activate(minsub.beehive.getHardenedInstance());
         return widget;
       };
@@ -372,15 +373,16 @@ define([
       it("Should display records coming from ORCID and has methods to filter/sort them", function (done) {
 
         var orcidMode = true;
-        var user = {
+
+        var fakeUser = {
+          getHardenedInstance : function(){return this},
+          getLocalStorage : function(){return { perPage : 50 }},
           isOrcidModeOn: function() {
             return orcidMode;
           },
-          getHardenedInstance: function() {
-            return this;
-          }
         };
-        beehive.addObject('User', user);
+        minsub.beehive.removeObject("User");
+        minsub.beehive.addObject("User", fakeUser);
 
         var orcidApi = getOrcidApi();
         sinon.stub(orcidApi, 'hasAccess', function() {return true});
@@ -443,6 +445,20 @@ define([
           return d;
         };
 
+        orcidMode = true;
+
+
+        var fakeUser = {
+          getHardenedInstance : function(){return this},
+          getLocalStorage : function(){return { perPage : 50 }},
+          isOrcidModeOn: function() {
+            return orcidMode;
+          },
+        };
+        minsub.beehive.removeObject("User");
+        minsub.beehive.addObject("User", fakeUser);
+
+
         var widget = _getWidget();
 
         var $w = widget.render().$el;
@@ -474,6 +490,17 @@ define([
           return d.promise();
 
         });
+
+
+        var fakeUser = {
+          getHardenedInstance : function(){return this},
+          getLocalStorage : function(){return { perPage : 50 }},
+          isOrcidModeOn: function() {
+            return orcidMode;
+          },
+        };
+        minsub.beehive.removeObject("User");
+        minsub.beehive.addObject("User", fakeUser);
 
         var widget = _getWidget();
         widget.activate(minsub.beehive.getHardenedInstance());
@@ -508,6 +535,17 @@ define([
           d.resolve(defaultResponse()['orcid-profile']);
           return d;
         };
+
+
+        var fakeUser = {
+          getHardenedInstance : function(){return this},
+          getLocalStorage : function(){return { perPage : 50 }},
+          isOrcidModeOn: function() {
+            return orcidMode;
+          },
+        };
+        minsub.beehive.removeObject("User");
+        minsub.beehive.addObject("User", fakeUser);
 
         var widget = _getWidget();
 
@@ -562,16 +600,14 @@ define([
           }
         };
 
-        var orcidMode = true;
-        var user = {
+        var fakeUser = {
+          getHardenedInstance : function(){return this},
+          getLocalStorage : function(){return { perPage : 50 }},
           isOrcidModeOn: function() {
             return orcidMode;
           },
-          getHardenedInstance: function() {
-            return this;
-          }
         };
-        beehive.addObject('User', user);
+        minsub.beehive.addObject("User", fakeUser);
 
         var orcidApi = getOrcidApi();
         sinon.stub(orcidApi, 'hasAccess', function() {return true});

@@ -1,11 +1,11 @@
 
 //widget can publish an alert 
 
-var pubsub = that.getBeeHive().getPubSub();
-         pubsub.publish(pubsub.ALERT, new ApiFeedback({
-           code: ApiFeedback.CODES.ALERT,
-           msg: "Logged in to ADS",
-           type: "success",
-	   modal : true
-         }));
-
+  //raise an error
+            var pubsub = this.getPubSub();
+            pubsub.publish(pubsub.ALERT, new ApiFeedback({
+              code: ApiFeedback.CODES.ALERT,
+              msg: "Page requested that does not exist: " + page,
+              type: "danger",
+              modal : true
+            }));

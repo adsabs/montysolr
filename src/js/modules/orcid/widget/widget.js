@@ -35,6 +35,7 @@ define([
     ) {
 
       var ResultsWidget = ListOfThingsWidget.extend({
+
         initialize : function(options){
           ListOfThingsWidget.prototype.initialize.apply(this, arguments);
 
@@ -82,14 +83,15 @@ define([
         orcidWidget : true,
 
         activate: function (beehive) {
-          this.setBeeHive(beehive);
+
+          ListOfThingsWidget.prototype.activate.apply(this, [].slice.apply(arguments));
 
           _.bindAll(this, 'processResponse');
           this.on('orcidAction:delete', function(model) {
             this.collection.remove(model);
           });
-        },
 
+        },
 
         /**
          * Go through all the recs and remove the ones that are duplicates
@@ -209,26 +211,20 @@ define([
           return docs;
         },
 
+
         getPaginationInfo: function(jsonResponse, docs) {
 
           // this information is important for calcullation of pages
           var numFound = docs.length;
           var perPage =  this.model.get('perPage') || 10;
           var start = 0;
-
+          var apiQuery = jsonResponse.getApiQuery() || new ApiQuery({'orcid': 'author X'});
           // compute the page number of this request
           var page = PaginationMixin.getPageVal(start, perPage);
-
           // compute which documents should be made visible
           var showRange = [page*perPage, ((page+1)*perPage)-1];
+          var pageData = this._getPaginationData( page, perPage, numFound);
 
-          // compute paginations (to be inserted into navigation)
-          var numAround = this.model.get('numAround') || 2;
-          var pageData = this._getPageDataDatastruct(jsonResponse.getApiQuery() || new ApiQuery({'orcid': 'author X'}),
-              page, numAround, perPage, numFound);
-
-          //should we show a "back to first page" button?
-          var showFirst = (_.pluck(pageData, "p").indexOf(1) !== -1) ? false : true;
 
           return {
             numFound: numFound,
@@ -237,7 +233,7 @@ define([
             page: page,
             showRange: showRange,
             pageData: pageData,
-            currentQuery: jsonResponse.getApiQuery() || new ApiQuery({'orcid': 'author X'})
+            currentQuery: apiQuery
           }
         },
 

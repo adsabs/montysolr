@@ -62,9 +62,15 @@ define([
       });
 
       var _getWidget = function() {
+
         var widget = new ResultsWidget();
 
-        var fakeUserObject = {getHardenedInstance : function(){return this}, isOrcidModeOn : function(){return false}, getUserData : function(){ return {link_server :  "foo"}}};
+        var fakeUserObject = {getHardenedInstance : function(){return this},
+          isOrcidModeOn : function(){return false},
+          getUserData : function(){ return {link_server :  "foo"}},
+          getLocalStorage : function(){return { perPage : 50 }}
+
+        };
         minsub.beehive.addObject("User", fakeUserObject);
 
         widget.activate(minsub.beehive.getHardenedInstance());
@@ -72,6 +78,7 @@ define([
       };
 
       it("should listen to START_SEARCH and automatically request and render data", function (done) {
+
         var widget = _getWidget();
         widget.foox = 1;
         expect(widget.collection.length).to.eql(0);
@@ -80,38 +87,38 @@ define([
         setTimeout(function() {
 
           expect(widget.model.get('currentQuery').toJSON()).to.eql({
-              "q": [
-                "star isbn:* *:*"
-              ],
-              "hl": [
-                "true"
-              ],
-              "hl.q": [
-                "star"
-              ],
-              "hl.fl": [
-                "title,abstract,body,ack"
-              ],
-              "hl.maxAnalyzedChars": [
-                "150000"
-              ],
-              "hl.requireFieldMatch": [
-                "true"
-              ],
-              "hl.usePhraseHighlighter": [
-                "true"
-              ],
-              "fl": [
-                "title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi"
-              ],
-              "rows": [
-                20
-              ],
-              "start": [
-                0
-              ]
-            });
-          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star+isbn%3A*+*%3A*&rows=20&start=0');
+            "q": [
+              "star isbn:* *:*"
+            ],
+            "hl": [
+              "true"
+            ],
+            "hl.fl": [
+              "title,abstract,body,ack"
+            ],
+            "hl.maxAnalyzedChars": [
+              "150000"
+            ],
+            "hl.requireFieldMatch": [
+              "true"
+            ],
+            "hl.usePhraseHighlighter": [
+              "true"
+            ],
+            "fl": [
+              "title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi"
+            ],
+            "rows": [
+              25
+            ],
+            "start": [
+              0
+            ],
+            "hl.q": [
+              "star"
+            ]
+          });
+          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star+isbn%3A*+*%3A*&rows=25&start=0');
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
@@ -329,7 +336,12 @@ define([
 
         var widget = new ResultsWidget({perPage: 10});
 
-        var fakeUserObject = {getHardenedInstance : function(){return this}, isOrcidModeOn : function(){return false}, getUserData : function(){ return {link_server :  "foo"}}};
+        var fakeUserObject = {getHardenedInstance : function(){return this},
+          isOrcidModeOn : function(){return false},
+          getUserData : function(){ return {link_server :  "foo"}},
+          getLocalStorage : function(){return { perPage : 50 }}
+
+        };
         minsub.beehive.addObject("User", fakeUserObject);
         widget.activate(minsub.beehive.getHardenedInstance());
 

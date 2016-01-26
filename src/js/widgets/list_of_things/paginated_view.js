@@ -12,7 +12,6 @@ define([
     'hbs!./templates/item-template',
     'hbs!./templates/results-container-template',
     'js/mixins/link_generator_mixin',
-    'hbs!./templates/pagination-template',
     'js/mixins/add_stable_index_to_collection',
     'hbs!./templates/empty-view-template',
     'hbs!./templates/initial-view-template',
@@ -30,7 +29,6 @@ define([
             ItemTemplate,
             ResultsContainerTemplate,
             LinkGenerator,
-            PaginationTemplate,
             WidgetPaginationMixin,
             EmptyViewTemplate,
             InitialViewTemplate,
@@ -38,7 +36,6 @@ define([
             analytics,
             MathJax
     ) {
-
 
     /**
      * A simple model that holds attributes of the
@@ -82,32 +79,22 @@ define([
       },
 
       initialize: function (options) {
-        this.EmptyViewClass =  Marionette.ItemView.extend({
+        this.EmptyViewClass = Marionette.ItemView.extend({
           template: EmptyViewTemplate
         });
         this.InitialViewClass = Marionette.ItemView.extend({
           template: InitialViewTemplate
         });
+
       },
 
-      onRender : function(){
-          if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
-        },
+      onRender: function () {
+        if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
+      },
 
       className: "list-of-things",
       childView: ItemView,
       alreadyRendered: false,
-
-      xshowCollection: function(){
-        var ItemView;
-        this.collection.each(function(item, index){
-          if (item.attributes.visible) {
-            ItemView = this.getChildView(item);
-            this.addChild(item, ItemView, index);
-          }
-        }, this);
-      },
-
 
       getEmptyView: function () {
         if (this.alreadyRendered)
@@ -123,24 +110,26 @@ define([
       events: {
         "click .show-highlights": "toggleHighlights",
         "click .show-abstract": "toggleAbstract",
-        "click a[data-paginate]": "changePage",
-        "input .per-page": "changePerPage"
+        "click a.page-control": "changePageWithButton",
+        "input input.page-control" : "debouncedChangePageWithInput",
+        "keyup input.page-control": "tabOrEnterChangePageWithInput",
+        "click .per-page": "changePerPage"
       },
 
-      toggleHighlights : function(){
-        if (this.model.get("showHighlights") == "open"){
+      toggleHighlights: function () {
+        if (this.model.get("showHighlights") == "open") {
           this.model.set("showHighlights", "closed");
         }
-        else if (this.model.get("showHighlights") == "closed"){
+        else if (this.model.get("showHighlights") == "closed") {
           this.model.set("showHighlights", "open");
         }
       },
 
-      toggleAbstract : function(){
-        if (this.model.get("showAbstract") == "open"){
+      toggleAbstract: function () {
+        if (this.model.get("showAbstract") == "open") {
           this.model.set("showAbstract", "closed");
         }
-        else if (this.model.get("showAbstract") == "closed"){
+        else if (this.model.get("showAbstract") == "closed") {
 
           this.model.set("showAbstract", "open");
           analytics('send', 'event', 'interaction', 'abstracts-toggled-on');
@@ -149,22 +138,22 @@ define([
 
       modelEvents: {
         "change": "render",
-        "change:showHighlights" : "toggleChildrenHighlights",
-        "change:showAbstract" : "toggleChildrenAbstracts"
+        "change:showHighlights": "toggleChildrenHighlights",
+        "change:showAbstract": "toggleChildrenAbstracts"
       },
 
-      collectionEvents : {
-        "reset" : "resetViewModel"
+      collectionEvents: {
+        "reset": "resetViewModel"
       },
 
       template: ResultsContainerTemplate,
 
-      resetViewModel : function(){
+      resetViewModel: function () {
         var defaults = this.model.defaults();
 
         this.model.set({
-          showAbstract : defaults.showAbstract,
-          showHighlights : defaults.showHighlights
+          showAbstract: defaults.showAbstract,
+          showHighlights: defaults.showHighlights
         });
       },
 
@@ -173,48 +162,70 @@ define([
        * with details (this place is normally hidden
        * by default)
        */
-      toggleChildrenHighlights : function () {
+      toggleChildrenHighlights: function () {
 
         var show = this.model.get("showHighlights");
 
         var itemVal = show === 'open' ? true : false;
 
-        this.collection.each(function(m){
+        this.collection.each(function (m) {
           //notify each item view to rerender itself and show/hide details
           m.set("showHighlights", itemVal);
         });
       },
 
-      toggleChildrenAbstracts : function () {
+      toggleChildrenAbstracts: function () {
 
         var show = this.model.get("showAbstract");
-
         var itemVal = show === 'open' ? true : false;
-
-        this.collection.each(function(m){
+        this.collection.each(function (m) {
           //notify each item view to rerender itself and show/hide details
           m.set("showAbstract", itemVal);
         });
       },
 
-      changePage: function (e) {
-        e.preventDefault();
-        var d = $(e.target).data("paginate");
-        this.trigger('pagination:select', d);
-        //scroll to top in preparation for loading of new records
-        document.body.scrollTop = document.documentElement.scrollTop = 0;
+      changePageWithButton: function (e) {
 
-        if (this.resultsWidget){
-          analytics('send', 'event', 'interaction', 'results-list-pagination', d);
+        e.preventDefault();
+        var $target = $(e.target);
+        if ($target.parent().hasClass("disabled")) return;
+        var transform = $target.hasClass("next-page") ? 1 : -1;
+        var pageVal = this.model.get("page") + transform;
+        this.trigger('pagination:select', pageVal);
+
+        if (this.resultsWidget) {analytics('send', 'event', 'interaction', 'results-list-pagination', pageVal); }
+      },
+
+      tabOrEnterChangePageWithInput : function (e) {
+        //subtract one since pages are 0 indexed
+        var pageVal = parseInt($(e.target).val() - 1);
+        //enter or tab
+        if (e.keyCode == 13 || e.keyCode == 9){
+          this.trigger('pagination:select', pageVal);
         }
       },
 
-      changePerPage: _.debounce(function (e) {
-        var perPage = parseInt($(e.target).val());
-        this.trigger('pagination:change', perPage);
-        e.preventDefault();
-      }, 2000)
+      debouncedChangePageWithInput : _.debounce(function (e) {
+            //subtract one since pages are 0 indexed
+            var pageVal = parseInt($(e.target).val() - 1);
+            this.trigger('pagination:select', pageVal);
+      }, 2200),
+
+      changePerPage: function (e) {
+         e.preventDefault();
+
+        var val = parseInt($(e.target).text().trim());
+        if (val === this.model.get("perPage")) return;
+
+        this.trigger("pagination:changePerPage", val)
+
+      }
+
+
     });
 
+
+
     return ListOfThingsView;
+
   });

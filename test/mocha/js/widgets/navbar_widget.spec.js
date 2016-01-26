@@ -206,6 +206,8 @@ define([
       u.completeLogIn = function(){};
 
       var spy = sinon.spy();
+
+      u.activate(minsub.beehive.getHardenedInstance());
       u.getPubSub = function() {return {publish : spy}};
 
       minsub.beehive.addObject("User", u);

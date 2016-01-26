@@ -13,10 +13,10 @@ define([
 
     return {
       showOrcidActions: function (isWorkInCollection) {
+
         var $icon = this.$('.mini-orcid-icon');
         $icon.removeClass('green');
         $icon.removeClass('gray');
-
 
         var $orcidActions = this.$('.orcid-actions');
         $orcidActions.removeClass('hidden');

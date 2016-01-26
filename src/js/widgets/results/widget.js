@@ -63,9 +63,7 @@ define([
         });
 
         this.view.resultsWidget = true;
-
         this.view.delegateEvents();
-
         //this must come after the event delegation!
         this.listenTo(this.collection, "reset", this.checkDetails);
         //finally, listen
@@ -81,12 +79,14 @@ define([
         'hl.requireFieldMatch': 'true',
         'hl.usePhraseHighlighter': 'true',
         fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi',
-        rows : 20,
+        rows : 25,
         start : 0
       },
 
       activate: function (beehive) {
-        this.setBeeHive(beehive);
+
+        ListOfThingsWidget.prototype.activate.apply(this, [].slice.apply(arguments));
+
         var pubsub = beehive.getService('PubSub');
         _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement', 'onStoragePaperUpdate', 'onCustomEvent');
         pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);

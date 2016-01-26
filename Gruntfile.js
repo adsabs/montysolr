@@ -626,8 +626,6 @@ module.exports = function(grunt) {
             "components/history_manager.js":75,
             "components/api_feedback.js":77,
             "components/transition.js":77,
-            "components/recaptcha_manager.js":49,
-            "components/user.js": 78,
             "widgets/dropdown-menu/widget.js":78,
             "widgets/list_of_things/paginated_view.js":78,
             "wraps/paper_network.js": 77, // some tests don't run properly in phantomjs,
@@ -642,7 +640,6 @@ module.exports = function(grunt) {
             "widgets/wordcloud/widget.js": 78,
             "components/analytics.js": 71,
             "wraps/landing_page_manager/landing_page_manager" : 48,
-            "modules/orcid/widget/widget.js" : 78
           }
         }
       },

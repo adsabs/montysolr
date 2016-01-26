@@ -1,0 +1,24 @@
+<div class="row">
+    {{#if pageData}}
+    <div class="col-sm-12 pagination-controls s-pagination-controls">
+        <div class="col-xs-5 per-page-container">
+            {{#if pageData}}
+            per page:
+            <a href="#" class="btn btn-sm {{#compare pageData.perPage 25}} per-page--active {{else}} btn-link {{/compare}} per-page">25</a>
+            <a href="#" class="btn btn-sm  {{#compare pageData.perPage 50}} per-page--active {{else}} btn-link {{/compare}} per-page">50</a>
+            <a href="#" class="btn btn-sm {{#compare pageData.perPage 100}} per-page--active {{else}} btn-link {{/compare}} per-page">100</a>
+            {{/if}}
+        </div>
+        <div class="col-xs-6">
+            <nav>
+                <ul class="pager">
+                    <li class="{{#unless pageData.previousPossible}} disabled {{/unless}}"><a href="#" class="page-control previous-page"><i class="fa fa-chevron-circle-left"></i> prev</a></li>
+                    <input type="text" value="{{pageData.currentPage}}" class="form-control page-control" style="display:inline-block;width:60px"> of {{pageData.totalPages}}
+                    <li class="{{#unless pageData.nextPossible}} disabled {{/unless}}"><a href="#" class="page-control next-page">next <i class="fa fa-chevron-circle-right"></i></a></li>
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+    {{/if}}
+</div>
