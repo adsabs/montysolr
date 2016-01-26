@@ -56,32 +56,8 @@ define(['underscore'], function (_) {
         s += 1;
       });
       return docs;
-    },
-
-    /**
-     *  create list of up to X page numbers to show;
-     *  it is zero-based count and respects numFound
-     *  boundary
-     *
-     * @param pageStartingPoint
-     * @returns {*}
-     */
-    generatePageNums: function (pageStartingPoint, numPagesAround, perPage, numFound) {
-      numPagesAround = numPagesAround || 2;
-      var leftSide = Math.max(pageStartingPoint-numPagesAround, 0);
-      var rightSide = pageStartingPoint + ((numPagesAround*2) - Math.abs(leftSide-pageStartingPoint));
-
-      var pageNums = _.map(_.range(leftSide, rightSide+1), function (d) {
-        return {p: d, current: (d === pageStartingPoint) ? true : false};
-      });
-      //page number can't be less than 0
-      pageNums = _.filter(pageNums, function (d) {
-        if (d.p < 0) return false;
-        if (this.getPageStart(d.p, perPage) >= numFound) return false;
-        return true;
-      }, this);
-      return pageNums;
     }
+
   };
 
   return WidgetPaginator;

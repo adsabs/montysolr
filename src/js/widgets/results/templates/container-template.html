@@ -36,9 +36,7 @@
         </div>
 
         <div class="col-xs-3">
-            <!--<button class="btn btn-default btn-sm btn-expand right-expand hidden-sm pull-right" title="hide right column" aria-label="hide right column"><i></i></button>-->
-            <!--<span class="s-expand-label">expand</span>-->
-            <!--<button class="btn btn-default btn-sm btn-expand left-expand hidden-xs pull-right" title="hide left column" aria-label="hide left column"><i></i></button>-->
+
         </div>
 
     </div>
@@ -59,27 +57,7 @@
 
 </div>
     {{#if pagination}}
-    <div class="row">
-        <div class="col-sm-12 pagination-controls s-pagination-controls">
-            <div class="col-xs-5 col-xs-offset-1">
-                <ul class="pagination">
-                    {{#if showFirst}}
-                    <li><a href="search/{{../currentQuery}}" data-paginate = "1" data-bypass>&laquo;</a></li>
-                    {{/if}}
-                    {{#each pageData}}
-                    <li {{#if this.current}} class="active" {{/if}} >
-                    <a href="{{this.link}}"  data-paginate = "{{this.p}}" >{{this.p}} </a>
-                    </li>
-                    {{/each}}
-                </ul>
-            </div>
-            <div class="col-xs-6 s-per-page-controls">
-                {{#if pageData}}
-                Show <input class="per-page" type="text" placeholder="{{perPage}}"/> per page
-                {{/if}}
-            </div>
-        </div>
-    </div>
+        {{> js/widgets/list_of_things/templates/pagination-partial}}
     {{/if}}
 
 </div>

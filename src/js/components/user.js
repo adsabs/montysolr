@@ -45,7 +45,9 @@ define([
     LocalStorageModel = Backbone.Model.extend({
       defaults : function(){
         return {
-          isOrcidModeOn : false
+          isOrcidModeOn : false,
+          //eventually propagate this to user account
+          perPage : undefined,
         }
       }
     });
@@ -115,25 +117,35 @@ define([
         }
       },
 
+
+      //general persistent storage
+      _persistModel: function() {
+
+        var storage  = this.getBeeHive().getService('PersistentStorage');
+        if (storage) {
+          storage.set('UserPreferences', this.localStorageModel.toJSON());
+        }
+      },
+
+      /*generic set localStorage function*/
+      setLocalStorage : function(obj){
+        this.localStorageModel.set(obj);
+        this._persistModel();
+      },
+
+      /*generic get localStorage function, gives you everything*/
+      getLocalStorage : function(obj){
+        return this.localStorageModel.toJSON();
+      },
+
       /* orcid functions */
       setOrcidMode : function(val){
-        if (!this.hasBeeHive())
-          return;
-
         this.localStorageModel.set("isOrcidModeOn", val);
         this._persistModel();
       },
 
       isOrcidModeOn : function(){
         return this.localStorageModel.get("isOrcidModeOn");
-      },
-
-      //XXX a quick hack
-      _persistModel: function() {
-        var storage  = this.getBeeHive().getService('PersistentStorage');
-        if (storage) {
-          storage.set('UserPreferences', this.localStorageModel.attributes);
-        }
       },
 
       /* general functions */
@@ -438,6 +450,8 @@ define([
         setUser : "set username into user",
         isLoggedIn: "whether the user is logged in",
         getUserName: "get the user's email before the @",
+        setLocalStorage : "sets an object in to user's local storage",
+        getLocalStorage : "gives you a json object for user's local storage",
         isOrcidModeOn : "figure out if user has Orcid mode activated",
         setOrcidMode : "set orcid ui on or off",
         getOpenURLConfig : "get list of openurl endpoints",

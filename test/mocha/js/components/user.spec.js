@@ -94,31 +94,78 @@ define([
      fetchStub.restore();
    });
 
+
+   it("allows widgets to save + query local storage vals", function(){
+
+     var u = new User();
+
+     var minsub = new (MinSub.extend({
+       request: function (apiRequest) {
+       }
+     }))({verbose: false});
+
+
+     var PersistentStorage = {
+       set : sinon.spy(),
+       get : function(){
+         if (arguments[0] === "UserPreferences"){
+           return  {isOrcidModeOn: true, perPage: 25}
+         }
+       }
+     };
+
+
+     //defaults
+     expect(u.localStorageModel.toJSON()).to.eql( {isOrcidModeOn: false, perPage: undefined});
+
+     minsub.beehive.addService("PersistentStorage", PersistentStorage);
+     u.activate(minsub.beehive);
+
+     //after loading local storage
+     expect(u.getLocalStorage()).to.eql({isOrcidModeOn: true, perPage: 25});
+
+     u.setLocalStorage({perPage : 50});
+
+     expect(PersistentStorage.set.args[0][0]).to.eql("UserPreferences");
+     expect(PersistentStorage.set.args[0][1]).to.eql({isOrcidModeOn: true, perPage: 50});
+
+   });
+
    it("provides a hardened interface with the methods widgets and other objects might need", function() {
 
      var u = new User();
      var hardened = u.getHardenedInstance();
      expect(hardened.__facade__).equals(true);
      expect(hardened.handleCallbackError).to.be.undefined;
-     expect(hardened).to.include.keys("setUser",
-       "isLoggedIn",
-       "getUserName",
-       "isOrcidModeOn",
-       "setOrcidMode",
-       "getOpenURLConfig",
-       "getUserData",
-       "setUserData",
-       "generateToken",
-       "getToken",
-       "deleteAccount",
-       "changePassword",
-       "changeEmail",
-       "__facade__",
-       "mixIn",
-       "USER_SIGNED_IN",
-       "USER_SIGNED_OUT",
-       "USER_INFO_CHANGE"
-     );
+
+     expect(_.keys(hardened)).to.eql(
+         ["setUser",
+           "isLoggedIn",
+           "getUserName",
+           "setLocalStorage",
+           "getLocalStorage",
+           "isOrcidModeOn",
+           "setOrcidMode",
+           "getOpenURLConfig",
+           "getUserData",
+           "setUserData",
+           "generateToken",
+           "getToken",
+           "deleteAccount",
+           "changePassword",
+           "changeEmail",
+           "setMyADSData",
+           "getUSER_SIGNED_IN",
+           "USER_SIGNED_IN",
+           "getUSER_SIGNED_OUT",
+           "USER_SIGNED_OUT",
+           "getUSER_INFO_CHANGE",
+           "USER_INFO_CHANGE",
+           "__facade__",
+           "mixIn"
+         ]
+
+     )
 
    });
 
