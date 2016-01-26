@@ -6,7 +6,8 @@ define([
   'js/widgets/facet/factory',
   'js/components/api_targets',
   'analytics',
-  'cache'
+  'cache',
+  'underscore'
 ], function (
   ApiResponse,
   ApiRequest,
@@ -15,7 +16,8 @@ define([
   FacetFactory,
   ApiTargets,
   analytics,
-  Cache
+  Cache,
+  _
   ) {
 
   return function() {
@@ -38,7 +40,8 @@ define([
 	  	}, _.isObject(options) ? options : {}));
 	};
 	widget.processFacetResponse = function(apiResponse, data) {
-	  	if (apiResponse instanceof SolrResponse) {
+//	  	if (apiResponse instanceof SolrResponse) {
+	    if (!('attributes' in apiResponse)) {
 			// We received a Solr response, so we need to do the following:
 			// 1. Leave the top level object facet entries untouched (like "0/Galaxy"),
 			//    and for deeper entries (like "1/Galaxy/<identifier>"), extract the identifiers
@@ -65,28 +68,28 @@ define([
 				});
 				this.getSIMBADobjects(identifiers);
 			};
-			var updater = function(model) {
-	            var v = model.value;
-				var objId;
-				if (v.charAt(0)==='1') {
-					var vv = v.split("/");
-					var objId = vv[vv.length-1];
-				}
-				var title = model.title;
-				var oname = this._cache.getSync(objId);
-				if (objId && objId === title && oname) {
-				 	model.set('title', oname)
-				};			 
-			};
 	        var facetCollection = this.processFacets(apiResponse, facets);
-			facetCollection.forEach(updater);
 	        this.updateCollectionAndView(info, facetCollection);
 	  	} else {
 			// We received a response from the micro service, so we need to do the following:
 			// 1. Add the mapping from the numerical object idetifier to the canonical object nane
 			for (var objId in apiResponse.attributes) {
 				this._cache.put(objId, apiResponse.attributes[objId]['canonical']);
-			}
+			};
+			var updater = function(facet) {
+	            var v = facet.value;
+				var objId;
+				if (v.charAt(0)==='1') {
+					var vv = v.split("/");
+					var objId = vv[vv.length-1];
+				}
+				var title = facet.title;
+				var oname = this._cache.getSync(objId);
+				if (objId && objId === title && oname) {
+				 	facet.set('title', oname)
+				};			 
+			};
+			facetCollection.forEach(updater);
 	  	}
 	};
     widget.getSIMBADobjects = function (identifiers) {
@@ -99,7 +102,7 @@ define([
             contentType : "application/json"
 		  }
         });
-//		pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processFacetResponse);
+//		pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, this.processFacetResponse);
 		pubsub.publish(pubsub.EXECUTE_REQUEST, request);
     };
     return widget;
