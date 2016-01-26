@@ -10,8 +10,8 @@ define([
   //config
 
   var links = [
-    { description : 'in BibTEX' , navEvent: 'export', params : {format: "bibtex"}},
-    { description : 'in AASTex' , navEvent: 'export', params : {format: "aastex"}},
+    { description : 'in BibTeX' , navEvent: 'export', params : {format: "bibtex"}},
+    { description : 'in AASTeX' , navEvent: 'export', params : {format: "aastex"}},
     { description : 'in EndNote' , navEvent: 'export', params : {format: "endnote"}},
     { description : 'in ADS Classic' , navEvent: 'export', params : {format: "classic"}}
 
