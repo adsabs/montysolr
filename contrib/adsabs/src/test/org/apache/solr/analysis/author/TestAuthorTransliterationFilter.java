@@ -39,4 +39,14 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 		String[] expected = { "Müller, Bill", "Mueller, Bill", "Muller, Bill" };
 		assertTokenStreamContents(stream, expected);
 	}
+	
+	public void testAccents() throws Exception {
+    Reader reader = new StringReader("Jeřábková, Tereza");
+    Tokenizer tokenizer = new KeywordTokenizer(reader);
+    AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
+    TokenStream stream = factory.create(new TestFilter(tokenizer));
+    
+    String[] expected = { "Jeřábková, Tereza", "Jerabkova, Tereza"};
+    assertTokenStreamContents(stream, expected);
+  }
 }

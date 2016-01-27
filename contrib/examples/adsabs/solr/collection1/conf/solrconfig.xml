@@ -28,7 +28,7 @@
 
   <codecFactory class="solr.SchemaCodecFactory"/>
   <schemaFactory class="ClassicIndexSchemaFactory"/>
-  
+   
   <indexConfig>
     
     <maxIndexingThreads>8</maxIndexingThreads>
