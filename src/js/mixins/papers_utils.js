@@ -67,7 +67,7 @@ define([
           }
           i += 1;
         }
-        if (!utc.getYear())
+        if (_.isNaN(utc.getYear()))
           throw new Error('Error parsing input: ' + dateString);
       }
       else {
