@@ -34,8 +34,10 @@ define([
         this.minsub = minsub = new (MinimalPubSub.extend({
           request: function (request) {
 			  if (request.get("target") == "search/query"){
+				  console.log("Getting Solr data");
 				  return SolrData();
 			  } else {
+				  console.log("Getting micro service data");
 				  return ObjServiceData();
 			  }
           }
@@ -67,6 +69,67 @@ define([
 				'expiresAfterWrite':60*30 // 30 mins
 		  	}, _.isObject(options) ? options : {}));
 		};
+		widget.processFacetResponse = function(apiResponse, data) {
+	//	  	if (apiResponse instanceof SolrResponse) {
+		    if (!('attributes' in apiResponse)) {
+				console.log("processing Solr data");
+				// We received a Solr response, so we need to do the following:
+				// 1. Leave the top level object facet entries untouched (like "0/Galaxy"),
+				//    and for deeper entries (like "1/Galaxy/<identifier>"), extract the identifiers
+				// 2. Send the list of identifiers to the object service end point
+				// 3. For the deeper entries, replace the identifiers with the canonical object names
+				if (typeof this._cache === 'undefined') {
+					this._cache = this._getNewCache();
+				}
+				var info = this.registerResponse(apiResponse, data);
+		        var facets = this.extractFacets(apiResponse);
+		        // no data for us
+		        if (!facets) {
+		          console.warn('No facet data for:', this.facetField);
+		          return;
+		        }
+		        // construct a list of SIMBAD identifiers
+				var ident = facets.filter(function(v){return (typeof v === 'string');}).filter(function(v){return (v.charAt(0)==='1');});
+				//
+		        // For non-empty lists of facet strings, translate the SIMBAD ids
+				if (ident.length > 0) {
+					var identifiers = ident.map(function(v){
+						var vv = v.split("/");
+						return vv[vv.length-1]
+					});
+					this.getSIMBADobjects(identifiers);
+				};
+		        var facetCollection = this.processFacets(apiResponse, facets);
+		        this.updateCollectionAndView(info, facetCollection);
+		  	} else {
+				console.log("processing micro service data");
+				// We received a response from the micro service, so we need to do the following:
+				// 1. Add the mapping from the numerical object idetifier to the canonical object nane
+				for (var objId in apiResponse.attributes) {
+					this._cache.put(objId, apiResponse.attributes[objId]['canonical']);
+				};
+				console.log(this._cache);
+//				var updater = function(facet) {
+//		            var v = facet.value;
+//					var objId;
+//					if (v.charAt(0)==='1') {
+//						var vv = v.split("/");
+//						var objId = vv[vv.length-1];
+//					}
+//					var title = facet.title;
+//					var oname = this._cache.getSync(objId);
+//					if (objId && objId === title && oname) {
+//					 	facet.set('title', oname)
+//					};			 
+//				};
+//				facetCollection.forEach(updater);
+			}
+		};
+	    widget.getSIMBADobjects = function (identifiers) {
+			var request =  new ApiRequest();
+			minsub.subscribeOnce(minsub.DELIVERING_RESPONSE, this.processFacetResponse);
+			minsub.publish(minsub.EXECUTE_REQUEST, request);
+	    };
 
         widget.activate(this.minsub.beehive.getHardenedInstance());
 
@@ -75,7 +138,6 @@ define([
 		window.$w = $w;
 
         minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'foo'}));
-		console.log($w);
 
         expect($w.find('.widget-body').children().not('.hide').length).to.be.eql(5);
         expect($w.find('.widget-body').children().filter('.hide').length).to.be.eql(95);
