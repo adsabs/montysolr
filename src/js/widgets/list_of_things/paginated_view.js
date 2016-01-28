@@ -95,7 +95,7 @@ define([
         if (data.queryOperator){
           data.queryURL = "#search/q=" + data.queryOperator + "(";
           data.queryURL += encodeURIComponent("bibcode:" + data.bibcode) + ")";
-          if (data.removeSelf) data.queryURL += "-bibcode:" + data.bibcode;
+          if (data.removeSelf) data.queryURL += encodeURIComponent(" -bibcode:" + data.bibcode);
           if (data.sortOrder) data.queryURL += "&sort=" + encodeURIComponent(data.sortOrder);
         }
         return data;
@@ -124,7 +124,6 @@ define([
         "click .show-highlights": "toggleHighlights",
         "click .show-abstract": "toggleAbstract",
         "click a.page-control": "changePageWithButton",
-        "input input.page-control" : "debouncedChangePageWithInput",
         "keyup input.page-control": "tabOrEnterChangePageWithInput",
         "click .per-page": "changePerPage"
       },
@@ -218,20 +217,12 @@ define([
         }
       },
 
-      debouncedChangePageWithInput : _.debounce(function (e) {
-            //subtract one since pages are 0 indexed
-            var pageVal = parseInt($(e.target).val() - 1);
-            this.trigger('pagination:select', pageVal);
-      }, 2200),
 
       changePerPage: function (e) {
          e.preventDefault();
-
         var val = parseInt($(e.target).text().trim());
         if (val === this.model.get("perPage")) return;
-
         this.trigger("pagination:changePerPage", val)
-
       }
 
 

@@ -77,6 +77,26 @@ define([
 
     });
 
+    it("resets pagination values whenever the bibcode param is changed in the model", function(){
+
+      var widget = new DetailsLoTWidget();
+
+      widget.activate(minsub.beehive.getHardenedInstance());
+      $("#test").append(widget.getEl());
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
+      expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":25,"numFound":841359,"currentQuery":{"q":["bibcode:bar"],"fl":["title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract"],"rows":[25],"start":[0]},"pageData":{"perPage":25,"totalPages":33655,"currentPage":1,"previousPossible":false,"nextPossible":true},"bibcode":"bar","page":0,"showRange":[0,24]}');
+
+     //go to second page
+      $(".page-control.next-page").click();
+      expect(widget.model.get("pageData")).to.eql({perPage: 25, totalPages: 33655, currentPage: 2, previousPossible: true, nextPossible: true});
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:anotherbibcode'}));
+      expect(widget.model.get("pageData")).to.eql({perPage: 25, totalPages: 10628, currentPage: 1, previousPossible: false, nextPossible: true});
+      expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":25,"numFound":265682,"currentQuery":{"q":["bibcode:anotherbibcode"],"fl":["title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract"],"rows":[25],"start":[0]},"pageData":{"perPage":25,"totalPages":10628,"currentPage":1,"previousPossible":false,"nextPossible":true},"bibcode":"anotherbibcode","page":0,"showRange":[0,24]}');
+
+
+      $("#test").empty();
+    });
+
     it("Show citations", function(){
       var widget = new CitationWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
@@ -84,10 +104,10 @@ define([
       var $w = widget.render().$el;
       //$('#test').append($w);
 
-      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(25);
 
-      expect($w.find("a:first").attr("href")).to.eql('#search/q=citations(bibcode%3Aundefined)&sort=date%20desc');
+      expect($w.find("a:first").attr("href")).to.eql('#search/q=citations(bibcode%3Abar)&sort=date%20desc');
 
     });
 
@@ -101,7 +121,7 @@ define([
      var query =  widget.customizeQuery( new ApiQuery({'q': 'bibcode:bar'}));
 
     //should have sort  = author desc
-     expect(query.url()).to.eql("fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=references(bibcode%3Abar)&rows=20&sort=first_author+asc&start=0");
+     expect(query.url()).to.eql("fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=references(bibcode%3Abar)&rows=25&sort=first_author+asc&start=0");
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(25);
@@ -112,7 +132,7 @@ define([
 
       expect($w.find(".s-article-title").text()).to.eql("foo");
 
-      expect($w.find("a:first").attr("href")).to.eql('#search/q=references(bibcode%3Aundefined)&sort=first_author%20asc');
+      expect($w.find("a:first").attr("href")).to.eql("#search/q=references(bibcode%3Abar)&sort=first_author%20asc");
 
 
 
@@ -125,12 +145,11 @@ define([
       var $w = widget.render().$el;
       //$('#test').append($w);
 
-      var query =  widget.customizeQuery( new ApiQuery({'q': 'foo:bar'}));
+      var query =  widget.customizeQuery( new ApiQuery({'q': 'bibcode:bar'}));
 
-      //should have sort  = author desc
-      expect(query.url()).to.eql('fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=trending(foo%3Abar)-foo%3Abar&rows=20&sort=date+desc&start=0');
+      expect(query.url()).to.eql('fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=trending(bibcode%3Abar)-bibcode%3Abar&rows=25&sort=date+desc&start=0');
 
-      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'foo:bar'}));
+      minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(25);
 
       expect($w.find(".s-list-description").text()).to.eql("Papers also read by those who read");
@@ -141,7 +160,7 @@ define([
 
       //should remove self from search results
 
-      expect($w.find("a:first").attr("href")).to.eql('#search/q=trending(bibcode%3Aundefined)-bibcode:undefined&sort=date%20desc');
+      expect($w.find("a:first").attr("href")).to.eql('#search/q=trending(bibcode%3Abar)%20-bibcode%3Abar&sort=date%20desc');
 
 
     });
