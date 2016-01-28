@@ -102,9 +102,7 @@ define([
             this.pagination.perPage = perPage;
             this.model.set(this.pagination);
           }
-
         }
-
       },
 
       processResponse: function (apiResponse) {
@@ -274,6 +272,12 @@ define([
           showRange: showRange
         });
 
+        //force a re-render of parent container
+        // since the page value might have been greater or less than allowed
+        //without the model changing (since values are adjusted)
+
+        this.view.render();
+
         this.hiddenCollection.showRange(showRange[0], showRange[1]);
         this.collection.reset(this.hiddenCollection.getVisibleModels());
 
@@ -324,7 +328,8 @@ define([
       reset: function() {
         this.collection.reset();
         this.hiddenCollection.reset();
-        this.model.set(_.extend(this.pagination, this.model.defaults()));
+        //reset the model, favoring values in this.pagination
+        this.model.set(_.defaults(this.pagination, this.model.defaults()));
       }
 
     });

@@ -212,6 +212,7 @@ define([
         // let other widgets know details
         this.trigger('page-manager-event', 'broadcast-payload', {
           title: this._docs[lowerCaseBibcode].title,
+          //this should be superfluous, widgets already subscribe to display_documents
           bibcode: bibcode
         });
 

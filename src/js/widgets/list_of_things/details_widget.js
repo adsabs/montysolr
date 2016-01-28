@@ -19,7 +19,7 @@ define([
     var DetailsWidget = ListOfThings.extend({
       defaultQueryArguments: {
         fl: 'title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract',
-        rows : 20,
+        rows : 25,
         start : 0
       },
 
@@ -27,6 +27,7 @@ define([
         ListOfThings.prototype.initialize.call(this, options);
 
         // other widgets can send us data through page manager
+        //here it is used just to get the title of the main article page
         this.on('page-manager-message', function(event, data){
           if (event === "broadcast-payload"){
             this.ingestBroadcastedPayload(data);
@@ -34,8 +35,9 @@ define([
         });
 
         //clear the collection when the model is reset with a new bibcode
+        // and set the model to default values
         this.listenTo(this.model, "change:bibcode",function(){
-          this.hiddenCollection.reset();
+          this.reset()
         });
 
       },
@@ -50,8 +52,27 @@ define([
         pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
       },
 
+
       ingestBroadcastedPayload: function(data) {
+        //right now just used to set the title from the abstract widget
         this.model.set(data);
+      },
+
+      dispatchRequest : function(apiQuery){
+
+        //reset the record
+        try {
+          var bibcode = apiQuery.get("q")[0].match(/bibcode:(.*)/)[1];
+        }
+        catch (e) {
+          console.error("was unable to parse the bibcode!");
+          return
+        }
+
+        this.model.set("bibcode", bibcode);
+        //dispatch the request
+        ListOfThings.prototype.dispatchRequest.apply(this, arguments);
+
       },
 
       customizeQuery: function() {
@@ -91,7 +112,6 @@ define([
       processDocs: function(apiResponse, docs, paginationInfo) {
 
         var self = this;
-
         var params = apiResponse.get("response");
         var start = params.start || (paginationInfo.start || 0);
 
@@ -100,7 +120,6 @@ define([
         });
 
         docs = this.parseLinksData(docs);
-
         return PaginationMixin.addPaginationToDocs(docs, start);
       }
     });

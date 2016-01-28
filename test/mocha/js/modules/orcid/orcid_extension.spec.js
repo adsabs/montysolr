@@ -90,7 +90,7 @@ define([
 
         widget.activate(minsub.beehive.getHardenedInstance());
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({
-          q: "star"
+         q : "bibcode:star"
         }));
 
         var $w = $(widget.render().el);
@@ -167,7 +167,7 @@ define([
 
         // force new batch (render)
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({
-          q: "star"
+          q: "bibcode:star"
         }));
 
         // widgets are in the 'loading' state
@@ -190,7 +190,7 @@ define([
         spy.reset();
 
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({
-          q: "star"
+          q: "bibcode:star"
         }));
 
         // widgets are in the 'loading' state
