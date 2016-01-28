@@ -88,6 +88,19 @@ define([
 
       },
 
+      serializeData : function(){
+        var data = this.model.toJSON();
+        //if it's an abstract page list with an 'export to results page'
+        //option, provide the properly escaped url
+        if (data.queryOperator){
+          data.queryURL = "#search/q=" + data.queryOperator + "(";
+          data.queryURL += encodeURIComponent("bibcode:" + data.bibcode) + ")";
+          if (data.removeSelf) data.queryURL += "-bibcode:" + data.bibcode;
+          if (data.sortOrder) data.queryURL += "&sort=" + encodeURIComponent(data.sortOrder);
+        }
+        return data;
+      },
+
       onRender: function () {
         if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
       },
