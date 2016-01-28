@@ -9,7 +9,10 @@ define([
       var options = {
         queryOperator : "trending",
         description : "Papers also read by those who read",
-        operator : true
+        operator : true,
+        sortOrder : "date desc",
+        //don't allow the record itself to be returned in trending search results
+        removeSelf : true
       };
       return new DetailsWidget(options);
     }
