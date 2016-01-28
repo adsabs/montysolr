@@ -413,7 +413,6 @@ define([
           }
 
           this.route = route;
-
           publishFeedback({code: ApiFeedback.CODES.UNMAKE_SPACE});
         });
 
