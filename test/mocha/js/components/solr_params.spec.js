@@ -8,7 +8,7 @@ define(['js/components/solr_params', 'backbone'], function(SolrParams, Backbone)
         {fieldsToConcatenate: ['q'], defaultOperator: ' AND '}
       );
       // 'fq=aff:xxx&fq=database:astronomy&q=full:foo AND title:bar'
-      expect(t.url()).to.equal('fq=database%3Aastronomy&fq=aff%3Axxx&q=full%3Afoo%20AND+title%3Abar');
+      expect(t.url()).to.equal('fq=database%3Aastronomy&fq=aff%3Axxx&q=full%3Afoo%20AND%20title%3Abar');
 
       // but the original values should remain untouched
       expect(t.get('q')).to.eql(['full:foo', 'title:bar']);
