@@ -70,7 +70,6 @@ define([
 		  	}, _.isObject(options) ? options : {}));
 		};
 		widget.processFacetResponse = function(apiResponse, data) {
-	//	  	if (apiResponse instanceof SolrResponse) {
 		    if (!('attributes' in apiResponse)) {
 				console.log("processing Solr data");
 				// We received a Solr response, so we need to do the following:
@@ -78,9 +77,6 @@ define([
 				//    and for deeper entries (like "1/Galaxy/<identifier>"), extract the identifiers
 				// 2. Send the list of identifiers to the object service end point
 				// 3. For the deeper entries, replace the identifiers with the canonical object names
-				if (typeof this._cache === 'undefined') {
-					this._cache = this._getNewCache();
-				}
 				var info = this.registerResponse(apiResponse, data);
 		        var facets = this.extractFacets(apiResponse);
 		        // no data for us
@@ -100,29 +96,33 @@ define([
 					this.getSIMBADobjects(identifiers);
 				};
 		        var facetCollection = this.processFacets(apiResponse, facets);
+				var updater = function(facet) {
+		            var v = facet.value;
+					var objId;
+					if (v.charAt(0)==='1') {
+						var vv = v.split("/");
+						var objId = vv[vv.length-1];
+					}
+					var title = facet.title;
+					var oname = widget._cache.getSync(objId);
+					if (objId && objId === title && oname) {
+					 	facet.title = oname;
+					};			 
+				};
+				facetCollection.forEach(updater);
 		        this.updateCollectionAndView(info, facetCollection);
 		  	} else {
 				console.log("processing micro service data");
 				// We received a response from the micro service, so we need to do the following:
 				// 1. Add the mapping from the numerical object idetifier to the canonical object nane
+				if (typeof this._cache === 'undefined') {
+					widget._cache = widget._getNewCache();
+				} else {
+					console.log("cache already exists");
+				}
 				for (var objId in apiResponse.attributes) {
-					this._cache.put(objId, apiResponse.attributes[objId]['canonical']);
+					widget._cache.put(objId, apiResponse.attributes[objId]['canonical']);
 				};
-				console.log(this._cache);
-//				var updater = function(facet) {
-//		            var v = facet.value;
-//					var objId;
-//					if (v.charAt(0)==='1') {
-//						var vv = v.split("/");
-//						var objId = vv[vv.length-1];
-//					}
-//					var title = facet.title;
-//					var oname = this._cache.getSync(objId);
-//					if (objId && objId === title && oname) {
-//					 	facet.set('title', oname)
-//					};			 
-//				};
-//				facetCollection.forEach(updater);
 			}
 		};
 	    widget.getSIMBADobjects = function (identifiers) {
@@ -141,6 +141,10 @@ define([
 
         expect($w.find('.widget-body').children().not('.hide').length).to.be.eql(5);
         expect($w.find('.widget-body').children().filter('.hide').length).to.be.eql(95);
+		
+		var top_level = $w.find('.div').not('.hide');
+		var test = $('div:data(widget, ObjectFacet)');
+        console.log(test);
       });
 
 
