@@ -85,7 +85,12 @@ define(['underscore',
         //router can communicate directly with navigator to replace url
         var replace = ( transition.replace || arg1 && arg1.replace ) ? true : false;
 
-        if (transition.route || transition.route === "") {
+        // don't reset the url if it is already correct, this could potentially
+        // cause a safari browser bug
+
+        if (decodeURI(window.location.hash) !== transition.route &&
+            transition.route || transition.route === ""
+        ) {
           // update the History object
           this.router.navigate(
               transition.route,

@@ -121,7 +121,7 @@ define([
      var query =  widget.customizeQuery( new ApiQuery({'q': 'bibcode:bar'}));
 
     //should have sort  = author desc
-     expect(query.url()).to.eql("fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=references(bibcode%3Abar)&rows=25&sort=first_author+asc&start=0");
+     expect(query.url()).to.eql('fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=references(bibcode%3Abar)&rows=25&sort=first_author%20asc&start=0');
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(25);
@@ -147,7 +147,7 @@ define([
 
       var query =  widget.customizeQuery( new ApiQuery({'q': 'bibcode:bar'}));
 
-      expect(query.url()).to.eql('fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=trending(bibcode%3Abar)-bibcode%3Abar&rows=25&sort=date+desc&start=0');
+      expect(query.url()).to.eql( 'fl=title%2Cbibcode%2Cauthor%2Ckeyword%2Cpub%2Caff%2Cvolume%2Cyear%2Clinks_data%2C%5Bcitations%5D%2Cproperty%2Cpubdate%2Cabstract&q=trending(bibcode%3Abar)-bibcode%3Abar&rows=25&sort=date%20desc&start=0');
 
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
       expect($w.find("label").length).to.equal(25);
@@ -157,7 +157,6 @@ define([
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 
       expect($w.find(".s-article-title").text()).to.eql("foo");
-
       //should remove self from search results
 
       expect($w.find("a:first").attr("href")).to.eql('#search/q=trending(bibcode%3Abar)%20-bibcode%3Abar&sort=date%20desc');

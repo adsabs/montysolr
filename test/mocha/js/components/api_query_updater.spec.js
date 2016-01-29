@@ -144,7 +144,7 @@ define([
 
       expect(q.get('__q_q')).to.eql(['AND', 'bar', 'baz']);
       expect(q2.get('__q_q')).to.eql(undefined);
-      expect(q2.url()).to.be.eql('q=(bar+AND+baz)');
+      expect(q2.url()).to.be.eql('q=(bar%20AND+baz)');
     });
 
     it("can wrap in quotes (if necessary)", function() {

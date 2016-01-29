@@ -86,7 +86,7 @@ define(['js/components/multi_params', 'backbone'], function(MultiParams, Backbon
       expect(t.url()).to.equal('boo=woo&boo=1&foo=bar&foo=baz');
 
       t = new MultiParams({'foo': '{!type=aqp fq=title v=$vv}', 'vv': 'title:foo'});
-      expect(t.url()).to.equal('foo=%7B!type%3Daqp+fq%3Dtitle+v%3D%24vv%7D&vv=title%3Afoo');
+      expect(t.url()).to.equal('foo=%7B!type%3Daqp%20fq%3Dtitle+v%3D%24vv%7D&vv=title%3Afoo');
 
       t = new MultiParams().load('foo=%7B!type%3Daqp+fq%3Dtitle+v%3D%24vv%7D&vv=title%3Afoo');
       expect(t.get('foo')).to.be.eql(['{!type=aqp fq=title v=$vv}']);

@@ -160,7 +160,11 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       //sorted = _.map(sorted, function(pair) { return [pair[0], _.map(pair[1], function(v) {return (v.indexOf && v.indexOf('=') > -1) ? encodeURIComponent(v) : v })]});
 
       // use traditional encoding
-      return $.param(_.object(sorted), true);
+      //this is going to be used for a url, not a form --> use %20 instead of +
+      var encoded =  $.param(_.object(sorted), true);
+          encoded = encoded.replace("+", "%20");
+
+      return encoded;
     },
 
     /**
