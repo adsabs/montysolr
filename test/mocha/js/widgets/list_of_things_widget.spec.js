@@ -220,8 +220,7 @@ define(['marionette',
         done();
       });
 
-      it("has a pagination view and model that handle displaying and transmitting pagination state and changes", function(done){
-
+      it("has a pagination view and model that handle displaying and transmitting pagination state and changes to localStorage", function(done){
 
         var minsub = new (MinPubSub.extend({
           request: function(apiRequest) {
@@ -241,8 +240,87 @@ define(['marionette',
         var fakeUserObject = {getHardenedInstance : function(){return this},
           isOrcidModeOn : function(){return false},
           getUserData : function(){ return {link_server :  "foo"}},
-          getLocalStorage : function(){return { perPage : 25 }},
+          getLocalStorage : function(){return { perPage : 25}},
           setLocalStorage : setStorageSpy
+        };
+        minsub.beehive.addObject("User", fakeUserObject);
+
+        var widget = new DetailsWidget();
+        //to test to make sure getLocalStorage was called
+        widget.model.set("perPage", 0);
+        widget.activate(minsub.beehive.getHardenedInstance());
+
+        var data = test1();
+        data.response.numFound = 100;
+
+        _.each(_.range(5), function(n) {
+          data.response.start = n*10;
+          var res = new ApiResponse(data);
+          res.setApiQuery(new ApiQuery({q: 'foo:bar'}));
+          widget.processResponse(res);
+        });
+
+        var $w = widget.render().$el;
+        $('#test').append($w);
+
+        //should initialize with the values from local storage
+        expect(widget.pagination.perPage).to.eql(25);
+
+        //first, set the page but don't have local storage send an event --> page won't change
+        widget.trigger("pagination:changePerPage", 50);
+        //an update in perPage should trigger a call to localstorage
+        expect(setStorageSpy.args[0][0]).to.eql({perPage: 50});
+
+        //but model shouldn't change, unless there's a user event, which didn't happen here
+        expect(widget.model.get("perPage")).to.eql(25);
+        expect($(".per-page--active").text().trim()).to.eql("25");
+        expect($("input.page-control").val()).to.eql("1");
+
+
+        //now, user object will publish the change
+        fakeUserObject.setLocalStorage = function(arg) {
+          minsub.publish(minsub.USER_ANNOUNCEMENT, "user_info_change", arg)
+        }
+
+        widget.trigger("pagination:changePerPage", 50);
+        expect(widget.model.get("perPage")).to.eql(50);
+        
+        expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":50,"numFound":100,"currentQuery":{"q":["foo:bar"]},"pageData":{"perPage":50,"totalPages":2,"currentPage":1,"previousPossible":false,"nextPossible":true},"page":0,"showRange":[0,49]}')
+
+        expect($(".per-page--active").text().trim()).to.eql("50");
+        expect($("input.page-control").val()).to.eql("1");
+
+        expect($(".page-control.previous-page").parent().hasClass("disabled")).to.be.true;
+        expect($(".page-control.next-page").parent().hasClass("disabled")).to.be.false;
+
+        expect(widget.collection.models[0].get('resultsIndex')).to.eql(0);
+        expect(widget.collection.models[4].get('resultsIndex')).to.eql(4);
+
+
+        done();
+      });
+
+
+      it("correctly displays pagination options depending on the model's settings", function(done){
+
+        var minsub = new (MinPubSub.extend({
+          request: function(apiRequest) {
+            var q = apiRequest.get('query');
+            var ret = test1();
+            _.each(q.keys(), function(k) {
+              ret.responseHeader.params[k] = q.get(k)[0];
+            });
+            //but widget is currently checking in the response.start not the responseheader
+            ret.response.start = q.get("start")[0];
+            return ret;
+          }
+        }))({verbose: false});
+
+
+        var fakeUserObject = {
+          getHardenedInstance : function(){return this},
+          isOrcidModeOn : function(){return false},
+          getLocalStorage : function(){return { perPage : 25 }},
         };
         minsub.beehive.addObject("User", fakeUserObject);
 
@@ -262,30 +340,10 @@ define(['marionette',
         var $w = widget.render().$el;
         $('#test').append($w);
 
-        /*
-        * first page
-        * */
-        widget.updatePagination({numFound: 100, page : 0, perPage : 50});
-        //an update in perPage should trigger a call to localstorage
-        expect(setStorageSpy.args[0][0]).to.eql({perPage: 50});
 
-        expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":50,"numFound":100,"currentQuery":{"q":["foo:bar"]},"pageData":{"perPage":50,"totalPages":2,"currentPage":1,"previousPossible":false,"nextPossible":true},"page":0,"showRange":[0,49]}')
+        //just calling the update function directly
 
-        expect($(".per-page--active").text().trim()).to.eql("50");
-        expect($("input.page-control").val()).to.eql("1");
-
-
-        expect($(".page-control.previous-page").parent().hasClass("disabled")).to.be.true;
-        expect($(".page-control.next-page").parent().hasClass("disabled")).to.be.false;
-
-        expect(widget.collection.models[0].get('resultsIndex')).to.eql(0);
-        expect(widget.collection.models[4].get('resultsIndex')).to.eql(4);
-
-        /*
-         * 3rd page
-         * */
-
-        widget.updatePagination({numFound: 100, page : 2 , perPage : 25});
+        widget.updatePagination({ page : 2 , perPage : 25});
 
         expect($(".per-page--active").text().trim()).to.eql("25");
         expect($("input.page-control").val()).to.eql("3");
@@ -300,7 +358,7 @@ define(['marionette',
          * last page
          * */
 
-        widget.updatePagination(({numFound: 100, page : 3, perPage : 25}));
+        widget.updatePagination(({ page : 3, perPage : 25}));
 
         expect($(".page-control.previous-page").parent().hasClass("disabled")).to.be.false;
         expect($(".page-control.next-page").parent().hasClass("disabled")).to.be.true;
@@ -312,7 +370,10 @@ define(['marionette',
         expect(widget.collection.models[0].get('resultsIndex')).to.eql(75);
         expect(widget.collection.models[4].get('resultsIndex')).to.eql(79);
 
-        done();
+        done()
+
+
+
       });
 
       it("the item view allows the user to view the lsit in a search results page if 'operator' option is true and 'queryOperator' option is set", function() {
