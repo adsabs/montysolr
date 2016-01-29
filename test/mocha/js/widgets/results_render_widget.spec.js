@@ -118,7 +118,7 @@ define([
               "star"
             ]
           });
-          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*+*%3A*&rows=25&start=0');
+          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*%20*%3A*&rows=25&start=0');
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
