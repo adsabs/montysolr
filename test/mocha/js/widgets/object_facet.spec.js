@@ -139,12 +139,13 @@ define([
 
         minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'foo'}));
 
-        expect($w.find('.widget-body').children().not('.hide').length).to.be.eql(5);
-        expect($w.find('.widget-body').children().filter('.hide').length).to.be.eql(95);
-		
-		var top_level = $w.find('.div').not('.hide');
-		var test = $('div:data(widget, ObjectFacet)');
-        console.log(test);
+        // We now should have a facet called "SIMBAD Objects"
+		expect($("#test-area .widget-name h3").text().trim()).to.eql("SIMBAD Objects")
+		// We expect a top level entry "X-ray" with 1 correspnding record
+		expect($("#test-area .widget-body").find(".item-view .size-graphic").text().indexOf('X-ray (1)')).to.be.greaterThan(0);
+		// If the SIMBAD id translating worked as expected, there should be an entry for "GOODS SOUTHERN FIELD"
+		expect($("#test-area .widget-body").find(".item-view .size-graphic").text().indexOf('GOODS SOUTHERN FIELD')).to.be.greaterThan(0);
+
       });
 
 

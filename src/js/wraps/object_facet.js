@@ -63,7 +63,7 @@ define([
 					var vv = v.split("/");
 					return vv[vv.length-1]
 				});
-//				this.getSIMBADobjects(identifiers);
+				this.getSIMBADobjects(identifiers);
 			};
 	        var facetCollection = this.processFacets(apiResponse, facets);
 			var updater = function(facet) {
@@ -79,16 +79,17 @@ define([
 				 	facet.title = oname;
 				};			 
 			};
-//			facetCollection.forEach(updater);
+			console.log(widget._cache);
+			if (!(typeof widget._cache === 'undefined')) {
+				facetCollection.forEach(updater);
+			}
 	        this.updateCollectionAndView(info, facetCollection);
 	  	} else {
 			console.log("processing micro service data");
 			// We received a response from the micro service, so we need to do the following:
 			// 1. Add the mapping from the numerical object idetifier to the canonical object nane
-			if (typeof this._cache === 'undefined') {
+			if (typeof widget._cache === 'undefined') {
 				widget._cache = widget._getNewCache();
-			} else {
-				console.log("cache already exists");
 			}
 			for (var objId in apiResponse.attributes) {
 				widget._cache.put(objId, apiResponse.attributes[objId]['canonical']);
@@ -105,7 +106,7 @@ define([
             contentType : "application/json"
 		  }
         });
-		pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, this.processFacetResponse);
+		pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processFacetResponse);
 		pubsub.publish(pubsub.EXECUTE_REQUEST, request);
     };
     return widget;
