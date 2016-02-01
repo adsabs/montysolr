@@ -48,7 +48,12 @@ define([
         _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model', 'description']));
 
         //widget.reset will restore these default pagination settings
-        this.pagination = _.defaults(options.pagination || {}, {
+        //for now, it doesn't make sense to pass them as options
+        //since localStorage perPage will override it anyway
+
+        //this functions as model.defaults while allowing the inheriting
+        //widgets to provide their own models with their own defaults
+        this.pagination = {
           pagination: true,
           //default per page : 25
           perPage: 25,
@@ -56,7 +61,7 @@ define([
           currentQuery: undefined,
           start: 0,
           pageData: undefined
-        });
+        };
 
         options.collection = options.collection || new PaginatedCollection();
 
@@ -92,8 +97,10 @@ define([
       activate: function (beehive) {
 
         this.setBeeHive(beehive);
+        _.bindAll(this, ["updatePaginationPreferences"]);
 
-        //might be a test
+        this.getPubSub().subscribe(this.getPubSub().USER_ANNOUNCEMENT, this.updatePaginationPreferences);
+
         if (this.getBeeHive().getObject("User") && this.getBeeHive().getObject("User").getLocalStorage ){
           var perPage = this.getBeeHive().getObject("User").getLocalStorage().perPage;
           if (perPage){
@@ -102,6 +109,13 @@ define([
             this.pagination.perPage = perPage;
             this.model.set(this.pagination);
           }
+        }
+      },
+
+      updatePaginationPreferences : function(event, data){
+        if (event == "user_info_change" && data.perPage && data.perPage !== this.pagination.perPage ){
+          //update per-page value
+          this.updatePagination({perPage : data.perPage});
         }
       },
 
@@ -206,17 +220,24 @@ define([
         start : 0
       },
 
-      updatePagination: function(options) {
+      /*
+      * right now only perPage value can be updated by list of things
+      * */
 
+      updateLocalStorage : function(options){
         //if someone has selected perPage, save it in to localStorage
-        var perPage = options.perPage || this.model.get('perPage');
         if (options.hasOwnProperty("perPage") && _.contains([25, 50, 100], options.perPage)){
           this.getBeeHive().getObject("User").setLocalStorage({ perPage : options.perPage });
           console.log("set user's page preferences in localStorage: " + options.perPage);
         }
+        //updatePagination will be called after localStorage triggers an event
+      },
+
+      updatePagination: function(options) {
 
         var numFound = options.numFound || this.model.get('numFound');
         var currentQuery = options.currentQuery || this.model.get('currentQuery') || new ApiQuery();
+        var perPage = options.perPage || this.model.get('perPage');
 
         //page is zero indexed! so 0 == page 1, etc
         var page;
@@ -262,6 +283,9 @@ define([
         var pageData = this._getPaginationData( page,  perPage, numFound);
         var showRange = [page*perPage, (page*perPage)+perPage-1];
 
+        //this needs to be updated as a default
+        this.pagination.perPage = perPage;
+
         this.model.set({
           start: start,
           perPage: perPage,
@@ -289,7 +313,7 @@ define([
       onAllInternalEvents: function(ev, arg1, arg2) {
 
         if (ev === "pagination:changePerPage"){
-          this.updatePagination({perPage: arg1});
+          this.updateLocalStorage({perPage: arg1});
         }
         else if (ev === "pagination:select") {
           return this.updatePagination({page: arg1});
@@ -308,10 +332,9 @@ define([
             var q = this.model.get('currentQuery').clone();
             q.set('__fetch_missing', 'true');
             q.set('start', start);
-            q.set('rows', perPage);
+            //larger row numbers were causing timeouts
+            q.set('rows', 25);
             var req = this.composeRequest(q);
-
-            //console.log('we have to retrieve new data' + JSON.stringify(arg1));
 
             if (req) {
               pubsub.publish(pubsub.EXECUTE_REQUEST, req);
