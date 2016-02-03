@@ -734,7 +734,7 @@ define([
         var options = {
           type: 'GET',
           url: url,
-          cache: this.pending ? true : false, // true = do not generate _ parameters (let browser cache responses)
+          cache: this.updateDatabasePromise ? true : false, // true = do not generate _ parameters (let browser cache responses)
           timeout: this.orcidApiTimeout,
           done: function(data) {
             result.resolve(data);
@@ -855,8 +855,11 @@ define([
         var result = $.Deferred();
         var self = this;
 
-        if (this.needsUpdate() || this.pending) {
-          this.updateDatabase()
+        if (
+            this.needsUpdate() ||
+            (this.updateDatabasePromise && this.updateDatabasePromise.state() !== "resolved")
+        )
+        {  this.updateDatabase()
             .done(function() {
               result.resolve(self._getRecInfo(data));
             })
@@ -921,23 +924,24 @@ define([
           profile = profile['orcid-profile'];
         
         var self = this;
-
         var whenDone = $.Deferred();
-        if (self.pending) { // update is already running
-          var tme = setInterval(function() {
-            if (self.pending == false) {
-              if (whenDone.state() != 'resolved')
-                whenDone.resolve();
-              clearInterval(tme);
-            }
-          }, 200);
-          setTimeout(function() {
-            clearInterval(tme);
-          }, 3000);
-          return whenDone.promise();
+
+        //update is currently in progress
+        if (this.updateDatabasePromise){
+          return this.updateDatabasePromise.promise();
         }
 
-        self.pending = true;
+        //otherwise, have to run the update and set this.updateDatabasePromise
+        this.updateDatabasePromise = whenDone;
+
+        //this function will clear the resolved whendone promise after 30 seconds,
+        //so if new requests are made, they will have to update database again
+        function clearWhenDoneAfterDelay(){
+          setTimeout(function(){
+            self.updateDatebasePromise = null;
+          }, 1000 * 30);
+        }
+
         self.virgin = false;
 
         var defer;
@@ -979,7 +983,6 @@ define([
             var whereClauses = [];
             query = query.sort();
             var steps = _.range(0, query.length, self.maxQuerySize);
-            var start, end;
             for(var i=0; i<steps.length; i++) {
               var q = {};
               for (var j=steps[i]; j<steps[i]+self.maxQuerySize; j++) {
@@ -1010,27 +1013,29 @@ define([
 
                 self.db = db;
                 self.profile = profile;
-                self.pending = false;
                 whenDone.resolve();
               }, function() {
                 console.error('Error processing response from ADS', arguments);
                 self.db = db;
                 self.profile = profile;
-                self.pending = false;
                 whenDone.resolve();
+                clearWhenDoneAfterDelay();
               });
           }
           else {
             self.db = db;
             self.profile = profile;
-            self.pending = false;
             whenDone.resolve();
+            clearWhenDoneAfterDelay();
           }
           })
           .fail(function() {
             whenDone.reject(arguments);
+            clearWhenDoneAfterDelay();
           });
+
         return whenDone;
+
       },
 
       _buildQuery: function(query) {
