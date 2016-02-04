@@ -158,6 +158,10 @@ define([
           promises.push(promise);
       }
 
+      if (promises.length == 1) {
+        promises.push(promise); // hack, so that $.when() always returns []
+      }
+
       var bigPromise = $.when.apply($, promises)
         .then(function () {
           _.each(arguments, function (promisedValues, idx) {
@@ -325,7 +329,7 @@ define([
           console.warn("Ignoring error");
           return;
         }
-        defer.reject();
+        defer.reject(err);
       };
 
       console.time("startLoading"+sectionName)
