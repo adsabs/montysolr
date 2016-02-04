@@ -1,0 +1,36 @@
+
+<!--html for modal alerts-->
+<div class="modal fade" id="alert-modal" tabindex="-1" role="dialog" aria-labelledby="alertBoxLabel" aria-hidden="true">
+
+</div>
+
+
+<div class="modal-dialog {{type}}">
+        <div class="modal-content" id="modal-alert-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+
+                <h4 class="modal-title" id="alertBoxLabel">
+                    {{#compare type "danger"}}
+                    <i class="icon-danger fa-2x"></i>
+                    {{/compare}}
+
+                    {{#compare type "success"}}
+                    <i class="icon-success fa-2x"></i>
+                    {{/compare}}
+
+                    {{#compare type "warning"}}
+                    {{/compare}}
+
+                    {{title}}
+
+                </h4>
+            </div>
+            <div class="modal-body">
+                {{{msg}}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
