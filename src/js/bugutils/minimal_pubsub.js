@@ -77,6 +77,7 @@ define(['underscore', 'backbone',
             context = req.get('options');
           }
           var response = self.request.apply(self, arguments);
+          if (!response) return;
           if (self.verbose) {
             console.log('[MinSub]', 'request', self.requestCounter, response);
           }

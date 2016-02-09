@@ -1,4 +1,11 @@
 <div class="row">
+    <div class="col-sm-12 page-loading" style="text-align:center">
+            {{#if loading}}
+            <i class="icon-loading"></i>&nbsp;Loading more papers...
+            {{/if}}
+    </div>
+</div>
+<div class="row">
     {{#if pageData}}
     <div class="col-sm-12 pagination-controls s-pagination-controls">
         <div class="col-xs-5 per-page-container">

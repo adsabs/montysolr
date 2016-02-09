@@ -144,6 +144,19 @@ define([
           {numFound: apiResponse.has("response.numFound")
             ? apiResponse.get("response.numFound")
             : this.hiddenCollection.length});
+
+        //finally, loading view (from pagination template) can be removed or added
+
+        if (//for pages other than the last page
+            (this.model.get("perPage") === this.collection.length) ||
+           //when this is satisfied, all pages are found
+            (this.hiddenCollection.length === apiResponse.get("response.numFound"))
+        ) {
+          this.model.set("loading", false);
+        }
+        else {
+          this.model.set("loading", true);
+        }
       },
 
       extractDocs: function(apiResponse) {
@@ -320,7 +333,7 @@ define([
         }
         else if (ev === 'show:missing') {
           var pubsub = this.getPubSub();
-          // TODO: show spinning wheel?? (we could do it from the template)
+
           _.each(arg1, function(gap) {
             var numFound = this.model.get('numFound');
             var start = gap.start;

@@ -285,7 +285,7 @@ define(['marionette',
         widget.trigger("pagination:changePerPage", 50);
         expect(widget.model.get("perPage")).to.eql(50);
         
-        expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":50,"numFound":100,"currentQuery":{"q":["foo:bar"]},"pageData":{"perPage":50,"totalPages":2,"currentPage":1,"previousPossible":false,"nextPossible":true},"page":0,"showRange":[0,49]}')
+        expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":50,"numFound":100,"currentQuery":{"q":["foo:bar"]},"pageData":{"perPage":50,"totalPages":2,"currentPage":1,"previousPossible":false,"nextPossible":true},"page":0,"showRange":[0,49],"loading":false}')
 
         expect($(".per-page--active").text().trim()).to.eql("50");
         expect($("input.page-control").val()).to.eql("1");
@@ -372,9 +372,94 @@ define(['marionette',
 
         done()
 
+      });
 
+      it("displays a loading view on pages that have not finished loading all the papers", function(){
+
+        var requests;
+
+        var minsub = new (MinPubSub.extend({
+          request: function(apiRequest) {
+            if (requests === 0) return;
+            requests--;
+            var ret = test1();
+            var q = apiRequest.get('query');
+            _.each(q.keys(), function(k) {
+              ret.responseHeader.params[k] = q.get(k)[0];
+            });
+            //but widget is currently checking in the response.start not the responseheader
+            ret.response.start = q.get("start")[0];
+            return ret;
+          }
+        }))({verbose: false});
+
+
+        var fakeUserObject = {
+          getHardenedInstance : function(){return this},
+          isOrcidModeOn : function(){return false},
+          getLocalStorage : function(){return { perPage : 25 }},
+        };
+        minsub.beehive.addObject("User", fakeUserObject);
+
+        var widget = new DetailsWidget();
+        widget.activate(minsub.beehive.getHardenedInstance());
+
+        var data = test1();
+        data.response.numFound = 32;
+
+        var $w = widget.render().$el;
+        $('#test').append($w);
+
+        data.response.start = 0;
+        var res = new ApiResponse(data);
+        res.setApiQuery(new ApiQuery({q: 'foo:bar'}));
+
+        requests = 1;
+
+        widget.processResponse(res);
+
+        expect($(".page-loading").text().trim()).to.eql("Loading more papers...");
+
+        widget.reset();
+
+        requests = 3;
+
+        _.each(_.range(3), function(n) {
+          data.response.start = n*10;
+          var res = new ApiResponse(data);
+          res.setApiQuery(new ApiQuery({q: 'foo:bar'}));
+          widget.processResponse(res);
+        });
+
+        expect($(".page-loading").text().trim()).to.eql("");
+
+        requests = 0;
+        widget.updatePagination({ page : 2 , perPage : 25});
+
+        //add penultimate record
+
+        data.response.start = 30;
+        data.response.docs = test1().response.docs.slice(0,1);
+        var res = new ApiResponse(data);
+        res.setApiQuery(new ApiQuery({q: 'foo:bar'}));
+
+        widget.processResponse(res);
+
+        expect($(".page-loading").text().trim()).to.eql("Loading more papers...");
+
+        //add final record, remove loading view
+
+        data.response.start = 31;
+        data.response.docs = test1().response.docs.slice(1,2);
+        var res = new ApiResponse(data);
+        res.setApiQuery(new ApiQuery({q: 'foo:bar'}));
+
+        widget.processResponse(res);
+
+        expect($(".page-loading").text().trim()).to.eql("");
 
       });
+
 
       it("the item view allows the user to view the lsit in a search results page if 'operator' option is true and 'queryOperator' option is set", function() {
 
