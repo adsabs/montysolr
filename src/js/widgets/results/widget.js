@@ -15,7 +15,8 @@ define([
     'js/mixins/papers_utils',
     'js/modules/orcid/extension',
     'js/mixins/dependon',
-    'analytics'
+    'analytics',
+    'js/components/api_feedback'
   ],
 
   function (
@@ -29,7 +30,8 @@ define([
     PapersUtilsMixin,
     OrcidExtension,
     Dependon,
-    analytics
+    analytics,
+    ApiFeedback
 
     ) {
 
@@ -121,7 +123,9 @@ define([
       },
 
       dispatchRequest: function(apiQuery) {
-          this.reset();
+
+        var pubsub = this.getPubSub();
+        this.reset();
           ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
       },
 

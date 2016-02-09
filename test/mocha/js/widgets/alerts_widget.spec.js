@@ -41,6 +41,7 @@ define([
     });
 
     it("displays messages", function(done) {
+
       var widget = _getWidget();
 
       var $w = widget.render().$el;
@@ -69,6 +70,7 @@ define([
       expect(promise.state()).to.be.eql('pending');
       var spy;
       promise.done((spy = sinon.spy()));
+
       $w.find('#alertBox a').click();
       expect(promise.state()).to.be.eql('resolved');
       expect(spy.lastCall.args[0]).to.be.eql({
@@ -101,36 +103,34 @@ define([
       expect(_.filter(_.flatten(widget.model.get.args), function(x) {return x == 'promise'}).length).to.be.eql(2);
 
 
-
       //now check the widget appears in modal mode
       promise = widget.alert({
         msg: 'this is <a href="foo">html</a> message',
         modal: true,
         events: {
-          'click #alertBox a': {
+          'click #modal-alert-content a': {
             action: Alerts.ACTION.TRIGGER_FEEDBACK,
             arguments: {code: 0}
           }
         }
       });
 
-      $w.find('#alertBox a').click();
-      expect(promise.state()).to.be.eql('resolved');
+        $('#modal-alert-content a[href="foo"]').click();
+        expect(promise.state()).to.be.eql('resolved');
 
-      setTimeout(function() {
-        expect($w.find('#alertBox a').is(':visible')).to.be.true;
-        $w.find('button.close').click();
         setTimeout(function() {
-          expect($w.find('#alertBox a').is(':visible')).to.be.false;
-          done();
-        }, 500)
+          expect($('#modal-alert-content a').is(':visible')).to.be.true;
+          $('button.close').click();
+          setTimeout(function() {
+            expect($('#modal-alert-content a').is(':visible')).to.be.false;
+            done();
+          }, 500)
 
-      }, 500);
+        }, 500);
+
 
     });
 
-
-
-  })
+  });
 
 });

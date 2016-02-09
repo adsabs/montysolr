@@ -5,198 +5,149 @@
  */
 
 define([
-    'js/widgets/base/base_widget',
-    'js/components/api_query',
-    'hbs!./templates/alerts_template',
-    'marionette',
-    'js/components/api_feedback',
-    'jquery',
-    'jquery-ui',
-    'js/components/alerts'
+      'marionette',
+      'js/widgets/base/base_widget',
+      'js/components/api_query',
+      'js/components/api_feedback',
+    //list of possible alerts
+      'js/components/alerts',
+      './modal_view',
+      './page_top_alert',
+      'jquery',
+      'jquery-ui',
+      'bootstrap'
 
-  ],
-  function(
-    BaseWidget,
-    ApiQuery,
-    WidgetTemplate,
-    Marionette,
-    ApiFeedback,
-    $,
-    $ui,
-    Alerts
-    ){
+    ],
+    function (
+              Marionette,
+              BaseWidget,
+              ApiQuery,
+              Alerts,
+              ApiFeedback,
+              ModalView,
+              BannerView,
+              $,
+              $ui,
+              bootstrap
+    ) {
 
 
-    var AlertsModel = Backbone.Model.extend({
-      defaults : {
-        type: 'info',
-        msg: undefined,
-        title: undefined,
-        events: undefined,
-        modal: false
-      }
-    });
-
-    var delegateEventSplitter = /^(\S+)\s*(.*)$/;
-    
-    var AlertsView = Marionette.ItemView.extend({
-
-      tagName : "span",
-      className : "s-alerts",
-
-      initialize: function () {
-      },
-
-      template: WidgetTemplate,
-
-      events: {
-        'click #alertBox button.close': 'close'
-      },
-
-      modelEvents: {
-        "change": 'render'
-      },
-
-      close : function(){
-        var that = this;
-        this.$(".alert").addClass("fadeOutUp");
-        setTimeout(function(){
-          that.$(".alert").css("display", "none");
-        },900);
-      },
-
-      destroy: function() {
-        if (this.model.get('modal')) {
-          var that = this;
-          this.$el.find('#alertBox').modal('hide').on('hidden.bs.modal', function() {
-            that.model.set('msg', null, {silent: true});
-          });
+      var AlertModel = Backbone.Model.extend({
+        defaults: {
+          type: 'info',
+          msg: undefined,
+          title: undefined,
+          events: undefined,
+          modal: false
         }
-        else {
-          this.model.set('msg', null);
-        }
-      },
+      });
 
-      render: function() {
-        if (this.$el) {
-          this.$el.off('.customEvents' + this.mid);
-        }
+      /*
+      * function called in onRender method of all alert views
+      * this allows for custom events to be added to the alert views
+      * when the events happen, a promise is resolved with the name of the event
+      * NOTE: this assumes there is only 1 event per alert view
+      * */
 
-        // this seems to be necessary (at least when the actions happen too fast ... like in unittests)
-        if (null && this.$el && this.$el.find('#alertBox.modal').length) {
+        function delegateAdditionalEvents() {
           var self = this;
-          var args = arguments;
-          this.$el.find('#alertBox.modal').modal('hide').on('hidden.bs.modal', function() {
-            Marionette.ItemView.prototype.render.apply(self, args);
-          });
-          return;
-        }
-        return Marionette.ItemView.prototype.render.apply(this, arguments);
-      },
+          var events = this.model.get('events');
+          var delegateEventSplitter = /^(\S+)\s*(.*)$/;
 
-      onRender: function() {
-        var self = this;
-        var events = this.model.get('events');
+          //first, remove previous events
+          if (this.$el) {
+            this.$el.off('.customEvents' + this.mid);
+          }
 
-        // attach functions to events; copied from backbone
-        // when 'event' is fired, it will call/resolve the
-        // promise object with the name of the event
-        if (events) {
-          var bindings = {};
-          _.each(events, function(evtValue, evt) {
+          // attach functions to events; copied from backbone
+          // when 'event' is fired, it will call/resolve the
+          // promise object with the name of the event
+          if (events) {
 
-            var match = evt.match(delegateEventSplitter);
-            var eventName = match[1], selector = match[2];
-            var key = evt;
+            _.each(events, function (evtValue, evt) {
 
-            var method = function(ev) {
-              if (ev) {
-                ev.preventDefault();
-                ev.stopPropagation();
+              var match = evt.match(delegateEventSplitter);
+              var eventName = match[1], selector = match[2];
+              var key = evt;
+
+              //create an event listener that resolves the promise
+              //with the supplied data when there is the proper event
+              var method = function (ev) {
+                if (ev) {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                }
+                var promise = this.model.get('promise');
+                var evts = this.model.get('events');
+                if (evts[key]){
+                  promise.resolve(evts[key]);
+                }
+                else {
+                  promise.resolve(key);
+                }
+                // unless it is modal, close it automatically
+                if (!this.model.get('modal')) {
+                  this.model.set('msg', null);
+                }
+              };
+
+              method = _.bind(method, self);
+              eventName += '.customEvents' + this.mid;
+              if (selector === '') {
+                self.$el.on(eventName, method);
+              } else {
+                self.$el.on(eventName, selector, method);
               }
-              var promise = this.model.get('promise');
-              var evts = this.model.get('events');
-              if (evts[key])
-                promise.resolve(evts[key]);
-              promise.resolve(key);
-              // unless it is modal, close it automatically
-              if (!this.model.get('modal')) {
-                this.model.set('msg', null);
-              }
-            };
+            });
+          }
+      };
 
-            method = _.bind(method, self);
-            eventName += '.customEvents' + this.mid;
-            if (selector === '') {
-              self.$el.on(eventName, method);
-            } else {
-              self.$el.on(eventName, selector, method);
-            }
+      var modalOnRender = ModalView.prototype.onRender;
+
+      ModalView.prototype.onRender = function(){
+        delegateAdditionalEvents.apply(this, arguments);
+        if (modalOnRender) modalOnRender.apply(this, arguments);
+      };
+
+      var bannerOnRender = BannerView.prototype.onRender;
+
+      BannerView.prototype.onRender = function(){
+        delegateAdditionalEvents.apply(this, arguments);
+        if (bannerOnRender) bannerOnRender.apply(this, arguments);
+      };
+
+
+      var AlertsWidget = BaseWidget.extend({
+
+        initialize: function (options) {
+          this.model = new AlertModel();
+          this.view = new BannerView({model: this.model});
+          this.modalView = new ModalView({model: this.model});
+          BaseWidget.prototype.initialize.apply(this, arguments);
+
+        },
+
+        activate: function (beehive) {
+          this.setBeeHive(beehive);
+          //listen to navigate event and close widget
+          var pubsub = this.getPubSub();
+          pubsub.subscribe(pubsub.NAVIGATE, this.modalView.closeModal);
+        },
+
+        alert: function (feedback) {
+          var promise = $.Deferred();
+          this.model.set({
+            msg: feedback.msg,
+            events: feedback.events,
+            title: feedback.title,
+            type: feedback.type || "info",
+            modal: feedback.modal,
+            promise: promise
           });
+          return promise.promise();
         }
 
-        if (this.model.get('modal')) {
-          this.showModal();
-        }
+      });
 
-      },
-
-      showModal: function() {
-        this.$el.find('#alertBox').modal('show');
-      }
+      return AlertsWidget;
     });
-
-
-    var AlertsWidget = BaseWidget.extend({
-
-      initialize : function(options){
-        this.model = new AlertsModel();
-        this.view = new AlertsView({model : this.model});
-        BaseWidget.prototype.initialize.apply(this, arguments);
-        this.listenTo(this.view, 'custom-event', _.bind(this.onCustomEvent, this));
-      },
-
-      activate: function (beehive) {
-        _.bindAll(this, ["clearView"]);
-        this.setBeeHive(beehive);
-        //listen to navigate event and close widget
-        var pubsub = this.getPubSub();
-        pubsub.subscribe(pubsub.NAVIGATE, this.clearView);
-      },
-
-      clearView : function(){
-        //to prevent re-rendering in inopportune moments
-        //WARNING: because this is subscribing to pubsub.navigate, it might be called
-        //right after another recently shown widget triggers an alert
-        
-        this.view.destroy();
-      },
-
-      alert: function(feedback) {
-        var promise = $.Deferred();
-        this.model.set({
-          events: feedback.events,
-          msg: feedback.msg,
-          title: feedback.title,
-          type: feedback.type || "info",
-          modal: feedback.modal,
-          promise: promise
-        });
-        return promise.promise();
-      },
-
-      onCustomEvent: function(ev, evtName) {
-        if (ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-        }
-
-        var events = this.model.get('events');
-
-      }
-
-    });
-
-
-    return AlertsWidget;
-  });
