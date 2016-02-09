@@ -65,43 +65,12 @@ define([
             orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
           });
 
-          var fakeHistoryManager = {
-            getCurrentNav : function(){
-              return "index-page";
-            },
-            getHardenedInstance : function(){return this}
-          };
-
-          var fakeAppStorage = {
-            getHardenedInstance: function () {
-              return this
-            },
-            setStashedNav : sinon.spy()
-          };
-
-
-          beehive.addService("HistoryManager", fakeHistoryManager);
-          beehive.addObject("AppStorage", fakeAppStorage);
-
 
           var oModule = new OrcidModule();
           oModule.activate(beehive);
           return beehive.getService('OrcidApi');
         };
-
-        it("signIn redirects to the appropriate ORCID url", function() {
-          var oApi = getOrcidApi();
-          var spy = sinon.spy();
-          minsub.subscribe(minsub.APP_EXIT, spy);
-          oApi.signIn();
-          expect(spy.called).to.eql(true);
-          expect(minsub.beehive.getObject("AppStorage").setStashedNav.calledWith("index-page")).to.be.true;
-          expect(spy.lastCall.args[0]).to.eql({
-            url: "https://api.orcid.org/oauth/authorize?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline&show_login=true&client_id=APP-P5ANJTQRRTMA6GXZ&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F%23%2Fuser%2Forcid",
-            type: 'orcid'
-          })
-        });
-
+        
         it("has methods to extract access code", function() {
           var oApi = getOrcidApi();
           // it receives window.location.search
@@ -125,6 +94,7 @@ define([
               "name":"Roman Chyla"});
 
             oApi.saveAccessData(res);
+
             expect(oApi.authData).to.eql(res);
 
             // the expires was added
@@ -138,6 +108,18 @@ define([
             });
 
           })
+        });
+
+        it("should handle ORCID sign in", function(){
+
+          var oApi = getOrcidApi();
+
+          beehive.getService("PubSub").publish = sinon.spy();
+
+          oApi.signIn();
+
+          expect(JSON.stringify(beehive.getService("PubSub").publish.args[0])).to.eql('[{},"[App]-Exit",{"type":"orcid","url":"https://api.orcid.org/oauth/authorize?scope=/orcid-profile/read-limited%20/orcid-works/create%20/orcid-works/update&response_type=code&access_type=offline&show_login=true&client_id=APP-P5ANJTQRRTMA6GXZ&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F%23%2Fuser%2Forcid"}]');
+          expect(JSON.stringify(beehive.getService("PubSub").publish.args[1])).to.eql('[{},"[PubSub]-Orcid-Announcement","login"]')
         });
 
         it("signOut forgets authentication details", function() {
@@ -332,7 +314,6 @@ define([
             request: function (apiRequest) {
               var target = apiRequest.get('target');
               var opts = apiRequest.get('options');
-
 
               if (target.indexOf('/orcid-profile') > -1) {
                 expect(opts.headers["Orcid-Authorization"]).to.eql('Bearer 4274a0f1-36a1-4152-9a6b-4246f166bafe');

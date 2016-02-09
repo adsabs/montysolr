@@ -149,12 +149,6 @@ define([
       expect(MasterPageManager.show.args[0][0]).to.eql("OrcidPage");
 
 
-
-
-
-
-
-
   });
 
 

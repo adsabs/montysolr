@@ -169,37 +169,6 @@ define([
         return JSON.parse(JSON.stringify(this.get("dynamicConfig")));
       },
 
-
-    //this is used when authentication requires an interruption in user flow
-    //stashedPage val should be the name of a navigate command
-    //should by called with 1 param: an array of args used for pubsub.navigate command
-
-    setStashedNav : function(pageInstructions){
-      var storage  = this.getBeeHive().getService('PersistentStorage');
-      if (storage){
-        storage.set("stashedNavArgs", pageInstructions);
-      }
-      else {
-        console.warn("no persistent storage service available");
-      }
-    },
-
-    executeStashedNav : function(){
-      var storage  = this.getBeeHive().getService('PersistentStorage');
-      if (storage){
-        var args = storage.get("stashedNavArgs");
-        if (!args) return false;
-        //it's a results page, so initiate a start search
-        if (args[0] == "results-page" && this.getCurrentQuery()){
-          //this feels hackish, but only easy way to run the stored query
-          this.getPubSub().publish(this.getPubSub().START_SEARCH, this.getCurrentQuery());
-        }
-        this.getPubSub().publish.apply(this.getPubSub(), [this.getPubSub().NAVIGATE].concat(args));
-        storage.remove("stashedNavArgs");
-        return true;
-      }
-    },
-
       hardenedInterface:  {
         getNumSelectedPapers: 'getNumSelectedPapers',
         isPaperSelected: 'isPaperSelected',
@@ -210,9 +179,8 @@ define([
         hasCurrentQuery: 'hasCurrentQuery',
         getConfigCopy : 'get read-only copy of dynamic config',
         set : 'set a value into app storage',
-        get : 'get a val from app storage',
-        setStashedNav : 'store a navigation command to be executed later',
-        executeStashedNav : 'execute the stored navigation command'
+        get : 'get a val from app storage'
+
       }
     }
   );

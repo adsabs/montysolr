@@ -602,15 +602,11 @@ define([
                     console.warn(error);
                   });
             }
-            //should we redirect back to a certain page now that orcid is authenticated?
-            //the stashed nav in question currently would only belong to orcid form on user page
-            //calling this function executes it
-            if (!appStorage.executeStashedNav()) {
+
               //go to the orcidbigwidget
               this.route = '#user/orcid';
                 app.getObject('MasterPageManager').show('OrcidPage',
                     ['OrcidBigWidget', 'SearchWidget']);
-            }
           }
           else {
             //just redirect to index page, no orcid access

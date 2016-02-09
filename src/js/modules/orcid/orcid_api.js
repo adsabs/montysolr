@@ -154,9 +154,6 @@ define([
         });
         //make sure to redirect to the proper page after sign in
         this.getPubSub().publish(this.getPubSub().ORCID_ANNOUNCEMENT, "login");
-        var currentPage = this.getBeeHive().getService("HistoryManager").getCurrentNav();
-        this.getBeeHive().getObject("AppStorage").setStashedNav(currentPage);
-
       },
 
       /*
