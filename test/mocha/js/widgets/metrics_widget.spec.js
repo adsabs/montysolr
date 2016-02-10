@@ -1078,7 +1078,7 @@ define([
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
       metricsWidget.renderWidgetForCurrentQuery();
-      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n    papers.\n    \n\n\n\n\n    Change to first  paper(s) (max is 2).\n     Submit');
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 2\n    \n    papers.\n    \n\n\n\n\n    Change to first  paper(s) (max is 2).\n     Submit \n\n\n\n\n    This metrics report is optimized for printing: just find the print command in your browser\'s toolbar.');
 
       sinon.spy(metricsWidget.getPubSub(), "publish");
 
@@ -1412,7 +1412,7 @@ define([
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
       metricsWidget.renderWidgetForCurrentQuery();
-      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 1\n    \n    paper.');
+      expect($("#test").find(".metrics-metadata").text().trim()).to.eql('Currently viewing metrics for 1\n    \n    paper.\n    \n\n\n\n\n\n    This metrics report is optimized for printing: just find the print command in your browser\'s toolbar.');
 
       expect($("#test").find("h3:visible").text()).to.eql("CitationsReads");
 

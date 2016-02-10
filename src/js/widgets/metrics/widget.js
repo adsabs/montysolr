@@ -714,6 +714,8 @@ define([
     renderWidgetForCurrentQuery : function(){
       this.resetWidget();
       this.containerModel.set("requestRowsAllowed", true);
+      //for printing
+      this.containerModel.set("url", window.location.href);
       this.dispatchRequest(this.getCurrentQuery());
     },
 
