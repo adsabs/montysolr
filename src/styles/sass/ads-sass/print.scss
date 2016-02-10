@@ -1,0 +1,75 @@
+.print-visible {
+  display : none;
+}
+@media print {
+
+  //THIS IS SUPER IMPORTANT otherwise page breaks don't work
+  #app-container {
+    overflow-x: visible !important;
+  }
+
+  .print-visible {
+    display:block;
+  }
+
+
+  //general, any page adjustments
+  .s-results-control-row-container, #navbar-container, .s-stable-search-bar-height, .s-metrics-metadata, .footer  {
+    display:none !important;
+  }
+
+  .nav-container, .toggle-menu {
+    display: none !important;
+  }
+
+  .s-right-col-widget-container, .query-info-widget {
+    display : none;
+  }
+
+.main-content-container {
+  border: none;
+}
+  //abstract-page
+
+  li.author a {
+    font-weight: bold;
+  }
+
+  //metrics
+
+  .icon-help {
+    display:none;
+  }
+
+  .close-widget {
+    display:none;
+  }
+
+  .s-metrics-title {
+    padding: 10px 0;
+  }
+
+  .s-metrics-section {
+    page-break-after: always;
+    page-break-inside: avoid;
+    -webkit-region-break-inside: avoid;
+    position: relative;
+  }
+
+  .nv-controlsWrap {
+    display : none;
+  }
+
+  .s-metrics-table, .s-metrics-graph {
+    display:block !important;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .s-metrics-table {
+    width: 60%;
+    margin-bottom: 50px;
+  }
+
+
+}

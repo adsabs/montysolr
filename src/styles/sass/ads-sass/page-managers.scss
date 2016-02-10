@@ -106,6 +106,9 @@ s-search-bar-motion is applied */
   position: relative;
   margin-bottom: 20px;
 
+  max-width: 1200px;
+  margin: auto;
+
 }
 
 //this class is useful if you want to apply  a background to
@@ -221,7 +224,6 @@ Styles for Abstract Page
 .s-right-col-widget-title {
   margin-top: 2px;
   @extend .secondary-header;
-
 }
 
 .s-right-col-widget-title.disabled {
@@ -229,6 +231,6 @@ Styles for Abstract Page
 }
 
 #app-container {
-  overflow-x: hidden;
+overflow-x: hidden;
 }
 #main-content:focus { outline: thin $brand-primary-faded dotted !important }
