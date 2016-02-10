@@ -536,9 +536,9 @@ define(['underscore',
       _buildOneRule: function(rule) {
         var val, q, field;
         if (rule.type == 'string') {
-          var input = rule.value.trim();
-
-          field = rule.field || '__all__';
+          var fv = this._cleanupFieldValue(rule.field, rule.value);
+          var input = fv.value;
+          field = fv.field;
 
           switch(rule.operator) {
 
@@ -651,6 +651,17 @@ define(['underscore',
         else {
           throw new Error("Not knowing what to do with: " + JSON.stringify(rule));
         }
+      },
+
+      _cleanupFieldValue: function(field, value) {
+        value = value.trim();
+        field = (field || '__all__').trim();
+
+        if (field.substring(0,1) === '^') {
+          value = '^' + value;
+          field = field.substring(1, field.length);
+        }
+        return {field: field, value: value};
       },
 
       extractFunctionValues: function(funcname, qtree) {
