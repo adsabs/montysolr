@@ -1,36 +1,40 @@
-<span class="s-large-close close-widget">x</span>
-<div class="metrics-metadata s-metrics-metadata">
-</div>
 
-     <!--used by widget when it is on the abstract page-->
-    {{#if title}}
-        <div style="padding-left:4%">
-            <h4 class="s-list-description">Metrics for</h4>
-            <h2 class="s-article-title">{{{title}}}</h2>
+<div class="metrics-container">
+    <div class="print-visible"><h2 style="font-weight: 800;text-align:center;">NASA/ADS Metrics Report </h2> </div>
+    <span class="s-large-close close-widget">x</span>
+
+    <div class="metrics-metadata s-metrics-metadata">
+    </div>
+
+         <!--used by widget when it is on the abstract page-->
+        {{#if title}}
+            <div style="padding-left:4%">
+                <h4 class="s-list-description">Metrics for</h4>
+                <h2 class="s-article-title">{{{title}}}</h2>
+            </div>
+        {{/if}}
+    <div class="s-metrics-section" id="papers">
+        <div class="s-metrics-title">
+            <h3>Papers</h3>
         </div>
-    {{/if}}
-<div class="s-metrics-section" id="papers">
-    <div class="s-metrics-title">
-        <h3>Papers</h3>
+        <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
     </div>
-    <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
-</div>
-<div class="s-metrics-section" id="citations">
-    <div class="s-metrics-title">
-        <h3>Citations</h3>
+    <div class="s-metrics-section" id="citations">
+        <div class="s-metrics-title">
+            <h3>Citations</h3>
+        </div>
+        <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
     </div>
-    <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
-</div>
-<div class="s-metrics-section" id="indices">
-    <div class="s-metrics-title">
-        <h3>Indices</h3>
+    <div class="s-metrics-section" id="indices">
+        <div class="s-metrics-title">
+            <h3>Indices</h3>
+        </div>
+        <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
     </div>
-    <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
-</div>
-<div class="s-metrics-section" id="reads">
-    <div class="s-metrics-title">
-        <h3>Reads</h3>
+    <div class="s-metrics-section" id="reads">
+        <div class="s-metrics-title">
+            <h3>Reads</h3>
+        </div>
+        <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
     </div>
-    <div class="metrics-table s-metrics-table"></div><div class="metrics-graph s-metrics-graph"></div>
 </div>
-
