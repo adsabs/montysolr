@@ -87,7 +87,10 @@ define([], function() {
 
 
      // google recaptcha
-     recaptchaKey : "6LfE6AITAAAAALdSy2qxVW4TBqy5RdmREiv-AwlJ"
+     recaptchaKey : "6LfE6AITAAAAALdSy2qxVW4TBqy5RdmREiv-AwlJ",
+
+     //this is for bbb to know to show the hourly flag on devui.adsabs.harvard.edu,
+     hourly : false
 
   }
 
