@@ -657,7 +657,7 @@ define(['underscore',
         value = value.trim();
         field = (field || '__all__').trim();
 
-        if (field.startsWith('^')) {
+        if (field.substring(0,1) === '^') {
           value = '^' + value;
           field = field.substring(1, field.length);
         }
