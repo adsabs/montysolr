@@ -89,19 +89,18 @@ define([
       },
 
       onRequest: function(apiQuery) {
-        if (!(apiQuery instanceof ApiQuery) || !apiQuery.has('q'))
+        if (!(apiQuery instanceof ApiQuery))
           throw new Error('You are kidding me!');
-
-        q.set('foo', this.model.get('name') || 'world');
-
+        var q = apiQuery.clone();
+        q.unlock();
+        q.set('command', 'update');
         this.dispatchRequest(q); // calling out parent's method
       },
 
       // triggered externally, by a query-mediator, when it receives data for our query
       onResponse: function(apiResponse) {
-        if (apiResponse.has('response.numFound')) {
-          this.model.set('msg', 'The query found: ' + apiResponse.get('response.numFound') + ' results.');
-        }
+        var data = apiResponse.toJSON();
+        console.log(data);
       },
 
       onServiceAction: function(name) {
