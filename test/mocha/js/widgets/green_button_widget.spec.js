@@ -16,8 +16,7 @@ define([
            ApiRequest,
            ApiQuery,
            MinimalPubSub,
-           GreenButtonWidget,
-           TestData
+           GreenButtonWidget
     ) {
 
     describe("Green Button Widget (green_button_widget.spec.js)", function () {
@@ -34,7 +33,8 @@ define([
                 date_last_modified: '2015-09-04T01:56:35.450686+00:00',
                 deployed: true,
                 tested: true,
-                status: 'green'
+                status: 'success',
+                previous_version: 'v1.0.59'
               },
               {
                 application: 'sandbox',
@@ -44,7 +44,7 @@ define([
                 date_last_modified: '2015-10-11T01:56:35.450686+00:00',
                 deployed: true,
                 tested: true,
-                status: 'green'
+                status: 'warning'
               },
               {
                 application: 'prod',
@@ -54,17 +54,18 @@ define([
                 date_last_modified: '2015-09-04T01:56:35.450686+00:00',
                 deployed: true,
                 tested: true,
-                status: 'yellow'
+                status: 'success'
               },
               {
-                application: 'prod',
-                environment: 'adsws',
-                version: 'v1.0.60',
+                application: 'sandbox',
+                environment: 'orcid',
+                version: 'sd3434elk',
                 date_created: '2015-09-04T01:56:35.450686+00:00',
                 date_last_modified: '2015-09-04T01:56:35.450686+00:00',
                 deployed: true,
                 tested: true,
-                status: 'green'
+                status: 'pending',
+                msg: 'Deployment running (5mins)'
               },
             ]
           }
@@ -92,12 +93,12 @@ define([
         widget.activate(this.minsub.beehive.getHardenedInstance()); // this is normally done by application
 
         var $w = widget.render().$el;
-        $('#test').append($w);
+        $('#scratch').append($w);
 
         var minsub = this.minsub;
         minsub.publish(minsub.START_SEARCH, minsub.createQuery({'command': 'start'}));
 
-        expect($w.find('.message').text()).to.be.eql('The query found: 841359 results.');
+        console.log('hey')
       });
 
 
