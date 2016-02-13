@@ -36,7 +36,7 @@ define([], function() {
      * the default config)
      * this can be absolute url; or url relative to the api path
      */
-    bootstrapUrls: ['http://localhost:8000/embed.dyn.js'],
+    bootstrapUrls: [],
 
     /**
      *  pushState: when true, urls are without hashtag '#'

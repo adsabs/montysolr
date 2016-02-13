@@ -24,15 +24,32 @@ define([
       'js/components/application',
       'js/apps/bumblebox/bootstrap',
       'dynamic_config',
-      'es5-shim'
+      'es5-shim',
+       'underscore'
     ],
     function(
       Router,
       Application,
       AppBootstrap,
-      DynamicConfig
+      DynamicConfig,
+      Es5Shim,
+      _
     ) {
       Application.prototype.shim();
+
+      // load the urls of dynamic config from the script element
+      _.each(document.getElementsByTagName('script'), function(scriptNode) {
+        if (scriptNode.hasAttribute('data-main') &&
+          (scriptNode.getAttribute('data-main') || '').indexOf('embed.config') > -1 &&
+          !scriptNode.hasAttribute('data-bbb-inuse')) {
+          scriptNode.setAttribute('data-bbb-inuse', true);
+          var c = scriptNode.getAttribute('data-load');
+          if (c) {
+            var urls = c.split(',');
+            DynamicConfig.bootstrapUrls = _.union(DynamicConfig.bootstrapUrls || [], urls);
+          }
+        }
+      });
 
       // at the beginning, we don't know anything about ourselves...
       var debug = window.location.href.indexOf('debug=true') > -1;
@@ -42,10 +59,10 @@ define([
 
       app.bootstrap(DynamicConfig)
         .done(function(loadedConfig) {
-          var config = app.onBootstrap(module.config(), loadedConfig);
+          var loadConfig = app.onBootstrap(module.config(), loadedConfig);
 
           // load the objects/widgets/modules
-          app.loadModules(config)
+          app.loadModules(loadConfig)
             .done(function() {
               // this will activate all loaded modules
               app.activate();

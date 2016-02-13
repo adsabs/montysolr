@@ -25,13 +25,14 @@ define([
 
     var Api = GenericModule.extend({
       url: '/api/1/', // usually overriden during app bootstrap
-      clientVersion: 20140329,
+      clientVersion: null,
       outstandingRequests: 0,
 
       access_token: null,
       refresh_token: null,
       expires_in: null,
       defaultTimeoutInMs: 60000,
+
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
@@ -43,10 +44,9 @@ define([
         response.setApiQuery(this.request.get('query'));
         this.api.trigger('api-response', response);
       },
+
       fail: function( jqXHR, textStatus, errorThrown ) {
-
         console.error('API call failed:', JSON.stringify(this.request.url()), jqXHR.status, errorThrown);
-
         var pubsub = this.api.hasBeeHive() ? this.api.getPubSub() : null;
         if (pubsub) {
           var feedback = new ApiFeedback({
@@ -66,18 +66,33 @@ define([
             this.api.trigger('api-error', this, jqXHR, textStatus, errorThrown);
         }
       },
+
       initialize: function() {
         this.always = _.bind(function() {this.outstandingRequests--;}, this);
       },
+
       getNumOutstandingRequests: function() {
         return this.outstandingRequests;
       },
+
       //used by api_access.js
       setVals : function(obj){
         _.each(obj, function(v,k){
           this[k] = v;
         }, this);
       },
+
+      /**
+       * Before executing an ajax request, this will be passed
+       * the options and can modify them. Typically, clients
+       * make want to provide their own implementation.
+       *
+       * @param opts
+       */
+      modifyRequestOptions: function(opts) {
+        // do nothing
+      },
+
       hardenedInterface : {
         request : "make a request to the API",
         setVals : "set a value on API (such as new access token)"
@@ -122,15 +137,15 @@ define([
         dataType: 'json',
         data: data,
         contentType: 'application/x-www-form-urlencoded',
-        headers: {"X-BB-Api-Client-Version": this.clientVersion},
         context: {request: request, api: self },
         timeout: this.defaultTimeoutInMs,
+        headers: {},
         cache: true, // do not generate _ parameters (let browser cache responses),
-        //need this so that cross domain cookies will work!
-        xhrFields: {
-          withCredentials: true // TODO: remove this (must be used only by certain widgets!!!)
-        }
       };
+
+      if (this.clientVersion) {
+        opts.headers['X-BB-Api-Client-Version'] = this.clientVersion;
+      }
 
       if (this.access_token) {
         opts.headers['Authorization'] = this.access_token;
@@ -145,6 +160,8 @@ define([
       _.extend(opts, _.omit(options, "headers"));
 
       this.outstandingRequests++;
+
+      this.modifyRequestOptions(opts);
 
       var jqXhr = $.ajax(opts)
         .always(opts.always ? [this.always, opts.always] : this.always)

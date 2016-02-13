@@ -3,6 +3,12 @@ define([], function() {
   var config = {
 
     /**
+     * When present, the version is sent with every ajax request
+     * to the api.
+     */
+    clientVersion: '',
+
+    /**
      * The url to the API services, if you develop locally,
      * (and have created tunnel to the API) you can set this
      * to //localhost:5000/v1 - but since our API allows for

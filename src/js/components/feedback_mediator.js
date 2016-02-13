@@ -192,7 +192,9 @@ define([
         case c.SERVER_ERROR:
 
           break;
-
+        case c.ALERT:
+          this.getApp().getController('AlertsController').onAlert(apiFeedback, entry);
+          break;
         default:
       }
     }

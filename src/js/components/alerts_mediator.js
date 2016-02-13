@@ -78,6 +78,10 @@ define([
                 default:
                   throw new Exception('Unknow action type:' + result);
               }
+
+              // close the widget immediately
+              var w = self.getWidget()
+              if (w && w.clearView) w.clearView();
             }
           });
         return promise;

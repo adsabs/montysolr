@@ -311,7 +311,8 @@ define([
       var defer = $.Deferred();
 
       var callback = function () {
-        console.timeEnd("startLoading"+sectionName)
+        if (self.debug)
+          console.timeEnd("startLoading"+sectionName)
         var modules = arguments;
         _.each(implNames, function (name, idx, implList) {
           ret[name] = modules[idx];
@@ -324,15 +325,18 @@ define([
 
       var errback = function (err) {
         var symbolicName = err.requireModules && err.requireModules[0];
-        console.warn("Error loading impl=" + symbolicName, err.requireMap);
+        if (self.debug)
+          console.warn("Error loading impl=" + symbolicName, err.requireMap);
         if (ignoreErrors) {
-          console.warn("Ignoring error");
+          if (self.debug)
+            console.warn("Ignoring error");
           return;
         }
         defer.reject(err);
       };
 
-      console.time("startLoading"+sectionName)
+      if (self.debug)
+        console.time("startLoading"+sectionName)
 
       // start loading the modules
       //console.log('loading', implNames, impls)

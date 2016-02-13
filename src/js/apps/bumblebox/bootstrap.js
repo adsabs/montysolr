@@ -19,43 +19,12 @@ define([
     PubSubEvents
   ) {
     var Mixin = {
-      configure: function(loadedConfig) {
-        var conf = this.getObject('DynamicConfig') || {};
-        conf = _.extend(loadedConfig, conf);
 
-        if (conf) {
-          var beehive = this.getBeeHive();
-          var api = beehive.getService('Api');
-
-          if (conf.root) {
-            api.url = conf.root + '/' + api.url;
-            this.root = conf.root;
-          }
-          if (conf.debug !== undefined) {
-            beehive.debug = conf.debug;
-            this.getController('QueryMediator').debug = conf.debug;
-          }
-
-          if (conf.apiRoot) {
-            api.url = conf.apiRoot;
-          }
-          this.bootstrapUrls = conf.bootstrapUrls;
-        }
-
-        // set the API key and other data from bootstrap
-        if (conf.access_token) {
-          this.getBeeHive().getService('Api').setVals({
-            access_token : conf.token_type + ':' + conf.access_token,
-            refresh_token : conf.refresh_token,
-            expires_in : conf.expires_in
-          });
-          console.warn('Redefining access_token: ' + conf.access_token);
-        }
-        else {
-          console.warn("bootstrap didn't provide access_token!");
-        }
-      },
-
+      /**
+       * Happens first, when the application starts (but before it starts
+       * loading modules). Here is the time to retrieve whatever configuration
+       * and/or files that should be available to the app instance
+       */
       bootstrap: function(conf) {
         conf = conf || {};
         var defer = $.Deferred();
@@ -125,6 +94,14 @@ define([
         return defer.promise();
       },
 
+      /**
+       * Called after the dynamic config was retrieved. It has to return
+       * a configuration to use for loading the application.
+       *
+       * @param app_config
+       * @param dynamic_config
+       * @returns {*}
+       */
       onBootstrap: function (app_config, dynamic_config) {
         // this is little bit of a (necessary) hack, we'll
         // update the configuration of the requirejs's
@@ -144,7 +121,7 @@ define([
             if (targetConfig[key]) {
               var target = rConfig[key];
               _.each(value, function(value, key, obj) {
-                target[key] = _.extend(value, target[key]); // use the new values as defaults
+                target[key] = _.defaults(value, target[key]); // use the new values as defaults
               });
             }
           })
@@ -157,6 +134,52 @@ define([
           app_config.widgets.TargetWidget = dynamic_config.TargetWidget;
         }
         return app_config;
+      },
+
+      /**
+       * Called after the modules/controllers/libraries were loaded and
+       * activated. Here you can configure the application instance.
+       *
+       * @param loadedConfig
+       */
+      configure: function(loadedConfig) {
+        var conf = this.getObject('DynamicConfig') || {};
+        conf = _.extend(conf, loadedConfig);
+
+        if (conf) {
+          var beehive = this.getBeeHive();
+          var api = beehive.getService('Api');
+
+          if (conf.root) {
+            api.url = conf.root + '/' + api.url;
+            this.root = conf.root;
+          }
+          if (conf.debug !== undefined) {
+            beehive.debug = conf.debug;
+            this.getController('QueryMediator').debug = conf.debug;
+          }
+
+          if (conf.apiRoot) {
+            api.url = conf.apiRoot;
+          }
+          this.bootstrapUrls = conf.bootstrapUrls;
+        }
+
+        this.getBeeHive().getService('Api').setVals({
+          access_token : 'Bearer:' + conf.access_token,
+          refresh_token : conf.refresh_token, // will probably be null....
+          expires_in : conf.expires_in,
+          clientVersion: null, // to avoid sending the headers (for now)
+          defaultTimeoutInMs: conf.defaultTimeoutInMs || 15000
+        });
+
+        // set the API key and other data from bootstrap
+        if (conf.access_token) {
+          console.warn('Redefining access_token: ' + conf.access_token);
+        }
+        else {
+          console.warn("bootstrap didn't provide access_token!");
+        }
       },
 
       reload: function(endPage) {

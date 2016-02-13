@@ -21,7 +21,7 @@ define([
     },
 
     ACTION: {
-      CALL_PUBSUB: 0,
+      CALL_PUBSUB: 2,
       TRIGGER_FEEDBACK: 1
     }
   };
