@@ -199,13 +199,13 @@ define([
       changePageWithButton: function (e) {
 
         e.preventDefault();
-        var $target = $(e.target);
+        var $target = $(e.currentTarget);
         if ($target.parent().hasClass("disabled")) return;
         var transform = $target.hasClass("next-page") ? 1 : -1;
         var pageVal = this.model.get("page") + transform;
         this.trigger('pagination:select', pageVal);
 
-        if (this.resultsWidget) {analytics('send', 'event', 'interaction', 'results-list-pagination', pageVal); }
+        if (this.resultsWidget) {analytics('send', 'event', 'interaction', 'results-list-pagination', pageVal) }
       },
 
       tabOrEnterChangePageWithInput : function (e) {
@@ -215,6 +215,9 @@ define([
         if (e.keyCode == 13 || e.keyCode == 9){
           this.trigger('pagination:select', pageVal);
         }
+
+        if (this.resultsWidget) {analytics('send', 'event', 'interaction', 'results-list-pagination', pageVal) }
+
       },
 
 
