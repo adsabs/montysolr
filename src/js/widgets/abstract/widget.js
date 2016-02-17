@@ -9,6 +9,7 @@ define([
     'cache',
     'js/widgets/base/base_widget',
     'hbs!./templates/abstract_template',
+    'hbs!./templates/metadata_template',
     'js/components/api_query',
     'js/mixins/link_generator_mixin',
     'js/mixins/papers_utils',
@@ -23,6 +24,7 @@ define([
     Cache,
     BaseWidget,
     abstractTemplate,
+    metadataTemplate,
     ApiQuery,
     LinkGeneratorMixin,
     PapersUtils,
@@ -81,6 +83,7 @@ define([
           hasAffiliation: hasAffiliation,
           abstract: doc.abstract,
           title: title,
+          author : doc.author,
           authorAff: authorAff,
           authorAffExtra: authorAffExtra,
           hasMoreAuthors: authorAffExtra.length,
@@ -152,7 +155,14 @@ define([
 
       onRender : function(){
         this.$(".icon-help").popover({trigger : "hover", placement : "right", html :true});
+
         if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
+
+        $("head").append(metadataTemplate(this.model.toJSON()));
+        var ev = document.createEvent('HTMLEvents');
+        ev.initEvent('ZoteroItemUpdated', true, true);
+        document.dispatchEvent(ev);
+
       }
 
     });
