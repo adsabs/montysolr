@@ -17,7 +17,7 @@ define([
     },
 
     events: {
-      'click #alertBox button.close': 'close'
+      'click #page-top-alert button.close': 'close'
     },
 
     close : function(){

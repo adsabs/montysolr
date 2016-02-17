@@ -89,13 +89,13 @@ define([
       promise = x.m.onAlert(new ApiFeedback({
         msg: 'this is <a href="foo">html</a> message',
         events: {
-          'click #alertBox a': 'foo-bar'
+          'click #page-top-alert a': 'foo-bar'
         }
       }))
       .done(function(x) {
         expect(x).to.be.eql('foo-bar');
       });
-      $w.find('#alertBox a').click();
+      $w.find('#page-top-alert a').click();
       expect(promise.state()).to.be.eql('resolved');
 
 
@@ -104,10 +104,10 @@ define([
       promise = x.m.onAlert(new ApiFeedback({
         msg: 'this is <a href="foo">html</a> message',
         events: {
-          'click #alertBox a': spy
+          'click #page-top-alert a': spy
         }
       }));
-      $w.find('#alertBox a').click();
+      $w.find('#page-top-alert a').click();
       expect(promise.state()).to.eql('resolved');
       expect(spy.called).to.be.true;
 
@@ -116,13 +116,13 @@ define([
       promise = x.m.onAlert(new ApiFeedback({
         msg: 'this is <a href="foo">html</a> message',
         events: {
-          'click #alertBox a': {
+          'click #page-top-alert a': {
             action: Alerts.ACTION.TRIGGER_FEEDBACK,
             arguments: {code: 0}
           }
         }
       }));
-      $w.find('#alertBox a').click();
+      $w.find('#page-top-alert a').click();
       expect(x.m.getPubSub().publish.called).to.be.true;
 
     });
