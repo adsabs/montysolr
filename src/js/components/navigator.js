@@ -97,6 +97,9 @@ define(['underscore',
               { trigger: transition.trigger || false, replace: replace }
           );
         }
+
+        //clear any metadata added to head on the previous page
+        $("head").find("meta[data-highwire]").remove();
       },
 
       handleMissingTransition: function() {

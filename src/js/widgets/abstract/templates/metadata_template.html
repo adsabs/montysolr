@@ -1,0 +1,19 @@
+<meta name="citation_title" content="{{title}}" data-highwire="true">
+{{#each author}}
+    <meta name="citation_author" content="{{this}}" data-highwire="true">
+{{/each}}
+{{#if pubdate}}
+    <meta name="citation_publication_date" content="{{pubdate}}" data-highwire="true">
+{{/if}}
+{{#if pub}}
+    <meta name="citation_journal_title" content="{{pub}}" data-highwire="true">
+{{/if}}
+{{#if volume}}
+    <meta name="citation_volume" content="{{volume}}" data-highwire="true">
+{{/if}}
+{{#if issue}}
+<meta name="citation_issue" content="{{issue}}" data-highwire="true">
+{{/if}}
+{{#if doi}}
+<meta name="citation_doi" content="{{doi}}" data-highwire="true">
+{{/if}}
