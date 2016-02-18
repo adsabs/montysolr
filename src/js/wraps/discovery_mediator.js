@@ -466,7 +466,7 @@ define([
                 msg: '<p>You will be redirected to ORCID.</p> <p>Please sign in with your ORCID credentials and click on the "authorize" button.</p><p><b>This service is experimental. Should you have any suggestions, please let us know at <a href="mailto:adshelp@cfa.harvard.edu">adshelp@cfa.harvard.edu</a></b></p><button class="btn btn-success" id="okOrcid">Take me to ORCID</button>',
                 modal: true,
                 events: {
-                  'clickbutton#okOrcid': 'OK'
+                  'click button#okOrcid': 'OK'
                 }
               }))
                 .done(function(resp) {
