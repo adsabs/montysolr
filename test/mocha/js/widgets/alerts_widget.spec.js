@@ -48,19 +48,19 @@ define([
       $('#test').append($w);
 
       widget.model.set('msg', 'this is simple message');
-      expect($w.find('#alertBox').text().indexOf('this is simple message') > -1).to.be.true;
+      expect($w.find('#page-top-alert').text().indexOf('this is simple message') > -1).to.be.true;
 
       widget.model.set('msg', '');
-      expect($w.find('#alertBox').length).to.be.eql(0);
+      expect($w.find('#page-top-alert').length).to.be.eql(0);
 
       widget.model.set('msg', 'this is <a href="foo">html</a> message');
-      expect($w.find('#alertBox a').attr('href')).to.be.eql('foo');
+      expect($w.find('#page-top-alert a').attr('href')).to.be.eql('foo');
 
       // we can pass pass events
       var promise = widget.alert({
         msg: 'this is <a href="foo">html</a> message',
         events: {
-          'click #alertBox a': {
+          'click #page-top-alert a': {
             action: Alerts.ACTION.CALL_PUBSUB,
             signal: minsub.BIG_FIRE,
             arguments: ['foo', 'bar']
@@ -71,7 +71,7 @@ define([
       var spy;
       promise.done((spy = sinon.spy()));
 
-      $w.find('#alertBox a').click();
+      $w.find('#page-top-alert a').click();
       expect(promise.state()).to.be.eql('resolved');
       expect(spy.lastCall.args[0]).to.be.eql({
         action: Alerts.ACTION.CALL_PUBSUB,
@@ -86,18 +86,18 @@ define([
       widget.alert({
         msg: 'this is <a href="foo">html</a> message',
         events: {
-          'click #alertBox a': 'foo-bar'
+          'click #page-top-alert a': 'foo-bar'
         }
       });
-      $w.find('#alertBox a').click();
+      $w.find('#page-top-alert a').click();
 
       widget.alert({
         msg: 'this is <a href="foo">html</a> message',
         events: {
-          'click #alertBox a': 'foo-bar'
+          'click #page-top-alert a': 'foo-bar'
         }
       });
-      $w.find('#alertBox a').click();
+      $w.find('#page-top-alert a').click();
 
       // if the previous handler was removed, we'll get only 2 calls
       expect(_.filter(_.flatten(widget.model.get.args), function(x) {return x == 'promise'}).length).to.be.eql(2);
