@@ -198,6 +198,15 @@ define([
           {done: spy})).to.be.OK;
         expect(ajaxSpy.lastCall.args[0].cache).to.eql(true);
         expect(ajaxSpy.lastCall.args[0].contentType).to.eql('application/x-www-form-urlencoded');
+        expect(ajaxSpy.lastCall.args[0].xhrFields).to.eql(undefined);
+        
+        api.modifyRequestOptions = function(opts) {
+          opts.xhrFields = {
+            withCredentials: true
+          }
+        };
+        expect(api.request(new ApiRequest({target: 'search', query: q}),
+          {done: spy})).to.be.OK;
         expect(ajaxSpy.lastCall.args[0].xhrFields).to.eql({
           withCredentials: true
         });

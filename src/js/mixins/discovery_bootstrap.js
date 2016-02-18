@@ -42,6 +42,19 @@ define([
           api.url = conf.apiRoot;
         }
 
+        if (conf.version) {
+          api.clientVersion = conf.version;
+        }
+
+        // modify the behaviour of all ajax requests
+        api.modifyRequestOptions = function(opts) {
+          //need this so that cross domain cookies will work!
+          // TODO: set this only for some requests - that way we'll save data channel (no cookies)
+          opts.xhrFields = {
+            withCredentials: true
+          }
+        };
+
         var orcidApi = beehive.getService('OrcidApi');
 
         if (conf.orcidProxy){

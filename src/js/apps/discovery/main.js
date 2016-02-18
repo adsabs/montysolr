@@ -22,13 +22,11 @@ define(['config', 'module'], function(config, module) {
       'js/mixins/api_access',
       'es5-shim'
     ],
-    function(
-      Router,
+    function(Router,
       Application,
       DiscoveryBootstrap,
       ApiAccess
       ) {
-
       Application.prototype.shim();
 
       // at the beginning, we don't know anything about ourselves...
@@ -100,5 +98,3 @@ define(['config', 'module'], function(config, module) {
 
 
 });
-
-

@@ -1,0 +1,29 @@
+{{#if title}}
+<div class="btn-group btn-{{status}}">
+
+    {{#if options}}
+    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+    {{title}}
+    <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        {{#each options}}
+        <li><a href="#" data-value="{{this.command}}">{{this.title}}</a></li>
+        {{/each}}
+        {{#if extra_options}}
+        <li class="divider"></li>
+        {{#each extra_options}}
+        <li><a href="#" data-value="{{this.command}}">{{this.title}}</a></li>
+        {{/each}}
+        {{/if}}
+    </ul>
+    {{else}}
+    <a class="btn" href="#">
+        {{title}}
+    </a>
+    {{/if}}
+    {{#if msg}}
+    <small>{{msg}}</small>
+    {{/if}}
+</div>
+{{/if}}
