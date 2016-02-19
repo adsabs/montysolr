@@ -258,6 +258,17 @@ define([
       autolist.find("li").first().click();
       expect($input.val()).to.eql("author:\"\"");
 
+      //autocomplete should return unless user cursor is at end of input text
+      //so this should not activate autocomplete options
+      $input.autocomplete("search", "author:\"foo\" a");
+      var autolist = $("ul.ui-autocomplete").last();
+
+      expect(autolist.css("display")).to.eql("none");
+
+      //this has set the cursor position in the right place, so it should work
+      $input.val("author:\"foo\" a");
+      $input.selectRange($input.val().length);
+
       $input.autocomplete("search", "author:\"foo\" a");
 
       //should try to autocomplete on only the 'a' just as before
