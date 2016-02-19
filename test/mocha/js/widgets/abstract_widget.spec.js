@@ -11,7 +11,14 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
       var testJSON, minsub;
       beforeEach(function(){
         testJSON = {  "responseHeader": {    "status": 0, "QTime": 62, "params": {
-          "fl": "abstract,title,author,aff,pub,pubdate,keyword", "indent": "true", "start": "4", "q": "planet\n", "wt": "json", "rows": "1"}},
+          "fl": "abstract,title,author,aff,pub,pubdate,keyword",
+          "indent": "true",
+          "start": "4",
+          "q": "planet\n",
+          "wt": "json",
+          "rows": "1",
+          "__show" : "foo"
+        }},
           "response": {
             "numFound": 238540, "start": 4,
             "docs": [
@@ -22,7 +29,9 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
                 "pub": "IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics",
                 "pubdate": "1981-00-00",
                 "title": ["Planetary Ephemerides"],
-                "aff": ["Heidelberg, Universität, Heidelberg, Germany", "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA"]
+                "aff": ["Heidelberg, Universität, Heidelberg, Germany", "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA"],
+                "citation_count" : 5,
+                "[citations]" : { num_citations : 3 }
               }
             ]}};
         minsub = new (MinimalPubSub.extend({
@@ -58,7 +67,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
         expect(spy.callCount).to.eql(1);
         expect(aw._docs['foo'].hasAffiliation).to.equal(2);
-        expect(aw._docs['foo'].hasMoreAuthors).to.equal(0);
+        expect(aw._docs['foo'].hasMoreAuthors).to.equal(undefined);
         expect(aw._docs['foo'].pubdate).to.equal("1981-00-00");
         expect(aw._docs['foo'].formattedDate).to.equal("1981");
         expect(aw._docs['foo'].pub).to.equal("IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics");
@@ -66,7 +75,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect(aw._docs['foo'].authorAff[1]).to.eql(["Standish, E. M.","California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA","%22Standish%2C+E.+M.%22"]
 
         );
-        expect(aw._docs['foo'].authorAffExtra).to.eql([]);
+        expect(aw._docs['foo'].authorAffExtra).to.eql(undefined);
 
         aw.maxAuthors = 1;
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
@@ -129,10 +138,31 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
       });
 
+      it("should trigger the page_manager_event 'broadcast_payload' every time it is shown to provide data for abstract page widgets", function(){
+
+        var payload;
+
+        var aw = new AbstractWidget();
+        aw.activate(minsub.beehive.getHardenedInstance());
+        aw.on("page-manager-event", function(ev, data){
+          if (ev === 'broadcast-payload') payload = data;
+        })
+        $("#test").append(aw.view.render().el);
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
+
+        expect(payload).to.eql({
+          "title": "Planetary Ephemerides",
+          "bibcode": "foo",
+          "citation_discrepancy": 2,
+          "citation_count": 5
+        });
+
+
+      });
+
       it("should populate the document head with  highwire-style metatags + trigger events to inform citation managers of update", function(){
         var aw = new AbstractWidget();
         aw.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
         var $w = aw.render().$el;
         $("#test").append($w);
         $("head [data-highwire]").remove();
@@ -142,10 +172,8 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         var fired = false;
         document.addEventListener('ZoteroItemUpdated', function(){fired = true}, false);
 
-        expect(fired).to.be.false;
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
 
-        // normally the query comes back with the __show parameter, but in the test we'll help it
-        aw.model.set(aw._docs['foo']);
 
         expect(fired).to.be.true;
 

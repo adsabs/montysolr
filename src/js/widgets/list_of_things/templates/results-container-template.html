@@ -29,6 +29,17 @@
     </div>
     {{/if}}
 
+    <!--citation widget should show info if [citations] and citation_count don't match-->
+    {{#compare queryOperator "citations"}}
+        {{#if citation_discrepancy }}
+        <div>
+           <i class="fa fa-exclamation-triangle"></i>
+            This list is missing <b>{{citation_discrepancy}}</b> records, which could not be matched to papers in ADS.
+        </div>
+        <br>
+    {{/if}}
+    {{/compare}}
+
     {{#if queryOperator}}
         <div class="s-operator">
             <a href="{{queryURL}}" class="btn btn-sm btn-primary-faded"><i class="fa fa-search"></i> view this list in a search results page</a>

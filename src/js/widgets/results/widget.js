@@ -80,7 +80,7 @@ define([
         'hl.maxAnalyzedChars': '150000',
         'hl.requireFieldMatch': 'true',
         'hl.usePhraseHighlighter': 'true',
-        fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,[citations],pub,aff,email,volume,pubdate,doi',
+        fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,citation_count,[citations],pub,aff,email,volume,pubdate,doi',
         rows : 25,
         start : 0
       },
@@ -191,7 +191,6 @@ define([
         docs = _.map(docs, function (d) {
           //used by link generator mixin
           d.link_server = link_server;
-
           d.identifier = d.bibcode;
           d.encodedIdentifier = encodeURIComponent(d.identifier);
           var h = {};
@@ -239,14 +238,6 @@ define([
 
           if (h.highlights && h.highlights.length > 0){
             d.highlights = h.highlights;
-          }
-
-          if(d["[citations]"] && d["[citations]"]["num_citations"]>0){
-            d.num_citations = self.formatNum(d["[citations]"]["num_citations"]);
-          }
-          else {
-            //formatNum would return "0" for zero, which would then evaluate to true in the template
-            d.num_citations = 0;
           }
 
           d.formattedDate = d.pubdate ? self.formatDate(d.pubdate, {format: 'yy/mm', missing: {day: 'yy/mm', month: 'yy'}}) : undefined;
