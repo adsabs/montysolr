@@ -45,57 +45,45 @@ define([
           bibcode: undefined,
           pub_raw: undefined,
           doi: undefined,
-          bibcode: undefined
+          citation_count : undefined
         }
       },
 
       parse: function (doc, maxAuthors) {
-        var authorAff, hasAffiliation, title, authorAffExtra;
-        maxAuthors = maxAuthors || 20;
+        var maxAuthors = maxAuthors || 20;
 
-        authorAff = [], authorAffExtra = [];
-
+        //"aff" is the name of the affiliations array that comes from solr
         doc.aff = doc.aff || [];
+
         if (doc.aff.length) {
-          hasAffiliation = _.without(doc.aff, '-').length;
+          doc.hasAffiliation = _.without(doc.aff, '-').length;
           // joining author and aff
-          authorAff = _.zip(doc.author, doc.aff);
+          doc.authorAff = _.zip(doc.author, doc.aff);
         }
         else if (doc.author) {
-          hasAffiliation = false;
-          authorAff = _.zip(doc.author, _.range(doc.author.length));
+          doc.hasAffiliation = false;
+          doc.authorAff = _.zip(doc.author, _.range(doc.author.length));
         }
 
-        _.each(authorAff, function(el, index){
-          authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"').replace(/%20/g, "+");
+        _.each(doc.authorAff, function(el, index){
+          doc.authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"').replace(/%20/g, "+");
         });
 
-        if (authorAff.length > maxAuthors) {
-          authorAffExtra = authorAff.slice(maxAuthors, authorAff.length);
-          authorAff = authorAff.slice(0, maxAuthors);
+        if (doc.authorAff.length > maxAuthors) {
+          doc.authorAffExtra = doc.authorAff.slice(maxAuthors, doc.authorAff.length);
+          doc.authorAff = doc.authorAff.slice(0, maxAuthors);
         }
 
-        var formattedDate = doc.pubdate ? PapersUtils.formatDate(doc.pubdate, {format: 'MM d yy', missing: {day: 'MM yy', month: 'yy'}}) : undefined;
+        doc.hasMoreAuthors = doc.authorAffExtra && doc.authorAffExtra.length;
 
-        title = $.isArray(doc.title)? doc.title[0] : undefined;
-
-        return {
-          hasAffiliation: hasAffiliation,
-          abstract: doc.abstract,
-          title: title,
-          author : doc.author,
-          authorAff: authorAff,
-          authorAffExtra: authorAffExtra,
-          hasMoreAuthors: authorAffExtra.length,
-          pub: doc.pub,
-          pubdate: doc.pubdate,
-          formattedDate: formattedDate,
-          keyword: doc.keyword,
-          bibcode: doc.bibcode,
-          pub_raw: doc.pub_raw,
-          doi: doc.doi,
-          bibcode: doc.bibcode
+        if (doc.pubdate){
+          doc.formattedDate =  PapersUtils.formatDate(doc.pubdate, {format: 'MM d yy', missing: {day: 'MM yy', month: 'yy'}});
         }
+
+        doc.title = doc.title instanceof Array ? doc.title[0] : undefined;
+
+        return doc;
+
       }
     });
 
@@ -192,7 +180,7 @@ define([
       },
 
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,pub,aff,volume,pubdate,doi,pub_raw',
+        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw',
         rows: 40
       },
 
@@ -220,10 +208,17 @@ define([
         this.model.set(this._docs[lowerCaseBibcode]);
         this._current = lowerCaseBibcode;
         // let other widgets know details
+        var c = this._docs[lowerCaseBibcode]["[citations]"];
+        var resolved_citations = c ? c.num_citations : 0;
+
         this.trigger('page-manager-event', 'broadcast-payload', {
           title: this._docs[lowerCaseBibcode].title,
           //this should be superfluous, widgets already subscribe to display_documents
-          bibcode: bibcode
+          bibcode: bibcode,
+
+          //used by citation list widget
+          citation_discrepancy : this._docs[lowerCaseBibcode].citation_count - resolved_citations,
+          citation_count : this._docs[lowerCaseBibcode].citation_count
         });
 
       },
@@ -232,7 +227,6 @@ define([
 
           var bibcode =  apiQuery.get('q'),
               q;
-//              currentQuery = this.getBeeHive().getObject("AppStorage") ? this.getBeeHive().getObject("AppStorage").getCurrentQuery() : undefined;
 
           if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
           //redefine bibcode
