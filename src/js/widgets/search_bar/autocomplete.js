@@ -10,8 +10,8 @@ define([
     {value: "author:\"^\"" , label : "First Author", match: "^author"},
     {value: "author:\"^\"" , label : "First Author", match: "author:\"^"},
 
-    {value: "bibstem:\"\"" , label : "Publication", match: "bibstem:\""},
-    {value: "bibstem:\"\"", label : "Publication", match: "publication (bibstem)"},
+    {value: "bibstem:\"\"" , label : "Publication (must use bibstem)", desc: "e.g. bibstem:ApJ", match: "bibstem:\""},
+    {value: "bibstem:\"\"", label : "Publication (must use bibstem)", desc: "e.g. bibstem:ApJ", match: "publication (bibstem)"},
 
     {value: "arXiv:" , label : "arXiv ID", match: "arxiv:"},
     {value: "doi:" , label : "DOI", match: "doi:"},

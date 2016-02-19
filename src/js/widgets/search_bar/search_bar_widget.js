@@ -149,6 +149,12 @@ define([
               return;
             }
 
+            //dont look for a match if cursor is not at the end of search bar
+            if ($input.getCursorPosition() !== $input.val().length) {
+              $input.autocomplete("close");
+              return;
+            }
+
             toMatch = findActiveAndInactive(request.term).active;
             if (!toMatch)
               return
@@ -220,11 +226,16 @@ define([
 
           //re-insert actual text w/ optional addition of autocompleted stuff
           select : function( event, ui ){
+
             $input.val( $input.data("ui-autocomplete").suggestedQ);
             //move cursor before final " or )
             var final = ui.item.value.split("").reverse()[0];
             if ( final == '"' || final == ")" ){
               $input.selectRange($input.val().length - 1);
+            }
+            else {
+              //just move cursor to the end, e.g. for property: refereed
+              $input.selectRange($input.val().length);
             }
 
             analytics('send', 'event', 'interaction', 'autocomplete-used', ui.item.value);
