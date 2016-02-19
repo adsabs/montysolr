@@ -201,6 +201,10 @@ define([
 
     submitForm : function($form, $modal) {
 
+      var data = $form.serialize();
+      //record the user agent string
+      data['user-agent-string'] = navigator.userAgent;
+
       function beforeSend () {
         $form.find("button[type=submit]")
           .html('<i class="icon-loading"></i> Sending form...');
@@ -225,7 +229,7 @@ define([
         target : ApiTargets.FEEDBACK,
         options : {
           method: "POST",
-          data: $form.serialize(),
+          data : data,
           dataType: 'json',
           done: done,
           fail : fail,
