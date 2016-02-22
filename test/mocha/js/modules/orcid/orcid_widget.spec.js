@@ -467,7 +467,7 @@ define([
         widget.onShow();
 
 
-        expect($("#test .s-results-control-row-container").text().replace(/\s{2,}/g, "")).to.eql('My ORCID Papers(3)ORCID Username: Roman ChylaORCID ID: 0000-0001-8178-9506To share this list of your ORCID papers:You can share this link: https://ui.adsabs.harvard.edu/#search/q=orcid%3A0000-0001-8178-9506&sort=date+descOr searchorcid:0000-0001-8178-9506in the ADS interface at any time.To claim papers in ORCID and add to this listclick here to search your name in ADSLearn more about using ORCID with ADS')
+        expect($("#test .s-results-control-row-container").text().replace(/\s{2,}/g, "")).to.eql('My ORCID Papers(3)ORCID Username: Roman ChylaORCID ID: 0000-0001-8178-9506To share this list of your ORCID papers:Search for your ORCID ID in ADS (orcid:0000-0001-8178-9506)You can then share the url of your results:https://ui.adsabs.harvard.edu/#search/q=orcid%3A0000-0001-8178-9506&sort=date+descPlease note that claims take up to 24 hours to be indexed in ADS.To claim papers in ORCID and add to this listclick here to search your name in ADSLearn more about using ORCID with ADS')
 
 
       });
