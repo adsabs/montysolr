@@ -487,14 +487,13 @@ define([
       $("#test li[data-tab=export-bibtex]").click();
 
       expect(spy.args[1]).to.eql([
-
         "[Router]-Navigate-With-Trigger",
         "library-export",
         {
           "bibcodes": [
-            "2015IAUGA..2257639R",
+            "2015IAUGA..2257982A",
             "2015IAUGA..2257768A",
-            "2015IAUGA..2257982A"
+            "2015IAUGA..2257639R"
           ],
           "subView": "bibtex",
           "id": "1",
@@ -504,26 +503,11 @@ define([
 
       w.setSubView({ subView : "export"});
 
-
       expect($("li.tab.active").find(".dropdown-menu li").eq(0).data("tab")).to.eql("export-bibtex");
 
       $("#test .tab[data-tab=metrics]").click();
 
-      expect(spy.args[2]).to.eql([
-
-        "[Router]-Navigate-With-Trigger",
-        "library-metrics",
-        {
-          "bibcodes":  [
-            "2015IAUGA..2257639R",
-            "2015IAUGA..2257768A",
-            "2015IAUGA..2257982A"
-          ],
-          "id": "1",
-          "publicView": false,
-          "subView" : undefined
-        }
-      ]);
+      expect(JSON.stringify(spy.args[2])).to.eql('["[Router]-Navigate-With-Trigger","library-metrics",{"bibcodes":["2015IAUGA..2257982A","2015IAUGA..2257768A","2015IAUGA..2257639R"],"id":"1","publicView":false}]');
 
       w.setSubView({ subView : "metrics"});
 
@@ -536,9 +520,9 @@ define([
         "library-visualization",
         {
           "bibcodes": [
-            "2015IAUGA..2257639R",
+            "2015IAUGA..2257982A",
             "2015IAUGA..2257768A",
-            "2015IAUGA..2257982A"
+            "2015IAUGA..2257639R"
           ],
           "subView": "AuthorNetwork",
           "id": "1",
@@ -636,12 +620,12 @@ define([
       $("#test").find(".bigquery-export").click();
 
       expect(publishStub.args[0][0]).to.eql("[PubSub]-New-Query");
-
+      
       expect(publishStub.args[0][1].toJSON()).to.eql({
         "__bigquery": [
-          "2015IAUGA..2257639R",
+          "2015IAUGA..2257982A",
           "2015IAUGA..2257768A",
-          "2015IAUGA..2257982A"
+          "2015IAUGA..2257639R"
         ]
       });
 

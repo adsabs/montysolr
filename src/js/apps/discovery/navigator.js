@@ -175,7 +175,7 @@ define([
         this.set("IndividualLibraryWidget", function(widget, data) {
           
           //where view is an object in the form
-          // {subView: sub, id: id, publicView : false}
+          // {subView: subView, id: id, publicView : false}
 
           data.publicView = data.publicView ? data.publicView : false;
 
@@ -232,14 +232,14 @@ define([
                 });
               }
               //show library list view (since there is nothing else to show in this tab
-              self.navigate("IndividualLibraryWidget", {sub: "library", id: data.id});
+              self.navigate("IndividualLibraryWidget", {subView: "library", id: data.id});
               return;
             }
             // if it was a regular export:
             //first, tell export widget what to show
             if (data.bibcodes && data.bibcodes.length) {
 
-              exportWidget.exportRecords(data.sub, data.bibcodes);
+              exportWidget.exportRecords(data.subView, data.bibcodes);
               //then, set library tab to proper field
               app.getWidget("IndividualLibraryWidget").done(function(widget) {
                 widget.setSubView({subView: "export", publicView: data.publicView});
@@ -250,7 +250,7 @@ define([
             else if (data.id) {
               app.getObject("LibraryController").getLibraryData(data.id).done(function (bibcodes) {
                 bibcodes = bibcodes.documents;
-                exportWidget.exportRecords(data.sub, bibcodes);
+                exportWidget.exportRecords(data.subView, bibcodes);
                 //then, set library tab to proper field
                 app.getWidget("IndividualLibraryWidget").done(function(widget) {
                   widget.setSubView({

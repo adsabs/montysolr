@@ -98,6 +98,8 @@ define([
             id = this.model.get("id");
 
         this.libraryCollection.reset();
+        // XXX: remove when pagination is implemented
+        this.libraryCollection.documents = [];
         this.view.header.empty();
         this.view.main.empty();
 
@@ -177,6 +179,10 @@ define([
 
                 that.createHeader(data.metadata);
                 that.libraryCollection.reset(data.solr.response.docs);
+                // XXX: actual (unlimited) list of bibcodes
+                //  remove when pagination is implemented
+                that.libraryCollection.documents = data.documents;
+
                 //remove the loading view
                 that.view.main.show(subView);
               }).fail(function(data){
@@ -246,6 +252,9 @@ define([
                 var bibcode = data.bibcode[0],
                   modelToRemove = that.libraryCollection.get(bibcode);
                 that.libraryCollection.remove(modelToRemove);
+
+                //XXX: remove after pagination is implemented
+                that.libraryCollection.documents = _.without(that.libraryCollection.documents, bibcode);
               });
             break;
         }
@@ -276,8 +285,7 @@ define([
 
         var that = this,
             id = this.model.get("id"),
-            pubsub = this.getBeeHive().getService('PubSub'),
-            query;
+            pubsub = this.getBeeHive().getService('PubSub');
 
         switch (event) {
 
@@ -302,7 +310,7 @@ define([
             var publicView = this.model.get("publicView");
             if (_.contains(other, arg1)){
               var command =  "library-" + arg1;
-              pubsub.publish(pubsub.NAVIGATE, command, {bibcodes : this.libraryCollection.pluck("bibcode"), subView : arg2, id : id, publicView : publicView});
+              pubsub.publish(pubsub.NAVIGATE, command, {bibcodes : this.libraryCollection.documents, subView : arg2, id : id, publicView : publicView});
             }
             else {
               pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", { subView : arg1, id : id, publicView : publicView });
@@ -315,7 +323,7 @@ define([
           case "start-search":
 
             var query = new ApiQuery({
-              __bigquery : this.libraryCollection.pluck("bibcode")
+              __bigquery : this.libraryCollection.documents
             });
 
             pubsub.publish(pubsub.START_SEARCH, query);
