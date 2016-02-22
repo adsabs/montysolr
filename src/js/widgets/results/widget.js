@@ -15,8 +15,7 @@ define([
     'js/mixins/papers_utils',
     'js/modules/orcid/extension',
     'js/mixins/dependon',
-    'analytics',
-    'js/components/api_feedback'
+    'analytics'
   ],
 
   function (
@@ -30,8 +29,7 @@ define([
     PapersUtilsMixin,
     OrcidExtension,
     Dependon,
-    analytics,
-    ApiFeedback
+    analytics
 
     ) {
 
@@ -102,14 +100,18 @@ define([
       onUserAnnouncement: function(message, data){
 
         if ( message == "user_info_change" && _.has(data, "isOrcidModeOn") ){
-          var collection = this.view.collection.toJSON();
+          //make sure to reset orcid state of all cached records, not just currently
+          //visible ones
+          var collection = this.hiddenCollection.toJSON();
           var docs = _.map(collection, function(x) {
             delete x.orcid;
             return x;
           });
-          if (data.isOrcidModeOn)
-            this.addOrcidInfo(docs);
-          this.view.collection.reset(docs);
+
+          if (data.isOrcidModeOn){ this.addOrcidInfo(docs); }
+
+          this.hiddenCollection.reset(docs);
+          this.view.collection.reset(this.hiddenCollection.getVisibleModels());
         }
       },
 
