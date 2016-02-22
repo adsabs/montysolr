@@ -1,11 +1,11 @@
 {{#if title}}
-<div class="btn-group btn-{{status}}">
+<div class="btn-group">
 
     {{#if options}}
-    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+    <button class="btn btn-group btn-{{status}} dropdown-toggle" data-toggle="dropdown" href="#">
     {{title}}
     <span class="caret"></span>
-    </a>
+    </button>
     <ul class="dropdown-menu">
         {{#each options}}
         <li><a href="#" data-value="{{this.command}}">{{this.title}}</a></li>
@@ -23,7 +23,7 @@
     </a>
     {{/if}}
     {{#if msg}}
-    <small>{{msg}}</small>
+    <div style="float:right"><p><small>{{msg}}</small></p></div>
     {{/if}}
 </div>
 {{/if}}

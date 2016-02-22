@@ -134,13 +134,14 @@ define([
         this.collection = new EnvironmentCollection();
         this.view = new WidgetView({model: this.model, collection: this.collection});
         BaseWidget.prototype.initialize.apply(this, arguments);
+        this._store = new ApiQuery();
       },
 
       onRender: function() {
         if (this.collection.models.length <= 0) {
-          this.onRequest(new ApiQuery({do: 'update'}));
+          this.onRequest(new ApiQuery({action: 'status'})); // ask for models
+          this.onRequest(new ApiQuery({action: 'store'})); // ask for storage data
         }
-        //this.update([{"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.162201", "application": "myads", "environment": "sandbox", "tested": false, "tag": "v1.0.9:v1.0.0-32-g46c0c55", "version": "v1.0.9:v1.0.0-32-g46c0c55", "date_created": "2016-02-18T16:50:59.162190", "active": ["v1.0.9:v1.0.0-32-g46c0c55"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.724240", "application": "biblib-service", "environment": "eb-deploy", "tested": false, "tag": "v1.0.4:v1.0-14-g15feb65", "version": "v1.0.4:v1.0-14-g15feb65", "date_created": "2016-02-18T16:50:59.724235", "active": ["v1.0.4:v1.0-14-g15feb65"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.302227", "application": "citation_helper_service", "environment": "sandbox", "tested": false, "tag": "cb35350588c7f67e05cd52f359251aebfae047f6:v1.0.2-10-g1cd5fc6", "version": "cb35350588c7f67e05cd52f359251aebfae047f6:v1.0.2-10-g1cd5fc6", "date_created": "2016-02-18T16:50:59.302216", "active": ["cb35350588c7f67e05cd52f359251aebfae047f6:v1.0.2-10-g1cd5fc6"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.320216", "application": "biblib-service", "environment": "sandbox", "tested": false, "tag": "v1.0.4:v1.0.2-10-g1cd5fc6", "version": "v1.0.4:v1.0.2-10-g1cd5fc6", "date_created": "2016-02-18T16:50:59.320205", "active": ["v1.0.4:v1.0.2-10-g1cd5fc6"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.699516", "application": "citation_helper_service", "environment": "eb-deploy", "tested": false, "tag": "v1.0.2:v1.0.0", "version": "v1.0.2:v1.0.0", "date_created": "2016-02-18T16:50:59.699511", "active": ["v1.0.2:v1.0.0"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.673478", "application": "export_service", "environment": "eb-deploy", "tested": false, "tag": "19db04216b5d64394e768f040d3e6bf8fab64723:v1.0-14-g15feb65", "version": "19db04216b5d64394e768f040d3e6bf8fab64723:v1.0-14-g15feb65", "date_created": "2016-02-18T16:50:59.673473", "active": ["19db04216b5d64394e768f040d3e6bf8fab64723:v1.0-14-g15feb65"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.126432", "application": "vis-services", "environment": "sandbox", "tested": false, "tag": "HEAD:v1.0.2-10-g1cd5fc6", "version": "HEAD:v1.0.2-10-g1cd5fc6", "date_created": "2016-02-18T16:50:59.126421", "active": ["HEAD:v1.0.2-10-g1cd5fc6"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.536408", "application": "vis-services", "environment": "eb-deploy", "tested": false, "tag": "HEAD:v1.0.0-1-g974b2a7", "version": "HEAD:v1.0.0-1-g974b2a7", "date_created": "2016-02-18T16:50:59.536403", "active": ["HEAD:v1.0.0-1-g974b2a7"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.075147", "application": "orcid-service", "environment": "sandbox", "tested": false, "tag": "HEAD:v1.0.0-32-g46c0c55", "version": "HEAD:v1.0.0-32-g46c0c55", "date_created": "2016-02-18T16:50:59.075135", "active": ["HEAD:v1.0.0-32-g46c0c55"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.587297", "application": "object_service", "environment": "eb-deploy", "tested": false, "tag": "v1.0.6:v1.0.0-1-g974b2a7", "version": "v1.0.6:v1.0.0-1-g974b2a7", "date_created": "2016-02-18T16:50:59.587293", "active": ["v1.0.6:v1.0.0-1-g974b2a7"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.622533", "application": "recommender_service", "environment": "eb-deploy", "tested": false, "tag": "v1.0.3:v1.0.0-3-g4fd0e07", "version": "v1.0.3:v1.0.0-3-g4fd0e07", "date_created": "2016-02-18T16:50:59.622529", "active": ["v1.0.3:v1.0.0-3-g4fd0e07"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.198212", "application": "graphics_service", "environment": "sandbox", "tested": false, "tag": "v1.0.4:v1.0.2-29-g15d300c", "version": "v1.0.4:v1.0.2-29-g15d300c", "date_created": "2016-02-18T16:50:59.198201", "active": ["v1.0.4:v1.0.2-29-g15d300c"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.741247", "application": "adsws", "environment": "eb-deploy", "tested": false, "tag": "v1.0.0:v1.0.2-18-g69fe4cd", "version": "v1.0.0:v1.0.2-18-g69fe4cd", "date_created": "2016-02-18T16:50:59.741242", "active": ["v1.0.0:v1.0.2-18-g69fe4cd"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.563620", "application": "harbour-service", "environment": "eb-deploy", "tested": false, "tag": "v1.0.2:v1.0.1-1-g269bdaf", "version": "v1.0.2:v1.0.1-1-g269bdaf", "date_created": "2016-02-18T16:50:59.563613", "active": ["v1.0.2:v1.0.1-1-g269bdaf"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.518141", "application": "myads", "environment": "eb-deploy", "tested": false, "tag": "v1.0.9:v1.0.2", "version": "v1.0.9:v1.0.2", "date_created": "2016-02-18T16:50:59.518135", "active": ["v1.0.9:v1.0.2"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.216172", "application": "metrics_service", "environment": "sandbox", "tested": false, "tag": "v1.0.6:v1.0.2-10-g1cd5fc6", "version": "v1.0.6:v1.0.2-10-g1cd5fc6", "date_created": "2016-02-18T16:50:59.216161", "active": ["v1.0.6:v1.0.2-10-g1cd5fc6"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.656393", "application": "graphics_service", "environment": "eb-deploy", "tested": false, "tag": "v1.0.4:v1.0.2", "version": "v1.0.4:v1.0.2", "date_created": "2016-02-18T16:50:59.656389", "active": ["v1.0.4:v1.0.2"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.102434", "application": "adsws", "environment": "sandbox", "tested": false, "tag": "v1.0.0:v1.0.2-17-g1b31375", "version": "v1.0.0:v1.0.2-17-g1b31375", "date_created": "2016-02-18T16:50:59.102422", "active": ["v1.0.0:v1.0.2-17-g1b31375"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.639727", "application": "orcid-service", "environment": "eb-deploy", "tested": false, "tag": "HEAD:v1.0.2", "version": "HEAD:v1.0.2", "date_created": "2016-02-18T16:50:59.639720", "active": ["HEAD:v1.0.2"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.180220", "application": "object_service", "environment": "sandbox", "tested": false, "tag": "v1.0.6:v1.0.2-10-g1cd5fc6", "version": "v1.0.6:v1.0.2-10-g1cd5fc6", "date_created": "2016-02-18T16:50:59.180209", "active": ["v1.0.6:v1.0.2-10-g1cd5fc6"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.266194", "tested": false, "tag": "e1933676ecf8a12bd8be819e0c710e931d4561a1:v1.0.2-31-g37ba320", "commit": null, "active": ["HEAD:v1.0.2-30-g82e8d99", "e1933676ecf8a12bd8be819e0c710e931d4561a1:v1.0.2-31-g37ba320"], "deployed": true, "environment": "sandbox", "application": "harbour-service", "version": "e1933676ecf8a12bd8be819e0c710e931d4561a1:v1.0.2-31-g37ba320", "msg": "AWS bootstrapped", "date_created": "2016-02-18T16:50:59.266183"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.284185", "application": "export_service", "environment": "sandbox", "tested": false, "tag": "19db04216b5d64394e768f040d3e6bf8fab64723:v1.0.2-10-g1cd5fc6", "version": "19db04216b5d64394e768f040d3e6bf8fab64723:v1.0.2-10-g1cd5fc6", "date_created": "2016-02-18T16:50:59.284174", "active": ["19db04216b5d64394e768f040d3e6bf8fab64723:v1.0.2-10-g1cd5fc6"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.604478", "application": "metrics_service", "environment": "eb-deploy", "tested": false, "tag": "v1.0.5:v1.0.0-3-g4fd0e07", "version": "v1.0.5:v1.0.0-3-g4fd0e07", "date_created": "2016-02-18T16:50:59.604474", "active": ["v1.0.5:v1.0.0-3-g4fd0e07"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}, {"previous_versions": [], "status": null, "date_last_modified": "2016-02-18T16:50:59.144227", "application": "recommender_service", "environment": "sandbox", "tested": false, "tag": "1d56dd562a9fb18dad615b510f59be622345665e:v1.0.2-10-g1cd5fc6", "version": "1d56dd562a9fb18dad615b510f59be622345665e:v1.0.2-10-g1cd5fc6", "date_created": "2016-02-18T16:50:59.144216", "active": ["1d56dd562a9fb18dad615b510f59be622345665e:v1.0.2-10-g1cd5fc6"], "commit": null, "deployed": true, "msg": "AWS bootstrapped"}]);
       },
 
       changeState: function() {
@@ -165,24 +166,80 @@ define([
       },
 
       composeRequest: function (apiQuery) {
-        var target = apiQuery.has('action') ? 'command' : 'status';
-        return new ApiRequest({
-          target: target,
-          query: apiQuery
-        });
+        var action = (apiQuery.get('action') || ['status'])[0];
+        switch (action) {
+          case 'status':
+            return new ApiRequest({
+              target: 'status',
+              query: apiQuery
+            });
+            break;
+          case 'command':
+            return new ApiRequest({
+              target: 'command',
+              query: apiQuery
+            });
+            break;
+          case 'store':
+            var key = apiQuery.has('key') ? apiQuery.get('key')[0] : 'green-button';
+            apiQuery.unset('action');
+            apiQuery.unset('key');
+            return new ApiRequest({
+              target: 'store/' + key,
+              query: apiQuery,
+              options: {
+                contentType: 'application/json',
+                type: apiQuery.url() == "" ? 'GET' : 'POST'
+              }
+            });
+            break;
+          default:
+            console.log('eror, unknown action', apiQuery.url());
+        }
+
       },
 
       // triggered externally, by a query-mediator, when it receives data for our query
       onResponse: function(apiResponse) {
         var data = apiResponse.toJSON();
-        this.update(data);
+        var q = apiResponse.getApiQuery();
+        if (data) {
+          if (q.has('action')) {
+            this.updateCollections(data);
+          }
+          else {
+            if (this.collection.models.length == 0) {
+              var self = this;
+              _.delay(function() {
+                self.refreshStore(data);
+              }, 2000);
+            }
+            else {
+              this.refreshStore(data);
+            }
+
+          }
+        }
+
+      },
+
+      refreshStore: function(data) {
+        _.each(data, function(value, key) {
+          this._store.set(key, value);
+        }, this);
+      },
+
+      updateStore: function(data) {
+        var q = this._store.clone();
+        q.set('action', 'store');
+        this.onRequest(q);
       },
 
       /**
        *
        * @param data
        */
-      update: function(data) {
+      updateCollections: function(data) {
         var coll = this._transform(data);
         this.model.set('cols', coll.cols, {silent: true});
         this.collection.reset(coll.models);
@@ -225,7 +282,7 @@ define([
         if (action.indexOf(':') > -1) {
           var parts = action.split(':');
           action = parts[0];
-          action_arg = parts.splice(1, parts.length()).join(':');
+          action_arg = parts.splice(1, parts.length).join(':');
         }
 
         switch(action) {
@@ -282,6 +339,24 @@ define([
                 events
               );
             }
+            break;
+
+          case 'deploy-manual':
+          case 'auto-deploy-head':
+          case 'auto-deploy-tag':
+            var s = action.replace('auto-deploy-', '').replace('deploy-', '');
+            this._store.set('deploy-strategy:'+ action_arg, s);
+
+            var m = this.collection.get(action_arg);
+            m.set('title', action_arg + ' (' + s + ')');
+            var opts = _.clone(m.attributes.options);
+            _.each(opts, function(o) {
+              o.checked = false;
+              if (o.command == action + ':' + action_arg)
+                o.checked = true;
+            });
+            m.set('options', opts);
+            this.updateStore();
             break;
 
           default:
@@ -365,28 +440,47 @@ define([
       _createAppModel: function(appName) {
         var data = {
           id: appName,
-          title: appName
+          title: appName + ' (' + (this._store.get('deploy-strategy:' + appName) || ['manual'])[0] + ')'
         };
         var options = [
-          {title: 'Choose (manul)', command: 'deploy-manual'},
-          {title: 'Automatically deploy latest changes (HEAD)', command: 'auto-deploy-head'},
-          {title: 'Automatically deploy latest release (tag)', command: 'auto-deploy-tag'},
+          {title: 'Choose what to deploy (manual)', command: 'deploy-manual:' + appName},
+          {title: 'Automatically deploy latest changes (HEAD)', command: 'auto-deploy-head:' + appName},
+          {title: 'Automatically deploy latest release (tag)', command: 'auto-deploy-tag:' + appName},
         ];
         data.options = options;
         return new Environment(data);
       },
 
+      _shortenVersion: function(label) {
+        var parts = (label || '').split(':');
+        var out = [];
+        _.each(parts, function(s) {
+          var prefix = ''
+          if (s.indexOf('-') > -1) {
+            var ps = s.split('-');
+            prefix = ps.slice(0,2).join('-');
+            s = ps[2];
+          }
+
+          var x = (s.substring(0,10));
+          if (x.substring(x.length-1) == '-')
+            x = x.substring(0, x.length-1);
+          out.push(x);
+        })
+        return out.join(':');
+      },
+
       _createEnvModel: function(appName, envName, data) {
         data = _.extend({
           id: appName + ':' + envName,
-          title: envName + ' (' + data.version + ')'
-        }, data);
+          title: envName + ' (' + this._shortenVersion(data.version) + ')'
+        }, data, this);
         var options = [
           {title: 'Show details', command: 'show-details'},
           {title: 'Show in AWS', command: 'show-in-aws'},
           {title: 'Restart', command: 'restart'},
         ]
-        if (data.previous_versions) {
+        if (data.previous_versions && data.previous_versions.length > 0) {
           options.push({title: 'Revert to (' + data.previous_versions[0] + ')', command: 'revert:' + data.previous_versions[0]})
         }
         data.options = options;
