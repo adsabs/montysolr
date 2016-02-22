@@ -2,18 +2,19 @@
 <div class="row s-results-control-row-container">
 
 
-    <div class="col-sm-8 col-sm-offset-2 " >
-        <br>
+    <div class="col-sm-10 col-sm-offset-1" style="padding:0 9%" >
         <h2>
-            <img src="../../styles/img/ads-orcid.svg" alt="orcid-ads logo" style="width:80px;">
-            My ORCID Papers
+            My ORCID Papers {{#if totalPapers}} (<b>{{ totalPapers }}</b>) {{/if}}
         </h2>
         <!--loading user data-->
         {{#if loading}}
             <p><i class="icon-loading"></i> Loading ORCID data...</p>
         {{else}}
-       <p>ORCID Username: <b>{{ orcidUserName }}</b></p>
-       <p>ORCID ID: <b>{{orcidID}}</b></p>
+        <div style="margin-bottom: 10px;">
+            <span style="width: 40%;">ORCID Username:&nbsp;<b>{{ orcidUserName }}</b></span>
+            &nbsp;&nbsp;&nbsp;
+            <span>ORCID ID:&nbsp;<b>{{orcidID}}</b></span>
+        </div>
 
          <p><i class="fa fa-info-circle"></i> To share this list of your ORCID papers:
                     <ul>
@@ -26,16 +27,18 @@
                     </ul>
           </p>
           <p> <i class="fa fa-info-circle"></i>
-               To claim papers in ORCID and add to this list,
-                    {{#if orcidUserName}}
-                    <button class="btn btn-sm btn-default search-author-name"><i class="fa fa-search"></i> click here to search your name in ADS</button>
-                    {{else}}
-                    search your name in ADS</button>
-                    {{/if}}
-           </p>
+               To claim papers in ORCID and add to this list <br>
+              <div style="padding-left:5%;">
+                {{#if orcidUserName}}
+                <button class="btn btn-sm btn-default search-author-name"><i class="fa fa-search"></i> click here to search your name in ADS</button>
+                {{else}}
+                search your name in ADS</button>
+                {{/if}}
+            </div>
 
-        <p> <a href="#orcid-instructions"> <i class="fa fa-arrow-circle-o-right"></i> Further instructions on using ORCID with ADS</a></p>
+           </p>
         <br>
+        <p> <a href="#orcid-instructions"> <i class="fa fa-arrow-circle-o-right"></i> Learn more about using ORCID with ADS</a></p>
         <br>
 
         {{/if}}
@@ -43,7 +46,7 @@
     </div>
 </div>
 <div class="row s-darker-background">
-    <div class="col-sm-10 col-sm-offset-1 s-main-content-container" style="margin-top:20px;padding-top: 20px;">
+    <div class="col-sm-10 s-main-content-container" style="margin-top:20px;padding-top: 20px; float:none">
         <div class="row">
             <ul class="col-sm-12 results-list  s-results-list list-unstyled s-display-block" aria-label="list of results">
             </ul>
