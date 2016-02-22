@@ -214,7 +214,7 @@ define([
 
         getPaginationInfo: function(jsonResponse, docs) {
 
-          // this information is important for calcullation of pages
+          // this information is important for calculation of pages
           var numFound = docs.length;
           var perPage =  this.model.get('perPage') || 10;
           var start = 0;
@@ -241,7 +241,6 @@ define([
           var oApi = this.getBeeHive().getService('OrcidApi');
           var self = this;
           if (oApi) {
-            console.log('onShow');
 
             if (!oApi.hasAccess())
               return;
@@ -267,7 +266,8 @@ define([
                     orcidUserName : params.firstName + " " + params.lastName,
                     orcidFirstName : params.firstName,
                     orcidLastName : params.lastName,
-                    loading: false
+                    loading: false,
+                    totalPapers  : response.get("response.docs") ? response.get("response.docs").length : "0"
                   });
                 });
           }
