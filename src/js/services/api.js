@@ -161,7 +161,7 @@ define([
 
       this.outstandingRequests++;
 
-      this.modifyRequestOptions(opts);
+      this.modifyRequestOptions(opts, request);
 
       var jqXhr = $.ajax(opts)
         .always(opts.always ? [this.always, opts.always] : this.always)

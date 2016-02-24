@@ -8,7 +8,8 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/components/pubsub_events',
-    'hbs'
+    'hbs',
+    'js/components/api_targets'
     ],
   function(
     _,
@@ -16,7 +17,9 @@ define([
     ApiQuery,
     ApiRequest,
     PubSubEvents,
-    HandleBars) {
+    HandleBars,
+    ApiTargets
+  ) {
 
   var Mixin = {
 
@@ -46,12 +49,15 @@ define([
           api.clientVersion = conf.version;
         }
 
-        // modify the behaviour of all ajax requests
-        api.modifyRequestOptions = function(opts) {
-          //need this so that cross domain cookies will work!
-          // TODO: set this only for some requests - that way we'll save data channel (no cookies)
-          opts.xhrFields = {
-            withCredentials: true
+        //ApiTargets has a _needsCredentials array that contains all endpoints
+        //that require cookies
+        api.modifyRequestOptions = function(opts, request) {
+          // there is a list of endpoints that DONT require cookies, if this endpoint
+          // is not in that list,
+          if (ApiTargets._doesntNeedCredentials.indexOf(request.get("target")) == -1){
+            opts.xhrFields = {
+              withCredentials: true
+            }
           }
         };
 

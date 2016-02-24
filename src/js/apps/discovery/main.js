@@ -68,6 +68,7 @@ define(['config', 'module'], function(config, module) {
                         var text = $sidebar.hasClass("show") ? '  <i class="fa fa-close"></i> Close Menu' : ' <i class="fa fa-bars"></i> Show Menu';
                         $button.html(text);
                      });
+
           //accessibility: skip to main content
           $("body").on("click", "#skip-to-main-content", function(e){
             e.preventDefault();
