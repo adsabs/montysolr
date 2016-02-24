@@ -474,9 +474,14 @@ define([
         "[Router]-Navigate-With-Trigger",
         "IndividualLibraryWidget",
         {
-          "subView": "admin",
+          "bibcodes": [
+            "2015IAUGA..2257982A",
+            "2015IAUGA..2257768A",
+            "2015IAUGA..2257639R"
+          ],
           "id": "1",
-          "publicView": false
+          "publicView": false,
+          "subView": "admin"
         }
       ]);
 
@@ -487,47 +492,54 @@ define([
       $("#test li[data-tab=export-bibtex]").click();
 
       expect(spy.args[1]).to.eql([
-
         "[Router]-Navigate-With-Trigger",
         "library-export",
         {
           "bibcodes": [
-            "2015IAUGA..2257639R",
+            "2015IAUGA..2257982A",
             "2015IAUGA..2257768A",
-            "2015IAUGA..2257982A"
+            "2015IAUGA..2257639R"
           ],
-          "subView": "bibtex",
           "id": "1",
-          "publicView": false
+          "publicView": false,
+          "subView": "export",
+          "widgetName": "ExportWidget",
+          "additional": {
+            "format": "bibtex"
+          }
         }
       ]);
 
-      w.setSubView({ subView : "export"});
 
+      w.setSubView({ subView : "export"});
 
       expect($("li.tab.active").find(".dropdown-menu li").eq(0).data("tab")).to.eql("export-bibtex");
 
       $("#test .tab[data-tab=metrics]").click();
 
-      expect(spy.args[2]).to.eql([
-
-        "[Router]-Navigate-With-Trigger",
-        "library-metrics",
-        {
-          "bibcodes":  [
-            "2015IAUGA..2257639R",
-            "2015IAUGA..2257768A",
-            "2015IAUGA..2257982A"
-          ],
-          "id": "1",
-          "publicView": false,
-          "subView" : undefined
-        }
-      ]);
+      expect(spy.args[2]).to.eql(
+          [
+            "[Router]-Navigate-With-Trigger",
+            "library-metrics",
+            {
+              "bibcodes": [
+                "2015IAUGA..2257982A",
+                "2015IAUGA..2257768A",
+                "2015IAUGA..2257639R"
+              ],
+              "id": "1",
+              "publicView": false,
+              "subView": "metrics",
+              "widgetName": "Metrics",
+              "additional": {}
+            }
+          ]
+      );
 
       w.setSubView({ subView : "metrics"});
 
       expect($("li.tab.active").data("tab")).to.eql("metrics");
+
 
       $("#test li[data-tab=visualization-AuthorNetwork]").click();
 
@@ -536,19 +548,20 @@ define([
         "library-visualization",
         {
           "bibcodes": [
-            "2015IAUGA..2257639R",
+            "2015IAUGA..2257982A",
             "2015IAUGA..2257768A",
-            "2015IAUGA..2257982A"
+            "2015IAUGA..2257639R"
           ],
-          "subView": "AuthorNetwork",
           "id": "1",
-          "publicView": false
+          "publicView": false,
+          "subView": "visualization",
+          "widgetName": "AuthorNetwork",
+          "additional": {}
         }
       ]);
 
       w.setSubView({ subView : "visualization"});
       expect($("li.tab.active").find(".dropdown-menu li").eq(0).data("tab")).to.eql("visualization-AuthorNetwork");
-
 
 
       //none of these options are available if the library has 0 bibcodes
@@ -636,12 +649,12 @@ define([
       $("#test").find(".bigquery-export").click();
 
       expect(publishStub.args[0][0]).to.eql("[PubSub]-New-Query");
-
+      
       expect(publishStub.args[0][1].toJSON()).to.eql({
         "__bigquery": [
-          "2015IAUGA..2257639R",
+          "2015IAUGA..2257982A",
           "2015IAUGA..2257768A",
-          "2015IAUGA..2257982A"
+          "2015IAUGA..2257639R"
         ]
       });
 

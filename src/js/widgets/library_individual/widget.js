@@ -98,6 +98,8 @@ define([
             id = this.model.get("id");
 
         this.libraryCollection.reset();
+        // XXX: remove when pagination is implemented
+        this.libraryCollection.documents = [];
         this.view.header.empty();
         this.view.main.empty();
 
@@ -177,6 +179,10 @@ define([
 
                 that.createHeader(data.metadata);
                 that.libraryCollection.reset(data.solr.response.docs);
+                // XXX: actual (unlimited) list of bibcodes
+                //  remove when pagination is implemented
+                that.libraryCollection.documents = data.documents;
+
                 //remove the loading view
                 that.view.main.show(subView);
               }).fail(function(data){
@@ -246,6 +252,9 @@ define([
                 var bibcode = data.bibcode[0],
                   modelToRemove = that.libraryCollection.get(bibcode);
                 that.libraryCollection.remove(modelToRemove);
+
+                //XXX: remove after pagination is implemented
+                that.libraryCollection.documents = _.without(that.libraryCollection.documents, bibcode);
               });
             break;
         }
@@ -276,8 +285,7 @@ define([
 
         var that = this,
             id = this.model.get("id"),
-            pubsub = this.getBeeHive().getService('PubSub'),
-            query;
+            pubsub = this.getBeeHive().getService('PubSub');
 
         switch (event) {
 
@@ -296,18 +304,41 @@ define([
             break;
 
           case "navigate":
-            //set the proper view value into the model
             this.model.set("subView", arg1);
-            var other = ["export", "metrics", "visualization"];
-            var publicView = this.model.get("publicView");
-            if (_.contains(other, arg1)){
-              var command =  "library-" + arg1;
-              pubsub.publish(pubsub.NAVIGATE, command, {bibcodes : this.libraryCollection.pluck("bibcode"), subView : arg2, id : id, publicView : publicView});
+            //set the proper view value into the model
+              var data = {
+                  bibcodes : this.libraryCollection.documents,
+                  id : id,
+                  publicView : this.model.get("publicView"),
+                //subview is dependant on the tab and is used exclusively by individuallibrarywidget
+                // to figure out which tab to highlight
+                  subView : arg1
+              }
+
+            if (_.contains(["export", "metrics", "visualization"], arg1)){
+
+              //augment data
+              switch (arg1) {
+                case "export":
+                  data.widgetName = "ExportWidget";
+                  data.additional = { format : arg2 };
+                  break;
+                case "visualization":
+                  data.widgetName = arg2;
+                  data.additional = {};
+                  break;
+                case "metrics":
+                  data.widgetName = "Metrics";
+                  data.additional = {};
+                  break;
+              }
+              pubsub.publish(pubsub.NAVIGATE, "library-" + arg1, data);
+
             }
             else {
-              pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", { subView : arg1, id : id, publicView : publicView });
+              pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", data);
             }
-            break
+            break;
 
           case "delete-library":
             this.getBeeHive().getObject("LibraryController").deleteLibrary(id, this.headerModel.get("name"));
@@ -315,7 +346,7 @@ define([
           case "start-search":
 
             var query = new ApiQuery({
-              __bigquery : this.libraryCollection.pluck("bibcode")
+              __bigquery : this.libraryCollection.documents
             });
 
             pubsub.publish(pubsub.START_SEARCH, query);

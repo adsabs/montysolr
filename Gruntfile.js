@@ -593,8 +593,7 @@ module.exports = function(grunt) {
           modulePattern : "../../js/(.*)",
           customModuleThreshold: {
 
-            "apps/discovery/navigator.js": 20,
-            "widgets/alerts/widget.js" : 73,
+            "apps/discovery/navigator.js": 30,
             "apps/discovery/router.js": 39,
             "widgets/facet/graph-facet/h_index_graph.js":2,
             "widgets/facet/graph-facet/year_graph.js":2,
@@ -613,9 +612,8 @@ module.exports = function(grunt) {
             "widgets/list_of_things/item_view.js":50,
             "widgets/base/base_widget.js":51,
             "widgets/breadcrumb/widget.js":55,
-            "components/navigator.js":30,
+            "components/navigator.js":60,
             "widgets/abstract/widget.js":58,
-            "widgets/network_vis/network_widget.js":60,
             "mixins/dependon.js":61,
             "widgets/facet/tree_view.js":62,
             "widgets/facet/item_view.js":71,

@@ -39,10 +39,7 @@ define([
       },
 
       setSubView : function(format){
-        this.exportRecords(format, [this.bibcode]);
-      },
-
-      processResponse : function(){
+        this.renderWidgetForListOfBibcodes([this.bibcode], format);
       }
 
     });

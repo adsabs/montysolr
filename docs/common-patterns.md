@@ -1,5 +1,5 @@
 
-- widget can publish an alert
+##widget can publish an alert
 
   //raise an error
             var pubsub = this.getPubSub();
@@ -11,7 +11,10 @@
             }));
 
 
-- for situations where a widget can update a value that is propagated the the rest of
+
+## widgets stay in sync with data from server
+
+for situations where a widget can update a value that is propagated the the rest of
 the app and maybe to a server, the most convenient pattern in bumblebee is
 
 1. when being activated, widget requests current value
@@ -22,3 +25,14 @@ the app and maybe to a server, the most convenient pattern in bumblebee is
 so widgets initialize with correct value and then stay updated based on pubsub
 
 this pattern is used in libraries and for the page number preferences
+
+
+## widgets that display bibcodes should have the following methods:
+
+1. renderWidgetForCurrentQuery(data)
+-- widget uses internal getCurrentQuery function and renders itself
+@param {object} data
+
+2.  renderWidgetForListOfBibcodes(bibcodeArray, data)
+@param {array} bibcodeArray
+@param {object} data
