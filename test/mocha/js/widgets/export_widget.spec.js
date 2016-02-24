@@ -105,7 +105,8 @@ define([
       var $w = widget.render().$el;
       $('#test').append($w);
 
-      widget.exportRecords('bibtex', ['one', 'two']);
+      widget.renderWidgetForListOfBibcodes(['one', 'two'], { format : 'bibtex'});
+
       expect($("#test textarea").text().indexOf('Takatsuka') > -1).to.eql(true);
       expect($w.find(".change-rows").length).to.be.eql(0);
 

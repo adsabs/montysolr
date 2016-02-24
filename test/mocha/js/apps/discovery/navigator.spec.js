@@ -14,8 +14,6 @@ define([
 
       var n = new Navigator();
 
-      var minsub  = new Minsub();
-
       //fake Services
 
       var orcidApi = {
@@ -107,18 +105,11 @@ define([
 
       //1. dont show the modal
 
-    //  n.catalog.get("orcid-page").execute();
-    //
-    //  //remove this flag that lets us know to show a special modal when user goes to #orcid-page
-    //  expect(storage.remove.args[0][0]).to.eql("orcidAuthenticating");
-    //
-    //  //modal wasn't called
-    //  expect(AlertsController.alert.callCount).to.eql(0);
-    //
-    //  //executestashednav returned true
-    //  expect(  n.catalog.get("orcid-page").route).to.be.false;
-    //
-    //expect(MasterPageManager.show.callCount).to.eql(0);
+      n.catalog.get("orcid-page").execute();
+      //remove this flag that lets us know to show a special modal when user goes to #orcid-page
+      expect(storage.remove.args[0][0]).to.eql("orcidAuthenticating");
+      //modal wasn't called
+      expect(AlertsController.alert.callCount).to.eql(0);
 
       //2. show the modal and redirect to orcidbigwidget
 
@@ -133,7 +124,6 @@ define([
       };
 
       n.catalog.get("orcid-page").execute();
-
       expect(AlertsController.alert.callCount).to.eql(1);
       expect(AlertsController.alert.args[0][0]).to.be.instanceof(ApiFeedback);
       expect(AlertsController.alert.args[0][0].title).to.eql("You are now logged in to ORCID");
@@ -141,15 +131,109 @@ define([
       //remove this flag that lets us know to show a special modal when user goes to #orcid-page
       expect(storage.remove.args[0][0]).to.eql("orcidAuthenticating");
 
-      //executestashednav returned true
-      expect(  n.catalog.get("orcid-page").route).to.eql("#user/orcid");
-
-      expect(MasterPageManager.show.callCount).to.eql(1);
+      expect(MasterPageManager.show.callCount).to.eql(2);
 
       expect(MasterPageManager.show.args[0][0]).to.eql("OrcidPage");
 
 
   });
+
+    it("should have endpoints for library-export, library-metrics, and library-visualization", function(){
+
+
+      var n = new Navigator();
+
+      n.getPubSub = function(){
+        return {
+          publish : sinon.spy()
+        }
+      }
+
+      var Export = {
+        renderWidgetForListOfBibcodes : sinon.spy()
+      };
+      var Library = {
+        setSubView : sinon.spy()
+      };
+
+      var MasterPageManager = {
+        show : sinon.spy()
+      };
+
+      var app = {
+
+        getObject: function (obj) {
+
+          if (obj === "MasterPageManager") {
+            return MasterPageManager;
+          }
+        },
+
+        getWidget : function(obj){
+          var d = $.Deferred();
+          if (obj === "ExportWidget"){
+            d.resolve(Export);
+          }
+          if (obj === "IndividualLibraryWidget"){
+            d.resolve(Library);
+          }
+          return d;
+        }
+      };
+
+      n.start(app);
+
+
+      n.catalog.get("library-export").execute("library-export",    {
+        "bibcodes": [
+          "2015IAUGA..2257982A",
+          "2015IAUGA..2257768A",
+          "2015IAUGA..2257639R"
+        ],
+        "id": "1",
+        "publicView": false,
+        "subView": "export",
+        "widgetName": "ExportWidget",
+        "additional": {
+          "format": "bibtex"
+        }
+      });
+
+      expect(Export.renderWidgetForListOfBibcodes.callCount).to.eql(1);
+      expect(Export.renderWidgetForListOfBibcodes.args[0]).to.eql([
+        [
+          "2015IAUGA..2257982A",
+          "2015IAUGA..2257768A",
+          "2015IAUGA..2257639R"
+        ],
+        {
+          "format": "bibtex"
+        }
+      ]);
+
+      expect(Library.setSubView.callCount).to.eql(1);
+      expect(Library.setSubView.args[0]).to.eql([
+        {
+          "subView": "export",
+          "publicView": false,
+          "id": "1"
+        }
+      ]);
+
+      expect(MasterPageManager.show.callCount).to.eql(1)
+      expect(MasterPageManager.show.args[0]).to.eql([
+        "LibrariesPage",
+        [
+          "IndividualLibraryWidget",
+          "UserNavbarWidget",
+          "ExportWidget"
+        ]
+      ]);
+
+
+
+
+    });
 
 
 

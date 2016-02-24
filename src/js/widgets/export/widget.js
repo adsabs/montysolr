@@ -130,8 +130,7 @@ define([
       },
 
       exportRecords: function(ev) {
-        if (ev)
-          ev.preventDefault()
+        if (ev)  ev.preventDefault();
         this.trigger('export-records');
       },
 
@@ -173,11 +172,12 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive);
+        this.getPubSub().subscribe(this.getPubSub().INVITING_REQUEST, _.bind(this.setCurrentQuery, this));
       },
 
       viewEvents: {
-        'export-records': 'exportRecords',
-        'export-query': 'exportQuery',
+        'export-records': 'renderWidgetForListOfBibcodes',
+        'export-query': 'renderWidgetForCurrentQuery',
         'close-widget': 'closeWidget'
       },
 
@@ -203,13 +203,13 @@ define([
        * @param info (object with apiQuery, numFound, and format params)
 
        */
-      exportQuery: function(info) {
+      renderWidgetForCurrentQuery : function(info) {
 
         this.model.reset();
 
-        //navigator hands off these values, they originally come from app storage
+        //navigator hands off these values
         this.model.set({
-        'query': info.currentQuery,
+        'query': this.getCurrentQuery(),
         'format' : info.format,
         'numFound': info.numFound
         });
@@ -247,13 +247,26 @@ define([
               });
       },
 
-      exportRecords: function(format, recs) {
+      // @param {array} recs
+      // @param {object} data
+      renderWidgetForListOfBibcodes : function(recs, data) {
+
+        this.model.reset();
+
         if (!_.isArray(recs)) throw new Error('Identifiers must be an array');
         if (recs.length <= 0) console.warn('Do you want to export nothing? Let me be!');
+        if (!data || !data.format) throw new Error('no export format was provided');
+
+        //classic special case
+        if (data.format === "classic"){
+          this.openClassicExports({bibcodes : recs});
+          return;
+        }
+
         this.model.set('current', recs.length);
-        this.model.set('format', format);
-        this.model.set('identifiers');
-        this._getExports(format, recs);
+        this.model.set('format', data.format);
+        this._getExports(data.format, recs);
+
       },
 
       //special case, will eventually be removed
