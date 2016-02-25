@@ -80,7 +80,7 @@ define([
       widget.view.render();
 
       //only can change record #s if we have a query
-      expect($("#test").find(".change-rows").text().trim()).to.eql( 'Change to first\n            \n            record(s) (max is 500).\n             Submit');
+      expect($("#test").find(".change-rows").text().trim()).to.eql('Change to first\n            \n            record(s) (max is 800).\n             Submit');
 
       //will automatically recalculate the "max" value when numFound changes
       widget.model.set("numFound", 80);
