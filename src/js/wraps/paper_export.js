@@ -39,7 +39,7 @@ define([
       },
 
       setSubView : function(format){
-        this.renderWidgetForListOfBibcodes([this.bibcode], format);
+        this.renderWidgetForListOfBibcodes([this.bibcode], {format : format});
       }
 
     });
