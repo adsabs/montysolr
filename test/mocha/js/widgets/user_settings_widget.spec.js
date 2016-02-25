@@ -160,38 +160,22 @@ define([
 
       var triggerStub = sinon.stub(u.view, "trigger");
 
-      $("#test").find("input[name=old_password]").val("foo");
-      $("#test").find("input[name=old_password]").trigger("change");
-      expect($("#test").find("input[name=old_password]").parent().hasClass("has-success")).to.be.false;
-      expect($("#test").find("input[name=old_password]").parent().hasClass("has-error")).to.be.false;
-
-      $("#test").find("input[name=old_password]").val("Foooo5");
-      $("#test").find("input[name=old_password]").trigger("change");
-      expect($("#test").find("input[name=old_password]").parent().hasClass("has-success")).to.be.true;
-      expect($("#test").find("input[name=old_pasword]").parent().hasClass("has-error")).to.be.false;
-
-      $("#test").find("input[name=new_password1]").val("boo");
-      $("#test").find("input[name=new_password1]").trigger("change");
-      expect($("#test").find("input[name=new_password1]").parent().hasClass("has-success")).to.be.false;
-      expect($("#test").find("input[name=new_password1]").parent().hasClass("has-error")).to.be.false;
-
-      $("#test").find("input[name=new_password1]").val("Boooo3");
-      $("#test").find("input[name=new_password1]").trigger("change");
-      expect($("#test").find("input[name=new_password1]").parent().hasClass("has-success")).to.be.true;
-      expect($("#test").find("input[name=new_password1]").parent().hasClass("has-error")).to.be.false;
-
       //premature submit should trigger error message instead of submitting the form,
       // and show error highlight on invalid fields
-      expect($("#test").find("button[type=submit]").hasClass("btn-success")).to.be.false;
       $("#test").find("button[type=submit]").click();
+
+      $("#test").find("input[name=old_password]").val("fake3333");
+      $("#test").find("input[name=old_password]").trigger("change");
 
       expect(triggerStub.callCount).to.eql(0);
 
-      expect($("#test").find("input[name=new_password1]").parent().hasClass("has-success")).to.be.true;
       expect($("#test").find("input[name=new_password2]").parent().hasClass("has-error")).to.be.true;
 
-      expect($("#test").find("input[name=new_password1]").parent().find(".help-block").hasClass("no-show")).to.be.true;
+      expect($("#test").find("input[name=new_password1]").parent().find(".help-block").hasClass("no-show")).to.be.false;
       expect($("#test").find("input[name=new_password2]").parent().find(".help-block").hasClass("no-show")).to.be.false;
+
+      $("#test").find("input[name=new_password1]").val("Boooo3");
+      $("#test").find("input[name=new_password1]").trigger("change");
 
       $("#test").find("input[name=new_password2]").val("Boo");
       $("#test").find("input[name=new_password2]").trigger("change");
@@ -205,7 +189,6 @@ define([
 
       //finally,  fake the g-recaptcha-response
       u.view.content.currentView.model.set("g-recaptcha-response", "foo");
-      expect($("#test").find("button[type=submit]").hasClass("btn-success")).to.be.true;
 
       $("#test").find("button[type=submit]").click();
       expect(triggerStub.callCount).to.eql(1);

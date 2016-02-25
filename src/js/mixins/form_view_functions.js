@@ -11,22 +11,17 @@ define([
   var formFunctions = {
 
     //for the view
-    //checks whether to show a green submit button on model change
     checkValidationState: function () {
-      //hide possible submit button message
+      //hide help
       if (this.model.isValidSafe()) {
 
         this.$("button[type=submit]")
-          .addClass("btn-success")
           .prev(".help-block")
           .html("")
           .addClass("no-show");
 
       }
-      else {
-        this.$("button[type=submit]")
-          .removeClass("btn-success");
-      }
+
     },
 
     //for the view

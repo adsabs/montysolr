@@ -338,20 +338,18 @@ require.config({
       //this allows for instant validation of form fields using the backbone-validation plugin
       _.extend(Backbone.Validation.callbacks, {
         valid: function (view, attr, selector) {
-          var $el = view.$('input[name=' + attr + ']'),
-            $group = $el.closest('.form-group');
+          var $el = view.$('input[name=' + attr + ']');
 
-          $group.removeClass('has-error').addClass("has-success");
-          $group.find(".icon-success").removeClass("hidden");
-          $group.find('.help-block').html('').addClass('no-show');
+           $el.closest('.form-group')
+              .removeClass('has-error')
+              .find('.help-block')
+              .html('')
+              .addClass('no-show');
 
         },
         invalid: function (view, attr, error, selector) {
           var $el = view.$('[name=' + attr + ']');
           $group = $el.closest('.form-group');
-
-          $group.removeClass("has-success");
-          $group.find(".icon-success").addClass("hidden");
 
           if (view.submit === true){
             //only show error states if there has been a submit event

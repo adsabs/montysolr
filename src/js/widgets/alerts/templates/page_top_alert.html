@@ -1,6 +1,10 @@
  {{#if msg}}
     <div class="alert alert-{{type}}" id="page-top-alert">
-        {{{msg}}}
-        <button type="button" class="close"><span aria-hidden="true"><i class="fa fa-2x fa-times"></i></span><span class="sr-only">Close</span></button>
+        <div>
+            {{{msg}}}
+        </div>
+        <div>
+            <button type="button" class="close"><span aria-hidden="true"><i class="fa fa-2x fa-times"></i></span><span class="sr-only">Close</span></button>
+        </div>
     </div>
     {{/if}}
