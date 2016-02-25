@@ -54,8 +54,16 @@ define([
       PERMISSIONS : "biblib/permissions",
 
 
+      /*
+      * this is used by the mixin 'user_change_rows' to set max allowed/default requested
+      */
+
       _limits  : {
         //use the same name from discovery.config.js
+
+        ExportWidget : {
+          default : 500, limit : 3000
+        },
 
         Metrics : {
           default : 1000, limit : 2000
@@ -76,7 +84,6 @@ define([
         BubbleChart : {
           //default == limit
           default : 1500
-
         }
       }
 

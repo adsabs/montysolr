@@ -12,6 +12,7 @@ define([
     "hbs!../network_vis/templates/loading-template",
     "hbs!./templates/classic_submit_form",
     'js/components/api_feedback',
+    'js/components/api_targets',
     'jquery',
     'jquery-ui',
     'module',
@@ -29,6 +30,7 @@ define([
     LoadingTemplate,
     ClassicFormTemplate,
     ApiFeedback,
+    ApiTargets,
     $,
     $ui,
     WidgetConfig,
@@ -61,10 +63,8 @@ define([
           //something the user needs to know about
           msg: undefined,
           identifiers: [],
-
-          defaultMax: 500,
-          //we will originally ask for 200 records
-          default: 200,
+          defaultMax: ApiTargets._limits.ExportWidget.limit,
+          default: ApiTargets._limits.ExportWidget.default,
           // returned by api_feedback after starting_search_cycle
           numFound : undefined,
           // total currently being shown
@@ -129,10 +129,6 @@ define([
         }, 2000);
       },
 
-      exportRecords: function(ev) {
-        if (ev)  ev.preventDefault();
-        this.trigger('export-records');
-      },
 
       signalCloseWidget: function(ev) {
         this.trigger('close-widget');
@@ -265,6 +261,8 @@ define([
 
         this.model.set('current', recs.length);
         this.model.set('format', data.format);
+        this.model.set("rows", ApiTargets._limits.ExportWidget.default);
+
         this._getExports(data.format, recs);
 
       },

@@ -1,8 +1,6 @@
 
 define([
-
     'js/widgets/export/widget',
-
     'js/components/api_query',
     'js/components/json_response'
   ],

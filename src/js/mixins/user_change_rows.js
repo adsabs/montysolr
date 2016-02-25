@@ -7,6 +7,18 @@ define([
 
   ){
 
+  /*
+  * use this model as a base for any widget that needs to request
+  * varying numbers of records from solr and visualize/export/etc them
+  * in some way.
+  *
+  * Currently used by metrics and visualization widgets (not export for now)
+  * they set the relevant solr vals into the model in the
+  * processResponse function
+  * */
+
+
+
   var mixin = {};
 
   mixin.Model = Backbone.Model.extend({
@@ -47,11 +59,8 @@ define([
       this.set("current", _.min([this.get("rows"), this.get("numFound")]));
     }
 
-
   });
-
 
   return mixin;
 
-
-})
+});
