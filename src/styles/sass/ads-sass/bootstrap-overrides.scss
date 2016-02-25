@@ -96,7 +96,6 @@ textarea[disabled]{
 }
 
 .btn-success, .btn-danger, .btn-info, .btn-warning, .btn-primary, .btn-primary-faded {
-  box-shadow : 1px 1px 4px $gray-light;
 
   &:hover {
     box-shadow : 1px 1px 6px $gray;
@@ -104,7 +103,6 @@ textarea[disabled]{
 }
 
 .btn-success.btn-sm, .btn-info.btn-sm, .btn-danger.btn-sm, .btn-warning.btn-sm, .btn-primary.btn-sm, .btn-primary-faded.btn-sm {
-  box-shadow : 1px 1px 2px $gray-light;
 
   &:hover {
     box-shadow : 1px 1px 4px $gray;
@@ -112,8 +110,7 @@ textarea[disabled]{
 }
 
 
-.btn-success.btn-sm, .btn-info.btn-xs, .btn-danger.btn-xs, .btn-warning.btn-xs, .btn-primary.btn-xs, .btn-primary-faded.btn-xs {
-  box-shadow : 1px 1px 1px $gray-light;
+.btn-success.btn-xs, .btn-info.btn-xs, .btn-danger.btn-xs, .btn-warning.btn-xs, .btn-primary.btn-xs, .btn-primary-faded.btn-xs {
 
   &:hover {
     box-shadow : 1px 1px 2px $gray;

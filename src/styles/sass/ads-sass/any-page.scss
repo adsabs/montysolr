@@ -20,6 +20,11 @@
   }
 }
 
+@keyframes fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
 div[data-widget="AlertsWidget"] {
 
   .alert {
@@ -30,13 +35,22 @@ div[data-widget="AlertsWidget"] {
     border: 0px solid transparent !important;
     padding: 25px;
     padding-left: 45px;
+    animation : fade-in 1s;
+    position: relative;
   }
 
-  button.close {
-    position: relative;
-    top: -11px;
-    left: 3px;
+  .alert>div {
+    display:inline-block;
+    vertical-align: top;
   }
+
+  .alert>div:first-of-type {
+    width: 80%;
+  }
+  .alert>div:nth-of-type(2) {
+    width: 19%;
+  }
+
 }
 
 .s-tabs-widget {
