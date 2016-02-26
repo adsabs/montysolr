@@ -194,17 +194,16 @@ define([
 
       // activate the new pageManagerWidget
       if (!pageManagerModel.get('isSelected')){
-        //this triggers 'changeManager'
-        pageManagerModel.set({'isSelected': true});
         //'changeWithinManager' also gets triggered if options are changed, leading to
         //a wasteful re-render!
         pageManagerModel.set({options: options, object : pageManagerWidget}, {silent : true});
+        //this triggers 'changeManager'
+        pageManagerModel.set({'isSelected': true});
       }
       else {
         //it's already selected, trigger a change within the manager
         pageManagerModel.set({options : options, object : pageManagerWidget})
       }
-
 
       var previousPMName = this.currentChild;
       this.currentChild = pageManagerName;
