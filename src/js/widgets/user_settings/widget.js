@@ -79,7 +79,6 @@ define([
 
     triggerSubmit: function () {
       this.model.unset("user");
-
       FormFunctions.triggerSubmit.apply(this, arguments);
     },
 
@@ -90,15 +89,10 @@ define([
       if (this.model.isValidSafe()) {
         //don't go for actual submit button, that is on the modal
         this.$("button.initial-submit")
-          .addClass("btn-success")
           .prev(".help-block")
           .html("")
           .addClass("no-show");
 
-      }
-      else {
-        this.$("button.initial-submit")
-          .removeClass("btn-success");
       }
     },
 

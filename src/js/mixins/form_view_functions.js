@@ -19,9 +19,7 @@ define([
           .prev(".help-block")
           .html("")
           .addClass("no-show");
-
       }
-
     },
 
     //for the view
