@@ -86,7 +86,7 @@ module.exports = function(grunt) {
           baseUrl: 'dist/js',
           allowSourceOverwrites: true,
           keepBuildDir: true,
-          generateSourceMaps: true,
+          generateSourceMaps: false,
           removeCombined: true,
           optimize: 'uglify2',
           findNestedDependencies: true,
@@ -145,7 +145,7 @@ module.exports = function(grunt) {
           findNestedDependencies: true,
           wrap: true,
           preserveLicenseComments: false,
-          generateSourceMaps: true,
+          generateSourceMaps: false,
           uglify2: {
             output: {
               beautify: false
