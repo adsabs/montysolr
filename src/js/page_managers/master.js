@@ -139,7 +139,6 @@ define([
   var MasterPageManager = PageManagerController.extend({
     constructor: function(options) {
       options = options || {};
-      this._managers = {};
       _.extend(this, _.pick(options, ['debug']));
       this.view = new MasterView(options);
       this.collection = this.view.collection;
@@ -158,53 +157,67 @@ define([
       PageManagerController.prototype.assemble.call(this, app);
     },
 
-
-    show: function(pageManager, options) {
-      //this.model.set('numCalled', this.model.attributes.numCalled+1, {silent: true});
-
+    show: function(pageManagerName, options) {
+   
       var app = this.getApp();
 
-      if (!this.collection.find({'id': pageManager}))
-        this.collection.add({'id': pageManager});
-      var coll = this.collection.find({id: pageManager});
+      if (!this.collection.find({'id': pageManagerName})) {
+        this.collection.add({'id': pageManagerName});
+      }
+      
+      var pageManagerModel = this.collection.find({id: pageManagerName});
 
-      var pm;
-      if (coll.get('object')) {
-        pm = coll.get('object');
+      //if the model does not already reference the actual manager widget, add it now
+      var pageManagerWidget;
+      if (pageManagerModel.get('object')) {
+        pageManagerWidget = pageManagerModel.get('object');
       }
       else {
-        pm = app._getWidget(pageManager); // will throw error if not there
-        coll.set('object', pm);
+        pageManagerWidget = app._getWidget(pageManagerName); // will throw error if not there
+        pageManagerModel.set('object', pageManagerWidget);
       }
 
-      if (pm && pm.assemble) {
+      if (!pageManagerWidget) { console.error("unable to find page manager: " + pageManagerName) }
+
+      if (pageManagerWidget.assemble) {
         // assemble the new page manager (while the old one is still in place)
-        pm.assemble(app);
+        pageManagerWidget.assemble(app);
       }
       else {
         console.error('eeeek, ' + pageManager + ' has no assemble() method!');
       }
 
-      // hide those that are visible
-      if (!coll.attributes.isSelected) {
+      if (!pageManagerModel.attributes.isSelected) {
+        //hide other managers
         this.hideAll();
       }
 
-      // activate the new PM
-      coll.set({'isSelected': true, options: options, object: pm});
+      // activate the new pageManagerWidget
+      if (!pageManagerModel.get('isSelected')){
+        //this triggers 'changeManager'
+        pageManagerModel.set({'isSelected': true});
+        //'changeWithinManager' also gets triggered if options are changed, leading to
+        //a wasteful re-render!
+        pageManagerModel.set({options: options, object : pageManagerWidget}, {silent : true});
+      }
+      else {
+        //it's already selected, trigger a change within the manager
+        pageManagerModel.set({options : options, object : pageManagerWidget})
+      }
 
-      var previousPM = this.currentChild;
-      this.currentChild = pageManager;
+
+      var previousPMName = this.currentChild;
+      this.currentChild = pageManagerName;
 
       // disassemble the old one (behind the scenes)
-      if (previousPM && previousPM != pageManager) {
-        var oldPm = this.collection.find({id: previousPM});
-        if (oldPm && oldPm.get('object'))
-          oldPm.get('object').disAssemble(app);
+      if (previousPMName && previousPMName != pageManagerName) {
+        var oldPM = this.collection.find({id: previousPMName});
+        if (oldPM && oldPM.get('object'))
+          oldPM.get('object').disAssemble(app);
       }
 
       // send notification
-      this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManager);
+      this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManagerName);
     },
 
     getCurrentActiveChild: function() {
