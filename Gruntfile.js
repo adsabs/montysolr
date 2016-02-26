@@ -86,7 +86,7 @@ module.exports = function(grunt) {
           baseUrl: 'dist/js',
           allowSourceOverwrites: true,
           keepBuildDir: true,
-          generateSourceMaps: false,
+          generateSourceMaps: true,
           removeCombined: true,
           optimize: 'uglify2',
           findNestedDependencies: true,
@@ -98,7 +98,11 @@ module.exports = function(grunt) {
               beautify: false
             },
             warnings: true,
-            mangle: false
+            mangle: false,
+            compress : {
+              drop_console: true,
+              drop_debugger: true
+            }
           }
         }
       },
@@ -138,16 +142,20 @@ module.exports = function(grunt) {
           name: "js/apps/discovery/main",
           keepBuildDir: true,
           mainConfigFile : "dist/discovery.config.js",
-          generateSourceMaps: false,
           findNestedDependencies: true,
           wrap: true,
           preserveLicenseComments: false,
+          generateSourceMaps: true,
           uglify2: {
             output: {
               beautify: false
             },
             warnings: true,
-            mangle: false
+            mangle: false,
+            compress : {
+              drop_console: true,
+              drop_debugger: true
+            }
           }
         }
       },
