@@ -155,6 +155,9 @@ define([
               bibcode = resp.response.docs[0].bibcode;
               self.getPubSub().publish(self.getPubSub().DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:' + bibcode}));
             }
+            else if (resp.response && resp.response.docs && !resp.response.docs.length) {
+              console.error("the query  " + q.get("q")[0] + "  did not return any bibcodes");
+            }
           },
           fail: function() {
             console.log('Cannot identify page to load, bibcode: ' + bibcode);

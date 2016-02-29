@@ -34,9 +34,12 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
                 "[citations]" : { num_citations : 3 }
               }
             ]}};
+
+
+
         minsub = new (MinimalPubSub.extend({
           request: function (apiRequest) {
-            return testJSON;
+            if (apiRequest.get("query").get("q")[0] == "bibcode:foo") return testJSON;
           }
         }))({verbose: false});
 
@@ -55,6 +58,18 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect(aw).to.be.instanceof(BaseWidget);
         expect(aw.view).to.be.instanceof(Marionette.ItemView);
         expect(aw.model).to.be.instanceof(Backbone.Model);
+      });
+
+      it("should show an appropriate default page in the case that the bibcode isn't found", function(){
+
+        var aw = new AbstractWidget();
+
+        aw.activate(minsub.beehive.getHardenedInstance());
+
+        $("#test").append(aw.render().el);
+
+        expect($("article").text().trim().replace(/\s{2}/gi, "")).to.eql("Abstract Not FoundNo valid abstract selected for retrieval or abstract not yet indexed in ADS.")
+
       });
 
       it("should have a model that takes raw solr data and parses it to template-ready condition", function(){
