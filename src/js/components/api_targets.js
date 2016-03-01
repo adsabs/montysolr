@@ -14,7 +14,8 @@ define([
     Backbone
     ) {
 
-    return {
+   var config =  {
+      BOOTSTRAP : '/accounts/bootstrap',
       SEARCH: 'search/query',
       QTREE: 'search/qtree',
       BIGQUERY: 'search/bigquery',
@@ -58,8 +59,9 @@ define([
       * this is used by the mixin 'user_change_rows' to set max allowed/default requested
       */
 
-      _limits  : {
-        //use the same name from discovery.config.js
+
+     _limits  : {
+      //use the same name from discovery.config.js
 
         ExportWidget : {
           default : 500, limit : 3000
@@ -71,16 +73,16 @@ define([
 
         AuthorNetwork : {
           default : 400, limit : 1000
-
         },
+
         PaperNetwork : {
           default : 400, limit : 1000
-
         },
+
         ConceptCloud : {
           default : 150, limit : 150
-
         },
+
         BubbleChart : {
           //default == limit
           default : 1500
@@ -88,4 +90,29 @@ define([
       }
 
     };
+
+    //add credential info
+
+    //doesn't require cross domain cookies
+    config._doesntNeedCredentials = [
+
+        config.SEARCH,
+        config.QTREE,
+        config.BIGQUERY,
+        config.EXPORT,
+        config.SERVICE_AUTHOR_NETWORK,
+        config.SERVICE_PAPER_NETWORK,
+        config.SERVICE_WORDCLOUD,
+        config.SERVICE_METRICS,
+        config.RECOMMENDER,
+        config.GRAPHICS,
+        config.FEEDBACK
+
+    ];
+
+
+    return config;
+
+
+
   });
