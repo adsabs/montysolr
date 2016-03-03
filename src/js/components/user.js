@@ -347,7 +347,7 @@ define([
         function onDone(){
           //publish alert
           function alertSuccess (){
-            var message = "Please check <b>" + new_email+ "</b> for further instructions";
+            var message = "<p>Please check <b>" + new_email+ "</b> for further instructions</p><p>(If you don't see the email, please <b>check your spam folder</b>)</p>";
             this.getPubSub().publish(this.getPubSub().ALERT,  new ApiFeedback({code: 0, msg: message, type : "success", title: "Success", modal: true}));
           };
           //need to do it this way so the alert doesnt get lost after page is changed
