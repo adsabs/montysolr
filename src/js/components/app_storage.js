@@ -20,17 +20,12 @@ define([
   var AppStorage = Backbone.Model.extend({
 
       activate: function(beehive) {
-        var that = this;
         this.setBeeHive(beehive);
         _.bindAll(this, "onPaperSelection", "onBulkPaperSelection");
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.PAPER_SELECTION, this.onPaperSelection);
         pubsub.subscribe(pubsub.BULK_PAPER_SELECTION, this.onBulkPaperSelection);
-        //see if we can load an api query from app storage
-        if (this.getBeeHive().getService("PersistentStorage")){
-          var stashedQuery = this.getBeeHive().getService("PersistentStorage").get("currentQuery");
-          this.setCurrentQuery(new ApiQuery(stashedQuery));
-        }
+
       },
 
       initialize: function() {
