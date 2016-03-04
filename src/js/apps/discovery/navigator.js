@@ -160,6 +160,9 @@ define([
 
         this.set("AllLibrariesWidget", function(widget, subView){
 
+          if (redirectIfNotSignedIn())
+            return;
+
           var subView = subView || "libraries";
           app.getObject('MasterPageManager').show("LibrariesPage",
             ["AllLibrariesWidget", "UserNavbarWidget"]);
