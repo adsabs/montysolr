@@ -171,6 +171,16 @@ module.exports = function(grunt) {
       }
     },
 
+    //remove unused css rules
+    purifycss: {
+      options: {},
+      target: {
+        src: ['dist/bumblebee_app.js'],
+        css: ['dist/styles/css/styles.css'],
+        dest: 'dist/styles/css/styles.css',
+      },
+    },
+
     // add md5 checksums to the distribution files
     'hash_require': {
       /* find js/css files, and add hash (md5 checksum) to them
@@ -812,6 +822,7 @@ module.exports = function(grunt) {
 
 
   // Grunt contribution tasks.
+  // so you dont have to do grunt.loadNpmTasks for each one
   require('load-grunt-tasks')(grunt);
 
   // Create an aliased test task.
@@ -973,6 +984,7 @@ module.exports = function(grunt) {
       'exec:git_describe',
       'string-replace:dist',
       'requirejs:release_individual', 'requirejs:release_concatenated','requirejs:release_css',
+      'purifycss',
       'hash_require:js', 'hash_require:css',
       'copy:keep_original', 'copy:bumblebee_app',
       'assemble',
