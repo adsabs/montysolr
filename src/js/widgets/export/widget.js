@@ -195,11 +195,14 @@ define([
       },
 
       /**
-       * Export data directly - use the supplied query (must be supplied)
-       * @param info (object with apiQuery, numFound, and format params)
+       * Export data directly - uses the widget's cached query
+       * @param info (object with numFound, and format params)
 
        */
       renderWidgetForCurrentQuery : function(info) {
+
+        if (!_.isObject(info)) throw new Error('info must be an object!');
+        if (!info.format || !info.numFound) throw new Error('info must contain the keys "format" and "numFound" ');
 
         this.model.reset();
 
@@ -246,6 +249,8 @@ define([
       // @param {array} recs
       // @param {object} data
       renderWidgetForListOfBibcodes : function(recs, data) {
+
+        if (!_.isObject(data)) throw new Error('data must be an object!');
 
         this.model.reset();
 
