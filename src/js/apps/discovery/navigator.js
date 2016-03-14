@@ -342,8 +342,7 @@ define([
 
             // is a special case, it opens in a new tab
             if (options.onlySelected && storage.hasSelectedPapers()) {
-
-              widget.renderWidgetForListOfBibcodes(storage.getSelectedPapers(), format);
+              widget.renderWidgetForListOfBibcodes(storage.getSelectedPapers(), { format : format });
 
             }
             //all records specifically requested
