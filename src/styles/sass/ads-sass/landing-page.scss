@@ -293,15 +293,14 @@ div[data-field=date] {
   }
 }
 
+
 .classic-form {
 
   label {
     color: $gray;
   }
 
-  font-size: 16px;
-  max-width: 640px;
-  margin: auto;
+  @extend .basic-form-style;
 
   div[data-field] {
     margin-bottom: 15px;

@@ -1,0 +1,24 @@
+
+<form class="{{endpoint}}-form basic-form-style">
+    <div class="form-group">
+        <label for="{{endpoint}}-username">Email address</label>
+        <input name="{{endpoint}}_email" type="email" class="form-control" id="{{endpoint}}-username" placeholder="Email">
+    </div>
+    <div class="form-group">
+        <label for="{{endpoint}}-password">Password</label>
+        <input name="{{endpoint}}_password" type="password" class="form-control" id="{{endpoint}}-password" placeholder="Password">
+    </div>
+
+    {{#compare endpoint "classic" }}
+        <div class="form-group">
+            <label for="classic-mirror-list">Choose an ADS Classic Mirror Site</label>
+            <select name="classic_mirror" class="form-control" id="classic-mirror-list">
+                {{#each mirrors}}
+                <option>{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+    {{/compare}}
+
+    <button type="submit" class="btn btn-primary-faded submit-credentials pull-right">Submit</button>
+</form>

@@ -1,0 +1,15 @@
+.library-import-form>div {
+  margin: 30px 0;
+}
+
+.library-import-form {
+  max-width: 600px;
+  margin: auto;
+}
+
+.library-import-form form {
+  border: 1px solid $gray-lighter;
+  padding: 10px;
+  @extend .clearfix;
+
+}

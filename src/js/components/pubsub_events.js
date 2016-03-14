@@ -167,7 +167,6 @@ define([], function() {
     * */
     STORAGE_PAPER_UPDATE: "[User]-Paper-Update",
 
-
     LIBRARY_CHANGE : "[PubSub]-Library-Change"
 
 };

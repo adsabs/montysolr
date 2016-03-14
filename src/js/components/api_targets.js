@@ -43,7 +43,21 @@ define([
       GRAPHICS: 'graphics',
       FEEDBACK : 'feedback/slack',
 
-      //store ADS information connected with ORCID here
+     //library import from classic
+     LIBRARY_IMPORT_CLASSIC_AUTH : 'harbour/auth/classic',
+     LIBRARY_IMPORT_CLASSIC_MIRRORS : 'harbour/mirrors',
+     LIBRARY_IMPORT_CLASSIC_TO_BBB: 'biblib/classic',
+
+     //library import from 2.0
+     LIBRARY_IMPORT_ADS2_AUTH : 'harbour/auth/twopointoh',
+     LIBRARY_IMPORT_ADS2_TO_BBB: 'biblib/twopointoh',
+
+     LIBRARY_IMPORT_ZOTERO: "harbour/export/twopointoh/zotero",
+
+     //returns credentials from both classic and 2.0 if they exist
+     LIBRARY_IMPORT_CREDENTIALS: 'harbour/user',
+
+     //store ADS information connected with ORCID here
       ORCID_PREFERENCES : 'orcid/preferences',
 
       //library endpoints
