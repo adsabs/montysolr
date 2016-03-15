@@ -16,6 +16,7 @@ require.config({
   }()),
 
 
+  //this will be overridden in the compiled file
   waitSeconds: 30,
 
   // Configuration we want to make available to modules of ths application
