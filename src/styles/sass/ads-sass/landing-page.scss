@@ -150,14 +150,13 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 }
 
 .s-landing-main {
-  min-height: 700px;
+  min-height: 615px;
   background: $darker-background;
 
   .s-ads-card {
     @media(min-width: $screen-sm-min) {
       margin: 15px;
     }
-   min-height: 680px;
   }
 }
 
@@ -323,6 +322,9 @@ div[data-field=date] {
   }
 }
 
-
-
+.unobtrusive-landing-page-alert {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid $gray-lighter;
+}
 
