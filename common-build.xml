@@ -255,6 +255,7 @@
 		<fileset dir="${common.dir}/build">
 			<include name = "*solrjars-extracted/*.jar" />
 			<include name = "*solrjars-extracted/solrj-lib/*.jar" />
+			<include name = "*solrjars-extracted/example-lib/ext/*.jar" />
 		</fileset>
 		<!-- montysolr lib jars -->
 		<fileset dir="${common.dir}/lib">

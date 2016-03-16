@@ -755,7 +755,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 					i++;
 					continue;
 				}
-			  idMapping.get(i, ret);
+			  ret = idMapping.get(i);
 			  if (ret.length > 0) {
 			    setter.set(docBase, i, ret.utf8ToString()); // in this case, docbase will always be 0
 			  }

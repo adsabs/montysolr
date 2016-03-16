@@ -9,6 +9,7 @@
 	<classpathentry kind="src" path="contrib/examples/src/test"/>
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry kind="con" path="build/solr-download/apache-solr-4.0.0-SVN/org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-test-framework-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lib/ant-1.8.2.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-standalone-2.7-b1.jar" sourcepath="contrib/adsabs/lib/jython-2.7-b1-sources.jar"/>
@@ -64,6 +65,11 @@
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/stringtemplate-3.2.1.jar"/>
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-3.4.jar"/>
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/antlr-runtime-3.4.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/ext/jcl-over-slf4j-1.7.6.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/ext/jul-to-slf4j-1.7.6.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/ext/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/ext/slf4j-api-1.7.6.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/example-lib/ext/slf4j-log4j12-1.7.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/apache-solr-49"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/antlr-runtime-3.5.jar"/>
@@ -79,7 +85,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-benchmark-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-classification-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-codecs-4.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-core-4.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-core-4.9-SNAPSHOT.jar" sourcepath="/apache-solr-49/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-demo-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-expressions-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-facet-4.9-SNAPSHOT.jar"/>
@@ -89,24 +95,23 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-memory-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-misc-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queries-4.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queryparser-4.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-queryparser-4.9-SNAPSHOT.jar" sourcepath="/apache-solr-49/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-replicator-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-sandbox-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-spatial-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-suggest-4.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-test-framework-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-analysis-extras-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-cell-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-clustering-4.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-core-4.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-core-4.9-SNAPSHOT.jar" sourcepath="/apache-solr-49/solr"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-dataimporthandler-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-dataimporthandler-extras-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-langid-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-map-reduce-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-morphlines-cell-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-morphlines-core-4.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-solrj-4.9-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr-test-framework-4.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-solrj-4.9-SNAPSHOT.jar" sourcepath="/apache-solr-49/solr"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr-test-framework-4.9-SNAPSHOT.jar" sourcepath="/apache-solr-49/solr"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-uima-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr-velocity-4.9-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>

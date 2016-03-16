@@ -160,7 +160,7 @@ class CitationsTransform extends DocTransformer
 				if (citations[i] < 0) // unresolved refs = -1
 					continue;
 				if (idMapping != null) {
-					idMapping.get(citations[i], ret);
+					ret = idMapping.get(citations[i]);
 					data.add(ret.utf8ToString());
 				}
 				else {
@@ -181,7 +181,7 @@ class CitationsTransform extends DocTransformer
 				if (references[i] < 0) // unresolved refs = -1
 					continue;
 				if (idMapping != null) {
-					idMapping.get(references[i], ret);
+					ret = idMapping.get(references[i]);
 					data.add(ret.utf8ToString());
 				}
 				else {

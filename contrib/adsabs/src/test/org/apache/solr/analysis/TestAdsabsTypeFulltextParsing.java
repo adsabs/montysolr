@@ -270,8 +270,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     
     // ticket #318
-    assertQueryEquals(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "title^1.4 all pub"),
-    		"+(title:creation^1.4 | pub:creation | all:creation) +pub:of +pub:a +(title:thesaurus^1.4 | pub:thesaurus | all:thesaurus)", 
+    assertQueryEquals(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "all title^1.4 pub"),
+    		"+(all:creation | pub:creation | title:creation^1.4) +pub:of +pub:a +(all:thesaurus | pub:thesaurus | title:thesaurus^1.4)", 
     		BooleanQuery.class);
     assertQ(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "title^1.4 all pub"), 
     		"//*[@numFound='1']",
@@ -395,7 +395,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // lastly - unfielded phrase
     assertQueryEquals(req("q", "\"modified newtonian dynamics\"", "defType", "aqp", "qf", "title^2.0 all^1.5"), 
-    		"((((title:\"modified newtonian dynamics\" (title:syn::acr::mond title:syn::modified newtonian dynamics)))^2.0) | (((all:\"modified newtonian dynamics\" (all:syn::acr::mond all:syn::modified newtonian dynamics)))^1.5))", 
+    		"((((all:\"modified newtonian dynamics\" (all:syn::acr::mond all:syn::modified newtonian dynamics)))^1.5) | (((title:\"modified newtonian dynamics\" (title:syn::acr::mond title:syn::modified newtonian dynamics)))^2.0))", 
     		DisjunctionMaxQuery.class);
     assertQ(req("q", "\"modified newtonian dynamics\"", "qf", "title^2.0 all^1.5"), 
     		"//*[@numFound='2']",
@@ -527,7 +527,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='4']"
         );
     //setDebug(true);
-    assertQueryEquals(req("q", "=\"Hubble Space Telescope\"", "defType", "aqp", "qf", "title body"), 
+    assertQueryEquals(req("q", "=\"Hubble Space Telescope\"", "defType", "aqp", "qf", "body title"), 
         "(body:\"hubble space telescope\" | title:\"hubble space telescope\")", 
         DisjunctionMaxQuery.class);
   }

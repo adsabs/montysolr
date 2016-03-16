@@ -59,12 +59,12 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	      int[][] data = it.next();
 	      int[] references = data[0];
 		  	if (references != null && references.length > 0) {
-		  		uniqueValueCache.get(paperid, ret);
+		  		ret = uniqueValueCache.get(paperid);
 		  		out.write(ret.utf8ToString());
 		  		out.write("\t");
 		  		first=true;
 		  		for (int luceneDocId: references) {
-			  		uniqueValueCache.get(luceneDocId, ret);
+			  		ret = uniqueValueCache.get(luceneDocId);
 					  if (ret.length > 0) {
 					  	if (!first) {
 					  		out.write("\t");
