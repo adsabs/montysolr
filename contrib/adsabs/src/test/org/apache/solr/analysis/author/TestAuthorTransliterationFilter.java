@@ -46,7 +46,7 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
     AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
     TokenStream stream = factory.create(new TestFilter(tokenizer));
     
-    String[] expected = { "Jeřábková, Tereza", "Jerabkova, Tereza"};
+    String[] expected = { "Jeřábková, Tereza", "Jerhaebkovae, Tereza", "Jerabkova, Tereza"};
     assertTokenStreamContents(stream, expected);
   }
 }

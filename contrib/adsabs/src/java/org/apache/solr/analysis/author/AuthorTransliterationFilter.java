@@ -5,6 +5,7 @@ package org.apache.solr.analysis.author;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import org.apache.lucene.analysis.TokenFilter;
@@ -17,13 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jluker
- * 
  * This class creates different spellings and variations of the
  * author names as they are indexed (it was initially called
  * AuthorAutoSynonymFilter)
- *
  */
+
 public final class AuthorTransliterationFilter extends TokenFilter {
 
   public static final Logger log = LoggerFactory.getLogger(AuthorTransliterationFilter.class);
@@ -33,12 +32,14 @@ public final class AuthorTransliterationFilter extends TokenFilter {
     super(input);
     this.termAtt = addAttribute(CharTermAttribute.class);
     this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
-    this.transliterationStack = new Stack<String>();
+    this.transliterationStack = null;
     this.typeAtt = addAttribute(TypeAttribute.class);
     this.tokenType = tokenType;
+    this.N = 0;
   }
 
-  private Stack<String> transliterationStack;
+  private int N;
+  private List<String> transliterationStack;
   private AttributeSource.State current;
 
   private final CharTermAttribute termAtt;
@@ -52,8 +53,8 @@ public final class AuthorTransliterationFilter extends TokenFilter {
   @Override
   public boolean incrementToken() throws IOException {
 
-    if (this.transliterationStack.size() > 0) {
-      String syn = this.transliterationStack.pop();
+    if (this.N > 0) {
+      String syn = this.transliterationStack.get(--N);
       this.restoreState(this.current);
       this.termAtt.setEmpty();
       this.termAtt.append(syn);
@@ -79,7 +80,8 @@ public final class AuthorTransliterationFilter extends TokenFilter {
     ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(termAtt.toString());
     if (synonyms.size() > 0) {
       //log.debug("variants: " + synonyms);
-      transliterationStack.addAll(synonyms);
+      transliterationStack = synonyms;
+      N = synonyms.size();
       return true;
     }
 
@@ -89,7 +91,8 @@ public final class AuthorTransliterationFilter extends TokenFilter {
   @Override
   public void reset() throws IOException {
     super.reset();
-    transliterationStack.clear();
+    transliterationStack = null;
+    N = 0;
     current = null;
   }
 }

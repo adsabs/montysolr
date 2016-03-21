@@ -224,7 +224,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
       );
 		assertQueryEquals(req("q", "pubdate:2013 foo", 
 		    "defType", "aqp", "qf", "title keyword"), 
-        "+date:[1356998400000 TO 1388534400000} +(title:foo | keyword:foo)", 
+        "+date:[1356998400000 TO 1388534400000} +(keyword:foo | title:foo)", 
         BooleanQuery.class);
 		assertQueryEquals(req("q", "pubdate:2013 title:foo", 
         "defType", "aqp", "qf", "title keyword"), 

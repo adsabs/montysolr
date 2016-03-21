@@ -43,11 +43,11 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertTrue(termAtt.toString().equals("MULLER, BILL"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
@@ -55,11 +55,11 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUller, Bill"));
+    assertTrue(termAtt.toString().equals("MUEller, Bill"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUEller, Bill"));
+    assertTrue(termAtt.toString().equals("MUller, Bill"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     assertFalse(ts.incrementToken());
@@ -124,11 +124,11 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertTrue(termAtt.toString().equals("MULLER, BILL"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
@@ -136,11 +136,11 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUller, Bill"));
+    assertTrue(termAtt.toString().equals("MUEller, Bill"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUEller, Bill"));
+    assertTrue(termAtt.toString().equals("MUller, Bill"));
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     assertFalse(ts.incrementToken());
