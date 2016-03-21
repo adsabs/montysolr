@@ -9,7 +9,7 @@
 	<classpathentry kind="src" path="contrib/examples/src/test"/>
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry kind="con" path="build/solr-download/apache-solr-4.0.0-SVN/org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-test-framework-4.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene-test-framework-4.9-SNAPSHOT.jar" sourcepath="/apache-solr-49/lucene"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/test-framework/lib/ant-1.8.2.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-standalone-2.7-b1.jar" sourcepath="contrib/adsabs/lib/jython-2.7-b1-sources.jar"/>

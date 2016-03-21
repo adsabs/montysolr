@@ -1,6 +1,8 @@
 package org.apache.solr.analysis.author;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Stack;
 
@@ -27,11 +29,11 @@ public final class AuthorQueryVariationsFilter extends TokenFilter {
 		super(input);
 		this.termAtt = addAttribute(CharTermAttribute.class);
 		this.posIncrAtt = addAttribute(PositionIncrementAttribute.class);
-		this.variationStack = new Stack<String>();
+		this.variationStack = new ArrayDeque<String>();
 		this.typeAtt = addAttribute(TypeAttribute.class);
 	}
     
-	private Stack<String> variationStack;
+	private Deque<String> variationStack;
 	private AttributeSource.State current;
 	
 	private final CharTermAttribute termAtt;
@@ -41,7 +43,7 @@ public final class AuthorQueryVariationsFilter extends TokenFilter {
 	@Override
 	public boolean incrementToken() throws IOException {
 		if (this.variationStack.size() > 0) {
-			String syn = this.variationStack.remove(0);
+			String syn = this.variationStack.pop();
 			this.restoreState(this.current);
 			this.termAtt.setEmpty();
 			this.termAtt.append(syn);
@@ -69,7 +71,7 @@ public final class AuthorQueryVariationsFilter extends TokenFilter {
 		      if (s.endsWith(".*") && !s.substring(0,s.length()-2).contains("\\b")) {
 		        s = s.replace(".*", "*");
 		      }
-		    	variationStack.push(s);
+		      variationStack.add(s);
 		    }
 	        return true;
 	    }

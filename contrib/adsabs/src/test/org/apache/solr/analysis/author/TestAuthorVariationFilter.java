@@ -16,7 +16,7 @@ public class TestAuthorVariationFilter extends BaseTokenStreamTestCase {
 		Tokenizer tokenizer = new KeywordTokenizer(reader);
 		AuthorQueryVariationsFilterFactory factory = new AuthorQueryVariationsFilterFactory(new HashMap<String,String>());
 		TokenStream stream = factory.create(tokenizer);
-		String[] expected = { "GOMEZ, HECTOR", "GOMEZ, H", "GOMEZ,", "GOMEZ, HECTOR\\b.*", "GOMEZ, H\\b.*",  };
+		String[] expected = { "GOMEZ, HECTOR", "GOMEZ,", "GOMEZ, HECTOR\\b.*", "GOMEZ, H", "GOMEZ, H\\b.*",  };
 		assertTokenStreamContents(stream, expected);
 	}
 }

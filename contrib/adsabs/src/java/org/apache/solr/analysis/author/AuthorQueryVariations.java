@@ -6,6 +6,7 @@ package org.apache.solr.analysis.author;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class AuthorQueryVariations {
     HashMap<String,String> parsedAuthor = null;
     parsedAuthor = AuthorUtils.parseAuthor(authorString);
 
-    HashSet<String> variations = new HashSet<String>();
+    HashSet<String> variations = new LinkedHashSet<String>();
     if (parsedAuthor == null) {
       variations.add(authorString);
       return variations;
@@ -60,7 +61,7 @@ public class AuthorQueryVariations {
   }
 
   public static HashSet<String> generateNameVariations(HashMap<String,String> parsedAuthor) {
-    HashSet<String> variations = new HashSet<String>();
+    HashSet<String> variations = new LinkedHashSet<String>();
     return generateNameVariations(parsedAuthor, variations);
   }
 
@@ -127,7 +128,7 @@ public class AuthorQueryVariations {
     HashMap<String,String> parsedAuthor = null;
     parsedAuthor = AuthorUtils.parseAuthor(authorString);
 
-    HashSet<String> variations = new HashSet<String>();
+    HashSet<String> variations = new LinkedHashSet<String>();
     if (parsedAuthor == null) {
       variations.add(authorString);
       return variations;
@@ -136,7 +137,7 @@ public class AuthorQueryVariations {
   }
 
   public static HashSet<String> generateSynonymVariations(HashMap<String,String> parsedAuthor) {
-    HashSet<String> variations = new HashSet<String>();
+    HashSet<String> variations = new LinkedHashSet<String>();
     return generateSynonymVariations(parsedAuthor, variations);
   }
 
