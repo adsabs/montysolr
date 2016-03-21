@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,8 @@ public class SpanConverter {
 			return convertPhraseToSpan(container);
 		} else if (q instanceof BooleanQuery) {
 			return convertBooleanToSpan(container);
+		} else if (q instanceof RegexpQuery) {
+		  return new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q);
 		} else {
 			
 				SpanQuery wrapped = wrapNonConvertible(container);
@@ -71,7 +74,7 @@ public class SpanConverter {
 		}
 	}
 
-	public SpanQuery wrapNonConvertible(SpanConverterContainer container) {
+  public SpanQuery wrapNonConvertible(SpanConverterContainer container) {
 		if (wrapNonConvertible) {
 			return doWrapping(container);
 		}

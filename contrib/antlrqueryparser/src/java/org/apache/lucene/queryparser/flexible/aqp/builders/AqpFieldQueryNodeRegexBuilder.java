@@ -17,7 +17,7 @@ public class AqpFieldQueryNodeRegexBuilder implements StandardQueryBuilder {
 
   public Query build(QueryNode queryNode) throws QueryNodeException {
     FieldQueryNode fieldNode = (FieldQueryNode) queryNode;
-
+    
     return new RegexpQuery(new Term(fieldNode.getFieldAsString(),
         fieldNode.getTextAsString()));
 

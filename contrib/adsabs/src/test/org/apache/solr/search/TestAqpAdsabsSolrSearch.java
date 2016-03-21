@@ -298,6 +298,20 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testSpecialCases() throws Exception {
 	  
+    // #30 - first_author and author:"^fooo" give diff results
+	  assertQueryEquals(req("defType", "aqp", 
+        "q", "first_author:\"kurtz, m j\""
+        ), 
+        "first_author:kurtz, m j first_author:kurtz, m j* first_author:/kurtz, m[^\\s]+ j/ first_author:/kurtz, m[^\\s]+ j .*/ first_author:kurtz, m first_author:kurtz,", 
+        BooleanQuery.class
+      );
+    assertQueryEquals(req("defType", "aqp", 
+        "q", "author:\"^kurtz, m j\""
+        ), 
+        "spanPosRange(spanOr([author:kurtz, m j, SpanMultiTermQueryWrapper(author:kurtz, m j*), SpanMultiTermQueryWrapper(author:/kurtz, m[^\\s]+ j/), SpanMultiTermQueryWrapper(author:/kurtz, m[^\\s]+ j .*/), author:kurtz, m, author:kurtz,]), 0, 1)", 
+        SpanPositionRangeQuery.class
+      );
+	    
 	  // strange effect of paranthesis - github #23; we want to see this even (inside brackets)
 	  // +(
 	  //   (
@@ -315,15 +329,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  
 	  //setDebug(true);
 	  assertQueryEquals(req("defType", "aqp", 
-	      "q", "stephen murray author_facet_hier:\"0/Murray, S\"",
-	      "qf", "abstract title",
-	      "aqp.unfielded.tokens.strategy", "multiply",
-        "aqp.unfielded.tokens.new.type", "simple",
-        "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
-	      ), 
+          "q", "stephen murray author_facet_hier:\"0/Murray, S\"",
+          "qf", "abstract title",
+          "aqp.unfielded.tokens.strategy", "multiply",
+          "aqp.unfielded.tokens.new.type", "simple",
+          "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
+          ), 
         "+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S", 
         BooleanQuery.class
-    );
+      );
 	  
 	  assertQueryEquals(req("defType", "aqp", 
         "q", "((stephen murray)) author_facet_hier:\"0/Murray, S\"",
@@ -334,7 +348,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         ), 
         "+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S", 
         BooleanQuery.class
-    );
+      );
 	  assertQueryEquals(req("defType", "aqp", 
         "q", "=(stephen murray) author_facet_hier:\"0/Murray, S\"",
         "qf", "title abstract",
@@ -344,7 +358,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         ), 
         "+(abstract:stephen | title:stephen) +(abstract:murray | title:murray) +author_facet_hier:0/Murray, S", 
         BooleanQuery.class
-    );
+      );
 	  
 	  
 		// virtual fields (their definition is in the solrconfig.xml)
@@ -400,12 +414,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         SecondOrderQuery.class);
 		
 		
-    // trendy() - what people read, it reads data from index
+	    // trendy() - what people read, it reads data from index
 		assertU(addDocs("author", "muller", "reader", "bibcode1", "reader", "bibcode2"));
-    assertU(addDocs("author", "muller", "reader", "bibcode2", "reader", "bibcode4"));
-    assertU(addDocs("author", "muller", "reader", "bibcode5", "reader", "bibcode2"));
-    assertU(commit());
-    assertQueryEquals(req("defType", "aqp", "q", "trending(author:muller)"), 
+		assertU(addDocs("author", "muller", "reader", "bibcode2", "reader", "bibcode4"));
+		assertU(addDocs("author", "muller", "reader", "bibcode5", "reader", "bibcode2"));
+		assertU(commit());
+		assertQueryEquals(req("defType", "aqp", "q", "trending(author:muller)"), 
         "like:bibcode1 bibcode2 bibcode2 bibcode4 bibcode5 bibcode2", 
         MoreLikeThisQueryFixed.class);
     
@@ -434,14 +448,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 		
 		
-		// old positional search
-	  // TODO: check for the generated warnings
+        // old positional search
+        // TODO: check for the generated warnings
 		
 		assertQueryEquals(req("defType", "aqp", "q","^two"),
 				"spanPosRange(spanOr([author:two,, SpanMultiTermQueryWrapper(author:two,*)]), 0, 1)", 
 				SpanPositionRangeQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q","one ^two, j k"), 
-				"+all:one +spanPosRange(spanOr([author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), EmptySpanQuery(author:/two, j[^\\s]+ k/), EmptySpanQuery(author:/two, j[^\\s]+ k .*/), author:two, j, author:two,]), 0, 1)",
+				"+all:one +spanPosRange(spanOr([author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), SpanMultiTermQueryWrapper(author:/two, j[^\\s]+ k/), SpanMultiTermQueryWrapper(author:/two, j[^\\s]+ k .*/), author:two, j, author:two,]), 0, 1)",
 				BooleanQuery.class);
 		assertQueryEquals(req("defType", "aqp", "q","one \"^phrase, author\"", "qf", "title author"),
 				"+(((author:one, author:one,*)) | title:one) +spanPosRange(spanOr([author:phrase, author, SpanMultiTermQueryWrapper(author:phrase, author *), author:phrase, a, SpanMultiTermQueryWrapper(author:phrase, a *), author:phrase,]), 0, 1)",
@@ -450,7 +464,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		// author expansion can generate regexes, so we should deal with them (actually we ignore them)
 		assertQueryEquals(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A. K. B.\", 1)"), 
-				"spanPosRange(spanOr([author:accomazzi, a k b, SpanMultiTermQueryWrapper(author:accomazzi, a k b*), EmptySpanQuery(author:/accomazzi, a[^\\s]+ k[^\\s]+ b/), EmptySpanQuery(author:/accomazzi, a[^\\s]+ k[^\\s]+ b .*/), author:accomazzi, a, author:accomazzi,]), 0, 1)", 
+				"spanPosRange(spanOr([author:accomazzi, a k b, SpanMultiTermQueryWrapper(author:accomazzi, a k b*), SpanMultiTermQueryWrapper(author:/accomazzi, a[^\\s]+ k[^\\s]+ b/), SpanMultiTermQueryWrapper(author:/accomazzi, a[^\\s]+ k[^\\s]+ b .*/), author:accomazzi, a, author:accomazzi,]), 0, 1)", 
 				SpanPositionRangeQuery.class);
 		
 		

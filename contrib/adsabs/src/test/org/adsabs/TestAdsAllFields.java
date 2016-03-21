@@ -245,7 +245,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertU(adoc("id", "25", "bibcode", "b25", "title", "datetest",
 				"pubdate", "1977-01-01", "date", "1977-01-01T00:30:00Z"));
 
-
+		assertU(adoc("id", "50", "bibcode", "b50", "author", "Bond, E J"));
+		assertU(adoc("id", "51", "bibcode", "b51", "author", "Bond, Edwin James"));
+		assertU(adoc("id", "52", "bibcode", "b52", "author", "Bond, E James"));
+		assertU(adoc("id", "53", "bibcode", "b53", "author", "Bond, Edwin J"));
+		assertU(adoc("id", "54", "bibcode", "b54", "author", "Bond, EJames"));
+		assertU(adoc("id", "55", "bibcode", "b55", "author", "Bond, E"));
+		assertU(adoc("id", "56", "bibcode", "b56", "author", "Bond, J"));
+		assertU(adoc("id", "57", "bibcode", "b57", "author", "Bond,"));
 
 		assertU(commit("waitSearcher", "true"));
 
@@ -1045,6 +1052,44 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "doctype:article"),
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='100']");
+    
+    /**
+     * Author search must give the same results if we use
+     * pos() or ^author
+     */
+    assertQ(req("q", "author:bond"),
+        "//*[@numFound='8']"
+    );
+    assertQ(req("q", "author:\"^bond\""),
+        "//*[@numFound='8']"
+    );
 
+    assertQ(req("q", "author:\"bond, edwin james\""),
+        "//*[@numFound='6']",
+        "//doc/int[@name='recid'][.='50']",
+        "//doc/int[@name='recid'][.='51']",
+        "//doc/int[@name='recid'][.='52']",
+        "//doc/int[@name='recid'][.='53']",
+        "//doc/int[@name='recid'][.='55']",
+        "//doc/int[@name='recid'][.='57']"
+    );
+    assertQ(req("q", "author:\"^bond, edwin james\""),
+        "//*[@numFound='6']",
+        "//doc/int[@name='recid'][.='50']",
+        "//doc/int[@name='recid'][.='51']",
+        "//doc/int[@name='recid'][.='52']",
+        "//doc/int[@name='recid'][.='53']",
+        "//doc/int[@name='recid'][.='55']",
+        "//doc/int[@name='recid'][.='57']"
+    );
+    assertQ(req("q", "pos(author:\"bond, edwin james\", 1, 2)"),
+        "//*[@numFound='6']",
+        "//doc/int[@name='recid'][.='50']",
+        "//doc/int[@name='recid'][.='51']",
+        "//doc/int[@name='recid'][.='52']",
+        "//doc/int[@name='recid'][.='53']",
+        "//doc/int[@name='recid'][.='55']",
+        "//doc/int[@name='recid'][.='57']"
+    );
 	}
 }
