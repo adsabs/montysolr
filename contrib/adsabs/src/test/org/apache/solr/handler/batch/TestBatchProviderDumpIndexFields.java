@@ -32,9 +32,9 @@ public class TestBatchProviderDumpIndexFields extends BatchProviderTest {
 		req.close();
 		
 		checkFile(tmpDir + "/00000", 
-				"{\"id\":[\"1\"],\"floatf\":[\"1.0\"],\"title\":[\"green\",\"wall\"]},",
-				"{\"id\":[\"6\"],\"floatf\":[\"1.0\"],\"title\":[\"for\",\"peace\"]},",
-				"{\"id\":[\"8\"],\"floatf\":[\"1.0\"],\"title\":[\"for\",\"peace\"]}]"
+				"{\"id\":[\"1\"],\"title\":[\"green\",\"wall\"],\"floatf\":[\"1.0\"]},",
+				"{\"id\":[\"6\"],\"title\":[\"for\",\"peace\"],\"floatf\":[\"1.0\"]},",
+				"{\"id\":[\"8\"],\"title\":[\"for\",\"peace\"],\"floatf\":[\"1.0\"]}]"
 		);
 		
 		req = req("jobid", "00000", "#workdir", tmpDir, "q", "title:wall OR title:peace", 
