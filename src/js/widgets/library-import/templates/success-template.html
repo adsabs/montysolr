@@ -1,0 +1,25 @@
+<h4>Success!</h4>
+{{#if created}}
+<div>
+    The following libraries were successfully imported for the first time:
+    <ul>
+        {{#each created}}
+        <li>{{this}}</li>
+        {{/each}}
+    </ul>
+
+</div>
+{{/if}}
+
+
+{{#if updated}}
+    <div>
+
+        The following libraries were updated or merged:
+        <ul>
+            {{#each updated}}
+            <li>{{this}}</li>
+            {{/each}}
+        </ul>
+    </div>
+{{/if}}

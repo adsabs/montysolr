@@ -410,6 +410,39 @@ define([
 
       },
 
+      importLibraries : function(service){
+
+        var endpoint, d = $.Deferred(), that = this;
+        if (service === "classic"){
+          endpoint = ApiTargets.LIBRARY_IMPORT_CLASSIC_TO_BBB;
+        }
+        else if (service === "twopointoh"){
+          endpoint = ApiTargets.LIBRARY_IMPORT_ADS2_TO_BBB;
+        }
+        else {
+          console.error("didn't recognize library endpoint! should be one of 'classic' or 'twopointoh' ");
+          return
+        }
+
+        this.getBeeHive().getService("Api").request(new ApiRequest({
+          target: endpoint,
+          options: {
+            done: function (data) {
+             d.resolve.apply(undefined,[].slice.apply(arguments));
+              //re-fetch metadata, since new libs were imported
+              that._fetchAllMetadata();
+            },
+            fail: function (data) {
+              d.reject.apply(undefined,[].slice.apply(arguments));
+            }
+          }
+        }));
+
+        return d.promise();
+
+      },
+
+
       hardenedInterface: {
         getAllMetadata : "returns json list of libraries",
         getLibraryData : "get library records + metadata",
@@ -423,6 +456,8 @@ define([
         updateLibraryContents : "updateLibraryContents",
 //      updateLibraryPermissions : "updateLibraryPermissions",
         updateLibraryMetadata : "updateLibraryMetadata",
+
+        importLibraries : "importLibraries"
       }
 
     });

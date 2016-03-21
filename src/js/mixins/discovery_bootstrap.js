@@ -187,7 +187,6 @@ define([
       if (!navigator)
         complain('services.Navigator');
 
-
       var masterPageManager = app.getObject('MasterPageManager');
       if (!masterPageManager)
         complain('objects.MasterPageManager');

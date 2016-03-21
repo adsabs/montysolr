@@ -29,6 +29,7 @@ define([], function() {
       '/widgets/graphics_widgets.spec.js',
       '/widgets/libraries_all.spec.js',
       '/widgets/library_individual.spec.js',
+      '/widgets/library_import_widget.spec.js',
       '/widgets/list_of_things_expanding.spec.js',
       '/widgets/list_of_things_widget.spec.js',
       '/widgets/lot_derivates.spec.js',
@@ -51,7 +52,7 @@ define([], function() {
       '/widgets/user_settings_widget.spec.js',
       '/widgets/wordcloud_widget.spec.js',
       '/widgets/year_graph_facet_widget.spec.js',
-      '/widgets/hello_world_widget.spec.js',
+      '/widgets/hello_world_widget.spec.js'
   ];
   return tests;
 });

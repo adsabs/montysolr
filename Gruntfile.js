@@ -80,6 +80,7 @@ module.exports = function(grunt) {
     // Task to minify modules/css; it should run only after files were
     // copied over to the 'dist' folder
     requirejs: {
+      waitSeconds: 0,
       baseUrl: 'dist/js', // this is needed just for the 'stupid' list task
       release_individual: {
         options: {
@@ -323,11 +324,6 @@ module.exports = function(grunt) {
       styles: {
         files: ['./src/styles/sass/ads-sass/*.scss'], // which files to watch
         tasks: ['sass', 'autoprefixer', 'express:dev', 'watch:styles'],
-        options: {
-          livereload: {
-            port : 35279
-          }
-        }
       }
     },
 
@@ -651,7 +647,7 @@ module.exports = function(grunt) {
             "mixins/discovery_bootstrap.js": 1,
             "widgets/navbar/widget.js": 53,
             "widgets/success/view.js": 60,
-            "components/library_controller.js" : 75,
+            "components/library_controller.js" : 74,
             "widgets/wordcloud/widget.js": 78,
             "components/analytics.js": 71,
             "wraps/landing_page_manager/landing_page_manager" : 48,

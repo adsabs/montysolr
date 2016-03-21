@@ -121,13 +121,23 @@ define([
           this.route = "#paper-form";
         });
 
+        this.set("LibraryImport", function(page,data){
+          if (redirectIfNotSignedIn())
+            return;
+          app.getObject('MasterPageManager').show("SettingsPage",
+              ['LibraryImport', "UserNavbarWidget"]);
+
+          this.route = "#user/settings/library-import";
+          publishPageChange("settings-page");
+
+        });
+
 
         //request for the widget
         this.set("UserSettings", function(page, data){
           if (redirectIfNotSignedIn())
             return;
-          var subView = data.subView || "token";
-          //set left hand nav panel correctly and tell the view what to show
+
           app.getObject('MasterPageManager').show("SettingsPage",
             ['UserSettings', "UserNavbarWidget"]);
           app.getWidget("SettingsPage")

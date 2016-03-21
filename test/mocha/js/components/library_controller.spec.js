@@ -36,7 +36,7 @@ define([
     it("should offer a hardened interface to widgets with the relevant library CRUD operations", function(){
 
       var l = new LibraryController();
-
+      
       expect(_.keys(l.getHardenedInstance())).to.eql([
         "getAllMetadata",
         "getLibraryData",
@@ -46,6 +46,7 @@ define([
         "deleteLibrary",
         "updateLibraryContents",
         "updateLibraryMetadata",
+        "importLibraries",
         "__facade__",
         "mixIn"
       ]);
@@ -358,6 +359,51 @@ define([
       expect(bibs).to.eql( ["1", "2", "3"] );
 
     });
+
+
+    it("should have an importLibraries function to import from classic or 2.0", function(){
+
+      var l = new LibraryController();
+
+      var minsub = new (MinSub.extend({
+        request: function() {
+          return {some: 'foo'}
+        }
+      }))({verbose: false});
+
+      var requestSpy = sinon.spy(
+          function(){
+            arguments[0].toJSON().options.done();
+          }
+      )
+
+      var fakeApi = {
+        getHardenedInstance : function(){return this},
+        request : requestSpy
+      };
+
+      minsub.beehive.removeService("Api");
+      minsub.beehive.addService("Api", fakeApi);
+
+      var fetchSpy = sinon.stub(l, "_fetchAllMetadata");
+
+      l.activate(minsub.beehive.getHardenedInstance());
+
+      var test;
+
+      l.importLibraries("classic").done(function(){
+        test = "foo"
+      });
+
+      expect(requestSpy.args[0][0].get("target")).to.eql("biblib/classic");
+
+      expect(fetchSpy.callCount).to.eql(1);
+
+      expect(test).to.eql("foo");
+
+
+
+    })
   });
 
 })
