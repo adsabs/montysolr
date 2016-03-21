@@ -64,21 +64,34 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
 .s-landing-tabs {
 
-  z-index: 2;
-  text-align: center;
-  height: 99px;
-  position: relative;
-  top: -45px;
+  @media (min-width: $screen-sm-min){
+    height: 99px;
+    position: relative;
+    top: -45px;
+    z-index: 2;
+    text-align: center;
+
+  }
 
   .s-tab {
-    width: 120px;
+    width: 100px;
     font-size: 18px;
-    font-size: 22px;
     border-bottom: 8px transparent;
-    a {
-      width: 110px;
-      text-align: center;
+
+    @media (min-width: $screen-sm-min){
+     font-size: 22px;
+      width: 120px;
+
     }
+
+    a {
+      width: 90px;
+      text-align: center;
+      @media (min-width: $screen-sm-min){
+        width: 110px;
+      }
+    }
+
   }
 
   .s-tab:not(.active){
@@ -88,11 +101,18 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   }
 
   svg {
-    max-height: 75px;
-    position: relative;
-    top: 8px;
-    transition : transform .5s, fill .5s;
-    width: 120px;
+
+    display: none;
+
+    @media (min-width: $screen-sm-min){
+      display:block;
+      max-height: 75px;
+      position: relative;
+      top: 8px;
+      transition : transform .5s, fill .5s;
+      width: 120px;
+
+    }
 
   }
 
