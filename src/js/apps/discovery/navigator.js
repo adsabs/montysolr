@@ -127,7 +127,12 @@ define([
           app.getObject('MasterPageManager').show("SettingsPage",
               ['LibraryImport', "UserNavbarWidget"]);
 
-          this.route = "#user/settings/library-import";
+          app.getWidget("SettingsPage")
+              .done(function(widget) {
+                widget.setActive("LibraryImport");
+              });
+
+          this.route = "#user/settings/libraryimport";
           publishPageChange("settings-page");
 
         });
