@@ -4,7 +4,7 @@
     The following libraries were successfully imported for the first time:
     <ul>
         {{#each created}}
-        <li>{{this}}</li>
+        <li><a href="{{this.link}}">{{this.name}}</a></li>
         {{/each}}
     </ul>
 
@@ -18,7 +18,7 @@
         The following libraries were updated or merged:
         <ul>
             {{#each updated}}
-            <li>{{this}}</li>
+            <li><a href="{{this.link}}">{{this.name}}</a></li>
             {{/each}}
         </ul>
     </div>

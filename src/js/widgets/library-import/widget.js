@@ -151,10 +151,10 @@ define([
             .done(function(data){
               var successData = {};
               successData.updated = data.filter(function(d){return d.action === "updated"})
-                                        .map(function(d){return d.name});
+                                        .map(function(d){return {name : d.name, link : "#user/libraries/" + d.library_id } });
 
               successData.created = data.filter(function(d){return d.action === "created"})
-                                        .map(function(d){return d.name});
+                                        .map(function(d){return {name : d.name, link : "#user/libraries/" + d.library_id } });
                   view.model.set({
                     successMessage: SuccessTemplate(successData),
                     errorMessage: ""
