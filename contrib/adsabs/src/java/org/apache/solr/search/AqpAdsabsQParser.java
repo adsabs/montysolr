@@ -1,6 +1,8 @@
 package org.apache.solr.search;
 
+import java.text.FieldPosition;
 import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
@@ -29,7 +31,6 @@ import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.handler.AdsConfigHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.DateField;
 import org.apache.solr.schema.IndexSchema;
@@ -212,7 +213,7 @@ public class AqpAdsabsQParser extends QParser {
 
 		if (namedParams.containsKey("aqp.floatFields")) {
       for (String f: namedParams.get("aqp.floatFields").split(",")) {
-        ncm.put(f, new NumericConfig(8, NumberFormat.getNumberInstance(Locale.US), NumericType.FLOAT));
+        ncm.put(f, new NumericConfig(8, new MaxNumberFormat(Float.MAX_VALUE), NumericType.FLOAT));
       }
     }
 
@@ -221,19 +222,58 @@ public class AqpAdsabsQParser extends QParser {
 		      ? namedParams.get("aqp.dateFormat") : "yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
 		  sdf.setTimeZone(DateField.UTC);
       for (String f: namedParams.get("aqp.dateFields").split(",")) {
-        ncm.put(f, new NumericConfig(6, new NumberDateFormat(sdf), NumericType.LONG));
+        ncm.put(f, new NumericConfig(6, new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), NumericType.LONG));
       }
     }
 		
     // when precision step=0 (ie use the default solr value), then it is Integer.MAX_VALUE
 		if (namedParams.containsKey("aqp.intFields")) {
       for (String f: namedParams.get("aqp.intFields").split(",")) {
-        ncm.put(f, new NumericConfig(Integer.MAX_VALUE, NumberFormat.getNumberInstance(Locale.US), NumericType.INT));
+        ncm.put(f, new NumericConfig(Integer.MAX_VALUE, new MaxNumberFormat(Integer.MAX_VALUE), NumericType.INT));
       }
     }
 		
 		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS).putAll(defaultConfig.virtualFields);
 		
+	}
+	
+
+  /**
+	 * Internal class that allows us to accept '*' (lucene's way of saying 'anything')
+	 */
+	private class MaxNumberFormat extends NumberFormat {
+	  private static final long serialVersionUID = -407706279343648005L;
+    private NumberFormat parser = null;
+    private Number max = null;
+    
+    public MaxNumberFormat(Number max) {
+      this(NumberFormat.getNumberInstance(Locale.US), max);
+    }
+	  public MaxNumberFormat(NumberFormat parser, Number max) {
+	    this.parser = parser;
+	    this.max = max;
+	  }
+	  
+    
+    @Override
+    public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+      return parser.format(number, toAppendTo, pos);
+    }
+
+    @Override
+    public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+      return parser.format(number, toAppendTo, pos);
+    }
+
+    @Override
+    public Number parse(String source, ParsePosition parsePosition) {
+      if (source.contains("*")) {
+        parsePosition.setIndex(1);
+        return max;
+      }
+      return parser.parse(source, parsePosition);
+    }
+	  
 	}
 
 	public Query parse() throws SyntaxError {

@@ -22,6 +22,7 @@ package org.adsabs;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -174,6 +175,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"cite_read_boost\": 0.52" +
 
 				", \"classic_factor\": 5002" +
+				", \"citation_count\": 10" +
 				", \"simbid\": [5, 3000001]" +
 				", \"reader\": [\"abaesrwersdlfkjsd\", \"asfasdflkjsdfsldj\"]" +
 
@@ -276,6 +278,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 		assertQ(req("q", "recid:100"), "//*[@numFound='1']");
 		assertQ(req("q", "recid:0100"), "//*[@numFound='1']");
+		assertQ(req("q", "recid:[99 TO 100]"), "//*[@numFound='1']");
+		assertQ(req("q", "recid:[99 TO *]"), "//*[@numFound>='1']");
 
 
 		/*
@@ -803,7 +807,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "read_count:0.0"),
 				"//doc/int[@name='recid'][.='101']",
 				"//*[@numFound='1']");
-
+		assertQ(req("q", "read_count:[0.0 TO *]"),
+        "//doc/int[@name='recid'][.='101']",
+        "//*[@numFound>='4']");
 
 		/*
 		 * cite_read_boost
@@ -840,7 +846,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='104']",
 				"//doc/int[@name='recid'][.='101']",
 				"//*[@numFound='2']");
-
+		assertQ(req("q", "cite_read_boost:[0.0 TO *]"),
+        "//*[@numFound>='5']");
 
 		/*
 		 * classic_factor
@@ -866,6 +873,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='3']"
 		);
 
+		assertQ(req("q", "classic_factor:[0 TO *]", "indent", "true"),
+        "//*[@numFound>='3']"
+    );
 
 
 		/*
@@ -880,7 +890,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
 		);
-
+		assertQ(req("q", "simbid:[0 TO *]"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
 
 		/*
 		 * simbtype - simbad object types, added 30/12/14
@@ -919,6 +932,38 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']"
 		);
 
+		/*
+		 * citation_count
+		 */
+		
+		assertQ(req("q", "citation_count:[0 TO 10]"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		assertQ(req("q", "citation_count:[0 TO *]"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+
+		
+		/*
+		 * indexstamp
+		 */
+		assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00\" TO *]"), 
+		    "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound>='20']"
+    );
+		
+		
+		/*
+     * date
+     */
+    assertQ(req("q", "date:[\"2012-10-01T00:00:00\" TO *]"), 
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound>='1']"
+    );
+    
+		
 		/*
 		 * reference
 		 */
