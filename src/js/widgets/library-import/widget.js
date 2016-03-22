@@ -116,13 +116,18 @@ define([
                 type: "POST",
                 data: data,
                 done: function (data) {
-                  view.model.set(data);
+                  view.model.set(data, {silent : true});
+                  view.model.trigger("change");
                 },
                 fail : function(data){
                   view.model.set({
                     successMessage: "",
                     errorMessage: data.responseJSON.error
-                  });
+                  }, {silent : true});
+                  view.model.trigger("change");
+                  //doing it this way (silent then trigger change)
+                  // so that user can close the alert and a new version of the
+                  //same alert can later still be shown if necessary
                 }
               }
             }));
@@ -155,21 +160,25 @@ define([
 
               successData.created = data.filter(function(d){return d.action === "created"})
                                         .map(function(d){return {name : d.name, link : "#user/libraries/" + d.library_id } });
-                  view.model.set({
+              view.model.set({
                     successMessage: SuccessTemplate(successData),
                     errorMessage: ""
                   }, {silent : true});
+
               view.model.trigger("change");
               //doing it this way so that user can close the alert and a new version of the
               //same alert can still be shown if necessary
 
             })
             .fail(function(){
+
               view.model.set({
                 successMessage: "",
                 errorMessage: "There was a problem and libraries were not imported."
               }, {silent:true});
+
               view.model.trigger("change");
+
             });
 
       }
