@@ -313,13 +313,15 @@ public class AqpANTLRNode extends QueryNodeImpl {
     List<QueryNode> children = getChildren();
     if (children != null) {
       for (QueryNode child : children) {
-        AqpANTLRNode n = (AqpANTLRNode) child;
-        if (n.getTokenLabel().equals(tokenName)) {
-          return level+1;
+        if (child instanceof AqpANTLRNode) {
+          AqpANTLRNode n = (AqpANTLRNode) child;
+          if (n.getTokenLabel().equals(tokenName)) {
+            return level+1;
+          }
+          int nl = n.hasTokenName(tokenName, level+1);
+          if (nl > level+1)
+          	return nl;
         }
-        int nl = n.hasTokenName(tokenName, level+1);
-        if (nl > level+1)
-        	return nl;
       }
     }
     return level;

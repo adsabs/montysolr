@@ -298,6 +298,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 	public void testSpecialCases() throws Exception {
 	  
+	  // nested functions should parse well: citations(author:"^kurtz")
+    assertQueryEquals(req("defType", "aqp", "q", "citations(author:\"^kurtz\")"), 
+        "SecondOrderQuery(spanPosRange(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)]), 0, 1), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))", 
+        SecondOrderQuery.class);
+    
+    assertQueryEquals(req("defType", "aqp", "q", "citations(citations(author:\"^kurtz\"))"), 
+        "SecondOrderQuery(SecondOrderQuery(spanPosRange(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)]), 0, 1), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache)), filter=null, collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+        SecondOrderQuery.class);
+    
     // #30 - first_author and author:"^fooo" give diff results
 	  assertQueryEquals(req("defType", "aqp", 
         "q", "first_author:\"kurtz, m j\""
