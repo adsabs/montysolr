@@ -130,7 +130,7 @@ require.config({
 
         IndividualLibraryWidget : 'js/widgets/library_individual/widget',
         AllLibrariesWidget : 'js/widgets/libraries_all/widget',
-        LibraryImport : 'js/widgets/library-import/widget'
+        LibraryImport : 'js/widgets/library_import/widget'
 
       },
       plugins: {}
