@@ -1,5 +1,5 @@
 define([
-'js/widgets/library-import/widget',
+'js/widgets/library_import/widget',
  'js/bugutils/minimal_pubsub',
 'js/components/api_targets'
 
