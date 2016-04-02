@@ -63,9 +63,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
       it("should show an appropriate default page in the case that the bibcode isn't found", function(){
 
         var aw = new AbstractWidget();
-
         aw.activate(minsub.beehive.getHardenedInstance());
-
         $("#test").append(aw.render().el);
 
         expect($("article").text().trim().replace(/\s{2}/gi, "")).to.eql("Abstract Not FoundNo valid abstract selected for retrieval or abstract not yet indexed in ADS.")
@@ -175,6 +173,37 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
       });
 
+      it("should completely clear it's (single) model before inserting the next page's data", function(){
+        var aw = new AbstractWidget();
+
+        aw._docs =  {
+          1 : { field1 : 'boo', field2 : 'goo'},
+          2: { field1 : 'boo2' }
+        };
+
+        $("#test").append(aw.render().el);
+
+        aw.displayBibcode('1');
+
+        expect(aw.model.toJSON()).to.eql({
+          "field1": "boo",
+          "field2": "goo"
+        });
+
+        aw.displayBibcode('2');
+
+        expect(aw.model.toJSON()).to.eql({
+          "field1": "boo2",
+        });
+
+
+
+
+
+
+      });
+
+
       it("should populate the document head with  highwire-style metatags + trigger events to inform citation managers of update", function(){
         var aw = new AbstractWidget();
         aw.activate(minsub.beehive.getHardenedInstance());
@@ -188,7 +217,6 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         document.addEventListener('ZoteroItemUpdated', function(){fired = true}, false);
 
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
-
 
         expect(fired).to.be.true;
 
@@ -219,12 +247,9 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
           }
         ]);
 
-
       });
 
-
     });
-
 
 
 

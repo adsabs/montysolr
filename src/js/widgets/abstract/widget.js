@@ -205,7 +205,11 @@ define([
 
         var lowerCaseBibcode = bibcode.toLowerCase();
 
+        //wipe out the former values, because this new set of data
+        // might not have every key
+        this.model.clear({silent : true});
         this.model.set(this._docs[lowerCaseBibcode]);
+
         this._current = lowerCaseBibcode;
         // let other widgets know details
         var c = this._docs[lowerCaseBibcode]["[citations]"];
