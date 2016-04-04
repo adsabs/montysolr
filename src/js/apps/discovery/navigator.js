@@ -138,40 +138,33 @@ define([
         });
 
 
-        //request for the widget
-        this.set("UserSettings", function(page, data){
-          if (redirectIfNotSignedIn())
-            return;
+        function settingsPreferencesView (widgetName, defaultView) {
 
-          app.getObject('MasterPageManager').show("SettingsPage",
-            ['UserSettings', "UserNavbarWidget"]);
-          app.getWidget("SettingsPage")
-           .done(function(widget) {
-             widget.setActive("UserSettings",  subView);
-           });
+          return function(page, data) {
+            if (redirectIfNotSignedIn())  return;
 
-          this.route = "#user/settings/"+subView;
-          publishPageChange("settings-page");
+            var subView = data.subView || defaultView;
+            if (!subView) console.error("no subview or default view provided /" +
+                "to the navigator function!");
 
-        });
+            app.getObject('MasterPageManager').show("SettingsPage",
+                [widgetName, "UserNavbarWidget"]);
 
-        //request for the widget
-        this.set("UserPreferences", function(page, data){
-          if (redirectIfNotSignedIn())
-            return;
-          var subView = data.subView || "librarylink";
-          //set left hand nav panel correctly and tell the view what to show
-          app.getObject('MasterPageManager').show("SettingsPage",
-            ['UserPreferences', "UserNavbarWidget"]);
-          app.getWidget("SettingsPage").done(function(widget) {
-              widget.setActive("UserPreferences", subView);
+            app.getWidget("SettingsPage").done(function(widget){
+              widget.setActive(widgetName,  subView);
             });
 
-          this.route = "#user/settings/" + subView;
+            this.route =  "#user/settings/" + subView;
+            publishPageChange("settings-page");
+          }
 
-          publishPageChange("settings-page");
+        }
 
-        });
+        //request for the widget
+        this.set("UserSettings", settingsPreferencesView("UserSettings", undefined));
+
+        //request for the widget
+        this.set("UserPreferences", settingsPreferencesView("UserPreferences", "librarylink"));
 
         this.set("AllLibrariesWidget", function(widget, subView){
 
