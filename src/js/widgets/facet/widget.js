@@ -198,31 +198,11 @@ define([
           }
         }
 
-        // for the first level display only (nested levels are triggered through toggleChildren)
-        //if (paginator.getCycle() <= 1 && this.view === view) {
-        //  view.displayMore(this.view.displayNum);
-        //}
-
         // with facets, it is hard to decide whether there is more data waiting to be fetched
         if (facetCollection.length < view.displayNum) {
           view.disableShowMore();
         }
         else {
-          // this assumes facets are exclusive, ie their counts sum up to the total
-          //if (info.numFound > 0) {
-          //  // count the number of all facets we already have
-          //  var total = 0;
-          //  collection.each(function(model) {
-          //    total += model.attributes.count;
-          //  });
-          //  if (total < info.numFound) {
-          //    view.enableShowMore();
-          //  }
-          //  else {
-          //    view.disableShowMore();
-          //  }
-          //}
-
           view.enableShowMore();
         }
       },
