@@ -43,15 +43,21 @@ define([
     // Helper function to update facets, replacing the SIMBAD identifier with
     // the associated SIMBAD canonical object name in the facet entry 'title' attribute
     widget.updater = function(facet) {
-      var v = facet.value;
+      // if facet comes from widget.collection.models, value follows from attributes (facet.attributes.value)
+      if ('attributes' in facet) {
+        var fct = facet.attributes;
+      } else {
+        var fct = facet;
+      }
+      var v = fct.value;
       if (v.charAt(0)==='1') {
         var vv = v.split("/");
         var objId = vv[vv.length-1];
       }
-      var title = facet.title;
+      var title = fct.title;
       var oname = widget._cache.getIfPresent(objId);
       if (objId && objId === title && oname) {
-        facet.title = oname;
+        fct.title = oname;
       };
     };
     // Main facet callback function
@@ -61,6 +67,7 @@ define([
       if (typeof this._cache === 'undefined') {
         this._cache = this._getNewCache();
       }
+      //
       // Now we look at what kind of response was submitted
       if (!('attributes' in apiResponse)) {
         // We received a Solr response, so we need to do the following:
@@ -95,11 +102,11 @@ define([
         for (var objId in apiResponse.attributes) {
           widget._cache.put(objId, apiResponse.attributes[objId]['canonical']);
         }
-        console.log(facetCollection);
-        if (facetCollection) {
-          facetCollection.forEach(widget.updater);
-          this.updateCollectionAndView(info, facetCollection);
-        }
+        widget.collection.models.forEach( function(v) {
+          if (v.children.models.length > 0) {
+            v.children.models.forEach(widget.updater);
+          }
+        });
       }
     }
     // Get object information from the object search micro service
