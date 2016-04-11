@@ -2,16 +2,14 @@
 <i class="item-closed facet-caret " aria-label="toggle"></i>
 {{/if}}
 
-    <label class="s-facet-label">
-        <input type="checkbox" class="widget-item" value="{{value}}">
-        <span class="size-graphic-container">
-            <span class="size-graphic">&nbsp;{{{title}}}<span class="facet-amount">&nbsp;({{count}})</span></span>
-        </span>
+ <input type="checkbox" class="widget-item" value="{{value}}" id ="widget-item-{{value}}">
+<label class="s-facet-label" for="widget-item-{{value}}">
+&nbsp;<span title="{{{title}}}" class="facet-title">{{{title}}}</span><span class="facet-amount">&nbsp;&nbsp;{{count}}</span>
 </label>
 
 {{#if more}}
 <div class="facet-body">
     <div class="child-facets"></div>
-    <button class="btn btn-xs btn-link show-more hide">more</button>
+    <button class="btn btn-xs btn-default btn-inverse show-more hide ">more</button>
 </div>
 {{/if}}
