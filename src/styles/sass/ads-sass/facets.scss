@@ -49,56 +49,37 @@
   width: 94% !important;
 }
 
-.size-graphic-container {
-  width: 77%;
-  display: inline-block;
-  background-color: $body-bg;
-  height: 19px;
-  margin-left: 2px;
-  margin-bottom: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-
-}
-
-.size-graphic {
-  display: block;
-  background-color:  lighten($brand-primary-faded, 35%);
-  overflow-x: visible;
-  color: black;
-  font-size : 14px;
-  font-weight: 400;
-}
-
-
-.s-facet-selected {
-  .size-graphic {
-    background-color:  lighten($brand-primary-faded, 25%);
-  }
-
-}
 
 .s-facet-label {
   .facet-amount {
-    display: none;
-
+    float: right;
+    color: $gray-light;
   }
 }
 
-.s-facet-label:hover {
-  .facet-amount {
-    display: inline-block;
-  }
+.facet-title {
+  display: inline-block;
+  max-width: 55%;
+  //improve mouseover interaction
+  width: 55%;
+  cursor:pointer;
+  line-height: 18px;
+
+}
+.widget-body .item-view {
+  margin-bottom: 4px;
+  cursor: pointer;
+  max-width: 200px;
 }
 
-.facet-amount {
-  visibility:hide;
-  &:hover {
-    display:block;
-  }
+.widget-body .item-view input {
+  vertical-align: top;
+  cursor:pointer;
 }
 
+.item-view:hover >label >.facet-amount {
+  color: $gray-darker;
+}
 
 .s-item-caret {
   position: absolute !important;
@@ -118,8 +99,9 @@
 .s-widget label {
   font-weight: normal;
   margin: 0px;
-  width: 100%;
-  display: inline-block;
+  width: 96%;
+  max-width: 200px;
+  display: inline;
 }
 
 
@@ -155,6 +137,11 @@
   min-width: 93px;
   top: 70%;
   left: 50%;
+  border: 1px solid lighten($brand-primary-faded, 10%);
+}
+
+.widget-item:checked + label span {
+  color: $brand-primary-faded !important;
 }
 
 .s-widget-options {
@@ -168,17 +155,20 @@
 .s-widget-meta .dropdown-menu label {
   padding: 0px;
   margin: 0px;
+  cursor:pointer
+}
+
+.s-widget-meta .dropdown-menu input {
+  cursor:pointer
 }
 
 
+
 .s-widget-body {
-  x-overflow: hidden;
-  y-overflow: hidden;
   padding-left: 8%;
   padding-top: 11px;
 
 }
-
 
 .s-citation-padding {
   height: 15px;
