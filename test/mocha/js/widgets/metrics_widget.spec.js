@@ -853,7 +853,7 @@ define([
       metricsWidget.processMetrics(JSON.parse(JSON.stringify(testData)));
 
       $("#test").append(metricsWidget.view.el);
-      metricsWidget.resetWidget();
+      metricsWidget.reset();
 
       //check to see that the rendered views are inserted
       expect($("#test").find((".metrics-graph *")).length).to.eql(0);

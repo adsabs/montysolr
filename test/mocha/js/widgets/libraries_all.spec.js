@@ -30,7 +30,7 @@ define([
 
     var fakeLibraryController =   {
       getHardenedInstance : function(){return this},
-      getAllMetadata : function(){ return stubMetadata.libraries },
+      getLibraryMetadata : function(){ return $.Deferred().resolve(stubMetadata.libraries) },
       getLibraryData : function(id ){ var d =  $.Deferred(); d.resolve(stubData); return d.promise() },
       updateLibraryContents : function(updateData){var d = $.Deferred(); d.resolve(_.extend({name: "Aliens Among Us", id: 1, description: "Are you one of them?", permission : "owner", num_papers : 45, date_created: '2015-04-03 04:30:04', date_last_modified: '2015-04-09 06:30:04'}, updateData )); return d},
       updateLibraryMetadata : sinon.spy(function(updateData){

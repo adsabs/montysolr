@@ -155,6 +155,8 @@ define(['marionette',
         this.setBeeHive(beehive);
         _.bindAll(this);
 
+        var that = this;
+
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.STORAGE_PAPER_UPDATE, this.onStoragePaperChange);
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
@@ -165,8 +167,11 @@ define(['marionette',
           // know whether to show library panel
           this.model.set("loggedIn", true);
           //fetch list of libraries
-          var libraryData = this.getBeeHive().getObject("LibraryController").getAllMetadata();
-          this.processLibraryInfo(libraryData);
+          var libraryData = this.getBeeHive().getObject("LibraryController")
+              .getLibraryMetadata()
+              .done(function(data){
+              that.processLibraryInfo(data);
+          });
         }
 
       },

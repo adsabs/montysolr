@@ -418,11 +418,11 @@ define([
     },
 
     closeWidget: function () {
-      this.resetWidget();
+      this.reset();
       this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
     },
 
-    resetWidget: function () {
+    reset: function () {
       this.childViews = {};
       //empty the container view
       _.each(this.view.regions, function(v,k){
@@ -712,7 +712,7 @@ define([
     },
 
     renderWidgetForCurrentQuery : function(){
-      this.resetWidget();
+      this.reset();
       this.containerModel.set("requestRowsAllowed", true);
       //for printing
       this.containerModel.set("url", window.location.href);
@@ -720,7 +720,7 @@ define([
     },
 
     renderWidgetForListOfBibcodes : function(bibcodes){
-      this.resetWidget();
+      this.reset();
 
       var request =  new ApiRequest({
         target: ApiTargets.SERVICE_METRICS,

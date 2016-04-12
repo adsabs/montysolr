@@ -81,6 +81,14 @@ define([
           else if (obj === "MasterPageManager") {
             return MasterPageManager;
           }
+          else if (obj === "LibraryController"){
+            return {
+              getLibraryBibcodes : function(){
+                debugger
+                return ["1", "2", "3"]
+              }
+            }
+          }
         },
 
         getController: function (obj) {
@@ -167,6 +175,13 @@ define([
           if (obj === "MasterPageManager") {
             return MasterPageManager;
           }
+          else if (obj === "LibraryController"){
+            return {
+              getLibraryBibcodes : function(){
+                return $.Deferred().resolve(["1", "2", "3"]);
+              }
+            }
+          }
         },
 
         getWidget : function(obj){
@@ -185,11 +200,6 @@ define([
 
 
       n.catalog.get("library-export").execute("library-export",    {
-        "bibcodes": [
-          "2015IAUGA..2257982A",
-          "2015IAUGA..2257768A",
-          "2015IAUGA..2257639R"
-        ],
         "id": "1",
         "publicView": false,
         "subView": "export",
@@ -202,9 +212,9 @@ define([
       expect(Export.renderWidgetForListOfBibcodes.callCount).to.eql(1);
       expect(Export.renderWidgetForListOfBibcodes.args[0]).to.eql([
         [
-          "2015IAUGA..2257982A",
-          "2015IAUGA..2257768A",
-          "2015IAUGA..2257639R"
+          "1",
+          "2",
+          "3"
         ],
         {
           "format": "bibtex"

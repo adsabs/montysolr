@@ -66,7 +66,7 @@ define([
     },
 
     modelEvents : {
-      "change:active" : "highlightTab"
+      "change" : "render"
     },
 
 
@@ -133,23 +133,7 @@ define([
 
     },
 
-    // whenever active tab changes
 
-    highlightTab : function(){
-
-      this.$(".tab.active").removeClass("active");
-      //find the proper tab
-      var activeString = this.model.get("active").split("-")[0];
-      var $active = this.$("li[data-tab^=" + activeString + "]");
-
-      if ($active.hasClass("tab")){
-        $active.addClass("active");
-      }
-      else {
-        //it's a dropdown, go up a level
-        $active.eq(0).parent().prev().parent().addClass("active");
-      }
-    },
 
     triggerSubviewNavigate : function(e){
 

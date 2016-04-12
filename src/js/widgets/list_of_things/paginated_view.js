@@ -63,20 +63,7 @@ define([
      */
     var ListOfThingsView = Marionette.CompositeView.extend({
 
-      constructor: function (options) {
-        options = options || {};
-        if (options) {
-          _.defaults(options, _.pick(this, ['model', 'collectionEvents', 'modelEvents']));
-        }
-        if (!options.model) {
-          options.model = new MainViewModel();
-        }
-
-        var args = _.toArray(arguments);
-        args[0] = options;
-
-        return Marionette.CompositeView.prototype.constructor.apply(this, args);
-      },
+      childView : ItemView,
 
       initialize: function (options) {
         this.EmptyViewClass = Marionette.ItemView.extend({
@@ -85,6 +72,8 @@ define([
         this.InitialViewClass = Marionette.ItemView.extend({
           template: InitialViewTemplate
         });
+
+        this.model = new MainViewModel();
 
       },
 
@@ -106,7 +95,7 @@ define([
       },
 
       className: "list-of-things",
-      childView: ItemView,
+      
       alreadyRendered: false,
 
       getEmptyView: function () {
@@ -219,7 +208,6 @@ define([
         if (this.resultsWidget) {analytics('send', 'event', 'interaction', 'results-list-pagination', pageVal) }
 
       },
-
 
       changePerPage: function (e) {
          e.preventDefault();
