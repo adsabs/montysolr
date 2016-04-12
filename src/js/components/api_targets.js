@@ -53,6 +53,7 @@ define([
      LIBRARY_IMPORT_ADS2_TO_BBB: 'biblib/twopointoh',
 
      LIBRARY_IMPORT_ZOTERO: "harbour/export/twopointoh/zotero",
+     LIBRARY_IMPORT_MENDELEY: "harbour/export/twopointoh/mendeley",
 
      //returns credentials from both classic and 2.0 if they exist
      LIBRARY_IMPORT_CREDENTIALS: 'harbour/user',

@@ -9,7 +9,7 @@
         You are currently authenticated as <b>{{twopointoh_email}}</b>.
     </div>
     <div>
-        <button class="btn btn-primary-faded import-all-libraries"> <i class="fa fa-arrow-circle-down"></i> Import all ADS 2.0 libraries</button>
+        <button class="btn btn-primary-faded import-all-libraries"> <i class="fa fa-arrow-circle-down"></i> Import all ADS 2.0 libraries to this system</button>
     </div>
 
     <div class="status">
@@ -28,11 +28,18 @@
     </div>
 
     <div>
-        <button class="btn btn-default import-zotero"> <i class="fa fa-download"></i> Download my ADS 2.0 libraries to Zotero-style BibTeX </button>
+        <h4>Download ADS 2.0 Libraries</h4>
+        <hr>
+        <button class="btn btn-default bibtex-import" data-target="zotero">
+            <i class="fa fa-download"></i> to Zotero-style BibTeX
+        </button>
+        &nbsp;
+        <button class="btn btn-default bibtex-import" data-target="mendeley">
+            <i class="fa fa-download"></i> to Mendeley-style BibTeX
+        </button>
     </div>
-
-
 <hr>
+<br>
 
         <button class="btn btn-default collapsed" data-toggle="collapse" data-target="#ads2-form-container">
             <i class="toggle-icon"></i>
