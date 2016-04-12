@@ -100,7 +100,7 @@ define([
           'fq_visualization_author': 'Author Network',
           'fq_visualization_paper': 'Paper Network',
           'fq_wordcloud': 'Concept Cloud',
-          'fq_bubble_chart': 'Results Graph'
+          'fq_bubble_chart': 'Results Graph',
 
         };
         this.currentQuery = null;

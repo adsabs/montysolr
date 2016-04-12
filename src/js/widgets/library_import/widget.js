@@ -15,7 +15,8 @@ define([
              ADS2ImportView,
              ClassicImportView,
              SuccessTemplate,
-             Bootstrap) {
+             Bootstrap
+) {
   /* config vars */
 
   var CLASSIC = 'classic';
@@ -47,15 +48,19 @@ define([
 
     events: {
       'click button.submit-credentials': 'authenticate',
+      'click button.bibtex-import' : 'importBibtex',
     },
 
     triggers : {
       'click button.import-all-libraries': 'library-import',
-      'click button.import-zotero' : 'zotero-import'
     },
 
     modelEvents: {
       'change': 'render'
+    },
+
+    importBibtex : function(e){
+      this.trigger("bibtex-import", {target : $(e.target).data("target")})
     },
 
     authenticate: function (e) {
@@ -193,11 +198,23 @@ define([
         importLibraries(ADS2, that.view.ads2View);
       });
 
-      //finally, attach listener for zotero import event
+      //finally, attach listener for zotero/mendeley import event
+      this.view.ads2View.on("bibtex-import", function (data) {
 
-      this.view.ads2View.on("zotero-import", function (data) {
+        //right now, zotero or mendeley
+        var target = 'LIBRARY_IMPORT_' + data.target.toUpperCase();
+
         that.getBeeHive().getService("Api").request(new ApiRequest({
-          target: ApiTargets.LIBRARY_IMPORT_ZOTERO
+          target: ApiTargets[target],
+          options :  {
+            done : function(){
+              var iframe = '<iframe style="display:none;" src="' + arguments[0].url + '"></iframe>';
+              $(document.body).append(iframe);
+              setTimeout(function(){
+                  $(iframe).remove();
+              }, 1000);
+            }
+          }
         }))
       });
 

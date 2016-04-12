@@ -195,10 +195,15 @@ ApiTargets
       l.activate(minsub.beehive.getHardenedInstance());
 
       $("#test").append( l.render().el);
+      
+      $("#twopointoh-import-tab .bibtex-import[data-target=zotero]").click();
 
-      $("#twopointoh-import-tab .import-zotero").click();
+      expect(requestSpy.args[2][0].toJSON().target).to.eql("harbour/export/twopointoh/zotero");
 
-      expect(requestSpy.args[2][0].toJSON()).to.eql({target: "harbour/export/twopointoh/zotero"});
+      $("#twopointoh-import-tab .bibtex-import[data-target=mendeley]").click();
+
+      expect(requestSpy.args[3][0].toJSON().target).to.eql("harbour/export/twopointoh/mendeley");
+
 
     });
 
