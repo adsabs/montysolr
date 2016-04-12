@@ -116,8 +116,12 @@
 
 }
 
+.facet-filter {
+  color: $brand-primary-faded;
+}
+
 .s-item-children {
-  padding-left: 10%;
+  padding-left: 6%;
 
 }
 
@@ -137,7 +141,6 @@
   min-width: 93px;
   top: 70%;
   left: 50%;
-  border: 1px solid lighten($brand-primary-faded, 10%);
 }
 
 .widget-item:checked + label span {
@@ -165,7 +168,7 @@
 
 
 .s-widget-body {
-  padding-left: 8%;
+  padding-left: 4%;
   padding-top: 11px;
 
 }
@@ -191,6 +194,7 @@
 .s-widget h3 {
   @extend .secondary-header;
   margin: 0 6px;
+  color: $text-color;
 }
 
 .s-sort-widget label{
