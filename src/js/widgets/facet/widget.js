@@ -384,14 +384,20 @@ define([
         // we need to prevent that
 
         var self = this;
+		var object_names = {};
 
         if (conditions && _.keys(conditions).length > 0) {
 
           conditions = _.values(conditions);
           _.each(conditions, function(c, i, l) {
-            l[i] = self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value);
+			  l[i] = self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value);
+			  if (self.facetField == 'simbad_object_facet_hier') {
+			  	object_names[self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value)] = c.title;
+			  }
           });
-
+          // Above: create a hash mapping self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value)
+		  // to self.queryUpdater.escapeInclWhitespace(c.title), and later on replace the values in
+		  // __simbad_object_facet_hier_fq_simbad_object_facet_hier attribute 1, 2 ... (not 0)
           q = q.clone();
 
           var fieldName = 'fq_' + this.facetField;
@@ -424,7 +430,21 @@ define([
             }
             q.set('fq', fqs);
           }
-
+		  
+		  if (self.facetField == 'simbad_object_facet_hier') {
+			  var current_values = q.get('__simbad_object_facet_hier_fq_simbad_object_facet_hier');
+			  var new_values = [];
+			  for (var e in current_values) {
+				  var val = current_values[e];
+				  var new_val = val;
+				  if (val in object_names) {
+					  new_val = object_names[val];
+				  };
+				  new_values[e] = new_val;
+			  };
+			  q.set('__simbad_object_facet_hier_fq_simbad_object_facet_hier', new_values);
+		  }
+		  
           this.dispatchNewQuery(paginator.cleanQuery(q));
 
           analytics('send', 'event', 'interaction', 'facet-applied', JSON.stringify({name : this.facetField, logic : operator, conditions : conditions }));

@@ -96,6 +96,7 @@ define([
           'fq_bibgroup_facet': 'BibGroup',
           'fq_data_facet': 'Data',
           'fq_vizier_facet': 'Vizier',
+          'fq_simbad_object_facet_hier': 'Object',
           'fq_grant': 'Grant',
           'fq_visualization_author': 'Author Network',
           'fq_visualization_paper': 'Paper Network',
@@ -190,11 +191,10 @@ define([
             if (!this.knownFilters[k]) {
               return;
             }
-
             var oneFilter = {
               category: this.knownFilters[k],
               filter_name: k,
-              filter_query: data[k][0]
+              filter_query: data[k][0],
             };
 
             if (data[k].length > 1) {
