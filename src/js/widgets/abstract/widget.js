@@ -147,6 +147,9 @@ define([
         if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
 
         $("head").append(metadataTemplate(this.model.toJSON()));
+        //and set the title
+        document.title = this.model.get("title");
+
         var ev = document.createEvent('HTMLEvents');
         ev.initEvent('ZoteroItemUpdated', true, true);
         document.dispatchEvent(ev);

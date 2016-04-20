@@ -100,6 +100,8 @@ define(['underscore',
 
         //clear any metadata added to head on the previous page
         $("head").find("meta[data-highwire]").remove();
+        //and set the default title
+        document.title = 'ADS Search';
       },
 
       handleMissingTransition: function() {
