@@ -58,7 +58,6 @@ define(['underscore',
 
     serializeData : function(){
       var data = this.model.toJSON();
-      data.count = this.formatNum(data.count);
       return data;
     }
 

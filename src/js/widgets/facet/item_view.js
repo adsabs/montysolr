@@ -29,7 +29,6 @@ define(['underscore', 'js/widgets/base/item_view',
 
     serializeData : function(){
       var data = this.model.toJSON();
-      data.count = this.formatNum(data.count);
       return data;
     }
 
