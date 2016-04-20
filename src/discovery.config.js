@@ -76,6 +76,7 @@ require.config({
         LibrariesPage: 'js/wraps/libraries_page_manager/libraries_page_manager',
         HomePage: 'js/wraps/home_page_manager/home_page_manager',
         PublicLibrariesPage : 'js/wraps/public_libraries_page_manager/public_libraries_manager',
+        ErrorPage : 'js/wraps/error_page_manager/error_page_manager',
 
         Authentication: 'js/widgets/authentication/widget',
         UserSettings: 'js/widgets/user_settings/widget',

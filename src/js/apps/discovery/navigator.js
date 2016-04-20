@@ -103,7 +103,7 @@ define([
 
 
         this.set("404", function(){
-          $("#body-template-container").html(ErrorTemplate());
+          app.getObject('MasterPageManager').show('ErrorPage');
           this.route = '#404';
         });
 
