@@ -195,6 +195,10 @@
   @extend .secondary-header;
   margin: 0 6px;
   color: $text-color;
+  @media(min-width: $screen-sm-max) and (max-width: $screen-md-max) {
+    font-size: 16px;
+    margin: 0;
+  }
 }
 
 .s-sort-widget label{
@@ -207,6 +211,9 @@
 
 .s-widget-container {
   position: relative;
+  @media(min-width: $screen-sm-max) and (max-width: $screen-md-max) {
+    font-size: 13px;
+  }
 }
 
 

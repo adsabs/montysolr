@@ -9,6 +9,7 @@ define([
     'js/components/paginator',
     'js/mixins/widget_pagination',
     'js/components/api_query_updater',
+    'd3',
     'analytics'
   ],
   function (
@@ -20,6 +21,7 @@ define([
             Paginator,
             WidgetPagination,
             ApiQueryUpdater,
+            d3,
             analytics
     ) {
 
@@ -145,6 +147,8 @@ define([
         return facets;
       },
 
+      facetAmountFormatter : d3.format("s"),
+
       processFacets: function(apiResponse, facets) {
         var facetsCol = [];
         var l = facets.length;
@@ -160,11 +164,17 @@ define([
           if (preprocessorChain) {
             modifiedValue = preprocessorChain.call(this, fValue);
           }
+
+         //nicely formatted facet count
+         var count = this.facetAmountFormatter(fNum)
+                        .replace(/\d+(?=k)/, function(all){return all.slice(0,1)})
+
           var d = {
             total : numFound,
             title: modifiedValue,
+            d3title: modifiedValue,
             value: fValue,
-            count: fNum,
+            count: count,
             modified: modifiedValue,
             children: []
           };
