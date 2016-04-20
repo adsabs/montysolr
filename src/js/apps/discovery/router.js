@@ -324,7 +324,7 @@ define([
       },
 
       noPageFound : function() {
-        this.getPubSub().publish(this.getPubSub().NAVIGATE, "404")
+       this.routerNavigate('404');
       },
 
 
