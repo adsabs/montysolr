@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -342,21 +343,25 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   public void warm(SolrIndexSearcher searcher, SolrCache<K,V> old) {
-  	isWarming = true;
-  	try {
-  		log.info("Warming cache (" + name() + "): " + searcher);
-	  	if (this.incremental ) {
-	  		warmIncrementally(searcher, old);
-	  	}
-	  	else {
-	      warmRebuildEverything(searcher, old);
-	  	}
-	  	log.info("Warming cache done (# entries:" + map.size() + "): " + searcher);
-  	} 
-  	catch (IOException e) {
-    	throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
+    long warmingStartTime = System.nanoTime();
+    if (isAutowarmingOn()) {
+    	isWarming = true;
+    	try {
+    		log.info("Warming cache (" + name() + "): " + searcher);
+  	  	if (this.incremental ) {
+  	  		warmIncrementally(searcher, old);
+  	  	}
+  	  	else {
+  	      warmRebuildEverything(searcher, old);
+  	  	}
+  	  	log.info("Warming cache done (# entries:" + map.size() + "): " + searcher);
+    	} 
+    	catch (IOException e) {
+      	throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
+      }
+    	sourceReaderHashCode = searcher.hashCode();
     }
-  	sourceReaderHashCode = searcher.hashCode();
+    warmupTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - warmingStartTime, TimeUnit.NANOSECONDS);
   }
   
   private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
@@ -438,7 +443,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	}
 
     
-    long warmingStartTime = System.currentTimeMillis();
     CitationLRUCache<K,V> other = (CitationLRUCache<K,V>)old;
 
     // collect ids of documents that need to be reloaded/regenerated during this
@@ -559,8 +563,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
         }
       }
     }
-
-    warmupTime = System.currentTimeMillis() - warmingStartTime;
   }
 
   
