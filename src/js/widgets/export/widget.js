@@ -275,7 +275,10 @@ define([
       //special case, will eventually be removed
       openClassicExports : function(options){
         if (options.bibcodes){
-           var $form =  $(ClassicFormTemplate({bibcodes: options.bibcodes}));
+           var $form =  $(ClassicFormTemplate({
+             bibcodes: options.bibcodes,
+             exportLimit : apiTargets._limits.ExportWidget.limit
+           }));
           $form.submit();
         }
         else if (options.currentQuery ) {

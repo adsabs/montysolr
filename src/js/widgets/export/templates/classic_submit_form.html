@@ -1,5 +1,5 @@
 <form action="http://adsabs.harvard.edu/cgi-bin/nph-abs_connect" target="_blank" method="post" class="hidden">
-    <input type="hidden" name="nr_to_return" value="500"/>
+    <input type="hidden" name="nr_to_return" value="{{exportLimit}}"/>
 
     {{#each bibcodes}}
     <input type="hidden" name="bibcode" value="{{this}}"/>
