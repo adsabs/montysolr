@@ -77,7 +77,7 @@
   cursor:pointer;
 }
 
-.item-view:hover >label >.facet-amount {
+.item-view:hover >label, .item-view:hover >label .facet-amount {
   color: $gray-darker;
 }
 
