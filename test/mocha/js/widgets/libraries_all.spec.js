@@ -64,7 +64,7 @@ define([
       //4 entries
       expect($("#test tbody tr").length).to.eql(4);
 
-      expect($("#test tbody tr:first").html()).to.eql( '\n\n<td>\n    1\n</td>\n<td>\n    \n    <i class="fa fa-lg fa-lock" title="this library is private"></i>\n    \n</td>\n\n<td>\n\n    <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a>\n    <p>Are you one of them?</p> \n\n</td>\n\n<td>300</td>\n\n<td>owner</td>\n\n<td>6/4/15 7:57p</td>\n\n');
+      expect(normalizeSpace($("#test tbody tr:first").html())).to.eql('<td> 1 </td> <td> <i class="fa fa-lg fa-lock" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p>Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>6/4/15 7:57p</td>');
 
     });
 

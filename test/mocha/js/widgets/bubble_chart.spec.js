@@ -6123,7 +6123,7 @@ define([
       realSvg.on("mouseover.tooltip").call(realSvg.node());
 
       expect($(".d3-tooltip").css("display")).to.eql("block");
-      expect($(".d3-tooltip").text()).to.eql('\nBrown Dwarfs in the Hyades and Beyond?\n(1999AJ....117..343R)\nCitations: 44,\nReads: 3\n\n\n\n');
+      expect(normalizeSpace($(".d3-tooltip").text())).to.eql('Brown Dwarfs in the Hyades and Beyond? (1999AJ....117..343R) Citations: 44, Reads: 3');
 
     });
 

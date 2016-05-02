@@ -233,7 +233,7 @@ define([
 
       //loading view should have been removed
 
-      expect($(".preferences-widget .panel-heading").text().trim()).to.eql('ORCID Settings\n        \n        You are signed in to ORCID as Alex Holachek\n\n         Not you?\n            Sign into ORCID as a different user')
+      expect(normalizeSpace($(".preferences-widget .panel-heading").text().trim())).to.eql('ORCID Settings You are signed in to ORCID as Alex Holachek Not you? Sign into ORCID as a different user')
 
       //should be checked by default if we don't pre-fill the data for the form
       expect($(".authorized-ads-user").is(":checked")).to.be.true;

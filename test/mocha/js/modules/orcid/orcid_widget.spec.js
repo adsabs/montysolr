@@ -439,7 +439,7 @@ define([
         var orcidApi = getOrcidApi();
         orcidApi.saveAccessData({access: true});
         orcidApi.getUserProfile = function() {
-          expect($("#test .s-results-control-row-container").text().trim()).to.eql('My ORCID Papers \n        \n        \n        \n             Loading ORCID data...');
+          expect(normalizeSpace($("#test .s-results-control-row-container").text().trim())).to.eql('My ORCID Papers Loading ORCID data...');
           var d = $.Deferred();
           d.resolve(defaultResponse()['orcid-profile']);
           return d;

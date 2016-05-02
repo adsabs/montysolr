@@ -1781,7 +1781,7 @@ define([
     networkWidget.view.graphView.model.set("selectedEntity", accomazziNode);
     $("#test").find("button.filter-add").click();
 
-    expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('at least one member of Group 1  OR \n        \n            Accomazzi, A');
+    expect(normalizeSpace($("#test").find(".s-filter-names-container").text())).to.eql('at least one member of Group 1 OR Accomazzi, A');
 
     $("#test").find("button.filter-remove").click();
 
@@ -1901,7 +1901,7 @@ define([
     //trigger show event, should prompt dispatchRequest
     networkWidget.renderWidgetForCurrentQuery();
 
-    expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 1000 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
+    expect(normalizeSpace($("#test").find(".network-metadata").text())).to.eql('Currently viewing data for 1000 papers. Change to first papers (max is 1000). Submit');
     sinon.spy(networkWidget.getPubSub(), "publish");
     $("#test").find(".network-metadata input").val("400");
     $("#test").find(".network-metadata button.submit-rows").trigger("click");
@@ -1909,7 +1909,7 @@ define([
     setTimeout(function () {
         expect(networkWidget.getPubSub().publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
         expect(networkWidget.getPubSub().publish.args[0][1].get("query").toJSON().query).to.eql(['{"q":["star"],"rows":[400]}']);
-        expect($("#test").find(".network-metadata").text().trim()).to.eql('Currently viewing data for 400 papers.\n\n\nChange to first  papers (max is 1000).\n Submit');
+        expect(normalizeSpace($("#test").find(".network-metadata").text())).to.eql('Currently viewing data for 400 papers. Change to first papers (max is 1000). Submit');
         done();
     }, 800);
 
