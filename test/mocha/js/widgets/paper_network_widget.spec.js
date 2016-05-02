@@ -19016,8 +19016,6 @@ define([
       //to change the detail view, set the current group in the container view model to the group id
       paperNetwork.view.graphView.model.set("selectedEntity", [group1, group2]);
 
-      debugger
-
       expect(normalizeSpace($(".s-group-content tbody tr:first").html())).to.eql('<td> <a href="#abs/1986SPIE..627..733T">1986SPIE..627..733T</a> </td> <td> 0.61% </td> <td> 0.69% </td>')
 
     });
