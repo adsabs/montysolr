@@ -18989,9 +18989,9 @@ define([
       //summary
       expect($(".s-group-content p:first").text()).to.eql('This group consists of 60 papers, which have been cited, in total, 2904\n           times.');
       //most highly cited
-      expect($(".s-group-content .s-top-papers").find("li:first").html().trim()).to.eql('<a href="#abs/1999PASP..111..438F" data-bypass="" target="_blank"><b>The Updated Zwicky Catalog (UZC)</b></a>; <i>Falco, Emilio E.</i>\n                   (295 citations)');
+      expect(normalizeSpace($(".s-group-content .s-top-papers").find("li:first").html().trim())).to.eql('<a href="#abs/1999PASP..111..438F" data-bypass="" target="_blank"><b>The Updated Zwicky Catalog (UZC)</b></a>; <i>Falco, Emilio E.</i> (295 citations)');
       //most highly referenced
-      expect($(".s-group-content ul:last li:first").html().trim()).to.eql("<i class=\"fa fa-star-o\"></i>\n                   \n                   <a href=\"#abs/2005PASP..117.1411F\" data-bypass=\"\" target=\"_blank\">2005PASP..117.1411F</a> (cited by 28% of papers\n                   in this group)");
+      expect(normalizeSpace($(".s-group-content ul:last li:first").html().trim())).to.eql('<i class=\"fa fa-star-o\"></i> <a href=\"#abs/2005PASP..117.1411F\" data-bypass=\"\" target=\"_blank\">2005PASP..117.1411F</a> (cited by 28% of papers in this group)');
 
     });
 
@@ -19016,7 +19016,9 @@ define([
       //to change the detail view, set the current group in the container view model to the group id
       paperNetwork.view.graphView.model.set("selectedEntity", [group1, group2]);
 
-      expect($(".s-group-content tbody tr:first").html().trim()).to.eql('<td>\n                <a href="#abs/1986SPIE..627..733T">1986SPIE..627..733T</a>\n            </td>\n            <td>\n                0.61%\n            </td>\n            <td>\n                0.69%\n            </td>')
+      debugger
+
+      expect(normalizeSpace($(".s-group-content tbody tr:first").html())).to.eql('<td> <a href="#abs/1986SPIE..627..733T">1986SPIE..627..733T</a> </td> <td> 0.61% </td> <td> 0.69% </td>')
 
     });
 
@@ -19037,7 +19039,7 @@ define([
       paperNetwork.view.graphView.model.set("selectedEntity", $("#test").find("#vis-group-2")[0]);
       $("#test").find("button.filter-add").click();
 
-      expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('Group 1  OR \n        \n            Group 2');
+      expect(normalizeSpace($("#test").find(".s-filter-names-container").text().trim())).to.eql('Group 1 OR Group 2');
       $("#test").find("button.filter-remove").click();
 
       expect($("#test").find(".s-filter-names-container").text().trim()).to.eql('Group 1');

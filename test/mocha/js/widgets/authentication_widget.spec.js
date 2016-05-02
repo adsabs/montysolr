@@ -37,7 +37,7 @@ function(
       $("#test").append(a.view.render().el);
 
       //should render nothing since there is no subview indicated in the view model
-      expect($("#test").html()).to.eql('<div class="s-authentication-container row s-form-widget"><div class="form-container s-form-container  col-sm-10 col-sm-offset-1  col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3">\n\n</div></div>');
+      expect(normalizeSpace($("#test").html())).to.eql('<div class="s-authentication-container row s-form-widget"><div class="form-container s-form-container col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3"> </div></div>');
 
       a.setSubView("login");
 

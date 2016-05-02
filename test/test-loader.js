@@ -12,6 +12,12 @@ define([
     ){
     "use strict";
 
+    // utility
+
+    window.normalizeSpace = function(str){
+      return str.replace(/\s+/g, " ").trim();
+    }
+
     /*globals mocha, expect, chai,bbbTest */
     chai.Assertion.includeStack = true;
 

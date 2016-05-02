@@ -246,7 +246,7 @@ define([
 
       g.activate(minsub.beehive.getHardenedInstance());
 
-      expect($(".s-graphics-sidebar").html()).to.eql('\n\n  <div class=\"s-right-col-widget-container\">\n    <div class=\"graphics-container s-graphics-container\">\n      <h4 class=\"s-right-col-widget-title\">Graphics</h4>\n      <div class=\"grid-cell\">\n        <img src=\"https://s3.amazonaws.com/aasie/images/1538-4357/447/1/L37/10_1086_309555_fg1_tb.gif\" alt=\"figure from paper\" class=\"grid-cell__image\">\n        <p><i>Click to view more</i></p>\n      </div>\n    </div>\n  </div>\n\n\n');
+      expect(normalizeSpace($(".s-graphics-sidebar").html())).to.eql('<div class="s-right-col-widget-container"> <div class="graphics-container s-graphics-container"> <h4 class="s-right-col-widget-title">Graphics</h4> <div class="grid-cell"> <img src="https://s3.amazonaws.com/aasie/images/1538-4357/447/1/L37/10_1086_309555_fg1_tb.gif" alt="figure from paper" class="grid-cell__image"> <p><i>Click to view more</i></p> </div> </div> </div>');
 
       var spy = sinon.spy();
       g.getPubSub = function() {return {publish : spy, NAVIGATE: minsub.NAVIGATE}};

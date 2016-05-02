@@ -154,7 +154,7 @@ define(['marionette',
 
         view.toggleChildrenAbstracts();
 
-        expect($w.find(".abstract-row:first").text().trim()).to.eql('Abstract\n                    \n                        \n                        In this paper we give a bijective proof for a relation between uni- bi- and tricellular maps of certain topological genus. While this relation can formally be obtained using Matrix-theory as a result of the Schwinger-Dyson equation, we here present a bijection for the corresponding coefficient equation. Our construction is facilitated by repeated application of a certain cutting, the contraction of edges, incident to two vertices and the deletion of certain edges.');
+        expect(normalizeSpace($w.find(".abstract-row:first").text().trim())).to.eql('Abstract In this paper we give a bijective proof for a relation between uni- bi- and tricellular maps of certain topological genus. While this relation can formally be obtained using Matrix-theory as a result of the Schwinger-Dyson equation, we here present a bijection for the corresponding coefficient equation. Our construction is facilitated by repeated application of a certain cutting, the contraction of edges, incident to two vertices and the deletion of certain edges.');
 
         expect(coll.pluck("showAbstract")[0]).to.eql(true);
 
