@@ -403,6 +403,9 @@ define([
           case 'fq_grant':
             s = s.replace(/grant:/g, '');
             break;
+          case 'fq_simbad_object_facet_hier':
+            s = s.replace(/simbad_object_facet_hier:0\\\//g, '');
+            break;
         }
 
         // replace quotes, if any

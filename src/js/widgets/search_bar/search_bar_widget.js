@@ -5,6 +5,8 @@ define([
       'hbs!./templates/search_bar_template',
       'hbs!./templates/search_form_template',
       'js/components/query_builder/plugin',
+      'js/components/api_request',
+      'js/components/api_targets',
       'js/components/api_feedback',
       'js/mixins/formatter',
       './autocomplete',
@@ -20,6 +22,8 @@ define([
         SearchBarTemplate,
         SearchFormTemplate,
         QueryBuilderPlugin,
+        ApiRequest,
+        ApiTargets,
         ApiFeedback,
         FormatMixin,
         autocompleteArray,
@@ -316,7 +320,11 @@ define([
         },
 
         setFormVal: function(v) {
-          this.$(".q").val(v);
+          if (this.original_query) {
+            this.$(".q").val(this.original_query);
+          } else {
+            this.$(".q").val(v);
+          }
           this.toggleClear();
 
         },
@@ -452,6 +460,8 @@ define([
 
           //replace uppercased fields with lowercase
           query = query.replace(/([A-Z])\w+:/g, function(letter){return letter.toLowerCase()});
+//          // store the query in case it gets changed (which happens when there is an object query)
+          this.original_query = query;
 
           this.trigger("start_search", query);
 
@@ -525,7 +535,12 @@ define([
 
             case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
               this.setCurrentQuery(feedback.query);
-              this.view.setFormVal(feedback.query.get('q').join(' '));
+              if (feedback.response.responseHeader.params["__original_query"]) {
+                var newq = feedback.response.responseHeader.params["__original_query"];
+                this.view.setFormVal(newq);
+              } else {
+                this.view.setFormVal(feedback.query.get('q').join(' '));
+              }
               this.view.setNumFound(feedback.numFound || 0);
               break;
             case ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START:

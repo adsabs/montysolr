@@ -93,6 +93,32 @@ define(['underscore',
         this._executeRequest(apiRequest, senderKey);
       },
 
+      doQueryTranslation: function(q) {
+        var d = $.Deferred(),
+          pubsub = this.getPubSub(),
+          options = {
+            type : "POST",
+            contentType : "application/json"
+          };
+        // Send the entire query to the "query" endpoint of the "object_service" micro service
+        // this endpoint will grab the "object:<expression>" from the query string and send back
+        // a translated query string which will have "simbid:<expression with SIMBAD identifiers>"
+        // instead of the "object:" part
+        var request =  new ApiRequest({
+          target: ApiTargets.SERVICE_OBJECTS_QUERY,
+          query: new ApiQuery({"query" : q}),
+          options : options
+        });
+        // when the promise gets resolved, it will have the JSON response of the micro service
+        // which will have the translated object query
+        pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, function(response){
+          d.resolve(response.toJSON());
+        });
+
+        pubsub.publish(pubsub.EXECUTE_REQUEST, request);
+        return d.promise();
+      },
+
       getQueryAndStartSearchCycle : function(apiQuery, senderKey){
 
         var that = this,
@@ -100,6 +126,9 @@ define(['underscore',
 
         //modifies apiQuery in place
         SecondarySort.addSecondarySort(apiQuery);
+
+        this.original_url = apiQuery.url();
+        this.original_query = apiQuery.get("q")
 
         // checking if it's a new big query
         if (apiQuery.get("__bigquery")) {
@@ -140,6 +169,20 @@ define(['underscore',
         else if (apiQuery.get("__qid")){
           this.startSearchCycle.apply(this, arguments);
         }
+        // check if this is an "object:" query
+        else if (apiQuery.get("q")[0].indexOf("object:") > -1) {
+          // we have an "object:" query as part of the query
+          // first define a callback function to process the response of the micro service
+          // and bind it to "this" so that we can use the trigger
+          var callback = function(v){
+            var request = new ApiQuery({
+              q: v.query
+            });
+            this.startSearchCycle(request, senderKey);
+          }.bind(this);
+          // call the callback function when the promise has been resolved
+          this.doQueryTranslation(apiQuery.get("q")[0]).done(callback);
+        }
         else {
           this.startSearchCycle.apply(this, arguments);
         }
@@ -168,6 +211,11 @@ define(['underscore',
         if (apiQuery.keys().length <= 0) {
           console.error('[QM] : received empty query (huh?!)');
           return;
+        }
+
+        if (apiQuery.get("q")[0].indexOf("simbid:") > -1) {
+          apiQuery.add("__original_url", this.original_url);
+          apiQuery.add("__original_query", this.original_query);
         }
         var ps = this.getPubSub();
 
