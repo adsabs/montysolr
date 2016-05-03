@@ -24,7 +24,8 @@ define([
       SERVICE_PAPER_NETWORK: 'vis/paper-network',
       SERVICE_WORDCLOUD: 'vis/word-cloud',
       SERVICE_METRICS: 'metrics',
-	  SERVICE_OBJECTS: 'objects',
+      SERVICE_OBJECTS: 'objects',
+      SERVICE_OBJECTS_QUERY: 'objects/query',
       MYADS_STORAGE: 'vault',
 
       CSRF : 'accounts/csrf',

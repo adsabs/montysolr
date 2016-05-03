@@ -24,7 +24,11 @@ define([
     beforeEach(function (done) {
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
-          return Test();
+          if (apiRequest.get("target") == "objects/query"){
+            return {'query':'bibstem:ApJ simbid:1277363 year:2001'}
+          } else {
+            return Test();
+          }
         }
       }))({verbose: false});
       done();
@@ -396,6 +400,21 @@ define([
 
     it("when some of the fields have wrong input (and the query doesn't contain everything), the form should warn user before closing itself", function() {
 
+    });
+
+    it("check if the SIMBAD 'object:' search is properly translated into 'simbid:' search", function() {
+      var widget = _widget();
+      $("#test").append(widget.render().el);
+      var $w = widget.render().$el;
+
+      widget.view.on("start_search", function(query){
+        expect(query).to.eql("bibstem:ApJ object:Foo year:2001");
+      });
+
+      //should insert the field around the selected content if user has selected something
+      $w.find(".q").val("bibstem:ApJ object:Foo year:2001");
+      $w.find(".search-submit").click();
+      console.log($w.find(".s-num-found").html().trim());
     });
 
   });
