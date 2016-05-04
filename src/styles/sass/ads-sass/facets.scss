@@ -1,228 +1,175 @@
-.s-widget-meta:hover{
-  .item-open, .item-closed {
-    color: $gray-dark
-  }
-  h3 {
-    color: $gray-dark
-  }
-
-}
-
-
-.item-open {
-  @extend .s-item-open;
-}
-
-.item-closed {
-  @extend .s-item-closed;
-}
-
-//rules for item open and closed styling
-.s-tree {
-  .item-open {
-    display: inline-block;
-    width: 12px;
-    left: -13%;
-    margin-top: -10px;
-    margin-bottom: -10px;
-    cursor: pointer;
-    z-index:1;
-    @extend .icon-item-open;
-  }
-  .item-closed {
-    display:inline-block;
-    width: 8px;
-    margin-left: 2px;
-    cursor: pointer;
-    z-index:1;
-    margin-top: -10px;
-    margin-bottom: -10px;
-    @extend .icon-item-closed;
-  }
-
+.facet__container {
   position: relative;
 }
-
-
-.s-facet-label {
-  position: relative;
-  cursor:pointer;
-  .facet-amount {
-    color: $gray-light;
-    position: absolute;
-    right: 0;
-    top: -1px;
-
-    @media (min-width : $screen-lg-min){
-      right: 3%;
-    }
-  }
-}
-
-.facet-title {
-  display:inline-block;
-  max-width: 100px;
-  overflow: auto;
-  position: relative;
-
-  font-size: 14px;
-  top: -1px;
-}
-.widget-body .item-view {
-  cursor: pointer;
-  max-width: 200px;
-}
-
-.widget-body .item-view input {
-  vertical-align: top;
-  cursor:pointer;
-}
-
-.item-view:hover >label, .item-view:hover >label .facet-amount {
-  color: $gray-darker;
-}
-
-.s-item-caret {
-  position: absolute !important;
-  left : -10%;
-}
-
-.s-widget {
-  margin-bottom: 10px;
-}
-
-.s-widget .item-caret:hover {
-
-  color: $gray-dark;
+.facet__toggle {
   cursor: pointer;
 }
-
-.s-widget label {
-  font-weight: normal;
-  margin: 0px;
-  display: inline-block;
-  max-width: 175px;
-  width: 85%;
+.facet__header {
+  margin: 0 0 0 8px;
+  color: $text-color;
+  letter-spacing: 0.05rem;
+  font-size: 18px;
+  position:relative;
+  top: -2px;
+  @extend .secondary-header;
+  @media (min-width: $screen-lg-min) {
+    font-size: 20px;
+    position:relative;
+    top: -3px;
+  }
 }
-
-
-.tree .show-more button {
-  float: right;
+.facet__list {
+  margin-bottom: 0;
+  padding: 0;
+  list-style: none;
 }
-
-
-.s-widget-meta {
-  cursor: pointer !important;
-  height: 25px;
-
+.facet__list .facet__list {
+  margin-left: 10px;
 }
-
-.facet-filter {
-  color: $brand-primary-faded;
-}
-
-.item-body {
-  padding: 0 0 10px 5%;
+.facet__list-container {
   @extend .clearfix;
 }
-
-.main-caret {
-  width: 25px;
+.facet__list-container--child {
+  margin-left: 14px;
+  border: 1px solid #ededed;
+  background: rgb(247, 247, 247);
+}
+.facet__pagination-button {
+  margin: 5px 8px 5px 0;
 }
 
-.s-logic-dropdown {
-  position: absolute;
-  top: 10px;
-  right: -10px;
-  z-index: 4;
-
-  button {
-    padding: 0px;
+.facet__pagination-container {
+  float: right;
+}
+.facet-label__icon {
+  color: $gray-light;
+  @extend .fa;
+  @extend .fa-2x;
+}
+.facet-label {
+  position: relative;
+  margin: 3px 0 0 12px;
+  padding: 2px 0 2px 5px;
+  width: 90%;
+  width: calc(100% - 2rem);
+  font-weight: normal;
+  &:hover {
+    color: darken($text-color, 10%);
+    cursor: pointer;
   }
 }
-
-.s-dropdown-menu {
-  padding: 15%;
-  width: 95px;
-  min-width: 95px;
-  top: 70%;
-  left: 50%;
+//hierarchical label
+.facet__toggle .facet-label {
+  margin: 3px 0 0;
+  //fallback
+  width: 90%;
+  width: calc(100% - 2rem);
 }
-
-.widget-item:checked + label span {
-  color: $brand-primary-faded !important;
+.facet__list-container--child .facet-label {
+  margin: 0;
+  padding: 2px 3px;
+  width: 97%;
 }
-
-.s-widget-meta .dropdown-menu p {
-  padding: 3px 5px 0px 5px;
+.facet__list-container--child .facet__icon {
+  margin-bottom: 0;
 }
-
-.s-widget-meta .dropdown-menu label {
-  padding: 0px;
-  margin: 0px;
-  cursor:pointer
-}
-
-.s-widget-meta .dropdown-menu input {
-  cursor:pointer
-}
-
-.facet-container .s-widget-body {
-  //this targets only the traditional
-  //facets until this css can be refactored
-  padding-left: 10%;
-}
-
-.s-widget-body {
-  padding-top: 10px;
-}
-
-.s-citation-padding {
-  height: 15px;
-}
-.s-widget-body .selected {
-  color: $brand-primary
-}
-
-
-.sort-options {
-  margin: 0px;
-  padding-left: 20px;
-}
-
-.sort-options label {
-  margin: 0px;
-}
-
-
-.s-widget h3 {
-  @extend .secondary-header;
-  font-size: 18px;
-  letter-spacing: .05rem;
-  margin: 0 3px;
-  color: $text-color;
-
-}
-
-.s-sort-widget label{
-
-  display:block;
-  font-weight: 300;
-  margin-left: 5px;
-
-}
-
-.s-widget-container {
+.facet__icon {
   position: relative;
+  color: lighten($text-color, 8%);
+  font-size: 3rem !important;
+  width: 1.5rem !important;
+  @extend .fa;
+  &:hover {
+    color: $text-color;
+  }
 }
-
-
+.facet__list .facet__icon {
+  margin-bottom: 0;
+  color: $gray-light;
+  @extend .fa-lg;
+  &:hover {
+    color: darken($gray-light, 15%);
+  }
+}
+.facet__icon--closed {
+  &:before {
+    content: $fa-var-angle-right;
+  }
+}
+.facet__icon--open {
+  &:before {
+    content: $fa-var-angle-down;
+  }
+}
+.facet-label input:checked + span {
+  color: $brand-primary-faded;
+}
+.facet-label__title {
+  display: inline-block;
+  max-width: 70%;
+  vertical-align: top;
+  font-size: 14px;
+}
+.facet-label__amount {
+  position: absolute;
+  right: 3px;
+  color: $gray-light;
+}
+.facet__dropdown {
+  position: absolute;
+  top: 14px;
+  left: 90%;
+  z-index: 1;
+  padding: 10px;
+  width: 100px;
+  opacity: 0.95;
+  @extend .s-ads-card;
+}
+.facet__dropdown label {
+  display: block;
+}
 .graph-facet {
-
+  padding: 30px 3%;
   hr {
     margin: 10px 0;
   }
-
-  padding: 0 3%;
-  padding-bottom: 30px;
+}
+.facet__state-message {
+  padding-left: 15%;
+  font-style: italic;
+}
+//some animations, might remove these later
+.swoop-enter {
+  opacity: 0;
+  transition: all 0.3s ease-in;
+  transform: translate3d(0, -20%, 0);
+}
+.swoop-enter.swoop-enter-active {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+.swoop-leave {
+  opacity: 1;
+  transition: all 0.3s ease-in;
+  transform: translate3d(0, 0, 0);
+}
+.swoop-leave.swoop-leave-active {
+  opacity: 0;
+  transform: translate3d(0, -20%, 0);
+}
+.slide-enter {
+  overflow: hidden;
+  max-height: 0;
+  transition: all 0.5s ease-in;
+}
+.slide-enter.slide-enter-active {
+  max-height: 800px;
+}
+.slide-leave {
+  max-height: 600px;
+  transition: all 0.3s ease-out;
+}
+.slide-leave.slide-leave-active {
+  overflow: hidden;
+  max-height: 0;
 }

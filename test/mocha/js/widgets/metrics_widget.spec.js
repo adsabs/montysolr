@@ -848,7 +848,6 @@ define([
 
     it("should have a function that empties the main view", function(){
 
-
       var metricsWidget = new MetricsWidget();
       metricsWidget.processMetrics(JSON.parse(JSON.stringify(testData)));
 

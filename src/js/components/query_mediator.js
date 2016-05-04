@@ -475,7 +475,7 @@ define(['underscore',
 
       _executeRequest: function(apiRequest, senderKey) {
         // show the loading view for the widget
-        this._makeWidgetSpin(senderKey.getId());
+        //this._makeWidgetSpin(senderKey.getId());
 
         // for altering widget queries
         // from regular solr requests to execute_query requests

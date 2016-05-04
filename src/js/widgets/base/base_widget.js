@@ -4,7 +4,6 @@ define([
   'js/components/api_query',
   'js/components/api_request',
   'js/mixins/widget_mixin_method',
-  'js/mixins/widget_state_handling',
   'js/components/api_targets',
   'js/mixins/dependon'
 ], function (
@@ -13,7 +12,6 @@ define([
   ApiQuery,
   ApiRequest,
   WidgetMixin,
-  WidgetStateMixin,
   ApiTargets,
   Dependon
   ) {
@@ -83,7 +81,6 @@ define([
         Marionette.bindEntityEvents(this, this.view, Marionette.getOption(this, "viewEvents"));
       if (this.model)
         Marionette.bindEntityEvents(this, this.model, Marionette.getOption(this, "modelEvents"));
-
     },
 
     /**
@@ -101,7 +98,6 @@ define([
 
       //custom dispatchRequest function goes here
       pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
-
       //custom handleResponse function goes here
       pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
     },
@@ -263,25 +259,12 @@ define([
 
     render : function(){
       return this.view.render();
-    },
-
-
-    /**
-     * A standard method, called by widgets when they want to
-     * check default widget compomenets
-     */
-    _checkStandardWidgetOptions: function(options) {
-      if (typeof options.view === "undefined") {
-        throw new Error("Missing view")
-      }
-      if (typeof options.view.collection === "undefined") {
-        throw new Error("Missing view.collection");
-      }
     }
+
 
   }, {mixin: WidgetMixin});
 
-  _.extend(BaseWidget.prototype, WidgetStateMixin, Dependon.BeeHive);
+  _.extend(BaseWidget.prototype, Dependon.BeeHive);
 
   return BaseWidget
 

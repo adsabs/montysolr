@@ -6,8 +6,7 @@ define([
     'js/components/api_request',
     'js/components/api_query',
     'js/bugutils/minimal_pubsub',
-    'js/widgets/widget_states',
-    'js/widgets/base/item_view'
+    'js/widgets/widget_states'
   ],
   function(
     Marionette,
@@ -17,8 +16,7 @@ define([
     ApiRequest,
     ApiQuery,
     MinimalPubSub,
-    WidgetStates,
-    ItemView
+    WidgetStates
     ) {
 
     describe("Base Widget (base_widget.spec.js)", function() {
@@ -80,37 +78,6 @@ define([
         expect(widget.activate).to.be.instanceof(Function);
         expect(widget.destroy).to.be.instanceof(Function);
         expect(widget.render).to.be.instanceof(Function);
-      });
-
-      it("has methods to indicate change in the widget state", function(){
-
-        var widget = new BaseWidget({view: new ItemView()});
-
-        expect(widget.changeState).to.be.Function;
-        expect(widget.widgetStateHandlers).to.be.defined;
-
-        var $w = widget.render().$el;
-
-        $("#test").append($w);
-
-        widget.changeState({state: WidgetStates.WAITING});
-        expect($w.find(".s-loading").length).to.eql(1);
-
-        widget.changeState({state: WidgetStates.RESET});
-        expect($w.find(".s-loading").length).to.eql(0);
-
-        expect(widget._states.length).to.be.eql(0);
-
-        widget.widgetStateHandlers[WidgetStates.ERRORED].revert = sinon.spy();
-        widget.changeState({state: WidgetStates.ERRORED});
-        expect($w.hasClass("s-error")).to.be.true;
-
-
-        widget.changeState({state: WidgetStates.RESET});
-
-        expect(widget.widgetStateHandlers[WidgetStates.ERRORED].revert.called).to.be.true;
-        expect(widget._states.length).to.be.eql(0);
-
       });
 
 

@@ -38,7 +38,7 @@ define(['./base_graph',
 
         var data, xLabels, x, y, xAxis, yAxis, chart, line;
 
-        data = _.clone(this.graphData);
+        data = _.clone(this.model.get("graphData"));
 
         this.hIndex = data[_.indexOf(data, _.findWhere(data, function (d) {
           if (d.x > d.y) {
@@ -172,7 +172,7 @@ define(['./base_graph',
 
         var data, max, x, y, xAxis, yAxis;
 
-        data = _.clone(this.graphData);
+        data = _.clone(this.model.get("graphData"));
 
         max = data[data.length - 1].x;
 
@@ -338,7 +338,7 @@ define(['./base_graph',
       buildSlider: function () {
 
         var that = this;
-        var data = _.clone(this.graphData);
+        var data = _.clone(this.model.get("graphData"));
         var max = data[data.length - 1].x;
         var min = data[0].x;
 
@@ -376,9 +376,8 @@ define(['./base_graph',
 
       submitFacet: function () {
         //find citation limit
-        var limit = this.graphData[this.$(".slider").slider("value") - 1].y;
-        this.model.set("value", "[" + limit + " TO 9999999]");
-        this.trigger('itemClicked');
+        var limit = this.model.get("graphData")[this.$(".slider").slider("value") - 1].y;
+        this.trigger('facet-applied', "[" + limit + " TO 9999999]");
       }
     })
 

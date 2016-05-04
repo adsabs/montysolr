@@ -1,331 +1,655 @@
 define([
+    "redux",
+    "js/widgets/facet/actions",
+    "js/widgets/facet/reducers",
+    "js/widgets/facet/create_store",
+    "js/wraps/author_facet",
     'js/bugutils/minimal_pubsub',
-    './test_json/test1',
-    './test_json/test2',
-    'js/widgets/facet/widget',
-    'js/widgets/base/paginated_multi_callback_widget',
-    'js/widgets/facet/container_view',
-    'js/widgets/facet/collection',
-    'hbs!js/widgets/facet/templates/logic-container',
-    'js/widgets/base/tree_view',
-    'js/widgets/facet/tree_view',
-  ],
+    'react',
+    'react-dom'
+    ],
 
-  function (
-    MinimalPubsub,
-    test1,
-    test2,
-    FacetWidget,
-    FacetWidgetSuperClass,
-    FacetContainerView,
-    FacetCollection,
-    LogicSelectionContainerTemplate,
-    TreeView,
-    FacetTreeView
-    ) {
+  function(
+    Redux,
+    Actions,
+    Reducers,
+    createStore,
+    AuthorFacet,
+    MinSub,
+    React,
+    ReactDOM
+  ) {
 
-    describe("FacetWidget - base (facet_widget.spec.js)", function () {
+    describe("FacetWidget", function() {
 
-
-      var minsub, testId;
-      beforeEach(function(done) {
-        //var testId = 'test' + Math.random().toString(16).split('.')[1];
-        //var testEl = $('<div id="' +  testId + '">hello</div>');
-        testId = '#test';
-        //$('#test-area').append(testEl);
-        minsub = new (MinimalPubsub.extend({
-          request: function(apiRequest) {
-            var ret;
-            if (this.requestCounter % 2 === 0) {
-              ret = test1();
-            } else {
-              ret = test2();
-            }
-            // modify the test to contain only 5 pairs of facet values
-            _.each(_.keys(ret.facet_counts.facet_fields), function(fKey) {
-              ret.facet_counts.facet_fields[fKey] = Array.prototype.slice.call(ret.facet_counts.facet_fields[fKey], 0, 10);
-            });
-
-            return ret;
+      var sampleResponse = {
+        "responseHeader": {
+          "status": 0,
+          "QTime": 18,
+          "params": {
+            "facet.limit": "25",
+            "q": "author:\"accomazzi,a\"",
+            "facet.field": "author_facet_hier",
+            "fl": "id",
+            "facet.prefix": "0/",
+            "sort": "date desc",
+            "facet.mincount": "1",
+            "facet": "true",
+            "wt": "json",
+            "facet.offset": "0"
           }
-        }))({verbose: false});
-        done();
-      });
-
-      afterEach(function(done) {
-
-        var ta = $(testId);
-        if (ta) {
-          ta.empty();
+        },
+        "response": {
+          "numFound": 186,
+          "start": 0,
+          "docs": [{
+              "id": "11310415"
+              }, {
+              "id": "11266285"
+              }, {
+              "id": "11121250"
+              }, {
+              "id": "11057812"
+              }
+            ]
+        },
+        "facet_counts": {
+          "facet_queries": {},
+          "facet_fields": {
+            "author_facet_hier": ["0/Accomazzi, A", 186, "0/Kurtz, M", 151, "0/Grant, C", 146, "0/Murray, S", 142]
+          },
+          "facet_dates": {},
+          "facet_ranges": {}
         }
-        minsub.destroy();
-        done();
-      });
+      }
 
-      it("should return FacetWidget", function(done) {
+      it("should have the appropriate default state given individual widget presets", function() {
 
-        var w = new FacetWidget({
-          view: new FacetContainerView({
-            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
-            collection: new FacetCollection(),
-            displayNum: 3,
-            maxDisplayNum: 10,
-            openByDefault: true,
-            showOptions: true
-          }),
-         defaultQueryArguments: {
-           'facet.field': 'foo'
-         }
-        });
+        var store = createStore();
 
-        expect(w).to.be.instanceof(FacetWidget);
-        expect(w).to.be.instanceof(FacetWidgetSuperClass);
-
-        $w = $(w.render().el);
-        expect($w.find('h5').text().trim()).to.be.equal('Facet Title');
-        expect($w.find('.widget-body').text().indexOf('No content to display.') > -1).to.be.true;
-        done();
-      });
-
-      it("should throw errors when you instantiate it without proper variables", function() {
-        expect(function() {new FacetWidget()}).to.throw.Error;
-      });
-
-
-      it("communicates with pubsub", function(done) {
-        var widget = new FacetWidget({
-          defaultQueryArguments: {
-            "facet": "true",
-            "facet.field": "author_facet_hier",
-            "facet.mincount": "1"
-          },
-          view: new FacetContainerView({
-            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
-            collection: new FacetCollection(),
-            displayNum: 3,
-            maxDisplayNum: 10,
-            openByDefault: true,
-            showOptions: true
-          })
-        });
-
-        sinon.spy(widget, "dispatchRequest");
-        sinon.spy(widget, "processResponse");
-
-        widget.activate(minsub.beehive.getHardenedInstance());
-
-        //$(testId).append(widget.render());
-
-        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
-        expect(widget.dispatchRequest.called).to.be.true;
-        expect(widget.processResponse.called).to.be.true;
-        expect(widget.processResponse.args[0][0].getApiQuery().url()).to.equal("facet=true&facet.field=author_facet_hier&facet.mincount=1&q=star&rows=20&start=0");
-        done();
-
-      });
-
-      it("interacts with the view (sets a new query)", function(done) {
-        var widget = new FacetWidget({
-          defaultQueryArguments: {
-            "facet": "true",
-            "facet.field": "author_facet_hier",
-            "facet.mincount": "1"
-          },
-          view: new FacetContainerView({
-            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
-            collection: new FacetCollection(),
-            displayNum: 3,
-            maxDisplayNum: 10,
-            openByDefault: true,
-            showOptions: true,
-
-          })
-        });
-
-        sinon.spy(widget, "_dispatchRequest");
-        sinon.spy(widget, "processResponse");
-        sinon.spy(widget, "dispatchNewQuery");
-
-        widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
-
-        var $w = $(widget.render().el);
-        $(testId).append($w);
-
-        // options are there and visible
-        expect($w.find('.widget-options.bottom:first').hasClass('hide')).to.be.false;
-        expect($w.find('.item-view').length).to.be.equal(5);
-        expect($w.find('.item-view').not('.hide').length).to.be.equal(3);
-
-
-        $w.find('button[wtarget="ShowMore"]').click();
-        setTimeout(
-          function() {
-            expect($w.find('.item-view').not('.hide').length).to.be.equal(6);
-            expect($w.find('.item-view').filter('.hide').length).to.be.equal(4);
-            expect(widget.collection.models[0].get('title')).to.be.equal('0/Head, J');
-            expect(widget.collection.models[5].get('title')).to.be.equal('0/Wang, J');
-
-            expect(widget._dispatchRequest.callCount).to.be.equal(2);
-            expect(widget.processResponse.callCount).to.be.equal(2);
-
-            // select one item - this should trigger new query
-//            $w.find('.item-view:eq(5) input').click();  // XXX for some reason this works only if it is appended to the page
-//            expect(widget.dispatchNewQuery.callCount).to.be.equal(1);
-//            expect(widget.dispatchNewQuery.args[0][0].get('q')).to.be.eql(["(star AND 0\\/Wang,\\ J)"]);
-//            expect(widget.processResponse.callCount).to.be.equal(3);
-
-
-            // which updates the view (we should see 3 new, 2 hidden new items)
-//            expect($w.find('.widget-options.bottom:first').hasClass('hide')).to.be.false;
-//            expect($w.find('.item-view').length).to.be.equal(5);
-//            expect($w.find('.item-view').filter('.hide').length).to.be.equal(2);
-
-            done();
-          }
-        ,100);
-
-      });
-
-      it("handles logical selection", function(done) {
-
-        var widget = new FacetWidget({
-          defaultQueryArguments: {
-            "facet": "true",
-            "facet.field": "author_facet_hier",
-            "facet.mincount": "1"
-          },
-          view: new FacetContainerView({
-            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
-            collection: new FacetCollection(),
-            displayNum: 3,
-            maxDisplayNum: 10,
-            openByDefault: true,
-            showOptions: true,
-            template: LogicSelectionContainerTemplate,
-            logicOptions: {single: ["limit to", "exclude"], multiple: ["and", "or", "exclude"]}
-          })
-        });
-        sinon.spy(widget, "dispatchNewQuery");
-
-        widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
-
-        var $w = $(widget.render().el);
-        $('#test').append($w);
-
-        $w.find('.item-view:first input').click();
-        expect($w.find('input[value="limit to"]').is(':visible')).to.be.true;
-
-        $w.find('input[value="limit to"]').attr('checked', 'checked').trigger('click');
-        //i don't understand why it is not closing (it does when i click manually)
-        //expect($w.find('input[value="limit to"]').is(':visible')).to.be.false;
-
-        // TODO: check the query?
-        // we expect to see a new query
-        expect(widget.dispatchNewQuery.called).to.be.true;
-
-        done();
-      });
-
-      it("knows to handle hierarchial views", function(done) {
-
-        var widget = new FacetWidget({
-          defaultQueryArguments: {
-            "facet": "true",
-            "facet.field": "author_facet_hier",
-            "facet.mincount": "1"
-          },
-          view: new FacetContainerView({
-            childView: FacetTreeView,
-            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
-            collection: new TreeView.CollectionClass(),
-            displayNum: 3,
-            maxDisplayNum: 10,
-            openByDefault: true,
-            showOptions: true,
-            template: LogicSelectionContainerTemplate,
-            logicOptions: {single: ["limit to", "exclude"], multiple: ["and", "or", "exclude"]}
-          })
-        });
-        sinon.spy(widget, "handleTreeExpansion");
-        sinon.spy(widget, "processFacetResponse");
-
-        widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
-
-        var $w = $(widget.render().el);
-        $('#test').append($w);
-
-        expect($w.find('input').length).to.be.gt(0);
-
-        $w.find('.widget-item:first').click();
-        expect(widget.handleTreeExpansion.called).to.be.true;
-        expect(widget.processFacetResponse.called).to.be.true;
-        expect(widget.processFacetResponse.args[1][0].getApiQuery().get('facet.prefix')).to.be.eql(['1/Head, J/']);
-
-        done();
-      });
-
-      it("accepts chain of value processors", function(done) {
-        var widget = new FacetWidget({
-          defaultQueryArguments: {
-            "facet": "true",
-            "facet.field": "author_facet_hier",
-            "facet.mincount": "1"
-          },
-          view: new FacetContainerView({
-            model: new FacetContainerView.ContainerModelClass({title: "Facet Title"}),
-            collection: new FacetCollection(),
-            displayNum: 3,
-            maxDisplayNum: 10,
-            openByDefault: true,
-            showOptions: true
-          }),
-          responseProcessors: [
-            function(v) {return 'x/' + v},
-            function(v) {vv = v.split('/'); return vv[vv.length-1]}
-          ]
-        });
-
-        widget.activate(minsub.beehive.getHardenedInstance());
-        minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'star'}));
-
-        expect(widget.collection.models[0].get('title')).to.be.equal('x/Head, J');
-        done();
-      });
-
-
-      describe("facet collection", function () {
-        /*this is checkbox-type data; data for graphs (change-apply) will consist of a series of 
-         x-y values for aggregation and visualization*/
-        var fakeFacetData = [
+        expect(JSON.stringify(store.getState())).to.eql(JSON.stringify(
           {
-            title          : " Wang, J (1496)",
-            valWithoutSlash: "Wang, J",
-            value          : "0/Wang, J"
+            "config": {
+              "preprocessors": [],
+              "hierMaxLevels": 1,
+              "openByDefault": false
+            },
+            "state": {
+              "open": false,
+              "visible": 5,
+              "selected": []
+            },
+            "pagination": {
+              "finished": false
+            },
+            "children": [],
+            "facets": {}
           }
-        ];
+        ));
 
-        var c = new FacetCollection(fakeFacetData);
+        //now provide it with author config
+        var widget = AuthorFacet();
 
-        it("should have text preprocessing functions for raw solr data", function () {
-          expect(c).to.have.property("titleCase");
-          expect(c).to.have.property("allCaps");
-          expect(c).to.have.property("removeSlash");
+        //ensure that the config object is located in each widget's store rather than on the widget object itself
 
+        expect(Object.keys(widget.store.getState())).to.eql(["config", "state", "pagination", "children", "facets"]);
+
+        expect(JSON.stringify(widget.store.getState())).to.eql(JSON.stringify({
+            "config": {
+              "preprocessors": [],
+              "hierMaxLevels": 2,
+              "facetField": "author_facet_hier",
+              "openByDefault": true,
+              "facetTitle": "Authors",
+              "logicOptions": {
+                "single": [
+                  "limit to",
+                  "exclude"
+                ],
+                "multiple": [
+                  "and",
+                  "or",
+                  "exclude"
+                ]
+              }
+            },
+            "state": {
+              "open": false,
+              "visible": 5,
+              "selected": []
+            },
+            "pagination": {
+              "finished": false
+            },
+            "children": [],
+            "facets": {}
+          }))
+
+      });
+
+      it("should handle data request and response events properly", function() {
+
+        var widget = AuthorFacet();
+
+        widget.store.dispatch(Actions().data_requested());
+
+        //only pagination "loading" key is changed
+        expect(JSON.stringify(_.pick(widget.store.getState(), 'state', 'pagination'))).to.eql(
+          JSON.stringify({
+            "state": {
+              "open": false,
+              "visible": 5,
+              "selected": []
+            },
+            "pagination": {
+              "state": "loading",
+              "finished": false
+            }
+          })
+        );
+
+        widget.store.dispatch(Actions().data_received(sampleResponse));
+
+        expect(JSON.stringify(widget.store.getState())).to
+        .eql(JSON.stringify(
+                        {
+                "config": {
+                  "preprocessors": [],
+                  "hierMaxLevels": 2,
+                  "facetField": "author_facet_hier",
+                  "openByDefault": true,
+                  "facetTitle": "Authors",
+                  "logicOptions": {
+                    "single": [
+                      "limit to",
+                      "exclude"
+                    ],
+                    "multiple": [
+                      "and",
+                      "or",
+                      "exclude"
+                    ]
+                  }
+                },
+                "state": {
+                  "open": false,
+                  "visible": 5,
+                  "selected": []
+                },
+                "pagination": {
+                  "state": "success",
+                  "finished": true
+                },
+                "children": [
+                  "0/Accomazzi, A",
+                  "0/Kurtz, M",
+                  "0/Grant, C",
+                  "0/Murray, S"
+                ],
+                "facets": {
+                  "0/Accomazzi, A": {
+                    "name": "Accomazzi, A",
+                    "value": "0/Accomazzi, A",
+                    "count": 186,
+                    "pagination": {
+                      "finished": false
+                    },
+                    "children": [],
+                    "state": {
+                      "open": false,
+                      "visible": 5,
+                      "selected": []
+                    }
+                  },
+                  "0/Kurtz, M": {
+                    "name": "Kurtz, M",
+                    "value": "0/Kurtz, M",
+                    "count": 151,
+                    "pagination": {
+                      "finished": false
+                    },
+                    "children": [],
+                    "state": {
+                      "open": false,
+                      "visible": 5,
+                      "selected": []
+                    }
+                  },
+                  "0/Grant, C": {
+                    "name": "Grant, C",
+                    "value": "0/Grant, C",
+                    "count": 146,
+                    "pagination": {
+                      "finished": false
+                    },
+                    "children": [],
+                    "state": {
+                      "open": false,
+                      "visible": 5,
+                      "selected": []
+                    }
+                  },
+                  "0/Murray, S": {
+                    "name": "Murray, S",
+                    "value": "0/Murray, S",
+                    "count": 142,
+                    "pagination": {
+                      "finished": false
+                    },
+                    "children": [],
+                    "state": {
+                      "open": false,
+                      "visible": 5,
+                      "selected": []
+                    }
+                  }
+                }
+              }
+        ))
+
+        //now test fetching data for child facet
+        widget.store.dispatch(Actions().data_requested("0/Accomazzi, A"));
+
+        expect(JSON.stringify(widget.store.getState().facets["0/Accomazzi, A"])).to.eql(JSON.stringify({
+          "name": "Accomazzi, A",
+          "value": "0/Accomazzi, A",
+          "count": 186,
+          "pagination": {
+            "state": "loading",
+            "finished": false
+          },
+          "children": [],
+          "state": {
+            "open": false,
+            "visible": 5,
+            "selected": []
+          }
+        }));
+
+        //test hierarchical facet data received
+        widget.store.dispatch(Actions().data_received(sampleResponse, "0/Accomazzi, A"));
+
+        expect(JSON.stringify(widget.store.getState().facets["0/Accomazzi, A"])).to.eql(JSON.stringify({
+            "name": "Accomazzi, A",
+            "value": "0/Accomazzi, A",
+            "count": 186,
+            "pagination": {
+              "state": "success",
+              "finished": true
+            },
+            "children": [
+              "0/Accomazzi, A",
+              "0/Kurtz, M",
+              "0/Grant, C",
+              "0/Murray, S"
+            ],
+            "state": {
+              "open": false,
+              "visible": 5,
+              "selected": []
+            }
+          }
+
+        ));
+
+      });
+
+      it("should only set the finished param in the pagination state if fewer facets return than were requested", function() {
+
+        var widget = AuthorFacet();
+
+        var shortResponse = _.cloneDeep(sampleResponse);
+
+        //should return only 5 facets instead of the requested 25
+        shortResponse.facet_counts.facet_fields.author_facet_hier = shortResponse.facet_counts.facet_fields.author_facet_hier.slice(0, 10);
+
+        widget.store.dispatch(Actions().data_received(shortResponse));
+
+        expect(JSON.stringify(widget.store.getState().pagination)).to.eql(JSON.stringify({
+          state: "success",
+          finished: true
+        }));
+
+        //finished = true got set bc response number was < 25
+        //now mock a longer response
+        var widget = AuthorFacet();
+        var longResponse = _.cloneDeep(sampleResponse);
+        //representing 25 responses
+        longResponse.facet_counts.facet_fields.author_facet_hier = _.range(50).map(function(n) {
+          if (n % 2 === 0) {
+            return "0/fake name"
+          } else {
+            return 5
+          }
         });
-        it("should initiate a facet model with appropriate default values", function () {
-          //for change-apply containers
-          expect(c.models[0].attributes).to.include.key("newValue");
-          //for logic containers
-          expect(c.models[0].attributes).to.include.key("selected");
 
+        widget.store.dispatch(Actions().data_received(longResponse));
+
+        expect(JSON.stringify(widget.store.getState().pagination)).to.eql(JSON.stringify({
+          "state": "success",
+          "finished": false
+        }))
+
+      });
+
+      it("should mediate requests/responses through the widget's connection with pub sub", function() {
+
+        var longResponse = _.cloneDeep(sampleResponse);
+        //representing 25 responses
+        longResponse.facet_counts.facet_fields.author_facet_hier = _.range(40).map(function(n) {
+          if (n % 2 === 0) {
+            return "0/fake name"
+          } else {
+            return 5
+          }
+        });
+
+        var minsub = new(MinSub.extend({
+          request: sinon.spy()
+        }))({
+          verbose: false
+        });
+
+        var widget = AuthorFacet();
+        widget.activate(minsub.beehive.getHardenedInstance());
+
+        //set in some initial data
+        widget.store.dispatch(widget.actions.data_received(longResponse));
+
+        //request
+        minsub.publish(minsub.INVITING_REQUEST, new minsub.T.QUERY({
+          q: 'star'
+        }));
+
+        //initial data should be totally cleared
+        expect(Object.keys(widget.store.getState().facets).length).to.eql(0);
+
+        //request was made
+        expect(JSON.stringify(minsub.request.args[0][0].get("query").toJSON())).to.eql(JSON.stringify({
+          "q": [
+              "star"
+            ],
+          "facet": [
+              "true"
+            ],
+          "facet.mincount": [
+              "1"
+            ],
+          "facet.limit": [
+              20
+            ],
+          "fl": [
+              "id"
+            ],
+          "facet.prefix": [
+              "0/"
+            ],
+          "facet.field": [
+              "author_facet_hier"
+            ],
+          "facet.offset": [
+              0
+            ],
+          "rows": [
+              1
+            ]
+        }))
+
+        //facet state was toggled open, since it's open by default
+        expect(widget.store.getState().state.open).to.be.true;
+
+        //response
+        widget.store.dispatch(widget.actions.data_received(longResponse));
+
+        //now test pagination
+        widget.store.dispatch(widget.actions.fetch_data());
+
+        expect(JSON.stringify(minsub.request.args[1][0].get("query").toJSON())).to.eql(JSON.stringify({
+          "q": [
+                "star"
+              ],
+          "facet": [
+                "true"
+              ],
+          "facet.mincount": [
+                "1"
+              ],
+          "facet.limit": [
+                20
+              ],
+          "fl": [
+                "id"
+              ],
+          "facet.prefix": [
+                "0/"
+              ],
+          "facet.field": [
+                "author_facet_hier"
+              ],
+          "facet.offset": [
+                20
+              ],
+          "rows": [
+                1
+              ]
+        }));
+
+      });
+
+      it("should fetch the first set of facets automatically when facet or facet child is toggled for the first time", function() {
+
+        var store = createStore();
+        var actions = Actions();
+        actions.fetch_data = sinon.spy(function() {
+          return {
+            type: "fake"
+          }
+        });
+
+        expect(actions.fetch_data.callCount).to.eql(0);
+        expect(store.getState().state).to.eql({
+          open: false,
+          visible: 5,
+          selected: []
         })
 
+        store.dispatch(actions.toggle_facet());
+        expect(actions.fetch_data.callCount).to.eql(1);
+
+        expect(store.getState().state).to.eql({
+          open: true,
+          visible: 5,
+          selected: []
+        })
+
+        store.dispatch(actions.toggle_facet(false));
+        expect(store.getState().state).to.eql({
+          open: false,
+          visible: 5,
+          selected: []
+        })
+
+        //now do the same thing, but this time with pre-loaded facets, nothing should be requested
+
+        store.dispatch(Actions().data_received(sampleResponse));
+
+        store.dispatch(actions.toggle_facet());
+        expect(store.getState().state).to.eql({
+          open: true,
+          visible: 5,
+          selected: []
+        })
+
+        expect(actions.fetch_data.callCount).to.eql(1);
+
       });
 
+      it("should have an action to totally reset the widget state while maintaining the individual widget config", function() {
 
-    })
+        var widget = AuthorFacet();
+
+        widget.store.dispatch(widget.actions.data_received(sampleResponse));
+        widget.store.dispatch(widget.actions.reset_state());
+        expect(JSON.stringify(widget.store.getState())).to.eql(JSON.stringify(
+                  {
+          "config": {
+            "preprocessors": [],
+            "hierMaxLevels": 2,
+            "facetField": "author_facet_hier",
+            "openByDefault": true,
+            "facetTitle": "Authors",
+            "logicOptions": {
+              "single": [
+                "limit to",
+                "exclude"
+              ],
+              "multiple": [
+                "and",
+                "or",
+                "exclude"
+              ]
+            }
+          },
+          "state": {
+            "open": false,
+            "visible": 5,
+            "selected": []
+          },
+          "pagination": {
+            "finished": false
+          },
+          "children": [],
+          "facets": {}
+        }));
+});
+
+      it("should automatically open, load and select children of hierarchical facets when they are selected", function() {
+        var widget = AuthorFacet();
+        //happens in the view
+        $("#test").append(widget.render().el);
+
+        widget.store.dispatch(widget.actions.data_received(sampleResponse));
+        widget.store.dispatch(widget.actions.select_facet("0/Accomazzi, A"));
+
+        var hierarchicalResponse = _.cloneDeep(sampleResponse);
+        hierarchicalResponse.facet_counts.facet_fields.author_facet_hier = ["1/Accomazzi, A/Accomazzi, Alberto", 5, "1/Accomazzi, A/Accomazzi, A A", 10]
+        widget.store.dispatch(widget.actions.data_received(hierarchicalResponse, "0/Accomazzi, A"));
+
+
+        //should be closed by default
+        expect($("#test").find(".facet__icon:first").hasClass("facet__icon--closed")).to.be.true;
+        expect($("#test").find(".facet__icon:first").hasClass("facet__icon--open")).to.be.false;
+
+        //open
+        widget.store.dispatch(widget.actions.toggle_facet());
+
+        expect($("#test").find(".facet__icon:first").hasClass("facet__icon--closed")).to.be.false;
+        expect($("#test").find(".facet__icon:first").hasClass("facet__icon--open")).to.be.true;
+
+        React.addons.TestUtils.Simulate.click(document.querySelector('input[type=checkbox]'));
+
+        expect(widget.store.getState().state.selected).to
+        .eql(["0/Accomazzi, A", "1/Accomazzi, A/Accomazzi, Alberto", "1/Accomazzi, A/Accomazzi, A A"]);
+
+        //but logic dropdown should show as if only 1 choice were selected
+        expect($("#test").find(".facet__dropdown label").map(function(i, el){return el.textContent}).get()).to
+        .eql([" limit to", " exclude"]);
+
+        $("#test").empty();
+
+      })
+
+      it("should be able to submit facets", function() {
+
+        var widget = AuthorFacet();
+        widget.store.dispatch(widget.actions.data_received(sampleResponse));
+        widget.store.dispatch(widget.actions.select_facet("0/Accomazzi, A"));
+        expect(JSON.stringify(widget.store.getState().state)).to.eql(JSON.stringify({
+          open: false,
+          visible: 5,
+          selected: ["0/Accomazzi, A"]
+        }));
+        widget.store.dispatch(widget.actions.select_facet("0/Kurtz, M"));
+        expect(JSON.stringify(widget.store.getState().state)).to.eql(JSON.stringify({
+          open: false,
+          visible: 5,
+          selected: ["0/Accomazzi, A", "0/Kurtz, M"]
+        }));
+
+        widget.setCurrentQuery(new MinSub.prototype.T.QUERY({
+          q: 'star'
+        }))
+        widget.dispatchNewQuery = sinon.spy();
+        widget.store.dispatch(widget.actions.submit_filter("or"));
+        expect(JSON.stringify(widget.dispatchNewQuery.args[0][0])).to.eql(JSON.stringify({
+          "q": [
+                  "star"
+                ],
+          "fq_author": [
+                  "(author_facet_hier:\"0/Accomazzi, A\" OR author_facet_hier:\"0/Kurtz, M\")"
+                ],
+          "__author_facet_hier_fq_author": [
+                  "OR",
+                  "author_facet_hier:\"0/Accomazzi, A\"",
+                  "author_facet_hier:\"0/Kurtz, M\""
+                ],
+          "fq": [
+                  "{!type=aqp v=$fq_author}"
+                ]
+        }))
+
+      });
+
+      it("should only submit necessary facets on submit (for hierarchical facets, avoid sending children)", function() {
+
+        var widget = AuthorFacet();
+
+        widget.store.dispatch(widget.actions.data_received(sampleResponse));
+        //now mock a hierarchical child response
+        var hierarchicalResponse = _.cloneDeep(sampleResponse);
+        hierarchicalResponse.facet_counts.facet_fields.author_facet_hier = ["1/Accomazzi, A/Accomazzi, Alberto", 5, "1/Accomazzi, A/Accomazzi, A A", 10]
+        widget.store.dispatch(widget.actions.data_received(hierarchicalResponse, "0/Accomazzi, A"));
+
+        expect(widget.store.getState().facets["0/Accomazzi, A"].children).to.eql(
+          [
+          "1/Accomazzi, A/Accomazzi, Alberto",
+          "1/Accomazzi, A/Accomazzi, A A"
+        ]);
+
+        widget.store.dispatch(widget.actions.select_facet("0/Accomazzi, A"));
+
+        //should contain parent AND children
+        expect(widget.store.getState().state.selected).to.eql([
+          "1/Accomazzi, A/Accomazzi, Alberto",
+          "1/Accomazzi, A/Accomazzi, A A",
+          "0/Accomazzi, A"
+        ]);
+
+        widget.setCurrentQuery(new MinSub.prototype.T.QUERY({
+          q: 'star'
+        }));
+        widget.dispatchNewQuery = sinon.spy();
+        widget.submitFilter("and");
+
+        //only submitting parent
+        expect(JSON.stringify(widget.dispatchNewQuery.args[0][0])).to.eql(JSON.stringify({
+            "q": [
+              "star"
+            ],
+            "fq_author": [
+              "(author_facet_hier:\"0/Accomazzi, A\")"
+            ],
+            "__author_facet_hier_fq_author": [
+              "AND",
+              "author_facet_hier:\"0/Accomazzi, A\""
+            ],
+            "fq": [
+              "{!type=aqp v=$fq_author}"
+            ]
+          }))
+
+      })
+
+    });
 
   });
