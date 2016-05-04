@@ -59,9 +59,6 @@
 
 .facet-title {
   display: inline-block;
-  max-width: 55%;
-  //improve mouseover interaction
-  width: 55%;
   cursor:pointer;
   line-height: 18px;
 
@@ -193,11 +190,12 @@
 
 .s-widget h3 {
   @extend .secondary-header;
-  margin: 0 6px;
+  font-size: 18px;
+  letter-spacing: .05rem;
+  margin: 0 3px;
   color: $text-color;
   @media(min-width: $screen-sm-max) and (max-width: $screen-md-max) {
     font-size: 16px;
-    margin: 0;
   }
 }
 
