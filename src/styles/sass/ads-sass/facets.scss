@@ -43,12 +43,6 @@
   position: relative;
 }
 
-.s-item-children label {
-  position: relative;
-  left : 3%;
-  width: 94% !important;
-}
-
 
 .s-facet-label {
   .facet-amount {
@@ -58,10 +52,9 @@
 }
 
 .facet-title {
-  display: inline-block;
-  cursor:pointer;
-  line-height: 18px;
-
+  display:inline-block;
+  max-width: 100px;
+  overflow: auto;
 }
 .widget-body .item-view {
   margin-bottom: 4px;
