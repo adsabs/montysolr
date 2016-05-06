@@ -198,31 +198,11 @@ define([
           }
         }
 
-        // for the first level display only (nested levels are triggered through toggleChildren)
-        //if (paginator.getCycle() <= 1 && this.view === view) {
-        //  view.displayMore(this.view.displayNum);
-        //}
-
         // with facets, it is hard to decide whether there is more data waiting to be fetched
         if (facetCollection.length < view.displayNum) {
           view.disableShowMore();
         }
         else {
-          // this assumes facets are exclusive, ie their counts sum up to the total
-          //if (info.numFound > 0) {
-          //  // count the number of all facets we already have
-          //  var total = 0;
-          //  collection.each(function(model) {
-          //    total += model.attributes.count;
-          //  });
-          //  if (total < info.numFound) {
-          //    view.enableShowMore();
-          //  }
-          //  else {
-          //    view.disableShowMore();
-          //  }
-          //}
-
           view.enableShowMore();
         }
       },
@@ -404,14 +384,20 @@ define([
         // we need to prevent that
 
         var self = this;
+		var object_names = {};
 
         if (conditions && _.keys(conditions).length > 0) {
 
           conditions = _.values(conditions);
           _.each(conditions, function(c, i, l) {
-            l[i] = self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value);
+			  l[i] = self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value);
+			  if (self.facetField == 'simbad_object_facet_hier') {
+			  	object_names[self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value)] = c.title;
+			  }
           });
-
+          // Above: create a hash mapping self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value)
+		  // to self.queryUpdater.escapeInclWhitespace(c.title), and later on replace the values in
+		  // __simbad_object_facet_hier_fq_simbad_object_facet_hier attribute 1, 2 ... (not 0)
           q = q.clone();
 
           var fieldName = 'fq_' + this.facetField;
@@ -444,7 +430,21 @@ define([
             }
             q.set('fq', fqs);
           }
-
+		  
+		  if (self.facetField == 'simbad_object_facet_hier') {
+			  var current_values = q.get('__simbad_object_facet_hier_fq_simbad_object_facet_hier');
+			  var new_values = [];
+			  for (var e in current_values) {
+				  var val = current_values[e];
+				  var new_val = val;
+				  if (val in object_names) {
+					  new_val = object_names[val];
+				  };
+				  new_values[e] = new_val;
+			  };
+			  q.set('__simbad_object_facet_hier_fq_simbad_object_facet_hier', new_values);
+		  }
+		  
           this.dispatchNewQuery(paginator.cleanQuery(q));
 
           analytics('send', 'event', 'interaction', 'facet-applied', JSON.stringify({name : this.facetField, logic : operator, conditions : conditions }));
