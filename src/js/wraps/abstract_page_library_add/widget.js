@@ -38,7 +38,7 @@ define([
           // know whether to show library panel
           this.model.set("loggedIn", true);
           //fetch list of libraries
-          var libraryData = this.getBeeHive().getObject("LibraryController").getAllMetadata();
+          var libraryData = this.getBeeHive().getObject("LibraryController").getLibraryMetadata();
           this.processLibraryInfo(libraryData);
         }
 

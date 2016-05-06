@@ -170,7 +170,7 @@ define([
 
         if (leftState === "open" && rightState === "open") {
           $middleCol.removeClass(this._returnBootstrapClasses)
-            .addClass("col-md-7 col-sm-8")
+            .addClass("col-md-9")
         }
         else if (leftState === "closed" && rightState === "open") {
           $middleCol.removeClass(this._returnBootstrapClasses)
