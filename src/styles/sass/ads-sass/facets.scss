@@ -92,7 +92,8 @@
   font-weight: normal;
   margin: 0px;
   display: inline-block;
-  width: 150px;
+  max-width: 175px;
+  width: 85%;
 }
 
 
@@ -112,9 +113,12 @@
 }
 
 .item-body {
-  padding: 5px 4%;
-  background: #F7F7F7;
+  padding: 0 0 10px 5%;
   @extend .clearfix;
+}
+
+.main-caret {
+  width: 25px;
 }
 
 .s-logic-dropdown {
@@ -140,8 +144,8 @@
   color: $brand-primary-faded !important;
 }
 
-.s-widget-options {
-  height: 0px
+.widget-options {
+  width: 90%;
 }
 
 .s-widget-meta .dropdown-menu p {
@@ -158,12 +162,14 @@
   cursor:pointer
 }
 
-
+.facet-container .s-widget-body {
+  //this targets only the traditional
+  //facets until this css can be refactored
+  padding-left: 10%;
+}
 
 .s-widget-body {
-  padding-left: 4%;
-  padding-top: 11px;
-
+  padding-top: 10px;
 }
 
 .s-citation-padding {
@@ -186,13 +192,11 @@
 
 .s-widget h3 {
   @extend .secondary-header;
-  font-size: 18px;
+  font-size: 20px;
   letter-spacing: .05rem;
   margin: 0 3px;
   color: $text-color;
-  @media(min-width: $screen-sm-max) and (max-width: $screen-md-max) {
-    font-size: 16px;
-  }
+
 }
 
 .s-sort-widget label{
@@ -205,9 +209,6 @@
 
 .s-widget-container {
   position: relative;
-  @media(min-width: $screen-sm-max) and (max-width: $screen-md-max) {
-    font-size: 13px;
-  }
 }
 
 
@@ -217,6 +218,6 @@
     margin: 10px 0;
   }
 
-  padding-right: 6%;
+  padding: 0 3%;
   padding-bottom: 30px;
 }
