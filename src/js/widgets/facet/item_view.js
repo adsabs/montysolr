@@ -16,6 +16,10 @@ define(['underscore', 'js/widgets/base/item_view',
       'click .widget-item': "onClick"
     },
 
+    modelEvents : {
+      'change:title' : 'render'
+    },
+
     onClick: function(ev) {
       ev.stopPropagation();
       this.model.set('selected', ev.target.checked);

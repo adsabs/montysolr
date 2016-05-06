@@ -1,3 +1,4 @@
+
 define(['underscore',
   'marionette',
   'js/widgets/base/tree_view',
@@ -40,6 +41,10 @@ define(['underscore',
       'click .widget-item': "onClick",
       'click .item-caret ': "toggleChildren",
       'click .show-more': 'onShowMore'
+    },
+
+    modelEvents : {
+      'change:title' :  'render'
     },
 
     onClick: function (ev) {

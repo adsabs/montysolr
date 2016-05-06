@@ -607,6 +607,7 @@ module.exports = function(grunt) {
           modulePattern : "../../js/(.*)",
           customModuleThreshold: {
 
+            "widgets/facet/widget.js" : 78,
             "apps/discovery/navigator.js": 30,
             "apps/discovery/router.js": 37,
             "widgets/facet/graph-facet/h_index_graph.js":2,
