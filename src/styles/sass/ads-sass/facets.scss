@@ -45,6 +45,7 @@
 
 
 .s-facet-label {
+  cursor:pointer;
   .facet-amount {
     float: right;
     color: $gray-light;
@@ -55,9 +56,10 @@
   display:inline-block;
   max-width: 100px;
   overflow: auto;
+  position: relative;
+  top: -1px;
 }
 .widget-body .item-view {
-  margin-bottom: 4px;
   cursor: pointer;
   max-width: 200px;
 }
@@ -89,14 +91,13 @@
 .s-widget label {
   font-weight: normal;
   margin: 0px;
-  width: 96%;
-  max-width: 200px;
-  display: inline;
+  display: inline-block;
+  width: 150px;
 }
 
 
 .tree .show-more button {
-  margin-left: 50%;
+  float: right;
 }
 
 
@@ -110,16 +111,17 @@
   color: $brand-primary-faded;
 }
 
-.s-item-children {
-  padding-left: 6%;
-
+.item-body {
+  padding: 5px 4%;
+  background: #F7F7F7;
+  @extend .clearfix;
 }
 
 .s-logic-dropdown {
-  position: relative;
-  top: -33px;
-  left: 75%;
-  z-index: $z-index-4;
+  position: absolute;
+  top: 10px;
+  right: -10px;
+  z-index: 4;
 
   button {
     padding: 0px;
@@ -128,7 +130,8 @@
 
 .s-dropdown-menu {
   padding: 15%;
-  min-width: 93px;
+  width: 95px;
+  min-width: 95px;
   top: 70%;
   left: 50%;
 }
