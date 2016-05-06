@@ -183,48 +183,63 @@ define([
 
         });
 
+        this.set("LibraryAdminView", function(widget){
+
+          //this is NOT navigable from outside, so library already has data
+          //only setting a nav event to hide previous widgets
+          app.getWidget("IndividualLibraryWidget").done(function(widget) {
+            widget.setSubView({subView : 'admin'});
+            app.getObject('MasterPageManager').show("LibrariesPage",
+                ["IndividualLibraryWidget", "UserNavbarWidget"]);
+            publishPageChange("libraries-page");
+          });
+
+        });
+
         this.set("IndividualLibraryWidget", function(widget, data) {
-          
+
           //where view is an object in the form
           // {subView: subView, id: id, publicView : false}
 
           data.publicView = data.publicView ? data.publicView : false;
 
-          if (!_.contains(["library", "admin", "metrics", "export", "visualization"], data.subView )){
-            throw new Error("no valid subview provided to individual library widget");
-          }
+          this.route = data.publicView ? "#/public-libraries/" + data.id : "#user/libraries/" + data.id;
 
-          if ( data.publicView ){
-            app.getWidget("IndividualLibraryWidget").done(function(widget) {
-              widget.setSubView(data);
-              //then, show library page manager
-              app.getObject('MasterPageManager').show("PublicLibrariesPage",
-                ["IndividualLibraryWidget"]);
+          app.getObject("LibraryController").getLibraryMetadata(data.id).done(function(metadata){
+
+            data.editRecords =  _.contains(["write", "admin", "owner"], metadata.permission) &&
+                                  !data.publicView;
+            //inform library list widget about the data
+            app.getWidget("LibraryListWidget").done(function(widget){
+              widget.setData(data);
+
+              if ( data.publicView ){
+                app.getWidget("IndividualLibraryWidget").done(function(widget) {
+                  widget.setSubView(data);
+                  //then, show library page manager
+                  app.getObject('MasterPageManager').show("PublicLibrariesPage",
+                      ["IndividualLibraryWidget", "LibraryListWidget"]);
+                });
+              }
+              //make sure user is signed in
+              else if (!redirectIfNotSignedIn()){
+
+                app.getWidget("IndividualLibraryWidget").done(function(widget) {
+                  widget.setSubView(data);
+                  app.getObject('MasterPageManager').show("LibrariesPage",
+                      ["IndividualLibraryWidget", "LibraryListWidget", "UserNavbarWidget"]);
+                  publishPageChange("libraries-page");
+                });
+              }
+
             });
-          }
-          //make sure user is signed in
-          else if (!redirectIfNotSignedIn()){
-
-            app.getWidget("IndividualLibraryWidget").done(function(widget) {
-              widget.setSubView(data);
-              app.getObject('MasterPageManager').show("LibrariesPage",
-                ["IndividualLibraryWidget", "UserNavbarWidget"]);
-              publishPageChange("libraries-page");
-            });
-
-          }
-
-          if (data.publicView) {
-            this.route = "#/public-libraries/" + data.id ;
-          }
-          else {
-            this.route = "#user/libraries/" + data.id;
-          }
+          });
         });
-
 
         //for external widgets shown by library
         function navToLibrarySubView (widget, data) {
+
+          var that = this;
 
           //actual name of widget to be shown in main area
           var widgetName = data.widgetName;
@@ -235,46 +250,45 @@ define([
           //id of library being shown
           var id = data.id;
           var publicView = data.publicView;
-          var bibcodes = data.bibcodes;
 
-          function renderLibrarySub(bibcodes){
-            app.getWidget(widgetName).done(function(widget){
-              widget.renderWidgetForListOfBibcodes(bibcodes, additional);
-            });
-            //then, set library tab to proper field
-            app.getWidget("IndividualLibraryWidget").done(function(widget){
-              widget.setSubView({ subView : subView, publicView : publicView, id : id });
-            })
-          }
+          //clear current data
+          app.getWidget(widgetName).done(function(widget){
+            if (widget.reset) widget.reset();
+            else if (widget.resetWidget) widget.resetWidget();
+          });
 
-          //first, tell export widget what to show
-          if (bibcodes && bibcodes.length) {
-            renderLibrarySub(bibcodes);
-          }
-          else if (id){
-            app.getObject("LibraryController").getLibraryData(id).done(function(bibcodes){
-              renderLibrarySub(bibcodes.documents);
-            });
-          }
-          else {
-            throw new Error("neither an identifying id for library nor the bibcodes themselves were provided to navigator, this is what was provided " + data);
-            return
-          }
-
+          //just stick the empty views in there, otherwise the interface lags as the lib controller
+          //paginates through the library bibcodes
           if (publicView){
             app.getObject('MasterPageManager').show("PublicLibrariesPage",
                 ["IndividualLibraryWidget", widgetName]);
             this.route = "#/public-libraries/" + data.id ;
           }
           else {
-
             app.getObject('MasterPageManager').show("LibrariesPage",
                 ["IndividualLibraryWidget", "UserNavbarWidget", widgetName]);
             this.route = "#user/libraries/" + data.id;
             publishPageChange("libraries-page");
           }
 
+          function renderLibrarySub(id){
+            app.getObject("LibraryController")
+                .getLibraryBibcodes(id)
+                .done(function (bibcodes){
+                  app.getWidget(widgetName).done(function(widget){
+                    widget.renderWidgetForListOfBibcodes(bibcodes, additional);
+                  });
+                  //then, set library tab to proper field'
+                  app.getWidget("IndividualLibraryWidget").done(function(widget){
+                    widget.setSubView({ subView : subView, publicView : publicView, id : id });
+                  });
+                });
+          }
+
+          renderLibrarySub(id);
+
         } // end navToLibrarySubview
+
 
         this.set("library-export", navToLibrarySubView);
         this.set("library-visualization", navToLibrarySubView);

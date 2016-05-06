@@ -46,9 +46,7 @@ function(
         this.listenTo(this.paginationModel, "change:page", this._onPaginationChange);
         this.listenTo(this.paginationModel, "change:perPage", this._onPaginationChange);
       }
-      this.on("collection:augmented", this.onCollectionAugmented);
     },
-
 
     model: ItemModel,
 
@@ -72,15 +70,16 @@ function(
       this.trigger("pagination:change");
     },
 
-    onCollectionAugmented: function () {
-      if (this.paginationModel) {
-        this._updateStartAndEndIndex();
-      }
-      this.lastMissingTrigger = null;
-    },
+    /*
+    * need to reset lastMissingTrigger
+    * or else subsequent pagination attempts
+    * will never fetch beyond 25 records
+    * */
 
-    onReset: function() {
+    reset: function() {
+      this.lastMissingTrigger = null;
       this.lastIndex = -1;
+      Backbone.Collection.prototype.reset.apply(this, arguments);
     },
 
     getStartIndex: function() {

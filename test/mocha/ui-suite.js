@@ -29,6 +29,7 @@ define([], function() {
       '/widgets/graphics_widgets.spec.js',
       '/widgets/libraries_all.spec.js',
       '/widgets/library_individual.spec.js',
+      '/widgets/library_list_widget.spec.js',
       '/widgets/library_import_widget.spec.js',
       '/widgets/list_of_things_expanding.spec.js',
       '/widgets/list_of_things_widget.spec.js',

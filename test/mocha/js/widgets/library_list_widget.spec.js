@@ -1,16 +1,18 @@
 define([
-  "js/widgets/library_individual/widget",
-  "js/bugutils/minimal_pubsub"
+  "js/widgets/library_list/widget",
+  "js/bugutils/minimal_pubsub",
+  "js/widgets/list_of_things/widget"
 
 ], function(
 
-  LibraryWidget,
-  MinSub
+    LibraryWidget,
+    MinSub,
+    ListOfThingsWidget
 
-  ) {
+) {
 
 
-  describe("Library Widget (library_individual.spec.js)", function () {
+  describe("Library List Widget (library_list_widget.spec.js)", function () {
 
     var stubLibraryMetadata = [
       {
@@ -176,6 +178,7 @@ define([
             "fq": "{!bitset}",
             "q": "*:*",
             "rows": "1000",
+            "sort" : "citation_count desc",
             "wt": "json"
           },
           "status": 0
@@ -318,6 +321,7 @@ define([
             "fl": "title,abstract,bibcode,author,aff,links_data,property,[citations],pub,pubdate",
             "fq": "{!bitset}",
             "q": "*:*",
+            "sort" : "citation_count desc",
             "rows": "1000",
             "wt": "json"
           },
@@ -331,104 +335,13 @@ define([
       }
     };
 
-    var stubData3 = {
-      "documents": [],
-      "metadata": {
-        "date_created": "2015-08-06T17:13:10.830175",
-        "date_last_modified": "2015-08-06T19:12:42.261850",
-        "description": "My ADS library",
-        "id": "ieW0QRG-QSeNNXLjgGNjhg",
-        "name": "test test tess",
-        "num_documents": 0,
-        "num_users": 1,
-        "owner": "aholachek",
-        "permission": "owner",
-        "public": true
-      },
-      "solr": {
-        "response": {
-          "docs": [],
-          "numFound": 3,
-          "start": 0
-        }
-      },
 
-      "updates": {
-        "duplicates_removed": 0,
-        "num_updated": 0,
-        "update_list": []
-      }
-    };
 
 
     var fakeLibraryController = {
       getHardenedInstance: function () {
         return this
       },
-      getLibraryBibcodes : sinon.spy(function(){
-        var d = $.Deferred();
-        d.resolve(["1", "2", "3"])
-        return d.promise();
-      }),
-      getLibraryData: sinon.spy(function () {
-        var d = $.Deferred();
-        d.resolve( stubData1)
-        return d
-      }),
-      getLibraryMetadata: sinon.spy(function (id) {
-        var d = $.Deferred();
-        if (id){
-          d.resolve(_.findWhere(stubLibraryMetadata, {id : id}));
-        }
-        d.resolve(stubLibraryMetadata);
-        return d.promise();
-      }),
-      getPublicLibraryMetadata: sinon.spy(function (id) {
-        var d = $.Deferred();
-        if (id){
-          d.resolve(_.findWhere(stubLibraryMetadata, {id : id}));
-        }
-        d.resolve(stubLibraryMetadata);
-        return d.promise();
-      }),
-
-      getAllBibcodes: sinon.spy(function (id) {
-        var d = $.Deferred();
-        if (id == 1) {
-          d.resolve([1,2,3])
-        } else if (id == 2) {
-          d.resolve([4,5,6])
-        } else if (id == 3) {
-          d.resolve([7,8,9])
-        }
-        return d.promise()
-      }),
-      updateLibraryContents: function (updateData) {
-        var d = $.Deferred();
-        d.resolve(_.extend({
-          name: "Aliens Among Us",
-          id: 1,
-          description: "Are you one of them?",
-          permission: "owner",
-          num_papers: 45,
-          date_created: '2015-04-03 04:30:04',
-          date_last_modified: '2015-04-09 06:30:04'
-        }, updateData));
-        return d
-      },
-      updateLibraryMetadata: sinon.spy(function (updateData) {
-        var d = $.Deferred();
-        d.resolve(_.extend({
-          name: "Aliens Among Us",
-          id: 1,
-          description: "Are you one of them?",
-          permission: "owner",
-          num_papers: 45,
-          date_created: '2015-04-03 04:30:04',
-          date_last_modified: '2015-04-09 06:30:04'
-        }, updateData));
-        return d
-      }),
       updateLibraryContents: sinon.spy(function (updateData) {
         var d = $.Deferred();
         d.resolve();
@@ -437,104 +350,32 @@ define([
 
     };
 
+    var fakeApi = {
+      getHardenedInstance: function () {
+        return this
+      },
+      request : sinon.spy(function(){
+        arguments[0].toJSON().options.done(stubData1);
+      })
+    }
+
     afterEach(function () {
       $("#test").empty();
     });
 
 
-    it("should display different header views depending on a person's permissions, allowing admin/owners to edit title/description ", function () {
+    it("should inherit from list of things widget", function(){
 
-      var w = new LibraryWidget();
+      var l = new LibraryWidget();
 
-      var minsub = new (MinSub.extend({
-        request: function (apiRequest) {
-          return {some: 'foo'}
-        }
-      }))({verbose: false});
-
-      minsub.beehive.addObject("LibraryController", fakeLibraryController);
-      w.activate(minsub.beehive.getHardenedInstance());
-
-      var spy = sinon.spy();
-      w.getPubSub = function () {
-        return {publish: spy}
-      };
-
-      $("#test").append(w.getEl());
-
-      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(0);
-
-      w.setSubView({subView: "library", id: "1"});
-
-      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(1);
-
-      expect($("#test .editable-item form").eq(0).hasClass("hidden")).to.be.true;
-
-      $("#test .editable-item").eq(0).find(".toggle-form").click();
-
-      expect($("#test .editable-item form").eq(0).hasClass("hidden")).to.be.false;
-
-      $("#test .editable-item form").eq(0).find("input").val("here is a better, newer title");
-
-      expect(fakeLibraryController.updateLibraryMetadata.args[0]).to.eql(undefined);
-
-      $("#test .editable-item form").eq(0).find("button.btn-success").click();
-
-      expect(fakeLibraryController.updateLibraryMetadata.args[0][0]).to.eql("1");
-      expect(fakeLibraryController.updateLibraryMetadata.args[0][1]).to.eql({name: "here is a better, newer title"});
-
-      //navigating to permissions
-      expect($("#test .main").children().length).to.eql(0);
-      expect($("#test .main .library-admin-view").length).to.eql(0);
-
-      expect($("#test .tab[data-tab=admin]").length).to.eql(1);
-
-      //neither above are possible if you dont have admin privileges,
-      //the data sent back by stub function will have "read" permisions
-      w.setSubView({subView: "library", id: "3"});
-
-      //no edit privileges
-      expect($("#test .header h2 button").length).to.eql(0)
-      expect($("#test .header div[data-field=description]").length).to.eql(0)
-
-      expect($("#test .tab[data-tab=admin]").length).to.eql(0);
-
-    });
-
-    it("should fetch metadata + library data and display a public view properly", function () {
-
-      var w = new LibraryWidget();
-
-      var minsub = new (MinSub.extend({
-        request: function (apiRequest) {
-          return {some: 'foo'}
-        }
-      }))({verbose: false});
-
-      minsub.beehive.addObject("LibraryController", fakeLibraryController);
-
-      w.activate(minsub.beehive.getHardenedInstance());
-
-      var spy = sinon.spy();
-      w.getPubSub = function () {
-        return {publish: spy, NAVIGATE: minsub.NAVIGATE}
-      };
-
-      $("#test").append(w.getEl());
-
-      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(2);
-
-      w.setSubView({id: "1", subView: "library", publicView: true});
-
-      //should grab the metadata from the getLibraryData function rather than getLibraryMetadata if public library
-      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(2);
+      expect(l).to.be.instanceof(ListOfThingsWidget);
 
     });
 
 
-    it("should allow users to navigate to other subviews (export, metrics, library, vis, admin)", function () {
+    it("should show a library list that allows you to delete records from a library if you have owner/admin/write permissions", function () {
 
-      var w = new LibraryWidget();
+      var l = new LibraryWidget();
 
       var minsub = new (MinSub.extend({
         request: function (apiRequest) {
@@ -542,107 +383,67 @@ define([
         }
       }))({verbose: false});
 
-
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
+      minsub.beehive.removeService("Api");
+      minsub.beehive.addService("Api", fakeApi);
 
-      w.activate(minsub.beehive.getHardenedInstance());
+      l.activate(minsub.beehive.getHardenedInstance());
 
-      var spy = sinon.spy();
+      $("#test").append(l.view.el);
 
-      w.getBeeHive().getService("PubSub").publish = spy;
+      l.setData({
+        publicView : false,
+        id : "2",
+        editRecords : true
+      });
 
-      $("#test").append(w.getEl());
+      l.onShow();
 
-      w.setSubView({subView: "library", id: "1"});
+      expect(fakeApi.request.callCount).to.eql(1);
+      var req = fakeApi.request.args[0][0];
+      expect(req.get("target")).to.eql("biblib/libraries/2");
+      expect(req.get("query").toJSON()).to.eql({
+        "fl": [
+          "title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract"
+        ],
+        "rows": [
+          25
+        ],
+        "start": [
+          0
+        ],
+        "sort": [
+          "citation_count desc"
+        ]
+      });
 
-      //navigating to permissions
-      expect($("#test .main .library-admin-view").length).to.eql(0);
+        expect($("#test .library-item:first").find("button.remove-record").length).to.eql(1);
 
-      $("#test .tab[data-tab=admin]").click();
+        $("#test .library-item:first button.remove-record").click();
 
-      expect(spy.args[0]).to.eql(
-       ["[Router]-Navigate-With-Trigger",
-        "LibraryAdminView",
-        {"id":"1","publicView":false,"subView":"admin"}]
-      );
+        expect(fakeLibraryController.updateLibraryContents.callCount).to.eql(1);
 
-      w.setSubView({subView: "admin"});
-
-      expect($("li.tab.active").data("tab")).to.eql("admin");
-
-      $("#test li[data-tab=export-bibtex]").click();
-
-      expect(spy.args[1]).to.eql([
-        "[Router]-Navigate-With-Trigger",
-        "library-export",
-        {
-          "id": "1",
-          "publicView": false,
-          "subView": "export",
-          "widgetName": "ExportWidget",
-          "additional": {
-            "format": "bibtex"
+        expect(fakeLibraryController.updateLibraryContents.args[0]).to.eql([
+          "2",
+          {
+            "bibcode": [
+              "2015IAUGA..2257768A"
+            ],
+            "action": "remove"
           }
-        }
-      ]);
+        ]);
 
+        //this library doesn't have ability to delete records
 
-      w.setSubView({subView: "export"});
+        l.setData({subView: "library", id: "3"});
 
-      expect($("li.tab.active").find(".dropdown-menu li").eq(0).data("tab")).to.eql("export-bibtex");
-
-      $("#test .tab[data-tab=metrics]").click();
-
-      expect(spy.args[2]).to.eql(
-          [
-            "[Router]-Navigate-With-Trigger",
-            "library-metrics",
-            {
-              "id": "1",
-              "publicView": false,
-              "subView": "metrics",
-              "widgetName": "Metrics",
-              "additional": {}
-            }
-          ] );
-
-      w.setSubView({subView: "metrics"});
-
-      expect($("li.tab.active").data("tab")).to.eql("metrics");
-
-
-      $("#test li[data-tab=visualization-AuthorNetwork]").click();
-
-      expect(spy.args[3]).to.eql([
-        "[Router]-Navigate-With-Trigger",
-        "library-visualization",
-        {
-          "id": "1",
-          "publicView": false,
-          "subView": "visualization",
-          "widgetName": "AuthorNetwork",
-          "additional": {}
-        }
-      ]);
-
-      w.setSubView({subView: "visualization"});
-      expect($("li.tab.active").find(".dropdown-menu li").eq(0).data("tab")).to.eql("visualization-AuthorNetwork");
-
-
-      //none of these options are available if the library has 0 bibcodes
-      w.setSubView({subView: "library", id: "2"});
-
-      //export, metrics, vis disabled
-      expect($("#test li[data-tab=export-bibtex]").length).to.eql(0);
-      expect($("#test li[data-tab=metrics]").length).to.eql(0);
-      expect($("#test li[data-tab=visualization-AuthorNetwork]").length).to.eql(0);
+        expect($("#test .library-item:first").find("button.remove-record").length).to.eql(0);
 
     });
 
+    it("allow sorting based on pubdate/read_count/citation_count", function () {
 
-    it("should allow export to the search results page", function (done) {
-
-      var w = new LibraryWidget();
+      var l = new LibraryWidget();
 
       var minsub = new (MinSub.extend({
         request: function (apiRequest) {
@@ -652,76 +453,50 @@ define([
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
 
-      w.activate(minsub.beehive.getHardenedInstance());
+      minsub.beehive.removeService("Api");
+      minsub.beehive.addService("Api", fakeApi);
 
-      w.setSubView({subView: "library", id: "1"});
-
-      $("#test").append(w.view.el);
-
-      var publishStub = sinon.stub(w.getPubSub(), "publish");
-
-      expect(fakeLibraryController.getLibraryBibcodes.callCount).to.eql(0);
-
-      $("#test").find(".bigquery-export").click();
+      l.activate(minsub.beehive.getHardenedInstance());
 
 
-      expect(fakeLibraryController.getLibraryBibcodes.callCount).to.eql(1);
+      $("#test").append(l.view.el);
 
-      setTimeout(function(){
+      l.setData({
+        publicView : false,
+        id : "2",
+        editRecords : true
+      });
 
-        expect(publishStub.args[0][0]).to.eql("[PubSub]-New-Query");
+      l.onShow();
 
-        expect(publishStub.args[0][1].toJSON()).to.eql({
-          "__bigquery": [
-            "1",
-            "2",
-            "3"
-          ]
-        });
+      l.reset = sinon.spy();
 
-        done();
-
-      }, 10);
-
-    });
-
-    it("should facilitate showing export, vis, and metrics widgets", function(){
+      //calls reset to get rid of pagination info in the model
+      expect(l.reset.callCount).to.eql(0);
 
 
+      expect($("#sort-select").find("option[selected]").val()).to.eql("citation_count desc");
 
-    });
+      $("option[value='read_count asc']").trigger("change");
+
+      expect(l.reset.callCount).to.eql(1);
+
+      expect(fakeApi.request.args[3][0].get("query").toJSON().sort[0]).to.eql("read_count asc");
+
+      $("option[value='date desc']").trigger("change");
+
+      //resets to desc as
+      expect(fakeApi.request.args[4][0].get("query").toJSON().sort[0]).to.eql("date desc");
 
 
-    it("should have an admin view that allows you to change the public/private status of your library", function () {
 
-      var w = new LibraryWidget();
 
-      var minsub = new (MinSub.extend({
-        request: function (apiRequest) {
-          return {some: 'foo'}
-        }
-      }))({verbose: false});
 
-      minsub.beehive.addObject("LibraryController", fakeLibraryController);
 
-      w.activate(minsub.beehive.getHardenedInstance());
-
-      $("#test").append(w.getEl());
-
-      w.setSubView({subView: "admin", id: "1", publicView: false});
-
-      $("#test .public-button").click();
-
-      expect(fakeLibraryController.updateLibraryMetadata.args[1]).to.eql([
-        "1",
-        {
-          "public": true
-        }
-      ]);
 
     });
 
 
-  });
+  })
 
 });

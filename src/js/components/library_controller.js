@@ -6,6 +6,7 @@ define([
     'js/components/api_targets',
     'js/components/api_request',
     'js/components/api_feedback',
+    'js/components/api_query',
     'js/mixins/dependon'
 
   ],
@@ -16,10 +17,9 @@ define([
     ApiTargets,
     ApiRequest,
     ApiFeedback,
+    ApiQuery,
     Dependon
     ) {
-
-
 
     var LibraryModel = Backbone.Model.extend({
 
@@ -74,6 +74,8 @@ define([
             if (ev == "change" && arg1 instanceof Backbone.Model ){
               //a single model changed, widgets might want to know which one
               pubsub.publish(pubsub.LIBRARY_CHANGE, this.collection.toJSON(), {ev: ev, id: arg1.id});
+              //also clear out the bibcode cache if necessary
+              delete this._libraryBibcodeCache[arg1.id];
             }
             else {
               pubsub.publish(pubsub.LIBRARY_CHANGE, this.collection.toJSON(),  {ev: ev});
@@ -160,7 +162,7 @@ define([
 
         if (options.bibcodes == "all"){
 
-          var limit = options.limit || 1000,
+          var limit = options.limit || 2000,
               start = 0,
               rows = 100,
               bibcodes = [];
@@ -215,7 +217,7 @@ define([
 
         var endpoint = ApiTargets["LIBRARIES"];
         return this.composeRequest(endpoint, "GET").done(function(data){
-          that._dataLoaded = true;
+          that._metadataLoaded = true;
           that.collection.reset(data.libraries);
         });
 
@@ -225,20 +227,123 @@ define([
        * public methods
        *
        */
+      /*
+      * this is how widgets/controllers can learn about
+      * all libraries
+      * if you provide an id, you just get info
+      * about the lib with that id
+      * */
 
-      getAllMetadata : function(){
-        return this.collection.toJSON();
+      getLibraryMetadata : function(id){
+        var deferred = $.Deferred();
+        var that = this;
+        if  (!this._metadataLoaded){
+          this._fetchAllMetadata().done(function(data){
+            //make sure the collection is refilled before this promise is resolved
+            setTimeout(function(){
+              var data = id ? that.collection.get(id).toJSON() : that.collection.toJSON();
+              deferred.resolve(data)
+            }, 1)
+          })
+        }
+        else {
+          var data = id ? that.collection.get(id).toJSON() : that.collection.toJSON();
+          deferred.resolve(data)
+        }
+
+        return deferred.promise();
       },
 
       /*
-       * get all records + metadata from an individual library
-       *
-       */
+      * public libraries don't necessarily belong to the user, so fetch the info
+      * each time
+      * */
 
-      getLibraryData: function(id){
+      getPublicLibraryMetadata : function(id){
+        if (!id) throw new Error("need to provide a library id");
+        var deferred = $.Deferred();
 
-        var endpoint = ApiTargets["LIBRARIES"] + "/" + id;
-        return this.composeRequest(endpoint, "GET");
+        this.composeRequest(ApiTargets["LIBRARIES"] + "/" + id)
+            .done(function(data){
+                deferred.resolve(data.metadata);
+            });
+
+      return deferred.promise();
+      },
+
+
+      /*
+      *
+      * here, store lists of bibcodes requested from the 'getLibraryBibcodes'
+      * method. they are stored here so that if a user quickly toggles back
+      * and forth between the export/metrics/vis widget, we won't have to re-fetch
+      * the bibcodes
+      * */
+
+      _libraryBibcodeCache : {},
+
+      /*
+      * get list of 2000 bibcodes,
+      * this is used for fetching data for export, metrics, etc
+      *
+      * */
+
+      getLibraryBibcodes : function(id){
+
+        var deferred = $.Deferred(),
+            that = this,
+            maxReturned = 3000;
+
+        //we already have it in the cache, so just resolve + return promise
+        if (this._libraryBibcodeCache[id]) {
+          deferred.resolve(this._libraryBibcodeCache[id]);
+          return deferred.promise();
+        }
+
+        var limit = maxReturned,
+            //start gets incremented
+            start = 0,
+            rows = 100,
+            bibcodes = [],
+            endpoint = ApiTargets["LIBRARIES"] + "/" + id,
+            that = this;
+
+        //this function gets called repeatedly
+        function done(data) {
+          limit = data.solr.response.numFound > maxReturned ? maxReturned : data.solr.response.numFound;
+          var bibs = _.pluck(data.solr.response.docs, 'bibcode');
+          [].push.apply(bibcodes, bibs);
+          start += rows;
+          if (start < limit){  makeRequest(); }
+          else {
+            that._libraryBibcodeCache[id] = bibcodes;
+            deferred.resolve(bibcodes);
+          }
+        }
+
+        function makeRequest(){
+
+          var q = new ApiQuery();
+          q.set("rows", 100);
+          q.set("fl", "bibcode");
+
+          q.set("start", start);
+
+          var request =  new ApiRequest({
+            target: endpoint,
+            query: q,
+            options : {
+              context : this,
+              contentType : "application/x-www-form-urlencoded",
+              done : done,
+              fail : this.handleError
+            }
+          });
+          that.getBeeHive().getService("Api").request(request);
+        }
+
+        makeRequest.call(this);
+        return deferred.promise();
 
       },
 
@@ -444,8 +549,8 @@ define([
 
 
       hardenedInterface: {
-        getAllMetadata : "returns json list of libraries",
-        getLibraryData : "get library records + metadata",
+        getPublicLibraryMetadata : "get metadata especially for a public library",
+        getLibraryMetadata : "returns json list of libraries, optional lib id as param",
         createLibrary : "createLibrary",
 
         //these two functions fetch bibcodes based on the arguments given
@@ -457,7 +562,11 @@ define([
 //      updateLibraryPermissions : "updateLibraryPermissions",
         updateLibraryMetadata : "updateLibraryMetadata",
 
-        importLibraries : "importLibraries"
+        importLibraries : "importLibraries",
+
+        //currently called by library individual widget to get
+        //lists of bibs to pass to export, metrics, vis widgets etc
+        getLibraryBibcodes : "getLibraryBibcodes"
       }
 
     });

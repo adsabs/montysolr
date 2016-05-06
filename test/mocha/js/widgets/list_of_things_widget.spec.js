@@ -250,6 +250,7 @@ define(['marionette',
         widget.model.set("perPage", 0);
         widget.activate(minsub.beehive.getHardenedInstance());
 
+
         var data = test1();
         data.response.numFound = 100;
 

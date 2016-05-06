@@ -81,6 +81,7 @@ require.config({
         Authentication: 'js/widgets/authentication/widget',
         UserSettings: 'js/widgets/user_settings/widget',
         UserPreferences: 'js/widgets/preferences/widget',
+        LibraryImport : 'js/widgets/library_import/widget',
         BreadcrumbsWidget: 'js/widgets/filter_visualizer/widget',
         NavbarWidget: 'js/widgets/navbar/widget',
         UserNavbarWidget: 'js/widgets/user_navbar/widget',
@@ -131,8 +132,7 @@ require.config({
 
         IndividualLibraryWidget : 'js/widgets/library_individual/widget',
         AllLibrariesWidget : 'js/widgets/libraries_all/widget',
-        LibraryImport : 'js/widgets/library_import/widget'
-
+        LibraryListWidget : 'js/widgets/library_list/widget'
       },
       plugins: {}
       }

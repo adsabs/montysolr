@@ -1,29 +1,27 @@
 define([
-
     "marionette",
     "js/components/api_query",
     "js/widgets/base/base_widget",
     "./views/library_header",
     "./views/manage_permissions",
-    "./views/view_library",
     "hbs!./templates/layout-container",
     "hbs!./templates/loading-library",
+    'js/components/api_targets'
   ],
   function(
-
     Marionette,
     ApiQuery,
     BaseWidget,
     HeaderView,
     AdminView,
-    LibraryView,
     ContainerTemplate,
-    LoadingTemplate
+    LoadingTemplate,
+    ApiTargets
 
     ){
 
     var LoadingView = Marionette.ItemView.extend({
-      template : LoadingTemplate
+       template : LoadingTemplate
     });
 
     var ContainerView  = Marionette.LayoutView.extend({
@@ -34,7 +32,6 @@ define([
         header  : ".header",
         main : ".main"
       }
-
     });
 
     var StateModel = Backbone.Model.extend({
@@ -56,12 +53,13 @@ define([
         this.view = new ContainerView();
         this.model = new StateModel();
 
-        //need access to it persistently, this is a collection of records within a library
-        this.libraryCollection = new LibraryView.Collection();
-        this.headerModel = new HeaderView.Model();
-
         //need to make sure view is rendered at least 1x before it shows a subview
         this.view.render();
+
+        this.headerModel = new HeaderView.Model();
+        this.headerView = new HeaderView({model : this.headerModel});
+        this.view.header.show( this.headerView );
+
       },
 
       activate: function(beehive) {
@@ -69,195 +67,95 @@ define([
         _.bindAll(this);
         var pubsub = beehive.getService('PubSub');
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.onLibraryChange);
+        //now that beehive is present, attach event handlers to header view
+        this.headerView.on("all", this.handleHeaderEvents, this);
       },
 
       onLibraryChange : function(collectionJSON, info){
 
-        if (info.ev == "change" &&
-            info.id ==  this.model.get("id") &&
-            _.findWhere(collectionJSON, {id : info.id}).num_documents > this.headerModel.get("num_documents")
-          ){
-          this.updateWidget();
-        }
         //record was deleted from within widget, just update metadata
-        else if (info.ev == "change" &&  info.id ==  this.model.get("id")){
-          this.syncHeader(collectionJSON);
+        if (info.ev == "change" &&  info.id ==  this.model.get("id")){
+          this.updateSubView();
         }
       },
 
-      //called when ID changes
-      updateWidget : function() {
-        this.switchToNewLib();
-        this.updateSubView();
-      },
+      updateHeader : function(){
 
-      //reset widget, update header view
-      switchToNewLib : function(){
+        var done = function done(metadata){
+          //updating header
+          this.headerModel.set(_.extend(metadata,
+              { active : this.model.get("subView"),
+                publicView : this.model.get("publicView")
+              }
+          ));
 
-        var LibraryController = this.getBeeHive().getObject("LibraryController"),
-            id = this.model.get("id");
+        }.bind(this);
 
-        this.libraryCollection.reset();
-        // XXX: remove when pagination is implemented
-        this.libraryCollection.documents = [];
-        this.view.header.empty();
-        this.view.main.empty();
+        var libController =  this.getBeeHive()
+            .getObject("LibraryController");
 
-        //PUBLIC LIBRARY
-        //return--> library data + metadata will be fetched in updateSubView,
-        //which will call createHeader
-        if (this.model.get("publicView")) return;
-
-        // could be for any view -- library, export, metrics, etc--so insert
-        // the correct header now
-        //we will re-render when we get library info, but header will be visible for loading time
-
-        var metadata = _.findWhere(LibraryController.getAllMetadata(), {id : id});
-        this.createHeader(metadata);
-
-      },
-
-      createHeader : function(metadata){
-
-        var that = this;
-        //updating header
-        that.headerModel.set(_.extend(metadata,
-          { active : that.model.get("subView"),
-            publicView : that.model.get("publicView")
-          }
-        ));
-
-        var header = new HeaderView({model : this.headerModel});
-        header.on("all", this.handleHeaderEvents, this);
-        this.view.header.show( header );
-
-      },
-
-      //respond to library_collection change event
-
-      syncHeader : function(data){
-        var currentLibMetadata = _.findWhere(data, {id : this.model.get("id")});
-        this.headerModel.set(currentLibMetadata);
-        //only needs to render if it's currently in the DOM
-        if (this.view.header.currentView && $("body").find(this.view.header.currentView.el).length > 0){
-          this.view.header.currentView.render();
+        //fetch data
+        if (this.model.get("publicView")){
+         libController.getPublicLibraryMetadata(this.model.get("id"))
+              .done(done);
         }
+        else {
+          libController.getLibraryMetadata(this.model.get("id"))
+              .done(done);
+        }
+
       },
 
       updateSubView : function(){
 
+        this.view.main.empty();
+
         var that = this,
             id = this.model.get("id"),
-            view = this.model.get("subView"),
-            LibraryController = that.getBeeHive().getObject("LibraryController");
+            view = this.model.get("subView");
 
         if (!id || !view){
-          console.warn("library widget's updateSubView called without requisite library id and view name");
+          console.warn("library widget's updateSubView called without requisite library id and view name in model");
           return
         }
-        //let header model know
-        that.headerModel.set("active", view);
+        
+        that.view.main.show(new LoadingView());
 
-        switch (view) {
+        //create header
+        this.updateHeader();
 
-          case "library":
-            var public = this.model.get("publicView"),
-                permission = that.headerModel.get("permission"),
-                editRecords = !!_.contains(["write", "admin", "owner"], permission) && !public,
-                subView = new LibraryView({collection : that.libraryCollection, permission : editRecords, perPage : Marionette.getOption(this, "perPage") });
-
-            subView.on("all", that.handleLibraryEvents, that);
-
-            //collection is  already loaded, just show the view
-            if (this.libraryCollection.length) that.view.main.show(subView);
-
-            //load the collection + then show the view
-            if (this.libraryCollection.length === 0){
-
-              that.view.main.show(new LoadingView());
-              LibraryController.getLibraryData(id).done(function (data) {
-
-                that.createHeader(data.metadata);
-                that.libraryCollection.reset(data.solr.response.docs);
-                // XXX: actual (unlimited) list of bibcodes
-                //  remove when pagination is implemented
-                that.libraryCollection.documents = data.documents;
-
-                //remove the loading view
-                that.view.main.show(subView);
-              }).fail(function(data){
-                //the collection wasn't public
-                that.getPubSub().publish(that.getPubSub().NAVIGATE, "404");
-              });
-
-            }
-            break;
-
-          case "admin":
-            var subView = new AdminView({ model : this.headerModel });
-            subView.on("all", that.handleAdminEvents, that);
-            this.view.main.show( subView );
-            break;
-
-          //the following 3 cases insert different widgets, so empty the "main" container
-          case "export":
-            this.view.main.empty();
-            break;
-
-          case "metrics":
-            this.view.main.empty();
-            break;
-
-          case "visualization":
-            this.view.main.empty();
-            break;
-
+        if (["library", "export", "metrics", "visualization"].indexOf(view) > -1){
+          that.view.main.empty();
         }
+        else if (view === "admin"){
+          var subView = new AdminView({model: this.headerModel});
+          subView.on("all", that.handleAdminEvents, that);
+          this.view.main.show(subView);
+        }
+        else {
+          throw new Error("don't recognize that subview: ", view)
+        }
+
       },
 
       /*
        * ****this is the only way to change the state of the view***
        * called by the navigator
-       * a change of ID will trigger the function "switchToNewLib"
-       * a change of view will only trigger "updateSubView"
        * */
 
       setSubView  : function(data) {
 
-        //data must have {id : X, subview : X, publicView : X}
-        data = _.extend({ subView : "library", publicView : false }, data);
-        this.model.set(data);
+        //this can be used to refresh the view with new data or just to reflect
+        //changes in the model that came from elsewhere, like a library change event
 
-        //if id or publicView changed, library changed --> need to destroy everything and start again
-        if (this.model.changedAttributes().hasOwnProperty("id") ||  this.model.changedAttributes().hasOwnProperty("publicView")) {
-          //this calls both switchToNewLib and updateSubView
-          this.updateWidget();
+        if (data){
+          //data must have {id : X, subview : X, publicView : X}
+          data = _.extend({ subView : "library", publicView : false }, data);
+          this.model.set(data);
         }
-        else {
-          //just update sub view info
-          this.updateSubView();
-        }
-      },
 
-      handleLibraryEvents : function (event, arg1, arg2){
-        var that = this;
+        this.updateSubView();
 
-        switch (event) {
-          case "removeRecord":
-            //from library list view
-            var data = {bibcode : [arg1], action : "remove"},
-              id = this.model.get("id");
-            this.getBeeHive().getObject("LibraryController").updateLibraryContents(id, data)
-              .done(function(){
-                var bibcode = data.bibcode[0],
-                  modelToRemove = that.libraryCollection.get(bibcode);
-                that.libraryCollection.remove(modelToRemove);
-
-                //XXX: remove after pagination is implemented
-                that.libraryCollection.documents = _.without(that.libraryCollection.documents, bibcode);
-              });
-            break;
-        }
       },
 
       handleAdminEvents : function (event, arg1, arg2) {
@@ -285,74 +183,80 @@ define([
 
         var that = this,
             id = this.model.get("id"),
-            pubsub = this.getBeeHive().getService('PubSub');
+            pubsub = this.getBeeHive().getService('PubSub'),
+            libController = this.getBeeHive().getObject("LibraryController");
 
         switch (event) {
 
           case "updateVal":
             //from header view
-            this.getBeeHive().getObject("LibraryController")
-              .updateLibraryMetadata(id, arg1)
-              .done(function(data){
-                //make a new view
-                that.headerModel.set(data);
-                var header = new HeaderView({ model : that.headerModel });
-                header.on("all", that.handleHeaderEvents, that);
-                that.view.header.show( header );
+            libController
+                .updateLibraryMetadata(id, arg1)
+                .done(function (data) {
+                  //make a new view
+                  that.headerModel.set(data);
+                  var header = new HeaderView({model: that.headerModel});
+                  header.on("all", that.handleHeaderEvents, that);
+                  that.view.header.show(header);
 
-              });
+                });
             break;
 
           case "navigate":
-            this.model.set("subView", arg1);
-            //set the proper view value into the model
+
+              this.model.set("subView", arg1);
+
               var data = {
-                  bibcodes : this.libraryCollection.documents,
-                  id : id,
-                  publicView : this.model.get("publicView"),
-                //subview is dependant on the tab and is used exclusively by individuallibrarywidget
+                id: id,
+                publicView: this.model.get("publicView"),
+                //subview is dependent on the tab and is used exclusively by individuallibrarywidget
+                //in the nav function
                 // to figure out which tab to highlight
-                  subView : arg1
-              }
+                subView: arg1
+              };
+                  /*
+                  * these subviews require requesting bibcode data first
+                  * */
+                if (_.contains(["export", "metrics", "visualization"], data.subView )) {
 
-            if (_.contains(["export", "metrics", "visualization"], arg1)){
+                    switch (arg1) {
+                      case "export":
+                        data.widgetName = "ExportWidget";
+                        data.additional = { format : arg2 };
+                        break;
+                      case "visualization":
+                        data.widgetName = arg2;
+                        data.additional = {};
+                        break;
+                      case "metrics":
+                        data.widgetName = "Metrics";
+                        data.additional = {};
+                        break;
+                    }
+                    pubsub.publish(pubsub.NAVIGATE, "library-" + arg1, data);
+                }
 
-              //augment data
-              switch (arg1) {
-                case "export":
-                  data.widgetName = "ExportWidget";
-                  data.additional = { format : arg2 };
-                  break;
-                case "visualization":
-                  data.widgetName = arg2;
-                  data.additional = {};
-                  break;
-                case "metrics":
-                  data.widgetName = "Metrics";
-                  data.additional = {};
-                  break;
-              }
-              pubsub.publish(pubsub.NAVIGATE, "library-" + arg1, data);
+                else if (data.subView === "library"){
+                  pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", data);
+                }
+              else if ( data.subView ===  "admin"){
+                  pubsub.publish(pubsub.NAVIGATE, "LibraryAdminView", data);
+                }
 
+              break;
+              case "delete-library":
+               libController.deleteLibrary(id, this.headerModel.get("name"));
+                break;
+
+              case "start-search":
+                libController.getLibraryBibcodes().done(function (bibcodes) {
+                  var query = new ApiQuery({
+                    __bigquery : bibcodes
+                  });
+                  pubsub.publish(pubsub.START_SEARCH, query);
+                });
             }
-            else {
-              pubsub.publish(pubsub.NAVIGATE, "IndividualLibraryWidget", data);
-            }
-            break;
-
-          case "delete-library":
-            this.getBeeHive().getObject("LibraryController").deleteLibrary(id, this.headerModel.get("name"));
-            break;
-          case "start-search":
-
-            var query = new ApiQuery({
-              __bigquery : this.libraryCollection.documents
-            });
-
-            pubsub.publish(pubsub.START_SEARCH, query);
         }
-      }
-
     });
 
     return Library

@@ -128,12 +128,16 @@ define([
       },
 
       activate: function(beehive) {
+        var that = this;
         this.setBeeHive(beehive);
         _.bindAll(this);
         this.getPubSub().subscribe(this.getPubSub().LIBRARY_CHANGE, this.updateCollection);
 
         //initial data request
-        this.libraryCollection.reset(this.getBeeHive().getObject("LibraryController").getAllMetadata());
+        this.getBeeHive().getObject("LibraryController").getLibraryMetadata().done(function(data){
+          that.libraryCollection.reset(data);
+        });
+
       },
 
       updateCollection : function(data){

@@ -45,7 +45,7 @@ define([
       initialize: function (options) {
         options = options || {};
 
-        _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model', 'description']));
+        _.defaults(options, _.pick(this, ['view', 'collection', 'pagination', 'model', 'description', 'childView']));
 
         //widget.reset will restore these default pagination settings
         //for now, it doesn't make sense to pass them as options
@@ -66,8 +66,13 @@ define([
         options.collection = options.collection || new PaginatedCollection();
 
         if (!options.view) {
+
           //operator instructs view to show a link that has citations:(bibcode) or something similar
-            options.view = new PaginatedView({collection: options.collection, model: options.model });
+            options.view = new PaginatedView({
+              collection: options.collection,
+              model: options.model,
+              childView : options.childView
+            });
         }
 
         options.view.model.set(this.pagination, {silent: true});
@@ -120,8 +125,6 @@ define([
       },
 
       processResponse: function (apiResponse) {
-        var q = apiResponse.getApiQuery();
-        this.setCurrentQuery(q);
 
         var docs = this.extractDocs(apiResponse);
         var pagination = this.getPaginationInfo(apiResponse, docs);
@@ -325,6 +328,12 @@ define([
 
       onAllInternalEvents: function(ev, arg1, arg2) {
 
+        //for testing, allow widget to not have been activated
+        try {
+          var pubsub = this.getPubSub();
+        } catch(e){
+        }
+
         if (ev === "pagination:changePerPage"){
           this.updateLocalStorage({perPage: arg1});
         }
@@ -332,15 +341,12 @@ define([
           return this.updatePagination({page: arg1});
         }
         else if (ev === 'show:missing') {
-          var pubsub = this.getPubSub();
-
           _.each(arg1, function(gap) {
             var numFound = this.model.get('numFound');
             var start = gap.start;
             var perPage = this.model.get('perPage');
 
-            if (start >= numFound)
-              return; // ignore this
+            if (start >= numFound)  return; // ignore this
 
             var q = this.model.get('currentQuery').clone();
             q.set('__fetch_missing', 'true');
@@ -349,16 +355,19 @@ define([
             q.set('rows', 25);
             var req = this.composeRequest(q);
 
-            if (req) {
-              pubsub.publish(pubsub.EXECUTE_REQUEST, req);
-            }
+            //allows widgets to override if necessary
+            this.executeRequest(req);
+
           }, this);
 
         }
         else if (ev == "childview:toggleSelect") {
-          var pubsub = this.getPubSub();
           pubsub.publish(pubsub.PAPER_SELECTION, arg2.data.identifier);
         }
+      },
+
+      executeRequest : function(req){
+        this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, req);
       },
 
       reset: function() {

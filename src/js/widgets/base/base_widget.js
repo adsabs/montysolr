@@ -136,6 +136,16 @@ define([
         }
       }
 
+    },    _dispatchRequest: function(apiQuery) {
+      var q = this.customizeQuery(apiQuery);
+      if (q) {
+        var req = this.composeRequest(q);
+        if (req) {
+          var pubsub = this.getPubSub();
+          pubsub.publish(pubsub.DELIVERING_REQUEST, req);
+        }
+      }
+
     },
 
     /**
