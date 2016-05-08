@@ -48,5 +48,6 @@ exec {
   'grunt_cli':
     command => 'grunt setup',
     cwd     => '/bumblebee/',
+    timeout => 900,
     require => Exec['npm_install_grunt'];
 }
