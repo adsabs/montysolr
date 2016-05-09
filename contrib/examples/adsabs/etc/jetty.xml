@@ -24,8 +24,8 @@
            </New>
         </Arg>
         <Set name="minThreads"><SystemProperty name="jetty.minThreads" default="100"/></Set>
-        <Set name="maxThreads"><SystemProperty name="jetty.port" default="250"/></Set>
-        <Set name="detailedDump">false</Set>
+        <Set name="maxThreads"><SystemProperty name="jetty.maxThreads" default="250"/></Set>
+        <Set name="detailedDump"><SystemProperty name="jetty.detailedDump" default="false"/></Set>
       </New>
     </Set>
 
@@ -39,10 +39,10 @@
             <Set name="host"><SystemProperty name="jetty.host" /></Set>
             <Set name="port"><SystemProperty name="jetty.port" default="8983"/></Set>
             <Set name="maxIdleTime"><SystemProperty name="jetty.maxIdleTime" default="60000"/></Set>
-            <!-- <Set name="Acceptors"><SystemProperty name="jetty.acceptors" default="2"/></Set> -->
-            <Set name="statsOn">true</Set>
+            <Set name="Acceptors"><SystemProperty name="jetty.acceptors" default="2"/></Set>
+            <Set name="statsOn"><SystemProperty name="jetty.statsOn" default="false"/></Set>
             <Set name="lowResourcesConnections"><SystemProperty name="jetty.lowResourcesConnections" default="100"/></Set>
-            <Set name="lowResourcesMaxIdleTime"><SystemProperty name="jetty.lowResourcesMaxIdleTime" default="1500"/></Set>
+            <Set name="lowResourcesMaxIdleTime"><SystemProperty name="jetty.lowResourcesMaxIdleTime" default="10000"/></Set>
           </New>
       </Arg>
     </Call>
