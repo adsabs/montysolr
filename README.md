@@ -24,7 +24,7 @@ Port 8000 is forwarded directly to the host (8000:8000). This directory is synce
 
 1. `vagrant up`
 1. `vagrant ssh`
-1. `cd /vagrant && grunt server`
+1. `cd /bumblebee && grunt server`
 
 
 dev setup - linux
