@@ -11,6 +11,17 @@
     <button class="btn btn-primary-faded import-all-libraries"> <i class="fa fa-arrow-circle-down"></i>  Import all Classic libraries</button>
 </div>
 
+<hr>
+
+    <button class="btn btn-default collapsed" data-toggle="collapse" data-target="#classic-form-container">
+        <i class="toggle-icon"></i>
+        Sign into a new Classic account
+    </button>
+<div class="collapse" id="classic-form-container">
+    {{> js/widgets/library_import/templates/authentication-form-partial}}
+</div>
+
+{{/unless}}
 
 <div class="status">
     {{#if errorMessage}}
@@ -27,17 +38,3 @@
     </div>
     {{/if}}
 </div>
-
-<hr>
-
-    <button class="btn btn-default collapsed" data-toggle="collapse" data-target="#classic-form-container">
-        <i class="toggle-icon"></i>
-        Sign into a new Classic account
-    </button>
-<div class="collapse" id="classic-form-container">
-    {{> js/widgets/library_import/templates/authentication-form-partial}}
-</div>
-
-
-
-{{/unless}}

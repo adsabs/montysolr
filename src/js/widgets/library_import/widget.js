@@ -39,7 +39,6 @@ define([
         throw new Error('we don\'t recognize that endpoint: ' + options.endpoint);
       }
       this.model = new ImportModel({endpoint: options.endpoint});
-
       this.template = ( options.endpoint === CLASSIC ) ? ClassicImportView : ADS2ImportView;
 
     },
@@ -262,7 +261,7 @@ define([
             },
             fail : function(response, status){
               //if user hasnt registered yet
-              if (response.responseJSON.error == "This user has not setup an ADS Classic account") return;
+              if (response.responseJSON.error == "This user has not set up an ADS Classic account") return;
               else console.error(response);
             }
           }
