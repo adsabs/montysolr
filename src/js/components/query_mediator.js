@@ -96,6 +96,13 @@ define(['underscore',
         var that = this,
             ps = this.getPubSub();
 
+        //add secondary sort with correct asc/desc
+        if (apiQuery.get("sort")){
+          var primarySort = apiQuery.get("sort")[0];
+          var secondarySort = primarySort.indexOf(" asc") > -1 ? "bibcode asc" : "bibcode desc";
+          apiQuery.set("sort", [primarySort, secondarySort]);
+        }
+
         // checking if it's a new big query
         if (apiQuery.get("__bigquery")) {
 
