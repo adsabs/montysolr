@@ -5,8 +5,7 @@ define([
     "./views/library_header",
     "./views/manage_permissions",
     "hbs!./templates/layout-container",
-    "hbs!./templates/loading-library",
-    'js/components/api_targets'
+    "hbs!./templates/loading-library"
   ],
   function(
     Marionette,
@@ -15,9 +14,7 @@ define([
     HeaderView,
     AdminView,
     ContainerTemplate,
-    LoadingTemplate,
-    ApiTargets
-
+    LoadingTemplate
     ){
 
     var LoadingView = Marionette.ItemView.extend({

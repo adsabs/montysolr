@@ -179,6 +179,8 @@ define([
     },
 
     createApiResponse : function(apiQuery, resp){
+      //hide possible record deleted success method
+      this.model.set("itemDeleted", false);
 
       //might have been an error
       if (_.isString(resp.solr)) {
@@ -283,8 +285,10 @@ define([
               id = this.model.get("libraryID");
           this.getBeeHive().getObject("LibraryController").updateLibraryContents(id, data)
               .done(function(){
-                //lazy!! fetch new data
-               that.dispatchRequest();
+                that.reset();
+                //flash a success message
+                that.model.set("itemDeleted", true);
+                that.dispatchRequest({sort : that.model.get("sort") });
               });
           break;
 

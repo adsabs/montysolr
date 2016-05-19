@@ -419,7 +419,16 @@ define([
 
         expect($("#test .library-item:first").find("button.remove-record").length).to.eql(1);
 
-        $("#test .library-item:first button.remove-record").click();
+      var r = fakeApi.request;
+
+      fakeApi.request = function(){};
+
+      expect($(".record-deleted").length).to.eql(0);
+
+      $("#test .library-item:first button.remove-record").click();
+
+      //show the message
+      expect($(".record-deleted").length).to.eql(1);
 
         expect(fakeLibraryController.updateLibraryContents.callCount).to.eql(1);
 
@@ -439,6 +448,8 @@ define([
 
         expect($("#test .library-item:first").find("button.remove-record").length).to.eql(0);
 
+      fakeApi.request = r;
+
     });
 
     it("allow sorting based on pubdate/read_count/citation_count", function () {
@@ -457,7 +468,6 @@ define([
       minsub.beehive.addService("Api", fakeApi);
 
       l.activate(minsub.beehive.getHardenedInstance());
-
 
       $("#test").append(l.view.el);
 
@@ -481,12 +491,12 @@ define([
 
       expect(l.reset.callCount).to.eql(1);
 
-      expect(fakeApi.request.args[3][0].get("query").toJSON().sort[0]).to.eql("read_count asc");
+      expect(fakeApi.request.args[2][0].get("query").toJSON().sort[0]).to.eql("read_count asc");
 
       $("option[value='date desc']").trigger("change");
 
       //resets to desc as
-      expect(fakeApi.request.args[4][0].get("query").toJSON().sort[0]).to.eql("date desc");
+      expect(fakeApi.request.args[3][0].get("query").toJSON().sort[0]).to.eql("date desc");
 
 
 
