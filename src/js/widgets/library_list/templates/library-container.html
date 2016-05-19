@@ -1,4 +1,7 @@
 <div class="s-library-actions">
+    {{#if itemDeleted}}
+        <h3 class="record-deleted"><i class="icon-success"/> Record successfully deleted</h3>
+    {{/if}}
     {{#if hasRecords}}
             <div class="btn-group sort-widget s-sort-widget">
                 <!-- Single button -->
