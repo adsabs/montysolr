@@ -84,7 +84,13 @@ define(['./base_graph',
         this.innerChart.append("g").classed({
           "axis"  : true,
           "x-axis": true
-        }).attr("transform", "translate(0," + this.height + ")").call(xAxis).selectAll("text").style("text-anchor", "end").attr("dx", "-.8em").attr("dy", ".15em").attr("transform", function (d) {
+        }).attr("transform", "translate(0," + this.height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function (d) {
           return "rotate(-65)"
         });
 

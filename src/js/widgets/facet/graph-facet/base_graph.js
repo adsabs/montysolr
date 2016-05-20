@@ -28,13 +28,6 @@ define(['marionette',
       this.id = this.graphTitle + "-graph";
 
       //setting some constants for the graph
-      this.bins = 12; //will be around 12, depending on remainders
-      this.margin = {
-        top   : 5,
-        right : 5,
-        bottom: 20,
-        left  : 20
-      };
       this.fullWidth = 110;
       this.fullHeight = 100;
 
@@ -52,6 +45,14 @@ define(['marionette',
 
       this.on("facet:active", this.pulseApplyButton)
 
+    },
+
+    bins : 12, //will be around 12, depending on remainders
+    margin : {
+      top   : 5,
+      right : 5,
+      bottom: 20,
+      left  : 20
     },
 
     template: FacetGraphTemplate,
