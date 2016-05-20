@@ -168,6 +168,18 @@ Year, Citation and Reference Graphs
   left: 0;
 }
 
+#year-graph .tick line {
+  display: none;
+}
+
+#year-graph .domain {
+  display: none;
+}
+
+#year-graph .y-axis text {
+  text-anchor: start;
+}
+
 #citation-graph .chart {
   min-height: 240px;
 }
@@ -576,7 +588,6 @@ $group-circle-active : lighten($brand-warning, 10%);
   text {
     stroke :none;
     fill: $gray-darker;
-    font-weight: 300;
   }
 }
 
