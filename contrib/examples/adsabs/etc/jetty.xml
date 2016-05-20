@@ -23,6 +23,7 @@
               <Arg type="int"><SystemProperty name="jetty.queueSize" default="4000"/></Arg>
            </New>
         </Arg>
+        <Set name="maxQueued"><Property name="jetty.maxQueued" default="100"/></Set>
         <Set name="minThreads"><SystemProperty name="jetty.minThreads" default="100"/></Set>
         <Set name="maxThreads"><SystemProperty name="jetty.maxThreads" default="250"/></Set>
         <Set name="detailedDump"><SystemProperty name="jetty.detailedDump" default="false"/></Set>

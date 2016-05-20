@@ -31,12 +31,12 @@
    
   <indexConfig>
     
-    <maxIndexingThreads>8</maxIndexingThreads>
+    <maxIndexingThreads>${solr.maxIndexingThreads:8}</maxIndexingThreads>
     
-    <useCompoundFile>false</useCompoundFile>
+    <useCompoundFile>${solr.useCompoundFile:false}</useCompoundFile>
 
-    <ramBufferSizeMB>1000</ramBufferSizeMB>
-    <maxBufferedDocs>50000</maxBufferedDocs>
+    <ramBufferSizeMB>${solr.ramBufferSize:1000}</ramBufferSizeMB>
+    <maxBufferedDocs>${solr.maxBufferedDocs:50000}</maxBufferedDocs>
 
     
     <!-- When we run several instances sharing the same index, we must

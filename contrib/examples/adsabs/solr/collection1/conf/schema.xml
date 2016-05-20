@@ -1431,9 +1431,6 @@
 		<field name="links_data" type="string" indexed="false" stored="true"
 			multiValued="true" />
 
-		<field name="ids_data" type="string" indexed="false" stored="true"
-			multiValued="true" />
-
 
     <!--
     @api.doc
