@@ -147,24 +147,8 @@ s-search-bar-motion is applied */
   }
 }
 
-.s-results-middle-column {
-  @media (min-width : $screen-md-min){
-    float: right;
-  }
-
-  @media (min-width : $screen-lg-min){
-    float: left;
-  }
-}
-
 .s-right-column {
-  @media (min-width : $screen-md-min){
     padding-right: 0;
-  }
-
-  @media (min-width : $screen-lg-min){
-    padding-left: 0;
-  }
 }
 
 .btn-upside-down i {
