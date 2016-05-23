@@ -13,7 +13,8 @@
         <div class="col-xs-12 s-dynamic-page-body" id="dynamic-page-body">
             <div class="max-width-wrapper">
                 <div class="row">
-                    <div class="hidden-xs col-sm-3 col-lg-2 s-left-column s-results-column" id="results-left-column">
+                    <div class="hidden-xs col-sm-3 s-left-column s-results-column" id="results-left-column">
+                        <div data-widget="QueryInfo"/>
                         <h2 class="sr-only">Filters for the Current Search</h2>
                         <div class="left-col-container s-left-col-container">
                             <div data-widget="AuthorFacet"/>
@@ -28,9 +29,11 @@
                             <div data-widget="VizierFacet"/>
                             <div data-widget="GrantsFacet"/>
                         </div>
+                        <div data-widget="GraphTabs"/>
+                        <div data-widget="QueryDebugInfo" data-debug="true"/>
                     </div>
 
-                    <div class="col-sm-9 col-lg-7 s-results-middle-column s-results-column" id="results-middle-column">
+                    <div class="col-sm-9 s-results-middle-column s-results-column" id="results-middle-column">
 
                         <div class="main-content-container s-main-content-container" id="main-content" tabindex="-1" role="main" aria-label="container for search results and other main content">
                             <div data-widget="Results"/>
@@ -38,18 +41,11 @@
                             <div data-widget="AuthorNetwork"/>
                             <div data-widget="PaperNetwork"/>
                             <div data-widget="Metrics"/>
-                            <div data-widget="BubbleChart"></div>
+                            <div data-widget="BubbleChart"/>
                             <div data-widget="ConceptCloud"/>
                         </div>
                     </div>
 
-                    <div class="hidden-xs col-sm-3 col-lg-3  results-right-column s-right-column s-results-column" id="results-right-column">
-                        <h2 class="sr-only">Additional Functionality (Information about your query, and more search filters)</h2>
-
-                        <div data-widget="QueryInfo"/>
-                        <div data-widget="GraphTabs"/>
-                        <div data-widget="QueryDebugInfo" data-debug="true"/>
-                    </div>
                 </div>
             </div>
 
