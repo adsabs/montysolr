@@ -24,7 +24,7 @@ define([
     var widget = FacetFactory.makeHierarchicalCheckboxFacet({
       facetField: "simbad_object_facet_hier",
       facetTitle: "SIMBAD Objects",
-      openByDefault: true,
+      openByDefault: false,
       logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['and', 'or', 'exclude']},
       responseProcessors: [
         function (v) {
