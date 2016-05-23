@@ -65,16 +65,21 @@ define([
           doc.authorAff = _.zip(doc.author, _.range(doc.author.length));
         }
 
-        _.each(doc.authorAff, function(el, index){
-          doc.authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"').replace(/%20/g, "+");
-        });
+        //only true if there was an author array
+        //now add urls
+        if (doc.authorAff){
 
-        if (doc.authorAff.length > maxAuthors) {
-          doc.authorAffExtra = doc.authorAff.slice(maxAuthors, doc.authorAff.length);
-          doc.authorAff = doc.authorAff.slice(0, maxAuthors);
+          _.each(doc.authorAff, function(el, index){
+            doc.authorAff[index][2] = encodeURIComponent('"' +  el[0] + '"').replace(/%20/g, "+");
+          });
+
+          if (doc.authorAff.length > maxAuthors) {
+            doc.authorAffExtra = doc.authorAff.slice(maxAuthors, doc.authorAff.length);
+            doc.authorAff = doc.authorAff.slice(0, maxAuthors);
+          }
+
+          doc.hasMoreAuthors = doc.authorAffExtra && doc.authorAffExtra.length;
         }
-
-        doc.hasMoreAuthors = doc.authorAffExtra && doc.authorAffExtra.length;
 
         if (doc.pubdate){
           doc.formattedDate =  PapersUtils.formatDate(doc.pubdate, {format: 'MM d yy', missing: {day: 'MM yy', month: 'yy'}});
