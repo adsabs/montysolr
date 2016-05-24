@@ -147,7 +147,7 @@ define([
       fl: 'title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract',
       rows : 25,
       start : 0,
-      sort : "citation_count desc"
+      sort : "date desc"
     },
 
     activate : function(beehive){
@@ -207,6 +207,7 @@ define([
     },
 
     dispatchRequest : function(queryOptions){
+      //uses defaultQueryArguments
       var q = this.customizeQuery(new ApiQuery());
       if (queryOptions){
         q.set(queryOptions);
@@ -288,7 +289,8 @@ define([
                 that.reset();
                 //flash a success message
                 that.model.set("itemDeleted", true);
-                that.dispatchRequest({sort : that.model.get("sort") });
+                var data = that.model.get("sort") ? {sort : that.model.get("sort")} : {};
+                that.dispatchRequest(data);
               });
           break;
 
