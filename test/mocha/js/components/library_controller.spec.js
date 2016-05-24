@@ -38,7 +38,6 @@ define([
       var l = new LibraryController();
 
       expect(_.keys(l.getHardenedInstance())).to.eql([
-        "getPublicLibraryMetadata",
         "getLibraryMetadata",
         "createLibrary",
         "createLibAndAddBibcodes",
@@ -57,7 +56,6 @@ define([
     it("should automatically keep the libraries metadata collection in sync throughout different CRUD operations", function(){
 
       var l = new LibraryController();
-
 
       var minsub = new (MinSub.extend({
         request: function() {
@@ -579,10 +577,19 @@ define([
 
       var l = new LibraryController();
 
+      var fetchMetadataSpy = sinon.spy(l, "fetchLibraryMetadata");
+
       l.composeRequest = sinon.spy(function(){
-        var d = $.Deferred();
-        d.resolve(stubMetadata);
-        return d.promise();
+        if (arguments[0] === "biblib/libraries"){
+          var d = $.Deferred();
+          d.resolve(stubMetadata);
+          return d.promise();
+        }
+       else if (arguments[0] === "biblib/libraries/17") {
+          var d = $.Deferred();
+          d.resolve({ metadata : {id : '17', title : "Public Lib 2"} });
+          return d.promise();
+        }
       });
 
       //should fetch data if _metadataLoaded === false
@@ -601,19 +608,23 @@ define([
       //should just return collection (or model json if lib id is provided) if _metadataLoaded
 
       l.getLibraryMetadata("3").done(function(data){
-        expect(data.id).to.eql("3")
-        done();
+        expect(data.id).to.eql("3");
       });
 
       expect(l.composeRequest.callCount).to.eql(1);
 
+      //public library or a lbirary that isnt in general collection for some reason
+      expect(fetchMetadataSpy.callCount).to.eql(0);
+
+      l.getLibraryMetadata("17").done(function(data){
+        expect(data.id).to.eql("17")
+        done();
+      });
+
+      expect(fetchMetadataSpy.callCount).to.eql(1);
+
     });
 
-    it("should offer widgets a method to get library bibcodes, and cache the bibcodes for future use", function(){
-
-
-
-    });
 
     it("should have an internal method, composeRequest, that actually composes API request and returns and resolves a promise (so public functions can return the promise)", function(){
 
@@ -643,8 +654,8 @@ define([
 
       expect(promise.state()).to.eql("resolved");
 
-
     });
+
 
     it("should allow widgets to create + delete libraries", function(){
 
@@ -823,9 +834,7 @@ define([
 
       expect(test).to.eql("foo");
 
-
-
-    })
+    });
   });
 
 })

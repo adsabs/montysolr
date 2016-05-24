@@ -104,7 +104,6 @@ define([
 
         this.set("404", function(){
           app.getObject('MasterPageManager').show('ErrorPage');
-          this.route = '#404';
         });
 
 
