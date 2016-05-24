@@ -235,6 +235,11 @@ define([
       * */
 
       getLibraryMetadata : function(id){
+        // check to see if the id is even in the collection,
+        // if not return fetchLibraryMetadata;
+        if (id && !this.collection.get(id)) {
+          return this.fetchLibraryMetadata(id);
+        }
         var deferred = $.Deferred();
         var that = this;
         if  (!this._metadataLoaded){
@@ -247,19 +252,24 @@ define([
           })
         }
         else {
-          var data = id ? that.collection.get(id).toJSON() : that.collection.toJSON();
-          deferred.resolve(data)
-        }
+          var data;
 
+          if (id){
+            data =  that.collection.get(id).toJSON();
+          } else {
+            data = that.collection.toJSON();
+          }
+          deferred.resolve(data);
+        }
         return deferred.promise();
       },
 
       /*
-      * public libraries don't necessarily belong to the user, so fetch the info
-      * each time
+      * fetch the data especially -- useful for public libraries but also
+      * in case the new data hasn't been added to the collection yet
       * */
 
-      getPublicLibraryMetadata : function(id){
+      fetchLibraryMetadata : function(id){
         if (!id) throw new Error("need to provide a library id");
         var deferred = $.Deferred();
 
@@ -549,7 +559,6 @@ define([
 
 
       hardenedInterface: {
-        getPublicLibraryMetadata : "get metadata especially for a public library",
         getLibraryMetadata : "returns json list of libraries, optional lib id as param",
         createLibrary : "createLibrary",
 

@@ -88,18 +88,10 @@ define([
 
         }.bind(this);
 
-        var libController =  this.getBeeHive()
-            .getObject("LibraryController");
-
-        //fetch data
-        if (this.model.get("publicView")){
-         libController.getPublicLibraryMetadata(this.model.get("id"))
-              .done(done);
-        }
-        else {
-          libController.getLibraryMetadata(this.model.get("id"))
-              .done(done);
-        }
+        this.getBeeHive()
+            .getObject("LibraryController")
+            .getLibraryMetadata(this.model.get("id"))
+            .done(done);
 
       },
 
