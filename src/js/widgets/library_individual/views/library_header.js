@@ -127,8 +127,8 @@ define([
       var $target = $(e.currentTarget),
           $form = $target.parent();
 
-      $form.find("input").val("");
-      $form.find("textarea").val("");
+      $form.find("input").val(this.model.get("name"));
+      $form.find("textarea").val(this.model.get("description"));
       $form.addClass("hidden");
 
     },

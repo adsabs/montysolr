@@ -104,7 +104,6 @@ define([
 
   });
 
-
   var LibraryCollectionView = ListOfThingsWidget.extend({
 
     //called by the navigator

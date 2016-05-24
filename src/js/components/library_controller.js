@@ -242,23 +242,18 @@ define([
         }
         var deferred = $.Deferred();
         var that = this;
+        //if this is the initial check, just wait until we can load the metadata
         if  (!this._metadataLoaded){
           this._fetchAllMetadata().done(function(data){
             //make sure the collection is refilled before this promise is resolved
             setTimeout(function(){
               var data = id ? that.collection.get(id).toJSON() : that.collection.toJSON();
               deferred.resolve(data)
-            }, 1)
+            }, 1);
           })
         }
         else {
-          var data;
-
-          if (id){
-            data =  that.collection.get(id).toJSON();
-          } else {
-            data = that.collection.toJSON();
-          }
+          var data = id ? that.collection.get(id).toJSON() : that.collection.toJSON();
           deferred.resolve(data);
         }
         return deferred.promise();
@@ -270,12 +265,17 @@ define([
       * */
 
       fetchLibraryMetadata : function(id){
+        var that = this;
         if (!id) throw new Error("need to provide a library id");
         var deferred = $.Deferred();
 
         this.composeRequest(ApiTargets["LIBRARIES"] + "/" + id)
             .done(function(data){
                 deferred.resolve(data.metadata);
+            })
+            .fail(function(){
+              // just navigate to a 404 page
+              that.getPubSub().publish(that.getPubSub().NAVIGATE, "404");
             });
 
       return deferred.promise();

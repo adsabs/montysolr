@@ -376,6 +376,9 @@ define([
         return d
       }),
       getLibraryMetadata: sinon.spy(function (id) {
+        if (id &&  !_.findWhere(stubLibraryMetadata, {id : id})){
+          this.fetchLibraryMetadata(id);
+        }
         var d = $.Deferred();
         if (id){
           d.resolve(_.findWhere(stubLibraryMetadata, {id : id}));
@@ -383,6 +386,7 @@ define([
         d.resolve(stubLibraryMetadata);
         return d.promise();
       }),
+
       getPublicLibraryMetadata: sinon.spy(function (id) {
         var d = $.Deferred();
         if (id){
@@ -522,12 +526,13 @@ define([
 
       $("#test").append(w.getEl());
 
+      //defaults
       expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(2);
 
-      w.setSubView({id: "1", subView: "library", publicView: true});
+      //not in collection, but behind the scenes library controller should fetch it
+      w.setSubView({id: "7", subView: "library", publicView: true});
 
-      //should grab the metadata from the getLibraryData function rather than getLibraryMetadata if public library
-      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(2);
+      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(3);
 
     });
 

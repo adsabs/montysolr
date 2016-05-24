@@ -413,7 +413,7 @@ define([
           0
         ],
         "sort": [
-          "citation_count desc"
+          "date desc"
         ]
       });
 
