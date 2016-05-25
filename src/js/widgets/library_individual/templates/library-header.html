@@ -74,7 +74,7 @@
         <h2>{{name}} <button class="btn btn-link toggle-form">edit</button></h2>
         <form class="hidden">
             <label  class="sr-only" for="#edit-library-title"> Change title </label>
-            <input class="form-control" type="text" id="edit-library-title" value="{{name}}"/>
+            <input class="form-control" type="text" id="edit-library-title" value="{{name}}" maxlength="50"/>
             <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
             <button class="btn btn-small btn-default"> cancel</button>
         </form>
@@ -86,7 +86,7 @@
         </p>
         <form class="hidden">
             <label class="sr-only" for="#edit-library-description"> Change description </label>
-            <textarea class="form-control" id="edit-library-description">{{description}}</textarea>
+            <textarea class="form-control" id="edit-library-description" maxlength="200">{{description}}</textarea>
             <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
             <button class="btn btn-small btn-default">cancel</button>
         </form>
