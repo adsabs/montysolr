@@ -5,9 +5,8 @@
  */
 
 define([
-    'underscore',
     'js/widgets/list_of_things/widget',
-    'js/widgets/base/base_widget',
+    'js/widgets/abstract/widget',
     'js/mixins/add_stable_index_to_collection',
     'js/mixins/link_generator_mixin',
     'js/mixins/formatter',
@@ -19,9 +18,8 @@ define([
   ],
 
   function (
-    _,
     ListOfThingsWidget,
-    BaseWidget,
+    AbstractWidget,
     PaginationMixin,
     LinkGenerator,
     Formatter,
@@ -70,6 +68,12 @@ define([
         // to this event on the view
         this.listenTo(this.view, "toggle-all", this.triggerBulkAction);
 
+        //to facilitate sharing records with abstract, extend defaultQueryFields to include any extra abstract fields
+        var abstractFields = AbstractWidget.prototype.defaultQueryArguments.fl.split(",");
+        var resultsFields = this.defaultQueryArguments.fl.split(",");
+        resultsFields = _.union(abstractFields, resultsFields);
+        this.defaultQueryArguments.fl = resultsFields.join(",");
+
       },
 
       defaultQueryArguments: {
@@ -86,7 +90,6 @@ define([
       activate: function (beehive) {
 
         ListOfThingsWidget.prototype.activate.apply(this, [].slice.apply(arguments));
-
         var pubsub = beehive.getService('PubSub');
         _.bindAll(this, 'dispatchRequest', 'processResponse', 'onUserAnnouncement', 'onStoragePaperUpdate', 'onCustomEvent');
         pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
@@ -125,8 +128,6 @@ define([
       },
 
       dispatchRequest: function(apiQuery) {
-
-        var pubsub = this.getPubSub();
         this.reset();
           ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
       },
@@ -188,6 +189,9 @@ define([
         if (this.hasBeeHive() && this.getBeeHive().hasObject('AppStorage')) {
           appStorage = this.getBeeHive().getObject('AppStorage');
         }
+
+        //stash docs so other widgets can access them
+        this.getBeeHive().getObject("DocStashController").stashDocs(docs);
 
         //any preprocessing before adding the resultsIndex is done here
         docs = _.map(docs, function (d) {
@@ -253,6 +257,7 @@ define([
         });
 
         docs = this.parseLinksData(docs);
+
         return docs;
       },
 
