@@ -71,13 +71,16 @@ define([
           getLocalStorage : function(){return { perPage : 50 }}
 
         };
+        var fakeDocStashController = {getHardenedInstance :function(){return this}, stashDocs : sinon.spy()};
+        minsub.beehive.addObject("DocStashController", fakeDocStashController );
+
         minsub.beehive.addObject("User", fakeUserObject);
 
         widget.activate(minsub.beehive.getHardenedInstance());
         return widget;
       };
 
-      it("should listen to START_SEARCH and automatically request and render data", function (done) {
+      it("should listen to START_SEARCH and automatically request and render data (with fields augmented by abstract widget)", function (done) {
 
         var widget = _getWidget();
         widget.foox = 1;
@@ -106,7 +109,7 @@ define([
               "true"
             ],
             "fl": [
-              "title,abstract,bibcode,author,keyword,id,links_data,property,citation_count,[citations],pub,aff,email,volume,pubdate,doi"
+              "title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,links_data,property,email"
             ],
             "rows": [
               25
@@ -119,7 +122,7 @@ define([
             ]
           });
 
-          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Clinks_data%2Cproperty%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cemail%2Cvolume%2Cpubdate%2Cdoi&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*%20*%3A*&rows=25&start=0');
+          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Clinks_data%2Cproperty%2Cemail&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*%20*%3A*&rows=25&start=0');
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
@@ -344,7 +347,11 @@ define([
 
         };
         minsub.beehive.addObject("User", fakeUserObject);
+        var fakeDocStashController = {getHardenedInstance :function(){return this}, stashDocs : sinon.spy()};
+        minsub.beehive.addObject("DocStashController", fakeDocStashController );
+
         widget.activate(minsub.beehive.getHardenedInstance());
+
 
         var $w = widget.render().$el;
         $("#test").append($w);

@@ -44,7 +44,9 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         }))({verbose: false});
 
         var fakeAppStorage = {getHardenedInstance :function(){return this}, getCurrentQuery : function(){return new MinimalPubSub.prototype.T.QUERY()}};
+        var fakeDocStashController = {getHardenedInstance :function(){return this}, getDocs : function(){ return [ {bibcode : '1' }, {bibcode : '2'} ]}};
         minsub.beehive.addObject("AppStorage", fakeAppStorage);
+        minsub.beehive.addObject("DocStashController", fakeDocStashController );
 
       });
 
@@ -124,6 +126,17 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect($w.find(".s-abstract-text").text()).to.match(/In the past twenty years there has been a great amount of growth in radiometric observing methods./);
       });
 
+      it("should pre-populate with values from the docstashcontroller", function(){
+        var aw = new AbstractWidget();
+        aw.activate(minsub.beehive.getHardenedInstance());
+        aw.dispatchRequest = sinon.spy();
+
+        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:goo'}));
+
+        expect(Object.keys(aw._docs)).to.eql(["1", "2"]);
+
+      });
+
       it("should request a new bibcode if it can't find it in this._docs", function(){
 
         var aw = new AbstractWidget();
@@ -173,7 +186,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
       });
 
-      it("should completely clear it's (single) model before inserting the next page's data", function(){
+      it("should completely clear its (single) model before inserting the next page's data", function(){
         var aw = new AbstractWidget();
 
         aw._docs =  {
@@ -195,10 +208,6 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect(aw.model.toJSON()).to.eql({
           "field1": "boo2",
         });
-
-
-
-
 
 
       });

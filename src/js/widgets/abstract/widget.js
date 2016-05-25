@@ -185,11 +185,20 @@ define([
         pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
         pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
         pubsub.subscribe(pubsub.DISPLAY_DOCUMENTS, this.onDisplayDocuments);
+
       },
 
       defaultQueryArguments: {
         fl: 'title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw',
         rows: 40
+      },
+
+      mergeStashedDocs : function(docs) {
+        _.each(docs, function(d){
+          if (!this._docs[d.bibcode]) {
+            this._docs[d.bibcode] = d;
+          }
+        }, this);
       },
 
       onNewQuery: function (apiQuery) {
@@ -210,41 +219,42 @@ define([
 
       //bibcode is already in _docs
       displayBibcode : function(bibcode){
-
-        var lowerCaseBibcode = bibcode.toLowerCase();
-
+        
         //wipe out the former values, because this new set of data
         // might not have every key
         this.model.clear({silent : true});
-        this.model.set(this._docs[lowerCaseBibcode]);
+        this.model.set(this._docs[bibcode]);
 
-        this._current = lowerCaseBibcode;
+        this._current = bibcode;
         // let other widgets know details
-        var c = this._docs[lowerCaseBibcode]["[citations]"];
+        var c = this._docs[bibcode]["[citations]"];
         var resolved_citations = c ? c.num_citations : 0;
 
         this.trigger('page-manager-event', 'broadcast-payload', {
-          title: this._docs[lowerCaseBibcode].title,
+          title: this._docs[bibcode].title,
           //this should be superfluous, widgets already subscribe to display_documents
           bibcode: bibcode,
 
           //used by citation list widget
-          citation_discrepancy : this._docs[lowerCaseBibcode].citation_count - resolved_citations,
-          citation_count : this._docs[lowerCaseBibcode].citation_count
+          citation_discrepancy : this._docs[bibcode].citation_count - resolved_citations,
+          citation_count : this._docs[bibcode].citation_count
         });
 
       },
 
       onDisplayDocuments: function (apiQuery) {
+        
+        //check to see if a query is already in progress (the way bbb is set up, it will be)
+        //if so, auto fill with docs initially requested by results widget
+        this.mergeStashedDocs(this.getBeeHive().getObject("DocStashController").getDocs());
 
-          var bibcode =  apiQuery.get('q'),
-              q;
+        var bibcode =  apiQuery.get('q'), q;
 
-          if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
+        if (bibcode.length > 0 && bibcode[0].indexOf('bibcode:') > -1) {
           //redefine bibcode
           var bibcode = bibcode[0].replace('bibcode:', '');
         }
-        if (this._docs[bibcode.toLowerCase()]) { // we have already loaded it
+        if (this._docs[bibcode]) { // we have already loaded it
          this.displayBibcode(bibcode);
         }
         else {
@@ -282,7 +292,7 @@ define([
               doc.doi = {doi: doc.doi,  href: this.adsUrlRedirect("doi", doc.doi)}
             }
             d = this.model.parse(doc, this.maxAuthors);
-            this._docs[d.bibcode.toLowerCase()] = d;
+            this._docs[d.bibcode] = d;
           }, this);
 
           if (apiResponse.has('responseHeader.params.__show')) {

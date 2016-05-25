@@ -180,6 +180,9 @@ define([
 
         this.triggerMethod("show");
 
+        //scroll to top
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
+
         return this.view;
       },
 

@@ -628,7 +628,6 @@ module.exports = function(grunt) {
             "widgets/base/base_widget.js":51,
             "widgets/breadcrumb/widget.js":55,
             "components/navigator.js":60,
-            "widgets/abstract/widget.js":58,
             "mixins/dependon.js":61,
             "widgets/facet/tree_view.js":62,
             "widgets/facet/item_view.js":71,
