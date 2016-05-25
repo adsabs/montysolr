@@ -182,12 +182,7 @@ define([
             libController
                 .updateLibraryMetadata(id, arg1)
                 .done(function (data) {
-                  //make a new view
                   that.headerModel.set(data);
-                  var header = new HeaderView({model: that.headerModel});
-                  header.on("all", that.handleHeaderEvents, that);
-                  that.view.header.show(header);
-
                 });
             break;
 
