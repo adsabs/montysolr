@@ -175,6 +175,7 @@ define(['marionette',
       submitQuery: function (data) {
         var apiQuery = this.getCurrentQuery().clone();
         apiQuery.set("sort", data);
+        debugger
         this.getPubSub().publish(this.getPubSub().START_SEARCH, apiQuery);
 
         analytics('send', 'event', 'interaction', 'sort-applied', data);
@@ -195,7 +196,8 @@ define(['marionette',
         var sortVals;
 
         if (q.has('sort')) {
-          sortVals = q.get('sort')[0].split(/\s+/);
+          var primary = q.get('sort')[0].split(",")[0];
+          sortVals = primary.split(/\s+/);
           this.model.removeDefaults();
           this.model.addDefault("sortOptions", sortVals[0]);
           this.model.addDefault("orderOptions", sortVals[1]);

@@ -15,8 +15,8 @@ define([
   'js/components/api_response',
   'js/components/api_targets',
   'js/mixins/add_stable_index_to_collection',
+  'js/mixins/add_secondary_sort',
   'bootstrap'
-
 
 ], function(
     Marionette,
@@ -35,6 +35,7 @@ define([
     ApiResponse,
     ApiTargets,
     PaginationMixin,
+    SecondarySort,
     Bootstrap
 
 ){
@@ -192,7 +193,7 @@ define([
       }
       //set sort
       var sort = resp.solr.responseHeader.params.sort;
-      this.model.set({ sort: sort});
+      this.model.set({ sort: sort.split(",")[0]});
 
       resp = new ApiResponse(resp.solr)
       resp.setApiQuery(apiQuery);
@@ -208,9 +209,14 @@ define([
     dispatchRequest : function(queryOptions){
       //uses defaultQueryArguments
       var q = this.customizeQuery(new ApiQuery());
+
       if (queryOptions){
         q.set(queryOptions);
       }
+
+      //add bibcode sort as secondary option
+      SecondarySort.addSecondarySort(q)
+      
       var req = this.composeRequest(q);
       this.getBeeHive().getService("Api").request(req);
     },

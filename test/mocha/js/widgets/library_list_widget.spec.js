@@ -412,10 +412,10 @@ define([
         "start": [
           0
         ],
-        "sort": [
-          "date desc"
-        ]
+        "sort": ["date desc, bibcode desc"]
+
       });
+
 
         expect($("#test .library-item:first").find("button.remove-record").length).to.eql(1);
 
@@ -484,19 +484,18 @@ define([
       //calls reset to get rid of pagination info in the model
       expect(l.reset.callCount).to.eql(0);
 
-
       expect($("#sort-select").find("option[selected]").val()).to.eql("citation_count desc");
 
       $("option[value='read_count asc']").trigger("change");
 
       expect(l.reset.callCount).to.eql(1);
 
-      expect(fakeApi.request.args[2][0].get("query").toJSON().sort[0]).to.eql("read_count asc");
+      expect(fakeApi.request.args[2][0].get("query").toJSON().sort[0]).to.eql("read_count asc, bibcode asc");
 
       $("option[value='date desc']").trigger("change");
 
-      //resets to desc as
-      expect(fakeApi.request.args[3][0].get("query").toJSON().sort[0]).to.eql("date desc");
+      //resets to desc
+      expect(fakeApi.request.args[3][0].get("query").toJSON().sort[0]).to.eql("date desc, bibcode desc");
 
 
 
