@@ -51,6 +51,7 @@ define([
           m.set("isSelected", false, {silent: true});
         }
       });
+
       s.set("isSelected", true);
     }
   });
@@ -81,67 +82,44 @@ define([
         Marionette.ItemView.prototype.constructor.call(this, options);
       },
 
-      collectionEvents : {
-        "change:isSelected" : "changeManager",
-        "change:options": "changeWithinManager"
-      },
-
       //transition between page managers
-      changeManager: function(model, opts){
+      changeManager: function() {
 
-        var within = (opts.flag == "within");
+        var model = this.collection.findWhere({ isSelected : true });
+        // call the subordinate page-manager
+        var res = model.attributes.object.show.apply(model.attributes.object, model.attributes.options);
 
-        if (model.attributes.isSelected) {
-          // call the subordinate page-manager
-          var res = model.attributes.object.show.apply(model.attributes.object, model.attributes.options);
+        //detach previous controller
+        this.$(".dynamic-container").children().detach();
+        this.$(".dynamic-container").append(res.$el);
+        model.attributes.numAttach += 1;
 
-          if (this.notFirst && !within){
-            //only show transitions for subsequent pages
-            this.$(".dynamic-container").append(res.$el.addClass("fade-in"));
-          }
-          else if (!within) {
-            this.$(".dynamic-container").append(res.el);
-            this.notFirst = true;
-          }
-          model.attributes.numAttach += 1;
+        //scroll to top
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
+        //and fix the search bar back in its default spot
+        $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion");
+        $(".s-quick-add").removeClass("hidden");
 
-          //and fix the search bar back in its default spot
-          $(".s-search-bar-full-width-container").removeClass("s-search-bar-motion");
-          $(".s-quick-add").removeClass("hidden");
-        }
-        else {
-          if (model.attributes.object && model.attributes.object.view.$el.parent().length > 0) {
-            model.attributes.object.view.$el.detach();
-            model.attributes.numDetach += 1;
-          }
-        }
-        this.render();
       },
 
       //transition widgets within a manager
-      changeWithinManager : function(model){
-        this.changeManager(model, {flag: "within"})
-      },
+      changeWithinManager : function(){
 
-      render: function() {
-        // render only once
-        if (!this._rendered) {
-          Marionette.ItemView.prototype.render.apply(this);
-          this._rendered = true;
-        }
-        return this;
+        var model = this.collection.findWhere({ isSelected : true });
+        model.attributes.object.show.apply(model.attributes.object, model.attributes.options);
+        model.attributes.numAttach += 1;
       }
     }
   );
 
   var MasterPageManager = PageManagerController.extend({
-    constructor: function(options) {
+
+    initialize : function(options){
       options = options || {};
-      _.extend(this, _.pick(options, ['debug']));
       this.view = new MasterView(options);
       this.collection = this.view.collection;
       this.model = this.view.model;
-      this.initialize();
+      PageManagerController.prototype.initialize.apply(this, arguments);
     },
 
     activate: function(beehive) {
@@ -156,7 +134,6 @@ define([
     },
 
     show: function(pageManagerName, options) {
-   
       var app = this.getApp();
 
       if (!this.collection.find({'id': pageManagerName})) {
@@ -185,22 +162,17 @@ define([
         console.error('eeeek, ' + pageManager + ' has no assemble() method!');
       }
 
-      if (!pageManagerModel.attributes.isSelected) {
-        //hide other managers
-        this.hideAll();
-      }
-
-      // activate the new pageManagerWidget
+      // it's a new page
       if (!pageManagerModel.get('isSelected')){
-        //'changeWithinManager' also gets triggered if options are changed, leading to
-        //a wasteful re-render!
-        pageManagerModel.set({options: options, object : pageManagerWidget}, {silent : true});
-        //this triggers 'changeManager'
-        pageManagerModel.set({'isSelected': true});
+        pageManagerModel.set({options: options, object : pageManagerWidget});
+        this.collection.selectOne(pageManagerName);
+        this.view.changeManager();
       }
       else {
+        //it's within a page
+        pageManagerModel.set({options : options, object : pageManagerWidget});
         //it's already selected, trigger a change within the manager
-        pageManagerModel.set({options : options, object : pageManagerWidget})
+        this.view.changeWithinManager();
       }
 
       var previousPMName = this.currentChild;
@@ -209,24 +181,19 @@ define([
       // disassemble the old one (behind the scenes)
       if (previousPMName && previousPMName != pageManagerName) {
         var oldPM = this.collection.find({id: previousPMName});
-        if (oldPM && oldPM.get('object'))
+
+        if (oldPM && oldPM.get('object')){
+          oldPM.set("numDetach", oldPM.get("numDetach") + 1);
           oldPM.get('object').disAssemble(app);
+        }
       }
 
-      // send notification
       this.getPubSub().publish(this.getPubSub().ARIA_ANNOUNCEMENT, pageManagerName);
     },
 
+    //used by discovery mediator
     getCurrentActiveChild: function() {
       return this.collection.get(this.currentChild).get('object'); // brittle?
-    },
-
-    hideAll: function() {
-      _.each(this.collection.models, function(model) {
-        if (model.attributes.isSelected) {
-          model.set('isSelected', false);
-        }
-      });
     },
 
     /**
@@ -260,24 +227,10 @@ define([
       $("a#skip-to-main-content").remove();
       $("div#aria-announcement-container").remove();
       $("#app-container").before(AriaAnnouncementTemplate({page : msg}));
-
-
-    },
-
-    /**
-     * Will find and insert any widget that is still not filled on the page
-     * @param app
-     */
-    insertMasterWidgets: function(app){
-      //for header and footer
-      //var nav = app.getWidget("NavbarWidget");
-      //$("#navbar-container").append(nav.render().el);
-
     }
 
   });
 
   _.extend(MasterPageManager.prototype, Dependon.App);
   return MasterPageManager;
-
 });
