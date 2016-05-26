@@ -60,9 +60,8 @@ define([
       },
 
       /**
-       * This is the necessary step to activate the page manager; we'll render
-       * the widgets and append them inside the appropriate places inside the
-       * template
+       * Render the widgets and append them inside the appropriate places inside the
+       * template. This happens only 1x during the lifetime of the page manager
        *
        * @param app
        */
@@ -179,10 +178,6 @@ define([
         }
 
         this.triggerMethod("show");
-
-        //scroll to top
-        document.body.scrollTop = document.documentElement.scrollTop = 0;
-
         return this.view;
       },
 
