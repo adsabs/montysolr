@@ -45,10 +45,17 @@
 
 
 .s-facet-label {
+  position: relative;
   cursor:pointer;
   .facet-amount {
-    float: right;
     color: $gray-light;
+    position: absolute;
+    right: 0;
+    top: -1px;
+
+    @media (min-width : $screen-lg-min){
+      right: 3%;
+    }
   }
 }
 
@@ -57,6 +64,8 @@
   max-width: 100px;
   overflow: auto;
   position: relative;
+
+  font-size: 14px;
   top: -1px;
 }
 .widget-body .item-view {
@@ -144,10 +153,6 @@
   color: $brand-primary-faded !important;
 }
 
-.widget-options {
-  width: 90%;
-}
-
 .s-widget-meta .dropdown-menu p {
   padding: 3px 5px 0px 5px;
 }
@@ -192,7 +197,7 @@
 
 .s-widget h3 {
   @extend .secondary-header;
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: .05rem;
   margin: 0 3px;
   color: $text-color;

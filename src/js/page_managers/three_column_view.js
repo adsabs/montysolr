@@ -87,21 +87,6 @@ define([
           this.$(".s-left-col-container").toggle(show === null ? true : show);
         },
 
-        /**
-         * Show/hide - in a slide fashion - the columns when user clicks on the
-         * controls
-         *
-         * @param e
-         */
-        onClickToggleColumns: function (e) {
-          var name, $button, state;
-          $button = $(e.currentTarget);
-          $button.toggleClass("btn-reversed");
-          name = $button.hasClass("left-expand") ? "left" : "right";
-          state = this.model.get(name) === "open" ? "closed" : "open";
-          this.model.set('user_' + name, state);
-          this.model.set(name, state);
-        },
 
         _returnBootstrapClasses: function () {
           var classes = this.classList;
@@ -141,14 +126,12 @@ define([
         },
 
 
-
         _updateColumnView: function () {
 
           var leftState, rightState, $leftCol, $rightCol, $middleCol;
 
           leftState = this.model.get("left");
           rightState = this.model.get("right");
-
 
           $leftCol = this.$("#results-left-column");
           $rightCol = this.$("#results-right-column");
@@ -157,20 +140,33 @@ define([
 
           _.each([['left', leftState, $leftCol], ['right', rightState, $rightCol]], function(x) {
             if (x[1] == 'open') {
-              x[2].removeClass("hidden-col");
+              x[2].removeClass("hidden");
               var $col = x[2];
               setTimeout(function(){
                 $col.children().show(0);
               }, 500)
             }
             else {
-              x[2].addClass("hidden-col");
+              x[2].addClass("hidden");
             }
           });
 
-          $middleCol.removeClass(this._returnBootstrapClasses)
-              .addClass("col-sm-9 col-lg-7");
-          
+          if (leftState === "open" && rightState === "open") {
+            $middleCol.removeClass(this._returnBootstrapClasses)
+                .addClass("col-sm-9 col-md-7")
+          }
+          //else if (leftState === "closed" && rightState === "open") {
+          //  $middleCol.removeClass(this._returnBootstrapClasses)
+          //      .addClass("col-md-9 col-sm-12")
+          //}
+          //else if (leftState === "open" && rightState === "closed") {
+          //  $middleCol.removeClass(this._returnBootstrapClasses)
+          //      .addClass("col-md-10 col-sm-8")
+          //}
+          else if (leftState === "closed" && rightState === "closed") {
+            $middleCol.removeClass(this._returnBootstrapClasses)
+                .addClass("col-md-12 col-sm-12")
+          }
         }
 
       });
