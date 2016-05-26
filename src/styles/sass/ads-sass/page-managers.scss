@@ -97,7 +97,7 @@ s-search-bar-motion is applied */
 /* Styles for results and abstract page */
 
 
-.s-main-content-container{
+.s-main-content-container {
 
   @extend .clearfix;
   @extend .s-ads-card;
@@ -125,8 +125,18 @@ s-search-bar-motion is applied */
   min-height: 500px;
 }
 
+.s-abstract-content {
+  #right-col-container {
+    padding-left: 0;
+  }
+}
+
 .s-left-column {
-  padding-right: 0
+  padding-right: 0;
+}
+
+.s-abstract-content {
+  padding-left: 0;
 }
 
 /* Styles just for results page */
@@ -139,7 +149,7 @@ s-search-bar-motion is applied */
   }
   .s-left-col-container {
     @extend .s-ads-card;
-    padding: 15px;
+    padding: 5px;
     padding-bottom: 15px;
     min-height: 500px;
     margin-bottom: 25px;
@@ -220,3 +230,21 @@ Styles for Abstract Page
 overflow-x: hidden;
 }
 #main-content:focus { outline: none; }
+
+.s-results-middle-column {
+  @media (min-width : $screen-sm-min){
+    float: right;
+  }
+
+  @media (min-width : $screen-md-min){
+    float: left;
+  }
+}
+
+.s-right-column {
+
+  @media (min-width : $screen-md-min){
+    padding-left: 0;
+    padding-right: 15px;
+  }
+}
