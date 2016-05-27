@@ -280,6 +280,7 @@ define([
           "click #search-form-container": function (e) {
             e.stopPropagation();
           },
+          "keyup .q" : "toggleClear",
           "click #search-form-container .title": "toggleFormSection",
           "click .show-form": "onShowForm",
           "submit form[name=main-query]": "submitQuery",
@@ -307,7 +308,7 @@ define([
 
         clearInput : function(e){
           this.$input.val("");
-          this.$(".icon-clear").addClass("hidden");
+          this.toggleClear();
         },
 
         getFormVal: function() {
