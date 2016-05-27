@@ -83,7 +83,8 @@ define([
 
     });
 
-
+    var cb;
+    
     var ExportView = Marionette.ItemView.extend({
 
       className : "s-export",
@@ -134,25 +135,36 @@ define([
         this.trigger('close-widget');
       },
 
+      onDestroy : function(){
+        //get rid of clipboard event listener
+        if (cb) cb.destroy();
+      },
+
       onRender : function(){
         var that = this;
-        var cb = new Clipboard("#btn-copy");
+        //this doesn't seem to be working?
+        if (cb) cb.destroy();
+        //reduce unnecessary work
+        if (!that.model.get("export")) return;
+
+        cb = new Clipboard("#btn-copy");
 
         cb.on('success', function(e) {
           this.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Copied!')
           e.clearSelection();
           setTimeout(function(){
             that.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Copy to Clipboard')
-          }, 2000)
+          }, 800)
         });
 
-        cb.on('error', function(e) {
-          //this should only affect safari, execCommand isn't supported
-          this.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Now press Ctrl+C (or Cmd+C for Mac) to copy');
-          setTimeout(function(){
-            that.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Copy to Clipboard')
-          }, 4000);
-        });
+        cb.on('error', function  (e){
+              //this should only affect safari, execCommand isn't supported
+              this.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Now press Ctrl+C (or Cmd+C for Mac) to copy');
+              setTimeout(function(){
+                that.$("#btn-copy").html('<i class="fa fa-lg fa-clipboard"></i> Copy to Clipboard')
+              }, 2000);
+            }
+        );
       }
 
     });
