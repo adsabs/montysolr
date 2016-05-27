@@ -136,7 +136,8 @@ define([
 
         $("button[data-value='date']").parent().click();
 
-        expect(w.getPubSub().publish.lastCall.args[1].get("sort")[0]).to.eql("date asc");
+        //bibcode asc is added by query mediator
+        expect(w.getPubSub().publish.lastCall.args[1].get("sort")[0]).to.eql("date asc, bibcode asc");
 
       })
 

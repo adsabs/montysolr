@@ -11,6 +11,7 @@ define(['underscore',
     'cache',
     'js/components/generic_module',
     'js/mixins/dependon',
+    'js/mixins/add_secondary_sort',
     'js/mixins/feedback_handling',
     'js/components/api_request',
     'js/components/api_response',
@@ -26,6 +27,7 @@ define(['underscore',
     Cache,
     GenericModule,
     Dependon,
+    SecondarySort,
     FeedbackMixin,
     ApiRequest,
     ApiResponse,
@@ -96,12 +98,8 @@ define(['underscore',
         var that = this,
             ps = this.getPubSub();
 
-        //add secondary sort with correct asc/desc
-        if (apiQuery.get("sort")){
-          var primarySort = apiQuery.get("sort")[0];
-          var secondarySort = primarySort.indexOf(" asc") > -1 ? "bibcode asc" : "bibcode desc";
-          apiQuery.set("sort", [primarySort, secondarySort]);
-        }
+        //modifies apiQuery in place
+        SecondarySort.addSecondarySort(apiQuery);
 
         // checking if it's a new big query
         if (apiQuery.get("__bigquery")) {
