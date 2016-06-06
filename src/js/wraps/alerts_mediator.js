@@ -26,7 +26,6 @@ define([
         AlertsMediator.prototype.activate.apply(this, arguments);
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.APP_STARTED, _.bind(this.displaySiteMessageWithDelay, this));
-        pubsub.subscribe(pubsub.ARIA_ANNOUNCEMENT, _.bind(this.checkAndDisplaySiteMessage, this));
       },
 
       onAlert: function(apiFeedback, psk) {
