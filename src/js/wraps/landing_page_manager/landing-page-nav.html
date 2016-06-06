@@ -3,8 +3,10 @@
     {{#each tabs}}
             <li class="s-tab {{#if this.isSelected}} active {{/if}}">
                 <a href="{{this.path}}" data-widget-id="{{this.id}}">
-                    {{{this.svg}}}
                     {{this.title}}
+                    <span class="hidden-xs">
+                        Form
+                    </span>
                 </a>
             </li>
     {{/each}}

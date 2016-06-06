@@ -10,20 +10,21 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 .s-starry-background-wrapper {
   background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, .8)), url("../img/background.jpg");
   margin: 0 -15px;
+  background-attachment: fixed;
 }
 
 .s-logo-header {
 
   img {
-    max-width: 400px;
-    margin: 0 20px 10px 0;
+    max-width: 360px;
+    margin: 15px 0 0 0;
     width: 90%;
+    opacity: .9;
   }
 
   background-attachment: fixed;
   @extend .row;
-  padding-top: 25px;
-  padding-bottom: 15px;
+  padding-top: 20px;
   text-align: center;
 
   .ads-logo {
@@ -64,32 +65,29 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
 .s-landing-tabs {
 
-  @media (min-width: $screen-sm-min){
-    height: 99px;
-    position: relative;
-    top: -45px;
-    z-index: 2;
-    text-align: center;
+  text-align: center;
 
-  }
 
   .s-tab {
+    border-bottom: 8px solid transparent;
     width: 32%;
     font-size: 18px;
-    border-bottom: 8px transparent;
+    border-radius: 4px;
+    position:relative;
+    top: 4px;
+    min-width: 100px;
 
     @media (min-width: $screen-sm-min){
-     font-size: 22px;
-      width: 120px;
+     font-size: 20px;
+      width: 150px;
 
     }
 
     a {
-      width: 90px;
+      padding-top: 8px;
+      width: 100%;
+      height: 100%;
       text-align: center;
-      @media (min-width: $screen-sm-min){
-        width: 110px;
-      }
     }
 
   }
@@ -98,62 +96,16 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     a {
       color: $gray-lighter;
     }
-  }
-
-  svg {
-
-    display: none;
-
-    @media (min-width: $screen-sm-min){
-      display:block;
-      max-height: 75px;
-      position: relative;
-      top: 8px;
-      transition : transform .5s, fill .5s;
-      width: 120px;
-
+    &:hover {
+      background-color: hsla(360, 100%, 100%, .15);
     }
-
   }
 
   .active {
-    border-bottom: 8px solid $brand-primary-faded;
+    background-color: #fff;
     color: lighten($brand-primary-faded, 10%);
   }
 
-  .svg-needs-stroke {
-    stroke: $gray-lighter;
-  }
-
-  .svg-needs-fill {
-    fill: $gray-lighter;
-  }
-
-  .active {
-    .svg-needs-stroke {
-      stroke: lighten($brand-primary-faded, 10%);
-    }
-
-    .svg-needs-fill {
-      fill:lighten($brand-primary-faded, 10%);
-    }
-  }
-
-  &::after {
-    position:absolute;
-    bottom: 1px;
-    background-color: black;
-    width: 100%;
-    height:20px;
-    z-index: $z-index-1;
-  }
-
-    .modern-search {
-      position: relative;
-      top: -14px;
-      width: 87px;
-      left: 16px;
-    }
 
 }
 
@@ -169,64 +121,27 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   }
 }
 
-.s-landing-main {
-  min-height: 615px;
-  background: $darker-background;
-
-  .s-ads-card {
-    @media(min-width: $screen-sm-min) {
-      margin: 15px;
-    }
-  }
-}
-
 .s-bumblebee-info {
 
-  font-size: 1.2em;
+  h2 {
+    color: $brand-primary-faded;
+    font-size: 22px;
+  }
+
   margin: 0 -15px;
   background: url("../img/background.jpg") top center repeat fixed;
-  color: white;
-  h2 {
-    color: white;
-    font-weight:100;
-  }
-
-  a {
-    color: lighten($brand-info, 15%);
-  }
-
-  p {
-    font-weight: 300;
-    font-size:18px;
-  }
+  color: darken($text-color, 10%);
 
   .s-transparent-background {
-    background-color: hsla(308, 100%, 0%, 0.30);
-    padding: 100px 0;
+    padding: 40px 0;
   }
 
-  .s-bumble-rocket {
-    max-width: 110px;
-    position: relative;
-    left: 9px;
-    top: -15px;
+  .features-wrapper {
+    background: white;
   }
 
-  .s-landing-icon {
-
-    height: 175px;
-    width: 175px;
-    line-height: 175px;
-    max-width: 100%;
-    color: white;
-    border-radius : 50%;
-    display: block;
-    background-color: saturate($brand-primary-faded, 5%);
-    font-size: 4em;
-    text-align: center;
-    vertical-align: middle;
-    position: relative;
-    margin: 0 auto 50px;
+  .features-wrapper .col-sm-4>div{
+    padding: 4%;
   }
 
   .s-bottom-line {
@@ -316,6 +231,8 @@ div[data-field=date] {
 
 .classic-form {
 
+  margin: 10px auto 60px auto;
+
   label {
     color: $gray;
   }
@@ -342,7 +259,7 @@ div[data-field=date] {
 }
 
 .unobtrusive-landing-page-alert {
-  padding: 10px;
+  padding: 16px;
   text-align: center;
   border-bottom: 1px solid $gray-lighter;
 }
