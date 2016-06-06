@@ -232,8 +232,8 @@ define([
                libController.deleteLibrary(id, this.headerModel.get("name"));
                 break;
 
-              case "start-search":
-                libController.getLibraryBibcodes().done(function (bibcodes) {
+          case "start-search":
+                libController.getLibraryBibcodes(this.model.get("id")).done(function (bibcodes) {
                   var query = new ApiQuery({
                     __bigquery : bibcodes
                   });
