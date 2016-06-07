@@ -125,6 +125,9 @@ define([
 
         w.activate(minsub.beehive.getHardenedInstance());
 
+        w.setCurrentQuery(new ApiQuery({q : "foo"}))
+
+
         sinon.spy(w.getPubSub(), 'publish');
 
         // simulate the click (works in phantomjs)
