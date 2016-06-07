@@ -1,11 +1,12 @@
 define([
   "js/widgets/library_individual/widget",
-  "js/bugutils/minimal_pubsub"
-
+  "js/bugutils/minimal_pubsub",
+  "moment"
 ], function(
 
   LibraryWidget,
-  MinSub
+  MinSub,
+  moment
 
   ) {
 
@@ -690,8 +691,32 @@ define([
 
     });
 
-    it("should facilitate showing export, vis, and metrics widgets", function(){
+    it("should display the correct metadata", function(){
+      var w = new LibraryWidget();
 
+      var minsub = new (MinSub.extend({
+        request: function (apiRequest) {
+          return {some: 'foo'}
+        }
+      }))({verbose: false});
+
+      minsub.beehive.addObject("LibraryController", fakeLibraryController);
+
+      w.activate(minsub.beehive.getHardenedInstance());
+
+      w.setSubView({subView: "library", id: "1"});
+
+      $("#test").append(w.view.el);
+
+
+      //from UTC time to EST
+      try {
+        expect($(".s-library-info .col-sm-3").eq(1).find("span").text()).to.eql("Apr 3 2015, 12:30am");
+      }
+      catch (e) {
+        expect($(".s-library-info .col-sm-3").eq(1).find("span").text()).to.eql("Apr 3 2015, 4:30am");
+
+      }
 
 
     });
