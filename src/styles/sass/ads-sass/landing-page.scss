@@ -8,18 +8,27 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 }
 
 .s-starry-background-wrapper {
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, .8)), url("../img/background.jpg");
+  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, .7)), url("../img/background.jpg");
   margin: 0 -15px;
   background-attachment: fixed;
 }
 
 .s-logo-header {
 
+  font-size: 40px;
+  color: white;
+  font-weight: 300;
+  letter-spacing: .15rem;
+
   img {
-    max-width: 360px;
-    margin: 15px 0 0 0;
-    width: 90%;
-    opacity: .9;
+    max-width: 75px;
+    position: relative;
+    top: -5px;
+  }
+
+  >div {
+    position: relative;
+    left: -2%;
   }
 
   background-attachment: fixed;
@@ -27,41 +36,9 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
   padding-top: 20px;
   text-align: center;
 
-  .ads-logo {
-    color: $gray-lighter;
-    font-weight: 100;
-    text-transform: lowercase;
-    font-size:54px;
-    margin:0 0 20px 0;
-    b {
-      font-weight: 300;
-    }
-  }
-
-  .bumblebee {
-    width:13%;
-    position: absolute;  right: 3%;
-    top: -14px;
-    max-width: 185px;
-    @media(max-width: $screen-xs-max){
-      display:none;
-    }
   }
 
 
-  h2 {
-    color: white;
-    margin-top: 0;
-    margin-bottom: 16px;
-    font-weight: 100;
-    font-size: 26px;
-  }
-
-  .s-title-wrapper {
-    padding: 10px 0 0 0;
-  }
-
-}
 
 .s-landing-tabs {
 
@@ -70,6 +47,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
   .s-tab {
     border-bottom: 8px solid transparent;
+    margin-top: 10px;
     width: 32%;
     font-size: 18px;
     border-radius: 4px;
@@ -138,6 +116,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
   .features-wrapper {
     background: white;
+    margin: 0 40px;
   }
 
   .features-wrapper .col-sm-4>div{
