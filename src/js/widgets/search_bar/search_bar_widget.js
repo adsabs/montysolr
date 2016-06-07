@@ -271,7 +271,7 @@ define([
             }
           });
 
-          this.$('[data-toggle="tooltip"]').tooltip();
+          this.$('[data-toggle="tooltip"]').tooltip({ html : true });
 
         },
 
