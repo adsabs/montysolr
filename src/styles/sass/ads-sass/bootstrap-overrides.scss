@@ -234,3 +234,8 @@ p {
   border-radius: 0px;
   box-shadow: none;
 }
+
+.tooltip .tooltip-inner {
+  font-size: $font-size-base;
+  padding: 6px;
+}
