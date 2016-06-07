@@ -17,8 +17,8 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
   font-size: 40px;
   color: white;
+  -webkit-font-smoothing: antialiased;
   font-weight: 300;
-  letter-spacing: .15rem;
 
   img {
     max-width: 75px;
@@ -44,9 +44,8 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
   text-align: center;
 
-
-  .s-tab {
-    border-bottom: 8px solid transparent;
+  .landing-tab {
+    display: inline-block;
     margin-top: 10px;
     width: 32%;
     font-size: 18px;
@@ -54,23 +53,30 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     position:relative;
     top: 4px;
     min-width: 100px;
+    -webkit-font-smoothing: antialiased;
+    font-weight: 500;
+
 
     @media (min-width: $screen-sm-min){
      font-size: 20px;
-      width: 150px;
+      width: 160px;
 
     }
 
     a {
-      padding-top: 8px;
       width: 100%;
+      display: inline-block;
+      padding: 10px;
       height: 100%;
       text-align: center;
+      &:hover {
+        text-decoration: none;
+      }
     }
 
   }
 
-  .s-tab:not(.active){
+  .landing-tab:not(.active){
     a {
       color: $gray-lighter;
     }
@@ -79,7 +85,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     }
   }
 
-  .active {
+  .landing-tab.active {
     background-color: #fff;
     color: lighten($brand-primary-faded, 10%);
   }

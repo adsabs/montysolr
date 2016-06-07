@@ -198,7 +198,8 @@ require.config({
     'squire': '../bower_components/squire/src/Squire',
     'clipboard': 'libs/clipboard/clipboard',
     'es5-shim' : 'libs/es5-shim/es5-shim',
-    'mathjax' : '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&amp;delayStartupUntil=configured'
+    'mathjax' : '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&amp;delayStartupUntil=configured',
+    'moment' : 'libs/momentjs/moment'
 
   },
 

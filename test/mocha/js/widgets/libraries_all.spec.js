@@ -1,10 +1,12 @@
 define([
   "js/widgets/libraries_all/widget",
-  "js/bugutils/minimal_pubsub"
+  "js/bugutils/minimal_pubsub",
+  "moment"
 
 ], function(
   LibrariesWidget,
-  MinSub
+  MinSub,
+  moment
   ){
 
   describe("Libraries Home Widget (UI Widget)", function(){
@@ -64,7 +66,18 @@ define([
       //4 entries
       expect($("#test tbody tr").length).to.eql(4);
 
-      expect(normalizeSpace($("#test tbody tr:first").html())).to.eql('<td> 1 </td> <td> <i class="fa fa-lg fa-lock" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p>Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>6/4/15 7:57p</td>');
+      //hack for system date time
+      var entry  = normalizeSpace($("#test tbody tr:first").html());
+      if (entry.match("7:57pm")){
+        expect(entry).to.eql(
+        '<td> 1 </td> <td> <i class="fa fa-lg fa-lock" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p>Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>Jun 11 2015, 7:57pm</td>'
+        )
+      }
+      else {
+        expect(entry).to.eql(
+            '<td> 1 </td> <td> <i class="fa fa-lg fa-lock" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p>Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>Jun 11 2015, 3:57pm</td>'
+        )
+      }
 
     });
 
@@ -114,7 +127,16 @@ define([
       $("#test thead th").eq(5).find("button").click();
       $("#test thead th").eq(5).find("button").click();
 
-      expect($("#test tbody td:nth-of-type(6)").map(function(e){return this.textContent}).get()).to.eql(["6/4/15 7:57p", "6/3/14 7:57p", "6/2/13 7:57p", "6/1/12 7:57p"]);
+
+        var dates = $("#test tbody td:nth-of-type(6)").map(function(i,d){return $(d).text()}).get();
+
+        if (dates[0] === "Jun 11 2015, 3:57pm"){
+          expect(dates).to.eql(["Jun 11 2015, 3:57pm","Jun 11 2014, 3:57pm","Jun 11 2013, 3:57pm","Jun 11 2012, 3:57pm"])
+        }
+      else {
+          //hack, assume UTC
+          expect(dates).to.eql(["Jun 11 2015, 7:57pm","Jun 11 2014, 7:57pm","Jun 11 2013, 7:57pm","Jun 11 2012, 7:57pm"])
+        }
 
     })
 

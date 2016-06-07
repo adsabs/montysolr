@@ -1,11 +1,13 @@
 define([
   "marionette",
   "hbs!../templates/library-header",
+  "moment",
   "bootstrap"
 
 ], function(
   Marionette,
   LibraryHeaderTemplate,
+  moment,
   Bootstrap
 
   ){
@@ -71,27 +73,7 @@ define([
 
 
     formatDate : function(d){
-
-      var d = new Date(d);
-
-      function formatAMPM(date) {
-        var hours = date.getHours();
-        var minutes = date.getMinutes();
-        var ampm = hours >= 12 ? 'pm' : 'am';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        minutes = minutes < 10 ? '0'+minutes : minutes;
-        var strTime = hours + ':' + minutes  + ampm;
-        return strTime;
-      }
-
-      var year = d.getFullYear().toString().slice(2,4),
-        month = d.getMonth() + 1,
-        day = d.getDay(),
-        time = formatAMPM(d);
-
-      return month + "/" + day + "/" + year + " " + time;
-
+     return moment.utc(d).local().format("MMM D YYYY, h:mma");
     },
 
     serializeData : function(){
