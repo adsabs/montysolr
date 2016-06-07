@@ -69,7 +69,6 @@ define([
       },
 
       onLibraryChange : function(collectionJSON, info){
-
         //record was deleted from within widget, just update metadata
         if (info.ev == "change" &&  info.id ==  this.model.get("id")){
           this.updateSubView();

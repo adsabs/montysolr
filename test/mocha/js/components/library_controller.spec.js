@@ -57,6 +57,8 @@ define([
 
       var l = new LibraryController();
 
+      var fetchLibraryMetadataSpy = sinon.spy(l, "fetchLibraryMetadata");
+
       var minsub = new (MinSub.extend({
         request: function() {
           return {some: 'foo'}
@@ -78,13 +80,16 @@ define([
         else if ( target == "biblib/documents/7" && method == "POST"){
           d.resolve({ number_added : 4 });
         }
+       //update after a request
+        else if ( target == "biblib/libraries/7"){
+          d.resolve({ metadata : {name: "Space Travel and You", id: "7", description: "", permission : "write", num_documents : 4004, date_created: '2013-06-03 04:30:04', date_last_modified: '2015-06-09 06:30:04'} });
+        }
 
         else {
           d.resolve(stubMetadata);
         }
         return d.promise();
       });
-
 
       //causes library controller to fetch its data
       minsub.publish(minsub.USER_ANNOUNCEMENT, "user_signed_in");
@@ -113,14 +118,12 @@ define([
 
       expect(l.collection.get(1)).to.be.instanceOf(Backbone.Model);
 
-
       l.deleteLibrary(1);
 
       expect(l.composeRequest.args[3]).to.eql(["biblib/documents/1", "DELETE"]);
 
       //record was removed
       expect(l.collection.get(1)).to.be.undefined;
-
 
       l.updateLibraryMetadata(2, {name: "nothing sun"});
 
@@ -136,8 +139,16 @@ define([
 
       expect(l.collection.get(2).get("name")).to.eql("nothing sun");
       expect(l.collection.get(7).get("num_documents")).to.eql(4000);
-      l.updateLibraryContents(7, {bibcode : [1,2,3,4]})
+
+      expect(fetchLibraryMetadataSpy.callCount).to.eql(0);
+
+      l.updateLibraryContents(7, {bibcode : [1,2,3,4]});
+
+      expect(fetchLibraryMetadataSpy.args[0][0]).to.eql(7);
+
       expect(l.collection.get(7).get("num_documents")).to.eql(4004);
+
+      fetchLibraryMetadataSpy.restore();
 
     });
 

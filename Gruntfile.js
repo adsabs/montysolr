@@ -651,6 +651,7 @@ module.exports = function(grunt) {
             "widgets/wordcloud/widget.js": 78,
             "components/analytics.js": 71,
             "wraps/landing_page_manager/landing_page_manager" : 48,
+            "widgets/libraries_all/views/view_all_libraries.js" : 78
           }
         }
       },

@@ -175,7 +175,6 @@ define(['marionette',
       submitQuery: function (data) {
         var apiQuery = this.getCurrentQuery().clone();
         apiQuery.set("sort", data);
-        debugger
         this.getPubSub().publish(this.getPubSub().START_SEARCH, apiQuery);
 
         analytics('send', 'event', 'interaction', 'sort-applied', data);
