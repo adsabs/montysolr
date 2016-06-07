@@ -1,5 +1,24 @@
 
 
+.navbar-brand {
+
+  h1 {
+    display : inline;
+    color: #fff !important;
+    position: relative;
+    top: -7px;
+    left: 6px;
+    font-size: 23px;
+    font-weight: 100;
+    letter-spacing: .12rem;
+
+  }
+
+  img {
+    display : inline-block;
+  }
+}
+
 //otherwise dropdown buttons are mis-styled
 //and won't match the actual links
 .navbar-nav .btn-link {
