@@ -66,6 +66,8 @@ define([
         app.getObject('AppStorage').setCurrentQuery(null);
       }
 
+      this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+
       if (feedback.request && feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
 
