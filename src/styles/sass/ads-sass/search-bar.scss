@@ -171,13 +171,17 @@ input.q {
 
 .s-landing-page-layout {
 
+  .only-show-on-landing {
+    display: block;
+  }
+
 
   .s-search-bar-widget {
     max-width: 800px;
     margin: auto;
   }
 
-  .only-show-on-landing {
+  .quick-reference {
     display: block;
     font-size: 17px;
     dl {
@@ -196,10 +200,10 @@ input.q {
 
     @media screen and (min-width:$screen-sm-min){
 
-      .col-sm-6.first{
+      .col-sm-6:first-of-type{
         width: 46%;
       }
-      .col-sm-6.second {
+      .col-sm-6:nth-of-type(2) {
         width: 54%;
       }
       dl {
@@ -218,3 +222,25 @@ input.q {
   }
 
 }
+
+.landing-faq {
+  text-align: center;
+  font-size: 16px;
+  dl {
+    margin-left: 15px;
+  }
+  dt {
+    font-weight:500;
+    margin-top: 25px;
+  }
+  dd {
+    font-weight: 300;
+    a {
+      font-weight: normal;
+    }
+  }
+
+}
+
+
+

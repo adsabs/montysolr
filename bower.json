@@ -15,7 +15,7 @@
     "d3": "~3.4.6",
     "d3-cloud": "~1.0.5",
     "dsjslib": "https://github.com/monmohan/dsjslib.git#v0.6.6",
-    "fontawesome": "~4.3.0",
+    "fontawesome": "~4.6.0",
     "html5-boilerplate": "~4.3.0",
     "jQuery-QueryBuilder": "https://github.com/romanchyla/jQuery-QueryBuilder.git#master",
     "jquery": "~2.0.3",
