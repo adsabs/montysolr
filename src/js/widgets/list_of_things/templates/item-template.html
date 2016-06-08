@@ -42,9 +42,11 @@
 
                     {{else}}
 
-                        <a href="#" class="btn-link disabled" aria-disabled="true">
-                            <i class="s-text-icon" aria-label="quick access to full text links"></i>
+                    <div title="full text links (none)">
+                        <a href="#" class="btn-link disabled" aria-disabled="true" aria-label="full text links">
+                            <i class="s-text-icon" aria-hidden="true"></i>
                         </a>
+                    </div>
 
                     {{/if}}
 
@@ -66,10 +68,12 @@
                 </ul>
 
                 {{else}}
-
-                    <a href="#" class="btn-link disabled" aria-disabled="true">
-                        <i class="s-list-icon" aria-label="quick links to lists of references, citations and more"></i>
+                <div title="references, citations (none)">
+                    <a href="#" class="btn-link disabled" aria-disabled="true" aria-label="quick links to lists of references, citations etc">
+                        <i class="s-list-icon" aria-hidden="true"></i>
                     </a>
+                </div>
+
 
                 {{/if}}
 
@@ -85,16 +89,17 @@
                 <ul class="hidden list-unstyled link-details s-link-details" role="menu">
 
                     {{#each links.data}}
-                    <li><a {{#if this.openAccess}}class="s-open-access"{{/if}} href="{{this.link}}" target="_blank"
+                    <li><a {{#if this.openAccess}} class="s-open-access"{{/if}} href="{{this.link}}" target="_blank"
                         >{{this.title}}</a></li>
                     {{/each}}
                 </ul>
 
                 {{else}}
-
-                    <a href="#" class="btn-link disabled" aria-disabled="true">
-                        <i class="s-data-icon" aria-label="quick links to data associated with this article"></i>
-                    </a>
+                    <div title="data products (none)">
+                        <a href="#" class="btn-link disabled" aria-disabled="true" aria-label="quick links to data associated with this article">
+                            <i class="s-data-icon" aria-hidden="true"></i>
+                        </a>
+                    </div>
 
                 {{/if}}
 

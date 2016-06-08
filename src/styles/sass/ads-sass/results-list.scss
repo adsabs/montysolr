@@ -1,8 +1,6 @@
 
 // results list css
 
-
-
 //icons for links
 
 .s-icon-draw-attention {
@@ -22,9 +20,9 @@
   position: absolute;
   top: 18px;
   @extend .s-ads-card;
-  padding: 8px 10px;
+  padding: 14px;
   z-index: $z-index-4;
-  margin-left: -8%;
+  margin-left: -30%;
   min-width: 160px;
   font-weight:normal;
 }
