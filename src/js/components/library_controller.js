@@ -248,7 +248,7 @@ define([
             //make sure the collection is refilled before this promise is resolved
             setTimeout(function(){
               var data = id ? that.collection.get(id).toJSON() : that.collection.toJSON();
-              deferred.resolve(data)
+              deferred.resolve(data);
             }, 1);
           })
         }
@@ -271,7 +271,9 @@ define([
 
         this.composeRequest(ApiTargets["LIBRARIES"] + "/" + id)
             .done(function(data){
-                deferred.resolve(data.metadata);
+              deferred.resolve(data.metadata);
+              //set into collection
+              that.collection.add(data.metadata, {merge : true});
             })
             .fail(function(){
               // just navigate to a 404 page
@@ -410,26 +412,8 @@ define([
 
         var endpoint = ApiTargets["DOCUMENTS"] + "/" + id;
         return this.composeRequest(endpoint, "POST", data)
-          .done(function(info){
-            var currentNum = parseInt(that.collection.get(id).get("num_documents"));
-            var newNum;
-            if (_.has(info, "number_added")){
-              newNum = currentNum + parseInt(info.number_added);
-            }
-            else if (_.has(info, "number_removed")) {
-              newNum = currentNum - parseInt(info.number_removed);
-            }
-            else {
-             console.warn("unable to find out whether records were added or removed");
-            }
-
-            if (newNum){
-              that.collection.get(id).set({
-                num_documents : newNum,
-                date_last_modified : new Date().toString()
-              });
-            }
-
+          .done(function(){
+           that.fetchLibraryMetadata(id);
           })
           .fail(function(jqXHR){
             var error = JSON.parse(jqXHR.responseText).error

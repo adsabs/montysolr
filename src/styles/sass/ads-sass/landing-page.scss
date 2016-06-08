@@ -53,9 +53,6 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
     position:relative;
     top: 4px;
     min-width: 100px;
-    -webkit-font-smoothing: antialiased;
-    font-weight: 500;
-
 
     @media (min-width: $screen-sm-min){
      font-size: 20px;
