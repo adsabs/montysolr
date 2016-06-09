@@ -196,7 +196,7 @@ define([
       mergeStashedDocs : function(docs) {
         _.each(docs, function(d){
           if (!this._docs[d.bibcode]) {
-            this._docs[d.bibcode] = d;
+            this._docs[d.bibcode] = this.model.parse(d);
           }
         }, this);
       },

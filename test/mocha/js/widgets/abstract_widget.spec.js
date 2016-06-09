@@ -44,7 +44,15 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         }))({verbose: false});
 
         var fakeAppStorage = {getHardenedInstance :function(){return this}, getCurrentQuery : function(){return new MinimalPubSub.prototype.T.QUERY()}};
-        var fakeDocStashController = {getHardenedInstance :function(){return this}, getDocs : function(){ return [ {bibcode : '1' }, {bibcode : '2'} ]}};
+
+        var stashTestDoc = _.cloneDeep(testJSON.response.docs[0]);
+        //change bibcode so it doesn't interfere with other tests (that
+        // should request the bibcode from the API)
+        stashTestDoc.bibcode = "baz";
+
+        var fakeDocStashController = {getHardenedInstance :function(){return this},
+          getDocs : function(){ return [ stashTestDoc ]}
+        };
         minsub.beehive.addObject("AppStorage", fakeAppStorage);
         minsub.beehive.addObject("DocStashController", fakeDocStashController );
 
@@ -133,7 +141,49 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:goo'}));
 
-        expect(Object.keys(aw._docs)).to.eql(["1", "2"]);
+        expect(Object.keys(aw._docs)).to.eql(["baz"]);
+
+        //docs should be parsed in the mergestasheddocs function
+        //an 'authoraff' array is proof that the parsing occured
+
+        expect(JSON.stringify(_.values(aw._docs)[0])).to.eql(JSON.stringify({
+          "bibcode": "baz",
+          "keyword": [
+            "HARMONY OF THE UNIVERSE",
+            "THEORY OF MUSIC",
+            "PLATO'S BODIES"
+          ],
+          "author": [
+            "Lieske, J. H.",
+            "Standish, E. M."
+          ],
+          "abstract": "In the past twenty years there has been a great amount of growth in radiometric observing methods.",
+          "pub": "IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics",
+          "pubdate": "1981-00-00",
+          "title": "Planetary Ephemerides",
+          "aff": [
+            "Heidelberg, Universität, Heidelberg, Germany",
+            "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA"
+          ],
+          "citation_count": 5,
+          "[citations]": {
+            "num_citations": 3
+          },
+          "hasAffiliation": 2,
+          "authorAff": [
+            [
+              "Lieske, J. H.",
+              "Heidelberg, Universität, Heidelberg, Germany",
+              "%22Lieske%2C+J.+H.%22"
+            ],
+            [
+              "Standish, E. M.",
+              "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA",
+              "%22Standish%2C+E.+M.%22"
+            ]
+          ],
+          "formattedDate": "1981"
+        }));
 
       });
 
