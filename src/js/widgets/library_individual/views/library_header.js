@@ -141,6 +141,10 @@ define([
     },
 
     triggerStartSearch : function(){
+      //hide icons
+      this.$(".bigquery-export i").css("display", "none");
+      //show loader
+      this.$(".bigquery-export .icon-loading").css("display", "inline-block");
       this.trigger("start-search");
     }
 
