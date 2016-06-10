@@ -25,6 +25,9 @@ define([
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
           if (apiRequest.get("target") == "objects/query"){
+            // This mimics the response of the object service microservice, which translates a query like e.g.
+            // "bibstem:ApJ object:Andromeda year:2001" into one where the "object:" part is replaced by its
+            // "simbid:" equivalent
             return {'query':'bibstem:ApJ simbid:1277363 year:2001'}
           } else {
             return Test();
@@ -401,8 +404,9 @@ define([
     it("when some of the fields have wrong input (and the query doesn't contain everything), the form should warn user before closing itself", function() {
 
     });
-
-    it("check if the SIMBAD 'object:' search is properly translated into 'simbid:' search", function() {
+    // Internally, 'object:' queries get translated into 'simbid:' queries (because this is what the Solr documents contain)
+    // but since SIMBAD identifiers are meaningless to the user, we need to keep the original 'object' query visible in the UI
+    it("check if the SIMBAD 'object:' search stays the way it is", function() {
       var widget = _widget();
       $("#test").append(widget.render().el);
       var $w = widget.render().$el;
