@@ -38,6 +38,8 @@ define([
 
     {value: "orcid:" , label : "ORCiD identifier", match: "orcid:"},
 
+    {value: "object:" , label : "SIMBAD object (e.g. object:LMC)", match: "object:"},
+
     {value: "citations()" , label : "Citations", desc: "Get papers citing your search result set", match: "citations("},
     {value: "references()" , label : "References", desc: "Get papers referenced by your search result set", match: "references("},
 
