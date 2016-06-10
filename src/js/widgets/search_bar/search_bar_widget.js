@@ -295,7 +295,6 @@ define([
           "keypress #search-form-container" : function(){
             //for analytics
             //this is not exact (might have experimented then closed the builder)
-            // but it's close enough
             this._queryBuilderUsed = true;
           }
         },
@@ -326,7 +325,6 @@ define([
             this.$(".q").val(v);
           }
           this.toggleClear();
-
         },
 
         setNumFound : function(numFound){
@@ -410,7 +408,6 @@ define([
               newVal = operator + "(" + currentVal + ")";
               currentVal = "";
               this.setFormVal(newVal);
-              this.toggleClear();
               return
             }
 
@@ -441,9 +438,6 @@ define([
               this.$input.selectRange( newString.length );
             }
           }
-
-          //figure out if clear button needs to be there
-          this.toggleClear();
 
           analytics('send', 'event', 'interaction', 'field-insert-button-pressed', df);
 
@@ -531,26 +525,14 @@ define([
         },
 
         handleFeedback: function(feedback) {
-          switch (feedback.code) {
+          if (feedback.code === ApiFeedback.CODES.SEARCH_CYCLE_STARTED || feedback.code ===  ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START ) {
 
-            case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
-              this.setCurrentQuery(feedback.query);
-              if (feedback.response.responseHeader.params["__original_query"]) {
-                var newq = feedback.response.responseHeader.params["__original_query"];
-                this.view.setFormVal(newq);
-              } else {
-                this.view.setFormVal(feedback.query.get('q').join(' '));
-              }
-              this.view.setNumFound(feedback.numFound || 0);
-              break;
-            case ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START:
-              //still want search bar to reflect failed search (from form widgets)
-              var q = feedback.request.get("query").get("q").join(' ');
-              this.setCurrentQuery(q);
-              this.view.setFormVal(q);
-              this.view.setNumFound(0);
-              break;
-
+            var query = feedback.query ? feedback.query : feedback.request.get("query");
+            var newq = query.get("__original_query") ? query.get("__original_query")[0] : query.get("q").join(" ");
+            
+            this.setCurrentQuery(feedback.query);
+            this.view.setFormVal(newq);
+            this.view.setNumFound(feedback.numFound || 0);
           }
         },
 
@@ -569,12 +551,9 @@ define([
 
           this.listenTo(this.view, "render", function () {
             var query = this.getCurrentQuery().get("q");
-            if (query) {
-              this.view.setFormVal(query);
-              this.view.$(".icon-clear").removeClass("hidden");
-            } else {
-              this.view.$(".icon-clear").addClass("hidden");
-            }
+            if (query) this.view.setFormVal(query);
+            this.view.toggleClear();
+
           });
 
           BaseWidget.prototype.initialize.call(this, options)

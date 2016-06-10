@@ -127,7 +127,7 @@ define(['underscore',
         //modifies apiQuery in place
         SecondarySort.addSecondarySort(apiQuery);
 
-        this.original_url = apiQuery.url();
+        this.original_url = this.queryUpdater.clean(apiQuery).url();
         this.original_query = apiQuery.get("q")
 
         // checking if it's a new big query
@@ -213,7 +213,7 @@ define(['underscore',
           return;
         }
 
-        if (apiQuery.get("q")[0].indexOf("simbid:") > -1) {
+        if (apiQuery.get("q")[0].indexOf("simbid") > -1) {
           apiQuery.add("__original_url", this.original_url);
           apiQuery.add("__original_query", this.original_query);
         }
