@@ -147,13 +147,10 @@ define([
 
       it("should be able to get SIMBAD identifiers for queries with 'object:' field", function(done){
 
-        var qm = new QueryMediator();
-        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});
-        var api = beehive.Services.get('Api');
-        api.request.restore();
-        sinon.stub(api, "request", function(request){
-          return {'query':'bibstem:ApJ simbid:1277363 year:2001'};
-        });
+
+        var qm =  createTestQM().qm;
+
+        var publishSpy = sinon.spy(qm.getPubSub(), "publish");
 
         var q = new ApiQuery({
           q : "bibstem:ApJ object:Foo year:2001"
@@ -163,19 +160,28 @@ define([
 
         qm.getQueryAndStartSearchCycle(q, "fakeKey");
 
-        setTimeout(function(){
-          expect(startSearch.args[0][0].toJSON()).to.eql(
-            {
-              "q": [
-                "bibstem:ApJ simbid:1277363 year:2001"
+        expect(publishSpy.args[0]).to.eql([
+          "[PubSub]-Execute-Request",
+          {
+            "target": "objects/query",
+            "query": {
+              "query": [
+                "bibstem:ApJ object:Foo year:2001"
               ]
+            },
+            "options": {
+              "type": "POST",
+              "contentType": "application/json"
             }
-          );
+          }
+        ]);
 
-          done();
-        }, 1);
+        //now resolve the promise
 
-        qm.startSearchCycle.restore();
+        qm.getPubSub().publish(qm.getPubSub().DELIVERING_RESPONSE,  )
+
+
+        
 
       });
 
