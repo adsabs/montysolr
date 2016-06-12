@@ -14,7 +14,8 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/components/pubsub_events',
-    'js/components/api_feedback'
+    'js/components/api_feedback',
+    'js/components/json_response'
      ],
   function(
     _,
@@ -28,7 +29,8 @@ define([
     ApiQuery,
     ApiRequest,
     PubSubEvents,
-    ApiFeedback
+    ApiFeedback,
+    JsonResponse
     ) {
 
     var beehive, debug = false, pubSpy;
@@ -160,28 +162,34 @@ define([
 
         qm.getQueryAndStartSearchCycle(q, "fakeKey");
 
-        expect(publishSpy.args[0]).to.eql([
-          "[PubSub]-Execute-Request",
-          {
-            "target": "objects/query",
-            "query": {
-              "query": [
-                "bibstem:ApJ object:Foo year:2001"
-              ]
-            },
-            "options": {
-              "type": "POST",
-              "contentType": "application/json"
-            }
-          }
-        ]);
+        var r = new ApiRequest({
+          target: "objects/query",
+          query: new ApiQuery({"query" : "bibstem:ApJ object:Foo year:2001"}),
+          "options": {"type": "POST","contentType": "application/json"}
+        });
 
-        //now resolve the promise
+        setTimeout(function() {
+          expect(publishSpy.args[0][0]).to.eql("[PubSub]-Execute-Request");
+          expect(publishSpy.args[0][1].get('query').url()).to.eql(r.get('query').url());
+          done();
+        }, 1);
 
-        qm.getPubSub().publish(qm.getPubSub().DELIVERING_RESPONSE,  )
+        // Check that query mediator object has "original_query" and "original_url" attributes
+        setTimeout(function() {
+          expect(qm).to.have.all.keys('original_url', 'original_query');
+          done();
+        }, 1);
 
+        // Check that response from API gets properly processed
+        qm.getPubSub().publish(qm.getPubSub().DELIVERING_RESPONSE, new JsonResponse({"query":"bibstem:ApJ simbid:123456 year:2001"}));
 
-        
+        setTimeout(function() {
+          expect(publishSpy.args[1][0]).to.eql("[PubSub]-New-Response");
+          expect(publishSpy.args[1][1].get('query')).to.eql("bibstem:ApJ simbid:123456 year:2001");
+          done();
+        }, 1);
+
+        qm.startSearchCycle.restore();
 
       });
 
