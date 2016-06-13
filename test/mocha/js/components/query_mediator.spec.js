@@ -147,8 +147,7 @@ define([
 
       });
 
-      it("should be able to get SIMBAD identifiers for queries with 'object:' field", function(done){
-
+      it("should be able to get SIMBAD identifiers for queries with 'object:' field", function(){
 
         var qm =  createTestQM().qm;
 
@@ -168,26 +167,25 @@ define([
           "options": {"type": "POST","contentType": "application/json"}
         });
 
-        setTimeout(function() {
-          expect(publishSpy.args[0][0]).to.eql("[PubSub]-Execute-Request");
-          expect(publishSpy.args[0][1].get('query').url()).to.eql(r.get('query').url());
-          done();
-        }, 1);
+        expect(publishSpy.args[0][0]).to.eql("[PubSub]-Execute-Request");
+        expect(publishSpy.args[0][1].get('query').url()).to.eql(r.get('query').url());
 
         // Check that query mediator object has "original_query" and "original_url" attributes
-        setTimeout(function() {
-          expect(qm).to.have.all.keys('original_url', 'original_query');
-          done();
-        }, 1);
+        expect(qm.original_query).to.eql(["bibstem:ApJ object:Foo year:2001"]);
+        expect(qm.original_url).to.eql("q=bibstem%3AApJ%20object%3AFoo%20year%3A2001");
 
         // Check that response from API gets properly processed
         qm.getPubSub().publish(qm.getPubSub().DELIVERING_RESPONSE, new JsonResponse({"query":"bibstem:ApJ simbid:123456 year:2001"}));
 
-        setTimeout(function() {
-          expect(publishSpy.args[1][0]).to.eql("[PubSub]-New-Response");
-          expect(publishSpy.args[1][1].get('query')).to.eql("bibstem:ApJ simbid:123456 year:2001");
-          done();
-        }, 1);
+
+        expect(JSON.stringify(startSearch.args[0])).to.eql(JSON.stringify([
+          {
+            "q": [
+              "bibstem:ApJ simbid:123456 year:2001"
+            ]
+          },
+          "fakeKey"
+        ]));
 
         qm.startSearchCycle.restore();
 
