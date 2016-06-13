@@ -14,8 +14,7 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/components/pubsub_events',
-    'js/components/api_feedback',
-    'js/components/json_response'
+    'js/components/api_feedback'
      ],
   function(
     _,
@@ -29,8 +28,7 @@ define([
     ApiQuery,
     ApiRequest,
     PubSubEvents,
-    ApiFeedback,
-    JsonResponse
+    ApiFeedback
     ) {
 
     var beehive, debug = false, pubSpy;
@@ -142,50 +140,6 @@ define([
 
           done();
         }, 1);
-
-        qm.startSearchCycle.restore();
-
-      });
-
-      it("should be able to get SIMBAD identifiers for queries with 'object:' field", function(){
-
-        var qm =  createTestQM().qm;
-
-        var publishSpy = sinon.spy(qm.getPubSub(), "publish");
-
-        var q = new ApiQuery({
-          q : "bibstem:ApJ object:Foo year:2001"
-        });
-
-        var startSearch = sinon.stub(qm, "startSearchCycle");
-
-        qm.getQueryAndStartSearchCycle(q, "fakeKey");
-
-        var r = new ApiRequest({
-          target: "objects/query",
-          query: new ApiQuery({"query" : "bibstem:ApJ object:Foo year:2001"}),
-          "options": {"type": "POST","contentType": "application/json"}
-        });
-
-        expect(publishSpy.args[0][0]).to.eql("[PubSub]-Execute-Request");
-        expect(publishSpy.args[0][1].get('query').url()).to.eql(r.get('query').url());
-
-        // Check that query mediator object has "original_query" and "original_url" attributes
-        expect(qm.original_query).to.eql(["bibstem:ApJ object:Foo year:2001"]);
-        expect(qm.original_url).to.eql("q=bibstem%3AApJ%20object%3AFoo%20year%3A2001");
-
-        // Check that response from API gets properly processed
-        qm.getPubSub().publish(qm.getPubSub().DELIVERING_RESPONSE, new JsonResponse({"query":"bibstem:ApJ simbid:123456 year:2001"}));
-
-
-        expect(JSON.stringify(startSearch.args[0])).to.eql(JSON.stringify([
-          {
-            "q": [
-              "bibstem:ApJ simbid:123456 year:2001"
-            ]
-          },
-          "fakeKey"
-        ]));
 
         qm.startSearchCycle.restore();
 

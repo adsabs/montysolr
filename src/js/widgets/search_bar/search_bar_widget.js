@@ -5,8 +5,6 @@ define([
       'hbs!./templates/search_bar_template',
       'hbs!./templates/search_form_template',
       'js/components/query_builder/plugin',
-      'js/components/api_request',
-      'js/components/api_targets',
       'js/components/api_feedback',
       'js/mixins/formatter',
       './autocomplete',
@@ -22,8 +20,6 @@ define([
         SearchBarTemplate,
         SearchFormTemplate,
         QueryBuilderPlugin,
-        ApiRequest,
-        ApiTargets,
         ApiFeedback,
         FormatMixin,
         autocompleteArray,
@@ -295,6 +291,7 @@ define([
           "keypress #search-form-container" : function(){
             //for analytics
             //this is not exact (might have experimented then closed the builder)
+            // but it's close enough
             this._queryBuilderUsed = true;
           }
         },
@@ -319,12 +316,9 @@ define([
         },
 
         setFormVal: function(v) {
-          if (this.original_query) {
-            this.$(".q").val(this.original_query);
-          } else {
-            this.$(".q").val(v);
-          }
+          this.$(".q").val(v);
           this.toggleClear();
+
         },
 
         setNumFound : function(numFound){
@@ -408,6 +402,7 @@ define([
               newVal = operator + "(" + currentVal + ")";
               currentVal = "";
               this.setFormVal(newVal);
+              this.toggleClear();
               return
             }
 
@@ -439,6 +434,9 @@ define([
             }
           }
 
+          //figure out if clear button needs to be there
+          this.toggleClear();
+
           analytics('send', 'event', 'interaction', 'field-insert-button-pressed', df);
 
         },
@@ -454,8 +452,6 @@ define([
 
           //replace uppercased fields with lowercase
           query = query.replace(/([A-Z])\w+:/g, function(letter){return letter.toLowerCase()});
-//          // store the query in case it gets changed (which happens when there is an object query)
-          this.original_query = query;
 
           this.trigger("start_search", query);
 
@@ -525,14 +521,21 @@ define([
         },
 
         handleFeedback: function(feedback) {
-          if (feedback.code === ApiFeedback.CODES.SEARCH_CYCLE_STARTED || feedback.code ===  ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START ) {
+          switch (feedback.code) {
 
-            var query = feedback.query ? feedback.query : feedback.request.get("query");
-            var newq = query.get("__original_query") ? query.get("__original_query")[0] : query.get("q").join(" ");
-            
-            this.setCurrentQuery(feedback.query);
-            this.view.setFormVal(newq);
-            this.view.setNumFound(feedback.numFound || 0);
+            case ApiFeedback.CODES.SEARCH_CYCLE_STARTED:
+              this.setCurrentQuery(feedback.query);
+              this.view.setFormVal(feedback.query.get('q').join(' '));
+              this.view.setNumFound(feedback.numFound || 0);
+              break;
+            case ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START:
+              //still want search bar to reflect failed search (from form widgets)
+              var q = feedback.request.get("query").get("q").join(' ');
+              this.setCurrentQuery(q);
+              this.view.setFormVal(q);
+              this.view.setNumFound(0);
+              break;
+
           }
         },
 
@@ -551,9 +554,12 @@ define([
 
           this.listenTo(this.view, "render", function () {
             var query = this.getCurrentQuery().get("q");
-            if (query) this.view.setFormVal(query);
-            this.view.toggleClear();
-
+            if (query) {
+              this.view.setFormVal(query);
+              this.view.$(".icon-clear").removeClass("hidden");
+            } else {
+              this.view.$(".icon-clear").addClass("hidden");
+            }
           });
 
           BaseWidget.prototype.initialize.call(this, options)
