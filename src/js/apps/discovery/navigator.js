@@ -325,7 +325,12 @@ define([
             searchPageAlwaysVisible);
           //allowing widgets to override appstorage query (so far only used for orcid redirect)
           var q = app.getObject('AppStorage').getCurrentQuery();
-          var route = '#search/' + queryUpdater.clean(q).url();
+          if (q && q.get("__original_url")) {
+            var route = '#search/' + q.get("__original_url");
+            q.unset('__original_url');
+          } else {
+            var route = '#search/' + queryUpdater.clean(q).url();
+          }
 
           //taking care of inserting bigquery key here, not sure if right place
           //clean(q) above got rid of qid key, reinsert it
