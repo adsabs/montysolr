@@ -384,20 +384,14 @@ define([
         // we need to prevent that
 
         var self = this;
-		var object_names = {};
 
         if (conditions && _.keys(conditions).length > 0) {
 
           conditions = _.values(conditions);
           _.each(conditions, function(c, i, l) {
 			  l[i] = self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value);
-			  if (self.facetField == 'simbad_object_facet_hier') {
-			  	object_names[self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value)] = c.title;
-			  }
           });
-          // Above: create a hash mapping self.facetField + ':' + self.queryUpdater.escapeInclWhitespace(c.value)
-		  // to self.queryUpdater.escapeInclWhitespace(c.title), and later on replace the values in
-		  // __simbad_object_facet_hier_fq_simbad_object_facet_hier attribute 1, 2 ... (not 0)
+
           q = q.clone();
 
           var fieldName = 'fq_' + this.facetField;
@@ -430,17 +424,42 @@ define([
             }
             q.set('fq', fqs);
           }
-		  
+
+      // In the case of the SIMBAD objects facet, we need to do something in order to get the
+      // object names into the breadcrumbs. Without doing the exercise below, we would end up
+      // with the SIMBAD identifiers in the breadcrumbs, rather than the corresponding object
+      // names. If somebody selects multiple entries in the facet simultaneously, we can rely on
+      // the contents of "conditions" to make this translation, but this fails with applying
+      // filters sequentially. Here the cache we created in the object facet widget comes to the
+      // rescue, which we can access as "self._cache".
 		  if (self.facetField == 'simbad_object_facet_hier') {
+        // The attribute '__simbad_object_facet_hier_fq_simbad_object_facet_hier' was defined to
+        // carry over information that will allow us to replace SIMBAD identifiers with their
+        // associated object names elsewhere in the application, in the case of processing a
+        // filter query. It is a list of values like
+        //    ["AND", "simbad_object_facet_hier:1\/Galaxy\/3133169"]
+        // and when you select two facets entries: first one, 'limit to', second one, 'limit to'
+        // you will get an entry like
+        //    ["AND", "(simbad_object_facet_hier:1\/Galaxy\/3133169)", "simbad_object_facet_hier:1\/Galaxy\/1575544"]
+        // If we do nothing, the facet strings will appear in the breadcrumbs. So, we will need to replace them
+        // by their corresponding object names. That is where the SIMBAD identifiers come in (3133169
+        // and 1575544 in this example). These should be present as keys in the cache generated in
+        // the object facet widget, returning the associated (canonical) object names
 			  var current_values = q.get('__simbad_object_facet_hier_fq_simbad_object_facet_hier');
+        // The array 'new_values' will replace 'current_values'
 			  var new_values = [];
 			  for (var e in current_values) {
 				  var val = current_values[e];
-				  var new_val = val;
-				  if (val in object_names) {
-					  new_val = object_names[val];
-				  };
-				  new_values[e] = new_val;
+          // Get the SIMBAD identifier, taking into account that there may be a trailing bracket
+          var identifier = val.split('/').pop().replace(/\)$/, "");
+          // Get the associated canonical object name (or 'none')
+          var oname = self._cache.getIfPresent(identifier);
+          // Add the object name to the list with new values or keep the old value
+          if (oname) {
+            new_values[e] = oname;
+          } else {
+            new_values[e] = identifier;
+          }
 			  };
 			  q.set('__simbad_object_facet_hier_fq_simbad_object_facet_hier', new_values);
 		  }
