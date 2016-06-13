@@ -24,14 +24,7 @@ define([
     beforeEach(function (done) {
       minsub = new (MinimalPubSub.extend({
         request: function (apiRequest) {
-          if (apiRequest.get("target") == "objects/query"){
-            // This mimics the response of the object service microservice, which translates a query like e.g.
-            // "bibstem:ApJ object:Andromeda year:2001" into one where the "object:" part is replaced by its
-            // "simbid:" equivalent
-            return {'query':'bibstem:ApJ simbid:1277363 year:2001'}
-          } else {
-            return Test();
-          }
+          return Test();
         }
       }))({verbose: false});
       done();
@@ -403,22 +396,6 @@ define([
 
     it("when some of the fields have wrong input (and the query doesn't contain everything), the form should warn user before closing itself", function() {
 
-    });
-    // Internally, 'object:' queries get translated into 'simbid:' queries (because this is what the Solr documents contain)
-    // but since SIMBAD identifiers are meaningless to the user, we need to keep the original 'object' query visible in the UI
-    it("check if the SIMBAD 'object:' search stays the way it is", function() {
-      var widget = _widget();
-      $("#test").append(widget.render().el);
-      var $w = widget.render().$el;
-
-      widget.view.on("start_search", function(query){
-        expect(query).to.eql("bibstem:ApJ object:Foo year:2001");
-      });
-
-      //should insert the field around the selected content if user has selected something
-      $w.find(".q").val("bibstem:ApJ object:Foo year:2001");
-      $w.find(".search-submit").click();
-      console.log($w.find(".s-num-found").html().trim());
     });
 
   });
