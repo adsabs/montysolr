@@ -95,11 +95,11 @@ define(['underscore',
 
       doQueryTranslation: function(q) {
         var d = $.Deferred(),
-          pubsub = this.getPubSub(),
-          options = {
+            pubsub = this.getPubSub(),
+            options = {
             type : "POST",
             contentType : "application/json"
-          };
+            };
         // Send the entire query to the "query" endpoint of the "object_service" micro service
         // this endpoint will grab the "object:<expression>" from the query string and send back
         // a translated query string which will have "simbid:<expression with SIMBAD identifiers>"
