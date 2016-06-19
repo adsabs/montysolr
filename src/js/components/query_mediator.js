@@ -175,10 +175,8 @@ define(['underscore',
           // first define a callback function to process the response of the micro service
           // and bind it to "this" so that we can use the trigger
           var callback = function(v){
-            var request = new ApiQuery({
-              q: v.query
-            });
-            this.startSearchCycle(request, senderKey);
+            apiQuery.set({q : v.query});
+            this.startSearchCycle(apiQuery, senderKey);
           }.bind(this);
           // call the callback function when the promise has been resolved
           this.doQueryTranslation(apiQuery.get("q")[0]).done(callback);
