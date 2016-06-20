@@ -122,6 +122,7 @@ define([
           logic = $t.find(".logic-group input:checked").val();
           field = $t.data("field");
           if (logic == "BOOLEAN"){
+            val = val.replace("\n", " ");
             qDict.q.push(field + ":(" + val + ")");
           }
           else {
@@ -146,8 +147,7 @@ define([
           }
 
         }
-      })
-
+      });
       return qDict;
     },
 

@@ -275,7 +275,7 @@ define([
             }
           });
 
-          this.$('[data-toggle="tooltip"]').tooltip({ html : true });
+          this.$('[data-toggle="tooltip"]').tooltip();
 
         },
 
@@ -319,11 +319,7 @@ define([
         },
 
         setFormVal: function(v) {
-          if (this.original_query) {
-            this.$(".q").val(this.original_query);
-          } else {
-            this.$(".q").val(v);
-          }
+          this.$(".q").val(v);
           this.toggleClear();
         },
 
@@ -525,15 +521,17 @@ define([
         },
 
         handleFeedback: function(feedback) {
+
           if (feedback.code === ApiFeedback.CODES.SEARCH_CYCLE_STARTED || feedback.code ===  ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START ) {
 
             var query = feedback.query ? feedback.query : feedback.request.get("query");
             var newq = query.get("__original_query") ? query.get("__original_query")[0] : query.get("q").join(" ");
-            
+
             this.setCurrentQuery(feedback.query);
             this.view.setFormVal(newq);
             this.view.setNumFound(feedback.numFound || 0);
           }
+
         },
 
         initialize: function (options) {
