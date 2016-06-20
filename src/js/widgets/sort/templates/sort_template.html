@@ -1,29 +1,17 @@
 <div class="btn-group sort-widget s-sort-widget">
-    <!-- Single button -->
-    <button type="button" class="btn btn-default dropdown-toggle" id="sort-button" data-toggle="dropdown" aria-label="sort options">
-        Sort: <b>{{current}}</b>
-        <span class="caret">
-    </button>
-    <ul class="dropdown-menu" role="menu">
-        <li class="no-hover-style" style="padding: 10px;">
-            {{#each orderOptions}}
-            <label><input type="radio" value="{{this.value}}"  name="order-options" {{#if this.default}}checked="checked" {{/if}}> {{this.title}}&nbsp;&nbsp;<i class="fa {{faIcon}}"></i></label>
-            {{/each}}
-            <div class="hidden instructions s-instructions">
-                <i class="fa fa-arrow-circle-down"></i> pick one
-            </div>
-        </li>
-        <li class="divider"></li>
-           {{#each sortOptions}}
-             <li class="sort-options">
-                 <button class="btn btn-link sort-options" data-value="{{this.value}}">{{this.title}}</button>
-             </li>
-            {{/each}}
-            <li class="no-hover-style" style="height:30px">
-              <a  title="Click to open a page that explains sort options in a new tab."
-                  href="//adsabs.github.io/help/actions/sort/" target="_blank" class="pull-right help-link">
-                  <i class=" fa-2x icon-help"></i>
-              </a>
-            </li>
-    </ul>
+    <label for="sort-select" class="sort-label"> sort : </label>
+    <select class="form-control" id="sort-select" style="display:inline; width:180px">
+        <optgroup label="descending">
+            <option value="citation_count desc" {{#compare sort "citation_count desc"}} selected {{/compare}}>citation count desc</option>
+            <option value="date desc" {{#compare sort "date desc"}} selected {{/compare}}>pub date desc</option>
+            <option value="read_count desc" {{#compare sort "read_count desc"}} selected {{/compare}}>read count desc</option>
+            <option value="classic_factor desc" {{#compare sort "classic_factor desc"}} selected {{/compare}}>relevancy desc</option>
+        </optgroup>
+        <optgroup label="ascending">
+            <option value="citation_count asc" {{#compare sort "citation_count asc"}} selected {{/compare}}>citation count asc</option>
+            <option value="date asc" {{#compare sort "date asc"}} selected {{/compare}}>pub date asc</option>
+            <option value="read_count asc" {{#compare sort "read_count asc"}} selected {{/compare}}>read count asc</option>
+            <option value="classic_factor asc" {{#compare sort "classic_factor asc"}} selected {{/compare}}>relevancy asc</option>
+        </optgroup>
+    </select>
 </div>

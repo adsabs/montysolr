@@ -50,28 +50,13 @@
 
 }
 
-.s-sort-widget {
-  
-  li:first-of-type:hover {
-    background-color: white;
-  }
-
-  #sort-button {
-    color: $text-color !important;
-  }
-
-  .btn-link {
-    padding: 0;
-    display: block;
-  }
-
-  .s-instructions {
-    margin-top: 5px;
-    padding: 2%;
-    color: lighten($brand-info, 5%);
-  }
+.s-sort-widget .sort-label {
+  font-weight: bold;
+  display : inline;
+  font-size: 2rem;
+  position: relative;
+  top: .3rem;
 }
-
 
 .s-dropdown-widget {
 
