@@ -291,6 +291,9 @@ define([
         var svg = d3.select(this.$("svg")[0])
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
+            //for svg copying by svg crowbar
+          .attr("style", "font-family:helvetica,arial,san-serif")
+          .attr("id", "network-viz-time-series")
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
