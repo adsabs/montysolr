@@ -366,13 +366,7 @@ define([
 
     showResetPasswordSuccessView : function(){
 
-      //get rid of loading view
-      this.renderSubView();
-
-      var view = new SuccessView({
-        title : "Password Reset Successful",
-        message : '<a href="#">click here to go to the home page.</a>'
-      });
+      var view = new SuccessView({title : "Password Reset Successful"});
       this.container.show(view);
     },
 
