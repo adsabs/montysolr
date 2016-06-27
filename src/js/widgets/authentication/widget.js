@@ -361,12 +361,19 @@ define([
 
     showRegisterSuccessView: function(){
       var view = new SuccessView({title : "Registration Successful"});
-      this.container.show(view)
+      this.container.show(view);
     },
 
     showResetPasswordSuccessView : function(){
-      var view = new SuccessView({title : "Password Reset Successful"});
-      this.container.show(view)
+
+      //get rid of loading view
+      this.renderSubView();
+
+      var view = new SuccessView({
+        title : "Password Reset Successful",
+        message : '<a href="#">click here to go to the home page.</a>'
+      });
+      this.container.show(view);
     },
 
     forwardSubmit : function(viewModel){
