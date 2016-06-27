@@ -274,7 +274,9 @@ define([
       pubsub = this.getPubSub();
       promise.done(function(){
         pubsub.publish(pubsub.USER_ANNOUNCEMENT, "reset_password_2_success");
-        var message = "Your password has been successfully reset";
+        //navigate to home page
+        pubsub.publish(pubsub.NAVIGATE, "index-page");
+        var message = "Your password has been successfully reset!";
         pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "success", modal: true}));
       });
 
