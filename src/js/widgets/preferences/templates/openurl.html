@@ -8,11 +8,11 @@
     {{#if openURLName}}
     <div class="current-link-server">
         <p>Your Library Link Server is set to <b>{{{openURLName}}}</b>.</p>
-        <button class="btn btn-primary-faded btn-sm {{#if link_server}} collapsed {{/if}}" data-toggle="collapse" data-target="#link-server-container"><i class="toggle-icon"></i> Change Library Link Server</button>
+        <button class="btn btn-primary-faded btn-sm {{#if openURLName }} collapsed {{/if}}" data-toggle="collapse" data-target="#link-server-container"><i class="toggle-icon"></i> Change Library Link Server</button>
     </div>
     {{/if}}
 
-    <div id="link-server-container" class="{{#if link_server}} collapse {{/if}}">
+    <div id="link-server-container" class="{{#if openURLName }} collapse {{/if}}">
         <br/>
         <form class="form-inline" >
             <div class="form-group" style="min-width:300px">
