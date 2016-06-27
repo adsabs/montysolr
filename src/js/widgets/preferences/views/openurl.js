@@ -29,6 +29,9 @@ define([
         return data
       }
 
+      // in weird/buggy cases, the previously selected open url might not exist in our openURLCOnfig data
+      // available now. So just act like there is no openURLName, which will prompt the user to select a new
+      //openURL
       var current = _.findWhere(data.openURLConfig, {link : data.link_server});
       data.openURLName = current ? current.name : "";
       return data;
