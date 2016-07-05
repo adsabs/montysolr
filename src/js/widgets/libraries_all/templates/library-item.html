@@ -5,16 +5,16 @@
 </td>
 <td>
     {{#if public}}
-    <i class="fa fa-lg fa-unlock text-success" title="this library is public"></i>
+    <i class="fa fa-lg fa-unlock" title="this library is public"></i>
     {{else}}
-    <i class="fa fa-lg fa-lock" title="this library is private"></i>
+    <i class="fa fa-lg fa-lock text-light" title="this library is private"></i>
     {{/if}}
 </td>
 
 <td>
 
     <a href="#user/libraries/{{id}}"><h3 class="s-library-title">{{name}}</h3></a>
-    {{#if description}}<p>{{description}}</p> {{/if}}
+    {{#if description}}<p class="library-description">{{description}}</p> {{/if}}
 
 </td>
 
@@ -23,4 +23,3 @@
 <td>{{permission}}</td>
 
 <td>{{date_last_modified}}</td>
-
