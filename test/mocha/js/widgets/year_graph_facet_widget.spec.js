@@ -1,7 +1,8 @@
 define(["js/widgets/facet/factory",
      'js/components/api_response',
-    'js/widgets/facet/graph-facet/year_graph'],
-  function(FacetFactory, ApiResponse, YearGraphView){
+    'js/wraps/graph_tabs'
+],
+  function(FacetFactory, ApiResponse, GraphTabs){
 
 
     var testJSON = {
@@ -203,109 +204,14 @@ define(["js/widgets/facet/factory",
       var widget;
 
       beforeEach(function(){
-
-        widget = FacetFactory.makeGraphFacet({
-          graphView            : YearGraphView,
-          facetField           : "year",
-          defaultQueryArguments: {
-            "facet.pivot"   : "property,year",
-            "facet"         : "true",
-            "facet.minCount": "1"
-          },
-
-          processResponse      : function (apiResponse) {
-
-            this.setCurrentQuery(apiResponse.getApiQuery());
-
-            var data = apiResponse.get("facet_counts.facet_pivot.property,year");
-
-            if (apiResponse.get("response.numFound") < 2) {
-              this.collection.reset({graphData: []});
-              return
-            }
-
-            var refData = _.findWhere(data, {value: "refereed"});
-
-            if (refData) {
-              refData = refData.pivot;
-            }
-
-            var nonRefData = _.findWhere(data, {value: "notrefereed"});
-
-            if (nonRefData) {
-              nonRefData = nonRefData.pivot;
-            }
-
-            var maxVal, minVal;
-
-            _.each(refData, function (d) {
-              var val = parseInt(d.value);
-              if (maxVal === undefined) {
-                maxVal = val;
-              }
-              else if (val > maxVal) {
-                maxVal = val
-              }
-              if (minVal === undefined) {
-                minVal = val;
-              }
-              else if (parseInt(d.value) < minVal) {
-                minVal = parseInt(d.value);
-              }
-            });
-
-            _.each(nonRefData, function (d) {
-              var val = parseInt(d.value);
-              if (maxVal === undefined) {
-                maxVal = val;
-              }
-              else if (val > maxVal) {
-                maxVal = val
-              }
-              if (minVal === undefined) {
-                minVal = val;
-              }
-              else if (parseInt(d.value) < minVal) {
-                minVal = parseInt(d.value);
-              }
-            });
-
-            var yearRange = _.range(minVal, maxVal + 1);
-
-            var finalData = [];
-
-            _.each(yearRange, function (year) {
-              var stringYear = year + "";
-              refCount = _.filter(refData, function (d) {
-                return d.value === stringYear
-              })[0];
-              refCount = refCount ? refCount.count : 0;
-              nonRefCount = _.filter(nonRefData, function (d) {
-                return d.value === stringYear
-              })[0];
-              nonRefCount = nonRefCount ? nonRefCount.count : 0;
-
-              finalData.push({x: year, y: refCount + nonRefCount, refCount: refCount})
-
-            })
-
-            if (finalData.length < 2) {
-              this.collection.reset({graphData: []});
-              return
-            }
-            this.collection.reset([
-              {graphData: finalData}
-            ]);
-          }});
-
+        widget = GraphTabs().yearGraphWidget;
         widget.processResponse(new ApiResponse(testJSON));
-
       });
 
 
       it("should process refereed and refereed data into a single array, filling in missing years (with y values of 0), to be used by d3", function(){
 
-        var graphData = widget.collection.models[0].attributes.graphData;
+        var graphData = widget.model.attributes.graphData;
 
         var expectedResults  = [{"x":1988,"y":1,"refCount":0},{"x":1989,"y":2,"refCount":1},{"x":1990,"y":0,"refCount":0},{"x":1991,"y":0,"refCount":0},{"x":1992,"y":2,"refCount":0},{"x":1993,"y":0,"refCount":0},{"x":1994,"y":1,"refCount":0},{"x":1995,"y":3,"refCount":2},{"x":1996,"y":1,"refCount":0},{"x":1997,"y":1,"refCount":0},{"x":1998,"y":1,"refCount":0},{"x":1999,"y":1,"refCount":0},{"x":2000,"y":1,"refCount":1},{"x":2001,"y":0,"refCount":0},{"x":2002,"y":0,"refCount":0},{"x":2003,"y":1,"refCount":0},{"x":2004,"y":1,"refCount":0},{"x":2005,"y":0,"refCount":0},{"x":2006,"y":1,"refCount":0},{"x":2007,"y":3,"refCount":0},{"x":2008,"y":0,"refCount":0},{"x":2009,"y":2,"refCount":0},{"x":2010,"y":1,"refCount":0},{"x":2011,"y":4,"refCount":0},{"x":2012,"y":2,"refCount":0},{"x":2013,"y":2,"refCount":1},{"x":2014,"y":3,"refCount":0}];
 
@@ -313,9 +219,7 @@ define(["js/widgets/facet/factory",
             expect(d).to.eql(graphData[i])
           });
 
-      })
-
-
+      });
 
 
     })

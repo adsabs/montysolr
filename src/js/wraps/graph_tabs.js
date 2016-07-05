@@ -37,7 +37,7 @@ define([
           var data = apiResponse.get("facet_counts.facet_pivot.property,year");
 
           if (apiResponse.get("response.numFound") < 2) {
-            this.collection.reset({graphData: []});
+            this.model.set({graphData: []});
             return
           }
 
@@ -107,12 +107,10 @@ define([
           })
 
           if (finalData.length < 2) {
-            this.collection.reset({graphData: []});
+            this.model.set({ graphData: [] });
             return
           }
-          this.collection.reset([
-            {graphData: finalData}
-          ]);
+          this.model.set({ graphData: finalData });
         }});
 
       var citationGraphWidget = FacetFactory.makeGraphFacet({
@@ -138,12 +136,11 @@ define([
           var data = apiResponse.get("facet_counts.facet_pivot.property,citation_count");
 
           if (apiResponse.get("response.numFound") < 2) {
-            this.collection.reset({graphData: []});
+            this.model.set({graphData: []});
             return
           }
 
           var refData = _.findWhere(data, {value: "refereed"});
-
           if (refData) {
             refData = refData.pivot;
           }
@@ -171,7 +168,7 @@ define([
           });
 
           if (finalData.length < 2) {
-            this.collection.reset({graphData: []});
+            this.model.set({graphData: []});
             return
           }
 
@@ -181,24 +178,24 @@ define([
 
           //a cut off of 2000
           finalData = _.first(finalData, 2000);
-
-          finalData = _.map(finalData, function (d, i) {
+         finalData = _.map(finalData, function (d, i) {
             d.x = i + 1;
             return d
           });
 
-          var statsCount = FormatMixin.formatNum(apiResponse.get("stats.stats_fields.citation_count.sum"));
+          var statsCount;
+          if (apiResponse.toJSON().stats){
+            statsCount = FormatMixin.formatNum(apiResponse.get("stats.stats_fields.citation_count.sum"));
+          }
 
-          this.collection.reset([
+          this.model.set(
             {
               graphData: finalData,
               statsCount : statsCount,
               statsDescription : "total number of citations"
             }
-          ]);
-
+          );
         }
-
       });
 
       var readsGraphWidget = FacetFactory.makeGraphFacet({
@@ -223,7 +220,7 @@ define([
           var data = apiResponse.get("facet_counts.facet_pivot.property,read_count");
 
           if (apiResponse.get("response.numFound") < 2) {
-            this.collection.reset({graphData: []});
+            this.model.set({graphData: []});
             return
           }
 
@@ -256,7 +253,7 @@ define([
           })
 
           if (finalData.length < 2) {
-            this.collection.reset({graphData: []});
+            this.model.set({graphData: []});
             return
           }
 
@@ -272,26 +269,33 @@ define([
             return d
           });
 
-          var statsCount = FormatMixin.formatNum(apiResponse.get("stats.stats_fields.read_count.sum"));
+          var statsCount;
+          if (apiResponse.toJSON().stats){
+            var statsCount = FormatMixin.formatNum(apiResponse.get("stats.stats_fields.read_count.sum"));
+          }
 
-          this.collection.reset([
-            {
+          this.model.set({
               graphData: finalData,
               statsCount: statsCount,
               statsDescription : "total recent (90 day) reads"
-            }
-          ]);
+            });
 
         }
 
       });
 
-      return new TabsWidget({tabs: [
+      var tab =  new TabsWidget({tabs: [
         {title: "Years", widget: yearGraphWidget, id: "year-facet", default: true},
         {title: "Citations", widget: citationGraphWidget, id: "citations-facet"},
         {title: "Reads", widget: readsGraphWidget, id: "reads-facet"}
       ]
       });
+      //for tests
+      tab.yearGraphWidget = yearGraphWidget;
+      tab.citationGraphWidget = citationGraphWidget;
+      tab.readsGraphWidget = readsGraphWidget;
+
+      return tab;
     }
 
   });

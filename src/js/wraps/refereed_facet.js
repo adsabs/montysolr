@@ -12,37 +12,18 @@ define([
       facetTitle: "Refereed",
       openByDefault: true,
       defaultQueryArguments: {
-        "facet": "true",
-        "facet.mincount": "1",
-        "fl": "id",
-        "facet.field" : "property",
         "facet.query": 'property:refereed',
-        'facet.limit': 5
       },
-      // this is optimization, we'll execute only one query (we don't even facet on
-      // other values). There is a possibility is is OK (but could also be wrong;
-      // need to check)
-      extractionProcessors: function (apiResponse) {
-        var returnList = [];
-        if (apiResponse.get('response.numFound') <= 0) {
-          return returnList;
-        }
 
-        if (apiResponse.has('facet_counts.facet_queries')) {
-          var queries = apiResponse.get('facet_counts.facet_queries');
-          var v, found = 0;
-          _.each(_.keys(queries), function (k) {
-            v = queries[k];
-            if (k.indexOf(':refereed') > -1) {
-              found = v;
-              returnList.push("refereed", v);
-            }
+      preprocessors: function (facetList) {
+       return facetList
+          .filter(function(f){ return (f.value === "notrefereed" || f.value === "refereed") })
+          .map(function(f) {
+            if (f.name === "notrefereed") f.name = "non-refereed";
+            return f;
           });
-
-          returnList.push('not-refereed', apiResponse.get('response.numFound') - found);
-          return returnList;
-        }
       },
+
       logicOptions: {single: ['limit to', 'exclude'], 'multiple': ['invalid choice']}
 
     });

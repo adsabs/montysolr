@@ -42,7 +42,7 @@ define([
        var that = this;
        var data, xLabels, x, y, xAxis, yAxis, chart, bar;
        var standardFormatter = d3.format("s");
-       data = _.clone(this.graphData);
+       data = _.clone(this.model.get("graphData"));
        data = this.binData(data, this.bins);
        xLabels = _.pluck(data, "x"), maxVal = d3.max(_.pluck(data, "y"));
        x = d3.scale.ordinal().domain(xLabels).rangeRoundBands([0, this.width], .1);
@@ -219,7 +219,7 @@ define([
 
        var that = this;
        var data, x, xLabels, y, xAxis, yAxis, bar;
-       data = _.clone(this.graphData);
+       data = _.clone(this.model.get("graphData"));
 
        /* checking : do we need to signal
        that facet is active/ show apply button?
@@ -322,7 +322,7 @@ define([
      buildSlider: function () {
 
        var that = this;
-       var data = _.clone(this.graphData);
+       var data = _.clone(this.model.get("graphData"));
        var min = data[0].x;
        var max = data[data.length - 1].x;
 
@@ -365,8 +365,7 @@ define([
      },
 
      submitFacet: function () {
-       this.model.set("value", this.$(".slider").slider("values").join("-"));
-       this.trigger('itemClicked');
+       this.trigger('facet-applied', this.$(".slider").slider("values").join("-"));
      }
 
    })

@@ -2,19 +2,16 @@ define(['marionette',
     'd3',
     'jquery',
     'jquery-ui',
-    'js/widgets/base/item_view',
     'hbs!./templates/graph'
   ],
   function (Marionette,
             d3,
             $,
             $ui,
-            BaseItemView,
             FacetGraphTemplate
-
     ) {
 
-  var ZoomableGraphView = BaseItemView.extend({
+  var ZoomableGraphView = Marionette.ItemView.extend({
 
     className : "graph-facet",
 
@@ -24,25 +21,16 @@ define(['marionette',
       this.xAxisTitle = options.xAxisTitle;
       this.graphTitle = options.graphTitle;
       this.pastTenseTitle = options.pastTenseTitle;
-
       this.id = this.graphTitle + "-graph";
 
       //setting some constants for the graph
       this.fullWidth = 110;
       this.fullHeight = 100;
-
       this.width = this.fullWidth - this.margin.left - this.margin.right;
       this.height = this.fullHeight - this.margin.top - this.margin.bottom;
 
-      try {
-        this.graphData = this.model.toJSON().graphData;
-      } catch (e) {
-        throw new Error("Graph widget has no model or else an incorrect model")
-      }
-
       //for citation and reads graph
-      this.currentScale = "linear"
-
+      this.currentScale = "linear";
       this.on("facet:active", this.pulseApplyButton)
 
     },
@@ -66,6 +54,10 @@ define(['marionette',
       "blur input[type=text]": "triggerGraphChange"
     },
 
+    modelEvents : {
+      'change' : 'render'
+    },
+
     pulseApplyButton : function(){
       this.$(".apply").addClass("draw-attention-primary-faded");
       //this initiates an animation that lasts for 6 second
@@ -76,18 +68,16 @@ define(['marionette',
     },
 
     onRender: function () {
+      if (!this.model.get("graphData")) return;
       if (this.model.get("graphData").length < 2){
-        this.$el.html("Too little data to make a useful graph.")
+        this.$el.html("Too little data to make a useful graph.");
+        return
       }
-      else {
-        this.insertLegend();
-        this.buildGraph();
-        this.addSliderWindows();
-        this.buildSlider();
-        if (this.addToOnRender){
-          this.addToOnRender();
-        }
-      }
+      this.insertLegend();
+      this.buildGraph();
+      this.addSliderWindows();
+      this.buildSlider();
+      if (this.addToOnRender) this.addToOnRender();
     }
 
   });

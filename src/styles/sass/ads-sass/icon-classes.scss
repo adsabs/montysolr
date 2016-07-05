@@ -5,28 +5,6 @@
   }
 }
 
-.s-item-closed {
-  color: $gray-light;
-  @extend .fa;
-  @extend .fa-2x;
-  position: relative;
-  top: 3px;
-  &:before {
-    content: $fa-var-angle-right;
-  }
-}
-
-.s-item-open {
-  color: $gray-light;
-  @extend .fa;
-  @extend .fa-2x;
-  position: relative;
-  top: 3px;
-  &:before {
-    content: $fa-var-angle-down;
-  }
-}
-
 // to indicate that column expands
 
 .paginate-left-icon {
@@ -141,12 +119,12 @@
 
 .icon-details {
    cursor: pointer;
-  @extend .item-closed;
+  @extend .icon-item-closed;
   color: $gray-light;
 }
 
 .icon-hide-details {
-  @extend .item-open;
+  @extend .icon-item-open;
   cursor: pointer;
   color: $gray-light;
 }

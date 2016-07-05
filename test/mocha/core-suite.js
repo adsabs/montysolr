@@ -44,7 +44,7 @@ define([], function() {
       '/mixins/papers_utils.spec.js',
       '/mixins/openurl_generator.spec.js',
       '/mixins/add_secondary_sort.spec.js'
-      
+
   ];
   return tests;
 });

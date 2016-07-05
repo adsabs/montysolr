@@ -10,14 +10,7 @@ define([
     var widget = FacetFactory.makeHierarchicalCheckboxFacet({
       facetField: "grant_facet_hier",
       facetTitle: "Grants",
-      openByDefault: false,
-      logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]},
-      responseProcessors: [
-        function (v) {
-          var vv = v.split('/');
-          return vv[vv.length - 1]
-        }
-      ]
+      logicOptions: {single: ['limit to', 'exclude'], multiple: ["or", "exclude"]}
     });
 
 
