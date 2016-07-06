@@ -17,7 +17,6 @@ define([
     'js/components/api_query_updater',
     'js/components/api_feedback',
     'js/components/pubsub_key',
-    'js/mixins/feedback_handling',
     'js/mixins/dependon'
   ],
   function(
@@ -30,7 +29,6 @@ define([
     ApiQueryUpdater,
     ApiFeedback,
     PubSubKey,
-    FeedbackHandlingMixin,
     Dependon
     ) {
 
@@ -68,7 +66,6 @@ define([
       var pubsub = this.getPubSub();
       pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.receiveFeedback, this));
     },
-
 
 
     /**
@@ -201,7 +198,7 @@ define([
 
   });
 
-  _.extend(ErrorMediator.prototype, Dependon.BeeHive, Dependon.App, FeedbackHandlingMixin);
+  _.extend(ErrorMediator.prototype, Dependon.BeeHive, Dependon.App);
 
   return ErrorMediator;
 });

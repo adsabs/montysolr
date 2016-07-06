@@ -68,14 +68,15 @@ define([
 
       //hack for system date time
       var entry  = normalizeSpace($("#test tbody tr:first").html());
+
       if (entry.match("7:57pm")){
         expect(entry).to.eql(
-        '<td> 1 </td> <td> <i class="fa fa-lg fa-lock" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p>Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>Jun 11 2015, 7:57pm</td>'
+          '<td> 1 </td> <td> <i class="fa fa-lg fa-lock text-light" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p class="library-description">Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>Jun 11 2015, 7:57pm</td>'
         )
       }
       else {
         expect(entry).to.eql(
-            '<td> 1 </td> <td> <i class="fa fa-lg fa-lock" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p>Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>Jun 11 2015, 3:57pm</td>'
+            '<td> 1 </td> <td> <i class="fa fa-lg fa-lock text-light" title="this library is private"></i> </td> <td> <a href="#user/libraries/1"><h3 class="s-library-title">Aliens Among Us</h3></a> <p class="library-description">Are you one of them?</p> </td> <td>300</td> <td>owner</td> <td>Jun 11 2015, 3:57pm</td>'
         )
       }
 

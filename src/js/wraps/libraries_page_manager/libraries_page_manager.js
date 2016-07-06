@@ -16,10 +16,7 @@ define([
 
     TOCTemplate : TOCTemplate,
 
-    TOCEvents :  _.extend(TOCView.prototype.events, {
-      "click a[href='#/user/libraries']" : function(){
-        this.trigger("page-manager-event", "navigate", {navCommand : "AllLibrariesWidget" , sub : "libraries"});
-      },
+    TOCEvents :   {
 
       "click button.create-library" : function(){
         function createLib(){
@@ -32,7 +29,8 @@ define([
         }
         this.trigger("page-manager-event", "apply-function", {func : createLib});
       }
-    }),
+
+    },
 
     createView: function(options) {
       options = options || {};

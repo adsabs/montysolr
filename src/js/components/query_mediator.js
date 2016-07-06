@@ -12,7 +12,6 @@ define(['underscore',
     'js/components/generic_module',
     'js/mixins/dependon',
     'js/mixins/add_secondary_sort',
-    'js/mixins/feedback_handling',
     'js/components/api_request',
     'js/components/api_response',
     'js/components/api_query_updater',
@@ -28,7 +27,6 @@ define(['underscore',
     GenericModule,
     Dependon,
     SecondarySort,
-    FeedbackMixin,
     ApiRequest,
     ApiResponse,
     ApiQueryUpdater,
@@ -474,8 +472,6 @@ define(['underscore',
       },
 
       _executeRequest: function(apiRequest, senderKey) {
-        // show the loading view for the widget
-        //this._makeWidgetSpin(senderKey.getId());
 
         // for altering widget queries
         // from regular solr requests to execute_query requests
@@ -695,6 +691,6 @@ define(['underscore',
 
     });
 
-    _.extend(QueryMediator.prototype, Dependon.BeeHive, Dependon.App, FeedbackMixin);
+    _.extend(QueryMediator.prototype, Dependon.BeeHive, Dependon.App);
     return QueryMediator;
   });

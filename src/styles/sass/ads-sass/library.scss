@@ -1,17 +1,17 @@
 .s-sort-active {
-  box-shadow : 0px 0px 0px #fff;
   background-color: $brand-primary-faded;
+  box-shadow : 0px 0px 0px #fff;
   color: #fff;
 
   &:hover {
-    box-shadow: 0px 0px 0px #fff;
     background-color: darken($brand-primary-faded, 5%);
+    box-shadow: 0px 0px 0px #fff;
     color: #fff;
   }
 
   &:focus {
-    box-shadow : 0px 0px 0px #fff;
     background-color: darken($brand-primary-faded, 5%);
+    box-shadow : 0px 0px 0px #fff;
     color: #fff;
   }
 }
@@ -22,30 +22,64 @@
 
 //styles specific to metadata/all libraries widget
 .s-all-libraries-widget {
-
-  @extend .s-ads-card;
-
   margin-top: 30px;
   padding: 20px 3.7%;
 
+  @extend .s-ads-card;
 
   .s-library-title {
-    font-size: 24px;
-    font-weight: 400;
-    margin-top: 0;
+    position:relative;
+    top: -3px;
+    margin: 0 0 5px 0;
+    font-weight: 500;
+    font-size: 18px;
+  }
+
+  .libraries-list-container th {
+    font-weight: 500;
+    font-variant: small-caps;
+    text-transform: lowercase;
+    font-size: 18px;
   }
 
   tbody tr {
     cursor:pointer
   }
+
+  //bootstrap override
+  .table > thead > tr > th, .table > thead > tr > td, .table > tbody > tr > th,
+  .table > tbody > tr > td, .table > tfoot > tr > th, .table > tfoot > tr > td {
+    padding: 10px 8px;
+    border-top: 1px solid #ddd;
+    vertical-align: top;
+    line-height: 1.428571429;
 }
 
+a:hover {
+  text-decoration: none;
+}
+
+}
+
+.all-libraries-widget .library-description {
+  margin: 0;
+  max-width: 370px;
+}
+
+.all-libraries-widget .fa-unlock {
+  color: $brand-success;
+}
+
+.all-libraries-widget tbody tr {
+  border-bottom: 1px solid lighten(#e8e8e8, 3%);
+}
 
 .library-detail-view, .library-widget .main {
-  @extend .s-ads-card;
   margin: 15px auto;
   padding: 20px 3.7%;
-  max-width: 1000px
+  max-width: 1000px;
+
+  @extend .s-ads-card;
 }
 
 .library-widget .main:empty {
@@ -53,14 +87,14 @@
 }
 
 .library-widget .header {
-  background-color: $body-bg;
-  border-bottom: $border-light-default;
-  box-shadow: 2px 2px 5px #E6E6E6;
   margin: -10px -15px 0 -15px;
-  font-size: 16px;
-  font-weight: 300;
   padding: 20px 50px 0 5.2%;
   min-height: 300px;
+  border-bottom: $border-light-default;
+  background-color: $body-bg;
+  box-shadow: 2px 2px 5px #E6E6E6;
+  font-weight: 300;
+  font-size: 16px;
 
   .header > div {
     margin: 0 5%;
@@ -72,20 +106,19 @@
 
   .s-library-title {
     h2 {
-      font-weight: 300;
       display: inline;
-
     }
   }
 }
 
 .library-list-container {
-  @extend .clearfix;
-  padding-left: 0;
   position: relative;
   left: -5.7%;
   margin-top: 12px;
+  padding-left: 0;
   list-style: none;
+
+  @extend .clearfix;
 }
 
 .library-item {
@@ -104,20 +137,19 @@
 .s-library-widget {
 
   .s-library-actions {
-
     padding: 10px 0%;
   }
 
 
   .s-permissions-list-container, .s-public-container {
-    border:  $border-light-default;
     padding: 1%;
+    border:  $border-light-default;
   }
 
   .s-editable-buttons {
-    margin-left: 40px;
     position: relative;
     top: -6px;
+    margin-left: 40px;
   }
 
   button[data-target="#library-actions"] {
@@ -130,8 +162,8 @@
 
 
  .s-library-nav-tabs {
-  padding-left: 0;
   margin: 0;
+  padding-left: 0;
 
   }
 
@@ -141,18 +173,18 @@
   }
 
   .s-library-title, .s-library-description {
-
     margin: 10px 0;
 
   }
 
   .s-library-info {
-    padding: 10px 0;
-    @extend .clearfix;
     margin-top: 10px;
-    @extend .s-spacer-top;
+    padding: 10px 0;
     border-top: $border-light-default;
     border-bottom: $border-light-default;
+
+    @extend .clearfix;
+    @extend .s-spacer-top;
 
     p:first-of-type {
       display: inline-block;
@@ -172,6 +204,7 @@
 
   .s-details-container{
     text-align: left;
+
     @extend .clearfix;
     div:first-of-type{
       padding-left: 0;
@@ -196,17 +229,17 @@
 .s-public-libraries-layout {
 
   .s-public-lib-descriptor {
-    padding: 1px;
-    background: #F5F5F5;
-    margin-left: -15px;
     margin-right: -15px;
+    margin-left: -15px;
+    padding: 1px;
+    border-bottom: 2px solid $gray-light;
+    background: #F5F5F5;
     text-align: center;
 
     h3 {
       font-weight: 300;
       font-size:28px;
     }
-    border-bottom: 2px solid $gray-light;
   }
 
   .s-library-title h2 {
@@ -216,18 +249,17 @@
 }
 
 .editable-item {
-
   position: relative;
 
   form {
     position: absolute;
     top: 0;
-    background-color: $body-bg;
     display: inline-block;
+    background-color: $body-bg;
 
     input, textarea {
-      width: 280px;
       display: inline;
+      width: 280px;
     }
 
     button {
@@ -236,4 +268,45 @@
 
   }
 
+}
+
+
+.library-nav  {
+  margin-top: 80px !important;
+}
+
+
+.library-nav > div:hover {
+  background-color: $gray-lightest;
+  color: $brand-primary-faded;
+}
+.library-nav button, .library-nav a {
+  display: inline-block;
+  padding: 10px 0 10px 15px;
+  width: 100%;
+  height: 100%;
+  color: lighten($text-color, 10%)!important;
+  text-transform: lowercase;
+  font-weight: 500;
+  font-variant: small-caps;
+  font-size: 18px;
+  @media (min-width: $screen-lg-min) {
+  font-size: 20px;
+  }
+
+  i.fa {
+    width: 2rem;
+    font-size: 15px;
+    text-align: left;
+    color: $brand-primary-faded;
+  }
+
+  &:hover {
+    text-decoration: none !important;
+  }
+
+}
+
+.library-nav button {
+  text-align: left;
 }
