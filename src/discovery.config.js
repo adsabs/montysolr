@@ -24,11 +24,9 @@ require.config({
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
   config: {
 
-    'es6': {
-            'resolveModuleSource': function(source) {
-                return 'es6!'+source;
-            }
-        },
+  'es6': {
+              'modules': undefined,
+      },
 
     'js/widgets/export/widget': {
       url: 'http://adsabs-classic-exports-service.elasticbeanstalk.com',
