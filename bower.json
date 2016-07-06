@@ -32,12 +32,11 @@
     "select2": "4.0.0",
     "MathJax": "~2.5.3",
     "react": "^15.1.0",
-    "requirejs-react-jsx": "~1.0.2",
     "react-redux": "https://cdnjs.cloudflare.com/ajax/libs/react-redux/4.4.5/react-redux.js",
     "redux": "https://cdnjs.cloudflare.com/ajax/libs/redux/3.5.2/redux.js",
     "redux-thunk": "https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.1.0/redux-thunk.min.js",
     "requirejs-babel": "^0.0.9"
-  },
+    },
   "devDependencies": {
     "chai": "~1.8.0",
     "qunit": "~1.12.0",

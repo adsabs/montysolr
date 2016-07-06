@@ -17,6 +17,7 @@ module.exports = function(grunt) {
       }
     },
 
+
     // This will install libraries (client-side dependencies)
     bower: {
       install: {
@@ -85,37 +86,23 @@ module.exports = function(grunt) {
         options: {
           baseUrl: 'dist/js',
           allowSourceOverwrites: true,
+          stubModules : ['babel', 'es6'],
+
           keepBuildDir: true,
           generateSourceMaps: false,
           removeCombined: true,
-          optimize: 'uglify2',
           findNestedDependencies: true,
           wrap: true,
           preserveLicenseComments: false,
           dir: 'dist/js',
-          uglify2: {
-            output: {
-              beautify: false
-            },
-            warnings: true,
-            mangle: false,
-            compress : {
-              drop_console: true,
-              drop_debugger: true
-            }
-          }
+          optimize: 'uglify2'
+
         }
       },
       release_concatenated : {
         options: {
           baseUrl: 'dist/',
           wrapShim: true,
-
-          exclude: ['babel'],
-            pragmasOnSave: {
-          'excludeBabel': true
-        },
-
           include : (function(){
 
             var s = grunt.file.read("src/discovery.config.js"),
@@ -126,14 +113,14 @@ module.exports = function(grunt) {
               var paths = [];
 
               function pushPaths(config_obj) {
-                for (var k in config_obj) {
-                  var v = config_obj[k];
-                  if (v instanceof Object) {
-                    pushPaths(v);
-                  } else {
-                    paths.push(v);
-                  }
-                }
+               for (var k in config_obj) {
+                 var v = config_obj[k];
+                 if (v instanceof Object) {
+                   pushPaths(v);
+                 } else {
+                   paths.push(v);
+                 }
+               }
               };
 
               pushPaths(obj);
@@ -143,25 +130,7 @@ module.exports = function(grunt) {
             return getPaths(bumblebeeConfig);
 
           }()),
-          //get minified versions of libraries
-          paths : {
-
-            jquery :'//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min', //code.jquery.com/jquery-2.0.3.min.js';
-            'jquery-ui' :  '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min', //code.jquery.com/ui/1.10.4/jquery-ui.min.js';
-            bootstrap : '//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min',
-            underscore : 'libs/lodash/lodash.compat.min',
-            react : 'libs/react/react-with-addons.min',
-            'react-dom' : 'libs/react/react-dom.min',
-            marionette : 'libs/marionette/backbone.marionette.min',
-            'backbone.wreqr' : 'libs/backbone.wreqr/lib/backbone.wreqr.min',
-            'backbone.babysitter' : 'libs/backbone.babysitter/backbone.babysitter.min',
-            d3 : 'libs/d3/d3.min',
-            nvd3 : 'libs/nvd3/nv.d3.min',
-            'persist-js' : 'libs/persist-js/persist-all-min'
-          },
           allowSourceOverwrites: true,
-          skipDirOptimize: true,
-
           out: "dist/bumblebee_app.js",
           name: "js/apps/discovery/main",
           keepBuildDir: true,
@@ -170,17 +139,9 @@ module.exports = function(grunt) {
           wrap: true,
           preserveLicenseComments: false,
           generateSourceMaps: false,
-          uglify2: {
-            output: {
-              beautify: false
-            },
-            warnings: true,
-            mangle: false,
-            compress : {
-              drop_console: true,
-              drop_debugger: true
-            }
-          }
+
+          stubModules : ['babel', 'es6'],
+          optimize: 'uglify2'
         }
       },
       release_css: {
@@ -203,18 +164,6 @@ module.exports = function(grunt) {
         css: ['dist/styles/css/styles.css'],
         dest: 'dist/styles/css/styles.css',
       },
-    },
-
-    babel: {
-      options: {
-        sourceMap: true,
-        presets: ['es2015']
-      },
-      dist: {
-        files: {
-          'dist/bumblebee_app.js': 'dist/bumblebee_app.js'
-        }
-      }
     },
 
     // add md5 checksums to the distribution files
@@ -363,7 +312,7 @@ module.exports = function(grunt) {
     },
 
     concurrent: {
-      serverTasks: ['watch:server', 'watch:styles']
+        serverTasks: ['watch:server', 'watch:styles']
     },
     //**
     //* PhantomJS is a headless browser that runs our tests, by default it runs core-suite
@@ -380,7 +329,7 @@ module.exports = function(grunt) {
       web_testing: {
         options: {
           urls: [
-            'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=discovery-suite')
+              'http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=discovery-suite')
           ]
         }
       },
@@ -490,23 +439,23 @@ module.exports = function(grunt) {
             flatten: true
           },
           {
-            src: ['bower_components/react/**'],
-            dest: 'src/libs/react',
-            expand: true,
-            flatten: true
-          },
-          {
-            src: ['bower_components/requirejs-babel/**'],
-            dest: 'src/libs/requirejs-babel',
-            expand: true,
-            flatten: true
-          },
-          {
-            //surely there's a better pattern for recursive file copying?
             cwd: 'bower_components/bootstrap-sass/assets/stylesheets/',
             src: ['*', '**'],
             expand: true
-          }
+          },
+          {
+            src: ['bower_components/react/*.js'],
+            dest: 'src/libs/react/',
+            expand: true,
+            flatten: true
+          },
+          {
+            src: ['bower_components/requirejs-babel/*.js'],
+            dest: 'src/libs/requirejs-babel-plugin/',
+            expand: true,
+            flatten: true
+          },
+
 
         ]
       },
@@ -520,12 +469,11 @@ module.exports = function(grunt) {
             //grunt.verbose.writeln('src' + src);
             return dest + src.replace('/src/', '/');
           }
-        }
-        ]
+        }]
       },
       discovery_vars: {
-        src: 'src/discovery.vars.js.default',
-        dest: 'src/discovery.vars.js'
+          src: 'src/discovery.vars.js.default',
+          dest: 'src/discovery.vars.js'
       },
       keep_original: {
         files: [{
@@ -573,8 +521,8 @@ module.exports = function(grunt) {
           }
 
         }]
-      }
-    },
+        }
+      },
 
     // compress whatever we have in the dist and
     // store it along-side with it (nginx can serve
@@ -598,24 +546,16 @@ module.exports = function(grunt) {
       }
     },
 
-    // minifying files we need to minify ourselves
-    uglify: {
-      bumblebee_minify_files : {
-        files : {"dist/libs/backbone/backbone-min.js": "dist/libs/backbone/backbone.js"}
-      }
-    },
-
-
     sass: {
-      options: {
-        sourceMap: true
-      },
-      dist: {
-        files: {
-          'src/styles/css/styles.css' : 'src/styles/sass/manifest.scss'
+        options: {
+          sourceMap: true
+        },
+        dist: {
+          files: {
+            'src/styles/css/styles.css' : 'src/styles/sass/manifest.scss'
+          }
         }
-      }
-    },
+      },
 
     /* for changing the name of the data-main file in dist/index */
 
@@ -656,12 +596,14 @@ module.exports = function(grunt) {
           modulePattern : "../../js/(.*)",
           customModuleThreshold: {
 
+            "widgets/facet/widget.js" : 78,
             "apps/discovery/navigator.js": 30,
             "apps/discovery/router.js": 37,
             "widgets/facet/graph-facet/h_index_graph.js":2,
             "widgets/facet/graph-facet/year_graph.js":2,
             "wraps/graph_tabs.js":5,
-            "widgets/facet/graph-facet/widget.js":8,
+            "widgets/facet/graph-facet/base_graph.js":8,
+            "wraps/author_facet.js":13,
             "widgets/export/widget.js":23,
             "widgets/facet/collection.js":33,
             "mixins/widget_mixin_method.js":37,
@@ -676,8 +618,8 @@ module.exports = function(grunt) {
             "widgets/breadcrumb/widget.js":55,
             "components/navigator.js":60,
             "mixins/dependon.js":61,
-            "widgets/facet/actions.js" : 68,
-            "widgets/facet/reducers.js" : 78,
+            "widgets/facet/tree_view.js":62,
+            "widgets/facet/item_view.js":71,
             "widgets/query_info/query_info_widget.js":46,
             "widgets/resources/widget.js":72,
             "wraps/table_of_contents.js":73,
@@ -690,7 +632,7 @@ module.exports = function(grunt) {
             "wraps/paper_export.js": 68,
             "widgets/recommender/widget.js" : 65,
             "wraps/discovery_mediator.js": 5, // these two guys are complex to test (but i've already started)
-            "mixins/feedback_handling.js": 7,
+            "mixins/feedback_handling.js": 35,
             "mixins/discovery_bootstrap.js": 1,
             "widgets/navbar/widget.js": 53,
             "widgets/success/view.js": 60,
@@ -698,8 +640,7 @@ module.exports = function(grunt) {
             "widgets/wordcloud/widget.js": 78,
             "components/analytics.js": 71,
             "wraps/landing_page_manager/landing_page_manager" : 48,
-            "widgets/libraries_all/views/view_all_libraries.js" : 78,
-            "components/api_query_updater.js" : 78
+            "widgets/libraries_all/views/view_all_libraries.js" : 78
           }
         }
       },
@@ -720,7 +661,7 @@ module.exports = function(grunt) {
           }
           //reporter: 'JSONCov',
           //dest: './coverage/output'
-        }
+          }
       }
     },
 
@@ -872,13 +813,13 @@ module.exports = function(grunt) {
 
   // Create an aliased test task.
   grunt.registerTask('setup', 'Sets up the development environment',
-      ['install-dependencies',
-        'bower-setup',
-        '_conditional_copy',
-        'copy:libraries',
-        'sass',
-        'curl:google-analytics'
-      ]);
+    ['install-dependencies',
+      'bower-setup',
+      '_conditional_copy',
+      'copy:libraries',
+      'sass',
+      'curl:google-analytics'
+    ]);
 
   grunt.registerTask('_conditional_copy', function() {
     if (!grunt.file.exists('src/discovery.vars.js')) {
@@ -950,9 +891,7 @@ module.exports = function(grunt) {
     paths['jquery-ui'] = '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min'; //code.jquery.com/ui/1.10.4/jquery-ui.min.js';
     paths['bootstrap'] = '//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min';
     paths['underscore'] = 'libs/lodash/lodash.compat.min';
-    paths['backbone'] = 'libs/backbone/backbone-min';
-    paths['react'] = '//cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-with-addons.min.js';
-    paths['react-dom'] = '//cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.min.js';
+    //paths['backbone'] = 'libs/backbone/backbone-min';
     paths['marionette'] = 'libs/marionette/backbone.marionette.min';
     paths['backbone.wreqr'] = 'libs/backbone.wreqr/lib/backbone.wreqr.min';
     paths['backbone.babysitter'] = 'libs/backbone.babysitter/backbone.babysitter.min';
@@ -990,13 +929,13 @@ module.exports = function(grunt) {
     grunt.file.write('dist/index.html', newHtml);
 
     console.log(chalk.green(
-        "=====================================================================\n" +
-        "OK, done! Your release is ready for deployment. But I recommend that\n"  +
-        "you test it, first make sure the development web server is not running\n" +
-        "then execute: grunt test:release (or 'grunt server:release' and look)\n" +
-        "\n" +
-        "Also make sure that you deploy correct values with dist/discovery.vars.js\n" +
-        "=====================================================================\n"))
+    "=====================================================================\n" +
+    "OK, done! Your release is ready for deployment. But I recommend that\n"  +
+    "you test it, first make sure the development web server is not running\n" +
+    "then execute: grunt test:release (or 'grunt server:release' and look)\n" +
+    "\n" +
+    "Also make sure that you deploy correct values with dist/discovery.vars.js\n" +
+    "=====================================================================\n"))
 
   });
 
@@ -1026,16 +965,15 @@ module.exports = function(grunt) {
   grunt.registerTask('coverage', ['env:dev', 'express:dev', 'blanket_mocha:full']);
 
   grunt.registerTask('release',
-      [ 'setup',
-        'clean:release', 'copy:release',
-        'exec:git_describe',
-        'string-replace:dist',
-        'requirejs:release_individual', 'requirejs:release_concatenated','requirejs:release_css',
-        'hash_require:js', 'hash_require:css',
-        'copy:keep_original', 'copy:bumblebee_app',
-        'assemble',
-        'uglify'
-      ]);
+    [ 'setup',
+      'clean:release', 'copy:release',
+      'exec:git_describe',
+      'string-replace:dist',
+      'requirejs:release_individual', 'requirejs:release_concatenated','requirejs:release_css',
+      'hash_require:js', 'hash_require:css',
+      'copy:keep_original', 'copy:bumblebee_app',
+      'assemble'
+  ]);
 
   grunt.registerTask("sauce", ['env:dev',  "sass", "autoprefixer", "exec:git_describe", 'express:dev', "saucelabs-mocha"]);
 
