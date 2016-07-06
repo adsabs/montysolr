@@ -1,6 +1,8 @@
 // Main config file for the Discovery application
 require.config({
 
+
+
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
   deps: (function(){
@@ -22,10 +24,11 @@ require.config({
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
   config: {
 
-    //config for es6 requirejs plugin (necessary to transpile JSX templates)
     'es6': {
-      'modules': undefined
-    },
+            'resolveModuleSource': function(source) {
+                return 'es6!'+source;
+            }
+        },
 
     'js/widgets/export/widget': {
       url: 'http://adsabs-classic-exports-service.elasticbeanstalk.com',
@@ -175,8 +178,8 @@ require.config({
     'jquery': 'libs/jquery/jquery',
     'react' : 'libs/react/react-with-addons',
     'react-dom' : 'libs/react/react-dom',
-    es6: "libs/requirejs-babel/es6",
-    babel: "libs/requirejs-babel/babel-5.8.34.min",
+     es6: 'libs/requirejs-babel-plugin/es6',
+     babel: 'libs/requirejs-babel-plugin/babel-5.8.34.min',
     'redux' : 'libs/redux/index',
     'react-redux' : 'libs/react-redux/index',
     'redux-thunk' : 'libs/redux-thunk/index',
