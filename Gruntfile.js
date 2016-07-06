@@ -82,23 +82,7 @@ module.exports = function(grunt) {
     requirejs: {
       waitSeconds: 0,
       baseUrl: 'dist/js', // this is needed just for the 'stupid' list task
-      release_individual: {
-        options: {
-          baseUrl: 'dist/js',
-          allowSourceOverwrites: true,
-          stubModules : ['babel', 'es6'],
 
-          keepBuildDir: true,
-          generateSourceMaps: false,
-          removeCombined: true,
-          findNestedDependencies: true,
-          wrap: true,
-          preserveLicenseComments: false,
-          dir: 'dist/js',
-          optimize: 'uglify2'
-
-        }
-      },
       release_concatenated : {
         options: {
           baseUrl: 'dist/',
@@ -141,7 +125,12 @@ module.exports = function(grunt) {
           generateSourceMaps: false,
 
           stubModules : ['babel', 'es6'],
-          optimize: 'uglify2'
+          optimize: 'uglify2',
+
+          paths : {
+            react : 'https://fb.me/react-15.2.0.min.js',
+            'react-dom' : 'https://fb.me/react-dom-15.2.0.min.js'
+          }
         }
       },
       release_css: {
@@ -969,7 +958,7 @@ module.exports = function(grunt) {
       'clean:release', 'copy:release',
       'exec:git_describe',
       'string-replace:dist',
-      'requirejs:release_individual', 'requirejs:release_concatenated','requirejs:release_css',
+      'requirejs:release_concatenated','requirejs:release_css',
       'hash_require:js', 'hash_require:css',
       'copy:keep_original', 'copy:bumblebee_app',
       'assemble'
