@@ -70,8 +70,6 @@ define([
       }
     },
 
-    smallLoadingIcon : true
-
   });
 
 

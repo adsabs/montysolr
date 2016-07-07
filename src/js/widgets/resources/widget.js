@@ -37,8 +37,6 @@ define([
 
   var ResourcesView = Marionette.ItemView.extend({
 
-    smallLoadingIcon : true,
-
     template : ResourcesTemplate,
 
     className : "resources-widget",

@@ -588,8 +588,6 @@ module.exports = function(grunt) {
             "components/api_query_updater.js" : 78,
             'widgets/facet/graph-facet/h_index_graph.js' : 38,
 
-            "widgets/facet/widget.js" : 78,
-            "widgets/facet/actions.js" : 68,
             'widgets/facet/graph-facet/widget.js' : 64,
             'widgets/facet/graph-facet/year_graph.js' : 58,
             'widgets/facet/graph-facet/h_index_graph.js ' : 38,
@@ -609,7 +607,6 @@ module.exports = function(grunt) {
             "widgets/breadcrumb/widget.js":55,
             "components/navigator.js":60,
             "mixins/dependon.js":61,
-            "widgets/facet/reducers.js":78,
             "widgets/query_info/query_info_widget.js":46,
             "widgets/resources/widget.js":72,
             "wraps/table_of_contents.js":73,

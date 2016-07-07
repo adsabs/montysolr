@@ -47,33 +47,43 @@ define([
 
   var ContainerComponent = React.createClass({
 
+    createDropdown : function (){
+
+      //no dropdown if no selected facets!
+      if (this.props.activeFacets.length === 0) return '';
+
+      var arr, dropdownContent;
+
+      if (this.props.activeFacets.length > 25)
+        return <div className='facet__dropdown'>select no more than 25 facets at a time</div>
+
+      if (this.props.activeFacets.length === 1){
+          arr = this.props.reduxState.config.logicOptions.single
+        }
+      else {
+        arr = this.props.reduxState.config.logicOptions.multiple;
+      }
+
+      if (arr[0] == 'invalid choice') return <div className='facet__dropdown'>invalid choice!</div>
+
+      else {
+          return (<div className='facet__dropdown'>
+            { arr.map(function(val){
+            return <label key={val}>
+                      <input type='radio' onChange ={_.partial(this.props.submitFilter, val)}/> {val}
+                  </label>
+          }, this) }
+          </div>);
+        }
+    },
+
     render : function(){
 
       var header = (<h3 className='facet__header' onClick={ _.partial(this.props.toggleFacet, undefined) }>
         {this.props.reduxState.config.facetTitle}
       </h3>);
 
-      function createDropdown(arr){
-        if (arr[0] == 'invalid choice'){
-          return 'invalid choice!'
-        }
-        return <div className='facet__dropdown'>
-          { arr.map(function(val){
-          return <label key={val}>
-                    <input type='radio' onChange ={_.partial(this.props.submitFilter, val)}/> {val}
-                </label>
-        }, this) }
-        </div>
-      }
-
-      var dropdownContainer;
-
-      if (this.props.activeFacets.length === 1) {
-       dropdownContainer = createDropdown.call(this, this.props.reduxState.config.logicOptions.single);
-      }
-      else if (this.props.activeFacets.length > 1){
-       dropdownContainer = createDropdown.call(this, this.props.reduxState.config.logicOptions.multiple);
-      }
+      var dropdownContainer = this.createDropdown();
 
       return (
           <div className='facet__container'>
@@ -94,7 +104,9 @@ define([
             </ToggleList>
           </div>
       )
-    }
+    },
+
+    
   });
 
   return ReactRedux.connect(mapStateToProps, mapDispatchToProps )(ContainerComponent);
