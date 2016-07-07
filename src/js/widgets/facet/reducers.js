@@ -152,7 +152,7 @@ define([
     };
 
     //for dataReceived reducer
-    function processData(data, preprocessors) {
+    reducer.processData = function(data, preprocessors) {
 
       preprocessors = preprocessors || [];
       if (_.isFunction(preprocessors)) preprocessors = [preprocessors];
@@ -184,7 +184,7 @@ define([
     reducer.dataReceived = function(state, data, id) {
       var facets = data.facet_counts.facet_fields[Object.keys(data.facet_counts.facet_fields)[0]];
       var finished = (facets.length / 2 == parseInt(data.responseHeader.params['facet.limit'])) ? false : true;
-      facets = processData(facets, state.config.preprocessors);
+      facets = reducer.processData(facets, state.config.preprocessors);
       //for children array
       var dataIds = facets.map(function(d) {
         return d.value

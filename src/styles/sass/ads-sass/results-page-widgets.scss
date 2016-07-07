@@ -1,158 +1,133 @@
-
-
 .s-results-control-row-container {
-  padding: .2% 0;
-  background-color: $body-bg;
+  padding: 0.2% 0;
   border-bottom: $border-default;
-  box-shadow : 0 3px 4px $default-box-shadow-color;
+  background-color: $body-bg;
+  box-shadow: 0 3px 4px $default-box-shadow-color;
+
   @extend .clearfix;
 }
-
 .s-results-control-row {
-  padding-bottom:  1%;
-  background-color:  $darker-background;
-  div[data-widget="ExportDropdown"]{
+  padding-bottom: 1%;
+  background-color: $darker-background;
+  div[data-widget="ExportDropdown"] {
     margin-right: 4%;
   }
-
   .s-sort-widget {
     position: relative;
     left: -3%;
   }
-
   .s-results-action-buttons {
     padding: 10px 0;
-    >.btn {
-      font-size : 16px;
+    > .btn {
+      font-size: 16px;
     }
   }
-
   div.dropdown-menu {
     width: 200px;
-
   }
-
 }
-
-
 .export-start-val {
+  display: inline;
+  width: 30%;
+
   @extend .form-control;
   @extend .input-sm;
-  display: inline;
-  width: 30%
 }
-
 .export-end-val {
+  display: inline;
+  width: 30%;
+
   @extend .form-control;
   @extend .input-sm;
-  display: inline;
-  width: 30%
-
 }
-
 .s-sort-widget .sort-label {
-  font-weight: bold;
-  display : inline;
-  font-size: 2rem;
   position: relative;
-  top: .3rem;
+  top: 0.3rem;
+  display: inline;
+  letter-spacing: 0.15rem;
+  font-weight: 500;
+  font-size: 2.2rem;
 }
-
 .s-dropdown-widget {
-
   .s-divider-bottom {
     padding: 10px;
   }
-
   .export-start-val {
+    display: inline;
+    width: 30%;
+
     @extend .form-control;
     @extend .input-sm;
-    display: inline;
-    width: 30%
   }
-
   .export-end-val {
+    display: inline;
+    width: 30%;
+
     @extend .form-control;
     @extend .input-sm;
-    display: inline;
-    width: 30%
   }
 }
-
 .s-results-links {
- width: 100%;
+  width: 100%;
 }
-
-
 .s-query-info-widget {
-
-  .num-found, .currently-selected {
-    font-size: 18px;
+  .currently-selected,
+  .num-found {
     padding: 2px 0;
+    font-size: 18px;
   }
-
   .s-library-area {
     margin-top: 15px;
-    @extend .s-ads-card;
-    background-color: white;
     margin-bottom: 20px;
-    border: 0px solid transparent;
-  }
+    border: 0 solid transparent;
+    background-color: white;
 
-  .s-library-add-title, #library-console {
+    @extend .s-ads-card;
+  }
+  #library-console,
+  .s-library-add-title {
     padding: 10px;
   }
-
   .s-library-add-title {
-    cursor: pointer;
     background: $brand-primary-faded;
-    color:white;
-    font-size: 16px;
+    color: white;
     font-weight: 300;
-
-
+    font-size: 16px;
+    cursor: pointer;
     i.fa-caret-down {
-      float: right;
       position: relative;
-      left: -8px;
       top: 4px;
+      left: -8px;
+      float: right;
       font-size: 1.5em;
     }
-
     &:hover {
       background: darken($brand-primary-faded, 5%);
     }
   }
-
   .s-filter-div {
-    font-size: $font-size-base;
     font-weight: 300;
+    font-size: $font-size-base;
   }
-
   .clear-selected {
     .fa-times {
       @extend .text-danger;
     }
   }
-
-    .page-bulk-add {
-      .fa-plus {
-        @extend .text-success;
-      }
-      position: relative;
-      top: -3px
+  .page-bulk-add {
+    position: relative;
+    top: -3px;
+    .fa-plus {
+      @extend .text-success;
     }
-
+  }
   .s-all-vs-selected {
-    width: 160px;
     display: inline;
     margin-left: 10px;
+    width: 160px;
   }
-
   .s-library-select {
-    width: 70%;
     display: inline;
+    width: 70%;
   }
-
-
 }

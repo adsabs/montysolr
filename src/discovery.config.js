@@ -1,8 +1,5 @@
 // Main config file for the Discovery application
 require.config({
-
-
-
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
   deps: (function(){

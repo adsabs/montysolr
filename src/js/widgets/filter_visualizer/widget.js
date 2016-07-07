@@ -110,12 +110,10 @@ define([
         this.maxQueryLen = options.maxQueryLen;
       },
 
-
       render : function(){
         this.view.render();
         return this.view.el
       },
-
 
       processFeedback: function(feedback) {
         switch (feedback.code) {
@@ -503,5 +501,3 @@ define([
 
     return WidgetController;
   });
-
-
