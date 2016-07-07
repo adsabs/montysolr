@@ -110,7 +110,7 @@ define([
             }, this);
       }
 
-      var showMore = !finished || (list.length > visible),
+      var showMore = !finished || (facets.length > visible),
           moreButtonClasses = showMore ? "btn btn-default btn-xs facet__pagination-button" : " hidden",
           lessButtonClasses = visible > 5 ? "btn btn-default btn-xs facet__pagination-button" : "hidden";
 

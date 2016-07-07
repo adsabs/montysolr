@@ -94,11 +94,9 @@ define([
       activate: function(beehive) {
         this.setBeeHive(beehive);
         _.bindAll(this, 'dispatchRequest', 'processResponse');
-        //custom dispatchRequest function goes here
         this.getPubSub().subscribe(this.getPubSub().INVITING_REQUEST, this.dispatchRequest);
       },
 
-      //called in response to "inviting_request"
       dispatchRequest: function(apiQuery) {
         this.setCurrentQuery(apiQuery);
         this.store.dispatch(this.actions.reset_state());
@@ -142,12 +140,14 @@ define([
         q.unlock();
 
         var facetField = this.store.getState().config.facetField;
+
+        //not sure why this is necessary, otherwise queryupdater will return a too-long name
+        var fieldName = 'fq_' + facetField.replace('_facet_hier', '');
+
         var conditions = Reducers.getActiveFacets(this.store.getState(), this.store.getState().state.selected)
           .map(function(c) {
             return facetField + ":\"" + c + "\"";
           });
-
-        var fieldName = 'fq_' + facetField.replace("_facet_hier", "");
 
         if (operator == 'and' || operator == 'limit to') {
           this.queryUpdater.updateQuery(q, fieldName, 'limit', conditions);

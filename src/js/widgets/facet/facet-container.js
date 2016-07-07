@@ -49,9 +49,9 @@ define([
 
     render : function(){
 
-      var header = <h3 className='facet__header' onClick={ _.partial(this.props.toggleFacet, undefined) }>
+      var header = (<h3 className='facet__header' onClick={ _.partial(this.props.toggleFacet, undefined) }>
         {this.props.reduxState.config.facetTitle}
-      </h3>;
+      </h3>);
 
       function createDropdown(arr){
         if (arr[0] == 'invalid choice'){
@@ -59,7 +59,7 @@ define([
         }
         return <div className='facet__dropdown'>
           { arr.map(function(val){
-          return <label>
+          return <label key={val}>
                     <input type='radio' onChange ={_.partial(this.props.submitFilter, val)}/> {val}
                 </label>
         }, this) }
