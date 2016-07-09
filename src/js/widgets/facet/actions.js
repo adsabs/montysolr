@@ -3,6 +3,7 @@ define([
 ], function(
   _
 ) {
+  //http://redux.js.org/docs/basics/Actions.html
 
   var actions = {};
 

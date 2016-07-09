@@ -59,36 +59,6 @@ define([
     }
   };
 
-  /**
-   * The widget has requested data and is waiting for them to
-   * arrive (we should indicate it)
-   */
-  handlers[WidgetStates.WAITING] = {
-    set: function(state) {
-      var view = getView(this);
-      if (view && view.$el) {
-        if(view.$el.find(".s-loading").length === 0) {
-          //if the widget is small, it can have an attribute on the object
-          //or be passed an option to show a small loading indicator
-          if (Marionette.getOption(view, "smallLoadingIcon")){
-            view.$el.append(LoadingTemplateSmall(state));
-          }
-          else {
-            //otherwise, show a larger indivator
-            view.$el.append(LoadingTemplate(state));
-          }
-        }
-      }
-    },
-    revert: function() {
-      var view = getView(this);
-      if (view && view.$el) {
-        if(view.$el.find(".s-loading").length !== 0) {
-          view.$el.find(".s-loading").remove();
-        }
-      }
-    }
-  };
 
   handlers[WidgetStates.IDLE] = {
     set: function(state) {

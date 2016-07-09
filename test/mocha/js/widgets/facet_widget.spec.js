@@ -63,6 +63,10 @@ define([
         }
       }
 
+      afterEach(function(){
+        document.querySelector("#test").innerHTML = '';
+      })
+
       it('should have the appropriate default state given individual widget presets', function() {
 
         var store = createStore();
@@ -591,6 +595,73 @@ define([
                   '{!type=aqp v=$fq_author}'
                 ]
         }))
+
+      });
+
+      it("should have a dropdown that shows the user the appropriate logic options", function(){
+
+        var widget = AuthorFacet();
+
+        var albertoResponse = _.cloneDeep(sampleResponse);
+        albertoResponse.facet_counts.facet_fields.author_facet_hier = albertoResponse.facet_counts.facet_fields.author_facet_hier.slice(0, 2);
+
+        widget.store.dispatch(widget.actions.data_received(albertoResponse));
+        //now mock a hierarchical child response
+        var hierarchicalResponse = _.cloneDeep(sampleResponse);
+        // generate a long list of fake sub alberto names
+
+        function randomString(len) {
+          var alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+          var s = '';
+          while(len > 0) {
+            s+= alphabet[Math.floor(Math.random() * 26)];
+            len-=1;
+          }
+          return s;
+        }
+
+        var hierNames = _.range(100).map(function(n, i){
+          if (i % 2 !== 0) return 5;
+          return '1/Accomazzi, A/' + randomString(12);
+        })
+
+        hierarchicalResponse.facet_counts.facet_fields.author_facet_hier = hierNames;
+        widget.store.dispatch(widget.actions.data_received(hierarchicalResponse, '0/Accomazzi, A'));
+
+        $('#test').append(widget.render().el);
+
+        widget.store.dispatch(widget.actions.toggle_facet());
+        widget.store.dispatch(widget.actions.toggle_facet('0/Accomazzi, A'));
+
+        //mimicking the user pushing the 'more' button a bunch of times
+        widget.store.dispatch(widget.actions.increase_visible('0/Accomazzi, A'));
+        widget.store.dispatch(widget.actions.increase_visible('0/Accomazzi, A'));
+        widget.store.dispatch(widget.actions.increase_visible('0/Accomazzi, A'));
+        widget.store.dispatch(widget.actions.increase_visible('0/Accomazzi, A'));
+
+          //select 2 facets
+          [].slice.apply(document.querySelectorAll('#test input[type=checkbox]')).slice(2,4).forEach(function(el){
+              React.addons.TestUtils.Simulate.change(el, {"target": {"checked": true}})
+          });
+
+        expect([].slice.apply(document.querySelectorAll('.facet__dropdown label')).map(function(l){return l.textContent})).to.eql([" and", " or", " exclude"]);
+
+        //select the parent
+          React.addons.TestUtils.Simulate.change(document.querySelector('#test input[type=checkbox]'), {"target": {"checked": true}});
+
+          //this should select all the children
+          expect(widget.store.getState().state.selected.length).to.eql(51)
+
+          expect([].slice.apply(document.querySelectorAll('.facet__dropdown label')).map(function(l){return l.textContent})).to.eql([" limit to", " exclude"]);
+
+          //now deselect one of the facets
+          React.addons.TestUtils.Simulate.change(document.querySelectorAll('#test input[type=checkbox]')[8], {"target": {"checked": false}});
+
+
+          expect(document.querySelector('.facet__dropdown').textContent).to.eql(
+            'select no more than 25 facets at a time'
+          )
+
 
       });
 
