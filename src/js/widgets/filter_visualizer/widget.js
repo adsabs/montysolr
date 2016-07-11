@@ -215,6 +215,13 @@ define([
           }
         }, this);
 
+        //clean up for hierarchical facets (remove parents)
+        filters.forEach(function(filt){
+          filt.filter_value = filt.filter_value.map(function(facet){
+            return facet.replace(/1\/[^/]+\//, '');
+          });
+        });
+
         // finally sort them by preference/ remove unknown
         filters = _.sortBy(filters, function(x) {
           var ix = _.indexOf(self.knownFilters, x.category);

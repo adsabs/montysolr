@@ -120,19 +120,6 @@ define([
 
     };
 
-    handlers[ApiFeedback.CODES.SEARCH_CYCLE_FINISHED] = function(feedback) {
-      return; // not doing anything right now
-      // retrieve ids of all components that wait for a query
-      var ids = _.keys(feedback.cycle.inprogress);
-
-      // turn ids into a list of widgets
-      var widgets = this.getWidgets(ids);
-
-      // change widget state
-      if (widgets) {
-        //this.changeWidgetsState(widgets, {state: WidgetStates.IDLE});
-      }
-    };
 
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START] = function(feedback) {
       var apiRequest = feedback.request;
@@ -308,12 +295,12 @@ define([
           return; // We are done
         }
 
-        var widgets = this.getWidgets([psk.getId()]);
-        if (widgets && widgets.length == 0) {
-          return; // we can ignore it
-        }
-        this.changeWidgetsState(widgets, {state: WidgetStates.RESET});
-        this.changeWidgetsState(widgets, {state: WidgetStates.ERRORED});
+        // var widgets = this.getWidgets([psk.getId()]);
+        // if (widgets && widgets.length == 0) {
+        //   return; // we can ignore it
+        // }
+        // this.changeWidgetsState(widgets, {state: WidgetStates.RESET});
+        // this.changeWidgetsState(widgets, {state: WidgetStates.ERRORED});
 
         this._tmp.api_failures = this._tmp.api_failures || {};
         this._tmp.api_failures[n] = this._tmp.api_failures[n] || 0;
