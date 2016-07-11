@@ -68,11 +68,12 @@ define([
 
       else {
           return (<div className='facet__dropdown'>
-            { arr.map(function(val){
-            return <label key={val}>
-                      <input type='radio' onChange ={_.partial(this.props.submitFilter, val)}/> {val}
-                  </label>
-          }, this) }
+          <div className='facet__dropdown__title'><b>{ this.props.activeFacets.length }</b> selected</div>
+          { arr.map(function(val){
+          return <label key={val}>
+                    <input type='radio' onChange ={_.partial(this.props.submitFilter, val)}/> {val}
+                </label>
+        }, this) }
           </div>);
         }
     },
@@ -106,7 +107,7 @@ define([
       )
     },
 
-    
+
   });
 
   return ReactRedux.connect(mapStateToProps, mapDispatchToProps )(ContainerComponent);
