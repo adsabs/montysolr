@@ -4,6 +4,9 @@
     <hr/>
 {{/if}}
 <div class="graph-legend"></div>
+{{#unless graphData}}
+loading...
+{{/unless}}
  <div class="s-svg-container">
      <svg class="chart s-chart" viewBox="0 0 110 100" preserveAspectRatio="xMinYMin meet">
      </svg>

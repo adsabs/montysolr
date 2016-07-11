@@ -120,16 +120,28 @@
   top: 14px;
   left: 90%;
   z-index: 1;
-  padding: 10px;
-  width: 100px;
+  width: 120px;
   opacity: 0.95;
   @extend .s-ads-card;
+  box-shadow: 0 0 20px rgba(77, 77, 77, 0.5);
+  padding: 10px;
+
 }
+.facet__dropdown__title {
+  border-bottom: 2px solid #4073dd;
+  text-align: center;
+  color: #666666;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+
+}
+
 .facet__dropdown label {
   display: block;
+  cursor: pointer;
 }
 .graph-facet {
-  padding: 30px 3%;
+  padding: 20px 1% 40px 3%;
   hr {
     margin: 10px 0;
   }

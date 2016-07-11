@@ -588,7 +588,7 @@ module.exports = function(grunt) {
             "components/api_query_updater.js" : 78,
             'widgets/facet/graph-facet/h_index_graph.js' : 38,
 
-            'widgets/facet/graph-facet/widget.js' : 64,
+            'widgets/facet/graph-facet/widget.js' : 60,
             'widgets/facet/graph-facet/year_graph.js' : 58,
             'widgets/facet/graph-facet/h_index_graph.js ' : 38,
             "apps/discovery/navigator.js": 30,

@@ -9,7 +9,6 @@ define([
       if (!state) state = reducer.getDefaultState();
 
       switch (action.type) {
-
         case 'DATA_REQUESTED':
           return reducer.dataRequested(state, action.id);
         case 'DATA_RECEIVED':
@@ -45,7 +44,7 @@ define([
     }
 
     reducer.facetSelected = function(state, id) {
-      //if it's a hierarchical facet, select all the children (might not be loaded yet)
+      //if it's a hierarchical facet, select all the VISIBLE children (might not be loaded yet)
       var selected = _.unique(state.state.selected.concat(state.facets[id].children.concat([id])));
       //or, if all children are selected, but parent is not, select the parent
       _.forEach(state.facets, function(v, k) {

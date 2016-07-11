@@ -38,6 +38,8 @@ define([
         },
 
         dispatchRequest: function (apiQuery) {
+          //reset the graph
+          this.model.unset('graphData');
           var q = this.customizeQuery(apiQuery);
           var req = this.composeRequest(q);
           this.getPubSub().publish(this.getPubSub().DELIVERING_REQUEST, req);
