@@ -186,7 +186,6 @@ define([
       q.unset('facet');
       q.unset("start");
       q.unset("rows");
-
       this.dispatchNewQuery(q);
 
       analytics('send', 'event', 'interaction', 'facet-applied', JSON.stringify({

@@ -84,12 +84,10 @@ define([
         {this.props.reduxState.config.facetTitle}
       </h3>);
 
-      var dropdownContainer = this.createDropdown();
-
       return (
           <div className='facet__container'>
             <React.addons.CSSTransitionGroup transitionName='swoop' transitionEnterTimeout={300} transitionLeaveTimeout={300}>
-              { dropdownContainer }
+              { this.createDropdown() }
             </React.addons.CSSTransitionGroup>
 
             <ToggleList

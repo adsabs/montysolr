@@ -5,8 +5,8 @@ define([
     'js/widgets/facet/create_store',
     'js/wraps/author_facet',
     'js/bugutils/minimal_pubsub',
-    'react',
-    'react-dom'
+    'dev-react',
+    'react-dom',
     ],
 
   function(
@@ -526,7 +526,6 @@ define([
         $('#test').append(widget.render().el);
 
         widget.store.dispatch(widget.actions.data_received(sampleResponse));
-        widget.store.dispatch(widget.actions.select_facet('0/Accomazzi, A'));
 
         var hierarchicalResponse = _.cloneDeep(sampleResponse);
         hierarchicalResponse.facet_counts.facet_fields.author_facet_hier = ['1/Accomazzi, A/Accomazzi, Alberto', 5, '1/Accomazzi, A/Accomazzi, A A', 10]
@@ -542,10 +541,16 @@ define([
         expect($('#test').find('.facet__icon:first').hasClass('facet__icon--closed')).to.be.false;
         expect($('#test').find('.facet__icon:first').hasClass('facet__icon--open')).to.be.true;
 
-        React.addons.TestUtils.Simulate.click(document.querySelector('input[type=checkbox]'));
+        expect(widget.store.getState().state.selected).to
+          .eql([]);
+        widget.store.dispatch(widget.actions.select_facet('0/Accomazzi, A'));
 
         expect(widget.store.getState().state.selected).to
-          .eql(['0/Accomazzi, A', '1/Accomazzi, A/Accomazzi, Alberto', '1/Accomazzi, A/Accomazzi, A A']);
+          .eql([
+          "1/Accomazzi, A/Accomazzi, Alberto",
+          "1/Accomazzi, A/Accomazzi, A A",
+          "0/Accomazzi, A"
+        ]);
 
         //but logic dropdown should show as if only 1 choice were selected
         expect($('#test').find('.facet__dropdown label').map(function(i, el) {
@@ -640,23 +645,28 @@ define([
         widget.store.dispatch(widget.actions.increase_visible('0/Accomazzi, A'));
 
           //select 2 facets
-          [].slice.apply(document.querySelectorAll('#test input[type=checkbox]')).slice(2,4).forEach(function(el){
-              React.addons.TestUtils.Simulate.change(el, {"target": {"checked": true}})
+          Object.keys(widget.store.getState().facets).slice(2,4).forEach(function(id){
+              widget.store.dispatch(widget.actions.select_facet(id))
           });
 
-        expect([].slice.apply(document.querySelectorAll('.facet__dropdown label')).map(function(l){return l.textContent})).to.eql([" and", " or", " exclude"]);
+        expect([].slice.apply(document.querySelectorAll('.facet__dropdown label'))
+        .map(function(l){return l.textContent}))
+        .to.eql([" and", " or", " exclude"]);
 
-        //select the parent
-          React.addons.TestUtils.Simulate.change(document.querySelector('#test input[type=checkbox]'), {"target": {"checked": true}});
+        //select the parent (Just 'Alberto, A')
+        widget.store.dispatch(widget.actions.select_facet('0/Accomazzi, A'))
 
           //this should select all the children
           expect(widget.store.getState().state.selected.length).to.eql(51)
 
-          expect([].slice.apply(document.querySelectorAll('.facet__dropdown label')).map(function(l){return l.textContent})).to.eql([" limit to", " exclude"]);
+          expect([].slice.apply(document.querySelectorAll('.facet__dropdown label'))
+          .map(function(l){return l.textContent})).to.eql([" limit to", " exclude"]);
 
           //now deselect one of the facets
-          React.addons.TestUtils.Simulate.change(document.querySelectorAll('#test input[type=checkbox]')[8], {"target": {"checked": false}});
-
+          //select 2 facets
+          Object.keys(widget.store.getState().facets).slice(2,3).forEach(function(id){
+              widget.store.dispatch(widget.actions.unselect_facet(id))
+          });
 
           expect(document.querySelector('.facet__dropdown').textContent).to.eql(
             'select no more than 25 facets at a time'

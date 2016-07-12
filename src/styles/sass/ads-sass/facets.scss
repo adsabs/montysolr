@@ -150,7 +150,7 @@
   padding-left: 15%;
   font-style: italic;
 }
-//some animations, might remove these later
+//used with dropdown
 .swoop-enter {
   opacity: 0;
   transition: all 0.3s ease-in;
@@ -168,20 +168,4 @@
 .swoop-leave.swoop-leave-active {
   opacity: 0;
   transform: translate3d(0, -20%, 0);
-}
-.slide-enter {
-  overflow: hidden;
-  max-height: 0;
-  transition: all 0.5s ease-in;
-}
-.slide-enter.slide-enter-active {
-  max-height: 800px;
-}
-.slide-leave {
-  max-height: 600px;
-  transition: all 0.3s ease-out;
-}
-.slide-leave.slide-leave-active {
-  overflow: hidden;
-  max-height: 0;
 }

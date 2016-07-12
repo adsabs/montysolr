@@ -170,9 +170,12 @@ require.config({
     "underscore": "libs/lodash/lodash.compat",
 
     // 3rd party dependencies
-    'jquery': 'libs/jquery/jquery',
-    'react' : 'libs/react/react-with-addons',
-    'react-dom' : 'libs/react/react-dom',
+    // I can't for the life of my figure out how to swap non-minified libs in dev
+    // to minified libs in the r.js optimize task
+    react : '//fb.me/react-with-addons-15.2.1.min',
+    'react-dom' : '//fb.me/react-dom-15.2.1.min',
+    jquery : '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min',
+    'jquery-ui' : '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min',
      es6: 'libs/requirejs-babel-plugin/es6',
      babel: 'libs/requirejs-babel-plugin/babel-5.8.34.min',
     'redux' : 'libs/redux/index',
@@ -186,7 +189,6 @@ require.config({
     'backbone.eventbinder' : 'libs/backbone.eventbinder/backbone.eventbinder',
     'backbone.babysitter' : 'libs/backbone.babysitter/backbone.babysitter',
     'bootstrap': 'libs/bootstrap/bootstrap',
-    'jquery-ui' : 'libs/jqueryui/jquery-ui',
     'd3':'libs/d3/d3',
     'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
@@ -204,6 +206,8 @@ require.config({
     'sprintf': 'libs/sprintf/sprintf',
     'chai': '../bower_components/chai/chai',
     'sinon': '../bower_components/sinon/index',
+    //have to add this for tests
+    'dev-react' : '../bower_components/react/react-with-addons',
     'filesaver' : 'libs/FileSaver/FileSaver',
     'select2' : 'libs/select2/select2',
     'squire': '../bower_components/squire/src/Squire',
