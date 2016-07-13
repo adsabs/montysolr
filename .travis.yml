@@ -6,3 +6,8 @@ before_install: npm install -g grunt-cli
 install: npm install
 deployg: grunt release
 before_script: grunt setup
+addons:
+  sauce_connect:
+    username: jonnybazookatone
+    access_key: 
+      secure: "kKWiUfSFbRzWD6y3LMhBljM/dvVFkG5J318FqLt2Iu3ZRxNVdRf2W0cxR+D4kB5ZfRj85joCLMQQLIMd5qqDxJPpDqerrv+7AnUHLUgTPUiGkon7tDtXT/wGQnPcKWQ5krRb9KbYZ42S0FwCYueFaShVeNA3x+SL1/3e0R6Sd7xJwQgJLNQw/McRZXmOzkkH3Y/bkmH74hzWqeclySXyLQv4CXYxJwlJjjfC0NEQQLBwd2gRvpL1BGMV3ObkSBah849eV6r2ZBnXalTQXPhSQD9e5Ww/T1SzcW6yNCAY2ogAr55KkwPKTFm/haFDbYfkhJnVD8yWIQHMD8VHI8W9nk/k2ZPrW4AEPQfIjtvlg6ExQ7WJ7NpgPVfm4K7b3HadKqjE6hdTqCGlcXLTg824jaGRV5bib5l97vxrChi255sB5dTwrxm4hX+bJRAY99GBbIdeZ+tePAxAeg4+l1YImVmQkm33tNe7zSdEHqz4VReWQ6FQyaik20fMlYLHd3TD+NItmcEvXl3ezUfvjjEWBVp5xljxQNF/4JJaS7dSswDwEbRHCI3y8FB7BwPkL4XTl9Us+4KT2LUHmXElQVXQFlCobzYxlQpUllObrI/ikzlZRQY84lrO+jzyGae62/lmpfOjwg9NzDO4uleGuWRSonB5wV8SPDwvrULjD0hRSAw="
