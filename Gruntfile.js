@@ -132,8 +132,9 @@ module.exports = function(grunt) {
             //use cdns for major libs
             react : 'empty:',
             'react-dom' : 'empty:',
-            jquery : 'empty:',
-            'jquery-ui' : 'empty:'
+            'jquery' : 'empty:',
+            'jquery-ui' : 'empty:',
+            'requirejs' : 'empty:'
           }
         }
       },

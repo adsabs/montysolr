@@ -191,7 +191,6 @@ require.config({
     'bootstrap': 'libs/bootstrap/bootstrap',
     'd3':'libs/d3/d3',
     'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
-    'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
     'nvd3' :  'libs/nvd3/nv.d3',
