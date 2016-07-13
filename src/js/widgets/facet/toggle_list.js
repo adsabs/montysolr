@@ -8,9 +8,8 @@ define([
    d3
     ) {
 
-
   //putting FacetCheckbox and ToggleList in one file
-  //since requirejs forbids circular imports
+  //since requirejs forbids circular imports and they import eachother
 
   var FacetCheckbox = React.createClass({
 
@@ -137,12 +136,11 @@ define([
         : "facet__list-container";
 
       if (open) {
-        facetList = <div className={parentClass}>
-          <ul className="facet__list">
-            <React.addons.CSSTransitionGroup transitionName="slide" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
-              {list}
-            </React.addons.CSSTransitionGroup>
-          </ul>
+        facetList = (
+          <div className={parentClass}>
+              <ul className="facet__list">
+                {list}
+              </ul>
           <div className="facet__state-message">
             {stateMessage}
           </div>
@@ -155,6 +153,7 @@ define([
             </button>
           </div>
         </div>
+      )
       }
 
       return <div>
@@ -164,9 +163,7 @@ define([
             : "facet__icon facet__icon--closed"}
             onClick={_.partial(this.props.toggleFacet, this.props.id, !open)}/> {this.props.children}
         </div>
-        <React.addons.CSSTransitionGroup transitionName="slide" transitionEnterTimeout={500} transitionLeaveTimeout={500}>
           {facetList}
-        </React.addons.CSSTransitionGroup>
       </div>
     },
 

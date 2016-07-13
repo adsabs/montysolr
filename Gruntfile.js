@@ -84,6 +84,7 @@ module.exports = function(grunt) {
       baseUrl: 'dist/js', // this is needed just for the 'stupid' list task
 
       release_concatenated : {
+
         options: {
           baseUrl: 'dist/',
           wrapShim: true,
@@ -128,8 +129,11 @@ module.exports = function(grunt) {
           optimize: 'uglify2',
 
           paths : {
-            react : 'https://fb.me/react-15.2.0.min.js',
-            'react-dom' : 'https://fb.me/react-dom-15.2.0.min.js'
+            //use cdns for major libs
+            react : 'empty:',
+            'react-dom' : 'empty:',
+            jquery : 'empty:',
+            'jquery-ui' : 'empty:'
           }
         }
       },
@@ -873,18 +877,6 @@ module.exports = function(grunt) {
       paths[k] = newMap[k];
     }
 
-    // override certain libraries (they are always fetched from CDN and other locations)
-    paths['jquery'] = '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min'; //code.jquery.com/jquery-2.0.3.min.js';
-    paths['jquery-ui'] = '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min'; //code.jquery.com/ui/1.10.4/jquery-ui.min.js';
-    paths['bootstrap'] = '//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min';
-    paths['underscore'] = 'libs/lodash/lodash.compat.min';
-    //paths['backbone'] = 'libs/backbone/backbone-min';
-    paths['marionette'] = 'libs/marionette/backbone.marionette.min';
-    paths['backbone.wreqr'] = 'libs/backbone.wreqr/lib/backbone.wreqr.min';
-    paths['backbone.babysitter'] = 'libs/backbone.babysitter/backbone.babysitter.min';
-    paths['d3'] = 'libs/d3/d3.min';
-    paths['nvd3'] = 'libs/nvd3/nv.d3.min';
-    paths['persist-js'] = 'libs/persist-js/persist-all-min';
 
     // in development we use google-analytics, but for production we'll serve it
     // ourselves (because of silly Ghostery breaking Safari browsers)
