@@ -72,7 +72,7 @@ define([
       w.hiddenCollection.add([{bibcode : 1}, {bibcode : 2}]);
       expect(JSON.stringify(w.hiddenCollection.toJSON())).to.eql('[{"bibcode":1,"resultsIndex":0,"emptyPlaceholder":false,"visible":false,"actionsVisible":true},{"bibcode":2,"resultsIndex":1,"emptyPlaceholder":false,"visible":false,"actionsVisible":true}]');
       //this will be triggered by TOC widget on a fresh "display_documents"
-      w.trigger("page-manager-message", "broadcast-payload", {bibcode : 'new bibcode'} );
+      w.model.set('bibcode', 'new_bibcode');
       expect(JSON.stringify(w.hiddenCollection.toJSON())).to.eql("[]")
 
     });
@@ -111,7 +111,7 @@ define([
 
     });
 
-    it("Show references", function(){
+    it("Show references", function(done){
       var widget = new ReferencesWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
 
@@ -130,15 +130,16 @@ define([
 
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 
-      expect($w.find(".s-article-title").text()).to.eql("foo");
-
       expect($w.find("a:first").attr("href")).to.eql("#search/q=references(bibcode%3Abar)&sort=first_author%20asc");
 
-
+      setTimeout(function(){
+        expect($w.find(".s-article-title").text()).to.eql("foo");
+        done()
+      }, 200)
 
     });
 
-    it("Show coreads", function(){
+    it("Show coreads", function(done){
       var widget = new CoreadsWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
 
@@ -156,7 +157,12 @@ define([
 
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 
-      expect($w.find(".s-article-title").text()).to.eql("foo");
+      setTimeout(function(){
+        expect($w.find(".s-article-title").text()).to.eql("foo");
+        done()
+      }, 200)
+
+
       //should remove self from search results
 
       expect($w.find("a:first").attr("href")).to.eql('#search/q=trending(bibcode%3Abar)%20-bibcode%3Abar&sort=date%20desc');
@@ -164,7 +170,7 @@ define([
 
     });
 
-    it("Show TableOfContents", function(){
+    it("Show TableOfContents", function(done){
       var widget = new TableOfContentsWidget();
       widget.activate(minsub.beehive.getHardenedInstance());
 
@@ -177,7 +183,10 @@ define([
 
       widget.trigger("page-manager-message", "broadcast-payload", {title: "foo"})
 
-      expect($w.find(".s-article-title").text()).to.eql("foo");
+      setTimeout(function(){
+        expect($w.find(".s-article-title").text()).to.eql("foo");
+        done()
+      }, 200)
 
 
     });
