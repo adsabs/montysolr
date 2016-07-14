@@ -6,6 +6,7 @@ before_install: npm install -g grunt-cli
 install: npm install
 deployg: grunt release
 before_script: grunt setup
+script: grunt sauce
 addons:
   sauce_connect:
     username: jonnybazookatone
