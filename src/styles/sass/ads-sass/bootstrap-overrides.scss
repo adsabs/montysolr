@@ -36,7 +36,7 @@ h1, h2, h3 {
 
 textarea:focus, input:focus, select:focus, textarea:active, input:active, select:active {
   outline: 0;
-  border: 1px solid $brand-info;
+  border: 1px solid $brand-primary-faded;
   box-shadow: none !important;
 }
 
