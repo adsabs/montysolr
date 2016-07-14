@@ -54,8 +54,12 @@ define([
 
 
       ingestBroadcastedPayload: function(data) {
-        //right now just used to set the title from the abstract widget
-        this.model.set(data);
+        //this interferes with the model reset  in list_of_things so delay by a tiny amount
+        //this needs to be refactored
+        var that = this;
+        setTimeout(function(){
+          that.model.set("title", data.title);
+        }, 100);
       },
 
       dispatchRequest : function(apiQuery){
