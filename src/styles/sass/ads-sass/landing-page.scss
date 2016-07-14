@@ -228,3 +228,30 @@ div[data-field=date] {
   border-bottom: 1px solid $gray-lighter;
   text-align: center;
 }
+
+
+.landing-faq {
+  border-top: 1px solid $gray-lighter;
+}
+
+.landing-faq .fa-stack {
+  margin-bottom: 12px;
+}
+
+.landing-faq .col-sm-4 {
+  padding-top: 5%;
+  min-height: 220px;
+  &:hover {
+    background: $gray-lightest;
+  }
+}
+
+.landing-faq .col-sm-4 div{
+  max-width: 80%;
+    margin: auto
+}
+
+.landing-faq a {
+  color: lighten($brand-primary-faded, 5%) !important;
+  font-weight: bold;
+}
