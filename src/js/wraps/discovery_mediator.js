@@ -157,7 +157,7 @@ define([
                   self.getPubSub().publish(self.getPubSub().START_SEARCH, apiRequest.get('query'));
                 }, fail: function() {
                   alerts.alert(new ApiFeedback({
-                    msg: "Sorry, at the moment we can't connect to : " + apiRequest.get('target'),
+                    msg: "At the moment we can't connect to : " + apiRequest.get('target') + " \n Please try again later.",
                     modal: true,
                     type: "danger"
                   }));
@@ -243,7 +243,8 @@ define([
 
         alerts.alert(new ApiFeedback({
           code: ApiFeedback.CODES.ALERT,
-          msg: 'The ADS Api is having a bad day- the server returned error for this request <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
+          msg: 'Please try again later. \n The server returned an error: <pre class="pre-scrollable">' +
+           JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
           modal: true
         }));
       }
@@ -311,25 +312,8 @@ define([
         if (!feedback.beVerbose) return;
       }
 
-
       // we'll not show messages until search cycle is over
-      if (!this._tmp.cycle_started)
-        return;
-
-      var msg;
-      if (numErr > 2) {
-        alerter.alert(new ApiFeedback({
-          code: ApiFeedback.CODES.ERROR,
-          msg: 'I\'m afraid this component ' + n + ' is getting frustrated with the API. It failed it several times. <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>'
-        }));
-      }
-      else {
-        alerter.alert(new ApiFeedback({
-          code: ApiFeedback.CODES.ALERT,
-          msg: 'Error getting data for: ' + n + ' <pre class="pre-scrollable">' + JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
-          modal: true
-        }));
-      }
+      if (!this._tmp.cycle_started) return;
 
     };
 
