@@ -107,7 +107,7 @@ define([
       }
 
       matchers = {
-        default: /[=\w]+|"[^"]+"/g,
+        default: /=?"[^"]+"|[=\w]+/g,
         author:  /.+/gm,
         bibstem: /[^,^\s]+/g
       };
