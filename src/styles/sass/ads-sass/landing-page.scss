@@ -232,23 +232,20 @@ div[data-field=date] {
 
 .landing-faq {
   border-top: 1px solid $gray-lighter;
+  max-width:750px;
+  margin: auto;
 }
 
-.landing-faq .fa-stack {
-  margin-bottom: 12px;
+.landing-faq i {
+  margin-bottom: 15px;
 }
 
 .landing-faq .col-sm-4 {
   padding-top: 5%;
-  min-height: 220px;
+  min-height: 180px;
   &:hover {
     background: $gray-lightest;
   }
-}
-
-.landing-faq .col-sm-4 div{
-  max-width: 80%;
-    margin: auto
 }
 
 .landing-faq a {
