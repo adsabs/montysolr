@@ -659,8 +659,6 @@ module.exports = function(grunt) {
     'saucelabs-mocha': {
       all: {
         options: {
-          username: '<%= local.sauce_username || process.env.SAUCE_USERNAME %>',
-          key: '<%= local.sauce_access_key || process.env.SAUCE_ACCESS_KEY %>',
           urls: ['http://localhost:<%= local.port || 8000 %>/test/' + (grunt.option('testname') || 'mocha/tests.html?bbbSuite=core-suite')],
           tunnelTimeout: 30,
           "tunnel-identifier": process.env.TRAVIS_JOB_NUMBER,
