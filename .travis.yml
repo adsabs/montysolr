@@ -1,14 +1,14 @@
 language: node_js
 node_js:
-- '0.11'
-- '0.10'
+  - '0.11'
+  - '0.10'
 before_install: npm install -g grunt-cli
 install: npm install
 deployg: grunt release
 before_script: grunt setup
 script:
-- if [ "$TRAVIS_PULL_REQUEST" = "true" ]; then echo "grunt test"; grunt test; fi
-- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "true" ]; then echo "grunt test"; grunt test; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
 env:
   global:
     - secure: "DKftJorW5M8afWT8+XmAhnn4Jw0+Ff08ptAsvZQoJTle1GvHqY+wWerSuh1wZrpkCLa+BnGPE49RnExPKMPAuKZ11ocy5h7xFRJ4g/y/jy1kFwk0j94TtvDyhORa0eoIa9zFK4UymA+jdDiZvPbxIpXMqxeVb0kMTDkIpMn+16UIGS27kLvlC3o6rODFZjqnGvnB4GascP90GWuG+rxFEJ2hzwslrEwFJKDJZ7ytPnCQc9Cwck77t/oNL/Gro33BZKzvbeeHV7YbVfV6QK/+/SiPtQZ/ZvC3DokB7ojv1/v1vsTepW59kblScJBJo/aFlie1gT6WCPyzW7k+HC4aWm83rTNmttYVhEO/Z4wLOwRtyC3SDZZ96NXWKHZbvejmkP01cCWFCPGtiMMV1YLy2FvscCwXZxrwfx3zfqH+47JW20u+g0ZAWBt+QR0765TDKNGxQaGZm/ez3t6l9q2Mehew/TTSmOu8E5HLOJ6kT8MfzPPtn3l9iB8BoDOxoEGOnIxIcR061gSI5LcEwBmkfHk2LKJmdQisuPbmzBxNRJiQnGnHWWdk6F2zHP3q/KGtBnIYAwBSxf6jBg7i+tPvkiVDVMr7pmzKTJSY92mmrzmYanjVktea8Tptwl863iUs1z5/7HxMUZUqe4S/fTsdxQpMNwvV8xBbRGQSAm4VzL8="
