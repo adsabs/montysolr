@@ -7,7 +7,7 @@ install: npm install
 deployg: grunt release
 before_script: grunt setup
 script:
-  - if [ "$TRAVIS_PULL_REQUEST" = "true" ]; then echo "grunt test"; grunt test; fi
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "grunt test"; grunt test; fi
   - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
 env:
   global:
