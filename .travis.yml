@@ -1,16 +1,14 @@
 language: node_js
 node_js:
-  - "0.11"
-  - "0.10"
+- '0.11'
+- '0.10'
 before_install: npm install -g grunt-cli
 install: npm install
 deployg: grunt release
 before_script: grunt setup
-script: 
-   - 'if [ "$TRAVIS_PULL_REQUEST" = "true" ]; then echo "grunt test"; grunt test; fi'
-   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi'
-addons:
-  sauce_connect:
-    username: jonnybazookatone
-    access_key: 
-      secure: "kKWiUfSFbRzWD6y3LMhBljM/dvVFkG5J318FqLt2Iu3ZRxNVdRf2W0cxR+D4kB5ZfRj85joCLMQQLIMd5qqDxJPpDqerrv+7AnUHLUgTPUiGkon7tDtXT/wGQnPcKWQ5krRb9KbYZ42S0FwCYueFaShVeNA3x+SL1/3e0R6Sd7xJwQgJLNQw/McRZXmOzkkH3Y/bkmH74hzWqeclySXyLQv4CXYxJwlJjjfC0NEQQLBwd2gRvpL1BGMV3ObkSBah849eV6r2ZBnXalTQXPhSQD9e5Ww/T1SzcW6yNCAY2ogAr55KkwPKTFm/haFDbYfkhJnVD8yWIQHMD8VHI8W9nk/k2ZPrW4AEPQfIjtvlg6ExQ7WJ7NpgPVfm4K7b3HadKqjE6hdTqCGlcXLTg824jaGRV5bib5l97vxrChi255sB5dTwrxm4hX+bJRAY99GBbIdeZ+tePAxAeg4+l1YImVmQkm33tNe7zSdEHqz4VReWQ6FQyaik20fMlYLHd3TD+NItmcEvXl3ezUfvjjEWBVp5xljxQNF/4JJaS7dSswDwEbRHCI3y8FB7BwPkL4XTl9Us+4KT2LUHmXElQVXQFlCobzYxlQpUllObrI/ikzlZRQY84lrO+jzyGae62/lmpfOjwg9NzDO4uleGuWRSonB5wV8SPDwvrULjD0hRSAw="
+script:
+- if [ "$TRAVIS_PULL_REQUEST" = "true" ]; then echo "grunt test"; grunt test; fi
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
+env:
+  - secure: "DKftJorW5M8afWT8+XmAhnn4Jw0+Ff08ptAsvZQoJTle1GvHqY+wWerSuh1wZrpkCLa+BnGPE49RnExPKMPAuKZ11ocy5h7xFRJ4g/y/jy1kFwk0j94TtvDyhORa0eoIa9zFK4UymA+jdDiZvPbxIpXMqxeVb0kMTDkIpMn+16UIGS27kLvlC3o6rODFZjqnGvnB4GascP90GWuG+rxFEJ2hzwslrEwFJKDJZ7ytPnCQc9Cwck77t/oNL/Gro33BZKzvbeeHV7YbVfV6QK/+/SiPtQZ/ZvC3DokB7ojv1/v1vsTepW59kblScJBJo/aFlie1gT6WCPyzW7k+HC4aWm83rTNmttYVhEO/Z4wLOwRtyC3SDZZ96NXWKHZbvejmkP01cCWFCPGtiMMV1YLy2FvscCwXZxrwfx3zfqH+47JW20u+g0ZAWBt+QR0765TDKNGxQaGZm/ez3t6l9q2Mehew/TTSmOu8E5HLOJ6kT8MfzPPtn3l9iB8BoDOxoEGOnIxIcR061gSI5LcEwBmkfHk2LKJmdQisuPbmzBxNRJiQnGnHWWdk6F2zHP3q/KGtBnIYAwBSxf6jBg7i+tPvkiVDVMr7pmzKTJSY92mmrzmYanjVktea8Tptwl863iUs1z5/7HxMUZUqe4S/fTsdxQpMNwvV8xBbRGQSAm4VzL8="
+  - secure: "LpPSt65QqA+WP52q/r5c3a+3ORvAznW9JX8RN7M6zLqnUVLG+egPperIYDqbQl8GiXBFgOb/23sW6Q4cGRJMhfLCx13eYnq4pGEwLR8/cPcrqG1lFuK2UxNswEYQeMSVretzTNkQD8vACPwv6AXtf++/R8N4sXFZKARrC4/ebEInQo7SRGGSeepGkg/K1FtDdHtnbHFKWkq79EYoZ9dps4ySlAb8w0vIT08o9wuGCaIaomIVK7FLF9dYAYJgajEkrRGhUlVuYffSxYJ93ikU7TwyAidp7degPNbmQVVbkhblJ4SMwdXyIumUjwq1suyLEpbw0c3uT1OtJotfphFBCOXC/7ltHXxYOHMKscPHFEK4Df6QN96Nt/dvEvSpCo3px/0vV8UpTch0Gsn5lZQmuE/1PRuOLYQbznACEWaWCOyVtKg0m29sn1i8aId7HiievJzqiEzY/D8whOJF0ymtRiNkNvKI4GXSboj62ez1akOIH75FuMfNu4t/qnBUwy3Jufpa2LW+Oig4r2vgyMiv24o00QAD/OTpJF69pJ3nCZLQKq2uXZcRewm99w+ocaCHhTZayU4gIuRwDHIZnwYD+uC4+QF/x92j2WD7+aPXrWI4O8E0kmfphBBJnDWLBzr/tS71L9aRDtxfzjpC+ZuCOTuht8rXmNSasxBtwW7U9gE="
