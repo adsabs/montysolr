@@ -665,8 +665,8 @@ module.exports = function(grunt) {
           build: process.env.TRAVIS_JOB_ID,
           concurrency: 5,
           throttled: 5,
-          maxRetries: 1,
-
+          pollInterval: 2000,
+          statusCheckAttempts: 180,
           // the logic here is to test browser versions
           // bbb does not depend on OS specific API's
           // but it could still happen that certain features
@@ -681,12 +681,6 @@ module.exports = function(grunt) {
               browserName: 'internet explorer',
               platform: 'Windows 8.1',
               version: '11.0'
-            },
-
-            {
-              browserName: 'safari',
-              platform: 'OS X 10.6',
-              version: '5.1'
             },
             {
               browserName: "android",
