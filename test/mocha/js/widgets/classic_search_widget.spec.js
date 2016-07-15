@@ -49,8 +49,8 @@ define([
       //setting input[value=OR] prop "checked" to true isn't working in phantomjs for some reason :(
       w.view.$("div[data-field=title] input[name=title-logic]").val("OR")
 
-      w.view.$("div[data-field=abstract]").find("input[type=text]").val('-hawaii star');
-      w.view.$("div[data-field=abstract] input[name=abstract-logic]").val("BOOLEAN")
+      w.view.$("div[data-field=abs]").find("input[type=text]").val('-hawaii star');
+      w.view.$("div[data-field=abs] input[name=abstract-logic]").val("BOOLEAN")
 
       w.view.$("div[data-field=bibstem]").find("input[name=bibstem]").val("apj,mnras,");
 
@@ -63,16 +63,16 @@ define([
       w.view.$("button[type=submit]").eq(0).click();
 
       expect(publishSpy.args[0][2].toJSON()).to.eql({
-        "q": [
-          "property:refereed property:article author:(\"Accomazzi,a\" AND \"Kurtz,M\") title:(star OR planet OR \"gliese 581\") abstract:(-hawaii star) bibstem:(apj OR mnras)"
-        ],
-        "sort": [
-          "date desc"
-        ],
-        "fq": [
-          "database:(astronomy OR physics) pubdate:[2010-10-0 TO 9999-12-0]"
-        ]
-      });
+      "q": [
+        "property:refereed property:article author:(\"Accomazzi,a\" AND \"Kurtz,M\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj OR mnras)"
+      ],
+      "sort": [
+        "date desc"
+      ],
+      "fq": [
+        "database:(astronomy OR physics) pubdate:[2010-10-0 TO 9999-12-0]"
+      ]
+    });
 
       //one more
 
@@ -89,8 +89,8 @@ define([
       //setting input[value=OR] prop "checked" to true isn't working in phantomjs for some reason :(
       w.view.$("div[data-field=title] input[name=title-logic]").val("OR")
 
-      w.view.$("div[data-field=abstract]").find("input[type=text]").val('-hawaii star');
-      w.view.$("div[data-field=abstract] input[name=abstract-logic]").val("BOOLEAN")
+      w.view.$("div[data-field=abs]").find("input[type=text]").val('-hawaii star');
+      w.view.$("div[data-field=abs] input[name=abstract-logic]").val("BOOLEAN")
 
       w.view.$("div[data-field=bibstem]").find("input[name=bibstem]").val("    apj,     ");
 
@@ -100,7 +100,7 @@ define([
 
       expect(publishSpy.args[1][2].toJSON()).to.eql({
         "q": [
-          "property:refereed author:\"Accomazzi,a\" title:(star OR planet OR \"gliese 581\") abstract:(-hawaii star) bibstem:apj"
+          "property:refereed author:(\"Accomazzi,a\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj)"
         ],
         "sort": [
           "date desc"

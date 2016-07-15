@@ -172,8 +172,8 @@ require.config({
     // 3rd party dependencies
     // I can't for the life of my figure out how to swap non-minified libs in dev
     // to minified libs in the r.js optimize task
-    react : '//fb.me/react-with-addons-15.2.1.min',
-    'react-dom' : '//fb.me/react-dom-15.2.1.min',
+    react : '//cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react-with-addons.min',
+    'react-dom' : '//cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react-dom.min',
     jquery : '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min',
     'jquery-ui' : '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min',
      es6: 'libs/requirejs-babel-plugin/es6',
@@ -191,7 +191,6 @@ require.config({
     'bootstrap': 'libs/bootstrap/bootstrap',
     'd3':'libs/d3/d3',
     'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
-    'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
     'nvd3' :  'libs/nvd3/nv.d3',

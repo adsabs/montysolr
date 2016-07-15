@@ -97,6 +97,9 @@ define([
         this.getPubSub().subscribe(this.getPubSub().INVITING_REQUEST, this.dispatchRequest);
       },
 
+      /*
+        request is only dispatched automatically if the facet is open by default!
+       */
       dispatchRequest: function(apiQuery) {
         this.setCurrentQuery(apiQuery);
         this.store.dispatch(this.actions.reset_state());

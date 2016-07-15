@@ -107,7 +107,7 @@ define([
       }
 
       matchers = {
-        default: /\w+|"[^"]+"/g,
+        default: /=?"[^"]+"|[=\w]+/g,
         author:  /.+/gm,
         bibstem: /[^,^\s]+/g
       };
@@ -137,13 +137,9 @@ define([
 
             //quote matches if field == author
             phrases = field == "author" ? _.map(phrases, function(p){ return '"' + p + '"'}) : phrases;
-
-            if (phrases.length > 1){
-              qDict.q.push(field + ":(" + phrases.join(logic) +")" );
-            }
-            else {
-              qDict.q.push(field + ":" + phrases[0]);
-            }
+            //use parentheses always (bc of = parsing issue)
+            phrases = phrases.length > 1 ? phrases.join(logic) : phrases[0];
+            qDict.q.push(field + ":(" + phrases +")" );
           }
 
         }

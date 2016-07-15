@@ -84,7 +84,7 @@ $landing-page-hero-background : desaturate(lighten($brand-info, 20%), 15%);
 
   .landing-tab.active {
     background-color: #fff;
-    color: lighten($brand-primary-faded, 10%);
+    color: lighten($brand-primary-faded, 5%);
   }
 
 
@@ -227,4 +227,28 @@ div[data-field=date] {
   padding: 16px;
   border-bottom: 1px solid $gray-lighter;
   text-align: center;
+}
+
+
+.landing-faq {
+  border-top: 1px solid $gray-lighter;
+  max-width:750px;
+  margin: auto;
+}
+
+.landing-faq i {
+  margin-bottom: 15px;
+}
+
+.landing-faq .col-sm-4 {
+  padding-top: 5%;
+  min-height: 180px;
+  &:hover {
+    background: $gray-lightest;
+  }
+}
+
+.landing-faq a {
+  color: lighten($brand-primary-faded, 5%) !important;
+  font-weight: bold;
 }
