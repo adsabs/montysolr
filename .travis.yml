@@ -6,7 +6,9 @@ before_install: npm install -g grunt-cli
 install: npm install
 deployg: grunt release
 before_script: grunt setup
-script: grunt sauce
+script: 
+   - 'if [ "$TRAVIS_PULL_REQUEST" = "true" ]; then echo "grunt test"; grunt test; fi'
+   - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi'
 addons:
   sauce_connect:
     username: jonnybazookatone
