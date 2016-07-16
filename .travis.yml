@@ -6,3 +6,10 @@ before_install: npm install -g grunt-cli
 install: npm install
 deployg: grunt release
 before_script: grunt setup
+script:
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "grunt test"; grunt test; fi
+  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
+env:
+  global:
+    - secure: "sFUsR97iL52eNYu2snnU2Gs5DdUsi8Dlx8oxWZfbEOIEbBt6c3HE85bDkNu//s6ZtFeiJPgkK5k4zm8pbQrC/rfe3xNjsjqalWIZlIdg5DTJ5Eme0YRdi6m2dHHp34CeBpYPqfVyjQIb5JalJkaydRXKYV81rk1zpo89ouO1JLz9HnvXzmAGEy+7PKeYE7k1260qfk8468i7gPM1uZpDrWRiMMm2P8IAwGcbvOxhXJaChC+RqlnRApxLMb0vRhwv6g0eWe0qxikKF1Bwe3uiyt3Yqu2CeJhM5J1koTP/k0q1bmnBZu0eF46TGBXTKJ1q8RCwVqnn/b2Y42wGhkS8ESn1S/J+knKisXAAY+emfzOyNOyZHRqpMhonpT3RhVYxQRyrSyY3aIzyc8B3PaHhYqcgFNOkdJPFc23SPDZjmbOJ80siTfKgAzUWCgSPeK/O4j9d0GEeBgaNFKP63UAd7VK5IElq7ByySbjZl+lQiuaA0IfTpZwi+Xp7VqXAd1ASwsB7jeOcy9EoQJNSWjeYaMPw+BRyGsU0uPNb9CsM/AtI35vRAXyH9nNis9zccXqYApur+2rELo18I2bKmWiupc78UqNVOQCHcIyvjMDy4vSnhwBqqXRnqjt+MiermkQAll5BWd0v2CL3i3I/3K1kkPe7MG7+8ZtUom0atawbbXA="
+    - secure: "yKEZPN+sHuPJei3b8mN0eU+lmY2v4hJuuI2UI8kLgzj0HeuMhAYtcNFG/TM29FHR9ABSSggKBbD/+NFNMPYH3+q9wKqw7KHmiJh7EtUHbD4/LIeVDUewoSXZSEDhjDp/HUpl7fDp3FD/Rakzcn0Tbpn7Zcy31BSUl2i1bQraht22zLv29NM8AQjqawekGzAtzgtHCL8LQcZITOFYI1KtVg/kNeV1yuo6PJ6eXO8BsHQflmaeDubt0YWgWjarAYjWY7Y7/D2KXT51tKRV5PN7n78yC44c3PN0ksXpqcjmdDtqAc0szAvpuFcl4jFs+we6YoUAElFnxZ0aYvj1mf0PdgFyd07OgppXxqoiUDuv5N3Mrd3ucdvTffdKHoAdHbKxJKlJfkMUgshP4tA1iNZf0yExT3cpDwlmJ5iHmvd/qWSAfAQ/tGUCbDcPO6ClrGjo9t1JcR8GRGuA5PeOnTLXUjcXx8BRyOgc9tlzfTD0ookWJkojcBRpjuN/AcP673w4PT8ROmKkG/TcaBTEtIC1QVTU8DC4z4rU4N9p4vrngNNGL/jYvvo9x5eibRW82oQuohlKW+rOWn99Ajld9j2Tp2lQAd9mFtlSnep7+8iOa6th1WZTbSHUyQ+lv8lHvP0VGG2pCKWoqStmwn/+crz8waasg0+6S4iKdRU3MGksTOU="
