@@ -52,6 +52,10 @@ define([
       parse: function (doc, maxAuthors) {
         var maxAuthors = maxAuthors || 20;
 
+        //add doi link
+        if (doc.doi){
+          doc.doi = { doi: doc.doi,  href: LinkGeneratorMixin.adsUrlRedirect("doi", doc.doi) }
+        }
         //"aff" is the name of the affiliations array that comes from solr
         doc.aff = doc.aff || [];
 
@@ -219,7 +223,7 @@ define([
 
       //bibcode is already in _docs
       displayBibcode : function(bibcode){
-        
+
         //wipe out the former values, because this new set of data
         // might not have every key
         this.model.clear({silent : true});
@@ -243,7 +247,7 @@ define([
       },
 
       onDisplayDocuments: function (apiQuery) {
-        
+
         //check to see if a query is already in progress (the way bbb is set up, it will be)
         //if so, auto fill with docs initially requested by results widget
         this.mergeStashedDocs(this.getBeeHive().getObject("DocStashController").getDocs());
@@ -287,10 +291,6 @@ define([
         var d, bibcode;
         if (r.response && r.response.docs) {
           _.each(r.response.docs, function (doc) {
-            //add doi link
-            if (doc.doi){
-              doc.doi = {doi: doc.doi,  href: this.adsUrlRedirect("doi", doc.doi)}
-            }
             d = this.model.parse(doc, this.maxAuthors);
             this._docs[d.bibcode] = d;
           }, this);
@@ -309,6 +309,5 @@ define([
 
     });
 
-    _.extend(AbstractWidget.prototype, LinkGeneratorMixin);
     return AbstractWidget;
   });
