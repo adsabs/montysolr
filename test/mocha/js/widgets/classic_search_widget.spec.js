@@ -39,7 +39,7 @@ define([
 
       w.view.$("div[data-field=database]").find("input").attr("checked", true);
       w.view.$("div[data-field=author]").find("textarea").val("Accomazzi,a\rKurtz,M");
-      w.view.$("div[data-field=author]").find("textarea").trigger("keyup");
+      w.view.$("div[data-field=author]").find("textarea").trigger("input");
 
       w.view.$("div[data-field=date]").find("input[name=month_from]").val(10);
       w.view.$("div[data-field=date]").find("input[name=year_from]").val(2010);
@@ -79,7 +79,7 @@ define([
       w.view.render();
 
       w.view.$("div[data-field=author]").find("textarea").val("Accomazzi,a");
-      w.view.$("div[data-field=author]").find("textarea").trigger("keyup");
+      w.view.$("div[data-field=author]").find("textarea").trigger("input");
 
       w.view.$("div[data-field=date]").find("input[name=month_from]").val(10);
       w.view.$("div[data-field=date]").find("input[name=year_from]").val(2010);

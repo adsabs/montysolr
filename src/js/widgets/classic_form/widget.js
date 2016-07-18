@@ -33,11 +33,13 @@ define([
 
     events  : {
         "click button[type=submit]" : "submitForm",
-        "keyup input" : "checkValid",
-        "keyup textarea" : "checkValid"
+        "input input" : "checkValid",
+        "input textarea" : "checkValid",
+
     },
 
     checkValid : function(){
+      debugger
 
       var allVals = this.$("input[type=text], textarea").map(function(){return $(this).val()}).get().join("");
       if (allVals) {
