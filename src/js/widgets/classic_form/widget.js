@@ -39,7 +39,6 @@ define([
     },
 
     checkValid : function(){
-      debugger
 
       var allVals = this.$("input[type=text], textarea").map(function(){return $(this).val()}).get().join("");
       if (allVals) {
@@ -188,7 +187,6 @@ define([
   FormWidget = BaseWidget.extend({
 
     initialize: function (options) {
-
       options = options || {};
       this.view = new FormView();
       this.listenTo(this.view, "submit", this.submitForm);
@@ -200,6 +198,10 @@ define([
     },
 
     onShow : function(){
+      //clear the loading button
+      this.view.$("button[type=submit]").each(function(){
+        $(this).html('<i class="fa fa-search"></i> Search')
+      });
       //set focus to author field
       this.view.$("#classic-author").focus();
     },
@@ -218,7 +220,11 @@ define([
 
       analytics('send', 'event', 'interaction', 'classic-form-submit', JSON.stringify(queryDict));
 
-    }
+    },
+
+    //notify application to keep me around in memory indefinitely
+    //this is so the form and anything the user has entered into it can stay around
+    dontKillMe : true
 
   });
 

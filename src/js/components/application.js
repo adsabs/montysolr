@@ -501,6 +501,8 @@ define([
 
     returnWidget: function(name) {
       var ds = this.__barbarianInstances['widget:' + name];
+      //very rarely, a widget will want to be kept in memory
+      if (ds && ds.parent.dontKillMe) return;
       if (ds) {
         ds.counter--;
         this._killBarbarian('widget:' + name);
