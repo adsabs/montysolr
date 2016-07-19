@@ -21,6 +21,10 @@ define([
     analytics
     ) {
 
+    var genericErrorMessage = 'Our server returned an error.\n' +
+    'For the moment, please try <a href="http://adsabs.harvard.edu/abstract_service.html"> the classic service</a> instead.\n' +
+    'As Bumblebee usage increases, we occasionally have issues with machines getting overwhelmed, although this will become less of a problem we scale up.'
+
     var handlers = {};
 
     handlers[ApiFeedback.CODES.MAKE_SPACE] = function(feedback) {
@@ -38,7 +42,6 @@ define([
         if(this._tmp.callOnce[psk.getId()]) {
           return;
         }
-        this._makeWidgetsSpin([psk.getId()]);
         this._tmp.callOnce[psk.getId()] = true;
       }, this));
     };
@@ -157,7 +160,7 @@ define([
                   self.getPubSub().publish(self.getPubSub().START_SEARCH, apiRequest.get('query'));
                 }, fail: function() {
                   alerts.alert(new ApiFeedback({
-                    msg: "At the moment we can't connect to : " + apiRequest.get('target') + " \n Please try again later.",
+                    msg: genericErrorMessage,
                     modal: true,
                     type: "danger"
                   }));
@@ -166,7 +169,7 @@ define([
               .fail(function() {
                 alerts.alert(new ApiFeedback({
                   code: ApiFeedback.CODES.DANGER,
-                  msg: 'Our API is currently not responding to queries. Please try again later.',
+                  msg: genericErrorMessage,
                   modal: true
                 }));
               });
@@ -243,8 +246,7 @@ define([
 
         alerts.alert(new ApiFeedback({
           code: ApiFeedback.CODES.ALERT,
-          msg: 'Please try again later. \n The server returned an error: <pre class="pre-scrollable">' +
-           JSON.stringify(errorDetails, null, ' ') + '</pre>' ,
+          msg: genericErrorMessage,
           modal: true
         }));
       }
