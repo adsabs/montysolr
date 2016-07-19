@@ -21,9 +21,9 @@ define([
     analytics
     ) {
 
-    var genericErrorMessage = 'Our server returned an error.\n' +
+    var genericErrorMessage = '<b>Our server returned an error.</b>\n' +
     'For the moment, please try <a href="http://adsabs.harvard.edu/abstract_service.html"> the classic service</a> instead.\n' +
-    'As Bumblebee usage increases, we occasionally have issues with machines getting overwhelmed, although this will become less of a problem we scale up.'
+    'As Bumblebee usage increases, our servers occasionally get overwhelmed, although this will become less of a problem as we scale up.'
 
     var handlers = {};
 
