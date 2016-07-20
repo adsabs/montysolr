@@ -215,12 +215,8 @@ define([
           }
         }, this);
 
-        //clean up for hierarchical facets (remove parents)
-        filters.forEach(function(filt){
-          filt.filter_value = filt.filter_value.map(function(facet){
-            return facet.replace(/1\/[^/]+\//, '');
-          });
-        });
+
+
 
         // finally sort them by preference/ remove unknown
         filters = _.sortBy(filters, function(x) {
@@ -261,6 +257,7 @@ define([
        *
        **/
       prepareGUIData: function(filters) {
+
 
         if (this.withoutOperators)
           return this._prepareGUIDataWithoutOperators(filters);
@@ -376,6 +373,8 @@ define([
         while (s.indexOf('(') == 0 && s.indexOf(')') == s.length-1) {
           s = s.substr(1, s.length-2);
         }
+        //remove 0/ and 0/fghfgh1/ for hierarchical facets
+         s = s.replace(/0\/|1\/[^/]+\//, '');
 
         // replace fields
         switch (filter_name) {
