@@ -67,7 +67,7 @@ define([
     serializeClassic : function(){
       var qDict = {q : [], fq: []}, database, pubdateVals, dates, datestring, matchers;
       var pubdateDefaults = {
-        month_from: "00",
+        month_from: "01",
         year_from: "0000",
         month_to:  "12",
         year_to: "9999"
@@ -103,7 +103,7 @@ define([
        });
 
        datestring = "[" + dates[1] + "-" + dates[0] + "-0 TO " + dates[3] + "-" + dates[2] + "-0]";
-       qDict.fq.push("pubdate:" + datestring);
+       qDict.q.push("pubdate:" + datestring);
 
       }
 

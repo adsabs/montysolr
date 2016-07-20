@@ -62,17 +62,18 @@ define([
 
       w.view.$("button[type=submit]").eq(0).click();
 
+
       expect(publishSpy.args[0][2].toJSON()).to.eql({
-      "q": [
-        "property:refereed property:article author:(\"Accomazzi,a\" AND \"Kurtz,M\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj OR mnras)"
-      ],
-      "sort": [
-        "date desc"
-      ],
-      "fq": [
-        "database:(astronomy OR physics) pubdate:[2010-10-0 TO 9999-12-0]"
-      ]
-    });
+          "q": [
+            "property:refereed property:article pubdate:[2010-10-0 TO 9999-12-0] author:(\"Accomazzi,a\" AND \"Kurtz,M\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj OR mnras)"
+          ],
+          "sort": [
+            "date desc"
+          ],
+          "fq": [
+            "database:(astronomy OR physics)"
+          ]
+});
 
       //one more
 
@@ -100,13 +101,13 @@ define([
 
       expect(publishSpy.args[1][2].toJSON()).to.eql({
         "q": [
-          "property:refereed author:(\"Accomazzi,a\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj)"
+          "property:refereed pubdate:[2010-10-0 TO 2012-12-0] author:(\"Accomazzi,a\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj)"
         ],
         "sort": [
           "date desc"
         ],
         "fq": [
-          "database:astronomy pubdate:[2010-10-0 TO 2012-12-0]"
+          "database:astronomy"
         ]
       });
 
