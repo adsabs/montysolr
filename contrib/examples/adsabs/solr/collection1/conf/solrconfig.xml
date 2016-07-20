@@ -426,8 +426,10 @@
                   class="solr.admin.AdminHandlers" />
 
   <requestHandler name="/admin/ping" class="solr.PingRequestHandler">
+    <str name="healthcheckFile">server-enabled.txt</str>
     <lst name="defaults">
-      <str name="q">title:ads</str>
+      <str name="q">*:*</str>
+      <str name="wt">json</str>
     </lst>
   </requestHandler>
 
