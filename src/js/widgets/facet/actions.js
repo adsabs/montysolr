@@ -44,6 +44,13 @@ define([
         num: num
       });
 
+      // was the parent selected while the children already exist?
+      // if so the newly visible facets need to be
+      // selected too given our ~smart hierarchical facet handling~
+      if ( getState().state.selected.indexOf(id) > -1 ) {
+        dispatch( actions.select_facet(id) )
+      }
+
     }.bind(this);
 
   };
