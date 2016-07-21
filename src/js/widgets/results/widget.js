@@ -140,21 +140,14 @@ define([
           q = this.composeQuery(this.defaultQueryArguments, q);
         }
 
-        // remove some stupid cases for highlight query
+        /*
+         right now we're only showing a highlight query if there are no
+         unbounded wildcards (e.g. title:*). This is not ideal bc some queries
+         may be complex and after dropping the wildcard you could still want to
+         highlight things. But, that may need to be fixed on the solr side.
+         */
         var hq = q.get('q')[0];
-        hq = hq.replace(/\b\w+\:\*/g, '');
-        hq = hq.replace(/\*:\*/g, '');
-        hq = hq.trim();
-
-        if (hq == "") {
-          _.each(q.keys(), function(f) {
-            if (f.indexOf('hl.') == 0)
-              q.unset(f);
-          })
-        }
-        else {
-          q.set('hl.q', hq);
-        }
+        if (!hq.match(/\W\*\W/)) q.set('hl.q', hq);
 
         return q;
       },

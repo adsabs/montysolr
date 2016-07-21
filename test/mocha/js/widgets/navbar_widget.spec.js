@@ -312,7 +312,10 @@ define([
       $("form.feedback-form").submit();
 
       expect(requestStub.args[0][0].toJSON().target).to.eql("feedback/slack");
-      expect(JSON.stringify(requestStub.args[0][0].toJSON().options)).to.eql('{"method":"POST","data":"_subject=Bumblebee+Feedback&feedback-type=feedback&_gotcha=&name=&_replyto=&comments=test+comment","dataType":"json"}');
+      expect(requestStub.args[0][0].toJSON().options.dataType).to.eql("json");
+
+      expect(requestStub.args[0][0].toJSON().options.method).to.eql("POST");
+      expect(requestStub.args[0][0].toJSON().options.data.match(/comments=test\+comment/)).to.exist;
 
       setTimeout(function(){
         //form should be emptied
