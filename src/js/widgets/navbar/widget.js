@@ -203,7 +203,7 @@ define([
 
       var data = $form.serialize();
       //record the user agent string
-      data['user-agent-string'] = navigator.userAgent;
+      data +='&user-agent-string='  + encodeURIComponent(navigator.userAgent);
 
       function beforeSend () {
         $form.find("button[type=submit]")
