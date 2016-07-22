@@ -93,7 +93,7 @@ define([
       minsub.publish(minsub.START_SEARCH, minsub.createQuery({'q': 'foo:bar'}));
       setTimeout(function() {
         expect(widget.view.getFormVal()).to.be.eql('foo:bar');
-        expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">841,359</span></b><span class="s-light-font"> results</span>');
+        expect($w.find(".num-found-container").html().trim()).to.eql('841,359');
         done();
       }, 5);
 
@@ -116,7 +116,7 @@ define([
       minsub.publish(minsub.FEEDBACK, feedback);
       setTimeout(function() {
         expect(widget.view.getFormVal()).to.be.eql('fakeQuery');
-        expect($w.find(".s-num-found").html().trim()).to.eql('<span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">0</span></b><span class="s-light-font"> results</span>');
+        expect($w.find(".num-found-container").html().trim()).to.eql('0');
         done();
       }, 5);
 
