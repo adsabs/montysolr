@@ -82,6 +82,10 @@ define([
 
       it("should listen to START_SEARCH and automatically request and render data (with fields augmented by abstract widget)", function (done) {
 
+        /*
+          WILDCARD = NO HL.Q
+         */
+
         var widget = _getWidget();
         widget.foox = 1;
         expect(widget.collection.length).to.eql(0);
@@ -89,40 +93,92 @@ define([
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star isbn:* *:*"}));
         setTimeout(function() {
 
-          expect(widget.model.get('currentQuery').toJSON()).to.eql({
-            "q": [
-              "star isbn:* *:*"
-            ],
-            "hl": [
-              "true"
-            ],
-            "hl.fl": [
-              "title,abstract,body,ack"
-            ],
-            "hl.maxAnalyzedChars": [
-              "150000"
-            ],
-            "hl.requireFieldMatch": [
-              "true"
-            ],
-            "hl.usePhraseHighlighter": [
-              "true"
-            ],
-            "fl": [
-              "title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,links_data,property,email"
-            ],
-            "rows": [
-              25
-            ],
-            "start": [
-              0
-            ],
-            "hl.q": [
-              "star"
-            ]
-          });
 
-          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Clinks_data%2Cproperty%2Cemail&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*%20*%3A*&rows=25&start=0');
+
+          expect(widget.model.get('currentQuery').toJSON()).to.eql({
+              "q": [
+                "star isbn:* *:*"
+              ],
+              "hl": [
+                "true"
+              ],
+              "hl.fl": [
+                "title,abstract,body,ack"
+              ],
+              "hl.maxAnalyzedChars": [
+                "150000"
+              ],
+              "hl.requireFieldMatch": [
+                "true"
+              ],
+              "hl.usePhraseHighlighter": [
+                "true"
+              ],
+              "fl": [
+                "title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,links_data,property,email"
+              ],
+              "rows": [
+                25
+              ],
+              "start": [
+                0
+              ]
+            });
+
+          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Clinks_data%2Cproperty%2Cemail&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*%20*%3A*&rows=25&start=0');
+          expect(widget.collection.length).to.eql(10);
+          done();
+        }, 50);
+      });
+
+
+      it("should listen to START_SEARCH and automatically request and render data (with fields augmented by abstract widget)", function (done) {
+
+        /*
+          NO WILDCARD =  HL.Q
+         */
+
+        var widget = _getWidget();
+        widget.foox = 1;
+        expect(widget.collection.length).to.eql(0);
+        expect(widget.getCurrentQuery().toJSON()).to.eql({});
+        minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
+        setTimeout(function() {
+
+          expect(widget.model.get('currentQuery').toJSON()).to.eql({
+              "q": [
+                "star"
+              ],
+              "hl": [
+                "true"
+              ],
+              "hl.fl": [
+                "title,abstract,body,ack"
+              ],
+              "hl.maxAnalyzedChars": [
+                "150000"
+              ],
+              "hl.requireFieldMatch": [
+                "true"
+              ],
+              "hl.usePhraseHighlighter": [
+                "true"
+              ],
+              "fl": [
+                "title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,links_data,property,email"
+              ],
+              "rows": [
+                25
+              ],
+              "start": [
+                0
+              ],
+              "hl.q": [
+                "star"
+              ]
+            });
+
+          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Clinks_data%2Cproperty%2Cemail&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star&rows=25&start=0');
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
