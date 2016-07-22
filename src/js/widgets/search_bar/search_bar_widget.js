@@ -327,6 +327,16 @@ define([
           this.$(".num-found-container").html(this.formatNum(numFound));
         },
 
+        setCitationCount : function( citationCount, citationSort ){
+          if (!citationSort) {
+            this.$('.search-bar__citation-count').addClass('hidden', true);
+            return;
+          } else {
+            this.$('.search-bar__citation-count').removeClass('hidden');
+            this.$('.citation-count-container').html(this.formatNum(citationCount));
+          }
+      },
+
         onShowForm: function() {
 
           var formVal = this.getFormVal();
@@ -502,10 +512,22 @@ define([
           pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
           pubsub.subscribe(pubsub.NAVIGATE, _.bind(this.focusInput, this));
           this.view.activate(beehive.getHardenedInstance()); // XXX:rca - this sucks
+          pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
+          pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+        },
+
+
+        processResponse : function(apiResponse){
+        if (apiResponse.toJSON().stats){
+          var citationCount = apiResponse.get('stats.stats_fields.citation_count.sum');
+          var citationSort = apiResponse.get('responseHeader.params.sort').match(/citation_count/) ? true : false
+          this.view.setCitationCount(citationCount, citationSort);
+        }
         },
 
         defaultQueryArguments: {
-          //sort: 'date desc',
+          'stats': 'true',
+          'stats.field' : 'citation_count',
           fl: 'id'
         },
 
