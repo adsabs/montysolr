@@ -44,27 +44,37 @@ define([
     }
 
     reducer.facetSelected = function(state, id) {
-      //if it's a hierarchical facet, select all the VISIBLE children (might not be loaded yet)
-      var selected = _.unique(state.state.selected.concat(state.facets[id].children.concat([id])));
-      //or, if all children are selected, but parent is not, select the parent
-      _.forEach(state.facets, function(v, k) {
-        if (!v.children.length) return;
-        if (selected.indexOf(k) > -1) return;
-        var add = true;
-        for (var i = 0; i < v.children.length; i++) {
-          if (selected.indexOf(v.children[i]) == -1) {
-            add = false;
-            break;
-          }
+
+      var visibleChildren = state.facets[id].state.visible;
+      //if it's a hierarchical facet, select all the CURRENTLY VISIBLE children (might not be loaded yet)
+      var selected = _.unique(
+        state.state.selected.concat(
+        state.facets[id].children.slice(0, visibleChildren).concat([id])
+        )
+      );
+
+      //or, if all the visible children are selected, but parent is not, select the parent
+      //first see if you can find a parent
+      var parentId = _.filter(
+        _.pairs(state.facets),
+        function(item) { return (item[1].children.indexOf(id) > -1); }
+      );
+      //if you can, check if all its visible children are selected, and if they are, add it to the
+      // selected array
+      if (parentId.length){
+        parentId = parentId[0][0];
+        var parent =  state.facets[parentId];
+        var mustBeSelected = parent.children.slice(0, parent.state.visible);
+        if ( _.intersection(selected, mustBeSelected).length === mustBeSelected.length ){
+          selected = selected.concat([parentId]);
         }
-        if (add) selected.push(k);
-      });
+      }
 
       return _.assign({}, state, {
         state: _.assign({}, state.state, {
           selected: selected
         })
-      })
+      });
 
     };
 
@@ -80,7 +90,6 @@ define([
     reducer.facetUnselected = function(state, id) {
       var selected = _.without(state.state.selected, id);
       var parent = getParentName(id);
-
 
       //parent can't be selected if not all children are selected
       if (parent) {
@@ -214,7 +223,7 @@ define([
 
         if (state.state.selected.indexOf(id) > -1) {
           //show that these facets are selected
-          var newSelected = _.uniq(state.state.selected.concat(dataIds));
+          var newSelected = _.uniq(state.state.selected.concat(dataIds.slice(0, state.facets[id].state.visible )));
         } else {
           var newSelected = state.state.selected;
         }

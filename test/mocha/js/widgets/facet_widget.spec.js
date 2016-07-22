@@ -628,7 +628,7 @@ define([
         var hierNames = _.range(100).map(function(n, i){
           if (i % 2 !== 0) return 5;
           return '1/Accomazzi, A/' + randomString(12);
-        })
+        });
 
         hierarchicalResponse.facet_counts.facet_fields.author_facet_hier = hierNames;
         widget.store.dispatch(widget.actions.data_received(hierarchicalResponse, '0/Accomazzi, A'));
@@ -656,14 +656,17 @@ define([
         //select the parent (Just 'Alberto, A')
         widget.store.dispatch(widget.actions.select_facet('0/Accomazzi, A'))
 
-          //this should select all the children
-          expect(widget.store.getState().state.selected.length).to.eql(51)
+          //this should select all the ~~VISIBLE~~ children
+          expect(widget.store.getState().facets['0/Accomazzi, A'].state.visible).to.eql(25);
+          expect(widget.store.getState().state.selected.length).to.eql(26)
 
           expect([].slice.apply(document.querySelectorAll('.facet__dropdown label'))
           .map(function(l){return l.textContent})).to.eql([" limit to", " exclude"]);
 
+          // now showing 30 facets
+          widget.store.dispatch(widget.actions.increase_visible('0/Accomazzi, A'));
+
           //now deselect one of the facets
-          //select 2 facets
           Object.keys(widget.store.getState().facets).slice(2,3).forEach(function(id){
               widget.store.dispatch(widget.actions.unselect_facet(id))
           });
