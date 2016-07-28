@@ -171,9 +171,10 @@ define([
        *     }]
        */
       extractFilters: function(apiQuery) {
+
         var data = apiQuery.toJSON();
         var filters = [];
-        if (!data.fq) {
+        if (!data.fq && !apiQuery.get('__qid')) {
           return filters; // nothing to do
         }
 
@@ -216,8 +217,6 @@ define([
         }, this);
 
 
-
-
         // finally sort them by preference/ remove unknown
         filters = _.sortBy(filters, function(x) {
           var ix = _.indexOf(self.knownFilters, x.category);
@@ -225,6 +224,23 @@ define([
             return ix;
           return 1000; // everything else will be together (at the end)
         });
+
+        //add a special bigquery facet
+        //this is a special case since it doesn't represent an fq
+        if (apiQuery.get('__qid')) {
+
+          var bigQueryFilter = {
+              "category": apiQuery.get("__bigquerySource") ?
+               apiQuery.get("__bigquerySource") :
+               "Special Large Query",
+              "filter_name": "bigquery",
+              "filter_query": ""
+              }
+
+          filters.push(bigQueryFilter);
+
+        }
+
         return filters;
       },
 
@@ -257,7 +273,6 @@ define([
        *
        **/
       prepareGUIData: function(filters) {
-
 
         if (this.withoutOperators)
           return this._prepareGUIDataWithoutOperators(filters);
@@ -320,8 +335,19 @@ define([
             value: filter.filter_name + '|category|' + filter.category
           });
 
+          if (filter.filter_name === "bigquery"){
+            oneFilter.push({
+              type: 'operand',
+              display: 'custom filter',
+              value: filter.filter_name + '|control|x',
+              cantDelete : true
+            });
+            guiData.push({elements: oneFilter});
+            return;
+          }
+
           // if there are too many elements (or we're missing data bc we loaded from url), just show one value 'x custom values'
-          if ( !filter.filter_value ||
+          else if ( !filter.filter_value ||
                 filter.filter_value.length-1 > this.maxNumberOfTokens ||
                 filter.filter_value.join(' ').length > this.maxQueryLen
             ) {
@@ -424,6 +450,7 @@ define([
        * Builds a new ApiQuery based on the command we receive from the GUI
        */
       createModifiedQuery: function(value) {
+
         var parts = value.split('|'), c = {};
         c.name = parts[0];
         c.part = parts[1];

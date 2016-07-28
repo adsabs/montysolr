@@ -146,7 +146,17 @@ define(['underscore',
               type : "POST",
               contentType : "application/json",
               done : function(response){
-                that.startSearchCycle( new ApiQuery({q : apiQuery.get("q"), "__qid" : response.qid }), senderKey)
+
+                var newQuery = new ApiQuery({q : apiQuery.get("q"),
+                 "__qid" : response.qid,
+               });
+
+               var bigquerySource = apiQuery.get("__bigquerySource");
+               if ( bigquerySource ){
+                 newQuery.set('__bigquerySource', bigquerySource[0])
+               }
+
+                that.startSearchCycle( newQuery, senderKey )
               },
               fail : function(jqXHR, textStatus, errorThrown){
                 console.warn("bigquery failed:", [].slice.apply(arguments).join(","));

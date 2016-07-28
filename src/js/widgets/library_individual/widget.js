@@ -106,7 +106,7 @@ define([
           console.warn("library widget's updateSubView called without requisite library id and view name in model");
           return
         }
-        
+
         that.view.main.show(new LoadingView());
 
         //create header
@@ -234,7 +234,8 @@ define([
           case "start-search":
                 libController.getLibraryBibcodes(this.model.get("id")).done(function (bibcodes) {
                   var query = new ApiQuery({
-                    __bigquery : bibcodes
+                    __bigquery : bibcodes,
+                    __bigquerySource : 'Library: ' + that.headerModel.get("name")
                   });
                   pubsub.publish(pubsub.START_SEARCH, query);
                 });
