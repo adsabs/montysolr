@@ -277,41 +277,44 @@ solr.version=${solr.version}
         <echo message="Are lucene jars available? ${solr.jars.exist}" level="verbose" />
     </target>
 
+    <!-- copy all useful (for development useful) jars from solr to our project -->
 	<target name="extract-solr-jars" depends="check-solr-jars-exist" unless="solr.jars.exist">
-	    <delete dir="${build.dir}/solrjars-extracted" />
-        <mkdir dir="${build.dir}/solrjars-extracted" />
-        <unzip dest="${build.dir}/solrjars-extracted" overwrite="yes">
-          <fileset dir="${solr.real.location}/dist">
-            <include name="*solr*.war" />
-          </fileset>
-        </unzip>
-        <move todir="${build.dir}/solrjars-extracted">
-          <fileset dir="${build.dir}/solrjars-extracted/WEB-INF/lib">
-            <include name="**/**.jar"/>
-          </fileset>
-        </move>
-        <delete dir="${build.dir}/solrjars-extracted" includeemptydirs="true">
-          <exclude name="**/**.jar"/>
-        </delete>
-    		
-		<copy todir="${build.dir}/solrjars-extracted">
-          <fileset dir="${solr.real.location}/dist">
-            <include name="**/**.jar"/>
-          </fileset>
-        </copy>
-    		
-		<copy todir="${build.dir}/solrjars-extracted" flatten="true">
+		
+		<delete dir="${build.dir}/solrjars-extracted" />
+		
+		<!-- copy lucene jars -->
+		<copy todir="${build.dir}/solrjars-extracted/lucene" flatten="true">
           <fileset dir="${lucene.real.location}/build">
             <include name="**/**.jar"/>
           </fileset>
         </copy>
-		
-		<!-- this is required for running tests (that load jetty) -->
-		<copy todir="${build.dir}/solrjars-extracted/example-lib" flatten="false">
-          <fileset dir="${solr.real.location}/example/lib">
+
+		<!-- copy solr jars -->
+		<copy todir="${build.dir}/solrjars-extracted/solr">
+          <fileset dir="${solr.real.location}/dist">
             <include name="**/**.jar"/>
           </fileset>
         </copy>
+		
+		<!-- copy solr/webapp jars -->
+        <copy todir="${build.dir}/solrjars-extracted/solr">
+          <fileset dir="${solr.real.location}/server/solr-webapp/webapp/WEB-INF/lib">
+            <include name="**/**.jar"/>
+          </fileset>
+        </copy>
+		
+		<!-- copy jetty jars -->
+        <copy todir="${build.dir}/solrjars-extracted/jetty">
+          <fileset dir="${solr.real.location}/server/lib">
+            <include name="**/**.jar"/>
+          </fileset>
+        </copy>
+		
+		<!-- cleanup -->
+		<delete dir="${build.dir}/solrjars-extracted" includeemptydirs="true">
+          <exclude name="**/**.jar"/>
+        </delete>
+		
     </target>
 
 
