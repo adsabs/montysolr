@@ -4,6 +4,7 @@ define([
       'js/widgets/base/base_widget',
       'hbs!./templates/search_bar_template',
       'hbs!./templates/search_form_template',
+      'hbs!./templates/option-dropdown',
       'js/components/query_builder/plugin',
       'js/components/api_request',
       'js/components/api_targets',
@@ -13,7 +14,9 @@ define([
       'bootstrap', // if bootstrap is missing, jQuery events get propagated
       'jquery-ui',
       'js/mixins/dependon',
-      'analytics'
+      'analytics',
+      'select2',
+      'libs/select2/matcher'
     ],
     function (
         Marionette,
@@ -21,6 +24,7 @@ define([
         BaseWidget,
         SearchBarTemplate,
         SearchFormTemplate,
+        OptionDropdownTemplate,
         QueryBuilderPlugin,
         ApiRequest,
         ApiTargets,
@@ -30,7 +34,9 @@ define([
         bootstrap,
         jqueryUI,
         Dependon,
-        analytics
+        analytics,
+        select2,
+        oldMatcher
     ) {
 
       $.fn.getCursorPosition = function() {
@@ -133,7 +139,44 @@ define([
 
         onRender: function () {
 
+          var that = this;
+
           this.$("#search-form-container").append(SearchFormTemplate);
+          /*
+            select
+           */
+          this.$('#option-dropdown-container').append(OptionDropdownTemplate);
+
+        function matchStart (term, text) {
+            if (text.toUpperCase().indexOf(term.toUpperCase()) == 0) { return true; }
+            return false;
+          };
+
+          var $select = this.$(".quick-add-dropdown");
+
+          $select.select2({
+            placeholder: "All Search Terms",
+            matcher: oldMatcher( matchStart )
+          })
+          .on("change", function(e){
+            var val = e.target.value;
+            //prevent infinite loop!
+            if (!val) return;
+            var label = $(this).find("option[value='" + e.target.value + "']").closest("optgroup").attr("label");
+            $select.val(null).trigger('change');
+            setTimeout(function(){
+              that.selectFieldInsert(val, label);
+              //not entirely sure why this timeout is necessary...
+              //without it, focus is moved from the main query bar
+            }, 100);
+          })
+          //this seems to be necessary to show the placeholder on initial render
+          .val(null).trigger('change');
+
+          /*
+            end code for select
+           */
+
           this.$("#search-gui").append(this.queryBuilder.$el);
 
           var $input = this.$("input.q");
@@ -389,6 +432,48 @@ define([
           var startIndex = this.$input.getCursorPosition();
           this._cursorInfo = {selected : selected, startIndex : startIndex};
           this.toggleClear();
+        },
+
+        selectFieldInsert : function(val, label){
+
+          var startIndex = this._cursorInfo.startIndex,
+              selected = this._cursorInfo.selected,
+              currentVal = this.getFormVal(),
+              newVal, specialCharacter;
+
+          //selected will be "" if user didn't highlight any text
+          //newVal = df + ":\"" + selected + "\"";
+          //
+          switch (label) {
+            case 'fields':
+                newVal = val + ":\"" + selected + "\"";
+              break;
+            case 'operators':
+                newVal = val + "(" + selected + ")";
+              break;
+            case 'special characters':
+              if (val === '=') {
+                newVal = val + selected;
+              } else {
+                newVal = selected + val;
+              }
+              specialCharacter = true;
+              break;
+          }
+
+          if (selected) {
+            this.setFormVal(currentVal.substr(0, startIndex) +  newVal + currentVal.substr(startIndex + selected.length));
+          }
+          else { //append to the end
+            var newString = currentVal ?  (currentVal + " " + newVal) : newVal;
+            this.setFormVal( newString );
+            if (specialCharacter){
+              this.$input.selectRange( newString.length );
+            }
+            else {
+              this.$input.selectRange( newString.length -1);
+            }
+          }
         },
 
         fieldInsert: function (e) {

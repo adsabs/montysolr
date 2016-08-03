@@ -243,3 +243,18 @@ input.q {
   }
 
 }
+
+#option-dropdown-container .select2 {
+  min-width : 200px;
+  width: 25%;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #4080e4;
+}
+
+.s-landing-page-layout {
+  .select2-container--default .select2-selection--single .select2-selection__placeholder {
+      font-size: 16px;
+  }
+}
