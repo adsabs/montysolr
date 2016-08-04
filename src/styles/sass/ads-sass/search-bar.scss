@@ -258,3 +258,8 @@ input.q {
       font-size: 16px;
   }
 }
+
+//to improve scroll interaction
+.select2-container--default .select2-results > .select2-results__options {
+    padding-bottom: 50px;
+}
