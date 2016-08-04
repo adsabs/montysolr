@@ -1,19 +1,24 @@
 ABOUT MONTYSOLR
 ===============
 
-MontySolr is an open-source distribution of Solr (http://lucene.apache.org/solr)
+MontySolr is search engine behind Astrophysics Data System (ADS 2.0) - 
+"the world's most complete collection of scholarly content in the physical sciences" - 
+http://labs.adsabs.harvard.edu/adsabs/page/help/ADSinfo. It is built on top
+of Solr (http://lucene.apache.org/solr) but it is not a fork. New features
+are added as extensions. You can use MontySolr's infrastructure to add new
+features to SOLR without creating duplicates.
 
-It is the search engine behind Astrophysics Data System (ADS 2.0) - "the world's most complete collection of 
-scholarly content in the physical sciences" - http://labs.adsabs.harvard.edu/adsabs/page/help/ADSinfo
+So what is here:
 
-It features:
-
-  - very powerful query parser (equivalent of which you won't find anywhere else)
-  - second order queries (operators): extensive citation search
+  - extremely powerful query parser (equivalent of which you won't find anywhere else)
+  - second order queries (operators): analytical query operations
   - batch processing for long-running tasks
   - bitset queries (to search/analyze millions of docs by sending their IDs)
   - author name disambiguation
-  - and much more, I'm lazy to type...
+  - extensive tokenization rules
+  - multi-synonym parsing and expansion
+  - support for Jython business logic
+  - and of course: the whole configuration of the ADS search engine
   
   
 In the past MontySolr combined Java with extensions written in C++/Python but now 
@@ -24,7 +29,7 @@ that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014
 INSTALLATION
 ============
 
-You will need Java JDK (version 7), and 'ant' (v1.8 and newer) 
+You will need Java JDK (version 7 and higher), and 'ant' (v1.8 and newer) 
 
 ```bash
 
