@@ -1,12 +1,11 @@
 ABOUT MONTYSOLR
 ===============
 
-MontySolr is search engine behind Astrophysics Data System (ADS 2.0) - 
+MontySolr is the search engine behind Astrophysics Data System (ADS 2.0) - 
 "the world's most complete collection of scholarly content in the physical sciences" - 
-http://labs.adsabs.harvard.edu/adsabs/page/help/ADSinfo. It is built on top
-of Solr (http://lucene.apache.org/solr) but it is not a fork. New features
-are added as extensions. You can use MontySolr's infrastructure to add new
-features to SOLR without creating duplicates.
+http://ads.harvard.edu/. It is built on top of SOLR (http://lucene.apache.org/solr) 
+but it is not a fork. New features are added as extensions. You can use MontySolr's 
+infrastructure to add new functionality or test patches without duplicating code.
 
 So what is here:
 
