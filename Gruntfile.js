@@ -449,6 +449,13 @@ module.exports = function(grunt) {
             expand: true,
             flatten: true
           },
+          {
+            src: ['bower_components/select2/**/*.js'],
+            dest: 'src/libs/select2/',
+            expand: true,
+            flatten : true
+          },
+
 
 
         ]
