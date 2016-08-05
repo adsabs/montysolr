@@ -8,6 +8,12 @@
   width: 100%;
   height: 60px;
   padding-top: 10px;
+
+  //hide citation count if it's there
+.search-bar__citation-count {
+  display: none;
+}
+
 }
 
 
@@ -114,12 +120,12 @@
 #field-options {
   position: relative;
   left: 1.5%;
-  visibility: hidden;
+  overflow: hidden;
+  max-height: 37px;
+}
 
-  @media screen and (min-width:$screen-sm-min) {
-    visibility: visible;
- }
-
+#results-page-layout #field-options {
+  max-height: 32px;
 }
 
 .s-field-options {
@@ -245,7 +251,7 @@ input.q {
 }
 
 #option-dropdown-container .select2 {
-  min-width : 200px;
+  min-width : 180px;
   width: 25%;
 }
 
