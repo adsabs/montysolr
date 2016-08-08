@@ -68,9 +68,13 @@ define(['marionette',
     },
 
     handleFeedback: function (feedback) {
-      if (feedback.code === ApiFeedback.CODES.SEARCH_CYCLE_STARTED) {
-        this.setCurrentQuery(feedback.query);
-        this.model.set("sort", this.extractSort(feedback.query.get("sort")[0]))
+      if (feedback.code === ApiFeedback.CODES.SEARCH_CYCLE_STARTED ) {
+        try {
+          this.setCurrentQuery(feedback.query);
+          this.model.set("sort", this.extractSort(feedback.query.get("sort")[0]))
+        } catch (e) {
+          console.warn('sort widget could not detect any query sort')
+        }
       }
     }
 

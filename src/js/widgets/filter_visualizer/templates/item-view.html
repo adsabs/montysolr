@@ -8,10 +8,8 @@
     {{else}}
 
             <span class="filter-{{this.type}}">{{this.display}}</span>
-            {{#unless this.cantDelete}}
               <button class="btn btn-xs filter-{{this.type}}-remove" value="{{this.value}}" title="remove this filter">
                 <i class="fa fa-remove"></i></button>
-            {{/unless}}
 
         {{/compare}}
 
