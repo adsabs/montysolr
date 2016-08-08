@@ -155,6 +155,9 @@ define(['underscore',
                if ( bigquerySource ){
                  newQuery.set('__bigquerySource', bigquerySource[0])
                }
+               if ( apiQuery.get('sort') ){
+                 newQuery.set('sort', apiQuery.get('sort') )
+               }
 
                 that.startSearchCycle( newQuery, senderKey )
               },
@@ -173,10 +176,7 @@ define(['underscore',
           this.getBeeHive().getService("Api").request(request);
 
         }
-        // pre-existing big query--maybe from faceting or url load
-        else if (apiQuery.get("__qid")){
-          this.startSearchCycle.apply(this, arguments);
-        }
+
         // check if this is an "object:" query
         else if (apiQuery.get("q")[0].indexOf("object:") > -1) {
           // we have an "object:" query as part of the query
@@ -203,6 +203,20 @@ define(['underscore',
         //we have to clear selected records in app storage here too
         if ( this.getBeeHive().getObject("AppStorage")){
           this.getBeeHive().getObject("AppStorage").clearSelectedPapers();
+        }
+
+        /*
+          if it's a pre-existing bigquery NOT supplanted by another bigquery,
+          and not forcibly clearing the current bigquery, then
+          keep it and just augment it rather than losing the bigquery
+          this is so that users can add q parameters to bigqueries, e.g. library exports
+         */
+        if (this.mostRecentQuery.get('__qid') &&
+         !apiQuery.get('__qid') &&
+         !apiQuery.get('__clearBiqQuery')
+       ){
+          this.mostRecentQuery.set('q', apiQuery.get('q'));
+          apiQuery = this.mostRecentQuery;
         }
 
         this.mostRecentQuery = apiQuery;

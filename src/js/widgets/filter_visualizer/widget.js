@@ -340,7 +340,6 @@ define([
               type: 'operand',
               display: 'custom filter',
               value: filter.filter_name + '|control|x',
-              cantDelete : true
             });
             guiData.push({elements: oneFilter});
             return;
@@ -523,10 +522,20 @@ define([
        * that back views
        */
       onFilterEvent: function(node, value) {
-        var newQuery = this.createModifiedQuery(value);
+        //remove a bigquery
+        if (value === 'bigquery|control|x' ){
+          var newQuery = new ApiQuery({
+            q : '*',
+            '__clearBiqQuery' : 'true'
+          });
+        } else {
+          var newQuery = this.createModifiedQuery(value);
+        }
+
         var ps = this.getBeeHive().getService('PubSub');
         if (ps)
           ps.publish(ps.START_SEARCH, newQuery);
+
       }
 
     });

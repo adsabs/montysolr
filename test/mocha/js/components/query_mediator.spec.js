@@ -191,33 +191,39 @@ define([
 
       });
 
-      it("should be able to take a qid from url-supplied apiQuery and start the search cycle", function(){
+      it("should simply add q parameters to a bigquery if the bigquery is not overridden", function(){
 
-        var qm = new QueryMediator();
-        qm.activate(beehive, {getPskOfPluginOrWidget: function() {}});
+        var qm =  createTestQM().qm;
 
-        var q = new ApiQuery({
-          __qid : "fakeQID",
-          q : "foo",
-          fq : "boo"
-        });
+        var publishSpy = sinon.spy(qm.getPubSub(), "publish");
 
-        var startSearchCycle = sinon.stub(qm, "startSearchCycle");
-        qm.getQueryAndStartSearchCycle(q, "fakeKey");
+        //as if previous query was a bigquery
+        qm.mostRecentQuery= new ApiQuery({
+            "q": [
+              "*:*"
+            ],
+            "__qid": [
+              "fakeQueryID"
+            ]
+          });
 
-        expect(startSearchCycle.args[0][0].toJSON()).to.eql({
-          "__qid": [
-            "fakeQID"
-          ],
-          "q": [
-            "foo"
-          ],
-          "fq": [
-            "boo"
-          ]
-        });
+        qm.startSearchCycle( new ApiQuery({
+          q : 'star'
+        }), {getId : function(){ return 1 }});
 
-        qm.startSearchCycle.restore();
+        expect(publishSpy.args[0][0]).to.eql("[PubSub]-Inviting-Request");
+
+        //it has just augmented the query with a new q parameter
+        expect(publishSpy.args[0][1].toJSON()).to.eql(
+          {
+            "q": [
+              "star"
+            ],
+            "__qid": [
+              "fakeQueryID"
+            ]
+          }
+        );
 
       });
 
@@ -583,7 +589,7 @@ define([
         var x = createTestQM();
         var qm = x.qm, key1 = x.key1, key2 = x.key2, req1 = x.req1, req2 = x.req2;
         qm.activateCache();
-        
+
         var rk = qm._getCacheKey(req1);
 
         qm._executeRequest(req1, key1);
@@ -761,5 +767,3 @@ define([
           "title":["<em>Star</em> Streams"]}}}';
 
 });
-
-

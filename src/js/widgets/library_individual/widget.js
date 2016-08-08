@@ -235,7 +235,8 @@ define([
                 libController.getLibraryBibcodes(this.model.get("id")).done(function (bibcodes) {
                   var query = new ApiQuery({
                     __bigquery : bibcodes,
-                    __bigquerySource : 'Library: ' + that.headerModel.get("name")
+                    __bigquerySource : 'Library: ' + that.headerModel.get("name"),
+                    // sort : 'date desc'
                   });
                   pubsub.publish(pubsub.START_SEARCH, query);
                 });

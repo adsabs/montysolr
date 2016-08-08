@@ -21,10 +21,6 @@ define([
       var minsub;
 
       beforeEach(function (done) {
-        var ta = $('#test');
-        if (ta) {
-          ta.empty();
-        }
         minsub = new (MinSub.extend({
           request: function(apiRequest) {
             console.log('called')
@@ -33,6 +29,10 @@ define([
         }))({verbose: false});
         done();
       });
+
+      afterEach(function(){
+        $("#test").empty()
+      })
 
       it("returns FilterVisualizer object", function () {
         expect(new FilterVisualizerWidget()).to.be.instanceof(FilterVisualizerWidget);
@@ -181,7 +181,7 @@ define([
         filters = widget.extractFilters(q);
         expect(filters[0]).to.eql({
           category: 'Author',
-          filter_name: 'fq_author', 
+          filter_name: 'fq_author',
           filter_query: "(author_facet_hier:\"0/Wang, J\")",
           filter_key: '__author_facet_hier_fq_author',
           filter_value: ["AND","author_facet_hier:\"0/Wang, J\""]
@@ -543,6 +543,59 @@ define([
         expect(widget.beautifyOperand('fq_data_facet', 'data_facet:foo')).to.eql('foo');
         expect(widget.beautifyOperand('fq_vizier_facet', 'vizier_facet:foo')).to.eql('foo');
         expect(widget.beautifyOperand('fq_grant', 'grant:foo')).to.eql('foo');
+      });
+
+      it("handles bigquery as a filter special case", function(){
+
+        var widget = new FilterVisualizerWidget();
+        widget.activate(minsub.beehive.getHardenedInstance());
+        var $w = $(widget.render());
+
+        $('#test').append($w);
+
+          widget.processFeedback(minsub.createFeedback({
+                  code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
+                  numFound: 100,
+                  query: minsub.createQuery({
+                    "q": [
+                      "*:*"
+                    ],
+                    "__qid": [
+                      "bd07de928f0066253af7528336acaf4a"
+                    ],
+                    "__bigquerySource": [
+                      "Library: Papers by Alberto Accomazzi"
+                    ]
+                  })
+                })
+              );
+
+        expect($("span.filter-topic-group").length).to.eql(1);
+        expect($("span.filter-topic-group h5").text()).to.eql('Library: Papers by Alberto Accomazzi');
+
+        var publishSpy = sinon.spy();
+
+        widget.getBeeHive = function(){
+          return {
+            getService : function(){
+              return {
+                publish : publishSpy
+              }
+            }
+          }
+        }
+
+        $("button.filter-operand-remove").click();
+
+        expect(publishSpy.args[0][1].toJSON()).to.eql({
+          "q": [
+            "*"
+          ],
+          "__clearBiqQuery": [
+            "true"
+          ]
+        });
+
       });
 
     });
