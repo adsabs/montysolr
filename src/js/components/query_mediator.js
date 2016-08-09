@@ -135,7 +135,7 @@ define(['underscore',
           //don't need this anymore
           apiQuery.unset("__bigquery");
           //query might have a q, otherwise q is everything
-          if (!apiQuery.get("q")) apiQuery.set("q", "*");
+          if (!apiQuery.get("q")) apiQuery.set("q", "*:*");
           //bigquery endpoint needs this value set
           apiQuery.add("fq", "{!bitset}");
 
