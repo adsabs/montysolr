@@ -74,7 +74,7 @@ public class AqpLuceneQParser extends QParser {
 		
 		// now configure the parser using the request params, likely incomplete (yet)
 		QueryConfigHandler config = qParser.getQueryConfigHandler();
-		qParser.setAnalyzer(schema.getAnalyzer());
+		qParser.setAnalyzer(schema.getQueryAnalyzer()); //CHECK: this used to be getAnalyzer(); potentially dangerous
 		qParser.setDefaultField(params.get(CommonParams.DF, qParser.getDefaultField()));
 		
 		String opParam = getParam(QueryParsing.OP);

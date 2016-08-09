@@ -35,7 +35,7 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 
   public void testBooleanQuery() throws Exception {
 
-    WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+    WhitespaceAnalyzer analyzer = new WhitespaceAnalyzer();
 
     AqpQueryParser qp = getParser(analyzer);
 
@@ -226,7 +226,7 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 
     BooleanQuery.setMaxClauseCount(2);
     try {
-      qp = getParser(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+      qp = getParser(new WhitespaceAnalyzer());
 
       qp.parse("one two three", "field");
       fail("ParseException expected due to too many boolean clauses");

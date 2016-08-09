@@ -11,7 +11,7 @@
 	<classpathentry kind="con" path="build/solr-download/apache-solr-4.0.0-SVN/org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-common-6.1.0-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-common-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-common-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-icu-6.1.0-SNAPSHOT-javadoc.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-icu-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-kuromoji-6.1.0-SNAPSHOT-javadoc.jar"/>
@@ -35,7 +35,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-codecs-6.1.0-SNAPSHOT-javadoc.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-codecs-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-core-6.1.0-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-core-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-core-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-demo-6.1.0-SNAPSHOT-javadoc.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-demo-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-expressions-6.1.0-SNAPSHOT-javadoc.jar"/>
@@ -69,7 +69,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-suggest-6.1.0-SNAPSHOT-javadoc.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-suggest-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-test-framework-6.1.0-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-test-framework-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-test-framework-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/ant-1.8.2.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit-4.10.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit4-ant-2.3.4.jar"/>
@@ -129,7 +129,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-analytics-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-cell-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-clustering-6.1.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-core-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-core-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/solr"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-dataimporthandler-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-dataimporthandler-extras-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-langid-6.1.0-SNAPSHOT.jar"/>

@@ -101,7 +101,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 
   public AqpQueryParser getParser(Analyzer a) throws Exception {
     if (a == null)
-      a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
+      a = new SimpleAnalyzer();
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(a);
     return qp;
@@ -222,7 +222,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 
   public Query getQueryDOA(String query, Analyzer a) throws Exception {
     if (a == null)
-      a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
+      a = new SimpleAnalyzer();
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(a);
     qp.setDefaultOperator(Operator.AND);
@@ -301,12 +301,12 @@ public class AqpTestAbstractCase extends LuceneTestCase {
       e.printStackTrace();
       throw new QueryNodeException(e);
     }
-    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    qp.setAnalyzer(new WhitespaceAnalyzer());
     // qp.setLocale(Locale.ENGLISH);
     qp.setDateResolution(DateTools.Resolution.DAY);
 
     Query q = qp.parse(query, "date");
-    ScoreDoc[] hits = is.search(q, null, 1000).scoreDocs;
+    ScoreDoc[] hits = is.search(q, 1000).scoreDocs;
     assertEquals(expected, hits.length);
   }
 
@@ -450,8 +450,8 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 
     /** Filters MockTokenizer with StopFilter. */
     @Override
-    public final TokenStreamComponents createComponents(String fieldName, Reader reader) {
-      Tokenizer tokenizer = new MockTokenizer(reader, MockTokenizer.SIMPLE, true);
+    public final TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer tokenizer = new MockTokenizer(MockTokenizer.SIMPLE, true);
       return new TokenStreamComponents(tokenizer, new QPTestFilter(tokenizer));
     }
   }

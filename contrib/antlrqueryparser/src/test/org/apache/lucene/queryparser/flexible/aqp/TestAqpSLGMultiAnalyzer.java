@@ -155,9 +155,8 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   private class MultiAnalyzer extends Analyzer {
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName,
-        Reader reader) {
-      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE,
+    public TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer result = new MockTokenizer(MockTokenizer.WHITESPACE,
           true);
       return new TokenStreamComponents(result, new TestFilter(result));
     }
@@ -224,9 +223,9 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   private class PosIncrementAnalyzer extends Analyzer {
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName,
-        Reader reader) {
-      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE,
+    public TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer result = new MockTokenizer(
+          MockTokenizer.WHITESPACE,
           true);
       return new TokenStreamComponents(result, new TestPosIncrementFilter(
           result));

@@ -15,6 +15,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
@@ -93,8 +94,13 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
         Object obj = child.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
         if (obj != null) {
         	SpanQuery result = converter.getSpanQuery(new SpanConverterContainer((Query) obj, nearNode.getSlop(), nearNode.getInOrder()));
-        	result.setBoost(((Query) obj).getBoost());
           clauses[i++] = result;
+          
+          //TODO: v6 - boost is gone, have to move it converter
+          //if (obj instanceof BoostQuery) {
+          //  result = new BoostQuery(result, ((BoostQuery) obj).getBoost());
+          //}
+          
         } else {
           throw new QueryNodeException(new MessageImpl(
               QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
