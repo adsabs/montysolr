@@ -58,7 +58,7 @@ define([
         this.setBeeHive(beehive.getHardenedInstance())
         pubsub = this.getBeeHive().getService('PubSub');
 
-        pubsub.subscribe(pubsub.START_SEARCH, _.bind(this.updateCurrentQuery, this));
+        pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.updateCurrentQuery, this));
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
 
         /*
@@ -161,13 +161,13 @@ define([
         var deferred = $.Deferred(), that = this;
 
         if (options.bibcodes == "all"){
-
           var limit = options.limit || 2000,
               start = 0,
               rows = 100,
               bibcodes = [];
 
           var q = this._currentQuery.clone();
+          q.unlock();
               q.set("rows", 100);
               q.set("fl", "bibcode");
 
