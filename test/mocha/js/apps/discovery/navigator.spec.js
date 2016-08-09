@@ -84,7 +84,6 @@ define([
           else if (obj === "LibraryController"){
             return {
               getLibraryBibcodes : function(){
-                debugger
                 return ["1", "2", "3"]
               }
             }
