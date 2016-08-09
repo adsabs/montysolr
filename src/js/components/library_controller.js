@@ -304,7 +304,8 @@ define([
 
         var deferred = $.Deferred(),
             that = this,
-            maxReturned = 3000;
+            //hard limit, no more than 10,000 records can be exported to search results page
+            maxReturned = 10000;
 
         //we already have it in the cache, so just resolve + return promise
         if (this._libraryBibcodeCache[id]) {
