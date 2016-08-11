@@ -79,7 +79,9 @@ define([
         // b) modifying phrases and/or operators
 
         var newQuery = q.clone();
-        var msg = 'Your query returned 0 results: <a href="#" id="query-assistant">you can use this tool to build a new query.</a>';
+        var msg =  'Your query returned 0 results.&nbsp;<b><a href="#">&nbsp;&nbsp;Try looking at the search examples on the home page</a></b> ' +
+          ' or <b><a href="https://adsabs.github.io/help/search/search-syntax" target="_blank">reading our help page</a>.</b>';
+
         this.getAlerter().alert(new ApiFeedback({
           type: Alerts.TYPE.ALERT,
           msg: msg,
@@ -197,7 +199,9 @@ define([
             }
 
             alerts.alert(new ApiFeedback({
-              msg: (msg || 'There is something wrong with the query,') + ' <a id="query-assistant">please use this tool to fix it.</a>',
+              msg: (msg || 'There is something wrong with the query:') +
+              '<b><a href="#">&nbsp;&nbsp;Try looking at the search examples on the home page</a></b> ' +
+              ' or <b><a href="https://adsabs.github.io/help/search/search-syntax" target="_blank">reading our help page</a>.</b>',
               events: {
                 'click a#query-assistant': 'query-assistant'
               }
