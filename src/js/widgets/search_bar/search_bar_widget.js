@@ -350,7 +350,7 @@ define([
             //this is not exact (might have experimented then closed the builder)
             this._queryBuilderUsed = true;
           },
-          'click .bigquery-close .bigquery-tag' : 'clearBigquery'
+          'click .bigquery-close' : 'clearBigquery'
         },
 
         toggleClear : function(){

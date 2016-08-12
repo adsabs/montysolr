@@ -278,8 +278,11 @@ input.hasbigquery {
   position: absolute;
   top: 8px;
   z-index: 4;
-  left: 110px;
   width: 145px;
+  left: 10px;
+  @media (min-width: $screen-sm-min ){
+    left: 110px;
+  }
 }
 
 .bigquery-tag span {
