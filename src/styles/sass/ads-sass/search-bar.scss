@@ -103,7 +103,7 @@
   cursor: pointer;
 
   @media(min-width: $screen-sm-min) {
-    right: 12%;
+    right: 8%;
   }
 
   @media(min-width: $screen-lg-min){
@@ -169,6 +169,10 @@
 
 input.q {
   font-size: 16px;
+}
+
+input.hasbigquery {
+  padding-left: 160px;
 }
 
 .only-show-on-landing {
@@ -268,4 +272,29 @@ input.q {
 //to improve scroll interaction
 .select2-container--default .select2-results > .select2-results__options {
     padding-bottom: 50px;
+}
+
+.bigquery-tag {
+  position: absolute;
+  top: 8px;
+  z-index: 4;
+  left: 110px;
+  width: 145px;
+}
+
+.bigquery-tag span {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.bigquery-close {
+  float: right;
+  padding-top: 4px;
+  transition: color .5s;
+  &:hover {
+    color: red
+  }
 }

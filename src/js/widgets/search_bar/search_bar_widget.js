@@ -104,15 +104,21 @@ define([
         return toReturn;
       };
 
+      var SearchBarModel = Backbone.Model.extend({
+          defaults : function(){
+            return {
+              citationCount : undefined,
+              numFound : undefined,
+              bigquery : false,
+              bigquerySource : undefined
+
+            }
+          }
+      });
 
       var SearchBarView = Marionette.ItemView.extend({
 
         template: SearchBarTemplate,
-
-        render : function(){
-          return Marionette.ItemView.prototype.render.apply(this, arguments);
-          this.render = function(){ return this}
-        },
 
         className : "s-search-bar-widget",
 
@@ -135,6 +141,10 @@ define([
             var newQuery = this.queryBuilder.getQuery();
             this.setFormVal(newQuery);
           }
+        },
+
+        modelEvents : {
+          'change' : 'render'
         },
 
         onRender: function () {
@@ -339,7 +349,8 @@ define([
             //for analytics
             //this is not exact (might have experimented then closed the builder)
             this._queryBuilderUsed = true;
-          }
+          },
+          'click .bigquery-close .bigquery-tag' : 'clearBigquery'
         },
 
         toggleClear : function(){
@@ -362,23 +373,27 @@ define([
         },
 
         setFormVal: function(v) {
-          this.$(".q").val(v);
+          /*
+            bigquery special case: don't show the confusing *:*, just empty bar
+           */
+         if ( this.model.get('bigquery') && v === '*:*' ) {
+           this.$(".q").val('');
+         } else {
+           this.$(".q").val(v);
+         }
           this.toggleClear();
         },
 
-        setNumFound : function(numFound){
-          this.$(".num-found-container").html(this.formatNum(numFound));
-        },
-
-        setCitationCount : function( citationCount, citationSort ){
-          if (!citationSort) {
-            this.$('.search-bar__citation-count').addClass('hidden', true);
-            return;
-          } else {
-            this.$('.search-bar__citation-count').removeClass('hidden');
-            this.$('.citation-count-container').html(this.formatNum(citationCount));
+        serializeData : function(){
+          var j = this.model.toJSON();
+          j.numFound = j.numFound ?  this.formatNum(j.numFound) : 0;
+          if (this.model.get("bigquerySource")){
+            if ( this.model.get('bigquerySource').match(/library/i) ){
+              this.model.set({libraryName : this.model.get('bigquerySource').match(/library:(.*)/i)[1]});
+            }
           }
-      },
+          return j;
+        },
 
         onShowForm: function() {
 
@@ -548,7 +563,16 @@ define([
 //          // store the query in case it gets changed (which happens when there is an object query)
           this.original_query = query;
 
-          this.trigger("start_search", query);
+          //if we're within a bigquery, translate an empty query to "*:*"
+          if (!query && this.model.get('bigquery')){
+            query = '*:*';
+          }
+
+          var newQuery = new ApiQuery({
+            q: query
+          });
+
+          this.trigger("start_search", newQuery);
 
           //let analytics know what type of query it was
           fields = _.chain(autocompleteArray)
@@ -582,12 +606,42 @@ define([
 
           //reset
           this._queryBuilderUsed = false;
+        },
+
+        clearBigquery : function(){
+          var newQuery = new ApiQuery({
+            q: "*:*",
+            '__clearBiqQuery' : 'true'
+          });
+          this.trigger("start_search", newQuery );
         }
       });
 
       _.extend(SearchBarView.prototype, FormatMixin, Dependon.BeeHive);
 
       var SearchBarWidget = BaseWidget.extend({
+
+        initialize: function (options) {
+
+          this.model = new SearchBarModel();
+
+          this.view = new SearchBarView({model : this.model});
+
+          this.listenTo(this.view, "start_search", function (query) {
+            this.changeDefaultSort(query);
+            this.navigate(query);
+          });
+
+          this.listenTo(this.view, "render", function () {
+            var query = this.getCurrentQuery().get("q");
+            if (query){
+                this.view.setFormVal(query);
+            }
+            this.view.toggleClear();
+          });
+
+          BaseWidget.prototype.initialize.call(this, options)
+        },
 
         activate: function (beehive) {
           this.setBeeHive(beehive);
@@ -596,18 +650,18 @@ define([
           // search widget doesn't need to execute queries (but it needs to listen to them)
           pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.handleFeedback, this));
           pubsub.subscribe(pubsub.NAVIGATE, _.bind(this.focusInput, this));
-          this.view.activate(beehive.getHardenedInstance()); // XXX:rca - this sucks
+          this.view.activate(beehive.getHardenedInstance());
           pubsub.subscribe(pubsub.INVITING_REQUEST, this.dispatchRequest);
           pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
         },
 
-
         processResponse : function(apiResponse){
-        if (apiResponse.toJSON().stats){
-          var citationCount = apiResponse.get('stats.stats_fields.citation_count.sum');
-          var citationSort = apiResponse.get('responseHeader.params.sort').match(/citation_count/) ? true : false
-          this.view.setCitationCount(citationCount, citationSort);
-        }
+          if ( apiResponse.toJSON().stats && apiResponse.get('responseHeader.params').sort ){
+            var citationCount = apiResponse.get('stats.stats_fields.citation_count.sum');
+            var citationSort = apiResponse.get('responseHeader.params.sort').match(/citation_count/) ? true : false;
+            citationCount = citationSort ? citationCount : undefined;
+            this.model.set({citationCount : citationCount });
+          }
         },
 
         defaultQueryArguments: {
@@ -629,39 +683,23 @@ define([
 
         handleFeedback: function(feedback) {
 
-          if (feedback.code === ApiFeedback.CODES.SEARCH_CYCLE_STARTED || feedback.code ===  ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START ) {
+          if (feedback.code === ApiFeedback.CODES.SEARCH_CYCLE_STARTED ||
+            feedback.code ===  ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START ) {
 
             var query = feedback.query ? feedback.query : feedback.request.get("query");
             var newq = query.get("__original_query") ? query.get("__original_query")[0] : query.get("q").join(" ");
 
-            this.setCurrentQuery(feedback.query);
+            this.setCurrentQuery(query);
+
+            this.model.set({
+                  bigquerySource : query.get('__bigquerySource') ?  query.get('__bigquerySource')[0] : 'Bulk query',
+                  bigquery : query.get('__qid') ? true : false,
+                  numFound: feedback.numFound
+              });
+
+
             this.view.setFormVal(newq);
-            this.view.setNumFound(feedback.numFound || 0);
           }
-
-        },
-
-        initialize: function (options) {
-
-          this.currentQuery = undefined;
-          this.view = new SearchBarView();
-          this.listenTo(this.view, "start_search", function (query) {
-            var newQuery = new ApiQuery({
-              q: query
-            });
-
-            this.changeDefaultSort(newQuery);
-            this.navigate(newQuery);
-          });
-
-          this.listenTo(this.view, "render", function () {
-            var query = this.getCurrentQuery().get("q");
-            if (query) this.view.setFormVal(query);
-            this.view.toggleClear();
-
-          });
-
-          BaseWidget.prototype.initialize.call(this, options)
         },
 
         changeDefaultSort : function(query) {
@@ -693,6 +731,7 @@ define([
         },
 
         navigate: function (newQuery) {
+
           this.getPubSub().publish(this.getPubSub().START_SEARCH, newQuery);
         },
 

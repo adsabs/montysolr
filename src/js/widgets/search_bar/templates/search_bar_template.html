@@ -38,9 +38,20 @@
                         </div>
                         <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
                     </div>
-                    <input type="text" class="form-control q" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search"
+                    {{#if bigquery}}
+                      {{#if libraryName}}
+                      <button class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-book"/>&nbsp;<span>{{libraryName}}</span>&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></button>
+                        {{else}}
+                        <button class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-list-ul"/>&nbsp;&nbsp;Bulk query&nbsp;&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></button>
+                    {{/if}}
+                    <input type="text" class="form-control q hasbigquery" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search"
                            autocomplete="off" value={{currentQueryVal}}>
                     <i class="icon-clear s-clear-control"></i>
+                    {{else}}
+                        <input type="text" class="form-control q" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search"
+                               autocomplete="off" value={{currentQueryVal}}>
+                        <i class="icon-clear s-clear-control"></i>
+                    {{/if}}
                   <span class="input-group-btn">
                        <button type="submit" class="btn btn-primary search-submit s-search-submit" aria-label="submit">
                            <i class="fa fa-search"></i></button>
@@ -94,10 +105,12 @@
     </div>
 
     <div class="s-num-found">
-        <span class="s-light-font description">Your search returned</span> <b><span class="num-found-container"></span></b><span
+        <span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">{{numFound}}</span></b><span
             class="s-light-font"> results</span>
-            <span class="search-bar__citation-count hidden"> with <b><span class="citation-count-container"></span></b>
-            <span class="s-light-font description">total citations</span>
+            {{#if citationCount}}
+              <span class="search-bar__citation-count"> with <b><span class="citation-count-container">{{citationCount}}</span></b>
+              <span class="s-light-font description">total citations</span>
+          {{/if}}
           </span>
     </div>
 </div>

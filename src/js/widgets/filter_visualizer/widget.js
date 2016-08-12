@@ -225,22 +225,6 @@ define([
           return 1000; // everything else will be together (at the end)
         });
 
-        //add a special bigquery facet
-        //this is a special case since it doesn't represent an fq
-        if (apiQuery.get('__qid')) {
-
-          var bigQueryFilter = {
-              "category": apiQuery.get("__bigquerySource") ?
-               apiQuery.get("__bigquerySource") :
-               "Special Large Query",
-              "filter_name": "bigquery",
-              "filter_query": ""
-              }
-
-          filters.push(bigQueryFilter);
-
-        }
-
         return filters;
       },
 
@@ -335,18 +319,8 @@ define([
             value: filter.filter_name + '|category|' + filter.category
           });
 
-          if (filter.filter_name === "bigquery"){
-            oneFilter.push({
-              type: 'operand',
-              display: 'custom filter',
-              value: filter.filter_name + '|control|x',
-            });
-            guiData.push({elements: oneFilter});
-            return;
-          }
-
           // if there are too many elements (or we're missing data bc we loaded from url), just show one value 'x custom values'
-          else if ( !filter.filter_value ||
+          if ( !filter.filter_value ||
                 filter.filter_value.length-1 > this.maxNumberOfTokens ||
                 filter.filter_value.join(' ').length > this.maxQueryLen
             ) {
@@ -522,15 +496,7 @@ define([
        * that back views
        */
       onFilterEvent: function(node, value) {
-        //remove a bigquery
-        if (value === 'bigquery|control|x' ){
-          var newQuery = new ApiQuery({
-            q : '*',
-            '__clearBiqQuery' : 'true'
-          });
-        } else {
-          var newQuery = this.createModifiedQuery(value);
-        }
+        var newQuery = this.createModifiedQuery(value);
 
         var ps = this.getBeeHive().getService('PubSub');
         if (ps)

@@ -106,6 +106,8 @@ define([
       var widget = _widget();
       var $w = widget.render().$el;
 
+      $("#test").append($w)
+
       //puts query in the search bar even when feedback is error
       var feedback = {
         request : minsub.createRequest({'query': minsub.createQuery({'q': 'fakeQuery'})}),
@@ -157,7 +159,7 @@ define([
 
 
       widget.view.on("start_search", function(query){
-        expect(query).to.eql("author:Accomazzi bib:Apj property:refereed");
+        expect(query.get('q')[0]).to.eql("author:Accomazzi bib:Apj property:refereed");
       });
 
       //should insert the field around the selected content if user has selected something
@@ -398,6 +400,47 @@ define([
 
     });
 
+    it("displays a special tag when inside a bigquery, and hides *:* from the user", function(){
+
+      var s = new SearchBarWidget();
+      s.setCurrentQuery(new ApiQuery({q : "foo"}));
+      $("#test").append(s.render().el);
+
+      s.handleFeedback({
+        code : ApiFeedback.CODES.SEARCH_CYCLE_STARTED,
+        numFound : 1000,
+        query : new ApiQuery({
+          q : '*:*',
+          __bigquerySource : 'Library: Cool Papers woo',
+          __qid : 'hash string'
+        })
+      });
+
+      expect($(".input-group .bigquery-tag").text().trim()).to.eql("Cool Papers woo");
+
+      //it's a library so show a nice library icon
+      expect($(".input-group .bigquery-tag i").eq(0).attr("class")).to.eql("fa fa-book");
+
+      //hides the *:* from the user
+      expect($("input.q").val()).to.eql("")
+
+      //but if someone submits the 'empty' q, re-insert the *:*
+      s.navigate = sinon.spy();
+
+      $(".search-submit").click();
+
+      expect(s.navigate.args[0][0].toJSON()).to.eql({
+        "q": [
+          "*:*"
+        ],
+        "sort": [
+          "date desc"
+        ]
+      });
+
+
+    });
+
     it("when some of the fields have wrong input (and the query doesn't contain everything), the form should warn user before closing itself", function() {
 
     });
@@ -407,10 +450,6 @@ define([
       var widget = _widget();
       $("#test").append(widget.render().el);
       var $w = widget.render().$el;
-
-      widget.view.on("start_search", function(query){
-        expect(query).to.eql("bibstem:ApJ object:Foo year:2001");
-      });
 
       //should insert the field around the selected content if user has selected something
       $w.find(".q").val("bibstem:ApJ object:Foo year:2001");

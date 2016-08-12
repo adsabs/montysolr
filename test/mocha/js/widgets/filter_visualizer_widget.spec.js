@@ -545,58 +545,7 @@ define([
         expect(widget.beautifyOperand('fq_grant', 'grant:foo')).to.eql('foo');
       });
 
-      it("handles bigquery as a filter special case", function(){
 
-        var widget = new FilterVisualizerWidget();
-        widget.activate(minsub.beehive.getHardenedInstance());
-        var $w = $(widget.render());
-
-        $('#test').append($w);
-
-          widget.processFeedback(minsub.createFeedback({
-                  code: minsub.T.FEEDBACK.CODES.SEARCH_CYCLE_STARTED,
-                  numFound: 100,
-                  query: minsub.createQuery({
-                    "q": [
-                      "*:*"
-                    ],
-                    "__qid": [
-                      "bd07de928f0066253af7528336acaf4a"
-                    ],
-                    "__bigquerySource": [
-                      "Library: Papers by Alberto Accomazzi"
-                    ]
-                  })
-                })
-              );
-
-        expect($("span.filter-topic-group").length).to.eql(1);
-        expect($("span.filter-topic-group h5").text()).to.eql('Library: Papers by Alberto Accomazzi');
-
-        var publishSpy = sinon.spy();
-
-        widget.getBeeHive = function(){
-          return {
-            getService : function(){
-              return {
-                publish : publishSpy
-              }
-            }
-          }
-        }
-
-        $("button.filter-operand-remove").click();
-
-        expect(publishSpy.args[0][1].toJSON()).to.eql({
-          "q": [
-            "*"
-          ],
-          "__clearBiqQuery": [
-            "true"
-          ]
-        });
-
-      });
 
     });
   });
