@@ -438,6 +438,23 @@ define([
         ]
       });
 
+      //make sure bigquery can be removed
+        $(".bigquery-close").click();
+
+        expect(s.navigate.args[1][0].toJSON()).to.eql(
+          {
+            "q": [
+              "*:*"
+            ],
+            "__clearBiqQuery": [
+              "true"
+            ],
+            "sort": [
+              "date desc"
+            ]
+          }
+        );
+
 
     });
 
