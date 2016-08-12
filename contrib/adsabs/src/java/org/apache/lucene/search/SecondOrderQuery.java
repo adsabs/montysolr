@@ -25,10 +25,9 @@ public class SecondOrderQuery extends Query {
 
 	private static final long serialVersionUID = -5670377581753190942L;
 	Query firstOrderQuery;
-	Filter filter = null;
 	private SecondOrderCollector secondOrderCollector;
-	private boolean threaded;
 	private boolean alreadyExecuted;
+	private boolean needsScoring;
 
 	/**
 	 * Constructs a new query which applies a filter to the results of the
@@ -37,15 +36,14 @@ public class SecondOrderQuery extends Query {
 	 * 
 	 * @param query
 	 *            Query to be filtered, cannot be <code>null</code>.
-	 * @param filter
-	 *            Filter to apply to query results, cannot be <code>null</code>.
+	 * @param needsScoring
+	 *            Whether the query should apply scoring algorithm (or is a simple
+	 *            boolean, 1/0 - which runs faster; default is True)
 	 */
 	
-	public SecondOrderQuery(Query query, Filter filter, SecondOrderCollector collector, boolean threaded) {
+	public SecondOrderQuery(Query query, SecondOrderCollector collector, boolean needsScoring) {
 		this.firstOrderQuery = query;
-		this.filter = filter;
 		this.secondOrderCollector = collector;
-		this.threaded = threaded;
 		this.alreadyExecuted = false;
 		
 		if (collector == null) {
@@ -53,28 +51,9 @@ public class SecondOrderQuery extends Query {
 		}
 	}
 	
-	public SecondOrderQuery(Query query, Filter filter, SecondOrderCollector collector) {
-		this(query, filter, collector, false);
-  }
-	
 	public SecondOrderQuery(Query query, SecondOrderCollector collector) {
-		this(query, null, collector, false);
+    this(query, collector, true);
   }
-	
-	/*
-	public CollectorQuery(Query query, IndexReader reader, Collector collector) {
-		this.query = query;
-		this.filter = null;
-		this.collector = collector;
-		
-		if (collector == null) {
-			throw new IllegalStateException("Collector must not be null");
-		}
-		initDocStarts(reader);
-		
-	}
-	*/
-	
 	
 	
 	/**
@@ -88,34 +67,28 @@ public class SecondOrderQuery extends Query {
 	 */
 	public Weight createWeight(final IndexSearcher searcher) throws IOException {
 	    
-		if (threaded) {
-			return null;
+		Weight firstOrderWeight = firstOrderQuery.createWeight(searcher, needsScoring);
+		
+		//System.out.println("preparing: " + this.secondOrderCollector);
+		
+		// conduct search only if initialization of necessary caches went well
+		if (!alreadyExecuted && secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
+			//System.out.println("Executing: " + firstOrderQuery.toString());
+			searcher.search(firstOrderQuery, (Collector) secondOrderCollector);
+			
+			//System.out.println("  searching: " + this.secondOrderCollector);
+			
+			// TODO: can we avoid being called (initialized) in a loop?
+			// this looks like a bad design (on my side) if it happens
+			// it happens when 2nd order operators are nested
+			alreadyExecuted = true;
+			
 		}
-		else {
-			
-			Weight firstOrderWeight = firstOrderQuery.createWeight(searcher);
-			
-			//System.out.println("preparing: " + this.secondOrderCollector);
-			
-			// conduct search only if initialization of necessary caches went well
-			if (!alreadyExecuted && secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
-				//System.out.println("Executing: " + firstOrderQuery.toString());
-				searcher.search(firstOrderQuery, filter, (Collector) secondOrderCollector);
-				
-				//System.out.println("  searching: " + this.secondOrderCollector);
-				
-				// TODO: can we avoid being called (initialized) in a loop?
-				// this looks like a bad design (on my side) if it happens
-				// it happens when 2nd order operators are nested
-				alreadyExecuted = true;
-				
-			}
-			
-			//System.out.println("done:" + this.secondOrderCollector);
-			
-			// no logging, we are basic lucene class
-			return new SecondOrderWeight(firstOrderWeight, secondOrderCollector);
-		}
+		
+		//System.out.println("done:" + this.secondOrderCollector);
+		
+		// no logging, we are basic lucene class
+		return new SecondOrderWeight(firstOrderWeight, secondOrderCollector);
 	}
 	
 
@@ -123,8 +96,7 @@ public class SecondOrderQuery extends Query {
 	public Query rewrite(IndexReader reader) throws IOException {
 		Query rewritten = firstOrderQuery.rewrite(reader);
 		if (rewritten != firstOrderQuery) {
-			SecondOrderQuery clone = (SecondOrderQuery) this.clone();
-			clone.firstOrderQuery = rewritten;
+			SecondOrderQuery clone = new SecondOrderQuery(rewritten, this.secondOrderCollector);
 			return clone;
 		} else {
 			return this;
@@ -135,9 +107,6 @@ public class SecondOrderQuery extends Query {
 		return firstOrderQuery;
 	}
 
-	public Filter getFilter() {
-		return filter;
-	}
 	
 	public SecondOrderCollector getcollector() {
 		return secondOrderCollector;
@@ -157,7 +126,7 @@ public class SecondOrderQuery extends Query {
 
 	// inherit javadoc
 	public void extractTerms(Set<Term> terms) {
-		getQuery().extractTerms(terms);
+		((SecondOrderQuery) getQuery()).extractTerms(terms);
 	}
 
 	/** Prints a user-readable version of this query. */
@@ -165,10 +134,8 @@ public class SecondOrderQuery extends Query {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("SecondOrderQuery(");
 		buffer.append(firstOrderQuery.toString(s));
-		buffer.append(", filter=" + (filter!=null ? filter.toString() : "null"));
 		buffer.append(", collector=" + (secondOrderCollector!=null ? secondOrderCollector.toString() : "null"));
 		buffer.append(")");
-		buffer.append(ToStringUtils.boost(getBoost()));
 		return buffer.toString();
 	}
 
@@ -177,22 +144,14 @@ public class SecondOrderQuery extends Query {
 		if (o instanceof SecondOrderQuery) {
 			SecondOrderQuery fq = (SecondOrderQuery) o;
 			return (firstOrderQuery.equals(fq.firstOrderQuery) 
-					&& (filter != null ? filter.equals(fq.filter) : true)
-					&& secondOrderCollector.equals(fq.secondOrderCollector)
-					&& getBoost() == fq.getBoost());
+					&& secondOrderCollector.equals(fq.secondOrderCollector));
 		}
 		return false;
 	}
 
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		if (filter != null) {
-			return firstOrderQuery.hashCode() ^ filter.hashCode() ^ secondOrderCollector.hashCode()
-				+ Float.floatToRawIntBits(getBoost());
-		}
-		
-		return firstOrderQuery.hashCode() ^ secondOrderCollector.hashCode()
-				+ Float.floatToRawIntBits(getBoost());
+		return firstOrderQuery.hashCode() ^ secondOrderCollector.hashCode();
 	}
 	
 	

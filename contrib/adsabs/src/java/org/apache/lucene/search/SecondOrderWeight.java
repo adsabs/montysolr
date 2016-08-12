@@ -2,31 +2,24 @@ package org.apache.lucene.search;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.util.Bits;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.Term;
 
 public class SecondOrderWeight extends Weight {
 
   private static final long serialVersionUID = 1999318155593404879L;
   private final Weight innerWeight;
   private SecondOrderCollector secondOrderCollector;
-  private Map<Integer, Integer> docStarts;
 
   public SecondOrderWeight(Weight weight,
       SecondOrderCollector collector) throws IOException {
+    super(weight.getQuery());
     this.innerWeight = weight;
     this.secondOrderCollector = collector;
 
   }
-
-
-  @Override
-  public Query getQuery() {
-    return innerWeight.getQuery();
-  }
-
 
   @Override
   public float getValueForNormalization() throws IOException {
@@ -39,7 +32,7 @@ public class SecondOrderWeight extends Weight {
   }
 
   @Override
-  public Scorer scorer(AtomicReaderContext context, Bits acceptDocs) throws IOException {
+  public Scorer scorer(LeafReaderContext context) throws IOException {
     int docBase = context.docBase;
     int maxRange = docBase + context.reader().maxDoc();
     List<CollectorDoc> hits = secondOrderCollector.getSubReaderResults(docBase, maxRange);
@@ -48,14 +41,14 @@ public class SecondOrderWeight extends Weight {
   }
 
   @Override
-  public boolean scoresDocsOutOfOrder() {
-    return (innerWeight != null) ? innerWeight.scoresDocsOutOfOrder()
-        : false;
+  public void extractTerms(Set<Term> terms) {
+    innerWeight.extractTerms(terms);
   }
 
   @Override
-  public Explanation explain(AtomicReaderContext context, int doc) throws IOException {
-    //TODO: modify
-    return innerWeight.explain(context, doc);
+  public Explanation explain(LeafReaderContext context, int doc) throws IOException {
+    return Explanation.match(0.0f, "nested, result of", innerWeight.explain(context, doc));
   }
+
+
 }

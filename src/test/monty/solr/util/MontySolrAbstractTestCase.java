@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,6 +16,7 @@ import java.util.regex.Pattern;
 import monty.solr.util.MontySolrTestCaseJ4;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.servlet.DirectSolrConnection;
@@ -45,7 +48,7 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	  public void tearDown() throws Exception {
 		super.tearDown();
 		for (File f: tempFiles) {
-			recurseDelete(f);
+			Files.delete(f.toPath());
 		}
 	}
 	
@@ -131,9 +134,9 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	}
 	
 	public static File duplicateFile(File origFile) throws IOException {
-		File tmpFile = createTempFile();
-		FileUtils.copyFile(origFile, tmpFile);
-		return tmpFile;
+		Path tmpFile = createTempFile();
+		FileUtils.copyFile(origFile, tmpFile.toFile());
+		return tmpFile.toFile();
 	}
 	
 	public static int replaceInFile(File target, String toFind, String replacement) throws IOException {

@@ -17,9 +17,10 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.AssertingScorer.IteratorState;
 import org.apache.lucene.util.ToStringUtils;
 import org.apache.lucene.util.Bits;
 
@@ -42,48 +43,22 @@ public class BitSetQuery extends Query {
 	}
 
 	private class MatchAllScorer extends Scorer {
+	  final int maxDoc;
+	  final Bits liveDocs;
 		final float score;
-		private int doc = -1;
-		private int targetDoc = -1;
-		private final int maxDoc;
-		private final Bits liveDocs;
-		private final BitSet seekedDocs;
-		private int docBase;
+		final BitSet seekedDocs;
+		int docBase;
+    private DocIdSetIterator it;
 
 		MatchAllScorer(IndexReader reader, Bits liveDocs, Weight w, float score, BitSet seekedDocs, int docBase) {
 			super(w);
 			this.liveDocs = liveDocs;
 			this.score = score;
-			maxDoc = reader.maxDoc();
 			this.seekedDocs = seekedDocs;
 			this.docBase = docBase;
-			this.targetDoc = docBase;
+			this.maxDoc = reader.maxDoc();
 		}
 
-		@Override
-		public int docID() {
-			return doc;
-		}
-
-		@Override
-		public int nextDoc() throws IOException {
-			while (true) {
-				targetDoc = seekedDocs.nextSetBit(targetDoc);
-				if (targetDoc == -1 || targetDoc-docBase >= maxDoc) {
-					doc = NO_MORE_DOCS;
-					return doc;
-				}
-
-				doc = targetDoc - docBase;
-				targetDoc++;
-
-				if(liveDocs != null && doc < maxDoc && !liveDocs.get(doc)) {
-					continue;
-				}
-
-				return doc;
-			}
-		}
 
 		@Override
 		public float score() {
@@ -95,15 +70,63 @@ public class BitSetQuery extends Query {
 			return 1;
 		}
 
-		@Override
-		public int advance(int target) throws IOException {
-			doc = target-1;
-			return nextDoc();
-		}
 
     @Override
-    public long cost() {
-      return this.seekedDocs.cardinality();
+    public DocIdSetIterator iterator() {
+      
+      // arghhh! they made so many changes but never removed the Scorer.docId
+      // so we are, like idiots, forced to keep the iterator hanging around. WTF?!!
+      
+      it = new DocIdSetIterator() {
+        
+        int doc = -1;
+        int targetDoc = -1;
+        
+        @Override
+        public int advance(int target) throws IOException {
+          doc = target-1;
+          return nextDoc();
+        }
+        
+        @Override
+        public int docID() {
+          return doc;
+        }
+        
+        
+        @Override
+        public int nextDoc() throws IOException {
+          while (true) {
+            targetDoc = seekedDocs.nextSetBit(targetDoc);
+            if (targetDoc == -1 || targetDoc-docBase >= maxDoc) {
+              doc = NO_MORE_DOCS;
+              return doc;
+            }
+
+            doc = targetDoc - docBase;
+            targetDoc++;
+
+            if(liveDocs != null && doc < maxDoc && !liveDocs.get(doc)) {
+              continue;
+            }
+
+            return doc;
+          }
+        }
+
+        @Override
+        public long cost() {
+          return seekedDocs.cardinality();
+        }
+      };
+      
+      return it;
+    }
+
+
+    @Override
+    public int docID() {
+      return it.docID();
     }
 	}
 
@@ -111,7 +134,8 @@ public class BitSetQuery extends Query {
 		private float queryWeight;
 		private float queryNorm;
 
-		public MatchAllDocsWeight(IndexSearcher searcher) {
+		public MatchAllDocsWeight(IndexSearcher searcher, Query query) {
+		  super(query);
 		}
 
 		@Override
@@ -120,14 +144,8 @@ public class BitSetQuery extends Query {
 		}
 
 		@Override
-		public Query getQuery() {
-			return BitSetQuery.this;
-		}
-
-		@Override
 		public float getValueForNormalization() {
-			queryWeight = getBoost();
-			return queryWeight * queryWeight;
+			return 1.0f;
 		}
 
 		@Override
@@ -136,33 +154,29 @@ public class BitSetQuery extends Query {
 			queryWeight *= this.queryNorm;
 		}
 
-		@Override
-		public Scorer scorer(AtomicReaderContext context, Bits acceptDocs) throws IOException {
-			return new MatchAllScorer(context.reader(), acceptDocs, this, queryWeight, seekedDocs, context.docBase);
-		}
 
 		@Override
-		public Explanation explain(AtomicReaderContext context, int doc) {
-			// explain query weight
-			Explanation queryExpl = new ComplexExplanation
-			(true, queryWeight, "BitSetQuery, product of:");
-			if (getBoost() != 1.0f) {
-				queryExpl.addDetail(new Explanation(getBoost(),"boost"));
-			}
-			queryExpl.addDetail(new Explanation(queryNorm,"queryNorm"));
-
-			return queryExpl;
+		public Explanation explain(LeafReaderContext context, int doc) {
+			return Explanation.match(1.0f, "bitset query match");
 		}
+
+    @Override
+    public void extractTerms(Set<Term> terms) {
+      // do nothing
+    }
+
+    @Override
+    public Scorer scorer(LeafReaderContext context) throws IOException {
+      return new MatchAllScorer(context.reader(), context.reader().getLiveDocs(),
+          this, queryWeight, seekedDocs, context.docBase);
+    }
 	}
 
 	@Override
-	public Weight createWeight(IndexSearcher searcher) {
-		return new MatchAllDocsWeight(searcher);
+	public Weight createWeight(IndexSearcher searcher, boolean needsScore) {
+		return new MatchAllDocsWeight(searcher, this);
 	}
 
-	@Override
-	public void extractTerms(Set<Term> terms) {
-	}
 
 	@Override
 	public String toString(String field) {
@@ -170,7 +184,6 @@ public class BitSetQuery extends Query {
 		buffer.append("BitSetQuery(");
 		buffer.append("size=" + seekedDocs.cardinality());
 		buffer.append(")");
-		buffer.append(ToStringUtils.boost(getBoost()));
 		return buffer.toString();
 	}
 
@@ -178,8 +191,7 @@ public class BitSetQuery extends Query {
 	public boolean equals(Object o) {
 		if (!(o instanceof MatchAllDocsQuery))
 			return false;
-		MatchAllDocsQuery other = (MatchAllDocsQuery) o;
-		return this.getBoost() == other.getBoost();
+		return true;
 	}
 
 	@Override
@@ -187,7 +199,7 @@ public class BitSetQuery extends Query {
 		if (uuid != null) {
 			return uuid.hashCode();
 		}
-		return seekedDocs.hashCode() ^ Float.floatToIntBits(getBoost()) ^ 0x1AA71190;
+		return seekedDocs.hashCode() ^ 0x1AA71190;
 	}
 	
 	public void setUUID(String uuid) {

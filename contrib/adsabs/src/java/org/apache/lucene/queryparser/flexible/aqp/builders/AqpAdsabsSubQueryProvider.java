@@ -9,23 +9,20 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
-import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.DisjunctionMaxQuery;
-import org.apache.lucene.search.FieldCache.Floats;
 import org.apache.lucene.search.LuceneCacheWrapper;
 import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.Query;
@@ -33,7 +30,6 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SecondOrderCollector;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.SecondOrderCollectorAdsClassicScoringFormula;
-import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.lucene.search.SecondOrderCollectorCitedBy;
 import org.apache.lucene.search.SecondOrderCollectorCites;
 import org.apache.lucene.search.SecondOrderCollectorCitesRAM;
@@ -41,6 +37,7 @@ import org.apache.lucene.search.SecondOrderCollectorCitingTheMostCited;
 import org.apache.lucene.search.SecondOrderCollectorOperatorExpertsCiting;
 import org.apache.lucene.search.SecondOrderCollectorTopN;
 import org.apache.lucene.search.SecondOrderQuery;
+import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.search.join.JoinUtil;
@@ -77,6 +74,8 @@ import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.servlet.SolrRequestParsers;
+
+import com.google.common.primitives.Floats;
 
 
 /**

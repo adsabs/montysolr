@@ -51,9 +51,9 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-memory-6.1.0-SNAPSHOT-javadoc.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-memory-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-misc-6.1.0-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-misc-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-misc-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queries-6.1.0-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queries-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queries-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queryparser-6.1.0-SNAPSHOT-javadoc.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queryparser-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-replicator-6.1.0-SNAPSHOT-javadoc.jar"/>
@@ -137,7 +137,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-morphlines-cell-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-morphlines-core-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-solrj-6.1.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-test-framework-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-test-framework-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/solr"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-uima-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-velocity-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/spatial4j-0.6.jar"/>

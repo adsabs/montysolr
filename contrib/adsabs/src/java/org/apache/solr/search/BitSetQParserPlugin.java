@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,11 +18,12 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.Ints;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.solr.common.SolrException;
@@ -35,8 +37,10 @@ import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.uninverting.TestFieldCacheSort;
+import org.apache.solr.uninverting.UninvertingReader;
+import org.apache.solr.uninverting.UninvertingReader.Type;
 import org.apache.solr.schema.FieldType;
-import org.apache.solr.schema.IntField;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.StrField;
 import org.apache.solr.schema.TextField;
@@ -141,7 +145,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					}
 					
 					if (processors.size() == 0) {
-						return new BooleanQuery(); // match no docs
+						return new MatchNoDocsQuery();
 					}
 					
 					String[] operator = localParams.get("operator","and").split(",");
@@ -193,7 +197,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					
 					
 					if (topBits.cardinality() < 1)
-						return new BooleanQuery(); // match no docs
+						return new MatchNoDocsQuery();
 	
 					BitSetQuery q = new BitSetQuery(topBits);
 					
@@ -232,7 +236,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	      		@Override
 	      		public BitSet getBits() {
 	      			// we must harvest lucene docids
-	    				AtomicReader reader = req.getSearcher().getAtomicReader();
+	    				LeafReader reader = req.getSearcher().getLeafReader();
 	    				byte[] data;
               
 	    				try {
@@ -270,7 +274,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
     						if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
     							fieldIsInt = false;
     						}
-    						else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
+    						else if (c.isAssignableFrom(TrieIntField.class)) {
     							//pass
     						}
     						else {
@@ -304,9 +308,10 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
 	    						}
 	    						
-		    					Ints cache;
+		    					//Ints cache;
 		    					try {
 		    						cache = FieldCache.DEFAULT.getInts(reader, fieldName, false);
+		    						NumericDocValues ints = cache.getNumerics(reader, "theInt", FieldCache.INT_POINT_PARSER, random().nextBoolean());
 		    					} catch (IOException e) {
 		    						throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get a cache for field: " + fieldName + "\n" + e.getMessage());
 		    					}
