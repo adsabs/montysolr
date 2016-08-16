@@ -294,9 +294,11 @@ input.hasbigquery {
 }
 
 .bigquery-close {
-  float: right;
+  position: absolute;
+  right: 4px;
   padding-top: 4px;
   transition: color .5s;
+  z-index: 4;
   &:hover {
     color: red
   }
