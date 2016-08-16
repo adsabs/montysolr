@@ -3,7 +3,7 @@ define([
   'js/components/api_request',
   'js/components/api_targets',
   'hbs!./templates/tab-container',
-  'hbs!./templates/import-view-ads2',
+  'hbs!./templates/import-view-labs',
   'hbs!./templates/import-view-classic',
   'hbs!./templates/success-template',
   'bootstrap'

@@ -40,9 +40,9 @@
                     </div>
                     {{#if bigquery}}
                       {{#if libraryName}}
-                      <button class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-book"/>&nbsp;<span>{{libraryName}}</span>&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></button>
+                      <div class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-book"/>&nbsp;<span>{{libraryName}}</span>&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></div>
                         {{else}}
-                        <button class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-list-ul"/>&nbsp;&nbsp;Bulk query&nbsp;&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></button>
+                        <div class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-list-ul"/>&nbsp;&nbsp;Bulk query&nbsp;&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></div>
                     {{/if}}
                     <input type="text" class="form-control q hasbigquery" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search"
                            autocomplete="off" value={{currentQueryVal}}>
