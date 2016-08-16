@@ -28,7 +28,7 @@ define([
           this.getBeeHive().getService('Api').setVals({
             access_token : data.token_type + ':' + data.access_token,
             refresh_token : data.refresh_token,
-            expires_in : data.expires_in
+            expire_in : data.expire_in
         });
 
          console.warn('Redefining access_token: ' + data.access_token);
