@@ -269,20 +269,20 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 			
 			//printCache(cache);
 			// test ID mapping function
-			assertTrue( cache.get("b0").equals(0));
-			assertTrue( cache.get("b1").equals(1));
-			assertTrue( cache.get("b2").equals(2));
-			assertTrue( cache.get("x2").equals(2));
-			assertTrue( cache.get("x22").equals(2));
-			assertTrue( cache.get("b3").equals(3));
-			assertTrue( cache.get("b4").equals(4));
-			assertTrue( cache.get("b5").equals(5));
-			assertTrue( cache.get("x5").equals(5));
-			assertTrue( cache.get("b6").equals(6));
-			assertTrue( cache.get("b7").equals(7));
-			assertTrue( cache.get("b8").equals(8));
-			assertTrue( cache.get("b9").equals(9));
-			assertTrue( cache.get("b10").equals(10));
+			assertEquals(0, cache.get("b0"));
+			assertEquals(1, cache.get("b1"));
+			assertEquals(2, cache.get("b2"));
+			assertEquals(2, cache.get("x2"));
+			assertEquals(2, cache.get("x22"));
+			assertEquals(3, cache.get("b3"));
+			assertEquals(4, cache.get("b4"));
+			assertEquals(5, cache.get("b5"));
+			assertEquals(5, cache.get("x5"));
+			assertEquals(6, cache.get("b6"));
+			assertEquals(7, cache.get("b7"));
+			assertEquals(8, cache.get("b8"));
+			assertEquals(9, cache.get("b9"));
+			assertEquals(10, cache.get("b10"));
 			
 			// test references
 			

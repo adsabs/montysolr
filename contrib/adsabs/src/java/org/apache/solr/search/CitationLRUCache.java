@@ -18,6 +18,7 @@
 package org.apache.solr.search;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,19 +31,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.lucene.document.SortedBytesDocValuesField;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.BinaryDocValues;
-import org.apache.lucene.index.DocTermOrds;
-import org.apache.lucene.index.DocValues;
-import org.apache.lucene.index.DocsEnum;
-import org.apache.lucene.index.SegmentCommitInfo;
+import org.apache.lucene.index.DocValuesType;
+import org.apache.lucene.index.FieldInfo;
+import org.apache.lucene.index.FieldInfos;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.SortedDocValues;
+import org.apache.lucene.index.SortedNumericDocValues;
+import org.apache.lucene.index.SortedSetDocValues;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.DocIdSetIterator;
-import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.CacheEntry;
-import org.apache.lucene.search.FieldCache.Ints;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.FixedBitSet;
@@ -52,11 +50,14 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.schema.IntField;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.StrField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.schema.TrieIntField;
+import org.apache.solr.uninverting.UninvertingReader;
+import org.apache.solr.uninverting.UninvertingReader.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -76,7 +77,8 @@ import org.apache.solr.schema.TrieIntField;
  * 
  */
 public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,V> {
-
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  
   /* An instance of this class will be shared across multiple instances
    * of an LRUCache at the same time.  Make sure everything is thread safe.
    */
@@ -343,6 +345,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   public void warm(SolrIndexSearcher searcher, SolrCache<K,V> old) {
+    
     long warmingStartTime = System.nanoTime();
     if (isAutowarmingOn()) {
     	isWarming = true;
@@ -366,28 +369,26 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   
   private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
   	
-  	Map<String, List<String>> fields = getFields(searcher, this.identifierFields);
-  	if (fields.get("textFields").size() > 0 || fields.get("textFieldsMV").size() > 0) {
-  		synchronized (map) {
-  			treatIdentifiersAsText  = true;
-      }
+  	List<String> fields = getFields(searcher, this.identifierFields);
+  	
+  	if (this.referenceFields.length == 0 && this.citationFields.length == 0) {
+  	  return;
   	}
 
   	// builds the mapping from document ID's to lucene docids
-  	unInvertedTheDamnThing(searcher.getAtomicReader(), fields,
-  			null,
+  	unInvertedTheDamnThing(searcher, fields,
   			new KVSetter() {
 	  		@Override
 	  		@SuppressWarnings({ "unchecked" })
 	      public void set (int docbase, int docid, Object value) {
+	  		  if (treatIdentifiersAsText && value instanceof Integer) {
+            value = Integer.toString((Integer) value);
+	  		  }
 	    		put((K) value, (V) (Integer) (docbase+docid));
 	    	}
 	  	}
   	);
   	
-  	if (this.referenceFields.length == 0 && this.citationFields.length == 0) {
-  		return;
-  	}
   	
   	if (this.referenceFields.length > 0 || this.citationFields.length > 0) {
 	  	@SuppressWarnings("rawtypes")
@@ -395,8 +396,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	  	relMap.initializeCitationCache(searcher.maxDoc());
 	  	
 	  	
-	  	unInvertedTheDamnThing(searcher.getAtomicReader(), getFields(searcher, this.referenceFields), 
-	  			null,
+	  	unInvertedTheDamnThing(searcher, getFields(searcher, this.referenceFields), 
 	  			new KVSetter() {
 			  		@Override
 			      public void set (int docbase, int docid, Object value) {
@@ -407,8 +407,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 			  	}
 	  	);
 	  	
-	  	unInvertedTheDamnThing(searcher.getAtomicReader(), getFields(searcher, this.citationFields),
-	  			null,
+	  	unInvertedTheDamnThing(searcher, getFields(searcher, this.citationFields),
 	  			new KVSetter() {
 			  		@Override
 			      public void set (int docbase, int docid, Object value) {
@@ -433,16 +432,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   private void warmIncrementally(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
     if (regenerator==null) return;
     
-    //System.out.println("regenerator: " + regenerator);
     
-    Map<String, List<String>> fields = getFields(searcher, this.identifierFields);
-    if (fields.get("textClasses").size() > 0 || fields.get("textClassesMV").size() > 0) {
-  		synchronized (map) {
-  			treatIdentifiersAsText  = true;
-      }
-  	}
-
-    
+    List<String> fields = getFields(searcher, this.identifierFields);
     CitationLRUCache<K,V> other = (CitationLRUCache<K,V>)old;
 
     // collect ids of documents that need to be reloaded/regenerated during this
@@ -467,7 +458,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 //    	//System.out.println(l);
 //    }
     
-    Bits liveDocs = searcher.getAtomicReader().getLiveDocs();
+    Bits liveDocs = searcher.getLeafReader().getLiveDocs();
     //System.out.println(liveDocs == null ? "liveDocs=" + null : "liveDocs=" + liveDocs.length());
     //System.out.println("numDeletes=" + searcher.getAtomicReader().numDeletedDocs());
     
@@ -483,7 +474,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       // Build the mapping from indexed values into lucene ids
       // this must always be available, so we build it no matter what...
       // XXX: make it update only the necessary IDs (not the whole index)
-      unInvertedTheDamnThing(searcher.getAtomicReader(), fields, liveDocs, new KVSetter() {
+      unInvertedTheDamnThing(searcher, fields, new KVSetter() {
 	  		@SuppressWarnings("unchecked")
         @Override
 	      public void set (int docbase, int docid, Object value) {
@@ -567,68 +558,32 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
   
 
-	private Map<String, List<String>> getFields(SolrIndexSearcher searcher, String[] listOfFields) {
+	private List<String> getFields(SolrIndexSearcher searcher, String[] listOfFields) {
   	
-  	HashMap<String, List<String>> out = new HashMap<String, List<String>>();
-  	out.put("textFields", new ArrayList<String>());
-  	out.put("textFieldsMV", new ArrayList<String>());
-  	out.put("intFields", new ArrayList<String>());
-  	out.put("intFieldsMV", new ArrayList<String>());
-  	
-  	
-    int unknownClasses = 0;
-    //boolean foundRequired = false;
+	  List<String> out = new ArrayList<String>();
     
     IndexSchema schema = searcher.getCore().getLatestSchema();
-    
     if (schema.getUniqueKeyField() == null) {
     	throw new SolrException(ErrorCode.FORBIDDEN, "Sorry, your schema is missing unique key and thus you probably have many duplicates. I won't continue");
     }
     
-    //String unique = schema.getUniqueKeyField().getName();
-    
   	for (String f: listOfFields) {
-  		SchemaField fieldInfo = schema.getField(f.replace(":sorted", ""));
+  	  String fName = f.replace(":sorted", "");
+  		SchemaField fieldInfo = schema.getField(fName);
   		FieldType type = fieldInfo.getType();
   		
-  		//if (fieldInfo.isRequired()) {
-  		//	foundRequired = true;
-  		//}
+  		if (type.getNumericType() != null) {
+        synchronized (map) {
+          treatIdentifiersAsText  = true;
+        }
+      }
   		
-  		assert fieldInfo.stored() == true;
-  		
-  		Class<? extends FieldType> c = type.getClass();
-  		if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-  			if (fieldInfo.multiValued() || type.isMultiValued()) {
-  				out.get("textFieldsMV").add(f);
-  			}
-  			else {
-  				out.get("textFields").add(f);
-  			}
+  		if (!fieldInfo.stored() && type.getDocValuesFormat().equals(DocValuesType.NONE)) {
+  		  throw new SolrException(ErrorCode.FORBIDDEN, "The field " + f + " cannot be used to build citation cache!");
   		}
-  		else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
-  			if (fieldInfo.multiValued() || type.isMultiValued()) {
-  				out.get("intFieldsMV").add(f);
-  			}
-  			else {
-  				out.get("textFields").add(f);
-  			}
-  		}
-  		else {
-  			unknownClasses += 1;
-  		}
+  		out.add(fName);
   	}
-  	
-  	if (unknownClasses > 0 ) {
-  		throw new SolrException(ErrorCode.FORBIDDEN, "Cache can be built only from text/numeric fields");
-  	}
-  	
-  	//if (!foundRequired) {
-  	//	throw new SolrException(ErrorCode.FORBIDDEN, "At least one of the identifier fields must be type 'required'.");
-  	//}
-  	
   	return out;
-	  
   }
 
 	/*
@@ -655,9 +610,17 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   
-  
-  
+  /* 
+   * Reads values from the DocValue and/or FieldCache and calls the 
+   * setter
+   */
+  private class Transformer {
+    public void process(int docBase, int docid) {
+      throw new NotImplementedException();
+    }
+  }
   private class KVSetter {
+    @SuppressWarnings({ "unchecked" })
     public void set (int docbase, int docid, Object value) {
   		throw new NotImplementedException();
   	}
@@ -666,198 +629,132 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * Given the set of fields, we'll look inside them and retrieve (into memory)
    * all values
    */
-  private void unInvertedTheDamnThing(AtomicReader reader, Map<String, 
-  		List<String>> fields, Bits liveDocs, KVSetter setter) throws IOException {
+  private void unInvertedTheDamnThing(
+      SolrIndexSearcher searcher, 
+      List<String> fields, 
+      KVSetter setter) throws IOException {
   	
-  	if (liveDocs == null) {
-  		liveDocs = reader.getLiveDocs();
-  	}
+    LeafReader reader = searcher.getLeafReader();
+  	IndexSchema schema = searcher.getCore().getLatestSchema();
+  	List<LeafReaderContext> leaves = reader.getContext().leaves();
   	
-  	int docBase = reader.getContext().docBase;
-  	//System.out.println("***REBUILDING***");
-  	//System.out.println("Generating mapping from: " + reader.toString() + " docBase=" + docBase);
-  	
-  	// load multiple values->idlucene mapping
-  	for (String idField: fields.get("intFieldsMV")) {
-			DocTermOrds unInvertedIndex = new DocTermOrds(reader, liveDocs, idField);
-			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
-			if (termsEnum == null) {
-				continue;
-			}
-			DocsEnum docs = null;
-			for (;;) {
-				BytesRef term = termsEnum.next();
-				if (term == null)
-					break;
-				
-				Integer t = FieldCache.DEFAULT_INT_PARSER.parseInt(term);
-				
-				docs = termsEnum.docs(liveDocs, docs, 0); // we don't need docFreq
-				int i = 0;
-				for (;;) {
-					int d = docs.nextDoc();
-					if (d == DocIdSetIterator.NO_MORE_DOCS) {
-						break;
-					}
-					
-					setter.set(docBase, d, treatIdentifiersAsText ? Integer.toString(t) : t);
-					
-					i += 1;
-					//if (i > 1) {
-					//	log.warn("The term {} is used by more than one document {} ; your cache has problems", t, d+docBase);
-					//}
-				}
-			}
-		}
-  	
-  	/*
-  	 * Read every term
-  	 *    - for each term get all live documents
-  	 *    	- and do something with the pair: (docid, term)
-  	 */
-		for (String idField: fields.get("textFieldsMV")) {
-			DocTermOrds unInvertedIndex = new DocTermOrds(reader, liveDocs, idField);
-			TermsEnum termsEnum = unInvertedIndex.getOrdTermsEnum(reader);
-			if (termsEnum == null) {
-				continue;
-			}
-			DocsEnum docs = null;
-			for (;;) {
-				BytesRef term = termsEnum.next();
-				if (term == null)
-					break;
-				String t = term.utf8ToString();
-				
-				docs = termsEnum.docs(liveDocs, docs, 0); // we don't need docFreq
-				for (;;) {
-					int d = docs.nextDoc();
-					if (d == DocIdSetIterator.NO_MORE_DOCS) {
-						break;
-					}
-					
-					setter.set(docBase, d, t);
-					
-					//if (i > 1) {
-					//	log.warn("The term {} is used by more than one document {} ; your cache has problems", t, d+docBase);
-					//}
-				}
-			}
-		}
-		
-		
-  	// load single valued ids 
-		for (String idField: fields.get("textFields")) {
-			BinaryDocValues idMapping = getCacheReuseExisting(reader, idField);
-			
-			Integer i = 0;
-			BytesRef ret = new BytesRef();
-			while(i < reader.maxDoc()) {
-				if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
-					//System.out.println("skipping: " + i);
-					i++;
-					continue;
-				}
-			  ret = idMapping.get(i);
-			  if (ret.length > 0) {
-			    setter.set(docBase, i, ret.utf8ToString()); // in this case, docbase will always be 0
-			  }
-				i++;
-			}
-			if (purgeCache)
-				FieldCache.DEFAULT.purgeByCacheKey(reader.getCoreCacheKey());
-		}
-		for (String idField: fields.get("intFields")) {
-			Ints idMapping = FieldCache.DEFAULT.getInts(reader, idField, false);
-			Integer i = 0;
-			while(i < reader.maxDoc()) {
-				if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
-					//System.out.println("skipping: " + i);
-					i++;
-					continue;
-				}
-				setter.set(docBase, i, treatIdentifiersAsText ? Integer.toString(idMapping.get(i)) : idMapping.get(i));
-				i++;
-			}
-		}
+  	Bits liveDocs;
+  	LeafReader lr;
+  	Transformer transformer;
+    for (LeafReaderContext leave: leaves) {
+  	  int docBase = leave.docBase;
+  	  liveDocs = leave.reader().getLiveDocs();
+  	  lr = leave.reader();
+  	  FieldInfos fInfo = lr.getFieldInfos();
+  	  
+  	  for (String field: fields) {
 
+  	    FieldInfo fi = fInfo.fieldInfo(field);
+  	    SchemaField fSchema = schema.getField(field);
+  	    DocValuesType fType = fi.getDocValuesType();
+  	    Map<String,Type> mapping = new HashMap<String,Type>();
+  	    final LeafReader unReader;
+  	    
+  	    if (fType.equals(DocValuesType.NONE)) {
+  	      Class<? extends DocValuesType> c = fType.getClass();
+          if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
+            if (fSchema.multiValued()) {
+              mapping.put(field, Type.SORTED);
+            }
+            else {
+              mapping.put(field, Type.BINARY);
+            }
+          }
+          else if (c.isAssignableFrom(TrieIntField.class)) {
+            if (fSchema.multiValued()) {
+              mapping.put(field, Type.SORTED_SET_INTEGER);
+            }
+            else {
+              mapping.put(field, Type.INTEGER_POINT);
+            }
+          }
+          else {
+            continue;
+          }
+          unReader = new UninvertingReader(lr, mapping);
+  	    }
+  	    else {
+  	      unReader = lr;
+  	    }
+        
+        switch(fType) {
+  	      case NUMERIC:
+  	        transformer = new Transformer() {
+  	          NumericDocValues dv = unReader.getNumericDocValues(field);
+  	          @Override
+              public void process(int docBase, int docId) {
+                int v = (int) dv.get(docId);
+                setter.set(docBase, docId, v);
+              }
+  	        };
+  	        break;
+  	      case SORTED_NUMERIC:
+  	        transformer = new Transformer() {
+              SortedNumericDocValues dv = unReader.getSortedNumericDocValues(field);
+              @Override
+              public void process(int docBase, int docId) {
+                dv.setDocument(docId);
+                int max = dv.count();
+                int v;
+                for (int i=0; i<max; i++) {
+                  v = (int) dv.valueAt(i);
+                  setter.set(docBase, docId, v);
+                }
+              }
+            };
+  	        break;
+  	      case SORTED_SET:
+  	        transformer = new Transformer() {
+              SortedSetDocValues dv = unReader.getSortedSetDocValues(field);
+              int errs = 0;
+              @Override
+              public void process(int docBase, int docId) {
+                if (errs > 5)
+                  return;
+                dv.setDocument(docId);
+                for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
+                  final BytesRef value = dv.lookupOrd(ord);
+                  setter.set(docBase, docId, value.utf8ToString());
+                }
+              }
+            };
+  	        break;
+  	      case SORTED:
+  	        transformer = new Transformer() {
+  	          SortedDocValues dv = unReader.getSortedDocValues(field);
+              TermsEnum te;
+              @Override
+              public void process(int docBase, int docId) {
+                BytesRef v = dv.get(docId);
+                if (v.length == 0)
+                  return;
+                setter.set(docBase, docId, v.utf8ToString());
+              }
+            };
+  	        break;
+  	      default:
+  	        throw new IllegalArgumentException("The field " + field + " is of type that cannot be un-inverted");
+  	    }
+  	    
+  	    int i = 0;
+        while(i < lr.maxDoc()) {
+          if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
+            i++;
+            continue;
+          }
+          transformer.process(docBase, i);
+          i++;
+        }
+  	  }
+  	  
+  	}
 	}
 
-  private BinaryDocValues getCacheReuseExisting(AtomicReader reader, String idField) throws IOException {
-  	
-  	purgeCache = false;
-  	
-  	Boolean sorted = false;
-  	if (idField.indexOf(':') > -1) {
-  		String[] parts = idField.split(":");
-  		idField = parts[0];
-  		if (parts[1].indexOf("sort") > -1)
-  			sorted = true;
-  	}
-  	
-  	// first try discover if there exists a cache already that we can reuse
-  	// be careful, the cache needs to be populated properly - ie. when a new
-  	// searcher is opened, the warming query should generate these caches;
-  	// otherwise it could happen we grab the old searcher's cache
-  	if (reuseCache) {
-	  	CacheEntry[] caches = FieldCache.DEFAULT.getCacheEntries();
-			if (caches != null) {
-				ArrayList<CacheEntry> potentialCandidates = new ArrayList<CacheEntry>();
-				
-				for (int i=0; i < caches.length; i++) {
-					
-					CacheEntry c = caches[i];
-					String key = c.getFieldName();
-					String readerKey = c.getReaderKey().toString();
-					String segmentCode = readerKey.substring(readerKey.indexOf("(")+1, readerKey.length()-1);
-					
-					if (idField.equals(key) && 
-							(reader.getCoreCacheKey().toString().contains(segmentCode)
-									|| readerKey.contains("SegmentCoreReaders"))) {
-						if (sorted) {
-							if (c.getValue() instanceof SortedDocValues)	potentialCandidates.add(c);
-						}
-						else {
-							potentialCandidates.add(c);
-						}
-					}
-					
-				}
-				
-				if (potentialCandidates.size() == 0) {
-					// pass
-				}
-				else if (potentialCandidates.size() == 1) {
-					CacheEntry ce = potentialCandidates.get(0);
-					Object v = ce.getValue();
-					if (v instanceof BinaryDocValues) {
-						return (BinaryDocValues) v;
-					}
-				}
-				else {
-					log.warn("We cannot unambiguously identify cache entry for: {}, {}", idField, reader.getCoreCacheKey());
-				}
-				
-			}
-  	}
-		
-		BinaryDocValues idMapping;
-		purgeCache = true;
-		
-		// because sorting components will create the cache anyway; we can avoid duplicating data
-		// if we create a cache duplicate, the tests will complain about cache insanity (and rightly so)
-		if (sorted) {
-			idMapping = FieldCache.DEFAULT.getTermsIndex(reader, idField);
-			//System.out.println("creating new sorted: " + idField);
-			//System.out.println("created: " + idMapping);
-		}
-		else {
-		  idMapping = FieldCache.DEFAULT.getTerms(reader, idField, false); // XXX:rca - should we use 'true'?
-		  //System.out.println("creating new: " + idField);
-		  //System.out.println("created: " + idMapping);
-		}
-		return idMapping;
-		
-  }
   //////////////////////// SolrInfoMBeans methods //////////////////////
 
 

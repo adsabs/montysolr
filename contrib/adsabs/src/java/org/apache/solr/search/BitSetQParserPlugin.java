@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,17 +17,16 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BitSetQuery;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.Base64;
@@ -36,19 +34,16 @@ import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.handler.loader.CSVLoader;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.uninverting.TestFieldCacheSort;
-import org.apache.solr.uninverting.UninvertingReader;
-import org.apache.solr.uninverting.UninvertingReader.Type;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.StrField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.schema.TrieIntField;
+import org.apache.solr.uninverting.UninvertingReader;
 import org.apache.solr.update.AddUpdateCommand;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.solr.handler.loader.CSVLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -308,16 +303,16 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
 	    						}
 	    						
-		    					//Ints cache;
-		    					try {
-		    						cache = FieldCache.DEFAULT.getInts(reader, fieldName, false);
-		    						NumericDocValues ints = cache.getNumerics(reader, "theInt", FieldCache.INT_POINT_PARSER, random().nextBoolean());
-		    					} catch (IOException e) {
-		    						throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get a cache for field: " + fieldName + "\n" + e.getMessage());
-		    					}
-		    					
-		    					if (cache == null)
-		    						return translatedBitSet;
+	    						Map<String, UninvertingReader.Type> mapping = new HashMap();
+	    		        mapping.put(fieldName, UninvertingReader.Type.INTEGER_POINT);
+	    		        UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
+	    		        NumericDocValues cache;
+                  try {
+                    cache = uninvertingReader.getNumericDocValues(fieldName);
+                  } catch (IOException e) {
+                    return translatedBitSet;
+                  }
+	    		        
 		    					
 		    					// suckers, we have to translate whateve integer value into a lucene docid
 		    					log.warn("We are translating values for a field without a cache: {}. Terrible, terrible idea!", fieldName);
@@ -326,7 +321,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		    					int maxDoc = reader.maxDoc();
 		    					int docValue;
 		    					while(docid < maxDoc) {
-		    						docValue = cache.get(docid);
+		    						docValue = (int) cache.get(docid);
 		    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
 		    							translatedBitSet.set(docid);
 		    						}
