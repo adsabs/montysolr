@@ -9,7 +9,9 @@ define([
     'js/components/api_response',
     'js/components/api_query',
     'js/components/api_feedback',
-    'js/mixins/hardened'
+    'js/mixins/hardened',
+    'js/mixins/api_access',
+    'moment'
   ],
   function(
     _,
@@ -20,7 +22,9 @@ define([
     ApiResponse,
     ApiQuery,
     ApiFeedback,
-    Hardened
+    Hardened,
+    ApiAccess,
+    Moment
     ) {
 
     var Api = GenericModule.extend({
@@ -30,9 +34,8 @@ define([
 
       access_token: null,
       refresh_token: null,
-      expires_in: null,
+      expire_in: null,
       defaultTimeoutInMs: 60000,
-
 
       activate: function(beehive) {
         this.setBeeHive(beehive);
@@ -99,10 +102,10 @@ define([
       }
     });
 
-    Api.prototype.request = function(request, options) {
+    Api.prototype._request = function(request, options){
 
       options = _.extend({}, options, request.get('options'));
-      
+
       var data,
           self = this,
           query = request.get('query');
@@ -171,12 +174,44 @@ define([
       jqXhr = jqXhr.promise(jqXhr);
 
       return jqXhr;
+
+    };
+
+    //stubbable for testing
+    Api.prototype.getCurrentUTCMoment = function(){
+      return Moment().utc();
+    };
+
+    Api.prototype.request = function(request, options) {
+
+      var that = this;
+
+      if (!this.expire_in) return that._request(request, options);
+
+      //expire_in is in UTC, not local time
+      var expiration = Moment.utc(this.expire_in);
+      var now = this.getCurrentUTCMoment();
+
+      var difference = now.diff(expiration, 'minutes');
+      //fewer than 2 minutes before token expires
+      if (difference > -2 ){
+        var d = $.Deferred();
+        this.getApiAccess().done(function(){
+          d.resolve(that._request(request, options));
+        });
+        return d.promise();
+      }
+      else {
+        return that._request(request, options);
+      }
+
     };
 
     _.extend(Api.prototype, Mixin.BeeHive);
     _.extend(Api.prototype, Hardened);
+    _.extend(Api.prototype, ApiAccess);
+
 
 
     return Api
   });
-

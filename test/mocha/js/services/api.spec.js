@@ -8,14 +8,16 @@ define([
   'js/services/api',
   'js/components/api_request',
   'js/components/api_query',
-  'js/components/api_response'
+  'js/components/api_response',
+  'moment'
 ], function(
   $,
   _,
   Api,
   ApiRequest,
   ApiQuery,
-  ApiResponse
+  ApiResponse,
+  Moment
   ) {
 
   describe("Api Service (api.spec.js)", function() {
@@ -181,6 +183,51 @@ define([
       expect(spy.thisValues[0]).to.have.ownProperty('api', 'request');
     });
 
+    it("should automatically request a new token if there is less than 2 minutes before token expiration", function(){
+
+      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+
+      api.access_token = 'foo';
+      api.expire_in = "2016-08-16T18:12:00"
+
+      api.getCurrentUTCMoment = function(){
+        //mock a EDT time
+        return  Moment.parseZone("2016-08-16T14:11:00-04:00").utc();
+      }
+
+      api._request = sinon.spy();
+
+      api.getApiAccess = sinon.spy(function(){
+        var d = $.Deferred();
+        d.resolve();
+        api.access_token = 'boo'
+        return d.promise();
+      });
+
+      var q = new ApiQuery({q: 'foo'});
+
+    api.request(new ApiRequest({target: '/test', query: q, sender: 'woo'}));
+
+      expect(api.getApiAccess.callCount).to.eql(1);
+      expect(api.access_token).to.eql('boo');
+      expect(api._request.callCount).to.eql(1);
+
+    //this request should not lead to an access_token refresh bc
+    //expiration is 3 minutes in the future
+
+    api.expire_in = "2016-08-16T18:13:05.982Z";
+
+    api.getCurrentUTCMoment = function(){
+      return Moment("2016-08-16T18:11:05.982Z").utc();
+    }
+
+      api.request(new ApiRequest({target: '/test', query: q, sender: 'woo'}));
+
+       expect(api.getApiAccess.callCount).to.eql(1);
+       expect(api._request.callCount).to.eql(2);
+
+    });
+
     describe("Testing request options", function() {
 
       var ajaxSpy;
@@ -199,7 +246,7 @@ define([
         expect(ajaxSpy.lastCall.args[0].cache).to.eql(true);
         expect(ajaxSpy.lastCall.args[0].contentType).to.eql('application/x-www-form-urlencoded');
         expect(ajaxSpy.lastCall.args[0].xhrFields).to.eql(undefined);
-        
+
         api.modifyRequestOptions = function(opts) {
           opts.xhrFields = {
             withCredentials: true
