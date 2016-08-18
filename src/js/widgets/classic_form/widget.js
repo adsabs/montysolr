@@ -110,6 +110,7 @@ define([
       matchers = {
         default: /=?"[^"]+"|[=\w]+/g,
         author:  /.+/gm,
+        object: /.+/gm,
         bibstem: /[^,^\s]+/g
       };
 
@@ -136,8 +137,8 @@ define([
             }
             phrases = val.match(matcher);
 
-            //quote matches if field == author
-            phrases = field == "author" ? _.map(phrases, function(p){ return '"' + p + '"'}) : phrases;
+            //quote matches if field is author or object 
+            phrases = (field == "author" || field == "object") ? _.map(phrases, function(p){ return '"' + p + '"'}) : phrases;
             //use parentheses always (bc of = parsing issue)
             phrases = phrases.length > 1 ? phrases.join(logic) : phrases[0];
             qDict.q.push(field + ":(" + phrases +")" );
