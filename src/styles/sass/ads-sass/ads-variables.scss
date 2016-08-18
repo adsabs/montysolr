@@ -10,12 +10,6 @@ $border-light-default: 1px solid $border-light-color;
 $darker-background : $gray-lighter;
 $default-box-shadow-color : darken($body-bg, 15%);
 
-/* Social Media Colors */
-
-$facebook-color : rgb(59,89,153);
-$twitter-color : rgb(64,153,255);
-$mendeley-color : rgb(60,30,33);
-$sciencewise-color: rgb(179, 27, 27);
 
 /* Z Index Values */
 
@@ -38,5 +32,3 @@ $vis-color-4 : $brand-danger;
 
 $subtle-brand-primary : desaturate($brand-primary, 40%);
 $disabled-color : mix($gray-light, $gray-lighter);
-
-

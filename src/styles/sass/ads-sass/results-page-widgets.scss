@@ -89,7 +89,9 @@
     padding: 10px;
   }
   .s-library-add-title {
-    background: $brand-primary-faded;
+    background: $brand-info;
+    transition: background .4s;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     color: white;
     font-weight: 300;
     font-size: 16px;
@@ -102,7 +104,7 @@
       font-size: 1.5em;
     }
     &:hover {
-      background: darken($brand-primary-faded, 5%);
+      background: darken($brand-info, 5%);
     }
   }
   .s-filter-div {
@@ -129,5 +131,6 @@
   .s-library-select {
     display: inline;
     width: 70%;
+    max-width: 166px;
   }
 }

@@ -283,7 +283,7 @@ define(['marionette',
 
         var that = this,
           //ten seconds
-          timeout = 10000;
+          timeout = 30000;
 
         setTimeout(function(){
           that.model.unset("feedback");
