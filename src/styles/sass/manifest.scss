@@ -15,9 +15,6 @@ $fa-font-path:        "//netdna.bootstrapcdn.com/font-awesome/4.6.3/fonts";  // 
 /* Import Bootstrap source */
 @import '../../libs/bootstrap-sass/_bootstrap';
 
-/* Import nvd3 css */
-
-@import '../css/modified_nv.d3';
 
 /* Import stuff that should be accessible by modules below */
 @import 'ads-sass/ads-variables';
@@ -54,5 +51,3 @@ $fa-font-path:        "//netdna.bootstrapcdn.com/font-awesome/4.6.3/fonts";  // 
 @import 'ads-sass/user-styles';
 @import 'ads-sass/visualizations';
 @import 'ads-sass/print';
-
-

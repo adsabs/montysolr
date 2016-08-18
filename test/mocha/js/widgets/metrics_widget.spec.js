@@ -864,7 +864,6 @@ define([
 
     it("should have a configurable graph view that can show a bar chart", function(done){
 
-      this.timeout(3000);
       var metricsWidget = new MetricsWidget();
       var gModel = new metricsWidget.components.GraphModel();
 
@@ -878,12 +877,11 @@ define([
       //need to wait for animation to complete
 
       setTimeout(function(){
-
-        expect(d3.selectAll("#test g.nv-series-0 rect")[0].length).to.eql(5);
+      expect($("#test rect").length).to.eql(20);
         $("#test").empty();
         done();
 
-      }, 2000);
+      }, 1000);
 
 
     })
@@ -892,7 +890,6 @@ define([
 
     it("should have a configurable graph view that can show a line chart", function(done){
 
-      this.timeout(3000);
       var metricsWidget = new MetricsWidget();
       var gModel = new metricsWidget.components.GraphModel({graphType : "line"});
       var graphView = new metricsWidget.components.GraphView({model : gModel });
@@ -902,12 +899,10 @@ define([
       $("#test").empty().append(graphView.render().el);
 
       setTimeout(function(){
-        //should show 6 different lines, so 12 items (nvd3 shows a separate group with a path and a group of circles)
-        expect($(".nv-group").length).to.eql(12)
-
+        expect($("#test path.line").length).to.eql(6);
         done();
 
-      }, 2500)
+      }, 1000)
 
     })
 
