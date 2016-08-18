@@ -8,31 +8,30 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
-import org.apache.lucene.document.FieldType.NumericType;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
-import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.standard.config.NumberDateFormat;
-import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
+import org.apache.lucene.document.FieldType.LegacyNumericType;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubQueryProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler.ConfigurationKeys;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.LegacyNumericConfig;
+import org.apache.lucene.queryparser.flexible.standard.config.NumberDateFormat;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.DateField;
 import org.apache.solr.schema.IndexSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +48,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class AqpAdsabsQParser extends QParser {
-
+  
+  public static TimeZone UTC = TimeZone.getTimeZone("UTC");
 	public static final Logger log = LoggerFactory
 	.getLogger(AqpAdsabsQParser.class);
 
@@ -106,7 +106,7 @@ public class AqpAdsabsQParser extends QParser {
     }
 
 
-		qParser.setAnalyzer(schema.getAnalyzer());
+		qParser.setAnalyzer(schema.getQueryAnalyzer());
 
 		String defaultField = getParam(CommonParams.DF);
 		if (defaultField == null) {
@@ -208,28 +208,28 @@ public class AqpAdsabsQParser extends QParser {
 		}
 
 
-		HashMap<String, NumericConfig> ncm = new HashMap<String, NumericConfig>();
-		config.set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP, ncm);
+		HashMap<String, LegacyNumericConfig> ncm = new HashMap<String, LegacyNumericConfig>();
+		config.set(StandardQueryConfigHandler.ConfigurationKeys.LEGACY_NUMERIC_CONFIG_MAP, ncm);
 
 		if (namedParams.containsKey("aqp.floatFields")) {
       for (String f: namedParams.get("aqp.floatFields").split(",")) {
-        ncm.put(f, new NumericConfig(8, new MaxNumberFormat(Float.MAX_VALUE), NumericType.FLOAT));
+        ncm.put(f, new LegacyNumericConfig(8, new MaxNumberFormat(Float.MAX_VALUE), LegacyNumericType.FLOAT)); //UPGRADE: todo
       }
     }
 
 		if (namedParams.containsKey("aqp.dateFields")) {
 		  SimpleDateFormat sdf = new SimpleDateFormat(namedParams.containsKey("aqp.dateFormat") 
 		      ? namedParams.get("aqp.dateFormat") : "yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
-		  sdf.setTimeZone(DateField.UTC);
+		  sdf.setTimeZone(UTC);
       for (String f: namedParams.get("aqp.dateFields").split(",")) {
-        ncm.put(f, new NumericConfig(6, new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), NumericType.LONG));
+        ncm.put(f, new LegacyNumericConfig(6, new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), LegacyNumericType.LONG));
       }
     }
 		
     // when precision step=0 (ie use the default solr value), then it is Integer.MAX_VALUE
 		if (namedParams.containsKey("aqp.intFields")) {
       for (String f: namedParams.get("aqp.intFields").split(",")) {
-        ncm.put(f, new NumericConfig(Integer.MAX_VALUE, new MaxNumberFormat(Integer.MAX_VALUE), NumericType.INT));
+        ncm.put(f, new LegacyNumericConfig(Integer.MAX_VALUE, new MaxNumberFormat(Integer.MAX_VALUE), LegacyNumericType.INT));
       }
     }
 		
