@@ -609,11 +609,7 @@ define([
         },
 
         clearBigquery : function(){
-          var newQuery = new ApiQuery({
-            q: "*:*",
-            '__clearBiqQuery' : 'true'
-          });
-          this.trigger("start_search", newQuery );
+          this.trigger("clear_big_query");
         }
       });
 
@@ -629,6 +625,17 @@ define([
 
           this.listenTo(this.view, "start_search", function (query) {
             this.changeDefaultSort(query);
+            this.navigate(query);
+          });
+
+          this.listenTo(this.view, "clear_big_query", function (query) {
+
+            var query = this._currentQuery.clone();
+            //awkward but need to remove qid + provide __clearBigQuery
+            //for querymediator to do the correct thing
+            query.unset('__qid');
+            query.unset('__bigquerySource');
+            query.set('__clearBiqQuery', 'true');
             this.navigate(query);
           });
 

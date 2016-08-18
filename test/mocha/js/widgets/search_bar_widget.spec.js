@@ -438,22 +438,24 @@ define([
         ]
       });
 
+      //stub previous bigquery
+      s._currentQuery = new ApiQuery({
+        q : 'star OR planet',
+        __qid : 'foo',
+        __bigquerySource : 'boo'
+      })
+
       //make sure bigquery can be removed
         $(".bigquery-close").click();
 
-        expect(s.navigate.args[1][0].toJSON()).to.eql(
-          {
-            "q": [
-              "*:*"
-            ],
-            "__clearBiqQuery": [
-              "true"
-            ],
-            "sort": [
-              "date desc"
-            ]
-          }
-        );
+        expect(s.navigate.args[1][0].toJSON()).to.eql({
+          "q": [
+            "star OR planet"
+          ],
+          "__clearBiqQuery": [
+            "true"
+          ]
+        });
 
 
     });
