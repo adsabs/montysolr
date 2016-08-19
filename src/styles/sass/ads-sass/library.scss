@@ -20,6 +20,54 @@
   padding: 15px;
 }
 
+.s-tab {
+  font-size: 16px;
+}
+
+.alert {
+  position:absolute;
+  margin-left: 300px;
+  margin-top: 50px;
+  width:50%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.s-citation-helper-metadata {
+  padding: 3%;
+
+  input {
+    width: 60px;
+  }
+}
+
+.s-citation-helper-metadata:empty {
+  padding:0;
+}
+
+.citation-helper-item {
+  list-style: none;
+  >div{
+    margin-bottom: 20px;
+    border-bottom: 1px;
+  }
+  .s-top-row {
+    //delete button makes it too big
+    max-height: 24px;
+  }
+}
+
+.citation-helper-list-container {
+  position: relative;
+  margin-top: 12px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.s-selectbox-col {
+  text-align: right;
+  padding-left: 0;
+  }
 //styles specific to metadata/all libraries widget
 .s-all-libraries-widget {
   margin-top: 30px;

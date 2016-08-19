@@ -107,6 +107,7 @@ require.config({
         BubbleChart : 'js/widgets/bubble_chart/widget',
 
         Metrics :  'js/widgets/metrics/widget',
+        CitationHelper: 'js/widgets/citation_helper/widget',
         OrcidBigWidget: 'js/modules/orcid/widget/widget',
 
         AuthorFacet: 'js/wraps/author_facet',
