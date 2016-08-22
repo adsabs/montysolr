@@ -7,7 +7,7 @@
     <div class="graph-tab s-graph-tab {{#unless normalizedGraphData}} no-show {{/unless}} {{#if normalized}}active{{/if}} " data-tab="normalized">
       Normalized</div>
     {{/if}}
-    <div class="s-metrics-svg-container" >
+    <div>
       <form action="" class="stacked-form">
       <label> stacked
         <input type="radio" name="bar-arrangement" value="stacked" checked/>
@@ -18,7 +18,7 @@
       </form>
       <div class="pull-right graph-key">
       </div>
-      <div class="svg-container" style="padding-bottom: 58%">
+      <div class="s-metrics-svg-container" style="padding-bottom: 58%">
         <svg class="s-metrics-svg" viewbox="0 0 480 250" preserveAspectRatio="xMinYMin meet"></svg>
       </div>
     </div>
