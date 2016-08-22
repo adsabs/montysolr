@@ -193,7 +193,6 @@ require.config({
     'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
-    'nvd3' :  'libs/nvd3/nv.d3',
     // for development use
     //'google-analytics': "//www.google-analytics.com/analytics_debug",
     'google-analytics': "//www.google-analytics.com/analytics",
@@ -263,12 +262,7 @@ require.config({
     'd3-cloud' : {
       deps :['d3']
     },
-
-    'nvd3' : {
-      deps : ['d3']
-
-    },
-
+    
     'jquery-ui' : {
       deps: ['jquery']
     },

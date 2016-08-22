@@ -1,6 +1,6 @@
 define([
   'marionette',
-  'nvd3',
+  'd3',
   'js/widgets/base/base_widget',
   './extractor_functions',
   'js/components/api_response',
@@ -19,10 +19,11 @@ define([
   'bootstrap',
   'js/components/api_feedback',
   'js/components/api_targets',
-  'hbs!../network_vis/templates/loading-template'
+  'hbs!../network_vis/templates/loading-template',
+  './d3-tip'
 ], function (
   Marionette,
-  nvd3,
+  d3,
   BaseWidget,
   DataExtractor,
   ApiResponse,
@@ -41,8 +42,14 @@ define([
   bs,
   ApiFeedback,
   ApiTargets,
-  loadingTemplate
+  loadingTemplate,
+  d3Tip
   ) {
+
+    /*
+    NOTE: importing d3-tip from the metrics folder bc it is a modified file made to
+    work AMD
+     */
 
 
   //used for processing data
@@ -90,7 +97,9 @@ define([
         normalized: false,
         //tells graph which options to allow
         //right now we do "histogram" and "line"
-        graphType: "histogram"
+        graphType: "histogram",
+        barArrangement : 'stacked',
+        yAxisLabel : 'Papers'
       }
     }
   });
@@ -100,7 +109,10 @@ define([
     className: "graph-view s-graph-view",
     initialize: function () {
       this.initial = true;
-      this.listenTo(this.model, "change:normalized", this.drawGraph);
+    },
+
+    modelEvents : {
+      'change:normalized' : 'render'
     },
 
     ui: {
@@ -108,13 +120,11 @@ define([
     },
 
     events: {
-      "click .graph-tab": "updateTabValue"
+      "click .graph-tab": "updateTabValue",
     },
 
     updateTabValue: function (e) {
       var $e = $(e.currentTarget);
-      this.$(".graph-tab").removeClass("active");
-      $e.addClass("active");
       var val = $e.data("tab");
       if (val === "normalized") {
         this.model.set("normalized", true);
@@ -124,139 +134,316 @@ define([
       }
     },
 
+
     colors  : ["#5683e0", "#7ab889", "#ffb639", "#ed5e5b", "#ce5cff", "#1c459b"],
 
     drawHistogram: function () {
 
-      var data, d3SVG;
-      var that = this;
-      d3SVG = d3.select(this.ui.svg[0]);
+      //modified from https://bl.ocks.org/mbostock/3943967
 
-      //for the tooltip
-      //tells you the total value of y for a given x value
-      //e.g. adds refereed and non-refereed
-      function countAll(data, year) {
-        var total = 0;
-        _.each(data, function (d) {
-          var val = _.filter(d.values, function (v) {
-            if (v.x == year) {
-              return true
-            }
-          });
-          total+= val[0].y;
-        });
-        return  total;
-      }
+        var graphData = this.model.get("normalized") ?
+        this.model.get("normalizedGraphData") :
+        this.model.get("graphData");
 
-      //get data
-      data = this.model.get("normalized") ? this.model.get("normalizedGraphData") : this.model.get("graphData");
-      //make a copy
-      data =  $.extend(true, [], data);
+        var n = graphData.length,
+        stack = d3.layout.stack(),
+        layers = stack(graphData.map(function(g){ return g.values })),
+        yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); }),
+        yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
 
-      //figure out : is this a transition or a re-draw
-      if (that.chart) {
-        //it's a transition
+        var svg = d3.select(this.$("svg")[0]);
+        var that = this;
 
-       //overriding library tooltip function
-        that.chart.tooltip(function (key, x, y, e, graph) {
-          var total = countAll(data, x);
-          return  '<h3>'+x+'</h3>'+
-            '<p><b>' + key + "</b>: " +  y  + '</p>' +
-            '<p><b> Total: </b>' + total.toFixed(1) + '</p>'
-        });
+        var margin = {top: 20, right: 10, bottom: 20, left: 50},
+            width = 480 - margin.left - margin.right,
+            height = 250 - margin.top - margin.bottom;
 
-        d3SVG
-          .datum(data)
-          .transition()
-          .duration(500)
-          .call(that.chart);
-      }
-      else {
+        var years = this.model.get('graphData')[0].values.map(function(o){return o.x});
 
-        nv.addGraph(function () {
-          that.chart = nv.models.multiBarChart();
+        var x = d3.scale.ordinal()
+            .domain(years)
+            .rangeRoundBands([0, width], .08);
 
-          that.chart
-            .color(that.colors);
+        var y = d3.scale.linear()
+            .domain([0, yStackMax])
+            .range([height, 0]);
 
-          that.chart.yAxis
-            //only touch values that are divisible by 1 to get rid of #s that look like "4.0"
-            .tickFormat(function(d){
-              if (d === 0 ){
-                //sometimes -0.1 was showing on the y axis, I dont know why
-                return 0
-              }
-              if (d % 1 !== 0){
-                return d3.format(",.01f")(d)
-              }
-              else {
-                return d3.format(",.0d")(d)
-              }
 
+        this.$("svg").empty();
+
+        var graphContainerG =  svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .classed("graph-container-g", true);
+
+          //create the key
+          if (!this.$(".graph-key").children().length){
+            var keyDivs = d3.select(this.$(".graph-key")[0])
+            .selectAll("div")
+            .data(graphData.map(function(o){return o.key}))
+              .enter()
+              .append("div");
+
+            keyDivs
+              .append("div")
+              .classed("key-block", true)
+              .style("background-color", function(d,i){
+                return that.colors[i]
+              });
+            keyDivs
+              .append("span")
+              .text(function(d){
+                return d;
+              });
+          }
+
+          //cache it so it can be applied to the rects later
+          if (!this.tip) {
+
+            this.tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+              var data = that.model.get("graphData");
+              return data.map(function(obj){
+                var title = obj.key;
+                var val = _.findWhere(obj.values, { x : d.x }).y;
+                return "<b>" + title + "</b>:&nbsp;" + val;
+              }).join("<br/>")
             });
+          }
 
-          /*
-           * This is how you make the chart stacked by default
-           * Not documented anywhere.
-           * */
-          that.chart.multibar.stacked(true);
+          graphContainerG.call(this.tip);
 
-          //overriding library tooltip function
-          that.chart.tooltip(function (key, x, y, e, graph) {
-            var total = countAll(data, x);
-            return  '<h3>'+x+'</h3>'+
-              '<p><b>' + key + "</b>: " +  y  + '</p>' +
-              '<p><b> Total: </b>' +  total.toFixed(1) + '</p>'
-          });
+          graphContainerG.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")");
 
-          d3SVG
-            .datum(data)
-            .call(that.chart);
-        });
-      }
+          graphContainerG.append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(0,0)");
+
+          graphContainerG.append("text")
+              .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+              .attr("transform", "translate("+  -40 +","+(height/2)+")rotate(-90)")  // text is drawn off the screen top left, move down and out and rotate
+              .classed("graph-label", true)
+              .text(this.model.get("yAxisLabel"));
+
+          this.$("input[name=bar-arrangement]").on("change", changeBarArrangement);
+
+          var color = d3.scale.ordinal()
+              .domain([0, n - 1])
+              .range(this.colors);
+
+          var layer =  graphContainerG
+               .selectAll(".layer")
+               .data(layers)
+               .enter().append("g")
+               .attr("class", "layer")
+               .style("fill", function(d, i) { return color(i); });
+
+           var rect = layer.selectAll("rect")
+               .data(function(d) { return d; })
+             .enter()
+             .append("rect")
+             .attr("width", x.rangeBand())
+             .attr("x", function(d) { return x(d.x) })
+             .on('mouseover', this.tip.show)
+             .on('mouseout', this.tip.hide);
+
+
+        var xTickValues = years.length > 5 ? years.filter(function(y, i){
+          if (i % 3 === 0) return true
+        }) : years;
+
+         var xAxis = d3.svg.axis()
+             .scale(x)
+             .tickSize(0)
+             .tickValues(xTickValues)
+             .tickPadding(6)
+             .orient("bottom");
+
+         var yTickCount =  yStackMax > 1 ? 5 : 0;
+
+         var yAxis = d3.svg.axis()
+             .scale(y)
+             .tickSize(0)
+             .ticks(yTickCount)
+             .tickFormat(function(d){
+               if (d > 1) {
+                 return d3.format("s")(d)
+               } else {
+                 return  d3.format(".1n")(d)
+               }
+             })
+             .orient("left");
+
+        graphContainerG.select(".x.axis")
+            .call(xAxis);
+
+        graphContainerG.select(".y.axis")
+            .transition()
+            .call(yAxis);
+
+        graphContainerG.selectAll("rect")
+        .transition()
+        .delay(function(d, i) { return i * 10; })
+        .attr("y", function(d) { return y(d.y0 + d.y); })
+        .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+
+
+      /*
+        stacked/grouped
+       */
+       function changeBarArrangement(e) {
+         if (this.value === "grouped") transitionGrouped();
+         else transitionStacked();
+       }
+
+       function transitionGrouped() {
+         y.domain([0, yGroupMax]);
+
+         rect.transition()
+             .duration(500)
+             .delay(function(d, i) { return i * 10; })
+             .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+             .attr("width", x.rangeBand() / n)
+           .transition()
+             .attr("y", function(d) { return y(d.y); })
+             .attr("height", function(d) { return height - y(d.y); });
+       }
+
+       function transitionStacked() {
+         y.domain([0, yStackMax]);
+
+         rect.transition()
+             .duration(500)
+             .delay(function(d, i) { return i * 10; })
+             .attr("y", function(d) { return y(d.y0 + d.y); })
+             .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+           .transition()
+             .attr("x", function(d) { return x(d.x); })
+             .attr("width", x.rangeBand());
+           }
+
+
     },
 
     drawLineGraph: function () {
-      var data, d3SVG, options, that = this;
 
-      d3SVG = d3.select(this.ui.svg[0]);
-      //get data
-      data = this.model.get("normalized") ? this.model.get("normalizedGraphData") : this.model.get("graphData");
-      //make a copy
-      data =  $.extend(true, [], data);
+      var that = this;
 
-      //figure out : is this a transition or a re-draw
-      if (that.chart) {
-        d3SVG
-          .datum(data)
-          .transition()
-          .duration(500)
-          .call(that.chart);
-      }
-      else {
-        options = {
-          showControls: false
-        };
+      //dont need the radio buttons
+      this.$(".stacked-form").remove();
 
-        nv.addGraph(function () {
-          that.chart = nv.models.lineChart()
-            .x(function (d) {
-              return d.x
-            })
-            .y(function (d) {
-              return d.y
-            })
-            .color(that.colors)
-            .useInteractiveGuideline(true)
-            .options(options);
+      //cache it so it can be applied to the rects later
+      var tip = d3.tip()
+      .attr('class', 'd3-tip')
+      .offset([-10, 0])
+      .html(function(d) {
+        return d.key
+      });
 
-          that.chart.yAxis
-            .tickFormat(d3.format(",.0f"));
+      var graphData = this.model.get("graphData");
 
-          d3SVG.datum(data)
-            .call(that.chart);
-        });
-      }
+      //parse the years
+      graphData.forEach(function(d){
+        d.values.forEach(function(v){
+          v.x = parseInt(v.x)
+        })
+      })
+
+      var years = graphData[0].values.map(function(o){return o.x});
+
+      var svg = d3.select(this.$("svg")[0]),
+        margin = {top: 20, right: 80, bottom: 30, left: 50},
+        width = 480 - margin.left - margin.right,
+        height = 250 - margin.top - margin.bottom;
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var x = d3.scale.linear()
+        .domain(d3.extent(years))
+        .range([0, width]);
+
+    var y = d3.scale.linear()
+        .range([height, 0]);
+
+      y.domain([
+        0,
+        d3.max(
+          _.flatten(graphData.map(function(g){return g.values.map(function(v){return v.y})}))
+        )
+      ]);
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .tickSize(0)
+          .ticks(5)
+          .tickFormat(d3.format())
+          .tickPadding(6)
+          .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .tickSize(0)
+          .ticks(5)
+          .tickFormat(function(d){
+            if (d > 1) {
+              return d3.format("s")(d)
+            } else {
+              return  d3.format(".1n")(d)
+            }
+          })
+          .orient("left");
+
+      var line = d3.svg.line()
+          .x(function(d) { return x(d.x); })
+          .y(function(d) { return y(d.y); });
+
+      g.call(tip);
+
+      g.append("g")
+    		.attr("class", "x axis")
+    		.attr("transform", "translate(0," + height + ")")
+    		.call(xAxis);
+
+    	g.append("g")
+    		.attr("class", "y axis")
+    		.call(yAxis);
+
+      var index = g.selectAll(".index")
+        .data(graphData)
+        .enter().append("g")
+          .attr("class", "index");
+
+      index.append("path")
+          .attr("class", "line")
+          .attr("d", function(d) {
+            return line(d.values); })
+          .style("stroke", function(d, i) { return that.colors[i]; })
+          .on('mouseover', tip.show)
+          .on('mouseout', tip.hide);
+
+        // append key
+        var keyDivs = d3.select(this.$(".graph-key")[0])
+        .style({position : 'absolute', right : 0 })
+        .selectAll("div")
+        .data(graphData.map(function(o){return o.key}))
+          .enter()
+          .append("div");
+
+        keyDivs
+          .append("div")
+          .classed("key-block", true)
+          .style("background-color", function(d,i){
+            return that.colors[i]
+          });
+        keyDivs
+          .append("span")
+          .text(function(d){
+            return d;
+          });
+
+
     },
 
     //listens on change events
@@ -569,7 +756,7 @@ define([
       this.childViews.papersGraphView.model.set("normalizedGraphData", this.dataExtractor.plot_paperhist({norm: true, paperhist_data: hist["publications"]}));
 
       //citations graph
-      var citationsModel = new GraphModel();
+      var citationsModel = new GraphModel({yAxisLabel : 'Citations'});
       this.childViews.citationsGraphView = new GraphView({model: citationsModel });
       this.childViews.citationsGraphView.model.set("graphData", this.dataExtractor.plot_citshist({norm: false, citshist_data: hist["citations"]}));
       this.childViews.citationsGraphView.model.set("normalizedGraphData", this.dataExtractor.plot_citshist({norm: true, citshist_data: hist["citations"]}));

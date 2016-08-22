@@ -402,12 +402,6 @@ module.exports = function(grunt) {
             flatten: true
           },
           {
-            src: ['bower_components/nvd3/*.js'],
-            dest: 'src/libs/nvd3/',
-            expand: true,
-            flatten: true
-          },
-          {
             src: ['bower_components/requirejs-plugins/src/*.js'],
             dest: 'src/libs/requirejs-plugins/',
             expand: true,
@@ -948,7 +942,7 @@ module.exports = function(grunt) {
       'clean:release', 'copy:release',
       'exec:git_describe',
       'string-replace:dist',
-      'requirejs:release_concatenated','requirejs:release_css',
+      // 'requirejs:release_concatenated','requirejs:release_css',
       'hash_require:js', 'hash_require:css',
       'copy:keep_original', 'copy:bumblebee_app',
       'assemble'

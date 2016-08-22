@@ -1,12 +1,25 @@
 
 .s-metrics-svg {
-  height: 345px !important;
+  display: inline-block;
+  	position: absolute;
+  	top: 0;
+  	left: 0;
 
   .disabled{
     pointer-events: all;
   }
 }
 
+
+.svg-container {
+  display: inline-block;
+	position: relative;
+	width: 100%;
+	vertical-align: middle;
+	overflow: hidden;
+  padding-bottom: 100%;
+
+}
 
 
 .s-metrics-title {
@@ -66,7 +79,7 @@
 
 .s-metrics-graph {
   //mostly for print considerations
-  max-width: 600px;
+  max-width: 700px;
 
   @media(min-width: $screen-sm-min){
     width: 60%;
@@ -106,7 +119,7 @@
 
 .s-graph-container text {
 
-  font-size : 16px !important;
+  font-size : 10px !important;
 }
 
 .s-metrics-metadata {
@@ -122,25 +135,86 @@
 }
 
 
-/* nvd3 overrides */
-.nvtooltip h3 {
-  font-size: 16px;
-  font-weight: bold;
-  background-color: #fff;
-}
-
-.nvtooltip  p {
-  text-align: left;
-}
-
-.nvtooltip {
-  box-shadow: 2px 2px 2px $gray-light;
-}
-
-
 .s-graph-view {
   position: relative;
   top: 20px;
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.graph-label {
+  font-weight: bold;
+  font-size: 10px !important;
+  fill: #4b4b4b !important;
+}
+
+.stacked-form {
+  label {
+    font-weight: normal;
+  }
+  margin-left: 10%;
+  display: inline-block;
+}
+
+rect {
+  opacity: .85;
+  transition: opacity .2s;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.line {
+  stroke-opacity: .85;
+  transition: stroke-opacity .2s;
+  &:hover {
+    stroke-opacity: 1;
+  }
+}
+
+.key-block {
+  width: 10px;
+  height: 10px;
+  display:inline-block;
+  margin-right: 5px;
+}
+
+.graph-key {
+  font-size: 12px;
 }
 
 
+}
+
+
+.d3-tip {
+  line-height: 1;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}

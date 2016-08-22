@@ -22,7 +22,6 @@
     "jqueryui": "~1.10.4",
     "lodash": "~2.4.1",
     "marionette": "2.4.5",
-    "nvd3": "1.8.4",
     "persist-js": "https://github.com/jeremydurham/persist-js.git#~0.3.0",
     "require-handlebars-plugin": "1.0.0",
     "requirejs": "2.1.8",
@@ -36,7 +35,7 @@
     "redux": "https://cdnjs.cloudflare.com/ajax/libs/redux/3.5.2/redux.js",
     "redux-thunk": "https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.1.0/redux-thunk.min.js",
     "requirejs-babel": "^0.0.9"
-    },
+  },
   "devDependencies": {
     "chai": "~1.8.0",
     "qunit": "~1.12.0",
