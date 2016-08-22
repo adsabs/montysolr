@@ -2,6 +2,10 @@ define([
 
 ], function () {
 
+  function hasNonZero (arr){
+    return arr.filter(function(x){ return x.y > 0}).length > 0;
+  }
+
 var DataExtractor = {};
 
   function getNonRef(ref, all){
@@ -38,7 +42,11 @@ var DataExtractor = {};
     return [
       {key: "Refereed", values: returnArray[0]},
       {key: "Non-refereed", values: returnArray[1]}
-    ];
+    ].filter(
+         function(x, i){
+            return hasNonZero(x.values);
+         }
+       );
 
   };
 
@@ -62,7 +70,11 @@ var DataExtractor = {};
     return [
       {key: "Refereed", values: returnArray[0]},
       {key: "Non-refereed", values: returnArray[1]}
-    ];
+    ].filter(
+         function(x, i){
+            return hasNonZero(x.values);
+         }
+       );
 
   };
 
@@ -85,13 +97,26 @@ var DataExtractor = {};
       returnArray.push(transformedArray);
     });
 
+    //now, filter to only include arrays with at least 1 non-zero val
 
-    return  [
-      {key: "Ref. citations to ref. papers", values: returnArray[0]},
-      {key: "Ref. citations to non ref. papers", values: returnArray[1]},
-      {key: "Non ref. citations to ref. papers", values: returnArray[2]},
-      {key: "Non ref. citations to non ref. papers", values: returnArray[3]}
-    ];
+    return [
+     "Ref. citations to ref. papers",
+     "Ref. citations to non ref. papers",
+     "Non ref. citations to ref. papers",
+     "Non ref. citations to non ref. papers"
+   ].map(
+     function(x,i){
+       return {
+         key : x,
+         values : returnArray[i]
+       }
+     }
+   )
+   .filter(
+     function(x, i){
+        return hasNonZero(x.values);
+     }
+   )
 
   };
 

@@ -5,8 +5,29 @@
 
     <span class="s-large-close close-widget">x</span>
 
-    <div class="metrics-metadata s-metrics-metadata">
+    {{#if loading}}
+
+    <div class="s-metrics-metadata">
+      <i class="icon-loading"/> Loading metrics...
     </div>
+
+    {{else}}
+
+    <div class="metrics-metadata s-metrics-metadata">
+
+      <p>
+          This metrics report is optimized for printing: just find the print command in your browser's toolbar.
+      </p>
+
+      <p>
+        Currently showing metrics for <b>{{numFound}}</b> records.
+      </p>
+
+    </div>
+
+    {{/if}}
+
+
 
          <!--used by widget when it is on the abstract page-->
         {{#if title}}

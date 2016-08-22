@@ -8,8 +8,6 @@ define([
   'js/components/api_request',
   'js/components/api_query',
   'js/mixins/dependon',
-  'js/mixins/user_change_rows',
-  'hbs!./templates/metrics_metadata',
   'hbs!./templates/metrics_container',
   'hbs!./templates/graph_template',
   'hbs!./templates/paper_table',
@@ -19,7 +17,6 @@ define([
   'bootstrap',
   'js/components/api_feedback',
   'js/components/api_targets',
-  'hbs!../network_vis/templates/loading-template',
   './d3-tip'
 ], function (
   Marionette,
@@ -31,8 +28,6 @@ define([
   ApiRequest,
   ApiQuery,
   Dependon,
-  UserChangeMixin,
-  MetricsMetadataTemplate,
   MetricsContainer,
   GraphTemplate,
   PaperTableTemplate,
@@ -42,19 +37,18 @@ define([
   bs,
   ApiFeedback,
   ApiTargets,
-  loadingTemplate,
   d3Tip
   ) {
 
     /*
     NOTE: importing d3-tip from the metrics folder bc it is a modified file made to
-    work AMD
+    work with AMD
      */
-
 
   //used for processing data
 
   function limitPlaces(n){
+    if (!n) return n;
     var stringNum = n.toString();
     if (stringNum.indexOf(".") > -1 && stringNum.split(".")[1]){
       return n.toFixed(1)
@@ -139,6 +133,8 @@ define([
 
     drawHistogram: function () {
 
+      var that = this;
+
       //modified from https://bl.ocks.org/mbostock/3943967
 
         var graphData = this.model.get("normalized") ?
@@ -167,7 +163,6 @@ define([
         var y = d3.scale.linear()
             .domain([0, yStackMax])
             .range([height, 0]);
-
 
         this.$("svg").empty();
 
@@ -230,16 +225,12 @@ define([
 
           this.$("input[name=bar-arrangement]").on("change", changeBarArrangement);
 
-          var color = d3.scale.ordinal()
-              .domain([0, n - 1])
-              .range(this.colors);
-
           var layer =  graphContainerG
                .selectAll(".layer")
                .data(layers)
                .enter().append("g")
                .attr("class", "layer")
-               .style("fill", function(d, i) { return color(i); });
+               .style("fill", function(d, i) { return that.colors[i]; });
 
            var rect = layer.selectAll("rect")
                .data(function(d) { return d; })
@@ -250,10 +241,24 @@ define([
              .on('mouseover', this.tip.show)
              .on('mouseout', this.tip.hide);
 
+        var xTickValues;
 
-        var xTickValues = years.length > 5 ? years.filter(function(y, i){
-          if (i % 3 === 0) return true
-        }) : years;
+        //avoid having too many ticks
+        if (years.length > 20) {
+          var interval = Math.floor(years.length/5);
+          xTickValues = years.filter(function(y){
+            return y % interval === 0
+          });
+
+        }
+        else if (years.length > 8){
+          xTickValues = years.filter(function(y){
+            return y % 2 === 0
+          });
+        }
+        else {
+          xTickValues = years;
+        }
 
          var xAxis = d3.svg.axis()
              .scale(x)
@@ -345,12 +350,14 @@ define([
 
       var graphData = this.model.get("graphData");
 
+      if (!graphData) return;
+
       //parse the years
       graphData.forEach(function(d){
         d.values.forEach(function(v){
           v.x = parseInt(v.x)
         })
-      })
+      });
 
       var years = graphData[0].values.map(function(o){return o.x});
 
@@ -359,6 +366,16 @@ define([
         width = 480 - margin.left - margin.right,
         height = 250 - margin.top - margin.bottom;
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      //it's only one year, show a message
+      if (years.length === 1){
+        g.append("text")
+        .attr("x", 10)
+        .attr("y", 100)
+        .text("time period is less than a year, refer to table to the left for values");
+
+        return
+      }
 
     var x = d3.scale.linear()
         .domain(d3.extent(years))
@@ -443,7 +460,6 @@ define([
             return d;
           });
 
-
     },
 
     //listens on change events
@@ -467,43 +483,38 @@ define([
   });
 
 
-  var ContainerModel = UserChangeMixin.Model;
+  var ContainerModel = Backbone.Model.extend({
+
+    defaults : function(){
+      return {
+        widgetName : 'Metrics'
+      }
+    }
+  });
 
   var ContainerView = Marionette.LayoutView.extend({
 
-    onRender : function(){
-      this.renderMetadata();
-    },
-
-    //function to just re-render the metadata part at the top
-    renderMetadata : function(){
-        var data = {};
-        data.max = this.model.get("max");
-        data.current = this.model.get("current");
-        data.requestRowsAllowed = this.model.get("requestRowsAllowed");
-        this.$(".metrics-metadata").html(this.metadataTemplate(data));
-    },
-
     template: MetricsContainer,
-    metadataTemplate : MetricsMetadataTemplate,
-    events : {
-      "click .submit-rows" : "changeRows",
-      "click .close-widget": "signalCloseWidget"
-    },
 
-    changeRows : function(e) {
-      e.preventDefault();
-      var num = parseInt(this.$(".metrics-rows").val());
-      //render the loading tempalte
-      if (num){
-        this.model.set("userVal", _.min([this.model.get("max"), num]));
-        this.$(".s-metrics-metadata").html(loadingTemplate());
-      }
+    events : {
+      "click .close-widget": "signalCloseWidget",
+      "click .show-all" : "signalShowAll"
     },
 
     signalCloseWidget: function () {
+      //kill the d3 tip if it's still there
+      $(".d3-tip").remove();
       this.trigger('close-widget');
     },
+
+    signalShowAll: function () {
+      this.$(".show-all").html('<i class="icon-loading"/>&nbsp;&nbsp;' + this.$(".show-all").html());
+      this.trigger('show-all');
+      },
+
+      modelEvents : {
+        change : 'render'
+      },
 
     regions: {
       papersGraph: "#papers .metrics-graph",
@@ -520,93 +531,54 @@ define([
   var MetricsWidget = BaseWidget.extend({
 
     viewEvents: {
-      'close-widget': 'closeWidget'
+      'close-widget': 'closeWidget',
+      'show-all' : 'showAll'
     },
 
     initialize: function (options) {
 
       options = options || {};
 
-      this.containerModel = new ContainerModel({widgetName : "Metrics"});
-      this.listenTo(this.containerModel, "change:userVal", this.requestDifferentRows);
+      this.containerModel = new ContainerModel();
       this.view = new ContainerView({model : this.containerModel});
       this.childViews = {};
       Marionette.bindEntityEvents(this, this.view, Marionette.getOption(this, "viewEvents"));
 
-      //for widgets that extend the base MetricsWidget
+      //for widgets that extend the base MetricsWidget, so they can access this stuff
       this.dataExtractor = DataExtractor;
       this.GraphModel = GraphModel;
       this.GraphView = GraphView;
 
-      this.defaultQueryArguments =  {
-          fl : "bibcode",
-          rows : this.containerModel.get("default")
-      };
+    },
 
+    defaultQueryArguments : {
+      fl : ['bibcode']
+    },
+
+    //so I can test these individually
+    components: {
+      TableModel: TableModel,
+      TableView: TableView,
+      GraphView: GraphView,
+      GraphModel: GraphModel,
+      ContainerView: ContainerView
     },
 
     activate : function(beehive){
       this.setBeeHive(beehive);
-      _.bindAll(this, "setCurrentQuery", "processResponse");
+      _.bindAll(this, "setCurrentQuery", "processMetrics", "checkIfSimpleRequired");
       var pubsub = beehive.getService('PubSub');
       pubsub.subscribe(pubsub.INVITING_REQUEST, this.setCurrentQuery);
-      pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
-
-      //on initialization, store the current query
-      if (this.getBeeHive().getObject("AppStorage")){
-        this.setCurrentQuery(this.getBeeHive().getObject("AppStorage").getCurrentQuery());
-      }
-    },
-
-    getMetrics : function(bibcodes){
-
-      var d = $.Deferred(),
-        pubsub = this.getPubSub(),
-        options = {
-          type : "POST",
-          contentType : "application/json"
-        };
-
-      var request =  new ApiRequest({
-        target: ApiTargets.SERVICE_METRICS,
-        query: new ApiQuery({"bibcodes" : bibcodes}),
-        options : options
-      });
-      // so promise can be resolved
-
-      pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, function(response){
-        d.resolve(response.toJSON());
-      });
-
-      pubsub.publish(pubsub.EXECUTE_REQUEST, request);
-      return d.promise();
-    },
-
-    processResponse: function (response) {
-
-      //it's bibcodes from the search endpoint
-      if (response instanceof ApiResponse){
-        var bibcodes = _.map(response.get("response.docs"), function(d){return d.bibcode})
-        // let container view know how many bibcodes we have
-        this.view.model.set({"numFound": parseInt(response.get("response.numFound")),
-          "rows":  parseInt(response.get("responseHeader.params.rows"))});
-
-        //disable option to get more/fewer bibcodes if there's only 1
-        if (parseInt(response.get("response.numFound")) === 1){
-          this.containerModel.set("requestRowsAllowed", false);
-        }
-
-        this.getMetrics(bibcodes);
-      }
-      //it's from the metrics endpoint
-      else if (response instanceof JsonResponse ) {
-        this.processMetrics(response);
-      }
     },
 
     closeWidget: function () {
       this.reset();
       this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+    },
+
+    //load a large query including RIQ/indices/Tori
+    showAll : function(){
+      this.getIndicators();
     },
 
     reset: function () {
@@ -617,52 +589,13 @@ define([
           this.view[k].currentView.destroy();
       }, this);
 
-      this.containerModel.clear({silent : true}).set(this.containerModel.defaults(), {silent : true});
-    },
-
-    //when a user requests a different number of documents
-    requestDifferentRows : function(model, rows){
-      var query = this.getCurrentQuery().clone();
-      query.unlock();
-      query.set("rows", model.get("userVal"));
-      query.set("fl", "bibcode");
-
-      var request = new ApiRequest({
-        target : ApiTargets.SEARCH,
-        query : query
-      });
-      this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
-    },
-
-    processMetrics : function (response){
-        //how is the json response formed? need to figure out why attributes is there
-        response = response.attributes ? response.attributes : response;
-        // for now, metrics api returns errors as 200 messages, so we have to detect it
-        if ((response.msg && response.msg.indexOf('Unable to get results') > -1) || (response.status == 500)) {
-          this.closeWidget();
-          this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({
-            code: ApiFeedback.CODES.ALERT,
-            msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please try with different search parameters.',
-            modal: true
-          }));
-          return;
-        }
-      if (response["basic stats"]["number of papers"] === 1){
-        this.createTableViews(response, 1);
-        this.createGraphViewsForOnePaper(response);
-        this.insertViewsForOnePaper(response);
-      }
-      else {
-        this.createTableViews(response);
-        this.createGraphViews(response);
-        this.insertViews(response);
-      }
-
+      this.containerModel.clear({silent : true});
     },
 
     createTableViews: function (response, num_bibcodes) {
 
-      var tableData = num_bibcodes === 1 ?  this.createTableDataForOnePaper(response) : this.createTableData(response);
+      var tableData = num_bibcodes === 1 ? this.createTableDataForOnePaper(response)
+      : this.createTableData(response);
 
       this.childViews.papersTableView = new TableView({
         template: PaperTableTemplate,
@@ -689,7 +622,6 @@ define([
     /*
     * functions for >1 bibcode
     * */
-
     createTableData : function(response){
       var data = {};
       var generalData = {refereed: response["basic stats refereed"], total: response["basic stats"]};
@@ -723,17 +655,16 @@ define([
         normalizedRefereedCitations: [citationData.total["normalized number of refereed citations"], citationData.refereed["normalized number of refereed citations"]]
       };
 
-        data.indicesModelData = {
-          hIndex: [indicesData.total["h"], indicesData.refereed["h"]],
-          mIndex: [indicesData.total["m"], indicesData.refereed["m"]],
-          gIndex: [indicesData.total["g"], indicesData.refereed["g"]],
-          i10Index: [indicesData.total["i10"], indicesData.refereed["i10"]],
-          i100Index: [indicesData.total["i100"], indicesData.refereed["i100"]],
-          toriIndex: [indicesData.total["tori"], indicesData.refereed["tori"]],
-          riqIndex: [indicesData.total["riq"], indicesData.refereed["riq"]],
-          read10Index: [indicesData.total["read10"], indicesData.refereed["read10"]]
+      data.indicesModelData = {
+      hIndex: [indicesData.total["h"], indicesData.refereed["h"]],
+      mIndex: [indicesData.total["m"], indicesData.refereed["m"]],
+      gIndex: [indicesData.total["g"], indicesData.refereed["g"]],
+      i10Index: [indicesData.total["i10"], indicesData.refereed["i10"]],
+      i100Index: [indicesData.total["i100"], indicesData.refereed["i100"]],
+      toriIndex: [indicesData.total["tori"], indicesData.refereed["tori"]],
+      riqIndex: [indicesData.total["riq"], indicesData.refereed["riq"]],
+      read10Index: [indicesData.total["read10"], indicesData.refereed["read10"]]
       }
-
 
       //keep to 2 decimal places
       _.each(data, function(table,k){
@@ -744,7 +675,6 @@ define([
 
       return data;
     },
-
 
     createGraphViews: function (response) {
 
@@ -761,42 +691,39 @@ define([
       this.childViews.citationsGraphView.model.set("graphData", this.dataExtractor.plot_citshist({norm: false, citshist_data: hist["citations"]}));
       this.childViews.citationsGraphView.model.set("normalizedGraphData", this.dataExtractor.plot_citshist({norm: true, citshist_data: hist["citations"]}));
 
-      //indices graph
-      var indicesModel = new GraphModel({graphType: "line"});
-      this.childViews.indicesGraphView = new GraphView({model: indicesModel });
-      //this isnt in histograms array
-      this.childViews.indicesGraphView.model.set("graphData", this.dataExtractor.plot_series({series_data: response["time series"]}));
-
       //reads graph
       var readsModel = new GraphModel();
       this.childViews.readsGraphView = new GraphView({model: readsModel });
       this.childViews.readsGraphView.model.set("graphData", this.dataExtractor.plot_readshist({norm: false, readshist_data: hist["reads"]}));
       this.childViews.readsGraphView.model.set("normalizedGraphData", this.dataExtractor.plot_readshist({norm: true, readshist_data: hist["reads"]}));
+
+      //indices graph
+      var indicesModel = new GraphModel({graphType: "line"});
+      this.childViews.indicesGraphView = new GraphView({model: indicesModel });
+
+      //might not be there (for 'simple' variant)
+     if (response["time series"]) {
+      this.childViews.indicesGraphView.model.set("graphData", this.dataExtractor.plot_series({series_data: response["time series"]}));
+    } else {
+      this.childViews.indicesGraphView.model.set({showingSimple : true})
+    }
+
     },
 
     insertViews: function () {
-
       //render the container view
       this.view.render();
+      //attach table and graph views
+      ['papers', 'citations', 'indices', 'reads'].forEach(function(name){
+          this.view[name + 'Table'].show(this.childViews[name + 'TableView']);
+          this.view[name + 'Graph'].show(this.childViews[name + 'GraphView']);
+        }, this);
 
-      //attach table views
-      this.view.papersTable.show(this.childViews.papersTableView);
-      this.view.citationsTable.show(this.childViews.citationsTableView);
-      this.view.indicesTable.show(this.childViews.indicesTableView);
-      this.view.readsTable.show(this.childViews.readsTableView);
-
-      //attach graph views
-      this.view.papersGraph.show(this.childViews.papersGraphView);
-      this.view.citationsGraph.show(this.childViews.citationsGraphView);
-      this.view.indicesGraph.show(this.childViews.indicesGraphView);
-      this.view.readsGraph.show(this.childViews.readsGraphView);
     },
 
     /*
     * functions for 1 bibcode
     * */
-
-
     insertViewsForOnePaper: function (data) {
       //render the container view
       this.view.render({title : this.containerModel.get("title")});
@@ -885,49 +812,270 @@ define([
       return  data["basic stats"]["total number of reads"] > 0;
     },
 
+
     /*
     * end functions for 1 paper
     * */
 
-    //so I can test these individually
-    components: {
-      TableModel: TableModel,
-      TableView: TableView,
-      GraphView: GraphView,
-      GraphModel: GraphModel,
-      ContainerView: ContainerView
+    renderWidgetForCurrentQuery : function(options){
+      //{ simple : true/false}
+      options = options || {};
+
+      this.reset();
+      //for printing
+      this.containerModel.set({
+        url : window.location.href,
+        loading : true
+      });
+
+      var q = this.customizeQuery(this.getCurrentQuery());
+
+      var that = this;
+
+      var allBibcodes = [],
+          rows = 1000,
+          start = 0,
+          numFound = undefined,
+          limit = ApiTargets._limits.Metrics.default;
+
+      q.set("rows", rows);
+
+      var sendRepeatingRequest = function (start){
+
+        q.set({start : start});
+
+        this._executeSearch(q).done(function(request){
+
+          allBibcodes = allBibcodes.concat(
+            request.get("response.docs").map(function(o){return o.bibcode})
+          );
+
+          numFound = numFound || request.get("response").numFound;
+          start += rows;
+          if (start >= numFound || start >= limit){
+            //if more than 6000 records, automatically request the simple version
+            if (numFound > limit && options.simple === undefined) options.simple = true;
+
+            //set numFound  + bibcodes into the view Model
+            that.containerModel.set({numFound : numFound > limit ? limit : numFound,
+              bibcodes : allBibcodes
+             });
+
+            that.getMetrics(allBibcodes, options);
+          } else {
+            sendRepeatingRequest(start);
+          }
+        });
+      }.bind(this);
+
+      sendRepeatingRequest(start);
+
     },
 
-    renderWidgetForCurrentQuery : function(){
-      this.reset();
-      this.containerModel.set("requestRowsAllowed", true);
-      //for printing
-      this.containerModel.set("url", window.location.href);
-      this.dispatchRequest(this.getCurrentQuery());
+    /**
+     * requires a current apiQuery
+     */
+    checkIfSimpleRequired : function(){
+      //bibcodes are being provided rather than query, don't show the simple version
+      if (!this._currentQuery) return new $.Deferred().resolve(false);
+
+      var query = this._currentQuery.clone();
+      query.unlock();
+      query.set({
+         stats : 'true',
+        'stats.field' : 'citation_count',
+        fl: 'id'
+      });
+
+      return this._executeSearch(query).then(function(apiResponse){
+         var citationCount = apiResponse.get('stats.stats_fields.citation_count.sum');
+         var simple = citationCount > 50000 ? true : false;
+         return simple
+      });
+
+    },
+
+    //just get indicators
+    getIndicators : function(){
+
+      var pubsub = this.getPubSub(),
+        options = {
+          type: "POST",
+          contentType: "application/json"
+        };
+
+      var query = new ApiQuery({
+        bibcodes : this.containerModel.get("bibcodes"),
+        types : ['indicators', 'timeseries']
+      });
+
+      var request = new ApiRequest({
+        target: ApiTargets.SERVICE_METRICS,
+        query: query,
+        options: options
+      });
+
+      function onResponse(jsonResponse) {
+        var response = jsonResponse.toJSON();
+        
+        this.childViews.indicesGraphView.model.set({
+          graphData: this.dataExtractor.plot_series({series_data: response["time series"]}),
+          showingSimple : false
+        }
+      );
+
+        var indicesData = {refereed : response["indicators refereed"], total : response["indicators"]};
+
+        var indicesModelData = {
+        hIndex: [indicesData.total["h"], indicesData.refereed["h"]],
+        mIndex: [indicesData.total["m"], indicesData.refereed["m"]],
+        gIndex: [indicesData.total["g"], indicesData.refereed["g"]],
+        i10Index: [indicesData.total["i10"], indicesData.refereed["i10"]],
+        i100Index: [indicesData.total["i100"], indicesData.refereed["i100"]],
+        toriIndex: [indicesData.total["tori"], indicesData.refereed["tori"]],
+        riqIndex: [indicesData.total["riq"], indicesData.refereed["riq"]],
+        read10Index: [indicesData.total["read10"], indicesData.refereed["read10"]]
+        }
+
+        //keep to 2 decimal places
+          _.each(indicesModelData, function(arr, name){
+            indicesModelData[name] = [limitPlaces(arr[0]), limitPlaces(arr[1])];
+          });
+
+        this.childViews.indicesTableView.model.set(indicesModelData);
+
+        this.childViews.indicesTableView.render();
+        this.childViews.indicesGraphView.render();
+      }
+
+      onResponse = onResponse.bind(this);
+
+      pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, onResponse);
+      pubsub.publish(pubsub.EXECUTE_REQUEST, request);
+    },
+
+    getMetrics: function(bibcodes, options) {
+      options = options || {};
+     
+    /*
+            this function returns a promise
+            at the moment the promise is only used by
+            the abstract page metrics widget that shows metrics
+            for 1 paper
+          */
+
+    var d = $.Deferred();
+
+    function _getMetrics(simple) {
+
+      var pubsub = this.getPubSub(),
+        options = {
+          type: "POST",
+          contentType: "application/json"
+        };
+
+      var query = new ApiQuery({
+        bibcodes : bibcodes,
+      });
+
+      if (simple) query.set({
+        types: ['simple']
+      });
+
+      var request = new ApiRequest({
+        target: ApiTargets.SERVICE_METRICS,
+        query: query,
+        options: options
+      });
+
+      function onResponse() {
+        //the promise is used by paper metrics widget
+        d.resolve();
+        this.processMetrics.apply(this, arguments);
+      }
+
+      onResponse = onResponse.bind(this);
+
+      pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, onResponse);
+      pubsub.publish(pubsub.EXECUTE_REQUEST, request);
+
+    }
+
+    _getMetrics = _getMetrics.bind(this);
+
+    if (options.simple !== undefined) {
+      _getMetrics(options.simple);
+    } else {
+      this.checkIfSimpleRequired().done(_getMetrics);
+    }
+
+    return d.promise();
+
+  },
+
+
+    processMetrics : function (response){
+
+      this.containerModel.set("loading", false);
+
+        //how is the json response formed? need to figure out why attributes is there
+        response = response.attributes ? response.attributes : response;
+        // for now, metrics api returns errors as 200 messages, so we have to detect it
+        if ((response.msg && response.msg.indexOf('Unable to get results') > -1) || (response.status == 500)) {
+          this.closeWidget();
+          this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({
+            code: ApiFeedback.CODES.ALERT,
+            msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please try with different search parameters.',
+            modal: true
+          }));
+          return;
+        }
+      if (response["basic stats"]["number of papers"] === 1){
+        this.createTableViews(response, 1);
+        this.createGraphViewsForOnePaper(response);
+        this.insertViewsForOnePaper(response);
+      }
+      else {
+        this.createTableViews(response);
+        this.createGraphViews(response);
+        this.insertViews(response);
+      }
+
+    },
+
+    _executeSearch: function(apiQuery){
+
+      var pubsub = this.getPubSub();
+
+      var req = new ApiRequest({
+        target: ApiTargets.SEARCH,
+        query: apiQuery
+      });
+      var defer = $.Deferred();
+
+      pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
+        defer.resolve(data);
+      }), this);
+
+      pubsub.publish(pubsub.EXECUTE_REQUEST, req);
+
+      return defer;
     },
 
     renderWidgetForListOfBibcodes : function(bibcodes){
       this.reset();
 
-      var request =  new ApiRequest({
-        target: ApiTargets.SERVICE_METRICS,
-        query: new ApiQuery({"bibcodes" : bibcodes}),
-        options : {
-          type : "POST",
-          contentType : "application/json"
-        }
-      });
-
-      //normally this info would come from apiquery
       // let container view know how many bibcodes we have
-      this.view.model.set({
+      this.containerModel.set({
         numFound : bibcodes.length,
-        rows : bibcodes.length
+        loading : true
       });
-
-      this.containerModel.set("requestRowsAllowed", false);
-
-      this.getPubSub().publish(this.getPubSub().EXECUTE_REQUEST, request);
+      /*
+        for now, library metrics always show everything (simple = false).
+        If this changed in the future, the checkIfSimpleRequired function would need to
+        be refactored to create a bigquery, then send the qid to execute_query
+       */
+      this.getMetrics(bibcodes, {simple : false});
     }
 
   });

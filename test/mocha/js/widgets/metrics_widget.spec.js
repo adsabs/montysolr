@@ -17,7 +17,7 @@ define([
   ApiTargets
   ){
 
-  describe("Metrics Widget (metrics_widget.spec.js)", function(){
+describe("Metrics Widget (metrics_widget.spec.js)", function(){
 
 //query : {"bibcodes":["1980ApJS...44..137K","1980ApJS...44..489B"]}'
 
@@ -302,7 +302,7 @@ define([
 
     //first, test Edwin's functions
 
-    it("should have a data extractor object that takes metrics data and prepares json for the nvd3 graph", function(){
+    it("should have a data extractor object that takes metrics data and prepares json for the graph", function(){
 
       var hist = testData.histograms;
 
@@ -314,211 +314,163 @@ define([
       var norm_paperhist = DataExtractor.plot_paperhist({norm : false, paperhist_data : hist["publications"]});
       var indexes_data = DataExtractor.plot_series({series_data : testData["time series"]});
 
+
       expect(citshist).to.eql([
-        {
-          "key": "Ref. citations to ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 0
-            },
-            {
-              "x": "2012",
-              "y": 0
-            },
-            {
-              "x": "2013",
-              "y": 0
-            },
-            {
-              "x": "2014",
-              "y": 0
-            },
-            {
-              "x": "2015",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "Ref. citations to non ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 1
-            },
-            {
-              "x": "2012",
-              "y": 1
-            },
-            {
-              "x": "2013",
-              "y": 0
-            },
-            {
-              "x": "2014",
-              "y": 1
-            },
-            {
-              "x": "2015",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "Non ref. citations to ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 0
-            },
-            {
-              "x": "2012",
-              "y": 0
-            },
-            {
-              "x": "2013",
-              "y": 0
-            },
-            {
-              "x": "2014",
-              "y": 1
-            },
-            {
-              "x": "2015",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "Non ref. citations to non ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 1
-            },
-            {
-              "x": "2012",
-              "y": 5
-            },
-            {
-              "x": "2013",
-              "y": 3
-            },
-            {
-              "x": "2014",
-              "y": 2
-            },
-            {
-              "x": "2015",
-              "y": 2
-            }
-          ]
-        }
-      ]);
+  {
+    "key": "Ref. citations to non ref. papers",
+    "values": [
+      {
+        "x": "2011",
+        "y": 1
+      },
+      {
+        "x": "2012",
+        "y": 1
+      },
+      {
+        "x": "2013",
+        "y": 0
+      },
+      {
+        "x": "2014",
+        "y": 1
+      },
+      {
+        "x": "2015",
+        "y": 0
+      }
+    ]
+  },
+  {
+    "key": "Non ref. citations to ref. papers",
+    "values": [
+      {
+        "x": "2011",
+        "y": 0
+      },
+      {
+        "x": "2012",
+        "y": 0
+      },
+      {
+        "x": "2013",
+        "y": 0
+      },
+      {
+        "x": "2014",
+        "y": 1
+      },
+      {
+        "x": "2015",
+        "y": 0
+      }
+    ]
+  },
+  {
+    "key": "Non ref. citations to non ref. papers",
+    "values": [
+      {
+        "x": "2011",
+        "y": 1
+      },
+      {
+        "x": "2012",
+        "y": 5
+      },
+      {
+        "x": "2013",
+        "y": 3
+      },
+      {
+        "x": "2014",
+        "y": 2
+      },
+      {
+        "x": "2015",
+        "y": 2
+      }
+    ]
+  }
+]);
 
       expect(norm_citshist).to.eql([
-        {
-          "key": "Ref. citations to ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 0
-            },
-            {
-              "x": "2012",
-              "y": 0
-            },
-            {
-              "x": "2013",
-              "y": 0
-            },
-            {
-              "x": "2014",
-              "y": 0
-            },
-            {
-              "x": "2015",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "Ref. citations to non ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 0.25
-            },
-            {
-              "x": "2012",
-              "y": 0.3333333333333333
-            },
-            {
-              "x": "2013",
-              "y": 0
-            },
-            {
-              "x": "2014",
-              "y": 1
-            },
-            {
-              "x": "2015",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "Non ref. citations to ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 0
-            },
-            {
-              "x": "2012",
-              "y": 0
-            },
-            {
-              "x": "2013",
-              "y": 0
-            },
-            {
-              "x": "2014",
-              "y": 0.125
-            },
-            {
-              "x": "2015",
-              "y": 0
-            }
-          ]
-        },
-        {
-          "key": "Non ref. citations to non ref. papers",
-          "values": [
-            {
-              "x": "2011",
-              "y": 0.1111111111111111
-            },
-            {
-              "x": "2012",
-              "y": 2.861111111111111
-            },
-            {
-              "x": "2013",
-              "y": 0.9444444444444444
-            },
-            {
-              "x": "2014",
-              "y": 0.4444444444444444
-            },
-            {
-              "x": "2015",
-              "y": 0.3611111111111111
-            }
-          ]
-        }
-      ]);
+  {
+    "key": "Ref. citations to non ref. papers",
+    "values": [
+      {
+        "x": "2011",
+        "y": 0.25
+      },
+      {
+        "x": "2012",
+        "y": 0.3333333333333333
+      },
+      {
+        "x": "2013",
+        "y": 0
+      },
+      {
+        "x": "2014",
+        "y": 1
+      },
+      {
+        "x": "2015",
+        "y": 0
+      }
+    ]
+  },
+  {
+    "key": "Non ref. citations to ref. papers",
+    "values": [
+      {
+        "x": "2011",
+        "y": 0
+      },
+      {
+        "x": "2012",
+        "y": 0
+      },
+      {
+        "x": "2013",
+        "y": 0
+      },
+      {
+        "x": "2014",
+        "y": 0.125
+      },
+      {
+        "x": "2015",
+        "y": 0
+      }
+    ]
+  },
+  {
+    "key": "Non ref. citations to non ref. papers",
+    "values": [
+      {
+        "x": "2011",
+        "y": 0.1111111111111111
+      },
+      {
+        "x": "2012",
+        "y": 2.861111111111111
+      },
+      {
+        "x": "2013",
+        "y": 0.9444444444444444
+      },
+      {
+        "x": "2014",
+        "y": 0.4444444444444444
+      },
+      {
+        "x": "2015",
+        "y": 0.3611111111111111
+      }
+    ]
+  }
+]);
+
 
       expect(readshist).to.eql([
         {
@@ -877,7 +829,7 @@ define([
       //need to wait for animation to complete
 
       setTimeout(function(){
-      expect($("#test rect").length).to.eql(20);
+      expect($("#test rect").length).to.eql(15);
         $("#test").empty();
         done();
 
@@ -934,7 +886,12 @@ define([
       metricsWidget.createGraphViews(JSON.parse(JSON.stringify(testData)));
 
       //should have 4 graph views
-      expect(_.keys(metricsWidget.childViews)).to.eql(["papersGraphView", "citationsGraphView", "indicesGraphView", "readsGraphView"]);
+      expect(_.keys(metricsWidget.childViews)).to.eql([
+            "papersGraphView",
+            "citationsGraphView",
+            "readsGraphView",
+            "indicesGraphView"
+          ]);
 
       //they should be instances of GraphView
       expect(metricsWidget.childViews.papersGraphView).to.be.instanceof(metricsWidget.components.GraphView);
@@ -969,7 +926,9 @@ define([
 
       var minsub = new (MinimalPubSub.extend({
         request: function(apiRequest) {
-          if (apiRequest.toJSON().target === ApiTargets.SEARCH) {
+          this.counter = this.counter || 0;
+          if (apiRequest.toJSON().target === ApiTargets.SEARCH && this.counter == 0) {
+            this.counter++;
             return {
               "responseHeader": {
                 "status": 0,
@@ -988,7 +947,52 @@ define([
               ]
               }};
           }
+          else if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter == 1) {
+            //stats query
+            this.counter++;
+
+            return {
+                "responseHeader": {
+                  "status": 0,
+                  "QTime": 10,
+                  "params": {
+                    "q": "2016ChNew..23....8T",
+                    "stats": "true",
+                    "fl": "id",
+                    "sort": "date desc, bibcode desc",
+                    "wt": "json",
+                    "stats.field": "citation_count"
+                  }
+                },
+                "response": {
+                  "numFound": 1,
+                  "start": 0,
+                  "docs": [
+                    {
+                      "id": "11642300"
+                    }
+                  ]
+                },
+                "stats": {
+                  "stats_fields": {
+                    "citation_count": {
+                      "min": 0,
+                      "max": 0,
+                      "count": 1,
+                      "missing": 0,
+                      "sum": 0,
+                      "sumOfSquares": 0,
+                      "mean": 0,
+                      "stddev": 0,
+                      "facets": {}
+                    }
+                  }
+                }
+              }
+            }
+
           else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS) {
+            this.counter++;
             return JSON.parse(JSON.stringify(testData));
           }
         }}))({verbose: false});
@@ -1010,13 +1014,14 @@ define([
       }, 5);
     });
 
+    it("should request a simple variant of the metrics if > 50,000 citations", function(){
+      var metricsWidget = new MetricsWidget();
 
-    it("should allow the user to request a different number of documents", function(done){
 
       var minsub = new (MinimalPubSub.extend({
-        request: function (apiRequest) {
+        request: sinon.spy(function(apiRequest) {
           this.counter = this.counter || 0;
-          if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter == 0) {
+          if (apiRequest.toJSON().target === ApiTargets.SEARCH && this.counter == 0) {
             this.counter++;
             return {
               "responseHeader": {
@@ -1025,27 +1030,8 @@ define([
                 "params": {
                   "fl": "bibcode",
                   "indent": "true",
-                  "wt": "json",
                   "rows": 200,
-                  "q": "bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
-              "response": {"numFound": 2, "start": 0, "docs": [
-                {
-                  "bibcode": "1980ApJS...44..489B"},
-                {
-                  "bibcode": "1980ApJS...44..137K"}
-              ]
-              }}
-          }
-          else if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter > 1){
-            return {
-              "responseHeader": {
-                "status": 0,
-                "QTime": 1,
-                "params": {
-                  "fl": "bibcode",
-                  "indent": "true",
                   "wt": "json",
-                  "rows": 1,
                   "q": "bibcode:(\"1980ApJS...44..137K\" OR \"1980ApJS...44..489B\")\n"}},
               "response": {"numFound": 2, "start": 0, "docs": [
                 {
@@ -1053,41 +1039,67 @@ define([
                 {
                   "bibcode": "1980ApJS...44..137K"}
               ]
-              }}
+              }};
           }
-          //just to be explicit
-          else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS ) {
+          else if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter == 1) {
+            //stats query
+            this.counter++;
+
+            return {
+                "responseHeader": {
+                  "status": 0,
+                  "QTime": 10,
+                  "params": {
+                    "q": "2016ChNew..23....8T",
+                    "stats": "true",
+                    "fl": "id",
+                    "sort": "date desc, bibcode desc",
+                    "wt": "json",
+                    "stats.field": "citation_count"
+                  }
+                },
+                "response": {
+                  "numFound": 1,
+                  "start": 0,
+                  "docs": [
+                    {
+                      "id": "11642300"
+                    }
+                  ]
+                },
+                "stats": {
+                  "stats_fields": {
+                    "citation_count": {
+                      //sum is checked by the widget
+                      "sum": 100000,
+
+                    }
+                  }
+                }
+              }
+            }
+
+          else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS) {
             this.counter++;
             return JSON.parse(JSON.stringify(testData));
           }
-        }
+        })
       }))({verbose: false});
 
-      var metricsWidget = new MetricsWidget();
       metricsWidget.activate(minsub.beehive.getHardenedInstance());
 
-      $("#test").append(metricsWidget.view.render().el);
+      expect(metricsWidget.childViews.citationsTableView).to.be.undefined;
 
       //provide widget with current query
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
+      //trigger show event, should prompt dispatchRequest
       metricsWidget.renderWidgetForCurrentQuery();
-      expect(normalizeSpace($("#test").find(".metrics-metadata").text().trim())).to.eql('Currently viewing metrics for 2 papers. Change to first paper(s) (max is 2). Submit This metrics report is optimized for printing: just find the print command in your browser\'s toolbar.');
 
-      sinon.spy(metricsWidget.getPubSub(), "publish");
-
-        $("#test").find(".metrics-metadata input").val("1");
-        $("#test").find(".metrics-metadata button.submit-rows").trigger("click");
-
-        setTimeout(function(){
-          expect(metricsWidget.getPubSub().publish.args[0][0]).to.eql(minsub.EXECUTE_REQUEST);
-          expect(metricsWidget.getPubSub().publish.args[0][1].get("query").toJSON().rows).to.eql([1]);
-          expect($("#test").find(".metrics-metadata").text().trim()).to.eql("Loading data...");
-          done();
-        }, 1000);
-
+      expect(minsub.request.args[2][0].get("query").toJSON().types).to.eql(["simple"]);
 
     });
+
 
     it("should render citations and references only for 1 bibcode", function(){
 
@@ -1389,11 +1401,54 @@ define([
               ]
               }}
           }
-          //just to be explicit
-          else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS ) {
+          else if (apiRequest.toJSON().target == ApiTargets.SEARCH && this.counter == 1) {
+            //stats query
             this.counter++;
-            return JSON.parse(JSON.stringify(testDataOne));
-          }
+            return {
+                "responseHeader": {
+                  "status": 0,
+                  "QTime": 10,
+                  "params": {
+                    "q": "2016ChNew..23....8T",
+                    "stats": "true",
+                    "fl": "id",
+                    "sort": "date desc, bibcode desc",
+                    "wt": "json",
+                    "stats.field": "citation_count"
+                  }
+                },
+                "response": {
+                  "numFound": 1,
+                  "start": 0,
+                  "docs": [
+                    {
+                      "id": "11642300"
+                    }
+                  ]
+                },
+                "stats": {
+                  "stats_fields": {
+                    "citation_count": {
+                      "min": 0,
+                      "max": 0,
+                      "count": 1,
+                      "missing": 0,
+                      "sum": 0,
+                      "sumOfSquares": 0,
+                      "mean": 0,
+                      "stddev": 0,
+                      "facets": {}
+                    }
+                  }
+                }
+              }
+            }
+
+            //just to be explicit
+            else if (apiRequest.toJSON().target == ApiTargets.SERVICE_METRICS ) {
+              this.counter++;
+              return JSON.parse(JSON.stringify(testDataOne));
+            }
         }
       }))({verbose: false});
 
@@ -1402,11 +1457,11 @@ define([
 
       $("#test").append(metricsWidget.view.render().el);
 
+
       //provide widget with current query
       minsub.publish(minsub.START_SEARCH, new ApiQuery({q : "star"}));
 
       metricsWidget.renderWidgetForCurrentQuery();
-      expect(normalizeSpace($("#test").find(".metrics-metadata").text())).to.eql("Currently viewing metrics for 1 paper. This metrics report is optimized for printing: just find the print command in your browser's toolbar.");
 
       expect($("#test").find("h3:visible").text()).to.eql("CitationsReads");
 

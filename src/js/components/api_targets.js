@@ -85,7 +85,7 @@ define([
         },
 
         Metrics : {
-          default : 1000, limit : 2000
+          default : 6000, limit : 6000
         },
 
         AuthorNetwork : {
