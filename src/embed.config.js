@@ -94,7 +94,6 @@ require.config({
     'hoverIntent': 'libs/jquery-hoverIntent/jquery.hoverIntent',
     'cache': 'libs/dsjslib/lib/Cache',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
-    'nvd3': 'libs/nvd3/nv.d3',
     'filesaver': 'libs/FileSaver/FileSaver',
     'select2': 'libs/select2/select2',
     'squire': '../bower_components/squire/src/Squire',
