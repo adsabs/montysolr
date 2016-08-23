@@ -71,6 +71,10 @@ define([
       "change" : "render"
     },
 
+    onRender : function(){
+      this.$('[data-toggle="tooltip"]').tooltip();
+    },
+
 
     formatDate : function(d){
      return moment.utc(d).local().format("MMM D YYYY, h:mma");
@@ -81,6 +85,11 @@ define([
       var data = this.model.toJSON();
       data.date_last_modified = this.formatDate(data.date_last_modified);
       data.date_created = this.formatDate(data.date_created);
+      if (this.model.get("num_documents") >= 2000) {
+        //show a warning when user exports library that it might take a while
+        data.largeLibrary = true
+      }
+
       return data;
 
     },
@@ -114,7 +123,6 @@ define([
       $form.addClass("hidden");
 
     },
-
 
 
     triggerSubviewNavigate : function(e){

@@ -678,15 +678,18 @@ define([
         expect(publishStub.args[0][0]).to.eql("[PubSub]-New-Query");
 
         expect(publishStub.args[0][1].toJSON()).to.eql({
-          "__bigquery": [
-            "1",
-            "2",
-            "3"
-          ],
-          "__bigquerySource": [
-            "Library: Aliens Among Us"
-          ]
-        });
+            "__bigquery": [
+              "1",
+              "2",
+              "3"
+            ],
+            "__bigquerySource": [
+              "Library: Aliens Among Us"
+            ],
+            "sort": [
+              "date desc"
+            ]
+          });
 
         done();
 

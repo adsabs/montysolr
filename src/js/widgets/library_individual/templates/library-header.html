@@ -68,10 +68,24 @@
 
     {{#if edit}}
     <div class="pull-right" style="position:relative;z-index:1">
-        <button class="btn btn-default bigquery-export">
-            <i class="icon-loading" style="display:none"></i>
-            <i class="fa fa-arrow-right"></i> View library in search results page
-        </button>
+      
+      {{#if largeLibrary}}
+          <button
+          class="btn btn-default bigquery-export"
+          data-placement="bottom"
+          title="large libraries can take some time to export"
+          data-toggle="tooltip"
+          >
+              <i class="icon-loading" style="display:none"></i>
+              <i class="fa fa-arrow-right"></i> View library in search results page
+          </button>
+      {{else}}
+          <button class="btn btn-default bigquery-export">
+              <i class="icon-loading" style="display:none"></i>
+              <i class="fa fa-arrow-right"></i> View library in search results page
+          </button>
+      {{/if}}
+
     </div>
     <div class="editable-item" data-field="name">
         <h2>{{name}} <button class="btn btn-link toggle-form">edit</button></h2>

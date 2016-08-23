@@ -9,12 +9,12 @@
                 <select class="form-control" id="sort-select" style="display:inline; width:180px">
                     <optgroup label="descending">
                         <option value="citation_count desc" {{#compare sort "citation_count desc"}} selected {{/compare}}>citation count desc</option>
-                        <option value="date desc" {{#compare sort "date desc"}} selected {{/compare}}>pub date desc</option>
+                        <option value="date desc" {{#compare sort "date desc"}} selected {{/compare}}>date desc</option>
                         <option value="read_count desc" {{#compare sort "read_count desc"}} selected {{/compare}}>read count desc</option>
                     </optgroup>
                     <optgroup label="ascending">
                         <option value="citation_count asc" {{#compare sort "citation_count asc"}} selected {{/compare}}>citation count asc</option>
-                        <option value="date asc" {{#compare sort "date asc"}} selected {{/compare}}>pub date asc</option>
+                        <option value="date asc" {{#compare sort "date asc"}} selected {{/compare}}>date asc</option>
                         <option value="read_count asc" {{#compare sort "read_count asc"}} selected {{/compare}}>read count asc</option>
                     </optgroup>
                 </select>
