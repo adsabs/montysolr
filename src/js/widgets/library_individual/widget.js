@@ -236,7 +236,7 @@ define([
                   var query = new ApiQuery({
                     __bigquery : bibcodes,
                     __bigquerySource : 'Library: ' + that.headerModel.get("name"),
-                    // sort : 'date desc'
+                     sort : 'date desc'
                   });
                   pubsub.publish(pubsub.START_SEARCH, query);
                 });
