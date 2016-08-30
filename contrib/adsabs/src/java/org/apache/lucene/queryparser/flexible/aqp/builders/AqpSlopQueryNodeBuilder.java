@@ -1,5 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
+import org.apache.lucene.index.Term;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,7 +26,9 @@ import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
+import org.apache.lucene.search.PhraseQuery.Builder;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 
 /**
  * This builder basically reads the {@link Query} object set on the
@@ -58,7 +62,15 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
 	    		defaultValue = pos[pos.length-1] - pos.length + 1;
 	    	}
     	}
-      ((PhraseQuery) query).setSlop(defaultValue);
+    	
+    	if (defaultValue <= 1) return query;
+    	
+    	Builder builder = new PhraseQuery.Builder();
+    	builder.setSlop(defaultValue);
+    	for (Term t: ((PhraseQuery) query).getTerms()) {
+    	  builder.add(t);
+    	}
+    	query = builder.build();
 
     } else {
     	if (defaultValue == 0) {
@@ -67,7 +79,16 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
 	    		defaultValue = pos[pos.length-1] - pos.length + 1;
 	    	}
     	}
-      ((MultiPhraseQuery) query).setSlop(defaultValue);
+    	
+    	if (defaultValue <= 1) return query;
+    	
+      MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder();
+      builder.setSlop(defaultValue);
+      Term[][] terms = ((MultiPhraseQuery) query).getTermArrays(); 
+      for (int i=0; i < terms.length; i++) {
+        builder.add(terms[i]);
+      }
+      query = builder.build();
     }
 
     return query;

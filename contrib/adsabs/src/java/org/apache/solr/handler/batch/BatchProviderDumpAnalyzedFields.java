@@ -83,7 +83,7 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 		SolrCore core = req.getCore();
 		IndexSchema schema = core.getLatestSchema();
 		final HashMap<String, FieldType> fieldsToLoad = new HashMap<String, FieldType>();
-		final Analyzer analyzer = core.getLatestSchema().getAnalyzer();
+		final Analyzer analyzer = core.getLatestSchema().getIndexAnalyzer();
 
 		String q = params.get(CommonParams.Q, null);
 		if (q == null) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilderProvider;
@@ -12,6 +13,7 @@ import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.util.AttributeImpl;
+import org.apache.lucene.util.AttributeReflector;
 
 public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements
 		AqpFunctionQueryBuilderConfig {
@@ -61,14 +63,30 @@ public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements
 
 	@Override
 	public void clear() {
-		throw new UnsupportedOperationException();
-		
+		providers.clear();
+		builders.clear();
 	}
 
 	@Override
 	public void copyTo(AttributeImpl target) {
-		throw new UnsupportedOperationException();
-		
+		AqpFunctionQueryBuilderConfig t = (AqpFunctionQueryBuilderConfig) target;
+		for (AqpFunctionQueryBuilderProvider provider: providers) {
+      t.addProvider(provider);
+    }
+    for ( Entry<String, AqpFunctionQueryBuilder> builder: builders.entrySet()) {
+      t.setBuilder(builder.getKey(), builder.getValue());
+    }
 	}
+
+	
+  @Override
+  public void reflectWith(AttributeReflector reflector) {
+    for (AqpFunctionQueryBuilderProvider provider: providers) {
+      reflector.reflect(AqpFunctionQueryBuilderConfig.class, "provider", provider);
+    }
+    for ( Entry<String, AqpFunctionQueryBuilder> builder: builders.entrySet()) {
+      reflector.reflect(AqpFunctionQueryBuilderConfig.class, "builder:" + builder.getKey(), builder.getValue());
+    }
+  }
 
 }
