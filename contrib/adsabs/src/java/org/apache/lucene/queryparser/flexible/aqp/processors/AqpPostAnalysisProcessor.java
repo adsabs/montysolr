@@ -43,6 +43,18 @@ import org.apache.solr.common.params.SolrParams;
  * add a boost to queries that were original input, or wrap queries with
  * many terms into a spanquery instead of a phrase. The options are many!
  * 
+ * This processor will extract all synonyms from the "multi token stream"
+ * it will join the synonyms with OR's and keep other tokens in place
+ * ie. it will create a new tree:
+ * 
+ * <pre>
+ *                      hubble space telescope goes home
+ *                                         |
+ *                                   ----------------      
+ *                                  /          \     \
+ *       (hubble space telescope | HST)       goes   home
+ *  
+ *  </pre>
  *
  */
 public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {

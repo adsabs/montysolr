@@ -20,11 +20,9 @@ package org.apache.lucene.search;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.AssertingScorer.IteratorState;
-import org.apache.lucene.util.ToStringUtils;
+import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.Bits;
 
-import java.util.BitSet;
 import java.util.Set;
 import java.io.IOException;
 

@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.search.DocIdSet;
-import org.apache.lucene.search.Filter;
-import org.apache.lucene.util.Bits;
+import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -72,36 +69,12 @@ public class BatchProviderDumpBibcodes extends BatchProvider {
 	  
 	  
 	  ModifiableSolrParams mParams = new ModifiableSolrParams( locReq.getParams() );
-	  mParams.set(CommonParams.Q, "*:*");
+	  mParams.set(CommonParams.Q, "custom ids");
 	  locReq.setParams(mParams);
-	  internalWorker.setFilter(new BitSetFilter(bits));
-	  
+	  internalWorker.setQuery(new BitSetQuery(bits));
 	  internalWorker.run(locReq, queue);
-	  
-	  
   }
 	
-	public static final class BitSetFilter extends Filter {
-		private FixedBitSet docs;
-    
-    public BitSetFilter(FixedBitSet docs) {
-      this.docs = docs;
-    }
-
-    @Override
-    public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) {
-      final FixedBitSet set = new FixedBitSet(context.reader().maxDoc());
-      int docBase = context.docBase;
-      final int limit = docBase+context.reader().maxDoc();
-      int docId = docBase;
-      while ((docId = docs.nextSetBit(docId)) != -1 && docId < limit) {
-      	set.set(docId-docBase);
-      	docId++;
-      }
-      return set.nextSetBit(0) == -1 ? null:set;
-    }
-    
-  }
 	
 	@Override
   public String getDescription() {

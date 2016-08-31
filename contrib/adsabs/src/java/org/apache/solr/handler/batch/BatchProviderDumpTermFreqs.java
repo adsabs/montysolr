@@ -75,7 +75,7 @@ public class BatchProviderDumpTermFreqs extends BatchProvider {
 				out.write("# term stats is not available for this field");
 				continue;
 			}
-			reuse = te.iterator(reuse);
+			reuse = te.iterator();
 
 			BytesRef term;
 			while((term = reuse.next()) != null) {

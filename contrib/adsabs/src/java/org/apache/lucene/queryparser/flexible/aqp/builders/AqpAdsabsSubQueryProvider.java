@@ -446,9 +446,9 @@ AqpFunctionQueryBuilderProvider {
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
-						fp.getReq().getSearcher().getAtomicReader());
+						fp.getReq().getSearcher().getLeafReader());
 				
-				return new SecondOrderQuery(innerQuery, null, 
+				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper, ratio));
 			}
 		});

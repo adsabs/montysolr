@@ -3,18 +3,15 @@ package org.apache.solr.handler.batch;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.search.Collector;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Scorer;
-import org.apache.lucene.util.Bits;
+import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.response.JSONDumper;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.QueryParsing;
@@ -50,13 +47,8 @@ public class BatchProviderDumpDocsByQuery extends BatchProvider {
 		final FixedBitSet bits = new FixedBitSet(searcher.getIndexReader().maxDoc());
 		
 		// collect ids of docs we want to dump
-		searcher.search(query, new Collector() {
+		searcher.search(query, new SimpleCollector() {
 			private int docBase;
-
-			@Override
-			public boolean acceptsDocsOutOfOrder() {
-				return true;
-			}
 
 			@Override
 			public void collect(int i) throws IOException {
@@ -64,13 +56,13 @@ public class BatchProviderDumpDocsByQuery extends BatchProvider {
 			}
 
 			@Override
-      public void setScorer(Scorer scorer) throws IOException {
-	      // TODO Auto-generated method stub
+      public void doSetNextReader(LeafReaderContext context) throws IOException {
+	      docBase = context.docBase;
       }
 
-			@Override
-      public void setNextReader(AtomicReaderContext context) throws IOException {
-	      docBase = context.docBase;
+      @Override
+      public boolean needsScores() {
+        return false;
       }
 		});
 		

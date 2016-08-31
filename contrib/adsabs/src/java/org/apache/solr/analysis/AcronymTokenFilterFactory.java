@@ -23,7 +23,6 @@ public class AcronymTokenFilterFactory extends TokenFilterFactory {
 
     public AcronymTokenFilterFactory(Map<String,String> args) {
         super(args);
-        assureMatchVersion();
         this.emitBoth = this.getBoolean(args, "emitBoth", true);
         if (args.containsKey("prefix")) {
         	prefix = (String) args.get("prefix");

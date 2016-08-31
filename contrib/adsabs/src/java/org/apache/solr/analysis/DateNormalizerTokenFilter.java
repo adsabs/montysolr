@@ -9,7 +9,6 @@ import java.util.Locale;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.solr.schema.DateField;
 import org.apache.solr.util.DateMathParser;
 
 public final class DateNormalizerTokenFilter extends TokenFilter {
@@ -26,9 +25,9 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
     format = new SimpleDateFormat[parts.length];
     for (int i=0;i<parts.length;i++) {
       format[i] = new SimpleDateFormat(parts[i], Locale.ROOT);
-      format[i].setTimeZone(DateField.UTC);
+      format[i].setTimeZone(DateMathParser.UTC);
     }
-    dmp = new DateMathParser(DateField.UTC, Locale.ROOT);
+    dmp = new DateMathParser(DateMathParser.UTC);
   }
 
   @Override
@@ -62,7 +61,7 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
           //else {
             //date = dmp.parseMath("+5MINUTES"); // 00-00 dates are 1 minute after midnight
           //}
-          return DateField.formatExternal(date);
+          return f.format(date);
       } catch (ParseException e) {
         //pass
       }
