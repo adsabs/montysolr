@@ -119,7 +119,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
     }
 
     @Override
-    public Tokenizer create(AttributeFactory factory, Reader input) {
+    public Tokenizer create(AttributeFactory factory) {
       // TODO : this could be used to parse the source data (right now Solr and WordNet synonym
       // parser do it
       throw new IllegalAccessError("Not implemented");
@@ -161,9 +161,9 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
       
       return new Analyzer() {
         @Override
-        protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer(Version.LUCENE_48, reader) : factory.create(reader);
-          TokenStream stream = ignoreCase ? new LowerCaseFilter(Version.LUCENE_48, tokenizer) : tokenizer;
+        protected TokenStreamComponents createComponents(String fieldName) {
+          Tokenizer tokenizer = factory == null ? new WhitespaceTokenizer() : factory.create();
+          TokenStream stream = ignoreCase ? new LowerCaseFilter(tokenizer) : tokenizer;
           return new TokenStreamComponents(tokenizer, stream);
         }
       };

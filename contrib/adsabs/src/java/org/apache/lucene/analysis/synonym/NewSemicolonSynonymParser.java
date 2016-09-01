@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.util.CharsRef;
+import org.apache.lucene.util.CharsRefBuilder;
 
 public class NewSemicolonSynonymParser extends NewSynonymFilterFactory.SynonymParser {
   private final boolean expand;
@@ -50,19 +51,19 @@ public class NewSemicolonSynonymParser extends NewSynonymFilterFactory.SynonymPa
         String inputStrings[] = split(sides[0], ";");
         inputs = new CharsRef[inputStrings.length];
         for (int i = 0; i < inputs.length; i++) {
-          inputs[i] = analyze(inputStrings[i].trim(), new CharsRef());
+          inputs[i] = analyze(inputStrings[i].trim(), new CharsRefBuilder());
         }
         
         String outputStrings[] = split(sides[1], ";");
         outputs = new CharsRef[outputStrings.length];
         for (int i = 0; i < outputs.length; i++) {
-          outputs[i] = analyze(outputStrings[i].trim(), new CharsRef());
+          outputs[i] = analyze(outputStrings[i].trim(), new CharsRefBuilder());
         }
       } else {
         String inputStrings[] = split(line, ";");
         inputs = new CharsRef[inputStrings.length];
         for (int i = 0; i < inputs.length; i++) {
-          inputs[i] = analyze(inputStrings[i].trim(), new CharsRef());
+          inputs[i] = analyze(inputStrings[i].trim(), new CharsRefBuilder());
         }
         if (expand) {
           outputs = inputs;

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +23,8 @@ import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SolrCacheWrapper;
+import org.apache.lucene.util.BitSet;
+import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
@@ -149,11 +150,11 @@ public class BitSetQParserPlugin extends QParserPlugin {
 								"There is " + processors.size() + " data streams, but inconsistent number of operators: " + localParams.get("operator","and"));
 					}
 					
-					BitSet topBits = null;
+					FixedBitSet topBits = null;
 					int i = 0;
 					for (DataProcessor processor : processors) {
 						
-						BitSet bits = processor.getBits();
+						FixedBitSet bits = processor.getBits();
 						
 						if (bits == null) {
 							if (operator.length > 0) {
@@ -229,7 +230,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	      	
 	      	DataProcessor p = new DataProcessor(req) {
 	      		@Override
-	      		public BitSet getBits() {
+	      		public FixedBitSet getBits() {
 	      			// we must harvest lucene docids
 	    				LeafReader reader = req.getSearcher().getLeafReader();
 	    				byte[] data;
@@ -241,7 +242,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	              throw new SolrException(ErrorCode.BAD_REQUEST, e1);
               }
               
-	    				BitSet bits = fromByteArray(data, 
+	    				FixedBitSet bits = fromByteArray(data, 
 	    						localParams.getBool("little_endian", false)
 	    						?	LITTLE_ENDIAN_BIT_MASK : BIG_ENDIAN_BIT_MASK);
 	    				
@@ -276,7 +277,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
     							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
     						}
     						
-    						BitSet translatedBitSet = new BitSet(reader.maxDoc());
+    						FixedBitSet translatedBitSet = new FixedBitSet(reader.maxDoc());
     						
     						
 	    					SolrCacheWrapper<SolrCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
@@ -360,13 +361,13 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    this.req = req;
     }
 
-		public BitSet getBits() throws ParseException {
+		public FixedBitSet getBits() throws ParseException {
 			
 			if (docs.size() == 0) {
-				return new BitSet(0);
+				return new FixedBitSet(0);
 			}
 			
-			BitSet bs = new BitSet(req.getSearcher().maxDoc());
+			FixedBitSet bs = new FixedBitSet(req.getSearcher().maxDoc());
 			
 			SolrInputDocument d = docs.get(0);
 			// for csv, we can assume that every doc has the same fields (?)
@@ -538,9 +539,8 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 
 	protected byte[] toByteArray(BitSet bitSet) {
-		// java6 doesn't have toByteArray()
 		byte[] bytes = new byte[(bitSet.length() + 7) / 8];
-		for ( int i = bitSet.nextSetBit(0); i >= 0; i = bitSet.nextSetBit(i+1) ) {
+		for ( int i = bitSet.nextSetBit(0); i >= 0 && i < Integer.MAX_VALUE; i = bitSet.nextSetBit(i+1) ) {
 			bytes[i / 8] |= 128 >> (i % 8);
 		}
 		return bytes;
@@ -550,8 +550,8 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	// python intbitsets and these are (probably) encoded using little endian
 	// we must be able to de-construct them properly, however internally, inside
 	// Java we should be using big endian
-	protected BitSet fromByteArray(byte[] bytes, int[] bitMask) {
-		BitSet bs = new BitSet(bytes == null? 0 : bytes.length * 8);
+	protected FixedBitSet fromByteArray(byte[] bytes, int[] bitMask) {
+		FixedBitSet bs = new FixedBitSet(bytes == null? 0 : bytes.length * 8);
 		int s = bytes.length * 8;
 		for (int i = 0; i < s; i++) {
 			if ((bytes[i/8] & bitMask[i%8]) != 0) // ((bytes[i/8] & (128 >> (i % 8))) != 0) 
@@ -560,7 +560,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		return bs;
 	}
 
-	protected BitSet fromByteArray(byte[] bytes) {
+	protected FixedBitSet fromByteArray(byte[] bytes) {
 		return fromByteArray(bytes, BIG_ENDIAN_BIT_MASK);
 	}
 

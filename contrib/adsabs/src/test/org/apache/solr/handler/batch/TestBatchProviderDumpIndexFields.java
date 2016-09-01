@@ -2,7 +2,6 @@ package org.apache.solr.handler.batch;
 
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.SortableFloatField;
 
 public class TestBatchProviderDumpIndexFields extends BatchProviderTest {
 

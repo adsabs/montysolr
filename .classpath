@@ -174,5 +174,6 @@
 	<classpathentry kind="lib" path="contrib/adsabs/lib/antlr-3.4.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-2.7-b1-sources.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/jython-standalone-2.7-b1.jar"/>
+	<classpathentry kind="lib" path="/dvt/luke-6.1/target/luke-with-deps.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -18,12 +18,13 @@ package org.apache.solr.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.util.BitSet;
+import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
@@ -95,7 +96,7 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 
 		assertEquals(base64string, "BACA");
 		assertArrayEquals(byteData, bqp.decodeBase64(base64string));
-		assertEquals(data, bqp.fromByteArray(bqp.decodeBase64(base64string)));
+		assertEquals((FixedBitSet) data, (FixedBitSet) bqp.fromByteArray(bqp.decodeBase64(base64string)));
 
 		assertEquals(gzipBase64string, "H4sIAAAAAAAAAGNhaAAA7vLwFQMAAAA=");
 		assertArrayEquals(byteData, bqp.unGZip(gzipData));
@@ -168,7 +169,12 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 
 
 	private BitSet convert(int[] numbers) {
-		BitSet bitSet = new BitSet();
+	  int m = 0;
+	  for (int n: numbers) {
+	    if (n > m)
+	      m = n;
+	  }
+		BitSet bitSet = new FixedBitSet(m+7);
 		for (int i: numbers) {
 			bitSet.set(i);
 		}

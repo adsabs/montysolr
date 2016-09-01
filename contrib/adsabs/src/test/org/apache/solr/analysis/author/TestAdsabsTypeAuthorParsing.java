@@ -301,7 +301,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     // persist the transliteration map after new docs were indexed
     // and reload synonym chain harvested during indexing
-    Analyzer iAnalyzer = h.getCore().getLatestSchema().getAnalyzer();
+    Analyzer iAnalyzer = h.getCore().getLatestSchema().getIndexAnalyzer();
     Analyzer qAnalyzer = h.getCore().getLatestSchema().getQueryAnalyzer();
 
     TokenStream iAuthor = iAnalyzer.tokenStream("author", new StringReader(""));

@@ -60,7 +60,8 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
 	
 	public void compare(String input, String... expected) throws Exception {
 		Reader reader = new StringReader(input);
-		Tokenizer tokenizer = new KeywordTokenizer(reader);
+		Tokenizer tokenizer = new KeywordTokenizer();
+		tokenizer.setReader(reader);
 		PythonicAuthorNormalizeFilterFactory factory = new PythonicAuthorNormalizeFilterFactory(new HashMap<String,String>());
 		TokenStream stream = factory.create(tokenizer);
 		stream.reset();

@@ -24,6 +24,7 @@ import java.text.ParseException;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.util.CharsRef;
+import org.apache.lucene.util.CharsRefBuilder;
 
 /**
  * Parser for wordnet prolog format
@@ -47,7 +48,7 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
     try {
       String line = null;
       String lastSynSetID = "";
-      CharsRef synset[] = new CharsRef[8];
+      CharsRefBuilder synset[] = new CharsRefBuilder[8];
       int synsetSize = 0;
       
       while ((line = br.readLine()) != null) {
@@ -80,9 +81,9 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
     }
   }
  
-  private CharsRef parseSynonym(String line, CharsRef reuse) throws IOException {
+  private CharsRef parseSynonym(String line, CharsRefBuilder reuse) throws IOException {
     if (reuse == null) {
-      reuse = new CharsRef(8);
+      reuse = new CharsRefBuilder();
     }
     
     int start = line.indexOf('\'')+1;
@@ -92,7 +93,7 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
     return analyze(text, reuse);
   }
   
-  private void addInternal(CharsRef synset[], int size) {
+  private void addInternal(CharsRefBuilder synset[], int size) {
     if (size <= 1) {
       return; // nothing to do
     }
@@ -100,12 +101,12 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
     if (expand) {
       for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-          add(synset[i], synset[j], false);
+          add(synset[i].get(), synset[j].get(), false);
         }
       }
     } else {
       for (int i = 0; i < size; i++) {
-        add(synset[i], synset[0], false);
+        add(synset[i].get(), synset[0].get(), false);
       }
     }
   }

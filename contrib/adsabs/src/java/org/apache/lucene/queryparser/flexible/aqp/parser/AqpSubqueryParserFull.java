@@ -6,6 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -35,8 +36,12 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
   public Query simplify(Query query) {
     if (query instanceof BooleanQuery) {
       List<BooleanClause>clauses = ((BooleanQuery) query).clauses();
-      if (clauses.size()==1 && ((BooleanQuery) query).getBoost() == 1.0) {
+      if (clauses.size()==1) {
         Query q = clauses.get(0).getQuery();
+        
+        if (q instanceof BoostQuery && ((BoostQuery) query).getBoost() != 1.0)
+          return q;
+        
         if (q.toString().toString().equals("")) return null;
         if (q instanceof DisjunctionMaxQuery && ((DisjunctionMaxQuery) q).getDisjuncts().size()==1) {
           return ((DisjunctionMaxQuery) q).getDisjuncts().get(0);
@@ -74,15 +79,13 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
   protected Query swimDeep(TermQuery query) throws SyntaxError {
     if (parser != null && qtypes != null && isWanted(query)) {
       parser.setString(query.toString());
-      Query newQ = parser.parse();
-      newQ.setBoost(query.getBoost());
-      return newQ;
+      return parser.parse();
     }
     return query;
   }
   
   protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-    ArrayList<Query> parts = query.getDisjuncts();
+    ArrayList<Query> parts = (ArrayList<Query>) query.getDisjuncts();
     for (int i=0;i<parts.size();i++) {
       Query oldQ = parts.get(i);
       parts.set(i, swimDeep(oldQ));
@@ -96,7 +99,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     for (int i=0;i<clauses.size();i++) {
       BooleanClause c = clauses.get(i);
       Query qq = swimDeep(c.getQuery());
-      c.setQuery(qq);
+      clauses.set(i, new BooleanClause(qq, c.getOccur()));
     }
     return query;
   }

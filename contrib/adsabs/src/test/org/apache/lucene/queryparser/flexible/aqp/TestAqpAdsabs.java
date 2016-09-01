@@ -53,13 +53,11 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public void testAnalyzers() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
 		Analyzer pa = new Analyzer() {
 			@Override
-			protected TokenStreamComponents createComponents(String fieldName,
-					Reader reader) {
+			protected TokenStreamComponents createComponents(String fieldName) {
 				PatternTokenizer filter;
-				filter = new PatternTokenizer(reader, Pattern.compile("\\|"), -1);
+				filter = new PatternTokenizer(Pattern.compile("\\|"), -1);
 				return new TokenStreamComponents(filter);
 			}
 		};
@@ -77,7 +75,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// note: nothing too much exciting here - the real tests must be done with the 
 		// ADS author query, and for that we will need solr unittests - so for now, just basic stuff
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		
 		assertQueryEquals("author:\"A Einstein\"", null, "author:\"a einstein\"", PhraseQuery.class);
 		// probably, this should construct a different query (a phrase perhaps)
@@ -105,7 +103,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 * @throws Exception
 	 */
 	public void testIdentifiers() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		Query q = null;
 		assertQueryEquals("arXiv:1012.5859", wsa, "arxiv:1012.5859");
 		assertQueryEquals("xfield:10.1086/345794", wsa, "xfield:10.1086/345794");
@@ -132,7 +130,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 * @throws Exception
 	 */
 	public void testDateRanges() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		
 		assertQueryEquals("intitle:\"QSO\" 1995-2000", null, "+intitle:qso +date:[1995 TO 2000]");
 		
@@ -167,7 +165,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 */
 	public void testRanges() throws Exception {
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		
 		assertQueryEquals("[20020101 TO 20030101]", null, "[20020101 TO 20030101]");
 		assertQueryEquals("[20020101 TO 20030101]^0.5", null, "[20020101 TO 20030101]^0.5");
@@ -204,7 +202,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
 	public void testModifiers() throws Exception {
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		
 		assertQueryEquals("jakarta^4 apache", null, "+jakarta^4.0 +apache");
 		assertQueryEquals("\"jakarta apache\"^4 \"Apache Lucene\"", null, "+\"jakarta apache\"^4.0 +\"apache lucene\"");
@@ -311,10 +309,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		q = assertQueryEquals("te?t", null, "te?t", WildcardQuery.class);
 		
 		q = assertQueryEquals("test*", null, "test*", WildcardQuery.class);
-	    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
+	    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
 	    
 	    q = assertQueryEquals("test?", null, "test?", WildcardQuery.class);
-	    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT, ((MultiTermQuery) q).getRewriteMethod());
+	    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
 		
 		assertQueryEquals("te*t", null, "te*t", WildcardQuery.class);
 		assertQueryEquals("*te*t", null, "*te*t", WildcardQuery.class);
@@ -368,7 +366,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 * @throws Exception
 	 */
 	public void testEscaped() throws Exception {
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		assertQueryEquals("\\(1\\+1\\)\\:2", wsa, "(1+1):2", TermQuery.class);
 		assertQueryEquals("th\\*is", wsa, "th*is", TermQuery.class);
 		assertQueryEquals("a\\\\\\\\+b", wsa, "a\\\\+b", TermQuery.class);
@@ -385,7 +383,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 */
 	public void testBasics() throws Exception{
 		
-		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		KeywordAnalyzer kwa = new KeywordAnalyzer();
 		assertQueryEquals("keyword:\"planets and satellites\"", wsa, "keyword:\"planets and satellites\"", PhraseQuery.class);
 		
@@ -556,7 +554,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	
   public void testRegex() throws Exception{
       
-      WhitespaceAnalyzer wsa = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+      WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
       assertQueryEquals("/foo$/", wsa, "/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/foo$/", wsa, "keyword:/foo$/", RegexpQuery.class);
       assertQueryEquals("keyword:/^foo$/", wsa, "keyword:/^foo$/", RegexpQuery.class);
