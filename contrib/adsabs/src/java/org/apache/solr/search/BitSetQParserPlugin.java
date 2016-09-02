@@ -250,88 +250,90 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    				// set of integer values that need translation into lucene
 	    				// docids; this depends on presence/absence of 'field' param
 	    				
-	    				if (localParams.get("field", null) != null) {
-	    					String fieldName = localParams.get("field");
-	    					SchemaField field = req.getSchema().getField(fieldName);
+	    				if (localParams.get("field", null) == null)
+	    				  return bits;
+	    				
+	    				
+    					String fieldName = localParams.get("field");
+    					SchemaField field = req.getSchema().getField(fieldName);
 
-	    					if (field.multiValued()) {
-	    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't use bitset with multi-valued fields");
-	    					}
+    					if (field.multiValued()) {
+    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't use bitset with multi-valued fields");
+    					}
 
-	    					if (allowedFields.size() > 0 && !allowedFields.contains(fieldName)) {
-	    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't search against field " + fieldName + " (reason: field forbidden#!@#!)");
-	    					}
+    					if (allowedFields.size() > 0 && !allowedFields.contains(fieldName)) {
+    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't search against field " + fieldName + " (reason: field forbidden#!@#!)");
+    					}
 
-	    					
-	    					
-	    					FieldType ftype = field.getType();
-    						Class<? extends FieldType> c = ftype.getClass();
-    						boolean fieldIsInt = true;
-    						if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-    							fieldIsInt = false;
-    						}
-    						else if (c.isAssignableFrom(TrieIntField.class)) {
-    							//pass
-    						}
-    						else {
+    					
+    					
+    					FieldType ftype = field.getType();
+  						Class<? extends FieldType> c = ftype.getClass();
+  						boolean fieldIsInt = true;
+  						if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
+  							fieldIsInt = false;
+  						}
+  						else if (c.isAssignableFrom(TrieIntField.class)) {
+  							//pass
+  						}
+  						else {
+  							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
+  						}
+  						
+  						FixedBitSet translatedBitSet = new FixedBitSet(reader.maxDoc());
+  						
+  						
+    					SolrCacheWrapper<SolrCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
+    					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
+    						for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
+    					     if (fieldIsInt) {
+    					    	 int v = cacheWrapper.getLuceneDocId(0, i);
+    					    	 if (v == -1)
+    					    		 continue;
+  					    		 translatedBitSet.set(v);
+    					     }
+    					     else {
+    					    	 int v = cacheWrapper.getLuceneDocId(0, Integer.toString(i));
+    					    	 if (v == -1)
+    					    		 continue;
+    					    	 translatedBitSet.set(v);
+    					     }
+    					  }
+    						bits = translatedBitSet;
+    					}
+    					else {
+    					
+    						if (!fieldIsInt) {
     							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
     						}
     						
-    						FixedBitSet translatedBitSet = new FixedBitSet(reader.maxDoc());
-    						
-    						
-	    					SolrCacheWrapper<SolrCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
-	    					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
-	    						for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
-	    					     if (fieldIsInt) {
-	    					    	 int v = cacheWrapper.getLuceneDocId(0, i);
-	    					    	 if (v == -1)
-	    					    		 continue;
-    					    		 translatedBitSet.set(v);
-	    					     }
-	    					     else {
-	    					    	 int v = cacheWrapper.getLuceneDocId(0, Integer.toString(i));
-	    					    	 if (v == -1)
-	    					    		 continue;
-	    					    	 translatedBitSet.set(v);
-	    					     }
-	    					  }
-	    						bits = translatedBitSet;
-	    					}
-	    					else {
+    						Map<String, UninvertingReader.Type> mapping = new HashMap();
+    		        mapping.put(fieldName, UninvertingReader.Type.INTEGER_POINT);
+    		        UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
+    		        NumericDocValues cache;
+                try {
+                  cache = uninvertingReader.getNumericDocValues(fieldName);
+                } catch (IOException e) {
+                  return translatedBitSet;
+                }
+    		        
 	    					
-	    						if (!fieldIsInt) {
-	    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
+	    					// suckers, we have to translate whateve integer value into a lucene docid
+	    					log.warn("We are translating values for a field without a cache: {}. Terrible, terrible idea!", fieldName);
+	    					
+	    					int docid = 0; // lucene docid
+	    					int maxDoc = reader.maxDoc();
+	    					int docValue;
+	    					while(docid < maxDoc) {
+	    						docValue = (int) cache.get(docid);
+	    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
+	    							translatedBitSet.set(docid);
 	    						}
-	    						
-	    						Map<String, UninvertingReader.Type> mapping = new HashMap();
-	    		        mapping.put(fieldName, UninvertingReader.Type.INTEGER_POINT);
-	    		        UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
-	    		        NumericDocValues cache;
-                  try {
-                    cache = uninvertingReader.getNumericDocValues(fieldName);
-                  } catch (IOException e) {
-                    return translatedBitSet;
-                  }
-	    		        
-		    					
-		    					// suckers, we have to translate whateve integer value into a lucene docid
-		    					log.warn("We are translating values for a field without a cache: {}. Terrible, terrible idea!", fieldName);
-		    					
-		    					int docid = 0; // lucene docid
-		    					int maxDoc = reader.maxDoc();
-		    					int docValue;
-		    					while(docid < maxDoc) {
-		    						docValue = (int) cache.get(docid);
-		    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
-		    							translatedBitSet.set(docid);
-		    						}
-		    						docid++;
-		    					}
-	    					
-		    					bits = translatedBitSet;
+	    						docid++;
 	    					}
-	    				}
+    					
+	    					bits = translatedBitSet;
+    					}
 	    				return bits;
 	      		}
 	      	};
@@ -542,6 +544,8 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		byte[] bytes = new byte[(bitSet.length() + 7) / 8];
 		for ( int i = bitSet.nextSetBit(0); i >= 0 && i < Integer.MAX_VALUE; i = bitSet.nextSetBit(i+1) ) {
 			bytes[i / 8] |= 128 >> (i % 8);
+			if (i+1 >= bitSet.length())
+			  break;
 		}
 		return bytes;
 	}

@@ -371,9 +371,9 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	
   	List<String> fields = getFields(searcher, this.identifierFields);
   	
-  	if (this.referenceFields.length == 0 && this.citationFields.length == 0) {
-  	  return;
-  	}
+  	//if (this.referenceFields.length == 0 && this.citationFields.length == 0) {
+  	//  return;
+  	//}
 
   	// builds the mapping from document ID's to lucene docids
   	unInvertedTheDamnThing(searcher, fields,

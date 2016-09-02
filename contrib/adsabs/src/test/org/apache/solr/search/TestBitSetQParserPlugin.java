@@ -96,7 +96,7 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 
 		assertEquals(base64string, "BACA");
 		assertArrayEquals(byteData, bqp.decodeBase64(base64string));
-		assertEquals((FixedBitSet) data, (FixedBitSet) bqp.fromByteArray(bqp.decodeBase64(base64string)));
+		assertTrue(((FixedBitSet) data).equals((FixedBitSet) bqp.fromByteArray(bqp.decodeBase64(base64string))));
 
 		assertEquals(gzipBase64string, "H4sIAAAAAAAAAGNhaAAA7vLwFQMAAAA=");
 		assertArrayEquals(byteData, bqp.unGZip(gzipData));
@@ -174,7 +174,9 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 	    if (n > m)
 	      m = n;
 	  }
-		BitSet bitSet = new FixedBitSet(m+7);
+	  // fixedbitset has to be one bit larger; also we need to round up num of bits
+	  int size = ((m + 8)/8) * 8;
+		BitSet bitSet = new FixedBitSet(size);
 		for (int i: numbers) {
 			bitSet.set(i);
 		}
