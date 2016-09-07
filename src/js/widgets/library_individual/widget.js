@@ -112,7 +112,7 @@ define([
         //create header
         this.updateHeader();
 
-        if (["library", "export", "metrics", "visualization"].indexOf(view) > -1){
+        if (["library", "export", "metrics", "visualization", "citation_helper"].indexOf(view) > -1){
           that.view.main.empty();
         }
         else if (view === "admin"){
@@ -200,7 +200,7 @@ define([
                   /*
                   * these subviews require requesting bibcode data first
                   * */
-                if (_.contains(["export", "metrics", "visualization"], data.subView )) {
+                if (_.contains(["export", "metrics", "visualization", "citation_helper"], data.subView )) {
 
                     switch (arg1) {
                       case "export":
@@ -214,6 +214,13 @@ define([
                       case "metrics":
                         data.widgetName = "Metrics";
                         data.additional = {};
+                        break;
+                      case "citation_helper":
+                        data.widgetName = "CitationHelper";
+                        data.additional = { libid: id,
+                          permission: this.headerModel.get('permission'),
+                          libname: this.headerModel.get('name')
+                        };
                         break;
                     }
                     pubsub.publish(pubsub.NAVIGATE, "library-" + arg1, data);

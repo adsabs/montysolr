@@ -1,0 +1,68 @@
+{{#if feedback}}
+{{#if feedback.success}}
+<div class="alert alert-success alert-dismissable" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+    {{feedback.numRecords}} records were added to library <b>{{feedback.name}}</b>
+</div>
+{{else}}
+<div class="alert alert-danger alert-dismissable" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+    No records were added to <b>{{feedback.name}}</b>: <em>{{feedback.error}}</em>
+</div>
+{{/if}}
+{{/if}}
+{{#if items}}
+<div class="citation-helper-metadata s-citation-helper-metadata">
+
+<h4>Suggested Articles</h4>
+<p>These suggestions are based on a 'friends-of-friends' analysis of the citation network for the papers in the library (scores start at 2).</p>
+    <br>
+
+  {{#compare permission "owner" operator="=="}}
+    <div class="row"><div class="col-xs-6"><button class="btn btn-sm btn-success submit-add-to-library">Add selected papers to this library</button></div></div>
+  {{/compare}}
+</div>
+<br>
+<ul class="citation-helper-list-container-list-container s-citation-helper-list-container">
+
+    {{#each items}}
+    <li class="citation-helper-item s-citation-helper-item">
+        <div class="col-sm-10">
+            <div class="row s-top-row">
+                <div class="col-xs-1 s-selectbox-col s-top-row-col">
+                    <input type="checkbox" value="{{bibcode}}" name="identifier">
+                </div>
+                <div class="col=sm-3 col-xs-4 s-top-row-col">{{bibcode}}</div>
+                <div class="col-sm-2 s-top-row-col"><b>score: {{score}}</b></div>
+            </div>
+            <div class="row">
+                <div class="col-xs-10 col-xs-offset-1">
+                <a href="#abs/{{bibcode}}">
+                    <h3 class="s-results-title">{{title}}</h3>
+                </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-10 col-xs-offset-1">
+                    <ul class="list-inline just-authors s-results-authors">
+                        <li class="article-author">
+                            {{author}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </li>
+    {{/each}}
+
+</ul>
+
+{{/if}}
+
+{{#if msg}}
+    <div style="padding-left: 20px; padding-top: 50px;">
+        <div class="row s-message-control-row"><i>{{msg}}</i></div>
+    </div>
+{{/if}}
+
+</div>

@@ -292,6 +292,7 @@ define([
         this.set("library-export", navToLibrarySubView);
         this.set("library-visualization", navToLibrarySubView);
         this.set("library-metrics", navToLibrarySubView);
+        this.set("library-citation_helper", navToLibrarySubView);
 
         this.set("home-page", function(){
           app.getObject('MasterPageManager').show("HomePage",

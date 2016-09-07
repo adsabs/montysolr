@@ -26,6 +26,7 @@ define([
       SERVICE_METRICS: 'metrics',
       SERVICE_OBJECTS: 'objects',
       SERVICE_OBJECTS_QUERY: 'objects/query',
+       SERVICE_CITATION_HELPER: 'citation_helper',
       MYADS_STORAGE: 'vault',
 
       CSRF : 'accounts/csrf',

@@ -51,6 +51,7 @@
                     <!--<li data-tab="visualization-BubbleChart">Bubble Chart</li>-->
                 </ul>
             </li>
+            <li class="tab s-tab  {{#compare active 'citation_helper'}} active {{/compare}}" data-tab="citation_helper"><i class="fa fa-flask"></i> Citation Helper </li>
         </ul>
     {{else}}
         <!-- tab navigation works for only library page and optionally admin -->
@@ -59,6 +60,7 @@
             <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="icon-export"></i> Export</li>
             <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
             <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
+            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-flask"></i> Citation Helper </li>
         </ul>
     {{/compare}}
 
@@ -206,6 +208,7 @@
                 <!--<li data-tab="visualization-BubbleChart">Bubble Chart</li>-->
             </ul>
         </li>
+        <li class="tab s-tab  {{#compare active 'citation_helper'}} active {{/compare}}" data-tab="citation_helper"><i class="fa fa-flask"></i> Citation Helper </li>
     </ul>
 
     {{else}}
@@ -219,6 +222,7 @@
         <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="icon-export"></i> Export</li>
         <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
         <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
+        <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="fa fa-flask"></i> Citation Helper </li>
     </ul>
     {{/compare}}
 
