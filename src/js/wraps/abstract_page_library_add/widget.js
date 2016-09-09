@@ -28,6 +28,8 @@ define([
         this.setBeeHive(beehive);
         _.bindAll(this);
 
+        var that = this;
+
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.LIBRARY_CHANGE, this.processLibraryInfo);
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, this.handleUserAnnouncement);
@@ -38,8 +40,11 @@ define([
           // know whether to show library panel
           this.model.set("loggedIn", true);
           //fetch list of libraries
-          var libraryData = this.getBeeHive().getObject("LibraryController").getLibraryMetadata();
-          this.processLibraryInfo(libraryData);
+          var libraryData = this.getBeeHive().getObject("LibraryController")
+            .getLibraryMetadata()
+            .done(function(data){
+              that.processLibraryInfo(data);
+            });
         }
 
       },
