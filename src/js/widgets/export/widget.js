@@ -301,7 +301,7 @@ define([
             .done(function(apiResponse) {
               // export documents by their ids
               var ids = _.map(apiResponse.get('response.docs'), function(d) {return d.bibcode});
-              var $form =  $(ClassicFormTemplate({ bibcodes: ids }));
+              var $form =  $(ClassicFormTemplate({ bibcodes: ids, exportLimit: ids.length }));
               //firefox requires form to actually be in the dom when it is submitted
               $("body").append($form);
               $form.submit();
