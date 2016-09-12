@@ -154,6 +154,11 @@ define([
        * */
       function importLibraries(endpoint, view) {
 
+        var working = '<i class="fa fa-lg fa-spinner fa-pulse"></i> Working...';
+        view.$("button.import-all-libraries")
+          .addClass("disabled")
+          .html(working);
+
         this.getBeeHive()
             .getObject("LibraryController")
             .importLibraries(endpoint)
