@@ -122,6 +122,7 @@ require.config({
         VizierFacet: 'js/wraps/vizier_facet',
         GraphTabs : 'js/wraps/graph_tabs',
         FooterWidget : 'js/widgets/footer/widget',
+        PubtypeFacet: 'js/wraps/pubtype_facet',
 
         ShowAbstract: 'js/widgets/abstract/widget',
         ShowGraphics: 'js/widgets/graphics/widget',

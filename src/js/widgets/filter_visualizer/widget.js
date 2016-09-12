@@ -102,6 +102,7 @@ define([
           'fq_visualization_paper': 'Paper Network',
           'fq_wordcloud': 'Concept Cloud',
           'fq_bubble_chart': 'Results Graph',
+          'fq_doctype': 'Pubtype'
 
         };
         this.currentQuery = null;
@@ -408,6 +409,9 @@ define([
             break;
           case 'fq_simbad_object_facet_hier':
             s = s.replace(/simbad_object_facet_hier:0\\\//g, '');
+            break;
+          case 'fq_doctype':
+            s = s.replace(/doctype:/g, '');
             break;
         }
 
