@@ -11,25 +11,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import monty.solr.util.MontySolrAbstractTestCase;
-import monty.solr.util.MontySolrSetup;
-
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.FieldCache.Floats;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.search.SyntaxError;
+import org.apache.solr.uninverting.UninvertingReader;
 import org.junit.BeforeClass;
+
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 @SuppressCodecs("SimpleText")
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -132,17 +131,18 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(cache);
 		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
-		Floats boostConst = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
-          "boost_const", false);
-		Floats boost1 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
-        "boost_1", false);
-		Floats boost2 = FieldCache.DEFAULT.getFloats(tempReq.getSearcher().getAtomicReader(), 
-        "boost_2", false);
-		
+		Map<String, UninvertingReader.Type> mapping = new HashMap();
+    mapping.put("boost_const", UninvertingReader.Type.SORTED);
+    mapping.put("boost_1", UninvertingReader.Type.SORTED);
+    mapping.put("boost_2", UninvertingReader.Type.SORTED);
     
-		LuceneCacheWrapper<Floats> boostConstant = LuceneCacheWrapper.getFloatCache("boost_const", boostConst);
-		LuceneCacheWrapper<Floats> boostOne = LuceneCacheWrapper.getFloatCache("boost_1", boost1);
-		LuceneCacheWrapper<Floats> boostTwo = LuceneCacheWrapper.getFloatCache("boost_2", boost2);
+    
+    //UninvertingReader uninvertingReader = new UninvertingReader(tempReq.getSearcher().getLeafReader(), mapping);
+    //NumericDocValues boostConst = uninvertingReader.getNumericDocValues("boost_const");
+    
+		LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache("boost_const", tempReq.getSearcher().getLeafReader());
+		LuceneCacheWrapper<NumericDocValues> boostOne = LuceneCacheWrapper.getFloatCache("boost_1", tempReq.getSearcher().getLeafReader());
+		LuceneCacheWrapper<NumericDocValues> boostTwo = LuceneCacheWrapper.getFloatCache("boost_2", tempReq.getSearcher().getLeafReader());
 		
   	
   	
@@ -317,11 +317,11 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 
 			final ArrayList<ScoreDoc> results = new ArrayList<ScoreDoc>();
 
-			searcher.search(new SecondOrderQuery(q, null, collector),
-			    new Collector() {
+			searcher.search(new SecondOrderQuery(q, collector),
+			    new SimpleCollector() {
 
 				    private Scorer scorer;
-				    private AtomicReader reader;
+				    private LeafReader reader;
 
 				    @Override
 				    public void setScorer(Scorer scorer) throws IOException {
@@ -329,7 +329,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 				    }
 
 				    @Override
-				    public void setNextReader(AtomicReaderContext context)
+				    public void doSetNextReader(LeafReaderContext context)
 				        throws IOException {
 					    reader = context.reader();
 				    }
@@ -343,10 +343,10 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 					        .score()));
 				    }
 
-				    @Override
-				    public boolean acceptsDocsOutOfOrder() {
-					    return false;
-				    }
+            @Override
+            public boolean needsScores() {
+              return false;
+            }
 			    });
 
 			Collections.sort(results, new Comparator() {
@@ -397,9 +397,9 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   	
   	final ArrayList<ScoreDoc> results = new ArrayList<ScoreDoc>();
 		
-  	searcher.search(new SecondOrderQuery(new MatchAllDocsQuery(), null, new AbstractSecondOrderCollector() {
+  	searcher.search(new SecondOrderQuery(new MatchAllDocsQuery(), new AbstractSecondOrderCollector() {
 			@Override
-			public void setNextReader(AtomicReaderContext context) throws IOException {
+			public void doSetNextReader(LeafReaderContext context) throws IOException {
 				setFinalValueType(testFinalType);
 			}
 			
@@ -413,24 +413,25 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 					}
 				}
 			}
+
+      @Override
+      public boolean needsScores() {
+        return false;
+      }
 			
-			@Override
-			public boolean acceptsDocsOutOfOrder() {
-				return false;
-			}
 		}),
-  			new Collector() { // this one collects results
+  			new SimpleCollector() { // this one collects results
 					
 					private int docBase;
 					private Scorer scorer;
-					private AtomicReader reader;
+					private LeafReader reader;
 
 					@Override
 					public void setScorer(Scorer scorer) throws IOException {
 						this.scorer = scorer;
 					}
 					@Override
-					public void setNextReader(AtomicReaderContext context) throws IOException {
+					public void doSetNextReader(LeafReaderContext context) throws IOException {
 						docBase = context.docBase;
 						reader = context.reader();
 					}
@@ -442,11 +443,11 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 						// store 'id' instead of docid
 						results.add(new ScoreDoc(Integer.parseInt(idValue), scorer.score()));
 					}
+          @Override
+          public boolean needsScores() {
+            return false;
+          }
 					
-					@Override
-					public boolean acceptsDocsOutOfOrder() {
-						return false;
-					}
 				});
   	
   	Collections.sort(results, new Comparator() {

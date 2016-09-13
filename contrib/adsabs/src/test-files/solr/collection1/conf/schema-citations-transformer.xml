@@ -31,7 +31,7 @@
     <dynamicField name="x*" type="string" indexed="true"
       stored="true" multiValued="true" />
     <dynamicField name="boost*" type="float" indexed="true"
-      stored="true" multiValued="true" />
+      stored="true" multiValued="false" docValues="true"/>
   </fields>
   <uniqueKey>id</uniqueKey>
 </schema>

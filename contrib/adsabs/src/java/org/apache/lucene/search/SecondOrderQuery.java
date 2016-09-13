@@ -65,9 +65,9 @@ public class SecondOrderQuery extends Query {
 	 * return the Weight object, which carries with itself the results of the
 	 * first-order query
 	 */
-	public Weight createWeight(final IndexSearcher searcher) throws IOException {
+	public Weight createWeight(final IndexSearcher searcher, boolean needsScores) throws IOException {
 	    
-		Weight firstOrderWeight = firstOrderQuery.createWeight(searcher, needsScoring);
+		Weight firstOrderWeight = firstOrderQuery.createWeight(searcher, needsScores);
 		
 		//System.out.println("preparing: " + this.secondOrderCollector);
 		

@@ -3,12 +3,13 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.search.FieldCache.Floats;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.NumericDocValues;
+import org.apache.solr.uninverting.UninvertingReader;
 
 public class LuceneCacheWrapper<T> implements CacheWrapper {
 	
@@ -55,30 +56,25 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 		throw new NotImplementedException();
 	}
 	
-	public static LuceneCacheWrapper<Floats> getFloatCache(String fieldName, AtomicReader reader)  {
+	public static LuceneCacheWrapper<NumericDocValues> getFloatCache(String fieldName, LeafReader reader) 
+	    throws IOException  {
 		
-		Floats data;
-    try {
-      data = FieldCache.DEFAULT.getFloats(reader, fieldName, false);
-    } catch (IOException e) {
-      throw new SolrException(ErrorCode.SERVER_ERROR, e);
-    }
+	  Map<String, UninvertingReader.Type> mapping = new HashMap<String, UninvertingReader.Type>();
+    mapping.put(fieldName, UninvertingReader.Type.SORTED_SET_FLOAT);
+    UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
+    NumericDocValues values = uninvertingReader.getNumericDocValues(fieldName);
+    //uninvertingReader.close();
     
 		final String fName = fieldName;
-		LuceneCacheWrapper<Floats> newCache = new LuceneCacheWrapper<Floats>(new SoftReference<Floats>(data)) {
+		LuceneCacheWrapper<NumericDocValues> newCache = new LuceneCacheWrapper<NumericDocValues>(new SoftReference<NumericDocValues>(values)) {
 			@Override
 		  public String internalToString() {
 				return "float[] " + fName;
 		  }
 			@Override
 			public float getFloat(int docid) {
-				Floats c = cache.get();
-				// XXX: rca - this was the old logic; what happens if docid is bigger than current index?
-				//if (docid < c.length) {
-				//	return c[docid]; 
-				//}
-				//return -1.0f;
-				return c.get(docid);
+				long v = this.cache.get().get(docid);
+				return (float) v;
 			}
 		};
 		
@@ -86,29 +82,4 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 		
 	}
 
-	public static LuceneCacheWrapper<Floats> getFloatCache(String fieldName, Floats data)  {
-		
-		final String fName = fieldName;
-		LuceneCacheWrapper<Floats> newCache = new LuceneCacheWrapper<Floats>(new SoftReference<Floats>(data)) {
-			@Override
-		  public String internalToString() {
-				return "float[] " + fName;
-		  }
-			@Override
-			public float getFloat(int docid) {
-			  Floats c = cache.get();
-        // XXX: rca - this was the old logic; what happens if docid is bigger than current index?
-        //if (docid < c.length) {
-        //  return c[docid]; 
-        //}
-        //return -1.0f;
-        return c.get(docid);
-			}
-		};
-		
-		return newCache;
-		
-	}
-	
-	
 }

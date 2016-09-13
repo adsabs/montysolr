@@ -20,6 +20,8 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.BytesRefBuilder;
+import org.apache.lucene.util.LegacyNumericUtils;
 import org.apache.lucene.util.NumericUtils;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationLRUCache;
@@ -200,16 +202,16 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 			//assertQ(req("q", "id:" + i), "//*[@numFound='1']");
 			
 			// int field types must be searched with bytes value (not strings)
-			BytesRef br = new BytesRef();
-			NumericUtils.intToPrefixCoded(i, 0, br);
+			BytesRefBuilder br = new BytesRefBuilder();
+			LegacyNumericUtils.intToPrefixCoded(i, 0, br);
 			
 			// references
 			if (i % 2 == 1) {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.utf8ToString())), null,
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
 						new SecondOrderCollectorCites(referencesWrapper, new String[] {"reference"})), maxHitsFound).scoreDocs;
 			}
 			else {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.utf8ToString())), null,
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
 						new SecondOrderCollectorCitesRAM(referencesWrapper), false), maxHitsFound).scoreDocs;
 			}
 			
@@ -224,7 +226,7 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 				System.out.println("Expecting:" + Arrays.toString(references.get(i)));
 				System.out.println("Got:" + Arrays.toString(hits));
 				if(!hitsEquals(references.get(i), references, hits)) {
-					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
 					new SecondOrderCollectorCites(referencesWrapper, new String[] {"reference"}), false), maxHitsFound).scoreDocs;
 					hitsEquals(references.get(i), references, hits);
 				}
@@ -236,17 +238,17 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 			
 			// citations: {papers} -> X
 			if (i % 2 == 0) {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
 					new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
 			}
 			else {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
 						new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
 			}
 			
 			if (debug) {
 				if(!citedByEquals(citations.get(i), citations, hits)) {
-					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))), null,
+					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
 					    new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
 					
 					citedByEquals(citations.get(i), citations, hits);
@@ -278,7 +280,7 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 	private void compareCitations(Query query, SecondOrderCollector collector) throws IOException {
 		SolrQueryRequest r = req("test");
 		SolrIndexSearcher searcher = r.getSearcher();
-		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, null, collector), 100).scoreDocs;
+		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, collector), 100).scoreDocs;
 		ScoreDoc[] r2 = searcher.search(JoinUtil.createJoinQuery("id", false, "reference", query, searcher, ScoreMode.Max), 100).scoreDocs;
 		compareResults(r1, r2);
   }
@@ -298,7 +300,7 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 	private void compareReferences(Query query, SecondOrderCollector collector) throws IOException {
 		SolrQueryRequest r = req("test");
 		SolrIndexSearcher searcher = r.getSearcher();
-		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, null, collector), 100).scoreDocs;
+		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, collector), 100).scoreDocs;
 		ScoreDoc[] r2 = searcher.search(JoinUtil.createJoinQuery("reference", true, "id", query, searcher, ScoreMode.Max), 100).scoreDocs;
 		compareResults(r1, r2);
   }

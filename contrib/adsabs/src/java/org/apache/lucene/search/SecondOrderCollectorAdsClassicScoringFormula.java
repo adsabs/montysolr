@@ -1,13 +1,10 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.SlowCompositeReaderWrapper;
-import org.apache.lucene.search.FieldCache.Floats;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.NumericDocValues;
 
 /**
  * This is a toy example for testing the ADS Classic relevance
@@ -37,16 +34,16 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	private float lucenePart;
 	private float adsPart;
 	private CacheWrapper cache;
-	private LuceneCacheWrapper<Floats> boostCache;
+	private LuceneCacheWrapper<NumericDocValues> boostCache;
 
-	public SecondOrderCollectorAdsClassicScoringFormula(SolrCacheWrapper cache, LuceneCacheWrapper<Floats> boostCache, float ratio) {
+	public SecondOrderCollectorAdsClassicScoringFormula(SolrCacheWrapper cache, LuceneCacheWrapper<NumericDocValues> boostCache, float ratio) {
 		this.cache = cache;
 		this.lucenePart = ratio;
 		this.adsPart = 1.0f - ratio;
 		this.boostCache = boostCache;
 	}
 	
-	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, LuceneCacheWrapper<Floats> boostCache) {
+	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, LuceneCacheWrapper<NumericDocValues> boostCache) {
 		this.cache = cache;
 		this.lucenePart = 0.5f;
 		this.adsPart = 0.5f;
@@ -77,16 +74,12 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	}
 
 	@Override
-	public void setNextReader(AtomicReaderContext context)
+	public void doSetNextReader(LeafReaderContext context)
 			throws IOException {
 		this.docBase = context.docBase;
 
 	}
 
-	@Override
-	public boolean acceptsDocsOutOfOrder() {
-		return firstOrderScorerOutOfOrder;
-	}
 	
 	@Override
 	public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
@@ -117,8 +110,18 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "(cache=" + cache.toString() + ", boost=" + boostCache.toString() 
-		+ ", outOfOrder=" + this.acceptsDocsOutOfOrder() 
 		+ ", lucene=" + this.lucenePart + ", adsPart=" + this.adsPart + ")";
 	}
+
+  @Override
+  public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public boolean needsScores() {
+    return true;
+  }
 
 }

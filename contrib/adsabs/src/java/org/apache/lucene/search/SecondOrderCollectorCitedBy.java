@@ -2,6 +2,7 @@ package org.apache.lucene.search;
 
 import java.io.IOException;
 import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.LeafReaderContext;
 
 /**
  * // citations(P) - set of papers that have P in their reference list
@@ -45,13 +46,6 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		
 	}
 
-
-	@Override
-	public boolean acceptsDocsOutOfOrder() {
-		return true;
-	}
-	
-	
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ")";
@@ -61,20 +55,5 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	public int hashCode() {
 		return 8959545 ^ cache.hashCode();
 	}
-	
-	/** Returns true iff <code>o</code> is equal to this. */
-	public boolean equals(Object o) {
-		if (o instanceof SecondOrderCollector) {
-			SecondOrderCollector fq = (SecondOrderCollector) o;
-			return hashCode() == fq.hashCode();
-		}
-		return false;
-	}
 
-  @Override
-  public void setNextReader(AtomicReaderContext context) throws IOException {
-     this.docBase = context.docBase;
-  }
-	
-	
 }
