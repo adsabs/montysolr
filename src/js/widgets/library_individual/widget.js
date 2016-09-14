@@ -205,7 +205,7 @@ define([
                     switch (arg1) {
                       case "export":
                         data.widgetName = "ExportWidget";
-                        data.additional = { format : arg2 };
+                        data.additional = { format : arg2, libid: id };
                         break;
                       case "visualization":
                         data.widgetName = arg2;

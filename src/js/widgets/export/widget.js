@@ -272,7 +272,7 @@ define([
 
         //classic special case
         if (data.format === "classic"){
-          this.openClassicExports({bibcodes : recs});
+          this.openClassicExports({bibcodes : recs, libid: data.libid});
           return;
         }
 
@@ -289,7 +289,7 @@ define([
         if (options.bibcodes){
            var $form =  $(ClassicFormTemplate({
              bibcodes: options.bibcodes,
-             exportLimit : apiTargets._limits.ExportWidget.limit
+             exportLimit : ApiTargets._limits.ExportWidget.limit
            }));
           $form.submit();
         }
@@ -313,7 +313,15 @@ define([
         }
 
         //finally, close export widget and return to results page
-        this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+
+        if (options.libid) {
+          // We are in an ADS library: the contents of the library need to stay visible and the highlight
+          // has to go back to the "View Library" menu item
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, "IndividualLibraryWidget", {subView: "library", id : options.libid});
+        } else {
+          this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+        }
+        //this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
       },
 
       /**
