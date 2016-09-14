@@ -3,7 +3,6 @@ package examples.adsabs;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.search.FieldCache;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
@@ -33,7 +32,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 	
 	@Override
 	  public void tearDown() throws Exception {
-	  FieldCache.DEFAULT.purgeAllCaches();
+	  //FieldCache.DEFAULT.purgeAllCaches();
     super.tearDown();
 	}
 	

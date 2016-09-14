@@ -23,6 +23,7 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -162,8 +163,8 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 		return configString;
 	};
 	
-	public static String getSolrHome() {
-		return System.getProperty("solr.solr.home");
+	public static Path getSolrHome() {
+		return new File(System.getProperty("solr.solr.home")).toPath();
 	}
 
 	/**

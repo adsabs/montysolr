@@ -73,8 +73,6 @@ import org.slf4j.LoggerFactory;
  * network in memory. However, the initial mapping (value<->lucene id)
  * will always be constructed in its entirety.
  * 
- * TODO: I should use DocValues after we move to >= vSolr42
- * 
  */
 public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,V> {
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -99,10 +97,10 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   private long evictions;
 
   private long warmupTime = 0;
-
-  private LinkedHashMap<K,V> map;
   private String description="Citation LRU Cache";
 
+  // the main objects
+  private LinkedHashMap<K,V> relationships;
 	private String[] referenceFields;
 	private String[] citationFields;
 	private String[] identifierFields = null;
@@ -118,7 +116,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 	// not be necessary as we are going to denormalize 
 	// citation data outside solr and prepare everything there...
 	private boolean incremental = false;
-
 	private boolean reuseCache;
 	
 
@@ -159,7 +156,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     final int initialSize = Math.min(str==null ? 1024 : Integer.parseInt(str), limit);
     description = generateDescription(limit, initialSize);
 
-    map = new RelationshipLinkedHashMap<K,V>(initialSize, 0.75f, true, 
+    relationships = new RelationshipLinkedHashMap<K,V>(initialSize, 0.75f, true, 
     		limit, sizeInPercent);
 
     if (persistence==null) {
@@ -168,7 +165,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     }
 
     stats = (CumulativeStats)persistence;
-
     return persistence;
   }
 
@@ -186,8 +182,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
 
   public int size() {
-    synchronized(map) {
-      return map.size();
+    synchronized(relationships) {
+      return relationships.size();
     }
   }
 
@@ -197,7 +193,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   
   public V put(K key, V value) {
   	//System.out.println("put(" + key + "," + value+")");
-    synchronized (map) {
+    synchronized (relationships) {
       if (getState() == State.LIVE) {
         stats.inserts.incrementAndGet();
       }
@@ -205,13 +201,13 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       // increment local inserts regardless of state???
       // it does make it more consistent with the current size...
       inserts++;
-      return map.put(key,value);
+      return relationships.put(key,value);
     }
   }
 
   public V get(K key) {
-    synchronized (map) {
-      V val = map.get(key);
+    synchronized (relationships) {
+      V val = relationships.get(key);
       if (getState() == State.LIVE) {
         // only increment lookups and hits if we are live.
         lookups++;
@@ -234,22 +230,22 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * The first comes references, the second are citations
    */
   public  Iterator<int[][]> getCitationsIterator() {
-  	return ((RelationshipLinkedHashMap<K,V>) map).getRelationshipsIterator();
+  	return ((RelationshipLinkedHashMap<K,V>) relationships).getRelationshipsIterator();
   }
   
   public int getCitationsIteratorSize() {
-  	synchronized (map) {
-  		return ((RelationshipLinkedHashMap<K,V>) map).relationshipsDataSize();
+  	synchronized (relationships) {
+  		return ((RelationshipLinkedHashMap<K,V>) relationships).relationshipsDataSize();
   	}
   }
   
   public int[] getCitations(K key) {
-  	synchronized (map) {
-  		V val = map.get(key);
+  	synchronized (relationships) {
+  		V val = relationships.get(key);
   		if (val==null)
   			return null;
   		
-      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) relationships;
       int[] values = relMap.getCitations((Integer)val);
       
       if (getState() == State.LIVE) {
@@ -270,8 +266,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * what we have directly using lucene docid
    */
   public int[] getCitations(int docid) {
-    synchronized (map) {
-      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+    synchronized (relationships) {
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) relationships;
       int[] val = relMap.getCitations(docid);
       
       if (getState() == State.LIVE) {
@@ -288,12 +284,12 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
   
   public int[] getReferences(K key) {
-  	synchronized (map) {
-  		V val = map.get(key);
+  	synchronized (relationships) {
+  		V val = relationships.get(key);
   		if (val==null)
   			return null;
   		
-      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) relationships;
       int[] values = relMap.getReferences((Integer)val);
       
       if (getState() == State.LIVE) {
@@ -314,8 +310,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * what we have directly using lucene docid
    */
   public int[] getReferences(int docid) {
-    synchronized (map) {
-      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) map;
+    synchronized (relationships) {
+      RelationshipLinkedHashMap<K,V> relMap = (RelationshipLinkedHashMap<K,V>) relationships;
       int[] val = relMap.getReferences(docid);
       
       if (getState() == State.LIVE) {
@@ -332,8 +328,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   }
 
   public void clear() {
-    synchronized(map) {
-      map.clear();
+    synchronized(relationships) {
+      relationships.clear();
     }
   }
   
@@ -357,7 +353,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	  	else {
   	      warmRebuildEverything(searcher, old);
   	  	}
-  	  	log.info("Warming cache done (# entries:" + map.size() + "): " + searcher);
+  	  	log.info("Warming cache done (# entries:" + relationships.size() + "): " + searcher);
     	} 
     	catch (IOException e) {
       	throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
@@ -392,8 +388,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	
   	if (this.referenceFields.length > 0 || this.citationFields.length > 0) {
 	  	@SuppressWarnings("rawtypes")
-      final RelationshipLinkedHashMap relMap = (RelationshipLinkedHashMap) map;
-	  	relMap.initializeCitationCache(searcher.maxDoc());
+      final RelationshipLinkedHashMap relMap = (RelationshipLinkedHashMap) relationships;
+	  	relMap.initializeCitationCache(searcher.maxDoc()); // TODO: touch only updated fields
 	  	
 	  	
 	  	unInvertedTheDamnThing(searcher, getFields(searcher, this.referenceFields), 
@@ -487,7 +483,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     else if (liveDocs != null) {
     	
     	Integer luceneId;
-      for (V v: other.map.values()) {
+      for (V v: other.relationships.values()) {
       	luceneId = ((Integer) v);
       	if (luceneId <= liveDocs.length() && !liveDocs.get(luceneId)) { // doc was either deleted or updated
       		//System.out.println("Found deleted: " + luceneId);
@@ -512,18 +508,18 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       Object[] keys,vals = null;
       
       // Don't do the autowarming in the synchronized block, just pull out the keys and values.
-      synchronized (other.map) {
+      synchronized (other.relationships) {
         
-        int sz = autowarm.getWarmCount(other.map.size());
+        int sz = autowarm.getWarmCount(other.relationships.size());
         
         keys = new Object[sz];
         vals = new Object[sz];
 
-        Iterator<Map.Entry<K, V>> iter = other.map.entrySet().iterator();
+        Iterator<Map.Entry<K, V>> iter = other.relationships.entrySet().iterator();
 
         // iteration goes from oldest (least recently used) to most recently used,
         // so we need to skip over the oldest entries.
-        int skip = other.map.size() - sz;
+        int skip = other.relationships.size() - sz;
         for (int i=0; i<skip; i++) iter.next();
 
 
@@ -573,7 +569,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   		FieldType type = fieldInfo.getType();
   		
   		if (type.getNumericType() != null) {
-        synchronized (map) {
+        synchronized (relationships) {
           treatIdentifiersAsText  = true;
         }
       }
@@ -650,6 +646,12 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	  for (String field: fields) {
 
   	    FieldInfo fi = fInfo.fieldInfo(field);
+  	    
+  	    if (fi == null) {
+  	      log.error("Field " + field + " has no schema entry; skipping it!");
+  	      continue;
+  	    }
+  	    
   	    SchemaField fSchema = schema.getField(field);
   	    DocValuesType fType = fi.getDocValuesType();
   	    Map<String,Type> mapping = new HashMap<String,Type>();
@@ -773,13 +775,13 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public NamedList getStatistics() {
     NamedList lst = new SimpleOrderedMap();
-    synchronized (map) {
+    synchronized (relationships) {
       lst.add("lookups", lookups);
       lst.add("hits", hits);
       lst.add("hitratio", calcHitRatio(lookups,hits));
       lst.add("inserts", inserts);
       lst.add("evictions", evictions);
-      lst.add("size", map.size());
+      lst.add("size", relationships.size());
     }
     lst.add("warmupTime", warmupTime);
     
@@ -900,6 +902,14 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 
   
   /*
+   * The main datastructure holding information about the lucene documents.
+   * 
+   * For speed purposes, the data gets loaded into RAM; we have those pieces
+   * 
+   *  - mapping: key -> lucene docid
+   *  - references: docid -> many other docids
+   *  - citations: docid -> many other docids
+   *  
    * Until I implement dynamic loading of data, this cache 
    * will always grow to the maxdoc size, so that no 
    * evictions happen

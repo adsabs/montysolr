@@ -131,18 +131,13 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		SolrCacheWrapper citationsWrapper = new SolrCacheWrapper.CitationsCache(cache);
 		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
-		Map<String, UninvertingReader.Type> mapping = new HashMap();
-    mapping.put("boost_const", UninvertingReader.Type.SORTED);
-    mapping.put("boost_1", UninvertingReader.Type.SORTED);
-    mapping.put("boost_2", UninvertingReader.Type.SORTED);
     
-    
-    //UninvertingReader uninvertingReader = new UninvertingReader(tempReq.getSearcher().getLeafReader(), mapping);
-    //NumericDocValues boostConst = uninvertingReader.getNumericDocValues("boost_const");
-    
-		LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache("boost_const", tempReq.getSearcher().getLeafReader());
-		LuceneCacheWrapper<NumericDocValues> boostOne = LuceneCacheWrapper.getFloatCache("boost_1", tempReq.getSearcher().getLeafReader());
-		LuceneCacheWrapper<NumericDocValues> boostTwo = LuceneCacheWrapper.getFloatCache("boost_2", tempReq.getSearcher().getLeafReader());
+		LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache(
+		    "boost_const", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getLeafReader());
+		LuceneCacheWrapper<NumericDocValues> boostOne = LuceneCacheWrapper.getFloatCache(
+		    "boost_1", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getLeafReader());
+		LuceneCacheWrapper<NumericDocValues> boostTwo = LuceneCacheWrapper.getFloatCache(
+		    "boost_2", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getLeafReader());
 		
   	
   	
@@ -202,9 +197,9 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
    // topN()
   	testQ2((Query) new SecondOrderQuery(new MatchAllDocsQuery(), 
   			new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostTwo)), 
-  			new SecondOrderCollectorTopN(2, true),
+  			new SecondOrderCollectorTopN(2),
   			Arrays.asList(5,0));
-  	testQ2("*:*", new SecondOrderCollectorTopN(2, true),
+  	testQ2("*:*", new SecondOrderCollectorTopN(2),
   			Arrays.asList(0,1));
   	
 	}

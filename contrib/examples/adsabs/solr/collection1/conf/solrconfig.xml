@@ -45,8 +45,6 @@
          
     <lockType>${montysolr.locktype:native}</lockType>
 
-    <nrtMode>true</nrtMode>
-
 
     <deletionPolicy class="solr.SolrDeletionPolicy">
     

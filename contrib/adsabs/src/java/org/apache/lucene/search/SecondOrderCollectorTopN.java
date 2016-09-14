@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.lucene.search.DocIdSetIterator;
 
-import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.LeafReaderContext;
 
 public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 
@@ -19,37 +19,11 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 		this.detail = detail;
 	}
 	
-	public SecondOrderCollectorTopN(int topN, boolean docsScoredInOrder) {
-		topCollector = TopScoreDocCollector.create(topN, docsScoredInOrder);
-		this.topN = topN;
-	}
-	
 	public SecondOrderCollectorTopN(int topN) {
-		topCollector = TopScoreDocCollector.create(topN, !firstOrderScorerOutOfOrder);
+		topCollector = TopScoreDocCollector.create(topN);
 		this.topN = topN;
 	}
 	
-	@Override
-	public void setScorer(Scorer scorer) throws IOException {
-		topCollector.setScorer(scorer);
-
-	}
-
-	@Override
-	public void collect(int doc) throws IOException {
-		topCollector.collect(doc);
-	}
-
-	@Override
-	public void setNextReader(AtomicReaderContext context) throws IOException {
-		topCollector.setNextReader(context);
-
-	}
-
-	@Override
-	public boolean acceptsDocsOutOfOrder() {
-		return topCollector.acceptsDocsOutOfOrder();
-	}
 	
 	@Override
 	public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
@@ -77,7 +51,23 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 	
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(" + topN + ", outOfOrder=" + this.acceptsDocsOutOfOrder() + (detail!=null ? ", info=" + detail : "") + ")";
+		return this.getClass().getSimpleName() + "(" + topN + (detail!=null ? ", info=" + detail : "") + ")";
 	}
 
+  @Override
+  public boolean needsScores() {
+    return topCollector.needsScores();
+  }
+
+  @Override
+  public void collect(int doc) throws IOException {
+    throw new UnsupportedOperationException("Must not be called");
+    
+  }
+  
+  @Override
+  public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
+    LeafCollector c = topCollector.getLeafCollector(context);
+    return c;
+  }
 }

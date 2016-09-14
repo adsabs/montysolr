@@ -114,12 +114,6 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	}
 
   @Override
-  public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public boolean needsScores() {
     return true;
   }

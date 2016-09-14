@@ -1,8 +1,6 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.LeafReaderContext;
 
 /**
  * // citations(P) - set of papers that have P in their reference list
@@ -55,5 +53,11 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	public int hashCode() {
 		return 8959545 ^ cache.hashCode();
 	}
+
+
+  @Override
+  public boolean needsScores() {
+    return true;
+  }
 
 }

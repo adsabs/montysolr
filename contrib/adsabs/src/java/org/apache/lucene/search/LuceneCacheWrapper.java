@@ -10,6 +10,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.solr.uninverting.UninvertingReader;
+import org.apache.solr.uninverting.UninvertingReader.Type;
 
 public class LuceneCacheWrapper<T> implements CacheWrapper {
 	
@@ -56,11 +57,14 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 		throw new NotImplementedException();
 	}
 	
-	public static LuceneCacheWrapper<NumericDocValues> getFloatCache(String fieldName, LeafReader reader) 
+	public static LuceneCacheWrapper<NumericDocValues> getFloatCache(
+	    String fieldName, 
+	    Type type, 
+	    LeafReader reader)
 	    throws IOException  {
 		
 	  Map<String, UninvertingReader.Type> mapping = new HashMap<String, UninvertingReader.Type>();
-    mapping.put(fieldName, UninvertingReader.Type.SORTED_SET_FLOAT);
+    mapping.put(fieldName, type);
     UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
     NumericDocValues values = uninvertingReader.getNumericDocValues(fieldName);
     //uninvertingReader.close();

@@ -9,6 +9,9 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
@@ -21,9 +24,11 @@ import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.LuceneCacheWrapper;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
@@ -37,6 +42,7 @@ import org.apache.lucene.search.SecondOrderCollectorCitingTheMostCited;
 import org.apache.lucene.search.SecondOrderCollectorOperatorExpertsCiting;
 import org.apache.lucene.search.SecondOrderCollectorTopN;
 import org.apache.lucene.search.SecondOrderQuery;
+import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopFieldCollector;
@@ -70,10 +76,13 @@ import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.RawQParserPlugin;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.search.SortSpec;
+import org.apache.solr.search.SortSpecParsing;
 import org.apache.solr.search.SpatialBoxQParserPlugin;
 import org.apache.solr.search.SpatialFilterQParserPlugin;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.servlet.SolrRequestParsers;
+import org.apache.solr.uninverting.UninvertingReader;
+import org.apache.solr.uninverting.UninvertingReader.Type;
 
 import com.google.common.primitives.Floats;
 
@@ -94,7 +103,20 @@ AqpFunctionQueryBuilderProvider {
 	//TODO: make configurable
 	static String[] citationSearchIdField = new String[]{"bibcode", "alternate_bibcode"};
 	static String citationSearchRefField = "reference";
-
+	
+	private static LuceneCacheWrapper<NumericDocValues> getLuceneCache(FunctionQParser fp, String fieldname) throws SyntaxError {
+	  LuceneCacheWrapper<NumericDocValues> cacheWrapper;
+    SchemaField field = fp.getReq().getSchema().getField(fieldname);
+    try {
+      cacheWrapper = LuceneCacheWrapper.getFloatCache(
+          "cite_read_boost", field.getType().getUninversionType(field), 
+          fp.getReq().getSearcher().getLeafReader());
+    } catch (IOException e) {
+      throw new SyntaxError("Naughty, naughty server error", e);
+    }
+    return cacheWrapper;
+	}
+	
 	static {
 		
 		/* @api.doc
@@ -224,7 +246,7 @@ AqpFunctionQueryBuilderProvider {
 				SolrIndexSearcher searcher = req.getSearcher();
 
 				// find the 200 most interesting papers and collect their readers
-				SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(innerQuery, null, 
+				SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorTopN(200));
 				discoverMostReadQ.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
 
@@ -234,9 +256,9 @@ AqpFunctionQueryBuilderProvider {
 				fieldsToLoad.add(fieldName);
 
 				try {
-					searcher.search(discoverMostReadQ, new Collector() {
+					searcher.search(discoverMostReadQ, new SimpleCollector() {
 						private Document d;
-						private AtomicReader reader;
+						private LeafReader reader;
 						private boolean firstPassed = false;
 						@Override
 						public void setScorer(Scorer scorer) throws IOException {
@@ -254,28 +276,26 @@ AqpFunctionQueryBuilderProvider {
 						}
 
 						@Override
-						public void setNextReader(AtomicReaderContext context)
+						public void doSetNextReader(LeafReaderContext context)
 						throws IOException {
 							this.reader = context.reader();
 						}
-
-						@Override
-						public boolean acceptsDocsOutOfOrder() {
-							return false;
-						}
+            @Override
+            public boolean needsScores() {
+              return true;
+            }
 					});
 				} catch (IOException e) {
 					throw new SyntaxError(e.getMessage(), e);
 				}
 
 				MoreLikeThisQuery mlt = new MoreLikeThisQueryFixed(readers.toString(), new String[] {fieldName}, 
-						new WhitespaceAnalyzer(Version.LUCENE_48), fieldName);
+						new WhitespaceAnalyzer(), fieldName);
 
 				// configurable params
 				mlt.setMinTermFrequency(0);
 				mlt.setMinDocFreq(2);
 				mlt.setMaxQueryTerms(200);
-				mlt.setBoost(2.0f);
 				mlt.setPercentTermsToMatch(0.0f);
 
 				//try {
@@ -284,7 +304,7 @@ AqpFunctionQueryBuilderProvider {
 				//} catch (IOException e) {
 				//}
 
-				return mlt;
+				return new BoostQuery(mlt, 2.0f);
 			}
 		});
 
@@ -360,7 +380,7 @@ AqpFunctionQueryBuilderProvider {
 						//if (!fType.isMultiValued()) {
 						//	throw new SyntaxError("The positional search doesn't make sense for: " + query);
 						//}
-						positionIncrementGap = fType.getAnalyzer().getPositionIncrementGap(field.getName());
+						positionIncrementGap = fType.getIndexAnalyzer().getPositionIncrementGap(field.getName());
 						if (positionIncrementGap == 0)
 							positionIncrementGap = 1;
 					}
@@ -445,8 +465,7 @@ AqpFunctionQueryBuilderProvider {
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
-						fp.getReq().getSearcher().getLeafReader());
+				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
 				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper, ratio));
@@ -526,22 +545,22 @@ AqpFunctionQueryBuilderProvider {
 
 
 				if (sortOrRank.equals("score")) {
-					return new SecondOrderQuery(innerQuery, null, 
+					return new SecondOrderQuery(innerQuery, 
 							new SecondOrderCollectorTopN(topN));
 				}
 				else {
-					SortSpec sortSpec = QueryParsing.parseSortSpec(sortOrRank, fp.getReq());
+					SortSpec sortSpec = SortSpecParsing.parseSortSpec(sortOrRank, fp.getReq());
 
 					SolrIndexSearcher searcher = fp.getReq().getSearcher();
 
 					TopFieldCollector collector;
 					try {
-						collector = TopFieldCollector.create(searcher.weightSort(sortSpec.getSort()), topN, false, true, true, true);
+						collector = TopFieldCollector.create(searcher.weightSort(sortSpec.getSort()), topN, false, true, true);
 					} catch (IOException e) {
 						throw new SyntaxError("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
 					}
 
-					return new SecondOrderQuery(innerQuery, null, 
+					return new SecondOrderQuery(innerQuery, 
 							new SecondOrderCollectorTopN(sortOrRank, topN, collector));
 				}
 			}
@@ -588,7 +607,7 @@ AqpFunctionQueryBuilderProvider {
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 								
-				return new SecondOrderQuery(innerQuery, null, 
+				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorCitedBy(citationsWrapper), false);
 			}
 		});
@@ -632,7 +651,7 @@ AqpFunctionQueryBuilderProvider {
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				
-				return new SecondOrderQuery(innerQuery, null, 
+				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorCitesRAM(referencesWrapper), false);
 			}
 		});
@@ -718,8 +737,7 @@ AqpFunctionQueryBuilderProvider {
         SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
-						fp.getReq().getSearcher().getAtomicReader());
+				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
 				SecondOrderQuery outerQuery = new SecondOrderQuery( // references
 						new SecondOrderQuery( // topn
@@ -762,9 +780,9 @@ AqpFunctionQueryBuilderProvider {
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				//TODO: make configurable the name of the field				
-				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
+				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 
-				return new SecondOrderQuery(innerQuery, null, 
+				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorOperatorExpertsCiting(citationsWrapper, boostWrapper));
 			}
 		});
@@ -796,7 +814,7 @@ AqpFunctionQueryBuilderProvider {
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", fp.getReq().getSearcher().getAtomicReader());
+				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
 				SecondOrderQuery outerQuery = new SecondOrderQuery( // citations
 						new SecondOrderQuery( // topn
@@ -829,10 +847,9 @@ AqpFunctionQueryBuilderProvider {
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<Floats> boostWrapper = LuceneCacheWrapper.getFloatCache("cite_read_boost", 
-						fp.getReq().getSearcher().getAtomicReader());
+				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
-				return new SecondOrderQuery(innerQuery, null, 
+				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostWrapper));
 			}
 		});
@@ -844,7 +861,7 @@ AqpFunctionQueryBuilderProvider {
 				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				return new SecondOrderQuery(innerQuery, null, 
+				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorCites(citationsWrapper, new String[] {citationSearchRefField}), false);
 
 			}
@@ -886,7 +903,7 @@ AqpFunctionQueryBuilderProvider {
 				return simplify(q);
 			}
 			protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-				ArrayList<Query> parts = query.getDisjuncts();
+				List<Query> parts = query.getDisjuncts();
 				for (int i=0;i<parts.size();i++) {
 					Query oldQ = parts.get(i);
 					String field = null;
@@ -903,7 +920,8 @@ AqpFunctionQueryBuilderProvider {
 						}
 					}
 					if (field!=null) {
-						parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
+						parts.set(i, reAnalyze(field, getParser().getString(), 
+						    oldQ.getClass().isInstance(BoostQuery.class) ? ((BoostQuery)oldQ).getBoost() : null));
 					}
 					else {
 						parts.set(i, swimDeep(oldQ));
@@ -920,12 +938,14 @@ AqpFunctionQueryBuilderProvider {
 				return null;
 				//return f; // always re-analyze
 			}
-			private Query reAnalyze(String field, String value, float boost) throws SyntaxError {
+			private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {
 				QParser fParser = getParser();
 				System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
 				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
 				Query q = aqp.getQuery();
-				q.setBoost(boost);
+				if (boost != null && boost != 1.0f) {
+				  q = new BoostQuery(q, boost);
+				}
 				return q;
 			}
 		});
@@ -938,7 +958,7 @@ AqpFunctionQueryBuilderProvider {
 				return simplify(reParse(q, fp, (Class<?>)null));
 			}
 			protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-				ArrayList<Query> parts = query.getDisjuncts();
+				List<Query> parts = query.getDisjuncts();
 				for (int i=0;i<parts.size();i++) {
 					Query oldQ = parts.get(i);
 					String field = null;
@@ -955,7 +975,8 @@ AqpFunctionQueryBuilderProvider {
 						}
 					}
 					if (field!=null) {
-						parts.set(i, reAnalyze(field, getParser().getString(), oldQ.getBoost()));
+						parts.set(i, reAnalyze(field, getParser().getString(), 
+						    oldQ.getClass().isInstance(BoostQuery.class) ? ((BoostQuery)oldQ).getBoost() : null));
 					}
 					else {
 						parts.set(i, swimDeep(oldQ));
@@ -964,11 +985,13 @@ AqpFunctionQueryBuilderProvider {
 				return query;
 			}
 
-			private Query reAnalyze(String field, String value, float boost) throws SyntaxError {
+			private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {
 				QParser fParser = getParser();
 				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
 				Query q = aqp.getQuery();
-				q.setBoost(boost);
+				if (boost != null && boost != 1.0f) {
+          q = new BoostQuery(q, boost);
+        }
 				return q;
 			}
 		});
@@ -1009,7 +1032,7 @@ AqpFunctionQueryBuilderProvider {
 				if (!cache.isWarmingOrWarmed()) {
 					cache.warm(req.getSearcher(), cache);
 				}
-				return new BooleanQuery();
+				return new MatchNoDocsQuery();
 			}
 		});
 			

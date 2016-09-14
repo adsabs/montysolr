@@ -1,9 +1,7 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
@@ -53,12 +51,6 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	
 
 	@Override
-	public void setScorer(Scorer scorer) throws IOException {
-		this.scorer = scorer;
-
-	}
-
-	@Override
 	public void collect(int doc) throws IOException {
 		//if (reader.isDeleted(doc)) return;
 		
@@ -77,18 +69,6 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		}
 	}
 
-	@Override
-	public void setNextReader(AtomicReaderContext context)
-			throws IOException {
-		this.reader = context.reader();
-		this.docBase = context.docBase;
-	}
-
-	@Override
-	public boolean acceptsDocsOutOfOrder() {
-		return true;
-	}
-	
 	
 	@Override
 	public String toString() {
@@ -99,7 +79,12 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	public int hashCode() {
 		return 9645127 ^ fieldsToLoad.hashCode() ^ cache.hashCode();
 	}
-	
-	
-	
+
+
+
+
+  @Override
+  public boolean needsScores() {
+    return true;
+  }
 }

@@ -1,10 +1,6 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
-
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.solr.search.CitationLRUCache;
 
 /**
  * Find the papers that are citing results of the search
@@ -29,12 +25,6 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   }
   
   
-
-  @Override
-  public void setScorer(Scorer scorer) throws IOException {
-    this.scorer = scorer;
-
-  }
 
   @Override
   public void collect(int doc) throws IOException {
@@ -66,11 +56,6 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   }
 
 
-  @Override
-  public boolean acceptsDocsOutOfOrder() {
-    return true;
-  }
-  
   
   @Override
   public String toString() {
@@ -91,10 +76,12 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
     return false;
   }
 
+
+
   @Override
-  public void setNextReader(AtomicReaderContext context) throws IOException {
-     this.docBase = context.docBase;
+  public boolean needsScores() {
+    return true;
   }
-  
+
   
 }
