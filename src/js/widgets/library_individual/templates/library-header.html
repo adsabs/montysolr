@@ -2,6 +2,29 @@
 
 {{#if publicView}}
 
+    {{#if loggedIn}}
+    <div class="pull-right" style="position:relative;z-index:1">
+
+        {{#if largeLibrary}}
+        <button
+            class="btn btn-default bigquery-export"
+            data-placement="bottom"
+            title="large libraries can take some time to export"
+            data-toggle="tooltip"
+            >
+            <i class="icon-loading" style="display:none"></i>
+            <i class="fa fa-arrow-right"></i> View library in search results page
+        </button>
+        {{else}}
+        <button class="btn btn-default bigquery-export">
+            <i class="icon-loading" style="display:none"></i>
+            <i class="fa fa-arrow-right"></i> View library in search results page
+        </button>
+        {{/if}}
+
+    </div>
+    {{/if}}
+
     <div class="s-library-title">
         <h2>{{name}}</h2>
     </div>

@@ -361,6 +361,12 @@ define([
       }
     };
 
+    var fakeUser = {
+      getHardenedInstance : function(){return this},
+      USER_SIGNED_IN : "user_signed_in",
+      isLoggedIn : function(){return true },
+      getUserData : function(){return {} }
+    };
 
     var fakeLibraryController = {
       getHardenedInstance: function () {
@@ -415,6 +421,7 @@ define([
           id: 1,
           description: "Are you one of them?",
           permission: "owner",
+          loggedIn: true,
           num_papers: 45,
           date_created: '2015-04-03 04:30:04',
           date_last_modified: '2015-04-09 06:30:04'
@@ -428,6 +435,7 @@ define([
           id: 1,
           description: "Are you one of them?",
           permission: "owner",
+          loggedIn: true,
           num_papers: 45,
           date_created: '2015-04-03 04:30:04',
           date_last_modified: '2015-04-09 06:30:04'
@@ -458,6 +466,7 @@ define([
       }))({verbose: false});
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
+      minsub.beehive.addObject("User", fakeUser);
       w.activate(minsub.beehive.getHardenedInstance());
 
       var spy = sinon.spy();
@@ -517,6 +526,7 @@ define([
       }))({verbose: false});
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
+      minsub.beehive.addObject("User", fakeUser);
 
       w.activate(minsub.beehive.getHardenedInstance());
 
@@ -550,6 +560,7 @@ define([
 
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
+      minsub.beehive.addObject("User", fakeUser);
 
       w.activate(minsub.beehive.getHardenedInstance());
 
@@ -587,7 +598,8 @@ define([
           "subView": "export",
           "widgetName": "ExportWidget",
           "additional": {
-            "format": "bibtex"
+            "format": "bibtex",
+            "libid": "1"
           }
         }
       ]);
@@ -657,6 +669,7 @@ define([
       }))({verbose: false});
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
+      minsub.beehive.addObject("User", fakeUser);
 
       w.activate(minsub.beehive.getHardenedInstance());
 
@@ -707,6 +720,7 @@ define([
       }))({verbose: false});
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
+      minsub.beehive.addObject("User", fakeUser);
 
       w.activate(minsub.beehive.getHardenedInstance());
 
@@ -739,6 +753,7 @@ define([
       }))({verbose: false});
 
       minsub.beehive.addObject("LibraryController", fakeLibraryController);
+      minsub.beehive.addObject("User", fakeUser);
 
       w.activate(minsub.beehive.getHardenedInstance());
 

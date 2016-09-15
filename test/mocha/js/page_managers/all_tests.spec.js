@@ -89,6 +89,8 @@ define([
 
 
         it("assembles/disassembles the page view", function(done) {
+          // this fails when the time limit is 2000ms, because it roughly takes 2600ms
+          // limit is set in: bower_components/mocha/mocha.js
           var app = new Application({debug: false});
           delete config.core.objects.Navigator;
           config.widgets.PageManager = 'js/wraps/abstract_page_manager/abstract_page_manager';
