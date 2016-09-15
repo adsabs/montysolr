@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.index.BinaryDocValues;
-import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
@@ -71,7 +70,7 @@ public class CitationsTransformerFactory extends TransformerFactory
     BinaryDocValues idMapping = null;
     if (params.getBool("resolve", false)) {
     	try {
-	      idMapping = FieldCache.DEFAULT.getTerms(searcher.getAtomicReader(), resolutionField, false);
+	      idMapping = req.getSearcher().getLeafReader().getBinaryDocValues(resolutionField);
       } catch (IOException e) {
 	      throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get data for resolving field: " + resolutionField, e);
       }
@@ -115,7 +114,7 @@ class CitationsTransform extends DocTransformer
   }
 
   @Override
-  public void transform(SolrDocument doc, int docid) {
+  public void transform(SolrDocument doc, int docid, float score) {
     if( docid >= 0) {
       doc.setField( name, generate(doc, docid) );
     }

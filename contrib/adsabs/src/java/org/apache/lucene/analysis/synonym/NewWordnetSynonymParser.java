@@ -1,5 +1,3 @@
-package org.apache.lucene.analysis.synonym;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,11 +14,14 @@ package org.apache.lucene.analysis.synonym;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.lucene.analysis.synonym;
+
 
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.text.ParseException;
+import java.util.Arrays;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.util.CharsRef;
@@ -35,20 +36,19 @@ import org.apache.lucene.util.CharsRefBuilder;
 // TODO: allow you to specify syntactic categories (e.g. just nouns, etc)
 public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymParser {
   private final boolean expand;
-  private final Analyzer analyzer;
   
   public NewWordnetSynonymParser(boolean dedup, boolean expand, Analyzer analyzer) {
     super(dedup, analyzer);
     this.expand = expand;
-    this.analyzer = analyzer;
   }
-  
-  public void add(Reader in) throws IOException, ParseException {
+
+  @Override
+  public void parse(Reader in) throws IOException, ParseException {
     LineNumberReader br = new LineNumberReader(in);
     try {
       String line = null;
       String lastSynSetID = "";
-      CharsRefBuilder synset[] = new CharsRefBuilder[8];
+      CharsRef synset[] = new CharsRef[8];
       int synsetSize = 0;
       
       while ((line = br.readLine()) != null) {
@@ -60,12 +60,10 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
         }
 
         if (synset.length <= synsetSize+1) {
-          CharsRef larger[] = new CharsRef[synset.length * 2];
-          System.arraycopy(synset, 0, larger, 0, synsetSize);
-          synset = larger;
+          synset = Arrays.copyOf(synset, synset.length * 2);
         }
         
-        synset[synsetSize] = parseSynonym(line, synset[synsetSize]);
+        synset[synsetSize] = parseSynonym(line, new CharsRefBuilder());
         synsetSize++;
         lastSynSetID = synSetID;
       }
@@ -93,7 +91,7 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
     return analyze(text, reuse);
   }
   
-  private void addInternal(CharsRefBuilder synset[], int size) {
+  private void addInternal(CharsRef synset[], int size) {
     if (size <= 1) {
       return; // nothing to do
     }
@@ -101,12 +99,12 @@ public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymPars
     if (expand) {
       for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-          add(synset[i].get(), synset[j].get(), false);
+          add(synset[i], synset[j], false);
         }
       }
     } else {
       for (int i = 0; i < size; i++) {
-        add(synset[i].get(), synset[0].get(), false);
+        add(synset[i], synset[0], false);
       }
     }
   }

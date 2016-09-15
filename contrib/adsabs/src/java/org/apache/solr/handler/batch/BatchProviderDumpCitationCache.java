@@ -3,10 +3,11 @@ package org.apache.solr.handler.batch;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.lucene.index.BinaryDocValues;
-import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -52,8 +53,11 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  
 	  Iterator<int[][]> it = cache.getCitationsIterator();
 	  
+	  
+	  
+	  
 	  if (!returnDocids) {
-	    BinaryDocValues uniqueValueCache = FieldCache.DEFAULT.getTerms(req.getSearcher().getAtomicReader(), uniqueField, false);
+	    BinaryDocValues uniqueValueCache = req.getSearcher().getLeafReader().getBinaryDocValues(uniqueField);
 	    int paperid = 0;
 	    while (it.hasNext()) {
 	      int[][] data = it.next();

@@ -29,7 +29,6 @@ import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.LuceneCacheWrapper;
 import org.apache.lucene.search.MatchNoDocsQuery;
-import org.apache.lucene.search.MoreLikeThisQueryFixed;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SecondOrderCollector;
@@ -289,7 +288,7 @@ AqpFunctionQueryBuilderProvider {
 					throw new SyntaxError(e.getMessage(), e);
 				}
 
-				MoreLikeThisQuery mlt = new MoreLikeThisQueryFixed(readers.toString(), new String[] {fieldName}, 
+				MoreLikeThisQuery mlt = new MoreLikeThisQuery(readers.toString(), new String[] {fieldName}, 
 						new WhitespaceAnalyzer(), fieldName);
 
 				// configurable params
