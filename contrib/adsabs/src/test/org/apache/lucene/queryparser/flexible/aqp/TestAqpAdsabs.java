@@ -168,15 +168,15 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		
 		assertQueryEquals("[20020101 TO 20030101]", null, "[20020101 TO 20030101]");
-		assertQueryEquals("[20020101 TO 20030101]^0.5", null, "[20020101 TO 20030101]^0.5");
+		assertQueryEquals("[20020101 TO 20030101]^0.5", null, "([20020101 TO 20030101])^0.5");
 		assertQueryNodeException("[20020101 TO 20030101]^0.5~");
 		assertQueryNodeException("[20020101 TO 20030101]^0.5~");
 		assertQueryEquals("title:[20020101 TO 20030101]", null, "title:[20020101 TO 20030101]");
-		assertQueryEquals("title:[20020101 TO 20030101]^0.5", null, "title:[20020101 TO 20030101]^0.5");
+		assertQueryEquals("title:[20020101 TO 20030101]^0.5", null, "(title:[20020101 TO 20030101])^0.5");
 		assertQueryNodeException("title:[20020101 TO 20030101]^0.5~");
 		assertQueryNodeException("title:[20020101 TO 20030101]^0.5~");
 		assertQueryEquals("[* TO 20030101]", null, "[\\* TO 20030101]");
-		assertQueryEquals("[20020101 TO *]^0.5", null, "[20020101 TO \\*]^0.5");
+		assertQueryEquals("[20020101 TO *]^0.5", null, "([20020101 TO \\*])^0.5");
 		assertQueryNodeException("[* 20030101]^0.5~");
 		assertQueryNodeException("[20020101 *]^0.5~");
 		assertQueryEquals("[this TO that]", null, "[this TO that]");
@@ -204,45 +204,45 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		
-		assertQueryEquals("jakarta^4 apache", null, "+jakarta^4.0 +apache");
-		assertQueryEquals("\"jakarta apache\"^4 \"Apache Lucene\"", null, "+\"jakarta apache\"^4.0 +\"apache lucene\"");
+		assertQueryEquals("jakarta^4 apache", null, "+(jakarta)^4.0 +apache");
+		assertQueryEquals("\"jakarta apache\"^4 \"Apache Lucene\"", null, "+(\"jakarta apache\")^4.0 +\"apache lucene\"");
 		
-		assertQueryEquals("this +(that thus)^7", null, "+this +((+that +thus)^7.0)");
-		assertQueryEquals("this (+(that)^7)", null, "+this +that^7.0");
+		assertQueryEquals("this +(that thus)^7", null, "+this +(+that +thus)^7.0");
+		assertQueryEquals("this (+(that)^7)", null, "+this +(that)^7.0");
 		
 		assertQueryEquals("roam~", null, "roam~2", FuzzyQuery.class);
 		assertQueryEquals("roam~0.8", null, "roam~0.8", SlowFuzzyQuery.class);
 		assertQueryEquals("roam~0.899999999", null, "roam~0.9");
 		
 		
-		assertQueryEquals("roam^", null, "roam");
-		assertQueryEquals("roam^0.8", null, "roam^0.8");
-		assertQueryEquals("roam^0.899999999", null, "roam^0.9");
-		assertQueryEquals("roam^8", null, "roam^8.0");
+		assertQueryEquals("roam^", null, "(roam)^1.0");
+		assertQueryEquals("roam^0.8", null, "(roam)^0.8");
+		assertQueryEquals("roam^0.899999999", null, "(roam)^0.9");
+		assertQueryEquals("roam^8", null, "(roam)^8.0");
 		
 		
 		// this should fail
 		assertQueryNodeException("roam^~");
-		assertQueryEquals("roam^0.8~", null, "roam~2^0.8");
-		assertQueryEquals("roam^0.899999999~0.5", null, "roam~0.5^0.9");
+		assertQueryEquals("roam^0.8~", null, "(roam~2)^0.8");
+		assertQueryEquals("roam^0.899999999~0.5", null, "(roam~0.5)^0.9");
 		
 		// should this fail?
-		assertQueryEquals("roam~^", null, "roam~2");
-		assertQueryEquals("roam~0.8^", null, "roam~0.8");
-		assertQueryEquals("roam~0.899999999^0.5", null, "roam~0.9^0.5");
+		assertQueryEquals("roam~^", null, "(roam~2)^1.0");
+		assertQueryEquals("roam~0.8^", null, "(roam~0.8)^1.0");
+		assertQueryEquals("roam~0.899999999^0.5", null, "(roam~0.9)^0.5");
 		
 		// with wsa analyzer the 5 is retained as a token
-		assertQueryEquals("this^ 5", wsa, "+this +5");
+		assertQueryEquals("this^ 5", wsa, "+(this)^1.0 +5");
 		
 		// with standard tokenizer, it goes away
-		assertQueryEquals("this^ 5", null, "this");
+		assertQueryEquals("this^ 5", null, "(this)^1.0");
 		
 		assertQueryEquals("this^0. 5", wsa, "+this +5");
 		assertQueryEquals("/this^0. 5/", wsa, "/this^0. 5/");
-		assertQueryEquals("this^0.4 5", wsa, "+this^0.4 +5");
+		assertQueryEquals("this^0.4 5", wsa, "+(this)^0.4 +5");
 		
-		assertQueryEquals("this^5~ 9", null, "this~2^5.0");
-		assertQueryEquals("this^5~ 9", wsa, "+this~2^5.0 +9");
+		assertQueryEquals("this^5~ 9", null, "(this~2)^5.0");
+		assertQueryEquals("this^5~ 9", wsa, "+(this~2)^5.0 +9");
 		
 		assertQueryEquals("9999", wsa, "9999");
 		assertQueryEquals("9999.1", wsa, "9999.1");
@@ -253,12 +253,12 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// but a proximity operator, thus it can be >= 1.0
 		assertQueryEquals("\"weak lensing\"~", null, "\"weak lensing\"~2");
 		assertQueryEquals("\"jakarta apache\"~10", null, "\"jakarta apache\"~10");
-		assertQueryEquals("\"jakarta apache\"^10", null, "\"jakarta apache\"^10.0");
-		assertQueryEquals("\"jakarta apache\"~10^", null, "\"jakarta apache\"~10");
-		assertQueryEquals("\"jakarta apache\"^10~", null, "\"jakarta apache\"~2^10.0");
-		assertQueryEquals("\"jakarta apache\"~10^0.6", null, "\"jakarta apache\"~10^0.6");
-		assertQueryEquals("\"jakarta apache\"^10~0.6", null, "\"jakarta apache\"^10.0");
-		assertQueryEquals("\"jakarta apache\"^10~2.4", null, "\"jakarta apache\"~2^10.0");
+		assertQueryEquals("\"jakarta apache\"^10", null, "(\"jakarta apache\")^10.0");
+		assertQueryEquals("\"jakarta apache\"~10^", null, "(\"jakarta apache\"~10)^1.0");
+		assertQueryEquals("\"jakarta apache\"^10~", null, "(\"jakarta apache\"~2)^10.0");
+		assertQueryEquals("\"jakarta apache\"~10^0.6", null, "(\"jakarta apache\"~10)^0.6");
+		assertQueryEquals("\"jakarta apache\"^10~0.6", null, "(\"jakarta apache\")^10.0");
+		assertQueryEquals("\"jakarta apache\"^10~2.4", null, "(\"jakarta apache\"~2)^10.0");
 		
 		
 		// switching-off analysis for individual tokens:

@@ -47,16 +47,16 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 
     // test the clause rewriting/optimization
     Query q = qp.parse("a -(-(+(-(x)^0.6))^0.2)^0.3", "");
-    assertQueryMatch(qp, "a -(-(+(-(x)^0.6))^0.2)^0.3", "", "+a -x^0.3");
-    assertQueryMatch(qp, "-(-(+(-(x)^0.6))^0.2)^0.3", "", "x^0.3"); // not
+    assertQueryMatch(qp, "a -(-(+(-(x)^0.6))^0.2)^0.3", "", "+a -(x)^0.3");
+    assertQueryMatch(qp, "-(-(+(-(x)^0.6))^0.2)^0.3", "", "(x)^0.3"); // not
                                                                     // minus,
                                                                     // because
                                                                     // that is
                                                                     // not
                                                                     // allowed
-    assertQueryMatch(qp, "-(-(+(-(x)^0.6))^0.2)^", "", "x"); // because defualt
+    assertQueryMatch(qp, "-(-(+(-(x)^0.6))^0.2)^", "", "(x)^1.0"); // because defualt
                                                              // boost is 1.0f
-    assertQueryMatch(qp, "-(-(+(-(x)^))^0.2)^0.1", "", "x^0.1"); // because
+    assertQueryMatch(qp, "-(-(+(-(x)^))^0.2)^0.1", "", "(x)^0.1"); // because
                                                                  // defualt
                                                                  // boost is
                                                                  // 1.0f
@@ -73,8 +73,8 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
     qb = qp.parse("\"a \\\"b c\\\" d\"", "x");
     assertQueryMatch(qp, "\"a \\\"b c\\\" d\"", "x", qa.toString());
 
-    assertQueryMatch(qp, "+(-(-(-(x)^0.6))^0.2)^", "field", "field:x");
-    assertQueryMatch(qp, "+(-(-(-(x)^0.6))^0.2)^0.5", "field", "field:x^0.5");
+    assertQueryMatch(qp, "+(-(-(-(x)^0.6))^0.2)^", "field", "(field:x)^1.0");
+    assertQueryMatch(qp, "+(-(-(-(x)^0.6))^0.2)^0.5", "field", "(field:x)^0.5");
 
     // the first element will be positive, because the negative X NOT Y
     // is currently implemented that way (the first must return something)
@@ -82,7 +82,7 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
     // "((+field:a +field:b)^0.8) -((+field:x +field:y)^0.2)"
 
     assertQueryMatch(qp, "(+(-(a b)))^0.8 OR -(x y)^0.2", "field",
-        "+((+field:a +field:b)^0.8) -((+field:x +field:y)^0.2)");
+        "+(+field:a +field:b)^0.8 -(+field:x +field:y)^0.2");
 
     assertQueryMatch(qp, "(+(-(a b)))^0.8 AND -(x y)^0.2", "field",
         "+((+field:a +field:b)^0.8) -((+field:x +field:y)^0.2)");

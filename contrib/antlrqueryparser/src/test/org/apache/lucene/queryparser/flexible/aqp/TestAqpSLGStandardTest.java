@@ -217,17 +217,17 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     Query q = qp.parse("foo*bar", "field");
     assertTrue(q instanceof WildcardQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE, //CHECK: other CONSTANT_
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((MultiTermQuery) q).getRewriteMethod());
 
     q = qp.parse("foo*", "field");
     assertTrue(q instanceof PrefixQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE,
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((MultiTermQuery) q).getRewriteMethod());
 
     q = qp.parse("[a TO z]", "field");
     assertTrue(q instanceof TermRangeQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE,
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((MultiTermQuery) q).getRewriteMethod());
   }
 
@@ -295,8 +295,9 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     PhraseQuery.Builder expected = new PhraseQuery.Builder();
     expected.add(new Term("field", "中"));
     expected.add(new Term("field", "国"));
+    expected.setSlop(3);
 
-    assertEquals(new BoostQuery(expected.build(), 3), getQuery("\"中国\"~3", analyzer));
+    assertEquals(expected.build(), getQuery("\"中国\"~3", analyzer));
   }
 
   public void testSimple() throws Exception {
@@ -344,13 +345,13 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertTrue(getQuery("hello", null) instanceof TermQuery);
     assertTrue(getQuery("\"hello there\"", null) instanceof PhraseQuery);
 
-    assertQueryEquals("germ term^2.0", null, "germ term^2.0");
-    assertQueryEquals("(term)^2.0", null, "term^2.0");
+    assertQueryEquals("germ term^2.0", null, "germ (term)^2.0");
+    assertQueryEquals("(term)^2.0", null, "(term)^2.0");
     assertQueryEquals("(germ term)^2.0", null, "(germ term)^2.0");
-    assertQueryEquals("term^2.0", null, "term^2.0");
-    assertQueryEquals("term^2", null, "term^2.0");
-    assertQueryEquals("\"germ term\"^2.0", null, "\"germ term\"^2.0");
-    assertQueryEquals("\"term germ\"^2", null, "\"term germ\"^2.0");
+    assertQueryEquals("term^2.0", null, "(term)^2.0");
+    assertQueryEquals("term^2", null, "(term)^2.0");
+    assertQueryEquals("\"germ term\"^2.0", null, "(\"germ term\")^2.0");
+    assertQueryEquals("\"term germ\"^2", null, "(\"term germ\")^2.0");
 
     assertQueryEquals("(foo OR bar) AND (baz OR boo)", null,
         "+(foo bar) +(baz boo)");
@@ -386,7 +387,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryEquals("\"term germ\"~2 flork", null, "\"term germ\"~2 flork");
     assertQueryEquals("\"term\"~2", null, "term");
     assertQueryEquals("\" \"~2 germ", null, "germ");
-    assertQueryEquals("\"term germ\"~2^2", null, "\"term germ\"~2^2.0");
+    assertQueryEquals("\"term germ\"~2^2", null, "(\"term germ\"~2)^2.0");
   }
 
   public void testNumber() throws Exception {
@@ -403,18 +404,18 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testWildcard() throws Exception {
     assertQueryEquals("term*", null, "term*");
-    assertQueryEquals("term*^2", null, "term*^2.0");
+    assertQueryEquals("term*^2", null, "(term*)^2.0");
     assertQueryEquals("term~", null, "term~2");
     assertQueryEquals("term~0.7", null, "term~1");
 
-    assertQueryEquals("term~^2", null, "term~2^2.0");
+    assertQueryEquals("term~^2", null, "(term~2)^2.0");
 
-    assertQueryEquals("term^2~", null, "term~2^2.0");
+    assertQueryEquals("term^2~", null, "(term~2)^2.0");
     assertQueryEquals("term*germ", null, "term*germ");
-    assertQueryEquals("term*germ^3", null, "term*germ^3.0");
+    assertQueryEquals("term*germ^3", null, "(term*germ)^3.0");
 
     assertTrue(getQuery("term*", null) instanceof PrefixQuery);
-    assertTrue(getQuery("term*^2", null) instanceof PrefixQuery);
+    assertTrue(((BoostQuery) getQuery("term*^2", null)).getQuery() instanceof PrefixQuery);
     assertTrue(getQuery("term~", null) instanceof FuzzyQuery);
     assertTrue(getQuery("term~0.7", null) instanceof FuzzyQuery);
 
@@ -495,7 +496,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testQPA() throws Exception {
-    assertQueryEquals("term term^3.0 term", qpAnalyzer, "term term^3.0 term");
+    assertQueryEquals("term term^3.0 term", qpAnalyzer, "term (term)^3.0 term");
     assertQueryEquals("term stop^3.0 term", qpAnalyzer, "term term");
 
     assertQueryEquals("term term term", qpAnalyzer, "term term term");
@@ -531,19 +532,19 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testRange() throws Exception {
     assertQueryEquals("[ a TO z]", null, "[a TO z]");
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE,
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((TermRangeQuery) getQuery("[ a TO z]", null)).getRewriteMethod());
 
     AqpQueryParser qp = getParser();
 
-    qp.setMultiTermRewriteMethod(MultiTermQuery.SCORING_BOOLEAN_REWRITE);
-    assertEquals(MultiTermQuery.SCORING_BOOLEAN_REWRITE,
+    qp.setMultiTermRewriteMethod(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE);
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE,
         ((TermRangeQuery) qp.parse("[ a TO z]", "field")).getRewriteMethod());
 
     assertQueryEquals("[ a TO z ]", null, "[a TO z]");
     assertQueryEquals("{ a TO z}", null, "{a TO z}");
     assertQueryEquals("{ a TO z }", null, "{a TO z}");
-    assertQueryEquals("{ a TO z }^2.0", null, "{a TO z}^2.0");
+    assertQueryEquals("{ a TO z }^2.0", null, "({a TO z})^2.0");
     assertQueryEquals("[ a TO z] OR bar", null, "[a TO z] bar");
     assertQueryEquals("[ a TO z] AND bar", null, "+[a TO z] +bar");
     assertQueryEquals("( bar blar { a TO z}) ", null, "bar blar {a TO z}");
@@ -950,9 +951,8 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     Query result = qp.parse("a:the OR a:foo", "a");
     assertNotNull("result is null and it shouldn't be", result);
-    assertTrue("result is not a BooleanQuery", result instanceof BooleanQuery);
-    assertTrue(((BooleanQuery) result).clauses().size() + " does not equal: "
-        + 0, ((BooleanQuery) result).clauses().size() == 0);
+    assertTrue("result is not a MatchNoDocsQuery", result instanceof MatchNoDocsQuery);
+
     result = qp.parse("a:woo OR a:the", "a");
     assertNotNull("result is null and it shouldn't be", result);
     assertTrue("result is not a TermQuery", result instanceof TermQuery);
@@ -962,11 +962,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
         "a");
 
     assertNotNull("result is null and it shouldn't be", result);
-    assertTrue("result is not a BooleanQuery", result instanceof BooleanQuery);
-    if (VERBOSE)
-      System.out.println("Result: " + result);
-    assertTrue(((BooleanQuery) result).clauses().size() + " does not equal: "
-        + 2, ((BooleanQuery) result).clauses().size() == 2);
+    assertEquals(result.toString(), "(fieldX:xxxxx fieldy:xxxxxxxx)^2.0");
   }
 
   public void testPositionIncrement() throws Exception {

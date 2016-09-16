@@ -135,7 +135,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("synonyms", "synonyms.txt");
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(new StringMockResourceLoader("a b c,d"));
-    TokenStream ts = factory.create(keywordMockTokenizer(new StringReader("a e")));
+    TokenStream ts = factory.create(whitespaceMockTokenizer(new StringReader("a e")));
     // This fails because ["e","e"] is the value of the token stream
     assertTokenStreamContents(ts, new String[] { "a", "e" });
   }
