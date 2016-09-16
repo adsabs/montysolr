@@ -4,6 +4,7 @@
   <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
   <schemaFactory class="ClassicIndexSchemaFactory"/>
   <dataDir>${solr.data.dir:}</dataDir>
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
   <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
   <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
 

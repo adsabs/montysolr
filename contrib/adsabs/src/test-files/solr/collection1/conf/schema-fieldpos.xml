@@ -2,7 +2,7 @@
 <schema name="minimal" version="1.1">
 	<types>
 		<fieldType name="string" class="solr.StrField" />
-		<fieldType name="sfloat" class="solr.SortableFloatField"
+		<fieldType name="sfloat" class="solr.TrieFloatField"
 			sortMissingLast="true" omitNorms="true" />
 
 

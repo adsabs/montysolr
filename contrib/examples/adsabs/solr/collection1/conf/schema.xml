@@ -452,11 +452,11 @@
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
 					words="ads_text.kill_sens" enablePositionIncrements="false"
-					luceneMatchVersion="4.3"/>
+					/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
 					words="ads_text.kill" enablePositionIncrements="false"
-					luceneMatchVersion="4.3"/>
+					/>
 
 
 
@@ -540,11 +540,11 @@
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
 					words="ads_text.kill_sens" enablePositionIncrements="false"
-					luceneMatchVersion="4.3"/>
+					/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
 					words="ads_text.kill" enablePositionIncrements="false"
-					luceneMatchVersion="4.3"/>
+					/>
 
 
 
@@ -614,11 +614,11 @@
         <!-- remove stop words - first the case sensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="false"
           words="ads_text.kill_sens" enablePositionIncrements="false"
-          luceneMatchVersion="4.3"/>
+          />
         <!-- remove stop words - then case insensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="true"
           words="ads_text.kill" enablePositionIncrements="false"
-          luceneMatchVersion="4.3"/>
+          />
 
 
 

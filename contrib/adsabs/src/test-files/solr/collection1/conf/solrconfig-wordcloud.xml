@@ -5,7 +5,7 @@
   <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
   <dataDir>${solr.data.dir:}</dataDir>
   <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
-
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
   <searchComponent name="wordcloud" class="solr.WordCloudComponent"/>
   
   <requestHandler name="standard" class="solr.StandardRequestHandler">
