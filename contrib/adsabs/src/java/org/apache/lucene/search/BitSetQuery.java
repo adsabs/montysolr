@@ -24,7 +24,7 @@ public class BitSetQuery extends Query {
       return new ConstantScoreWeight(this) {
         @Override
         public Scorer scorer(LeafReaderContext context) throws IOException {
-          return new ConstantScoreScorer(this, score(), new BitSetIterator(docs, docs.approximateCardinality()));
+          return new ConstantScoreScorer(this, score(), new BasedBitSetIterator(docs, docs.approximateCardinality(), context.docBase));
         }
       };
     }

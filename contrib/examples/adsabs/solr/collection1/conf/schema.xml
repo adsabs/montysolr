@@ -451,11 +451,11 @@
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="ads_text.kill_sens" enablePositionIncrements="false"
+					words="ads_text.kill_sens"
 					/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="ads_text.kill" enablePositionIncrements="false"
+					words="ads_text.kill"
 					/>
 
 
@@ -539,11 +539,11 @@
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="false"
-					words="ads_text.kill_sens" enablePositionIncrements="false"
+					words="ads_text.kill_sens"
 					/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="ads_text.kill" enablePositionIncrements="false"
+					words="ads_text.kill"
 					/>
 
 
@@ -613,11 +613,11 @@
 
         <!-- remove stop words - first the case sensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="false"
-          words="ads_text.kill_sens" enablePositionIncrements="false"
+          words="ads_text.kill_sens"
           />
         <!-- remove stop words - then case insensitively -->
         <filter class="solr.StopFilterFactory" ignoreCase="true"
-          words="ads_text.kill" enablePositionIncrements="false"
+          words="ads_text.kill"
           />
 
 
@@ -945,7 +945,8 @@
 		<field name="recid" type="int" indexed="true" stored="true" multiValued="false"
 			required="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 		<field name="bibcode" type="normalized_string_ascii" indexed="true" multiValued="false"
-			stored="true" required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			stored="true" required="true" omitNorms="true" omitTermFreqAndPositions="true"
+			/>
 
 
 		<!--
