@@ -30,7 +30,7 @@ public class TestASCIIDuplicatingFilter extends BaseTokenStreamTestCase {
 		// test it doesnt interfere
 		stream = factory.create(whitespaceMockTokenizer(new StringReader("Cyril Methood")));
     assertTokenStreamContents(stream, 
-        new String[] {"cyril", "methood"}, 
+        new String[] {"Cyril", "Methood"}, 
         new int[] {1, 1});
 	}
 }
