@@ -79,9 +79,11 @@ define([
 
         var done = function done(metadata){
           //updating header
+          var loggedIn = this.getBeeHive().getObject("User").isLoggedIn();
           this.headerModel.set(_.extend(metadata,
               { active : this.model.get("subView"),
-                publicView : this.model.get("publicView")
+                publicView : this.model.get("publicView"),
+                loggedIn: loggedIn
               }
           ));
 
