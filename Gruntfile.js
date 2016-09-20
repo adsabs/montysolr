@@ -723,30 +723,9 @@ module.exports = function(grunt) {
             },
             {
               browserName: 'iphone',
-              platform: 'OS X 10.10',
-              version: '8.1',
-              deviceName: 'iPhone Simulator'
-            },
-            {
-              browserName: 'iphone',
               platform: 'OS X 10.9',
               version: '7.0',
               deviceName: 'iPhone Simulator'
-            },
-
-            {
-              browserName: 'iphone',
-              deviceName: 'iPad Simulator',
-              deviceOrientation: 'portrait',
-              platform: 'OS X 10.10',
-              version: '8.1'
-            },
-            {
-              browserName: 'iphone',
-              deviceName: 'iPad Simulator',
-              deviceOrientation: 'portrait',
-              platform: 'OS X 10.9',
-              version: '7.0'
             }
           ],
           testname: 'bbb',
