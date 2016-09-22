@@ -8,14 +8,18 @@
                 <label for="sort-select" style="font-weight:bold;display:inline"> Sort:  </label>
                 <select class="form-control" id="sort-select" style="display:inline; width:180px">
                     <optgroup label="descending">
-                        <option value="citation_count desc" {{#compare sort "citation_count desc"}} selected {{/compare}}>citation count desc</option>
-                        <option value="date desc" {{#compare sort "date desc"}} selected {{/compare}}>date desc</option>
-                        <option value="read_count desc" {{#compare sort "read_count desc"}} selected {{/compare}}>read count desc</option>
+                        <option value="citation_count desc" {{#compare sort "citation_count desc"}} selected {{/compare}}>Citation Count desc</option>
+                        <option value="date desc" {{#compare sort "date desc"}} selected {{/compare}}>Date desc</option>
+                        <option value="read_count desc" {{#compare sort "read_count desc"}} selected {{/compare}}>Read Count desc</option>
+                        <option value="first_author desc" {{#compare sort "first_author desc"}} selected {{/compare}}>First Author desc</option>
+                        <option value="bibcode desc" {{#compare sort "bibcode desc"}} selected {{/compare}}>Bibcode desc</option>
                     </optgroup>
                     <optgroup label="ascending">
-                        <option value="citation_count asc" {{#compare sort "citation_count asc"}} selected {{/compare}}>citation count asc</option>
-                        <option value="date asc" {{#compare sort "date asc"}} selected {{/compare}}>date asc</option>
-                        <option value="read_count asc" {{#compare sort "read_count asc"}} selected {{/compare}}>read count asc</option>
+                        <option value="citation_count asc" {{#compare sort "citation_count asc"}} selected {{/compare}}>Citation Count asc</option>
+                        <option value="date asc" {{#compare sort "date asc"}} selected {{/compare}}>Date asc</option>
+                        <option value="read_count asc" {{#compare sort "read_count asc"}} selected {{/compare}}>Read Count asc</option>
+                        <option value="first_author asc" {{#compare sort "first_author asc"}} selected {{/compare}}>First Author asc</option>
+                        <option value="bibcode asc" {{#compare sort "bibcode asc"}} selected {{/compare}}>Bibcode asc</option>
                     </optgroup>
                 </select>
 
