@@ -455,8 +455,7 @@
 					/>
 				<!-- remove stop words - then case insensitively -->
 				<filter class="solr.StopFilterFactory" ignoreCase="true"
-					words="ads_text.kill"
-					/>
+					words="ads_text.kill"/>
 
 
 
@@ -470,7 +469,7 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
-        <charFilter class="solr.HTMLStripCharFilterFactory"/>
+                <charFilter class="solr.HTMLStripCharFilterFactory"/>
 				<!-- AA: as above, but we only have one canonical replacement for the
 					expression -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
@@ -489,8 +488,8 @@
 				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)"
 					group="-1" />
 
-			  <!--  translate math symbols and others into their ascii representation -->
-        <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+			    <!--  translate math symbols and others into their ascii representation -->
+                <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
 
 				<filter class="solr.WordDelimiterFilterFactory"

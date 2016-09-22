@@ -399,16 +399,16 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
     }
 		
 		private void insertItself(List<List<QueryNode>> oneQuery) throws CloneNotSupportedException {
-			if (nodeRetrieved > 0) {
+			//if (nodeRetrieved > 0) {
 	    	ArrayList<QueryNode> copyOfNodes = new ArrayList<QueryNode>(payload.size());
 	    	for (QueryNode n: payload) {
 	    		copyOfNodes.add(n.cloneTree());
 	    	}
 	    	oneQuery.add(copyOfNodes);
-	    }
-	    else {
-	    	oneQuery.add(payload);
-	    }
+	    //}
+	    //else {
+	    //	oneQuery.add(payload);
+	    //}
     }
 
 		

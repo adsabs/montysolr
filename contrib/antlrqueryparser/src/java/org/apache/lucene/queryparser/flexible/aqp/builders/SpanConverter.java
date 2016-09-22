@@ -15,8 +15,11 @@ import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
@@ -24,6 +27,7 @@ import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.spans.SpanBoostQuery;
 import org.apache.lucene.search.spans.SpanCollector;
 import org.apache.lucene.search.spans.SpanMultiTermQueryWrapper;
 import org.apache.lucene.search.spans.SpanNearQuery;
@@ -42,20 +46,29 @@ public class SpanConverter {
 	public SpanQuery getSpanQuery(SpanConverterContainer container)
 	throws QueryNodeException {
 		Query q = container.query;
+		float boost = container.boost;
+		
 		if (q instanceof SpanQuery) {
-			return (SpanQuery) q;
+			return wrapBoost((SpanQuery) q, boost);
 		} else if (q instanceof TermQuery) {
-			return new SpanTermQuery(((TermQuery) q).getTerm());
+			return wrapBoost(new SpanTermQuery(((TermQuery) q).getTerm()), boost);
 		} else if (q instanceof WildcardQuery) {
-			return new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q);
+			return wrapBoost(new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q), boost);
 		} else if (q instanceof PrefixQuery) {
-			return new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q);
+			return wrapBoost(new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q), boost);
 		} else if (q instanceof PhraseQuery) {
-			return convertPhraseToSpan(container);
+			return wrapBoost(convertPhraseToSpan(container), boost);
 		} else if (q instanceof BooleanQuery) {
-			return convertBooleanToSpan(container);
+			return wrapBoost(convertBooleanToSpan(container), boost);
 		} else if (q instanceof RegexpQuery) {
-		  return new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q);
+		  return wrapBoost(new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q), boost);
+		} else if (q instanceof DisjunctionMaxQuery) {
+      return wrapBoost(convertDisjunctionQuery(container), boost);
+		} else if (q instanceof BoostQuery) {
+		  return wrapBoost(getSpanQuery(new SpanConverterContainer(((BoostQuery) q).getQuery(), 1, true)),
+		      ((BoostQuery) q).getBoost());
+		} else if (q instanceof MatchNoDocsQuery) {
+      return new EmptySpanQuery(container.query);
 		} else {
 			
 				SpanQuery wrapped = wrapNonConvertible(container);
@@ -68,7 +81,31 @@ public class SpanConverter {
 					+ q.getClass().getName()));
 		}
 	}
+	
+	private SpanQuery convertDisjunctionQuery(SpanConverterContainer container) throws QueryNodeException {
+    DisjunctionMaxQuery q = (DisjunctionMaxQuery) container.query;
+    List<Query> clauses = q.getDisjuncts();
+    if (clauses.size() == 0) {
+      container.query = new MatchNoDocsQuery();
+      return getSpanQuery(container);
+    }
+    else if (clauses.size() == 1) {
+      container.query = clauses.get(0);
+      return getSpanQuery(container);
+    }
+    else {
+      throw new QueryNodeException(new MessageImpl(
+          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
+          "DisjunctionQuery is not compatible with the proximity search: "
+          + q.getClass().getName()));
+    }
+  }
 
+  private SpanQuery wrapBoost(SpanQuery q, float boost) {
+	  if (boost != 1.0f)
+	    return new SpanBoostQuery(q, boost);
+	  return q;
+	}
   public SpanQuery wrapNonConvertible(SpanConverterContainer container) {
 		if (wrapNonConvertible) {
 			return doWrapping(container);

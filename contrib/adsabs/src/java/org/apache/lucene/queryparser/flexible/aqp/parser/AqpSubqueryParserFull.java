@@ -39,7 +39,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
       if (clauses.size()==1) {
         Query q = clauses.get(0).getQuery();
         
-        if (q instanceof BoostQuery && ((BoostQuery) query).getBoost() != 1.0)
+        if (q instanceof BoostQuery && ((BoostQuery) q).getBoost() != 1.0)
           return q;
         
         if (q.toString().toString().equals("")) return null;

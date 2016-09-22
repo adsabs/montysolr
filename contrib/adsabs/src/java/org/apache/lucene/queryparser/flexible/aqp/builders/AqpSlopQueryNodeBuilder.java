@@ -84,9 +84,10 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
     	
       MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder();
       builder.setSlop(defaultValue);
-      Term[][] terms = ((MultiPhraseQuery) query).getTermArrays(); 
+      int[] positions = ((MultiPhraseQuery) query).getPositions();
+      Term[][] terms = ((MultiPhraseQuery) query).getTermArrays();
       for (int i=0; i < terms.length; i++) {
-        builder.add(terms[i]);
+        builder.add(terms[i], positions[i]);
       }
       query = builder.build();
     }

@@ -275,7 +275,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		// purely aestetical, final touches to the query
 		// we are rewriting the tree, for example:
-		// +(this that) +what' becomes '+this +that +what'
+		// +(+this +that) +what' becomes '+this +that +what'
 		add(new AqpGroupQueryOptimizerProcessor());
 		add(new AqpOptimizationProcessor());
 		

@@ -45,6 +45,7 @@ import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
@@ -1329,6 +1330,9 @@ public class AqpExtendedDismaxQParser extends QParser {
           localReq = new LocalSolrQueryRequest(req.getCore(), nl);
           QParser aqpParser = getParser(qs, "aqp", localReq);
           query = aqpParser.parse();
+          
+          if (query instanceof MatchNoDocsQuery)
+            return null;
           
           switch (type) {
             case PHRASE: // fallthrough
