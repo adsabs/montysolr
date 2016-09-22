@@ -191,6 +191,9 @@ define(['marionette',
       },
 
       processLibraryInfo : function(data){
+       data.sort(function(a,b){
+         return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+       });
        this.model.set("libraries", data);
      },
 
