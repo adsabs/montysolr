@@ -728,6 +728,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQueryEquals(req("q", "Hubble.Space.Microscope -bum MIT BX", "defType", "aqp"), 
         "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) -all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx",
         BooleanQuery.class);
+    assertQueryEquals(req("q", "Hubble.Space.Microscope -bum MIT BX", "defType", "aqp"), 
+        "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) -all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx",
+        BooleanQuery.class);
 
     assertQueryEquals(req("q", "Hubble-Space-Microscope bum MIT BX", "defType", "aqp"), 
         "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) +all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx", 
@@ -859,7 +862,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         + "title:\"350mhz ? (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"",
         BooleanQuery.class);
     
-    dumpDoc(null, "title");
+    //dumpDoc(null, "title");
     assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$ ray Sources for Radio Millisecond Pulsars\""), 
         "//*[@numFound='4']",
         "//doc/str[@name='id'][.='400']",
