@@ -114,7 +114,8 @@ define([
       contentTypes : {
         endnote : "application/x-endnote-refer",
         bibtex : "application/x-bibtex",
-        aastex : "text/plain"
+        aastex : "text/plain",
+        ris: "text/plain"
       },
 
       downloadRecords : function(){
@@ -340,7 +341,8 @@ define([
         var tbl = {
           endnote: 'endnote',
           aastex: 'aastex',
-          bibtex: 'bibtex'
+          bibtex: 'bibtex',
+          ris: 'ris'
         };
         format = tbl[format.toLowerCase()] || format.toLowerCase();
 

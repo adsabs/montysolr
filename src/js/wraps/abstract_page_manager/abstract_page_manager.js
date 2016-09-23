@@ -70,7 +70,8 @@ define([
       ShowMetrics : {"title": "Metrics", "path":"metrics", "showCount": false, "category":"view"},
       ShowPaperExport__bibtex : {"title": "in BibTeX", "path":"export/bibtex", "category":"export", "alwaysThere":"true"},
       ShowPaperExport__aastex : {"title": "in AASTeX", "path":"export/aastex", "category":"export", "alwaysThere":"true"},
-      ShowPaperExport__endnote : {"title": "in EndNote", "path":"export/endnote", "category":"export", "alwaysThere":"true"}
+      ShowPaperExport__endnote : {"title": "in EndNote", "path":"export/endnote", "category":"export", "alwaysThere":"true"},
+      ShowPaperExport__ris : {"title": "in RIS", "path":"export/ris", "category":"export", "alwaysThere":"true"},
     }
 
 
