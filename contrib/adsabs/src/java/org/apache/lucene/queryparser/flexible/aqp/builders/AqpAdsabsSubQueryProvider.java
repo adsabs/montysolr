@@ -108,7 +108,7 @@ AqpFunctionQueryBuilderProvider {
     SchemaField field = fp.getReq().getSchema().getField(fieldname);
     try {
       cacheWrapper = LuceneCacheWrapper.getFloatCache(
-          "cite_read_boost", field.getType().getUninversionType(field), 
+          "cite_read_boost", UninvertingReader.Type.SORTED_SET_FLOAT, 
           fp.getReq().getSearcher().getLeafReader());
     } catch (IOException e) {
       throw new SyntaxError("Naughty, naughty server error", e);

@@ -20,6 +20,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	protected String boostField;
 	private SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache;
 	private LuceneCacheWrapper<NumericDocValues> boostCache;
+  private int hashCode;
 	
 	public SecondOrderCollectorOperatorExpertsCiting(
 	      SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache, 
@@ -95,8 +96,20 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return 435878 ^ boostField.hashCode() ^ cache.hashCode();
+	  if (hashCode == 0) {
+      hashCode = computeHashCode();
+      assert hashCode != 0;
+    }
+    assert hashCode == computeHashCode();
+    return hashCode;
 	}
+
+
+  private int computeHashCode() {
+    if (boostField != null)
+      return 1301081 ^ boostField.hashCode() ^ cache.hashCode();
+    return 1301081 ^ cache.hashCode();
+  }
 
 
   @Override

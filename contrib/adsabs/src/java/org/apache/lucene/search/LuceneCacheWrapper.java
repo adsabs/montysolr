@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.lucene.index.DocValues;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.solr.uninverting.UninvertingReader;
@@ -67,7 +68,9 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
     mapping.put(fieldName, type);
     UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
     NumericDocValues values = uninvertingReader.getNumericDocValues(fieldName);
-    //uninvertingReader.close();
+    
+    if (values == null)
+      values = DocValues.emptyNumeric();
     
 		final String fName = fieldName;
 		LuceneCacheWrapper<NumericDocValues> newCache = new LuceneCacheWrapper<NumericDocValues>(new SoftReference<NumericDocValues>(values)) {
