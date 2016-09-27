@@ -11,25 +11,15 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 public class TestDateNormalizerFilter extends BaseTokenStreamTestCase {
 	
 	public void test() throws Exception {
-		ASCIIDuplicatingFilterFactory factory = new ASCIIDuplicatingFilterFactory(new HashMap<String,String>());
+	  HashMap<String, String> config = new HashMap<String, String>();
+	  config.put("format", "yyyy-MM-dd|yy-MM-dd|yy-MM");
+		DateNormalizerTokenFilterFactory factory = new DateNormalizerTokenFilterFactory(config);
 		
-		TokenStream stream = factory.create(whitespaceMockTokenizer(new StringReader("čtyřista čtyřicet čtyři")));
-		String[] expected = new String[] { "čtyřista", "ctyrista", "čtyřicet", "ctyricet", "čtyři", "ctyri" };
-		int[] increments = new int[] {1, 0, 1, 0, 1, 0};
-		String W = TypeAttribute.DEFAULT_TYPE;
-		String D = OnChangeDuplicatingFilter.DUPLICATE;
-		String[] types = new String[] { W, D, W, D, W, D};
-		assertTokenStreamContents(stream, expected, increments);
-		
-		stream = factory.create(whitespaceMockTokenizer(new StringReader("čtyřista čtyřicet čtyři")));
-		assertTokenStreamContents(stream, expected, types);
-		
-		
-		
-		// test it doesnt interfere
-		stream = factory.create(whitespaceMockTokenizer(new StringReader("Cyril Methood")));
+		TokenStream stream;
+		stream = factory.create(whitespaceMockTokenizer(new StringReader("2014-12-00")));
     assertTokenStreamContents(stream, 
-        new String[] {"cyril", "methood"}, 
-        new int[] {1, 1});
+        new String[] {"2014-12-01"} 
+        
+    );
 	}
 }

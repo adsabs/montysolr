@@ -85,22 +85,22 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
         "+(+field:a +field:b)^0.8 -(+field:x +field:y)^0.2");
 
     assertQueryMatch(qp, "(+(-(a b)))^0.8 AND -(x y)^0.2", "field",
-        "+((+field:a +field:b)^0.8) -((+field:x +field:y)^0.2)");
+        "+(+field:a +field:b)^0.8 -(+field:x +field:y)^0.2");
 
     assertQueryMatch(qp, "(+(-(a b)))^0.8 -(x y)", "field",
-        "+((+field:a +field:b)^0.8) -(+field:x +field:y)");
+        "+(+field:a +field:b)^0.8 -(+field:x +field:y)");
     // or does -(x y) have different semantics? ... -field:x -field:y
     // +((-(+field:a +field:b))^0.8) -field:x -field:y
 
     assertQueryMatch(qp, "+((+(-(a b)))^0.8)^0.7 OR -(x y)^0.2", "field",
-        "+((+field:a +field:b)^0.7) -((+field:x +field:y)^0.2)");
+        "+(+field:a +field:b)^0.7 -(+field:x +field:y)^0.2");
 
     assertQueryMatch(qp, "+title:(dog cat)", "field", "+title:dog +title:cat");
 
     assertQueryMatch(qp, "title:(+dog -cat)", "field", "+title:dog -title:cat");
-
+    qp.setAllowLeadingWildcard(true);
     assertQueryMatch(qp, "\\*", "field", "field:*");
-
+    qp.setAllowLeadingWildcard(false);
     assertQueryMatch(qp, "term~", "field", "field:term~2");
     assertQueryMatch(qp, "term~1", "field", "field:term~1");
     assertQueryMatch(qp, "term~2", "field", "field:term~2");
@@ -139,7 +139,7 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
     assertQueryMatch(qp, "-one -two", "field", "-field:one -field:two");
 
     assertQueryMatch(qp, "x:one NOT y:two -three^0.5", "field",
-        "+(+x:one -y:two) -field:three^0.5");
+        "+(+x:one -y:two) -(field:three)^0.5");
 
     qp.setAllowSlowFuzzy(true);
     assertQueryMatch(qp, "one NOT two -three~0.2", "field",
@@ -149,7 +149,7 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
         "+field:one -field:two -field:three~0.2");
 
     assertQueryMatch(qp, "one two^0.5 three~0.2", "field",
-        "+field:one +field:two^0.5 +field:three~0.2");
+        "+field:one +(field:two)^0.5 +field:three~0.2");
     qp.setAllowSlowFuzzy(false);
 
     assertQueryMatch(qp, "one NOT two -three~0.2", "field",
@@ -159,7 +159,7 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
         "+field:one -field:two -field:three~2");
 
     assertQueryMatch(qp, "one two^0.5 three~0.2", "field",
-        "+field:one +field:two^0.5 +field:three~2");
+        "+field:one +(field:two)^0.5 +field:three~2");
 
     q = qp.parse("one (two three)^0.8", "field");
     
@@ -213,16 +213,16 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
         "+field:this +field:that");
 
     assertQueryMatch(qp, "this (+(that)^0.7)", "field",
-        "+field:this +field:that^0.7");
+        "+field:this +(field:that)^0.7");
 
     assertQueryMatch(qp, "this (+(that thus)^0.7)", "field",
-        "+field:this +((+field:that +field:thus)^0.7)");
+        "+field:this +(+field:that +field:thus)^0.7");
 
     assertQueryMatch(qp, "this (-(+(that thus))^0.7)", "field",
-        "+field:this -((+field:that +field:thus)^0.7)");
+        "+field:this -(+field:that +field:thus)^0.7");
 
     assertQueryMatch(qp, "this (+(-(+(-(that thus))^0.1))^0.3)", "field",
-        "+field:this +((+field:that +field:thus)^0.3)");
+        "+field:this +(+field:that +field:thus)^0.3");
 
     BooleanQuery.setMaxClauseCount(2);
     try {

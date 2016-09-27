@@ -237,9 +237,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     //dumpDoc(null, "id", "title");
     assertQueryEquals(req("q", "title:\"bubble pace telescope multi-pace foobar\"", "defType", "aqp"), 
         "title:\"bubble (pace syn::lunar) telescope multi (pace syn::lunar) foobar\" "
-        + "title:\"bubble (pace syn::lunar) telescope multipace ? foobar\" "
+        + "title:\"bubble (pace syn::lunar) telescope ? multipace foobar\" "
         + "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multi (pace syn::lunar) foobar\"~2 "
-        + "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multipace ? foobar\"~3",
+        + "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? ? multipace foobar\"~3",
         BooleanQuery.class);
     assertQ(req("q", "title" + ":\"bubble pace telescope multi-pace foobar\""), "//*[@numFound='1']",
         "//doc/str[@name='id'][.='17']");
@@ -543,6 +543,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   
   
   public void testSynonyms() throws Exception {
+    
     
     /*
      * Test multi-token translation, the chain is set to recognize

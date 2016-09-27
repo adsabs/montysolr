@@ -9,6 +9,8 @@ import java.util.Locale;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.solr.util.DateMathParser;
 
 public final class DateNormalizerTokenFilter extends TokenFilter {
@@ -17,6 +19,7 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private DateMathParser dmp;
   private String offset;
+  private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS", Locale.ROOT);
   
   public DateNormalizerTokenFilter(TokenStream input, String incomingFormat, String offset) {
     super(input);
@@ -61,7 +64,7 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
           //else {
             //date = dmp.parseMath("+5MINUTES"); // 00-00 dates are 1 minute after midnight
           //}
-          return f.format(date);
+          return sdf.format(date);
       } catch (ParseException e) {
         //pass
       }
