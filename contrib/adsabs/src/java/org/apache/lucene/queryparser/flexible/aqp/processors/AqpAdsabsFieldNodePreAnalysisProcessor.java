@@ -43,7 +43,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
 	  super();
 	  dmp = new DateMathParser(DateMathParser.UTC);
     
-    sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT);
+    sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
@@ -190,7 +190,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
 			String...moveBy) throws QueryNodeException {
 		String[] dateParts = originalDate.split("-|/");
 		Date dateWithOffset = (Date) parsedDate.clone();
-		
+		dmp.setNow(parsedDate);
 		try {
 			if (dateParts.length == 1) { // just a year
 				assert moveBy.length >= 1;

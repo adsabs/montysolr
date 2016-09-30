@@ -21,7 +21,7 @@ public final class AdsConfig {
     public static String[] TYPE_NORMALIZED_TEXT_ASCII_FIELDS = new String[]{"pub", "keyword", "keyword_norm"};
     
     public static String TYPE_NORMALIZED_STRING_ASCII = "bibcode";
-    public static String[] TYPE_NORMALIZED_STRING_ASCII_FIELDS = new String[]{"bibcode", "volume", 
+    public static String[] TYPE_NORMALIZED_STRING_ASCII_FIELDS = new String[]{"bibcode", "citation", "volume", 
     	"issue", "lang", "issn", "isbn", "property", "database", "data", "bibgroup", "vizier"};
     
     public static String[] TYPE_DATE_FIELDS = new String[]{"date"};

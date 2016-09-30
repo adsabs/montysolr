@@ -424,13 +424,17 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 				String original = doc.getField("original").stringValue();
 				String[] parts = original.split("\\,? ");
 				Query[] queries = buildQueries(parts);
+				if (queries == null)
+				  continue;
 				TermQuery oq = new TermQuery(new Term("original", original));
 				int ho = searcher.search(oq, 1).totalHits;
 				for (Query q: queries) {
+				  if (q == null) continue;
 					Builder bq = new BooleanQuery.Builder();
 					bq.add(q, Occur.MUST);
 					bq.add(new TermQuery(new Term("id", Integer.toString(randomIds[i]))), Occur.MUST);
 					if (q != null) {
+					  System.out.println(q.toString());
 						int no = searcher.search(bq.build(), 1).totalHits;
 						if (no != 1) {
 							System.out.println("Results differ: " + oq + " <<>> " + q + "   [" + ho + " : " + no + "]");
@@ -454,7 +458,9 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	}
 
 	private Query[] buildQueries(String[] parts) throws UnsupportedEncodingException {
-		int howMany = TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
+		int howMany = TestUtil.nextInt(random(), 2, parts.length-1); // how many initials
+		if (howMany < 2)
+		  return null;
 		Query[] queries = new Query[9];
 		queries[1] = getRegexpQuery(parts, howMany, false);
 		queries[2] = getWildcardQuery(parts, howMany, false);

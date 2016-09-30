@@ -371,9 +371,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // multi-pace is split by WDFF and expanded with a synonym
     assertQueryEquals(req("q", "title:\"bubble pace telescope multi-pace foobar\"", "defType", "aqp"), 
         "title:\"bubble (pace syn::lunar) telescope multi (pace syn::lunar) foobar\"" +
-        " title:\"bubble (pace syn::lunar) telescope multipace ? foobar\"" +
+        " title:\"bubble (pace syn::lunar) telescope ? multipace foobar\"" +
         " title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multi (pace syn::lunar) foobar\"~2" +
-        " title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multipace ? foobar\"~3",
+        " title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? ? multipace foobar\"~3",
         BooleanQuery.class);
     assertQ(req("q", "title" + ":\"bubble pace telescope multi-pace foobar\""), "//*[@numFound='1']",
         "//doc/str[@name='id'][.='17']");
@@ -415,9 +415,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     //dumpDoc(null, "title", "recid");
     assertQueryEquals(req("q", "title:\"bubble pace telescope multi-foo\"", "defType", "aqp", "df", "title"), 
         "title:\"bubble (pace syn::lunar) telescope multi foo\" " +
-        "title:\"bubble (pace syn::lunar) telescope multifoo\" " +
+        "title:\"bubble (pace syn::lunar) telescope ? multifoo\" " +
         "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multi foo\"~2 " +
-        "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multifoo\"~2",
+        "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? ? multifoo\"~3",
         BooleanQuery.class);
     assertQ(req("q", "title:\"bubble pace telescope multi-foo\"", "defType", "aqp", "df", "title"), 
     		"//*[@numFound='2']",
@@ -799,6 +799,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='10']",
         "//doc/str[@name='id'][.='11']"
         );
+
     assertQ(req("q", "title" + ":*sky"), "//*[@numFound='4']", 
         "//doc/str[@name='id'][.='10']",
         "//doc/str[@name='id'][.='11']",
@@ -851,16 +852,15 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "defType", "aqp"), 
         "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
         + "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz ? (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz ? (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~2", 
+        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "     
+        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~2", 
         BooleanQuery.class);
-    
     
     assertQueryEquals(req(
         "q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\"", 
         "defType", "aqp"), 
         "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz ? (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"",
+        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"",
         BooleanQuery.class);
     
     //dumpDoc(null, "title");

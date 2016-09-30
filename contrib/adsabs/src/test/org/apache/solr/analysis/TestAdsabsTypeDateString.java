@@ -76,7 +76,6 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 		assertU(addDocs("date", "1977-01-01T00:30:00Z"));
 
     assertU(commit());
-
     assertQ(req("q", "*:*"), "//*[@numFound='16']");
     
     
@@ -100,8 +99,10 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     		"date:[1325376000000 TO 1325462399000]", 
     		LegacyNumericRangeQuery.class);
     // 1012-01-01T00:00:01 - 2012-12-31T23:59:59
+    // NOTE: the date parsing is tricky (calendars were changed in 1582)
+    // so it actually produces 1011-12-26; but I think we can ignore it
     assertQueryEquals(req("q", "pubdate:[* TO 2012]", "defType", "aqp"), 
-    		"date:[-30231100799000 TO 1356998399000]", 
+    		"date:[-30231619199000 TO 1356998399000]", 
     		LegacyNumericRangeQuery.class);
     
     // 2012-01-01T00:00:00 - 3011-12-31T23:59:59

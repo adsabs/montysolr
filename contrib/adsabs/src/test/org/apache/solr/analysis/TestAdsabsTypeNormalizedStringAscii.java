@@ -54,28 +54,56 @@ public class TestAdsabsTypeNormalizedStringAscii extends MontySolrQueryTestCase 
 	
 
   public void test() throws Exception {
-
-    assertU(addDocs(F.TYPE_NORMALIZED_STRING_ASCII_FIELDS, "Bílá kobyla skočila přes čtyřista"));
-    assertU(addDocs(F.TYPE_NORMALIZED_STRING_ASCII_FIELDS, "třicet-tři stříbrných střech"));
-    assertU(addDocs(F.TYPE_NORMALIZED_STRING_ASCII_FIELDS, "A ještě TřistaTřicetTři stříbrných stovek"));
-    assertU(addDocs(F.TYPE_NORMALIZED_STRING_ASCII_FIELDS, "one two three"));
-    assertU(addDocs(F.TYPE_NORMALIZED_STRING_ASCII_FIELDS, "este-c'est que"));
-    assertU(addDocs(F.TYPE_NORMALIZED_STRING_ASCII_FIELDS, "568"));
-
-    assertU(commit());
     
-    //dumpDoc(null, F.ID, F.TYPE_NORMALIZED_STRING_ASCII_FIELDS[0]);
+    String[] fs = new String[]{"bibcode", "identifier", "title"}; // single-val-string, multi-val-string, text
+    assertU(addDocs(fs, "Bílá kobyla skočila přes čtyřista"));
+    assertU(addDocs(fs, "třicet-tři stříbrných střech"));
+    assertU(addDocs(fs, "A ještě TřistaTřicetTři stříbrných stovek"));
+    assertU(addDocs(fs, "one two three"));
+    assertU(addDocs(fs, "este-c'est que"));
+    assertU(addDocs(fs, "568"));
+
+    assertU(commit("waitSearcher", "true"));
     
     assertQ(req("q", "*:*"), "//*[@numFound='6']");
 
     assertQueryEquals(req("q", "bibcode:Bílá", "qt", "aqp"), "bibcode:bila", TermQuery.class);
     assertQueryEquals(req("q", "bibcode:Bila-bila", "qt", "aqp"), "bibcode:bilabila", TermQuery.class);
+    
     assertQ(req("q", "bibcode:Bílá*"), 
     		"//*[@numFound='1']", 
     		"//doc[1]/str[@name='id'][.='0']");
-    assertQ(req("q", "bibcode:Bílá-kobyla*"), "//*[@numFound='1']", 
+    assertQ(req("q", "identifier:Bílá*"), 
+        "//*[@numFound='1']", 
+        "//doc[1]/str[@name='id'][.='0']");
+    assertQ(req("q", "title:Bílá*"), 
+        "//*[@numFound='1']", 
+        "//doc[1]/str[@name='id'][.='0']");
+    
+    assertQ(req("q", "bibcode:kobyla"), 
+        "//*[@numFound='0']");
+    assertQ(req("q", "identifier:kobyla"), 
+        "//*[@numFound='0']");
+    assertQ(req("q", "title:kobyla"), 
+        "//*[@numFound='1']", 
+        "//doc[1]/str[@name='id'][.='0']");
+    
+    
+    assertQ(req("q", "bibcode:Bílá-kobyla*"), 
+        "//*[@numFound='1']", 
     		"//doc[1]/str[@name='id'][.='0']");
-    assertQ(req("q", "bibcode:kobyla"), "//*[@numFound='0']");
+    assertQ(req("q", "identifier:Bílá-kobyla*"), 
+        "//*[@numFound='1']", 
+        "//doc[1]/str[@name='id'][.='0']");
+    assertQ(req("q", "title:Bílá-kobyla*"), 
+        "//*[@numFound='0']");
+    
+    assertQ(req("q", "bibcode:Bílá-kobyla"), 
+        "//*[@numFound='0']");
+    assertQ(req("q", "identifier:Bílá-kobyla"), 
+        "//*[@numFound='0']");
+    assertQ(req("q", "title:Bílá-kobyla"), 
+        "//*[@numFound='1']");
     
     assertQ(req("q", "bibcode:\"one two three\""), 
     		"//*[@numFound='1']", 

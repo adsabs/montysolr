@@ -496,7 +496,7 @@
 
 				<filter class="org.apache.lucene.analysis.miscellaneous.AqpWordDelimiterFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
-					catenateNumbers="0" catenateAll="0" splitOnCaseChange="0"
+					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
 					 />
                 
@@ -650,11 +650,11 @@
 			positionIncrementGap="0">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy" />
+				<filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy|yyyy-MM-dd'T'HH:mm:ss'Z'" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy" />
+				<filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy|yyyy-MM-dd'T'HH:mm:ss'Z'" />
 			</analyzer>
 		</fieldType>
 
@@ -678,28 +678,30 @@
 		</fieldType>
 
 
-		<!-- as opposed to doi_string, identifier is only ascii -->
-
-		<fieldType name="identifier_normalized_string_ascii" class="solr.TextField">
-			<analyzer type="index">
-				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.ASCIIFoldingFilterFactory" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:)"
-					replacement="" replace="all" />
-				<filter class="solr.TrimFilterFactory" />
-				<filter
+		<!-- docvalues can be stored only as strfields; but we want to apply special
+		      tokenizer chains; so that's what AqpStrField allows; be careful to use
+		      appropriate tokenizer class (whitespace is only for multitoken fiels). -->
+		<fieldType name="identifier_string" class="org.apache.solr.schema.AqpStrField">
+		   <analyzer type="index">
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="solr.ASCIIFoldingFilterFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
+                    replacement="" replace="all" />
+                <filter class="solr.TrimFilterFactory" />
+                <filter
           class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-			</analyzer>
-			<analyzer type="query">
-				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.ASCIIFoldingFilterFactory" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:)"
-					replacement="" replace="all" />
-				<filter class="solr.TrimFilterFactory" />
-			</analyzer>
-		</fieldType>
+                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="solr.ASCIIFoldingFilterFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
+                    replacement="" replace="all" />
+                <filter class="solr.TrimFilterFactory" />
+            </analyzer>
+        </fieldType>
 
 
 		<fieldType name="first_string" class="solr.TextField">
@@ -947,7 +949,7 @@
 			required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 		<field name="recid" type="int" indexed="true" stored="true" multiValued="false"
 			required="false" omitNorms="true" omitTermFreqAndPositions="true"/>
-		<field name="bibcode" type="normalized_string_ascii" indexed="true" multiValued="false"
+		<field name="bibcode" type="identifier_string" indexed="true" multiValued="false"
 			stored="true" required="true" omitNorms="true" omitTermFreqAndPositions="true"
 			/>
 
@@ -999,7 +1001,7 @@
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 
-		<field name="identifier" type="identifier_normalized_string_ascii" indexed="true" stored="true"
+		<field name="identifier" type="identifier_string" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="alternate_bibcode" type="normalized_string_ascii" indexed="true" stored="true"
@@ -1239,14 +1241,14 @@
 		<field name="copyright" type="affiliation_text" indexed="true" stored="true"
 		  omitNorms="true" />
 
-		<field name="reference" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="reference" type="identifier_string" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-	  <field name="citation" type="normalized_string_ascii" indexed="true" stored="true"
-      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+	    <field name="citation" type="identifier_string" indexed="true" stored="true"
+          multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
-      multiValued="true" omitNorms="true"/>
+          multiValued="true" omitNorms="true"/>
 
 
 
@@ -1434,6 +1436,8 @@
 			-->
 		<field name="links_data" type="string" indexed="false" stored="true"
 			multiValued="true" />
+		<field name="ids_data" type="string" indexed="false" stored="true"
+            multiValued="true" />
 
 
     <!--
@@ -1484,20 +1488,20 @@
 		=================================================
 		-->
 
-		<field name="bibcode_wildcard" type="normalized_string_ascii"
-      indexed="false" stored="false" required="false" multiValued="false" />
+		<field name="bibcode_wildcard" type="identifier_string"
+          indexed="false" stored="false" required="false" multiValued="false" />
 
-    <field name="doi_wildcard" type="doi_string"
-      indexed="false" stored="false" required="false" multiValued="true" />
-
-    <field name="pub_wildcard" type="normalized_text_ascii"
-      indexed="false" stored="false" required="false" multiValued="false" />
-
-    <field name="issn_wildcard" type="normalized_string_ascii"
-      indexed="false" stored="false" multiValued="false"/>
-
-    <field name="isbn_wildcard" type="normalized_string_ascii"
-      indexed="false" stored="false" required="false" multiValued="false" />
+	    <field name="doi_wildcard" type="doi_string"
+	      indexed="false" stored="false" required="false" multiValued="true" />
+	
+	    <field name="pub_wildcard" type="normalized_text_ascii"
+	      indexed="false" stored="false" required="false" multiValued="false" />
+	
+	    <field name="issn_wildcard" type="normalized_string_ascii"
+	      indexed="false" stored="false" multiValued="false"/>
+	
+	    <field name="isbn_wildcard" type="normalized_string_ascii"
+	      indexed="false" stored="false" required="false" multiValued="false" />
 
 		<field name="author_notrans" type="author_short_name_rage"
 			indexed="false" stored="false" />
@@ -1511,11 +1515,11 @@
 		<field name="author_short_name_rage" type="author_short_name_rage"
 			indexed="false" stored="false" />
 
-    <field name="author_collector" type="author_collector"
-      indexed="false" stored="false" multiValued="true" />
-
-    <field name="reference_wildcard" type="normalized_string_ascii"
-      indexed="false" stored="false" required="false" />
+	    <field name="author_collector" type="author_collector"
+	        indexed="false" stored="false" multiValued="true" />
+	
+	    <field name="reference_wildcard" type="normalized_string_ascii"
+            indexed="false" stored="false" required="false" />
 
 		<!--
 		@api.doc

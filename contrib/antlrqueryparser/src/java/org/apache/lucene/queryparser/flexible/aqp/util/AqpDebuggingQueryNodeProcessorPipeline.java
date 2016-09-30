@@ -67,10 +67,10 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
         System.out.println(newMap);
         System.out.println("     -----------------");
       }
+      System.out.println(newVal.equals(oldVal) ? (newMap.equals(oldMap) ? "" : newVal) : newVal);
 
       System.out.println("--------------------------------------------");
 
-      System.out.println(newVal.equals(oldVal) ? "" : newVal);
 
       oldVal = newVal;
       oldMap = newMap;

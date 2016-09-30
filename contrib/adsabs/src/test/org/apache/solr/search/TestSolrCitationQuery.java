@@ -3,10 +3,11 @@ package org.apache.solr.search;
 import org.junit.BeforeClass;
 
 import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 
-public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
+public class TestSolrCitationQuery extends MontySolrQueryTestCase {
 
 
 	@BeforeClass
@@ -59,8 +60,9 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 		assertU(adoc("id", "5", "bibcode", "F",
 				"citation", "C"
 				));
-		
 		assertU(commit("waitSearcher", "true")); // very weird, it is not waiting
+		
+		
 		
 		assertQ(req("q", "*:*"),
 				"//*[@numFound='6']"

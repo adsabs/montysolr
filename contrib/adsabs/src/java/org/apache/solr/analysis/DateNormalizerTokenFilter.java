@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -19,18 +20,20 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private DateMathParser dmp;
   private String offset;
-  private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS", Locale.ROOT);
+  private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+  
   
   public DateNormalizerTokenFilter(TokenStream input, String incomingFormat, String offset) {
     super(input);
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.offset = offset;
     String[] parts = incomingFormat.split("\\|");
     format = new SimpleDateFormat[parts.length];
     for (int i=0;i<parts.length;i++) {
-      format[i] = new SimpleDateFormat(parts[i], Locale.ROOT);
-      format[i].setTimeZone(DateMathParser.UTC);
+      format[i] = new SimpleDateFormat(parts[i], Locale.US);
+      format[i].setTimeZone(TimeZone.getTimeZone("UTC"));
     }
-    dmp = new DateMathParser(DateMathParser.UTC);
+    dmp = new DateMathParser(TimeZone.getTimeZone("UTC"));
   }
 
   @Override

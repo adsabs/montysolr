@@ -69,7 +69,7 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "three-jets-four"));
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "five jets"));
     
-    assertU(commit());
+    assertU(commit("waitSearcher", "true"));
 
     assertQ(req("q", "*:*"), "//*[@numFound='10']");
     

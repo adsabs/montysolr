@@ -814,7 +814,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * cite_read_boost
 		 */
-		//dumpDoc(null, "recid", "read_count", "cite_read_boost");
+		dumpDoc(null, "recid", "read_count", "cite_read_boost");
 		assertQ(req("q", "cite_read_boost:[0.0 TO 1.0]"),
 				"//doc/int[@name='recid'][.='100']",
 				"//doc/int[@name='recid'][.='101']",
