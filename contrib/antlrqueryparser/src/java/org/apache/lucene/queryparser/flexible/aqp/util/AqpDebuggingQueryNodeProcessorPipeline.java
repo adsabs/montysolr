@@ -43,6 +43,7 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
     newMap = oldMap;
 
     int i = 1;
+    System.out.println( this.getClass().toGenericString());
     System.out.println("     0. starting");
     System.out.println("--------------------------------------------");
     System.out.println(oldVal);

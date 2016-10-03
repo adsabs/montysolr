@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
@@ -136,12 +139,12 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		HashMap<Integer, int[]> references = createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
 		
 		
-		assertU(commit()); // closes the writer, create a new segment
+		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 		
 		references.putAll(createRandomDocs(new Float(maxHits * 0.3f).intValue(), new Float(maxHits * 0.7f).intValue()));
 		
 		
-		assertU(commit()); // closes the writer, create a new segment
+		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 		references.putAll(createRandomDocs(new Float(maxHits * 0.71f).intValue(), new Float(maxHits * 1.0f).intValue()));
 		
 		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
@@ -339,12 +342,21 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 				return false;
 			}
 		}
+		Set<Integer> exp = new HashSet<Integer>();
 		ArrayList<Integer> expected = new ArrayList<Integer>();
 		for (int r: thisDocCites) {
 			if (cites.containsKey(r)) {
-				expected.add(r);
+				exp.add(r);
 			}
 		}
+		for (Integer x: exp) {
+		  expected.add(x);
+		}
+		Collections.sort(expected);
+		Collections.sort(result);
+    
+		
+		assertEquals(expected, result);
 		if (!(result.containsAll(expected) && expected.containsAll(result))) {
 			System.err.println("expected: " + expected.toString() + " actual: " + result.toString());
 		}

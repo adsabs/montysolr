@@ -66,11 +66,14 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 	  if (node instanceof WildcardQueryNode) {
 	    field = ((WildcardQueryNode) node).getFieldAsString();
 	    value = ((WildcardQueryNode) node).getTextAsString();
+	    if (value.indexOf('*') == 0 || value.indexOf('?') == 0)
+	      return node; //let the analyzer decide the fate
+	        
 	    for (String suffix: new String[]{"_wildcard", ""}) {
   	    if (hasAnalyzer(field + suffix)) {
-          tokens =  analyze(field + suffix, "foo*bar");
+          tokens =  analyze(field + suffix, value);
           
-          if (tokens.length > 1 || value.indexOf('*') == 0 || value.indexOf('?') == 0)
+          if (tokens.length > 1)
             return node; // break, let the analyzer decide the fate
           
           if (!tokens[0].equals(value)) {
