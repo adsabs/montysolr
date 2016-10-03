@@ -1,116 +1,106 @@
-<div class="row" role="search">
+<div role="search">
+  <div class="row">
     <h2 class="sr-only">Search Bar to Enter New Query</h2>
-
     <div class="col-sm-12 s-quick-add" aria-label="quick add fields">
-        <div id="expanded-search-form" class="unselectable">
-            <div id="field-options">
-                <span class="s-field-options">quick field:</span>
-                <button class="btn btn-link btn-sm" title='search for an author, e.g. author:"Kurtz,M"'
-                        data-toggle="tooltip" data-field="author" data-punc='"'>Author
+      <div id="expanded-search-form" class="unselectable">
+        <div id="field-options">
+          <span class="s-field-options">quick field:</span>
+          <button class="btn btn-link btn-sm" title='search for an author, e.g. author:"Kurtz,M"' data-toggle="tooltip" data-field="author" data-punc='"'>Author
                 </button>
-                <button class="btn btn-link btn-sm" title='search for a first author, e.g. author:"^Kurtz,M"'
-                        data-toggle="tooltip" data-field="first-author" data-punc='"'>First Author
+          <button class="btn btn-link btn-sm" title='search for a first author, e.g. author:"^Kurtz,M"' data-toggle="tooltip" data-field="first-author" data-punc='"'>First Author
                 </button>
-                <button class="btn btn-link btn-sm" title="limit search to abstract, title and keyword fields"
-                        data-toggle="tooltip" data-field="abs" data-punc='"'>Abstract
+          <button class="btn btn-link btn-sm" title="limit search to abstract, title and keyword fields" data-toggle="tooltip" data-field="abs" data-punc='"'>Abstract
                 </button>
-                <button class="btn btn-link btn-sm" title="e.g. year:1999 or year:1999-2016" data-toggle="tooltip"
-                        data-field="year">Year
+          <button class="btn btn-link btn-sm" title="e.g. year:1999 or year:1999-2016" data-toggle="tooltip" data-field="year">Year
                 </button>
-                <button class="btn btn-link btn-sm" title="search titles, abstract, text, keywords and acknowledgements of the articles"
-                        data-toggle="tooltip" data-field="full" data-punc='"'>Fulltext
+          <button class="btn btn-link btn-sm" title="search titles, abstract, text, keywords and acknowledgements of the articles" data-toggle="tooltip" data-field="full" data-punc='"'>Fulltext
                 </button>
-              <!--container for additional fields/operators-->
-                <span id="option-dropdown-container"></span>
-            </div>
+          <!--container for additional fields/operators-->
+          <span id="option-dropdown-container"></span>
         </div>
+      </div>
     </div>
-</div>
-<div class="row">
+  </div>
+  <div class="row">
     <div class="col-sm-12 search-bar-input-row s-search-bar-input-row">
-        <form name="main-query">
-            <div class="form-group has-feedback">
-                <div class="input-group">
-                    <div class="input-group-btn">
-                        <div type="div" class="btn btn-default dropdown-toggle show-form hidden-xs"
-                             data-toggle="dropdown">Advanced
-                            <div class="caret"></div>
-                        </div>
-                        <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
-                    </div>
-                    {{#if bigquery}}
-                      {{#if libraryName}}
-                      <div class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-book"/>&nbsp;<span>{{libraryName}}</span>&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></div>
-                        {{else}}
-                        <div class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-list-ul"/>&nbsp;&nbsp;Bulk query&nbsp;&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove"/></div>
-                    {{/if}}
-                    <input type="text" class="form-control q hasbigquery" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search"
-                           autocomplete="off" value={{currentQueryVal}}>
-                    <i class="icon-clear s-clear-control"></i>
-                    {{else}}
-                        <input type="text" class="form-control q" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search"
-                               autocomplete="off" value={{currentQueryVal}}>
-                        <i class="icon-clear s-clear-control"></i>
-                    {{/if}}
-                  <span class="input-group-btn">
+      <form name="main-query">
+        <div class="form-group has-feedback">
+          <div class="input-group">
+            <div class="input-group-btn">
+              <div type="div" class="btn btn-default dropdown-toggle show-form hidden-xs" data-toggle="dropdown">Advanced
+                <div class="caret"></div>
+              </div>
+              <div class="dropdown-menu s-search-form-container" id="search-form-container"></div>
+            </div>
+            {{#if bigquery}} {{#if libraryName}}
+            <div class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-book" />&nbsp;<span>{{libraryName}}</span>&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove" /></div>
+            {{else}}
+            <div class="btn btn-xs btn-info bigquery-tag"><i class="fa fa-list-ul" />&nbsp;&nbsp;Bulk query&nbsp;&nbsp;<i class="fa fa-close fa-lg bigquery-close" title="click to remove" /></div>
+            {{/if}}
+            <input type="text" class="form-control q hasbigquery" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search" autocomplete="off" value={{currentQueryVal}}>
+            <i class="icon-clear s-clear-control"></i> {{else}}
+            <input type="text" class="form-control q" name="q" autofocus aria-label="Start typing a query here to begin an ADS Search" autocomplete="off" value={{currentQueryVal}}>
+            <i class="icon-clear s-clear-control"></i> {{/if}}
+            <span class="input-group-btn">
                        <button type="submit" class="btn btn-primary search-submit s-search-submit" aria-label="submit">
                            <i class="fa fa-search"></i></button>
                   </span>
 
-                </div>
-                <!-- /input-group -->
-            </div>
-            <!-- /form-group-->
-        </form>
-    </div>
-    <div class="only-show-on-landing">
-        <div class="quick-reference">
-            <div class="col-sm-6">
-              <dl class="dl-horizontal">
-                    <dt>author</dt>
-                    <dd>author:"huchra, john"</dd>
-                    <dt>first author</dt>
-                    <dd>author:"^huchra, john"</dd>
-                    <dt>abstract + title</dt>
-                    <dd>abs:"dark energy"</dd>
-                    <dt>year</dt>
-                    <dd>year:2000</dd>
-                    <dt>year range</dt>
-                    <dd>year:2000-2005</dd>
-                    <dt>full text</dt>
-                    <dd>full:"gravitational waves"</dd>
-                    <dt>publication</dt>
-                    <dd>bibstem:ApJ <i class="icon-help" data-toggle="tooltip" title="this field requires the bibstem, or journal abbreviation--try going to the 'Paper' tab above for an easy-to-use form version"></i></dd>
-                </dl>
-            </div>
-            <div class="col-sm-6  quick-reference">
-                <dl class="dl-horizontal">
-                    <dt>citations</dt>
-                    <dd>citations(author:"huchra, j") <i class="icon-help" data-toggle="tooltip" title="finds all papers that cite a given set of papers"></i></dd>
-                    <dt>references</dt>
-                    <dd>references(author:"huchra, j") <i class="icon-help" data-toggle="tooltip" title="finds all papers referenced by a given set of papers"></i></dd>
-                    <dt>reviews</dt>
-                    <dd>reviews("gamma-ray bursts") <i class="icon-help" data-toggle="tooltip" title="finds articles citing the most relevant papers on the topic being researched"></i></dd>
-                    <hr/>
-                    <dt>refereed</dt>
-                    <dd>property:refereed <i class="icon-help" data-toggle="tooltip" title="limit to non-refereed papers by searching property:notrefereed"></i></dd>
-                    <dt>astronomy</dt>
-                    <dd>database:astronomy <i class="icon-help" data-toggle="tooltip" title="limit to physics papers by searching database:physics"></i></dd>
-                    <dt>OR</dt>
-                    <dd>abs:(planet OR star) <i class="icon-help" data-toggle="tooltip" title="default logic is AND, e.g. abs:(planet star) would be interpreted as abs:(planet AND star)"></i></dd>
-                </dl>
-            </div>
+          </div>
+          <!-- /input-group -->
         </div>
-
+        <!-- /form-group-->
+      </form>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="only-show-on-landing">
+    <div class="quick-reference">
+      <div class="col-sm-6">
+        <dl class="dl-horizontal">
+          <dt>author</dt>
+          <dd>author:"huchra, john"</dd>
+          <dt>first author</dt>
+          <dd>author:"^huchra, john"</dd>
+          <dt>abstract + title</dt>
+          <dd>abs:"dark energy"</dd>
+          <dt>year</dt>
+          <dd>year:2000</dd>
+          <dt>year range</dt>
+          <dd>year:2000-2005</dd>
+          <dt>full text</dt>
+          <dd>full:"gravitational waves"</dd>
+          <dt>publication</dt>
+          <dd>bibstem:ApJ <i class="icon-help" data-toggle="tooltip" title="this field requires the bibstem, or journal abbreviation--try going to the 'Paper' tab above for an easy-to-use form version"></i></dd>
+        </dl>
+      </div>
+      <div class="col-sm-6  quick-reference">
+        <dl class="dl-horizontal">
+          <dt>citations</dt>
+          <dd>citations(author:"huchra, j") <i class="icon-help" data-toggle="tooltip" title="finds all papers that cite a given set of papers"></i></dd>
+          <dt>references</dt>
+          <dd>references(author:"huchra, j") <i class="icon-help" data-toggle="tooltip" title="finds all papers referenced by a given set of papers"></i></dd>
+          <dt>reviews</dt>
+          <dd>reviews("gamma-ray bursts") <i class="icon-help" data-toggle="tooltip" title="finds articles citing the most relevant papers on the topic being researched"></i></dd>
+          <hr/>
+          <dt>refereed</dt>
+          <dd>property:refereed <i class="icon-help" data-toggle="tooltip" title="limit to non-refereed papers by searching property:notrefereed"></i></dd>
+          <dt>astronomy</dt>
+          <dd>database:astronomy <i class="icon-help" data-toggle="tooltip" title="limit to physics papers by searching database:physics"></i></dd>
+          <dt>OR</dt>
+          <dd>abs:(planet OR star) <i class="icon-help" data-toggle="tooltip" title="default logic is AND, e.g. abs:(planet star) would be interpreted as abs:(planet AND star)"></i></dd>
+        </dl>
+      </div>
     </div>
 
-    <div class="s-num-found">
-        <span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">{{numFound}}</span></b><span
-            class="s-light-font"> results</span>
-            {{#if citationCount}}
-              <span class="search-bar__citation-count"> with <b><span class="citation-count-container">{{citationCount}}</span></b>
-              <span class="s-light-font description">total citations</span>
-          {{/if}}
-          </span>
-    </div>
+  </div>
+
+  <div class="s-num-found">
+    <span class="s-light-font description">Your search returned</span> <b><span class="num-found-container">{{numFound}}</span></b><span class="s-light-font"> results</span> {{#if citationCount}}
+    <span class="search-bar__citation-count"> with <b><span class="citation-count-container">{{citationCount}}</span></b>
+    <span class="s-light-font description">total citations</span> {{/if}}
+    </span>
+  </div>
+</div>
 </div>
