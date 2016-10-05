@@ -17,13 +17,6 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
   }
 	
 	
-	@SuppressWarnings("unchecked")
-  @Override
-	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		return super.searcherInitialization(searcher, firstOrderWeight);
-	}
-	
-
 	@Override
 	public void collect(int doc) throws IOException {
 		int[] citations = cache.getLuceneDocIds(doc+docBase);

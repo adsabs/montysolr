@@ -21,19 +21,7 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 	
 	
 	@Override
-	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		return super.searcherInitialization(searcher, firstOrderWeight);
-	}
-	
-
-	@Override
-	public void setScorer(Scorer scorer) throws IOException {
-		this.scorer = scorer;
-
-	}
-
-	@Override
-	public void collect(int doc) throws IOException {
+  public void collect(int doc) throws IOException {
 		int[] v = cache.getLuceneDocIds(doc+docBase);
 		if (v == null) return;
 		float s = scorer.score();

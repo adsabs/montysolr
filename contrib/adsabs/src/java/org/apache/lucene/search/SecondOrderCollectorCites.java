@@ -45,7 +45,6 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	@SuppressWarnings("unchecked")
   @Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		reader = searcher.getIndexReader();
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	
@@ -53,8 +52,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	@Override
 	public void collect(int doc) throws IOException {
 		//if (reader.isDeleted(doc)) return;
-		
-		Document document = reader.document(doc, fieldsToLoad);
+		Document document = this.context.reader().document(doc, fieldsToLoad);
 		float s = scorer.score();
 		
 		for (String f: fieldsToLoad) {

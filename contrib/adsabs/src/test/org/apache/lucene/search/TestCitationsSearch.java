@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,24 +11,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-
-import monty.solr.util.MontySolrAbstractTestCase;
-import monty.solr.util.MontySolrSetup;
+import java.util.stream.Collectors;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.join.JoinUtil;
-import org.apache.lucene.search.join.ScoreMode;
-import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.BytesRefBuilder;
 import org.apache.lucene.util.LegacyNumericUtils;
-import org.apache.lucene.util.NumericUtils;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.junit.BeforeClass;
+
+import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrSetup;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationsSearch extends MontySolrAbstractTestCase {
@@ -128,38 +124,24 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 	}
 	
 	
-	
-	
-	
 	public void testCitesCollector() throws Exception {
-		
 		
 		int maxHits = 1000;
 		int maxHitsFound = new Float(maxHits * 0.3f).intValue();
-		HashMap<Integer, int[]> references = createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
-		
-		
+		createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
 		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
-		
-		references.putAll(createRandomDocs(new Float(maxHits * 0.3f).intValue(), new Float(maxHits * 0.7f).intValue()));
-		
-		
+
+		createRandomDocs(new Float(maxHits * 0.3f).intValue(), new Float(maxHits * 0.7f).intValue());
 		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
-		references.putAll(createRandomDocs(new Float(maxHits * 0.71f).intValue(), new Float(maxHits * 1.0f).intValue()));
-		
+
+		createRandomDocs(new Float(maxHits * 0.71f).intValue(), new Float(maxHits * 1.0f).intValue());
 		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
-		
-		
-		// invert ourselves - this is what we expect to find
-		HashMap<Integer, int[]> citations = invert(references);
-		
 		
 		// get the cache
 		tempReq = req("test");
 		SolrIndexSearcher searcher = tempReq.getSearcher();
 		
 		final CitationLRUCache cache = (CitationLRUCache) searcher.getCache("citations-cache-from-references");
-		
 		assert cache != null;
 		
 		@SuppressWarnings("rawtypes")
@@ -169,7 +151,35 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
 		
-		
+	  // invert ourselves - this is what we expect to find
+    HashMap<Integer, int[]> references = reconstructCitationCache(searcher);
+    HashMap<Integer, int[]> citations = invert(references);
+    
+    for (Entry<Integer, int[]> es: references.entrySet()) {
+      int docid = es.getKey();
+      int docids[] = es.getValue();
+      for (int reference: docids) {
+        List<Integer> a = Arrays.stream(citations.get(reference)).boxed().collect(Collectors.toList());
+        List<Integer> b = Arrays.stream(citationsWrapper.getLuceneDocIds(reference)).boxed().collect(Collectors.toList());
+        assertTrue(a.contains(docid));
+        assertTrue(b.contains(docid));
+        assertEquals(a, b);
+      }
+    }
+    
+    for (Entry<Integer, int[]> es: citations.entrySet()) {
+      int docid = es.getKey();
+      int docids[] = es.getValue();
+      for (int reference: docids) {
+        List<Integer> a = Arrays.stream(references.get(reference)).boxed().collect(Collectors.toList());
+        List<Integer> b = Arrays.stream(referencesWrapper.getLuceneDocIds(reference)).boxed().collect(Collectors.toList());
+        Collections.sort(a);
+        Collections.sort(b);
+        assertTrue(a.contains(docid));
+        assertTrue(b.contains(docid));
+        assertEquals(docid + " produced diff cache results", a, b);
+      }
+    }
 		
 		// to collect the measurements data
 		Map<Integer, Integer> histogram = new HashMap<Integer, Integer>();
@@ -178,45 +188,39 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		coll.searcherInitialization(searcher, null);
 		
 		
-		
-  	// verify we have all docs in the index
-		for (Integer docid: references.keySet()) {
-			assertQ(req("q", "id:" + docid), "//*[@numFound='1']");
-		}
-		assertQ(req("*:*"), "//*[@numFound='" + references.size() + "']");
-		int numWithReferences = 0;
-		for (Entry<Integer, int[]> entry: references.entrySet()) {
-			if (entry.getValue().length > 0) {
-				numWithReferences += 1;
-			}
-		}
-		assertQ(req("reference:*"), "//*[@numFound='" + numWithReferences + "']");
-  	// run 2nd order through the whole index (no IO error should happen)
+		// run 2nd order through the whole index (no IO error should happen)
 		searcher.search(new SecondOrderQuery(new MatchAllDocsQuery(), coll), 10); 
-		
-		
-		
-		
 		
 		
 		ScoreDoc[] hits;
 		for (Integer i=0; i<maxHits; i++) {
 			
-			//assertQ(req("q", "id:" + i), "//*[@numFound='1']");
-			
 			// int field types must be searched with bytes value (not strings)
 			BytesRefBuilder br = new BytesRefBuilder();
 			LegacyNumericUtils.intToPrefixCoded(i, 0, br);
 			
-			// references
-			if (i % 2 == 1) {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
-						new SecondOrderCollectorCites(referencesWrapper, new String[] {"reference"})), maxHitsFound).scoreDocs;
-			}
-			else {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+			ScoreDoc[] doc = searcher.search(new TermQuery(new Term("id", br.get().utf8ToString())), 1000).scoreDocs;
+			
+			if (doc.length == 0) // that's ok, some docs are missing
+			  continue;
+			  
+			assertEquals("Not found : " + i, 1, doc.length);
+			int docid = doc[0].doc;
+			
+			// references(id:X)
+			System.out.println(i + " cites : "  + join(references.get(docid)) + ":" + join(referencesWrapper.getLuceneDocIds(docid)));
+			hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+			    new SecondOrderCollectorCites(referencesWrapper, new String[] {"reference"})), maxHitsFound).scoreDocs;
+			hitsEquals(docid, references, hits);
+			hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
 						new SecondOrderCollectorCitesRAM(referencesWrapper), false), maxHitsFound).scoreDocs;
-			}
+			hitsEquals(docid, references, hits);
+			
+			// citations(id:X)
+			System.out.println(i + " cited-by : "  + join(citations.get(docid)) + ":" + join(citationsWrapper.getLuceneDocIds(docid)));
+			hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+          new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
+			hitsEquals(docid, citations, hits);
 			
 			if (!histogram.containsKey(hits.length)) {
 				histogram.put(hits.length, 0);
@@ -224,49 +228,10 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 			histogram.put(hits.length, histogram.get(hits.length) + 1);
 			
 			
-			if (debug) {
-				System.out.println("references(id:"+i+")");
-				System.out.println("Expecting:" + Arrays.toString(references.get(i)));
-				System.out.println("Got:" + Arrays.toString(hits));
-				if(!hitsEquals(references.get(i), references, hits)) {
-					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
-					new SecondOrderCollectorCites(referencesWrapper, new String[] {"reference"}), false), maxHitsFound).scoreDocs;
-					hitsEquals(references.get(i), references, hits);
-				}
-			}
-			else {
-				assertTrue(hitsEquals(references.get(i), references, hits));
-			}
-			
-			
-			// citations: {papers} -> X
-			if (i % 2 == 0) {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
-					new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
-			}
-			else {
-				hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
-						new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
-			}
-			
-			if (debug) {
-				if(!citedByEquals(citations.get(i), citations, hits)) {
-					hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", String.valueOf(i))),
-					    new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
-					
-					citedByEquals(citations.get(i), citations, hits);
-				}
-			}
-			else {
-				//assertTrue(citedByEquals(citedBy.get(i), citedBy, hits));
-			}
-			
-			
 			if (i % 5000 == 0 && debug) {
 				System.out.println("Done: " + i);
 			}
 		}
-		
 		
 		
 		int sum = 0;
@@ -276,37 +241,61 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		}
 		if (debug) System.out.println(sum);
 		
-		
-		
 	}
 	
-	private void compareCitations(Query query, SecondOrderCollector collector) throws IOException {
-		SolrQueryRequest r = req("test");
-		SolrIndexSearcher searcher = r.getSearcher();
-		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, collector), 100).scoreDocs;
-		ScoreDoc[] r2 = searcher.search(JoinUtil.createJoinQuery("id", false, "reference", query, searcher, ScoreMode.Max), 100).scoreDocs;
-		compareResults(r1, r2);
-  }
-	
-	private void compareResults(ScoreDoc[] r1, ScoreDoc[] r2) {
-		ArrayList<Integer> a1 = new ArrayList<Integer>();
-		ArrayList<Integer> a2 = new ArrayList<Integer>();
-		for (int i=0;i<r1.length;i++) {
-			a1.add(r1[i].doc);
-			a2.add(r2[i].doc);
-		}
-		Collections.sort(a1);
-		Collections.sort(a2);
-		assertEquals("The implementations return different results", a1, a2);
+	private String join(int[] l) {
+	  if (l == null) return "";
+	  StringBuilder sb = new StringBuilder();
+	  for(int s: l){
+	    if (sb.length()>0) sb.append(",");
+	    sb.append(s);
+	  }
+	  return sb.toString();
 	}
 	
-	private void compareReferences(Query query, SecondOrderCollector collector) throws IOException {
-		SolrQueryRequest r = req("test");
-		SolrIndexSearcher searcher = r.getSearcher();
-		ScoreDoc[] r1 = searcher.search(new SecondOrderQuery(query, collector), 100).scoreDocs;
-		ScoreDoc[] r2 = searcher.search(JoinUtil.createJoinQuery("reference", true, "id", query, searcher, ScoreMode.Max), 100).scoreDocs;
-		compareResults(r1, r2);
+	
+	private HashMap<Integer, int[]> reconstructCitationCache(SolrIndexSearcher searcher) 
+	    throws IOException {
+	  Map<String, Integer> bibcodeToDocid = new HashMap<String, Integer>();
+    Map<String, String[]> references = new HashMap<String, String[]>();
+    
+	  searcher.search(new MatchAllDocsQuery(), new SimpleCollector() {
+      
+      private LeafReaderContext context;
+
+      @Override
+      public boolean needsScores() {
+        return false;
+      }
+      
+      @Override
+      protected void doSetNextReader(LeafReaderContext context) throws IOException {
+        this.context = context;
+      }
+      
+      @Override
+      public void collect(int doc) throws IOException {
+        Document d = searcher.doc(doc + this.context.docBase);
+	      bibcodeToDocid.put(d.get("bibcode"), doc + this.context.docBase);
+        references.put(d.get("bibcode"), d.getValues("reference"));
+      }
+    });
+	  HashMap<Integer, int[]> out = new HashMap<Integer, int[]>();
+	  for (Entry<String, String[]> es: references.entrySet()) {
+	    int docid = bibcodeToDocid.get(es.getKey());
+	    Set<Integer> docids = new HashSet<Integer>();
+	    String[] refs = es.getValue();
+	    for (int i=0; i<refs.length; i++) {
+	      if (bibcodeToDocid.get(refs[i]) == null)
+	        continue;
+	      docids.add(bibcodeToDocid.get(refs[i]));
+	    }
+	    out.put(docid, Arrays.stream(docids.toArray(new Integer[docids.size()])).mapToInt(Integer::intValue).toArray());
+	  }
+	  return out;
   }
+
+
 	
 	private HashMap<Integer, int[]> invert(HashMap<Integer, int[]> cites) {
 		HashMap<Integer, List<Integer>> result = new HashMap<Integer, List<Integer>>(cites.size());
@@ -329,63 +318,27 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		return out;
 	}
 
-	private boolean hitsEquals(int[] thisDocCites, HashMap<Integer, int[]> cites, ScoreDoc[] hits) throws CorruptIndexException, IOException {
-		DirectoryReader reader = tempReq.getSearcher().getIndexReader();
-		if (thisDocCites == null && hits.length == 0) return true;
+	private boolean hitsEquals(int docid, HashMap<Integer, int[]> cache, ScoreDoc[] hits) throws CorruptIndexException, IOException {
+		int[] links = cache.get(docid);
+		
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		for (ScoreDoc d: hits) {
-			try {
-				Document doc = reader.document(d.doc);
-				result.add(Integer.valueOf(doc.get("id")));
-			}
-			catch (IOException e) {
-				return false;
-			}
+			result.add(d.doc);
 		}
-		Set<Integer> exp = new HashSet<Integer>();
 		ArrayList<Integer> expected = new ArrayList<Integer>();
-		for (int r: thisDocCites) {
-			if (cites.containsKey(r)) {
-				exp.add(r);
-			}
-		}
-		for (Integer x: exp) {
-		  expected.add(x);
+		if (links != null) {
+  		for (int r: links) {
+  		  expected.add(r);
+  		}
 		}
 		Collections.sort(expected);
 		Collections.sort(result);
     
 		
-		assertEquals(expected, result);
-		if (!(result.containsAll(expected) && expected.containsAll(result))) {
-			System.err.println("expected: " + expected.toString() + " actual: " + result.toString());
-		}
-		return result.containsAll(expected) && expected.containsAll(result);
+		assertEquals(docid + " differs", expected, result);
+		return true;
 	}
 	
-	private boolean citedByEquals(int[] thisDocCites, HashMap<Integer, int[]> cites, ScoreDoc[] hits) throws CorruptIndexException, IOException {
-		DirectoryReader reader = tempReq.getSearcher().getIndexReader();
-		if (thisDocCites == null && hits.length == 0) return true;
-		ArrayList<Integer> result = new ArrayList<Integer>();
-		for (ScoreDoc d: hits) {
-			try {
-				Document doc = reader.document(d.doc);
-				result.add(Integer.valueOf(doc.get("id")));
-			}
-			catch (IOException e) {
-				return false;
-			}
-		}
-		ArrayList<Integer> expected = new ArrayList<Integer>();
-		for (int r: thisDocCites) {
-			expected.add(r);
-		}
-		if (!(result.containsAll(expected) && expected.containsAll(result))) {
-			System.err.println("expected: " + expected.toString() + " actual: " + result.toString());
-		}
-		return result.containsAll(expected) && expected.containsAll(result);
-	}
-
 
 	// Uniquely for Junit 3
 	public static junit.framework.Test suite() {

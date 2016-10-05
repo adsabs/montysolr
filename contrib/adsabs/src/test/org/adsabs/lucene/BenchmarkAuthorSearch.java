@@ -458,6 +458,8 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 	}
 
 	private Query[] buildQueries(String[] parts) throws UnsupportedEncodingException {
+	  if (parts.length - 1 < 3)
+	    return null;
 		int howMany = TestUtil.nextInt(random(), 2, parts.length-1); // how many initials
 		if (howMany < 2)
 		  return null;

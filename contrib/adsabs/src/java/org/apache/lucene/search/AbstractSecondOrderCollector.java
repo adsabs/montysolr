@@ -23,7 +23,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 	private Integer lastPos = null;
 	protected float ensureCapacityRatio = 0.25f;
 	protected FinalValueType compactingType = FinalValueType.MAX_VALUE;
-  private LeafReaderContext context;
+  protected LeafReaderContext context;
 
 	public AbstractSecondOrderCollector() {
 		lock = new ReentrantLock();

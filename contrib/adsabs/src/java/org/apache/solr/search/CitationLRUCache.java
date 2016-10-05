@@ -630,9 +630,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
       List<String> fields, 
       KVSetter setter) throws IOException {
   	
-    LeafReader reader = searcher.getLeafReader();
   	IndexSchema schema = searcher.getCore().getLatestSchema();
-  	List<LeafReaderContext> leaves = reader.getContext().leaves();
+  	List<LeafReaderContext> leaves = searcher.getIndexReader().getContext().leaves();
   	
   	Bits liveDocs;
   	LeafReader lr;
@@ -642,7 +641,6 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
   	  liveDocs = leave.reader().getLiveDocs();
   	  lr = leave.reader();
   	  FieldInfos fInfo = lr.getFieldInfos();
-  	  
   	  for (String field: fields) {
 
   	    FieldInfo fi = fInfo.fieldInfo(field);
@@ -994,7 +992,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     		addReference(sourceDocid, (Integer) this.get(value));
     	}
     	else {
-    		addReference(sourceDocid, -1);
+    		//addReference(sourceDocid, -1);
     	}
     }
     public void addReference(int sourceDocid, Integer targetDocid) {
@@ -1007,7 +1005,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
     		addCitation(sourceDocid, (Integer) this.get(value));
     	}
     	else {
-    		addCitation(sourceDocid, -1);
+    		//addCitation(sourceDocid, -1);
     	}
     }
     

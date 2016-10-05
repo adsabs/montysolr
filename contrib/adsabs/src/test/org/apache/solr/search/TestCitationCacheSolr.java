@@ -365,8 +365,8 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b2"));
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b3"));
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b4"));
-				compare("References", new int[]{2, 3, 4, -1}, cache.getReferences("b10"));
-				compare("References", new int[]{2, 3, 4, -1}, cache.getReferences(11));
+				compare("References", new int[]{2, 3, 4}, cache.getReferences("b10"));
+				compare("References", new int[]{2, 3, 4}, cache.getReferences(11));
 				
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 11}, cache.getCitations("b2"));
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}, cache.getCitations("b3"));
@@ -442,7 +442,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b3"));
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b4"));
 				compare("References", null, cache.getReferences("b10"));
-				compare("References", new int[]{2, 3, 4, -1}, cache.getReferences(11)); // b44 cannot be resolved
+				compare("References", new int[]{2, 3, 4}, cache.getReferences(11)); // b44 cannot be resolved
 				
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 11}, cache.getCitations("b2"));
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}, cache.getCitations("b3"));
@@ -458,9 +458,9 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b4"));
 				compare("References", null, cache.getReferences("b10"));
 				
-				compare( "Citations", new int[]{0, 1, -1, 3, 4, 5, 6, 7, 8, 9, 2, 8}, cache.getCitations("b2"));
-				compare( "Citations", new int[]{0, 1, -1, 3, 4, 5, 6, 7, 9, 2}, cache.getCitations("b3"));
-				compare( "Citations", new int[]{0, 1, -1, 3, 4, 5, 6, 7, 8, 9, 2}, cache.getCitations("b4"));
+				compare( "Citations", new int[]{0, 1, 3, 4, 5, 6, 7, 8, 9, 2, 8}, cache.getCitations("b2"));
+				compare( "Citations", new int[]{0, 1, 3, 4, 5, 6, 7, 9, 2}, cache.getCitations("b3"));
+				compare( "Citations", new int[]{0, 1, 3, 4, 5, 6, 7, 8, 9, 2}, cache.getCitations("b4"));
 				compare( "Citations", null, cache.getCitations("b10"));
 				compare( "Citations", null, cache.getReferences(11));
 				
@@ -491,8 +491,8 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b2"));
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b3"));
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b4"));
-				compare("References", new int[]{2, 3, 4, -1}, cache.getReferences("b10"));
-				compare("References", new int[]{2, 3, 4, -1}, cache.getReferences(11));
+				compare("References", new int[]{2, 3, 4}, cache.getReferences("b10"));
+				compare("References", new int[]{2, 3, 4}, cache.getReferences(11));
 				
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 11}, cache.getCitations("b2"));
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}, cache.getCitations("b3"));
@@ -546,7 +546,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				
 				compare("References", null, cache.getReferences("b8"));
 				compare("References", null, cache.getReferences("b9"));
-				compare("References", new int[]{2, 3, 4, -1}, cache.getReferences("b10"));
+				compare("References", new int[]{2, 3, 4}, cache.getReferences("b10"));
 				
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9}, cache.getCitations("b2"));
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9}, cache.getCitations("b3"));
@@ -560,9 +560,9 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				compare("References", null, cache.getReferences("b9"));
 				compare("References", new int[]{2, 3, 4}, cache.getReferences("b10"));
 				
-				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, -1, -1, 2, -1}, cache.getCitations("b2"));
-				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, -1, 2}, cache.getCitations("b3"));
-				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, -1, -1, 2}, cache.getCitations("b4"));
+				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, 2}, cache.getCitations("b2"));
+				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, 2}, cache.getCitations("b3"));
+				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, 2}, cache.getCitations("b4"));
 				compare( "Citations", null, cache.getCitations("b10")); 
 				
 			}
@@ -596,8 +596,8 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				
 				compare( "References", new int[]{2, 3, 4}, cache.getReferences("b2"));
 				compare( "References", new int[]{4, 2, 2}, cache.getReferences("b8"));
-				compare( "References", new int[]{2, 3, 4, -1}, cache.getReferences("b9"));
-				compare( "References", new int[]{2, 3, 4, -1}, cache.getReferences("b10"));
+				compare( "References", new int[]{2, 3, 4}, cache.getReferences("b9"));
+				compare( "References", new int[]{2, 3, 4}, cache.getReferences("b10"));
 	
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 10, 11}, cache.getCitations("b2"));
 				compare( "Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}, cache.getCitations("b3"));
@@ -614,7 +614,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				compare( "References", new int[]{2, 3, 4}, cache.getReferences("b10"));
 				
 				// -1 == x8, the alternate bibcode is missing in the newly added doc
-				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2, -1}, cache.getCitations("b2"));
+				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2}, cache.getCitations("b2"));
 				compare( "Citations", new int[]{0, 1, 9, 3, 4, 5, 6, 7, 11, 2}, cache.getCitations("b3"));
 				compare( "Citations", null, cache.getCitations("b8"));
 				compare( "Citations", null, cache.getCitations("b9"));
@@ -634,9 +634,9 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 					new int[][] {	new int[]{2,3,4}, new int[0] },
 					new int[][] {	new int[]{2,3,4}, new int[0] },
 					new int[][] {	new int[0], new int[0] },
-					new int[][] {	new int[]{2,3,4,-1}, new int[0] },
+					new int[][] {	new int[]{2,3,4}, new int[0] },
 					new int[][] {	new int[]{4,2,2}, new int[0] },
-					new int[][] {	new int[]{2,3,4,-1}, new int[0] },
+					new int[][] {	new int[]{2,3,4}, new int[0] },
 				};
 				
 				assertArrayEquals(expected, getCache(cache));
@@ -645,7 +645,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 				int[][][] expected = new int[][][] {
 						new int[][] {	new int[]{2, 3, 4}, new int[0] },
 						new int[][] {	new int[]{2, 3, 4}, new int[0] },
-						new int[][] {	new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2, -1} },
+						new int[][] {	new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2} },
 						new int[][] {	new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 11, 2} },
 						new int[][] {	new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2} },
 						new int[][] {	new int[]{2, 3, 4}, new int[0] },

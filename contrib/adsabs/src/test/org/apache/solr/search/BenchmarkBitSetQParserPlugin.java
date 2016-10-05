@@ -58,7 +58,7 @@ public class BenchmarkBitSetQParserPlugin extends MontySolrAbstractTestCase {
 			startTimer("run");
 			startTimer("Building random bitset indexSize=" + indexSize + " fill=" + fill);
 			BitSet r = randomBitSet(indexSize, fill);
-			appendToTimer("Size=" +r.length() + ",cardinality=" +r.cardinality()+ " highestBit=" + r.prevSetBit(r.length()));
+			appendToTimer("Size=" +r.length() + ",cardinality=" +r.cardinality()+ " highestBit=" + r.prevSetBit(r.length()-1));
 			stopTimer();
 
 			BitSetQParserPlugin bqp = new BitSetQParserPlugin();

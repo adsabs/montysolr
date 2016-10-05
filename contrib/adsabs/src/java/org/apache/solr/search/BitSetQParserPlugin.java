@@ -20,6 +20,7 @@ import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BitSetQuery;
+import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SolrCacheWrapper;
@@ -285,7 +286,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
   						
     					SolrCacheWrapper<SolrCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
     					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
-    						for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
+    						for (int i = bits.nextSetBit(0); i >= 0 && i < DocIdSetIterator.NO_MORE_DOCS; i = bits.nextSetBit(i+1)) {
     					     if (fieldIsInt) {
     					    	 int v = cacheWrapper.getLuceneDocId(0, i);
     					    	 if (v == -1)
@@ -542,7 +543,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 	protected byte[] toByteArray(BitSet bitSet) {
 		byte[] bytes = new byte[(bitSet.length() + 7) / 8];
-		for ( int i = bitSet.nextSetBit(0); i >= 0 && i < Integer.MAX_VALUE; i = bitSet.nextSetBit(i+1) ) {
+		for ( int i = bitSet.nextSetBit(0); i >= 0 && i < DocIdSetIterator.NO_MORE_DOCS; i = bitSet.nextSetBit(i+1) ) {
 			bytes[i / 8] |= 128 >> (i % 8);
 			if (i+1 >= bitSet.length())
 			  break;
