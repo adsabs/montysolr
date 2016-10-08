@@ -27,7 +27,6 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.TermQuery;
@@ -40,9 +39,12 @@ import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.util.TestRuleLimitSysouts;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.lucene.util.TestUtil;
 
+
+@TestRuleLimitSysouts.Limit(bytes = 600000)
 @SuppressCodecs({"Lucene3x", "SimpleText"})
 public class BenchmarkAuthorSearch extends LuceneTestCase{
 	private IndexSearcher searcher;
@@ -411,7 +413,8 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 			String original = doc.get("original").toString();
 			String[] parts = original.split("\\,? ");
 			int howMany = TestUtil.nextInt(random(), 0, parts.length-1); // how many initials
-			data.add(new TestCase(original, parts, howMany));
+			if (howMany > 1)
+			  data.add(new TestCase(original, parts, howMany));
 		}
 		return data;
 	}
@@ -434,8 +437,11 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 					bq.add(q, Occur.MUST);
 					bq.add(new TermQuery(new Term("id", Integer.toString(randomIds[i]))), Occur.MUST);
 					if (q != null) {
-					  System.out.println(q.toString());
-						int no = searcher.search(bq.build(), 1).totalHits;
+					  //System.out.println(q.toString());
+					  Query query = bq.build();
+					  //System.out.println(query.toString());
+					  //System.out.println("q: " + searcher.search(q, 10).totalHits);
+						int no = searcher.search(query, 1).totalHits;
 						if (no != 1) {
 							System.out.println("Results differ: " + oq + " <<>> " + q + "   [" + ho + " : " + no + "]");
 							if (store == true) {
@@ -457,7 +463,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 
 	}
 
-	private Query[] buildQueries(String[] parts) throws UnsupportedEncodingException {
+	private Query[] buildQueries(String[] parts) throws IOException {
 	  if (parts.length - 1 < 3)
 	    return null;
 		int howMany = TestUtil.nextInt(random(), 2, parts.length-1); // how many initials
@@ -483,7 +489,8 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		clauses[0] = new SpanTermQuery(new Term("vectrfield", parts[0])); // surname
 		for (int i = 0; i < howMany; i++) {
 			if (truncate) {
-				clauses[i+1] = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
+			  SpanMultiTermQueryWrapper<WildcardQuery> q = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
+				clauses[i+1] = q;
 			}
 			else {
 				clauses[i+1] = new SpanTermQuery(new Term("vectrfield", parts[i+1]));
@@ -493,7 +500,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		return sq;
 	}
 	
-	private Query getPayloadQuery(String[] parts, int howMany, boolean truncate) throws UnsupportedEncodingException {
+	private Query getPayloadQuery(String[] parts, int howMany, boolean truncate) throws IOException {
 		List<BytesRef> payloads = new ArrayList<BytesRef>(howMany+1);
 		BytesRef pay = new BytesRef((Integer.toString(0)).getBytes("UTF-8"));
 		payloads.add(pay);
@@ -502,8 +509,10 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 		clauses[0] = new SpanTermQuery(new Term("vectrfield", parts[0])); // surname
 		for (int i = 0; i < howMany; i++) {
 			if (truncate) {
-				//clauses[i+1] = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
-				clauses[i+1] = new SpanMultiTermQueryWrapper<PrefixQuery>(new PrefixQuery(new Term("vectrfield", parts[i+1].substring(0, 1))));
+			  SpanMultiTermQueryWrapper<WildcardQuery> q = new SpanMultiTermQueryWrapper<WildcardQuery>(new WildcardQuery(new Term("vectrfield", parts[i+1].substring(0, 1) + "*")));
+				clauses[i+1] = (SpanQuery) q.rewrite(searcher.getIndexReader());
+				
+				//clauses[i+1] = new SpanMultiTermQueryWrapper<PrefixQuery>(new PrefixQuery(new Term("vectrfield", parts[i+1].substring(0, 1))));
 			}
 			else {
 				clauses[i+1] = new SpanTermQuery(new Term("vectrfield", parts[i+1]));

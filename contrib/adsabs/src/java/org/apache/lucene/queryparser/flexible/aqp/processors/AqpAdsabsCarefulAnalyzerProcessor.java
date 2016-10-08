@@ -66,19 +66,53 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 	  if (node instanceof WildcardQueryNode) {
 	    field = ((WildcardQueryNode) node).getFieldAsString();
 	    value = ((WildcardQueryNode) node).getTextAsString();
-	    if (value.indexOf('*') == 0 || value.indexOf('?') == 0)
-	      return node; //let the analyzer decide the fate
+	    
+	    int asteriskPosition = -1;
+	    int qmarkPosition = -1;
+	    int origLen = value.length();
+	    
+	    if (value.indexOf('*') > -1) {
+	      asteriskPosition = value.indexOf('*');
+	    }
+	    if (value.indexOf('?') > -1) {
+	      qmarkPosition = value.indexOf('?');
+	    }
+	    
+	    if (asteriskPosition > 0 && asteriskPosition+1 < value.length()
+	        || qmarkPosition > 0 && qmarkPosition+1 < value.length()
+	        || asteriskPosition > -1 && qmarkPosition > -1)
+	      return node;
 	        
 	    for (String suffix: new String[]{"_wildcard", ""}) {
   	    if (hasAnalyzer(field + suffix)) {
           tokens =  analyze(field + suffix, value);
           
-          if (tokens.length > 1)
+          if (tokens.length != 1)
             return node; // break, let the analyzer decide the fate
           
-          if (!tokens[0].equals(value)) {
+          String newToken = tokens[0];
+          if (newToken.length() < origLen) {
+            if (qmarkPosition > -1) {
+              if (qmarkPosition == 0) {
+                newToken = '?' + tokens[0];
+              }
+              else { 
+                newToken = tokens[0] + '?';
+              }
+            }
+            else {
+              if (asteriskPosition == 0) {
+                newToken = '*' + tokens[0];
+              }
+              else {
+                newToken = tokens[0] + '*';
+              }
+            }
+          }
+          
+          if (!newToken.equals(value)) {
             return new WildcardQueryNode(field, 
-                tokens[0], ((WildcardQueryNode)node).getBegin(),
+                newToken, ((WildcardQueryNode)node).getBegin(),
               ((WildcardQueryNode)node).getEnd());
           }
         }

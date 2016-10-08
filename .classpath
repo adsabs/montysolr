@@ -74,7 +74,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit-4.10.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit4-ant-2.3.4.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/randomizedtesting-runner-2.3.4.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lucene-libs/lucene-test-framework-6.1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lucene-libs/lucene-test-framework-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/antlr4-runtime-4.5.1-1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/asm-5.0.4.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/asm-commons-5.0.4.jar"/>
