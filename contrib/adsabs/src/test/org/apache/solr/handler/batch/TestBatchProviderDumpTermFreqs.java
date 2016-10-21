@@ -1,5 +1,7 @@
 package org.apache.solr.handler.batch;
 
+import java.io.File;
+
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.request.SolrQueryRequest;
 
@@ -12,7 +14,7 @@ public class TestBatchProviderDumpTermFreqs extends BatchProviderTest {
 		createIndex();
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-		String tmpDir = System.getProperty("java.io.tmpdir");
+		String tmpDir = new File("./temp").getAbsolutePath();
 		SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "fields", "bibcode,title");
 		
 		BatchProviderDumpTermFreqs provider = new BatchProviderDumpTermFreqs();

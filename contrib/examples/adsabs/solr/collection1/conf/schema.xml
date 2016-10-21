@@ -700,6 +700,7 @@
                 <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
                     replacement="" replace="all" />
                 <filter class="solr.TrimFilterFactory" />
+                <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>
             </analyzer>
         </fieldType>
 
@@ -997,7 +998,7 @@
 
 		 -->
 
-		<field name="doi" type="doi_string" indexed="true" stored="true"
+		<field name="doi" type="identifier_string" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 

@@ -23,8 +23,7 @@
       <dependency org="org.antlr" name="antlr-runtime" rev="3.4"/> 
       <dependency org="org.antlr" name="antlr" rev="3.4"/>
       <dependency org="org.antlr" name="ST4" rev="4.0.4"/>
-      <dependency org="org.antlr" name="gunit" rev="3.4"/>
-      
+      <dependency org="org.antlr" name="gunit" rev="3.5"/>
       <exclude org="*" ext="*" matcher="regexp" type="${ivy.exclude.types}"/>
     </dependencies>
 </ivy-module>

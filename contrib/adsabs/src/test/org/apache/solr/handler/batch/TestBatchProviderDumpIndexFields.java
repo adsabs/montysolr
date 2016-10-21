@@ -1,5 +1,7 @@
 package org.apache.solr.handler.batch;
 
+import java.io.File;
+
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.solr.request.SolrQueryRequest;
 
@@ -22,7 +24,7 @@ public class TestBatchProviderDumpIndexFields extends BatchProviderTest {
 		
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-		String tmpDir = System.getProperty("java.io.tmpdir");
+		String tmpDir = new File("./temp").getAbsolutePath();
 		SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "q", "title:wall OR title:peace", 
 				"fields", "id,title,floatf");
 		

@@ -32,7 +32,7 @@ public class TestBatchProviderFindWordGroups extends BatchProviderTest {
 		
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-		String tmpDir = System.getProperty("java.io.tmpdir");
+		String tmpDir = new File("./temp").getAbsolutePath();
 		
 		writeData(tmpDir + "/00001.input", "blue\nseas\nrace");
 		

@@ -13,7 +13,7 @@ public class TestBatchProviderDumpBibcodes extends BatchProviderTest {
 		createIndex();
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-		String tmpDir = System.getProperty("java.io.tmpdir");
+		String tmpDir = new File("./temp").getAbsolutePath();
 		String jobid = "00009";
 		
 		File jobFile = new File(tmpDir + "/" + jobid + ".input");

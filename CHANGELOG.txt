@@ -1,3 +1,7 @@
 MontySolr 0.1, 2011-05-19
 -------------------------
 - Initial release
+
+MontySolr 1.0, 2016-10-12
+-------------------------
+- Upgrade to SOLR 6.x

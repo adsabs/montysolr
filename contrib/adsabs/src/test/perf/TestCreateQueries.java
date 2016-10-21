@@ -42,7 +42,7 @@ public class TestCreateQueries extends MontySolrAbstractTestCase {
 		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
 				  +	"perf-solrconfig.xml";
 		
-		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+		initCore(configString, schemaString, "./temp");
 	}
 	
 	

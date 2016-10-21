@@ -97,7 +97,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 	    NamedList<Object> defaults = new NamedList<Object>();
 	    defaults.add("allowed", ".*");
 	    defaults.add("asynchronous", true);
-	    defaults.add("workdir", "batch-handler");
+	    defaults.add("workdir", new File("./temp").getAbsolutePath() + "/batch-handler");
 	    
 	    NamedList<Object> providers = new NamedList<Object>();
 	    /*
@@ -139,7 +139,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     
     assertEquals("{!aqp} lang:(german OR english) AND *:*", thisParams.get("q"));
     assertEquals(true, thisParams.getBool("asynchronous"));
-    assertEquals("batch-handler", thisParams.get("workdir"));
+    assertEquals(new File("./temp").getAbsolutePath() + "/batch-handler", thisParams.get("workdir"));
     assertEquals("bibcode,title,author", thisParams.get("fields"));
     assertEquals(jobid, thisParams.get("jobid"));
     assertEquals("foo\nzooo\nščř", thisParams.get("#data"));

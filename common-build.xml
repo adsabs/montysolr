@@ -36,8 +36,7 @@
 
 	<!-- Give user a chance to override without editing this file
 	      (and without typing -D each time it compiles it -->
-	<property file="${user.home}/lucene.build.properties"/>
-	<property file="${user.home}/build.properties"/>
+	<property file="${user.home}/montysolr.build.properties"/>
 	<property file="${basedir}/build.properties"/>
 	<property file="${common.dir}/build.properties"/>
 	<property name="montysolr.dependencies.dir" location="${common.dir}/build/solrjars-extracted" />
@@ -52,8 +51,8 @@
 
 	<property name="name" value="${ant.project.name}"/>
 	<property name="Name" value="MontySolr"/>
-	<property name="dev.version" value="4.0-SNAPSHOT"/>
-	<property name="tests.luceneMatchVersion" value="4.0"/>
+	<property name="dev.version" value="6.x-SNAPSHOT"/>
+	<property name="tests.luceneMatchVersion" value="6.0"/>
 	<property name="version" value="${dev.version}"/>
 	<property name="spec.version" value="${version}"/>
 	<property name="year" value="2000-${current.year}"/>
@@ -62,14 +61,14 @@
 	<property name="common.classpath.excludes" value="**/*.txt,**/*.template,**/*.sha1" />
 
 	<property name="ivy.bootstrap.version" value="2.3.0" />
-  <property name="ivy.default.configuration" value="*"/>
-  <property name="ivy.sync" value="true"/>
+    <property name="ivy.default.configuration" value="*"/>
+    <property name="ivy.sync" value="true"/>
 
 	<property name="junit.jar" value="junit-4.10.jar"/>
 	<property name="junit-location.jar" value="${common.dir}/lib/${junit.jar}"/>
 
 	<path id="junit-path">
-		<fileset dir="${montysolr.dependencies.dir}/test-framework/lib">
+		<fileset dir="${montysolr.dependencies.dir}/solr/test-framework/lib">
 			<include name="junit-*.jar" />
 			<include name="randomizedtesting-runner-*.jar" />
 		</fileset>
@@ -100,14 +99,13 @@
 	<property name="tests.verbose" value="false"/>
 	<property name="tests.infostream" value="${tests.verbose}"/>
 
-	<condition property="tests.heapsize" value="768M">
-		<isset property="run.clover"/>
-	</condition>
-	<property name="tests.heapsize" value="512M"/>
-
-	<condition property="tests.clover.args" value="-XX:ReservedCodeCacheSize=128m">
-		<isset property="run.clover"/>
-	</condition>
+	<condition property="tests.heapsize" value="768M" else="512M">
+        <isset property="run.clover"/>
+    </condition>
+      
+    <condition property="tests.clover.args" value="-XX:ReservedCodeCacheSize=128m -XX:MaxPermSize=192m" else="">
+       <isset property="run.clover"/>
+    </condition>
 	<property name="tests.clover.args" value=""/>
 
 	<property name="tests.tempDir" value="${build.dir}/test"/>
@@ -142,10 +140,10 @@
 
 	<property name="javac.deprecation" value="off"/>
 	<property name="javac.debug" value="on"/>
-	<property name="javac.source" value="1.7"/>
-	<property name="javac.target" value="1.7"/>
-	<property name="javac.source.backwards" value="1.7"/>
-	<property name="javac.target.backwards" value="1.7"/>
+	<property name="javac.source" value="1.8"/>
+	<property name="javac.target" value="1.8"/>
+	<property name="javac.source.backwards" value="1.8"/>
+	<property name="javac.target.backwards" value="1.8"/>
 	<property name="javac.args" value="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
 	<property name="bootclasspath" value=""/>
 	<property name="javadoc.link" value="http://download.oracle.com/javase/6/docs/api/"/>
@@ -249,13 +247,15 @@
 		</fileset>
 		<!-- lucene/solr jars -->
 		<fileset dir="${common.dir}/build">
-			<include name = "*solrjars-extracted/lucene-test*.jar" />
-			<include name = "*solrjars-extracted/apache-solr-test*.jar" />
+			<include name = "*solrjars-extracted/lucene/lucene-test*.jar" />
+			<include name = "*solrjars-extracted/solr/solr-test*.jar" />
 		</fileset>
 		<fileset dir="${common.dir}/build">
 			<include name = "*solrjars-extracted/*.jar" />
-			<include name = "*solrjars-extracted/solrj-lib/*.jar" />
-			<include name = "*solrjars-extracted/example-lib/ext/*.jar" />
+			<include name = "*solrjars-extracted/lucene/*.jar" />
+			<include name = "*solrjars-extracted/solr/*.jar" />
+			<include name = "*solrjars-extracted/solr/solrj-lib/*.jar" />
+			<include name = "*solrjars-extracted/jetty/ext/*.jar" />
 		</fileset>
 		<!-- montysolr lib jars -->
 		<fileset dir="${common.dir}/lib">
@@ -277,7 +277,7 @@
 		<!-- these classes cannot be found in solr/lucene jars, they are needed
 	                 for proper compilation of unittests -->
 		<fileset dir="${common.dir}/build">
-      <include name="solrjars-extracted/test-framework/**.jar" />
+      <include name="solrjars-extracted/solr/test-framework/**.jar" />
     </fileset>
 
 		<path refid="common.classpath"/>
@@ -839,8 +839,8 @@
 	<target name="install-junit4-taskdef" depends="ivy-configure">
 		<!-- JUnit4 taskdef. -->
 		<ivy:resolve   file="${common.dir}/build/solr-download/apache-solr-${solr.version}/lucene/test-framework/ivy.xml" type="jar" log="quiet" />
-		<ivy:cachepath file="${common.dir}/build/solr-download/apache-solr-${solr.version}/lucene/test-framework/ivy.xml" conf="junit4-stdalone" type="jar" transitive="false" pathid="path.junit4" />
-
+		<ivy:cachepath organisation="com.carrotsearch.randomizedtesting" module="junit4-ant" revision="${/com.carrotsearch.randomizedtesting/junit4-ant}"
+		                   type="jar" inline="true" log="download-only" pathid="path.junit4" />
 		<taskdef uri="antlib:com.carrotsearch.junit4">
 			<classpath refid="path.junit4" />
 		</taskdef>

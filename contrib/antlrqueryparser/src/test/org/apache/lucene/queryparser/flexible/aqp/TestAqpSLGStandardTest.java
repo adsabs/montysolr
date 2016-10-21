@@ -1063,9 +1063,4 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     dir.close();
   }
 
-  // Uniquely for Junit 3
-  public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(TestAqpSLGStandardTest.class);
-  }
-
 }

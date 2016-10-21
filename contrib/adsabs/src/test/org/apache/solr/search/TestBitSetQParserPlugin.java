@@ -49,8 +49,7 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
 					+ "bitset-solrconfig.xml";
 		
-		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-			    + "/example/solr");
+		initCore(configString, schemaString, "./temp");
 	}
 	
 

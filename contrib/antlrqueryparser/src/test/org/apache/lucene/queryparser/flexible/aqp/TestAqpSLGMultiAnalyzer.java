@@ -259,9 +259,4 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
 
   }
 
-  // Uniquely for Junit 3
-  public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiAnalyzer.class);
-  }
-
 }
