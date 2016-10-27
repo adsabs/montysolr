@@ -20,6 +20,8 @@
     <info organisation="montysolr" module="examples"/>
     
     <dependencies>
+      <dependency org="org.antlr" name="antlr-runtime" rev="3.5.2"/>
+      <dependency org="org.python" name="jython-standalone" rev="2.7-b1" transitive="false"/>
       <exclude org="*" ext="*" matcher="regexp" type="${ivy.exclude.types}"/> 
     </dependencies>
 </ivy-module>

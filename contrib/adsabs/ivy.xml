@@ -26,8 +26,8 @@
     </configurations>
     
     <dependencies>
-      <dependency org="org.antlr" name="antlr-runtime" rev="3.4"/>
-      <dependency org="org.antlr" name="antlr" rev="3.4" transitive="false"/>
+      <dependency org="org.antlr" name="antlr-runtime" rev="3.5.2"/>
+      <dependency org="org.antlr" name="antlr" rev="3.5.2" transitive="false"/>
       <dependency org="org.python" name="jython-standalone" rev="2.7-b1" transitive="false"/>
       
       <dependency org="org.eclipse.jetty" name="jetty-continuation" rev="${/org.eclipse.jetty/jetty-continuation}" transitive="false" conf="servlet->default"/>

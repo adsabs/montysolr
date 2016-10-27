@@ -22,6 +22,8 @@
 	<description>
 	    ADS search engine extensions
     </description>
+    <property name="solr.nature" value="true"/>
+	<import file="../upstream-include.xml" />
 
 	<!-- with this we'll trick antlrqueryparser into generating grammars for us in our folder -->
 	<import file="../antlrqueryparser/macros.xml" />
@@ -36,8 +38,6 @@
 	<property name="aqp.grammar" value="${grammar}"/>
 	<import file="../antlrqueryparser/build.xml" />
     
-    <property name="solr.nature" value="true"/>
-	<import file="../upstream-include.xml" />
 	
 	<target name="foo">
 		   <echo>${include.path}</echo>

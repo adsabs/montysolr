@@ -32,7 +32,7 @@
 		</not>
 	</condition>
 	<property name="example.name" value="${ename}" />
-	
+
 	<condition property="example.ignore-environment" value="true">
 		<not>
 			<isset property="ignore-environment" />
@@ -90,16 +90,16 @@
      we include only the classpaths that are inside 
      the example, so that it can run without anything 
      else -->
-		
+
 		<unzip src="${build.dir}/${example.name}/webapps/solr.war" dest="${build.dir}/${example.name}/solrwar" overwrite="off"/>
-		
+
 		<path id="examples.classpath">
 			<fileset dir="${build.dir}/${example.name}/">
 				<include name="solrwar/WEB-INF/lib/**/*.jar" />
 				<include name="solr/lib/**/*.jar" />
 				<include name="lib/**/*.jar" />
 			</fileset>
-			
+
 			<pathelement location="${build.dir}/${example.name}/jython"/>
 		</path>
 
@@ -107,22 +107,22 @@
 
 		<path id="classpath">
 			<path refid="examples.classpath" />
-    </path>
+		</path>
 
 		<path id="test.classpath">
 			<!-- MontySolr test classes -->
-      <pathelement location="${common.dir}/build/classes/test"/>
-			
+			<pathelement location="${common.dir}/build/classes/test"/>
+
 			<path refid="common.test.classpath" />
 			<path refid="test.base.classpath"/>
 			<path refid="examples.classpath" />
 		</path>
-		
+
 		<!--
 		<echo>classpath: ${toString:classpath}</echo>
 		<echo>test.classpath: ${toString:test.classpath}</echo>
 		-->
-		
+
 		<property name="classpath.populated" value="true"/>
 	</target>
 
@@ -136,10 +136,10 @@
 			<arg line="build-one -Dename=adsabs" />
 		</exec>
 	</target>
-	
+
 	<target name="jar-core" description="Packages the JAR file">
-    <!-- does nothing on purpose //-->
-  </target>
+		<!-- does nothing on purpose //-->
+	</target>
 
 	<target name="build-all" depends="build-one">
 		<echo>
@@ -156,19 +156,84 @@
 		<fail />
 	</target>
 
-	<target name="build-one" depends="jar">
-		<assemble-example example-name="${example.name}" montysolr-example="${basedir}/${example.name}" 
-			solr-example="${prop.solr.real.location}/example" />
-	    
+	<target name="build-one" >
+		<!-- (temporary) remove our libraries -->
+        <ant target="unlink-upstream" dir="${basedir}/../antlrqueryparser"  inheritall="false" />
+		<ant target="unlink-upstream" dir="${basedir}/../adsabs"  inheritall="false" />
+		
+		<!-- build solr distributionpwd
+		<ant target="package" dir="${prop.solr.real.location}"  inheritall="false" />
+		
+		<echo>Building: ${build.dir}/${example.name}</echo>
+		<delete dir="${build.dir}/${example.name}" />
+		<unzip dest="${build.dir}"> 
+			<fileset dir="${prop.solr.real.location}/package"> 
+				<include name="*.zip"/> 
+			</fileset> 
+		</unzip>
+		
+		<copy todir="${build.dir}/${example.name}">
+			<fileset dir="${build.dir}"> 
+                <include name="solr*/**"/>
+            </fileset>
+			<regexpmapper from="solr-[^/]*/(.*)" to="\1" />
+		</copy>
+		-->
+		
+		<!-- build our own libraries -->
+		<ant target="jar" dir="${basedir}/../antlrqueryparser"  inheritall="false" />
+        <ant target="jar" dir="${basedir}/../adsabs"  inheritall="false" />
+
+		<!-- fetch them -->
+		<ant target="get-jar" dir="${basedir}/../antlrqueryparser"  inheritall="false" />
+        <ant target="get-jar" dir="${basedir}/../adsabs"  inheritall="false" />
+		
+		<!-- copy our jars into the solr (necessary, can't be inside ./lib) -->
+		<copy todir="${build.dir}/${example.name}/server/solr-webapp/webapp/WEB-INF/lib" flatten="true">
+			<fileset dir="${common.build.dir}"> 
+                <include name="**/montysolr-*.jar"/>
+            </fileset>
+		</copy>
+		
+        <!-- gather and copy the python code to example/python -->
+		<echo>Putting Jython code together into: "${build.dir}/${example.name}/server/resources</echo>
+        <copy todir="${build.dir}/${example.name}/server/resources" flatten="false" overwrite="true">
+            <fileset dir="${common.dir}/contrib">
+                <include name="**/src/jython/**/*.py" />
+            </fileset>
+            <regexpmapper from=".*/src/jython/(.*)" to="\1" />
+        </copy>
+
+        <!-- set the python/jython files not-readable so that i am not tempted to mess w/ them -->
+        <chmod perm="ugo-x">
+            <fileset dir="${build.dir}/${example.name}/server/resources">
+            	<include name="*.py" />
+                <include name="**/*.py" />
+            </fileset>
+        </chmod>
+		
+		<!-- include jars that should be included -->
+		<ivy:retrieve/>
+		<copy todir="${build.dir}/${example.name}/server/solr-webapp/webapp/WEB-INF/lib" flatten="true" overwrite="true" verbose="true">
+            <fileset dir="${basedir}/lib">
+            	<include name="**/*.jar" />
+                <include name="*.jar" />
+            </fileset>
+        </copy>
+	</target>
+		
+	<target name="build-onex" depends="jar">
+		<assemble-example example-name="${example.name}" montysolr-example="${basedir}/${example.name}" solr-example="${prop.solr.real.location}/example" />
+
 		<mkdir dir="${build.dir}/${example.name}/solr/lib" />
-		
+
 		<!-- existence of this folder prevents solr from using tmp (and UI admin going blank) -->
-	  <mkdir dir="${build.dir}/${example.name}/work" />
-		
-		
+		<mkdir dir="${build.dir}/${example.name}/work" />
+
+
 		<mkdir dir="${build.dir}/${example.name}/python" />
-    <mkdir dir="${build.dir}/${example.name}/jython" />
-		
+		<mkdir dir="${build.dir}/${example.name}/jython" />
+
 		<echo>Putting Python code together into: "${build.dir}/${example.name}/python</echo>
 
 		<!-- gather and copy the python code to example/python -->
@@ -181,13 +246,13 @@
 
 		<echo>Putting Jython code together into: "${build.dir}/${example.name}/jython</echo>
 
-    <!-- gather and copy the python code to example/python -->
-    <copy todir="${build.dir}/${example.name}/jython" flatten="false" overwrite="true">
-      <fileset dir="${common.dir}/contrib">
-        <include name="**/src/jython/**/*.py" />
-      </fileset>
-      <regexpmapper from=".*/src/jython/(.*)" to="\1" />
-    </copy>
+		<!-- gather and copy the python code to example/python -->
+		<copy todir="${build.dir}/${example.name}/jython" flatten="false" overwrite="true">
+			<fileset dir="${common.dir}/contrib">
+				<include name="**/src/jython/**/*.py" />
+			</fileset>
+			<regexpmapper from=".*/src/jython/(.*)" to="\1" />
+		</copy>
 
 		<!-- set the python/jython files not-readable so that i am not tempted to mess w/ them -->
 		<chmod perm="ugo-x">
@@ -196,49 +261,49 @@
 			</fileset>
 		</chmod>
 		<chmod perm="ugo-x">
-      <fileset dir="${build.dir}/${example.name}/jython">
-        <include name="**" />
-      </fileset>
-    </chmod>
+			<fileset dir="${build.dir}/${example.name}/jython">
+				<include name="**" />
+			</fileset>
+		</chmod>
 
-	    
-		
+
+
 		<!-- include our jars (and other dependencies) directly into solr.war - this is not strictly
 		     necessary; however if we don't do that, we have to at least include our customizations
 		     to solr code (eg. DIH classes and query parser additions). So this was the simplest
 		     and hopefully 'best' way -->
-		
-		<unzip src="${build.dir}/${example.name}/webapps/solr.war" dest="${build.dir}/${example.name}/solrwar" />
-		
-		<!-- put montysolr jars into war -->
-    <copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true" verbose="yes">
-      <fileset dir="${common.dir}/build">
-        <include name="montysolr*.jar" />
-      	<include name="contrib/*/montysolr*.jar" />
-      </fileset>
-    </copy>
 
-    <!-- add selected libraries -->
+		<unzip src="${build.dir}/${example.name}/webapps/solr.war" dest="${build.dir}/${example.name}/solrwar" />
+
+		<!-- put montysolr jars into war -->
+		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true" verbose="yes">
+			<fileset dir="${common.dir}/build">
+				<include name="montysolr*.jar" />
+				<include name="contrib/*/montysolr*.jar" />
+			</fileset>
+		</copy>
+
+		<!-- add selected libraries -->
 		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
-      <fileset dir="${montysolr.dependencies.dir}">
-        <!--<include name="**/apache-solr-dataimporthandler*.jar" />-->
-        <include name="**/lucene-join*.jar" />
-        <include name="**/lucene-sandbox*.jar" />
-      </fileset>
-    </copy>
-    <copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
-      <fileset dir="${common.dir}/contrib">
-        <include name="**/lib/antlr-runtime*.jar" />
-      	<include name="**/lib/jython-standalone*.jar" />
-      </fileset>
-    </copy>
-		
+			<fileset dir="${montysolr.dependencies.dir}">
+				<!--<include name="**/apache-solr-dataimporthandler*.jar" />-->
+				<include name="**/lucene-join*.jar" />
+				<include name="**/lucene-sandbox*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
+			<fileset dir="${common.dir}/contrib">
+				<include name="**/lib/antlr-runtime*.jar" />
+				<include name="**/lib/jython-standalone*.jar" />
+			</fileset>
+		</copy>
+
 		<!-- zip the jar back -->
 		<zip destfile="${build.dir}/${example.name}/webapps/solr.war" basedir="${build.dir}/${example.name}/solrwar" />
-		
-	    
+
+
 		<antcall target="populate-classpath" />
-		
+
 		<!-- generate the run.sh using default profile (even if that may be wrong for now) -->
 		<ant inheritAll="false" inheritRefs="false" target="generate-run.sh">
 			<property name="ename" value="${example.name}" />
@@ -252,11 +317,11 @@
 		</exec>
 		-->
 
-		<delete dir="${build.dir}/${example.name}/solrwar"/>
-    <delete dir="${build.dir}/${example.name}/example-DIH"/>
-    <delete dir="${build.dir}/${example.name}/exampledocs"/>
-		<delete dir="${build.dir}/${example.name}/" includes="build.xml ivy.xml"/>
-		
+		<delete dir="${build.dir}/${example.name}/solrwar" />
+		<delete dir="${build.dir}/${example.name}/example-DIH" />
+		<delete dir="${build.dir}/${example.name}/exampledocs" />
+		<delete dir="${build.dir}/${example.name}/" includes="build.xml ivy.xml" />
+
 		<echo>
     The distribution is ready in: ${build.dir}/${example.name}
     You can start solr by: ${build.dir}/${example.name}/run.sh
@@ -286,7 +351,7 @@
 		<property prefix="missing" file="${example.name}/${example.config}" />
 
 		<antcall target="populate-classpath" />
-		
+
 		<exec executable="ant" failonerror="true">
 			<env key="PYTHONPATH" value="${missing.PYTHONPATH}" />
 			<env key="MONTYSOLR_JVMARGS" value="${missing.MONTYSOLR_JVMARGS}" />
@@ -324,23 +389,23 @@
 	</target>
 
 	<target name="test" depends="build-one,populate-classpath,common.test" />
-	
+
 	<target name="compile-core" depends="populate-classpath,common.compile-core"/>
-	
+
 
 	<macrodef name="create-run.sh">
-	    <attribute name="classpath" />
-	    <attribute name="classpathref" />
-	    <attribute name="jvmargs" />
-	    <attribute name="arguments" default="" />
-	    <attribute name="solr-home-dir" />
-	    <attribute name="solr-data-dir" />
-	    <attribute name="ignore-environment" default="true" />
-	    <attribute name="pythonpath" default="${build.dir}/${example.name}/python"/>
-		  <attribute name="jythonpath" default="${build.dir}/${example.name}/jython"/>
-	    <attribute name="basedir" default="${basedir}"/>
-	    <sequential>
-	        <echo file="@{basedir}/run.sh">#!/bin/bash
+		<attribute name="classpath" />
+		<attribute name="classpathref" />
+		<attribute name="jvmargs" />
+		<attribute name="arguments" default="" />
+		<attribute name="solr-home-dir" />
+		<attribute name="solr-data-dir" />
+		<attribute name="ignore-environment" default="true" />
+		<attribute name="pythonpath" default="${build.dir}/${example.name}/python"/>
+		<attribute name="jythonpath" default="${build.dir}/${example.name}/jython"/>
+		<attribute name="basedir" default="${basedir}"/>
+		<sequential>
+			<echo file="@{basedir}/run.sh">#!/bin/bash
 	                
 	    #           MontySolr:
 	    #           ========
@@ -375,72 +440,72 @@
 	                
 	                </echo>
 
-        <replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
-        <replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
-        <chmod file="@{basedir}/run.sh" perm="u+x" />
+			<replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
+			<replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
+			<chmod file="@{basedir}/run.sh" perm="u+x" />
 
-	    </sequential>
+		</sequential>
 
 	</macrodef>
 
 	<macrodef name="run-montysolr">
-	    <attribute name="classpath" />
-	    <attribute name="classpathref" />
-	    <attribute name="jvmargs" />
-	    <attribute name="arguments" default="" />
-	    <attribute name="solr-home-dir" />
-	    <attribute name="solr-data-dir" />
-	    <attribute name="ignore-environment" default="true" />
-	    <attribute name="pythonpath" default=""/>
-		  <attribute name="jythonpath" default=""/>
-	    <attribute name="basedir" default="${basedir}"/>
+		<attribute name="classpath" />
+		<attribute name="classpathref" />
+		<attribute name="jvmargs" />
+		<attribute name="arguments" default="" />
+		<attribute name="solr-home-dir" />
+		<attribute name="solr-data-dir" />
+		<attribute name="ignore-environment" default="true" />
+		<attribute name="pythonpath" default=""/>
+		<attribute name="jythonpath" default=""/>
+		<attribute name="basedir" default="${basedir}"/>
 
-	    <sequential>
-	        <java classpath="@{classpath}"
+		<sequential>
+			<java classpath="@{classpath}"
 	                classpathref="@{classpathref}"
 	                fork="true"
 	                newenvironment="@{ignore-environment}"
 	                dir="@{basedir}"
 	                >
 
-	            <env key="PYTHONPATH" path="@{pythonpath}" />
-	            <jvmarg line="-Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir}"/>
-	            <jvmarg line="@{jvmargs} -jar start.jar"/>
-	            <arg line="@{arguments}"/>
-	        </java>
-	    </sequential>
+				<env key="PYTHONPATH" path="@{pythonpath}" />
+				<jvmarg line="-Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir}"/>
+				<jvmarg line="@{jvmargs} -jar start.jar"/>
+				<arg line="@{arguments}"/>
+			</java>
+		</sequential>
 	</macrodef>
-	
+
 	<macrodef name="assemble-example">
-	    <attribute name="montysolr-example"/>
-	    <attribute name="solr-example"/>
-	    <attribute name="example-name"/>
-	    <attribute name="build-dir" default="${build.dir}"/>
-	    <sequential>
-	        <delete dir="@{build-dir}/@{example-name}" failonerror="false"/>
+		<attribute name="montysolr-example"/>
+		<attribute name="solr-example"/>
+		<attribute name="example-name"/>
+		<attribute name="build-dir" default="${build.dir}"/>
+		<sequential>
+			<delete dir="@{build-dir}/@{example-name}" failonerror="false"/>
 
-	        <mkdir dir="@{build-dir}/@{example-name}"/>
+			<mkdir dir="@{build-dir}/@{example-name}"/>
 
-	        <!-- first copy the montysolr files -->
-	        <copy todir="@{build-dir}/@{example-name}" overwrite="true">
-	            <fileset dir="@{montysolr-example}">
-	                <include name="**/**" />
-	            </fileset>
-	        </copy>
+			<!-- first copy the montysolr files -->
+			<copy todir="@{build-dir}/@{example-name}" overwrite="true">
+				<fileset dir="@{montysolr-example}">
+					<include name="**/**" />
+				</fileset>
+			</copy>
 
-	        <!-- then the remaining solr files -->
-	        <copy todir="@{build-dir}/@{example-name}" overwrite="false">
-	            <fileset dir="@{solr-example}">
-	                <include name="**/**" />
-	            </fileset>
-	        </copy>
+			<!-- then the remaining solr files -->
+			<copy todir="@{build-dir}/@{example-name}" overwrite="false">
+				<fileset dir="@{solr-example}">
+					<include name="**/**" />
+				</fileset>
+			</copy>
 
-	        <echo>
+			<echo>
 	                  Assembled @{example-name} at @{build-dir}/@{example-name}
          </echo>
 
-	    </sequential>
+		</sequential>
 	</macrodef>
 
-	
+
 </project>
