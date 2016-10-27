@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,16 +16,19 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
-import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.NumericDocValues;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BitSetQuery;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.Ints;
+import org.apache.lucene.search.DocIdSetIterator;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.SolrCacheWrapper;
+import org.apache.lucene.util.BitSet;
+import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.Base64;
@@ -34,17 +36,16 @@ import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.handler.loader.CSVLoader;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.FieldType;
-import org.apache.solr.schema.IntField;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.StrField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.schema.TrieIntField;
+import org.apache.solr.uninverting.UninvertingReader;
 import org.apache.solr.update.AddUpdateCommand;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.solr.handler.loader.CSVLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +142,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					}
 					
 					if (processors.size() == 0) {
-						return new BooleanQuery(); // match no docs
+						return new MatchNoDocsQuery();
 					}
 					
 					String[] operator = localParams.get("operator","and").split(",");
@@ -150,11 +151,11 @@ public class BitSetQParserPlugin extends QParserPlugin {
 								"There is " + processors.size() + " data streams, but inconsistent number of operators: " + localParams.get("operator","and"));
 					}
 					
-					BitSet topBits = null;
+					FixedBitSet topBits = null;
 					int i = 0;
 					for (DataProcessor processor : processors) {
 						
-						BitSet bits = processor.getBits();
+						FixedBitSet bits = processor.getBits();
 						
 						if (bits == null) {
 							if (operator.length > 0) {
@@ -193,7 +194,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 					
 					
 					if (topBits.cardinality() < 1)
-						return new BooleanQuery(); // match no docs
+						return new MatchNoDocsQuery();
 	
 					BitSetQuery q = new BitSetQuery(topBits);
 					
@@ -230,9 +231,9 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	      	
 	      	DataProcessor p = new DataProcessor(req) {
 	      		@Override
-	      		public BitSet getBits() {
+	      		public FixedBitSet getBits() {
 	      			// we must harvest lucene docids
-	    				AtomicReader reader = req.getSearcher().getAtomicReader();
+	    				LeafReader reader = req.getSearcher().getLeafReader();
 	    				byte[] data;
               
 	    				try {
@@ -242,7 +243,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	              throw new SolrException(ErrorCode.BAD_REQUEST, e1);
               }
               
-	    				BitSet bits = fromByteArray(data, 
+	    				FixedBitSet bits = fromByteArray(data, 
 	    						localParams.getBool("little_endian", false)
 	    						?	LITTLE_ENDIAN_BIT_MASK : BIG_ENDIAN_BIT_MASK);
 	    				
@@ -250,87 +251,90 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    				// set of integer values that need translation into lucene
 	    				// docids; this depends on presence/absence of 'field' param
 	    				
-	    				if (localParams.get("field", null) != null) {
-	    					String fieldName = localParams.get("field");
-	    					SchemaField field = req.getSchema().getField(fieldName);
+	    				if (localParams.get("field", null) == null)
+	    				  return bits;
+	    				
+	    				
+    					String fieldName = localParams.get("field");
+    					SchemaField field = req.getSchema().getField(fieldName);
 
-	    					if (field.multiValued()) {
-	    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't use bitset with multi-valued fields");
-	    					}
+    					if (field.multiValued()) {
+    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't use bitset with multi-valued fields");
+    					}
 
-	    					if (allowedFields.size() > 0 && !allowedFields.contains(fieldName)) {
-	    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't search against field " + fieldName + " (reason: field forbidden#!@#!)");
-	    					}
+    					if (allowedFields.size() > 0 && !allowedFields.contains(fieldName)) {
+    						throw new SolrException(ErrorCode.BAD_REQUEST, "I am sorry, you can't search against field " + fieldName + " (reason: field forbidden#!@#!)");
+    					}
 
-	    					
-	    					
-	    					FieldType ftype = field.getType();
-    						Class<? extends FieldType> c = ftype.getClass();
-    						boolean fieldIsInt = true;
-    						if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-    							fieldIsInt = false;
-    						}
-    						else if (c.isAssignableFrom(TrieIntField.class) || c.isAssignableFrom(IntField.class)) {
-    							//pass
-    						}
-    						else {
+    					
+    					
+    					FieldType ftype = field.getType();
+  						Class<? extends FieldType> c = ftype.getClass();
+  						boolean fieldIsInt = true;
+  						if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
+  							fieldIsInt = false;
+  						}
+  						else if (c.isAssignableFrom(TrieIntField.class)) {
+  							//pass
+  						}
+  						else {
+  							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
+  						}
+  						
+  						FixedBitSet translatedBitSet = new FixedBitSet(reader.maxDoc());
+  						
+  						
+    					SolrCacheWrapper<SolrCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
+    					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
+    						for (int i = bits.nextSetBit(0); i >= 0 && i < DocIdSetIterator.NO_MORE_DOCS; i = bits.nextSetBit(i+1)) {
+    					     if (fieldIsInt) {
+    					    	 int v = cacheWrapper.getLuceneDocId(0, i);
+    					    	 if (v == -1)
+    					    		 continue;
+  					    		 translatedBitSet.set(v);
+    					     }
+    					     else {
+    					    	 int v = cacheWrapper.getLuceneDocId(0, Integer.toString(i));
+    					    	 if (v == -1)
+    					    		 continue;
+    					    	 translatedBitSet.set(v);
+    					     }
+    					  }
+    						bits = translatedBitSet;
+    					}
+    					else {
+    					
+    						if (!fieldIsInt) {
     							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
     						}
     						
-    						BitSet translatedBitSet = new BitSet(reader.maxDoc());
-    						
-    						
-	    					SolrCacheWrapper<SolrCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
-	    					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
-	    						for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
-	    					     if (fieldIsInt) {
-	    					    	 int v = cacheWrapper.getLuceneDocId(0, i);
-	    					    	 if (v == -1)
-	    					    		 continue;
-    					    		 translatedBitSet.set(v);
-	    					     }
-	    					     else {
-	    					    	 int v = cacheWrapper.getLuceneDocId(0, Integer.toString(i));
-	    					    	 if (v == -1)
-	    					    		 continue;
-	    					    	 translatedBitSet.set(v);
-	    					     }
-	    					  }
-	    						bits = translatedBitSet;
-	    					}
-	    					else {
+    						Map<String, UninvertingReader.Type> mapping = new HashMap();
+    		        mapping.put(fieldName, UninvertingReader.Type.INTEGER_POINT);
+    		        UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
+    		        NumericDocValues cache;
+                try {
+                  cache = uninvertingReader.getNumericDocValues(fieldName);
+                } catch (IOException e) {
+                  return translatedBitSet;
+                }
+    		        
 	    					
-	    						if (!fieldIsInt) {
-	    							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
+	    					// suckers, we have to translate whateve integer value into a lucene docid
+	    					log.warn("We are translating values for a field without a cache: {}. Terrible, terrible idea!", fieldName);
+	    					
+	    					int docid = 0; // lucene docid
+	    					int maxDoc = reader.maxDoc();
+	    					int docValue;
+	    					while(docid < maxDoc) {
+	    						docValue = (int) cache.get(docid);
+	    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
+	    							translatedBitSet.set(docid);
 	    						}
-	    						
-		    					Ints cache;
-		    					try {
-		    						cache = FieldCache.DEFAULT.getInts(reader, fieldName, false);
-		    					} catch (IOException e) {
-		    						throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get a cache for field: " + fieldName + "\n" + e.getMessage());
-		    					}
-		    					
-		    					if (cache == null)
-		    						return translatedBitSet;
-		    					
-		    					// suckers, we have to translate whateve integer value into a lucene docid
-		    					log.warn("We are translating values for a field without a cache: {}. Terrible, terrible idea!", fieldName);
-		    					
-		    					int docid = 0; // lucene docid
-		    					int maxDoc = reader.maxDoc();
-		    					int docValue;
-		    					while(docid < maxDoc) {
-		    						docValue = cache.get(docid);
-		    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
-		    							translatedBitSet.set(docid);
-		    						}
-		    						docid++;
-		    					}
-	    					
-		    					bits = translatedBitSet;
+	    						docid++;
 	    					}
-	    				}
+    					
+	    					bits = translatedBitSet;
+    					}
 	    				return bits;
 	      		}
 	      	};
@@ -360,13 +364,13 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    this.req = req;
     }
 
-		public BitSet getBits() throws ParseException {
+		public FixedBitSet getBits() throws ParseException {
 			
 			if (docs.size() == 0) {
-				return new BitSet(0);
+				return new FixedBitSet(0);
 			}
 			
-			BitSet bs = new BitSet(req.getSearcher().maxDoc());
+			FixedBitSet bs = new FixedBitSet(req.getSearcher().maxDoc());
 			
 			SolrInputDocument d = docs.get(0);
 			// for csv, we can assume that every doc has the same fields (?)
@@ -538,10 +542,11 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 
 	protected byte[] toByteArray(BitSet bitSet) {
-		// java6 doesn't have toByteArray()
 		byte[] bytes = new byte[(bitSet.length() + 7) / 8];
-		for ( int i = bitSet.nextSetBit(0); i >= 0; i = bitSet.nextSetBit(i+1) ) {
+		for ( int i = bitSet.nextSetBit(0); i >= 0 && i < DocIdSetIterator.NO_MORE_DOCS; i = bitSet.nextSetBit(i+1) ) {
 			bytes[i / 8] |= 128 >> (i % 8);
+			if (i+1 >= bitSet.length())
+			  break;
 		}
 		return bytes;
 	}
@@ -550,8 +555,8 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	// python intbitsets and these are (probably) encoded using little endian
 	// we must be able to de-construct them properly, however internally, inside
 	// Java we should be using big endian
-	protected BitSet fromByteArray(byte[] bytes, int[] bitMask) {
-		BitSet bs = new BitSet(bytes == null? 0 : bytes.length * 8);
+	protected FixedBitSet fromByteArray(byte[] bytes, int[] bitMask) {
+		FixedBitSet bs = new FixedBitSet(bytes == null? 0 : bytes.length * 8);
 		int s = bytes.length * 8;
 		for (int i = 0; i < s; i++) {
 			if ((bytes[i/8] & bitMask[i%8]) != 0) // ((bytes[i/8] & (128 >> (i % 8))) != 0) 
@@ -560,7 +565,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		return bs;
 	}
 
-	protected BitSet fromByteArray(byte[] bytes) {
+	protected FixedBitSet fromByteArray(byte[] bytes) {
 		return fromByteArray(bytes, BIG_ENDIAN_BIT_MASK);
 	}
 

@@ -17,7 +17,6 @@ public class DateNormalizerTokenFilterFactory extends TokenFilterFactory {
 
     public DateNormalizerTokenFilterFactory(Map<String,String> args) {
         super(args);
-        assureMatchVersion();
         this.inputFormat = args.containsKey("format") ? (String) args.get("format") : "yyyy-MM-dd";
         this.offset = "+30MINUTES";
         args.remove("format");

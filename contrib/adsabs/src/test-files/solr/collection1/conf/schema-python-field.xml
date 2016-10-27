@@ -14,7 +14,7 @@
  
  <!--  MontySolr special Python fields -->
  <types>
-  <fieldType name="sfloat" class="solr.SortableFloatField" sortMissingLast="true" omitNorms="true"/>
+  <fieldType name="sfloat" class="solr.TrieFloatField" sortMissingLast="true" omitNorms="true"/>
   <fieldType name="string" class="solr.StrField"/>
   <fieldType name="textpy" class="solr.PythonTextField" positionIncrementGap="100">
     <analyzer type="index">

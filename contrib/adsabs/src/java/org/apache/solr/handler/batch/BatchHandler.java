@@ -80,7 +80,8 @@ public class BatchHandler extends RequestHandlerBase {
 	private long sleepTime;
 	private Map<String, BatchProvider> providers;
 	private Thread thread;
-	private File tmpDir;
+	private File tmpDir = null;
+	private String defaultWorkdir = null;
 
 	
 	public BatchHandler() {
@@ -123,46 +124,48 @@ public class BatchHandler extends RequestHandlerBase {
 		if (defs.get("sleepTime") != null) {
 			sleepTime  = Long.parseLong((String) defs.get("sleepTime"));
 		}
-
-		// we cannot get the solr indexdir at this point, so let's hope for best :)
-		String startDir = System.getProperty("user.dir");
-
-		if (defs.get("workdir") != null) {
-			File wdir = new File((String) defs.get("workdir"));
-			if (wdir.isAbsolute() && wdir.canWrite()) {
-				tmpDir = wdir;
-			}
-			else if (!wdir.isAbsolute() && wdir.canWrite()) {
-				log.info("Batch handler will write into: {}", wdir.getAbsolutePath());
-				tmpDir = wdir;
-			}
-			else if (!wdir.exists()) {
-				if (!wdir.isAbsolute()) {
-					wdir = new File(startDir + "/" + wdir.toString());
-				}
-				// sadly, available only for java 7
-        //Files.createDirectory(wdir.toPath(), 
-        //		PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-----")));
-        wdir.mkdir();
-				tmpDir = wdir;
-			}
-			else {
-				throw new RuntimeException("The folder is not readable: " + wdir.toString());
-			}
-		}
-		else {
-			//tmpDir = Files.createTempDirectory("montysolr-batch-handler", 
-      //		PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-----")));
-      createTempDir("montysolr-batch-handler");
-		}
-
+		
+		defaultWorkdir = defs.get("workdir") != null ? (String) defs.get("workdir") : null;
 	}
 
 	
+	private void checkHomeDir() {
+	  if (tmpDir != null)
+	    return;
+	  
+	   // we cannot get the solr indexdir at this point, so let's hope for best :)
+    String startDir = System.getProperty("user.dir");
+
+    if (defaultWorkdir != null) {
+      File wdir = new File(defaultWorkdir);
+      if (wdir.isAbsolute() && wdir.canWrite()) {
+        tmpDir = wdir;
+      }
+      else if (!wdir.isAbsolute() && wdir.exists() && wdir.canWrite()) {
+        log.info("Batch handler will write into: {}", wdir.getAbsolutePath());
+        tmpDir = wdir;
+      }
+      else if (!wdir.exists()) {
+        if (!wdir.isAbsolute()) {
+          wdir = new File(startDir + "/" + wdir.toString());
+        }
+        wdir.mkdir();
+        tmpDir = wdir;
+      }
+      else {
+        throw new RuntimeException("The folder is not readable: " + wdir.toString());
+      }
+    }
+    else {
+      createTempDir("montysolr-batch-handler");
+    }
+
+	}
 	
 	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp)
 	throws IOException, InterruptedException {
-
+	  checkHomeDir();
+	  
 		SolrParams params = req.getParams();
 		String command = params.get("command","info");
 
@@ -511,13 +514,13 @@ public class BatchHandler extends RequestHandlerBase {
 		BatchHandlerRequestQueue _queue = null;
 		
 		private void initialize(SolrQueryRequest req) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-			Class clazz = loadClass(name, req.getCore());
+			Class clazz = loadClass(this.getName(), req.getCore());
 			if (BatchProviderI.class.isAssignableFrom(clazz)) {
 				_runner = (BatchProviderI) clazz.newInstance();
-				_runner.setName(name);
+				_runner.setName(this.getName());
 			}
 			else {
-				throw new RuntimeException("The class does not provide BatchProviderI interface: " + this.name);
+				throw new RuntimeException("The class does not provide BatchProviderI interface: " + this.getName());
 			}
 		}
 
@@ -552,13 +555,13 @@ public class BatchHandler extends RequestHandlerBase {
 		}
 
 		public String toString() {
-			return "LazyBatchProvider:(" + this.name + ")";
+			return "LazyBatchProvider:(" + this.getName() + ")";
 		}
 
 		@Override
     public String getDescription() {
 	    if (_runner == null) {
-	    	return "Lazy loader for a provider: " + name + " I don't know what I hold :-)";
+	    	return "Lazy loader for a provider: " + this.getName() + " I don't know what I hold :-)";
 	    }
 	    else {
 	    	return _runner.getDescription();

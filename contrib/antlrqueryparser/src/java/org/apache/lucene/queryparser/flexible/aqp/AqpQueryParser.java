@@ -38,7 +38,7 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.config.FuzzyConfig;
-import org.apache.lucene.queryparser.flexible.standard.config.NumericConfig;
+import org.apache.lucene.queryparser.flexible.standard.config.LegacyNumericConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
@@ -473,13 +473,13 @@ public class AqpQueryParser extends QueryParserHelper {
 
   }
 
-  public void setNumericConfigMap(Map<String, NumericConfig> numericConfigMap) {
-    getQueryConfigHandler().set(ConfigurationKeys.NUMERIC_CONFIG_MAP,
+  public void setNumericConfigMap(Map<String, LegacyNumericConfig> numericConfigMap) {
+    getQueryConfigHandler().set(ConfigurationKeys.LEGACY_NUMERIC_CONFIG_MAP,
         numericConfigMap);
   }
 
-  public Map<String, NumericConfig> getNumericConfigMap() {
-    return getQueryConfigHandler().get(ConfigurationKeys.NUMERIC_CONFIG_MAP);
+  public Map<String, LegacyNumericConfig> getNumericConfigMap() {
+    return getQueryConfigHandler().get(ConfigurationKeys.LEGACY_NUMERIC_CONFIG_MAP);
   }
 
   /**

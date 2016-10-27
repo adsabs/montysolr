@@ -111,8 +111,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 	public static void beforeClass() throws Exception {
 		
 		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
-		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1"
 		    });
 				
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
@@ -120,7 +120,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
 		
 		configString = MontySolrSetup.getMontySolrHome()
-			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+			    + "/contrib/examples/adsabs/solr/collection1/solrconfig.xml";
 		
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
@@ -133,7 +133,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      */
 
     String configFile = MontySolrSetup.getMontySolrHome()
-    		+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+    		+ "/contrib/examples/adsabs/solr/collection1/schema.xml";
 
     File newConfig;
     try {
@@ -219,7 +219,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "151", "bibcode", "xxxxxxxxxx151", "title", "nag55269"));
     assertU(adoc("id", "152", "bibcode", "xxxxxxxxxx152", "title", "nag5 5269"));
     
-    assertU(adoc("id", "318", "bibcode", "xxxxxxxxxx318", "title", "creation of a thesaurus"));
+    assertU(adoc("id", "318", "bibcode", "xxxxxxxxxx318", "title", "creation of a thesaurus", "pub", "creation of a thesaurus"));
     assertU(adoc("id", "382", "bibcode", "xxxxxxxxxx382", "title", "xhtml <tags> should be <SUB>fooxx</SUB> <xremoved>"));
 
     // greek letter should not be a problem, #604
@@ -235,13 +235,18 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   public void testMultiTokens() throws Exception {
     
     //dumpDoc(null, "id", "title");
+    assertQueryEquals(req("q", "title:\"bubble pace telescope multi-pace foobar\"", "defType", "aqp"), 
+        "title:\"bubble (pace syn::lunar) telescope multi (pace syn::lunar) foobar\" "
+        + "title:\"bubble (pace syn::lunar) telescope ? multipace foobar\" "
+        + "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multi (pace syn::lunar) foobar\"~2 "
+        + "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? ? multipace foobar\"~3",
+        BooleanQuery.class);
+    assertQ(req("q", "title" + ":\"bubble pace telescope multi-pace foobar\""), "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='17']");
     
-    
-//    assertQueryEquals(req("q", "\"NASA grant\"~3 NEAR N*", "defType", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
-//        "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))", 
-//        DisjunctionMaxQuery.class);
-    
-    
+    //assertQueryEquals(req("q", "\"NASA grant\"~3 NEAR N*", "defType", "aqp", "qf", "author^1.5 title^1.4 abstract^1.3 all"), 
+    //    "(((spanNear([abstract:acr::nag5, abstract:5269], 5, true) abstract:acr::nag55269)^1.3) | ((author:nag5 5269, author:nag5 5269, * author:nag5 5 author:nag5 5 * author:nag5)^1.5) | ((spanNear([title:acr::nag5, title:5269], 5, true) title:acr::nag55269)^1.4) | (spanNear([all:acr::nag5, all:5269], 5, true) all:acr::nag55269))", 
+    //    DisjunctionMaxQuery.class);
     
     
     // UPPER-CASE vs lower-case
@@ -268,11 +273,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='152']"
         );
     
-    
     // ticket #318
     assertQueryEquals(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "all title^1.4 pub"),
-    		"+(all:creation | pub:creation | title:creation^1.4) +pub:of +pub:a +(all:thesaurus | pub:thesaurus | title:thesaurus^1.4)", 
+    		"+(all:creation | pub:creation | (title:creation)^1.4) +pub:of +pub:a +(all:thesaurus | pub:thesaurus | (title:thesaurus)^1.4)", 
     		BooleanQuery.class);
+    assertQ(req("q", "pub:of AND pub:a"),
+        "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='318']"
+        );
     assertQ(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "title^1.4 all pub"), 
     		"//*[@numFound='1']",
     		"//doc/str[@name='id'][.='318']"
@@ -395,7 +403,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // lastly - unfielded phrase
     assertQueryEquals(req("q", "\"modified newtonian dynamics\"", "defType", "aqp", "qf", "title^2.0 all^1.5"), 
-    		"((((all:\"modified newtonian dynamics\" (all:syn::acr::mond all:syn::modified newtonian dynamics)))^1.5) | (((title:\"modified newtonian dynamics\" (title:syn::acr::mond title:syn::modified newtonian dynamics)))^2.0))", 
+    		"(((all:\"modified newtonian dynamics\" (all:syn::acr::mond all:syn::modified newtonian dynamics)))^1.5 | ((title:\"modified newtonian dynamics\" (title:syn::acr::mond title:syn::modified newtonian dynamics)))^2.0)", 
     		DisjunctionMaxQuery.class);
     assertQ(req("q", "\"modified newtonian dynamics\"", "qf", "title^2.0 all^1.5"), 
     		"//*[@numFound='2']",
@@ -409,7 +417,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "title:\"bubble (pace syn::lunar) telescope multi foo\" " +
         "title:\"bubble (pace syn::lunar) telescope ? multifoo\" " +
         "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? multi foo\"~2 " +
-        "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? ? multifoo\"~3", 
+        "title:\"(syn::bubble pace telescope syn::acr::bpt) ? ? ? multifoo\"~3",
         BooleanQuery.class);
     assertQ(req("q", "title:\"bubble pace telescope multi-foo\"", "defType", "aqp", "df", "title"), 
     		"//*[@numFound='2']",
@@ -535,6 +543,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   
   
   public void testSynonyms() throws Exception {
+    
     
     /*
      * Test multi-token translation, the chain is set to recognize
@@ -720,6 +729,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQueryEquals(req("q", "Hubble.Space.Microscope -bum MIT BX", "defType", "aqp"), 
         "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) -all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx",
         BooleanQuery.class);
+    assertQueryEquals(req("q", "Hubble.Space.Microscope -bum MIT BX", "defType", "aqp"), 
+        "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) -all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx",
+        BooleanQuery.class);
 
     assertQueryEquals(req("q", "Hubble-Space-Microscope bum MIT BX", "defType", "aqp"), 
         "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) +all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx", 
@@ -787,6 +799,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='10']",
         "//doc/str[@name='id'][.='11']"
         );
+
     assertQ(req("q", "title" + ":*sky"), "//*[@numFound='4']", 
         "//doc/str[@name='id'][.='10']",
         "//doc/str[@name='id'][.='11']",
@@ -839,28 +852,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "defType", "aqp"), 
         "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
         + "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
+        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "     
         + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~2", 
-        BooleanQuery.class);
-    
-    
-    assertQueryEquals(req(
-        "q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$-ray Sources for Radio Millisecond Pulsars\"", 
-        "defType", "aqp"), 
-        "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"",
-        BooleanQuery.class);
-    
-    
-    assertQueryEquals(req(
-        "q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ ray Sources for Radio Millisecond Pulsars\"", 
-        "defType", "aqp"), 
-        "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350 (mhz syn::mhz) (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\" "
-        + "title:\"350mhz (acr::gbt syn::acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~2",
         BooleanQuery.class);
     
     assertQueryEquals(req(
@@ -883,6 +876,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='401']",
         "//doc/str[@name='id'][.='402']",
         "//doc/str[@name='id'][.='403']");
+    
+
+    assertQ(req("q", "title:\"Survey\""), 
+        "//*[@numFound>='4']");
+    assertQ(req("q", "title:\"Faint Fermi\""), 
+        "//*[@numFound>='4']");
+    assertQ(req("q", "title:\"GBT Survey\""), 
+        "//*[@numFound>='4']");
+    assertQ(req("q", "title:\"GBT Survey of 50 Faint Fermi\"~2"), 
+        "//*[@numFound>='4']");
     
     assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\""), 
         "//*[@numFound='4']",

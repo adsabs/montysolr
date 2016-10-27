@@ -12,8 +12,8 @@ import org.apache.lucene.queryparser.flexible.standard.processors.FuzzyQueryNode
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.NumericQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.NumericRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericRangeQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
@@ -208,8 +208,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
       
     }
 		
-		add(new NumericQueryNodeProcessor());
-    add(new NumericRangeQueryNodeProcessor());
+		add(new LegacyNumericQueryNodeProcessor());
+    add(new LegacyNumericRangeQueryNodeProcessor());
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		
@@ -275,7 +275,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		
 		// purely aestetical, final touches to the query
 		// we are rewriting the tree, for example:
-		// +(this that) +what' becomes '+this +that +what'
+		// +(+this +that) +what' becomes '+this +that +what'
 		add(new AqpGroupQueryOptimizerProcessor());
 		add(new AqpOptimizationProcessor());
 		

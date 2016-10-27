@@ -46,7 +46,7 @@ public final class SelectiveLowerCaseFilter extends TokenFilter {
    */
   public SelectiveLowerCaseFilter(Version matchVersion, TokenStream in) {
     super(in);
-    charUtils = CharacterUtils.getInstance(matchVersion);
+    charUtils = CharacterUtils.getInstance();
   }
   
   @Override

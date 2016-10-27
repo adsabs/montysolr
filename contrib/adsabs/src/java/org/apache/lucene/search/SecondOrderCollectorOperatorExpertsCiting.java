@@ -3,9 +3,8 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.Set;
 
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.FieldCache.Floats;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.NumericDocValues;
 import org.apache.solr.search.CitationLRUCache;
 
 /**
@@ -20,9 +19,12 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	protected String[] uniqueIdField;
 	protected String boostField;
 	private SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache;
-	private LuceneCacheWrapper<Floats> boostCache;
+	private LuceneCacheWrapper<NumericDocValues> boostCache;
+  private int hashCode;
 	
-	public SecondOrderCollectorOperatorExpertsCiting(SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache, LuceneCacheWrapper<Floats> boostWrapper) {
+	public SecondOrderCollectorOperatorExpertsCiting(
+	      SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache, 
+	      LuceneCacheWrapper<NumericDocValues> boostWrapper) {
 		super();
 		
 		assert cache != null;
@@ -81,16 +83,11 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	}
 
 	@Override
-	public void setNextReader(AtomicReaderContext context)
+	public void doSetNextReader(LeafReaderContext context)
 			throws IOException {
 		this.docBase = context.docBase;
 	}
 
-	@Override
-	public boolean acceptsDocsOutOfOrder() {
-		return true;
-	}
-	
 	
 	@Override
 	public String toString() {
@@ -99,8 +96,26 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	
 	/** Returns a hash code value for this object. */
 	public int hashCode() {
-		return 435878 ^ boostField.hashCode() ^ cache.hashCode();
+	  if (hashCode == 0) {
+      hashCode = computeHashCode();
+      assert hashCode != 0;
+    }
+    assert hashCode == computeHashCode();
+    return hashCode;
 	}
+
+
+  private int computeHashCode() {
+    if (boostField != null)
+      return 1301081 ^ boostField.hashCode() ^ cache.hashCode();
+    return 1301081 ^ cache.hashCode();
+  }
+
+
+  @Override
+  public boolean needsScores() {
+    return true;
+  }
 	
 	
 	

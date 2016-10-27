@@ -62,15 +62,18 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorPipeline;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.processors.GroupQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.BooleanQuery2ModifierNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpSyntaxParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardLuceneParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BooleanQuery.Builder;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PhraseQuery;
@@ -81,7 +84,7 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.automaton.BasicAutomata;
+import org.apache.lucene.util.automaton.Automata;
 import org.apache.lucene.util.automaton.CharacterRunAutomaton;
 
 /**
@@ -141,9 +144,8 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     /** Filters MockTokenizer with StopFilter. */
     @Override
-    public final TokenStreamComponents createComponents(String fieldName,
-        Reader reader) {
-      Tokenizer tokenizer = new MockTokenizer(reader, MockTokenizer.SIMPLE,
+    public final TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer tokenizer = new MockTokenizer(MockTokenizer.SIMPLE,
           true);
       return new TokenStreamComponents(tokenizer, new QPTestFilter(tokenizer));
     }
@@ -211,21 +213,21 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testConstantScoreAutoRewrite() throws Exception {
     AqpQueryParser qp = getParser();
-    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    qp.setAnalyzer(new WhitespaceAnalyzer());
 
     Query q = qp.parse("foo*bar", "field");
     assertTrue(q instanceof WildcardQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((MultiTermQuery) q).getRewriteMethod());
 
     q = qp.parse("foo*", "field");
     assertTrue(q instanceof PrefixQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((MultiTermQuery) q).getRewriteMethod());
 
     q = qp.parse("[a TO z]", "field");
     assertTrue(q instanceof TermRangeQuery);
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((MultiTermQuery) q).getRewriteMethod());
   }
 
@@ -240,72 +242,69 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testCJKTerm() throws Exception {
     // individual CJK chars as terms
-    StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    StandardAnalyzer analyzer = new StandardAnalyzer();
 
-    BooleanQuery expected = new BooleanQuery();
+    Builder expected = new BooleanQuery.Builder();
     expected.add(new TermQuery(new Term("field", "中")),
         BooleanClause.Occur.SHOULD);
     expected.add(new TermQuery(new Term("field", "国")),
         BooleanClause.Occur.SHOULD);
 
-    assertEquals(expected, getQuery("中国", analyzer));
+    assertEquals(expected.build(), getQuery("中国", analyzer));
   }
 
   public void testCJKBoostedTerm() throws Exception {
     // individual CJK chars as terms
-    StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    StandardAnalyzer analyzer = new StandardAnalyzer();
 
-    BooleanQuery expected = new BooleanQuery();
-    expected.setBoost(0.5f);
+    Builder expected = new BooleanQuery.Builder();
     expected.add(new TermQuery(new Term("field", "中")),
         BooleanClause.Occur.SHOULD);
     expected.add(new TermQuery(new Term("field", "国")),
         BooleanClause.Occur.SHOULD);
-
-    assertEquals(expected, getQuery("中国^0.5", analyzer));
+    
+    assertEquals(new BoostQuery(expected.build(), 0.5f), getQuery("中国^0.5", analyzer));
   }
 
   public void testCJKPhrase() throws Exception {
     // individual CJK chars as terms
-    StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    StandardAnalyzer analyzer = new StandardAnalyzer();
 
-    PhraseQuery expected = new PhraseQuery();
+    PhraseQuery.Builder expected = new PhraseQuery.Builder();
     expected.add(new Term("field", "中"));
     expected.add(new Term("field", "国"));
 
-    assertEquals(expected, getQuery("\"中国\"", analyzer));
+    assertEquals(expected.build(), getQuery("\"中国\"", analyzer));
   }
 
   public void testCJKBoostedPhrase() throws Exception {
     // individual CJK chars as terms
-    StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    StandardAnalyzer analyzer = new StandardAnalyzer();
 
-    PhraseQuery expected = new PhraseQuery();
-    expected.setBoost(0.5f);
+    PhraseQuery.Builder expected = new PhraseQuery.Builder();
     expected.add(new Term("field", "中"));
     expected.add(new Term("field", "国"));
 
-    assertEquals(expected, getQuery("\"中国\"^0.5", analyzer));
+    assertEquals(new BoostQuery(expected.build(), 0.5f), getQuery("\"中国\"^0.5", analyzer));
   }
 
   public void testCJKSloppyPhrase() throws Exception {
     // individual CJK chars as terms
-    StandardAnalyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    StandardAnalyzer analyzer = new StandardAnalyzer();
 
-    PhraseQuery expected = new PhraseQuery();
-    expected.setSlop(3);
+    PhraseQuery.Builder expected = new PhraseQuery.Builder();
     expected.add(new Term("field", "中"));
     expected.add(new Term("field", "国"));
+    expected.setSlop(3);
 
-    assertEquals(expected, getQuery("\"中国\"~3", analyzer));
+    assertEquals(expected.build(), getQuery("\"中国\"~3", analyzer));
   }
 
   public void testSimple() throws Exception {
     assertQueryEquals("\"term germ\"~2", null, "\"term germ\"~2");
     assertQueryEquals("term term term", null, "term term term");
-    assertQueryEquals("t�rm term term", new WhitespaceAnalyzer(
-        TEST_VERSION_CURRENT), "t�rm term term");
-    assertQueryEquals("�mlaut", new WhitespaceAnalyzer(TEST_VERSION_CURRENT),
+    assertQueryEquals("t�rm term term", new WhitespaceAnalyzer(), "t�rm term term");
+    assertQueryEquals("�mlaut", new WhitespaceAnalyzer(),
         "�mlaut");
 
     // XXX: not allowed, TODO???
@@ -346,13 +345,13 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertTrue(getQuery("hello", null) instanceof TermQuery);
     assertTrue(getQuery("\"hello there\"", null) instanceof PhraseQuery);
 
-    assertQueryEquals("germ term^2.0", null, "germ term^2.0");
-    assertQueryEquals("(term)^2.0", null, "term^2.0");
+    assertQueryEquals("germ term^2.0", null, "germ (term)^2.0");
+    assertQueryEquals("(term)^2.0", null, "(term)^2.0");
     assertQueryEquals("(germ term)^2.0", null, "(germ term)^2.0");
-    assertQueryEquals("term^2.0", null, "term^2.0");
-    assertQueryEquals("term^2", null, "term^2.0");
-    assertQueryEquals("\"germ term\"^2.0", null, "\"germ term\"^2.0");
-    assertQueryEquals("\"term germ\"^2", null, "\"term germ\"^2.0");
+    assertQueryEquals("term^2.0", null, "(term)^2.0");
+    assertQueryEquals("term^2", null, "(term)^2.0");
+    assertQueryEquals("\"germ term\"^2.0", null, "(\"germ term\")^2.0");
+    assertQueryEquals("\"term germ\"^2", null, "(\"term germ\")^2.0");
 
     assertQueryEquals("(foo OR bar) AND (baz OR boo)", null,
         "+(foo bar) +(baz boo)");
@@ -376,7 +375,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testPunct() throws Exception {
-    Analyzer a = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+    Analyzer a = new WhitespaceAnalyzer();
     assertQueryEquals("a&b", a, "a&b");
     assertQueryEquals("a&&b", a, "a&&b");
     assertQueryEquals(".NET", a, ".NET");
@@ -388,7 +387,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryEquals("\"term germ\"~2 flork", null, "\"term germ\"~2 flork");
     assertQueryEquals("\"term\"~2", null, "term");
     assertQueryEquals("\" \"~2 germ", null, "germ");
-    assertQueryEquals("\"term germ\"~2^2", null, "\"term germ\"~2^2.0");
+    assertQueryEquals("\"term germ\"~2^2", null, "(\"term germ\"~2)^2.0");
   }
 
   public void testNumber() throws Exception {
@@ -397,7 +396,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryEquals("term 1.0 1 2", null, "term");
     assertQueryEquals("term term1 term2", null, "term term term");
 
-    Analyzer a = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    Analyzer a = new StandardAnalyzer();
     assertQueryEquals("3", a, "3");
     assertQueryEquals("term 1.0 1 2", a, "term 1.0 1 2");
     assertQueryEquals("term term1 term2", a, "term term1 term2");
@@ -405,18 +404,18 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testWildcard() throws Exception {
     assertQueryEquals("term*", null, "term*");
-    assertQueryEquals("term*^2", null, "term*^2.0");
+    assertQueryEquals("term*^2", null, "(term*)^2.0");
     assertQueryEquals("term~", null, "term~2");
     assertQueryEquals("term~0.7", null, "term~1");
 
-    assertQueryEquals("term~^2", null, "term~2^2.0");
+    assertQueryEquals("term~^2", null, "(term~2)^2.0");
 
-    assertQueryEquals("term^2~", null, "term~2^2.0");
+    assertQueryEquals("term^2~", null, "(term~2)^2.0");
     assertQueryEquals("term*germ", null, "term*germ");
-    assertQueryEquals("term*germ^3", null, "term*germ^3.0");
+    assertQueryEquals("term*germ^3", null, "(term*germ)^3.0");
 
     assertTrue(getQuery("term*", null) instanceof PrefixQuery);
-    assertTrue(getQuery("term*^2", null) instanceof PrefixQuery);
+    assertTrue(((BoostQuery) getQuery("term*^2", null)).getQuery() instanceof PrefixQuery);
     assertTrue(getQuery("term~", null) instanceof FuzzyQuery);
     assertTrue(getQuery("term~0.7", null) instanceof FuzzyQuery);
 
@@ -497,7 +496,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testQPA() throws Exception {
-    assertQueryEquals("term term^3.0 term", qpAnalyzer, "term term^3.0 term");
+    assertQueryEquals("term term^3.0 term", qpAnalyzer, "term (term)^3.0 term");
     assertQueryEquals("term stop^3.0 term", qpAnalyzer, "term term");
 
     assertQueryEquals("term term term", qpAnalyzer, "term term term");
@@ -533,19 +532,19 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testRange() throws Exception {
     assertQueryEquals("[ a TO z]", null, "[a TO z]");
-    assertEquals(MultiTermQuery.CONSTANT_SCORE_AUTO_REWRITE_DEFAULT,
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
         ((TermRangeQuery) getQuery("[ a TO z]", null)).getRewriteMethod());
 
     AqpQueryParser qp = getParser();
 
-    qp.setMultiTermRewriteMethod(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE);
-    assertEquals(MultiTermQuery.SCORING_BOOLEAN_QUERY_REWRITE,
+    qp.setMultiTermRewriteMethod(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE);
+    assertEquals(MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE,
         ((TermRangeQuery) qp.parse("[ a TO z]", "field")).getRewriteMethod());
 
     assertQueryEquals("[ a TO z ]", null, "[a TO z]");
     assertQueryEquals("{ a TO z}", null, "{a TO z}");
     assertQueryEquals("{ a TO z }", null, "{a TO z}");
-    assertQueryEquals("{ a TO z }^2.0", null, "{a TO z}^2.0");
+    assertQueryEquals("{ a TO z }^2.0", null, "({a TO z})^2.0");
     assertQueryEquals("[ a TO z] OR bar", null, "[a TO z] bar");
     assertQueryEquals("[ a TO z] AND bar", null, "+[a TO z] +bar");
     assertQueryEquals("( bar blar { a TO z}) ", null, "bar blar {a TO z}");
@@ -641,7 +640,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testEscaped() throws Exception {
-    Analyzer a = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+    Analyzer a = new WhitespaceAnalyzer();
 
     /*
      * assertQueryEquals("\\[brackets", a, "\\[brackets");
@@ -749,7 +748,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   }
 
   public void testQueryStringEscaping() throws Exception {
-    Analyzer a = new WhitespaceAnalyzer(TEST_VERSION_CURRENT);
+    Analyzer a = new WhitespaceAnalyzer();
 
     assertEscapedQueryEquals("a-b:c", a, "a\\-b\\:c");
     assertEscapedQueryEquals("a+b:c", a, "a\\+b\\:c");
@@ -819,7 +818,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testBoost() throws Exception {
     CharacterRunAutomaton stopSet = new CharacterRunAutomaton(
-        BasicAutomata.makeString("on"));
+        Automata.makeString("on"));
     Analyzer oneStopAnalyzer = new MockAnalyzer(random(), MockTokenizer.SIMPLE, true);
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(oneStopAnalyzer);
@@ -828,21 +827,21 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertNotNull(q);
     q = qp.parse("\"hello\"^2.0", "field");
     assertNotNull(q);
-    assertEquals(q.getBoost(), (float) 2.0, (float) 0.5);
+    assertEquals(((BoostQuery) q).getBoost(), (float) 2.0, (float) 0.5);
     q = qp.parse("hello^2.0", "field");
     assertNotNull(q);
-    assertEquals(q.getBoost(), (float) 2.0, (float) 0.5);
+    assertEquals(((BoostQuery) q).getBoost(), (float) 2.0, (float) 0.5);
     q = qp.parse("\"on\"^1.0", "field");
     assertNotNull(q);
 
     AqpQueryParser qp2 = getParser();
-    qp2.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
+    qp2.setAnalyzer(new StandardAnalyzer());
 
     q = qp2.parse("the^3", "field");
     // "the" is a stop word so the result is an empty query:
     assertNotNull(q);
     assertEquals("", q.toString());
-    assertEquals(1.0f, q.getBoost(), 0.01f);
+    assertEquals(q.getClass(), MatchNoDocsQuery.class);
   }
 
   public void testException() throws Exception {
@@ -858,7 +857,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testCustomQueryParserWildcard() throws Exception {
     try {
-      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse(
+      QPTestParser.init(new WhitespaceAnalyzer()).parse(
           "a?t", "contents");
       fail("Wildcard queries should not be allowed");
     } catch (QueryNodeException expected) {
@@ -868,7 +867,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testCustomQueryParserFuzzy() throws Exception {
     try {
-      QPTestParser.init(new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).parse(
+      QPTestParser.init(new WhitespaceAnalyzer()).parse(
           "xunit~", "contents");
       fail("Fuzzy queries should not be allowed");
     } catch (QueryNodeException expected) {
@@ -880,7 +879,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     BooleanQuery.setMaxClauseCount(2);
     try {
       AqpQueryParser qp = getParser();
-      qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+      qp.setAnalyzer(new WhitespaceAnalyzer());
 
       qp.parse("one two three", "field");
       fail("ParseException expected due to too many boolean clauses");
@@ -894,17 +893,17 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
    */
   public void testPrecedence() throws Exception {
     AqpQueryParser qp1 = getParser();
-    qp1.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    qp1.setAnalyzer(new WhitespaceAnalyzer());
 
     AqpQueryParser qp2 = getParser();
-    qp2.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    qp2.setAnalyzer(new WhitespaceAnalyzer());
 
     // TODO: to achieve standard lucene behaviour (no operator precedence)
     // modify the GroupQueryNodeProcessor to recognize our new BooleanQN classes
     // then do:
     QueryNodeProcessorPipeline processor = (QueryNodeProcessorPipeline) qp1
         .getQueryNodeProcessor();
-    processor.add(new GroupQueryNodeProcessor());
+    processor.add(new BooleanQuery2ModifierNodeProcessor());
 
     Query query1 = qp1.parse("A AND B OR C AND D", "field");
     Query query2 = qp2.parse("+A +B +C +D", "field");
@@ -915,8 +914,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
   public void testLocalDateFormat() throws IOException, QueryNodeException,
       ParseException {
     Directory ramDir = new RAMDirectory();
-    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(
-        TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)));
+    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(new WhitespaceAnalyzer()));
     addDateDoc("a", 2005, 12, 2, 10, 15, 33, iw);
     addDateDoc("b", 2005, 12, 4, 22, 15, 00, iw);
     iw.close();
@@ -948,14 +946,13 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testStopwords() throws Exception {
     AqpQueryParser qp = getParser();
-    qp.setAnalyzer(new StopAnalyzer(TEST_VERSION_CURRENT, StopFilter
-        .makeStopSet(TEST_VERSION_CURRENT, "the", "foo")));
+    qp.setAnalyzer(new StopAnalyzer(StopFilter
+        .makeStopSet("the", "foo")));
 
     Query result = qp.parse("a:the OR a:foo", "a");
     assertNotNull("result is null and it shouldn't be", result);
-    assertTrue("result is not a BooleanQuery", result instanceof BooleanQuery);
-    assertTrue(((BooleanQuery) result).clauses().size() + " does not equal: "
-        + 0, ((BooleanQuery) result).clauses().size() == 0);
+    assertTrue("result is not a MatchNoDocsQuery", result instanceof MatchNoDocsQuery);
+
     result = qp.parse("a:woo OR a:the", "a");
     assertNotNull("result is null and it shouldn't be", result);
     assertTrue("result is not a TermQuery", result instanceof TermQuery);
@@ -965,17 +962,13 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
         "a");
 
     assertNotNull("result is null and it shouldn't be", result);
-    assertTrue("result is not a BooleanQuery", result instanceof BooleanQuery);
-    if (VERBOSE)
-      System.out.println("Result: " + result);
-    assertTrue(((BooleanQuery) result).clauses().size() + " does not equal: "
-        + 2, ((BooleanQuery) result).clauses().size() == 2);
+    assertEquals(result.toString(), "(fieldX:xxxxx fieldy:xxxxxxxx)^2.0");
   }
 
   public void testPositionIncrement() throws Exception {
     AqpQueryParser qp = getParser();
-    qp.setAnalyzer(new StopAnalyzer(TEST_VERSION_CURRENT, StopFilter
-        .makeStopSet(TEST_VERSION_CURRENT, "the", "in", "are", "this")));
+    qp.setAnalyzer(new StopAnalyzer(StopFilter
+        .makeStopSet("the", "in", "are", "this")));
 
     qp.setEnablePositionIncrements(true);
 
@@ -996,13 +989,13 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testMatchAllDocs() throws Exception {
     AqpQueryParser qp = getParser();
-    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    qp.setAnalyzer(new WhitespaceAnalyzer());
 
     assertEquals(new MatchAllDocsQuery(), qp.parse("*:*", "field"));
     assertEquals(new MatchAllDocsQuery(), qp.parse("(*:*)", "field"));
     BooleanQuery bq = (BooleanQuery) qp.parse("+*:* -*:*", "field");
-    assertTrue(bq.getClauses()[0].getQuery() instanceof MatchAllDocsQuery);
-    assertTrue(bq.getClauses()[1].getQuery() instanceof MatchAllDocsQuery);
+    assertTrue(bq.clauses().get(0).getQuery() instanceof MatchAllDocsQuery);
+    assertTrue(bq.clauses().get(1).getQuery() instanceof MatchAllDocsQuery);
   }
 
   private class CannedTokenizer extends Tokenizer {
@@ -1010,8 +1003,8 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     private final PositionIncrementAttribute posIncr = addAttribute(PositionIncrementAttribute.class);
     private final CharTermAttribute term = addAttribute(CharTermAttribute.class);
 
-    public CannedTokenizer(Reader reader) {
-      super(reader);
+    public CannedTokenizer() {
+      super();
     }
 
     @Override
@@ -1046,16 +1039,15 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   private class CannedAnalyzer extends Analyzer {
     @Override
-    public TokenStreamComponents createComponents(String ignored,
-        Reader alsoIgnored) {
-      return new TokenStreamComponents(new CannedTokenizer(alsoIgnored));
+    public TokenStreamComponents createComponents(String ignored) {
+      return new TokenStreamComponents(new CannedTokenizer());
     }
   }
 
   public void testMultiPhraseQuery() throws Exception {
     Directory dir = newDirectory();
     IndexWriter w = new IndexWriter(dir, newIndexWriterConfig(
-        TEST_VERSION_CURRENT, new CannedAnalyzer()));
+        new CannedAnalyzer()));
     Document doc = new Document();
     doc.add(newField("field", "", TextField.TYPE_NOT_STORED));
     w.addDocument(doc);
@@ -1069,11 +1061,6 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     r.close();
     w.close();
     dir.close();
-  }
-
-  // Uniquely for Junit 3
-  public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(TestAqpSLGStandardTest.class);
   }
 
 }

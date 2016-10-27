@@ -3,7 +3,7 @@
 	<name>apache-solr-48</name>
 	<comment></comment>
 	<projects>
-		<project>apache-solr-49</project>
+		<project>apache-solr-61</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

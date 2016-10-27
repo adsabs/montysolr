@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.util.AttributeImpl;
+import org.apache.lucene.util.AttributeReflector;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedbackEventHandler.ACTION;
 
 public class AqpFeedbackImpl extends AttributeImpl implements AqpFeedback {
@@ -63,6 +64,13 @@ public class AqpFeedbackImpl extends AttributeImpl implements AqpFeedback {
         }
       }
     }
+  }
+
+  @Override
+  public void reflectWith(AttributeReflector reflector) {
+    for (AqpFeedbackEvent ev: events) {
+      reflector.reflect(AqpFeedback.class, "feedback", ev.getType());
+    };
   }
 
 }

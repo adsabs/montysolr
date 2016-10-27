@@ -21,14 +21,15 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Collector;
+import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -73,7 +74,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 		assert lowerLimit < upperLimit && lowerLimit >= 0.0f;
 		
 		
-		final Analyzer analyzer = schema.getAnalyzer();
+		final Analyzer analyzer = schema.getIndexAnalyzer();
 		final HashSet<String> fieldsToLoad = new HashSet<String>();
 		String[] fields = params.getParams("fields");
 		for (String f: fields) {
@@ -101,16 +102,12 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  	
 			final BatchHandlerRequestQueue batchQueue = queue;
 			
-			searcher.search(query, null, new Collector() {
-				private AtomicReader reader;
+			searcher.search(query, new SimpleCollector() {
+				private LeafReader reader;
 				private int processed = 0;
 				private CharTermAttribute termAtt;
 				private PositionIncrementAttribute posIncrAtt;
 
-				@Override
-				public boolean acceptsDocsOutOfOrder() {
-					return true;
-				}
 
 				@Override
 				public void collect(int i) throws IOException {
@@ -234,14 +231,14 @@ public class BatchProviderFindWordGroups extends BatchProvider {
         }
 				
 				
-				@Override
-				public void setNextReader(AtomicReaderContext context) {
+				public void doSetNextReader(LeafReaderContext context) {
 					this.reader = context.reader();
 				}
-				@Override
-				public void setScorer(org.apache.lucene.search.Scorer scorer) {
-					// Do Nothing
-				}
+
+        @Override
+        public boolean needsScores() {
+          return false;
+        }
 			});
 			
 			if (collectedItems.size() > stopAterReaching) {
@@ -281,7 +278,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	
 	private Query buildQuery(List<String> terms, HashSet<String> fieldsToLoad, int maxClauses) {
 	  ArrayList<String> toRemove = new ArrayList<String>();
-	  BooleanQuery bq = new BooleanQuery();
+	  Builder bq = new BooleanQuery.Builder();
 	  
 	  String ff = "";
 	  if (fieldsToLoad.size() > 0) {
@@ -292,12 +289,12 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  
 	  for (int i=0;i<terms.size() && i<maxClauses;i++) {
 	  	if (fieldsToLoad.size() > 1) {
-	  		BooleanQuery bbq;
-				bbq = new BooleanQuery();
+	  		Builder bbq;
+				bbq = new BooleanQuery.Builder();
 				for (String f: fieldsToLoad) {
-					new BooleanClause(new TermQuery(new Term(f, terms.get(i))), Occur.SHOULD);
+					bbq.add(new BooleanClause(new TermQuery(new Term(f, terms.get(i))), Occur.SHOULD));
 				}
-	  		bq.add(bbq, Occur.SHOULD);
+	  		bq.add(bbq.build(), Occur.SHOULD);
 	  	}
 	  	else {
 	  		bq.add(new BooleanClause(new TermQuery(new Term(ff, terms.get(i))), Occur.SHOULD));
@@ -307,7 +304,7 @@ public class BatchProviderFindWordGroups extends BatchProvider {
 	  for (String t: toRemove) {
 	  	terms.remove(t);
 	  }
-	  return bq;
+	  return bq.build();
   }
 
 	private List<String> readInputFile(File input) throws IOException {

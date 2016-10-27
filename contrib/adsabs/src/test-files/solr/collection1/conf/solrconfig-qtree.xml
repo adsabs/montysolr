@@ -18,6 +18,7 @@
 	<dataDir>${solr.data.dir:}</dataDir>
 	<directoryFactory name="DirectoryFactory"	class="${solr.directoryFactory:solr.RAMDirectoryFactory}" />
 	<searchComponent name="qtree"	class="org.apache.solr.handler.component.AqpQueryTree" />
+	<schemaFactory class="ClassicIndexSchemaFactory"/>
 	<requestHandler name="/qtree" class="solr.StandardRequestHandler">
 		<lst name="defaults">
 			<str name="echoParams">explicit</str>

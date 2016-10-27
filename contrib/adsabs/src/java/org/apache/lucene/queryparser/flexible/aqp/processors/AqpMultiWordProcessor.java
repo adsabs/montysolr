@@ -9,9 +9,8 @@ import java.util.Locale;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CachingTokenFilter;
-import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
+import org.apache.lucene.analysis.LegacyNumericTokenStream.LegacyNumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.AcronymTokenFilter;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
@@ -65,7 +64,7 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 
 	private CachingTokenFilter buffer;
 	private CharTermAttribute termAtt;
-	private NumericTermAttribute numAtt;
+	private LegacyNumericTermAttribute numAtt;
 	private TypeAttribute typeAtt;
   private PositionIncrementAttribute posAtt;
   private OffsetAttribute offsetAtt;
@@ -124,7 +123,6 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 	  FieldableNode fieldNode = (FieldableNode) terminalNode;
 	  int startingPosition = ((FieldQueryNode) fieldNode).getBegin();
 	  int maxOffset = ((String) terminalNode.getTag(AqpDEFOPMarkPlainNodes.PLAIN_TOKEN_CONCATENATED)).length() + startingPosition;
-    buffer.reset();
     int startOffset = 0;
     int endOffset = 0;
     
@@ -134,6 +132,7 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
     // the buffer shows us synonyms, but we must find their source-tokens
     // inside chilren[]
     try {
+      buffer.reset();
       while (buffer.incrementToken()) {
         typeAtt = buffer.getAttribute(TypeAttribute.class);
         offsetAtt = buffer.getAttribute(OffsetAttribute.class);
@@ -234,7 +233,7 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
       ((TextableQueryNode) newNode).setText(termAtt.toString());
     }
     else {
-      numAtt = buffer.getAttribute(NumericTermAttribute.class);
+      numAtt = buffer.getAttribute(LegacyNumericTermAttribute.class);
       ((TextableQueryNode) newNode).setText(new Long(numAtt.getRawValue()).toString());
     }
     return (FieldQueryNode) newNode;
@@ -339,10 +338,9 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 		LinkedList<QueryNode> children = new LinkedList<QueryNode>();
 		//children.add(new AqpNonAnalyzedQueryNode((FieldQueryNode) fieldNode)); // original input
 
-		buffer.reset();
-		Integer previousPos = null;
 
 		try {
+		  buffer.reset();
 			while (buffer.incrementToken()) {
 				
 			  posAtt = buffer.getAttribute(PositionIncrementAttribute.class);
@@ -357,8 +355,8 @@ public class AqpMultiWordProcessor extends QueryNodeProcessorImpl {
 					termAtt = buffer.getAttribute(CharTermAttribute.class);
 					((TextableQueryNode) newNode).setText(termAtt.toString());
 				}
-				else {
-					numAtt = buffer.getAttribute(NumericTermAttribute.class);
+				else if(buffer.hasAttribute(LegacyNumericTermAttribute.class)) {
+					numAtt = buffer.getAttribute(LegacyNumericTermAttribute.class);
 					((TextableQueryNode) newNode).setText(new Long(numAtt.getRawValue()).toString());
 				}
 

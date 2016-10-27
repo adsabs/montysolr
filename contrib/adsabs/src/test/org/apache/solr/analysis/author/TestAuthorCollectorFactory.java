@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
@@ -30,7 +31,8 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     AuthorTransliterationFactory transliteratorFactory = new AuthorTransliterationFactory(new HashMap<String,String>());
     
     //create the synonym writer for the test MÜLLER, BILL 
-    TokenStream stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
+    TokenStream stream = new PatternTokenizer(Pattern.compile(";"), -1);
+    ((Tokenizer)stream).setReader(new StringReader("MÜLLER, BILL;MÜller, Bill"));
     TokenStream ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     assertTrue(ts instanceof AuthorCollectorFilter);
     ts.reset();
@@ -68,7 +70,8 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     args.put("emitTokens", "true");
     args.put("tokenTypes", AuthorUtils.AUTHOR_INPUT);
     factory = new AuthorCollectorFactory(args);
-    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
+    stream = new PatternTokenizer(Pattern.compile(";"), -1);
+    ((Tokenizer)stream).setReader(new StringReader("MÜLLER, BILL;MÜller, Bill"));
     ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     ts.reset();
     
@@ -90,7 +93,9 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     args.put("emitTokens", "false");
     args.put("tokenTypes", AuthorUtils.AUTHOR_TRANSLITERATED);
     factory = new AuthorCollectorFactory(args);
-    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
+    
+    stream = new PatternTokenizer(Pattern.compile(";"), -1);
+    ((Tokenizer)stream).setReader(new StringReader("MÜLLER, BILL;MÜller, Bill"));
     ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     ts.reset();
     
@@ -112,7 +117,8 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     args.put("emitTokens", "false");
     args.put("tokenTypes", "foo");
     factory = new AuthorCollectorFactory(args);
-    stream = new PatternTokenizer(new StringReader("MÜLLER, BILL;MÜller, Bill"), Pattern.compile(";"), -1);
+    stream = new PatternTokenizer(Pattern.compile(";"), -1);
+    ((Tokenizer)stream).setReader(new StringReader("MÜLLER, BILL;MÜller, Bill"));
     ts = factory.create(transliteratorFactory.create(normFactory.create(stream)));
     ts.reset();
     

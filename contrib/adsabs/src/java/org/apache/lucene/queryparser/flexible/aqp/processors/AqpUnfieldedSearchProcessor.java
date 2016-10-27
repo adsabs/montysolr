@@ -89,13 +89,21 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	      }
 	      if (node.getParent() instanceof SlopQueryNode) {
 	      	subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
-	      	if (node.getParent().getParent() instanceof BoostQueryNode) {
-		      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
-		      }
+	      	//if (node.getParent().getParent() instanceof BoostQueryNode) {
+		      //	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
+		      //}
 	      }
-	      else if (node.getParent() instanceof BoostQueryNode) {
-	      	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent()).getValue();
-	      }
+	      /*else if (node.getParent() instanceof BoostQueryNode) {
+	      	//subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent()).getValue();
+	      	if (node.getParent().getParent() != null) {
+	      	  QueryNode root = node.getParent().getParent();
+	      	  List<QueryNode> children = root.getChildren();
+	      	  children.clear();
+	      	  children.add(node);
+	      	  root.set(children);
+	      	}
+	      	
+	      }*/
 	    }
 	    node.setTag("subQuery", subQuery);
 	    

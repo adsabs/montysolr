@@ -78,6 +78,12 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     assertEquals(expectedRes, q.toString());
 
     q = QueryParserUtil.parse(qtxt, fields, occur, a);
+    // The lucene (for mysterious) reasons decide to output
+    // boolean query; so smarter qparsers have to work around
+    // the dum engineers...
+    if (expectedRes.equals("") && q.toString().trim().equals(""))
+      return;
+      
     assertEquals(expectedRes, q.toString());
   }
 
@@ -85,7 +91,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     String[] fields = { "b", "t" };
     AqpQueryParser mfqp = getParser();
     mfqp.setMultiFields(fields);
-    mfqp.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
+    mfqp.setAnalyzer(new StandardAnalyzer());
 
     Query q = mfqp.parse("one", null);
     assertEquals("b:one t:one", q.toString());
@@ -101,14 +107,14 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
         q.toString());
 
     q = mfqp.parse("one^2 two", null);
-    assertEquals("((b:one t:one)^2.0) (b:two t:two)", q.toString());
+    assertEquals("(b:one t:one)^2.0 (b:two t:two)", q.toString());
 
     mfqp.setAllowSlowFuzzy(true);
     q = mfqp.parse("one~ two", null);
     assertEquals("(b:one~0.5 t:one~0.5) (b:two t:two)", q.toString());
 
     q = mfqp.parse("one~0.8 two^2", null);
-    assertEquals("(b:one~0.8 t:one~0.8) ((b:two t:two)^2.0)", q.toString());
+    assertEquals("(b:one~0.8 t:one~0.8) (b:two t:two)^2.0", q.toString());
 
     q = mfqp.parse("one* two*", null);
     assertEquals("(b:one* t:one*) (b:two* t:two*)", q.toString());
@@ -156,28 +162,28 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     AqpQueryParser mfqp = getParser();
     mfqp.setMultiFields(fields);
     mfqp.setFieldsBoost(boosts);
-    mfqp.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
+    mfqp.setAnalyzer(new StandardAnalyzer());
 
     // Check for simple
     Query q = mfqp.parse("one", null);
-    assertEquals("b:one^5.0 t:one^10.0", q.toString());
+    assertEquals("(b:one)^5.0 (t:one)^10.0", q.toString());
 
     // Check for AND
     q = mfqp.parse("one AND two", null);
-    assertEquals("+(b:one^5.0 t:one^10.0) +(b:two^5.0 t:two^10.0)",
+    assertEquals("+((b:one)^5.0 (t:one)^10.0) +((b:two)^5.0 (t:two)^10.0)",
         q.toString());
 
     // Check for OR
     q = mfqp.parse("one OR two", null);
-    assertEquals("(b:one^5.0 t:one^10.0) (b:two^5.0 t:two^10.0)", q.toString());
+    assertEquals("((b:one)^5.0 (t:one)^10.0) ((b:two)^5.0 (t:two)^10.0)", q.toString());
 
     // Check for AND and a field
     q = mfqp.parse("one AND two AND foo:test", null);
-    assertEquals("+(b:one^5.0 t:one^10.0) +(b:two^5.0 t:two^10.0) +foo:test",
+    assertEquals("+((b:one)^5.0 (t:one)^10.0) +((b:two)^5.0 (t:two)^10.0) +foo:test",
         q.toString());
     
     q = mfqp.parse("one^3 AND two^4", null);
-    assertEquals("+((b:one^5.0 t:one^10.0)^3.0) +((b:two^5.0 t:two^10.0)^4.0)",
+    assertEquals("+((b:one)^5.0 (t:one)^10.0)^3.0 +((b:two)^5.0 (t:two)^10.0)^4.0",
         q.toString());
   }
 
@@ -185,7 +191,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     String[] fields = { "b", "t" };
     String[] queries = { "one", "two" };
     AqpQueryParser qp = getParser();
-    qp.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
+    qp.setAnalyzer(new StandardAnalyzer());
     Query q = AqpQueryParserUtil.parse(qp, queries, fields);
     assertEquals("b:one t:two", q.toString());
 
@@ -215,7 +221,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     String[] queries6 = { "((+stop))", "+((stop))" };
     q = AqpQueryParserUtil.parse(qp, queries6, fields);
-    assertEquals("", q.toString());
+    assertEquals(" ", q.toString());
 
     String[] queries7 = { "one ((+stop)) +more", "+((stop)) +two" };
     q = AqpQueryParserUtil.parse(qp, queries7, fields);
@@ -231,18 +237,15 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     String[] fields = { "b", "t" };
     BooleanClause.Occur[] flags = { BooleanClause.Occur.MUST,
         BooleanClause.Occur.MUST_NOT };
-    Query q = QueryParserUtil.parse("one", fields, flags, new StandardAnalyzer(
-        TEST_VERSION_CURRENT));
+    Query q = QueryParserUtil.parse("one", fields, flags, new StandardAnalyzer());
     assertEquals("+b:one -t:one", q.toString());
 
-    q = QueryParserUtil.parse("one two", fields, flags, new StandardAnalyzer(
-        TEST_VERSION_CURRENT));
+    q = QueryParserUtil.parse("one two", fields, flags, new StandardAnalyzer());
     assertEquals("+(b:one b:two) -(t:one t:two)", q.toString());
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
-      q = QueryParserUtil.parse("blah", fields, flags2, new StandardAnalyzer(
-          TEST_VERSION_CURRENT));
+      q = QueryParserUtil.parse("blah", fields, flags2, new StandardAnalyzer());
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -255,21 +258,21 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
         BooleanClause.Occur.MUST_NOT };
     AqpQueryParser parser = getParser();
     parser.setMultiFields(fields);
-    parser.setAnalyzer(new StandardAnalyzer(TEST_VERSION_CURRENT));
+    parser.setAnalyzer(new StandardAnalyzer());
 
     Query q = QueryParserUtil.parse("one", fields, flags, new StandardAnalyzer(
-        TEST_VERSION_CURRENT));// , fields, flags, new
+        ));// , fields, flags, new
     // StandardAnalyzer());
     assertEquals("+b:one -t:one", q.toString());
 
     q = QueryParserUtil.parse("one two", fields, flags, new StandardAnalyzer(
-        TEST_VERSION_CURRENT));
+        ));
     assertEquals("+(b:one b:two) -(t:one t:two)", q.toString());
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
       q = QueryParserUtil.parse("blah", fields, flags2, new StandardAnalyzer(
-          TEST_VERSION_CURRENT));
+          ));
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -282,13 +285,13 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     BooleanClause.Occur[] flags = { BooleanClause.Occur.MUST,
         BooleanClause.Occur.MUST_NOT, BooleanClause.Occur.SHOULD };
     Query q = QueryParserUtil.parse(queries, fields, flags,
-        new StandardAnalyzer(TEST_VERSION_CURRENT));
+        new StandardAnalyzer());
     assertEquals("+f1:one -f2:two f3:three", q.toString());
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
       q = QueryParserUtil.parse(queries, fields, flags2, new StandardAnalyzer(
-          TEST_VERSION_CURRENT));
+          ));
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -301,13 +304,13 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     BooleanClause.Occur[] flags = { BooleanClause.Occur.MUST,
         BooleanClause.Occur.MUST_NOT };
     Query q = QueryParserUtil.parse(queries, fields, flags,
-        new StandardAnalyzer(TEST_VERSION_CURRENT));
+        new StandardAnalyzer());
     assertEquals("+b:one -t:two", q.toString());
 
     try {
       BooleanClause.Occur[] flags2 = { BooleanClause.Occur.MUST };
       q = QueryParserUtil.parse(queries, fields, flags2, new StandardAnalyzer(
-          TEST_VERSION_CURRENT));
+          ));
       fail();
     } catch (IllegalArgumentException e) {
       // expected exception, array length differs
@@ -333,10 +336,9 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
   }
 
   public void testStopWordSearching() throws Exception {
-    Analyzer analyzer = new StandardAnalyzer(TEST_VERSION_CURRENT);
+    Analyzer analyzer = new StandardAnalyzer();
     Directory ramDir = new RAMDirectory();
-    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(
-        TEST_VERSION_CURRENT, analyzer));
+    IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(analyzer));
     Document doc = new Document();
     doc.add(newField("body", "blah the footest blah", TextField.TYPE_NOT_STORED));
     iw.addDocument(doc);
@@ -349,7 +351,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     mfqp.setDefaultOperator(Operator.AND);
     Query q = mfqp.parse("the footest", null);
     IndexSearcher is = new IndexSearcher(DirectoryReader.open(ramDir));
-    ScoreDoc[] hits = is.search(q, null, 1000).scoreDocs;
+    ScoreDoc[] hits = is.search(q, 1000).scoreDocs;
     assertEquals(1, hits.length);
     ramDir.close();
   }
@@ -361,23 +363,22 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     MockAnalyzer stdAnalyzer = new MockAnalyzer(random());
 
     public AnalyzerReturningNull() {
-      super(new PerFieldReuseStrategy());
+      super(PER_FIELD_REUSE_STRATEGY);
     }
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName,
-        Reader reader) {
+    public TokenStreamComponents createComponents(String fieldName) {
       if ("f1".equals(fieldName)) {
-        return new TokenStreamComponents(new EmptyTokenizer(reader));
+        return new TokenStreamComponents(new EmptyTokenizer());
       } else {
-        return stdAnalyzer.createComponents(fieldName, reader);
+        return stdAnalyzer.createComponents(fieldName);
       }
     }
     
     final class EmptyTokenizer extends Tokenizer {
 
-      public EmptyTokenizer(Reader input) {
-        super(input);
+      public EmptyTokenizer() {
+        super();
       }
 
       @Override
@@ -387,9 +388,4 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     }
   }
 
-  // Uniquely for Junit 3
-  public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiField.class);
-  }
-  
 }

@@ -9,23 +9,15 @@ import org.apache.lucene.queries.function.valuesource.ConstValueSource;
 import org.apache.lucene.queries.function.valuesource.DoubleConstValueSource;
 import org.apache.lucene.queries.function.valuesource.LiteralValueSource;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.OpaqueQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.Query;
-import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.SchemaField;
-import org.apache.solr.search.FunctionQParser;
-import org.apache.solr.search.QParser;
-import org.apache.solr.search.QueryParsing;
 
 
 public class AqpFunctionQParser extends FunctionQParser {
@@ -95,7 +87,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 			return f.getType().getValueSource(f, this);
 		}
 
-		QueryParsing.StrParser p = new QueryParsing.StrParser(input);
+		StrParser p = new StrParser(input);
 
 		try {
 			Number num = p.getNumber();
@@ -121,7 +113,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 	public void setQueryNode(AqpFunctionQueryNode node) {
 		this.qNode = node;
 		if (node.getOriginalInput() != null) {
-			sp = new QueryParsing.StrParser(node.getOriginalInput().value);
+			sp = new StrParser(node.getOriginalInput().value);
 		}
 	}
 

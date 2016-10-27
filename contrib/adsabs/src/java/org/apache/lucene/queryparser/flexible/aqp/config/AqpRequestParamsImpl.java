@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.config;
 
 import org.apache.lucene.util.AttributeImpl;
+import org.apache.lucene.util.AttributeReflector;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
@@ -42,7 +43,12 @@ public class AqpRequestParamsImpl extends AttributeImpl
 
 	@Override
 	public void copyTo(AttributeImpl target) {
-		throw new UnsupportedOperationException();
+		AqpRequestParams t = (AqpRequestParams) target;
+		t.setLocalParams(localParams);
+		t.setParams(params);
+		t.setQueryString(query);
+		t.setRequest(req);
+		t.setResponse(rsp);
 	}
 
 	public void setLocalParams(SolrParams localParams) {
@@ -68,5 +74,15 @@ public class AqpRequestParamsImpl extends AttributeImpl
 	public void setQueryString(String query) {
 		this.query = query;
 	}
+
+  @Override
+  public void reflectWith(AttributeReflector reflector) {
+    reflector.reflect(AqpRequestParams.class, "req", req);
+    reflector.reflect(AqpRequestParams.class, "rsp", rsp);
+    reflector.reflect(AqpRequestParams.class, "localParams", localParams);
+    reflector.reflect(AqpRequestParams.class, "params", params);
+    reflector.reflect(AqpRequestParams.class, "query", query);
+    
+  }
 	
 }

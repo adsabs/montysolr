@@ -1,13 +1,10 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.IndexReader;
 
 /*
@@ -48,22 +45,14 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	@SuppressWarnings("unchecked")
   @Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		reader = searcher.getIndexReader();
 		return super.searcherInitialization(searcher, firstOrderWeight);
 	}
 	
 
 	@Override
-	public void setScorer(Scorer scorer) throws IOException {
-		this.scorer = scorer;
-
-	}
-
-	@Override
 	public void collect(int doc) throws IOException {
 		//if (reader.isDeleted(doc)) return;
-		
-		Document document = reader.document(doc, fieldsToLoad);
+		Document document = this.context.reader().document(doc, fieldsToLoad);
 		float s = scorer.score();
 		
 		for (String f: fieldsToLoad) {
@@ -78,18 +67,6 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		}
 	}
 
-	@Override
-	public void setNextReader(AtomicReaderContext context)
-			throws IOException {
-		this.reader = context.reader();
-		this.docBase = context.docBase;
-	}
-
-	@Override
-	public boolean acceptsDocsOutOfOrder() {
-		return true;
-	}
-	
 	
 	@Override
 	public String toString() {
@@ -100,7 +77,12 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 	public int hashCode() {
 		return 9645127 ^ fieldsToLoad.hashCode() ^ cache.hashCode();
 	}
-	
-	
-	
+
+
+
+
+  @Override
+  public boolean needsScores() {
+    return true;
+  }
 }

@@ -96,7 +96,7 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
         .toString());
 
     // phrase with non-default boost:
-    assertEquals("\"(multi multi2) foo\"^2.0", qp.parse("\"multi foo\"^2", "")
+    assertEquals("(\"(multi multi2) foo\")^2.0", qp.parse("\"multi foo\"^2", "")
         .toString());
 
     // phrase after changing default slop
@@ -155,9 +155,8 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   private class MultiAnalyzer extends Analyzer {
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName,
-        Reader reader) {
-      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE,
+    public TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer result = new MockTokenizer(MockTokenizer.WHITESPACE,
           true);
       return new TokenStreamComponents(result, new TestFilter(result));
     }
@@ -224,9 +223,9 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
   private class PosIncrementAnalyzer extends Analyzer {
 
     @Override
-    public TokenStreamComponents createComponents(String fieldName,
-        Reader reader) {
-      Tokenizer result = new MockTokenizer(reader, MockTokenizer.WHITESPACE,
+    public TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer result = new MockTokenizer(
+          MockTokenizer.WHITESPACE,
           true);
       return new TokenStreamComponents(result, new TestPosIncrementFilter(
           result));
@@ -258,11 +257,6 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
       return false;
     }
 
-  }
-
-  // Uniquely for Junit 3
-  public static junit.framework.Test suite() {
-    return new junit.framework.JUnit4TestAdapter(TestAqpSLGMultiAnalyzer.class);
   }
 
 }

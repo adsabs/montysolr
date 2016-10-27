@@ -29,7 +29,8 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 	
 	public void testAuthorSynonyms() throws Exception {
 		Reader reader = new StringReader("Müller, Bill");
-		Tokenizer tokenizer = new KeywordTokenizer(reader);
+		Tokenizer tokenizer = new KeywordTokenizer();
+		tokenizer.setReader(reader);
 		
 	  	
 		AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
@@ -42,7 +43,8 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 	
 	public void testAccents() throws Exception {
     Reader reader = new StringReader("Jeřábková, Tereza");
-    Tokenizer tokenizer = new KeywordTokenizer(reader);
+    Tokenizer tokenizer = new KeywordTokenizer();
+    tokenizer.setReader(reader);
     AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
     TokenStream stream = factory.create(new TestFilter(tokenizer));
     

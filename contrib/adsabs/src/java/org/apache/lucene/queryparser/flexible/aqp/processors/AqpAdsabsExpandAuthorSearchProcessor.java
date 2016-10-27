@@ -293,8 +293,8 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
   
   Analyzer authorNameAnalyzer = new Analyzer() {
       @Override
-       public TokenStreamComponents createComponents(String fieldName, Reader reader) {
-         Tokenizer source = new KeywordTokenizer(reader);
+       public TokenStreamComponents createComponents(String fieldName) {
+         Tokenizer source = new KeywordTokenizer();
          TokenStream filter = new PythonicAuthorNormalizerFilter(source);
          filter = new AuthorNormalizeFilter(filter);
          return new TokenStreamComponents(source, filter);

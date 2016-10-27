@@ -68,10 +68,9 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
     args.put("tokenizerFactory", KeywordTokenizerFactory.class.getCanonicalName().toString());
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSolrSingleSyn());
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
+    TokenStream ts = factory.create(keywordMockTokenizer(new StringReader("žščřdťň, á")));
     assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
         new int[]    {0, 0}, //startOffset
         new int[]    {10,10}, //endOffset
@@ -85,10 +84,9 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("synonyms", "synonyms.txt");
     args.put("format", "semicolon");
     args.put("tokenizerFactory", KeywordTokenizerFactory.class.getCanonicalName().toString());
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSemicolonSingleSyn());
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
+    TokenStream ts = factory.create(keywordMockTokenizer(new StringReader("žščřdťň, á")));
     assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
         new int[]    {0, 0}, //startOffset
         new int[]    {10,10}, //endOffset
@@ -96,7 +94,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 0}  //posIncr
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("žščřdťň, á"), MockTokenizer.KEYWORD, false));
+    ts = factory.create(keywordMockTokenizer(new StringReader("žščřdťň, á")));
     assertTokenStreamContents(ts, new String[] { "žščřdťň, á", "zscrdtn, a" },
         new int[]    {0, 0}, //startOffset
         new int[]    {10,10}, //endOffset
@@ -135,10 +133,9 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
   public void testMultiWordSynonyms() throws IOException {
     Map<String,String> args = new HashMap<String,String>();
     args.put("synonyms", "synonyms.txt");
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(new StringMockResourceLoader("a b c,d"));
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("a e"), MockTokenizer.WHITESPACE, false));
+    TokenStream ts = factory.create(whitespaceMockTokenizer(new StringReader("a e")));
     // This fails because ["e","e"] is the value of the token stream
     assertTokenStreamContents(ts, new String[] { "a", "e" });
   }
@@ -153,12 +150,11 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", NewSynonymFilterFactory.BestEffortSearchLowercase.class.getName());
     
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("foo hubble space telescope"), MockTokenizer.WHITESPACE, false));
+    TokenStream ts = factory.create(whitespaceMockTokenizer(new StringReader("foo hubble space telescope")));
     assertTokenStreamContents(ts, new String[] { "foo", "hubble", "hubble space telescope", "HST", "hs telescope", "space", "telescope" },
         new int[]    {0, 4, 4, 4, 4,11,17}, //startOffset
         new int[]    {3,10,26,26,26,16,26}, //endOffset
@@ -167,7 +163,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     );
     
     // test ignoreCase=true
-    ts = factory.create(new MockTokenizer(new StringReader("hst"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("hst")));
     assertTokenStreamContents(ts, new String[] { "hubble space telescope", "HST", "hs telescope"},
         new int[]    {0, 0, 0},
         new int[]    {3, 3, 3},
@@ -175,7 +171,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 0, 0}
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foo bar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foo bar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo", "foo bar", "foo ba", "fu ba", "foobar", "bar" },
         new int[]    {0, 5, 5, 5, 5, 5, 9}, //startOffset
         new int[]    {4, 8,12,12,12,12,12}, //endOffset
@@ -183,7 +179,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 1, 0, 0, 0, 0, 1}  //posIncr
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foobar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foobar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo bar", "foo ba", "fu ba", "foobar"},
         new int[]    {0, 5, 5, 5, 5, 5}, //startOffset
         new int[]    {4,11,11,11,11,11}, //endOffset
@@ -201,12 +197,11 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", TestParserReplaceNullsInclOrig.class.getName());
     
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("foo hubble space telescope"), MockTokenizer.WHITESPACE, false));
+    TokenStream ts = factory.create(whitespaceMockTokenizer(new StringReader("foo hubble space telescope")));
     assertTokenStreamContents(ts, new String[] { "foo", "hubble", "hubble space telescope", "hst", "hs telescope", "space", "telescope" },
         new int[]    {0, 4, 4, 4, 4,11,17}, //startOffset
         new int[]    {3,10,26,26,26,16,26}, //endOffset
@@ -215,7 +210,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     );
     
     
-    ts = factory.create(new MockTokenizer(new StringReader("hst"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("hst")));
     assertTokenStreamContents(ts, new String[] { "hst", "hubble space telescope", "hst", "hs telescope"},
         new int[]    {0, 0, 0, 0},
         new int[]    {3, 3, 3, 3},
@@ -223,7 +218,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 0, 0, 0}
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foo bar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foo bar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo", "foo bar", "foo ba", "fu ba", "foobar", "bar" },
         new int[]    {0, 5, 5, 5, 5, 5, 9}, //startOffset
         new int[]    {4, 8,12,12,12,12,12}, //endOffset
@@ -231,7 +226,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 1, 0, 0, 0, 0, 1}  //posIncr
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foobar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foobar")));
     assertTokenStreamContents(ts, new String[] { "some", "foobar", "foo bar", "foo ba", "fu ba", "foobar"},
         new int[]    {0, 5, 5, 5, 5, 5, 5}, //startOffset
         new int[]    {4,11,11,11,11,11,11}, //endOffset
@@ -250,12 +245,11 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", NewSynonymFilterFactory.MultiTokenReplaceNulls.class.getName());
     
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("foo hubble space telescope"), MockTokenizer.WHITESPACE, false));
+    TokenStream ts = factory.create(whitespaceMockTokenizer(new StringReader("foo hubble space telescope")));
     assertTokenStreamContents(ts, new String[] { "foo", "hubble space telescope", "HST", "hs telescope" },
         new int[]    {0, 4, 4, 4}, //startOffset
         new int[]    {3,26,26,26}, //endOffset
@@ -264,7 +258,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     );
     
     
-    ts = factory.create(new MockTokenizer(new StringReader("HST"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("HST")));
     assertTokenStreamContents(ts, new String[] { "hubble space telescope", "HST", "hs telescope"},
         new int[]    {0, 0, 0},
         new int[]    {3, 3, 3},
@@ -272,7 +266,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 0, 0}
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foo bar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foo bar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo bar", "foo ba", "fu ba", "foobar" },
         new int[]    {0, 5, 5, 5, 5}, //startOffset
         new int[]    {4,12,12,12,12}, //endOffset
@@ -280,7 +274,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 1, 0, 0, 0}  //posIncr
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foobar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foobar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo bar", "foo ba", "fu ba", "foobar"},
         new int[]    {0, 5, 5, 5, 5, 5}, //startOffset
         new int[]    {4,11,11,11,11,11}, //endOffset
@@ -298,12 +292,11 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("synonyms", "synonyms.txt");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("foo hubble space telescope"), MockTokenizer.WHITESPACE, false));
+    TokenStream ts = factory.create(whitespaceMockTokenizer(new StringReader("foo hubble space telescope")));
     assertTokenStreamContents(ts, new String[] { "foo", "hubble", "HST", "hs telescope", "space", "telescope" },
         new int[]    {0, 4, 4, 4,11,17}, //startOffset
         new int[]    {3,10,26,26,16,26}, //endOffset
@@ -312,7 +305,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     );
     
     
-    ts = factory.create(new MockTokenizer(new StringReader("HST"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("HST")));
     assertTokenStreamContents(ts, new String[] { "hubble", "HST", "hs telescope", "space", "telescope" },
         new int[]    {0, 0, 0, 0, 0},
         new int[]    {3, 3, 3, 3, 3},
@@ -320,7 +313,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 0, 0, 1, 1}
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foo bar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foo bar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo", "foo ba", "fu ba", "foobar", "bar" },
         new int[]    {0, 5, 5, 5, 5, 9}, //startOffset
         new int[]    {4, 8,12,12,12,12}, //endOffset
@@ -328,7 +321,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
         new int[]    {1, 1, 0, 0, 0, 1}  //posIncr
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foobar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foobar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo", "foo ba", "fu ba", "foobar", "bar"},
         new int[]    {0, 5, 5, 5, 5, 5}, //startOffset
         new int[]    {4,11,11,11,11,11}, //endOffset
@@ -349,12 +342,11 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     args.put("ignoreCase", "true");
     args.put("tokenizerFactory", "org.apache.lucene.analysis.core.KeywordTokenizerFactory");
     args.put("builderFactory", NewSynonymFilterFactory.AlwaysIncludeOriginal.class.getName());
-    args.put("luceneMatchVersion", TEST_VERSION_CURRENT.toString());
     NewSynonymFilterFactory factory = new NewSynonymFilterFactory(args);
     factory.inform(getSyn());
     
     
-    TokenStream ts = factory.create(new MockTokenizer(new StringReader("foo hubble space telescope"), MockTokenizer.WHITESPACE, false));
+    TokenStream ts = factory.create(whitespaceMockTokenizer(new StringReader("foo hubble space telescope")));
     assertTokenStreamContents(ts, new String[] { "foo", "hubble", "hubble", "hst", "hs telescope", "space", "space", "telescope", "telescope" },
     		new int[]    {0, 4, 4, 4, 4,11,11,17,17}, //startOffset
     		new int[]    {3,10,10,26,26,16,16,26,26}, //endOffset
@@ -363,7 +355,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     );
     
     
-    ts = factory.create(new MockTokenizer(new StringReader("hst"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("hst")));
     assertTokenStreamContents(ts, new String[] { "hst", "hubble", "hst", "hs telescope", "space", "telescope" },
     		new int[]    {0, 0, 0, 0, 0, 0},
     		new int[]    {3, 3, 3, 3, 3, 3},
@@ -371,7 +363,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     		new int[]    {1, 0, 0, 0, 1, 1}
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foo bar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foo bar")));
     assertTokenStreamContents(ts, new String[] { "some", "foo", "foo", "foo ba", "fu ba", "foobar", "bar", "bar" },
     		new int[]    {0, 5, 5, 5, 5, 5, 9, 9}, //startOffset
     		new int[]    {4, 8, 8,12,12,12,12,12}, //endOffset
@@ -379,7 +371,7 @@ public class TestNewMultiWordSynonyms extends BaseTokenStreamTestCase {
     		new int[]    {1, 1, 0, 0, 0, 0, 1, 0}  //posIncr
     );
     
-    ts = factory.create(new MockTokenizer(new StringReader("some foobar"), MockTokenizer.WHITESPACE, false));
+    ts = factory.create(whitespaceMockTokenizer(new StringReader("some foobar")));
     assertTokenStreamContents(ts, new String[] { "some", "foobar", "foo", "foo ba", "fu ba", "foobar", "bar"},
     		new int[]    {0, 5, 5, 5, 5, 5, 5}, //startOffset
     		new int[]    {4,11,11,11,11,11,11}, //endOffset

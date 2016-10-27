@@ -1,0 +1,65 @@
+
+<project name="upstream-include" xmlns:artifact="antlib:org.apache.maven.artifact.ant" xmlns:if="ant:if">
+    
+    <import file="./contrib-build.xml"/>
+    
+    <property name="include.path" value="solr/contrib/${ant.project.name}" if:set="solr.nature" />
+    <property name="include.path" value="lucene/${ant.project.name}" if:set="lucene.nature" />
+    <property name="include.location" location="${common.build.dir}/solr-download/apache-solr-${solr.version}/${include.path}"/>
+    <property name="build.path" value="solr/build/contrib/solr-${ant.project.name}" if:set="solr.nature" />
+    <property name="build.path" value="lucene/build/${ant.project.name}" if:set="lucene.nature" />
+    
+    <condition property="include.exists" value="true">
+        <and>
+            <available file="${include.location}/build.xml" />
+        </and>
+    </condition>
+    
+    <target name="unlink-upstream" description="Remove the ADS extension from Lucene/SOLR">
+        <echo>Deleting: ${include.location}</echo>
+        <delete dir="${include.location}" followsymlinks="false"  removenotfollowedsymlinks="true"/>
+    </target>
+    
+    <!-- link to upstream ant targets -->
+    <target name="test" depends="link-upstream">
+        <ant target="test" dir="${include.location}"
+                            inheritall="false">
+            <property name="javac.doclint.args" value="-Xdoclint:none" />
+        </ant>
+    </target>
+
+    <target name="default" depends="link-upstream">
+        <ant target="default" dir="${include.location}"
+                            inheritall="false">
+            <property name="javac.doclint.args" value="-Xdoclint:none" />
+        </ant>
+    </target>
+    
+    <target name="jar" depends="link-upstream">
+        <ant target="jar" dir="${include.location}"
+                            inheritall="false">
+            <property name="javac.doclint.args" value="-Xdoclint:none" />
+        </ant>
+    </target>
+    
+    <target name="compile" depends="link-upstream">
+        <ant target="compile" dir="${include.location}"
+                            inheritall="false">
+            <property name="javac.doclint.args" value="-Xdoclint:none" />
+        </ant>
+    </target>
+    
+    <target name="build-all">
+        <antcall target="jar"/>
+    </target>
+    
+    <target name="get-jar" description="Copies the built jars from lucene/solr to montysolr">
+        <echo>${build.dir}  ${common.build.dir}/solr-download/apache-solr-${solr.version}/${build.path}</echo>
+        <copy todir="${build.dir}" verbose="true">
+            <fileset dir="${common.build.dir}/solr-download/apache-solr-${solr.version}/${build.path}"> 
+                <include name="*.jar"/>
+            </fileset>
+            <regexpmapper from="(.*)" to="montysolr-\1" />
+        </copy>
+    </target>
+</project>

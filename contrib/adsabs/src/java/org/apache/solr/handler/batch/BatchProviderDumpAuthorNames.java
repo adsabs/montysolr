@@ -14,11 +14,10 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.search.Collector;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.util.Bits;
+import org.apache.lucene.search.SimpleCollector;
 import org.apache.solr.analysis.WriteableExplicitSynonymMap;
 import org.apache.solr.analysis.WriteableSynonymMap;
 import org.apache.solr.analysis.author.AuthorUtils;
@@ -37,17 +36,9 @@ import org.apache.solr.search.SolrIndexSearcher;
  */
 public class BatchProviderDumpAuthorNames extends BatchProvider {
 	
-	private Bits docsToCollect = null;
 	public String sourceField = "author";
 	public String analyzerField = "author_collector";
 
-	public void setDocsToCollect(Bits docsToCollect) {
-		this.docsToCollect = docsToCollect;
-	}
-	
-	
-	
-	
 	public void run(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws Exception {
 		
 		SolrParams params = req.getParams();
@@ -87,19 +78,17 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
     final WriteableSynonymMap synMap = createSynonymMap();
     synMap.setOutput(jobFile.getAbsolutePath());
 		
-    se.search(new MatchAllDocsQuery(), new Collector() {
-      private AtomicReader reader;
+    se.search(new MatchAllDocsQuery(), new SimpleCollector() {
+      private LeafReader reader;
       private int i = 0;
       private Set<String> tokenBuffer = new LinkedHashSet<String>();
       private CharTermAttribute termAtt;
       private TypeAttribute typeAtt;
       private String authorInput;
       
-      @Override
-      public boolean acceptsDocsOutOfOrder() {
-        return true;
+      protected void doSetNextReader(LeafReaderContext context) throws IOException {
+        reader = context.reader();
       }
-
       @Override
       public void collect(int i) {
         Document d;
@@ -136,14 +125,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
           // pass
         }
       }
-      @Override
-      public void setNextReader(AtomicReaderContext context) {
-        this.reader = context.reader();
-      }
-      @Override
-      public void setScorer(org.apache.lucene.search.Scorer scorer) {
-        // Do Nothing
-      }
+      
       private void addTokensToSynMap() {
 		    if (tokenBuffer.size()>0) {
 		    	if (authorInput != null && authorInput.length() >= 4 && authorInput.split(" ").length <= 5) // ignore obvious mistakes
@@ -152,6 +134,10 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 		      authorInput=null;
 		    }
 		  }
+      @Override
+      public boolean needsScores() {
+        return false;
+      }
     });
     
     synMap.persist();

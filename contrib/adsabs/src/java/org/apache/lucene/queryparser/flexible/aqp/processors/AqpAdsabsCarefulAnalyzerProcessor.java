@@ -64,41 +64,96 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 	  String value =null;
 	  String[] tokens;
 	  if (node instanceof WildcardQueryNode) {
-	    field = ((WildcardQueryNode) node).getFieldAsString() + "_wildcard";
+	    field = ((WildcardQueryNode) node).getFieldAsString();
 	    value = ((WildcardQueryNode) node).getTextAsString();
-	    if (hasAnalyzer(field)) {
-        tokens =  analyze(field, value);
-        if (!tokens[0].equals(value)) {
-          return new WildcardQueryNode(((WildcardQueryNode) node).getFieldAsString(), 
-              tokens[0], ((WildcardQueryNode)node).getBegin(),
-            ((WildcardQueryNode)node).getEnd());
+	    
+	    int asteriskPosition = -1;
+	    int qmarkPosition = -1;
+	    int origLen = value.length();
+	    
+	    if (value.indexOf('*') > -1) {
+	      asteriskPosition = value.indexOf('*');
+	    }
+	    if (value.indexOf('?') > -1) {
+	      qmarkPosition = value.indexOf('?');
+	    }
+	    
+	    if (asteriskPosition > 0 && asteriskPosition+1 < value.length()
+	        || qmarkPosition > 0 && qmarkPosition+1 < value.length()
+	        || asteriskPosition > -1 && qmarkPosition > -1)
+	      return node;
+	        
+	    for (String suffix: new String[]{"_wildcard", ""}) {
+  	    if (hasAnalyzer(field + suffix)) {
+          tokens =  analyze(field + suffix, value);
+          
+          if (tokens.length != 1)
+            return node; // break, let the analyzer decide the fate
+          
+          String newToken = tokens[0];
+          if (newToken.length() < origLen) {
+            if (qmarkPosition > -1) {
+              if (qmarkPosition == 0) {
+                newToken = '?' + tokens[0];
+              }
+              else { 
+                newToken = tokens[0] + '?';
+              }
+            }
+            else {
+              if (asteriskPosition == 0) {
+                newToken = '*' + tokens[0];
+              }
+              else {
+                newToken = tokens[0] + '*';
+              }
+            }
+          }
+          
+          if (!newToken.equals(value)) {
+            return new WildcardQueryNode(field, 
+                newToken, ((WildcardQueryNode)node).getBegin(),
+              ((WildcardQueryNode)node).getEnd());
+          }
         }
-      }
+	    }
 	  }
 	  else if(node instanceof FuzzyQueryNode) {
-	    field = ((FuzzyQueryNode) node).getFieldAsString() + "_fuzzy";
+	    field = ((FuzzyQueryNode) node).getFieldAsString();
 	    value = ((FuzzyQueryNode) node).getTextAsString();
-	    if (hasAnalyzer(field)) {
-        tokens =  analyze(field, value);
-        if (!tokens[0].equals(value)) {
-          return new FuzzyQueryNode(field = ((FuzzyQueryNode) node).getFieldAsString(), 
-              tokens[0], 
-            ((FuzzyQueryNode)node).getSimilarity(),
-            ((FuzzyQueryNode)node).getBegin(),
-            ((FuzzyQueryNode)node).getEnd());
+	    for (String suffix: new String[]{"_fuzzy", ""}) {
+  	    if (hasAnalyzer(field+suffix)) {
+          tokens =  analyze(field + suffix, value);
+          
+          if (tokens.length > 1)
+            return node; // break, let the analyzer decide the fate
+          
+          if (!tokens[0].equals(value)) {
+            return new FuzzyQueryNode(field, 
+                tokens[0], 
+              ((FuzzyQueryNode)node).getSimilarity(),
+              ((FuzzyQueryNode)node).getBegin(),
+              ((FuzzyQueryNode)node).getEnd());
+          }
         }
-      }
+	    }
 	  }
 	  else if(node instanceof AqpAdsabsRegexQueryNode) {
-	    field = ((FieldQueryNode) node).getFieldAsString() + "_regex";
+	    field = ((FieldQueryNode) node).getFieldAsString();
 	    value = ((FieldQueryNode) node).getText().toString();
-	    if (hasAnalyzer(field)) {
-	      tokens =  analyze(field, value);
-	      if (!tokens[0].equals(value)) {
-	        return new AqpAdsabsRegexQueryNode(((FieldQueryNode) node).getFieldAsString(), 
-	            tokens[0], ((FieldQueryNode)node).getBegin(),
-	            ((FieldQueryNode)node).getEnd());
-	      }
+	    for (String suffix: new String[]{"_regex", ""}) {
+  	    if (hasAnalyzer(field + suffix)) {
+  	      tokens =  analyze(field + suffix, value);
+  	      
+  	      if (tokens.length > 1)
+  	        return node; // break, let the analyzer decide the fate
+  	      
+  	      if (!tokens[0].equals(value)) {
+  	        return new AqpAdsabsRegexQueryNode(field, 
+  	            tokens[0], ((FieldQueryNode)node).getBegin(),
+  	            ((FieldQueryNode)node).getEnd());
+  	      }
+  	    }
 	    }
 	  }
 	  
@@ -154,12 +209,6 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 			// pass
 		}
 		
-		
-	  // for now let'd do this
-    if (out.size() > 1) {
-      throw new QueryNodeException(new MessageImpl("We are not expecting multiple tokens from analyzing: " + field + ":" + value));
-    }
-    
 		return out.toArray(new String[out.size()]);
 	}
 

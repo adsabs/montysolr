@@ -20,20 +20,30 @@
 <project name="antlrqueryparser" default="default" >
 
 	<description>
-    ANTLR Flexible Query Parser
-  </description>
+	    ANTLR Flexible Query Parser
+    </description>
 
-	<import file="../contrib-build.xml"/>
+	<property name="lucene.nature" value="true"/>
+    <import file="../upstream-include.xml" />
+	
+	<target name="link-upstream" unless="${include.exists}">
+        <mkdir dir="${include.location}"/>
+        <symlink link="${include.location}/src" resource="${basedir}/src" failonerror="true"/>
+        <symlink link="${include.location}/grammars" resource="${basedir}/grammars" failonerror="true"/>
+        <symlink link="${include.location}/ivy.xml" resource="${basedir}/ivy.xml" failonerror="true"/>
+        <symlink link="${include.location}/build.xml" resource="${basedir}/lucene-build.xml" failonerror="true"/>
+    </target>
+	
 	<property file="${common.dir}/contrib/antlrqueryparser/build.properties" prefix="dotprop"/>
 
 	<!-- parameters for the build, many of these have default values -->
 	<condition property="aqp.grammardir" value="./grammars">
-        <not>
-            <isset property="grammardir"/>
-        </not>
-  </condition>
-  
-  <property name="aqp.grammardir" value="${grammardir}"/>
+		<not>
+			<isset property="grammardir"/>
+		</not>
+	</condition>
+
+	<property name="aqp.grammardir" value="${grammardir}"/>
 	<property name="aqp.grammars.dir" location="${aqp.grammardir}" />
 	<property name="aqp.parser.dir" location="src/java/org/apache/lucene/queryparser/flexible/aqp/parser" />
 	<property name="aqp.classes.dir" location="${build.dir}/classes/java" />
@@ -49,7 +59,7 @@
 	</condition>
 	<property name="aqp.grammar" value="${grammar}"/>
 
-	
+
 	<condition property="aqp.rule" value="mainQ">
 		<not>
 			<isset property="rule"/>
@@ -64,11 +74,9 @@
 		</not>
 	</condition>
 	<property name="aqp.query" value="${query}" />
-	
 
-	
-	
-	
+
+
 	<mkdir dir="${build.dir}/classes/test"/>
 	<path id="classpath">
 		<path refid="base.classpath"/>
@@ -78,24 +86,24 @@
 		</fileset>
 		<fileset dir="${montysolr.dependencies.dir}">
 			<include name="**/lucene-queryparser*.jar"/>
-      <include name="**/lucene-sandbox*.jar"/>
-    </fileset>
+			<include name="**/lucene-sandbox*.jar"/>
+		</fileset>
 	</path>
 
-  <path id="compile.classpath">
-    <path refid="classpath"/>
-  	<pathelement location="${build.dir}/classes/test" />
-  	<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
-        <include name="**/antlr*.jar"/>
-  		  <include name="**/ST4*.jar"/>
-  		  <include name="**/stringtemplate*.jar"/>
-  		  <include name="**/gunit*.jar"/>
-    </fileset>
-  </path>
-        	
+	<path id="compile.classpath">
+		<path refid="classpath"/>
+		<pathelement location="${build.dir}/classes/test" />
+		<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
+			<include name="**/antlr*.jar"/>
+			<include name="**/ST4*.jar"/>
+			<include name="**/stringtemplate*.jar"/>
+			<include name="**/gunit*.jar"/>
+		</fileset>
+	</path>
+
 	<path id="test.classpath">
 		<path refid="test.base.classpath"/>
-        <path refid="common.test.classpath"/>
+		<path refid="common.test.classpath"/>
 		<path refid="classpath"/>
 		<fileset dir="${common.dir}/contrib/antlrqueryparser/lib">
 			<include name="**/antlr-runtime*.jar"/>
@@ -105,7 +113,6 @@
 	<path id="additional.classpath" />
 
 
-
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<clean-parser grammar-name="${aqp.grammar}" parser-dir="${aqp.parser.dir}"/>
@@ -113,11 +120,11 @@
 
 	<target name="compile-core" depends="generate-antlr,compile"/>
 
-	
+
 	<target name="generate-antlr" depends="antlr-generate" 
 		description="Regenerates grammar; usage -Dgrammar=&lt;name&gt;"/>
 
-	
+
 	<target name="antlr-generate" depends="resolve">
 		<generate-grammar grammar-name="${aqp.grammar}"
 			 grammar-dir="${aqp.grammars.dir}"
@@ -130,42 +137,42 @@
 
 	<!-- compiles both grammar and the test classes -->
 	<target name="compile-all" depends="compile,compile-ast" />
-		
-    
+
+
 	<target name="compile-ast">
 		<mkdir dir="${build.dir}/classes/test"/>
-    <compile srcdir="${common.dir}/contrib/antlrqueryparser/src/test" 
+		<compile srcdir="${common.dir}/contrib/antlrqueryparser/src/test" 
         destdir="${build.dir}/classes/test">
-        <classpath refid="compile.classpath"/>
-        <include name="**/BuildAST.java"/>
-    </compile>
+			<classpath refid="compile.classpath"/>
+			<include name="**/BuildAST.java"/>
+		</compile>
 	</target>
-	
+
 	<target name="compile" description="Compiles all the java classes" depends="generate-antlr">
 		<compile srcdir="src/java" 
 			destdir="${build.dir}/classes/java">
-        <classpath refid="compile.classpath"/>
-	      <include name="**/*.java"/>
-        <compilerarg line="-Xlint:-deprecation" />
-    </compile>
+			<classpath refid="compile.classpath"/>
+			<include name="**/*.java"/>
+			<compilerarg line="-Xlint:-deprecation" />
+		</compile>
 	</target>
-	
-  <target name="compile-prerequisites" depends="">
-      
-      <!-- we are using some classes from the parser test framework
+
+	<target name="compile-prerequisites" depends="">
+
+		<!-- we are using some classes from the parser test framework
            so we must compile them ourselves (not to depend on luck)
            
            But we'll put them into test so that it is not included
            inside generated jars
-      --> 
-      <compile srcdir="${prop.solr.home}/lucene/queryparser/src/test" 
+      -->
+		<compile srcdir="${prop.solr.home}/lucene/queryparser/src/test" 
           destdir="${build.dir}/classes/test">
-          <classpath refid="test.classpath"/>
-          <classpath refid="additional.classpath"/>
-          <include name="**/flexible/standard/**.java"/>
-      </compile>
-      
-  </target>
+			<classpath refid="test.classpath"/>
+			<classpath refid="additional.classpath"/>
+			<include name="**/flexible/standard/**.java"/>
+		</compile>
+
+	</target>
 
 
 	<target name="dot" depends="">
@@ -177,7 +184,7 @@
 		        />
 	</target>
 
-	
+
 	<target name="tree" depends="">
 		<generate-tree grammar-name="${aqp.grammar}"
 			query="${aqp.query}"
@@ -185,7 +192,7 @@
 			classpathref="compile.classpath"/>
 	</target>
 
-	
+
 	<target name="display" depends="dot" >
 		<echo>${dotprop.dot_viewer} ${aqp.dotfile}</echo>
 		<exec executable="${dotprop.dot_viewer}" failifexecutionfails="true">
@@ -193,7 +200,7 @@
 		</exec>
 	</target>
 
-	
+
 	<target name="view" description="Test the string, usage: ant -Dquery=string" depends="dot,tree,display">
 	</target>
 
@@ -203,22 +210,17 @@
 
 	<target name="gunit" description="Run the gunit test suite, usage: ant -Dgrammar=name" 
 		depends="generate-antlr">
-		 
+
 		<run-gunit grammar-name="${aqp.grammar}" 
 			grammar-dir="${aqp.grammars.dir}" 
 			classpathref="compile.classpath"/>
 
 	</target>
 
-	
-  <target name="test" depends="default,compile-all" >
-      <antcall target="common.test" inheritRefs="true"/>
-  </target>
 
-	
 	<target name="generate-html" description="Generates a html page for the grammar X (from X.gunit file)" 
 		depends="compile-all,generate-antlr" >
-	    
+
 		<echo>
 		      Generating graphs for the grammar ${aqp.grammar}
 			    Note: the ${dotprop.svg_generator} must exist and be executable
@@ -236,15 +238,15 @@
 	</target>
 
 	<target name="build-all"  depends="clean,default,compile-all,jar" />
-	
-	
+
+
 
 	<!--
 	============================================================================================
 	                                           MACROS
   ============================================================================================
 	//-->
-    
+
 	<import file="macros.xml" />
 
 </project>

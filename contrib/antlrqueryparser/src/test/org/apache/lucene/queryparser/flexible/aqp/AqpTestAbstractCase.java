@@ -18,7 +18,6 @@ package org.apache.lucene.queryparser.flexible.aqp;
  */
 
 import java.io.IOException;
-import java.io.Reader;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,7 +33,6 @@ import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -45,6 +43,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardLuceneParser;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryParserHelper;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -54,13 +53,12 @@ import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryNodeProcessorPipeline;
-import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
-import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardLuceneParser;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.util.LuceneTestCase;
+import org.junit.AfterClass;
 
 /**
  * This test case is a copy of the core Lucene query parser test, it was adapted
@@ -80,6 +78,14 @@ public class AqpTestAbstractCase extends LuceneTestCase {
     super.setUp();
     originalMaxClauses = BooleanQuery.getMaxClauseCount();
     parserArgs = new HashMap<String, String>();
+  }
+  
+  @Override
+  public void tearDown() throws Exception {
+    BooleanQuery.setMaxClauseCount(originalMaxClauses);
+    super.tearDown();
+    //System.clearProperty("python.cachedir.skip");
+    //System.clearProperty("python.console.encoding");
   }
 
   public static void fail(String message) {
@@ -101,7 +107,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 
   public AqpQueryParser getParser(Analyzer a) throws Exception {
     if (a == null)
-      a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
+      a = new SimpleAnalyzer();
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(a);
     return qp;
@@ -222,7 +228,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 
   public Query getQueryDOA(String query, Analyzer a) throws Exception {
     if (a == null)
-      a = new SimpleAnalyzer(TEST_VERSION_CURRENT);
+      a = new SimpleAnalyzer();
     AqpQueryParser qp = getParser();
     qp.setAnalyzer(a);
     qp.setDefaultOperator(Operator.AND);
@@ -301,12 +307,12 @@ public class AqpTestAbstractCase extends LuceneTestCase {
       e.printStackTrace();
       throw new QueryNodeException(e);
     }
-    qp.setAnalyzer(new WhitespaceAnalyzer(TEST_VERSION_CURRENT));
+    qp.setAnalyzer(new WhitespaceAnalyzer());
     // qp.setLocale(Locale.ENGLISH);
     qp.setDateResolution(DateTools.Resolution.DAY);
 
     Query q = qp.parse(query, "date");
-    ScoreDoc[] hits = is.search(q, null, 1000).scoreDocs;
+    ScoreDoc[] hits = is.search(q, 1000).scoreDocs;
     assertEquals(expected, hits.length);
   }
 
@@ -395,14 +401,8 @@ public class AqpTestAbstractCase extends LuceneTestCase {
     }
   }
 
-  @Override
-  public void tearDown() throws Exception {
-    BooleanQuery.setMaxClauseCount(originalMaxClauses);
-    super.tearDown();
-    System.clearProperty("python.cachedir.skip");
-    System.clearProperty("python.console.encoding");
-  }
-
+  
+  
   class DebuggingQueryNodeProcessorPipeline extends
       StandardQueryNodeProcessorPipeline {
     DebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig) {
@@ -450,8 +450,8 @@ public class AqpTestAbstractCase extends LuceneTestCase {
 
     /** Filters MockTokenizer with StopFilter. */
     @Override
-    public final TokenStreamComponents createComponents(String fieldName, Reader reader) {
-      Tokenizer tokenizer = new MockTokenizer(reader, MockTokenizer.SIMPLE, true);
+    public final TokenStreamComponents createComponents(String fieldName) {
+      Tokenizer tokenizer = new MockTokenizer(MockTokenizer.SIMPLE, true);
       return new TokenStreamComponents(tokenizer, new QPTestFilter(tokenizer));
     }
   }

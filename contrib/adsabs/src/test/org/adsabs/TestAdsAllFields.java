@@ -22,7 +22,7 @@ package org.adsabs;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.search.LegacyNumericRangeQuery; //TODO: convert to the new
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -47,16 +47,16 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
   @BeforeClass
   public static void beforeClass() throws Exception {
   	makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
-			MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-		  MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+			MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1",
+		  MontySolrSetup.getSolrHome() + "/example/solr/collection1"
 		});
 
     System.setProperty("solr.allow.unsafe.resourceloading", "true");
     schemaString = MontySolrSetup.getMontySolrHome()
-        + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+        + "/contrib/examples/adsabs/solr/collection1/schema.xml";
 
     configString = MontySolrSetup.getMontySolrHome()
-        + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+        + "/contrib/examples/adsabs/solr/collection1/solrconfig.xml";
 
     initCore(configString, schemaString, MontySolrSetup.getSolrHome()
 			    + "/example/solr");
@@ -814,7 +814,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * cite_read_boost
 		 */
-		//dumpDoc(null, "recid", "read_count", "cite_read_boost");
+		dumpDoc(null, "recid", "read_count", "cite_read_boost");
 		assertQ(req("q", "cite_read_boost:[0.0 TO 1.0]"),
 				"//doc/int[@name='recid'][.='100']",
 				"//doc/int[@name='recid'][.='101']",

@@ -10,6 +10,6 @@ public class MockIndexWriter extends IndexWriter {
   }
   
   public DirectoryReader getReader() throws IOException {
-    return this.getReader(true);
+    return this.getReader(true, true);
   }
 }

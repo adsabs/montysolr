@@ -2,12 +2,14 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -21,7 +23,6 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
-import org.apache.solr.schema.DateField;
 import org.apache.solr.util.DateMathParser;
 
 /**
@@ -40,9 +41,10 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
 
   public AqpAdsabsFieldNodePreAnalysisProcessor() {
 	  super();
-	  dmp = new DateMathParser(DateField.UTC, Locale.ROOT);
-	  sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
-    sdf.setTimeZone(DateField.UTC);
+	  dmp = new DateMathParser(DateMathParser.UTC);
+    
+    sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
 	@Override
@@ -188,7 +190,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
 			String...moveBy) throws QueryNodeException {
 		String[] dateParts = originalDate.split("-|/");
 		Date dateWithOffset = (Date) parsedDate.clone();
-		
+		dmp.setNow(parsedDate);
 		try {
 			if (dateParts.length == 1) { // just a year
 				assert moveBy.length >= 1;
@@ -206,7 +208,9 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
 			throw new QueryNodeException(new MessageImpl(e.getMessage()));
 		}
 		
-		return DateField.formatExternal(dateWithOffset);
+		
+    return sdf.format(dateWithOffset);
+    
 	}
 	
 	@Override

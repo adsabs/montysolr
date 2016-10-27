@@ -17,14 +17,17 @@
    under the License.    
 -->
 <ivy-module version="2.0">
-    <info organisation="montysolr" module="adsabs"/>
-    <configurations>
-      <conf name="default" description="jetty jars"/>
-      <conf name="servlet" description="servlet-api jar"/>
+    <info organisation="org.apache.solr" module="adsabs"/>
+    <configurations defaultconfmapping="compile->master;test->master">
+	    <conf name="compile" transitive="false"/> <!-- keep unused 'compile' configuration to allow build to succeed -->
+	    <conf name="test" transitive="false"/>
+	    <conf name="default" description="jetty jars"/>
+        <conf name="servlet" description="servlet-api jar"/>
     </configurations>
     
     <dependencies>
-      <dependency org="org.antlr" name="antlr" rev="3.4" transitive="false"/>
+      <dependency org="org.antlr" name="antlr-runtime" rev="3.5.2"/>
+      <dependency org="org.antlr" name="antlr" rev="3.5.2" transitive="false"/>
       <dependency org="org.python" name="jython-standalone" rev="2.7-b1" transitive="false"/>
       
       <dependency org="org.eclipse.jetty" name="jetty-continuation" rev="${/org.eclipse.jetty/jetty-continuation}" transitive="false" conf="servlet->default"/>

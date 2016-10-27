@@ -20,6 +20,7 @@ package org.apache.solr.core;
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
+
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.handler.AdsConfigHandler;
 import org.junit.BeforeClass;
@@ -42,7 +43,7 @@ public class TestExtendedConfig extends MontySolrAbstractTestCase {
 		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" 
 					+	"extended-solrconfig.xml";
 		
-		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+		initCore(configString, schemaString, "./temp");
 	}
 	
 

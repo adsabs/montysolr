@@ -1,11 +1,6 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.AtomicReaderContext;
 
 /*
  *    // references(P) - set of papers that are in the reference list of P
@@ -22,19 +17,6 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
   }
 	
 	
-	@SuppressWarnings("unchecked")
-  @Override
-	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
-		return super.searcherInitialization(searcher, firstOrderWeight);
-	}
-	
-
-	@Override
-	public void setScorer(Scorer scorer) throws IOException {
-		this.scorer = scorer;
-
-	}
-
 	@Override
 	public void collect(int doc) throws IOException {
 		int[] citations = cache.getLuceneDocIds(doc+docBase);
@@ -51,18 +33,7 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 		
 	}
 
-	@Override
-  public void setNextReader(AtomicReaderContext context)
-      throws IOException {
-    this.docBase = context.docBase;
-  }
 
-	@Override
-	public boolean acceptsDocsOutOfOrder() {
-		return true;
-	}
-	
-	
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ")";
@@ -72,7 +43,10 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	public int hashCode() {
 		return 2938572 ^ cache.hashCode();
 	}
-	
-	
-	
+
+
+  @Override
+  public boolean needsScores() {
+    return true;
+  }
 }

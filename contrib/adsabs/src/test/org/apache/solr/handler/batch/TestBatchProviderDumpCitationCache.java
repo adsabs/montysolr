@@ -1,5 +1,7 @@
 package org.apache.solr.handler.batch;
 
+import java.io.File;
+
 import org.apache.solr.request.SolrQueryRequest;
 
 public class TestBatchProviderDumpCitationCache extends BatchProviderTest {
@@ -18,7 +20,7 @@ public class TestBatchProviderDumpCitationCache extends BatchProviderTest {
 		
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-		String tmpDir = System.getProperty("java.io.tmpdir");
+		String tmpDir = new File("./temp").getAbsolutePath();
 		BatchProviderI provider = new BatchProviderDumpCitationCache();
 		
 		SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "unique_field", "bibcode", "ref_field", "reference");

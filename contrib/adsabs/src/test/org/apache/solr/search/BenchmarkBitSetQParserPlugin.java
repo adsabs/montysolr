@@ -2,9 +2,10 @@ package org.apache.solr.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Random;
 
+import org.apache.lucene.util.BitSet;
+import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.util.NamedList;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class BenchmarkBitSetQParserPlugin extends MontySolrAbstractTestCase {
 			startTimer("run");
 			startTimer("Building random bitset indexSize=" + indexSize + " fill=" + fill);
 			BitSet r = randomBitSet(indexSize, fill);
-			appendToTimer("Size=" +r.size() + ",cardinality=" +r.cardinality()+ " highestBit=" + r.previousSetBit(r.size()));
+			appendToTimer("Size=" +r.length() + ",cardinality=" +r.cardinality()+ " highestBit=" + r.prevSetBit(r.length()-1));
 			stopTimer();
 
 			BitSetQParserPlugin bqp = new BitSetQParserPlugin();
@@ -110,7 +111,7 @@ public class BenchmarkBitSetQParserPlugin extends MontySolrAbstractTestCase {
 	}
 
 	private BitSet randomBitSet(int size, float fill) {
-		BitSet bs = new BitSet();
+	  BitSet bs = new FixedBitSet(size+1);
 		float max = size * fill;
 		int i = 0;
 		Random r = random();

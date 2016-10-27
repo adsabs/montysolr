@@ -4,29 +4,21 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.BytesRef;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.StrUtils;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.response.transform.DocTransformer;
-import org.apache.solr.response.transform.TransformContext;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -87,7 +79,7 @@ public class WordCloudComponent extends SearchComponent {
     SolrIndexSearcher searcher = rb.req.getSearcher();
     IndexSchema schema = rb.req.getCore().getLatestSchema();
     
-    final Analyzer analyzer = rb.req.getCore().getLatestSchema().getAnalyzer();
+    final Analyzer analyzer = rb.req.getCore().getLatestSchema().getIndexAnalyzer();
     final HashMap<String, FieldType> fieldsToLoad = new HashMap<String, FieldType>();
     
     CharTermAttribute termAtt;
@@ -141,7 +133,7 @@ public class WordCloudComponent extends SearchComponent {
     
     // TODO: filter out the tokens (use some sort of a range 0.1-0.9 by frequency)
     
-    AtomicReader reader = searcher.getAtomicReader();
+    LeafReader reader = searcher.getLeafReader();
     BytesRef term;
     int df;
     String f;

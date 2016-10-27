@@ -1,5 +1,7 @@
 package org.apache.solr.handler.batch;
 
+import java.io.File;
+
 import org.apache.solr.request.SolrQueryRequest;
 
 public class TestBatchProviderDumpDocsByQuery extends BatchProviderTest {
@@ -10,7 +12,7 @@ public class TestBatchProviderDumpDocsByQuery extends BatchProviderTest {
 		createIndex();
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-		String tmpDir = System.getProperty("java.io.tmpdir");
+		String tmpDir = new File("./temp").getAbsolutePath();
 		SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "q", "id:1");
 		
 		BatchProviderDumpDocsByQuery provider = new BatchProviderDumpDocsByQuery();

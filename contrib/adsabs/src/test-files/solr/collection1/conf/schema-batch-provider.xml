@@ -2,7 +2,7 @@
 <schema name="minimal" version="1.1">
   <types>
     <fieldType name="string" class="solr.StrField" />
-    <fieldType name="sfloat" class="solr.SortableFloatField"
+    <fieldType name="sfloat" class="solr.TrieFloatField"
       sortMissingLast="true" omitNorms="true" />
     <fieldType name="int" class="solr.TrieIntField"
       precisionStep="0" omitNorms="true" positionIncrementGap="0" />
@@ -74,7 +74,7 @@
     <field name="floatf" type="sfloat" indexed="true" stored="true"/>
       
     <field name="bibcode" type="string" indexed="true" stored="true"
-      required="false" />
+      required="false" docValues="true"/>
     <field name="text" type="text" indexed="true" stored="true" />
     <field name="text_sw" type="text_stopwords" indexed="true" stored="true" />
     <field name="author" type="text" indexed="true" stored="true"

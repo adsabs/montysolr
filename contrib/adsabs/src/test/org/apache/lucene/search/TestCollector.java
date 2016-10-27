@@ -6,10 +6,10 @@ import java.util.Random;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.MockIndexWriter;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
@@ -57,8 +57,7 @@ public class TestCollector extends LuceneTestCase {
 		if (writer != null)
 			writer.close();
 		writer = new MockIndexWriter(directory, newIndexWriterConfig(
-				TEST_VERSION_CURRENT,
-				new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).setOpenMode(mode));
+				new WhitespaceAnalyzer()).setOpenMode(mode));
 	}
 
 	private void reOpenSearcher() throws IOException {
@@ -137,7 +136,7 @@ public class TestCollector extends LuceneTestCase {
 		 * Thread.sleep(1000);
 		 */
 
-		searcher.search(new MatchAllDocsQuery(), new Collector() {
+		searcher.search(new MatchAllDocsQuery(), new SimpleCollector() {
 			Scorer scorer;
 			IndexReader reader;
 			int docBase;
@@ -157,16 +156,18 @@ public class TestCollector extends LuceneTestCase {
 			}
 
 			@Override
-			public void setNextReader(AtomicReaderContext context)
+			public void doSetNextReader(LeafReaderContext context)
 					throws IOException {
 				this.reader = context.reader();
 				this.docBase = context.docBase;
 			}
 
-			@Override
-			public boolean acceptsDocsOutOfOrder() {
-				return true;
-			}
+      @Override
+      public boolean needsScores() {
+        return false;
+      }
+
+
 		});
 
 	}

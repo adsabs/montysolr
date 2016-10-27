@@ -39,17 +39,17 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 	public static void beforeClass() throws Exception {
 		
 		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
-		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1"
 		    });
 				
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
 		schemaString = MontySolrSetup.getMontySolrHome()
-					+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+					+ "/contrib/examples/adsabs/solr/collection1/schema.xml";
 
 		
 		configString = MontySolrSetup.getMontySolrHome()
-			    + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+			    + "/contrib/examples/adsabs/solr/collection1/solrconfig.xml";
 		
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
 			    + "/example/solr");
@@ -69,7 +69,7 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "three-jets-four"));
     assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "five jets"));
     
-    assertU(commit());
+    assertU(commit("waitSearcher", "true"));
 
     assertQ(req("q", "*:*"), "//*[@numFound='10']");
     

@@ -23,23 +23,13 @@
 	<property name="webdist.home" location="${webdist}" />
 	<property name="lib.dir" value="lib" />
 	<property name="app.name" value="montysolr_java" />
-  <property name="app.solr.name" value="solr_java" />	
+    <property name="app.solr.name" value="solr_java" />	
 	<property name="app.version" value="${solr.version}.${montysolr.version}" />
 	<property name="jar.suffix" value="${app.name}-${app.version}.jar" />
 	<property name="ddash" value="--" />
 
     
-	<!--
-    trunk (future 5) = http://svn.apache.org/repos/asf/lucene/dev/trunk
-    4.x (future 4.1 etc) = http://svn.apache.org/repos/asf/lucene/dev/branches/branch_4x
-    4.0 = http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0
-    4.8 = http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_8
-    
-    29/11/12 - tracking 4.0 (before it was trunk)
-    14/1/16 - tracking 4.9
-    //-->
-	<property name="solr.svn" value="http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_9" />
-
+    <property name="solr.branch" value="branch_6_1" />
 
 	<import file="common-build.xml"/>
 	<path id="classpath">
@@ -88,7 +78,6 @@
 		<mkdir dir="${dist.dir}" />
 		<mkdir dir="${classes.dir}" />
 		<mkdir dir="${build.dir}/jar" />
-
 	</target>
 
 
@@ -131,13 +120,13 @@
 
 
 	<target name="test" depends="write-properties" description="Run tests for core and contrib">
-    <antcall target="common.test" inheritall="true" inheritrefs="true"/>
-    <antcall target="test-contrib" inheritall="true" inheritrefs="true"/>
-  </target>
+        <antcall target="common.test" inheritall="true" inheritrefs="true"/>
+        <antcall target="test-contrib" inheritall="true" inheritrefs="true"/>
+    </target>
 
     
-  <!-- obsolete: redirecting to test -->
-  <target name="test-all" depends="test" />
+    <!-- obsolete: redirecting to test -->
+    <target name="test-all" depends="test" />
     
 	
 	<!-- writes into a simple format various config variables, they can be used by unittests/java -->
@@ -155,17 +144,10 @@ solr.version=${solr.version}
 		<replaceregexp file="${build.dir}/build.properties"
 		               match="\\"
 		               replace="/"
-			             flags="g"
-		/>
-	</target>
+			           flags="g"/>
+	 </target>
 
 
-
-
-
-	
-	
-	
 
 
 
@@ -185,65 +167,14 @@ solr.version=${solr.version}
       <sequential>
       	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
       	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/adsabs"  inheritall="false" />
-    		<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/examples"  inheritall="false" />
-    	</sequential>
-    	<!--
-      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
-        <arg line="build-all -f ${common.dir}/contrib/antlrqueryparser/build.xml"/>
-      </exec>
-      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
-        <arg line="build-all -f ${common.dir}/contrib/newseman/build.xml"/>
-      </exec>
-      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
-        <arg line="build-all -f ${common.dir}/contrib/adsabs/build.xml"/>
-      </exec>
-      <exec executable="${ant}" failifexecutionfails="true" failonerror="true" >
-        <arg line="build-all -f ${common.dir}/contrib/examples/build.xml"/>
-      </exec>
-      -->
-  
-      <!--
-           seems that ant 1.8.x gets the order differently, huh... so we must make sure
-           antlrqueryparser is built before the rest, so i can't use apply
-           
-      <apply executable="${ant}" parallel="false" failonerror="true" failifexecutionfails="true">
-        <arg line="build-all"/>
-        <arg value="-f"/>
-        <fileset dir="${common.dir}/contrib">
-          <include name="**/newseman/build.xml"/>
-          <include name="**/adsabs/build.xml"/>
-          <include name="**/examples/build.xml"/>
-        </fileset>
-      </apply>
-      -->
-      
+    	<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/examples"  inheritall="false" />
+      </sequential>
     </target>
 	
 	<target name="test-contrib" >
-		
-		<ant target="test"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
-    <ant target="test"  dir="${common.dir}/contrib/adsabs"  inheritall="false" />
-    <ant target="test"  dir="${common.dir}/contrib/examples"  inheritall="false" />
-		
-		<!--
-        <apply executable="${ant}" parallel="false" failonerror="true" >
-          <arg line="test"/>
-          <arg value="-f"/>
-          <fileset dir="${common.dir}/contrib">
-            <include name="**/antlrqueryparser/build.xml"/>
-          </fileset>
-        </apply>
-	  
-  	  <apply executable="${ant}" parallel="false" failonerror="true" >
-        <arg line="test"/>
-        <arg value="-f"/>
-  	    <arg line="-Dtests.file.encoding=UTF-8" />
-        <fileset dir="${common.dir}/contrib">
-          <include name="**/adsabs/build.xml"/>
-        </fileset>
-      </apply>
-	   -->
-		
+	    <ant target="test"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+        <ant target="test"  dir="${common.dir}/contrib/adsabs"  inheritall="false" />
+        <ant target="test"  dir="${common.dir}/contrib/examples"  inheritall="false" />
     </target>
 
 	
@@ -258,35 +189,30 @@ solr.version=${solr.version}
     
 	
 	<target name="get-solr"
-    depends="get-solr-usign-svn,check-solr-location,download-solr,build-solr-example,extract-solr-jars">
+      depends="get-solr-source-code,check-solr-location,build-solr-example,extract-solr-jars">
 	</target>
 
 	
 	
 	<!-- this is for development purposes - especially when lucene/solr stable releases are not yet there -->
-	<target name="get-solr-usign-svn">
+	<target name="get-solr-source-code">
 		<mkdir dir="${solr.home}"/>
-		
-		<!--
-		<exec executable="svn" failonerror="true" failifexecutionfails="true" dir="${solr.home}">
-      <arg line="update" />
-    </exec>
-		
-		<exec executable="svn" failonerror="true" failifexecutionfails="true" dir="${solr.home}">
-      <arg value="checkout" />
-			<arg value="${solr.svn}" />
-    </exec>
-		-->
-	  
-		<exec executable="python" failifexecutionfails="true" dir="${solr.home}">
-			<arg value="-c"/>
-			<arg value="import os;'${solr.svn}'.__contains__('svn') and (os.path.isdir('.svn') and os.system('svn update - -force') or os.system('svn checkout ${solr.svn} .'))"/>
+		<exec executable="git" failifexecutionfails="true" dir="${solr.home}">
+			<arg value="clone" />
+			<arg value="https://github.com/apache/lucene-solr.git" />
+			<arg value="." />
 		</exec>
-		
+		<exec executable="git" failifexecutionfails="true" dir="${solr.home}">
+            <arg value="checkout" />
+            <arg value="${solr.branch}" />
+        </exec>
 		<antcall target="check-solr-location" />
 	</target>
 
-	<!-- this target sets the location of the solr, if not present, we'll assume build/solr-download/apache-solr-${solr.version}/solr
+	
+	<!-- 
+	   this target sets the location of the solr, if not present, we'll assume 
+	   build/solr-download/apache-solr-${solr.version}/solr
 	   The property may also be set by a download-solr task
 	 -->
 	<target name="check-solr-location" >
@@ -298,11 +224,11 @@ solr.version=${solr.version}
 		</condition>
 		
 		<condition property="solr.real.location" value="${solr.home}/solr">
-        <and>
-            <available file="${solr.home}/solr/example/README.txt"/>
-            <available file="${solr.home}/solr/contrib/contrib-build.xml"/>
-        </and>
-    </condition>
+            <and>
+                <available file="${solr.home}/solr/example/README.txt"/>
+                <available file="${solr.home}/solr/contrib/contrib-build.xml"/>
+            </and>
+        </condition>
 
 		<condition property="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr">
 			<and>
@@ -312,62 +238,18 @@ solr.version=${solr.version}
 		</condition>
 
 		<echo message="Did we find solr location? Path=${solr.real.location}"/>
-		
 		<property name="lucene.real.location" location="${solr.real.location}/../lucene" />
 	</target>
 
 
-	<!-- Download the solr binary distribution, unless it was already downloaded (if solr.real.location is
-         set, then we know solr was already downloaded/exists) -->
-	<target name="download-solr"
-		unless="solr.real.location" depends="get-solr-mirror">
-
-
-		<!-- can't rely on the init target -->
-		<mkdir dir="${build.dir}/solr-download/"/>
-
-		<echo>Downloading Solr, please wait... (but if it takes too long, then run me again and I'll use a different mirror)</echo>
-
-		<get src="${solr.mirror}/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" 
-			verbose="true" ignoreerrors="true"/>
-		
-		<condition property="_download.using.apache.mirror" value="true">
-            <not>
-                <available file="${build.dir}/solr-download/${solr.version}-src.tgz"/>
-            </not>
-        </condition>
-        
-        <antcall target="download-using-apache-mirror" />
-		
-	    <antcall target="untar-solr" />
-		
-		<!-- set the property, it may be used by other targets (see check-solr-location target) -->
-		<property name="solr.real.location" value="${build.dir}/solr-download/apache-solr-${solr.version}/solr"/>
-	</target>
-	
-	
-	<target name="download-using-apache-mirror" if="_download.using.apache.mirror">
-            <echo>This is used only when the download using mirror site fails</echo>
-            <get src="http://archive.apache.org/dist/lucene/solr/${solr.version}/apache-solr-${solr.version}-src.tgz" dest="${build.dir}/solr-download/${solr.version}-src.tgz" 
-                        verbose="true" ignoreerrors="false"/>
-            
-    </target>
-
-	<target name="untar-solr" >
-		<untar dest="${build.dir}/solr-download" src="${build.dir}/solr-download/${solr.version}-src.tgz" compression="gzip"/>
-	</target>
-
 	<target name="build-solr-example" depends="check-solr-location,build-montysolr-dependencies">
 		<echo>Building the Solr example</echo>
 
-      <!--
-          Ant used to have some problems with the basedir (ant 1.7)
           <exec executable="${ant}" dir="${solr.real.location}" logerror="true">
             <env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
             <arg value="example" />
           </exec>
-      -->
-      <ant target="example"	dir="${solr.real.location}"  inheritall="false" />
+      
 	</target>
 	
 	<target name="build-montysolr-dependencies">
@@ -376,61 +258,64 @@ solr.version=${solr.version}
 		<ant target="dist-test-framework" dir="${solr.real.location}"  inheritall="false" />
 	</target>
 	
+	
 	<target name="check-solr-jars-exist" depends="check-solr-location" >
-    <!-- since on old ant we cannot ignore it -->
-    <mkdir dir="${solr.real.location}/dist" />
-		<mkdir dir="${build.dir}/solrjars-extracted" />
+        <!-- since on old ant we cannot ignore it -->
+        <mkdir dir="${solr.real.location}/dist" />
+    		<mkdir dir="${build.dir}/solrjars-extracted" />
+    
+        <path id="montysolr.classpath.testing">
+          <fileset dir="${build.dir}/solrjars-extracted" includes="**/*.jar" />
+        </path>
+    
+        <condition property="solr.jars.exist" value="true">
+          <and>
+            <available classname="org.apache.lucene.spatial.tier.InvalidGeoException" classpath="${toString:montysolr.classpath.testing}" />
+          </and>
+        </condition>
+    
+        <echo message="Are lucene jars available? ${solr.jars.exist}" level="verbose" />
+    </target>
 
-    <path id="montysolr.classpath.testing">
-      <fileset dir="${build.dir}/solrjars-extracted" includes="**/*.jar" />
-    </path>
-
-    <condition property="solr.jars.exist" value="true">
-      <and>
-        <available classname="org.apache.lucene.spatial.tier.InvalidGeoException" classpath="${toString:montysolr.classpath.testing}" />
-      </and>
-    </condition>
-
-    <echo message="Are lucene jars available? ${solr.jars.exist}" level="verbose" />
-  </target>
-
+    <!-- copy all useful (for development useful) jars from solr to our project -->
 	<target name="extract-solr-jars" depends="check-solr-jars-exist" unless="solr.jars.exist">
-    <delete dir="${build.dir}/solrjars-extracted" />
-    <mkdir dir="${build.dir}/solrjars-extracted" />
-    <unzip dest="${build.dir}/solrjars-extracted" overwrite="yes">
-      <fileset dir="${solr.real.location}/dist">
-        <include name="*solr*.war" />
-      </fileset>
-    </unzip>
-    <move todir="${build.dir}/solrjars-extracted">
-      <fileset dir="${build.dir}/solrjars-extracted/WEB-INF/lib">
-        <include name="**/**.jar"/>
-      </fileset>
-    </move>
-    <delete dir="${build.dir}/solrjars-extracted" includeemptydirs="true">
-      <exclude name="**/**.jar"/>
-    </delete>
 		
-		<copy todir="${build.dir}/solrjars-extracted">
-      <fileset dir="${solr.real.location}/dist">
-        <include name="**/**.jar"/>
-      </fileset>
-    </copy>
+		<delete dir="${build.dir}/solrjars-extracted" />
 		
-		<copy todir="${build.dir}/solrjars-extracted" flatten="true">
-      <fileset dir="${lucene.real.location}/build">
-        <include name="**/**.jar"/>
-      </fileset>
-    </copy>
+		<!-- copy lucene jars -->
+		<copy todir="${build.dir}/solrjars-extracted/lucene" flatten="true">
+          <fileset dir="${lucene.real.location}/build">
+            <include name="**/**.jar"/>
+          </fileset>
+        </copy>
+
+		<!-- copy solr jars -->
+		<copy todir="${build.dir}/solrjars-extracted/solr">
+          <fileset dir="${solr.real.location}/dist">
+            <include name="**/**.jar"/>
+          </fileset>
+        </copy>
 		
-		<!-- this is required for running tests (that load jetty) -->
-		<copy todir="${build.dir}/solrjars-extracted/example-lib" flatten="false">
-      <fileset dir="${solr.real.location}/example/lib">
-        <include name="**/**.jar"/>
-      </fileset>
-    </copy>
+		<!-- copy solr/webapp jars -->
+        <copy todir="${build.dir}/solrjars-extracted/solr">
+          <fileset dir="${solr.real.location}/server/solr-webapp/webapp/WEB-INF/lib">
+            <include name="**/**.jar"/>
+          </fileset>
+        </copy>
 		
-  </target>
+		<!-- copy jetty jars -->
+        <copy todir="${build.dir}/solrjars-extracted/jetty">
+          <fileset dir="${solr.real.location}/server/lib">
+            <include name="**/**.jar"/>
+          </fileset>
+        </copy>
+		
+		<!-- cleanup -->
+		<delete dir="${build.dir}/solrjars-extracted" includeemptydirs="true">
+          <exclude name="**/**.jar"/>
+        </delete>
+		
+    </target>
 
 
 	
@@ -440,23 +325,13 @@ solr.version=${solr.version}
 	   depends="">
 
 		<exec executable="ant" dir="${common.dir}/contrib/examples" logerror="true"	newenvironment="true">
-      <arg line="build-one -Dename=adsabs -Dprofile=normal.profile" />
-    </exec>
-
+          <arg line="build-one -Dename=adsabs -Dprofile=normal.profile" />
+        </exec>
 	</target>
 
 	
-	<target name="get-solr-mirror" depends="init" unless="solr.real.location">
-		<exec executable="python" outputproperty="solr.mirror" failonerror="true" logerror="true">
-			<arg value="-c" />
-			<arg  value="import urllib;t = urllib.urlopen('http://www.apache.org/dyn/closer.cgi/lucene/solr/').read();l = filter(lambda x: 'lucene/solr' in x, map(lambda x: x.split('&quot;')[0], filter(lambda x: x[:4] == 'http', t.split('href=&quot;'))));print l[0]"/>
-		</exec>
-		<echo>We will use the mirror: ${solr.mirror}</echo>
-	</target>
-
 	
 	<target name="install-eclipse-project-files" depends="init" >
-
 		<property name="_home" location="." />
 
 		<exec executable="${python}" failonerror="true" outputproperty="_top_folder" logerror="true">
@@ -559,8 +434,6 @@ solr.version=${solr.version}
 	    <copy todir=".settings/" overwrite="true">
 	      <fileset dir="${solr.real.location}/../.settings" includes="*.prefs" />
 	    </copy>
-		
-		
 	</target>
 	
 	<target name="modify-eclipse" depends="check-solr-location">
@@ -582,18 +455,13 @@ solr.version=${solr.version}
 		<replace file=".classpath">
 		  <replacefilter token="path=&quot;" value="path=&quot;${solr.relative.location}"/>
 			<replacefilter token="output=&quot;" value="output=&quot;${solr.relative.location}"/>
-			
 		</replace>
-		
-		
 	</target>
 	
 	<target name="ex" depends="check-solr-location">
 		<ant target="example"
 		            dir="${solr.real.location}"
 		            inheritall="false" />
-  </target>
+    </target>
 	
-	
-	
-	</project>
+</project>

@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.lucene.index.LeafReaderContext;
 
-public abstract class AbstractSecondOrderCollector extends Collector implements
-SecondOrderCollector {
+
+public abstract class AbstractSecondOrderCollector implements Collector, LeafCollector, SecondOrderCollector {
 
 	
 	
@@ -21,27 +22,39 @@ SecondOrderCollector {
 	protected Lock lock = null;
 	private Integer lastPos = null;
 	protected float ensureCapacityRatio = 0.25f;
-	protected boolean firstOrderScorerOutOfOrder = false;
 	protected FinalValueType compactingType = FinalValueType.MAX_VALUE;
+  protected LeafReaderContext context;
 
 	public AbstractSecondOrderCollector() {
 		lock = new ReentrantLock();
 		hits = new ArrayList<CollectorDoc>();
 	}
+	
+	/** This method is called before collecting <code>context</code>. */
+  protected void doSetNextReader(LeafReaderContext context) throws IOException {
+    this.context = context;
+    this.docBase = context.docBase;
+  }
 
+  @Override
+  public void setScorer(Scorer scorer) throws IOException {
+    this.scorer = scorer;
+  }
+  
+  @Override
+  public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
+    this.doSetNextReader(context);
+    return this;
+  }
+  
+  
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
 		// this is pretty arbitrary, but 2nd order queries may return many hits...
 		((ArrayList<CollectorDoc>) hits).ensureCapacity((int) (searcher.getIndexReader().maxDoc() * ensureCapacityRatio));
-		if (firstOrderWeight != null)
-			firstOrderScorerOutOfOrder = firstOrderWeight.scoresDocsOutOfOrder();
 		return true;
 	}
 	
-	@Override
-	public void setScorer(Scorer scorer) throws IOException {
-		this.scorer = scorer;
-
-	}
+	
 
 	public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
 
@@ -448,5 +461,5 @@ SecondOrderCollector {
 		}
 		return out.toString();
 	}
-
+	
 }

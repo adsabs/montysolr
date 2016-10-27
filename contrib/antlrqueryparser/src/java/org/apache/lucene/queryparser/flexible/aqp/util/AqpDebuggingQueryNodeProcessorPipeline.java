@@ -43,6 +43,7 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
     newMap = oldMap;
 
     int i = 1;
+    System.out.println( this.getClass().toGenericString());
     System.out.println("     0. starting");
     System.out.println("--------------------------------------------");
     System.out.println(oldVal);
@@ -67,10 +68,10 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
         System.out.println(newMap);
         System.out.println("     -----------------");
       }
+      System.out.println(newVal.equals(oldVal) ? (newMap.equals(oldMap) ? "" : newVal) : newVal);
 
       System.out.println("--------------------------------------------");
 
-      System.out.println(newVal.equals(oldVal) ? "" : newVal);
 
       oldVal = newVal;
       oldMap = newMap;

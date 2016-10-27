@@ -5,11 +5,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.solr.schema.DateField;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.solr.util.DateMathParser;
 
 public final class DateNormalizerTokenFilter extends TokenFilter {
@@ -18,17 +20,20 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private DateMathParser dmp;
   private String offset;
+  private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+  
   
   public DateNormalizerTokenFilter(TokenStream input, String incomingFormat, String offset) {
     super(input);
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     this.offset = offset;
     String[] parts = incomingFormat.split("\\|");
     format = new SimpleDateFormat[parts.length];
     for (int i=0;i<parts.length;i++) {
-      format[i] = new SimpleDateFormat(parts[i], Locale.ROOT);
-      format[i].setTimeZone(DateField.UTC);
+      format[i] = new SimpleDateFormat(parts[i], Locale.US);
+      format[i].setTimeZone(TimeZone.getTimeZone("UTC"));
     }
-    dmp = new DateMathParser(DateField.UTC, Locale.ROOT);
+    dmp = new DateMathParser(TimeZone.getTimeZone("UTC"));
   }
 
   @Override
@@ -62,7 +67,7 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
           //else {
             //date = dmp.parseMath("+5MINUTES"); // 00-00 dates are 1 minute after midnight
           //}
-          return DateField.formatExternal(date);
+          return sdf.format(date);
       } catch (ParseException e) {
         //pass
       }

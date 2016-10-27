@@ -13,17 +13,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
+import org.apache.lucene.analysis.LegacyNumericTokenStream.LegacyNumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.StringField;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Collector;
-import org.apache.lucene.search.Filter;
+import org.apache.lucene.search.LeafCollector;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SimpleCollector;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.CommonParams;
@@ -33,8 +34,8 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
-import org.apache.solr.schema.SortableFloatField;
 import org.apache.solr.schema.TextField;
+import org.apache.solr.search.Filter;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
 import org.apache.solr.search.QueryParsing;
@@ -68,12 +69,6 @@ import org.noggit.JSONUtil;
 
 public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 	
-	private Filter filter = null;
-	
-	public void setFilter(Filter filter) {
-		this.filter = filter;
-	}
-	
 	public void run(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws Exception {
 		
 		SolrParams params = req.getParams();
@@ -83,12 +78,8 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 		SolrCore core = req.getCore();
 		IndexSchema schema = core.getLatestSchema();
 		final HashMap<String, FieldType> fieldsToLoad = new HashMap<String, FieldType>();
-		final Analyzer analyzer = core.getLatestSchema().getAnalyzer();
+		final Analyzer analyzer = core.getLatestSchema().getIndexAnalyzer();
 
-		String q = params.get(CommonParams.Q, null);
-		if (q == null) {
-			throw new SolrException(ErrorCode.BAD_REQUEST, "The 'q' parameter is missing, but we must know how to select docs");
-		}
 
 		String[] fields = params.getParams("fields");
 		
@@ -108,9 +99,7 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 
 		final boolean analyze = params.getBool("analyze", true);
 		
-		String defType = params.get(QueryParsing.DEFTYPE,QParserPlugin.DEFAULT_QTYPE);
-		QParser parser = QParser.getParser(q, defType, req);
-		Query query = parser.getQuery();
+		Query query = this.getQuery(req);
 
 		SolrIndexSearcher se = req.getSearcher();
 
@@ -129,19 +118,17 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 		
 		final BatchHandlerRequestQueue batchQueue = queue;
 		
-		se.search(query, filter, new Collector() {
-			private AtomicReader reader;
+		se.search(query, new SimpleCollector() {
+			private LeafReader reader;
 			private int processed = 0;
 			private CharTermAttribute termAtt;
-			private NumericTermAttribute numAtt;
+			private LegacyNumericTermAttribute numAtt;
 			private PositionIncrementAttribute posIncrAtt;
 			private Map<String, List<String>>document = new HashMap<String, List<String>>();
 
-			@Override
-			public boolean acceptsDocsOutOfOrder() {
-				return true;
+			protected void doSetNextReader(LeafReaderContext context) throws IOException {
+			  reader = context.reader();
 			}
-
 			@Override
 			public void collect(int i) throws IOException {
 				Document d;
@@ -164,7 +151,6 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 					// test this field is analyzable as text field
 					boolean isText = fType.getClass().isAssignableFrom(StringField.class) 
 						|| fType.getClass().isAssignableFrom(TextField.class)
-						|| fType.getClass().isAssignableFrom(SortableFloatField.class)
 						; 
 					
 					//System.out.println(fName + " " + fType.getClass() + " isText " + isText);
@@ -230,14 +216,12 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 				// control chars should be escaped in JSON, so this should be safe
 				out.write(JSONUtil.toJSON(document, 0).replace("\n", ""));
 			}
-			@Override
-			public void setNextReader(AtomicReaderContext context) {
-				this.reader = context.reader();
-			}
-			@Override
-			public void setScorer(org.apache.lucene.search.Scorer scorer) {
-				// Do Nothing
-			}
+			
+      @Override
+      public boolean needsScores() {
+        // TODO Auto-generated method stub
+        return false;
+      }
 		});
 		//System.out.println("written + " + jobFile);
 		out.write("]\n");

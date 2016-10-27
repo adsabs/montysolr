@@ -56,16 +56,16 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 	public static void beforeClass() throws Exception {
 		
 		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
-			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
-		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1"
 		    });
 				
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
 		schemaString = MontySolrSetup.getMontySolrHome()
-  	      + "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+  	      + "/contrib/examples/adsabs/solr/collection1/schema.xml";
 		
 		configString = MontySolrSetup.getMontySolrHome()
-          + "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+          + "/contrib/examples/adsabs/solr/collection1/solrconfig.xml";
 		
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome()
 			    + "/example/solr");
@@ -97,7 +97,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 	    NamedList<Object> defaults = new NamedList<Object>();
 	    defaults.add("allowed", ".*");
 	    defaults.add("asynchronous", true);
-	    defaults.add("workdir", "batch-handler");
+	    defaults.add("workdir", new File("./temp").getAbsolutePath() + "/batch-handler");
 	    
 	    NamedList<Object> providers = new NamedList<Object>();
 	    /*
@@ -139,7 +139,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
     
     assertEquals("{!aqp} lang:(german OR english) AND *:*", thisParams.get("q"));
     assertEquals(true, thisParams.getBool("asynchronous"));
-    assertEquals("batch-handler", thisParams.get("workdir"));
+    assertEquals(new File("./temp").getAbsolutePath() + "/batch-handler", thisParams.get("workdir"));
     assertEquals("bibcode,title,author", thisParams.get("fields"));
     assertEquals(jobid, thisParams.get("jobid"));
     assertEquals("foo\nzooo\nščř", thisParams.get("#data"));

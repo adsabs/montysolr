@@ -3,30 +3,27 @@ package org.apache.solr.search;
 import org.junit.BeforeClass;
 
 import monty.solr.util.MontySolrAbstractTestCase;
+import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.search.FieldCache;
-import org.apache.lucene.search.FieldCache.CacheEntry;
 
-
-
-public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
+public class TestSolrCitationQuery extends MontySolrQueryTestCase {
 
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		
 		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
-			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf/",
-		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
+			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/",
+		      MontySolrSetup.getSolrHome() + "/example/solr/collection1"
 		    });
 				
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
 		schemaString = MontySolrSetup.getMontySolrHome()
-					+ "/contrib/examples/adsabs/solr/collection1/conf/schema.xml";
+					+ "/contrib/examples/adsabs/solr/collection1/schema.xml";
 		
 		configString = MontySolrSetup.getMontySolrHome()
-					+ "/contrib/examples/adsabs/solr/collection1/conf/solrconfig.xml";
+					+ "/contrib/examples/adsabs/solr/collection1/solrconfig.xml";
 		
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
@@ -34,7 +31,7 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 
 	@Override
 	public void tearDown() throws Exception {
-		FieldCache.DEFAULT.purgeAllCaches();
+		//FieldCache.DEFAULT.purgeAllCaches();
 		super.tearDown();
 	}
 
@@ -63,8 +60,9 @@ public class TestSolrCitationQuery extends MontySolrAbstractTestCase {
 		assertU(adoc("id", "5", "bibcode", "F",
 				"citation", "C"
 				));
-		
 		assertU(commit("waitSearcher", "true")); // very weird, it is not waiting
+		
+		
 		
 		assertQ(req("q", "*:*"),
 				"//*[@numFound='6']"

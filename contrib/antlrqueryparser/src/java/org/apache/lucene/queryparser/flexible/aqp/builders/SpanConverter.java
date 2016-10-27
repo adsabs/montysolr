@@ -3,42 +3,41 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermContext;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-import org.apache.lucene.sandbox.queries.regex.RegexQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.ComplexExplanation;
+import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
-import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.Weight;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.spans.SpanBoostQuery;
+import org.apache.lucene.search.spans.SpanCollector;
 import org.apache.lucene.search.spans.SpanMultiTermQueryWrapper;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanNotQuery;
 import org.apache.lucene.search.spans.SpanOrQuery;
 import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.search.spans.SpanScorer;
 import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.search.spans.SpanWeight;
 import org.apache.lucene.search.spans.Spans;
-import org.apache.lucene.util.Bits;
 
 public class SpanConverter {
 	
@@ -47,20 +46,29 @@ public class SpanConverter {
 	public SpanQuery getSpanQuery(SpanConverterContainer container)
 	throws QueryNodeException {
 		Query q = container.query;
+		float boost = container.boost;
+		
 		if (q instanceof SpanQuery) {
-			return (SpanQuery) q;
+			return wrapBoost((SpanQuery) q, boost);
 		} else if (q instanceof TermQuery) {
-			return new SpanTermQuery(((TermQuery) q).getTerm());
+			return wrapBoost(new SpanTermQuery(((TermQuery) q).getTerm()), boost);
 		} else if (q instanceof WildcardQuery) {
-			return new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q);
+			return wrapBoost(new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q), boost);
 		} else if (q instanceof PrefixQuery) {
-			return new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q);
+			return wrapBoost(new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q), boost);
 		} else if (q instanceof PhraseQuery) {
-			return convertPhraseToSpan(container);
+			return wrapBoost(convertPhraseToSpan(container), boost);
 		} else if (q instanceof BooleanQuery) {
-			return convertBooleanToSpan(container);
+			return wrapBoost(convertBooleanToSpan(container), boost);
 		} else if (q instanceof RegexpQuery) {
-		  return new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q);
+		  return wrapBoost(new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q), boost);
+		} else if (q instanceof DisjunctionMaxQuery) {
+      return wrapBoost(convertDisjunctionQuery(container), boost);
+		} else if (q instanceof BoostQuery) {
+		  return wrapBoost(getSpanQuery(new SpanConverterContainer(((BoostQuery) q).getQuery(), 1, true)),
+		      ((BoostQuery) q).getBoost());
+		} else if (q instanceof MatchNoDocsQuery) {
+      return new EmptySpanQuery(container.query);
 		} else {
 			
 				SpanQuery wrapped = wrapNonConvertible(container);
@@ -73,7 +81,31 @@ public class SpanConverter {
 					+ q.getClass().getName()));
 		}
 	}
+	
+	private SpanQuery convertDisjunctionQuery(SpanConverterContainer container) throws QueryNodeException {
+    DisjunctionMaxQuery q = (DisjunctionMaxQuery) container.query;
+    List<Query> clauses = q.getDisjuncts();
+    if (clauses.size() == 0) {
+      container.query = new MatchNoDocsQuery();
+      return getSpanQuery(container);
+    }
+    else if (clauses.size() == 1) {
+      container.query = clauses.get(0);
+      return getSpanQuery(container);
+    }
+    else {
+      throw new QueryNodeException(new MessageImpl(
+          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
+          "DisjunctionQuery is not compatible with the proximity search: "
+          + q.getClass().getName()));
+    }
+  }
 
+  private SpanQuery wrapBoost(SpanQuery q, float boost) {
+	  if (boost != 1.0f)
+	    return new SpanBoostQuery(q, boost);
+	  return q;
+	}
   public SpanQuery wrapNonConvertible(SpanConverterContainer container) {
 		if (wrapNonConvertible) {
 			return doWrapping(container);
@@ -109,8 +141,8 @@ public class SpanConverter {
 	throws QueryNodeException {
 		BooleanQuery q = (BooleanQuery) container.query;
 
-		BooleanClause[] clauses = q.getClauses();
-		SpanQuery[] spanClauses = new SpanQuery[clauses.length];
+		List<BooleanClause> clauses = q.clauses();
+		SpanQuery[] spanClauses = new SpanQuery[clauses.size()];
 		Occur o = null;
 		int i = 0;
 		for (BooleanClause c : clauses) {
@@ -124,7 +156,6 @@ public class SpanConverter {
 
 			Query sq = c.getQuery();
 			SpanQuery result = getSpanQuery(new SpanConverterContainer(sq, 1, true));
-			result.setBoost(sq.getBoost());
 			spanClauses[i] = result;
 			i++;
 		}
@@ -197,67 +228,76 @@ public class SpanConverter {
 
 		public EmptySpanQuery(Query wrappedQ) {
 			this.wrappedQ = wrappedQ;
-			
+
 			emptySpan = new Spans() {
-
-				@Override
-        public boolean next() throws IOException {
-	        return false;
+        @Override
+        public int nextStartPosition() throws IOException {
+          // TODO Auto-generated method stub
+          return 0;
         }
 
-				@Override
-        public boolean skipTo(int target) throws IOException {
-	        return false;
+        @Override
+        public int startPosition() {
+          // TODO Auto-generated method stub
+          return 0;
         }
 
-				@Override
-        public int doc() {
-	        return 0;
+        @Override
+        public int endPosition() {
+          // TODO Auto-generated method stub
+          return 0;
         }
 
-				@Override
-        public int start() {
-	        return 0;
+        @Override
+        public int width() {
+          // TODO Auto-generated method stub
+          return 0;
         }
 
-				@Override
-        public int end() {
-	        return 0;
+        @Override
+        public void collect(SpanCollector collector) throws IOException {
+          // TODO Auto-generated method stub
+          
         }
 
-				@Override
-        public Collection<byte[]> getPayload() throws IOException {
-	        return null;
+        @Override
+        public float positionsCost() {
+          // TODO Auto-generated method stub
+          return 0;
         }
 
-				@Override
-        public boolean isPayloadAvailable() throws IOException {
-	        return false;
+        @Override
+        public int docID() {
+          // TODO Auto-generated method stub
+          return 0;
+        }
+
+        @Override
+        public int nextDoc() throws IOException {
+          // TODO Auto-generated method stub
+          return 0;
+        }
+
+        @Override
+        public int advance(int target) throws IOException {
+          // TODO Auto-generated method stub
+          return 0;
         }
 
         @Override
         public long cost() {
+          // TODO Auto-generated method stub
           return 0;
         }
-	    	
 	    };
 		}
 
-		@Override
-    public Spans getSpans(AtomicReaderContext context, Bits acceptDocs,
-        Map<Term, TermContext> termContexts) throws IOException {
-	    return emptySpan;
-    }
 
 		@Override
     public String getField() {
 			if (wrappedQ instanceof RegexpQuery) {
 				return ((RegexpQuery) wrappedQ).getField();
 			}
-			else if (wrappedQ instanceof RegexQuery) {
-				return ((RegexQuery) wrappedQ).getField();
-			}
-			
 			return null;
     }
 
@@ -267,36 +307,33 @@ public class SpanConverter {
     }
 		
 		@Override
-	  public Weight createWeight(IndexSearcher searcher) throws IOException {
-	    return new EmptySpanWeight(this);
+	  public SpanWeight createWeight(IndexSearcher searcher, boolean needsScores) throws IOException {
+	    return new EmptySpanWeight(this, searcher, null);
 	  }
 		
-		@Override
-	  public void extractTerms(Set<Term> terms) {
-			// pass
-		}
+
+    @Override
+    public boolean equals(Object obj) {
+      // TODO Auto-generated method stub
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      // TODO Auto-generated method stub
+      return 0;
+    }
 	}
 	
-	public static class EmptySpanWeight extends Weight {
+	public static class EmptySpanWeight extends SpanWeight {
 		
-		private Query query;
 
-		public EmptySpanWeight (Query q) {
-			query = q;
-		}
-		
-		@Override
-    public Explanation explain(AtomicReaderContext context, int doc)
+    public EmptySpanWeight(SpanQuery query, IndexSearcher searcher, Map<Term, TermContext> termContexts)
         throws IOException {
-			return new ComplexExplanation(false, 0.0f, "Ignored: " + query.toString());
+      super(query, searcher, termContexts);
     }
 
-		@Override
-    public Query getQuery() {
-	    return query;
-    }
-
-		@Override
+    @Override
     public float getValueForNormalization() throws IOException {
 	    return 1.0f;
     }
@@ -307,8 +344,30 @@ public class SpanConverter {
     }
 
     @Override
-    public Scorer scorer(AtomicReaderContext context, Bits acceptDocs)
-        throws IOException {
+    public void extractTerms(Set<Term> terms) {
+      
+    }
+
+    @Override
+    public Explanation explain(LeafReaderContext context, int doc) throws IOException {
+      return Explanation.noMatch("Ignored: " + parentQuery.toString(), new ArrayList<Explanation>());
+    }
+
+    @Override
+    public SpanScorer scorer(LeafReaderContext context) throws IOException {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    @Override
+    public void extractTermContexts(Map<Term, TermContext> contexts) {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public Spans getSpans(LeafReaderContext ctx, Postings requiredPostings) throws IOException {
+      // TODO Auto-generated method stub
       return null;
     }
 		

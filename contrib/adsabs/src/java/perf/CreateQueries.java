@@ -79,7 +79,7 @@ public class CreateQueries {
 
     final BufferedWriter queriesOut = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(queriesFileOut),"UTF8"));
 
-    final Directory dir = FSDirectory.open(new File(indexPath));
+    final Directory dir = FSDirectory.open(new File(indexPath).toPath());
     final IndexReader r = DirectoryReader.open(dir);
 
     System.out.println("\nFind top df terms...");
@@ -382,7 +382,7 @@ public class CreateQueries {
     final MostFrequentTerms pq = new MostFrequentTerms(topN);
     Terms terms = MultiFields.getTerms(r, field);
     if (terms != null) {
-      TermsEnum termsEnum = terms.iterator(null);
+      TermsEnum termsEnum = terms.iterator();
       while (termsEnum.next() != null) {
         String term = termsEnum.term().utf8ToString();
         if (term.indexOf(':') != -1) {
