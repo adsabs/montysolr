@@ -161,7 +161,7 @@
         <ant target="unlink-upstream" dir="${basedir}/../antlrqueryparser"  inheritall="false" />
 		<ant target="unlink-upstream" dir="${basedir}/../adsabs"  inheritall="false" />
 		
-		<!-- build solr distributionpwd
+		<!-- build solr distribution -->
 		<ant target="package" dir="${prop.solr.real.location}"  inheritall="false" />
 		
 		<echo>Building: ${build.dir}/${example.name}</echo>
@@ -178,7 +178,6 @@
             </fileset>
 			<regexpmapper from="solr-[^/]*/(.*)" to="\1" />
 		</copy>
-		-->
 		
 		<!-- build our own libraries -->
 		<ant target="jar" dir="${basedir}/../antlrqueryparser"  inheritall="false" />
@@ -220,6 +219,14 @@
                 <include name="*.jar" />
             </fileset>
         </copy>
+		
+		<!-- copy over our configuration files -->
+        <copy todir="${build.dir}/${example.name}/server" overwrite="true">
+            <fileset dir="${basedir}/${example.name}">
+                <include name="**/**" />
+            </fileset>
+        </copy>
+
 	</target>
 		
 	<target name="build-onex" depends="jar">
