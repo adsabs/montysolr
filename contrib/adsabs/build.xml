@@ -39,10 +39,6 @@
 	<import file="../antlrqueryparser/build.xml" />
     
 	
-	<target name="foo">
-		   <echo>${include.path}</echo>
-	</target>
-	
 	<target name="link-upstream" unless="${include.exists}">
         <mkdir dir="${include.location}"/>
         <symlink link="${include.location}/src" resource="${basedir}/src" failonerror="true"/>

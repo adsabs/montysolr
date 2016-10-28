@@ -35,7 +35,7 @@ public class TestAqpLuceneQParserPlugin extends MontySolrAbstractTestCase {
 	public static void beforeClass() throws Exception {
 		
 		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
-			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/solr/collection1/conf",
+			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
 		      MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf"
 		    });
 				

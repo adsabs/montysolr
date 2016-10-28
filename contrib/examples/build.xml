@@ -40,34 +40,14 @@
 	</condition>
 	<property name="example.ignore-environment" value="${ignore-environment}" />
 
-	<condition property="example.jvmargs" value="-d64 -Xmx1024m">
-		<not>
-			<isset property="jvmargs" />
-		</not>
-	</condition>
-	<property name="example.jvmargs" value="${jvmargs}" />
 
-	<condition property="example.config" value="normal.profile">
+	<condition property="example.profile" value="normal">
 		<not>
 			<isset property="profile" />
 		</not>
 	</condition>
-	<property name="example.config" value="${profile}" />
+	<property name="example.profile" value="${profile}" />
 
-	<condition property="run.target" value="run-bare">
-		<not>
-			<isset property="target" />
-		</not>
-	</condition>
-	<property name="run.target" value="${target}" />
-
-
-	<!-- these will be used when running tests and command line montysolr
-         you can set them as:
-         export MONTYSOLR_JVMARGS=-Djava.util.logging.config.file=./example/etc/test.logging.properties
-
-         By default, we run in 64bit mode: -d64
-     //-->
 	<property environment="env" />
 	<property name="subant.jvmargs" value="" />
 	<property name="subant.args" value="" />
@@ -127,9 +107,7 @@
 	</target>
 
 
-	<target name="default" depends="jar,build-all-examples">
-
-	</target>
+	<target name="default" depends="jar,build-all-examples" />
 
 	<target name="build-all-examples" description="Assembles all examples">
 		<exec executable="${prop.ant}" failonerror="true">
@@ -156,7 +134,7 @@
 		<fail />
 	</target>
 
-	<target name="build-one" >
+	<target name="build-one" description="Assembles distribution, usage: ant build-one -Dename={example-name} (-Dprofile={profile})" >
 		<!-- (temporary) remove our libraries -->
         <ant target="unlink-upstream" dir="${basedir}/../antlrqueryparser"  inheritall="false" />
 		<ant target="unlink-upstream" dir="${basedir}/../adsabs"  inheritall="false" />
@@ -221,298 +199,52 @@
         </copy>
 		
 		<!-- copy over our configuration files -->
-        <copy todir="${build.dir}/${example.name}/server" overwrite="true">
+        <copy todir="${build.dir}/${example.name}" overwrite="true">
             <fileset dir="${basedir}/${example.name}">
                 <include name="**/**" />
             </fileset>
         </copy>
-
-	</target>
 		
-	<target name="build-onex" depends="jar">
-		<assemble-example example-name="${example.name}" montysolr-example="${basedir}/${example.name}" solr-example="${prop.solr.real.location}/example" />
-
-		<mkdir dir="${build.dir}/${example.name}/solr/lib" />
-
-		<!-- existence of this folder prevents solr from using tmp (and UI admin going blank) -->
-		<mkdir dir="${build.dir}/${example.name}/work" />
-
-
-		<mkdir dir="${build.dir}/${example.name}/python" />
-		<mkdir dir="${build.dir}/${example.name}/jython" />
-
-		<echo>Putting Python code together into: "${build.dir}/${example.name}/python</echo>
-
-		<!-- gather and copy the python code to example/python -->
-		<copy todir="${build.dir}/${example.name}/python" flatten="false" overwrite="true">
-			<fileset dir="${common.dir}/contrib">
-				<include name="**/src/python/**/*.py" />
-			</fileset>
-			<regexpmapper from=".*/src/python/(.*)" to="\1" />
-		</copy>
-
-		<echo>Putting Jython code together into: "${build.dir}/${example.name}/jython</echo>
-
-		<!-- gather and copy the python code to example/python -->
-		<copy todir="${build.dir}/${example.name}/jython" flatten="false" overwrite="true">
-			<fileset dir="${common.dir}/contrib">
-				<include name="**/src/jython/**/*.py" />
-			</fileset>
-			<regexpmapper from=".*/src/jython/(.*)" to="\1" />
-		</copy>
-
-		<!-- set the python/jython files not-readable so that i am not tempted to mess w/ them -->
+		<!-- set configuration based on the name of the profile -->
+		<copy todir="${build.dir}/${example.name}/bin" flatten="false" overwrite="true" verbose="true">
+            <fileset dir="${basedir}/${example.name}">
+                <include name="bin/solr.in*${example.profile}" />
+            </fileset>
+            <regexpmapper from="(bin/solr.in.[^.]+).(${example.profile})" to="\1" />
+        </copy>
+		
+		<!-- fix some solr problems -->
 		<chmod perm="ugo-x">
-			<fileset dir="${build.dir}/${example.name}/python">
-				<include name="**" />
-			</fileset>
-		</chmod>
-		<chmod perm="ugo-x">
-			<fileset dir="${build.dir}/${example.name}/jython">
-				<include name="**" />
-			</fileset>
-		</chmod>
-
-
-
-		<!-- include our jars (and other dependencies) directly into solr.war - this is not strictly
-		     necessary; however if we don't do that, we have to at least include our customizations
-		     to solr code (eg. DIH classes and query parser additions). So this was the simplest
-		     and hopefully 'best' way -->
-
-		<unzip src="${build.dir}/${example.name}/webapps/solr.war" dest="${build.dir}/${example.name}/solrwar" />
-
-		<!-- put montysolr jars into war -->
-		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true" verbose="yes">
-			<fileset dir="${common.dir}/build">
-				<include name="montysolr*.jar" />
-				<include name="contrib/*/montysolr*.jar" />
-			</fileset>
-		</copy>
-
-		<!-- add selected libraries -->
-		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
-			<fileset dir="${montysolr.dependencies.dir}">
-				<!--<include name="**/apache-solr-dataimporthandler*.jar" />-->
-				<include name="**/lucene-join*.jar" />
-				<include name="**/lucene-sandbox*.jar" />
-			</fileset>
-		</copy>
-		<copy todir="${build.dir}/${example.name}/solrwar/WEB-INF/lib" flatten="true" overwrite="true">
-			<fileset dir="${common.dir}/contrib">
-				<include name="**/lib/antlr-runtime*.jar" />
-				<include name="**/lib/jython-standalone*.jar" />
-			</fileset>
-		</copy>
-
-		<!-- zip the jar back -->
-		<zip destfile="${build.dir}/${example.name}/webapps/solr.war" basedir="${build.dir}/${example.name}/solrwar" />
-
-
-		<antcall target="populate-classpath" />
-
-		<!-- generate the run.sh using default profile (even if that may be wrong for now) -->
-		<ant inheritAll="false" inheritRefs="false" target="generate-run.sh">
-			<property name="ename" value="${example.name}" />
-			<property name="ignore-environment" value="true" />
-			<property name="profile" value="${example.config}" />
-		</ant>
-		<!--	
-		<exec executable="ant" failonerror="true" dir="${basedir}">
-			<arg line="-Dename=${example.name} -Dignore-environment=true -Dprofile=${example.config} -Dtarget=generate-run.sh" />
-			<arg value="run-configured" />
-		</exec>
-		-->
-
-		<delete dir="${build.dir}/${example.name}/solrwar" />
-		<delete dir="${build.dir}/${example.name}/example-DIH" />
-		<delete dir="${build.dir}/${example.name}/exampledocs" />
-		<delete dir="${build.dir}/${example.name}/" includes="build.xml ivy.xml" />
-
+            <fileset dir="${build.dir}/${example.name}/bin">
+                <include name="solr" />
+            </fileset>
+        </chmod>
+		
 		<echo>
-    The distribution is ready in: ${build.dir}/${example.name}
-    You can start solr by: ${build.dir}/${example.name}/run.sh
-    </echo>
+		    The distribution is ready in: ${build.dir}/${example.name}
+		    You can start solr by: ${build.dir}/${example.name}/bin/solr start
+	    </echo>
 
 	</target>
 
 
-	<target name="run" description="Run the example, usage: ant run -Dename={example-name}">
-		<exec executable="${prop.ant}" failonerror="true" dir="${basedir}">
-			<env key="MONTYSOLR_MAX_WORKERS" value="4" />
-			<env key="MONTYSOLR_JVMARGS" value="${example.jvmargs} ${env.MONTYSOLR_JVMARGS}" />
-			<env key="MONTYSOLR_ARGS" value="${env.MONTYSOLR_ARGS} --daemon" />
-			<arg line="-Dename=${example.name} -Dignore-environment=${example.ignore-environment}" />
-			<arg value="run-bare" />
-		</exec>
+	<target name="run" description="Run the example, usage: ant run -Dename={example-name} (-Dprofile={profile})">
+		<exec executable="bash" failonerror="true"  >
+            <arg value="${build.dir}/${example.name}/bin/solr" />
+			<arg value="start" />
+			<arg value="-f" />
+        </exec>
 	</target>
 
-
-
-	<target name="run-configured" description="Run the example with special configuration, usage: ant run-configured -Dename={example-name} -Dprofile={profile}.
-		If you only want to generate shell script,use: ant run-configured -Dename={example-name} -Dprofile={profile} -Dtarget=generate-run.sh">
-
-		<!-- i can't do ${example.name}.PYTHON without external lib
-		     eg. http://ant.apache.org/antlibs/props/index.html -->
-
-		<property prefix="missing" file="${example.name}/${example.config}" />
-
-		<antcall target="populate-classpath" />
-
-		<exec executable="ant" failonerror="true">
-			<env key="PYTHONPATH" value="${missing.PYTHONPATH}" />
-			<env key="MONTYSOLR_JVMARGS" value="${missing.MONTYSOLR_JVMARGS}" />
-			<env key="MONTYSOLR_ARGS" value="${missing.MONTYSOLR_ARGS}" />
-			<arg line="-Dename=${example.name} -Dignore-environment=false" />
-			<arg value="${run.target}" />
-		</exec>
-	</target>
-
-
-	<target name="run-bare" depends="populate-classpath,generate-run.sh">
-		<run-montysolr 
-			classpath=""
-			classpathref="examples.classpath" 
-			ignore-environment="${example.ignore-environment}" 
-			pythonpath="${env.PYTHONPATH}" 
-			solr-home-dir="${build.dir}/${example.name}/solr" 
-			solr-data-dir="${build.dir}/${example.name}/solr/data" 
-			jvmargs="${env.MONTYSOLR_JVMARGS}" 
-			arguments="${env.MONTYSOLR_ARGS}" 
-			basedir="${build.dir}/${example.name}" />
-	</target>
-
-	<target name="generate-run.sh" depends="populate-classpath">
-		<create-run.sh classpath="" 
-			classpathref="examples.classpath" 
-			ignore-environment="${example.ignore-environment}" 
-			pythonpath="${env.PYTHONPATH}"
-			solr-home-dir="${build.dir}/${example.name}/solr" 
-			solr-data-dir="${build.dir}/${example.name}/solr/data" 
-			jvmargs="${env.MONTYSOLR_JVMARGS}" 
-			arguments="${env.MONTYSOLR_ARGS}" 
-			basedir="${build.dir}/${example.name}" />
-		<echo>Start script generated at ${build.dir}/${example.name}/run.sh</echo>
-	</target>
+	<target name="stop" description="Stop the example, usage: ant stop -Dename={example-name} (-Dprofile={profile})">
+        <exec executable="bash" failonerror="true">
+            <arg value="${build.dir}/${example.name}/bin/solr" />
+            <arg value="stop" />
+        </exec>
+    </target>
 
 	<target name="test" depends="build-one,populate-classpath,common.test" />
-
 	<target name="compile-core" depends="populate-classpath,common.compile-core"/>
-
-
-	<macrodef name="create-run.sh">
-		<attribute name="classpath" />
-		<attribute name="classpathref" />
-		<attribute name="jvmargs" />
-		<attribute name="arguments" default="" />
-		<attribute name="solr-home-dir" />
-		<attribute name="solr-data-dir" />
-		<attribute name="ignore-environment" default="true" />
-		<attribute name="pythonpath" default="${build.dir}/${example.name}/python"/>
-		<attribute name="jythonpath" default="${build.dir}/${example.name}/jython"/>
-		<attribute name="basedir" default="${basedir}"/>
-		<sequential>
-			<echo file="@{basedir}/run.sh">#!/bin/bash
-	                
-	    #           MontySolr:
-	    #           ========
-	    #               
-	    #           basedir: @{basedir}
-	    #           ignore-environment: @{ignore-environment}
-
-	    JVMARGS=$1
-	    ARGS=$2
-	          
-	    export HOMEDIR=@@@          
-	    export PYTHONPATH=@{pythonpath}
-	    export JYTHONPATH=@{jythonpath}
-
-	    #          For reference (not needed by MontySOLR)
-	    export JAVA_CP="${toString:@{classpathref}}"            
-	    export CP="$JCC_CP${path.separator}$JAVA_CP"            
-	                
-	    java \
-	         -Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir} \
-	         -Dpython.path=$JYTHONPATH \
-	         @{jvmargs} $JVMARGS \
-	         -jar start.jar \
-	         @{arguments} $ARGS &amp;
-
-	    pid=$!
-	    echo "MontySolr pid=$pid"
-	    echo "$pid" > "$HOMEDIR/montysolr.pid"
-	    trap "kill $pid" TERM
-	    trap "kill $pid" SIGINT
-	    wait $pid                           
-	                
-	                </echo>
-
-			<replace file="@{basedir}/run.sh" token="@{basedir}" value="$HOMEDIR"/>
-			<replace file="@{basedir}/run.sh" token="@@@" value="@{basedir}"/>
-			<chmod file="@{basedir}/run.sh" perm="u+x" />
-
-		</sequential>
-
-	</macrodef>
-
-	<macrodef name="run-montysolr">
-		<attribute name="classpath" />
-		<attribute name="classpathref" />
-		<attribute name="jvmargs" />
-		<attribute name="arguments" default="" />
-		<attribute name="solr-home-dir" />
-		<attribute name="solr-data-dir" />
-		<attribute name="ignore-environment" default="true" />
-		<attribute name="pythonpath" default=""/>
-		<attribute name="jythonpath" default=""/>
-		<attribute name="basedir" default="${basedir}"/>
-
-		<sequential>
-			<java classpath="@{classpath}"
-	                classpathref="@{classpathref}"
-	                fork="true"
-	                newenvironment="@{ignore-environment}"
-	                dir="@{basedir}"
-	                >
-
-				<env key="PYTHONPATH" path="@{pythonpath}" />
-				<jvmarg line="-Dsolr.solr.home=@{solr-home-dir} -Dsolr.data.dir=@{solr-data-dir}"/>
-				<jvmarg line="@{jvmargs} -jar start.jar"/>
-				<arg line="@{arguments}"/>
-			</java>
-		</sequential>
-	</macrodef>
-
-	<macrodef name="assemble-example">
-		<attribute name="montysolr-example"/>
-		<attribute name="solr-example"/>
-		<attribute name="example-name"/>
-		<attribute name="build-dir" default="${build.dir}"/>
-		<sequential>
-			<delete dir="@{build-dir}/@{example-name}" failonerror="false"/>
-
-			<mkdir dir="@{build-dir}/@{example-name}"/>
-
-			<!-- first copy the montysolr files -->
-			<copy todir="@{build-dir}/@{example-name}" overwrite="true">
-				<fileset dir="@{montysolr-example}">
-					<include name="**/**" />
-				</fileset>
-			</copy>
-
-			<!-- then the remaining solr files -->
-			<copy todir="@{build-dir}/@{example-name}" overwrite="false">
-				<fileset dir="@{solr-example}">
-					<include name="**/**" />
-				</fileset>
-			</copy>
-
-			<echo>
-	                  Assembled @{example-name} at @{build-dir}/@{example-name}
-         </echo>
-
-		</sequential>
-	</macrodef>
 
 
 </project>
