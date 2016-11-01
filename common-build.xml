@@ -24,7 +24,7 @@
     This file is designed for importing into a main build file, and not intended
     for standalone use.
     </description>
-	
+
 	<!--
     ======================================================================
              Selected properties from lucene/common-build.xml 
@@ -32,7 +32,6 @@
     //-->
 
 	<dirname file="${ant.file.common}" property="common.dir"/>
-	<property name="dev-tools.dir" value="${common.dir}/../dev-tools"/>
 
 	<!-- Give user a chance to override without editing this file
 	      (and without typing -D each time it compiles it -->
@@ -61,8 +60,8 @@
 	<property name="common.classpath.excludes" value="**/*.txt,**/*.template,**/*.sha1" />
 
 	<property name="ivy.bootstrap.version" value="2.3.0" />
-    <property name="ivy.default.configuration" value="*"/>
-    <property name="ivy.sync" value="true"/>
+	<property name="ivy.default.configuration" value="*"/>
+	<property name="ivy.sync" value="true"/>
 
 	<property name="junit.jar" value="junit-4.10.jar"/>
 	<property name="junit-location.jar" value="${common.dir}/lib/${junit.jar}"/>
@@ -81,62 +80,6 @@
 	<!-- default arguments to pass to JVM executing tests -->
 	<property name="args" value=""/>
 
-	<property name="tests.seed" value="" />
-	<property name="tests.jvms" value="auto" />
-	<property name="tests.multiplier" value="1" />
-	<property name="tests.codec" value="random" />
-	<property name="tests.postingsformat" value="random" />
-	<property name="tests.locale" value="random" />
-	<property name="tests.timezone" value="random" />
-	<property name="tests.directory" value="random" />
-	<property name="tests.linedocsfile" value="europarl.lines.txt.gz" />
-    <property name="tests.loggingfile" value="${common.dir}/logging.properties"/>
-	<property name="tests.nightly" value="false" />
-	<property name="tests.weekly" value="false" />
-	<property name="tests.slow" value="true" />
-	<property name="tests.cleanthreads.sysprop" value="perMethod"/>
-	<property name="tests.asserts.gracious" value="false"/>
-	<property name="tests.verbose" value="false"/>
-	<property name="tests.infostream" value="${tests.verbose}"/>
-
-	<condition property="tests.heapsize" value="768M" else="512M">
-        <isset property="run.clover"/>
-    </condition>
-      
-    <condition property="tests.clover.args" value="-XX:ReservedCodeCacheSize=128m -XX:MaxPermSize=192m" else="">
-       <isset property="run.clover"/>
-    </condition>
-	<property name="tests.clover.args" value=""/>
-
-	<property name="tests.tempDir" value="${build.dir}/test"/>
-
-    <condition property="tests.remoteDebug" value="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y" else="" >
-        <isset property="remoteDebug"/>
-    </condition>
-    <echo message="remote debug: ${tests.remoteDebug}"/>
-	
-	<property name="tests.cachefile" location="${common.dir}/build/junit4/cached-timehints.txt" />
-	<property name="tests.cachefilehistory" value="20" />
-
-	<!-- Override these in your local properties to your desire. -->
-	<!-- Show simple class names (no package) in test suites. -->
-	<property name="tests.useSimpleNames" value="false" />
-	<!-- Max width for class name truncation.  -->
-	<property name="tests.maxClassNameColumns" value="10000" />
-	<!-- Show suite summaries for tests. -->
-	<property name="tests.showSuiteSummary" value="true" />
-	<!-- Show timestamps in console test reports. -->
-	<property name="tests.timestamps" value="false" />
-	<!-- Heartbeat in seconds for reporting long running tests or hung forked JVMs. -->
-	<property name="tests.heartbeat" value="60" />
-
-	<!-- Configure test emission to console for each type of status -->
-	<property name="tests.showError" value="true" />
-	<property name="tests.showFailure" value="true" />
-	<property name="tests.showIgnored" value="true" />
-
-    <!-- Display at most this many failures as a summary at the end of junit4 run. -->
-    <property name="tests.showNumFailures" value="10" />
 
 	<property name="javac.deprecation" value="off"/>
 	<property name="javac.debug" value="on"/>
@@ -146,29 +89,8 @@
 	<property name="javac.target.backwards" value="1.8"/>
 	<property name="javac.args" value="-Xlint -Xlint:-deprecation -Xlint:-serial"/>
 	<property name="bootclasspath" value=""/>
-	<property name="javadoc.link" value="http://download.oracle.com/javase/6/docs/api/"/>
-	<property name="javadoc.link.junit" value="http://junit.sourceforge.net/javadoc/"/>
-	<property name="javadoc.packagelist.dir" value="${common.dir}/tools/javadoc"/>
-	<available file="${javadoc.packagelist.dir}/java6/package-list" property="javadoc.java6.packagelist.exists"/>
-	<property name="javadoc.access" value="protected"/>
-	<property name="javadoc.charset" value="utf-8"/>
-	<property name="javadoc.dir" value="${common.dir}/build/docs"/>
-	<property name="javadoc.maxmemory" value="512m" />
-	<!-- Javadoc classpath -->
-	<path id="javadoc.classpath">
-		<path refid="classpath"/>
-		<pathelement location="${ant.home}/lib/ant.jar"/>
-		<fileset dir=".">
-			<exclude name="build/**/*.jar"/>
-			<include name="**/lib/*.jar"/>
-		</fileset>
-	</path>
-
-	<property name="changes.src.dir" value="${common.dir}/site/changes"/>
-	<property name="changes.target.dir" value="${common.dir}/build/docs/changes"/>
 
 	<property name="project.name" value="site"/>
-	<!-- todo: is this used by anakia or something else? -->
 	<property name="build.encoding" value="utf-8"/>
 
 	<property name="src.dir" location="src/java"/>
@@ -176,24 +98,10 @@
 	<property name="build.dir" location="build"/>
 	<!-- Needed in case a module needs the original build, also for compile-tools to be called from a module -->
 	<property name="common.build.dir" location="${common.dir}/build"/>
-	<property name="tests.lockdir" location="${common.build.dir}"/>
 	<property name="dist.dir" location="${common.dir}/dist"/>
 	<property name="maven.dist.dir" location="${dist.dir}/maven"/>
 	<property name="m2.repository.url" value="file://${maven.dist.dir}"/>
 	<property name="m2.repository.private.key" value="${user.home}/.ssh/id_dsa"/>
-
-
-	<property name="backwards.dir" location="backwards"/>
-	<property name="build.dir.backwards" location="${build.dir}/backwards"/>
-
-	<property name="junit.output.dir" location="${build.dir}/test"/>
-	<property name="junit.output.dir.backwards" location="${build.dir.backwards}/test"/>
-	<property name="junit.reports" location="${build.dir}/test/reports"/>
-	<property name="junit.reports.backwards" location="${build.dir.backwards}/test/reports"/>
-
-	<property name="manifest.file" location="${build.dir}/MANIFEST.MF"/>
-
-
 
 
 	<propertyset id="uptodate.and.compiled.properties" dynamic="true">
@@ -201,9 +109,6 @@
 		<propertyref regex=".*\.compiled$$"/>
 	</propertyset>
 
-	<patternset id="lucene.local.src.package.patterns"
-	              excludes="**/pom.xml,**/*.iml,**/*.jar,build/**,dist/**,benchmark/work/**,benchmark/temp/**,tools/javadoc/java6/**,tools/clover/**"
-	  />
 
 	<!-- Default exclude sources and javadoc jars from Ivy fetch to save time and bandwidth -->
 	<condition property="ivy.exclude.types" 
@@ -222,16 +127,13 @@
 	</fail>
 
 
-	
-	<!-- define dummy clover path used by junit -->
-    <path id="clover.classpath"/>
 
 	<!--
     ======================================================================
               important paths for MontySolr 
     ======================================================================	
 	//-->
-	
+
 	<property file="${common.build.dir}/build.properties" prefix="prop"/>
 
 	<!-- common classpaths that are shareable across montysolr
@@ -277,8 +179,8 @@
 		<!-- these classes cannot be found in solr/lucene jars, they are needed
 	                 for proper compilation of unittests -->
 		<fileset dir="${common.dir}/build">
-      <include name="solrjars-extracted/solr/test-framework/**.jar" />
-    </fileset>
+			<include name="solrjars-extracted/solr/test-framework/**.jar" />
+		</fileset>
 
 		<path refid="common.classpath"/>
 	</path>
@@ -290,14 +192,14 @@
 		<pathelement location="${common.dir}/build/classes/java"/>
 		<pathelement path="${java.class.path}"/>
 	</path>
-	
+
 	<!-- if testcase is specified let the family be empty (to include all) -->
 	<condition property="tests.family" value="">
-        <isset property="testcase" />
-    </condition>
+		<isset property="testcase" />
+	</condition>
 	<condition property="tests.family" value="${testfamily}">
-        <isset property="testfamily" />
-    </condition>
+		<isset property="testfamily" />
+	</condition>
 	<property name="tests.family" value="Test" />
 
 	<!--
@@ -319,36 +221,36 @@
 	</target>
 
 	<target name="ivy-configure">
-     <!-- [DW] ivy loses its configuration for some reason. cannot explain this. if
+		<!-- [DW] ivy loses its configuration for some reason. cannot explain this. if
           you have an idea, fix it.
           unless="ivy.settings.uptodate" -->
-    <!-- override: just for safety, should be unnecessary -->
-    <ivy:configure file="${common.dir}/ivy-settings.xml" override="true"/>
-    <!-- <property name="ivy.settings.uptodate" value="true"/> -->
-  </target>
+		<!-- override: just for safety, should be unnecessary -->
+		<ivy:configure file="${common.dir}/ivy-settings.xml" override="true"/>
+		<!-- <property name="ivy.settings.uptodate" value="true"/> -->
+	</target>
 
-  <target name="resolve" depends="ivy-availability-check,ivy-configure">
-    <!-- todo, make this a property or something. 
+	<target name="resolve" depends="ivy-availability-check,ivy-configure">
+		<!-- todo, make this a property or something. 
          only special cases need bundles -->
-    <ivy:retrieve type="jar,bundle,test,test-jar,tests" log="download-only"
+		<ivy:retrieve type="jar,bundle,test,test-jar,tests" log="download-only"
                   conf="${ivy.default.configuration}" sync="${ivy.sync}"/>
-  </target>
+	</target>
 
 	<property name="ivy_install_path" location="${user.home}/.ant/lib" />
-  <property name="ivy_bootstrap_url1" value="http://repo1.maven.org/maven2"/>
-  <!-- you might need to tweak this from china so it works -->
-  <property name="ivy_bootstrap_url2" value="http://uk.maven.org/maven2"/>
-  <property name="ivy_checksum_sha1" value="c5ebf1c253ad4959a29f4acfe696ee48cdd9f473"/>
+	<property name="ivy_bootstrap_url1" value="http://repo1.maven.org/maven2"/>
+	<!-- you might need to tweak this from china so it works -->
+	<property name="ivy_bootstrap_url2" value="http://uk.maven.org/maven2"/>
+	<property name="ivy_checksum_sha1" value="c5ebf1c253ad4959a29f4acfe696ee48cdd9f473"/>
 
 	<target name="ivy-availability-check" unless="ivy.available">
-	    <condition property="ivy.available">
-	      <typefound uri="antlib:org.apache.ivy.ant" name="configure" />
-	    </condition>
-	    <antcall target="ivy-fail" />
-	  </target>
+		<condition property="ivy.available">
+			<typefound uri="antlib:org.apache.ivy.ant" name="configure" />
+		</condition>
+		<antcall target="ivy-fail" />
+	</target>
 
-	  <target name="ivy-fail" unless="ivy.available">
-	   <echo>
+	<target name="ivy-fail" unless="ivy.available">
+		<echo>
 	     This build requires Ivy and Ivy could not be found in your ant classpath.
 
 	     (Due to classpath issues and the recursive nature of the Lucene/Solr 
@@ -381,8 +283,8 @@
 	     ant config to allow the user lib to be loaded.  See the wiki for more details:
 	       http://wiki.apache.org/lucene-java/HowToContribute#antivy
     </echo>
-    <fail>Ivy is not available</fail>
-  </target>
+		<fail>Ivy is not available</fail>
+	</target>
 	<target name="ivy-bootstrap" description="Download and install Ivy in the users ant lib dir" depends="ivy-bootstrap1,ivy-bootstrap2,ivy-checksum"/>
 
 	<!-- try to download from repo1.maven.org -->
@@ -422,476 +324,35 @@
 
 
 
-	<target name="compile-core" depends="init"
-          description="Compiles core classes">
-		<!-- deactivate: as we have everything in contribs
-		<compile
-      srcdir="${src.dir}"
-      destdir="${build.dir}/classes/java">
-			<classpath refid="classpath"/>
-		</compile>
-		-->
-
-		<!-- Copy the resources folder (if existent) -->
-		<copy todir="${build.dir}/classes/java">
-			<fileset dir="${src.dir}/../resources" erroronmissingdir="no"/>
-		</copy>
-		
+	<target name="compile-core" depends="init">
+		<!-- intentionally empty -->
 	</target>
 
 	<target name="compile" depends="compile-core">
 		<!-- convenience target to compile core -->
 	</target>
 
-	<target name="jar-core" depends="compile-core"
-    description="Packages the JAR file">
-		<jarify/>
-	</target>
-
-
-
-
-	<macrodef name="build-manifest" description="Builds a manifest file">
-		<attribute name="title"/>
-		<attribute name="implementation.title"/>
-		<attribute name="spec.version"/>
-		<attribute name="manifest.file" default="${manifest.file}"/>
-		<sequential>
-			<manifest file="@{manifest.file}">
-				<!--
-	        http://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#JAR%20Manifest
-	        http://java.sun.com/j2se/1.5.0/docs/guide/versioning/spec/versioning2.html
-	        http://java.sun.com/j2se/1.5.0/docs/api/java/lang/Package.html
-	        http://java.sun.com/j2se/1.5.0/docs/api/java/util/jar/package-summary.html
-	        http://java.sun.com/developer/Books/javaprogramming/JAR/basics/manifest.html
-	        -->
-				<!-- Don't set 'Manifest-Version' it identifies the version of the
-	             manifest file format, and should always be 1.0 (the default)
-
-	             Don't set 'Created-by' attribute, its purpose is
-	             to identify the version of java used to build the jar,
-	             which ant will do by default.
-
-	             Ant will happily override these with bogus strings if you
-	             tell it to, so don't.
-
-	             NOTE: we don't use section info because all of our manifest data
-	             applies to the entire jar/war ... no package specific info.
-	        -->
-				<attribute name="Extension-Name" value="@{implementation.title}"/>
-				<attribute name="Specification-Title" value="@{title}"/>
-				<!-- spec version must match "digit+{.digit+}*" -->
-				<attribute name="Specification-Version" value="@{spec.version}"/>
-				<attribute name="Specification-Vendor"
-	                   value="The Apache Software Foundation"/>
-				<attribute name="Implementation-Title" value="@{implementation.title}"/>
-				<!-- impl version can be any string -->
-				<attribute name="Implementation-Version"
-	                   value="${version} ${svnversion} - ${user.name} - ${DSTAMP} ${TSTAMP}"/>
-				<attribute name="Implementation-Vendor"
-	                   value="ADS"/>
-				<attribute name="X-Compile-Source-JDK" value="${javac.source}"/>
-				<attribute name="X-Compile-Target-JDK" value="${javac.target}"/>
-			</manifest>
-		</sequential>
-	</macrodef>
-
-	<macrodef name="jarify" description="Builds a JAR file">
-		<attribute name="basedir" default="${build.dir}/classes/java"/>
-		<attribute name="destfile" default="${build.dir}/${final.name}.jar"/>
-		<attribute name="title" default="MontySolr Extension: ${ant.project.name}"/>
-		<attribute name="excludes" default="**/pom.xml,**/*.iml"/>
-		<attribute name="metainf.source.dir" default="${common.dir}"/>
-		<attribute name="implementation.title" default="org.apache.lucene"/>
-		<attribute name="spec.version" default="${spec.version}"/>
-		<attribute name="manifest.file" default="${manifest.file}"/>
-		<element name="nested" optional="true" implicit="true"/>
-		<sequential>
-
-			<build-manifest title="@{title}"
-	                      implementation.title="@{implementation.title}"
-	                      spec.version="@{spec.version}"
-	                      manifest.file="@{manifest.file}"/>
-
-			<jar destfile="@{destfile}"
-	           basedir="@{basedir}"
-	           manifest="@{manifest.file}"
-	           excludes="@{excludes}">
-				<metainf dir="@{metainf.source.dir}" includes="LICENSE.txt,NOTICE.txt"/>
-				<nested />
-			</jar>
-		</sequential>
-	</macrodef>
 
 
 	<target name="compile-test" depends="compile-core">
-		<compile-test-macro srcdir="${tests.src.dir}" destdir="${build.dir}/classes/test"
-  						test.classpath="test.classpath"/>
+
 	</target>
 
-	<property name="tests.verbose" value="false"/>
 
-	<macrodef name="compile-test-macro" description="Compiles junit tests.">
-		<attribute name="srcdir"/>
-		<attribute name="destdir"/>
-		<attribute name="test.classpath"/>
-		<attribute name="javac.source" default="${javac.source}"/>
-		<attribute name="javac.target" default="${javac.target}"/>
-
-		<sequential>
-			<compile
-        srcdir="@{srcdir}" 
-        destdir="@{destdir}"
-        javac.source="@{javac.source}"
-        javac.target="@{javac.source}">
-				<classpath refid="@{test.classpath}"/>
-			</compile>
-
-			<!-- Copy any data files present to the classpath -->
-			<copy todir="@{destdir}">
-				<fileset dir="@{srcdir}" excludes="**/*.java"/>
-			</copy>
-		</sequential>
-	</macrodef>
-    
-	
-	<!-- Aliases for tests filters -->
-	  <condition property="tests.class" value="*.${testcase}">
-	    <isset property="testcase" />
-	  </condition>
-	  <condition property="tests.method" value="${testmethod}*">
-	    <isset property="testmethod" />
-	  </condition>
-	  <condition property="tests.showSuccess" value="true">
-	    <or>
-	      <isset property="tests.class" />
-	      <isset property="tests.method" />
-	    </or>
-	  </condition>
-	  <!-- default -->
-	  <property name="tests.showSuccess" value="false"/>
-
-      <condition property="tests.showOutput" value="always">
-        <or> 
-          <isset property="tests.class" />
-          <isset property="tests.method" />
-        </or>
-      </condition>
-      <property name="tests.showOutput" value="onerror"/>
-
-	<!-- Test macro using junit4. -->
-	<macrodef name="test-macro" description="Executes junit tests.">
-		<attribute name="junit.output.dir" default="${junit.output.dir}"/>
-		<attribute name="junit.classpath" default="junit.classpath"/>
-		<attribute name="testsDir" default="${build.dir}/classes/test"/>
-		<attribute name="tempDir" default="${tests.tempDir}"/>
-		<attribute name="threadNum" default="1"/>
-		<attribute name="tests.nightly" default="${tests.nightly}"/>
-		<attribute name="tests.weekly" default="${tests.weekly}"/>
-		<attribute name="tests.slow" default="${tests.slow}"/>
-		<attribute name="tests.multiplier" default="${tests.multiplier}"/>
-		<attribute name="testFamily" default="Test"/>
-
-		<sequential>
-			<!-- Warn if somebody uses removed properties. -->
-			<fail message="This property has been removed: tests.iter, use -Dtests.iters=N.">
-				<condition>
-					<isset property="tests.iter" />
-				</condition>
-			</fail>
-			<!-- this combo makes no sense LUCENE-4146 -->
-			<fail message="You are attempting to use 'tests.iters' in combination with a 'tests.method' value with does not end in a '*' -- This combination makes no sense, because the 'tests.method' filter will be unable to match the synthetic test names generated by the multiple iterations.">
-				<condition>
-					<and>
-						<isset property="tests.iters" />
-						<isset property="tests.method" />
-						<not>
-							<matches pattern="\*$" string="${tests.method}" />
-						</not>
-					</and>
-				</condition>
-			</fail>
-
-			<!-- Defaults. -->
-			<property name="tests.class"  value="" />
-			<property name="tests.method" value="" />
-			<property name="tests.dynamicAssignmentRatio" value="0.50" />
-			<!-- 50% of suites -->
-			<property name="tests.haltonfailure" value="true" />
-			<property name="tests.iters" value="" />
-			<property name="tests.dups"  value="1" />
-
-			<!-- Pick the random seed now (unless already set). -->
-	        <junit4:pickseed property="tests.seed" />
-
-	        <!-- Pick file.encoding based on the random seed. -->
-	        <junit4:pickfromlist property="tests.file.encoding" allowundefined="false" seed="${tests.seed}">
-	            <!-- Guaranteed support on any JVM. -->
-	            <value>US-ASCII</value>   <!-- single byte length -->
-	            <value>ISO-8859-1</value> <!-- single byte length -->
-	            <value>UTF-8</value>      <!-- variable byte length -->
-	            <value><!-- empty/ default encoding. --></value>
-
-	            <!--
-	            Disabled because of Java 1.7 bug on Linux/ Unix:
-	            http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7181721
-
-	            <value>UTF-16</value>     
-	            <value>UTF-16LE</value>   
-	            <value>UTF-16BE</value>
-	            -->
-	        </junit4:pickfromlist>
-			
-			<junit4:junit4
-	            dir="@{tempDir}"
-	            tempdir="@{tempDir}"
-	            maxmemory="${tests.heapsize}" 
-	            
-	            parallelism="@{threadNum}"
-
-	            printSummary="true"
-	            haltonfailure="${tests.haltonfailure}" 
-	            failureProperty="tests.failed"
-
-	            dynamicAssignmentRatio="${tests.dynamicAssignmentRatio}"
-	            shuffleOnSlave="true"
-	            leaveTemporary="false"
-	            seed="${tests.seed}"
-
-	            heartbeat="${tests.heartbeat}"
-				uniqueSuiteNames="false"
-	        >
-				<!-- Classpaths. -->
-				<classpath refid="@{junit.classpath}"/>
-				<classpath refid="clover.classpath" />
-
-				<!-- Assertions. -->
-				<assertions>
-					<enable package="org.apache.lucene"/>
-					<enable package="org.apache.solr"/>
-				</assertions>
-
-				<!-- JVM arguments and system properties. -->
-				<jvmarg line="${args}"/>
-				<jvmarg line="${tests.clover.args}"/>
-
-                <!-- For remote debugging from Eclipse -->
-                <jvmarg line="${tests.remoteDebug}" />
-
-				<!-- set the number of times tests should run -->
-				<sysproperty key="tests.iters" value="${tests.iters}"/>
-				<!-- allow tests to control debug prints -->
-				<sysproperty key="tests.verbose" value="${tests.verbose}"/>
-				<!-- even more debugging -->
-				<sysproperty key="tests.infostream" value="${tests.infostream}"/>
-				<!-- directory for formatter lock -->
-				<sysproperty key="tests.lockdir" value="${tests.lockdir}"/>
-				<!-- set the codec tests should run with -->
-				<sysproperty key="tests.codec" value="${tests.codec}"/>
-				<!-- set the postingsformat tests should run with -->
-				<sysproperty key="tests.postingsformat" value="${tests.postingsformat}"/>
-				<!-- set the locale tests should run with -->
-				<sysproperty key="tests.locale" value="${tests.locale}"/>
-				<!-- set the timezone tests should run with -->
-				<sysproperty key="tests.timezone" value="${tests.timezone}"/>
-				<!-- set the directory tests should run with -->
-				<sysproperty key="tests.directory" value="${tests.directory}"/>
-				<!-- set the line file source for oal.util.LineFileDocs -->
-				<sysproperty key="tests.linedocsfile" value="${tests.linedocsfile}"/>
-				<!-- set the Version that tests should run against -->
-				<sysproperty key="tests.luceneMatchVersion" value="${tests.luceneMatchVersion}"/>
-				<!-- for lucene we can be strict, and we don't want false fails even across methods -->
-				<sysproperty key="tests.cleanthreads" value="${tests.cleanthreads.sysprop}"/>
-				<!-- logging config file -->
-				<sysproperty key="java.util.logging.config.file" value="${tests.loggingfile}"/>
-				<!-- set whether or not nightly tests should run -->
-				<sysproperty key="tests.nightly" value="@{tests.nightly}"/>
-				<!-- set whether or not weekly tests should run -->
-				<sysproperty key="tests.weekly" value="@{tests.weekly}"/>
-				<!-- set whether or not slow tests should run -->
-				<sysproperty key="tests.slow" value="@{tests.slow}"/>
-
-				<!-- set whether tests framework should not require java assertions enabled -->
-				<sysproperty key="tests.asserts.gracious" value="${tests.asserts.gracious}"/>
-
-				<!-- TODO: create propertyset for test properties, so each project can have its own set -->
-				<sysproperty key="tests.multiplier" value="@{tests.multiplier}"/>
-
-				<!-- Temporary directory in the cwd. -->
-				<sysproperty key="tempDir" value="."/>
-
-				<sysproperty key="lucene.version" value="${dev.version}"/>
-
-				<sysproperty key="jetty.testMode" value="1"/>
-				<sysproperty key="jetty.insecurerandom" value="1"/>
-				<sysproperty key="solr.directoryFactory" value="org.apache.solr.core.MockDirectoryFactory"/>
-
-                <!-- disable AWT while running tests -->
-                <sysproperty key="java.awt.headless" value="true"/>
-
-				<!-- Only pass these to the test JVMs if defined in ANT. -->
-				<syspropertyset>
-					<propertyref prefix="tests.maxfailures" />
-					<propertyref prefix="tests.failfast" />
-					<propertyref prefix="tests.badapples" />
-				</syspropertyset>
-
-				<!-- Pass randomized settings to the forked JVM. -->
-				<syspropertyset ignoreEmpty="true">
-					<propertyref prefix="tests.file.encoding" />
-					<mapper type="glob" from="tests.*" to="*" />
-				</syspropertyset>
-
-				<!-- Use static cached test balancing statistcs. -->
-				<balancers>
-					<junit4:execution-times>
-						<fileset dir="${common.dir}/build/junit4" includes="**/*.txt" />
-					</junit4:execution-times>
-				</balancers>
-
-				<!-- Reporting listeners. -->
-				<listeners>
-					<!-- A simplified console output (maven-like). -->
-					<junit4:report-text
-	                    showThrowable="true" 
-	                    showStackTraces="true" 
-                        showOutput="${tests.showOutput}"
-
-	                    showStatusOk="${tests.showSuccess}"
-	                    showStatusError="${tests.showError}"
-	                    showStatusFailure="${tests.showFailure}"
-	                    showStatusIgnored="${tests.showIgnored}"
-
-	                    showSuiteSummary="${tests.showSuiteSummary}"
-
-	                    useSimpleNames="${tests.useSimpleNames}"
-	                    maxClassNameColumns="${tests.maxClassNameColumns}"
-	                    
-	                    timestamps="${tests.timestamps}"
-                        showNumFailures="${tests.showNumFailures}"
-	                />
-
-					<!-- Emits full status for all tests, their relative order on slaves. -->
-					<junit4:report-text
-	                    file="@{junit.output.dir}/tests-report.txt"
-	                    showThrowable="true" 
-	                    showStackTraces="true" 
-                        showOutput="${tests.showOutput}"
-
-	                    showStatusOk="true"
-	                    showStatusError="true"
-	                    showStatusFailure="true"
-	                    showStatusIgnored="true"
-
-	                    showSuiteSummary="true"
-	                    timestamps="true"
-	                />
-
-					<!-- Emits status on errors and failures only. -->
-					<junit4:report-text
-	                    file="@{junit.output.dir}/tests-failures.txt"
-	                    showThrowable="true" 
-	                    showStackTraces="true" 
-                        showOutput="${tests.showOutput}"
-
-	                    showStatusOk="false"
-	                    showStatusError="true"
-	                    showStatusFailure="true"
-	                    showStatusIgnored="false"
-
-	                    showSuiteSummary="false"
-	                    timestamps="true"
-	                />
-
-					<!-- Emit the information about tests timings (could be used to determine
-	                     the slowest tests or for reuse in balancing). -->
-
-					<junit4:report-execution-times file="@{junit.output.dir}/tests-timehints.txt" historyLength="5" />
-
-                    <!-- ANT-compatible XMLs for jenkins records etc. -->
-                    <junit4:report-ant-xml dir="@{junit.output.dir}" outputStreams="no" />
-
-                    <!--
-                    Enable if you wish to have a nice HTML5 report.
-                    <junit4:report-json file="@{junit.output.dir}/tests-report-${ant.project.name}/index.html" outputStreams="no" />
-                    -->
-
-				</listeners>
-			    
-				<!-- Input test classes. -->
-	            <junit4:duplicate times="${tests.dups}">
-	              <fileset dir="@{testsDir}">
-	                <include name="**/@{testFamily}*.class" />
-	                <include name="**/*@{testFamily}.class" />
-	                <exclude name="**/*$*" />
-	              </fileset>
-	            </junit4:duplicate>
-			</junit4:junit4>
-
-			<!-- Report the 5 slowest tests from this run to the console. -->
-			<echo>5 slowest tests:</echo>
-			<junit4:tophints max="5">
-				<file file="@{junit.output.dir}/tests-timehints.txt" />
-			</junit4:tophints>
-		</sequential>
-	</macrodef>
-
-	<target name="install-junit4-taskdef" depends="ivy-configure">
-		<!-- JUnit4 taskdef. -->
-		<ivy:resolve   file="${common.dir}/build/solr-download/apache-solr-${solr.version}/lucene/test-framework/ivy.xml" type="jar" log="quiet" />
-		<ivy:cachepath organisation="com.carrotsearch.randomizedtesting" module="junit4-ant" revision="${/com.carrotsearch.randomizedtesting/junit4-ant}"
-		                   type="jar" inline="true" log="download-only" pathid="path.junit4" />
-		<taskdef uri="antlib:com.carrotsearch.junit4">
-			<classpath refid="path.junit4" />
-		</taskdef>
-	</target>
-
-	<target name="test" depends="compile-test,install-junit4-taskdef" 
+	<target name="test" depends="compile-test" 
 		description="Runs unit tests">
 		<mkdir dir="${junit.output.dir}"/>
 		<mkdir dir="${common.dir}/build/junit4"/>
-		<test-macro threadNum="${tests.jvms}" testFamily="${tests.family}"/>
 	</target>
 
 
-	<target name="generate-test-reports" description="Generates test reports">
-		<mkdir dir="${junit.reports}"/>
-		<junitreport todir="${junit.output.dir}">
-			<!-- this fileset let's the task work for individual modules,
-	           as well as the project as a whole
-	       -->
-			<fileset dir="${build.dir}">
-				<include name="**/test/TEST-*.xml"/>
-			</fileset>
-			<report format="frames" todir="${junit.reports}"/>
-		</junitreport>
 
-		<mkdir dir="${junit.reports.backwards}"/>
-		<junitreport todir="${junit.output.dir.backwards}">
-			<!-- this fileset let's the task work for individual modules,
-	           as well as the project as a whole
-	       -->
-			<fileset dir="${build.dir.backwards}">
-				<include name="**/test/TEST-*.xml"/>
-			</fileset>
-			<report format="frames" todir="${junit.reports.backwards}"/>
-		</junitreport>
-	</target>
-
-	<target name="jar" depends="jar-core">
+	<target name="jar" depends="">
 		<!-- convenience target to package core JAR -->
 	</target>
 
-	<target name="jar-src">
-		<sequential>
-			<mkdir dir="${build.dir}" />
-			<jarify basedir="${src.dir}" destfile="${build.dir}/${final.name}-src.jar">
-				<fileset dir="${src.dir}/../resources" erroronmissingdir="no"/>
-			</jarify>
-		</sequential>
-	</target>
 
-	<target name="default" depends="jar-core"/>
+	<target name="default" depends=""/>
 
 
 
@@ -928,116 +389,70 @@
 	</macrodef>
 
 
-	<macrodef name="invoke-javadoc">
-		<element name="sources" optional="yes"/>
-		<attribute name="destdir"/>
-		<attribute name="title" default="${Name} ${version} API"/>
-		<attribute name="overview" default="${src.dir}/overview.html"/>
+
+
+
+	<!-- a cheap unittesting routine that executes all the tests found in the folder and below -->
+	<macrodef name="run-python-unittests">
+		<attribute name="srcdir"/>
+		<attribute name="python"/>
+		<attribute name="test-file" default=""/>
+		<attribute name="python-path"/>
+		<attribute name="failonerror" default="true"/>
+
 		<sequential>
-			<copy todir="@{destdir}/../prettify" overwrite="false">
-				<fileset dir="${prettify.dir}"/>
-			</copy>
-			<javadoc
-          overview="@{overview}"
-          packagenames="org.apache.lucene.*"
-          destdir="@{destdir}"
-          access="${javadoc.access}"
-          encoding="${build.encoding}"
-          charset="${javadoc.charset}"
-          docencoding="${javadoc.charset}"
-          author="true"
-          version="true"
-          use="true"
-          source="${ant.java.version}"
-          link="${javadoc.link}"
-          windowtitle="${Name} ${version} API"
-          doctitle="@{title}"
-          stylesheetfile="@{destdir}/../prettify/stylesheet+prettify.css"
-          maxmemory="${javadoc.maxmemory}"
-          bottom="Copyright &amp;copy; ${year} Apache Software Foundation.  All Rights Reserved.">
-				<tag name="lucene.experimental" 
-      	description="WARNING: This API is experimental and might change in incompatible ways in the next release."/>
-				<tag name="lucene.internal"
-        description="NOTE: This API is for Lucene internal purposes only and might change in incompatible ways in the next release."/>
-				<link offline="true" packagelistLoc="${javadoc.dir}"/>
-				<header>
-					<![CDATA[
-           <script src="{@docRoot}/../prettify/prettify.js" type="text/javascript">
-				</script>
-				<script language="JavaScript">window.onload=function(){windowTitle();prettyPrint();}</script>
-        ]]></header>
+			<apply executable="@{python}" failonerror="@{failonerror}">
+				<env key="PYTHONPATH" value="@{python-path}" />
+				<arg value="-c" />
+				<arg value="import os,sys,unittest;x=sys.argv.pop();print 'Testing ', x;a,b=os.path.split(x);sys.path.insert(0,a);m=__import__(os.path.basename(b.split('.')[0]));y=unittest.main(m)"/>
+				<fileset dir="@{srcdir}">
+					<include name="**/unittest_*.py"/>
+				</fileset>
+			</apply>
 
-			<sources />
-
-			<classpath refid="javadoc.classpath"/>
-		</javadoc>
-	</sequential>
-</macrodef>
-
-
-
-
-<!-- a cheap unittesting routine that executes all the tests found in the folder and below -->
-<macrodef name="run-python-unittests">
-	<attribute name="srcdir"/>
-	<attribute name="python"/>
-	<attribute name="test-file" default=""/>
-	<attribute name="python-path"/>
-	<attribute name="failonerror" default="true"/>
-
-	<sequential>
-		<apply executable="@{python}" failonerror="@{failonerror}">
-			<env key="PYTHONPATH" value="@{python-path}" />
-			<arg value="-c" />
-			<arg value="import os,sys,unittest;x=sys.argv.pop();print 'Testing ', x;a,b=os.path.split(x);sys.path.insert(0,a);m=__import__(os.path.basename(b.split('.')[0]));y=unittest.main(m)"/>
-			<fileset dir="@{srcdir}">
-				<include name="**/unittest_*.py"/>
-			</fileset>
-		</apply>
-
-		<!--
+			<!--
         	<exec executable="@{python}" failonerror="true">
 	            <env key="PYTHONPATH" value="@{python-path}${dist.dir}${path.separator}${env.PYTHONPATH}" />
         		<arg value="-c" />
         	    <arg value="x='@{test-file}';import os,sys,unittest;a,b=os.path.split(x);sys.path.insert(0,a);m=__import__(os.path.basename(b.split('.')[0]));y=unittest.main(m)" />
         	</exec>
         	-->
-	</sequential>
-</macrodef>
+		</sequential>
+	</macrodef>
 
 	<macrodef name="get-lucene-solr-package">
-	    <attribute name="package"/>
+		<attribute name="package"/>
 		<attribute name="ant" default="${prop.ant}"/>
 		<attribute name="ant-target" default="jar"/>
 		<attribute name="pattern" default="*.jar"/>
 		<attribute name="into" default="${build.dir}/lib"/>
-		
-		
+
+
 		<sequential>
-	        
-	        <mkdir dir="@{into}"/>
-			
 
-	        <!-- cal the ant -->
+			<mkdir dir="@{into}"/>
+
+
+			<!-- cal the ant -->
 			<apply executable="@{ant}" parallel="false" failonerror="true" failifexecutionfails="true">
-	          <arg line="@{ant-target}"/>
-	          <arg value="-f"/>
-	          <fileset dir="${prop.solr.home}">
-	            <include name="lucene/@{package}/build.xml"/>
-	          	<include name="solr/contrib/@{package}/build.xml"/>
-	          </fileset>
-	        </apply>
-	
+				<arg line="@{ant-target}"/>
+				<arg value="-f"/>
+				<fileset dir="${prop.solr.home}">
+					<include name="lucene/@{package}/build.xml"/>
+					<include name="solr/contrib/@{package}/build.xml"/>
+				</fileset>
+			</apply>
 
-	        <!-- then copy the result -->
-	        <copy todir="@{into}" overwrite="true" verbose="true" flatten="true">
-	            <fileset dir="${prop.solr.home}">
-	                <include name="lucene/build/@{package}/@{pattern}" />
-	            	<include name="solr/build/contrib/solr-@{package}/@{pattern}" />
-	            </fileset>
-	        </copy>
 
-	    </sequential>
+			<!-- then copy the result -->
+			<copy todir="@{into}" overwrite="true" verbose="true" flatten="true">
+				<fileset dir="${prop.solr.home}">
+					<include name="lucene/build/@{package}/@{pattern}" />
+					<include name="solr/build/contrib/solr-@{package}/@{pattern}" />
+				</fileset>
+			</copy>
+
+		</sequential>
 	</macrodef>
 
 </project>

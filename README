@@ -16,7 +16,7 @@ So what is here:
   - author name disambiguation
   - extensive tokenization rules
   - multi-synonym parsing and expansion
-  - support for Jython business logic
+  - support for Jython
   - and of course: the whole configuration of the ADS search engine
   
   
@@ -28,7 +28,11 @@ that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014
 INSTALLATION
 ============
 
-You will need Java JDK (version 7 and higher), and 'ant' (v1.8 and newer) 
+Go ahead to http://github.com/montysolr/releases and download/unzip the version of your
+choice. Then run ./bin/solr
+
+If you want to build Montysolr from sources, rest assured it is easy.
+You will need Java JDK (version 8 and higher), and 'ant' (v1.8 and newer) 
 
 ```bash
 
@@ -37,6 +41,5 @@ You will need Java JDK (version 7 and higher), and 'ant' (v1.8 and newer)
  $ ant build-all
 ```
 
-MontySolr works on Linux/Mac/Windows. Releases are automatically tested/deployed
-see: https://github.com/romanchyla/montysolr/releases.
+
 
