@@ -193,10 +193,10 @@ solr.version=${solr.version}
 	<!-- this is for development purposes - especially when lucene/solr stable releases are not yet there -->
 	<target name="get-solr-source-code">
 		<mkdir dir="${solr.home}"/>
-		<exec executable="git" failifexecutionfails="true" dir="${solr.home}">
+		<exec executable="git" failifexecutionfails="false" dir="${solr.home}">
 			<arg value="clone" />
 			<arg value="https://github.com/apache/lucene-solr.git" />
-			<arg value="." />
+			<arg value="${solr.home}" />
 		</exec>
 		<exec executable="git" failifexecutionfails="true" dir="${solr.home}">
 			<arg value="checkout" />
@@ -243,14 +243,14 @@ solr.version=${solr.version}
 
 		<exec executable="${ant}" dir="${solr.real.location}" logerror="true">
 			<env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
-			<arg value="example" />
+			<arg value="server" />
 		</exec>
 
 	</target>
 
-	<target name="build-montysolr-dependencies">
+	<target name="build-montysolr-dependencies" depends="check-solr-location">
 		<ant target="build-modules" dir="${lucene.real.location}"  inheritall="false" />
-		<ant target="dist-contrib" dir="${solr.real.location}"  inheritall="false" />
+        <ant target="dist-contrib" dir="${solr.real.location}"  inheritall="false" />
 		<ant target="dist-test-framework" dir="${solr.real.location}"  inheritall="false" />
 	</target>
 
