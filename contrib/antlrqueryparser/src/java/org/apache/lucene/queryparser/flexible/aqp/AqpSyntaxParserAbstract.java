@@ -9,11 +9,11 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  *  provide two methods:
  *  
  *  {@link AqpSyntaxParser}{@link #getTokenStream(CharSequence)}
- *  {@link AqpSyntaxParser}{@link #parseTokenStream(TokenStream, CharSequence, CharSequence)
+ *  {@link AqpSyntaxParser}{@link #parseTokenStream(TokenStream, CharSequence, CharSequence)}
  *  
  *  Optionally, the new class can also override
  *  
- *  {@link AqpSyntaxParser}{@link #initializeGrammar(String)
+ *  {@link AqpSyntaxParser}{@link #initializeGrammar(String)}
  *  
  *  The default implementation is using reflection and is able
  *  to instantiate any grammar provided that the top parse rule

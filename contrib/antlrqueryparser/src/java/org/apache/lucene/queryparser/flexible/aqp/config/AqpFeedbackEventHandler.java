@@ -15,7 +15,7 @@ public interface AqpFeedbackEventHandler {
    * chance to handle the event.
    * 
    * @param event
-   * @return
+   * @return STOP or SAVE_EVENT action
    */
   public ACTION handle(AqpFeedbackEvent event);
 }

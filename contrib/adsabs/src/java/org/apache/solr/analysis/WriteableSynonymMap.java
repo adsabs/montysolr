@@ -199,7 +199,6 @@ public abstract class WriteableSynonymMap {
    * instead
    * 
    * @param inputFile
-   * @return
    * @throws IOException
    */
   public List<String> getLines(String inputFile) throws IOException {

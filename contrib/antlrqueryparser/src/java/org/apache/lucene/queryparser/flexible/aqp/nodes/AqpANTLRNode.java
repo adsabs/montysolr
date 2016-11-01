@@ -82,7 +82,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
    * Method to transform the tree into JSON - so that we can send it to the 
    * javascript clients
    * 
-   * @return
+   * @return json representation of the node
    */
   public String toJson() {
     return toJson(0);
@@ -215,7 +215,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
    * 
    * (But their internal name is an 'OPERATOR')
    * 
-   * @return
+   * @return string, token label
    */
   public String getTokenLabel() {
     return tokenLabel;

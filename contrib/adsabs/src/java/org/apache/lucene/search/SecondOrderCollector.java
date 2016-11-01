@@ -36,7 +36,7 @@ public interface SecondOrderCollector {
 	 * before @see {@link SecondOrderCollector#searcherInitialization(Searcher)}
 	 * 
 	 * @param reader
-	 * @return
+	 * @return list of collectors
 	 */
 	public List<CollectorDoc> getSubReaderResults(int docBase, int docBaseEnd);
 
@@ -46,7 +46,6 @@ public interface SecondOrderCollector {
 	 * If there are two collector instances, but they do the same,
 	 * they should return the same hashCode. Usually done as a combination
 	 * of the field and the cache
-	 * @return
 	 */
 	public int hashCode();
 

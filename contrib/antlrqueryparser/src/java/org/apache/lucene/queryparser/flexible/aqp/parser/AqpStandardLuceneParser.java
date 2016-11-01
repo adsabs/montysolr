@@ -10,7 +10,7 @@ public class AqpStandardLuceneParser {
 
   /**
    * Constructs a {@link StandardQueryParser} object. The default grammar used
-   * is "LuceneGrammar" {@see AqpQueryParser#AqpQueryParser(String)}
+   * is "LuceneGrammar" {@link AqpQueryParser#AqpQueryParser(String)}
    * 
    * @throws Exception
    */
@@ -28,7 +28,6 @@ public class AqpStandardLuceneParser {
    * is using a dedicated parser class, instead of loading the parser
    * by its grammar name
    * 
-   * @return
    * @throws QueryNodeParseException
    */
   public static AqpQueryParser init() throws QueryNodeParseException {

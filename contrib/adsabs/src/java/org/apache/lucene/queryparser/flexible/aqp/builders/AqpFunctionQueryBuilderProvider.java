@@ -39,7 +39,7 @@ public interface AqpFunctionQueryBuilderProvider {
 	 * @param funcName
 	 * @param node
 	 * @param config 
-	 * @return
+	 * @return {@link AqpFunctionQueryBuilder}
 	 */
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config)
 		throws QueryNodeException;

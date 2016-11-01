@@ -32,7 +32,7 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
  * We create a new node BoostQueryNode(rest, 0.1) and return that node. <br/>
  * 
  * Presence of the BOOST node child means user specified at least "^" We'll use
- * the default from the configuration {@see BoostAttribute}
+ * the default from the configuration {@link BoostAttribute}
  * 
  * @see AqpTMODIFIERProcessor
  * @see AqpFUZZYProcessor

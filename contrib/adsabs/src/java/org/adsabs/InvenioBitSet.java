@@ -49,7 +49,7 @@ public class InvenioBitSet extends BitSet {
    * check (nor care for efficiency; so I don't know....)
    * 
    * @param input
-   * @return
+   * @return Invenio bitset
    * @throws DataFormatException
    * @throws IOException
    */
@@ -113,7 +113,7 @@ public class InvenioBitSet extends BitSet {
    * Returns Base64 encoded (compressed) representation of this bitset
    * suitable for sending data over wire
    *  
-   * @return
+   * @return string base64 representation
    * @throws IOException
    */
   public String toBase64() throws IOException {

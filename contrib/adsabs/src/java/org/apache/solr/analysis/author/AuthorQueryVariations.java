@@ -44,7 +44,7 @@ public class AuthorQueryVariations {
    * GOMEZ, H\w* Q\b.*   <-- only this one is extra added
    *  
    * @param authorString
-   * @return
+   * @return map with string mappings
    */
   public static HashSet<String> getQueryVariationsInclRegex(String authorString) {
 
@@ -121,7 +121,7 @@ public class AuthorQueryVariations {
    * 
    *  
    * @param authorString
-   * @return
+   * @return map with string mappings
    */
   public static HashSet<String> getQueryVariations(String authorString) {
 
