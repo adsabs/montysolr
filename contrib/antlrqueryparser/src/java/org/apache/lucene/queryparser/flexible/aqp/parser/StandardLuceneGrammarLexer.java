@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 /dvt/workspace2/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2016-11-01 17:11:04
+// $ANTLR 3.5.2 /dvt/workspace2/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2016-11-02 17:01:07
 
   package org.apache.lucene.queryparser.flexible.aqp.parser;
 

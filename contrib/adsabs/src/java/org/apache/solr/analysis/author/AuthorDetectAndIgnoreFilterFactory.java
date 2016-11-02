@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.apache.solr.analysis.author;
 
 import java.util.Map;

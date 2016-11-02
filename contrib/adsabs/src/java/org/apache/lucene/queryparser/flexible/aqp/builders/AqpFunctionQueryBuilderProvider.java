@@ -22,8 +22,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  * @see AqpFunctionQueryNode
  * @see AqpQFUNCProcessor
  * 
- * @author rchyla
- *
  */
 
 public interface AqpFunctionQueryBuilderProvider {
@@ -37,8 +35,11 @@ public interface AqpFunctionQueryBuilderProvider {
 	 * which may modify them
 	 * 
 	 * @param funcName
+	 *     name of the funciton, i.e. pos
 	 * @param node
+	 *     query node
 	 * @param config 
+	 *     query config
 	 * @return {@link AqpFunctionQueryBuilder}
 	 */
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config)

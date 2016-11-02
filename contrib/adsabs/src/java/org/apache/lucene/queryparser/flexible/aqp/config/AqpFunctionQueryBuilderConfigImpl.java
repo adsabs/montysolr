@@ -44,7 +44,8 @@ public class AqpFunctionQueryBuilderConfigImpl extends AttributeImpl implements
 	 * NOTE: passing the config as an argument is not good, normally it should be
 	 * accessible to us. However, the builders have no access to it, so we must
 	 * do this
-	 * @throws QueryNodeException 
+	 * @throws QueryNodeException
+	 *     when no builder is found
 	 */
 	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config) 
 		throws QueryNodeException {

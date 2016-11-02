@@ -47,8 +47,6 @@ import org.apache.solr.common.params.SolrParams;
  * @see FieldableNode
  * @see MultiFieldQueryNodeProcessor
  * @see AnalyzerQueryNodeProcessor
- * @see AqpInvenioQueryParser
- * @see DefaultFieldAttribute
  *
  */
 public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implements

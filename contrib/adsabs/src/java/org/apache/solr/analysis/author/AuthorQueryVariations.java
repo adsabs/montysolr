@@ -1,7 +1,5 @@
 package org.apache.solr.analysis.author;
 
-//import montysolr.jni.MontySolrVM;
-//import montysolr.jni.PythonMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +12,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Creates a variations of the author names, it receives eg:
  * John, K
- * @author jluker
- *
  */
+
 public class AuthorQueryVariations {
 
   public static final Logger log = LoggerFactory.getLogger(AuthorQueryVariations.class);
@@ -25,25 +22,29 @@ public class AuthorQueryVariations {
    * This method takes input string, e.g. "Hector, Gomez Q" and generates variations
    * of the author name.
    * 
+   * <pre>
    *  HECTOR, GOMEZ
    *	HECTOR, G
    *  HECTOR,
    *  HECTOR, GOMEZ Q*
    *  HECTOR, G Q*
+   * </pre>
    * 
    * It is essentially the same output as you get from getSynonymVariations except
    * a few special cases. These special cases are variations needed for querying the 
    * index of author names, but not needed or wanted for the process of transforming
    * the curated synonyms
-   * 
+   * <p>
    * Example "h quintero gomez" will output:
-   * 
+   * <pre>
    * GOMEZ, H\w* QUINTERO\b.*
    * GOMEZ,
    * GOMEZ, H\w*
-   * GOMEZ, H\w* Q\b.*   <-- only this one is extra added
-   *  
+   * GOMEZ, H\w* Q\b.*   &lt;-- only this one is extra added
+   * </pre>
+   * 
    * @param authorString
+   *      author name
    * @return map with string mappings
    */
   public static HashSet<String> getQueryVariationsInclRegex(String authorString) {
@@ -121,6 +122,7 @@ public class AuthorQueryVariations {
    * 
    *  
    * @param authorString
+   *    name in the natural form
    * @return map with string mappings
    */
   public static HashSet<String> getQueryVariations(String authorString) {

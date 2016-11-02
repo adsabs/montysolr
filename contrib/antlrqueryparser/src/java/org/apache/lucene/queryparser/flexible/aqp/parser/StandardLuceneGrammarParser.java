@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 /dvt/workspace2/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2016-11-01 17:11:03
+// $ANTLR 3.5.2 /dvt/workspace2/montysolr/contrib/antlrqueryparser/grammars/StandardLuceneGrammar.g 2016-11-02 17:01:06
 
   package org.apache.lucene.queryparser.flexible.aqp.parser;
 
@@ -869,7 +869,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: modifier, clauseOr, term_modifier
+					// elements: term_modifier, modifier, clauseOr
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -1019,7 +1019,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: modifier, term_modifier, clauseOr
+					// elements: clauseOr, term_modifier, modifier
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -1486,7 +1486,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: term_modifier, modifier, field, multi_value
+					// elements: field, multi_value, term_modifier, modifier
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -1621,7 +1621,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: modifier, field, value, term_modifier
+					// elements: modifier, term_modifier, value, field
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -2368,7 +2368,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 					if (state.failed) return retval;
 					if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 					// AST REWRITE
-					// elements: a, b
+					// elements: b, a
 					// token labels: 
 					// rule labels: a, b, retval
 					// token list labels: 
@@ -2535,7 +2535,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 					if (state.failed) return retval;
 					if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 					// AST REWRITE
-					// elements: a, b
+					// elements: b, a
 					// token labels: 
 					// rule labels: a, b, retval
 					// token list labels: 
@@ -3767,7 +3767,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 			if (state.failed) return retval;
 			if ( state.backtracking==0 ) stream_value.add(value62.getTree());
 			// AST REWRITE
-			// elements: value, modifier
+			// elements: modifier, value
 			// token labels: 
 			// rule labels: retval
 			// token list labels: 
@@ -4471,7 +4471,7 @@ public class StandardLuceneGrammarParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: CARAT, TILDE
+					// elements: TILDE, CARAT
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 

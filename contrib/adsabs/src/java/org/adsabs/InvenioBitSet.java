@@ -27,6 +27,7 @@ public class InvenioBitSet extends BitSet {
    * As opposed to .fastLoad() here you are passing uncompressed bytes
    * 
    * @param bytes
+   *      byte array
    */
   public InvenioBitSet(byte[] bytes) {
     super(bytes == null ? 0 : bytes.length * 8);
@@ -37,7 +38,6 @@ public class InvenioBitSet extends BitSet {
    * Invenio equivalent of .fastdump()
    * 
    * @return byte[]
-   * @throws IOException
    */
   public byte[] fastDump() throws IOException {
     byte[] input = this.toByteArray();
@@ -49,9 +49,8 @@ public class InvenioBitSet extends BitSet {
    * check (nor care for efficiency; so I don't know....)
    * 
    * @param input
+   *      output of the python fastdump
    * @return Invenio bitset
-   * @throws DataFormatException
-   * @throws IOException
    */
   
   public static InvenioBitSet fastLoad(byte[] input) throws DataFormatException, IOException {
@@ -114,7 +113,6 @@ public class InvenioBitSet extends BitSet {
    * suitable for sending data over wire
    *  
    * @return string base64 representation
-   * @throws IOException
    */
   public String toBase64() throws IOException {
     byte[] data = this.fastDump();

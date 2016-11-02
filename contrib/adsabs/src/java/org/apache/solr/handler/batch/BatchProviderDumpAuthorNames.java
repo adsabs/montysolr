@@ -31,7 +31,7 @@ import org.apache.solr.search.SolrIndexSearcher;
 
 /**
  * Provider which collects all author names,
- * and saves their ASCII => UTF8 mapping to disc. 
+ * and saves their ASCII =&gt; UTF8 mapping to disc. 
  *
  */
 public class BatchProviderDumpAuthorNames extends BatchProvider {

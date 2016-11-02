@@ -20,14 +20,13 @@ import org.apache.lucene.search.PrefixQuery;
  * The field value is the @{link DefaultFieldAttribute} 
  * specified in the configuration.
  * 
- * <br/>
+ * <p>
  * 
  * If the user specified a field, it will be set by the @{link AqpFIELDProcessor}
  * Therefore the {@link AqpQPHRASEProcessor} should run before it.
  * 
  * 
  * @see QueryConfigHandler
- * @see DefaultFieldAttribute
  *
  */
 public class AqpQIDENTIFIERProcessor extends AqpQProcessor {

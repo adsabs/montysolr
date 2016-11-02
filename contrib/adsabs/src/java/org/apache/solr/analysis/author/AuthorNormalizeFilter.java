@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.apache.solr.analysis.author;
 
 import java.io.IOException;
@@ -16,11 +13,7 @@ public final class AuthorNormalizeFilter extends TokenFilter {
 
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
-  //private boolean setIntoPayload = true;
 
-  /**
-   * @param input
-   */
   public AuthorNormalizeFilter(TokenStream input) {
     super(input);
   }

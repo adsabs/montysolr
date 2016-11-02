@@ -24,13 +24,13 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
  * 
  * Also each functional processor can be different, therefore my decision
  * was to register individual function builders inside the config
- * @see AqpFunctionQueryBuilderConfig#getBuilder(String, QueryNode)
+ * @see AqpFunctionQueryBuilderConfig
  * and then insert this builder into the QNode. It will wait there
  * until it is picked by the {@link AqpFunctionQueryBuilder} which 
  * will decide how it wants to parse the query (ie. it may just want
  * the literals, or it will request a full query object to be built, etc)
  * 
- * You should check each {@link AqpFunctionQueryBuilder#createQNode(QueryNode)}
+ * You should check each {@link AqpFunctionQueryBuilder}
  * for details on how are data processed.
  * 
  */

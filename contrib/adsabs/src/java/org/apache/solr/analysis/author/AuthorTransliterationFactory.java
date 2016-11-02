@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.apache.solr.analysis.author;
 
 import java.util.Map;
@@ -8,10 +5,6 @@ import java.util.Map;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 
-/**
- * @author jluker
- * 
- */
 public class AuthorTransliterationFactory extends TokenFilterFactory {
   
   private String inputType;

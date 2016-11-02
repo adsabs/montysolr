@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.apache.solr.analysis;
 
 import java.util.Map;

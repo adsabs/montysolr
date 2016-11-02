@@ -17,14 +17,13 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  * The field value used is the @{link DefaultFieldAttribute} 
  * specified in the configuration.
  * 
- * <br/>
+ * <p>
  * 
  * If the user specified a field, it will be set by the @{link AqpFIELDProcessor}
  * Therefore the {@link AqpQTRUNCATEDProcessor} should run before it.
  * 
  * 
  * @see QueryConfigHandler
- * @see DefaultFieldAttribute
  *
  */
 public class AqpAdsabsQTRUNCATEDProcessor extends AqpQProcessor {

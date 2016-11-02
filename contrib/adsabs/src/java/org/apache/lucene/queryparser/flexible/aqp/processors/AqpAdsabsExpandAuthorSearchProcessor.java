@@ -44,9 +44,8 @@ import org.apache.solr.analysis.author.PythonicAuthorNormalizerFilter;
  * Looks at the QueryNode(s) and if they are author searches,
  * it adds to them some ADS specific post-analysis logic
  * 
- * @see AqpFieldMapper
+ * @see AqpFieldMapperProcessor
  * @see QueryConfigHandler
- * @author rchyla
  * 
  */
 public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl {

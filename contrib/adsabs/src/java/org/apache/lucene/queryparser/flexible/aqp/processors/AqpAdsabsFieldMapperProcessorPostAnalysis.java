@@ -11,9 +11,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  * for it. It is used to change the field names on-the-fly. It does the same
  * thing as AqpFieldMapperProcessor
  * 
- * @see AqpFieldMapper
  * @see QueryConfigHandler
- * @author rchyla
  * 
  */
 public class AqpAdsabsFieldMapperProcessorPostAnalysis extends AqpFieldMapperProcessor {

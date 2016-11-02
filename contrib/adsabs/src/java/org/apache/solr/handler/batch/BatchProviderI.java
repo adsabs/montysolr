@@ -27,6 +27,7 @@ public interface BatchProviderI {
 	 * over the query constructed from the query parameters.
 	 * 
 	 * @param query
+	 *     query string
 	 */
 	public void setQuery(Query query);
 	public Query getQuery(SolrQueryRequest req) throws SyntaxError;

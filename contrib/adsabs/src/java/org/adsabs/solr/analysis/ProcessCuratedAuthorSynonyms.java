@@ -142,9 +142,6 @@ public class ProcessCuratedAuthorSynonyms {
 		}
 	}
 	
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		
 		PrintStream out = null;

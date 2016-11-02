@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * For the time being, we read whole index into memory to create 
  * a citation network, but this implementation should also be
  * capable of holding only partial (the most accessed) citation 
- * network in memory. However, the initial mapping (value<->lucene id)
+ * network in memory. However, the initial mapping (value&lt;-&gt;lucene id)
  * will always be constructed in its entirety.
  * 
  */

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is the CONFIGURATION for the ADS grammar (the zero phase: instantiation)
  * 
- * It is usually called from {@link AdsQParserPlugin}. This class contains the
+ * It is usually called from AdsQParserPlugin. This class contains the
  * sensitive default. However, some parameters can be overriden using url
  * params - that happens inside: {@link AqpAdsabsQParser}
  * 

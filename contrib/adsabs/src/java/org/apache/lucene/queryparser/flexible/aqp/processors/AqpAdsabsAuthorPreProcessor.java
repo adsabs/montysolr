@@ -15,12 +15,13 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
  * Looks at the QueryNode(s) and prepares them for analysis. This must happen
  * before AqpAdsabsAnalyzerProcessor
  * 
- * author:surname, m* => author:surname, m
+ * <pre> 
+ * author:surname, m* =&gt; author:surname, m
+ * </pre>
  * 
  * @see QueryConfigHandler
  * @see AqpAdsabsAnalyzerProcessor
  * @see AqpAdsabsExpandAuthorSearchProcessor
- * @author rchyla
  * 
  */
 public class AqpAdsabsAuthorPreProcessor extends QueryNodeProcessorImpl {

@@ -29,9 +29,8 @@ import org.apache.solr.util.DateMathParser;
  * Hand-made modifications that catch the exceptions or enhancements to
  * the AQP ADSABS parsing
  * 
- * @see AqpFieldMapper
+ * @see AqpFieldMapperProcessor
  * @see QueryConfigHandler
- * @author rchyla
  * 
  */
 public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorImpl {

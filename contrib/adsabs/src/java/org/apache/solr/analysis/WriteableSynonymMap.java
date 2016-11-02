@@ -199,7 +199,7 @@ public abstract class WriteableSynonymMap {
    * instead
    * 
    * @param inputFile
-   * @throws IOException
+   *    file path
    */
   public List<String> getLines(String inputFile) throws IOException {
     ArrayList<String> lines;

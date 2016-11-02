@@ -34,10 +34,9 @@ import org.slf4j.LoggerFactory;
  *       components)
  * <p>      
  *       In principle, it is configured like this:
- * <p>      
  * 
  * <pre>
- *      HashMap<String, NumericConfig> ncm = new HashMap<String, NumericConfig>();
+ *      HashMap&lt;String, NumericConfig&gt; ncm = new HashMap&lt;String, NumericConfig&gt;();
  *   		config.set(StandardQueryConfigHandler.ConfigurationKeys.NUMERIC_CONFIG_MAP, ncm);
  *      ncm.put(field_name, new NumericConfig(4, NumberFormat.getNumberInstance(Locale.US), NumericType.INT));
  * </pre>

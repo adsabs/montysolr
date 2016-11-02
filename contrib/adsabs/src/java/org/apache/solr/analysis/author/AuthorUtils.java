@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.apache.solr.analysis.author;
 
 import java.util.ArrayList;
@@ -15,10 +12,6 @@ import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 
 import java.text.*;
 
-/**
- * @author jluker
- *
- */
 public class AuthorUtils {
 	
 	public static final String AUTHOR_QUERY_VARIANT = "AUTHOR_QUERY_VARIANT";

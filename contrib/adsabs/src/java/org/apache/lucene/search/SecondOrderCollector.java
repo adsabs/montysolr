@@ -21,8 +21,9 @@ public interface SecondOrderCollector {
 	 * the query will not be executed
 	 * 
 	 * @param searcher
-	 * @param firstOrderWeight 
-	 * @throws IOException 
+	 *   solr index searcher
+	 * @param firstOrderWeight
+	 *   weight built from the seed query 
 	 */
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException;
 
@@ -33,9 +34,8 @@ public interface SecondOrderCollector {
 	 * Returns the sorted list of ScoreDoc hits that belong only
 	 * to this particular subreader. The range of subreaders is
 	 * known to the collector because we have inspected the searcher
-	 * before @see {@link SecondOrderCollector#searcherInitialization(Searcher)}
+	 * before {@link SecondOrderCollector}
 	 * 
-	 * @param reader
 	 * @return list of collectors
 	 */
 	public List<CollectorDoc> getSubReaderResults(int docBase, int docBaseEnd);
