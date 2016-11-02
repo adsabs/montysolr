@@ -9,7 +9,7 @@ public interface AqpSyntaxParser extends SyntaxParser {
   /**
    * @param grammarName
    *          - the name of the query
-   * @throws Exception
+   * @throws QueryNodeParseException
    *           - there are different implementations (should we want different
    *           interfaces?) some may be loading grammars on the fly, others will
    *           load grammars directly
@@ -28,6 +28,9 @@ public interface AqpSyntaxParser extends SyntaxParser {
    * @return TokenStream 
    *          - (un)modified stream of tokens
    * @throws QueryNodeParseException
+   *          - there are different implementations (should we want different
+   *           interfaces?) some may be loading grammars on the fly, others will
+   *           load grammars directly
    */
   public TokenStream getTokenStream(CharSequence input)
       throws QueryNodeParseException;

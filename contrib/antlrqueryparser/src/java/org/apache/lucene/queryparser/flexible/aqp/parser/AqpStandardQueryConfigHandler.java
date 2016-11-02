@@ -25,7 +25,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
     /**
      * This attribute is used by {@link AqpQNORMALProcessor} processor and must
      * be defined in the {@link QueryConfigHandler}. This attribute tells the
-     * processor what is the default field when no field is defined in a phrase. <br/>
+     * processor what is the default field when no field is defined in a phrase.
      * 
      */
     final public static ConfigurationKey<String> DEFAULT_FIELD = ConfigurationKey
@@ -35,7 +35,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
      * This attribute is used by {@link PhraseSlopQueryNodeProcessor} processor
      * and must be defined in the {@link QueryConfigHandler}. This attribute
      * tells the processor what is the default phrase slop when no slop is
-     * defined in a phrase. <br/>
+     * defined in a phrase.
      * 
      */
     final public static ConfigurationKey<Integer> DEFAULT_PROXIMITY = ConfigurationKey
@@ -44,7 +44,7 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
     /**
      * This attribute is used by {@link AqpDEFOPProcessor} processor and must be
      * defined in the {@link QueryConfigHandler}. This attribute tells the
-     * processor what are the allowed values when user submits them. <br/>
+     * processor what are the allowed values when user submits them.
      * 
      */
     final public static ConfigurationKey<int[]> ALLOWED_PROXIMITY_RANGE = ConfigurationKey

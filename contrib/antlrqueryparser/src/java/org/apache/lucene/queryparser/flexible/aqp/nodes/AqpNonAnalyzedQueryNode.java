@@ -21,8 +21,10 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 
 /**
- * A {@link NonAnalyzedQueryNode} represents a query that will not be processed
+ * The node represents a query that will not be processed
  * by an analyzer. It will be served to the search engine as it is
+ * 
+ * <p>
  * 
  * Example: e(+)
  */

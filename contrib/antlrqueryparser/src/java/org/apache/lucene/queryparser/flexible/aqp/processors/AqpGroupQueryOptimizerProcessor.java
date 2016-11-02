@@ -19,7 +19,8 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.BooleanModifierNode
  * all parameters from fuzzy, boost, and modifier nodes and apply those that are
  * closest to the actual query.
  * 
- * <br/>
+ * <p>
+ * 
  * Example:
  * 
  * <pre>

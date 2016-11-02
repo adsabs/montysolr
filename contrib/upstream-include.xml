@@ -24,28 +24,24 @@
     <target name="test" depends="link-upstream">
         <ant target="test" dir="${include.location}"
                             inheritall="false">
-            <property name="javac.doclint.args" value="-Xdoclint:none" />
         </ant>
     </target>
 
     <target name="default" depends="link-upstream">
         <ant target="default" dir="${include.location}"
                             inheritall="false">
-            <property name="javac.doclint.args" value="-Xdoclint:none" />
         </ant>
     </target>
     
     <target name="jar" depends="link-upstream">
         <ant target="jar" dir="${include.location}"
                             inheritall="false">
-            <property name="javac.doclint.args" value="-Xdoclint:none" />
         </ant>
     </target>
     
     <target name="compile" depends="link-upstream">
         <ant target="compile" dir="${include.location}"
                             inheritall="false">
-            <property name="javac.doclint.args" value="-Xdoclint:none" />
         </ant>
     </target>
     

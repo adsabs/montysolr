@@ -23,7 +23,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNodeImpl;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 
 /**
- * A {@link NonAnalyzedQueryNode} represents a query that was already be
+ * The node represents a query that was already be
  * processed by an analyzer. The child (typically only one) is the result of a
  * call to another analyzer.
  * 

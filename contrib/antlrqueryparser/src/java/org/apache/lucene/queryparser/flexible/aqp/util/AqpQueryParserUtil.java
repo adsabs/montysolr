@@ -42,12 +42,12 @@ final public class AqpQueryParserUtil {
    * &lt;/code&gt;
    * </pre>
    * 
+   * @param qp
+   *          Analyzer to use
    * @param queries
    *          Queries strings to parse
    * @param fields
    *          Fields to search on
-   * @param analyzer
-   *          Analyzer to use
    * @throws IllegalArgumentException
    *           if the length of the queries array differs from the length of the
    *           fields array
@@ -72,7 +72,6 @@ final public class AqpQueryParserUtil {
   /**
    * Parses a query, searching on the fields specified. Use this if you need to
    * specify certain fields as required, and others as prohibited.
-   * <p>
    * 
    * <pre>
    * Usage:
@@ -125,7 +124,6 @@ final public class AqpQueryParserUtil {
   /**
    * Parses a query, searching on the fields specified. Use this if you need to
    * specify certain fields as required, and others as prohibited.
-   * <p>
    * 
    * <pre>
    * Usage:

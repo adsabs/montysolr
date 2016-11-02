@@ -39,7 +39,7 @@ import org.apache.lucene.search.spans.SpanTermQuery;
  *  After the AST tree was parsed, and synonyms were found, 
  *  we may have the following tree:
  *  
- *  <p>
+ *  
  *  <pre>
  *        AqpNearQueryNode(5)
  *                |
@@ -70,7 +70,6 @@ import org.apache.lucene.search.spans.SpanTermQuery;
  * (dog AND (cat OR fat)) NEAR/5 batman
  * </pre>
  * 
- * @see QueryNodeProcessorPipeline
  * @see AqpNearQueryNode
  *
  */

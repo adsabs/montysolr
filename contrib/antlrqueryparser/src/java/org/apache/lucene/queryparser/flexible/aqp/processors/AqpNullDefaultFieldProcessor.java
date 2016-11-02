@@ -25,7 +25,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQuer
  * fieldb:query). But this works only when the initial field==null. If it was
  * '', nothing happens. If the current configuration contains
  * {@link MultiFieldQueryNodeProcessor} but it is empty, also the field will be
- * null (because {@link DefaultFieldAttribute} is by default null)
+ * null (because DefaultField is by default null)
  * 
  * {@link AnalyzerQueryNodeProcessor}, on the other hand, expects that field is
  * a string value - to be precise, it asks the current analyzer to check the
@@ -39,8 +39,6 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQuer
  * @see FieldableNode
  * @see MultiFieldQueryNodeProcessor
  * @see AnalyzerQueryNodeProcessor
- * @see AqpInvenioQueryParser
- * @see DefaultFieldAttribute
  * 
  */
 public class AqpNullDefaultFieldProcessor extends QueryNodeProcessorImpl

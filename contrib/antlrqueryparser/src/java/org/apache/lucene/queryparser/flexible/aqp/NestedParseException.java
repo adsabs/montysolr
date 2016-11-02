@@ -4,9 +4,7 @@ package org.apache.lucene.queryparser.flexible.aqp;
  * This class is used explicitly (and only) for exceptions that happen inside a
  * QueryParser (AQP). We want to have a mechanism to raise and exception that is
  * not interfering with existing interfaces. But which is caught by the
- * {@link AqpAdsabsQueryParser}
- * 
- * 
+ * AqpAdsabsQueryParser
  */
 
 public class NestedParseException extends RuntimeException {

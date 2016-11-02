@@ -57,34 +57,33 @@ import org.apache.lucene.search.Query;
  * <p>
  * This class is a helper that enables users to easily use the Lucene query
  * parser written in EBNF grammar using ANTLR
- * </p>
  * <p>
  * To construct a Query object from a query string, use the
  * {@link #parse(String, String)} method:
- * <ul>
- * ANTLRQueryParser queryParserHelper = new ANTLRQueryParser(); <br/>
+ * <pre>
+ * ANTLRQueryParser queryParserHelper = new ANTLRQueryParser();
  * Query query = queryParserHelper.parse("a AND b", "defaultField");
- * </ul>
+ * </pre>
  * <p>
  * To change any configuration before parsing the query string do, for example:
- * <p/>
- * <ul>
+ * <code>
  * // the query config handler returned by {@link StandardQueryParser} is a
- * {@link StandardQueryConfigHandler} <br/>
+ * {@link StandardQueryConfigHandler}
  * queryParserHelper.getQueryConfigHandler().setAnalyzer(new
  * WhitespaceAnalyzer());
- * </ul>
+ * </code>
  * <p>
  * The syntax for query strings is as follows (copied from the old QueryParser
  * javadoc):
- * <ul>
+ * <p>
  * A Query is a series of clauses. A clause may be prefixed by:
- * <ul>
- * <li>a plus (<code>+</code>) or a minus (<code>-</code>) sign, indicating that
+ * <p>
+ * a plus (<code>+</code>) or a minus (<code>-</code>) sign, indicating that
  * the clause is required or prohibited respectively; or
- * <li>a term followed by a colon, indicating the field to be searched. This
+ * <p>
+ * a term followed by a colon, indicating the field to be searched. This
  * enables one to construct queries which search multiple fields.
- * </ul>
+ * 
  * 
  * A clause may be either:
  * <ul>
@@ -104,18 +103,14 @@ import org.apache.lucene.search.Query;
  * Examples of appropriately formatted queries can be found in the <a
  * href="../../../../../../queryparsersyntax.html">query syntax
  * documentation</a>.
- * </p>
- * </ul>
  * <p>
  * The text parser used by this helper is a {@link StandardSyntaxParser}.
- * <p/>
  * <p>
  * The query node processor used by this helper is a
  * {@link StandardQueryNodeProcessorPipeline}.
- * <p/>
  * <p>
  * The builder used by this helper is a {@link StandardQueryTreeBuilder}.
- * <p/>
+ * <p>
  * 
  * @see StandardQueryParser
  * @see StandardQueryConfigHandler
@@ -153,10 +148,6 @@ public class AqpQueryParser extends QueryParserHelper {
    * 
    * It works by wrapping the processor pipeline into a debugging
    * class and by calling setDebug on the underlying builder.
-   * @throws SecurityException 
-   * @throws NoSuchMethodException 
-   * @throws InvocationTargetException 
-   * @throws IllegalArgumentException 
    * 
    * @see AqpDebuggingQueryNodeProcessorPipeline
    * @see AqpQueryTreeBuilder
@@ -321,7 +312,10 @@ public class AqpQueryParser extends QueryParserHelper {
    * Sets the boolean operator of the QueryParser. In default mode (
    * {@link Operator#OR}) terms without any modifiers are considered optional:
    * for example <code>capital of Hungary</code> is equal to
-   * <code>capital OR of OR Hungary</code>.<br/>
+   * <code>capital OR of OR Hungary</code>.
+   * 
+   * <p>
+   * 
    * In {@link Operator#AND} mode terms are considered to be in conjunction: the
    * above mentioned query is parsed as <code>capital AND of AND Hungary</code>
    */
@@ -405,7 +399,7 @@ public class AqpQueryParser extends QueryParserHelper {
 
   /**
    * By default, it uses
-   * {@link MultiTermQuery#CONSTANT_SCORE_AUTO_REWRITE_DEFAULT} when creating a
+   * {@link MultiTermQuery#CONSTANT_SCORE_BOOLEAN_REWRITE} when creating a
    * prefix, wildcard and range queries. This implementation is generally
    * preferable because it a) Runs faster b) Does not have the scarcity of terms
    * unduly influence score c) avoids any {@link TooManyListenersException}
@@ -680,10 +674,10 @@ public class AqpQueryParser extends QueryParserHelper {
   
   
   /**
-   * Returns the string value of the {@link NAMED_PARAMETER} if set or
+   * Returns the string value of the NAMED_PARAMETER if set or
    * null if nothing is there
    * 
-   * @return the {@link NAMED_PARAMETER} value for the given key
+   * @return the NAMED_PARAMETER value for the given key
    */
   public String getNamedParameter(String key) {
     Map<String, String> map = getQueryConfigHandler().get(
@@ -695,12 +689,12 @@ public class AqpQueryParser extends QueryParserHelper {
   }
 
   /**
-   * Sets the {@link NAMED_PARAMETER}
+   * Sets NAMED_PARAMETER
    * 
    * @param key
    *          name of the parameter; the value will depend on what 
    *          processors are using and what they accept
-   * @param valu
+   * @param value
    *          string value
    */
   public void setNamedParameter(String key, String value) {

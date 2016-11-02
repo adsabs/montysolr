@@ -97,7 +97,7 @@
 
 
 
-	<target name="clean" >
+	<target name="clean" depends="unlink-contrib">
 		<delete dir="${build.dir}" />
 		<delete dir="${classes.dir}" />
 		<mkdir dir="${classes.dir}"/>
@@ -173,7 +173,11 @@ solr.version=${solr.version}
 		<ant target="test"  dir="${common.dir}/contrib/examples"  inheritall="false" />
 	</target>
 
-
+    <target name="unlink-contrib" >
+    	<ant target="unlink-upstream"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+    	<ant target="unlink-upstream"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+    	<ant target="unlink-upstream"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+	</target>
 
 
 

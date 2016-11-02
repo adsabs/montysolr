@@ -14,7 +14,6 @@ public interface AqpFeedbackEventHandler {
    * If it returns false, the next registered event handler will not get a
    * chance to handle the event.
    * 
-   * @param event
    * @return STOP or SAVE_EVENT action
    */
   public ACTION handle(AqpFeedbackEvent event);

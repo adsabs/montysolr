@@ -27,7 +27,7 @@ import org.apache.lucene.search.Query;
 
 /**
  * This query tree builder only defines the necessary methods for
- * debugging. <br/>
+ * debugging. 
  * 
  * @see QueryTreeBuilder
  * @see StandardQueryNodeProcessorPipeline

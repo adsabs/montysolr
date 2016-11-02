@@ -10,7 +10,7 @@ import org.apache.lucene.search.RegexpQuery;
  * {@link AqpFieldQueryNodeRegexBuilder}. But the appropriate 
  * builder must be configured. 
  * 
- * @see instances of {@link QueryTreeBuilder}
+ * @see QueryTreeBuilder
  *
  */
 public class AqpAdsabsRegexQueryNode extends AqpNonAnalyzedQueryNode {

@@ -2,9 +2,10 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 
 /**
- * Converts QRANGEEX node into @{link {@link ParametricQueryNode}. The field
+ * Converts QRANGEEX node into {@link TermRangeQueryNode}. The field
  * value is the @{link DefaultFieldAttribute} specified in the configuration.
  * 
  * Because QRANGE nodes have this shape:
@@ -19,17 +20,15 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  * 
  * It is important to queue {@AqpQRANGEEProcessor} and
  * {@AqpQRANGEINProcessor} <b>before</b> processors that
- * transform QNORMAL, QPHRASE and other Q nodes <br/>
- * 
+ * transform QNORMAL, QPHRASE and other Q nodes
+ * <p>
  * If the user specified a field, it will be set by the @{link
  * AqpFIELDProcessor} Therefore this processor should queue before @{link
  * AqpFIELDProcessor}.
  * 
  * 
  * @see QueryConfigHandler
- * @see DefaultFieldAttribute
  * @see AqpQRANGEINProcessor
- * @see AqpQueryNodeProcessorPipeline
  * 
  */
 public class AqpQRANGEEXProcessor extends AqpQRANGEINProcessor {

@@ -27,7 +27,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  * A {@link AqpNotQueryNode} represents an NOT boolean operation performed on a
  * list of nodes.
  * 
- * <br/>
+ * <p>
  * 
  * The first node is set to be required
  * {@link ModifierQueryNode.Modifier#MOD_REQ} and the rest of the clauses will

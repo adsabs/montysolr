@@ -11,7 +11,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  * Converts QPHRASE node into @{link {@link QuotedFieldQueryNode}. The field
  * value is the @{link DefaultFieldAttribute} specified in the configuration.
  * 
- * <br/>
+ * <p>
  * 
  * If the user specified a field, it will be set by the @{link
  * AqpFIELDProcessor} Therefore the {@link AqpQPHRASEProcessor} should run
@@ -19,7 +19,6 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  * 
  * 
  * @see QueryConfigHandler
- * @see DefaultFieldAttribute
  * 
  */
 public class AqpQPHRASEProcessor extends AqpQProcessor {

@@ -14,7 +14,10 @@ import org.apache.lucene.queryparser.flexible.aqp.util.AqpUtils;
 
 /**
  * This processor applies the user-submitted value to all {@link FieldableNode}
- * nodes which are below it. The FIELD node itself will be discarded. <br/>
+ * nodes which are below it. The FIELD node itself will be discarded.
+ * 
+ * <p>
+ * 
  * If the FIELD has only one child, the child will be returned
  * 
  * @see FieldableNode

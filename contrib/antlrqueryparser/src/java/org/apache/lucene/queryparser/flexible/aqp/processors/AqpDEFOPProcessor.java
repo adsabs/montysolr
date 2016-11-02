@@ -53,7 +53,6 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  * </pre>
  * 
  * 
- * @see DefaultOperatorAttribute
  * @see AqpQueryParser#setDefaultOperator(org.apache.lucene.queryparser.flexible.standard.config.DefaultOperatorAttribute.Operator)
  * 
  */

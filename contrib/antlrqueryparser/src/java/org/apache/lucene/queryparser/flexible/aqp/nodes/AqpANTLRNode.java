@@ -245,6 +245,7 @@ public class AqpANTLRNode extends QueryNodeImpl {
    * says: 'AND')
    * 
    * @param tokenName
+   *      string to set
    */
   public void setTokenName(String tokenName) {
     this.tokenName = tokenName;

@@ -7,12 +7,15 @@ import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode.Modifier;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 
 /**
  * Creates a {@link ModifierQueryNode} from the MODIFIER node last child
  * 
  * If MODIFIER node contains only one child, we return that child and do
- * nothing. <br/>
+ * nothing.
+ * 
+ * <p>
  * 
  * If BOOST node contains two children, we take the first and check its input,
  * eg.
@@ -23,7 +26,9 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  *                 +  rest
  * </pre>
  * 
- * We create a new node ModifierQueryNode(rest, Modifier) and return that node. <br/>
+ * We create a new node ModifierQueryNode(rest, Modifier) and return that node.
+ * 
+ * <p>
  * 
  * This processor should run before {@link AqpOPERATORProcessor} to ensure that
  * local modifiers have precedence over the boolean operations. For example:
@@ -44,7 +49,6 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  *  +title:a -title:b +title:c
  * </pre>
  * 
- * @see Modifier
  * @see AqpBooleanQueryNode
  */
 public class AqpMODIFIERProcessor extends AqpQProcessor {

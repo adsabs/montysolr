@@ -19,11 +19,11 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
  * {@link AqpTMODIFIERProcessor} ran before. Because we depend on the proper
  * tree shape.
  * 
- * <br/>
+ * <p>
  * 
  * If BOOST node contains only one child, we return that child and do nothing.
  * 
- * <br/>
+ * <p>
  * 
  * If BOOST node contains two children, we take the first and check its input,
  * eg.
@@ -34,13 +34,13 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
  *               ~0.1  rest
  * </pre>
  * 
- * We create a new node {@@link AqpFuzzyModifierNode} (rest, 0.1) and
+ * We create a new node {@link AqpFuzzyModifierNode} (rest, 0.1) and
  * return that node.
  * 
- * <br/>
+ * <p>
  * 
  * Presence of the BOOST node child means user specified at least "^" We'll use
- * the default from the configuration {@link BoostAttribute}
+ * the default from the configuration.
  * 
  * @see AqpTMODIFIERProcessor
  * @see AqpFUZZYProcessor

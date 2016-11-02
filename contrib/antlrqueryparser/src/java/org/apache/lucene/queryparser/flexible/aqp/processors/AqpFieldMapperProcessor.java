@@ -17,7 +17,6 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
  * Looks at the QueryNode(s) and translates the field name if we have a mapping
  * for it. It is used to change the field names on-the-fly
  * 
- * @see AqpFieldMapper
  * @see QueryConfigHandler
  * 
  */

@@ -10,9 +10,10 @@ public class AqpExtendedLuceneParser {
 
   /**
    * Constructs a {@link StandardQueryParser} object. The default grammar used
-   * is "LuceneGrammar" {@link AqpQueryParser#AqpQueryParser(String)}
+   * is "LuceneGrammar" {@link AqpQueryParser}
    * 
-   * @throws Exception
+   * @throws QueryNodeParseException
+   *    Syntactic/semantic error occured
    */
 
   public static AqpQueryParser init(String grammarName)
@@ -29,6 +30,7 @@ public class AqpExtendedLuceneParser {
    * by its grammar name
    * 
    * @throws QueryNodeParseException
+   *  Syntactic/semantic error occured
    */
   public static AqpQueryParser init() throws QueryNodeParseException {
   	return new AqpQueryParser(new AqpStandardQueryConfigHandler(),
@@ -42,14 +44,13 @@ public class AqpExtendedLuceneParser {
    * Constructs a {@link StandardQueryParser} object and sets an
    * {@link Analyzer} to it. The same as:
    * 
-   * <ul>
+   * <pre>
    * StandardQueryParser qp = new StandardQueryParser();
    * qp.getQueryConfigHandler().setAnalyzer(analyzer);
-   * </ul>
+   * </pre>
    * 
    * @param analyzer
    *          the analyzer to be used by this query parser helper
-   * @throws Exception
    */
   public AqpQueryParser init(Analyzer analyzer) throws Exception {
     AqpQueryParser p = AqpStandardLuceneParser.init("ExtendedLuceneGrammar");

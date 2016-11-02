@@ -18,7 +18,10 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
 
 /**
  * This processor operates on OPERATOR nodes, these are the nodes with labels
- * AND, OR, NOT, DEFOP, NEAR and possibly others. <br/>
+ * AND, OR, NOT, DEFOP, NEAR and possibly others. 
+ * 
+ * <p>
+ * 
  * I have decided to create special QueryNodes for each type of the operator,
  * because the default implementation ({@link AndQueryNode}, {@link OrQueryNode}
  * ) was confusing.

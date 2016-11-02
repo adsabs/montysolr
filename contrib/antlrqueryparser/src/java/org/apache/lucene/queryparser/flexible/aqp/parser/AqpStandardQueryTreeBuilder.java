@@ -60,7 +60,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 
 /**
  * This query tree builder provides configuration for the standard
- * lucene syntax. <br/>
+ * lucene syntax.
  * 
  * @see AqpStandardLuceneParser
  */

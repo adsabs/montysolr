@@ -34,10 +34,12 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
  * </pre>
  * 
  * After the processor ran, the TMODIFIER node is removed and we return the
- * FUZZY node <br/>
+ * FUZZY node 
+ * 
+ * <p>
  * 
  * If TMODIFIER contains only single child, we return that child (thus remove
- * the TMODIFIER node from the tree). <br/>
+ * the TMODIFIER node from the tree).
  * 
  * @see AqpFUZZYProcessor
  * @see AqpBOOSTProcessor

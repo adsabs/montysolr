@@ -23,20 +23,20 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
 /**
  * Rewrites the query node which is below the {@link AqpFuzzyModifierNode}
  * 
- * The actions are: </br> 
+ * The actions are: <p> 
  * 
  * 
- * {@link FieldQueryNode} </br> 
- *    - query is turned into {@link FuzzyQueryNode} or {@link SlowFuzzyQueryNode} </br>
+ * {@link FieldQueryNode} <p> 
+ *    - query is turned into {@link FuzzyQueryNode} or {@link SlowFuzzyQueryNode} <p>
  *      depending the configuration of {@link AqpStandardQueryConfigHandler}.ConfigurationKeys.ALLOW_SLOW_FUZZY
- *    - invalid syntax is raised if not 0.0 > fuzzy < 1.0  </br>
+ *    - invalid syntax is raised if not 0.0 &gt; fuzzy &lt; 1.0  <p>
  *  
- * {@link WildcardQueryNode}, {@link QuotedFieldQueryNode} </br>
- *   - becomes {@link SlopQueryNode} </br>
+ * {@link WildcardQueryNode}, {@link QuotedFieldQueryNode} <p>
+ *   - becomes {@link SlopQueryNode} <p>
  * 
  * 
- * {@link QuotedFieldQueryNode} </br>
- *   - wrapped with {@link SlopQueryNode} </br>
+ * {@link QuotedFieldQueryNode} <p>
+ *   - wrapped with {@link SlopQueryNode}
  * 
  * 
  */

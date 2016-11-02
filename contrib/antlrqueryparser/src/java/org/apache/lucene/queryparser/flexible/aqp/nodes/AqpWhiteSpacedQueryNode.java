@@ -3,9 +3,9 @@ package org.apache.lucene.queryparser.flexible.aqp.nodes;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 
 /**
- * This node will be turned into the {@link AqpFunctionQueryNode} by 
+ * This node will be turned into the AqpFunctionQueryNode by 
  * AqpUnfieldedSearchProcessor. This node is created by 
- * {@link AqpDEFOPUnfieldedTokens} processor from a group of words
+ * AqpDEFOPUnfieldedTokens processor from a group of words
  * separated by spaces, these should be ideally reparsed again
  * 
  * The field, if present, means that the first token in the group
