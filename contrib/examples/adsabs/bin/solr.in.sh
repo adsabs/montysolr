@@ -23,7 +23,7 @@
 
 # Expert: If you want finer control over memory options, specify them directly
 # Comment out SOLR_HEAP if you are using this though, that takes precedence
-SOLR_JAVA_MEM="-d64 -Xmx2048m"
+SOLR_JAVA_MEM="-d64 -Xmx${SOLR_MEMORY_MX:-1024m} -Xms${SOLR_MEMORY_MS:-1024m}"
 
 # Enable verbose GC logging
 GC_LOG_OPTS="-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails \
@@ -68,8 +68,28 @@ ENABLE_REMOTE_JMX_OPTS="false"
 # The script will use SOLR_PORT+10000 for the RMI_PORT or you can set it here
 # RMI_PORT=18983
 
+# Location where Solr should write logs to; should agree with the file appender
+# settings in server/resources/log4j.properties
+SOLR_LOGS_DIR=${SHARED_FOLDER:-./server}/logs
+
+# Sets the port Solr binds to, default is 8983
+SOLR_PORT=${MONTYSOLR_JETTY_PORT:-9983}
+
+
 # Set the thread stack size
-SOLR_OPTS="$SOLR_OPTS -Xss256k"
+SOLR_OPTS="$SOLR_OPTS -Xss256k \
+-Dsolr.data.dir=${EBS_VOLUME:-./server/solr/collection1/data} \
+-Dpython.path=${HOMEDIR:-./server/resources} \
+-Dmontysolr.reuseCache=${MONTYSOLR_REUSE_CACHE:-false} \
+-Dmontysolr.batch.workdir=${EBS_VOLUME:-./server/solr/collection1/data/batch-handler} \
+-Dmontysolr.enable.write=${MONTYSOLR_ENABLE_WRITE:-false} \
+-Dmontysolr.warmSearcher=${MONTYSOLR_WARM_SEARCHER:-false} \
+-Dsolr.cache.size=${SOLR_CACHE_SIZE:-512} \
+-Dsolr.cache.initialSize=${SOLR_CACHE_INITIAL_SIZE:-512} \
+-Dsolr.cache.autowarmCount=${SOLR_CACHE_AUTOWARM_COUNT:-128} \
+-Dsolr.ramBufferSize=${SOLR_RAM_BUFFER_SIZE:-1000} \
+-Dsolr.maxBufferedDocs=${SOLR_MAX_BUFFERED_DOCS:-50000} \
+"
 
 # Anything you add to the SOLR_OPTS variable will be included in the java
 # start command line as-is, in ADDITION to other options. If you specify the
@@ -84,19 +104,13 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k"
 
 # Path to a directory for Solr to store cores and their data. By default, Solr will use server/solr
 # If solr.xml is not stored in ZooKeeper, this directory needs to contain solr.xml
-#SOLR_HOME=
+SOLR_HOME=${HOMEDIR:-.}/server/solr
 
 # Solr provides a default Log4J configuration properties file in server/resources
 # however, you may want to customize the log settings and file appender location
 # so you can point the script to use a different log4j.properties file
 #LOG4J_PROPS=/var/solr/log4j.properties
 
-# Location where Solr should write logs to; should agree with the file appender
-# settings in server/resources/log4j.properties
-#SOLR_LOGS_DIR=
-
-# Sets the port Solr binds to, default is 8983
-#SOLR_PORT=8983
 
 # Uncomment to set SSL-related system properties
 # Be sure to update the paths to the correct keystore for your environment
@@ -124,4 +138,3 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k"
 #  -DzkDigestUsername=admin-user -DzkDigestPassword=CHANGEME-ADMIN-PASSWORD \
 #  -DzkDigestReadonlyUsername=readonly-user -DzkDigestReadonlyPassword=CHANGEME-READONLY-PASSWORD"
 #SOLR_OPTS="$SOLR_OPTS $SOLR_ZK_CREDS_AND_ACLS"
-
