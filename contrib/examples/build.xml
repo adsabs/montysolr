@@ -249,7 +249,7 @@
 
 
 	<target name="release" description="Builds a release package" depends="build-one">
-		<zip destfile="${common.build.dir}/contrib/${project.name}/${example.name}.zip" basedir="${build.dir}/${example.name}"> 
+		<zip destfile="${build.dir}/${example.name}.zip" basedir="${build.dir}/${example.name}"> 
             <fileset dir="${build.dir}/${example.name}"> 
                 <include name="*"/> 
             </fileset> 
