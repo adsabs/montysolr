@@ -175,8 +175,8 @@ solr.version=${solr.version}
 
     <target name="unlink-contrib" >
     	<ant target="unlink-upstream"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
-    	<ant target="unlink-upstream"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
-    	<ant target="unlink-upstream"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+    	<ant target="unlink-upstream"  dir="${common.dir}/contrib/adsabs"  inheritall="false" />
+    	<ant target="unlink-upstream"  dir="${common.dir}/contrib/examples"  inheritall="false" />
 	</target>
 
 
