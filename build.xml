@@ -166,6 +166,16 @@ solr.version=${solr.version}
 			<ant target="build-all"  antfile="build.xml" dir="${common.dir}/contrib/examples"  inheritall="false" />
 		</sequential>
 	</target>
+	
+	<target name="build-all" description="Builds Montysolr + the distribution" depends="build">
+		<ant target="release"  dir="${common.dir}/contrib/examples"  inheritall="false" />
+	</target>
+	
+	<target name="release" description="To build github release" depends="build">
+        <ant target="release"  dir="${common.dir}/contrib/examples"  inheritall="false" />
+		<move file="${build.dir}/contrib/examples/adsabs.zip" tofile="${build.dir}/contrib/examples/montysolr.zip" />
+		<!-- TODO: automatically bump the release in the source and upload the binary file to github -->
+    </target>
 
 	<target name="test-contrib" description="Tests contrib parts">
 		<ant target="test"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
