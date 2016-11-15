@@ -39,7 +39,7 @@
         </ant>
     </target>
     
-    <target name="compile" depends="link-upstream">
+    <target name="compile" depends="resolve,link-upstream">
         <ant target="compile" dir="${include.location}"
                             inheritall="false">
         </ant>

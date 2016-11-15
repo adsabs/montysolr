@@ -119,7 +119,7 @@
 		<!-- does nothing on purpose //-->
 	</target>
 
-	<target name="build-all" depends="build-one">
+	<target name="build-all" depends="resolve,build-one">
 		<echo>
     	    Does nothing, because build-all is called from the main build and at that time we don't have all jars for contribs yet.
     	    Call build-all-examples instead 

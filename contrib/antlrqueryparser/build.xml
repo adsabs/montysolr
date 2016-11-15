@@ -148,7 +148,7 @@
 		</compile>
 	</target>
 
-	<target name="compile" description="Compiles all the java classes" depends="">
+	<target name="compile" description="Compiles all the java classes" depends="resolve">
 		<compile srcdir="src/java" 
 			destdir="${build.dir}/classes/java">
 			<classpath refid="compile.classpath"/>
