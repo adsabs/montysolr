@@ -427,6 +427,8 @@
       <str name="wt">json</str>
     </lst>
   </requestHandler>
+  
+  <requestHandler name="/admin/luke" class="solr.admin.LukeRequestHandler" />
 
   <requestHandler name="/debug/dump" class="solr.DumpRequestHandler" >
     <lst name="defaults">
