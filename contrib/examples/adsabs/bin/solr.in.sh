@@ -70,7 +70,7 @@ ENABLE_REMOTE_JMX_OPTS="false"
 
 # Location where Solr should write logs to; should agree with the file appender
 # settings in server/resources/log4j.properties
-SOLR_LOGS_DIR=${SHARED_FOLDER:-./server}/logs
+SOLR_LOGS_DIR=${MONTYSOLR_SHARED_DIR:-./server}/logs
 
 # Sets the port Solr binds to, default is 8983
 SOLR_PORT=${MONTYSOLR_JETTY_PORT:-9983}
@@ -78,10 +78,10 @@ SOLR_PORT=${MONTYSOLR_JETTY_PORT:-9983}
 
 # Set the thread stack size
 SOLR_OPTS="$SOLR_OPTS -Xss256k \
--Dsolr.data.dir=${EBS_VOLUME:-./server/solr/collection1/data} \
+-Dsolr.data.dir=${MONTYSOLR_INDEX_DIR:-./server/solr/collection1/data} \
 -Dpython.path=${MONTYSOLR_PYTHON_PATH:-./server/resources} \
 -Dmontysolr.reuseCache=${MONTYSOLR_REUSE_CACHE:-false} \
--Dmontysolr.batch.workdir=${EBS_VOLUME:-./server/solr/collection1/data/batch-handler} \
+-Dmontysolr.batch.workdir=${MONTYSOLR_INDEX_DIR:-./server/solr/collection1/data/}/batch-handler \
 -Dmontysolr.enable.write=${MONTYSOLR_ENABLE_WRITE:-false} \
 -Dmontysolr.warmSearcher=${MONTYSOLR_WARM_SEARCHER:-false} \
 -Dsolr.cache.size=${SOLR_CACHE_SIZE:-512} \
@@ -89,6 +89,7 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k \
 -Dsolr.cache.autowarmCount=${SOLR_CACHE_AUTOWARM_COUNT:-128} \
 -Dsolr.ramBufferSize=${SOLR_RAM_BUFFER_SIZE:-1000} \
 -Dsolr.maxBufferedDocs=${SOLR_MAX_BUFFERED_DOCS:-50000} \
+-DhostContext=${SOLR_HOST_CONTEXT:-solr} \
 "
 
 # Anything you add to the SOLR_OPTS variable will be included in the java
