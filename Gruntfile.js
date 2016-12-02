@@ -720,12 +720,6 @@ module.exports = function(grunt) {
               browserName: "chrome",
               platform: "linux",
               version: '42'
-            },
-            {
-              browserName: 'iphone',
-              platform: 'OS X 10.9',
-              version: '7.0',
-              deviceName: 'iPhone Simulator'
             }
           ],
           testname: 'bbb',
