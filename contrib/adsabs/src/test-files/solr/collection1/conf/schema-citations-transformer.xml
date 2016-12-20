@@ -22,7 +22,9 @@
       multiValued="true"/>
     <field name="citation" type="string" indexed="true" stored="true" 
       multiValued="true"/>
-    
+    <field name="year" type="string" indexed="true" stored="true"
+      required="false" />
+      
     <field name="date" type="date" indexed="true" stored="true"
       multiValued="false" />  
     <field name="indexstamp" type="date" indexed="true" stored="true"

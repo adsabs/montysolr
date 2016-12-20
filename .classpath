@@ -8,7 +8,7 @@
 	<classpathentry kind="src" path="contrib/examples/src/java"/>
 	<classpathentry kind="src" path="contrib/examples/src/test"/>
 	<classpathentry kind="con" path="build/solr-download/apache-solr-4.0.0-SVN/org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-common-6.1.0-SNAPSHOT.jar" sourcepath="/apache-solr-61/lucene"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-icu-6.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-kuromoji-6.1.0-SNAPSHOT.jar"/>

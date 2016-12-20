@@ -17,6 +17,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.util.BytesRefBuilder;
 import org.apache.lucene.util.LegacyNumericUtils;
 import org.apache.solr.request.SolrQueryRequest;
@@ -30,7 +32,7 @@ import monty.solr.util.MontySolrSetup;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationsSearch extends MontySolrAbstractTestCase {
 
-	private boolean debug = false;
+	private boolean debug = true;
 	private SolrQueryRequest tempReq;
 	
 	@BeforeClass
@@ -101,7 +103,13 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 			thisDoc.add(String.valueOf(k+start));
 			thisDoc.add("bibcode");
 			thisDoc.add("b" + (k+start));
-			
+			thisDoc.add("year");
+			if (k % 2 == 0) {
+			  thisDoc.add("2000");
+			}
+			else {
+			  thisDoc.add("1995");
+			}
 			int[] row = new int[randi[k].length];
 			
 			x = 0;
@@ -137,6 +145,9 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		createRandomDocs(new Float(maxHits * 0.71f).intValue(), new Float(maxHits * 1.0f).intValue());
 		assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 		
+		createRandomDocs(0, new Float(maxHits * 0.2f).intValue());
+    assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
+    
 		// get the cache
 		tempReq = req("test");
 		SolrIndexSearcher searcher = tempReq.getSearcher();
@@ -204,11 +215,13 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 			if (doc.length == 0) // that's ok, some docs are missing
 			  continue;
 			  
+			Document document = searcher.getIndexReader().document(doc[0].doc);
 			assertEquals("Not found : " + i, 1, doc.length);
 			int docid = doc[0].doc;
 			
 			// references(id:X)
-			System.out.println(i + " cites : "  + join(references.get(docid)) + ":" + join(referencesWrapper.getLuceneDocIds(docid)));
+			if (debug)
+			  System.out.println(i + " cites : "  + join(references.get(docid)) + " -> " + join(referencesWrapper.getLuceneDocIds(docid)));
 			hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
 			    new SecondOrderCollectorCites(referencesWrapper, new String[] {"reference"})), maxHitsFound).scoreDocs;
 			hitsEquals(docid, references, hits);
@@ -217,7 +230,8 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 			hitsEquals(docid, references, hits);
 			
 			// citations(id:X)
-			System.out.println(i + " cited-by : "  + join(citations.get(docid)) + ":" + join(citationsWrapper.getLuceneDocIds(docid)));
+			if (debug)
+			  System.out.println(i + " cited-by : "  + join(citations.get(docid)) + " -> " + join(citationsWrapper.getLuceneDocIds(docid)));
 			hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
           new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
 			hitsEquals(docid, citations, hits);
@@ -227,6 +241,28 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 			}
 			histogram.put(hits.length, histogram.get(hits.length) + 1);
 			
+		  // reference:X + year:195
+			Builder builder = new BooleanQuery.Builder();
+			builder.add(new BooleanClause(new TermQuery(new Term("reference",document.get("bibcode"))), Occur.MUST));
+			builder.add(new BooleanClause(new TermQuery(new Term("year", "1995")), Occur.MUST));
+			Query expected = builder.build();
+			
+			builder = new BooleanQuery.Builder();
+      builder.add(new BooleanClause(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+          new SecondOrderCollectorCitedBy(citationsWrapper), false), Occur.MUST));
+      builder.add(new BooleanClause(new TermQuery(new Term("year", "1995")), Occur.MUST));
+      Query seeked = builder.build();
+      
+      ScoreDoc[] hitsA = searcher.search(expected, maxHitsFound).scoreDocs;
+      ScoreDoc[] hitsB = searcher.search(seeked, maxHitsFound).scoreDocs;
+      
+      if (debug) {
+        System.out.print("hitsA: ");
+        prn(hitsA);
+        System.out.print("hitsB: ");
+        prn(hitsB);
+      }
+      assertScoreDocsEqual(hitsA, hitsB);
 			
 			if (i % 5000 == 0 && debug) {
 				System.out.println("Done: " + i);
@@ -241,6 +277,26 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		}
 		if (debug) System.out.println(sum);
 		
+	}
+	
+	private void assertScoreDocsEqual(ScoreDoc[] a, ScoreDoc[] b) {
+	  ArrayList<Integer> hitsA = new ArrayList<Integer>();
+	  ArrayList<Integer> hitsB = new ArrayList<Integer>();
+	  for (ScoreDoc d: a) {
+	    hitsA.add(d.doc);
+	  }
+	  for (ScoreDoc d: a) {
+      hitsB.add(d.doc);
+    }
+	  assertEquals(hitsA, hitsB);
+	}
+	
+	private void prn(ScoreDoc[] hits) {
+	  for (ScoreDoc doc: hits) {
+	    System.out.print(doc);
+	    System.out.print(", ");
+	  }
+	  System.out.println();
 	}
 	
 	private String join(int[] l) {

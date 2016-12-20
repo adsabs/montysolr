@@ -78,6 +78,11 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     assertU(commit());
     assertQ(req("q", "*:*"), "//*[@numFound='16']");
     
+    for (int i=1900; i<2025; i++) {
+      assertU(addDocs("year", Integer.toString(i)));
+    }
+    assertU(commit());
+    
     
     // test the query parser does the right thing
     //setDebug(true);
@@ -239,8 +244,28 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         "indexstamp:[1349049600000 TO 1638316800000]", 
         LegacyNumericRangeQuery.class);
     assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00\" TO \"2021-12-01T00:00:00Z\"]", "indent", "true"), 
-      "//*[@numFound='16']"
+      "//*[@numFound='141']"
       );
+    
+    
+    assertQ(req("q", "pubdate:1976 foo", "qf", "title keyword"), 
+        "//*[@numFound='1']"
+        );
+    
+    
+    /**
+     * year field
+     */
+    
+    for (int i=1900; i<2025; i++) {
+      assertQ(req("q", "year:1976"), 
+          "//*[@numFound='1']"
+          );
+    }
+    
+    assertQ(req("q", "year:1900-1950"), 
+        "//*[@numFound='51']"
+        );
   }
   
 }
