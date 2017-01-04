@@ -21,6 +21,7 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
  */
 public final class AcronymTokenFilter extends TokenFilter {
   public static final int ACRONYM_MIN_LENGTH = 2;
+  public static final float ACRONYM_UPPER_MIN_RATIO = 0.8f;
 
   // controls index-time vs. query-time behavior
   private boolean emitBoth;
@@ -76,7 +77,14 @@ public final class AcronymTokenFilter extends TokenFilter {
     return true;
   }
 
-  private boolean termIsAcronym(String term) {
+  /**
+   * Checks that the string is considered a valid acronoym. Usually all letters
+   * must be UPPERCASE (there is a minimum ration)
+   * 
+   * @param term
+   * @return true when the term has only UPPERCASE and digits
+   */
+  public static boolean termIsAcronym(String term) {
     if (term.length() < ACRONYM_MIN_LENGTH ) {
       return false;
     }
@@ -91,13 +99,16 @@ public final class AcronymTokenFilter extends TokenFilter {
       else if (Character.isDigit(c)) {
         d++;
       }
-      else {
-        return false;
-      }
     }
     if (d==l) {
       return false;
     }
+    
+    if (u+d < ACRONYM_MIN_LENGTH)
+      return false;
+    
+    if ( ((float) u+d / term.length()) < ACRONYM_UPPER_MIN_RATIO)
+      return false;
     
     return true;
   }
