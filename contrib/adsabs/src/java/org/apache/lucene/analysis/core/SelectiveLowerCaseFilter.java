@@ -50,7 +50,7 @@ public final class SelectiveLowerCaseFilter extends TokenFilter {
   @Override
   public final boolean incrementToken() throws IOException {
     if (input.incrementToken()) {
-      if (termIsAcronym(termAtt.toString())) {
+      if (AcronymTokenFilter.termIsAcronym(termAtt.toString())) {
         return true; // skip lowercasing
       }
       charUtils.toLowerCase(termAtt.buffer(), 0, termAtt.length());
@@ -60,10 +60,4 @@ public final class SelectiveLowerCaseFilter extends TokenFilter {
       return false;
   }
   
-  private boolean termIsAcronym(String term) {
-    if (term.length() < AcronymTokenFilter.ACRONYM_MIN_LENGTH || !term.equals(term.toUpperCase())) {
-      return false;
-    }
-    return true;
-  }
 }

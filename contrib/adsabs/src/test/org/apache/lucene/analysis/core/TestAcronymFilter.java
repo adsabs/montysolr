@@ -58,4 +58,29 @@ public class TestAcronymFilter extends BaseTokenStreamTestCase {
             new String[] { TypeAttribute.DEFAULT_TYPE, TypeAttribute.DEFAULT_TYPE,  "ACRONYM" }
         );
 	  }
+	  
+	  public void testMixedCases() throws Exception {
+      AcronymTokenFilterFactory factory = new AcronymTokenFilterFactory(new HashMap<String,String>() {{
+        put("emitBoth", "true");
+        put("prefix", "acr::");
+        put("setType", "ACRONYM");
+      }});
+      factory.setExplicitLuceneMatchVersion(true);
+      
+      TokenStream stream = factory.create(whitespaceMockTokenizer(new StringReader("DiRAC")));
+      assertTokenStreamContents(stream, 
+          new String[] {"DiRAC", "acr::DiRAC" },
+          new String[] { TypeAttribute.DEFAULT_TYPE,  "ACRONYM" }
+      );
+      stream = factory.create(whitespaceMockTokenizer(new StringReader("DiRAc")));
+      assertTokenStreamContents(stream, 
+          new String[] {"DiRAc" },
+          new String[] { TypeAttribute.DEFAULT_TYPE }
+      );
+      stream = factory.create(whitespaceMockTokenizer(new StringReader("DDDDDiRAc5")));
+      assertTokenStreamContents(stream, 
+          new String[] {"DDDDDiRAc5", "acr::DDDDDiRAc5" },
+          new String[] { TypeAttribute.DEFAULT_TYPE, "ACRONYM" }
+      );
+  }
 }
