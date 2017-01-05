@@ -88,12 +88,12 @@
 					acronymVariations="3" />
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-          synonyms="author_generated.translit"
-          ignoreCase="true"
-          expand="true"
-          tokenizerFactory="solr.KeywordTokenizerFactory"
-          builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
-          inclOrig="true" />
+                      synonyms="author_generated.translit"
+                      ignoreCase="true"
+                      expand="true"
+                      tokenizerFactory="solr.KeywordTokenizerFactory"
+                      builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+                      inclOrig="true" />
 				<!-- now remove the query variants, they were used only to discover upgraded
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -114,7 +114,7 @@
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk,
 					k", "adamguk, k" -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-          synonyms="author_curated.synonyms" format="semicolon"
+                    synonyms="author_curated.synonyms" format="semicolon"
 					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -700,7 +700,7 @@
                 <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
                     replacement="" replace="all" />
                 <filter class="solr.TrimFilterFactory" />
-                <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>
+                <!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>-->
             </analyzer>
         </fieldType>
 

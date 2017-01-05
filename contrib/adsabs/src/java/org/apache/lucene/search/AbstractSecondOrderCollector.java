@@ -62,7 +62,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 			return null;
 
 		int i = -1;
-
+		//TODO: prevent locking, test for !orgnized
 		lock.lock();
 		try {
 			if (!organized) {

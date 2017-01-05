@@ -23,6 +23,7 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.LegacyNumericRangeQuery; //TODO: convert to the new
+import org.apache.lucene.search.Query;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -787,15 +788,15 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		/*
-		 * read_count (float type)
+		 * read_count (int type)
 		 */
-		assertQ(req("q", "read_count:[0.0 TO 19.0]", "fl", "recid,bibcode,title,read_count"),
+		assertQ(req("q", "read_count:[0 TO 19]", "fl", "recid,bibcode,title,read_count"),
 				"//doc/int[@name='recid'][.='101']",
 				"//doc/int[@name='recid'][.='102']",
 				"//doc/int[@name='recid'][.='103']",
 				"//doc/int[@name='recid'][.='104']",
 				"//*[@numFound='4']");
-		assertQ(req("q", "read_count:19.0"),
+		assertQ(req("q", "read_count:19"),
 				"//doc/int[@name='recid'][.='103']",
 				"//*[@numFound='1']");
 		assertQ(req("q", "read_count:15.0"),
@@ -814,7 +815,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * cite_read_boost
 		 */
-		dumpDoc(null, "recid", "read_count", "cite_read_boost");
+		//dumpDoc(null, "recid", "read_count", "cite_read_boost");
 		assertQ(req("q", "cite_read_boost:[0.0 TO 1.0]"),
 				"//doc/int[@name='recid'][.='100']",
 				"//doc/int[@name='recid'][.='101']",
@@ -1012,6 +1013,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "year:[2011 TO 2014]"),
         "//doc[1]/int[@name='recid'][.='100']"
         );
+		assertQ(req("q", "year:1995-2013"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+		assertQueryEquals(req("q", "year:1995-1996", "debugQuery", "true"), "year:[1995 TO 1996]", Query.class);
 
 		/*
 		 * links_data (generated and stored as JSON for display purposes)

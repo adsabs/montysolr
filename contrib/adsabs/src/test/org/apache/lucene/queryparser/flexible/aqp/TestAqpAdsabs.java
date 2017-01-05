@@ -100,7 +100,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	/**
 	 * OK, done 17Apr
 	 * 
-	 * @throws Exception
 	 */
 	public void testIdentifiers() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
@@ -127,7 +126,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	/**
 	 * OK, Apr19
 	 * 
-	 * @throws Exception
 	 */
 	public void testDateRanges() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
@@ -161,7 +159,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	/**
 	 * OK, 17Apr
 	 * 
-	 * @throws Exception
 	 */
 	public void testRanges() throws Exception {
 		
@@ -362,9 +359,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 	}
 	
-	/**
-	 * @throws Exception
-	 */
 	public void testEscaped() throws Exception {
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		assertQueryEquals("\\(1\\+1\\)\\:2", wsa, "(1+1):2", TermQuery.class);
@@ -379,7 +373,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	 *        x:four -field:(-one +two x:three)
 	 *        "\"func(*) AND that\"" (should not be analyzed; AND becomes and)
 	 *        
-	 * @throws Exception
 	 */
 	public void testBasics() throws Exception{
 		

@@ -77,7 +77,7 @@ public class SecondOrderListOfDocsScorer extends Scorer {
         @Override
         public int advance(int target) throws IOException {
           while ((doc = nextDoc()) < target) {
-            //pass
+            // pass
           }
           return doc;
         }
