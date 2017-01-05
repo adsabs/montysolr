@@ -90,13 +90,40 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
   }
 
   private QueryNode getClauseIgnoreModifiers(QueryNode node) {
-  	if (node instanceof ModifierQueryNode 
-  			&& node.getChildren().get(0) instanceof ModifierQueryNode 
-  			&& ((ModifierQueryNode) node.getChildren().get(0)).getModifier()
-  			.equals(((ModifierQueryNode) node).getModifier())) {
-  		return getClauseIgnoreModifiers(node.getChildren().get(0));
-  	}
-  	return node.getChildren().get(0);
+    Modifier om = null;
+    if (node instanceof ModifierQueryNode) {
+      om = ((ModifierQueryNode) node).getModifier();
+    }
+    else {
+      return node;
+    }
+    
+    QueryNode ret = node;
+    while (ret instanceof ModifierQueryNode) {
+      if (ret.getChildren().size() != 1)
+        break;
+      QueryNode ch = ret.getChildren().get(0);
+      if (ch.getChildren() == null)
+        break;
+      boolean safe = true;
+      for (QueryNode child: ch.getChildren()) {
+        if (child instanceof ModifierQueryNode 
+            && ((ModifierQueryNode)child).getModifier().equals(om)) {
+          // pass
+        }
+        else {
+          safe = false;
+          break;
+        }
+      }
+      if (safe) {
+        ret = ch;
+      }
+      else {
+        break;
+      }
+    }
+  	return ret;
   }
   
   private boolean oneOfChildrenBoolean(QueryNode node) {

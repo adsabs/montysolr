@@ -258,7 +258,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "true",
                 "qf", "title^0.9 keyword^0.7"),
-                "(+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) ((keyword:\"r s t\")^0.7 | ((title:\"r s t\" (title:syn::r s t title:syn::acr::rst)))^0.9)",
+                "(+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) ((keyword:\"r s t\")^0.7 | ((title:\"r s t\" title:syn::r s t title:syn::acr::rst))^0.9)",
                 BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp",
@@ -309,6 +309,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
     public void testSpecialCases() throws Exception {
+      
+        // full - virtual field with wrong date
+        assertQueryEquals(req("defType", "aqp", "q", "full:(\"15-52-15050\" OR \"15-32-21062\")"),
+          "((ack:\"15 52 15050\" ack:155215050) (abstract:\"15 52 15050\" abstract:155215050)^2.0 (title:\"15 52 15050\" title:155215050)^2.0 (body:\"15 52 15050\" body:155215050) keyword:155215050) ((ack:\"15 32 21062\" ack:153221062) (abstract:\"15 32 21062\" abstract:153221062)^2.0 (title:\"15 32 21062\" title:153221062)^2.0 (body:\"15 32 21062\" body:153221062) keyword:153221062)",
+          BooleanQuery.class);
+
+      
 
         // nested functions should parse well: citations(author:"^kurtz")
         assertQueryEquals(req("defType", "aqp", "q", "citations(author:\"^kurtz\")"),
@@ -388,7 +395,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                "+(abstract:stephen | title:stephen) +(abstract:murray | title:murray) +author_facet_hier:0/Murray, S",
+                "+(+(abstract:stephen | title:stephen) +(abstract:murray | title:murray)) +author_facet_hier:0/Murray, S",
                 BooleanQuery.class
         );
 

@@ -39,7 +39,7 @@ import org.junit.BeforeClass;
  * 
  * The ads_text has several tasks to do:
  * 
- *    1) normalize the input text, ie. token -foo => token-foo
+ *    1) normalize the input text, ie. token -foo becomes token-foo
  *       this is done through a series of pattern replace filters
  *    2) use WordDelimiterFilterFactory to split words (ie. all-sky)
  *    3) discover synonyms (and we have several families of synonyms)

@@ -63,13 +63,13 @@ import org.adsabs.solr.AdsConfig.F;
  * "synonym-upgrade" considers only names with initials for
  * expansion. Ie. 
  *  
- *  "jones, c" => jones, christine; forman, c; forman, christine
+ *  "jones, c" =&gt; jones, christine; forman, c; forman, christine
  *  
  *  But Alberto wants that any short form produces the same effect,
  *  ie. 
  *  
- *  "jones," => jones, christine; forman, c; forman, christine
- *  "jones, c" => jones, christine; forman, c; forman, christine
+ *  "jones," =&gt; jones, christine; forman, c; forman, christine
+ *  "jones, c" =&gt; jones, christine; forman, c; forman, christine
  *  
  *  12-12-2012: Finished (I told Alberto, but we didn't review it again)
  * 

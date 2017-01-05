@@ -29,8 +29,6 @@ public abstract class MontySolrAbstractLuceneTestCase extends LuceneTestCase {
 	/**
 	 * Must be called first, so that we make sure 
 	 * properties are set (?)
-	 * 
-	 * @throws Exception
 	 */
 	public static void envInit() throws Exception {
 		// do nonno

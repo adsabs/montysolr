@@ -55,8 +55,6 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	/**
 	 * This must be called first, so that we make sure the Python 
 	 * interpreter is loaded
-	 * 
-	 * @throws Exception
 	 */
 	public static void envInit() throws Exception {
 		//System.setProperty("storeAll", "true");

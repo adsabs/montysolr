@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/java"/>
+	<classpathentry excluding="jython/|java/|test/" kind="src" path="contrib/adsabs/src"/>
 	<classpathentry kind="src" path="contrib/adsabs/src/jython"/>
 	<classpathentry kind="src" path="contrib/antlrqueryparser/src/test"/>
 	<classpathentry kind="src" path="contrib/adsabs/src/java"/>
