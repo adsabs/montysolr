@@ -24,6 +24,7 @@ import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.LegacyNumericRangeQuery; //TODO: convert to the new
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermRangeQuery;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -1016,7 +1017,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "year:1995-2013"),
         "//doc[1]/int[@name='recid'][.='100']"
         );
-		assertQueryEquals(req("q", "year:1995-1996", "debugQuery", "true"), "year:[1995 TO 1996]", Query.class);
+		assertQueryEquals(req("q", "year:1995-1996", "debugQuery", "true"), "year:[1995 TO 1996]", TermRangeQuery.class);
 
 		/*
 		 * links_data (generated and stored as JSON for display purposes)

@@ -297,6 +297,17 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "301", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, Jewell"));
     assertU(adoc(F.ID, "302", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, J"));
     
+    assertU(adoc(F.ID, "400", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae-Sik"));
+    assertU(adoc(F.ID, "401", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae- Sik"));
+    assertU(adoc(F.ID, "402", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D. -S."));
+    assertU(adoc(F.ID, "403", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D."));
+    assertU(adoc(F.ID, "404", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D"));
+    assertU(adoc(F.ID, "405", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D. S."));
+    assertU(adoc(F.ID, "406", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae S."));
+    assertU(adoc(F.ID, "407", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae S"));
+    assertU(adoc(F.ID, "408", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D Sik"));
+    assertU(adoc(F.ID, "409", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D-Sik"));
+    
     assertU(commit());
 
     // persist the transliteration map after new docs were indexed
@@ -342,7 +353,23 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
   
   public void testAuthorParsingUseCases() throws Exception {
-  	
+    
+    // issue #57: https://github.com/romanchyla/montysolr/issues/57
+    testAuthorQuery("\"Moon, Dae-Sik\"", 
+        "author:moon, dae sik author:moon, dae sik * author:moon, d sik author:moon, d sik * author:moon, dae s author:moon, dae s * author:moon, d s author:moon, d s * author:moon, dae author:moon, d author:moon,", 
+        "//*[@numFound='10']");
+    
+    /**
+     * will miss: Moon, Dae-Sik; Moon, Dae -Sik
+     * 
+     * ie where both parts are fully spelled; but it will find 'dae, s' and 'd sik'
+     * this logic seems defficient
+     * */
+    testAuthorQuery("\"Moon, D. -S.\"", 
+        "author:moon, d s author:moon, d s* author:/moon, d[^\\s]+ s/ author:/moon, d[^\\s]+ s .*/ author:moon, d author:moon,", 
+        "//*[@numFound='8']");
+    
+    
   	// test the definition that is in the live synonym file
   	// we use this for blackbox - to verify deployment is using
   	// synonym translation

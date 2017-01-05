@@ -56,6 +56,7 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
 		// #16 github: honorifics, when the only thing we have, should be treated as surnames
 		compare("goodman", "goodman,");
 		compare("alissa goodman", "alissa goodman,", "goodman, alissa");
+		
 	}
 	
 	public void compare(String input, String... expected) throws Exception {

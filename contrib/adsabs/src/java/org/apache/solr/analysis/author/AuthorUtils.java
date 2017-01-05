@@ -45,7 +45,8 @@ public class AuthorUtils {
 		  a = a + ",";
 		// do this at the end, we want to see the space instead of '-'
 		a = a.replace('-', ' ');
-		
+		// normalize spaces once again
+		a = n2.matcher(a.trim()).replaceAll(" ");
 		return a;
 	}
 	
