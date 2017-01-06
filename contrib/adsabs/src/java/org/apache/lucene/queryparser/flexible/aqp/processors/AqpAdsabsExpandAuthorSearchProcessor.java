@@ -221,9 +221,17 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
                 nn.append(" " + nameParts[i]);
               }
             }
+            
             nn.append(" " + nameParts[nameParts.length-1]);
-            parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString(), fqn.getBegin(), fqn.getEnd()));
-            parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString() + " .*", fqn.getBegin(), fqn.getEnd()));
+            
+            if (nameParts[nameParts.length-1].length()==1 && origNameInfo.parts[nameParts.length-1].length()==1) {
+              parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString() + ".*", fqn.getBegin(), fqn.getEnd()));
+            }
+            else {
+              parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString(), fqn.getBegin(), fqn.getEnd()));
+              parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString() + " .*", fqn.getBegin(), fqn.getEnd()));
+            }
+            
           }
           
         }

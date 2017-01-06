@@ -212,12 +212,12 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "20", "bibcode", "xxxxxxxxxxx20", "title", "bubble pace telescope multi-foo"));
     assertU(adoc("id", "21", "bibcode", "xxxxxxxxxxx21", "title", "BPT multi-foo"));
     
-    assertU(adoc("id", "147", "bibcode", "xxxxxxxxxx147", "title", "NAG5-5269"));
-    assertU(adoc("id", "148", "bibcode", "xxxxxxxxxx148", "title", "NAG55269"));
-    assertU(adoc("id", "149", "bibcode", "xxxxxxxxxx149", "title", "NAG5 5269"));
-    assertU(adoc("id", "150", "bibcode", "xxxxxxxxxx150", "title", "nag5-5269"));
-    assertU(adoc("id", "151", "bibcode", "xxxxxxxxxx151", "title", "nag55269"));
-    assertU(adoc("id", "152", "bibcode", "xxxxxxxxxx152", "title", "nag5 5269"));
+    assertU(adoc("id", "147", "bibcode", "xxxxxxxxxx147", "title", "NAG5-ABCD"));
+    assertU(adoc("id", "148", "bibcode", "xxxxxxxxxx148", "title", "NAG5ABCD"));
+    assertU(adoc("id", "149", "bibcode", "xxxxxxxxxx149", "title", "NAG5 ABCD"));
+    assertU(adoc("id", "150", "bibcode", "xxxxxxxxxx150", "title", "nag5-abcd"));
+    assertU(adoc("id", "151", "bibcode", "xxxxxxxxxx151", "title", "nag5abcd"));
+    assertU(adoc("id", "152", "bibcode", "xxxxxxxxxx152", "title", "nag5 abcd"));
     
     assertU(adoc("id", "318", "bibcode", "xxxxxxxxxx318", "title", "creation of a thesaurus", "pub", "creation of a thesaurus"));
     assertU(adoc("id", "382", "bibcode", "xxxxxxxxxx382", "title", "xhtml <tags> should be <SUB>fooxx</SUB> <xremoved>"));
@@ -250,20 +250,20 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     
     // UPPER-CASE vs lower-case
-    assertQueryEquals(req("q", "NAG5-5269", "defType", "aqp", "df", "title"),
-        	"(+title:acr::nag5 +title:5269) title:acr::nag55269",
+    assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp", "df", "title"),
+        	"(+title:acr::nag5 +title:acr::abcd) title:acr::nag5abcd",
           BooleanQuery.class);
-    assertQ(req("q", "NAG5-5269", "df", "title"), 
+    assertQ(req("q", "NAG5-ABCD", "df", "title"), 
     		"//*[@numFound='3']",
         "//doc/str[@name='id'][.='147']",
         "//doc/str[@name='id'][.='148']",
         "//doc/str[@name='id'][.='149']"
         );
     
-    assertQueryEquals(req("q", "nag5-5269", "defType", "aqp", "df", "title"),
-        "(+title:nag5 +title:5269) title:nag55269",
+    assertQueryEquals(req("q", "nag5-abcd", "defType", "aqp", "df", "title"),
+        "(+title:nag5 +title:abcd) title:nag5abcd",
         BooleanQuery.class);
-    assertQ(req("q", "nag5-5269", "df", "title"), 
+    assertQ(req("q", "nag5-abcd", "df", "title"), 
     		"//*[@numFound='6']",
     		"//doc/str[@name='id'][.='147']",
         "//doc/str[@name='id'][.='148']",
@@ -358,7 +358,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // now the multi-token version
     assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "defType", "aqp"), 
         "title:\"modified newtonian dynamics\"" +
-        " (title:syn::acr::mond title:syn::modified newtonian dynamics)", 
+        " title:syn::acr::mond title:syn::modified newtonian dynamics", 
         BooleanQuery.class);
     assertQ(req("q", "title" + ":\"modified newtonian dynamics\""), "//*[@numFound='2']",
     		"//doc/str[@name='id'][.='14']",
@@ -403,7 +403,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // lastly - unfielded phrase
     assertQueryEquals(req("q", "\"modified newtonian dynamics\"", "defType", "aqp", "qf", "title^2.0 all^1.5"), 
-    		"(((all:\"modified newtonian dynamics\" (all:syn::acr::mond all:syn::modified newtonian dynamics)))^1.5 | ((title:\"modified newtonian dynamics\" (title:syn::acr::mond title:syn::modified newtonian dynamics)))^2.0)", 
+    		"(((all:\"modified newtonian dynamics\" all:syn::acr::mond all:syn::modified newtonian dynamics))^1.5 | ((title:\"modified newtonian dynamics\" title:syn::acr::mond title:syn::modified newtonian dynamics))^2.0)", 
     		DisjunctionMaxQuery.class);
     assertQ(req("q", "\"modified newtonian dynamics\"", "qf", "title^2.0 all^1.5"), 
     		"//*[@numFound='2']",
@@ -554,7 +554,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // simple case
     assertQueryEquals(req("q", "title:\"hubble space telescope\"", "defType", "aqp"), 
-        "title:\"hubble space telescope\" (title:syn::hubble space telescope title:syn::acr::hst)", 
+        "title:\"hubble space telescope\" title:syn::hubble space telescope title:syn::acr::hst", 
         BooleanQuery.class);
     assertQ(req("q", "title:\"hubble space telescope\""), 
     		"//*[@numFound='2']",
@@ -760,11 +760,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   	
   	// #147 - parsing of WDDF tokens
   	// analyzer operation. eg. XXX-YYYY => (XXX AND YYY) OR XXXYYY
-  	assertQueryEquals(req("q", "NAG5-5269", "defType", "aqp"), 
-        "((+all:acr::nag5 +all:5269) all:acr::nag55269)", 
-        BooleanQuery.class);
-  	assertQueryEquals(req("q", "TM5-6003X", "defType", "aqp"), 
-        "((+all:acr::tm5 +all:acr::6003x) all:acr::tm56003x)", 
+  	assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp"), 
+        "((+all:acr::nag5 +all:acr::abcd) all:acr::nag5abcd)", 
         BooleanQuery.class);
   	
   	

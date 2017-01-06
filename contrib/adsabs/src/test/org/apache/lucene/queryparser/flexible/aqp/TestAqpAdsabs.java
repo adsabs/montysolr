@@ -266,14 +266,14 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("#(request synonyms 5)", null, "+request +synonyms");
 		
 		
-		assertQueryEquals("this and (one #5)", null, "+this +one");
-		assertQueryEquals("this and (one #5)", wsa, "+this +one +5");
+		assertQueryEquals("this and (one #5)", null, "+this +(+one)");
+		assertQueryEquals("this and (one #5)", wsa, "+this +(+one +5)");
 		
 		assertQueryEquals("=5", null, "5");
 		
 		assertQueryEquals("=(request synonyms 5)", null, "+request +synonyms +5");
-		assertQueryEquals("this and (one =5)", null, "+this +one +5");
-		assertQueryEquals("this and (one =5)", wsa, "+this +one +5");
+		assertQueryEquals("this and (one =5)", null, "+this +(+one +5)");
+		assertQueryEquals("this and (one =5)", wsa, "+this +(+one +5)");
 		
 	}
 	
@@ -435,18 +435,17 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("fieldx:(one +two -three)", null, "+fieldx:one +fieldx:two -fieldx:three");
 		assertQueryEquals("+field:(-one +two three)", null, "-one +two +three");
 		assertQueryEquals("-field:(-one +two three)", null, "-one +two +three");
-		assertQueryEquals("+field:(-one +two three) x:four", null, "-one +two +three +x:four");
+		assertQueryEquals("+field:(-one +two three) x:four", null, "+(-one +two +three) +x:four");
 		
 		
-		assertQueryEquals("x:four -field:(-one +two three)", null, "+x:four -one +two +three");
+		assertQueryEquals("x:four -field:(-one +two three)", null, "+x:four -(-one +two +three)");
 		
   	//TODO: the last x: field is overwritten, a bug, a feature?
-		assertQueryEquals("x:four -foo:(-one +two x:three)", null, "+x:four -foo:one +foo:two +foo:three");
+		assertQueryEquals("x:four -foo:(-one +two x:three)", null, "+x:four -(-foo:one +foo:two +foo:three)");
 		
 	  //XXX: I know about this bug, but having no time to fix, higher priorities...
-		//assertQueryEquals("x:four -foo:(-one two x:three)", null, "+x:four -(+foo:one +foo:two) +foo:three");
-		//assertQueryEquals("x:a -f:(-b c x:z)", null, "+x:a -f:b -f:c -x:z");
-		assertQueryEquals("x:a -f:(-b c x:z)", null, "+x:a -f:b +f:c +f:z");
+		assertQueryEquals("x:four -foo:(-one two x:three)", null, "+x:four -(-foo:one +foo:two +foo:three)");
+		assertQueryEquals("x:a -f:(-b c x:z)", null, "+x:a -(-f:b +f:c +f:z)");
 		
 		
 		assertQueryEquals("a test:(one)", null, "+a +test:one");
@@ -464,20 +463,20 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		
 		assertQueryEquals("m:(a b c)", null, "+m:a +m:b +m:c");
 		assertQueryEquals("+m:(a b c)", null, "+m:a +m:b +m:c"); 
-		assertQueryEquals("+m:(a b c) +x:d", null, "+m:a +m:b +m:c +x:d");
-		assertQueryEquals("+m:(a b c) x:d", null, "+m:a +m:b +m:c +x:d"); // OR is default, I always get tripped
+		assertQueryEquals("+m:(a b c) +x:d", null, "+(+m:a +m:b +m:c) +x:d");
+		assertQueryEquals("+m:(a b c) x:d", null, "+(+m:a +m:b +m:c) +x:d");
 		assertQueryEquals("+m:(a b c) OR x:d", null, "+(+m:a +m:b +m:c) x:d");
-		assertQueryEquals("+m:(a b c) -x:d", null, "+m:a +m:b +m:c -x:d");
+		assertQueryEquals("+m:(a b c) -x:d", null, "+(+m:a +m:b +m:c) -x:d");
 		
-		assertQueryEquals("+x:d +m:(a b c)", null, "+x:d +m:a +m:b +m:c");
-		assertQueryEquals("x:d +m:(a b c)", null, "+x:d +m:a +m:b +m:c"); // OR is default, I always get tripped
+		assertQueryEquals("+x:d +m:(a b c)", null, "+x:d +(+m:a +m:b +m:c)");
+		assertQueryEquals("x:d +m:(a b c)", null, "+x:d +(+m:a +m:b +m:c)");
 		assertQueryEquals("x:d OR +m:(a b c)", null, "x:d +(+m:a +m:b +m:c)");
-		assertQueryEquals("-x:d +m:(a b c)", null, "-x:d +m:a +m:b +m:c");
+		assertQueryEquals("-x:d +m:(a b c)", null, "-x:d +(+m:a +m:b +m:c)");
 		
-		assertQueryEquals("+x:d +m:(a b c) +y:e", null, "+x:d +m:a +m:b +m:c +y:e");
-		assertQueryEquals("x:d +m:(a b c) y:e", null, "+x:d +m:a +m:b +m:c +y:e"); // OR is default, I always get tripped
+		assertQueryEquals("+x:d +m:(a b c) +y:e", null, "+x:d +(+m:a +m:b +m:c) +y:e");
+		assertQueryEquals("x:d +m:(a b c) y:e", null, "+x:d +(+m:a +m:b +m:c) +y:e");
 		assertQueryEquals("x:d OR +m:(a b c) OR y:e", null, "x:d +(+m:a +m:b +m:c) y:e");
-		assertQueryEquals("-x:d +m:(a b c) -y:e", null, "-x:d +m:a +m:b +m:c -y:e");
+		assertQueryEquals("-x:d +m:(a b c) -y:e", null, "-x:d +(+m:a +m:b +m:c) -y:e");
 		
 		assertQueryEquals("+m:(a OR b OR c) x:d", null, "+(m:a m:b m:c) +x:d");
 		
@@ -487,7 +486,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("m:(a b c or d)", null, "+m:a +m:b +(m:c m:d)");
 		
 		assertQueryEquals("m:(a b c OR d)", null, "+m:a +m:b +(m:c m:d)"); 
-		assertQueryEquals("m:(a b c AND d)", null, "+m:a +m:b +m:c +m:d");
+		assertQueryEquals("m:(a b c AND d)", null, "+m:a +m:b +(+m:c +m:d)");
 		assertQueryEquals("m:(a b c OR d NOT e)", null, "+m:a +m:b +(m:c (+m:d -m:e))");
 		assertQueryEquals("m:(a b NEAR c)", null, "+m:a +spanNear([m:b, m:c], 5, true)");
 		assertQueryEquals("m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)");

@@ -104,10 +104,10 @@ public final class AcronymTokenFilter extends TokenFilter {
       return false;
     }
     
-    if (u+d < ACRONYM_MIN_LENGTH)
+    if (u < ACRONYM_MIN_LENGTH)
       return false;
     
-    if ( (((float) u+d) / term.length()) < ACRONYM_UPPER_MIN_RATIO)
+    if ( (((float) u+ ((float) d / 2.0)) / term.length()) < ACRONYM_UPPER_MIN_RATIO)
       return false;
     
     return true;
