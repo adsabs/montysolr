@@ -82,6 +82,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             File multiSynonymsFile = createTempFile(new String[]{
                     "hubble\0space\0telescope, HST",
                     "r\0s\0t, RST",
+                    "dark\0energy, DE"
             });
             replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiSynonymsFile.getAbsolutePath() + "\"");
 
@@ -310,6 +311,33 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+        // disable synonyms (also for virtual fiels) - #36
+        assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
+          "(abstract:\"dark energy\" abstract:syn::dark energy abstract:syn::acr::de) "
+          + "(title:\"dark energy\" title:syn::dark energy title:syn::acr::de) "
+          + "keyword:\"dark energy\"",
+          BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
+            "abstract:dark energy title:dark energy keyword:dark energy",
+            BooleanQuery.class);
+        
+        assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
+            "abstract:dark energy title:dark energy keyword:dark energy",
+            BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "=abs:(\"dark energy\")"),
+            "abstract:dark energy title:dark energy keyword:dark energy",
+            BooleanQuery.class);
+
+        assertQueryEquals(req("defType", "aqp", "q", "abs:(weak)"),
+            "(abstract:weak abstract:syn::lightweak) (title:weak title:syn::lightweak) keyword:weak",
+            BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "=abs:(weak)"),
+            "abstract:weak title:weak keyword:weak",
+            BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "abs:(=weak weak)"),
+            "+(abstract:weak title:weak keyword:weak) +((abstract:weak abstract:syn::lightweak) (title:weak title:syn::lightweak) keyword:weak)",
+            BooleanQuery.class);
+        
         // full - virtual field with wrong date
         assertQueryEquals(req("defType", "aqp", "q", "full:(\"15-52-15050\" OR \"15-32-21062\")"),
           "((ack:\"15 52 15050\" ack:155215050) (abstract:\"15 52 15050\" abstract:155215050)^2.0 (title:\"15 52 15050\" title:155215050)^2.0 (body:\"15 52 15050\" body:155215050) keyword:155215050) ((ack:\"15 32 21062\" ack:153221062) (abstract:\"15 32 21062\" abstract:153221062)^2.0 (title:\"15 32 21062\" title:153221062)^2.0 (body:\"15 32 21062\" body:153221062) keyword:153221062)",
