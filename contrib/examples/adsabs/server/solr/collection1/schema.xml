@@ -1192,7 +1192,7 @@
       This is the normalized version of a controlled keyword (if paper contains it).
       Very often this value may be missing.
      -->
-		<field name="keyword" type="normalized_text_ascii" indexed="true"
+		<field name="keyword" type="ads_text" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"/>
 
 		<field name="keyword_norm" type="normalized_text_ascii_nodedup" indexed="true" stored="true"
@@ -1201,11 +1201,11 @@
 		<field name="keyword_schema" type="normalized_text_ascii_nodedup" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true"/>
 
-    <field name="keyword_facet" type="string" indexed="true" stored="true"
-      multiValued="true" omitNorms="true"/>
-
-    <field name="arxiv_class" type="normalized_text_ascii" indexed="true" stored="true"
-      multiValued="true" omitNorms="true"/>
+	    <field name="keyword_facet" type="string" indexed="true" stored="true"
+	      multiValued="true" omitNorms="true"/>
+	
+	    <field name="arxiv_class" type="normalized_text_ascii" indexed="true" stored="true"
+	      multiValued="true" omitNorms="true"/>
 
 
 

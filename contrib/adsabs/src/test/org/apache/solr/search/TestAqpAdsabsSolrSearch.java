@@ -238,7 +238,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
                 "qf", "title keyword"),
-                "(+(keyword:pink | ((title:pink title:syn::pinkish))) +(keyword:elephant | title:elephant)) (keyword:\"pink elephant\" | title:\"(pink syn::pinkish) elephant\")",
+                "(+(((keyword:pink keyword:syn::pinkish)) | ((title:pink title:syn::pinkish))) +(keyword:elephant | title:elephant)) (keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\")",
                 BooleanQuery.class);
 
         // when combined, the ADS's default AND operator should be visible +foo
@@ -246,7 +246,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
                 "qf", "title keyword"),
-                "+((+(keyword:pink | ((title:pink title:syn::pinkish))) +(keyword:elephant | title:elephant)) (keyword:\"pink elephant\" | title:\"(pink syn::pinkish) elephant\")) +title:foo",
+                "+((+(((keyword:pink keyword:syn::pinkish)) | ((title:pink title:syn::pinkish))) +(keyword:elephant | title:elephant)) (keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\")) +title:foo",
                 BooleanQuery.class);
 
 
@@ -259,7 +259,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "true",
                 "qf", "title^0.9 keyword^0.7"),
-                "(+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) ((keyword:\"r s t\")^0.7 | ((title:\"r s t\" title:syn::r s t title:syn::acr::rst))^0.9)",
+                "(+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) (((keyword:\"r s t\" keyword:syn::r s t keyword:syn::acr::rst))^0.7 | ((title:\"r s t\" title:syn::r s t title:syn::acr::rst))^0.9)",
                 BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp",
@@ -267,8 +267,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "true",
-                "qf", "title^0.9 keyword^0.7"),
-                "(+((keyword:x)^0.7 | (title:x)^0.9) +((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9) +((keyword:y)^0.7 | (title:y)^0.9)) ((keyword:\"x r s t y\")^0.7 | ((title:\"x r s t y\" title:\"x (syn::r s t syn::acr::rst) ? ? y\"~2))^0.9)",
+                "qf", "title^0.9 keyword_norm^0.7"),
+                "(+((keyword_norm:x)^0.7 | (title:x)^0.9) +((keyword_norm:r)^0.7 | (title:r)^0.9) +((keyword_norm:s)^0.7 | (title:s)^0.9) +((keyword_norm:t)^0.7 | (title:t)^0.9) +((keyword_norm:y)^0.7 | (title:y)^0.9)) ((keyword_norm:\"x r s t y\")^0.7 | ((title:\"x r s t y\" title:\"x (syn::r s t syn::acr::rst) ? ? y\"~2))^0.9)",
                 BooleanQuery.class);
 
 
@@ -315,7 +315,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
           "(abstract:\"dark energy\" abstract:syn::dark energy abstract:syn::acr::de) "
           + "(title:\"dark energy\" title:syn::dark energy title:syn::acr::de) "
-          + "keyword:\"dark energy\"",
+          + "(keyword:\"dark energy\" keyword:syn::dark energy keyword:syn::acr::de)",
           BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
             "abstract:dark energy title:dark energy keyword:dark energy",
@@ -329,18 +329,18 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "abs:(weak)"),
-            "(abstract:weak abstract:syn::lightweak) (title:weak title:syn::lightweak) keyword:weak",
+            "(abstract:weak abstract:syn::lightweak) (title:weak title:syn::lightweak) (keyword:weak keyword:syn::lightweak)",
             BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=abs:(weak)"),
             "abstract:weak title:weak keyword:weak",
             BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "abs:(=weak weak)"),
-            "+(abstract:weak title:weak keyword:weak) +((abstract:weak abstract:syn::lightweak) (title:weak title:syn::lightweak) keyword:weak)",
+            "+(abstract:weak title:weak keyword:weak) +((abstract:weak abstract:syn::lightweak) (title:weak title:syn::lightweak) (keyword:weak keyword:syn::lightweak))",
             BooleanQuery.class);
         
         // full - virtual field with wrong date
         assertQueryEquals(req("defType", "aqp", "q", "full:(\"15-52-15050\" OR \"15-32-21062\")"),
-          "((ack:\"15 52 15050\" ack:155215050) (abstract:\"15 52 15050\" abstract:155215050)^2.0 (title:\"15 52 15050\" title:155215050)^2.0 (body:\"15 52 15050\" body:155215050) keyword:155215050) ((ack:\"15 32 21062\" ack:153221062) (abstract:\"15 32 21062\" abstract:153221062)^2.0 (title:\"15 32 21062\" title:153221062)^2.0 (body:\"15 32 21062\" body:153221062) keyword:153221062)",
+          "((ack:\"15 52 15050\" ack:155215050) (abstract:\"15 52 15050\" abstract:155215050)^2.0 (title:\"15 52 15050\" title:155215050)^2.0 (body:\"15 52 15050\" body:155215050) (keyword:\"15 52 15050\" keyword:155215050)) ((ack:\"15 32 21062\" ack:153221062) (abstract:\"15 32 21062\" abstract:153221062)^2.0 (title:\"15 32 21062\" title:153221062)^2.0 (body:\"15 32 21062\" body:153221062) (keyword:\"15 32 21062\" keyword:153221062))",
           BooleanQuery.class);
 
       

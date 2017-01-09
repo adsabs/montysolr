@@ -21,7 +21,7 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
  */
 public final class AcronymTokenFilter extends TokenFilter {
   public static final int ACRONYM_MIN_LENGTH = 2;
-  public static final float ACRONYM_UPPER_MIN_RATIO = 0.8f;
+  public static final float ACRONYM_UPPER_MIN_RATIO = 0.74999f;
 
   // controls index-time vs. query-time behavior
   private boolean emitBoth;
