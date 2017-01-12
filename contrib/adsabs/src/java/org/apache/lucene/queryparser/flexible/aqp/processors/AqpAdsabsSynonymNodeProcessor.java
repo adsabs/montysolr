@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
@@ -43,7 +44,20 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
 			else {
 				
 				QueryNode child = synNode.getChild();
-				if (child instanceof FieldQueryNode) {
+				
+				if (child instanceof GroupQueryNode) {
+				  for (QueryNode c: child.getChildren()) {
+				    for (QueryNode b: c.getChildren()) {
+				      if (b instanceof FieldQueryNode) {
+  				      String field = ((FieldQueryNode) b).getFieldAsString() + "_nosyn";
+  		          if (hasAnalyzer(field)) {
+  		            ((FieldQueryNode) b).setField(field); // change the field to use a different analyzer...
+  		          }
+				      }
+				    }
+				  }
+				}
+				else if (child instanceof FieldQueryNode) {
    				// we may be in situation that this node had a modifier (= or #)
 					// which only modifies the analysis, but doesn't turn it off
 					

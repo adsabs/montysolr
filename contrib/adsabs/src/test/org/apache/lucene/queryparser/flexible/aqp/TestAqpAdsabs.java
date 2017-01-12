@@ -153,7 +153,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// i don't think we should try to guess this as a date
 		assertQueryEquals("2011", null, "");
 		assertQueryEquals("2011", wsa, "2011");
-		
 	}
 	
 	/**
