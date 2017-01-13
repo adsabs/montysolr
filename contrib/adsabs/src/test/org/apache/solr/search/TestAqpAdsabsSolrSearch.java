@@ -90,7 +90,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                     "weak => lightweak",
                     "lensing => mikrolinseneffekt",
                     "pink => pinkish",
-                    "stephen, stephens => stephen"
+                    "stephen, stephens => stephen",
+                    "bremßtrahlung => brehmen"
             });
             replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 
@@ -311,6 +312,30 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+        // inconsistency disabling synonyms: #39
+        assertQueryEquals(req("defType", "aqp", "q", "full:bremßtrahlung"),
+          "(ack:bremßtrahlung ack:bremsstrahlung ack:syn::brehmen) "
+          + "(abstract:bremßtrahlung abstract:bremsstrahlung abstract:syn::brehmen)^2.0 "
+          + "(title:bremßtrahlung title:bremsstrahlung title:syn::brehmen)^2.0 "
+          + "(body:bremßtrahlung body:bremsstrahlung body:syn::brehmen) "
+          + "(keyword:bremßtrahlung keyword:bremsstrahlung keyword:syn::brehmen)",
+          BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "=full:bremßtrahlung"),
+            "(ack:bremßtrahlung ack:bremsstrahlung) "
+                + "(abstract:bremßtrahlung abstract:bremsstrahlung)^2.0 "
+                + "(title:bremßtrahlung title:bremsstrahlung)^2.0 "
+                + "(body:bremßtrahlung body:bremsstrahlung) "
+                + "(keyword:bremßtrahlung keyword:bremsstrahlung)",
+            BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "body:bremßtrahlung"),
+            "body:bremßtrahlung body:bremsstrahlung body:syn::brehmen",
+            BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "=body:bremßtrahlung"),
+            "body:bremßtrahlung body:bremsstrahlung",
+            BooleanQuery.class);
+
+
+      
         // disable synonyms (also for virtual fiels) - #36
         assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
           "(abstract:\"dark energy\" abstract:syn::dark energy abstract:syn::acr::de) "
@@ -318,14 +343,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           + "(keyword:\"dark energy\" keyword:syn::dark energy keyword:syn::acr::de)",
           BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
-            "abstract:dark energy title:dark energy keyword:dark energy",
+            "abstract:\"dark energy\" title:\"dark energy\" keyword:\"dark energy\"",
             BooleanQuery.class);
         
-        assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
-            "abstract:dark energy title:dark energy keyword:dark energy",
-            BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=abs:(\"dark energy\")"),
-            "abstract:dark energy title:dark energy keyword:dark energy",
+            "abstract:\"dark energy\" title:\"dark energy\" keyword:\"dark energy\"",
             BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "abs:(weak)"),

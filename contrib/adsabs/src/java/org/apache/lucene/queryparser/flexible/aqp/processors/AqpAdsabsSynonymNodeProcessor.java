@@ -42,19 +42,6 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
 			}
 			else {
 				
-				QueryNode child = synNode.getChild();
-				if (child instanceof FieldQueryNode) {
-   				// we may be in situation that this node had a modifier (= or #)
-					// which only modifies the analysis, but doesn't turn it off
-					
-					String field = ((FieldQueryNode) child).getFieldAsString() + "_nosyn";
-			    if (hasAnalyzer(field)) {
-			    	((FieldQueryNode) child).setField(field); // change the field to use a different analyzer...
-			    	return child;
-			    }
-				}
-			  
-		    
 				return applyNonAnalyzableToAllChildren(synNode.getChild());
 			}
 		}
@@ -67,6 +54,18 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
 			return node;
 		}
 		else if (node instanceof FieldQueryNode) {
+		  
+		  if (node.getTag("aqp.exact") != null) {
+		    // this node had a modifier (= or #)
+        // which only modifies the analysis, but doesn't turn it off
+        
+        String field = ((FieldQueryNode) node).getFieldAsString() + "_nosyn";
+        if (hasAnalyzer(field)) {
+          ((FieldQueryNode) node).setField(field); // change the field to use a different analyzer...
+          return node;
+        }
+		  }
+		  // catch all, avoid analysis
 			return new AqpNonAnalyzedQueryNode((FieldQueryNode) node); 
 		}
 		

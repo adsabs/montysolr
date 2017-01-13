@@ -1211,6 +1211,8 @@
 		<field name="keyword" type="ads_text" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"/>
 
+        <field name="keyword_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+        
 		<field name="keyword_norm" type="normalized_text_ascii_nodedup" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true"/>
 
