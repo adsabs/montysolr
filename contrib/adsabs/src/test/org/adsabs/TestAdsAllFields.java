@@ -197,6 +197,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"bibgroup_facet\": [\"Cfa\"]" +
 				", \"database\": [\"ASTRONOMY\", \"PHYSICS\"]" +
 				", \"comment\": [\"comment1 commentFoo\", \"comment2\"]" +
+				", \"pubnote\": [\"pubnote1 pubnoteFoo\", \"pubnote2\"]" +
 				", \"caption\": [\"caption1 captionFoo\", \"caption2\"]" +
 				
 				", \"body\": \"Some fulltext hashimoto\"" +
@@ -760,6 +761,19 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "abstract:\"q'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:\"q\\\\'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
 
+		
+		/*
+		 * pubnote
+		 */
+		
+		assertQ(req("q", "pubnote:pubnotefoo"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']"
+    );
+		assertQ(req("q", "pubnote:pubnote2"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']"
+    );
 
 		/*
 		 * reference
