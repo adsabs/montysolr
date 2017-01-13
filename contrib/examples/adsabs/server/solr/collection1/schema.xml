@@ -1124,6 +1124,9 @@
 
 		<field name="author_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  
+		<field name="author_count" type="int" indexed="true" stored="false"
+		  omitNorms="true" omitTermFreqAndPositions="true"/> 
 
 		<field name="first_author_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
@@ -1191,6 +1194,19 @@
 
       This is the normalized version of a controlled keyword (if paper contains it).
       Very often this value may be missing.
+      
+    * comment
+    
+      Comments associated with the article, e.g. captions of extracted table captions.
+      
+      @see: caption
+      
+    * pubnote
+    
+      Arxiv papers only field. Information about the publication (?)
+      
+      @since 61.1.0.1
+      
      -->
 		<field name="keyword" type="ads_text" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"/>
@@ -1236,9 +1252,12 @@
 		<field name="thesis" type="affiliation_text" indexed="true"	stored="true"
 		  omitNorms="true" />
 
-		<field name="comment" type="string" indexed="true" stored="${storeAll:false}"
+		<field name="comment" type="ads_text" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
+        
+        <field name="pubnote" type="ads_text" indexed="true" stored="true"
+          multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+          
 		<field name="copyright" type="affiliation_text" indexed="true" stored="true"
 		  omitNorms="true" />
 
@@ -1282,10 +1301,10 @@
        @depracated - use grant instead
 	   -->
 	  <field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
-      multiValued="true" omitNorms="true"/>
+        multiValued="true" omitNorms="true"/>
 
-		<field name="grant_facet_hier" type="string" indexed="true"
-			stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+	  <field name="grant_facet_hier" type="string" indexed="true"
+		stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 
     <!--
@@ -1305,7 +1324,7 @@
     -->
 		<field name="all" type="ads_text" indexed="true" stored="false"
 			multiValued="true" />
-    <field name="all_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+        <field name="all_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 
 
@@ -1329,6 +1348,12 @@
 
 		  Contains acknowledgements extracted from fulltexts (if it was
 		  possible to identify them).
+		
+		* caption
+		  
+		  Text of the caption string.
+		  
+		  @since 61.1.0.1
 
 		 -->
 		<field name="full" type="ads_text" indexed="false" stored="false"/>
@@ -1337,7 +1362,11 @@
 		<field name="body" type="ads_text" indexed="true" stored="true"
 			termVectors="true" termOffsets="true" termPositions="true" />
 		<field name="body_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
-
+        
+        <field name="caption" type="ads_text" indexed="true" stored="true" 
+            multiValued="true" />
+        <field name="caption_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+        
 		<field name="ack" type="ads_text" indexed="true" stored="true" />
 		<field name="ack_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
@@ -1453,11 +1482,24 @@
 
       Example query:
          indexstamp:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"]
+         
+    * update_timestamp
+    
+      This timestamp can be used to query for latest changes, the timestamp
+      is controlled by ADS and changes only when a significant change is
+      made to the document. Usually it excludes updates triggered by 
+      citations/reads/fulltext updates.
+      
+      @since v61.1.0.3
+      
      -->
 		<field name="indexstamp" type="tdate" indexed="true" stored="true"
 			default="NOW" multiValued="false" />
-
-    <field name="_version_" type="long" indexed="true" stored="true" />
+        
+        <field name="update_timestamp" type="tdate" indexed="true" stored="true"
+            default="NOW" multiValued="false" />
+            
+        <field name="_version_" type="long" indexed="true" stored="true" />
 
 
 		<!-- uncomment the following to ignore any fields that don't already match
@@ -1525,16 +1567,29 @@
 		<!--
 		@api.doc
 
-    * doctype
-
-      Each document contains document type (non-repeatable field)
-
-      Example query:
-
-         doctype:book
+	    * doctype
+	
+	      Each document contains document type (non-repeatable field)
+	
+	      Example query:
+	
+	         doctype:book
+	         
+	    * doctype_facet_hier
+	    
+	      Document type displayed in a hierarchy. Example:
+	      
+	           0/Article
+	           1/Article/Book chapter
+	           
+	      @since v61.1.0.1
 		-->
+		
 		<field name="doctype" type="normalized_string_ascii"
 	      indexed="true" stored="true" required="false" />
+	      
+	    <field name="doctype_facet_hier" type="string" indexed="true"
+            stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<!-- a field holding tokenizer chain for the unfield search (very important
 			to have if you require multi-word token expansion and unfielded search expansion

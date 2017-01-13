@@ -156,6 +156,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 				// author_facet_hier must be generated (solr doesn't modify it)
 				", \"author_facet_hier\": [\"0/T Hooft, V\", \"1/T Hooft, V/T Hooft, Van X\", \"0/Anders, J M\", \"1/Anders, J M/Anders, John Michael\", \"0/Einstein, A\"]" +
+				", \"author_count\": 5" +
 
 				// must be: "yyyy-MM-dd (metadata often is just: yyyy-MM|yyyy)
 				", \"pubdate\": \"2013-08-05\"" +
@@ -195,7 +196,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"bibgroup\": [\"Cfa\"]" +
 				", \"bibgroup_facet\": [\"Cfa\"]" +
 				", \"database\": [\"ASTRONOMY\", \"PHYSICS\"]" +
-
+				", \"comment\": [\"comment1 commentFoo\", \"comment2\"]" +
+				", \"caption\": [\"caption1 captionFoo\", \"caption2\"]" +
+				
 				", \"body\": \"Some fulltext hashimoto\"" +
 				", \"title\": \"This is of the title\"" +
 				", \"alternate_title\": \"This is of the alternate\"" +
@@ -217,6 +220,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"orcid_other\": [\"1111-2222-3333-4444\", \"1111-2222-3333-5555\", \"-\"]" +
 				", \"simbad_object_facet_hier\": [\"0/HII Region\", \"1/HII Region/9000000\"]" +
         ", \"doctype\": \"article\"" +
+        ", \"doctype_facet_hier\": [\"0/Article\", \"1/Article/Book chapter\"]" +
+        
+        ", \"update_timestamp\": \"2010-03-04T22:01:32.809Z\"" +
 			"}" +
 		"}}";
 		updateJ(json, null);
@@ -318,7 +324,28 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "bibstem:jnum.*"), "//*[@numFound='1']");
 		assertQ(req("q", "bibstem:jnum*"), "//*[@numFound='1']");
 
-
+		
+		/*
+     * caption
+     */
+    assertQ(req("q", "caption:caption1"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+    assertQ(req("q", "caption:captionfoo"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+    
+		
+		/*
+		 * comment
+		 */
+		assertQ(req("q", "comment:comment1"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+		assertQ(req("q", "comment:commentfoo"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+		
 		/*
 		 * doi:
 		 *
@@ -352,6 +379,16 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"<str>t' Hooft, van X</str>" +
 				"<str>Anders, John Michael</str>" +
 				"<str>Einstein, A</str></arr>");
+		
+		/*
+		 * author_count
+		 */
+		assertQ(req("q", "author_count:5"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+		assertQ(req("q", "author_count:[0 TO 6]"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
 
 		/*
 		 * pos() testing on the author search
@@ -1002,6 +1039,18 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='24']"
 		);
 
+		
+		/*
+		 * update_timestamp
+		 */
+		assertQ(req("q", "update_timestamp:[\"2010-01-04T22:01:32\" TO \"2010-08-04T22:01:32\"]"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']"
+    );
+		assertQ(req("q", "update_timestamp:[\"2010-03-04T22:01:32.109Z\" TO \"2010-03-04T22:01:33.099Z\"]"),
+		    "//*[@numFound='1']",
+		    "//doc/int[@name='recid'][.='100']"
+		    );
 
 
 		/*
@@ -1103,6 +1152,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "doctype:article"),
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='100']");
+    
+    /**
+     * doctype_facet_hier
+     */
+    assertQ(req("q", "doctype_facet_hier:\"0/Article\""),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+    assertQ(req("q", "doctype_facet_hier:\"1/Article/Book chapter\""),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+    
     
     /**
      * Author search must give the same results if we use
