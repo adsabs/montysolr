@@ -387,7 +387,9 @@ define([
         _.each(orcidWorks, function(w, idx) {
           if (w['work-external-identifiers'] && w['work-external-identifiers']['work-external-identifier']) {
             _.each(w['work-external-identifiers']['work-external-identifier'], function(el) {
-              ret[el['work-external-identifier-id']['value']] = {idx: idx, type: el['work-external-identifier-type'], "put-code": w['put-code']};
+              if (el['work-external-identifier-id'] && el['work-external-identifier-id']['value']) {
+                ret[el['work-external-identifier-id']['value']] = {idx: idx, type: el['work-external-identifier-type'], "put-code": w['put-code']};
+              }
             });
           }
         });
