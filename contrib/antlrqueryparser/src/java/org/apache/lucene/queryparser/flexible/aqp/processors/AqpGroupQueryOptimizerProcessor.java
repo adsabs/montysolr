@@ -1,18 +1,15 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpImmutableGroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
-import org.apache.lucene.queryparser.flexible.standard.nodes.BooleanModifierNode;
 
 /**
  * Optimizes the query by removing the superfluous GroupQuery nodes. We harvest

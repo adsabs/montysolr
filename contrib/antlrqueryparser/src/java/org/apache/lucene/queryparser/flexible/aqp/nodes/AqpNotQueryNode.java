@@ -30,8 +30,8 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  * <p>
  * 
  * The first node is set to be required
- * {@link ModifierQueryNode.Modifier#MOD_REQ} and the rest of the clauses will
- * have a {@link ModifierQueryNode.Modifier#MOD_NOT}
+ * {ModifierQueryNode.Modifier#MOD_REQ} and the rest of the clauses will
+ * have a {ModifierQueryNode.Modifier#MOD_NOT}
  * 
  * @see AqpBooleanQueryNode
  */

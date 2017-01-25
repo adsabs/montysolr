@@ -2,7 +2,6 @@ package org.apache.solr.search;
 
 import org.junit.BeforeClass;
 
-import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 

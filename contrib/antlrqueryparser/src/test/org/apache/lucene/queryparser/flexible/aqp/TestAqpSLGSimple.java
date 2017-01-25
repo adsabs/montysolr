@@ -2,15 +2,9 @@ package org.apache.lucene.queryparser.flexible.aqp;
 
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
-import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.BoostQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 

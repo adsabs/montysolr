@@ -1,17 +1,10 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
-import org.apache.lucene.util.ToStringUtils;
 
 
 /**

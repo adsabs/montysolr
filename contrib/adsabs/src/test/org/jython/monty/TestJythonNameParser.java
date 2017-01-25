@@ -6,7 +6,6 @@ import org.apache.lucene.util.LuceneTestCase;
 import org.jython.JythonObjectFactory;
 import org.jython.monty.interfaces.JythonNameParser;
 import org.python.core.PySystemState;
-import org.python.util.PythonInterpreter;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

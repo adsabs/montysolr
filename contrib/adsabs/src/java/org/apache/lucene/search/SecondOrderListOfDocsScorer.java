@@ -1,7 +1,6 @@
 package org.apache.lucene.search;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public class SecondOrderListOfDocsScorer extends Scorer {
         @Override
         public int docID() {
           if (idx < 0) {
-            return -1;
+            return NO_MORE_DOCS;
           } else if (idx < hits.size()) {
             return doc;
           } else {

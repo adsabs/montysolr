@@ -1,17 +1,11 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNotQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
@@ -27,8 +21,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 import org.apache.solr.common.params.SolrParams;
 
@@ -433,7 +425,7 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 		 * length will be decreased
 		 * 
 		 * @param paths
-		 * @return
+		 *    list of lists of lengths (consecutive segments of path segments)
 		 */
 		private int[] measurePathsInclGaps(List<List<Integer>> paths) {
       int[] measuredPaths = new int[paths.size()];

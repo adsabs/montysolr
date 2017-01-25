@@ -22,7 +22,7 @@ import java.io.IOException;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.util.CharacterUtils;
+import org.apache.lucene.analysis.CharacterUtils;
 import org.apache.lucene.util.Version;
 
 /**
@@ -33,7 +33,6 @@ import org.apache.lucene.util.Version;
  *   As of 3.1, supplementary characters are properly lowercased.
  */
 public final class SelectiveLowerCaseFilter extends TokenFilter {
-  private final CharacterUtils charUtils;
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   
   /**
@@ -44,7 +43,6 @@ public final class SelectiveLowerCaseFilter extends TokenFilter {
    */
   public SelectiveLowerCaseFilter(Version matchVersion, TokenStream in) {
     super(in);
-    charUtils = CharacterUtils.getInstance();
   }
   
   @Override
@@ -53,7 +51,7 @@ public final class SelectiveLowerCaseFilter extends TokenFilter {
       if (AcronymTokenFilter.termIsAcronym(termAtt.toString())) {
         return true; // skip lowercasing
       }
-      charUtils.toLowerCase(termAtt.buffer(), 0, termAtt.length());
+      CharacterUtils.toLowerCase(termAtt.buffer(), 0, termAtt.length());
       return true;
       
     } else

@@ -71,8 +71,6 @@
      the example, so that it can run without anything 
      else -->
 
-		<unzip src="${build.dir}/${example.name}/webapps/solr.war" dest="${build.dir}/${example.name}/solrwar" overwrite="off"/>
-
 		<path id="examples.classpath">
 			<fileset dir="${build.dir}/${example.name}/">
 				<include name="solrwar/WEB-INF/lib/**/*.jar" />

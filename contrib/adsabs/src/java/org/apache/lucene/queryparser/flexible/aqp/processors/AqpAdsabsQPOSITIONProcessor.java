@@ -14,7 +14,6 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
 
 public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {

@@ -17,7 +17,6 @@ package org.apache.lucene.queryparser.flexible.aqp;
  * limitations under the License.
  */
 
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,9 +58,9 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     assertStopQueryEquals("one stop", "b:one t:one");
     assertStopQueryEquals("one (stop)", "b:one t:one");
     assertStopQueryEquals("one ((stop))", "b:one t:one");
-    assertStopQueryEquals("stop", "");
-    assertStopQueryEquals("(stop)", "");
-    assertStopQueryEquals("((stop))", "");
+    assertStopQueryEquals("stop", "MatchNoDocsQuery(\"\")");
+    assertStopQueryEquals("(stop)", "MatchNoDocsQuery(\"\")");
+    assertStopQueryEquals("((stop))", "MatchNoDocsQuery(\"\")");
   }
 
   // verify parsing of query using a stopping analyzer
@@ -81,7 +80,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     // The lucene (for mysterious) reasons decide to output
     // boolean query; so smarter qparsers have to work around
     // the dum engineers...
-    if (expectedRes.equals("") && q.toString().trim().equals(""))
+    if (expectedRes.equals("MatchNoDocsQuery(\"\")"))
       return;
       
     assertEquals(expectedRes, q.toString());
@@ -221,7 +220,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     String[] queries6 = { "((+stop))", "+((stop))" };
     q = AqpQueryParserUtil.parse(qp, queries6, fields);
-    assertEquals(" ", q.toString());
+    assertEquals("MatchNoDocsQuery(\"\") MatchNoDocsQuery(\"\")", q.toString());
 
     String[] queries7 = { "one ((+stop)) +more", "+((stop)) +two" };
     q = AqpQueryParserUtil.parse(qp, queries7, fields);

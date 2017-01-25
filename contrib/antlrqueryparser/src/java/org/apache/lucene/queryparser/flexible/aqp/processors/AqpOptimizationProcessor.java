@@ -3,7 +3,6 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;

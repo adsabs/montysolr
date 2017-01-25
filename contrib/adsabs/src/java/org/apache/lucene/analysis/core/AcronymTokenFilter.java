@@ -82,6 +82,7 @@ public final class AcronymTokenFilter extends TokenFilter {
    * must be UPPERCASE (there is a minimum ration)
    * 
    * @param term
+   *      string to be checked
    * @return true when the term has only UPPERCASE and digits
    */
   public static boolean termIsAcronym(String term) {

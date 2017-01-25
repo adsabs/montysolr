@@ -33,7 +33,6 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
  * is stronger than implicit AND)
  * 
  * @see AqpBooleanQueryNode
- * @see StandardQueryConfigHandler.Operator
  */
 public class AqpDefopQueryNode extends AqpBooleanQueryNode {
 

@@ -70,7 +70,7 @@ public class CitationsTransformerFactory extends TransformerFactory
     BinaryDocValues idMapping = null;
     if (params.getBool("resolve", false)) {
     	try {
-	      idMapping = req.getSearcher().getLeafReader().getSortedDocValues(resolutionField);
+	      idMapping = req.getSearcher().getSlowAtomicReader().getSortedDocValues(resolutionField);
       } catch (IOException e) {
 	      throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get data for resolving field: " + resolutionField, e);
       }

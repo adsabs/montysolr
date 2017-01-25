@@ -1,7 +1,6 @@
 package org.apache.lucene.search;
 
 import org.apache.lucene.util.BitSet;
-import org.apache.lucene.util.BitSetIterator;
 
 /**
  * Iterator which works with the knowledge of index segment boundaries.

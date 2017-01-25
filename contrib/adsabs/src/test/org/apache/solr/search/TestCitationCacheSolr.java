@@ -265,7 +265,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 			//printCache(cache);
 			
 			assertTrue( cache.equals(cache2));
-			assertTrue( cache2 == cache2 );
+			assertTrue( cache == cache2 );
 			
 			//printCache(cache);
 			// test ID mapping function

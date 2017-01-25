@@ -24,7 +24,6 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -34,17 +33,12 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.nio.charset.MalformedInputException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Formatter;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.xpath.XPathExpressionException;
 
 import org.adsabs.solr.AdsConfig.F;
 
@@ -526,7 +520,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	// what happens we receive very long string (non-author thing)
   	testAuthorQuery(
         "\"purpose of this review is to bridge the gap between\"", 
-        		"",
+        		"MatchNoDocsQuery(\"\")",
         		"//*[@numFound='0']"
         		);
   	

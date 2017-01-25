@@ -13,7 +13,6 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQPHRASEProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor;
-import org.apache.lucene.search.PrefixQuery;
 
 /**
  * Converts QIDENTIFIER node into @{link {@link QuotedFieldQueryNode}. 

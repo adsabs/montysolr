@@ -18,7 +18,6 @@ package org.apache.lucene.queryparser.flexible.aqp;
  */
 
 import java.io.IOException;
-import java.io.Reader;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.MockTokenizer;
@@ -32,7 +31,6 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
-import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardLuceneParser;
 import org.apache.lucene.search.Query;
 
 /**

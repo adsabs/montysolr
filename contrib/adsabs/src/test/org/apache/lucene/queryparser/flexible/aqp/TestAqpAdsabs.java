@@ -1,6 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
-import java.io.Reader;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -151,7 +150,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("2000-", null, "date:[2000 TO \\*]");
 		
 		// i don't think we should try to guess this as a date
-		assertQueryEquals("2011", null, "");
+		assertQueryEquals("2011", null, "MatchNoDocsQuery(\"\")");
 		assertQueryEquals("2011", wsa, "2011");
 		
 	}
@@ -262,7 +261,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// this is an example of how complex the query parsing can be, and impossible
 		// without a powerful builder (this would just be unthinkable with the standard
 		// lucene parser and impossible with the invenio parser)
-		assertQueryEquals("#5", null, "");
+		assertQueryEquals("#5", null, "MatchNoDocsQuery(\"\")");
 		assertQueryEquals("#(request synonyms 5)", null, "+request +synonyms");
 		
 		

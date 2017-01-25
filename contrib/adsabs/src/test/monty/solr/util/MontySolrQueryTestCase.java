@@ -26,7 +26,6 @@ import org.getopt.luke.DocReconstructor.Reconstructed;
 import org.getopt.luke.GrowableStringArray;
 import org.junit.BeforeClass;
 
-
 public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 
 	protected static AqpTestAbstractCase tp = new AqpTestAbstractCase() {

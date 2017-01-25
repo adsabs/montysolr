@@ -10,8 +10,6 @@ import java.util.TimeZone;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.solr.util.DateMathParser;
 
 public final class DateNormalizerTokenFilter extends TokenFilter {

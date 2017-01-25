@@ -454,7 +454,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
 //    	//System.out.println(l);
 //    }
     
-    Bits liveDocs = searcher.getLeafReader().getLiveDocs();
+    Bits liveDocs = searcher.getSlowAtomicReader().getLiveDocs();
     //System.out.println(liveDocs == null ? "liveDocs=" + null : "liveDocs=" + liveDocs.length());
     //System.out.println("numDeletes=" + searcher.getAtomicReader().numDeletedDocs());
     

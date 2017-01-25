@@ -2,9 +2,6 @@ package org.apache.solr.analysis;
 
 import java.io.StringReader;
 import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;

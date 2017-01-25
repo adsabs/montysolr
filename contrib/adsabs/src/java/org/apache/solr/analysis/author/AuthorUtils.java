@@ -1,7 +1,6 @@
 package org.apache.solr.analysis.author;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;

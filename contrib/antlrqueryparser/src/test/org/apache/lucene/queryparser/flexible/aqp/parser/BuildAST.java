@@ -5,7 +5,6 @@ import org.antlr.runtime.tree.*;
 import org.antlr.stringtemplate.*;
 import java.lang.reflect.*;
 
-import org.apache.lucene.queryparser.flexible.aqp.parser.*;
 
 /**
  * A utility class for generating the dot/graph representations of the query

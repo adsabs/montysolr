@@ -22,7 +22,6 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.TermQuery;
-import org.adsabs.solr.AdsConfig.F;
 import org.junit.BeforeClass;
 
 /**

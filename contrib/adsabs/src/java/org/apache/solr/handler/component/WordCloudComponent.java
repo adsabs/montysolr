@@ -133,7 +133,7 @@ public class WordCloudComponent extends SearchComponent {
     
     // TODO: filter out the tokens (use some sort of a range 0.1-0.9 by frequency)
     
-    LeafReader reader = searcher.getLeafReader();
+    LeafReader reader = searcher.getSlowAtomicReader();
     BytesRef term;
     int df;
     String f;
