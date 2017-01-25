@@ -233,7 +233,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	      		@Override
 	      		public FixedBitSet getBits() {
 	      			// we must harvest lucene docids
-	    				LeafReader reader = req.getSearcher().getLeafReader();
+	    				LeafReader reader = req.getSearcher().getSlowAtomicReader();
 	    				byte[] data;
               
 	    				try {

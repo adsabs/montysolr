@@ -3,11 +3,9 @@ package org.apache.lucene.analysis.core;
 import java.io.StringReader;
 import java.util.HashMap;
 
-import org.apache.lucene.analysis.MockTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
-import org.apache.lucene.util.Version;
 import org.apache.solr.analysis.AcronymTokenFilterFactory;
 
 public class TestAcronymFilter extends BaseTokenStreamTestCase {

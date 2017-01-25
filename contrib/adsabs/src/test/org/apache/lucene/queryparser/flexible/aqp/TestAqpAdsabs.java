@@ -1,6 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
-import java.io.Reader;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 

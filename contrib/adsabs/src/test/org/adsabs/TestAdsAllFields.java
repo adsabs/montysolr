@@ -22,8 +22,6 @@ package org.adsabs;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.lucene.search.LegacyNumericRangeQuery; //TODO: convert to the new
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.schema.IndexSchema;

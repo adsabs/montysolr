@@ -3,7 +3,6 @@ package org.jython.monty;
 import org.apache.lucene.util.LuceneTestCase;
 import org.jython.JythonObjectFactory;
 import org.jython.monty.interfaces.JythonSimpleClass;
-import org.python.util.PythonInterpreter;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

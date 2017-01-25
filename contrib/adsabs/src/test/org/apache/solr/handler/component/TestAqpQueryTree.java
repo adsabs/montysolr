@@ -1,9 +1,5 @@
 package org.apache.solr.handler.component;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.apache.solr.request.SolrRequestHandler;
 import org.junit.BeforeClass;
 
 import monty.solr.util.MontySolrQueryTestCase;

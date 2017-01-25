@@ -4,8 +4,6 @@ import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.util.StrUtils;
 
 /*
  * A cleanup filter that catches cases that should not 

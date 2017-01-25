@@ -16,9 +16,7 @@ import java.util.regex.Pattern;
 import monty.solr.util.MontySolrTestCaseJ4;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.apache.solr.util.AbstractSolrTestCase;
 import org.junit.AfterClass;
@@ -88,7 +86,6 @@ public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
 	 * getSchemaFile() because at that stage the instance already
 	 * contains a config
 	 * 
-	 * @param loader
 	 */
 	public static void makeResourcesVisible(ClassLoader loader, String...paths) {
 		try {

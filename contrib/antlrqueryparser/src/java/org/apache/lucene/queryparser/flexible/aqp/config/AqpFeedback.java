@@ -20,7 +20,6 @@ package org.apache.lucene.queryparser.flexible.aqp.config;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.util.Attribute;
-import org.apache.lucene.util.AttributeReflector;
 
 /**
  * This attribute is used to collect feedback messages and suggestions from the

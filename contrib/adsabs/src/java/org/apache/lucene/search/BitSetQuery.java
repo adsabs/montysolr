@@ -3,7 +3,6 @@ package org.apache.lucene.search;
 import java.io.IOException;
 
 import org.apache.lucene.index.LeafReaderContext;
-import org.apache.lucene.util.BitSetIterator;
 import org.apache.lucene.util.FixedBitSet;
 
 /**

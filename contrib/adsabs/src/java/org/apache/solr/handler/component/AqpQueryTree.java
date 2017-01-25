@@ -2,7 +2,6 @@ package org.apache.solr.handler.component;
 
 import java.io.IOException;
 
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;

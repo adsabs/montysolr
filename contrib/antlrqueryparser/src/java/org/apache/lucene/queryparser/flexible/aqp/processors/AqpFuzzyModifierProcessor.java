@@ -14,7 +14,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;

@@ -23,7 +23,6 @@ import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.LegacyNumericRangeQuery;
-import org.adsabs.solr.AdsConfig.F;
 import org.junit.BeforeClass;
 
 /**

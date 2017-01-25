@@ -58,7 +58,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.util.LuceneTestCase;
-import org.junit.AfterClass;
 
 /**
  * This test case is a copy of the core Lucene query parser test, it was adapted

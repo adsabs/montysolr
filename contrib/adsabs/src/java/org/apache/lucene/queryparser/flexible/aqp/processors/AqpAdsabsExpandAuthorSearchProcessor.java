@@ -4,20 +4,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.Analyzer.TokenStreamComponents;
 import org.apache.lucene.analysis.core.KeywordTokenizer;
-import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -35,9 +29,7 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQuery
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.analysis.author.AuthorNormalizeFilter;
-import org.apache.solr.analysis.author.AuthorNormalizeFilterFactory;
 import org.apache.solr.analysis.author.AuthorUtils;
-import org.apache.solr.analysis.author.PythonicAuthorNormalizeFilterFactory;
 import org.apache.solr.analysis.author.PythonicAuthorNormalizerFilter;
 
 /**

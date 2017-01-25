@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.solr.common.cloud.ZooKeeperException;
 import org.apache.solr.common.util.StrUtils;
 import org.apache.solr.core.SolrResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoader;

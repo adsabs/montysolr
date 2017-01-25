@@ -28,7 +28,6 @@ import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PhraseQuery.Builder;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 
 /**
  * This builder basically reads the {@link Query} object set on the

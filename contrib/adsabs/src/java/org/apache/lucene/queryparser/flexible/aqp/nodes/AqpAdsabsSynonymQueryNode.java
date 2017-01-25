@@ -1,8 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp.nodes;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeError;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;

@@ -14,7 +14,6 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQuery
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 
 public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implements

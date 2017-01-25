@@ -17,7 +17,6 @@ package org.apache.lucene.queryparser.flexible.aqp;
  * limitations under the License.
  */
 
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 

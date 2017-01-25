@@ -1,7 +1,6 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
-import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.LuceneCacheWrapper;
 import org.apache.lucene.search.MatchNoDocsQuery;
@@ -49,7 +47,6 @@ import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
-import org.apache.lucene.util.Version;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -81,9 +78,6 @@ import org.apache.solr.search.SpatialFilterQParserPlugin;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.uninverting.UninvertingReader;
-import org.apache.solr.uninverting.UninvertingReader.Type;
-
-import com.google.common.primitives.Floats;
 
 
 /**
@@ -109,7 +103,7 @@ AqpFunctionQueryBuilderProvider {
     try {
       cacheWrapper = LuceneCacheWrapper.getFloatCache(
           "cite_read_boost", UninvertingReader.Type.SORTED_SET_FLOAT, 
-          fp.getReq().getSearcher().getLeafReader());
+          fp.getReq().getSearcher().getSlowAtomicReader());
     } catch (IOException e) {
       throw new SyntaxError("Naughty, naughty server error", e);
     }

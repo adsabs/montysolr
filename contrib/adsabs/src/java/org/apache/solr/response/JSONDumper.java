@@ -63,7 +63,7 @@ public class JSONDumper extends JSONWriter {
     SolrIndexSearcher searcher = req.getSearcher();
     
     if (liveDocs == null) {
-    	liveDocs = searcher.getLeafReader().getLiveDocs();
+    	liveDocs = searcher.getSlowAtomicReader().getLiveDocs();
     }
     
     

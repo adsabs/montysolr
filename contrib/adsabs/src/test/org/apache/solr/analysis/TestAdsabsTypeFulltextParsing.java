@@ -30,7 +30,6 @@ import org.apache.lucene.search.TermQuery;
 import java.io.File;
 import java.io.IOException;
 
-import org.adsabs.solr.AdsConfig.F;
 import org.junit.BeforeClass;
 
 /**

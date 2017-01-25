@@ -6,7 +6,6 @@ import java.util.List;
 import org.antlr.runtime.CharStream;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -15,8 +14,6 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFunctionQueryBuilderConfig;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessorPost;
 
 /**
  * Processing of functional queries may be more involved than the standard

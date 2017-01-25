@@ -29,7 +29,7 @@
 	<property name="ddash" value="--" />
 
 
-	<property name="solr.branch" value="branch_6_1" />
+	<property name="solr.branch" value="branch_6_3" />
 
 	<import file="common-build.xml"/>
 	<path id="classpath">
@@ -98,8 +98,8 @@
 
 
 	<target name="clean" depends="unlink-contrib">
-		<delete dir="${build.dir}" />
-		<delete dir="${classes.dir}" />
+		<delete dir="${build.dir}"/>
+		<delete dir="${classes.dir}"/>
 		<mkdir dir="${classes.dir}"/>
 	</target>
 
