@@ -520,7 +520,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	// what happens we receive very long string (non-author thing)
   	testAuthorQuery(
         "\"purpose of this review is to bridge the gap between\"", 
-        		"",
+        		"MatchNoDocsQuery(\"\")",
         		"//*[@numFound='0']"
         		);
   	

@@ -390,7 +390,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
   public void testNumber() throws Exception {
     // The numbers go away because SimpleAnalzyer ignores them
-    assertQueryEquals("3", null, "");
+    assertQueryEquals("3", null, "MatchNoDocsQuery(\"\")");
     assertQueryEquals("term 1.0 1 2", null, "term");
     assertQueryEquals("term term1 term2", null, "term term term");
 
@@ -516,14 +516,14 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     assertQueryEquals("term AND NOT phrase term", qpAnalyzer,
         "(+term -(phrase1 phrase2)) term");
 
-    assertQueryEquals("stop^3", qpAnalyzer, "");
-    assertQueryEquals("stop", qpAnalyzer, "");
-    assertQueryEquals("(stop)^3", qpAnalyzer, "");
-    assertQueryEquals("((stop))^3", qpAnalyzer, "");
-    assertQueryEquals("(stop^3)", qpAnalyzer, "");
-    assertQueryEquals("((stop)^3)", qpAnalyzer, "");
-    assertQueryEquals("(stop)", qpAnalyzer, "");
-    assertQueryEquals("((stop))", qpAnalyzer, "");
+    assertQueryEquals("stop^3", qpAnalyzer, "MatchNoDocsQuery(\"\")");
+    assertQueryEquals("stop", qpAnalyzer, "MatchNoDocsQuery(\"\")");
+    assertQueryEquals("(stop)^3", qpAnalyzer, "MatchNoDocsQuery(\"\")");
+    assertQueryEquals("((stop))^3", qpAnalyzer, "MatchNoDocsQuery(\"\")");
+    assertQueryEquals("(stop^3)", qpAnalyzer, "MatchNoDocsQuery(\"\")");
+    assertQueryEquals("((stop)^3)", qpAnalyzer, "MatchNoDocsQuery(\"\")");
+    assertQueryEquals("(stop)", qpAnalyzer, "MatchNoDocsQuery(\"\")");
+    assertQueryEquals("((stop))", qpAnalyzer, "MatchNoDocsQuery(\"\")");
     assertTrue(getQuery("term term term", qpAnalyzer) instanceof BooleanQuery);
     assertTrue(getQuery("term +stop", qpAnalyzer) instanceof TermQuery);
   }
@@ -838,7 +838,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     q = qp2.parse("the^3", "field");
     // "the" is a stop word so the result is an empty query:
     assertNotNull(q);
-    assertEquals("", q.toString());
+    assertEquals("MatchNoDocsQuery(\"\")", q.toString());
     assertEquals(q.getClass(), MatchNoDocsQuery.class);
   }
 

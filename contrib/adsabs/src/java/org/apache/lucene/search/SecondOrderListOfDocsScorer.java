@@ -53,7 +53,7 @@ public class SecondOrderListOfDocsScorer extends Scorer {
         @Override
         public int docID() {
           if (idx < 0) {
-            return -1;
+            return NO_MORE_DOCS;
           } else if (idx < hits.size()) {
             return doc;
           } else {

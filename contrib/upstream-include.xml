@@ -20,7 +20,7 @@
         <delete dir="${include.location}" followsymlinks="false"  removenotfollowedsymlinks="true"/>
     </target>
     
-    <!-- link to upstream ant targets -->
+    <!-- link to upstream ant targets has to be defined inside the parent build.xml (that is importing us) -->
     <target name="test" depends="link-upstream">
         <ant target="test" dir="${include.location}"
                             inheritall="false">
