@@ -105,12 +105,12 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k \
 
 # Path to a directory for Solr to store cores and their data. By default, Solr will use server/solr
 # If solr.xml is not stored in ZooKeeper, this directory needs to contain solr.xml
-SOLR_HOME=${HOMEDIR:-./solr}
+SOLR_HOME=${SOLR_HOME:-${DEFAULT_SERVER_DIR}/solr}
 
 # Solr provides a default Log4J configuration properties file in server/resources
 # however, you may want to customize the log settings and file appender location
 # so you can point the script to use a different log4j.properties file
-LOG4J_PROPS=${LOG4J_PROPS:-${SOLR_SERVER_DIR}/resources/log4j.properties}
+LOG4J_PROPS=${LOG4J_PROPS:-${DEFAULT_SERVER_DIR}/resources/log4j.properties}
 
 # Uncomment to set SSL-related system properties
 # Be sure to update the paths to the correct keystore for your environment
