@@ -114,7 +114,8 @@
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <query>
     <maxBooleanClauses>1024</maxBooleanClauses>
-
+    
+    <slowQueryThresholdMillis>1000</slowQueryThresholdMillis>
 
     <filterCache class="solr.FastLRUCache"
                  size="${solr.cache.size:512}"
@@ -160,9 +161,9 @@
 
     <useFilterForSortedQuery>true</useFilterForSortedQuery>
 
-   <queryResultWindowSize>25</queryResultWindowSize>
+    <queryResultWindowSize>25</queryResultWindowSize>
 
-   <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+    <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
 
 
     <!-- set montysolr.warmSeacher to 'false' if you want to just replicate/build
@@ -281,7 +282,7 @@
 
   <requestHandler name="/select" class="solr.SearchHandler">
      <lst name="defaults">
-       <str name="echoParams">explicit</str>
+       <str name="wt">json</str>
        <int name="rows">10</int>
        <!-- 
        ADSLABS:12/12: this can be overrided by url params. 
@@ -299,7 +300,10 @@
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
      </lst>
-     
+     <lst name="invariants">
+       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
+       <str name="echoParams">explicit</str>
+     </lst>
      <arr name="last-components">
       <str>wordcloud</str>
      </arr>
@@ -319,6 +323,9 @@
        <str name="useFastVectorHighlighter">true</str>
        
      </lst>
+    <lst name="invariants">
+       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
+    </lst>
     <arr name="last-components">
       <str>tvComponent</str>
     </arr>
@@ -333,6 +340,9 @@
 		<str name="mlt.mindf">1</str>
 		<str name="mlt.match.include">false</str>
 		</lst>
+		<lst name="invariants">
+	       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
+	     </lst>
 	</requestHandler> 
 
   <!-- A request handler that returns indented JSON by default -->
@@ -357,6 +367,9 @@
        <str name="aqp.unfielded.ignore.fields">pubdate year</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
+     </lst>
+     <lst name="invariants">
+       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
      </lst>
   </requestHandler>
 
