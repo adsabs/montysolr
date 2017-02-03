@@ -89,6 +89,7 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k \
 -Dsolr.cache.autowarmCount=${SOLR_CACHE_AUTOWARM_COUNT:-128} \
 -Dsolr.ramBufferSize=${SOLR_RAM_BUFFER_SIZE:-1000} \
 -Dsolr.maxBufferedDocs=${SOLR_MAX_BUFFERED_DOCS:-50000} \
+-Dmontysolr.logdir=${SOLR_LOGS_DIR} \
 -DhostContext=${SOLR_HOST_CONTEXT:-solr} \
 "
 
