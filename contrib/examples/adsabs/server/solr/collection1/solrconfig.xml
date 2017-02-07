@@ -301,7 +301,6 @@
        <str name="useFastVectorHighlighter">true</str>
      </lst>
      <lst name="invariants">
-       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
        <str name="echoParams">explicit</str>
      </lst>
      <arr name="last-components">
@@ -324,7 +323,7 @@
        
      </lst>
     <lst name="invariants">
-       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
+       <str name="echoParams">explicit</str>
     </lst>
     <arr name="last-components">
       <str>tvComponent</str>
@@ -341,7 +340,7 @@
 		<str name="mlt.match.include">false</str>
 		</lst>
 		<lst name="invariants">
-	       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
+	       <str name="echoParams">explicit</str>
 	     </lst>
 	</requestHandler> 
 
@@ -369,7 +368,7 @@
        <str name="useFastVectorHighlighter">true</str>
      </lst>
      <lst name="invariants">
-       <int name="timeAllowed">${montysolr.maxExecutionTime:30000}</int>
+       <str name="echoParams">explicit</str>
      </lst>
   </requestHandler>
 
