@@ -8,7 +8,7 @@ deployg: grunt release
 before_script: grunt setup
 script:
   - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then echo "grunt test"; grunt test; fi
-  - if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
+  #- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then echo "grunt sauce"; grunt sauce; fi
 env:
   global:
     - secure: "QiHFURctWLbr3uGEwqgABdKBzzXHHD819h4XTQsJ90Lcv04DsSzXZV0GAHa1bXiNIrNwxZD7T7fsakOBViEjIsginD1ZFAUMkR5KHYII3Gzlpu1ikuIHBrrPRLzTFhrsnJxFDRau9gwLeIoTgIP5AC3bw8ne/+6Oe6mW2fpphgU="
