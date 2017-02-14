@@ -50,10 +50,20 @@ public class SecondOrderListOfDocsScorer extends Scorer {
 
       return new DocIdSetIterator() {
         int idx = doc;
+        boolean initialized = false;
         @Override
         public int docID() {
           if (idx < 0) {
-            return NO_MORE_DOCS;
+            if (initialized)
+              return doc;
+            else {
+              initialized = true;
+              try {
+                return advance(idx);
+              } catch (IOException e) {
+                return NO_MORE_DOCS;
+              }
+            }
           } else if (idx < hits.size()) {
             return doc;
           } else {

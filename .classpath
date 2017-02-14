@@ -132,6 +132,6 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solrj-lib/woodstox-core-asl-4.4.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit4-ant-2.4.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/randomizedtesting-runner-2.4.0.jar"/>
-	<classpathentry kind="lib" path="lib/luke-4.0.0-BETA.jar"/>
+	<classpathentry kind="lib" path="lib/luke-with-deps.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

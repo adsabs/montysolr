@@ -1105,7 +1105,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='2']",
 				"//doc/int[@name='recid'][.='101']",
 				"//doc/int[@name='recid'][.='102']");
-
+		
+		// make sure the citation search optimization (short clause first)
+		// works well
+		assertQ(req("q", "citations(*:*) id:100"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']");
+		assertQ(req("q", "references(id:100) *:*"),
+		    "//*[@numFound='2']",
+        "//doc/int[@name='recid'][.='101']",
+        "//doc/int[@name='recid'][.='102']");
+		
 		// who cites us
 		assertQ(req("q", "citations(*:*)"),
 		    "//*[@numFound='3']");
