@@ -99,7 +99,7 @@ require.config({
     'squire': '../bower_components/squire/src/Squire',
     'clipboard': 'libs/clipboard/clipboard',
     'es5-shim': 'libs/es5-shim/es5-shim',
-    'mathjax': '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML&amp;delayStartupUntil=configured',
+    'mathjax': '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML&amp;delayStartupUntil=configured',
 
     // for development use
     // 'google-analytics': "//www.google-analytics.com/analytics_debug",
