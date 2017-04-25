@@ -421,12 +421,6 @@ module.exports = function(grunt) {
             flatten: true
           },
           {
-            src: ['bower_components/jqueryui/themes/smoothness/jquery-ui.min.css'],
-            dest: 'src/libs/jqueryui/',
-            expand: true,
-            flatten: true
-          },
-          {
             cwd: 'bower_components/bootstrap-sass/assets/stylesheets/',
             src: ['*', '**'],
             expand: true
@@ -444,7 +438,7 @@ module.exports = function(grunt) {
             flatten: true
           },
           {
-            src: ['bower_components/select2/**/*.js'],
+            src: ['bower_components/select2/**/*.js', 'bower_components/select2/**/*.css'],
             dest: 'src/libs/select2/',
             expand: true,
             flatten : true
