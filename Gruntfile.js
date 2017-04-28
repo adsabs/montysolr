@@ -493,9 +493,7 @@ module.exports = function(grunt) {
           dest: "dist/",
           expand: true,
           rename : function(dest, src){
-
             var gitDescribe = grunt.file.read('git-describe').trim();
-
             // find out what version of bbb we are going to assemble
             var tagInfo = gitDescribe.split('-');
             var version;
@@ -504,9 +502,8 @@ module.exports = function(grunt) {
             }
             else {
               version = tagInfo[2]; // use commit number instead of a tag
-              return "dist/bumblebee_app." + version + ".js";
             }
-
+            return "dist/bumblebee_app." + version + ".js";
           }
 
         }]
