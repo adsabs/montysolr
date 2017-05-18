@@ -168,13 +168,19 @@ var linkGenerator = {
     });
 
     //finally, sort the links.text
-   order = ["ADS PDF", "ADS Scanned Article", "Find it at your institution", "Publisher PDF", "Publisher Article", "arXiv e-print"];
-   links.text = _.sortBy(links.text, function(l){
+    order = [
+      "ADS PDF",
+      "ADS Scanned Article",
+      "Find it at your institution",
+      "Publisher Article",
+      "Publisher PDF",
+      "arXiv e-print"
+    ];
+    links.text = _.sortBy(links.text, function(l){
       return order.indexOf(l.title);
     });
 
     return links
-
   },
 
   // this function is used by list-of-things to add quick links to an item
