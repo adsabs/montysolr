@@ -640,9 +640,20 @@ define([
           });
 
           this.listenTo(this.view, "render", function () {
-            var query = this.getCurrentQuery().get("q");
-            if (query){
-                this.view.setFormVal(query);
+            var newQueryString;
+            var query = this.getCurrentQuery();
+            var oldQueryString = query.get('q');
+
+            if (oldQueryString) {
+              // Grab the original (no simbid refs) query string for the view
+              // This is re-run here in case the view is not updated and
+              // simbid refs show up
+              var newQueryString = query.get("__original_query") ?
+                query.get("__original_query")[0] : oldQueryString.join(" ");
+            }
+
+            if (newQueryString) {
+              this.view.setFormVal(newQueryString);
             }
             this.view.toggleClear();
           });
@@ -694,16 +705,18 @@ define([
             feedback.code ===  ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START ) {
 
             var query = feedback.query ? feedback.query : feedback.request.get("query");
-            var newq = query.get("__original_query") ? query.get("__original_query")[0] : query.get("q").join(" ");
+
+            // Grab the original (no simbid refs) query string for the view
+            var newq = query.get("__original_query") ?
+              query.get("__original_query")[0] : query.get("q").join(" ");
 
             this.setCurrentQuery(query);
 
             this.model.set({
-                  bigquerySource : query.get('__bigquerySource') ?  query.get('__bigquerySource')[0] : 'Bulk query',
-                  bigquery : query.get('__qid') ? true : false,
-                  numFound: feedback.numFound
-              });
-
+              bigquerySource : query.get('__bigquerySource') ?  query.get('__bigquerySource')[0] : 'Bulk query',
+              bigquery : query.get('__qid') ? true : false,
+              numFound: feedback.numFound
+            });
 
             this.view.setFormVal(newq);
           }

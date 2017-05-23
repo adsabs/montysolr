@@ -93,18 +93,21 @@ define(['underscore',
 
       doQueryTranslation: function(q) {
         var d = $.Deferred(),
-            pubsub = this.getPubSub(),
-            options = {
+          pubsub = this.getPubSub(),
+          options = {
             type : "POST",
             contentType : "application/json"
-            };
+          };
+
         // Send the entire query to the "query" endpoint of the "object_service" micro service
         // this endpoint will grab the "object:<expression>" from the query string and send back
         // a translated query string which will have "simbid:<expression with SIMBAD identifiers>"
         // instead of the "object:" part
         var request =  new ApiRequest({
           target: ApiTargets.SERVICE_OBJECTS_QUERY,
-          query: new ApiQuery({"query" : q}),
+          query: new ApiQuery({
+            'query': q
+          }),
           options : options
         });
         // when the promise gets resolved, it will have the JSON response of the micro service
@@ -125,8 +128,19 @@ define(['underscore',
         //modifies apiQuery in place
         SecondarySort.addSecondarySort(apiQuery);
 
-        this.original_url = this.queryUpdater.clean(apiQuery).url();
-        this.original_query = apiQuery.get("q")
+        // Watch for simbid references and use a masked version of the
+        // query to generate the url if any are found.
+        if (this.original_url && apiQuery.get('q')[0].indexOf('simbid') !== -1) {
+          var newQ = apiQuery.clone();
+
+          // Use the old query for the clone's query string, then get url
+          newQ.set('q', apiQuery.get('__original_query')[0]);
+          this.original_url = this.queryUpdater.clean(newQ).url();
+        } else {
+          this.original_url = this.queryUpdater.clean(apiQuery).url();
+        }
+
+        this.original_query = apiQuery.get('q');
 
         // checking if it's a new big query
         if (apiQuery.get("__bigquery")) {
@@ -183,7 +197,9 @@ define(['underscore',
           // first define a callback function to process the response of the micro service
           // and bind it to "this" so that we can use the trigger
           var callback = function(v){
-            apiQuery.set({q : v.query});
+            apiQuery.set({
+              q : v.query
+            });
             this.startSearchCycle(apiQuery, senderKey);
           }.bind(this);
           // call the callback function when the promise has been resolved
