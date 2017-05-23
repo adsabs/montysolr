@@ -45,7 +45,8 @@ define([
           bibcode: undefined,
           pub_raw: undefined,
           doi: undefined,
-          citation_count : undefined
+          citation_count: undefined,
+          titleLink: undefined
         }
       },
 
@@ -91,8 +92,22 @@ define([
 
         doc.title = doc.title instanceof Array ? doc.title[0] : undefined;
 
-        return doc;
+        // Find any links that are buried in the text of the title
+        // Parse it out and convert to BBB hash links, if necessary
+        var docTitleLink = doc.title.match(/<a.*href="(.*?)".*?>(.*)<\/a>/i);
+        if (docTitleLink) {
+          doc.title = doc.title.replace(docTitleLink[0], "").trim();
+          doc.titleLink = {
+            href: docTitleLink[1],
+            text: docTitleLink[2]
+          };
 
+          if (doc.titleLink.href.match(/^\/abs/)) {
+            doc.titleLink.href = "#" + doc.titleLink.href.slice(1);
+          }
+        }
+
+        return doc;
       }
     });
 
