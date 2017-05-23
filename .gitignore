@@ -7,6 +7,10 @@ lib-cov
 *.pid
 *.gz
 
+# Generated SCSS Files
+_*
+bootstrap
+
 pids
 logs
 
@@ -21,6 +25,7 @@ test/reports
 test/mocha/sandbox*
 
 src/styles/fonts
+src/styles/css
 
 .idea
 
