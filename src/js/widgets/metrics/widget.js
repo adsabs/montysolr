@@ -198,11 +198,13 @@ define([
             .attr('class', 'd3-tip')
             .offset([-10, 0])
             .html(function(d) {
-              var data = that.model.get("graphData");
+              var dataType = that.model.get("normalized") ?
+                "normalizedGraphData" : "graphData";
+              var data = that.model.get(dataType);
               return data.map(function(obj){
                 var title = obj.key;
                 var val = _.findWhere(obj.values, { x : d.x }).y;
-                return "<b>" + title + "</b>:&nbsp;" + val;
+                return "<b>" + title + "</b>:&nbsp;" + val.toFixed(2);
               }).join("<br/>")
             });
           }
