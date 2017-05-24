@@ -8,7 +8,10 @@
     </div>
 {{else}}
 
-<h2 class="s-abstract-title">{{{title}}}</h2>
+<h2 class="s-abstract-title">
+    {{title}}
+    <a href="{{titleLink.href}}">{{titleLink.text}}</a>
+</h2>
 
 
 {{#if authorAff.length}}

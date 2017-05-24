@@ -28,7 +28,7 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
                 "abstract": "In the past twenty years there has been a great amount of growth in radiometric observing methods.",
                 "pub": "IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics",
                 "pubdate": "1981-00-00",
-                "title": ["Planetary Ephemerides"],
+                "title": ["Planetary Ephemerides <A href=\"test-url\">TEST</A>"],
                 "aff": ["Heidelberg, Universität, Heidelberg, Germany", "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA"],
                 "citation_count" : 5,
                 "[citations]" : { num_citations : 3 }
@@ -95,10 +95,14 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
         expect(aw._docs['foo'].formattedDate).to.equal("1981");
         expect(aw._docs['foo'].pub).to.equal("IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics");
         expect(aw._docs['foo'].authorAff[0]).to.eql(["Lieske, J. H.","Heidelberg, Universität, Heidelberg, Germany","%22Lieske%2C+J.+H.%22"]);
-        expect(aw._docs['foo'].authorAff[1]).to.eql(["Standish, E. M.","California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA","%22Standish%2C+E.+M.%22"]
-
-        );
+        expect(aw._docs['foo'].authorAff[1]).to.eql([
+          "Standish, E. M.",
+          "California Institute of Technology, Jet Propulsion Laboratory, Pasadena, CA",
+          "%22Standish%2C+E.+M.%22"
+        ]);
         expect(aw._docs['foo'].authorAffExtra).to.eql(undefined);
+        expect(aw._docs['foo'].titleLink.href).to.eql('test-url');
+        expect(aw._docs['foo'].titleLink.text).to.eql('TEST');
 
         aw.maxAuthors = 1;
         minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
@@ -182,7 +186,11 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
               "%22Standish%2C+E.+M.%22"
             ]
           ],
-          "formattedDate": "1981"
+          "formattedDate": "1981",
+          "titleLink": {
+            "href": "test-url",
+            "text": "TEST"
+          }
         }));
 
       });
