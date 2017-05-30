@@ -145,6 +145,11 @@ define([
             promise: promise
           });
           return promise.promise();
+        },
+
+        closeView: function () {
+          this.view.close();
+          this.modalView.closeModal();
         }
 
       });
