@@ -42,7 +42,7 @@ define([
         this.setApp(app);
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.ALERT, _.bind(this.onAlert, this));
-        pubsub.subscribe(pubsub.FEEDBACK, _.bind(this.onStartSearch, this));
+        pubsub.subscribe(pubsub.NAVIGATE, _.bind(this.onNavigate, this));
 
         var widget = this.getWidget();
         if (!widget) {
@@ -50,8 +50,19 @@ define([
         }
       },
 
-      onStartSearch: function(apiFeedback) {
+      onNavigate: function (route) {
+        var self = this;
+        var pubSub = this.getPubSub();
 
+        // Close any errors produced on the login page on the next page navigation
+        if ('authentication-page' === route) {
+          pubSub.subscribeOnce(pubSub.NAVIGATE, function () {
+            var widget = self.getWidget();
+            if (widget && widget.closeView) {
+                widget.closeView();
+            }
+          });
+        }
       },
 
       onAlert: function(apiFeedback, psk) {
@@ -76,12 +87,14 @@ define([
                   self.getPubSub().publish(result.signal, result.arguments);
                   break;
                 default:
-                  throw new Exception('Unknow action type:' + result);
+                  throw new Exception('Unknown action type:' + result);
               }
 
               // close the widget immediately
-              var w = self.getWidget()
-              if (w && w.clearView) w.clearView();
+              var widget = self.getWidget();
+              if (widget && widget.closeView) {
+                  widget.closeView();
+              }
             }
           });
         return promise;
@@ -97,7 +110,7 @@ define([
       alert: function(apiFeedback) {
         var w = this.getWidget();
         if (!w) {
-          console.warn('"AlertsWidget" has disappered, we cant display messages to the user');
+          console.warn('"AlertsWidget" has disappeared, we cant display messages to the user');
           var defer = $.Deferred();
           defer.reject('AlertsWidget has disappeared');
           return defer.promise();
