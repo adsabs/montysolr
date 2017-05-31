@@ -37,8 +37,10 @@ define([
         num_users : 0,
         permission : "read",
         owner : undefined,
-        public : false
+        public : false,
 
+        // internal
+        currentEditField: undefined
       }
     },
 
@@ -95,21 +97,26 @@ define([
     },
 
     showForm: function(e){
-      $(e.target).parents().eq(1).find("form").removeClass("hidden");
+      this.currentEditField = $(e.target).data('field');
+      var formSelector = 'form[data-field="' + this.currentEditField + '"]';
+      $(formSelector).removeClass('hidden');
     },
 
     submitEdit : function(e){
-
       e.preventDefault();
-      var $target = $(e.target),
-        $editParent = $target.parent().parent(),
-        $edited = $editParent.find("input").length ?  $editParent.find("input") : $editParent.find("textarea"),
-        data = {};
+      var formSelector = 'form[data-field="' + this.currentEditField + '"]';
+      var val = $(formSelector).find('input, textarea').val();
+      var data = {};
 
-      data[$editParent.data("field")] = $edited.val();
-      this.trigger("updateVal", data);
-      $target.html("<i class=\"fa fa-spinner fa-pulse\"></i>");
+      // If there are no changes or empty string, don't update
+      if (val.length === 0 || val === this.model.get(this.currentEditField)) {
+        return this.cancelEdit(e);
+      }
 
+      // Pass empty string if undefined
+      data[this.currentEditField] = val;
+      this.trigger('updateVal', data);
+      $(e.target).html('<i class=\"fa fa-spinner fa-pulse\"></i>');
     },
 
     cancelEdit : function(e){

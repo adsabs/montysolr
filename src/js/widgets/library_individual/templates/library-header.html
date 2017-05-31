@@ -113,21 +113,24 @@
       {{/if}}
 
     </div>
-    <div class="editable-item" data-field="name">
-        <h2>{{name}} <button class="btn btn-link toggle-form">edit</button></h2>
-        <form class="hidden">
+    <div class="editable-item">
+        <h2>{{name}} <button class="btn btn-link toggle-form" data-field="name">edit</button></h2>
+        <form class="hidden" data-field="name">
             <label  class="sr-only" for="#edit-library-title"> Change title </label>
             <input class="form-control" type="text" id="edit-library-title" value="{{name}}" maxlength="50"/>
             <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
             <button class="btn btn-small btn-default"> cancel</button>
         </form>
     </div>
-    <div class="editable-item" data-field="description">
-        <span><b>description</b> <button class="btn btn-link toggle-form"> edit</button></span>
+    <div class="editable-item">
+        <span>
+            <b>description</b>
+            <button class="btn btn-link toggle-form" data-field="description">edit</button>
+        </span>
         <p>
            {{#if description }}{{ description }}{{else}}(none) {{/if}}
         </p>
-        <form class="hidden">
+        <form class="hidden" data-field="description">
             <label class="sr-only" for="#edit-library-description"> Change description </label>
             <textarea class="form-control" id="edit-library-description" maxlength="200">{{description}}</textarea>
             <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
