@@ -92,6 +92,11 @@ define([
         data.largeLibrary = true
       }
 
+      if (this.model.get('num_documents') === 0) {
+        // Restrict certain menu items if there are no library documents
+        data.noDocuments = true;
+      }
+
       return data;
 
     },
