@@ -454,6 +454,111 @@ define([
       $("#test").empty();
     });
 
+    it("should revert to original if a blank value is given for description/title", function () {
+      var w = new LibraryWidget();
+      var minSub = new (MinSub.extend({
+        request: function () {
+          return {
+            some: 'foo'
+          }
+        }
+      }))({ verbose: false });
+      minSub.beehive.addObject('LibraryController', fakeLibraryController);
+      minSub.beehive.addObject('User', fakeUser);
+      w.activate(minSub.beehive.getHardenedInstance());
+      var spy = sinon.spy();
+      w.getPubSub = function () { return { publish: spy }; };
+      var $test = $('#test').append(w.getEl());
+      fakeLibraryController.getLibraryMetadata.reset();
+      w.setSubView({subView: "library", id: "1"});
+
+      var titleFormSelector = 'form[data-field="name"]';
+      var descFormSelector = 'form[data-field="description"]';
+      var titleEditButtonSelector = 'button[data-field="name"]';
+      var descEditButtonSelector = 'button[data-field="description"]';
+      var originalTitle = w.headerModel.get('name');
+      var originalDescription = w.headerModel.get('description');
+
+      // should be hidden initially
+      expect($(titleFormSelector, $test).hasClass('hidden')).to.be.true;
+      expect($(descFormSelector, $test).hasClass('hidden')).to.be.true;
+
+      // find the edit button and click it
+      $(titleEditButtonSelector, $test).click();
+      $(descEditButtonSelector, $test).click();
+
+      // make sure they are opened
+      expect($(titleFormSelector, $test).hasClass('hidden')).to.be.false;
+      expect($(descFormSelector, $test).hasClass('hidden')).to.be.false;
+
+      // clear the inputs
+      $('input', titleFormSelector, $test).val('');
+      $('textarea', descEditButtonSelector, $test).val('');
+
+      // find the submit buttons and click it
+      $('button[type="submit"]', titleFormSelector, $test).click();
+      $('button[type="submit"]', descEditButtonSelector, $test).click();
+
+      // let's make sure that both the view and model didn't change
+      expect(w.headerModel.get('name')).to.eql(originalTitle);
+      expect(w.headerModel.get('description')).to.eql(originalDescription);
+      expect($('input', titleFormSelector, $test).val()).to.eql(originalTitle);
+      expect($('textarea', descFormSelector, $test).val()).to.eql(originalDescription);
+
+      // we should only have made the initial call to the server
+      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(1);
+    });
+
+    it("should revert to original if the same value is given for description/title", function () {
+      var w = new LibraryWidget();
+      var minSub = new (MinSub.extend({
+        request: function () {
+          return {
+            some: 'foo'
+          }
+        }
+      }))({ verbose: false });
+      minSub.beehive.addObject('LibraryController', fakeLibraryController);
+      minSub.beehive.addObject('User', fakeUser);
+      w.activate(minSub.beehive.getHardenedInstance());
+      var spy = sinon.spy();
+      w.getPubSub = function () { return { publish: spy }; };
+      var $test = $('#test').append(w.getEl());
+      fakeLibraryController.getLibraryMetadata.reset();
+      w.setSubView({subView: "library", id: "1"});
+
+      var titleFormSelector = 'form[data-field="name"]';
+      var descFormSelector = 'form[data-field="description"]';
+      var titleEditButtonSelector = 'button[data-field="name"]';
+      var descEditButtonSelector = 'button[data-field="description"]';
+      var originalTitle = w.headerModel.get('name');
+      var originalDescription = w.headerModel.get('description');
+
+      // should be hidden initially
+      expect($(titleFormSelector, $test).hasClass('hidden')).to.be.true;
+      expect($(descFormSelector, $test).hasClass('hidden')).to.be.true;
+
+      // find the edit button and click it
+      $(titleEditButtonSelector, $test).click();
+      $(descEditButtonSelector, $test).click();
+
+      // make sure they are opened
+      expect($(titleFormSelector, $test).hasClass('hidden')).to.be.false;
+      expect($(descFormSelector, $test).hasClass('hidden')).to.be.false;
+
+      // find the submit buttons and click it
+      $('button[type="submit"]', titleFormSelector, $test).click();
+      $('button[type="submit"]', descEditButtonSelector, $test).click();
+
+      // let's make sure that both the view and model didn't change
+      expect(w.headerModel.get('name')).to.eql(originalTitle);
+      expect(w.headerModel.get('description')).to.eql(originalDescription);
+      expect($('input', titleFormSelector, $test).val()).to.eql(originalTitle);
+      expect($('textarea', descFormSelector, $test).val()).to.eql(originalDescription);
+
+      // we should only have made the initial call to the server
+      expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(1);
+    });
 
     it("should display different header views depending on a person's permissions, allowing admin/owners to edit title/description ", function () {
 
@@ -476,6 +581,7 @@ define([
 
       $("#test").append(w.getEl());
 
+      fakeLibraryController.getLibraryMetadata.reset();
       expect(fakeLibraryController.getLibraryMetadata.callCount).to.eql(0);
 
       w.setSubView({subView: "library", id: "1"});

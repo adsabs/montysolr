@@ -6,22 +6,28 @@
     <div class="pull-right" style="position:relative;z-index:1">
 
         {{#if largeLibrary}}
-        <button
-            class="btn btn-default bigquery-export"
-            data-placement="bottom"
-            title="large libraries can take some time to export"
-            data-toggle="tooltip"
+            <button
+                    class="btn btn-default bigquery-export"
+                    data-placement="bottom"
+                    title="large libraries can take some time to export"
+                    data-toggle="tooltip"
             >
-            <i class="icon-loading" style="display:none"></i>
-            <i class="fa fa-arrow-right"></i> View library in search results page
-        </button>
+                <i class="icon-loading" style="display:none"></i>
+                <i class="fa fa-arrow-right"></i> View library in search results page
+            </button>
+        {{else if noDocuments}}
+            <div title="Add some papers to this library to gain this option">
+                <button class="btn btn-default bigquery-export disabled" disabled>
+                    <i class="icon-loading" style="display:none"></i>
+                    <i class="fa fa-arrow-right"></i> View library in search results page
+                </button>
+            </div>
         {{else}}
-        <button class="btn btn-default bigquery-export">
-            <i class="icon-loading" style="display:none"></i>
-            <i class="fa fa-arrow-right"></i> View library in search results page
-        </button>
+            <button class="btn btn-default bigquery-export">
+                <i class="icon-loading" style="display:none"></i>
+                <i class="fa fa-arrow-right"></i> View library in search results page
+            </button>
         {{/if}}
-
     </div>
     {{/if}}
 
@@ -30,11 +36,7 @@
     </div>
     <div class="s-library-description">
         <p>
-            {{#if description }}
-                {{ description }}
-            {{else}}
-                (none)
-            {{/if}}
+            {{ description }}
         </p>
     </div>
 
@@ -46,7 +48,16 @@
     </div>
 
     <!-- tabs -->
-    {{#compare num_documents 0 operator=">"}}
+    {{#if noDocuments}}
+        <!-- tab navigation works for only library page and optionally admin -->
+        <ul class="s-library-nav-tabs">
+            <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"> <i class="icon-export"></i> Export</li>
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"> <i class="fa fa-flask"></i> Citation Helper </li>
+        </ul>
+    {{else}}
         <ul class="s-library-nav-tabs" style="position:relative;top:40px;">
             <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
             <li class="tab s-tab dropdown {{#compare active 'export'}} active {{/compare}}">
@@ -77,16 +88,7 @@
             </li>
             <li class="tab s-tab  {{#compare active 'citation_helper'}} active {{/compare}}" data-tab="citation_helper"><i class="fa fa-flask"></i> Citation Helper </li>
         </ul>
-    {{else}}
-        <!-- tab navigation works for only library page and optionally admin -->
-        <ul class="s-library-nav-tabs">
-            <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
-            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="icon-export"></i> Export</li>
-            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
-            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
-            <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-flask"></i> Citation Helper </li>
-        </ul>
-    {{/compare}}
+    {{/if}}
 
 
 {{else}}
@@ -94,44 +96,54 @@
 
     {{#if edit}}
     <div class="pull-right" style="position:relative;z-index:1">
-      
-      {{#if largeLibrary}}
-          <button
-          class="btn btn-default bigquery-export"
-          data-placement="bottom"
-          title="large libraries can take some time to export"
-          data-toggle="tooltip"
-          >
-              <i class="icon-loading" style="display:none"></i>
-              <i class="fa fa-arrow-right"></i> View library in search results page
-          </button>
-      {{else}}
-          <button class="btn btn-default bigquery-export">
-              <i class="icon-loading" style="display:none"></i>
-              <i class="fa fa-arrow-right"></i> View library in search results page
-          </button>
-      {{/if}}
+
+        {{#if largeLibrary}}
+            <button
+                    class="btn btn-default bigquery-export"
+                    data-placement="bottom"
+                    title="large libraries can take some time to export"
+                    data-toggle="tooltip"
+            >
+                <i class="icon-loading" style="display:none"></i>
+                <i class="fa fa-arrow-right"></i> View library in search results page
+            </button>
+        {{else if noDocuments}}
+            <div title="Add some papers to this library to gain this option">
+                <button class="btn btn-default bigquery-export disabled" disabled>
+                    <i class="icon-loading" style="display:none"></i>
+                    <i class="fa fa-arrow-right"></i> View library in search results page
+                </button>
+            </div>
+        {{else}}
+            <button class="btn btn-default bigquery-export">
+                <i class="icon-loading" style="display:none"></i>
+                <i class="fa fa-arrow-right"></i> View library in search results page
+            </button>
+        {{/if}}
 
     </div>
-    <div class="editable-item" data-field="name">
-        <h2>{{name}} <button class="btn btn-link toggle-form">edit</button></h2>
-        <form class="hidden">
+    <div class="editable-item">
+        <h2>{{name}} <button class="btn btn-link toggle-form" data-field="name">edit</button></h2>
+        <form class="hidden" data-field="name">
             <label  class="sr-only" for="#edit-library-title"> Change title </label>
             <input class="form-control" type="text" id="edit-library-title" value="{{name}}" maxlength="50"/>
-            <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
-            <button class="btn btn-small btn-default"> cancel</button>
+            <button class="btn btn-small btn-success" type="submit"><i class="fa fa-check"></i> submit</button>
+            <button class="btn btn-small btn-default" type="reset"> cancel</button>
         </form>
     </div>
-    <div class="editable-item" data-field="description">
-        <span><b>description</b> <button class="btn btn-link toggle-form"> edit</button></span>
+    <div class="editable-item">
+        <span>
+            <b>description</b>
+            <button class="btn btn-link toggle-form" data-field="description">edit</button>
+        </span>
         <p>
            {{#if description }}{{ description }}{{else}}(none) {{/if}}
         </p>
-        <form class="hidden">
+        <form class="hidden" data-field="description">
             <label class="sr-only" for="#edit-library-description"> Change description </label>
             <textarea class="form-control" id="edit-library-description" maxlength="200">{{description}}</textarea>
-            <button class="btn btn-small btn-success"><i class="fa fa-check"></i> submit</button>
-            <button class="btn btn-small btn-default">cancel</button>
+            <button class="btn btn-small btn-success" type="submit"><i class="fa fa-check"></i> submit</button>
+            <button class="btn btn-small btn-default" type="reset">cancel</button>
         </form>
     </div>
 
@@ -200,56 +212,55 @@
     </div>
 
     <!-- tabs -->
-    {{#compare num_documents 0 operator=">"}}
-    <!-- extended tab navigation should work -->
-    <ul class="s-library-nav-tabs">
-        <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
-        {{#if edit }}
-        <li class="tab s-tab  {{#compare active 'admin'}} active {{/compare}}" data-tab="admin"><i class="fa fa-key"></i> Manage Access</li>
-        {{/if}}
-        <li class="tab s-tab dropdown {{#compare active 'export'}} active {{/compare}}">
-            <a  data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
-                <i class="icon-export"></i> Export
-                <span class="fa fa-lg fa-caret-down"></span>
-            </a>
-            <ul class="dropdown-menu" role="menu">
-                <li data-tab="export-bibtex">BibTeX</li>
-                <li data-tab="export-aastex">AASTeX</li>
-                <li data-tab="export-endnote">EndNote</li>
-                <li data-tab="export-ris">RIS</li>
-                <li data-tab="export-classic">ADS Classic</li>
-            </ul>
-        </li>
-        <li class="tab s-tab  {{#compare active 'metrics'}} active {{/compare}}" data-tab="metrics"><i class="icon-explore"></i> Metrics </li>
-        <li class="tab s-tab dropdown  {{#compare active 'visualization'}} active {{/compare}}">
-            <div data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
-                <i class="fa fa-eye"></i> Visualize
-                <span class="fa fa-lg fa-caret-down"></span>
-            </div>
-            <ul class="dropdown-menu" role="menu">
-                <li data-tab="visualization-AuthorNetwork">Author Network</li>
-                <li data-tab="visualization-PaperNetwork">Paper Network</li>
-                <li data-tab="visualization-ConceptCloud">Concept Cloud <small>(currently limited to first 100 records)</small></li>
-                <!--<li data-tab="visualization-BubbleChart">Bubble Chart</li>-->
-            </ul>
-        </li>
-        <li class="tab s-tab  {{#compare active 'citation_helper'}} active {{/compare}}" data-tab="citation_helper"><i class="fa fa-flask"></i> Citation Helper </li>
-    </ul>
+    {{#if noDocuments}}
+        <!-- tab navigation works for only library page and optionally admin -->
+        <ul class="s-library-nav-tabs">
+            <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
+            {{#if edit }}
+            <li class="tab s-tab  {{#compare active 'admin'}} active {{/compare}}" data-tab="admin"><i class="fa fa-key"></i> Manage Access</li>
+            {{/if}}
 
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"> <i class="icon-export"></i> Export</li>
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
+            <li class="s-tab s-disabled" title="Add some papers to this library to gain this option"><i class="fa fa-flask"></i> Citation Helper </li>
+        </ul>
     {{else}}
-    <!-- tab navigation works for only library page and optionally admin -->
-    <ul class="s-library-nav-tabs">
-        <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
-        {{#if edit }}
-        <li class="tab s-tab  {{#compare active 'admin'}} active {{/compare}}" data-tab="admin"><i class="fa fa-key"></i> Manage Access</li>
-        {{/if}}
-
-        <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="icon-export"></i> Export</li>
-        <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="icon-explore"></i> Metrics </li>
-        <li class="s-tab s-disabled" title="add some papers to this library to gain this option"> <i class="fa fa-eye"></i> Visualize </li>
-        <li class="s-tab s-disabled" title="add some papers to this library to gain this option"><i class="fa fa-flask"></i> Citation Helper </li>
-    </ul>
-    {{/compare}}
+        <!-- extended tab navigation should work -->
+        <ul class="s-library-nav-tabs">
+            <li class="tab s-tab  {{#compare active 'library'}} active {{/compare}}" data-tab="library"><i class="fa fa-list"></i> View Library</li>
+            {{#if edit }}
+            <li class="tab s-tab  {{#compare active 'admin'}} active {{/compare}}" data-tab="admin"><i class="fa fa-key"></i> Manage Access</li>
+            {{/if}}
+            <li class="tab s-tab dropdown {{#compare active 'export'}} active {{/compare}}">
+                <a  data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
+                    <i class="icon-export"></i> Export
+                    <span class="fa fa-lg fa-caret-down"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                    <li data-tab="export-bibtex">BibTeX</li>
+                    <li data-tab="export-aastex">AASTeX</li>
+                    <li data-tab="export-endnote">EndNote</li>
+                    <li data-tab="export-ris">RIS</li>
+                    <li data-tab="export-classic">ADS Classic</li>
+                </ul>
+            </li>
+            <li class="tab s-tab  {{#compare active 'metrics'}} active {{/compare}}" data-tab="metrics"><i class="icon-explore"></i> Metrics </li>
+            <li class="tab s-tab dropdown  {{#compare active 'visualization'}} active {{/compare}}">
+                <div data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">
+                    <i class="fa fa-eye"></i> Visualize
+                    <span class="fa fa-lg fa-caret-down"></span>
+                </div>
+                <ul class="dropdown-menu" role="menu">
+                    <li data-tab="visualization-AuthorNetwork">Author Network</li>
+                    <li data-tab="visualization-PaperNetwork">Paper Network</li>
+                    <li data-tab="visualization-ConceptCloud">Concept Cloud <small>(currently limited to first 100 records)</small></li>
+                    <!--<li data-tab="visualization-BubbleChart">Bubble Chart</li>-->
+                </ul>
+            </li>
+            <li class="tab s-tab  {{#compare active 'citation_helper'}} active {{/compare}}" data-tab="citation_helper"><i class="fa fa-flask"></i> Citation Helper </li>
+        </ul>
+    {{/if}}
 
 
 {{/if}}
