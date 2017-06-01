@@ -130,7 +130,7 @@ define(['underscore',
 
         // Watch for simbid references and use a masked version of the
         // query to generate the url if any are found.
-        if (this.original_url && apiQuery.get('q')[0].indexOf('simbid') !== -1) {
+        if (this.original_url && apiQuery.get('q') && apiQuery.get('q')[0].indexOf('simbid') !== -1) {
           var newQ = apiQuery.clone();
 
           // Use the old query for the clone's query string, then get url
