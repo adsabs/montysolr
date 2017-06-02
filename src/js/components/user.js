@@ -300,6 +300,12 @@ define([
         if (this.getBeeHive().getObject("MasterPageManager").currentChild === "AuthenticationPage" && this.isLoggedIn()){
           //so that navigator can redirect to the proper page
           var previousNav = this.getBeeHive().getService("HistoryManager").getPreviousNav();
+
+          // If there there was no history, redirect to landing page
+          if (!previousNav) {
+            previousNav = 'index-page';
+          }
+
           pubsub.publish.apply(pubsub, [pubsub.NAVIGATE].concat(previousNav));
         }
         else  if (this.getBeeHive().getObject("MasterPageManager").currentChild === "SettingsPage" && !this.isLoggedIn()){

@@ -1,6 +1,7 @@
 define([
   'underscore',
   'js/components/user',
+  'js/components/history_manager',
   'js/components/api_targets',
   'js/bugutils/minimal_pubsub',
   'js/components/api_request',
@@ -12,6 +13,7 @@ define([
 ], function(
   _,
   User,
+  HistoryManager,
   ApiTargets,
   MinSub,
   ApiRequest,
@@ -94,6 +96,42 @@ define([
      fetchStub.restore();
    });
 
+   it('redirects to the index-page after login if navigation history is empty', function() {
+     var user = new User();
+     var api = new Api();
+     var minsub = new MinSub({
+       verbose: true,
+       Api: api
+     });
+
+     // restore the original function, if for some reason it's still a spy
+     user.redirectIfNecessary.restore && user.redirectIfNecessary.restore();
+
+     minsub.publish = sinon.spy();
+
+     var historyManager = new HistoryManager();
+
+     // create mock services/objects
+     minsub.beehive.addService('HistoryManager', historyManager);
+     minsub.beehive.addObject('MasterPageManager', {
+       currentChild: 'AuthenticationPage'
+     });
+
+     sinon.stub(user, 'getBeeHive', _.constant(minsub.beehive));
+     sinon.stub(user, 'getPubSub', _.constant(minsub));
+     sinon.stub(user, 'isLoggedIn', _.constant(true));
+
+
+     user.redirectIfNecessary();
+
+     // should redirect to the index page
+     expect(minsub.publish.args[0][1]).to.eql('index-page');
+     // // should redirect to previous page otherwise
+     historyManager._history = ['results-page', 'authentication-page'];
+     user.redirectIfNecessary();
+     expect(minsub.publish.args[1][1]).to.eql('results-page');
+     minsub.destroy();
+   });
 
    it("allows widgets to save + query local storage vals", function(){
 
