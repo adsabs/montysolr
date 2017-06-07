@@ -11,14 +11,11 @@
     "url": "https://github.com/adsabs/bumblebee/issues"
   },
   "devDependencies": {
-    "almond": "~0.2.9",
-    "babel-cli": "^6.10.1",
-    "babel-preset-react": "^6.11.1",
     "blanket": "1.1.7",
+    "chalk": "~0.4.0",
     "express": "~3.4.8",
     "grunt": "~0.4.5",
     "grunt-autoprefixer": "~0.2.20130806",
-    "grunt-babel": "^6.0.0",
     "grunt-bbb-requirejs": "0.1.0-alpha.8",
     "grunt-blanket-mocha": "^0.4.1",
     "grunt-bower-task": "~0.4.0",
@@ -30,7 +27,6 @@
     "grunt-contrib-cssmin": "~0.8.0",
     "grunt-contrib-jshint": "~0.6.0",
     "grunt-contrib-requirejs": "1.0.0",
-    "grunt-contrib-uglify": "1.0.1",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-curl": "~2.2.0",
     "grunt-env": "~0.4.1",
@@ -38,35 +34,23 @@
     "grunt-express-server": "~0.4.13",
     "grunt-hash-required": "^0.1.5",
     "grunt-include-bootstrap": "~0.1.1",
-    "grunt-install-dependencies": "~0.1.0",
-    "grunt-mocha": "^0.4.11",
     "grunt-mocha-phantomjs": "~0.4.3",
     "grunt-processhtml": "~0.2.0",
     "grunt-purifycss": "^0.1.1",
     "grunt-sass": "^1.0.0",
     "grunt-saucelabs": "~8.6.1",
     "grunt-string-replace": "^1.2.0",
-    "install": "^0.5.6",
     "intern": "~3.0.0",
-    "load-grunt-tasks": "^3.2.0",
-    "mocha-phantomjs": "~3.5.2",
+    "load-grunt-config": "^0.19.2",
+    "lodash": "~2.4.1",
     "needle": "~0.7.1",
-    "npm": "^3.8.0",
-    "requirejs": "2.2.0"
+    "requirejs": "^2.3.3",
+    "time-grunt": "^1.4.0"
   },
   "peerDependencies": {
-    "bower": "*",
-    "grunt-cli": "*",
-    "coveralls": "*"
+    "grunt": "~0.4.5"
   },
   "scripts": {
     "test": "grunt test coverage"
-  },
-  "dependencies": {
-    "chalk": "~0.4.0",
-    "grunt-contrib-sass": "^0.9.2",
-    "lodash": "~2.4.1",
-    "maxmin": "~0.1.0",
-    "react-addons-test-utils": "^15.2.1"
   }
 }
