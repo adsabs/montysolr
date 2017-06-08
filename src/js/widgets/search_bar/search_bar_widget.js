@@ -172,10 +172,14 @@ define([
             var val = e.target.value;
             //prevent infinite loop!
             if (!val) return;
-            var label = $(this).find("option[value='" + e.target.value + "']").closest("optgroup").attr("label");
+            var $option = $(this).find('option[value="' + e.target.value + '"]');
+
+            // Grab any default value that is present on the element
+            var defaultValue = $option.data('defaultValue');
+            var label = $option.closest("optgroup").attr("label");
             $select.val(null).trigger('change');
             setTimeout(function(){
-              that.selectFieldInsert(val, label);
+              that.selectFieldInsert(val, label, defaultValue);
               //not entirely sure why this timeout is necessary...
               //without it, focus is moved from the main query bar
             }, 100);
@@ -449,19 +453,27 @@ define([
           this.toggleClear();
         },
 
-        selectFieldInsert : function(val, label){
+        selectFieldInsert : function(val, label, initialValue){
 
-          var startIndex = this._cursorInfo.startIndex,
-              selected = this._cursorInfo.selected,
-              currentVal = this.getFormVal(),
-              newVal, specialCharacter;
+          var newVal, specialCharacter;
+          var highlightedText = this._cursorInfo.selected;
+          var startIndex = this._cursorInfo.startIndex;
+          var currentVal = this.getFormVal();
+
+          // By default, selected will be the highlighted text surrounded by double qoutes
+          var selected = '\"' + highlightedText + '\"';
+
+          // If there was no highlighted text and an initial value was passed, use the initial value
+          if (highlightedText.length === 0 && initialValue) {
+            selected = initialValue;
+          }
 
           //selected will be "" if user didn't highlight any text
           //newVal = df + ":\"" + selected + "\"";
           //
           switch (label) {
             case 'fields':
-                newVal = val + ":\"" + selected + "\"";
+                newVal = val + ":" + selected;
               break;
             case 'operators':
                 newVal = val + "(" + selected + ")";
@@ -476,7 +488,7 @@ define([
               break;
           }
 
-          if (selected) {
+          if (highlightedText.length) {
             this.setFormVal(currentVal.substr(0, startIndex) +  newVal + currentVal.substr(startIndex + selected.length));
           }
           else { //append to the end
