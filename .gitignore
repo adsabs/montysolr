@@ -18,6 +18,7 @@ dist
 npm-debug.log
 node_modules
 bower_components
+git-describe
 
 src/libs
 test/coverage
