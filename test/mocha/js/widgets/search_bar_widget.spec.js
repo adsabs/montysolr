@@ -476,6 +476,106 @@ define([
       console.log($w.find(".s-num-found").html().trim());
     });
 
+    // Wait on element value to be updated (max of 2500ms), returns promise
+    var waitOnValueUpdate = function ($el) {
+      if (!$el || !$el.length) { return; }
+      var originalVal = $el.val();
+      var deferred = $.Deferred();
+      var count = 30;
+      var interval = setInterval(function () {
+        var newVal = $el.val();
+        if (newVal !== originalVal) {
+          clearInterval(interval);
+          deferred.resolve(newVal, $el);
+        }
+        if (--count === 0) {
+          clearInterval(interval);
+          deferred.reject('Timeout: waiting for element exceeded 1500ms');
+        }
+      }, 50);
+      return deferred.promise();
+    };
+
+    // Auto Fields
+    it('should add an auto-field when one is selected from the dropdown', function (done) {
+
+      var widget = _widget();
+      $('#test').append(widget.render().el);
+      var $w = widget.render().$el;
+      var $select = $('.quick-add-dropdown', $w);
+      var $search = $('input[name="q"]', $w);
+
+      waitOnValueUpdate($search)
+      .done(function (val) {
+        expect(val).to.eql('abstract:""');
+        done();
+      })
+      .fail(done);
+
+      $select.val('abstract').trigger('change');
+    });
+
+    it('should append an auto-field when one is selected from the dropdown', function (done) {
+
+      var widget = _widget();
+      $('#test').append(widget.render().el);
+      var $w = widget.render().$el;
+      var $select = $('.quick-add-dropdown', $w);
+      var $search = $('input[name="q"]', $w);
+      $search.val('abstract:""');
+
+      waitOnValueUpdate($search)
+        .done(function (val) {
+          expect(val).to.eql('abstract:"" keyword:""');
+          done();
+        })
+        .fail(done);
+
+      $select.val('keyword').trigger('change');
+    });
+
+    it('should use highlighted text as input to field', function (done) {
+
+      var widget = _widget();
+      $('#test').append(widget.render().el);
+      var $w = widget.render().$el;
+      var $select = $('.quick-add-dropdown', $w);
+      var $search = $('input[name="q"]', $w);
+      $search.val('dark matter');
+      var cursorMock = {
+        selected: 'dark matter',
+        startIndex: '0'
+      };
+      widget.view._cursorInfo = cursorMock;
+
+      waitOnValueUpdate($search)
+      .done(function (val) {
+        expect(val).to.eql('keyword:"dark matter"');
+        done();
+      })
+      .fail(done);
+
+      $select.val('keyword').trigger('change');
+    });
+
+    it('pubdate autofield should use default value, if nothing is highlighted', function (done) {
+
+      var widget = _widget();
+      $('#test').append(widget.render().el);
+      var $w = widget.render().$el;
+      var $select = $('.quick-add-dropdown', $w);
+      var $search = $('input[name="q"]', $w);
+      $search.val('');
+
+      waitOnValueUpdate($search)
+      .done(function (val) {
+        expect(val).to.eql('pubdate:[2000-01-01 TO 2010-01-01]');
+        done();
+      })
+      .fail(done);
+
+      $select.val('pubdate').trigger('change');
+    });
   });
 
-})
+});
