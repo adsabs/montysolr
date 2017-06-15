@@ -2,6 +2,9 @@
 {{#each author}}
     <meta name="citation_author" content="{{this}}" data-highwire="true">
 {{/each}}
+{{#if page}}
+    <meta name="citation_firstpage" content="{{page}}" data-highwire="true">
+{{/if}}
 {{#if pubdate}}
     <meta name="citation_publication_date" content="{{pubdate}}" data-highwire="true">
 {{/if}}

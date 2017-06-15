@@ -39,6 +39,7 @@ define([
           abstract: undefined,
           title: undefined,
           authorAff: undefined,
+          page: undefined,
           pub: undefined,
           pubdate: undefined,
           keywords: undefined,
@@ -68,6 +69,10 @@ define([
         else if (doc.author) {
           doc.hasAffiliation = false;
           doc.authorAff = _.zip(doc.author, _.range(doc.author.length));
+        }
+
+        if (doc.page && doc.page.length) {
+          doc.page = doc.page[0];
         }
 
         //only true if there was an author array
@@ -208,7 +213,7 @@ define([
       },
 
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw',
+        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,page',
         rows: 40
       },
 
