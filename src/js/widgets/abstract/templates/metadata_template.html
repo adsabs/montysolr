@@ -1,4 +1,20 @@
+<meta name="og:type" content="article" data-highwire="true">
+<meta name="twitter:card" content="summary" data-highwire="true">
+
 <meta name="citation_title" content="{{title}}" data-highwire="true">
+<meta name="og:title" content="{{title}}" data-highwire="true">
+<meta name="twitter:title" content="{{title}}" data-highwire="true">
+
+<meta name="og:url" content="{{url}}" data-highwire="true">
+<meta name="twitter:url" content="{{url}}" data-highwire="true">
+
+<meta name="og:image" content="https://ui.adsabs.harvard.edu/styles/img/transparent_logo.svg" data-highwire="true">
+<meta name="twitter:image" content="https://ui.adsabs.harvard.edu/styles/img/transparent_logo.svg" data-highwire="true">
+
+{{#if abstract}}
+    <meta name="og:description" content="{{abstract}}" data-highwire="true">
+    <meta name="twitter:description" content="{{abstract}}" data-highwire="true">
+{{/if}}
 {{#each author}}
     <meta name="citation_author" content="{{this}}" data-highwire="true">
 {{/each}}
@@ -15,8 +31,8 @@
     <meta name="citation_volume" content="{{volume}}" data-highwire="true">
 {{/if}}
 {{#if issue}}
-<meta name="citation_issue" content="{{issue}}" data-highwire="true">
+    <meta name="citation_issue" content="{{issue}}" data-highwire="true">
 {{/if}}
 {{#if doi}}
-<meta name="citation_doi" content="{{doi.doi}}" data-highwire="true">
+    <meta name="citation_doi" content="{{doi.doi}}" data-highwire="true">
 {{/if}}

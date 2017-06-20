@@ -175,6 +175,8 @@ define([
 
         if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
 
+        this.model.set('url', Backbone.history.location.href);
+
         $("head").append(metadataTemplate(this.model.toJSON()));
         //and set the title
         document.title = this.model.get("title");
