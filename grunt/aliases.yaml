@@ -12,6 +12,7 @@ setup:
     - 'bower:setup'
     - 'copy:discovery_vars'
     - 'copy:libraries'
+    - 'exec:convert_enzyme'
     - 'sass'
     - 'curl:google-analytics'
 
