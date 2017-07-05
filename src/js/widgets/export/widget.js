@@ -17,7 +17,6 @@ define([
     'jquery-ui',
     'module',
     'js/components/api_targets',
-     "filesaver",
     'js/mixins/dependon',
     'clipboard'
 
@@ -35,7 +34,6 @@ define([
     $ui,
     WidgetConfig,
     ApiTargets,
-    FileSaver,
     Dependon,
     Clipboard
     ){

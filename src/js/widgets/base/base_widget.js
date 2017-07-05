@@ -19,7 +19,7 @@ define([
   /**
    * Default PubSub based widget; the main functionality is inside
    *
-   *  dispatchRequest()
+   *  dispa tchRequest()
    *    - publishes ApiRequest object into PubSub (to initiate search)
    *
    *  processResponse()
@@ -131,17 +131,6 @@ define([
           pubsub.publish(pubsub.DELIVERING_REQUEST, req);
         }
       }
-
-    },    _dispatchRequest: function(apiQuery) {
-      var q = this.customizeQuery(apiQuery);
-      if (q) {
-        var req = this.composeRequest(q);
-        if (req) {
-          var pubsub = this.getPubSub();
-          pubsub.publish(pubsub.DELIVERING_REQUEST, req);
-        }
-      }
-
     },
 
     /**
