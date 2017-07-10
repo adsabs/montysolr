@@ -26,9 +26,9 @@
     <ul class="list-inline">
         {{#each authorAff}}
         {{#if @last}}
-        <li class="author"><a href="#search/q=author%3A{{this.[2]}}&sort=date+desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
+        <li class="author"><a href="#search/q=author:{{this.[2]}}&sort=date%20desc,%20bibcode%20desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
         {{else}}
-        <li class="author"><a href="#search/q=author%3A{{this.[2]}}&sort=date+desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
+        <li class="author"><a href="#search/q=author:{{this.[2]}}&sort=date%20desc,%20bibcode%20desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
         {{/if}}
         {{/each}}
         {{#if hasMoreAuthors}}
@@ -36,9 +36,9 @@
         {{/if}}
         {{#each authorAffExtra}}
         {{#if @last}}
-        <li class="author extra hide"><a href="#search/?q=author%3A{{this.[2]}}&sort=date+desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
+        <li class="author extra hide"><a href="#search/q=author:{{this.[2]}}&sort=date%20desc,%20bibcode%20desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span></li>
         {{else}}
-        <li class="author extra hide"><a href="#search/?q=author%3A{{this.[2]}}&sort=date+desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
+        <li class="author extra hide"><a href="#search/q=author:{{this.[2]}}&sort=date%20desc,%20bibcode%20desc">{{this.[0]}}</a><span class="affiliation hide"> (<i>{{this.[1]}}</i>)</span>;</li>
         {{/if}}
         {{/each}}
     </ul>
