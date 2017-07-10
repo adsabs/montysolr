@@ -191,15 +191,17 @@ define([
   actions.handleFeedback = function (feedback) {
     return function (dispatch, getState) {
       var stateQuery = getState().query.get('q')[0];
-      var feedbackQuery = feedback.request.get('query').get('q')[0];
-      if (feedbackQuery === stateQuery) {
+      if (feedback && feedback.request) {
+        var feedbackQuery = feedback.request.get('query').get('q')[0];
+        if (feedbackQuery === stateQuery) {
 
-        // reset bibcode on error, so we don't prematurely say the widget is ready
-        dispatch(actions.updateBibcode(null));
+          // reset bibcode on error, so we don't prematurely say the widget is ready
+          dispatch(actions.updateBibcode(null));
 
-        _.delay(function () {
-          dispatch(actions.handleError('API_QUERY_FAILED', null));
-        }, API_QUERY_DELAY);
+          _.delay(function () {
+            dispatch(actions.handleError('API_QUERY_FAILED', null));
+          }, API_QUERY_DELAY);
+        }
       }
     };
   };
