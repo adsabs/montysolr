@@ -10,9 +10,18 @@
   "bugs": {
     "url": "https://github.com/adsabs/bumblebee/issues"
   },
+  "dependencies": {
+    "backbone": "^1.3.3",
+    "bootstrap-sass": "^3.3.7",
+    "lodash": "^2.4.2",
+    "react": "^15.6.1",
+    "requirejs": "^2.3.3"
+  },
   "devDependencies": {
     "blanket": "1.1.7",
+    "browserify": "^14.4.0",
     "chalk": "~0.4.0",
+    "enzyme": "^2.9.1",
     "express": "~3.4.8",
     "grunt": "~0.4.5",
     "grunt-autoprefixer": "~0.2.20130806",
@@ -42,9 +51,11 @@
     "grunt-string-replace": "^1.2.0",
     "intern": "~3.0.0",
     "load-grunt-config": "^0.19.2",
-    "lodash": "~2.4.1",
     "needle": "~0.7.1",
-    "requirejs": "^2.3.3",
+    "react": "^15.6.1",
+    "react-addons-test-utils": "^15.6.0",
+    "react-dom": "^15.6.1",
+    "react-test-renderer": "^15.6.1",
     "time-grunt": "^1.4.0"
   },
   "peerDependencies": {

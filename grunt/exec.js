@@ -20,5 +20,8 @@ module.exports = {
   },
   npm_install: {
     cmd: 'npm install --no-package-lock --no-shrinkwrap'
+  },
+  convert_enzyme: {
+    cmd: "mkdir src/libs/enzyme && ./node_modules/.bin/browserify --standalone enzyme -x 'react/addons' -x 'react/lib/ReactContext' -x 'react/lib/ExecutionEnvironment' node_modules/enzyme/build/index.js > src/libs/enzyme/enzyme.js"
   }
 };
