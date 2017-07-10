@@ -5,7 +5,22 @@ define([
   'analytics'
 ], function (_, ApiQuery, analytics) {
 
-  var FIELDS = ['links_data'];
+  var FIELDS = [
+    'links_data',
+    '[citations]',
+    'property',
+    'bibcode',
+    'first_author',
+    'year',
+    'page',
+    'pub',
+    'pubdate',
+    'title',
+    'volume',
+    'doi',
+    'issue',
+    'issn'
+  ];
   var API_QUERY_DELAY = 300;
 
   var actions = {};
