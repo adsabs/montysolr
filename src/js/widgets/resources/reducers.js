@@ -1,5 +1,5 @@
 'use strict';
-define([], function (helper) {
+define([], function () {
 
   var initialState = function () {
     return {
