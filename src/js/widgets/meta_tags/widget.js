@@ -13,8 +13,6 @@ define([
     }
   });
 
-  var View = Backbone.View.extend();
-
   var Widget = BaseWidget.extend({
     initialize: function (options) {
       this.options = options || {};
@@ -45,6 +43,15 @@ define([
       });
 
       if (found.length) {
+
+        // Most will have DOIs, but account for other identifier formats
+        // These are optional
+        var optionalFields = {
+          issn: undefined,
+          isbn: undefined
+        };
+        found.unshift(optionalFields);
+        found = _.merge.apply(_, found);
         var keys = Object.keys(found);
         
         // check to make sure that the found doc has all of our fields
@@ -72,9 +79,6 @@ define([
     },
     updateMetaTags: function (data) {
       data.url = Backbone.history.location.href;
-
-      data.link_server = this
-      .getBeeHive().getObject('User').getUserData('USER_DATA').link_server;
 
       data = this.parseResourcesData(data);
 
@@ -110,7 +114,7 @@ define([
       document.dispatchEvent(ev);
     },
     defaultQueryArguments: {
-      fl: 'links_data,[citations],keyword,property,first_author,year,issn,title,aff,abstract,bibcode,pub,volume,author,issue,pubdate,doi,page',
+      fl: 'links_data,[citations],keyword,property,first_author,year,issn,isbn,title,aff,abstract,bibcode,pub,volume,author,issue,pubdate,doi,page',
       rows: 1
     }
   });
