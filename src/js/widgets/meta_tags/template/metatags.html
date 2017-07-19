@@ -1,0 +1,49 @@
+<meta name="og:type" content="article" data-highwire="true">
+<meta name="twitter:card" content="summary" data-highwire="true">
+
+<meta name="citation_title" content="{{title}}" data-highwire="true">
+<meta name="og:title" content="{{title}}" data-highwire="true">
+<meta name="twitter:title" content="{{title}}" data-highwire="true">
+
+<meta name="og:url" content="{{url}}" data-highwire="true">
+<meta name="twitter:url" content="{{url}}" data-highwire="true">
+<meta name="citation_abstract_html_url" content="{{url}}" data-highwire="true">
+
+<meta name="og:image" content="https://ui.adsabs.harvard.edu/styles/img/transparent_logo.svg" data-highwire="true">
+<meta name="twitter:image" content="https://ui.adsabs.harvard.edu/styles/img/transparent_logo.svg" data-highwire="true">
+
+{{#if abstract}}
+<meta name="og:description" content="{{abstract}}" data-highwire="true">
+<meta name="twitter:description" content="{{abstract}}" data-highwire="true">
+{{/if}}
+{{#each author}}
+<meta name="citation_author" content="{{this.name}}" data-highwire="true">
+<meta xmlns="http://www.w3.org/1999/xhtml" name="citation_author_institution" content="{{this.aff}}" data-highwire="true">
+{{/each}}
+{{#if page}}
+<meta name="citation_firstpage" content="{{page}}" data-highwire="true">
+{{/if}}
+{{#if pubdate}}
+<meta name="citation_publication_date" content="{{pubdate}}" data-highwire="true">
+{{/if}}
+{{#if pub}}
+<meta name="citation_journal_title" content="{{pub}}" data-highwire="true">
+{{/if}}
+{{#if volume}}
+<meta name="citation_volume" content="{{volume}}" data-highwire="true">
+{{/if}}
+{{#if issue}}
+<meta name="citation_issue" content="{{issue}}" data-highwire="true">
+{{/if}}
+{{#if doi}}
+<meta name="citation_doi" content="{{doi}}" data-highwire="true">
+{{/if}}
+{{#if issn}}
+<meta name="citation_issn" content="{{issn}}" data-highwire="true">
+{{/if}}
+{{#each keyword}}
+<meta name="citation_keywords" content="{{this}}" data-highwire="true">
+{{/each}}
+{{#if pdfUrl}}
+<meta name="citation_pdf_url" content="{{pdfUrl}}" data-highwire="true">
+{{/if}}

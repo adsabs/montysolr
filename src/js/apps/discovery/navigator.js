@@ -70,7 +70,8 @@ define([
         ];
 
         var detailsPageAlwaysVisible = [
-          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'ShowGraphicsSidebar', 'ShowLibraryAdd'
+          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'ShowGraphicsSidebar', 'ShowLibraryAdd',
+          'MetaTagsWidget'
         ];
 
         function redirectIfNotSignedIn(){
