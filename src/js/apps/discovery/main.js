@@ -81,7 +81,7 @@ define(['config', 'module'], function(config, module) {
           }
 
         }).fail(function () {
-          app.redirect('/500.html');
+          app.redirect('500.html');
         });
 
       }).fail(function() {
@@ -90,7 +90,7 @@ define(['config', 'module'], function(config, module) {
           return
         }
         // if we failed loading, retry *once again* (and give up eventually)
-        app.reload('/404.html');
+        app.reload('404.html');
       });
 
     });
