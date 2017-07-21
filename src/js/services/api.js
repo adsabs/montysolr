@@ -143,8 +143,12 @@ define([
         context: {request: request, api: self },
         timeout: this.defaultTimeoutInMs,
         headers: {},
-        cache: true, // do not generate _ parameters (let browser cache responses),
+        cache: true // do not generate _ parameters (let browser cache responses),
       };
+
+      if (options.timeout) {
+        opts.timeout = options.timeout;
+      }
 
       if (this.clientVersion) {
         opts.headers['X-BB-Api-Client-Version'] = this.clientVersion;

@@ -80,6 +80,7 @@ define([
       // XXX:rca - solve this better, through config
       var beehive = this.getBeeHive();
       var dynConf = this.getObject('DynamicConfig');
+      var timeout = 3000;
 
       var defer = $.Deferred();
 
@@ -103,7 +104,8 @@ define([
             pendingReqs--;
             if (pendingReqs <= 0) defer.resolve(retVal);
           },
-          type: 'GET'
+          type: 'GET',
+          timeout: timeout - 1
         };
         var redirect_uri = location.origin + location.pathname;
 
@@ -125,17 +127,16 @@ define([
         });
 
         setTimeout(function() {
-            if (defer.state() == 'resolved')
-              return;
-            defer.reject();
-          },
-          3000);
+          if (defer.state() === 'resolved') {
+            return;
+          }
+          defer.reject();
+        }, timeout);
       }
       else {
         setTimeout(function() {
-          defer.resolve({}),
-            1
-        });
+          defer.resolve({});
+        }, 1);
       }
       return defer;
     },
