@@ -1,4 +1,5 @@
 define([
+  'underscore',
   'marionette',
   'd3',
   'js/widgets/base/base_widget',
@@ -19,6 +20,7 @@ define([
   'js/components/api_targets',
   './d3-tip'
 ], function (
+  _,
   Marionette,
   d3,
   BaseWidget,
@@ -367,7 +369,9 @@ define([
         margin = {top: 20, right: 80, bottom: 30, left: 50},
         width = 480 - margin.left - margin.right,
         height = 250 - margin.top - margin.bottom;
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        g = svg.append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+          .attr('pointer-events', 'all');
 
       //it's only one year, show a message
       if (years.length === 1){
@@ -438,30 +442,212 @@ define([
           .attr("class", "line")
           .attr("d", function(d) {
             return line(d.values); })
-          .style("stroke", function(d, i) { return that.colors[i]; })
-          .on('mouseover', tip.show)
-          .on('mouseout', tip.hide);
+          .style("stroke", function(d, i) { return that.colors[i]; });
+          // .on('mouseover', tip.show)
+          // .on('mouseout', tip.hide);
 
-        // append key
-        var keyDivs = d3.select(this.$(".graph-key")[0])
-        .style({position : 'absolute', right : 0 })
-        .selectAll("div")
-        .data(graphData.map(function(o){return o.key}))
-          .enter()
-          .append("div");
 
-        keyDivs
-          .append("div")
-          .classed("key-block", true)
-          .style("background-color", function(d,i){
-            return that.colors[i]
+      // **** Hover Data Line ****
+
+      // iife to protect variables from leaking into other areas below
+      (function () {
+
+        // Set an offset for the overlay
+        var overlayOffset = 10;
+
+        // Generate groups from the graphData
+        var dataGroups = _.reduce(graphData, function (res, d) {
+          res[d.key] = d.values;
+          return res;
+        }, {});
+
+        // Create a <g> element for the hover stuff to live
+        var hoverGroup = svg.append('g').attr('pointer-events', 'all');
+
+        // Create a new vertical <line> that will follow the mouse
+        var hoverLine = hoverGroup.append('line')
+          .attr({
+            'pointer-events': 'none',
+            'x1': margin.left,
+            'x2': margin.left,
+            'y1': margin.top,
+            'y2': height + margin.top,
+            'stroke': 'black', 'stroke-width': '1px'
           });
-        keyDivs
-          .append("span")
-          .text(function(d){
-            return d;
-          });
 
+        // Create a set of dots, one for each group, that will follow the mouse
+        var focusDots = _.map(dataGroups, function (d, key) {
+          var dot = {
+            key: key,
+            el: hoverGroup.append('circle').attr({
+              'r': 3,
+              'stroke-width': '2px',
+              'fill': 'none',
+              'pointer-events': 'none'
+            }),
+            data: d
+          };
+          return dot;
+        });
+
+        // Create a small info area that will display values as we move mouse
+        var infoBox = g.append('foreignObject')
+        .attr({
+          'class': 'info-box',
+          'width': '200px',
+          'height': '100px'
+        }).style({
+          'padding-left': '10px',
+          'opacity': 0.75,
+          'font-size': '0.60em'
+        });
+
+        // Memoized function for generating info-box output
+        var createInfoBoxHtml = _.memoize(function (data) {
+          if (!data) { return; }
+          var out = '<table>';
+          out += '<tr><td><strong>Year:</strong></td><td>&nbsp;' + data.year + '</td></tr>';
+          for (var i in data.groups) {
+            var g = data.groups[i];
+            out += '<tr>';
+            out += '<td style=\"color:' + g.color + '\"><strong>' + g.key + ':</strong></td>';
+            out += '<td>&nbsp;' + g.val.toFixed(5) + '</td>';
+            out += '</tr>';
+          }
+          out += '</table>';
+          return out;
+        }, function (data) {
+          return data.year;
+        });
+
+        /**
+         * Memoized function that takes in a domainX and outputs an array
+         * of transform data points.
+         */
+        var parseDotsFromMouse = _.memoize(function (domainX) {
+          var bisector = d3.bisector(function (d) { return d.x; }).left;
+          var out = [];
+          _.forEach(focusDots, function (dot) {
+            var data = dot.data;
+            var pos = bisector(data, domainX);
+            var smaller = data[pos - 1] || 0;
+            var larger = data[pos] || data[data.length - 1];
+            var closest = domainX - smaller.x < larger.x === domainX ? smaller : larger;
+            var tranX = x(closest.x) + margin.left;
+            var tranY = y(closest.y) + margin.top;
+            out.push({
+              dot: dot,
+              data: closest,
+              pos: {
+                x: tranX,
+                y: tranY
+              }
+            });
+          }, 0);
+          return out;
+        });
+
+        /**
+         * Memoized function that takes in an array of data points and
+         * provides the average x coordinate, this is used to position the vertical
+         * line
+         */
+        var getAverageX = _.memoize(function (data) {
+          return _.reduce(data, function (res, d) {
+            return res + d.pos.x;
+          }, 0) / data.length;
+        }, function (d) {
+          return d[0].data.x;
+        });
+
+        /**
+         * Update the position of the dots that follow the lines, this works on a
+         * single dot at a time, also updating a the infoBoxData object during the
+         * loop
+         */
+        var updateElements = function (infoBoxData, item, idx) {
+          var el = item.dot.el;
+          var data = item.data;
+          var pos = item.pos;
+          el.attr({
+            'visibility': null,
+            'transform': 'translate(' + pos.x + ',' + pos.y + ')',
+            'stroke': that.colors[idx]
+          });
+          infoBoxData.year = data.x;
+          infoBoxData.groups.push({
+            key: item.dot.key,
+            val: data.y,
+            color: that.colors[idx]
+          });
+        };
+
+        /**
+         * Debounced function that hides the hover line, dots and infobox when
+         * mouseout occurs
+         */
+        var onRectMouseOut = _.debounce(function () {
+          infoBox.html('');
+          hoverLine.attr('visibility', 'hidden');
+          _.forEach(focusDots, function (f) {
+            f.el.attr('visibility', 'hidden');
+          });
+        }, 300, { leading: true });
+
+        /**
+         * When mousemove detected, the vertical line, dots and infobox are
+         * generated/updated.
+         */
+        var onRectMouseMove = function () {
+          var mouse = d3.mouse(this);
+
+          // transform mouse X domain into data points
+          var parsedDots = parseDotsFromMouse(x.invert(mouse[0]).toFixed(0));
+          var avgX = getAverageX(parsedDots);
+          var infoBoxData = { year: 0, groups: [] };
+
+          // one last loop to update elements
+          _.forEach(parsedDots, _.partial(updateElements, infoBoxData));
+
+          // Update the infobox
+          infoBox.html(createInfoBoxHtml(infoBoxData));
+
+          // Update vertical line
+          hoverLine.attr({ 'x1': avgX, 'x2': avgX, visibility: null });
+        };
+
+        // Append a <rect> that will be hidden but used to capture events
+        g.append('rect')
+          .attr({
+            'x': -overlayOffset,
+            'width': width + (overlayOffset * 2),
+            'height': height,
+            'visibility': 'hidden'
+          })
+          .on('mouseout', onRectMouseOut)
+          .on('mousemove', onRectMouseMove);
+      })();
+      // **** End Hover Data Line ****
+
+      // append key
+      var keyDivs = d3.select(this.$(".graph-key")[0])
+      .style({position : 'absolute', right : 0 })
+      .selectAll("div")
+      .data(graphData.map(function(o){return o.key}))
+        .enter()
+        .append("div");
+
+      keyDivs
+        .append("div")
+        .classed("key-block", true)
+        .style("background-color", function(d,i){
+          return that.colors[i]
+        });
+      keyDivs
+        .append("span")
+        .text(function(d){
+          return d;
+        });
     },
 
     //listens on change events
