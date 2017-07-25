@@ -1,4 +1,5 @@
 define([
+      'underscore',
       'marionette',
       'js/components/api_query',
       'js/widgets/base/base_widget',
@@ -15,10 +16,12 @@ define([
       'jquery-ui',
       'js/mixins/dependon',
       'analytics',
+      'js/components/query_validator',
       'select2',
       'libs/select2/matcher'
     ],
     function (
+        _,
         Marionette,
         ApiQuery,
         BaseWidget,
@@ -35,6 +38,7 @@ define([
         jqueryUI,
         Dependon,
         analytics,
+        QueryValidator,
         select2,
         oldMatcher
     ) {
@@ -125,6 +129,7 @@ define([
         initialize: function (options) {
           _.bindAll(this, "fieldInsert");
           this.queryBuilder = new QueryBuilderPlugin();
+          this.queryValidator = new QueryValidator();
         },
 
         activate: function(beehive) {
@@ -583,6 +588,24 @@ define([
           var newQuery = new ApiQuery({
             q: query
           });
+
+          // Perform a quick validation on the query
+          var validated = this.queryValidator.validate(newQuery);
+          if (!validated.result) {
+            var tokens = _.pluck(validated.tests, 'token');
+            tokens = (tokens.length > 1) ? tokens.join(', ') : tokens[0];
+            var pubsub = this.getPubSub();
+            pubsub.publish(pubsub.ALERT, new ApiFeedback({
+              code: 0,
+              msg: '<p><i class="fa fa-exclamation-triangle fa-2x" aria-hidden="true"></i> ' +
+              'Sorry! We aren\'t able to understand: <strong><i>' + tokens + '</i></strong></p>' +
+              '<p><strong><a href="/">Try looking at the search examples on the home page</a></strong> or ' +
+              '<strong><a href="https://adsabs.github.io/help/search/search-syntax">reading our help page.</a></strong></p>',
+              type : 'info',
+              fade : true
+            }));
+            return;
+          }
 
           this.trigger("start_search", newQuery);
 
