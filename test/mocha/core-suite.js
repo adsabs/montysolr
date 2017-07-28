@@ -17,6 +17,7 @@ define([], function() {
       '/components/beehive.spec.js',
       '/components/api_request.spec.js',
       '/components/query_mediator.spec.js',
+      '/components/query_validator.spec.js',
       '/components/services_container.spec.js',
 //      '/components/analytics.spec.js', // too slow
       '/components/application.spec.js',
