@@ -95,20 +95,22 @@ define([
           doc.formattedDate =  PapersUtils.formatDate(doc.pubdate, {format: 'MM d yy', missing: {day: 'MM yy', month: 'yy'}});
         }
 
-        doc.title = doc.title instanceof Array ? doc.title[0] : undefined;
+        if (doc.title && doc.title.length) {
+          doc.title = doc.title[0];
+          var docTitleLink = doc.title.match(/<a.*href="(.*?)".*?>(.*)<\/a>/i);
 
-        // Find any links that are buried in the text of the title
-        // Parse it out and convert to BBB hash links, if necessary
-        var docTitleLink = doc.title.match(/<a.*href="(.*?)".*?>(.*)<\/a>/i);
-        if (docTitleLink) {
-          doc.title = doc.title.replace(docTitleLink[0], "").trim();
-          doc.titleLink = {
-            href: docTitleLink[1],
-            text: docTitleLink[2]
-          };
+          // Find any links that are buried in the text of the title
+          // Parse it out and convert to BBB hash links, if necessary
+          if (docTitleLink) {
+            doc.title = doc.title.replace(docTitleLink[0], "").trim();
+            doc.titleLink = {
+              href: docTitleLink[1],
+              text: docTitleLink[2]
+            };
 
-          if (doc.titleLink.href.match(/^\/abs/)) {
-            doc.titleLink.href = "#" + doc.titleLink.href.slice(1);
+            if (doc.titleLink.href.match(/^\/abs/)) {
+              doc.titleLink.href = "#" + doc.titleLink.href.slice(1);
+            }
           }
         }
 
