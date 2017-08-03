@@ -567,7 +567,9 @@ define([
           }
           else {
             app.getWidget(widgetName).done(function(w){
-              w.renderWidgetForCurrentQuery();
+              w.renderWidgetForCurrentQuery({
+                currentQuery: q
+              });
             });
           }
         }

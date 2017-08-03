@@ -1015,8 +1015,8 @@ define([
         url : window.location.href,
         loading : true
       });
-
-      var q = this.customizeQuery(this.getCurrentQuery());
+      var q = this.getCurrentQuery() || options.currentQuery;
+      q = this.customizeQuery(q);
 
       var that = this;
 
@@ -1105,7 +1105,7 @@ define([
 
       function onResponse(jsonResponse) {
         var response = jsonResponse.toJSON();
-        
+
         this.childViews.indicesGraphView.model.set({
           graphData: this.dataExtractor.plot_series({series_data: response["time series"]}),
           showingSimple : false
@@ -1209,7 +1209,7 @@ define([
         //how is the json response formed? need to figure out why attributes is there
         response = response.attributes ? response.attributes : response;
         // for now, metrics api returns errors as 200 messages, so we have to detect it
-        if ((response.msg && response.msg.indexOf('Unable to get results') > -1) || (response.status == 500)) {
+        if ((response.Error && response.Error.indexOf('Unable to get results') > -1) || (response.status == 500)) {
           this.closeWidget();
           this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({
             code: ApiFeedback.CODES.ALERT,
