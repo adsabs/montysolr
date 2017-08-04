@@ -140,14 +140,15 @@ define([
 
       toggleMoreAuthors: function (ev) {
 
-        if (ev) ev.stopPropagation();
+        if (ev) {
+          ev.stopPropagation();
+        }
 
         this.$(".author.extra").toggleClass("hide");
         this.$(".author.extra-dots").toggleClass("hide");
         if (this.$(".author.extra").hasClass("hide")){
           this.$("#toggle-more-authors").text("Show all authors");
-        }
-        else {
+        } else {
           this.$("#toggle-more-authors").text("Hide authors");
         }
 
@@ -155,16 +156,16 @@ define([
 
       toggleAffiliation: function (ev) {
 
-        if (ev) ev.preventDefault();
+        if (ev) {
+          ev.preventDefault();
+        }
 
         this.$(".affiliation").toggleClass("hide");
         if (this.$(".affiliation").hasClass("hide")){
           this.$("#toggle-aff").text("Show affiliations")
-        }
-        else {
+        } else {
           this.$("#toggle-aff").text("Hide affiliations")
         }
-
       },
 
       onClick: function(ev) {
@@ -180,15 +181,14 @@ define([
         this.model.set('url', Backbone.history.location.href);
 
         $("head").append(metadataTemplate(this.model.toJSON()));
-        //and set the title
-        document.title = this.model.get("title");
+        
+        // and set the title, maintain tags
+        document.title = $('<div>' + this.model.get("title") + '</div>').text();
 
         var ev = document.createEvent('HTMLEvents');
         ev.initEvent('ZoteroItemUpdated', true, true);
         document.dispatchEvent(ev);
-
       }
-
     });
 
     var AbstractWidget = BaseWidget.extend({
