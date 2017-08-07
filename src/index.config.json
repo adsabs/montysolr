@@ -1,0 +1,19 @@
+[
+  {
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "ADS",
+    "alternateName": "Astrophysics Data System",
+    "url": "https://ui.adsabs.harvard.edu"
+  },
+  {
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "url": "https://ui.absads.harvard.edu/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://ui.adsabs.harvard.edu/#search/q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+]
