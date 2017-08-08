@@ -9,7 +9,6 @@ define([
     'cache',
     'js/widgets/base/base_widget',
     'hbs!./templates/abstract_template',
-    'hbs!./templates/metadata_template',
     'js/components/api_query',
     'js/mixins/link_generator_mixin',
     'js/mixins/papers_utils',
@@ -24,7 +23,6 @@ define([
     Cache,
     BaseWidget,
     abstractTemplate,
-    metadataTemplate,
     ApiQuery,
     LinkGeneratorMixin,
     PapersUtils,
@@ -178,16 +176,8 @@ define([
 
         if (MathJax) MathJax.Hub.Queue(["Typeset", MathJax.Hub, this.el]);
 
-        this.model.set('url', Backbone.history.location.href);
-
-        $("head").append(metadataTemplate(this.model.toJSON()));
-        
         // and set the title, maintain tags
         document.title = $('<div>' + this.model.get("title") + '</div>').text();
-
-        var ev = document.createEvent('HTMLEvents');
-        ev.initEvent('ZoteroItemUpdated', true, true);
-        document.dispatchEvent(ev);
       }
     });
 

@@ -48,7 +48,8 @@ define([], function() {
       '/widgets/user_settings_widget.spec.js',
       '/widgets/wordcloud_widget.spec.js',
       '/widgets/year_graph_facet_widget.spec.js',
-      '/widgets/hello_world_widget.spec.js'
+      '/widgets/hello_world_widget.spec.js',
+      '/widgets/meta_tags_widget.spec.js'
   ];
   return tests;
 });
