@@ -2,39 +2,43 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>NASA/ADS Search (Beta Interface)</title>
-    <meta name="description" content="A powerful, streamlined new way to search the Astrophysics Data System" />
-    <link rel="stylesheet" href="./styles/css/styles.css" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./styles/img/favicon.ico">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NASA/ADS Search (Beta Interface)</title>
+  <meta name="description" content="A powerful, streamlined new way to search the Astrophysics Data System" />
+  <link rel="stylesheet" href="./styles/css/styles.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./styles/img/favicon.ico">
 </head>
 
-<body>
-<!--items for announcement of new page, and optional skip to main content link go here (inserted by master.js)-->
+  <body>
+    <!--items for announcement of new page, and optional skip to main content link go here (inserted by master.js)-->
 
-<div class="container-fluid" id="app-container">
- <!--this is where bbb discovery gets inserted -->
-    <div id="body-template-container">
+    <div class="container-fluid" id="app-container">
+     <!--this is where bbb discovery gets inserted -->
+      <div id="body-template-container">
         <noscript>
-            <p></p>
-            <p>
-                Welcome hardcode user. Your client does not speak JavaScript,
-            please follow this link to access a non-JavaScript version of this
-                website:
-            <a href="//adsabs.harvard.edu/abstract_service.html">ADS Classic</a></p>
+          <p>
+              Welcome hardcode user. Your client does not speak JavaScript,
+          please follow this link to access a non-JavaScript version of this
+              website:
+          <a href="//adsabs.harvard.edu/abstract_service.html">ADS Classic</a></p>
         </noscript>
 
         <div class="loading-screen">
-            <div>
-                <div class="logo__astrophysics">astrophysics</div>
-                <div class="logo__data-system">data system</div>
-            </div>
-            <span class="loading-screen__loading">loading...</span>
+          <div>
+              <div class="logo__astrophysics">astrophysics</div>
+              <div class="logo__data-system">data system</div>
+          </div>
+          <span class="loading-screen__loading">loading...</span>
         </div>
-</div>
-
+      </div>
+    </div>
+    {{#each data}}
+    <script type="application/ld+json">
+      {{{this}}}
+    </script>
+    {{/each}}
     <script>
         // define waitSeconds above require script tag
         // to override the default, until main.js loads
@@ -44,10 +48,7 @@
         };
     </script>
 
-<!-- start the discovery application -->
-<script data-main="./discovery.config"  src="./libs/requirejs/require.js"></script>
-
-
-</body>
-
+    <!-- start the discovery application -->
+    <script data-main="./discovery.config"  src="./libs/requirejs/require.js"></script>
+  </body>
 </html>

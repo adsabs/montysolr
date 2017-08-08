@@ -91,7 +91,10 @@ module.exports = function (grunt) {
     release: {
       files: [{
         expand: true,
-        src: ['./src/**'],
+        src: [
+          './src/**',
+          '!./src/index.html'
+        ],
         dest: 'dist/',
         rename: function(dest, src) {
           return dest + src.replace('/src/', '/');

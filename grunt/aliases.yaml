@@ -140,6 +140,7 @@ release:
     - 'setup'
     - 'clean:release'
     - 'copy:release'
+    - 'compile-handlebars:index'
     - 'exec:git_describe'
     - 'string-replace:dist'
     - 'requirejs:release_concatenated'
