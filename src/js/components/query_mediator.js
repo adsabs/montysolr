@@ -132,9 +132,14 @@ define(['underscore',
         // query to generate the url if any are found.
         if (this.original_url && apiQuery.get('q') && apiQuery.get('q')[0].indexOf('simbid') !== -1) {
           var newQ = apiQuery.clone();
+          var origQ = apiQuery.get('q')[0];
+
+          if (apiQuery.has('__original_query')) {
+            origQ = apiQuery.get('__original_query')[0];
+          }
 
           // Use the old query for the clone's query string, then get url
-          newQ.set('q', apiQuery.get('__original_query')[0]);
+          newQ.set('q', origQ);
           this.original_url = this.queryUpdater.clean(newQ).url();
         } else {
           this.original_url = this.queryUpdater.clean(apiQuery).url();
