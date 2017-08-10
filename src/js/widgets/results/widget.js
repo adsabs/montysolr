@@ -202,10 +202,12 @@ define([
               var finalList = [];
               //adding abstract,title, etc highlights to one big list
               _.each(_.pairs(hl), function (pair) {
-                finalList = finalList.concat(pair[1]);
+                var str = (pair[1].length) ? pair[1][0] : '';
+                str = $('<d>' + str + '</d>').text();
+                finalList = finalList.concat([str]);
               });
 
-              if (finalList.length == 1 && finalList[0].trim() == "") {
+              if (finalList.length === 1 && finalList[0].trim() === "") {
                 return {};
               }
 
