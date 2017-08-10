@@ -228,16 +228,16 @@
                     {{#if shortAbstract}}
 
                     <div class="short-abstract" aria-label="a truncated version of the abstract">
-                        {{shortAbstract}}
+                        {{{shortAbstract}}}
                         &nbsp; <button class="btn btn-xs btn-default show-full-abstract">more</button>
                     </div>
                     <div class="full-abstract hidden">
-                        {{ abstract }}
+                        {{{abstract}}}
                         &nbsp; <button class="btn btn-xs btn-default hide-full-abstract">less</button>
                     </div>
                     {{else}}
                         <!--the abstract is short enough to be shown all at once-->
-                        {{abstract}}
+                        {{{abstract}}}
                     {{/if}}
                 {{/if}}
         </div>
