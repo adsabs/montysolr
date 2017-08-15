@@ -164,6 +164,9 @@ define(['backbone', 'underscore', 'jquery'], function(Backbone, _, $) {
       var encoded =  $.param(_.object(sorted), true);
           encoded = encoded.replace(/\+/g, "%20");
 
+      // Replace funky unicode quotes with normal ones
+      encoded = encoded.replace(/%E2%80%9[ECD]/g, '%22');
+
       return encoded;
     },
 
