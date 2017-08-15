@@ -26,6 +26,8 @@ define([
   var actions = {};
 
   actions.updateResources = function (value) {
+    value.fullTextSources = value.fullTextSources || [];
+    value.dataProducts = value.dataProducts || [];
     return {
       type: 'UPDATE_RESOURCES',
       fullTextSources: value.fullTextSources,
@@ -204,10 +206,30 @@ define([
    * @returns {Function}
    */
   actions.handleFeedback = function (feedback) {
-    return function (dispatch, getState) {
-      var stateQuery = getState().query.get('q')[0];
-      if (feedback && feedback.request) {
-        var feedbackQuery = feedback.request.get('query').get('q')[0];
+    return function (dispatch, getState, widget) {
+      var state = getState();
+      var widgetId = null;
+      try {
+        widgetId = widget.getPubSub().getCurrentPubSubKey().getId();
+      } catch (e) {
+        // In the case that the widget has already been destroyed, the beehive
+        // will be inactive -- don't let this error bubble up.
+      }
+      var stateQuery = (state.query && state.query.get) ?
+        state.query.get('q')[0] : null;
+      var errorId = (feedback.psk && feedback.psk.getId) ?
+        feedback.psk.getId() : -1;
+
+      if (
+        widgetId === errorId &&
+        feedback &&
+        feedback.request &&
+        feedback.request.has('query') &&
+        feedback.request.get('query').has('q') &&
+        state.isLoading
+      ) {
+        var query = feedback.request.get('query').get('q');
+        var feedbackQuery = (query.length) ? query[0] : null;
         if (feedbackQuery === stateQuery) {
 
           // reset bibcode on error, so we don't prematurely say the widget is ready

@@ -4,14 +4,17 @@ define([
     'react',
     'enzyme',
     'es6!js/widgets/resources/widget.jsx',
+    'es6!js/widgets/resources/components/app.jsx',
     'es6!js/widgets/resources/components/fullTextSources.jsx',
     'es6!js/widgets/resources/components/dataProducts.jsx',
     'es6!js/widgets/resources/components/loading.jsx',
+    'es6!js/widgets/resources/components/noSources.jsx',
     'js/widgets/resources/actions',
     'js/widgets/base/base_widget',
     'js/bugutils/minimal_pubsub'
   ],
-  function ($, React, Enzyme, ResourcesWidget, FullTextSources, DataProducts, LoadingIcon, actions, BaseWidget, MinPubSub) {
+  function ($, React, Enzyme, ResourcesWidget, App, FullTextSources,
+    DataProducts, LoadingIcon, NoSources, actions, BaseWidget, MinPubSub) {
 
   var mockResponse = {
     get: function () {
@@ -42,9 +45,36 @@ define([
     }
   };
 
+  var mockResponseNoLinksData = {
+    get: function () {
+      return this.response.docs[0];
+    },
+    "responseHeader": {
+      "status": 0,
+      "QTime": 1,
+      "params": {
+        "wt": "json",
+        "q": "bibcode:2017MNRAS.467.4015H",
+        "fl": "links_data"
+      }
+    },
+    "response": {
+      "numFound": 1,
+      "start": 0,
+      "docs": [
+        {
+          "links_data": undefined
+        }
+      ]
+    }
+  };
+
   var mockApiQuery = {
     get: function () {
       return ['bibcode:2017MNRAS.467.4015H'];
+    },
+    has: function () {
+      return true;
     }
   };
 
@@ -133,7 +163,6 @@ define([
       var query = dispatchRequestStub.args[0][0];
       expect(dispatchRequestStub.called).to.be.true;
       expect(query.get('q')[0]).to.equal('bibcode:2017MNRAS.467.4015H');
-      expect(query.get('fl')[0]).to.equal('links_data');
     });
 
     it('display documents correctly updates query and parses', function (done) {
@@ -318,13 +347,13 @@ define([
 
       var wrapNoProps = Enzyme.shallow(React.createElement(FullTextSources));
       var wrapWithProps = Enzyme.shallow(React.createElement(FullTextSources, props));
-      
+
       // no sources, no output
       expect(wrapNoProps.find('div').exists()).to.be.false;
 
       // has sources, should return proper markup
       expect(wrapWithProps.find('div').exists()).to.be.true;
-      
+
       // should have 3 links
       expect(wrapWithProps.find('a').length).to.equal(props.sources.length);
 
@@ -365,13 +394,13 @@ define([
 
       var wrapNoProps = Enzyme.shallow(React.createElement(DataProducts));
       var wrapWithProps = Enzyme.shallow(React.createElement(DataProducts, props));
-      
+
       // no products, no output
       expect(wrapNoProps.find('div').exists()).to.be.false;
 
       // has products, should return proper markup
       expect(wrapWithProps.find('div').exists()).to.be.true;
-      
+
       // should have 3 links
       expect(wrapWithProps.find('a').length).to.equal(props.products.length);
 
@@ -395,16 +424,48 @@ define([
       });
     });
 
+    it('renders no sources correctly', function () {
+      widget.activate(beehive);
+      widget.processResponse(mockResponseNoLinksData);
+
+      expect(widget.view.render().$el.text()).to.be.equal('No Sources Found');
+    });
+
+    it('dies when there is an error', function (done) {
+      widget.activate(beehive);
+      var fb = actions.handleFeedback({
+        request: {
+          get: _.constant(mockApiQuery),
+          has: _.constant(true)
+        },
+        psk: {
+          getId: function () {
+            return widget.getPubSub().getCurrentPubSubKey().getId()
+          }
+        }
+      });
+      var dispatch = sandbox.spy();
+      var store = sandbox.stub({
+        isLoading: true,
+        query: mockApiQuery
+      });
+      fb(dispatch, _.constant(store), widget);
+      setTimeout(function () {
+        expect(dispatch.calledTwice).to.be.true;
+        done();
+      }, 350);
+    });
+
     it('renders Loading component correctly', function () {
       widget.activate(beehive);
 
       var wrapNoShow = Enzyme.shallow(React.createElement(LoadingIcon, {
-        show: false 
+        show: false
       }));
-      var wrapWithShow = Enzyme.shallow(React.createElement(LoadingIcon, { 
-        show: true 
+      var wrapWithShow = Enzyme.shallow(React.createElement(LoadingIcon, {
+        show: true
       }));
-      
+
       // No output
       expect(wrapNoShow.find('span').exists()).to.be.false;
 
