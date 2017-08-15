@@ -208,7 +208,13 @@ define([
   actions.handleFeedback = function (feedback) {
     return function (dispatch, getState, widget) {
       var state = getState();
-      var widgetId = widget.getPubSub().getCurrentPubSubKey().getId();
+      var widgetId = null;
+      try {
+        widgetId = widget.getPubSub().getCurrentPubSubKey().getId();
+      } catch (e) {
+        // In the case that the widget has already been destroyed, the beehive
+        // will be inactive -- don't let this error bubble up.
+      }
       var stateQuery = (state.query && state.query.get) ?
         state.query.get('q')[0] : null;
       var errorId = (feedback.psk && feedback.psk.getId) ?
