@@ -4,9 +4,10 @@ define([
   'react-redux',
   'es6!./fullTextSources.jsx',
   'es6!./dataProducts.jsx',
-  'es6!./loading.jsx'
+  'es6!./loading.jsx',
+  'es6!./noSources.jsx'
 ], function (
-  actions, React, ReactRedux, FullTextSources, DataProducts, LoadingIcon) {
+  actions, React, ReactRedux, FullTextSources, DataProducts, LoadingIcon, NoSources) {
 
   var App = React.createClass({
     render: function () {
@@ -21,16 +22,24 @@ define([
             products={this.props.dataProducts}
             onLinkClick={this.props.onLinkClick}
           />
+          <NoSources noSources={this.props.noSources}/>
         </div>
       );
     }
   });
 
+  // only show no sources message if we aren't loading and no sources are found
+  var noSources = function (state) {
+    return !state.isLoading &&
+      !state.fullTextSources.length && !state.dataProducts.length;
+  };
+
   var mapStateToProps = function (state) {
     return {
       fullTextSources: state.fullTextSources,
       dataProducts: state.dataProducts,
-      isLoading: state.isLoading
+      isLoading: state.isLoading,
+      noSources: noSources(state)
     };
   };
 

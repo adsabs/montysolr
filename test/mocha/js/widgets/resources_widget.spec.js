@@ -4,6 +4,7 @@ define([
     'react',
     'enzyme',
     'es6!js/widgets/resources/widget.jsx',
+    'es6!js/widgets/resources/components/app.jsx',
     'es6!js/widgets/resources/components/fullTextSources.jsx',
     'es6!js/widgets/resources/components/dataProducts.jsx',
     'es6!js/widgets/resources/components/loading.jsx',
@@ -11,7 +12,7 @@ define([
     'js/widgets/base/base_widget',
     'js/bugutils/minimal_pubsub'
   ],
-  function ($, React, Enzyme, ResourcesWidget, FullTextSources, DataProducts, LoadingIcon, actions, BaseWidget, MinPubSub) {
+  function ($, React, Enzyme, ResourcesWidget, App, FullTextSources, DataProducts, LoadingIcon, actions, BaseWidget, MinPubSub) {
 
   var mockResponse = {
     get: function () {
@@ -133,7 +134,6 @@ define([
       var query = dispatchRequestStub.args[0][0];
       expect(dispatchRequestStub.called).to.be.true;
       expect(query.get('q')[0]).to.equal('bibcode:2017MNRAS.467.4015H');
-      expect(query.get('fl')[0]).to.equal('links_data');
     });
 
     it('display documents correctly updates query and parses', function (done) {
@@ -393,6 +393,18 @@ define([
         var source = mockLinksParsedData.dataProducts[idx];
         expect(arg[0]).to.equal(source.title);
       });
+    });
+
+    it('renders no sources correctly', function () {
+      widget.activate(beehive);
+      var props = {
+        fullTextSources: [],
+        dataProducts: [],
+        isLoading: true
+      };
+
+      var wrapNoProps = Enzyme.shallow(React.createElement(App));
+      var wrapWithProps = Enzyme.shallow(React.createElement(App, props));
     });
 
     it('renders Loading component correctly', function () {

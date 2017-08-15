@@ -47,7 +47,6 @@ define([
       return null;
     }
 
-
     var links = sources.map(function (source) {
       var onClick = props.onLinkClick.bind(this, source.title);
       return (
