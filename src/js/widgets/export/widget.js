@@ -18,8 +18,8 @@ define([
     'module',
     'js/components/api_targets',
     'js/mixins/dependon',
-    'clipboard'
-
+    'clipboard',
+    'filesaver'
   ],
   function(
     Marionette,
