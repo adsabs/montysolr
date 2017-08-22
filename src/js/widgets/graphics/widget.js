@@ -68,8 +68,7 @@ define([
       else {
         return {sampleGraphic : undefined};
       }
-    },
-
+    }
   });
 
 
@@ -154,6 +153,12 @@ define([
         var graphics = {};
         _.each(response.get("figures"), function(dict){
           graphics[dict.figure_label] = dict.images[0];
+
+          // check for interactive graphics
+          if ('interactive' === dict['figure_type']) {
+            graphics[dict.figure_label].interactive = true;
+          }
+
         },this);
 
       this.model.set({graphics : graphics, linkSentence : response.get("header")});

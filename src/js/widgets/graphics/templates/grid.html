@@ -12,9 +12,12 @@
     <p><i>{{{linkSentence}}}</i></p>
     {{#each graphics}}
     <a href="{{this.highres}}" target="_blank">
-
         <div class="grid-cell">
-
+            {{#if this.interactive}}
+            <div class="graphics_ribbon--interactive">
+                <span>INTERACTIVE</span>
+            </div>
+            {{/if}}
             <figure>
                 <img src="{{this.thumbnail}}" alt="{{@key}}" class="grid-cell__image"/>
             </figure>
