@@ -761,7 +761,11 @@ define([
 
     closeWidget: function () {
       this.reset();
-      this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+
+      // only redirect if we are allowed to do so
+      if (this.componentParams && this.componentParams.allowRedirect) {
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+      }
     },
 
     //load a large query including RIQ/indices/Tori
@@ -1203,12 +1207,22 @@ define([
 
       this.containerModel.set("loading", false);
 
-        //how is the json response formed? need to figure out why attributes is there
-        response = response.attributes ? response.attributes : response;
-        // for now, metrics api returns errors as 200 messages, so we have to detect it
-        if ((response.Error && response.Error.indexOf('Unable to get results') > -1) || (response.status == 500)) {
-          this.closeWidget();
-          this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({
+      //how is the json response formed? need to figure out why attributes is there
+      response = response.attributes ? response.attributes : response;
+
+      // the response might contain an error
+      if ((response.Error && response.Error.indexOf('Unable to get results') > -1) || (response.status === 500)) {
+        this.closeWidget();
+
+        var pubsub = null;
+        try {
+          pubsub = this.getPubSub();
+        } catch (e) {
+          console.error(e);
+        }
+
+        if (pubsub) {
+          pubsub.publish(pubsub.ALERT, new ApiFeedback({
             code: ApiFeedback.CODES.ALERT,
             msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please try with different search parameters.',
             modal: true

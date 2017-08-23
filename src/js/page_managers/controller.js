@@ -1,4 +1,5 @@
 define([
+    'jquery',
     'underscore',
     "marionette",
     "hbs!./templates/results-page-layout",
@@ -8,7 +9,7 @@ define([
     './view_mixin',
     'js/mixins/dependon'
   ],
-  function (_,
+  function ($, _,
             Marionette,
             pageTemplate,
             controlRowTemplate,
@@ -95,6 +96,12 @@ define([
               widget.assemble(app);
             }
 
+            // in case the user passed data params on the dom element,
+            // create props on the widget
+            _.assign(widget, {
+              componentParams: $(widgetDom).data()
+            });
+
             //reducing unneccessary rendering
             if (widget.getEl){
               el = widget.getEl()
@@ -158,6 +165,12 @@ define([
                   return; // skip widgets that are there only for debugging
                 }
                 $wcontainer.append(widget.el ? widget.el : widget.view.el);
+
+                // set data props from the container on the widget
+                _.assign(widget, {
+                  componentParams: $wcontainer.data()
+                });
+
                 try {
                   self.widgets[widgetName].triggerMethod('show');
                 }
@@ -207,7 +220,13 @@ define([
             var widget = self.widgets[widgetName];
             //don't call render each time or else we
             //would have to re-delegate widget events
-            self.view.$el.find('[data-widget="' + widgetName + '"]').append(widget.el ? widget.el : widget.view.el);
+            var $wcontainer = self.view.$el.find('[data-widget="' + widgetName + '"]');
+            $wcontainer.append(widget.el ? widget.el : widget.view.el);
+
+            // set data props from the container on the widget
+            _.assign(widget, {
+              componentParams: $wcontainer.data()
+            });
             self.widgets[widgetName].triggerMethod('show');
         });
         return this.view;
