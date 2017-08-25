@@ -1,11 +1,11 @@
-// Main config file for the Discovery application
+  // Main config file for the Discovery application
 require.config({
   // Initialize the application with the main application file or if we run
   // as a test, then load the test unittests
   deps: (function(){
 
-    if (typeof window !== "undefined" && window.bbbTest){
-      return  [window.bbbTest.testLoader ? window.bbbTest.testLoader : '../test/test-loader' ];
+    if (typeof window !== "undefined" && window.skipMain){
+      return [];
     }
     else {
       return [ 'js/apps/discovery/main'];

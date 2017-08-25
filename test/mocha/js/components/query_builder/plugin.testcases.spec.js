@@ -8,7 +8,7 @@ define(['underscore',
 
     describe("UI QueryBuilder - using live server (query_builder/plugin.testcases.spec.js)", function () {
 
-      this.pending = !window.bbbTest.serverReady;
+      // this.pending = !window.bbbTest.serverReady;
 
       var minsub, queryBuilder;
       beforeEach(function(done) {

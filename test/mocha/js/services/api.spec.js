@@ -334,7 +334,7 @@ define([
 
   describe("API Service - using live server (api.spec.js)", function() {
 
-    this.pending = !window.bbbTest.serverReady;
+    // this.pending = !window.bbbTest.serverReady;
 
     it("should retrieve data from server using GET and POST (default)", function(done) {
       var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit

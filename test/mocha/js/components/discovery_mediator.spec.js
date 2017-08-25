@@ -8,7 +8,7 @@ define([
   'js/components/api_response',
   'js/wraps/discovery_mediator',
   'js/components/feedback_mediator',
-  '../../widgets/test_json/test1',
+  '../widgets/test_json/test1',
   'js/bugutils/minimal_pubsub',
   'js/mixins/discovery_bootstrap',
   'js/modules/orcid/module',

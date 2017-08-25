@@ -269,55 +269,5 @@ define(['backbone', 'marionette', 'jquery', 'js/widgets/abstract/widget',
 
 
       });
-
-
-      it("should populate the document head with  highwire-style metatags + trigger events to inform citation managers of update", function(){
-        var aw = new AbstractWidget();
-        aw.activate(minsub.beehive.getHardenedInstance());
-        var $w = aw.render().$el;
-        $("#test").append($w);
-        $("head [data-highwire]").remove();
-
-
-        //check that bbb fired the correct events to contact reference manager
-        var fired = false;
-        document.addEventListener('ZoteroItemUpdated', function(){fired = true}, false);
-
-        minsub.publish(minsub.DISPLAY_DOCUMENTS, minsub.createQuery({'q': 'bibcode:foo'}));
-
-        expect(fired).to.be.true;
-
-        expect(
-            $("head [data-highwire]")
-            .map(function(ind, el){return {name : el.name, content : el.content} })
-            .get()
-        ).to.eql([
-          {
-            "name": "citation_title",
-            "content": "Planetary Ephemerides"
-          },
-          {
-            "name": "citation_author",
-            "content": "Lieske, J. H."
-          },
-          {
-            "name": "citation_author",
-            "content": "Standish, E. M."
-          },
-          {
-            "name": "citation_publication_date",
-            "content": "1981-00-00"
-          },
-          {
-            "name": "citation_journal_title",
-            "content": "IAU Colloq. 56: Reference Coordinate Systems for Earth Dynamics"
-          }
-        ]);
-
-      });
-
     });
-
-
-
   });

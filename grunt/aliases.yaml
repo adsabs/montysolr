@@ -58,27 +58,27 @@ test: 'test:once'
   description: 'Run tests using the local web server, re-run on changes'
   tasks:
     - 'env:dev'
-    - 'watch:web_testing'
+    - 'watch:mocha-runner:all'
 
 'test:once':
   description: 'Run tests once, without watching for changes'
   tasks:
     - 'env:dev'
     - 'express:dev'
-    - 'mocha_phantomjs:web_testing'
+    - 'mocha-runner:all'
 
 'test:sandbox':
   description: 'Test the sandbox, re-run on changes'
   tasks:
     - 'env:dev'
-    - 'watch:sandbox_testing'
+    - 'watch:mocha-runner:all'
 
 'test:release':
   description: 'Run tests in a release environment, on local web server'
   tasks:
     - 'env:release'
     - 'express:dev'
-    - 'mocha_phantomjs:web_testing'
+    - 'mocha-runner:all'
 
 'test:server':
   description: 'Runs the test server only'
@@ -91,7 +91,7 @@ test: 'test:once'
   description: 'Test locally, watch for changes'
   tasks:
     - 'env:dev'
-    - 'watch:local_testing'
+    - 'watch:mocha-runner:all'
 
 coverage:
   description: 'Generate the test coverage report'
