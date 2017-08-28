@@ -200,11 +200,10 @@ define([
 
               var hl = highlights[d.id];
               var finalList = [];
+
               //adding abstract,title, etc highlights to one big list
               _.each(_.pairs(hl), function (pair) {
-                var str = (pair[1].length) ? pair[1][0] : '';
-                str = $('<d>' + str + '</d>').text();
-                finalList = finalList.concat([str]);
+                finalList = finalList.concat(pair[1]);
               });
 
               if (finalList.length === 1 && finalList[0].trim() === "") {
@@ -229,7 +228,7 @@ define([
           if (d.author) {
             var l = shownAuthors.length - 1;
             d.authorFormatted = _.map(shownAuthors, function (d, i) {
-              if (i == l || l == 0) {
+              if (i === l || l === 0) {
                 return d; //last one, or only one
               } else {
                 return d + ";";
