@@ -27,7 +27,7 @@ module.exports = function (grunt) {
     // support grepping for tests, this is passed to mocha
     var grep = grunt.option('grep');
     if (grep) {
-      _.merge({}, options.args, { grep: grep });
+      options.args = _.merge({}, options.args, { grep: grep });
     }
 
     // stringify the args passed in as options
