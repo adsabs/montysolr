@@ -49,7 +49,11 @@ define([
         var redirect_uri = location.origin + location.pathname;
         var self = this;
         var defer = $.Deferred();
-        api.request(new ApiRequest({
+
+        // if token expired, make a _request
+        var request = options.tokenRefresh ? '_request' : 'request';
+
+        api[request](new ApiRequest({
             query: new ApiQuery({redirect_uri: redirect_uri}),
             target: this.bootstrapUrls ? this.bootstrapUrls[0] : '/accounts/bootstrap'}),
           {

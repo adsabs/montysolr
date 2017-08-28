@@ -200,7 +200,7 @@ define([
       //fewer than 2 minutes before token expires
       if (difference > -2 ){
         var d = $.Deferred();
-        this.getApiAccess().done(function(){
+        this.getApiAccess({ tokenRefresh: true }).done(function(){
           d.resolve(that._request(request, options));
         });
         return d.promise();
