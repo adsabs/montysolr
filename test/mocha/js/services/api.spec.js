@@ -228,6 +228,30 @@ define([
 
     });
 
+    it("should correctly reset the token if it has expired", function () {
+      var api = new Api({url: '/api/1'});
+      sinon.stub(api, 'getBeeHive', function () {
+        return {
+          getService: function () {
+            return api;
+          }
+        };
+      });
+      api.access_token = 'foo';
+      api.expire_in = Date.now();
+
+      var sendRequest = function () {
+        api.request(new ApiRequest({
+          target: '/test',
+          query: new ApiQuery({ q: 'foo' }),
+          sender: 'woo'
+        }));
+      };
+
+      expect(sendRequest).to.not.throw('Maximum call stack size exceeded');
+      api.getBeeHive.restore();
+    });
+
     describe("Testing request options", function() {
 
       var ajaxSpy;
