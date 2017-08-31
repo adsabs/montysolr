@@ -102,7 +102,7 @@ define([
          return val;
        });
 
-       datestring = "[" + dates[1] + "-" + dates[0] + "-0 TO " + dates[3] + "-" + dates[2] + "-0]";
+       datestring = "[" + dates[1] + "-" + dates[0] + " TO " + dates[3] + "-" + dates[2] + "]";
        qDict.q.push("pubdate:" + datestring);
 
       }
