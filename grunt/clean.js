@@ -13,5 +13,8 @@ module.exports = {
       './bower_components',
       'test/reports'
     ]
+  },
+  coverage: {
+    src: ['test/coverage']
   }
 };

@@ -21,9 +21,9 @@ require.config({
   // see: http://requirejs.org/docs/api.html#config-moduleconfig
   config: {
 
-  'es6': {
-              'modules': undefined,
-      },
+    'es6': {
+      modules: undefined
+    },
 
     'js/widgets/export/widget': {
       url: 'http://adsabs-classic-exports-service.elasticbeanstalk.com',
@@ -203,6 +203,7 @@ require.config({
     'jquery-ui' : '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min',
     'marionette' : 'libs/marionette/backbone.marionette',
     'mathjax' : '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML&amp;delayStartupUntil=configured',
+    'mocha': 'libs/mocha/mocha',
     'moment' : 'libs/momentjs/moment',
     'persist-js': 'libs/persist-js/src/persist',
     'react' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-with-addons.min',
@@ -218,11 +219,10 @@ require.config({
 
   },
 
-  hbs : {
+  hbs: {
     'templateExtension' : 'html',
     helpers: false
   },
-
 
   shim: {
 
@@ -230,7 +230,9 @@ require.config({
       deps: ["backbone"],
       exports: "Backbone"
     },
-
+    'mocha': {
+      exports: 'mocha'
+    },
     'backbone.stickit' : {
       deps : ['backbone']
     },

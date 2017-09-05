@@ -8,20 +8,12 @@
 </head>
   <body>
     <div id="mocha"></div>
-    <script src="../../bower_components/mocha/mocha.js"></script>
     <script src="../../libs/requirejs/require.js"></script>
     <script>
 
       // this forces the require config to not start the bumblebee application
       window.skipMain = true;
 
-      // init phantomjs-mocha, if running headlessly
-      if (typeof window.initMochaPhantomJS === 'function') {
-          window.initMochaPhantomJS();
-      }
-
-      // mocha settings
-      mocha.setup('bdd');
     </script>
     <script src="../../discovery.config.js"></script>
     <script>
@@ -35,52 +27,78 @@
 
           // get chai and sinon which will be turned into globals in the tests
           [
+            'mocha',
             'chai',
             'sinon',
             '../../test/mocha/suites',
-            '../../bower_components/es5-shim/es5-shim.js'
-          ], function (chai, sinon, suites) {
+            '../../bower_components/es5-shim/es5-shim.js',
+            '../../test/coverage/mapping'
+          ], function (mocha, chai, sinon, suites) {
 
-          // check if we are running on phantomjs
-          if (typeof global.initMochaPhantomJS === 'function') {
+            // mocha settings
+            mocha.setup('bdd');
 
-            // Stop console.log from cluttering up testing output
-            global.console = {
-              info: function () {},
-              warn: function () {},
-              log: function () {},
-              error: function () {}
+            // check if we are running headlessly
+            if (typeof global.initMochaPhantomJS === 'function') {
+
+              // init mochaPhantomJS
+              global.initMochaPhantomJS();
+
+              // Stop console.log from cluttering up testing output
+              global.console = {
+                info: function () {},
+                warn: function () {},
+                log: function () {},
+                error: function () {}
+              };
+            }
+
+            // parse out url params, needed only to grab suite name
+            var getUrlParam = function (name) {
+              name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+              var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+              var results = regex.exec(location.search);
+              return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
             };
-          }
 
-          // parse out url params, needed only to grab suite name
-          var getUrlParam = function (name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-          };
+            // define globals
+            global.expect = chai.expect;
+            global.assert = chai.assert;
+            global.should = chai.should;
+            global.normalizeSpace = function (str) {
+              return str.replace(/\s+/g, ' ').trim();
+            };
 
-          // define globals
-          global.expect = chai.expect;
-          global.assert = chai.assert;
-          global.should = chai.should;
-          global.normalizeSpace = function (str) {
-            return str.replace(/\s+/g, ' ').trim();
-          };
+            // pull the suite name from the query string, if able
+            var suite = getUrlParam('bbbSuite') || 'discovery';
+            var coverage = getUrlParam('coverage');
 
-          // pull the suite name from the query string, if able
-          var suite = getUrlParam('bbbSuite') || 'discovery';
+            var config = {};
+            if (coverage) {
+              config.map = {
+                '*': require('../../test/coverage/mapping')
+              };
 
-          // prefix the tests with the correct path
-          var tests = suites[suite].map(function (url) {
-            return '../../test/mocha/js' + url;
-          });
+              // add namespace for persistent storage (only for coverage)
+              config.config = {
+                'test/coverage/instrument/components/persistent_storage': {
+                  namespace: 'bumblebee'
+                }
+              };
+              console.log(config);
+            }
 
-          // load and run the test runner
-          require(tests, function () {
-            mocha.run();
-          });
+            // prefix the tests with the correct path
+            var tests = suites[suite].map(function (url) {
+              return '../../test/mocha/js' + url;
+            });
+
+            // load and run the test runner
+            require(config, tests, function () {
+              mocha.run();
+
+              global.__coverage__ = this.__coverage__;
+            });
         });
       })(window);
     </script>

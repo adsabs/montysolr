@@ -8,7 +8,29 @@ module.exports = function (grunt) {
 
   var _ = require('lodash');
   var async = require('async');
+  var istanbul = require('istanbul');
   var spawn = require('child_process').spawn;
+  var INSTRUMENT_PREFIX = 'test/coverage/instrument/';
+  var COVERAGE_FILE_NAME = 'test/coverage/mapping.js';
+
+  /**
+   * Gather all the src paths and prefix them with the coverage path
+   * then generate mappings for requirejs to use to map to instrumented code
+   */
+  var storeCoveragePaths = function () {
+    var mappings = grunt.file.expand([
+      'src/js/**/*.js',
+      '!src/js/**/*.jsx.js' // exclude es6 files
+    ]).reduce(function (res, p) {
+      p = p.replace('src/', '').replace(/\.js$/, '');
+      res[p] = p.replace('js/', INSTRUMENT_PREFIX);
+      return res;
+    }, {});
+
+    var contents = 'define(' + JSON.stringify(mappings) + ');';
+
+    grunt.file.write(COVERAGE_FILE_NAME, contents);
+  };
 
   grunt.registerMultiTask('mocha-runner', 'find and run tests', function () {
     var done = this.async();
@@ -59,6 +81,11 @@ module.exports = function (grunt) {
           return u += '&' + param.key + '=' + param.value;
         }, url);
       });
+
+      // get coverage paths
+      if (options.urlParams.coverage) {
+        storeCoveragePaths();
+      }
     }
 
     // no errors to begin with
@@ -95,11 +122,13 @@ module.exports = function (grunt) {
 
     // spawn a new test for each url, output total failures
     async.eachSeries(options.urls, spawnTest, function () {
+
       if (errors > 0) {
         grunt.fail.warn(errors + ' tests failed :(\n');
       } else if (errors === 0) {
         grunt.log.writeln(errors + ' tests failed :)\n');
       }
+
       done();
     });
   });
@@ -114,6 +143,18 @@ module.exports = function (grunt) {
     all: {
       options: {
         suites: ['discovery']
+      }
+    },
+    coverage: {
+      options: {
+        suites: ['discovery'],
+        urlParams: { coverage: true },
+        args: {
+          ignoreResourceErrors: true,
+          timeout: 10000,
+          hooks: '../../grunt/config/coverage-hook.js'
+        },
+        htmlReport: false
       }
     }
   };
