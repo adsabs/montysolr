@@ -698,11 +698,11 @@ define([
     signalShowAll: function () {
       this.$(".show-all").html('<i class="icon-loading"/>&nbsp;&nbsp;' + this.$(".show-all").html());
       this.trigger('show-all');
-      },
+    },
 
-      modelEvents : {
-        change : 'render'
-      },
+    modelEvents : {
+      change : 'render'
+    },
 
     regions: {
       papersGraph: "#papers .metrics-graph",
@@ -752,7 +752,7 @@ define([
       ContainerView: ContainerView
     },
 
-    activate : function(beehive){
+    activate: function(beehive){
       this.setBeeHive(beehive);
       _.bindAll(this, "setCurrentQuery", "processMetrics", "checkIfSimpleRequired");
       var pubsub = beehive.getService('PubSub');
@@ -761,7 +761,11 @@ define([
 
     closeWidget: function () {
       this.reset();
-      this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+
+      // only redirect if we are allowed to do so
+      if (this.componentParams && this.componentParams.allowRedirect) {
+        this.getPubSub().publish(this.getPubSub().NAVIGATE, "results-page");
+      }
     },
 
     //load a large query including RIQ/indices/Tori
@@ -852,7 +856,7 @@ define([
       toriIndex: [indicesData.total["tori"], indicesData.refereed["tori"]],
       riqIndex: [indicesData.total["riq"], indicesData.refereed["riq"]],
       read10Index: [indicesData.total["read10"], indicesData.refereed["read10"]]
-      }
+      };
 
       //keep to 2 decimal places
       _.each(data, function(table,k){
@@ -1077,10 +1081,8 @@ define([
 
       return this._executeSearch(query).then(function(apiResponse){
          var citationCount = apiResponse.get('stats.stats_fields.citation_count.sum');
-         var simple = citationCount > 50000 ? true : false;
-         return simple
+         return citationCount > 50000
       });
-
     },
 
     //just get indicators
@@ -1146,29 +1148,31 @@ define([
       options = options || {};
      
     /*
-            this function returns a promise
-            at the moment the promise is only used by
-            the abstract page metrics widget that shows metrics
-            for 1 paper
-          */
+      this function returns a promise
+      at the moment the promise is only used by
+      the abstract page metrics widget that shows metrics
+      for 1 paper
+    */
 
     var d = $.Deferred();
 
     function _getMetrics(simple) {
 
-      var pubsub = this.getPubSub(),
-        options = {
-          type: "POST",
-          contentType: "application/json"
-        };
+      var pubsub = this.getPubSub();
+      var options = {
+        type: "POST",
+        contentType: "application/json"
+      };
 
       var query = new ApiQuery({
-        bibcodes : bibcodes,
+        bibcodes : bibcodes
       });
 
-      if (simple) query.set({
-        types: ['simple']
-      });
+      if (simple) {
+        query.set({
+          types: ['simple']
+        });
+      }
 
       var request = new ApiRequest({
         target: ApiTargets.SERVICE_METRICS,
@@ -1186,7 +1190,6 @@ define([
 
       pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, onResponse);
       pubsub.publish(pubsub.EXECUTE_REQUEST, request);
-
     }
 
     _getMetrics = _getMetrics.bind(this);
@@ -1198,26 +1201,36 @@ define([
     }
 
     return d.promise();
-
   },
-
 
     processMetrics : function (response){
 
       this.containerModel.set("loading", false);
 
-        //how is the json response formed? need to figure out why attributes is there
-        response = response.attributes ? response.attributes : response;
-        // for now, metrics api returns errors as 200 messages, so we have to detect it
-        if ((response.Error && response.Error.indexOf('Unable to get results') > -1) || (response.status == 500)) {
-          this.closeWidget();
-          this.getPubSub().publish(this.getPubSub().ALERT, new ApiFeedback({
+      //how is the json response formed? need to figure out why attributes is there
+      response = response.attributes ? response.attributes : response;
+
+      // the response might contain an error
+      if ((response.Error && response.Error.indexOf('Unable to get results') > -1) || (response.status === 500)) {
+        this.closeWidget();
+
+        var pubsub = null;
+        try {
+          pubsub = this.getPubSub();
+        } catch (e) {
+          console.error(e);
+        }
+
+        if (pubsub) {
+          pubsub.publish(pubsub.ALERT, new ApiFeedback({
             code: ApiFeedback.CODES.ALERT,
             msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please try with different search parameters.',
             modal: true
           }));
-          return;
         }
+        return;
+      }
+
       if (response["basic stats"]["number of papers"] === 1){
         this.createTableViews(response, 1);
         this.createGraphViewsForOnePaper(response);
@@ -1250,20 +1263,20 @@ define([
       return defer;
     },
 
-    renderWidgetForListOfBibcodes : function(bibcodes){
+    renderWidgetForListOfBibcodes : function(bibcodes) {
       this.reset();
 
       // let container view know how many bibcodes we have
       this.containerModel.set({
-        numFound : bibcodes.length,
-        loading : true
+        numFound: bibcodes.length,
+        loading: true
       });
       /*
-        for now, library metrics always show everything (simple = false).
-        If this changed in the future, the checkIfSimpleRequired function would need to
-        be refactored to create a bigquery, then send the qid to execute_query
+       for now, library metrics always show everything (simple = false).
+       If this changed in the future, the checkIfSimpleRequired function would need to
+       be refactored to create a bigquery, then send the qid to execute_query
        */
-      this.getMetrics(bibcodes, {simple : false});
+      this.getMetrics(bibcodes, {simple: false});
     }
 
   });
