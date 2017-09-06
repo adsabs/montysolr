@@ -14,8 +14,8 @@ define([
     'js/components/api_query',
     'js/components/api_request',
     'js/components/api_targets',
-    'hbs!./../../../404',
-    'hbs!./templates/orcid-modal-template'
+    'hbs!404',
+    'hbs!js/apps/discovery/templates/orcid-modal-template'
   ],
 
   function (

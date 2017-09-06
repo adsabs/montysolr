@@ -3,8 +3,8 @@ define([
   'marionette',
   'js/widgets/base/base_widget',
   'js/components/api_request',
-  'hbs!./templates/container',
-  'hbs!./templates/tooltip',
+  'hbs!js/widgets/bubble_chart/templates/container',
+  'hbs!js/widgets/bubble_chart/templates/tooltip',
   'js/components/api_targets',
   "js/components/api_query_updater",
   "js/components/api_query"

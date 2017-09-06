@@ -1,8 +1,8 @@
 
 
 define(['./base_graph',
-    'hbs!./templates/h-index-graph-legend',
-    'hbs!./templates/h-index-slider-window',
+    'hbs!js/widgets/facet/graph-facet/templates/h-index-graph-legend',
+    'hbs!js/widgets/facet/graph-facet/templates/h-index-slider-window',
     'marionette'
   ],
 

@@ -1,7 +1,7 @@
 
 define([
     'marionette',
-  'hbs!./templates/modal_template',
+  'hbs!js/widgets/alerts/templates/modal_template'
 ], function(
     Marionette,
     ModalTemplate

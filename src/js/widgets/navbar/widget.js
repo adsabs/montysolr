@@ -1,14 +1,13 @@
 define([
   'marionette',
   'js/widgets/base/base_widget',
-  'hbs!./template/navbar',
-  'hbs!./template/feedback',
+  'hbs!js/widgets/navbar/template/navbar',
+  'hbs!js/widgets/navbar/template/feedback',
   'js/components/api_query_updater',
   'js/components/api_query',
   'js/components/api_request',
   'js/components/api_targets',
   'bootstrap'
-
 ], function (
   Marionette,
   BaseWidget,

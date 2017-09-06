@@ -1,8 +1,8 @@
 define([
   'js/page_managers/toc_controller',
   'js/page_managers/three_column_view',
-  'hbs!./home-page-layout',
-  'hbs!./home-nav'
+  'hbs!js/wraps/home_page_manager/home-page-layout',
+  'hbs!js/wraps/home_page_manager/home-nav'
 ], function (
   PageManagerController,
   PageManagerView,

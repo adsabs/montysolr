@@ -8,7 +8,6 @@ module.exports = function (grunt) {
 
   var _ = require('lodash');
   var async = require('async');
-  var istanbul = require('istanbul');
   var spawn = require('child_process').spawn;
   var INSTRUMENT_PREFIX = 'test/coverage/instrument/';
   var COVERAGE_FILE_NAME = 'test/coverage/mapping.js';
