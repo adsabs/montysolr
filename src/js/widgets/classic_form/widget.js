@@ -123,9 +123,43 @@ define([
         if (val !== ""){
           logic = $t.find(".logic-group input:checked").val();
           field = $t.data("field");
-          if (logic == "BOOLEAN"){
-            val = val.replace("\n", " ");
-            qDict.q.push(field + ":(" + val + ")");
+          if (logic === "BOOLEAN"){
+
+            // create a new updater object
+            var updater = new ApiQueryUpdater(' ');
+
+            // expecting input to be on separate lines, with each proceeded by
+            // a + or - symbol.
+            // split the lines
+            var lines = val.split(/(?:\n)/);
+
+            // trim all the lines
+            lines = $.map(lines, $.trim);
+
+            /*
+              transform each of the lines in a string
+              +blah -> +"blah"
+              -blah -> -"blah"
+              blah -> +"blah"
+            */
+            val = lines.reduce(function (res, line) {
+
+              // test the first character for presence of (+ or -)
+              if (/[+\-]/.test(line[0])) {
+
+                // +blah -> +"blah"
+                line = line[0] + updater.quoteIfNecessary(line.slice(1)) + ' ';
+              } else {
+
+                // blah -> +"blah"
+                line = '+' + updater.quoteIfNecessary(line) + ' ';
+              }
+
+              // add the built string to the result
+              return res += line;
+            }, '');
+
+            qDict.q.push(field + ":(" + val.trim() + ")");
           }
           else {
             logic = " " + logic + " ";

@@ -64,16 +64,16 @@ define([
 
 
       expect(publishSpy.args[0][2].toJSON()).to.eql({
-          "q": [
-            "property:refereed property:article pubdate:[2010-10-0 TO 9999-12-0] author:(\"Accomazzi,a\" AND \"Kurtz,M\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj OR mnras)"
-          ],
-          "sort": [
-            "date desc"
-          ],
-          "fq": [
-            "database:(astronomy OR physics)"
-          ]
-});
+        "q": [
+          "property:refereed property:article pubdate:[2010-10-0 TO 9999-12-0] author:(\"Accomazzi,a\" AND \"Kurtz,M\") title:(star OR planet OR \"gliese 581\") abs:(-\"hawaii star\") bibstem:(apj OR mnras)"
+        ],
+        "sort": [
+          "date desc"
+        ],
+        "fq": [
+          "database:(astronomy OR physics)"
+        ]
+      });
 
       //one more
 
@@ -101,7 +101,7 @@ define([
 
       expect(publishSpy.args[1][2].toJSON()).to.eql({
         "q": [
-          "property:refereed pubdate:[2010-10-0 TO 2012-12-0] author:(\"Accomazzi,a\") title:(star OR planet OR \"gliese 581\") abs:(-hawaii star) bibstem:(apj)"
+          "property:refereed pubdate:[2010-10-0 TO 2012-12-0] author:(\"Accomazzi,a\") title:(star OR planet OR \"gliese 581\") abs:(-\"hawaii star\") bibstem:(apj)"
         ],
         "sort": [
           "date desc"
@@ -111,11 +111,84 @@ define([
         ]
       });
 
-    })
+    });
 
+    it('Boolean logic text area correctly parses the input', function () {
+      var w = new ClassicForm();
 
+      var minsub = new (MinimalPubSub.extend({
+        request: function () {
+          return "";
+        }
+      }))({verbose: false});
 
+      var publishSpy = sinon.spy();
+
+      minsub.beehive.getService("PubSub").publish = publishSpy;
+      w.activate(minsub.beehive.getHardenedInstance());
+
+      $("#test").append(w.render().el);
+
+      w.onShow();
+
+      var setLogic = function (field, logic) {
+        w.view.$("div[data-field=" + field + "] input[name=" + field + "-logic]").val(logic);
+      };
+
+      var authorInput = function (str) {
+        if (Array.isArray(str)) {
+          str = str.join('\n');
+        }
+        w.view.$("div[data-field=author]").find("textarea").val(str);
+        w.view.$("div[data-field=author]").find("textarea").trigger("input");
+      };
+
+      var submitForm = function () {
+        w.view.$("button[type=submit]").eq(0).click();
+      };
+
+      // try simple combination
+      authorInput("-Accomazzi, a\n+author2\n-author3\nauthor4");
+      setLogic('author', 'BOOLEAN');
+      submitForm();
+
+      expect(publishSpy.args[0][2].toJSON()).to.eql({
+        "q": [
+          "author:(-\"Accomazzi, a\" +author2 -author3 +author4)"
+        ],
+        "sort": [
+          "date desc"
+        ],
+        "fq": [
+          "database:astronomy"
+        ]
+      });
+
+      w.view.render();
+
+      // try some crappy input
+      authorInput([
+        't e s t',
+        '    testing    ',
+        ' - test ',
+        'test',
+        '+testing',
+        '-testing'
+      ]);
+      setLogic('author', 'BOOLEAN');
+      submitForm();
+
+      expect(publishSpy.args[1][2].toJSON()).to.eql({
+        "q": [
+          "author:(+\"t e s t\" +testing -\" test\" +test +testing -testing)"
+        ],
+        "sort": [
+          "date desc"
+        ],
+        "fq": [
+          "database:astronomy"
+        ]
+      });
+    });
   });
-
-
-})
+});
