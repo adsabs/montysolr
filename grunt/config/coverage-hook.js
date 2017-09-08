@@ -22,6 +22,7 @@ var saveCoverage = function (page) {
 
   try {
     fs.write(COVERAGE_FILE, JSON.stringify(coverage), 'w');
+    console.log('Coverage File Written');
   } catch (e) {
     console.log('Unable to write to file...');
     console.error(e);

@@ -70,7 +70,6 @@
 
             // pull the suite name from the query string, if able
             var suite = getUrlParam('bbbSuite') || 'discovery';
-            var coverage = getUrlParam('coverage');
 
             // prefix the tests with the correct path
             var tests = suites[suite].map(function (url) {
@@ -88,12 +87,16 @@
               });
             };
 
-            if (coverage) {
+            if (getUrlParam('coverage')) {
               require([
                 '../../test/coverage/mapping'
               ], function (mapping) {
+
+                // start coverage tests
                 startTests({
-                  '*': mapping,
+                  map: {
+                    '*': mapping
+                  },
                   config: {
                     'test/coverage/instrument/components/persistent_storage': {
                       namespace: 'bumblebee'
@@ -103,6 +106,8 @@
               });
               return;
             }
+
+            // start normal tests
             startTests();
         });
       })(window);
