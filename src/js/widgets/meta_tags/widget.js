@@ -106,7 +106,17 @@ define([
       }
 
       // Update the <head> with the meta tags
-      $('head').append(metatagsTemplate(data));
+      $('head').append(function () {
+        return $(metatagsTemplate(data)).filter(function () {
+          var name = $(this).attr('name');
+          if (name) {
+
+            // check to see if the tag already exists
+            return !$('head>meta[name="' + name + '"]').length;
+          }
+          return true;
+        });
+      });
 
       // Let Zotero know things have updated
       var ev = document.createEvent('HTMLEvents');
