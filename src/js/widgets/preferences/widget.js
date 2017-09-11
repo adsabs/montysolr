@@ -4,7 +4,7 @@ define([
   "./views/openurl",
   "./views/orcid",
   "js/components/api_feedback",
-  "hbs!./templates/orcid-form-submit-modal"
+  "hbs!js/widgets/preferences/templates/orcid-form-submit-modal"
 ], function (
   Marionette,
   BaseWidget,

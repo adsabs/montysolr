@@ -1,12 +1,10 @@
 define([
   "marionette",
-  "hbs!../templates/libraries-list-container",
-  "hbs!../templates/library-item",
-  "hbs!../templates/no-libraries",
-  "hbs!../templates/loading-libraries",
+  "hbs!js/widgets/libraries_all/templates/libraries-list-container",
+  "hbs!js/widgets/libraries_all/templates/library-item",
+  "hbs!js/widgets/libraries_all/templates/no-libraries",
+  "hbs!js/widgets/libraries_all/templates/loading-libraries",
   "moment"
-
-
 ], function(
   Marionette,
   LibraryContainer,

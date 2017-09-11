@@ -96,31 +96,11 @@ test: 'test:once'
 coverage:
   description: 'Generate the test coverage report'
   tasks:
-    - 'env:dev'
-    - 'express:dev'
-    - 'blanket_mocha:full'
-
-testfunc: 'testfunc:local'
-
-'testfunc:local':
-  description: 'Run the local functional tests'
-  tasks:
-  - 'env:dev'
-  - 'sass'
-  - 'autoprefixer'
-  - 'exec:git_describe'
-  - 'express:dev'
-  - 'intern:local'
-
-'testfunc:remote':
-  description: 'Run the remote functional tests'
-  tasks:
-  - 'env:dev'
-  - 'sass'
-  - 'autoprefixer'
-  - 'exec:git_describe'
-  - 'express:dev'
-  - 'intern:remote'
+    - 'clean:coverage'
+    - 'exec:nyc-instrument'
+    - 'mocha-runner:coverage'
+    - 'coverage-report:coveralls'
+    - 'exec:coveralls-report'
 
 sauce:
   description: 'Run the SauceLabs tests'

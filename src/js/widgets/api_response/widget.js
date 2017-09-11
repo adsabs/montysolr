@@ -13,7 +13,7 @@ define([
     'backbone',
     'marionette',
     'js/components/api_response',
-    'hbs!./templates/widget-view',
+    'hbs!js/widgets/api_response/templates/widget-view',
     'js/components/pubsub_events',
     'js/mixins/dependon'
   ],

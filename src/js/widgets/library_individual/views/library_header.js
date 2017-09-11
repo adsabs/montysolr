@@ -1,6 +1,6 @@
 define([
   "marionette",
-  "hbs!../templates/library-header",
+  "hbs!js/widgets/library_individual/templates/library-header",
   "moment",
   "bootstrap"
 

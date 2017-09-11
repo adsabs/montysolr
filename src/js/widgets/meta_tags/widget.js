@@ -3,7 +3,7 @@ define([
   'backbone',
   'underscore',
   'js/widgets/base/base_widget',
-  'hbs!./template/metatags',
+  'hbs!js/widgets/meta_tags/template/metatags',
   'js/mixins/link_generator_mixin'
 ], function ($, Backbone, _, BaseWidget, metatagsTemplate, LinkGenerator) {
 

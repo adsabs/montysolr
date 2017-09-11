@@ -8,12 +8,12 @@ define([
     'underscore',
     'cache',
     'js/widgets/base/base_widget',
-    'hbs!./templates/abstract_template',
+    'hbs!js/widgets/abstract/templates/abstract_template',
     'js/components/api_query',
     'js/mixins/link_generator_mixin',
     'js/mixins/papers_utils',
     'mathjax',
-    'bootstrap',
+    'bootstrap'
   ],
   function (
     Marionette,

@@ -2,6 +2,7 @@ bumblebee
 =========
 
 [![Build Status](https://travis-ci.org/adsabs/bumblebee.svg?branch=master)](https://travis-ci.org/adsabs/bumblebee)
+[![Coverage Status](https://coveralls.io/repos/github/adsabs/bumblebee/badge.svg?branch=fix-code-coverage)](https://coveralls.io/github/adsabs/bumblebee?branch=fix-code-coverage)
 
 Bumblebee is a platform for building UI interface(s) - it was designed for Astrophysics Data System (https://ui.adsabs.harvard.edu) and its API.
 

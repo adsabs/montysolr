@@ -4,7 +4,7 @@ define([
   'js/components/api_targets',
   'js/components/api_request',
   'js/widgets/base/base_widget',
-  'hbs!./templates/recommender_template',
+  'hbs!js/widgets/recommender/templates/recommender_template',
   'bootstrap',
   'analytics'
 ], function(

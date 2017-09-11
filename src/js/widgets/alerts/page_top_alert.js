@@ -1,6 +1,6 @@
 define([
     'marionette',
-    'hbs!./templates/page_top_alert'
+    'hbs!js/widgets/alerts/templates/page_top_alert'
 ], function(
     Marionette,
     BannerTemplate
