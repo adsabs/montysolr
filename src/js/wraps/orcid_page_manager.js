@@ -1,7 +1,7 @@
 define([
   'js/page_managers/controller',
   'js/page_managers/one_column_view',
-  'hbs!./templates/orcid-page-layout'
+  'hbs!js/wraps/templates/orcid-page-layout'
 ], function (
   PageManagerController,
   PageManagerView,

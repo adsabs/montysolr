@@ -11,11 +11,11 @@ define([
       'js/mixins/add_stable_index_to_collection',
       'js/mixins/link_generator_mixin',
       'js/mixins/formatter',
-      'hbs!./templates/container-template',
+      'hbs!js/modules/orcid/widget/templates/container-template',
       'js/mixins/papers_utils',
       'js/components/api_query',
       'js/components/json_response',
-      'hbs!./templates/empty-template',
+      'hbs!js/modules/orcid/widget/templates/empty-template',
       'js/modules/orcid/extension'
     ],
 

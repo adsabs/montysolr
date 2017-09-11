@@ -4,8 +4,8 @@ define([
   'js/components/api_request',
   'js/components/api_response',
   'js/components/api_query',
-  'hbs!./templates/grid',
-  'hbs!./templates/sidebar',
+  'hbs!js/widgets/graphics/templates/grid',
+  'hbs!js/widgets/graphics/templates/sidebar',
   'js/components/api_targets'
 
 

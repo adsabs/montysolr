@@ -23,5 +23,11 @@ module.exports = {
   },
   convert_enzyme: {
     cmd: "mkdir src/libs/enzyme && ./node_modules/.bin/browserify --standalone enzyme -x 'react/addons' -x 'react/lib/ReactContext' -x 'react/lib/ExecutionEnvironment' node_modules/enzyme/build/index.js > src/libs/enzyme/enzyme.js"
+  },
+  'nyc-instrument': {
+    cmd: 'node_modules/.bin/nyc instrument src/js/ test/coverage/instrument'
+  },
+  'coveralls-report': {
+    cmd: 'cat test/coverage/reports/lcov/lcov.info | ./node_modules/coveralls/bin/coveralls.js'
   }
 };

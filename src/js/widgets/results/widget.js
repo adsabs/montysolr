@@ -10,7 +10,7 @@ define([
     'js/mixins/add_stable_index_to_collection',
     'js/mixins/link_generator_mixin',
     'js/mixins/formatter',
-    'hbs!./templates/container-template',
+    'hbs!js/widgets/results/templates/container-template',
     'js/mixins/papers_utils',
     'js/modules/orcid/extension',
     'js/mixins/dependon',

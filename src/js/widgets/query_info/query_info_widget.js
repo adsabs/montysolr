@@ -4,7 +4,7 @@ define(['marionette',
     'js/components/api_request',
     'js/components/api_query',
     'js/widgets/base/base_widget',
-    'hbs!./query_info_template',
+    'hbs!js/widgets/query_info/query_info_template',
     'js/mixins/formatter',
     'bootstrap',
     'js/components/api_feedback'

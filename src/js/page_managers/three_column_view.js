@@ -1,8 +1,8 @@
 define([
       "underscore",
       "marionette",
-      "hbs!./templates/results-page-layout",
-      'hbs!./templates/results-control-row',
+      "hbs!js/page_managers/templates/results-page-layout",
+      'hbs!js/page_managers/templates/results-control-row',
       'js/widgets/base/base_widget'
     ],
     function (

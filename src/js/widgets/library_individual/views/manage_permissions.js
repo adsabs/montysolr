@@ -1,7 +1,7 @@
 define([
   "marionette",
-  "hbs!../templates/manage-permissions-container",
-  "hbs!../templates/make-public",
+  "hbs!js/widgets/library_individual/templates/manage-permissions-container",
+  "hbs!js/widgets/library_individual/templates/make-public",
   "bootstrap"
 ], function(
   Marionette,
