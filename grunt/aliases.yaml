@@ -117,13 +117,14 @@ sauce:
 release:
   description: 'Build the assets and prepare for a release'
   tasks:
-    - 'setup'
     - 'clean:release'
     - 'copy:release'
     - 'compile-handlebars:index'
     - 'exec:git_describe'
     - 'string-replace:dist'
+    - 'babel:release'
     - 'requirejs:release_concatenated'
+    - 'uglify:release'
     - 'requirejs:release_css'
     - 'hash_require:js'
     - 'hash_require:css'
