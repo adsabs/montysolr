@@ -122,11 +122,23 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  // not needed; it will be taken from 'id'
 			  //", \"recid\": 100" +
 
-				", \"bibcode\": \"2014JNuM..455...10B\"" +
-				", \"alternate_bibcode\": [\"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\"]" +
-			  ", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
-				", \"identifier\": [\"arxiv:1234.5678\", \"ARXIV:hep-ph/1234\"]" +
+			  ", \"abstract\": \"all no-sky survey q'i quotient\"" +
+			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
+			  ", \"alternate_bibcode\": [\"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\"]" +
+			  ", \"alternate_title\": \"This is of the alternate\"" +
 
+			  // order and length must be the same for author,aff, email
+			  // missing value must be indicated by '-'
+			  ", \"author\": [\"t' Hooft, van X\", \"Anders, John Michael\", \"Einstein, A\"]" +
+			  ", \"author_count\": 5" +
+			  // author_facet_hier must be generated (solr doesn't modify it)
+			  ", \"author_facet_hier\": [\"0/T Hooft, V\", \"1/T Hooft, V/T Hooft, Van X\", \"0/Anders, J M\", \"1/Anders, J M/Anders, John Michael\", \"0/Einstein, A\"]" +
+			  // in the future, this can contain normalized author names
+			  ", \"author_norm\": [\"t' Hooft, van X\", \"Anders, John Michael\", \"Einstein, A\"]" +
+			  
+				", \"bibcode\": \"2014JNuM..455...10B\"" +
+				", \"bibgroup\": [\"Cfa\"]" +
+				", \"bibgroup_facet\": [\"Cfa\"]" +
 				/*
 				 * Bibstem is derived from bibcode, it is either the bibcode[4:9] OR
 				 * bibcode[4:13] when the volume information is NOT present
@@ -141,87 +153,74 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				 * are lowercased)
 				 *
 				 */
-				", \"bibstem\": [\"JNuM\", \"JNuM..455\"]" +
+				 ", \"bibstem\": [\"JNuM\", \"JNuM..455\"]" +
+				 ", \"body\": \"Some fulltext hashimoto\"" +
+				 ", \"caption\": [\"caption1 captionFoo\", \"caption2\"]" +
+				 ", \"citation\": [\"2014JNuM..455...10C\", \"2014JNuM..455...10D\"]" +
+				 ", \"cite_read_boost\": 0.52" +
+				 ", \"citation_count\": 10" +
+				 ", \"classic_factor\": 5002" +
+				 ", \"comment\": [\"comment1 commentFoo\", \"comment2\"]" +
+				 ", \"database\": [\"ASTRONOMY\", \"PHYSICS\"]" +
 
-				// order and length must be the same for author,aff, email
-				// missing value must be indicated by '-'
-				", \"author\": [\"t' Hooft, van X\", \"Anders, John Michael\", \"Einstein, A\"]" +
-				// in the future, this can contain normalized author names
-				", \"author_norm\": [\"t' Hooft, van X\", \"Anders, John Michael\", \"Einstein, A\"]" +
-
-				", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
-				", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
-
-				// author_facet_hier must be generated (solr doesn't modify it)
-				", \"author_facet_hier\": [\"0/T Hooft, V\", \"1/T Hooft, V/T Hooft, Van X\", \"0/Anders, J M\", \"1/Anders, J M/Anders, John Michael\", \"0/Einstein, A\"]" +
-				", \"author_count\": 5" +
-
-				// must be: "yyyy-MM-dd (metadata often is just: yyyy-MM|yyyy)
-				", \"pubdate\": \"2013-08-05\"" +
-				", \"year\": \"2013\"" +
-				// it is solr format for the pubdate, must be in the right format
-				// we need to add 30 minutes to every day; this allows us to search
-				// for ranges effectively; thus:
-				// 2013-08-5 -> 2013-08-05T00:30:00Z
-				// 2013-08   -> 2013-08-01T00:30:00Z
-				// 2013      -> 2013-01-01T00:30:00Z
-				", \"date\": \"2013-08-05T00:30:00Z\"" +
-
-				// Field that contains both grant ids and grant agencies.
-				", \"grant\": [\"NASA\", \"123456-78\", \"NSF-AST\", \"0618398\"]" +
-				// grant_agency/grant_id
-				", \"grant_facet_hier\": [\"0/NASA\", \"1/NASA/123456-78\"]" +
-
-				", \"read_count\": 50" +
-				", \"cite_read_boost\": 0.52" +
-
-				", \"classic_factor\": 5002" +
-				", \"citation_count\": 10" +
-				", \"simbid\": [5, 3000001]" +
-				", \"reader\": [\"abaesrwersdlfkjsd\", \"asfasdflkjsdfsldj\"]" +
-
-				", \"citation\": [\"2014JNuM..455...10C\", \"2014JNuM..455...10D\"]" +
-				", \"reference\": [\"2014JNuM..455...10R\", \"2014JNuM..455...10T\"]" +
-
-				// we actually index only the first token '2056'
-				", \"page\": [\"2056-2078\", \"55\"]" +
-				", \"eid\": \"00001\"" +
-				", \"volume\": \"l24\"" +
+				 // it is solr format for the pubdate, must be in the right format
+				 // we need to add 30 minutes to every day; this allows us to search
+				 // for ranges effectively; thus:
+				 // 2013-08-5 -> 2013-08-05T00:30:00Z
+				 // 2013-08   -> 2013-08-01T00:30:00Z
+				 // 2013      -> 2013-01-01T00:30:00Z
+        ", \"date\": \"2013-08-05T00:30:00Z\"" +
+				", \"doctype\": \"article\"" +
+				", \"doctype_facet_hier\": [\"0/Article\", \"1/Article/Book chapter\"]" +
+			  ", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
+			  ", \"eid\": \"00001\"" +
+			  ", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
+			  // Field that contains both grant ids and grant agencies.
+			  ", \"grant\": [\"NASA\", \"123456-78\", \"NSF-AST\", \"0618398\"]" +
+			  // grant_agency/grant_id
+			  ", \"grant_facet_hier\": [\"0/NASA\", \"1/NASA/123456-78\"]" +
+				", \"identifier\": [\"arxiv:1234.5678\", \"ARXIV:hep-ph/1234\"]" +
+				", \"ids_data\": [\"{whatever: here there MAST}\"]" +
 				", \"issue\": \"24i\"" +
-
-				// this list should contain normalized values
-				", \"property\": [\"Catalog\", \"Nonarticle\"]" +
-				", \"bibgroup\": [\"Cfa\"]" +
-				", \"bibgroup_facet\": [\"Cfa\"]" +
-				", \"database\": [\"ASTRONOMY\", \"PHYSICS\"]" +
-				", \"comment\": [\"comment1 commentFoo\", \"comment2\"]" +
-				", \"pubnote\": [\"pubnote1 pubnoteFoo\", \"pubnote2\"]" +
-				", \"caption\": [\"caption1 captionFoo\", \"caption2\"]" +
-				
-				", \"body\": \"Some fulltext hashimoto\"" +
-				", \"title\": \"This is of the title\"" +
-				", \"alternate_title\": \"This is of the alternate\"" +
-				", \"abstract\": \"all no-sky survey q'i quotient\"" +
 
 				", \"keyword\": [\"Classical statistical mechanics\", \"foo bar\"]" +
 				", \"keyword_norm\": [\"angular momentum\", \"89.20.Hh\"]" +
 				", \"keyword_schema\": [\"ADS\", \"PACS Codes\"]" +
 				", \"keyword_facet\": [\"angular momentum kw\"]" +
+
 				// ["{whatever: here there MAST}",
 				// {"foo": ["bar", "baz"], "one": {"two": "three"}}
-				", \"links_data\": [\"{whatever: here there MAST}\","
-														+ "\"{\\\"foo\\\": [\\\"bar\\\", \\\"baz\\\"], \\\"one\\\": {\\\"two\\\": \\\"three\\\"}}\"]" +
-				", \"ids_data\": [\"{whatever: here there MAST}\"]" +
-				", \"simbid\": [9000000, 1]" +
-				", \"simbtype\": [\"Galaxy\", \"HII Region\"]" +
+				", \"links_data\": [\"{whatever: here there MAST}\"," +
+				    "\"{\\\"foo\\\": [\\\"bar\\\", \\\"baz\\\"], \\\"one\\\": {\\\"two\\\": \\\"three\\\"}}\"]" +
+
+        ", \"nedid\": [\"X+1-5 =6\", \"foo bar\"]" +
+        ", \"nedtype\": [\"Other\", \"type2\"]" +
+        ", \"ned_object_facet_hier\": [ \"0/Other\", \"1/Other/X+1-5 =6\", \"0/type2\", \"1/type2/foo bar\"]" + 
+
 				", \"orcid_pub\": [\"1111-2222-3333-4444\", \"-\", \"0000-0002-4110-3511\"]" +
 				", \"orcid_user\": [\"-\", \"-\", \"0000-0002-4110-3511\"]" +
 				", \"orcid_other\": [\"1111-2222-3333-4444\", \"1111-2222-3333-5555\", \"-\"]" +
+
+				// we actually index only the first token '2056'
+				", \"page\": [\"2056-2078\", \"55\"]" +
+				", \"page_count\": 23" +
+				// this list should contain normalized values
+				", \"property\": [\"Catalog\", \"Nonarticle\"]" +
+				// must be: "yyyy-MM-dd (metadata often is just: yyyy-MM|yyyy)
+				", \"pubdate\": \"2013-08-05\"" +
+				", \"pubnote\": [\"pubnote1 pubnoteFoo\", \"pubnote2\"]" +
+				", \"read_count\": 50" +
+				", \"reader\": [\"abaesrwersdlfkjsd\", \"asfasdflkjsdfsldj\"]" +
+				", \"reference\": [\"2014JNuM..455...10R\", \"2014JNuM..455...10T\"]" +
 				", \"simbad_object_facet_hier\": [\"0/HII Region\", \"1/HII Region/9000000\"]" +
-        ", \"doctype\": \"article\"" +
-        ", \"doctype_facet_hier\": [\"0/Article\", \"1/Article/Book chapter\"]" +
-        
-        ", \"update_timestamp\": \"2010-03-04T22:01:32.809Z\"" +
+				", \"simbtype\": [\"Galaxy\", \"HII Region\"]" +
+				", \"simbid\": [5, 3000001]" +
+				", \"title\": \"This is of the title\"" +
+
+				", \"update_timestamp\": \"2010-03-04T22:01:32.809Z\"" +
+				", \"volume\": \"l24\"" +
+				", \"year\": \"2013\"" +
+
 			"}" +
 		"}}";
 		updateJ(json, null);
@@ -1224,5 +1223,33 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='55']",
         "//doc/int[@name='recid'][.='57']"
     );
+    
+    
+    /*
+     * nedid
+     * nedtype
+     * ned_object_facet_hier
+     */
+
+    assertQ(req("q", "nedid:\"FoO bar\""),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "nedtype:Other"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "ned_object_facet_hier:\"0/OTHER       \""),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    
+    /*
+     * page_count
+     */
+
+    assertQ(req("q", "page_count:23"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "page_count:[10 TO 24]"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
 	}
 }

@@ -649,7 +649,7 @@
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
        <str name="aqp.dateFields">date,indexstamp,update_timestamp</str>
        <str name="aqp.floatFields">cite_read_boost</str>
-       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count</str>
+       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count,page_count</str>
        <str name="aqp.authorFields">author,first_author</str>
     </lst>
   </queryParser>
