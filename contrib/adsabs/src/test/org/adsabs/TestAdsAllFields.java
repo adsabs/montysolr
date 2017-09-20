@@ -200,10 +200,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"orcid_pub\": [\"1111-2222-3333-4444\", \"-\", \"0000-0002-4110-3511\"]" +
 				", \"orcid_user\": [\"-\", \"-\", \"0000-0002-4110-3511\"]" +
 				", \"orcid_other\": [\"1111-2222-3333-4444\", \"1111-2222-3333-5555\", \"-\"]" +
-
+				", \"origin\": [\"Springer\", \"ADS Metadata\"]" +
+				
 				// we actually index only the first token '2056'
-				", \"page\": [\"2056-2078\", \"55\"]" +
+				", \"page\": [\"2056\", \"55\"]" +
 				", \"page_count\": 23" +
+				", \"page_range\": \"23-55s\"" +
 				// this list should contain normalized values
 				", \"property\": [\"Catalog\", \"Nonarticle\"]" +
 				// must be: "yyyy-MM-dd (metadata often is just: yyyy-MM|yyyy)
@@ -220,6 +222,20 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"update_timestamp\": \"2010-03-04T22:01:32.809Z\"" +
 				", \"volume\": \"l24\"" +
 				", \"year\": \"2013\"" +
+				
+				// timestamps grouped for sanity-sake
+				", \"entry_date\": \"2017-09-19T11:01:32.809000Z\"" + // iso format (2017-09-19T11:01:32.809+00:00) is NOT accepted 
+				", \"metadata_ctime\": \"2017-09-19T11:01:32.809Z\"" +   // missing 'Z' (not accepted)
+				", \"metadata_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+				", \"fulltext_ctime\": \"2017-09-19T11:01:32.809Z\"" +
+        ", \"fulltext_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+        ", \"nonbib_ctime\": \"2017-09-19T11:01:32.809Z\"" +
+        ", \"nonbib_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+        ", \"metrics_ctime\": \"2017-09-19T11:01:32.809Z\"" +
+        ", \"metrics_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+        ", \"orcid_ctime\": \"2017-09-19T11:01:32.809Z\"" +
+        ", \"orcid_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+				
 
 			"}" +
 		"}}";
@@ -530,9 +546,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * page
 		 */
 		assertQ(req("q", "page:2056"),
-				"//*[@numFound='1']",
-				"//doc/int[@name='recid'][.='100']");
-		assertQ(req("q", "page:2056-xxxxx"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']");
 		assertQ(req("q", "page:2056 AND page:55"),
@@ -999,7 +1012,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * indexstamp
 		 */
-		assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00\" TO *]"), 
+		assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00.000\" TO *]"), 
 		    "//doc/int[@name='recid'][.='100']",
         "//*[@numFound>='20']"
     );
@@ -1054,7 +1067,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * update_timestamp
 		 */
-		assertQ(req("q", "update_timestamp:[\"2010-01-04T22:01:32\" TO \"2010-08-04T22:01:32\"]"),
+		assertQ(req("q", "update_timestamp:[\"2010-01-04T22:01:32.000\" TO \"2010-08-04T22:01:32.999\"]"),
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='100']"
     );
@@ -1251,5 +1264,57 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "page_count:[10 TO 24]"),
         "//doc[1]/int[@name='recid'][.='100']"
         );
+    
+    /*
+     * page_range
+     */
+    
+    assertQ(req("q", "page_range:23"),
+        "//*[@numFound='0']" // not searchable
+        );
+    assertQ(req("q", "page:55"),
+        "//doc[1]/str[@name='page_range'][.='23-55s']"
+        );
+    
+    
+    /*
+     * entry_date + ctimes and modtimes
+     */
+    
+    assertQ(req("q", "entry_date:\"2017-09-19T11:01:32.809+00:00\""),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "entry_date:[\"2017-09-19T11:01:32.808Z\" TO \"2017-09-19T11:01:32.810Z\"]"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "entry_date:[\"2017-09-19T11:01:32.810Z\" TO \"2017-09-19T11:01:32.811Z\"]"),
+        "//*[@numFound='0']"
+        );
+    
+    for (String s: "metadata orcid fulltext nonbib metrics".split(" ")) {
+      assertQ(req("q", s + "_ctime:\"2017-09-19T11:01:32.809Z\""),
+          "//doc[1]/int[@name='recid'][.='100']"
+          );
+      assertQ(req("q", s + "_mtime:\"2017-09-19T11:01:32.809Z\""),
+          "//doc[1]/int[@name='recid'][.='100']"
+          );
+      assertQ(req("q", s + "_ctime:[\"2010-01-04T22:01:32.000\" TO \"2019-08-04T22:01:32.999\"]"),
+          "//*[@numFound='1']",
+          "//doc/int[@name='recid'][.='100']"
+      );
+      assertQ(req("q", s + "_mtime:[\"2010-01-04T22:01:32.000\" TO \"2019-08-04T22:01:32.000b\"]"),
+          "//*[@numFound='1']",
+          "//doc/int[@name='recid'][.='100']"
+      );
+    }
+    
+    /*
+     * origin
+     */
+    
+    assertQ(req("q", "origin:SPRINGER AND origin:\"ADS METADATA\""),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+     
 	}
 }

@@ -1082,12 +1082,12 @@
 		<field name="pub_raw" type="normalized_text_ascii" indexed="true"	stored="true"
 		  omitNorms="true" />
 
-		<field name="page" type="first_string" indexed="true" stored="true"
+		<field name="page" type="normalized_string" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-	    <field name="eid" type="first_string" indexed="true" stored="true"
+	    <field name="eid" type="normalized_string" indexed="true" stored="true"
             multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="year" type="first_string" indexed="true" stored="true"
+		<field name="year" type="normalized_string" indexed="true" stored="true"
 			multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="volume" type="normalized_string_ascii" indexed="true" stored="true"
@@ -1678,10 +1678,19 @@
             page_count:[0 TO 15]
                
           @since v63.1.0.5
+          
+        * page_range
+        
+          Page information (original string from the ADS database). This field is not searchable.
+          
+          @since v63.1.0.5
         -->
         
         <field name="page_count" type="int"
-          indexed="true" stored="false" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
+          indexed="true" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
+          
+        <field name="page_range" type="string"
+          indexed="false" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
           
 
         <!--
@@ -1739,6 +1748,27 @@
         <field name="metrics_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />	  
 	    <field name="orcid_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
         <field name="orcid_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        
+        
+        <!--
+        @api.doc
+
+            
+        * origin
+        
+          Provenance information (data source name) of what was used for merging the metadata records.
+          Mostly useful for internal/curation purposes. This field will contain all sources in the
+          descending order (most important first).
+          
+          Example query:
+          
+            origin:"springer"
+               
+          @since v63.1.0.5
+        -->
+        
+        <field name="origin" type="normalized_string"
+          indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
 	</fields>
 

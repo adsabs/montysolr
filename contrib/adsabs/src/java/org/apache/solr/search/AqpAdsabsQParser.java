@@ -226,6 +226,15 @@ public class AqpAdsabsQParser extends QParser {
       }
     }
 		
+		if (namedParams.containsKey("aqp.timestampFields")) {
+      SimpleDateFormat sdf = new SimpleDateFormat(namedParams.containsKey("aqp.timestampFormat") 
+          ? namedParams.get("aqp.timestampFormat") : "yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ROOT);
+      sdf.setTimeZone(UTC);
+      for (String f: namedParams.get("aqp.timestampFields").split(",")) {
+        ncm.put(f, new LegacyNumericConfig(6, new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), LegacyNumericType.LONG));
+      }
+    }
+		
     // when precision step=0 (ie use the default solr value), then it is Integer.MAX_VALUE
 		if (namedParams.containsKey("aqp.intFields")) {
       for (String f: namedParams.get("aqp.intFields").split(",")) {
