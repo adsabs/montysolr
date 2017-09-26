@@ -703,6 +703,23 @@
                 <!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>-->
             </analyzer>
         </fieldType>
+        
+        <fieldType name="normalized_string" class="org.apache.solr.schema.AqpStrField">
+           <analyzer type="index">
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.TrimFilterFactory" />
+                <filter
+          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.TrimFilterFactory" />
+                <!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>-->
+            </analyzer>
+        </fieldType>
 
 
 		<fieldType name="first_string" class="solr.TextField">
@@ -1065,12 +1082,12 @@
 		<field name="pub_raw" type="normalized_text_ascii" indexed="true"	stored="true"
 		  omitNorms="true" />
 
-		<field name="page" type="first_string" indexed="true" stored="true"
+		<field name="page" type="normalized_string" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-	  <field name="eid" type="first_string" indexed="true" stored="true"
-      multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
+	    <field name="eid" type="normalized_string" indexed="true" stored="true"
+            multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="year" type="first_string" indexed="true" stored="true"
+		<field name="year" type="normalized_string" indexed="true" stored="true"
 			multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="volume" type="normalized_string_ascii" indexed="true" stored="true"
@@ -1599,7 +1616,159 @@
 
 		<field name="unfielded_search" type="ads_text"
 			indexed="false" stored="false" multiValued="true" />
-	  <field name="unfielded_search_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+	    <field name="unfielded_search_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+	    
+	    
+	    <!--
+        @api.doc
+
+        * nedid
+    
+          String Identified of the NED object
+    
+          Example query:
+    
+             nedid:"X+1"
+             
+          @since v63.1.0.5
+             
+        * nedtype
+        
+          Type of the NED object (the array dimension corresponds to the array of nedid values)
+          
+            
+          Example query:
+          
+            nedtype:type2
+            
+          @since v63.1.0.5
+          
+            
+        * ned_object_facet_hier
+        
+          Hierarchical facet, string field - to allow for browsing NED objects.
+          
+          Example query:
+          
+            ned_object_facet_hier:"0/Other"
+               
+          @since v63.1.0.5
+        -->
+        
+        <field name="nedid" type="normalized_string"
+          indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+          
+        <field name="nedtype" type="normalized_string" indexed="true"
+            stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+            
+        <field name="ned_object_facet_hier" type="normalized_string" indexed="true"
+            stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+	  
+
+        <!--
+        @api.doc
+
+            
+        * page_count
+        
+          Number of pages.
+          
+          Example query:
+          
+            page_count:[0 TO 15]
+               
+          @since v63.1.0.5
+          
+        * page_range
+        
+          Page information (original string from the ADS database). This field is not searchable.
+          
+          @since v63.1.0.5
+        -->
+        
+        <field name="page_count" type="int"
+          indexed="true" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
+          
+        <field name="page_range" type="string"
+          indexed="false" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
+          
+
+        <!--
+        @api.doc
+    
+        * entry_date
+            
+          format: YYYY-MM-DD'T'hh:mm:ss.SSS'Z'
+          
+          Time when the record was first registered in the ADS database (even though 
+          the search field has millisecond granularity, in practice you can expect
+          at most 24h granularity in the search values)
+    
+          Example query:
+             entry_date:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"]
+             
+          @since v63.1.0.5
+             
+        * metadata_ctime
+        * metadata_mtime
+        * fulltext_ctime
+        * fulltext_mtime
+        * nonbib_ctime
+        * nonbib_mtime
+        * metrics_ctime
+        * metrics_mtime
+        * orcid_ctime
+        * orcid_mtime
+        
+          This timestamp can be used to query for latest changes in the ADS index.
+          
+          ctime = creation timestamp (doesn't change after the first entry)
+          mtime = modificaiton timestamp
+          
+          NOTE: the ctime can change under special circumstance (ie. if we decide
+          to recreate our database from scratch; therefore do not rely on the
+          timestamp to be immutable; it does not change frequently)
+          
+          The prefixex are (hopefully) self explanatory.
+          
+          Example query:
+             fulltext_mtime:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"]
+             
+          @since v61.1.0.3
+          
+         -->
+        <field name="entry_date" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="metadata_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="metadata_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="fulltext_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="fulltext_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="nonbib_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="nonbib_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="metrics_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="metrics_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />	  
+	    <field name="orcid_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        <field name="orcid_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
+        
+        
+        <!--
+        @api.doc
+
+            
+        * origin
+        
+          Provenance information (data source name) of what was used for merging the metadata records.
+          Mostly useful for internal/curation purposes. This field will contain all sources in the
+          descending order (most important first).
+          
+          Example query:
+          
+            origin:"springer"
+               
+          @since v63.1.0.5
+        -->
+        
+        <field name="origin" type="normalized_string"
+          indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
 	</fields>
 
