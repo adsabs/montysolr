@@ -238,11 +238,11 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 		
 		
 		// indexstamp range queries were not properly parsed
-		assertQueryEquals(req("q", "indexstamp:[\"2012-10-01T00:00:00\" TO \"2021-12-01T00:00:00Z\"]", 
+		assertQueryEquals(req("q", "indexstamp:[\"2012-10-01T00:00:00.000Z\" TO \"2021-12-01T00:00:00.000Z\"]", 
         "defType", "aqp"), 
         "indexstamp:[1349049600000 TO 1638316800000]", 
         LegacyNumericRangeQuery.class);
-    assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00\" TO \"2021-12-01T00:00:00Z\"]", "indent", "true"), 
+    assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00.000\" TO \"2021-12-01T00:00:00.000Z\"]", "indent", "true"), 
       "//*[@numFound='141']"
       );
     
