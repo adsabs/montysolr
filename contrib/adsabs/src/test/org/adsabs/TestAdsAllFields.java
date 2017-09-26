@@ -163,6 +163,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				 ", \"comment\": [\"comment1 commentFoo\", \"comment2\"]" +
 				 ", \"database\": [\"ASTRONOMY\", \"PHYSICS\"]" +
 
+        ", \"data\": [\"NED:15\", \"CDS:5\"]" +
+        ", \"data_count\": 20" +
 				 // it is solr format for the pubdate, must be in the right format
 				 // we need to add 30 minutes to every day; this allows us to search
 				 // for ranges effectively; thus:
@@ -207,7 +209,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"page_count\": 23" +
 				", \"page_range\": \"23-55s\"" +
 				// this list should contain normalized values
-				", \"property\": [\"Catalog\", \"Nonarticle\"]" +
+				", \"property\": [\"Catalog\", \"Nonarticle\", \"Data\"]" +
 				// must be: "yyyy-MM-dd (metadata often is just: yyyy-MM|yyyy)
 				", \"pubdate\": \"2013-08-05\"" +
 				", \"pubnote\": [\"pubnote1 pubnoteFoo\", \"pubnote2\"]" +
@@ -1315,6 +1317,23 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "origin:SPRINGER AND origin:\"ADS METADATA\""),
         "//doc[1]/int[@name='recid'][.='100']"
         );
-     
+
+    
+    /*
+     * data and data_count
+     * 
+     */
+    
+    assertQ(req("q", "data_count:[18 TO 21]"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    
+    assertQ(req("q", "data:(nEd OR foo)"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "data:\"NED:999\""), // numbers should be ignored in search, but stored
+        "//doc[1]/int[@name='recid'][.='100']",
+        "//doc[1]/arr[@name='data']/str[contains(text(),'NED:15')]"
+        );
 	}
 }

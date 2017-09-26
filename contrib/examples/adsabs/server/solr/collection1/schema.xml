@@ -771,7 +771,7 @@
 		    want to keep them in order and not loss any. Example is author, which
 		    has its own affiliation and email
      -->
-		<fieldType name="normalized_text_ascii_nodedup" class="solr.TextField">
+	<fieldType name="normalized_text_ascii_nodedup" class="solr.TextField">
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory" />
         <filter class="solr.ASCIIFoldingFilterFactory" />
@@ -904,7 +904,15 @@
 			</analyzer>
 		</fieldType>
 
-
+        
+        <fieldType name="normalized_key_number" class="solr.TextField">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.PatternReplaceFilterFactory" pattern="(\:[0-9]*)" replacement="" replace="all" />
+                <filter class="solr.TrimFilterFactory" />
+            </analyzer>
+        </fieldType>
 
 	</types>
 
@@ -1256,7 +1264,7 @@
 		<field name="bibgroup_facet" type="string" indexed="true"	stored="${storeAll:false}"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="data" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="data" type="normalized_key_number" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="data_facet" type="string" indexed="true"	stored="${storeAll:false}"
@@ -1769,6 +1777,24 @@
         
         <field name="origin" type="normalized_string"
           indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+        
+        <!--
+        @api.doc
+
+        * data_count
+        
+          Number of all data objects in the article (cummulative sum from all archives).
+          
+          Example query:
+          
+            data_count:[0 TO 15]
+               
+          @since v63.1.0.5
+        -->
+        
+        <field name="data_count" type="int"
+          indexed="true" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
+
 
 	</fields>
 
@@ -1782,9 +1808,9 @@
 
 	<copyField source="id" dest="recid" />
 
-  <copyField source="bibcode" dest="identifier" />
-  <copyField source="alternate_bibcode" dest="identifier" />
-  <copyField source="doi" dest="identifier" />
+    <copyField source="bibcode" dest="identifier" />
+    <copyField source="alternate_bibcode" dest="identifier" />
+    <copyField source="doi" dest="identifier" />
 
 	<copyField source="author_norm" dest="all" />
 	<copyField source="alternate_title" dest="all" />
