@@ -84,8 +84,8 @@
     </updateLog>
     
      <autoCommit> 
-       <maxDocs>40000</maxDocs>  <!--ADSLABS:06/2012 -->
-       <maxTime>1800000</maxTime> <!--ADSLABS:06/2012 --> 
+       <maxDocs>${montysolr.maxDocs:40000}</maxDocs>
+       <maxTime>${montysolr.maxTime:1800000}</maxTime> 
      </autoCommit>
 
 
