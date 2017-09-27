@@ -120,19 +120,19 @@
     <filterCache class="solr.FastLRUCache"
                  size="${solr.cache.size:512}"
                  initialSize="${solr.cache.initialSize:512}"
-                 autowarmCount="${solr.chache.autowarmCount:128}"
+                 autowarmCount="${solr.cache.autowarmCount:128}"
                  />
 
     <queryResultCache class="solr.LRUCache"
                      size="${solr.cache.size:512}"
                      initialSize="${solr.cache.initialSize:512}"
-                     autowarmCount="${solr.chache.autowarmCount:128}"
+                     autowarmCount="${solr.cache.autowarmCount:128}"
                      />
    
     <documentCache class="solr.LRUCache"
                    size="${solr.cache.size:512}"
                    initialSize="${solr.cache.initialSize:512}"
-                   autowarmCount="${solr.chache.autowarmCount:128}"
+                   autowarmCount="${solr.cache.autowarmCount:128}"
                    />
     
     <!-- 
@@ -150,7 +150,7 @@
               class="solr.CitationLRUCache"
               size="${solr.cache.size:512}"
               initialSize="${solr.cache.initialSize:512}"
-              autowarmCount="${solr.chache.autowarmCount:128}"
+              autowarmCount="${solr.cache.autowarmCount:128}"
               regenerator="solr.CitationLRUCache$SimpleRegenerator"
               identifierFields="bibcode:sorted,alternate_bibcode"
               citationFields="citation"
