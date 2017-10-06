@@ -1182,8 +1182,12 @@ define([
 
       function onResponse() {
         //the promise is used by paper metrics widget
-        d.resolve();
-        this.processMetrics.apply(this, arguments);
+        try {
+          this.processMetrics.apply(this, arguments);
+          d.resolve();
+        } catch (e) {
+          d.reject();
+        }
       }
 
       onResponse = onResponse.bind(this);
@@ -1211,24 +1215,9 @@ define([
       response = response.attributes ? response.attributes : response;
 
       // the response might contain an error
-      if ((response.Error && response.Error.indexOf('Unable to get results') > -1) || (response.status === 500)) {
+      if (response.Error || response.status === 500) {
         this.closeWidget();
-
-        var pubsub = null;
-        try {
-          pubsub = this.getPubSub();
-        } catch (e) {
-          console.error(e);
-        }
-
-        if (pubsub) {
-          pubsub.publish(pubsub.ALERT, new ApiFeedback({
-            code: ApiFeedback.CODES.ALERT,
-            msg: 'Unfortunately, the metrics service returned error (it affects only some queries). Please try with different search parameters.',
-            modal: true
-          }));
-        }
-        return;
+        throw new Error('Metrics Service Error');
       }
 
       if (response["basic stats"]["number of papers"] === 1){

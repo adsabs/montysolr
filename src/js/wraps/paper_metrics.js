@@ -26,11 +26,21 @@ define([
           var self = this;
           this.containerModel.set("title", data.title);
           this.getMetrics([bibcode]).done(function() {
+
+            // Everything worked, show the widget
             self.trigger('page-manager-event', 'widget-ready', {isActive: true, widget : self});
             if (self._waiting) {
               self.onShow();
               self._waiting = false;
             }
+          }).fail(function () {
+
+            // if the metrics fail, kill it
+            self.trigger('page-manager-event', 'widget-ready', {
+              isActive: false,
+              widget : self
+            });
+            self.destroy();
           });
         },
 
