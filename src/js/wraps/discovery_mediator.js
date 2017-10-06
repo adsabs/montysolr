@@ -21,9 +21,8 @@ define([
     analytics
     ) {
 
-    var genericErrorMessage = '<b>Our server returned an error.</b>\n' +
-    'For the moment, please try <a href="http://adsabs.harvard.edu/abstract_service.html"> the classic service</a> instead.\n' +
-    'As Bumblebee usage increases, our servers occasionally get overwhelmed, although this will become less of a problem as we scale up.'
+    var genericErrorMessage = '<h4><strong>Something went wrong</strong></h4>' +
+    'Please <a onclick="window.location.reload()" href="' + window.location.href + '">reload</a> to try again';
 
     var handlers = {};
 

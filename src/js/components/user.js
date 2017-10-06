@@ -181,8 +181,7 @@ define([
           error = "error unknown";
         }
 
-        var message = 'Unable to update information for endpoint ' + target + ' (' + error + ')' ;
-        pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+        console.error('POST request failed for endpoint: [' + target + ']', error);
       },
 
       handleFailedGET :  function(jqXHR, status, errorThrown, target){
@@ -196,8 +195,7 @@ define([
           error = "error unknown";
         }
 
-        var message = 'Unable to retrieve information for endpoint ' + target + ' (' + error + ')' ;
-        pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger"}));
+        console.error('GET request failed for endpoint: [' + target + ']', error);
       },
 
       fetchData : function(target){
