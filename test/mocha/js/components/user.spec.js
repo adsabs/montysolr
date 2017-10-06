@@ -506,19 +506,10 @@ define([
      u.redirectIfNecessary = sinon.stub();
 
      u.fetchData("fakeTarget");
-
-     //on fail
-
-     expect(u.getPubSub().publish.args[0][0]).to.eql("[Alert]-Message");
-     expect(u.getPubSub().publish.args[0][1].toJSON()).to.eql( {"code":0,"msg":"Unable to retrieve information for endpoint fakeTarget (OH NO)"});
-
      u.postData("fakeTarget");
 
-     expect(u.getPubSub().publish.args[1][0]).to.eql("[Alert]-Message");
-     expect(u.getPubSub().publish.args[1][1].toJSON()).to.eql({"code":0,"msg":"Unable to update information for endpoint fakeTarget (OH NO)"});
-
+     expect(u.getPubSub().publish.calledOn()).to.eql(false);
      requestStub.restore();
-
    });
 
  });
