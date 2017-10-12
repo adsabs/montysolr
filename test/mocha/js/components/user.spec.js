@@ -223,7 +223,7 @@ define([
        this.server.restore();
      });
 
-     it('orcid settings reset if the contact with the OrcidApi gives a 401', function() {
+     it('orcid settings reset if the contact with the OrcidApi gives a 401', function(done) {
 
        this.server.respondWith(/.*/,
          [401, { "Content-Type": "application/json" }, JSON.stringify({"you suck": "YOU FAILED"})]);
@@ -245,6 +245,9 @@ define([
 
        // Lets watch the signOut method and see if it is called
        sinon.spy(orcidApi, 'signOut');
+       sinon.stub(orcidApi, 'checkAccessOrcidApiAccess', function () {
+         return $.Deferred().reject({ status: '401' }).promise();
+       });
 
        // Add the user to the beehive, and activate stuff
        var user = new User();
@@ -263,11 +266,11 @@ define([
        this.server.respond();
 
        // The user object should reset everything
-       expect(orcidApi.signOut.called).to.eql(true);
-       expect(user.setOrcidMode.called).to.eql(true);
+       expect(orcidApi.signOut.called).to.eql(true, 'sign out was called');
+       expect(user.setOrcidMode.called).to.eql(true, 'orcid mode was turned off');
        expect(orcidApi.authData).to.eql(null);
        expect(user.isOrcidModeOn()).to.eql(0);
-
+       done();
      });
 
      it('orcid settings do not reset if the contact with the OrcidApi gives anything but a 401', function() {
