@@ -1114,9 +1114,6 @@
 			omitNorms="true" omitTermFreqAndPositions="true"/>
 
 
-		<!-- We get pubdate from invenio, we turn that into a properly formatted
-			date string and insert that into 'date' field (the DIH transformer does that) -->
-
 		<field name="date" type="tdate" indexed="true" stored="true"
 			omitNorms="true" omitTermFreqAndPositions="true"/>
 
