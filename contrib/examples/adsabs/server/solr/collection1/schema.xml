@@ -1795,6 +1795,32 @@
         <field name="data_count" type="int"
           indexed="true" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
 
+        <!--
+        @api.doc
+
+        * esources
+        
+          Sources of fulltext. Available values:
+          
+			PUB_PDF - paper has a link to publisher PDF fulltext
+			PUB_HTML - paper has a link to publisher HTML fulltext
+			ADS_PDF - paper has a link to ADS fulltext
+			ADS_SCAN - paper has a link to ADS scan
+			EPRINT_PDF - paper has a link to an eprint PDF (currently only arXiv, but possibly others in the future)
+			EPRINT_HTML - paper has a link to an eprint HTML (currently only arXiv)
+			AUTHOR_PDF - paper has a link to an author copy in PDF format
+			AUTHOR_HTML - paper has a link to an author copy in HTML format
+          
+          Example query:
+          
+            esources:PUB_PDF
+               
+          @since v63.1.0.6
+        -->
+        
+        <field name="esources" type="normalized_string"
+          indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
 
 	</fields>
 

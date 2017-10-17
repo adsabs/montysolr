@@ -177,6 +177,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  ", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
 			  ", \"eid\": \"00001\"" +
 			  ", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
+			  ", \"esources\": [\"AUTHOR_HTML\", \"PUB_PDF\"]" +
 			  // Field that contains both grant ids and grant agencies.
 			  ", \"grant\": [\"NASA\", \"123456-78\", \"NSF-AST\", \"0618398\"]" +
 			  // grant_agency/grant_id
@@ -1335,5 +1336,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc[1]/int[@name='recid'][.='100']",
         "//doc[1]/arr[@name='data']/str[contains(text(),'NED:15')]"
         );
+    
+    /*
+     * esources
+     * 
+     */
+    assertQ(req("q", "esources:pub_pDF"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    
 	}
 }
