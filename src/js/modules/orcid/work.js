@@ -203,7 +203,8 @@ define([
       pub: '$.pub',
       doi: '$.doi[0]',
       author: '$.author[*]',
-      title: '$.title[0]'
+      title: '$.title[0]',
+      type: '$.doctype'
     };
 
     var put = function (obj, p, val) {
@@ -228,6 +229,33 @@ define([
       return val;
     };
     var work = {};
+    var worktype = function(adsType) {
+      var oType = {
+        article: 'JOURNAL-ARTICLE',
+        inproceedings: 'CONFERENCE-PAPER',
+        abstract: 'CONFERENCE-ABSTRACT',
+        eprint: 'WORKING-PAPER',
+        phdthesis: 'DISSERTATION',
+        techreport: 'RESEARCH-TECHNIQUE',
+        inbook: 'BOOK-CHAPTER',
+        circular: 'RESEARCH-TOOL',
+        misc: 'OTHER',
+        book: 'BOOK',
+        proceedings: 'BOOK',
+        bookreview: 'BOOK-REVIEW',
+        erratum: 'JOURNAL-ARTICLE',
+        proposal: 'OTHER',
+        newsletter: 'NEWSLETTER-ARTICLE',
+        catalog: 'DATA-SET',
+        intechreport: 'RESEARCH-TECHNIQUE',
+        mastersthesis: 'DISSERTATION',
+        obituary: 'OTHER',
+        pressrelease: 'OTHER',
+        software: 'RESEARCH-TECHNIQUE',
+        talk: 'LECTURE-SPEECH'
+      };
+      return oType[adsType] || 'JOURNAL-ARTICLE';
+    };
     try {
       put(work, PATHS.publicationDateYear, get(ads.pubdate).split('-')[0]);
       put(work, PATHS.publicationDateMonth, get(ads.pubdate).split('-')[1]);
@@ -236,7 +264,7 @@ define([
       put(work, PATHS.externalIdValue, [get(ads.bibcode), get(ads.doi)]);
       put(work, PATHS.externalIdRelationship, ['SELF', 'SELF'])
       put(work, PATHS.journalTitle, get(ads.pub));
-      put(work, PATHS.type, 'JOURNAL_ARTICLE');
+      put(work, PATHS.type, worktype(get(ads.type)));
       var author = get(ads.author);
       author = (_.isArray(author)) ? author : [author];
       put(work, PATHS.contributorName, author);
