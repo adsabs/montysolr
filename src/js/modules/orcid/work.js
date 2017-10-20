@@ -4,9 +4,6 @@ define([
   'jsonpath'
 ], function (_, jp) {
 
-
-
-
   var PATHS = {
     createdDate:            '$["created-date"].value',
     lastModifiedDate:       '$["last-modified-date"].value',
@@ -229,12 +226,33 @@ define([
     };
     var work = {};
     try {
+
+      var exIds = {
+        types: [],
+        values: [],
+        relationships: []
+      };
+
+      // handle doi or bibcode not existing
+      var bib = get(ads.bibcode);
+      var doi = get(ads.doi);
+      if (bib) {
+        exIds.types.push('bibcode');
+        exIds.values.push(bib);
+        exIds.relationships.push('SELF');
+      }
+      if (doi) {
+        exIds.types.push('doi');
+        exIds.values.push(doi);
+        exIds.relationships.push('SELF');
+      }
+
       put(work, PATHS.publicationDateYear, get(ads.pubdate).split('-')[0]);
       put(work, PATHS.publicationDateMonth, get(ads.pubdate).split('-')[1]);
       put(work, PATHS.shortDescription, get(ads.abstract));
-      put(work, PATHS.externalIdType, ['bibcode', 'doi']);
-      put(work, PATHS.externalIdValue, [get(ads.bibcode), get(ads.doi)]);
-      put(work, PATHS.externalIdRelationship, ['SELF', 'SELF'])
+      put(work, PATHS.externalIdType, exIds.types);
+      put(work, PATHS.externalIdValue, exIds.values);
+      put(work, PATHS.externalIdRelationship, exIds.relationships);
       put(work, PATHS.journalTitle, get(ads.pub));
       put(work, PATHS.type, 'JOURNAL_ARTICLE');
       var author = get(ads.author);

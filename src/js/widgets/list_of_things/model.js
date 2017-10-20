@@ -118,9 +118,11 @@ function(
      *
      * @param start
      * @param end
+     * @param options
      * @returns {number}
      */
-    updateIndexes: function(start, end) {
+    updateIndexes: function(start, end, options) {
+      options = options || {};
       var start = _.isNumber(start) ? start : this.currentStartIndex;
       var end = _.isNumber(end) ?  end : this.currentEndIndex + 1;
       var visible = 0;
@@ -177,7 +179,10 @@ function(
         // to prevent multiple recursive requests
         if (JSON.stringify(gaps) != this.lastMissingTrigger) {
           this.lastMissingTrigger = JSON.stringify(gaps);
-          this.trigger('show:missing', gaps);
+
+          if (!options.silent) {
+            this.trigger('show:missing', gaps);
+          }
         }
       }
       this.numVisible = visible;
@@ -212,10 +217,11 @@ function(
      * @param end
      * @returns {*}
      */
-    showRange: function(start, end) {
+    showRange: function(start, end, options) {
+      options = options || {};
       if (start < 0) throw new Error("Start cannot be negative");
       if (end < start) throw new Error("End cannot be smaller than start");
-      return this.updateIndexes(start, end);
+      return this.updateIndexes(start, end, options);
     },
     getNumVisible: function() {
       return this.numVisible;

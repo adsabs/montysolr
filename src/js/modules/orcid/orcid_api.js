@@ -91,9 +91,10 @@ define([
         this.db = {};
         this.clearDBWait = 30000;
         this.dbUpdatePromise = null;
-        this.maxQuerySize = 100;
+        this.maxQuerySize = 50;
         this.queryUpdater = new ApiQueryUpdater('orcid_api');
         this.orcidApiTimeout = 30000; // 30 seconds
+        this.adsQueryTimeout = 10; // 10 seconds
         this.dirty = true; // initialize as dirty, so it updates
       },
 
@@ -492,6 +493,9 @@ define([
        * @param {Object} orcidWork
        */
       addWork: function (orcidWork) {
+        if (!_.isPlainObject(orcidWork)) {
+          throw new TypeError('Should be plain object');
+        }
         var $dd = $.Deferred();
         this.addCache.push({
 
@@ -512,6 +516,9 @@ define([
        *
        * Cached entries are checked against ids that ride along the request on
        * the xhr object.
+       *
+       * @private
+       * @returns {*}
        */
       _addWork: function () {
         var self = this;
@@ -535,7 +542,7 @@ define([
             var promise = cacheEntry.promise;
             var oldWork = cacheEntry.work;
 
-            // check to see if the work is an error message
+            // check to see if the work is an error message, { error: {...} }
             if (work.error) {
 
               // check to see if it's just a conflict
@@ -546,29 +553,28 @@ define([
               }
             } else {
 
-              // no errors, resole with the new work
-              promise.resolve(new Work(work));
+              // no errors, resolve with the new work, { work: {...} }
+              promise.resolve(new Work(work.work));
             }
             _.remove(self.addCache, cacheEntry);
           });
+        });
 
-          // on fail, reject the promises
-          prom.fail(function (res, status, xhr) {
-            var responseIds = xhr.orcidAddWorkIds;
-            if (!responseIds || responseIds.length !== works.length) {
-              return console.error('Response ids do not match payload length');
+        // on fail, reject the promises
+        prom.fail(function (responseIds) {
+          if (!_.isArray(responseIds) || _.isEmpty(responseIds)) {
+            console.error('no cache values found on failure');
+          }
+          var args = arguments;
+          var indexedIds = _.indexBy(self.addCache, 'id');
+          _.forEach(responseIds, function (id) {
+            var entry = indexedIds[id];
+            if (entry) {
+              _.remove(self.addCache, entry);
+              entry.promise.reject.apply(entry.promise, args);
+            } else {
+              console.error('no cache entry', self);
             }
-            var args = arguments;
-            var indexedIds = _.indexBy(self.addCache, 'id');
-            _.forEach(responseIds, function (id) {
-              var entry = indexedIds[id];
-              if (entry) {
-                _.remove(self.addCache, entry);
-                entry.promise.reject.apply(entry.promise, args);
-              } else {
-                console.error('no cache entry', self);
-              }
-            });
           });
         });
       },
@@ -585,8 +591,8 @@ define([
        */
       _addWorks: function (orcidWorks, ids) {
         var self = this;
-        if (!_.isArray(orcidWorks)) {
-          throw new TypeError('works must be an Array');
+        if (!_.isArray(orcidWorks) || !_.isArray(ids)) {
+          throw new TypeError('works and ids must be arrays');
         }
 
         var $dd = $.Deferred();
@@ -736,16 +742,17 @@ define([
             return dd.resolve({});
           }
 
+          // we have to create an identifier string for each
           var ret = _.reduce(data.response.docs, function (res, doc) {
             var bibcode = doc.bibcode.toLowerCase();
-            var key = 'bibcode:' + bibcode;
+            var key = 'identifier:' + bibcode;
             res[key] = bibcode;
             _.each(doc.doi, function (doi) {
-              var key = 'doi:' + doi.toLowerCase().replace('doi:', '');
+              var key = 'identifier:' + doi.toLowerCase().replace('doi:', '');
               res[key] = bibcode;
             });
             _.each(doc.alternate_bibcode, function (ab) {
-              var key = 'bibcode:' + ab.toLowerCase();
+              var key = 'identifier:' + ab.toLowerCase();
               res[key] = bibcode;
             });
             return res;
@@ -767,6 +774,16 @@ define([
           }
         })).fail(onFail);
 
+        // reject after timeout, if necessary
+        (function check (count) {
+          if (dd.state() === 'pending' && count <= 0) {
+            return dd.reject('Request Timeout');
+          } else if (dd.state() === 'resolved') {
+            return;
+          }
+          _.delay(check, 1000, --count);
+        })(this.adsQueryTimeout);
+
         return dd.promise();
       },
 
@@ -785,40 +802,38 @@ define([
        *
        * @example
        * _buildQuery({
-       *  identifier: ['2018CNSNS..56..270Q']
+       *  identifier: ['2018CNSNS..56..270Q', '2017CNSNS..56..270Q']
        * });
        * // returns:
        * { "q": [
-       *  "identifier:2018CNSNS..56..270Q OR identifier:2018CNSNS..56..270Q"
+       *  "identifier:2018CNSNS..56..270Q OR identifier:2017CNSNS..56..270Q"
        * ]}
        *
        * @param {Object} query - query object used to build new ApiQuery
-       * @param {string[]} [query.bibcode] query.bibcode
-       * @param {string[]} [query.alternate_bibcode] query.alternate_bibcode
-       * @param {string[]} [query.doi] query.doi
+       * @param {string[]} [query.identifier] query.identifier
        * @returns {ApiQuery} - a new api query to use in a request
        * @private
        */
       _buildQuery: function (query) {
-        if (_.isEmpty(query)) {
+        if (_.isEmpty(query) || !query.identifier) {
           return null;
         }
 
-        var formatString = function (values, field) {
-          if (values.length === 0) {
-            return '';
-          }
-          return field + ':' + values.join(' OR ');
-        };
-
-        var q = _(query).map(formatString).filter('length').value();
+        // reformat array as 'identifier:xxx OR identifier:xxx'
+        var q = _(query.identifier)
+          .map(function (v) {
+            return 'identifier:' + v;
+          })
+          .filter('length')
+          .value()
+          .join(' OR ');
 
         // don't let an empty query string through
         if (_.isEmpty(q)) {
           return null;
         }
 
-        return new ApiQuery({ q: q.join(' OR ') });
+        return new ApiQuery({ q: q });
       },
 
       /**
@@ -839,7 +854,6 @@ define([
           var dbPromise = self.dbUpdatePromise;
           self.setClean();
           self.db = db;
-          self.profile = profile;
           if (dbPromise) {
             dbPromise.resolve();
           }
@@ -899,25 +913,40 @@ define([
             finishUpdate(db);
           }
 
+          /**
+           * This will receive a set of of identifier strings that are in the
+           * following format:
+           *
+           * @example
+           * [
+           *  identifier:2017geoji.tmp...42f:"2017geoji.209..597f",
+           *  identifier:2017gml...tmp...20d:"2017gml...tmp...20d"
+           * ]
+           *
+           * It will then update the database, by setting a bibcode property on
+           * each record.  Also, if the record is not found here, it will be
+           * unset (-1) so that it won't be counted as an orcid record.
+           *
+           */
           var querySuccess = function () {
-            _.each(arguments, function (bibcodes) {
+            var ids = _.flatten(arguments);
 
-              // Update each orcid record with identifier info gained from ADS
-              _.each(db, function (v, key) {
+            // Update each orcid record with identifier info gained from ADS
+            _.each(db, function (v, key) {
+              var bibcode = ids[key];
 
-                var bibcode = bibcodes[key];
-
-                // ADS did not find a record for this identifier
-                if (!bibcode) {
-                  db[key].idx = -1;
-                } else {
-                  db[key].bibcode = bibcode;
-                }
-              });
+              // ADS did not find a record for this identifier
+              if (!bibcode) {
+                db[key].idx = -1;
+              } else {
+                db[key].bibcode = bibcode;
+              }
             });
+
             finishUpdate(db);
           };
 
+          // on fail, alert the console and finish the update
           var queryFailure = function () {
             console.error.apply(console, [
               'Error processing response from ADS'].concat(arguments));
@@ -946,24 +975,25 @@ define([
        * out if the record is sourced by ADS, whether it is known, and whether
        * ADS has the rights to update/delete it.
        *
-       * @param {Work} work
+       * @param {object} adsWork
        */
-      getRecordInfo: function (work) {
+      getRecordInfo: function (adsWork) {
         var self = this;
         var dd = $.Deferred();
 
         /**
          * Creates a metadata object based on the record data passed in.
          *
-         * @param {Object} data - record to gather metadata on
          * @returns {{
          *  isCreatedByADS: boolean,
          *  isCreatedByOthers: boolean,
          *  isKnownToADS: boolean,
          *  provenance: null
          * }}
+         *
+         * @param {object} adsWork
          */
-        var getInfo = function getInfo (data) {
+        var getRecordMetaData = function getInfo (adsWork) {
           var out = {
             isCreatedByADS: false,
             isCreatedByOthers: false,
@@ -971,8 +1001,15 @@ define([
             provenance: null
           };
 
+          /*
+          Looking to match the work record passed in to the entry in the db
+          Then we can add some metadata like whether it was an ADS sourced
+          record or not
+           */
           var updateRecord = function (k, v, out) {
-            var key = (k + ':' + v).toLowerCase();
+
+            // db is always 'identifier:xxx'
+            var key = ('identifier:' + v).toLowerCase();
             var rec = self.db[key];
 
             if (rec) {
@@ -990,7 +1027,7 @@ define([
             }
           };
 
-          var ids = _.pick(data, 'bibcode', 'doi', 'alternate_bibcode');
+          var ids = _.pick(adsWork, 'identifier', 'bibcode', 'doi', 'alternate_bibcode');
 
           _.each(ids, function (value, key) {
             if (_.isArray(value)) {
@@ -1010,11 +1047,11 @@ define([
         if (this.needsUpdate()) {
           this.updateDatabase()
             .done(function () {
-              dd.resolve(getInfo(work));
+              dd.resolve(getRecordMetaData(adsWork));
             })
             .fail(fail);
         } else {
-          dd.resolve(getInfo(work));
+          dd.resolve(getRecordMetaData(adsWork));
         }
 
         return dd.promise();
