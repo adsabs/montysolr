@@ -5,10 +5,11 @@ define([
 
   describe('Orcid Profile', function () {
 
-    describe('Instantiation', function () {
+    describe('constructor', function () {
       it('instantiates correctly', function () {
         expect(new Profile() instanceof Profile).to.equal(true);
       });
     });
+
   });
 });
