@@ -204,7 +204,9 @@ define([
           //before this returns, a loading view is shown
           expect($(".panel-body").text().trim()).to.eql("Loading...")
           d.resolve({
-            "orcid-bio" : { "personal-details" : {"given-names" : {"value" : "Alex"}, "family-name" : {"value" : "Holachek"}}}
+            getFirstName: _.constant('Alex'),
+            getLastName: _.constant('Holachek'),
+            getOrcid: _.constant('')
           });
           return d.promise();
         },
@@ -300,7 +302,9 @@ define([
         getUserProfile : function(){
           var d = $.Deferred();
           d.resolve({
-            "orcid-bio" : { "personal-details" : {"given-names" : {"value" : "Alex"}, "family-name" : {"value" : "Holachek"}}}
+            getFirstName: _.constant('Alex'),
+            getLastName: _.constant('Holachek'),
+            getOrcid: _.constant('')
           });
           return d.promise();
         },

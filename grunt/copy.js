@@ -84,6 +84,12 @@ module.exports = function (grunt) {
           dest: 'src/libs/select2/',
           expand: true,
           flatten : true
+        },
+        {
+          cwd: 'node_modules/jsonpath',
+          src: 'jsonpath*.js',
+          dest: 'src/libs/jsonpath',
+          expand: true
         }
       ]
     },
