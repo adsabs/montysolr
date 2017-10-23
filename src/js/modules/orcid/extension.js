@@ -30,12 +30,25 @@ define([
       var activate = WidgetClass.prototype.activate;
       var onAllInternalEvents = WidgetClass.prototype.onAllInternalEvents;
 
-      WidgetClass.prototype.activate = function(beehive) {
+      WidgetClass.prototype.activate = function (beehive) {
         this.setBeeHive(beehive);
         activate.apply(this, arguments);
       };
 
-      WidgetClass.prototype._getOrcidInfo = function(recInfo) {
+      /**
+       * Apply messages or other information to the orcid control under
+       * each record.  This will return a set of actions based on the
+       * metadata passed in.
+       *
+       * @example
+       * { isSourcedByADS: true, isCreatedByOthers: false, isCreatedByADS: true }
+       *
+       * //returns:
+       * { actions: { update: {...}, delete: {...}, view: {...} }, provenance: 'ads' }
+       *
+       * @returns {object} - orcid action options
+       */
+      WidgetClass.prototype._getOrcidInfo = function (recInfo) {
         var msg = {actions: {} , provenance : null};
 
         if (recInfo.isCreatedByOthers && recInfo.isCreatedByADS){
@@ -76,7 +89,15 @@ define([
         return msg;
       },
 
-      WidgetClass.prototype.addOrcidInfo = function(docs) {
+      /**
+       * Takes in a set of documents, should be a result of a search or orcid
+       * record page.  In either case, it will match the models by bibcode and
+       * update their orcid metadata
+       *
+       * @param {object[]} docs - the docs to update
+       * @returns {object[]} - the updated docs
+       */
+      WidgetClass.prototype.addOrcidInfo = function (docs) {
         var self = this;
         // add orcid info to the documents
         var orcidApi = this.getBeeHive().getService('OrcidApi');
@@ -98,10 +119,10 @@ define([
               var actions = self._getOrcidInfo(rInfo);
 
               // get the model for this document
-              if (self.collection && self.collection.findWhere) {
-                var model = self.collection.findWhere({bibcode: d.bibcode});
+              if (self.hiddenCollection && self.hiddenCollection.findWhere) {
+                var model = self.hiddenCollection.findWhere({ bibcode: d.bibcode });
                 if (model) {
-                  model.set('orcid', actions); // if not found, we can ignore this update (the view changed already)
+                  model.set('orcid', actions);
                 }
               }
 
@@ -109,7 +130,7 @@ define([
                 self.trigger('orcid-update-finished');
               }
             });
-            recInfo.fail(function(data) {
+            recInfo.fail(function (data) {
               counter -= 1;
 
               // very likely, the request timed out
@@ -151,9 +172,51 @@ define([
         return docs;
       };
 
-      WidgetClass.prototype.processDocs = function(apiResponse, docs, pagination) {
+      WidgetClass.prototype._paginationUpdate = function () {
         var self = this;
-        var docs = processDocs.apply(this, arguments);
+        _.forEach(this.hiddenCollection.models, function (hiddenModel) {
+          var match = _.find(self.collection.models, function (model) {
+            return model.get('bibcode') === hiddenModel.get('bibcode');
+          });
+
+          if (match && match.get('orcid').pending) {
+            match.set('orcid', hiddenModel.get('orcid'));
+          }
+        });
+      };
+
+      WidgetClass.prototype._updateModelsWithOrcid = function () {
+        var modelsToUpdate = _.filter(this.collection.models, function (m) {
+          return !m.has('_work') && (m.has('bibcode') || m.has('doi'));
+        });
+
+        if (_.isEmpty(modelsToUpdate)) {
+          return;
+        }
+
+        // this creates a connection between model->orcid, and updates source name
+        var oApi = this.getBeeHive().getService('OrcidApi');
+        oApi.getUserProfile().done(function (profile) {
+          var works = profile.getWorks();
+          _.forEach(modelsToUpdate, function (m) {
+            var exIds = _.pick(m.attributes, ['bibcode', 'doi']);
+            _.forEach(works, function (w) {
+              var wIds = w.getExternalIds();
+              var doi = _.any(exIds.doi, wIds.doi);
+
+              if (exIds.bibcode === wIds.bibcode || doi) {
+                m.set({
+                  'source_name': w.getSourceName(),
+                  '_work': w
+                });
+              }
+            });
+          });
+        });
+      };
+
+      WidgetClass.prototype.processDocs = function (apiResponse, docs, pagination) {
+        docs = processDocs.apply(this, arguments);
         var user = this.getBeeHive().getObject('User');
         //for results list only show if orcidModeOn, for orcid big widget show always
         if (user && user.isOrcidModeOn() || this.orcidWidget ){
@@ -161,6 +224,7 @@ define([
           if (pagination.numFound !== result.length) {
             _.extend(pagination, this.getPaginationInfo(apiResponse, docs));
           }
+          this._updateModelsWithOrcid();
           return result;
         }
         return docs;
@@ -224,7 +288,7 @@ define([
 
           var q = new ApiQuery({
             q: 'identifier:' + queryUpdater.quoteIfNecessary(identifier),
-            fl: 'title,abstract,bibcode,author,pub,pubdate,doi'
+            fl: 'title,abstract,bibcode,author,pub,pubdate,doi,doctype'
           });
 
           var req = new ApiRequest({
@@ -258,19 +322,32 @@ define([
         return final.promise();
       };
 
-      WidgetClass.prototype._findWorkByModel = function (model) {
+      /**
+       * Finds a work by comparing a model to what we retrieve from ORCID,
+       * It can also take a profile param that bypasses the call to orcid, if
+       * it isn't necessary to get the most up-to-date data.
+       *
+       * @param {object} [model] model
+       * @param {Profile} _profile
+       * @private
+       */
+      WidgetClass.prototype._findWorkByModel = function (model, _profile) {
         var $dd = $.Deferred();
         var oApi = this.getBeeHive().getService('OrcidApi');
         var exIds = _.pick(model.attributes, ['bibcode', 'doi']);
         var oldOrcid = _.clone(model.get('orcid') || {});
-        var profile = oApi.getUserProfile();
+        var profile = null;
+        if (!_profile) {
+          profile = oApi.getUserProfile();
+        }
 
-        profile.done(function (profile) {
+        var success = function (profile) {
           var works = profile.getWorks();
           var matchedWork = _.find(works, function (w) {
             var wIds = w.getExternalIds();
-            return exIds.bibcode === wIds.bibcode ||
-              exIds.doi === wIds.doi || exIds.doi[0] === wIds.doi;
+            var doi = _.any(exIds.doi, wIds.doi);
+
+            return exIds.bibcode === wIds.bibcode || doi;
           });
           if (matchedWork) {
             $dd.resolve(matchedWork);
@@ -283,9 +360,9 @@ define([
               error: msg
             }));
           }
-        });
+        };
 
-        profile.fail(function () {
+        var fail = function () {
           $dd.reject.apply($dd, arguments);
           var msg = 'Error retrieving ORCiD profile';
           console.error.apply(console, [msg].concat(arguments));
@@ -293,7 +370,14 @@ define([
             pending: null,
             error: msg
           }));
-        });
+        };
+
+        if (!_profile) {
+          profile.done(success);
+          profile.fail(fail);
+        } else {
+          success(_profile);
+        }
 
         return $dd.promise();
       };
@@ -323,8 +407,11 @@ define([
                     provenance: 'ads'
                   };
 
-                  model.set('orcid', self._getOrcidInfo(recInfo));
-                  model.set('source_name', work.getSourceName());
+                  model.set({
+                    orcid: self._getOrcidInfo(recInfo),
+                    'source_name': work.getSourceName()
+                  });
+
                   self.trigger('orcidAction:' + action, model);
                 });
               };
@@ -370,9 +457,28 @@ define([
 
                   // Remove entry from collection after delete
                   if (self.orcidWidget) {
-                    self.collection.reset();
-                    self.hiddenCollection.reset();
-                    self.onShow();
+                    var idx = model.resultsIndex;
+                    self.hiddenCollection.remove(model);
+                    var models = self.hiddenCollection.models;
+                    for (var i = idx; i < models.length; i++) {
+                      var m = models[i];
+                      m.set('resultsIndex', m.get('resultsIndex') - 1);
+                      m.set('indexToShow', m.get('indexToShow') - 1);
+                    }
+
+                    var showRange = self.model.get('showRange');
+                    var range = _.range(showRange[0], showRange[1] + 1);
+                    var visible = [];
+                    _.forEach(range, function (i) {
+                      models[i].set('visible', true);
+                      models[i].resultsIndex = i;
+                      models[i].set('resultsIndex', i);
+                      models[i].set('indexToShow', i + 1);
+                      visible.push(models[i]);
+                    });
+                    self.hiddenCollection.reset(models);
+                    self.collection.reset(visible);
+
                   } else {
                     // reset orcid actions
                     model.set('orcid', self._getOrcidInfo({}));
@@ -456,9 +562,8 @@ define([
             }
           };
           handlers[action] && handlers[action](data.model);
-        } else {
-          return onAllInternalEvents.apply(this, arguments);
         }
+        return onAllInternalEvents.apply(this, arguments);
       };
 
       return WidgetClass;

@@ -249,7 +249,7 @@ define([
         //updatePagination will be called after localStorage triggers an event
       },
 
-      updatePagination: function(options) {
+      updatePagination: function (options) {
 
         var numFound = options.numFound || this.model.get('numFound');
         var currentQuery = options.currentQuery || this.model.get('currentQuery') || new ApiQuery();
@@ -318,7 +318,9 @@ define([
 
         this.view.render();
 
-        this.hiddenCollection.showRange(showRange[0], showRange[1]);
+        this.hiddenCollection.showRange(showRange[0], showRange[1], {
+          silent: options.silentIndexUpdate
+        });
         this.collection.reset(this.hiddenCollection.getVisibleModels());
 
         //finally, scroll back to top
