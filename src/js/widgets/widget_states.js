@@ -1,15 +1,12 @@
-define([],
-  function (
-  ) {
+'use strict';
+define([], function () {
 
   var States = {
-    RESET: 0,
-    WAITING: 1,
-    ERRORED: 2,
-    ENABLED: 3,
-    DISABLED: 4
+    READY: 0,
+    LOADING: 1,
+    IDLE: 2,
+    FAILED: 3
   };
 
   return States;
-
 });

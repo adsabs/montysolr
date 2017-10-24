@@ -5,7 +5,8 @@ define([
   'js/components/api_request',
   'js/mixins/widget_mixin_method',
   'js/components/api_targets',
-  'js/mixins/dependon'
+  'js/mixins/dependon',
+  'js/mixins/widget_state_manager'
 ], function (
   Backbone,
   Marionette,
@@ -13,7 +14,8 @@ define([
   ApiRequest,
   WidgetMixin,
   ApiTargets,
-  Dependon
+  Dependon,
+  WidgetStateManagerMixin
   ) {
 
   /**
@@ -253,8 +255,7 @@ define([
 
   }, {mixin: WidgetMixin});
 
-  _.extend(BaseWidget.prototype, Dependon.BeeHive);
+  _.extend(BaseWidget.prototype, Dependon.BeeHive, WidgetStateManagerMixin);
 
-  return BaseWidget
-
+  return BaseWidget;
 });
