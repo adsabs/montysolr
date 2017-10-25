@@ -6,10 +6,13 @@ module.exports = function(grunt) {
       pkg: grunt.file.readJSON('package.json'),
       local: grunt.file.exists('local-config.json') ? grunt.file.readJSON('local-config.json') : {}
     },
-    loadGruntTasks: {
-      pattern: 'grunt-*',
-      config: 'package.json',
-      scope: 'devDependencies'
+    jitGrunt: {
+      staticMappings: {
+        express: 'grunt-express-server',
+        hash_require: 'grunt-hash-required',
+        buildcontrol: 'grunt-build-control',
+        bower: 'grunt-bower-task'
+      }
     }
   });
 

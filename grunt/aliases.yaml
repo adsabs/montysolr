@@ -131,3 +131,23 @@ release:
     - 'copy:keep_original'
     - 'copy:bumblebee_app'
     - 'assemble'
+
+deploy:
+  tasks:
+    - 'deploy:master'
+    - 'exec:kubernetes-build'
+    - 'release'
+    - 'deploy:kubernetes'
+    - 'exec:return-to-working-branch'
+
+'deploy:master':
+  description: 'deploy master onto build repo'
+  tasks:
+    - 'clean:deploy'
+    - 'buildcontrol:master'
+
+'deploy:kubernetes':
+  description: 'deploy kubernetes onto build repo'
+  tasks:
+    - 'clean:deploy'
+    - 'buildcontrol:kubernetes'
