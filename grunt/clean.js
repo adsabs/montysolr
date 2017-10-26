@@ -11,12 +11,18 @@ module.exports = {
   deploy: {
     src: [
       'dist/**/*',
+      '!dist/index.html',
       '!dist/bumblebee_app.*.js',
       '!dist/styles',
+      '!dist/styles/img',
+      '!dist/styles/img/*',
       '!dist/styles/css',
+      '!dist/styles/css/images',
+      '!dist/styles/css/images/*',
       '!dist/styles/css/styles.*.css',
-      '!dist/index.*.html',
-      'dist/index.original.html',
+      '!dist/libs',
+      '!dist/libs/requirejs',
+      '!dist/libs/requirejs/require.js',
     ]
   },
   bower: {
