@@ -155,8 +155,6 @@ define([
         onRender: function () {
 
           var that = this;
-
-          this.$("#search-form-container").append(SearchFormTemplate);
           /*
             select
            */
@@ -343,22 +341,13 @@ define([
 
         events: {
           "click #field-options button" : "fieldInsert",
-          "click #search-form-container": function (e) {
-            e.stopPropagation();
-          },
           "keyup .q" : "toggleClear",
-          "click #search-form-container .title": "toggleFormSection",
           "click .show-form": "onShowForm",
           "submit form[name=main-query]": "submitQuery",
           "click .icon-clear" : "clearInput",
           "keyup .q" : "storeCursorInfo",
           "select .q" : "storeCursorInfo",
           "click .q" : "storeCursorInfo",
-          "keypress #search-form-container" : function(){
-            //for analytics
-            //this is not exact (might have experimented then closed the builder)
-            this._queryBuilderUsed = true;
-          },
           'click .bigquery-close' : 'clearBigquery'
         },
 
@@ -433,10 +422,6 @@ define([
 
           // show the form
           this.specifyFormWidth();
-        },
-
-        specifyFormWidth: function () {
-          this.$("#search-form-container").width(this.$(".input-group").width());
         },
 
         toggleFormSection: function (e) {
