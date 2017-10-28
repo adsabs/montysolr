@@ -307,7 +307,8 @@ define([
 
 
 
-    it("shows the query builder form on clicking 'Search Form' ", function(done) {
+    // removed query builder ui component for now
+    it.skip("shows the query builder form on clicking 'Search Form' ", function(done) {
       var widget = _widget();
       var $w = widget.render().$el;
       $('#test').append($w);
@@ -328,7 +329,8 @@ define([
 
     });
 
-    it("changing function updates the search input", function() {
+    // removed query builder ui component for now
+    it.skip("changing function updates the search input", function() {
       var widget = _widget();
       var $w = widget.render().$el;
       $('#test').append($w);
