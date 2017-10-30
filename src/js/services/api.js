@@ -199,8 +199,9 @@ define([
       var difference = now.diff(expiration, 'minutes');
       //fewer than 2 minutes before token expires
       if (difference > -2 ){
-        var d = $.Deferred();
-        this.getApiAccess({ tokenRefresh: true }).done(function(){
+        var d = $.Deferred()
+        var opts = { tokenRefresh: true, reconnect: true };
+        this.getApiAccess(opts).done(function(){
           d.resolve(that._request(request, options));
         });
         return d.promise();
