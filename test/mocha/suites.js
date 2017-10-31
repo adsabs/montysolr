@@ -49,7 +49,8 @@ define([
      '/mixins/page-manager-mixin.spec',
      '/mixins/papers_utils.spec',
      '/mixins/openurl_generator.spec',
-     '/mixins/add_secondary_sort.spec'
+     '/mixins/add_secondary_sort.spec',
+     '/mixins/widget_state_manager.spec'
     ],
     'ui': [
      '/page_managers/all_tests.spec.js',
