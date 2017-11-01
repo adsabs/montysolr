@@ -60,10 +60,6 @@ define([
       var $w = widget.render().$el;
       $('#test').append($w);
 
-      //shows loading function by default
-      expect($("#test div div").text().trim()).to.eql("Loading data...");
-
-
       //shows export view if model has "exports"
 
       widget.model.reset();
@@ -80,31 +76,28 @@ define([
       widget.view.render();
 
       //only can change record #s if we have a query
-      expect($("#test").find(".change-rows").text().trim()).to.eql('Change to first\n            \n            record(s) (max is 800).\n             Submit');
+      expect($("#test").find(".change-rows").text().trim()).to.eql('Change to first\n' +
+        '    \n' +
+        '    record(s) (max is 800).\n' +
+        '     Submit');
 
       //will automatically recalculate the "max" value when numFound changes
       widget.model.set("numFound", 80);
 
       widget.view.render();
 
-      expect($("#test").find(".change-rows").text().trim()).to.eql( 'Change to first\n            \n            record(s) (max is 80).\n             Submit');
-
-      //if model has an error, shows that instead of exports
-      widget.model.set("error", "foo");
-
-      expect($("#test div div").hasClass("alert")).to.be.true;
-      expect($("#test div div").text().trim()).to.eql("foo");
-
+      expect($("#test").find(".change-rows").text().trim()).to.eql('Change to first\n' +
+        '    \n' +
+        '    record(s) (max is 80).\n' +
+        '     Submit');
 
       done();
-
     });
 
     it("can be called programatically", function() {
       var widget = _getWidget();
       var $w = widget.render().$el;
       $('#test').append($w);
-
       widget.renderWidgetForListOfBibcodes(['one', 'two'], { format : 'bibtex'});
 
       expect($("#test textarea").text().indexOf('Takatsuka') > -1).to.eql(true);
@@ -112,7 +105,6 @@ define([
 
       widget.model.reset();
       expect($("#test textarea").length).to.eql(0);
-
     });
 
 
