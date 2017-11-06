@@ -64,7 +64,7 @@ define([
               defer.resolve(data);
             },
             fail: function () {
-              defer.reject(arguments);
+              defer.reject.apply(defer, arguments);
             },
             type: 'GET'
           });
