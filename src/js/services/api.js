@@ -217,11 +217,7 @@ define([
       return (difference > -2 ) ? refreshToken() : that._request(request, options);
     };
 
-    _.extend(Api.prototype, Mixin.BeeHive);
-    _.extend(Api.prototype, Hardened);
-    _.extend(Api.prototype, ApiAccess);
-
-
+    _.extend(Api.prototype, Mixin.BeeHive, Hardened, ApiAccess);
 
     return Api
   });

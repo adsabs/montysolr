@@ -64,6 +64,7 @@ define([
         beehive = new BeeHive();
         beehive.addObject("AppStorage", {clearSelectedPapers : sinon.spy()});
         var api = new Api();
+        api.expire_in = Date.now() + 100000000;
         sinon.spy(api, 'request');
         beehive.addService('Api', api);
         var ps = new PubSub();
