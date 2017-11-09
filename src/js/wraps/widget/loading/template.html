@@ -1,7 +1,9 @@
 <div class="loading-container">
+  {{#unless hideCloseButton}}
   <div class="close-widget close-circle">
     <a href="#"><i class="fa fa-times fa-lg"></i></a>
   </div>
+  {{/unless}}
   <div class="loading">
     <div class="loading-icon-{{widgetLoadingSize}} fa fa-spinner fa-spin"></div>
     <div class="loading-text loading-text-{{widgetLoadingSize}}">Loading</div>

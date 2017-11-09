@@ -73,35 +73,8 @@ define([
       if (feedback.request && feedback.request.get('target').indexOf('search') > -1 && feedback.query && !feedback.numFound) {
         var q = feedback.query;
 
-        //TODO: in the future, we can look inside the query and decide whether they would like to expand it by
-        // a) searching fulltext (if there is any unfielded query)
-        // b) modifying phrases and/or operators
+        //TODO: add in generic handler for this error
 
-        var newQuery = q.clone();
-        var msg =  'Your query returned 0 results.&nbsp;<b><a href="#">&nbsp;&nbsp;Try looking at the search examples on the home page</a></b> ' +
-          ' or <b><a href="https://adsabs.github.io/help/search/search-syntax" target="_blank">reading our help page</a>.</b>';
-
-        this.getAlerter().alert(new ApiFeedback({
-          type: Alerts.TYPE.ALERT,
-          msg: msg,
-          events: {
-            'click a#query-assistant': 'query-assistant'
-          }
-        }))
-          .done(function(name) {
-            if (name == 'query-assistant') {
-              var q = newQuery.get('q').join(' ');
-              app.getWidget('SearchWidget')
-                .done(function(widget) {
-                  if (q) {
-                    widget.openQueryAssistant(q);
-                  }
-                  else {
-                    widget.openQueryAssistant('ooops, the query is complex (we are not yet ready for that)');
-                  }
-                });
-            }
-          });
         return; // do not bother with the rest
       }
 
