@@ -189,8 +189,23 @@ define([
     Api.prototype.request = function(request, options) {
 
       var that = this;
+      var refreshRetries = 3;
+      var refreshToken = function () {
+        var d = $.Deferred();
+        var req = that.getApiAccess({ tokenRefresh: true, reconnect: true });
+        req.done(function () {
+          d.resolve(that._request(request, options));
+        });
+        req.fail(function () {
+          (--refreshRetries > 0) ?
+            _.delay(refreshToken, 1000) : d.reject.apply(d, arguments);
+        });
+        return d.promise();
+      };
 
-      if (!this.expire_in) return that._request(request, options);
+      if (!this.expire_in) {
+        return refreshToken();
+      }
 
       //expire_in is in UTC, not local time
       var expiration = Moment.utc(this.expire_in);
@@ -198,24 +213,11 @@ define([
 
       var difference = now.diff(expiration, 'minutes');
       //fewer than 2 minutes before token expires
-      if (difference > -2 ){
-        var d = $.Deferred();
-        this.getApiAccess({ tokenRefresh: true }).done(function(){
-          d.resolve(that._request(request, options));
-        });
-        return d.promise();
-      }
-      else {
-        return that._request(request, options);
-      }
 
+      return (difference > -2 ) ? refreshToken() : that._request(request, options);
     };
 
-    _.extend(Api.prototype, Mixin.BeeHive);
-    _.extend(Api.prototype, Hardened);
-    _.extend(Api.prototype, ApiAccess);
-
-
+    _.extend(Api.prototype, Mixin.BeeHive, Hardened, ApiAccess);
 
     return Api
   });

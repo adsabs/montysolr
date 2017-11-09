@@ -20,6 +20,12 @@ define([
   Moment
   ) {
 
+  var __getApi = function (options) {
+    var api = new Api(options);
+    api.expire_in = Date.now() + 10000000;
+    return api;
+  };
+
   describe("Api Service (api.spec.js)", function() {
     beforeEach(function(done) {
       this.server = sinon.fakeServer.create();
@@ -63,7 +69,7 @@ define([
 
     it("should look at the ApiRequest to check whether to send a get (with url data) or post request (with json data)", function(done){
 
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
 
       var q = new ApiQuery({q: 'foo'});
       api.request(new ApiRequest({target: 'search', query: q}));
@@ -85,7 +91,7 @@ define([
     });
 
     it("should allow to override anything via options", function() {
-      var api = new Api({url: '/nonexisting/1'});
+      var api = __getApi({url: '/nonexisting/1'});
       var q = new ApiQuery({q: 'foo'});
       var spy = sinon.spy();
       api.request(new ApiRequest({target: 'search', query: q}), {url: 'http://foo.dot.com'})
@@ -101,7 +107,7 @@ define([
     });
 
     it("should call appropriate callback upon arrival of data", function(done) {
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
       sinon.stub(api, 'trigger');
       var q = new ApiQuery({q: 'foo'});
 
@@ -118,7 +124,7 @@ define([
     });
 
     it("should call error handlers on failed request", function(done) {
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
       sinon.stub(api, 'trigger');
       var q = new ApiQuery({q: 'foo'});
 
@@ -136,7 +142,7 @@ define([
     });
 
     it("should call error handlers when response is not valid", function() {
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
       sinon.stub(api, 'trigger');
       var q = new ApiQuery({q: 'foo'});
 
@@ -153,7 +159,7 @@ define([
     });
 
     it("should call 'always' handler (even if redefined)", function() {
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
       var spy = sinon.spy();
       sinon.spy(api, 'always', api.always);
       var q = new ApiQuery({q: 'foo'});
@@ -169,7 +175,7 @@ define([
     });
 
     it("should call 'done' handler (even if redefined)", function() {
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
       var spy = sinon.spy();
       sinon.spy(api, 'done', api.done);
       var q = new ApiQuery({q: 'foo'});
@@ -185,7 +191,7 @@ define([
 
     it("should automatically request a new token if there is less than 2 minutes before token expiration", function(){
 
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
 
       api.access_token = 'foo';
       api.expire_in = "2016-08-16T18:12:00"
@@ -229,7 +235,7 @@ define([
     });
 
     it("should correctly reset the token if it has expired", function () {
-      var api = new Api({url: '/api/1'});
+      var api = __getApi({url: '/api/1'});
       sinon.stub(api, 'getBeeHive', function () {
         return {
           getService: function () {
@@ -262,7 +268,7 @@ define([
         ajaxSpy.restore();
       });
       it("Should set appropriate options", function() {
-        var api = new Api({url: '/api/1'});
+        var api = __getApi({url: '/api/1'});
         var q = new ApiQuery({q: 'foo'});
         var spy = sinon.spy();
         expect(api.request(new ApiRequest({target: 'search', query: q}),
@@ -361,7 +367,7 @@ define([
     // this.pending = !window.bbbTest.serverReady;
 
     it("should retrieve data from server using GET and POST (default)", function(done) {
-      var api = new Api({url: '/api/1'}); // url is there, but i want to be explicit
+      var api = __getApi({url: '/api/1'}); // url is there, but i want to be explicit
       var q = new ApiQuery({q: 'foo'});
       var spy = sinon.spy();
 
