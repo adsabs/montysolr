@@ -153,7 +153,6 @@ define([
         },
 
         onRender: function () {
-
           var that = this;
           /*
             select
@@ -361,7 +360,7 @@ define([
           }
         },
 
-        clearInput : function(e){
+        clearInput : function(){
           this.$input.val("");
           this.toggleClear();
         },
@@ -552,7 +551,6 @@ define([
         },
 
         submitQuery: function(e) {
-
           var fields, fielded, query;
 
           e.preventDefault();
@@ -591,7 +589,6 @@ define([
             }));
             return;
           }
-
           this.trigger("start_search", newQuery);
 
           //let analytics know what type of query it was
@@ -646,6 +643,8 @@ define([
           this.listenTo(this.view, "start_search", function (query) {
             this.changeDefaultSort(query);
             this.navigate(query);
+            this.updateState('loading');
+            this.view.setFormVal(query.get('q'));
           });
 
           this.listenTo(this.view, "clear_big_query", function (query) {
@@ -660,7 +659,10 @@ define([
           });
 
           this.listenTo(this.view, "render", function () {
-            var newQueryString;
+            if (this.model.get('loading')) {
+              return;
+            }
+            var newQueryString = '';
             var query = this.getCurrentQuery();
             var oldQueryString = query.get('q');
 
@@ -668,7 +670,7 @@ define([
               // Grab the original (no simbid refs) query string for the view
               // This is re-run here in case the view is not updated and
               // simbid refs show up
-              var newQueryString = query.get("__original_query") ?
+              newQueryString = query.get("__original_query") ?
                 query.get("__original_query")[0] : oldQueryString.join(" ");
             }
 
@@ -683,6 +685,7 @@ define([
 
         activate: function (beehive) {
           this.setBeeHive(beehive);
+          this.activateWidget();
           var pubsub = this.getPubSub();
 
           // search widget doesn't need to execute queries (but it needs to listen to them)
@@ -739,6 +742,7 @@ define([
             });
 
             this.view.setFormVal(newq);
+            this.updateState('idle');
           }
         },
 
@@ -789,6 +793,14 @@ define([
         onDestroy: function () {
           this.view.queryBuilder.destroy();
           this.view.destroy();
+        },
+
+        onLoading: function () {
+          this.model.set('loading', true);
+        },
+
+        onIdle: function () {
+          this.model.set('loading', false);
         }
       });
 
