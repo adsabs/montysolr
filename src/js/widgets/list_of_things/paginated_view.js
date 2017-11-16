@@ -17,7 +17,8 @@ define([
     'hbs!js/widgets/list_of_things/templates/initial-view-template',
     './item_view',
     'analytics',
-    'mathjax'
+    'mathjax',
+    'hbs!js/wraps/widget/loading/template'
   ],
 
   function (
@@ -34,7 +35,8 @@ define([
             InitialViewTemplate,
             ItemView,
             analytics,
-            MathJax
+            MathJax,
+            loadingTemplate
     ) {
 
     /**
@@ -57,6 +59,18 @@ define([
       }
     });
 
+    var EmptyView = Marionette.ItemView.extend({
+      template: function (data) {
+        if (data.query) {
+          return EmptyViewTemplate(data);
+        }
+        return loadingTemplate(_.extend(data, {
+          widgetLoadingSize: 'big',
+          hideCloseButton: true
+        }));
+      }
+    });
+
     /**
      * This is the main view of the list of things. A composite
      * view that holds collection of items.
@@ -64,17 +78,10 @@ define([
     var ListOfThingsView = Marionette.CompositeView.extend({
 
       childView : ItemView,
+      emptyView: EmptyView,
 
       initialize: function (options) {
-        this.EmptyViewClass = Marionette.ItemView.extend({
-          template: EmptyViewTemplate
-        });
-        this.InitialViewClass = Marionette.ItemView.extend({
-          template: InitialViewTemplate
-        });
-
         this.model = new MainViewModel();
-
       },
 
       serializeData : function(){
@@ -98,13 +105,13 @@ define([
       
       alreadyRendered: false,
 
-      getEmptyView: function () {
-        if (this.alreadyRendered)
-          return this.EmptyViewClass;
-        else {
-          this.alreadyRendered = true;
-          return this.InitialViewClass;
-        }
+      emptyViewOptions: function (model) {
+        var query = this.model.get('query');
+        query = query && query[0];
+        model.set('query', query);
+        return {
+          model: model
+        };
       },
 
       childViewContainer: ".results-list",
@@ -215,8 +222,6 @@ define([
         if (val === this.model.get("perPage")) return;
         this.trigger("pagination:changePerPage", val)
       }
-
-
     });
 
 

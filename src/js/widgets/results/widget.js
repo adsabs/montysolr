@@ -118,7 +118,6 @@ define([
         }
       },
 
-
       onCustomEvent : function(event){
         if (event == "add-all-on-page"){
           var bibs = this.collection.pluck("bibcode");
@@ -129,7 +128,8 @@ define([
 
       dispatchRequest: function(apiQuery) {
         this.reset();
-          ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
+        this.setCurrentQuery(apiQuery);
+        ListOfThingsWidget.prototype.dispatchRequest.call(this, apiQuery);
       },
 
       customizeQuery: function (apiQuery) {

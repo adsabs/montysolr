@@ -467,7 +467,7 @@ define([
     });
     // Internally, 'object:' queries get translated into 'simbid:' queries (because this is what the Solr documents contain)
     // but since SIMBAD identifiers are meaningless to the user, we need to keep the original 'object' query visible in the UI
-    it("check if the SIMBAD 'object:' search stays the way it is", function() {
+    it.skip("check if the SIMBAD 'object:' search stays the way it is", function() {
       var widget = _widget();
       $("#test").append(widget.render().el);
       var $w = widget.render().$el;
@@ -476,6 +476,7 @@ define([
       $w.find(".q").val("bibstem:ApJ object:Foo year:2001");
       $w.find(".search-submit").click();
       console.log($w.find(".s-num-found").html().trim());
+      // todo: finish implementing this test
     });
 
     // Wait on element value to be updated (max of 2500ms), returns promise

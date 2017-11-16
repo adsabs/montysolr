@@ -84,14 +84,14 @@ define([
       widget.activate(minsub.beehive.getHardenedInstance());
       $("#test").append(widget.getEl());
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:bar'}));
-      expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":25,"numFound":841359,"currentQuery":{"q":["bibcode:bar"],"fl":["title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract"],"rows":[25],"start":[0]},"pageData":{"perPage":25,"totalPages":33655,"currentPage":1,"previousPossible":false,"nextPossible":true},"bibcode":"bar","page":0,"showRange":[0,24],"loading":false}');
+      expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":25,"numFound":841359,"currentQuery":{"q":["bibcode:bar"],"fl":["title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract"],"rows":[25],"start":[0]},"pageData":{"perPage":25,"totalPages":33655,"currentPage":1,"previousPossible":false,"nextPossible":true},"bibcode":"bar","query":false,"page":0,"showRange":[0,24],"loading":false}');
 
      //go to second page
       $(".page-control.next-page").click();
       expect(widget.model.get("pageData")).to.eql({perPage: 25, totalPages: 33655, currentPage: 2, previousPossible: true, nextPossible: true});
       minsub.publish(minsub.DISPLAY_DOCUMENTS, new ApiQuery({'q': 'bibcode:anotherbibcode'}));
       expect(widget.model.get("pageData")).to.eql({perPage: 25, totalPages: 10628, currentPage: 1, previousPossible: false, nextPossible: true});
-      expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":25,"numFound":265682,"currentQuery":{"q":["bibcode:anotherbibcode"],"fl":["title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract"],"rows":[25],"start":[0]},"pageData":{"perPage":25,"totalPages":10628,"currentPage":1,"previousPossible":false,"nextPossible":true},"bibcode":"anotherbibcode","page":0,"showRange":[0,24],"loading":false}');
+      expect(JSON.stringify(widget.model.toJSON())).to.eql('{"mainResults":false,"showAbstract":"closed","showHighlights":false,"pagination":true,"start":0,"perPage":25,"numFound":265682,"currentQuery":{"q":["bibcode:anotherbibcode"],"fl":["title,bibcode,author,keyword,pub,aff,volume,year,links_data,[citations],property,pubdate,abstract"],"rows":[25],"start":[0]},"pageData":{"perPage":25,"totalPages":10628,"currentPage":1,"previousPossible":false,"nextPossible":true},"bibcode":"anotherbibcode","query":false,"page":0,"showRange":[0,24],"loading":false}');
 
 
       $("#test").empty();

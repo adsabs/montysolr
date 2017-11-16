@@ -84,3 +84,14 @@ $base-loading-text-size: 1em;
 div[data-widget="ShowPaperExport"] .close-circle {
   display: none;
 }
+
+.results-feedback-button {
+  margin-top: 0 !important;
+}
+
+.col-center-block {
+  float: none;
+  display: inline-block;
+  margin: 0 20px;
+  text-align: left;
+}

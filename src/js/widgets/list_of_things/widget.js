@@ -140,6 +140,9 @@ define([
             this.hiddenCollection.showRange(pagination.showRange[0], pagination.showRange[1]);
           }
           this.view.collection.reset(this.hiddenCollection.getVisibleModels());
+          this.view.model.set('query', false);
+        } else {
+          this.view.model.set('query', apiResponse.getApiQuery().get('q'));
         }
 
         // XXX:rca - hack, to be solved later
@@ -376,7 +379,10 @@ define([
         this.collection.reset();
         this.hiddenCollection.reset();
         //reset the model, favoring values in this.pagination
-        this.model.set(_.defaults(this.pagination, this.model.defaults()));
+        this.model.set(_.defaults({
+          currentQuery: this.getCurrentQuery(),
+          query: false
+        }, this.pagination, this.model.defaults()));
       }
 
     });
