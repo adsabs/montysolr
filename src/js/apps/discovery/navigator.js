@@ -70,7 +70,7 @@ define([
         ];
 
         var detailsPageAlwaysVisible = [
-          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowRecommender', 'ShowGraphicsSidebar', 'ShowLibraryAdd',
+          'TOCWidget', 'SearchWidget', 'ShowResources', 'ShowGraphicsSidebar', 'ShowLibraryAdd',
           'MetaTagsWidget'
         ];
 
