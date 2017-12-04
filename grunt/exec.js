@@ -24,6 +24,9 @@ module.exports = {
   convert_enzyme: {
     cmd: "mkdir src/libs/enzyme && ./node_modules/.bin/browserify --standalone enzyme -x 'react/addons' -x 'react/lib/ReactContext' -x 'react/lib/ExecutionEnvironment' node_modules/enzyme/build/index.js > src/libs/enzyme/enzyme.js"
   },
+  convert_redux_mock_store: {
+    cmd: 'node node_modules/.bin/r.js -convert src/libs/redux-mock-store src/libs/redux-mock-store'
+  },
   'nyc-instrument': {
     cmd: 'node_modules/.bin/nyc instrument src/js/ test/coverage/instrument'
   },

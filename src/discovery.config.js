@@ -25,11 +25,6 @@ require.config({
       modules: undefined
     },
 
-    'js/widgets/export/widget': {
-      url: 'http://adsabs-classic-exports-service.elasticbeanstalk.com',
-      target: '/'
-    },
-
     'js/components/persistent_storage': {
       // the unique namespace under which the local storage will be created
       // so every new instance of the storage will be saving its data into
@@ -97,7 +92,7 @@ require.config({
         Results: 'js/widgets/results/widget',
         QueryInfo: 'js/widgets/query_info/query_info_widget',
         QueryDebugInfo: 'js/widgets/api_query/widget',
-        ExportWidget  : 'js/widgets/export/widget',
+        ExportWidget  : 'es6!js/widgets/export/widget.jsx',
         Sort : 'js/widgets/sort/widget',
         ExportDropdown : 'js/wraps/export_dropdown',
         VisualizationDropdown : 'js/wraps/visualization_dropdown',
@@ -208,7 +203,7 @@ require.config({
     'mocha': 'libs/mocha/mocha',
     'moment' : 'libs/momentjs/moment',
     'persist-js': 'libs/persist-js/src/persist',
-    'react' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-with-addons.min',
+    'react' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-with-addons',
     'react-backbone': 'libs/react-backbone/react.backbone',
     'react-dom' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min',
     'react-prop-types': 'libs/react-prop-types/index',
