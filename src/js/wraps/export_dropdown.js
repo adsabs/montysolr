@@ -16,6 +16,7 @@ define([
     { description : 'in RIS' , navEvent: 'export', params : {format: "ris"}},
     { description : 'in ADS Classic' , navEvent: 'export', params : {format: "classic"}},
     { description : 'Author Affiliation' , navEvent: 'show-author-affiliation-tool' }
+    { description : 'Other Formats' , navEvent: 'export', params : {format: "other"}}
 
     // deactivated, needs the myads microservice
     //{href : '/export/query' , description : 'Export Query' , navEvent: 'export-query'}
