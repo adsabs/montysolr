@@ -2,9 +2,8 @@
 .s-export-data {
   width:100%;
   font-family: $font-family-monospace;
-  display: block;
   margin-top: 20px;
-  height: 400px;
+  height: 300px;
   border: 2px solid lighten($gray-light, 20%);
   border-radius: $border-radius-large;
   padding: 10px;
@@ -23,4 +22,35 @@ div[data-widget="ShowPaperExport"]{
   .s-large-close {
     display:none;
   }
+}
+
+.export-textarea {
+  width: 100%;
+  min-height: 400px;
+  background-color: darken(white, 10);
+  color: lighten(black, 50);
+  resize: vertical;
+}
+
+.export-container {
+  padding-top: 2em;
+}
+
+.export-container .row {
+  margin-top: 1.4em;
+}
+
+.export-setup-cog {
+  font-size: 1.4em;
+}
+
+.export-progress {
+  @include make-row();
+  margin-top: -15px;
+  margin-bottom: 31px;
+  height: 5px;
+}
+
+.export-loading-icon {
+  margin-top: 30px;
 }
