@@ -301,7 +301,8 @@ define([
           expect(publishStub.args[0][1].toJSON()).to.eql({
             "q": [
               "author:(\"Name, Variation 1\" OR \"Name, Variation 2\" OR \"Hostetler, Tim\")"
-            ]
+            ],
+            "sort": ["date desc"]
           });
 
           done();
