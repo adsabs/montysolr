@@ -48,7 +48,7 @@ define([
         }
 
         //default
-        expect($("#test").find("#sort-select").val()).to.eql("citation_count desc");
+        expect($("#test").find("#sort-select").val()).to.eql("author_count desc");
 
         minsub.publish(minsub.FEEDBACK, fakeFeedback);
 
