@@ -796,7 +796,7 @@
       test: TestAdsabsTypeNormalizedStringAscii
      -->
 
-		<fieldType name="normalized_string_ascii" class="solr.TextField">
+		<fieldType name="normalized_text_ascii_notokenization" class="solr.TextField">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
@@ -929,7 +929,7 @@
 	                    <field>_regex
 
 	                    Usually, these are only safe to use with the simple types,
-	                    such as normalized_string_ascii. You can't hope to get
+	                    such as normalized_text_ascii_notokenization. You can't hope to get
 	                    a meaningful results if you try to use ads_text for example.
 	                    Besided, these fields should produce ONLY one token (1 in,
 	                    1 out)
@@ -1030,7 +1030,7 @@
 		<field name="identifier" type="identifier_string" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="alternate_bibcode" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="alternate_bibcode" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}"
@@ -1095,22 +1095,22 @@
 	    <field name="eid" type="normalized_string" indexed="true" stored="true"
             multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="year" type="normalized_string" indexed="true" stored="true"
+		<field name="year" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 			multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="volume" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="volume" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="issue" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="issue" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="issn" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="issn" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="isbn" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="isbn" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="lang" type="normalized_string_ascii" indexed="true" stored="${storeAll:false}"
+		<field name="lang" type="normalized_text_ascii_notokenization" indexed="true" stored="${storeAll:false}"
 			omitNorms="true" omitTermFreqAndPositions="true"/>
 
 
@@ -1138,7 +1138,7 @@
 		<field name="author" type="author" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
 
-		<field name="author_norm" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="author_norm" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true"/>
 
 		<field name="author_facet" type="string" indexed="true" stored="${storeAll:false}"
@@ -1155,7 +1155,7 @@
 
 		<field name="first_author" type="author" indexed="true" stored="true" />
 
-		<field name="first_author_norm" type="normalized_string_ascii"
+		<field name="first_author_norm" type="normalized_text_ascii_notokenization"
 			indexed="true" stored="true" />
 
 		<field name="aff" type="affiliation_text" indexed="true" stored="true"
@@ -1249,13 +1249,13 @@
 
 
 
-		<field name="property" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="property" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="database" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="database" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="bibgroup" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="bibgroup" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="bibgroup_facet" type="string" indexed="true"	stored="${storeAll:false}"
@@ -1267,7 +1267,7 @@
 		<field name="data_facet" type="string" indexed="true"	stored="${storeAll:false}"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
-		<field name="vizier" type="normalized_string_ascii" indexed="true" stored="true"
+		<field name="vizier" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="vizier_facet" type="string" indexed="true"	stored="${storeAll:false}"
@@ -1564,10 +1564,10 @@
 	    <field name="pub_wildcard" type="normalized_text_ascii"
 	      indexed="false" stored="false" required="false" multiValued="false" />
 	
-	    <field name="issn_wildcard" type="normalized_string_ascii"
+	    <field name="issn_wildcard" type="normalized_text_ascii_notokenization"
 	      indexed="false" stored="false" multiValued="false"/>
 	
-	    <field name="isbn_wildcard" type="normalized_string_ascii"
+	    <field name="isbn_wildcard" type="normalized_text_ascii_notokenization"
 	      indexed="false" stored="false" required="false" multiValued="false" />
 
 		<field name="author_notrans" type="author_short_name_rage"
@@ -1585,7 +1585,7 @@
 	    <field name="author_collector" type="author_collector"
 	        indexed="false" stored="false" multiValued="true" />
 	
-	    <field name="reference_wildcard" type="normalized_string_ascii"
+	    <field name="reference_wildcard" type="normalized_text_ascii_notokenization"
             indexed="false" stored="false" required="false" />
 
 		<!--
@@ -1609,7 +1609,7 @@
 	      @since v61.1.0.1
 		-->
 		
-		<field name="doctype" type="normalized_string_ascii"
+		<field name="doctype" type="normalized_text_ascii_notokenization"
 	      indexed="true" stored="true" required="false" />
 	      
 	    <field name="doctype_facet_hier" type="string" indexed="true"
