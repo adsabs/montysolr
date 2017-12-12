@@ -280,9 +280,6 @@ input.hasbigquery {
   z-index: 4;
   width: 145px;
   left: 10px;
-  @media (min-width: $screen-sm-min ){
-    left: 110px;
-  }
 }
 
 .bigquery-tag span {
