@@ -250,27 +250,26 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
     try {
       source = analyzer.tokenStream("author_short_name_rage", new StringReader(origInput));
       source.reset();
-    } catch (IOException e1) {
+      
+      CharTermAttribute termAtt = source.getAttribute(CharTermAttribute.class);
+      
+      List<String> synonyms = new ArrayList<String>();
+      while (source.incrementToken()) {
+        synonyms.add(termAtt.toString());
+      }
+      
+      if (synonyms.size()<2) { // the first one is the original
+        return null;
+      }
+      synonyms.remove(0);
+      
+      return synonyms.toArray(new String[synonyms.size()]);
+      
+    } finally {
     	if (source != null)
         source.close();
-      throw new RuntimeException(e1);
     }
     
-    
-    CharTermAttribute termAtt = source.getAttribute(CharTermAttribute.class);
-    
-    List<String> synonyms = new ArrayList<String>();
-    while (source.incrementToken()) {
-      synonyms.add(termAtt.toString());
-    }
-    source.close();
-    
-    if (synonyms.size()<2) { // the first one is the original
-      return null;
-    }
-    synonyms.remove(0);
-    
-    return synonyms.toArray(new String[synonyms.size()]);
   }
   
   private boolean isLongForm(String name) {

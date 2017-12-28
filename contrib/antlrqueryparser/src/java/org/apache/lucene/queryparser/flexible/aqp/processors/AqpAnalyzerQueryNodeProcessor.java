@@ -129,254 +129,265 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
       String text = fieldNode.getTextAsString();
       String field = fieldNode.getFieldAsString();
 
-      TokenStream source;
+      TokenStream source = null;
+      CachingTokenFilter buffer = null;
+      
       try {
         source = this.analyzer.tokenStream(field, new StringReader(text));
         source.reset();
-      } catch (IOException e1) {
-        throw new RuntimeException(e1);
-      }
-      CachingTokenFilter buffer = new CachingTokenFilter(source);
-
-      PositionIncrementAttribute posIncrAtt = null;
-      int numTokens = 0;
-      int positionCount = 0;
-      boolean severalTokensAtSamePosition = false;
-
-      if (buffer.hasAttribute(PositionIncrementAttribute.class)) {
-        posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
-      }
-
-      TypeAttribute typeAtt = null;
-      if (buffer.hasAttribute(TypeAttribute.class)) {
-        typeAtt = buffer.getAttribute(TypeAttribute.class);
-      }
-
-      try {
-
+        buffer = new CachingTokenFilter(source); //TODO: use reusable strategy?
+  
+        PositionIncrementAttribute posIncrAtt = null;
+        int numTokens = 0;
+        int positionCount = 0;
+        boolean severalTokensAtSamePosition = false;
+  
+        if (buffer.hasAttribute(PositionIncrementAttribute.class)) {
+          posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
+        }
+  
+        TypeAttribute typeAtt = null;
+        if (buffer.hasAttribute(TypeAttribute.class)) {
+          typeAtt = buffer.getAttribute(TypeAttribute.class);
+        }
+  
+        
         while (buffer.incrementToken()) {
           numTokens++;
           int positionIncrement = (posIncrAtt != null) ? posIncrAtt
               .getPositionIncrement() : 1;
           if (positionIncrement != 0) {
             positionCount += positionIncrement;
-
+  
           } else {
             severalTokensAtSamePosition = true;
           }
-
+  
         }
-
-      } catch (IOException e) {
-        // ignore
-      }
-
-      try {
+  
+        
+  
         // rewind the buffer stream
         buffer.reset();
-
+  
         // close original stream - all tokens buffered
         source.close();
-      } catch (IOException e) {
-        // ignore
-      }
-
-      if (!buffer.hasAttribute(CharTermAttribute.class)) {
-        return new NoTokenFoundQueryNode();
-      }
-
-      CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
-
-      int offsetStart = -1;
-      int offsetEnd = -1;
-      OffsetAttribute offsetAtt;
-      if (buffer.hasAttribute(OffsetAttribute.class)) {
-        offsetAtt = buffer.getAttribute(OffsetAttribute.class);
-      } else {
-        offsetAtt = null;
-      }
-
-      if (numTokens == 0) {
-        return new NoTokenFoundQueryNode();
-
-      } else if (numTokens == 1) {
-        String term = null;
-        try {
-          boolean hasNext;
-          hasNext = buffer.incrementToken();
-          assert hasNext == true;
-          term = termAtt.toString();
-
-        } catch (IOException e) {
-          // safe to ignore, because we know the number of tokens
+        source = null;
+  
+        if (!buffer.hasAttribute(CharTermAttribute.class)) {
+          return new NoTokenFoundQueryNode();
         }
-
-        fieldNode.setText(term);
-        if (offsetAtt != null) {
-          fieldNode.setBegin(queryStart + offsetAtt.startOffset());
-          fieldNode.setEnd(queryStart + offsetAtt.endOffset());
-        }
-        if (typeAtt != null)
-          fieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-        return fieldNode;
-
-      } else if (severalTokensAtSamePosition
-          || !(node instanceof QuotedFieldQueryNode)) {
-        if (positionCount == 1 || !(node instanceof QuotedFieldQueryNode)) {
-          // no phrase query:
-          LinkedList<QueryNode> children = new LinkedList<QueryNode>();
-
-          for (int i = 0; i < numTokens; i++) {
-            String term = null;
-            offsetStart = offsetEnd = -1;
-            try {
-              boolean hasNext = buffer.incrementToken();
-              assert hasNext == true;
-              term = termAtt.toString();
-              if (offsetAtt != null) {
-                offsetStart = queryStart + offsetAtt.startOffset();
-                offsetEnd = queryStart + offsetAtt.endOffset();
-              }
-
-            } catch (IOException e) {
-              // safe to ignore, because we know the number of tokens
-            }
-
-            FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
-                offsetEnd);
-            if (typeAtt != null)
-              fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-            children.add(fq);
-
-          }
-          return new GroupQueryNode(new StandardBooleanQueryNode(children,
-              positionCount == 1));
+  
+        CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
+  
+        int offsetStart = -1;
+        int offsetEnd = -1;
+        OffsetAttribute offsetAtt;
+        if (buffer.hasAttribute(OffsetAttribute.class)) {
+          offsetAtt = buffer.getAttribute(OffsetAttribute.class);
         } else {
-          // phrase query:
-          MultiPhraseQueryNode mpq = new MultiPhraseQueryNode();
-
-          List<FieldQueryNode> multiTerms = new ArrayList<FieldQueryNode>();
-          int position = -1;
-          int i = 0;
-          int termGroupCount = 0;
-
-          for (; i < numTokens; i++) {
-            String term = null;
-            offsetStart = offsetEnd = -1;
-            int positionIncrement = 1;
-            String tokenType = null;
-            try {
-              boolean hasNext = buffer.incrementToken();
-              assert hasNext == true;
-              term = termAtt.toString();
-              if (posIncrAtt != null) {
-                positionIncrement = posIncrAtt.getPositionIncrement();
-              }
-              if (offsetAtt != null) {
-                offsetStart = queryStart + offsetAtt.startOffset();
-                offsetEnd = queryStart + offsetAtt.endOffset();
-              }
-              if (typeAtt != null)
-                tokenType = typeAtt.type();
-            } catch (IOException e) {
-              // safe to ignore, because we know the number of tokens
-            }
-
-            if (positionIncrement > 0 && multiTerms.size() > 0) {
-
-              for (FieldQueryNode termNode : multiTerms) {
-
-                if (this.positionIncrementsEnabled) {
-                  termNode.setPositionIncrement(position);
-                } else {
-                  termNode.setPositionIncrement(termGroupCount);
-                }
-
-                mpq.add(termNode);
-
-              }
-
-              // Only increment once for each "group" of
-              // terms that were in the same position:
-              termGroupCount++;
-
-              multiTerms.clear();
-
-            }
-
-            position += positionIncrement;
-            FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
-                offsetEnd);
-            fq.setTag(TYPE_ATTRIBUTE, tokenType);
-            multiTerms.add(fq);
-
-          }
-
-          for (FieldQueryNode termNode : multiTerms) {
-
-            if (this.positionIncrementsEnabled) {
-              termNode.setPositionIncrement(position);
-
-            } else {
-              termNode.setPositionIncrement(termGroupCount);
-            }
-
-            mpq.add(termNode);
-
-          }
-
-          return mpq;
-
+          offsetAtt = null;
         }
-
-      } else {
-
-        TokenizedPhraseQueryNode pq = new TokenizedPhraseQueryNode();
-
-        int position = -1;
-
-        for (int i = 0; i < numTokens; i++) {
+  
+        if (numTokens == 0) {
+          return new NoTokenFoundQueryNode();
+  
+        } else if (numTokens == 1) {
           String term = null;
-          int positionIncrement = 1;
-          offsetStart = offsetEnd = -1;
-
           try {
-            boolean hasNext = buffer.incrementToken();
+            boolean hasNext;
+            hasNext = buffer.incrementToken();
             assert hasNext == true;
             term = termAtt.toString();
-
-            if (posIncrAtt != null) {
-              positionIncrement = posIncrAtt.getPositionIncrement();
-            }
-
-            if (offsetAtt != null) {
-              offsetStart = queryStart + offsetAtt.startOffset();
-              offsetEnd = queryStart + offsetAtt.endOffset();
-            }
-
+  
           } catch (IOException e) {
             // safe to ignore, because we know the number of tokens
           }
-
-          FieldQueryNode newFieldNode = new FieldQueryNode(field, term,
-              offsetStart, offsetEnd);
-          if (typeAtt != null)
-            newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-
-          if (this.positionIncrementsEnabled) {
-            position += positionIncrement;
-            newFieldNode.setPositionIncrement(position);
-
-          } else {
-            newFieldNode.setPositionIncrement(i);
+  
+          fieldNode.setText(term);
+          if (offsetAtt != null) {
+            fieldNode.setBegin(queryStart + offsetAtt.startOffset());
+            fieldNode.setEnd(queryStart + offsetAtt.endOffset());
           }
-
-          pq.add(newFieldNode);
-
+          if (typeAtt != null)
+            fieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+          return fieldNode;
+  
+        } else if (severalTokensAtSamePosition
+            || !(node instanceof QuotedFieldQueryNode)) {
+          if (positionCount == 1 || !(node instanceof QuotedFieldQueryNode)) {
+            // no phrase query:
+            LinkedList<QueryNode> children = new LinkedList<QueryNode>();
+  
+            for (int i = 0; i < numTokens; i++) {
+              String term = null;
+              offsetStart = offsetEnd = -1;
+              try {
+                boolean hasNext = buffer.incrementToken();
+                assert hasNext == true;
+                term = termAtt.toString();
+                if (offsetAtt != null) {
+                  offsetStart = queryStart + offsetAtt.startOffset();
+                  offsetEnd = queryStart + offsetAtt.endOffset();
+                }
+  
+              } catch (IOException e) {
+                // safe to ignore, because we know the number of tokens
+              }
+  
+              FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
+                  offsetEnd);
+              if (typeAtt != null)
+                fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+              children.add(fq);
+  
+            }
+            return new GroupQueryNode(new StandardBooleanQueryNode(children,
+                positionCount == 1));
+          } else {
+            // phrase query:
+            MultiPhraseQueryNode mpq = new MultiPhraseQueryNode();
+  
+            List<FieldQueryNode> multiTerms = new ArrayList<FieldQueryNode>();
+            int position = -1;
+            int i = 0;
+            int termGroupCount = 0;
+  
+            for (; i < numTokens; i++) {
+              String term = null;
+              offsetStart = offsetEnd = -1;
+              int positionIncrement = 1;
+              String tokenType = null;
+              try {
+                boolean hasNext = buffer.incrementToken();
+                assert hasNext == true;
+                term = termAtt.toString();
+                if (posIncrAtt != null) {
+                  positionIncrement = posIncrAtt.getPositionIncrement();
+                }
+                if (offsetAtt != null) {
+                  offsetStart = queryStart + offsetAtt.startOffset();
+                  offsetEnd = queryStart + offsetAtt.endOffset();
+                }
+                if (typeAtt != null)
+                  tokenType = typeAtt.type();
+              } catch (IOException e) {
+                // safe to ignore, because we know the number of tokens
+              }
+  
+              if (positionIncrement > 0 && multiTerms.size() > 0) {
+  
+                for (FieldQueryNode termNode : multiTerms) {
+  
+                  if (this.positionIncrementsEnabled) {
+                    termNode.setPositionIncrement(position);
+                  } else {
+                    termNode.setPositionIncrement(termGroupCount);
+                  }
+  
+                  mpq.add(termNode);
+  
+                }
+  
+                // Only increment once for each "group" of
+                // terms that were in the same position:
+                termGroupCount++;
+  
+                multiTerms.clear();
+  
+              }
+  
+              position += positionIncrement;
+              FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
+                  offsetEnd);
+              fq.setTag(TYPE_ATTRIBUTE, tokenType);
+              multiTerms.add(fq);
+  
+            }
+  
+            for (FieldQueryNode termNode : multiTerms) {
+  
+              if (this.positionIncrementsEnabled) {
+                termNode.setPositionIncrement(position);
+  
+              } else {
+                termNode.setPositionIncrement(termGroupCount);
+              }
+  
+              mpq.add(termNode);
+  
+            }
+  
+            return mpq;
+  
+          }
+  
+        } else {
+  
+          TokenizedPhraseQueryNode pq = new TokenizedPhraseQueryNode();
+  
+          int position = -1;
+  
+          for (int i = 0; i < numTokens; i++) {
+            String term = null;
+            int positionIncrement = 1;
+            offsetStart = offsetEnd = -1;
+  
+            try {
+              boolean hasNext = buffer.incrementToken();
+              assert hasNext == true;
+              term = termAtt.toString();
+  
+              if (posIncrAtt != null) {
+                positionIncrement = posIncrAtt.getPositionIncrement();
+              }
+  
+              if (offsetAtt != null) {
+                offsetStart = queryStart + offsetAtt.startOffset();
+                offsetEnd = queryStart + offsetAtt.endOffset();
+              }
+  
+            } catch (IOException e) {
+              // safe to ignore, because we know the number of tokens
+            }
+  
+            FieldQueryNode newFieldNode = new FieldQueryNode(field, term,
+                offsetStart, offsetEnd);
+            if (typeAtt != null)
+              newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+  
+            if (this.positionIncrementsEnabled) {
+              position += positionIncrement;
+              newFieldNode.setPositionIncrement(position);
+  
+            } else {
+              newFieldNode.setPositionIncrement(i);
+            }
+  
+            pq.add(newFieldNode);
+  
+          }
+  
+          return pq;
+  
         }
-
-        return pq;
-
+      } catch (IOException e1) {
+        throw new RuntimeException(e1);
+      } finally {
+        if (source != null) {
+          try {
+            source.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+        if (buffer != null) {
+          try {
+            buffer.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
       }
 
     }
