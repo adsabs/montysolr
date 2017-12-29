@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -96,6 +98,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
       boolean changed = false;
       for (int i=0;i<children.size();i++) {
         doExpansion(origNameInfo, children.get(i), collector, level);
+        
         // interlacing new values right behind the old values
         // it looks stupid (and is dangerous, true...) but i do it
         // to make the results more readable (to show expansion right
@@ -208,6 +211,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
             for (int i=1;i<nameParts.length-1;i++) {
               if (nameParts[i].length()==1 && origNameInfo.parts[i].length()==1) {
                 nn.append(" " + nameParts[i] + "[^\\s]+");
+                parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString(), fqn.getBegin(), fqn.getEnd()));
               }
               else {
                 nn.append(" " + nameParts[i]);
