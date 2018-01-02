@@ -234,6 +234,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     // used google to translate the word "term" to japanese -> ??
     assertQueryEquals("term\u3000term\u3000term", null,
         "term\u0020term\u0020term");
+    setDebug(true);
     assertQueryEqualsAllowLeadingWildcard("??\u3000??\u3000??", null,
         "??\u0020??\u0020??");
   }
