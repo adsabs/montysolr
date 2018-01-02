@@ -1,7 +1,9 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -136,7 +138,25 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
 
 	@Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
-    return node;
+	  if (node instanceof AqpBooleanQueryNode) {
+	    Set<String> seen = new HashSet<String>();
+      List<QueryNode> children = node.getChildren();
+      int i = 0;
+      boolean changed = false;
+      while (i < children.size()) {
+        if (seen.contains(children.get(i).toString())) {
+          children.remove(i);
+          changed = true;
+        }
+        else {
+          seen.add(children.get(i).toString());
+          i += 1;
+        }
+      }
+      if (changed)
+        node.set(children);
+	  }
+	  return node;
   }
 
   @Override
