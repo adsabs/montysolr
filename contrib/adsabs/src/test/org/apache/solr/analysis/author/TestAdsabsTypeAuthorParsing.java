@@ -1504,7 +1504,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     
     //dumpDoc(null, "id", "author");
-    setDebug(true);
+    setDebug(false);
     testAuthorQuery(
         "\"adamčuk, m karel\"", "author:adamčuk, m karel author:adamčuk, m karel * " +
                                 "author:/adamčuk, m[^\\s]+/ " +
@@ -1532,7 +1532,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                 "author:/adamchuk, m[^\\s]+ k/ " +
                                 "author:/adamchuk, m[^\\s]+ k .*/ " +
                                 "author:/adamchuk, m[^\\s]+/ author:/adamcuk, m[^\\s]+/",
-                                 "//*[@numFound='24']"        ,
+                                 "//*[@numFound='24']"        
         
          // "adamčuk, m karel" numFound=24
          //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
@@ -1543,38 +1543,47 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
          //  27 Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
          //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
          //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K 
-                                 
+    );
+    testAuthorQuery(
         "\"adamcuk, m karel\"", "author:adamcuk, m karel author:adamcuk, m karel * " +
+                                "author:/adamcuk, m[^\\s]+/ " +
                                 "author:/adamcuk, m[^\\s]+ karel/ author:/adamcuk, m[^\\s]+ karel .*/ " +
                                 "author:adamcuk, m k author:adamcuk, m k * " +
                                 "author:/adamcuk, m[^\\s]+ k/ author:/adamcuk, m[^\\s]+ k .*/ " +
                                 "author:adamcuk, m author:adamcuk," ,
-                                "//*[@numFound='6']",
+                                "//*[@numFound='8']"
                // If you wonder why it is not the same as above, then know it is because of the
                // special setup - we are testing various situations (study the synonym and ascii
                // upgrade setup to understand details)
                                 
-               // "adamcuk, m karel" numFound=6
+               // "adamcuk, m karel" numFound=8
         //        20  Adamcuk,                21  Adamcuk, M.             24  Adamcuk, Molja Karel   
         //        25  Adamcuk, M Karel        26  Adamcuk, Molja K        27  Adamcuk, M K   
+    );
+    testAuthorQuery(
         "\"adamchuk, m karel\"", "author:adamchuk, m karel author:adamchuk, m karel * " +
+                                 "author:/adamchuk, m[^\\s]+/ " +
                                  "author:/adamchuk, m[^\\s]+ karel/ author:/adamchuk, m[^\\s]+ karel .*/ " +
                                  "author:adamchuk, m k author:adamchuk, m k * " +
                                  "author:/adamchuk, m[^\\s]+ k/ author:/adamchuk, m[^\\s]+ k .*/ " +
                                  "author:adamchuk, m author:adamchuk," ,
-                                 "//*[@numFound='6']",
-                // "adamchuk, m karel" numFound=6
+                                 "//*[@numFound='8']"
+                // "adamchuk, m karel" numFound=8
         //         40  Adamchuk,               41  Adamchuk, M.            44  Adamchuk, Molja Karel  
         //         45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K   
-                           
+    );
+    testAuthorQuery(
         "\"adamczuk, m karel\"", "author:adamczuk, m karel author:adamczuk, m karel * " +
+                                 "author:/adamczuk, m[^\\s]+/ " +
                                  "author:/adamczuk, m[^\\s]+ karel/ author:/adamczuk, m[^\\s]+ karel .*/ " +
                                  "author:adamczuk, m k author:adamczuk, m k * " +
                                  "author:/adamczuk, m[^\\s]+ k/ author:/adamczuk, m[^\\s]+ k .*/ " +
                                  "author:adamczuk, m author:adamczuk," ,
-                                 "//*[@numFound='0']",
-         
+                                 "//*[@numFound='0']"
+    );
+    testAuthorQuery(
         "\"adamšuk, m karel\"", "author:adamšuk, m karel author:adamšuk, m karel * " +
+                                "author:/adamšuk, m[^\\s]+/ author:/adamshuk, m[^\\s]+/ author:/adamsuk, m[^\\s]+/" +
         		                    "author:/adamšuk, m[^\\s]+ karel/ author:/adamšuk, m[^\\s]+ karel .*/ " +
         		                    "author:adamšuk, m k author:adamšuk, m k * " +
         		                    "author:/adamšuk, m[^\\s]+ k/ author:/adamšuk, m[^\\s]+ k .*/ " +
@@ -1592,20 +1601,25 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		                    "author:/adamshuk, m[^\\s]+ k/ author:/adamshuk, m[^\\s]+ k .*/ " +
         		                    "author:adamshuk, m " +
         		                    "author:adamshuk,",
-                                "//*[@numFound='6']",
-                 // "adamšuk, m karel" numFound=6
-          //        80  Adamshuk,               81  Adamshuk, M.            84  Adamshuk, Molja Karel  
-          //        85  Adamshuk, M Karel       86  Adamshuk, Molja K       87  Adamshuk, M K
+                                "//*[@numFound='8']"
+             // "adamšuk, m karel" numFound=8
+                //  80 Adamshuk,               81  Adamshuk, M.            82  Adamshuk, Marel        
+                //  83 Adamshuk, Molja         84  Adamshuk, Molja Karel   85  Adamshuk, M Karel      
+                //  86 Adamshuk, Molja K       87  Adamshuk, M K                  		                    
                                 
+    );
+    testAuthorQuery(
         "\"adamguk, m karel\"", "author:adamguk, m karel author:adamguk, m karel * " +
+                                "author:/adamguk, m[^\\s]+/ " +
                                 "author:/adamguk, m[^\\s]+ karel/ author:/adamguk, m[^\\s]+ karel .*/ " +
                                 "author:adamguk, m k author:adamguk, m k * " +
                                 "author:/adamguk, m[^\\s]+ k/ author:/adamguk, m[^\\s]+ k .*/ " +
                                 "author:adamguk, m author:adamguk," ,
-                                "//*[@numFound='6']"
-               // "adamguk, m karel" numFound=6
-          //      60  Adamguk,                61  Adamguk, M.             64  Adamguk, Molja Karel   
-          //      65  Adamguk, M Karel        66  Adamguk, Molja K        67  Adamguk, M K    
+                                "//*[@numFound='8']"
+               // "adamguk, m karel" numFound=8
+                  //  60 Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
+                  //  63 Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
+                  //  66 Adamguk, Molja K        67  Adamguk, M K 
         
     );
     
@@ -1632,15 +1646,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      */
 
     expected = "author:adamčuk, a b author:adamčuk, a b* " +
-    		        "author:/adamčuk, a[^\\s]+ b.*/ " +
+    		        "author:/adamčuk, a[^\\s]+/ + author:/adamčuk, a[^\\s]+ b.*/ " +
     		        "author:adamčuk, a " +
     		        "author:adamčuk, " +
     		        "author:adamchuk, a b author:adamchuk, a b* " +
-    		        "author:/adamchuk, a[^\\s]+ b.*/ " +
+    		        "author:/adamchuk, a[^\\s]+/ author:/adamchuk, a[^\\s]+ b.*/ " +
     		        "author:adamchuk, a " +
     		        "author:adamchuk, " +
     		        "author:adamcuk, a b author:adamcuk, a b* " +
-    		        "author:/adamcuk, a[^\\s]+ b.*/ " +
+    		        "author:/adamcuk, a[^\\s]+/ author:/adamcuk, a[^\\s]+ b.*/ " +
     		        "author:adamcuk, a " +
     		        "author:adamcuk,"
                 ;
@@ -2402,31 +2416,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       
       System.out.println(escapeUnicode(vals[i]));
       
-      if (tp.debugParser) {
-      System.out.println(escapeUnicode(vals[i]));
-      System.out.println("Running test for " + author_field + ":" + vals[i]);
-      String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
       
-      ArrayList<String> out = new ArrayList<String>();
-      Matcher m = Pattern.compile("numFound=\\\"(\\d+)").matcher(response);
-      Matcher m2 = Pattern.compile("<doc><str name=\\\"id\\\">(\\d+)</str><arr name=\\\"" + author_field + "\\\"><str>([^<]*)</str></arr></doc>").matcher(response);
-      m.find();
-      String numFound = m.group(1);
-      while (m2.find()) {
-        out.add(String.format("%0$3s\t%2$-23s", m2.group(1), m2.group(2)));
-      }
-      Collections.sort(out);
-      System.out.print("                             // " + vals[i] + " numFound=" + numFound);
-      int j=0;
-      for (String s: out) {
-        if (j%3==0) {
-          System.out.print("\n                             // ");
-        }
-        System.out.print(s);
-        j++;
-      }
-      System.out.println();
-      }
       boolean failed = true;
       try {
 	      assertQueryEquals(req("defType", "aqp", "q", author_field + ":" + vals[i]),
@@ -2437,10 +2427,37 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       }
       finally {
       	if (failed) {
+      	  
+          System.out.println(escapeUnicode(vals[i]));
+          System.out.println("Running test for " + author_field + ":" + vals[i]);
+          String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
+          
+          ArrayList<String> out = new ArrayList<String>();
+          Matcher m = Pattern.compile("numFound=\\\"(\\d+)").matcher(response);
+          Matcher m2 = Pattern.compile("<doc><str name=\\\"id\\\">(\\d+)</str><arr name=\\\"" + author_field + "\\\"><str>([^<]*)</str></arr></doc>").matcher(response);
+          m.find();
+          String numFound = m.group(1);
+          while (m2.find()) {
+            out.add(String.format("%0$3s\t%2$-23s", m2.group(1), m2.group(2)));
+          }
+          Collections.sort(out);
+          System.out.print("                             // " + vals[i] + " numFound=" + numFound);
+          int j=0;
+          for (String s: out) {
+            if (j%3==0) {
+              System.out.print("\n                             // ");
+            }
+            System.out.print(s);
+            j++;
+          }
+          System.out.println();
+      	  
       	  QParser qParser = getParser(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]));
           Query q = qParser.parse();
           String actual = q.toString("field");
       		System.out.println("Offending test case: " + escapeUnicode(vals[i]) + "\nexpected vs actual: \n" + escapeUnicode(vals[i+1]) + "\n" + escapeUnicode(actual));
+      		
+      		
       	}
       }
     }
