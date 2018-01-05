@@ -1,9 +1,10 @@
 'use strict';
 define([
-  'react'
-], function (React) {
+  'react',
+  'create-react-class'
+], function (React, createReactClass) {
 
-  var NoSources = React.createClass({
+  var NoSources = createReactClass({
     render: function () {
       if (this.props.noSources) {
         return (

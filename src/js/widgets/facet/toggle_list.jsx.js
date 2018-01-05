@@ -1,17 +1,19 @@
 define([
    'react',
    'underscore',
-   'd3'
+   'd3',
+  'react-prop-types',
+  'create-react-class'
 ], function(
   React,
    _,
-   d3
+   d3, PropTypes, createReactClass
     ) {
 
   //putting FacetCheckbox and ToggleList in one file
   //since requirejs forbids circular imports and they import eachother
 
-  var FacetCheckbox = React.createClass({
+  var FacetCheckbox = createReactClass({
 
         format: function(count) {
           return d3.format("s")(count).replace(/\.\d{2,}/, function(m) {
@@ -54,21 +56,21 @@ define([
           }
         },
         propTypes: {
-          isChecked: React.PropTypes.bool.isRequired,
-          name: React.PropTypes.string.isRequired,
-          count: React.PropTypes.number.isRequired,
-          reduxState: React.PropTypes.object,
-          currentLevel: React.PropTypes.number,
-          showMoreFacets: React.PropTypes.func,
-          resetVisibleFacets: React.PropTypes.func,
-          toggleFacet: React.PropTypes.func,
-          selectFacet: React.PropTypes.func,
-          unselectFacet: React.PropTypes.func
+          isChecked: PropTypes.bool.isRequired,
+          name: PropTypes.string.isRequired,
+          count: PropTypes.number.isRequired,
+          reduxState: PropTypes.object,
+          currentLevel: PropTypes.number,
+          showMoreFacets: PropTypes.func,
+          resetVisibleFacets: PropTypes.func,
+          toggleFacet: PropTypes.func,
+          selectFacet: PropTypes.func,
+          unselectFacet: PropTypes.func
         }
 
       });
 
-  var ToggleList = React.createClass({
+  var ToggleList = createReactClass({
 
     render: function() {
 
@@ -168,13 +170,13 @@ define([
     },
 
     propTypes: {
-      reduxState: React.PropTypes.object.isRequired,
-      currentLevel: React.PropTypes.number.isRequired,
-      showMoreFacets: React.PropTypes.func.isRequired,
-      resetVisibleFacets: React.PropTypes.func.isRequired,
-      toggleFacet: React.PropTypes.func.isRequired,
-      selectFacet: React.PropTypes.func.isRequired,
-      unselectFacet: React.PropTypes.func.isRequired
+      reduxState: PropTypes.object.isRequired,
+      currentLevel: PropTypes.number.isRequired,
+      showMoreFacets: PropTypes.func.isRequired,
+      resetVisibleFacets: PropTypes.func.isRequired,
+      toggleFacet: PropTypes.func.isRequired,
+      selectFacet: PropTypes.func.isRequired,
+      unselectFacet: PropTypes.func.isRequired
     }
 
   });

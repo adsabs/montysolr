@@ -1,9 +1,8 @@
 'use strict';
 
 define([
-  'react',
-  'react-prop-types'
-], function (React, ReactPropTypes) {
+  'react'
+], function (React) {
 
   const style = {
     position: 'absolute',
@@ -22,10 +21,6 @@ define([
         <i className="fa fa-times fa-2x"/>
       </a>
     );
-  };
-
-  Closer.propTypes = {
-    onClick: ReactPropTypes.func.isRequired
   };
 
   return Closer;

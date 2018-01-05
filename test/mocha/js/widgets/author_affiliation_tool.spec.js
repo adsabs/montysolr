@@ -98,15 +98,13 @@ define([
 
       describe('initial state', function () {
         beforeEach(init);
-        describe('state is correct', function () {
-          it('matches initial state', function () {
-            expect(this.component.props.store.getState()).to.eql(initialState);
-          });
+        it('matches initial state', function () {
+          expect(this.component.props.store.getState()).to.eql(initialState);
+        });
 
-          it('table was rendered empty initially', function () {
-            var el = Enzyme.mount(this.component);
-            expect(el.find('.container').exists()).to.eql(true);
-          });
+        it('table was rendered empty initially', function () {
+          var el = Enzyme.mount(this.component);
+          expect(el.find('.container').exists()).to.eql(true);
         });
       });
 
