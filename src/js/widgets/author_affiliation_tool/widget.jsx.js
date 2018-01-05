@@ -47,7 +47,7 @@ define([
         ReduxThunk.default.withExtraArgument(this)
       );
       const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-        || compose;
+        || Redux.compose;
       this.store = Redux.createStore(reducers, composeEnhancers(middleware));
       this.view = new View({ store: this.store });
     },
@@ -79,7 +79,7 @@ define([
       }
     },
     renderWidgetForListOfBibcodes: function (ids) {
-      this.fetchAffiliationData(ids);
+      return this.fetchAffiliationData(ids);
     },
     fetchAffiliationData: function (ids) {
       const pubsub = this.getPubSub();

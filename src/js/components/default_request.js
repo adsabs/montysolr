@@ -60,8 +60,7 @@ define([
        * @private
        */
       _validate: function(attributes, options) {
-        for (attr in attributes) {
-
+        _.forOwn(attributes, function (val, attr) {
           var tempVal = attributes[attr];
 
           if (!(attr in allowedAttrs)) {
@@ -71,11 +70,8 @@ define([
           if (!allowedAttrs[attr].call(allowedAttrs, tempVal)) {
             throw new Error('Invalid value:key ' + attr  + tempVal);
           }
+        });
 
-          //if (attr in checker) {
-          //  attributes[attr] = checker[attr].call(checker, tempVal);
-          //}
-        }
         return true;
       },
 

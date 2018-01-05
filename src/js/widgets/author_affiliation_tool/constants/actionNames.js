@@ -12,15 +12,5 @@ define([], function () {
     setExporting: 'SET_EXPORTING'
   };
 
-  let handler = {
-    get: (target, key) => {
-      if (target.hasOwnProperty(key)) {
-        return target[key];
-      } else {
-        throw new Error(`Fired a wrong actionname: ${key}. Available Actions: ${Object.keys(target)}`);
-      }
-    }
-  };
-
-  return new Proxy(target, handler);
+  return target;
 });
