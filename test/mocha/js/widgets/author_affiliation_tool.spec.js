@@ -1,9 +1,4 @@
 'use strict';
-/*
-GLOBAL
-
-*/
-
 define([
   'jquery',
   'react',
@@ -94,10 +89,18 @@ define([
       }, React.createElement(App));
     };
 
+    var teardown = function () {
+      this.testSpies = null;
+      this.w.destroy();
+      this.w = null;
+      this.component = null;
+    };
+
     describe('Author Affiliation Tool (author_affiliation_tool.spec.js)', function () {
 
       describe('initial state', function () {
         beforeEach(init);
+        afterEach(teardown);
         it('matches initial state', function () {
           expect(this.component.props.store.getState()).to.eql(initialState);
         });
@@ -110,6 +113,7 @@ define([
 
       describe('renders for current query', function () {
         beforeEach(init);
+        afterEach(teardown);
 
         it('fetch affiliation data using ids', function (done) {
           var self = this;
@@ -166,6 +170,7 @@ define([
 
       describe('renders for list of bibcodes', function () {
         beforeEach(init);
+        afterEach(teardown);
 
         it('store has correct state', function (done) {
           var state = _.bind(function () {
@@ -198,6 +203,7 @@ define([
 
       describe('form actions', function () {
         beforeEach(init);
+        afterEach(teardown);
         it('toggle all works correctly', function () {
           var com = this.component;
           com.props.store.dispatch({ type: 'SET_DATA', value: mockGroupedData });
@@ -262,6 +268,7 @@ define([
 
       describe('exporting', function () {
         beforeEach(init);
+        afterEach(teardown);
         it('export button properly exports', function () {
           var eAffData = sinon.stub(this.w, 'exportAffiliationData', function () {
             return $.Deferred().promise();
