@@ -107,7 +107,7 @@ define([
 
     dispatch(requestExport());
     const q = new ApiQuery();
-    q.set('bibcodes', exports.ids);
+    q.set('bibcode', exports.ids);
     const req = composeRequest(q);
     req.set({
       target: ApiTargets.EXPORT + format.value,
@@ -158,7 +158,9 @@ define([
 
   actions.downloadFile = () => (dispatch, getState) => {
     const state = getState();
-    let blob = new Blob([state.exports.output], { type: 'text/plain;charset=utf-8' });
+    let blob = new Blob([state.exports.output], {
+      type: 'text/plain;charset=utf-8'
+    });
     saveAs(blob, `export-${state.format.value}.txt`)
   };
 

@@ -137,7 +137,7 @@ define([
     openClassicExports : function(options){
       if (options.bibcodes){
         var $form =  $(ClassicFormTemplate({
-          bibcodes: options.bibcodes,
+          bibcode: options.bibcodes,
           exportLimit : ApiTargets._limits.ExportWidget.limit
         }));
         $("body").append($form);
@@ -156,7 +156,9 @@ define([
             var ids = _.map(apiResponse.get('response.docs'), function(d) {
               return d.bibcode
             });
-            var $form =  $(ClassicFormTemplate({ bibcodes: ids, exportLimit: ids.length }));
+            var $form =  $(ClassicFormTemplate({
+              bibcode: ids,
+              exportLimit: ids.length }));
             //firefox requires form to actually be in the dom when it is submitted
             $("body").append($form);
             $form.submit();
