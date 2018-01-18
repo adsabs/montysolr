@@ -166,6 +166,10 @@
     <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
 
 
+    <listener event="newSearcher" 
+      class="org.apache.solr.handler.ReplicationEventListener"
+      enable="${montysolr.warmSearcher:true}" />
+      
     <!-- set montysolr.warmSeacher to 'false' if you want to just replicate/build
          index and you don't care to have citation cache (it speeds up indexing) -->
     <listener event="newSearcher" 

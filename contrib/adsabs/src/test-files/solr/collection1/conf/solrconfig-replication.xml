@@ -25,5 +25,20 @@
   <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
   <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
   
-      
+  <query>
+    <listener event="newSearcher" 
+      class="org.apache.solr.handler.ReplicationEventListener"
+      enable="${montysolr.warmSearcher:true}">
+      <str name="endpoint">/query</str>
+    </listener>
+  </query>
+  
+  
+  <requestHandler name="/replication" class="solr.ReplicationHandler" >
+         <lst name="slave">
+             <str name="masterUrl">http://localhost:9986/solr/collection1</str>
+             <str name="pollInterval">00:00:60</str>
+         </lst>
+  </requestHandler>
+        
 </config>
