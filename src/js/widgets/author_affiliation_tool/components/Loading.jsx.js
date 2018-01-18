@@ -12,6 +12,9 @@ define([
     }
   };
 
+  /**
+   * Loading Message/Icon
+   */
   const Loading = ({}) => (
     <div className="row text-center" role="alert" aria-busy={true}>
       <div className="col-xs-12" style={style.icon}>

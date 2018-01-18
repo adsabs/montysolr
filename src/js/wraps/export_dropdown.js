@@ -1,13 +1,6 @@
 define([
   'js/widgets/dropdown-menu/widget'
-
-], function(
-
-  DropdownWidget
-
-  ){
-
-  //config
+], function(DropdownWidget){
 
   var links = [
     { description : 'in BibTeX' , navEvent: 'export', params : {format: "bibtex"}},
@@ -15,7 +8,7 @@ define([
     { description : 'in EndNote' , navEvent: 'export', params : {format: "endnote"}},
     { description : 'in RIS' , navEvent: 'export', params : {format: "ris"}},
     { description : 'in ADS Classic' , navEvent: 'export', params : {format: "classic"}},
-    { description : 'Author Affiliation' , navEvent: 'show-author-affiliation-tool' }
+    { description : 'Author Affiliation' , navEvent: 'show-author-affiliation-tool' },
     { description : 'Other Formats' , navEvent: 'export', params : {format: "other"}}
 
     // deactivated, needs the myads microservice
@@ -28,8 +21,7 @@ define([
   var rightAlign = true;
   var selectedOption = true;
 
-  return function(){
-
+  return function () {
     var Dropdown = new DropdownWidget({
       links : links,
       btnType: btnType,

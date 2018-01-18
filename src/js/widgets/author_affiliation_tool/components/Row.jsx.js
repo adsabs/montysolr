@@ -5,6 +5,9 @@ define([
   'es6!../components/AffiliationRow.jsx'
 ], function (React, LastActiveDateRow, AffiliationRow) {
 
+  /**
+   * Simple Row which contains the Affiliation and LastActiveDate sections
+   */
   const Row = ({ onChange, data }) => {
     const { author, selected, affiliations, lastActiveDates } = data;
 

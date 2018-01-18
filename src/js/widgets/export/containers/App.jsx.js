@@ -39,6 +39,10 @@ define([
         'onCopyText'
       ]);
 
+      /**
+       * The count update is debounced, to make sure that lots of changes don't
+       * send many requests.
+       */
       this.updateCount = _.debounce((val) => {
         const { dispatch } = this.props;
         dispatch(setCount(parseInt(val)));
@@ -50,10 +54,16 @@ define([
       };
     }
 
+    /**
+     * On file download click, dispatch the download file action
+     */
     handleDownloadFileClick () {
       this.props.dispatch(downloadFile());
     }
 
+    /**
+     * On copy button click, show a message which dissappears after 5 seconds
+     */
     onCopyText() {
       this.setState({
         showAlert: true,
@@ -62,33 +72,60 @@ define([
       _.delay(() => this.setState({ showAlert: false }), 5000);
     }
 
+    /**
+     * On close click, close the widget
+     */
     handleCloseClick() {
       this.props.dispatch(closeComponent());
     }
 
+    /**
+     * On cancel, attempt to cancel request
+     *
+     * -- this mainly resets the form and ignores the pending request
+     */
     handleCancelClick() {
       this.props.dispatch(cancelRequest());
     }
 
+    /**
+     * When the count is updated, update the state accordingly
+     *
+     * @param {number} val - the count
+     */
     handleCountChange(val) {
       this.setState({ count: val }, () => this.updateCount(val));
     }
 
+    /**
+     * On Apply, the export process is begun
+     */
     handleApplyClick() {
       const { dispatch } = this.props;
       dispatch(fetchUsingQuery()).done(() => dispatch(fetchUsingIds()));
     }
 
+    /**
+     * Dispatch a form reset
+     */
     handleResetClick() {
       this.props.dispatch(reset());
     }
 
+    /**
+     * Update the format on the state when the user selects a new one
+     *
+     * @param {string} id - format id
+     */
     handleFormatChange(id) {
       const { dispatch, formats } = this.props;
       let format = _.find(formats, { id: id });
       dispatch(setFormat(format));
     }
 
+    /**
+     * Get the next set of items
+     */
     handleGetNextClick() {
       const { dispatch } = this.props;
       dispatch(getNextBatch());

@@ -3,6 +3,9 @@ define([
   'react'
 ], function (React) {
 
+  /**
+   * Set of buttons
+   */
   const SelectionButtons = ({ onClick }) => (
     <div className="btn-toolbar pull-right">
       <button className="btn btn-default"

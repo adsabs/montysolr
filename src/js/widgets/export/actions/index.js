@@ -11,6 +11,7 @@ define([
   'filesaver'
 ], function (_, $, ApiQuery, ApiTargets) {
 
+  // set of action names
   const actions = {
     SET_TAB: 'SET_TAB',
     SET_QUERY: 'SET_QUERY',
@@ -61,6 +62,11 @@ define([
   actions.hardReset = () =>               ({ type: actions.HARD_RESET });
   actions.setOrigin = (origin) =>         ({ type: actions.SET_ORIGIN, origin });
 
+  /**
+   * On request failure, we want to display a message to the user here
+   *
+   * @param args
+   */
   actions.requestFailed = (...args) => (dispatch) => {
     const { setHasError } = actions;
     dispatch(setHasError(true));
@@ -68,44 +74,76 @@ define([
     _.delay(() => dispatch(setHasError(false)), 5000);
   };
 
+  /**
+   * Update the selected format
+   *
+   * @param {string} format - the selected format
+   */
   actions.findAndSetFormat = (format) => (dispatch, getState) => {
     const { formats } = getState();
     let found = _.find(formats, { value: format });
     dispatch(actions.setFormat(found || formats[0]));
   };
 
-  actions.fetchUsingQuery = query => (dispatch, getState, widget) => {
+  /**
+   * Fetch ids using a query
+   *
+   * @returns {$.Promise} the request promise
+   */
+  actions.fetchUsingQuery = () => (dispatch, getState, widget) => {
     const { exports, main } = getState();
     const { composeRequest } = widget;
     const { requestIds, receiveIds, requestFailed, setTotalRecs } = actions;
 
     // create a new query from the serialized params
-    query = new ApiQuery(main.query);
+    let query = new ApiQuery(main.query);
     query.set({
+
+      // use a specific count, if it's less than the default batchSize
       rows: exports.count < exports.batchSize ? exports.count : exports.batchSize,
       fl: 'bibcode',
+
+      // start at the maxCount - batchSize, to get a particular window
       start: exports.maxCount - exports.batchSize
     });
 
+    // start requesting ids
     dispatch(requestIds());
     const req = composeRequest(query);
+
+    // execute the actual request
     const prom = widget._executeApiRequest(req);
     prom.then((res) => {
+
+      // pull out only the bibcodes
       const ids = _.map(res.get('response.docs'), 'bibcode');
+
+      // update the ids on the state
       dispatch(receiveIds(ids));
+
+      // set the total recs to based on the number of ids found
       dispatch(setTotalRecs(res.get('response.numFound')));
     });
+
+    // on failure, dispatch our handler
     prom.fail((...args) => dispatch(requestFailed(...args)));
 
     return prom;
   };
 
+  /**
+   * Fetch using ids, this will set up a request and fetch a request using
+   * identifiers and some other information.
+   */
   actions.fetchUsingIds = () => (dispatch, getState, widget) => {
     const { requestExport, receiveExport, requestFailed, setIgnore } = actions;
     const { composeRequest } = widget;
     const { format, exports } = getState();
 
+    // starting an export
     dispatch(requestExport());
+
+    // setting up a new query using our current ids
     const q = new ApiQuery();
     q.set('bibcode', exports.ids);
     const req = composeRequest(q);
@@ -117,16 +155,26 @@ define([
       }
     });
 
+    // send off the request
     return widget._executeApiRequest(req)
       .done(res => {
+
+        // if we are ignoring, then don't bother with the response
         if (!exports.ignore) {
           dispatch(receiveExport(res.get('export')));
         }
+
+        // stop ignoring
         dispatch(setIgnore(false));
       })
+
+      // on failure, send off to our handler
       .fail((...args) => dispatch(requestFailed(...args)));
   };
 
+  /**
+   * Get the next batch of records
+   */
   actions.getNextBatch = () => (dispatch, getState) => {
     const {
       setMaxCount, setBatchSize, setCount,
@@ -134,11 +182,22 @@ define([
     } = actions;
     const { exports } = getState();
 
+    // get the total, based on the max count and our batchsize
     let max = exports.maxCount + exports.batchSize;
+
+    // if that total is greater than the amount of records, we have to adjust it
     if (max > exports.totalRecs) {
+
+      // reset the batch size to be the total records minus our max
       let batch = exports.totalRecs - exports.maxCount;
+
+      // count is the current lower value (i.e. <count> of <maxCount>)
+      // the next batch will be smaller than (maxCount - count)
       let count = exports.count < batch ? exports.count : batch;
+
+      // max is the current upper value + the batch value, should be same as totalRecs
       max = exports.maxCount + batch;
+
       dispatch(setBatchSize(batch));
       dispatch(setCount(count));
     }
@@ -146,16 +205,30 @@ define([
     dispatch(fetchUsingQuery()).done(() => dispatch(fetchUsingIds()));
   };
 
+  /**
+   * Take a snapshot of the current state of the application
+   *
+   * We can use this in conjunction with reset, to reset back to an earlier state
+   *
+   * @param {object} snapshot - the current state
+   */
   actions.takeSnapshot = (snapshot) => (dispatch, getState) => {
     const snapshot = _.omit(getState().exports, 'snapshot');
     dispatch({ type: actions.TAKE_SNAPSHOT, snapshot: snapshot });
   };
-  
+
+  /**
+   * Close the component using the widget method
+   * also resets the widget so it's not in a weird state
+   */
   actions.closeComponent = () => (dispatch, getState, widget) => {
     dispatch(actions.hardReset());
     widget.closeWidget();
   };
 
+  /**
+   * Download the export string as a text file
+   */
   actions.downloadFile = () => (dispatch, getState) => {
     const state = getState();
     let blob = new Blob([state.exports.output], {

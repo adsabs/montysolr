@@ -36,6 +36,7 @@ define([
     HARD_RESET
   } = actions;
 
+  // format reducer
   const format = (state = {
     label: 'BibTeX',
     value: 'bibtex',
@@ -49,6 +50,7 @@ define([
     }
   };
 
+  // format collection reducer
   const formats = (state = [
     { value: 'bibtex', id: '0', label: 'BibTeX' },
     { value: 'bibtexabs', id: '1', label: 'BibTeX ABS' },
@@ -74,6 +76,7 @@ define([
     }
   };
 
+  // error messages reducer
   const error = ( state = {
     hasError: false,
     errorMsg: 'Sorry, something happened during the request. Please try again'
@@ -88,6 +91,7 @@ define([
     }
   };
 
+  // exports reducer (main export functionality)
   const exports = (state = {
     isFetching: false,
     output: '',
@@ -161,6 +165,7 @@ define([
     }
   };
 
+  // main state reducer
   const main = (state = {
     query: {},
     showCloser: true,

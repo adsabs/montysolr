@@ -9,6 +9,9 @@ define([
     right: '5px'
   };
 
+  /**
+   * A simple closer link that looks like an `X`
+   */
   const Closer = ({ onClick }) => {
 
     const handleClick = (e) => {
