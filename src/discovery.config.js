@@ -105,6 +105,7 @@ require.config({
         PaperNetwork : 'js/wraps/paper_network',
         ConceptCloud : 'js/widgets/wordcloud/widget',
         BubbleChart : 'js/widgets/bubble_chart/widget',
+        AuthorAffiliationTool: 'es6!js/widgets/author_affiliation_tool/widget.jsx',
 
         Metrics :  'js/widgets/metrics/widget',
         CitationHelper: 'js/widgets/citation_helper/widget',
@@ -188,9 +189,9 @@ require.config({
     'chai': '../bower_components/chai/chai',
     'classnames': '../bower_components/classnames/index',
     'clipboard': 'libs/clipboard/clipboard',
+    'create-react-class': 'libs/create-react-class/index',
     'd3':'libs/d3/d3',
     'd3-cloud' : 'libs/d3-cloud/d3.layout.cloud',
-    'dev-react' : '../bower_components/react/react-with-addons',
     'enzyme': 'libs/enzyme/enzyme',
     'es5-shim' : 'libs/es5-shim/es5-shim',
     'es6': 'libs/requirejs-babel-plugin/es6',
@@ -210,6 +211,7 @@ require.config({
     'react' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-with-addons.min',
     'react-backbone': 'libs/react-backbone/react.backbone',
     'react-dom' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min',
+    'react-prop-types': 'libs/react-prop-types/index',
     'react-redux' : 'libs/react-redux/index',
     'redux' : 'libs/redux/index',
     'redux-thunk' : 'libs/redux-thunk/index',
@@ -217,7 +219,6 @@ require.config({
     'sinon': '../bower_components/sinon/index',
     'sprintf': 'libs/sprintf/sprintf',
     'squire': '../bower_components/squire/src/Squire'
-
   },
 
   hbs: {

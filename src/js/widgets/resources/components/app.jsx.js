@@ -5,11 +5,12 @@ define([
   'es6!./fullTextSources.jsx',
   'es6!./dataProducts.jsx',
   'es6!./loading.jsx',
-  'es6!./noSources.jsx'
+  'es6!./noSources.jsx',
+  'create-react-class'
 ], function (
-  actions, React, ReactRedux, FullTextSources, DataProducts, LoadingIcon, NoSources) {
+  actions, React, ReactRedux, FullTextSources, DataProducts, LoadingIcon, NoSources, createReactClass) {
 
-  var App = React.createClass({
+  var App = createReactClass({
     render: function () {
       return (
         <div className="s-right-col-widget-container">

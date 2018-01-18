@@ -26,8 +26,11 @@ define([
       SERVICE_METRICS: 'metrics',
       SERVICE_OBJECTS: 'objects',
       SERVICE_OBJECTS_QUERY: 'objects/query',
-       SERVICE_CITATION_HELPER: 'citation_helper',
+      SERVICE_CITATION_HELPER: 'citation_helper',
+      SERVICE_AUTHOR_AFFILIATION_EXPORT: 'authoraff',
       MYADS_STORAGE: 'vault',
+      AUTHOR_AFFILIATION_SEARCH: 'author-affiliation/search',
+      AUTHOR_AFFILIATION_EXPORT: 'author-affiliation/export',
 
       CSRF : 'accounts/csrf',
       USER: 'accounts/user',

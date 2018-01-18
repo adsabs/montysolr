@@ -80,6 +80,24 @@ module.exports = function (grunt) {
           flatten: true
         },
         {
+          cwd: 'node_modules/create-react-class',
+          src: 'create-react-class.js',
+          dest: 'src/libs/create-react-class/',
+          expand: true,
+          rename: function (dest, src) {
+            return dest + src.replace('create-react-class', 'index');
+          }
+        },
+        {
+          cwd: 'node_modules/prop-types',
+          src: 'prop-types.js',
+          dest: 'src/libs/react-prop-types/',
+          expand: true,
+          rename: function (dest, src) {
+            return dest + src.replace('prop-types', 'index');
+          }
+        },
+        {
           src: ['bower_components/select2/**/*.js', 'bower_components/select2/**/*.css'],
           dest: 'src/libs/select2/',
           expand: true,

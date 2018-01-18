@@ -3,13 +3,15 @@ define([
   'react-redux',
   'underscore',
   'es6!./toggle_list.jsx',
-  './reducers'
+  './reducers',
+  'create-react-class'
 ],  function(
     React,
     ReactRedux,
     _,
     ToggleList,
-    Reducers
+    Reducers,
+    createReactClass
 ) {
 
   function mapStateToProps (state, ownProps){
@@ -45,7 +47,7 @@ define([
     }
   }
 
-  var ContainerComponent = React.createClass({
+  var ContainerComponent = createReactClass({
 
     createDropdown : function (){
 

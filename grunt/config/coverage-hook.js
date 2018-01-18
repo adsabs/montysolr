@@ -21,6 +21,7 @@ var saveCoverage = function (page) {
   });
 
   try {
+    console.log('writing coverage file...');
     fs.write(COVERAGE_FILE, JSON.stringify(coverage), 'w');
     console.log('Coverage File Written');
   } catch (e) {

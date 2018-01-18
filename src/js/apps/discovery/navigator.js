@@ -102,7 +102,6 @@ define([
           self.get('index-page').execute();
         });
 
-
         this.set("404", function(){
           app.getObject('MasterPageManager').show('ErrorPage');
         });
@@ -355,12 +354,18 @@ define([
           app.getWidget('ExportWidget').done(function(widget) {
 
             //classic is a special case, it opens in a new tab
-            if (format == "classic") {
+            if (format === "classic") {
               if (options.onlySelected && storage.hasSelectedPapers()) {
                 widget.openClassicExports({bibcodes: storage.getSelectedPapers()});
-              }
-              else {
+              } else {
                 widget.openClassicExports({currentQuery: storage.getCurrentQuery()});
+              }
+              return;
+            } else if (format === 'authoraff') {
+              if (options.onlySelected && storage.hasSelectedPapers()) {
+                widget.getAuthorAffForm({bibcodes: storage.getSelectedPapers()});
+              } else {
+                widget.getAuthorAffForm({currentQuery: storage.getCurrentQuery()});
               }
               return;
             }
@@ -549,7 +554,6 @@ define([
         * */
 
         function showResultsPageWidgetWithUniqueUrl (command, options){
-
           var q = app.getObject('AppStorage').getCurrentQuery();
           publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
           var widgetName = _.map(command.split("-").slice(1), function(w){return w[0].toUpperCase() + w.slice(1)}).join("");
@@ -572,6 +576,7 @@ define([
               });
             });
           }
+
         }
 
         this.set('show-author-network', function(command, options) {
@@ -648,11 +653,24 @@ define([
           this.route = data.href;
 
         });
+        this.set('show-author-affiliation-tool', function (id, options) {
+          var q = app.getObject('AppStorage').getCurrentQuery();
+          app.getObject('MasterPageManager').show('SearchPage', [
+            'AuthorAffiliationTool'
+          ].concat(searchPageAlwaysVisible.slice(1)));
+          this.route = '#search/' + queryUpdater.clean(q).url();
+          app.getWidget('AuthorAffiliationTool').done(function (w) {
+            if (options && options.onlySelected) {
+              var selected =  app.getObject('AppStorage').getSelectedPapers();
+              w.renderWidgetForListOfBibcodes(selected);
+            } else {
+              w.renderWidgetForCurrentQuery({ currentQuery: q });
+            }
+          });
+          publishFeedback({code: ApiFeedback.CODES.MAKE_SPACE});
+        });
       }
-
-
     });
 
     return NavigatorService;
-
   });

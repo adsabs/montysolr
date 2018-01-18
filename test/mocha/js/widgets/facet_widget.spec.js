@@ -5,7 +5,7 @@ define([
     'js/widgets/facet/create_store',
     'js/wraps/author_facet',
     'js/bugutils/minimal_pubsub',
-    'dev-react',
+    'react',
     'react-dom',
     ],
 

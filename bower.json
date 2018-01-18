@@ -30,7 +30,6 @@
     "es5-shim": "~4.5.9",
     "select2": "4.0.3",
     "MathJax": "~2.5.3",
-    "react": "^15.1.0",
     "react-redux": "https://cdnjs.cloudflare.com/ajax/libs/react-redux/4.4.5/react-redux.js",
     "redux": "https://cdnjs.cloudflare.com/ajax/libs/redux/3.5.2/redux.js",
     "redux-thunk": "https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.1.0/redux-thunk.min.js",
@@ -44,7 +43,6 @@
     "sinon": "http://sinonjs.org/releases/sinon-1.9.0.js",
     "sprintf": "~1.0.2",
     "squire": "~0.2.0",
-    "react-backbone": "react.backbone#^0.9.0",
     "requirejs-babel": "^0.0.9"
   }
 }
