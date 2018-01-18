@@ -46,20 +46,31 @@ define([
     activateValidation: FormFunctions.activateValidation,
     checkValidationState : FormFunctions.checkValidationState,
     triggerSubmit : FormFunctions.triggerSubmit,
+    dissmissError: function () {
+      this.model.set(this.model.defaults());
+      this.render();
+    },
 
     modelEvents: {
       "change": "checkValidationState"
     },
 
     events: {
-      "click button[type=submit]": "triggerSubmit"
+      "click button[type=submit]": "triggerSubmit",
+      "click a#dismiss-error": "dissmissError"
     }
 
   });
 
   FormModel = Backbone.Model.extend({
     isValidSafe : FormFunctions.isValidSafe,
-    reset: FormFunctions.reset
+    reset: FormFunctions.reset,
+    defaults: function () {
+      return {
+        hasError: false,
+        errorMsg: ''
+      };
+    }
   });
 
   var RegisterModel, RegisterView;
@@ -285,7 +296,7 @@ define([
       }
     }
 
-  })
+  });
 
   var AuthenticationContainer = Marionette.LayoutView.extend({
 
@@ -333,14 +344,26 @@ define([
       }
     },
 
-    showLoginForm: function () {
+    showLoginForm: function (error) {
       var view = new LogInView({model: this.logInModel});
+
+      // show error message
+      if (error) {
+        view.model.set({ hasError: true, errorMsg: error });
+      }
+
       view.on("submit-form", this.forwardSubmit, this);
       this.container.show(view);
     },
 
-    showRegisterForm: function () {
+    showRegisterForm: function (error) {
       var view = new RegisterView({model: this.registerModel});
+
+      // show error message
+      if (error) {
+        view.model.set({ hasError: true, errorMsg: error });
+      }
+
       view.on("submit-form", this.forwardSubmit, this);
       view.on("activate-recaptcha", _.bind(this.forwardActivateRecaptcha, this, view));
       this.container.show(view);
@@ -422,30 +445,29 @@ define([
       pubsub.publish(pubsub.NAVIGATE, "authentication-page", opts);
     },
 
-
     setSubView : function(subView){
       this.stateModel.set("subView", subView);
     },
 
-    handleUserAnnouncement : function(msg){
+    handleUserAnnouncement : function(name, msg){
 
       //reset all views and view models
       this.resetAll();
 
-      switch(msg){
+      switch(name){
         case User.prototype.USER_SIGNED_IN:
           //will immediately redirect
           break;
         case "login_fail":
           //will also see a relevant alert over the widget
-          this.view.showLoginForm();
+          this.view.showLoginForm(msg);
           break;
         case "register_success":
           this.view.showRegisterSuccessView();
           break;
         case "register_fail":
           //will also see a relevant alert over the widget
-          this.view.showRegisterForm();
+          this.view.showRegisterForm(msg);
           break;
         case "reset_password_1_success":
           this.view.showResetPasswordSuccessView();

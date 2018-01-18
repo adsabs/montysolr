@@ -136,24 +136,22 @@ define([
 
       expect(pubsub.publish.args[0][0]).to.eql("[Alert]-Message");
       expect(pubsub.publish.args[0][1].msg).to.eql("Log in was unsuccessful (error unknown)");
-      expect(pubsub.publish.args[1]).to.eql(["[PubSub]-User-Announcement", "login_fail"]);
+      expect(pubsub.publish.args[1]).to.eql(["[PubSub]-User-Announcement", "login_fail", "Log in was unsuccessful (error unknown)"]);
 
       s.registerFail(fakeXHR);
 
       expect(pubsub.publish.args[2][0]).to.eql("[Alert]-Message");
       expect(pubsub.publish.args[2][1].msg).to.eql('Registration was unsuccessful (error unknown)');
-      expect(pubsub.publish.args[3]).to.eql(["[PubSub]-User-Announcement", "register_fail"]);
+      expect(pubsub.publish.args[3]).to.eql(["[PubSub]-User-Announcement", "register_fail", 'Registration was unsuccessful (error unknown)']);
 
       s.resetPassword1Fail(fakeXHR);
 
       expect(pubsub.publish.args[4][0]).to.eql("[Alert]-Message");
-      expect(pubsub.publish.args[4][1].msg).to.eql("password reset step 1 was unsucessful (error unknown)")
       expect(pubsub.publish.args[5]).to.eql(["[PubSub]-User-Announcement", "reset_password_1_fail"]);
 
       s.resetPassword2Fail(fakeXHR);
 
       expect(pubsub.publish.args[6][0]).to.eql("[Alert]-Message");
-      expect(pubsub.publish.args[6][1].msg).to.eql("password reset step 2 was unsucessful (error unknown)");
       expect(pubsub.publish.args[7]).to.eql(["[PubSub]-User-Announcement", "reset_password_2_fail"]);
 
 
