@@ -95,9 +95,10 @@ define([
       dispatch(setCount(numFound));
       dispatch(setTotalRecs(numFound));
       if (format !== 'other') {
+        dispatch(takeSnapshot());
         dispatch(fetchUsingQuery())
           .then(() => dispatch(fetchUsingIds())
-            .then(() => dispatch(takeSnapshot()))
+            .always(() => dispatch(takeSnapshot()))
           );
       } else {
         dispatch(takeSnapshot());
