@@ -1,6 +1,7 @@
 package org.apache.solr.handler;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Random;
@@ -19,6 +20,8 @@ import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrEventListener;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.Builder;
 import org.apache.solr.client.solrj.request.QueryRequest;
@@ -26,6 +29,7 @@ import org.apache.solr.client.solrj.request.QueryRequest;
 
 public class ReplicationEventListener implements SolrEventListener {
   
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private AtomicInteger numberOfTimesCalled;
   private CountDownLatch latch;
@@ -54,7 +58,9 @@ public class ReplicationEventListener implements SolrEventListener {
   }
   
   @Override
-  public void postCommit() {}
+  public void postCommit() {
+    notifyCoordinator("index-loaded");
+  }
 
   @Override
   public void postSoftCommit() {}
@@ -77,22 +83,28 @@ public class ReplicationEventListener implements SolrEventListener {
       
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
+      log.warn("Delaying interrupted");
       notifyCoordinator("delay-interrupted", e.toString());
       throw new RuntimeException(e);
     } catch (BrokenBarrierException e) {
+      log.error("Broken barrier, we are not delaying index deployment any more.");
       notifyCoordinator("congestion-problem", "we have waited too long, another thread tried to open a searcher"); // this will never happe IFF there is only one write thread
     } catch (TimeoutException e) {
+      log.error("Time barrier timed out");
       notifyCoordinator("activating-new-index", "timeout :" + delayInSecs);
     }
+    
+    notifyCoordinator("activating-index", Integer.toString(delayInSecs));
     barrier.reset();
     numberOfTimesCalled.incrementAndGet();
+    log.info("Delaying action of (" + delayInSecs + "s.) passed. We have interfered x=" + numberOfTimesCalled + " times. Good luck!");
   }
   
   private Integer contactReplicatorCoordinator(String verb, String retrieve) {
     NamedList<Object> r = request(verb, null);
     String out = (String) r.get(retrieve);
     if (out == null) {
-      // TODO: log
+      log.error("Error contacting/getting data from coordinator.");
       return 0;
     }
     try {
@@ -103,6 +115,9 @@ public class ReplicationEventListener implements SolrEventListener {
     }
   }
   
+  private void notifyCoordinator(String event) {
+    request(event, null);
+  }
   private void notifyCoordinator(String event, String value) {
     request(event, value);
   }
@@ -111,7 +126,7 @@ public class ReplicationEventListener implements SolrEventListener {
     ModifiableSolrParams params = new ModifiableSolrParams();
     
     params.set("q", "foo");
-    params.set("verb", event);
+    params.set("event", event);
     if (value != null)
       params.set("value", value);
     try {
@@ -129,10 +144,12 @@ public class ReplicationEventListener implements SolrEventListener {
     QueryRequest request = new QueryRequest(params);
     request.setPath(coordinatorEndpoint);
     
+    log.info("Contacting coordinator: ", request);
+    
     try {
       return httpClient.request(request);
     } catch (SolrServerException | IOException e) {
-      // log
+      log.error(e.toString());
       return null;
     }
   }
