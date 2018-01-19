@@ -25,6 +25,8 @@ public class ReplicationCoordinatorHandler extends RequestHandlerBase {
   private Map<String, Integer> counters = new HashMap<String, Integer>();
   private Long latestGeneration = null;
   private int maxDelay = 15 * 60;
+
+  private int slaveCounters = 0;
   
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void init(NamedList args) {
@@ -37,6 +39,7 @@ public class ReplicationCoordinatorHandler extends RequestHandlerBase {
     long gen = getIndexGeneration(req.getCore());
     if (gen != latestGeneration) {
       counters.clear();
+      slaveCounters = 0;
     }
     
     SolrParams params = req.getParams();
@@ -48,23 +51,16 @@ public class ReplicationCoordinatorHandler extends RequestHandlerBase {
       return;
     }
     
-    
+    if (!counters.containsKey(slaveid))
+      counters.put(slaveid, slaveCounters++);
     
     if (event.equals("give-me-delay")) {
-      if (counters.containsKey(slaveid)) {
-        if (counters.get(slaveid))
+      int order = counters.get(slaveid);
+      
+      if (order % 2 == 0) {
+        rsp.add("delay", 0); // half of the slaves should start commits immediately
       }
-      else {
-        if (counters.size() % 2 == 0) { // every even request receives zero delay
-          counters.put(info.id, 0);
-          rsp.add("delay", 0);
-        }
-        else {
-          int d = calculateDelay(counters.size()+1);
-          counters.put(info.id, d);
-          rsp.add("delay", d);
-        }
-      }
+      
     }
     
   }
