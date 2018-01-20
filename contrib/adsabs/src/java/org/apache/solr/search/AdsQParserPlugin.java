@@ -57,9 +57,9 @@ public class AdsQParserPlugin extends QParserPlugin {
 			AqpQueryParser parser = AqpAdsabsQueryParser.init();
 			return new AqpAdsabsQParser(parser, qstr, localParams, params, req, defaultConfig);
 		} catch (QueryNodeParseException e) {
-			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e.getLocalizedMessage());
+			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e);
 		} catch (Exception e) {
-			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e.getLocalizedMessage());
+			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e);
 		}
 	}
 	

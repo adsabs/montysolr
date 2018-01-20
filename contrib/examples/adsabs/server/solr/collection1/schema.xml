@@ -1759,6 +1759,25 @@
         @api.doc
 
             
+        * entdate
+        
+          Field that allows you search for entry_date (without the annoying precision of entry_date)
+          
+          Example query:
+          
+            entdate:2011
+            entdate:2011-01
+               
+          @since v63.1.0.10
+        -->
+        <field name="entdate" type="date_string" indexed="true" stored="true"
+            omitNorms="true" omitTermFreqAndPositions="true"/>
+        
+        
+        <!--
+        @api.doc
+
+            
         * origin
         
           Provenance information (data source name) of what was used for merging the metadata records.
