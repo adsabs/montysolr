@@ -117,12 +117,6 @@ module.exports = function (grunt) {
           rename: function (dest, src) {
             return dest + src.replace('prop-types', 'index');
           }
-        },
-        {
-          cwd: 'node_modules/redux-mock-store/lib',
-          src: 'index.js',
-          dest: 'src/libs/redux-mock-store/',
-          expand: true
         }
       ]
     },

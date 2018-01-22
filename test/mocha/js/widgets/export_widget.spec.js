@@ -6,7 +6,6 @@ define([
   'react',
   'redux',
   'redux-thunk',
-  'redux-mock-store',
   'enzyme',
   'js/widgets/base/base_widget',
   'es6!js/widgets/export/reducers/index',
@@ -20,15 +19,19 @@ define([
   'js/bugutils/minimal_pubsub',
   'js/components/json_response'
 ], function (
-  module, _, $, React, Redux, ReduxThunk, configureStore, Enzyme, BaseWidget,
+  module, _, $, React, Redux, ReduxThunk, Enzyme, BaseWidget,
   reducers, actions, ExportWidget, Closer, ClipboardBtn, Export, Setup, App,
   MinPubSub, JSONResponse
 ) {
-  var timeout = 3000000;
 
   var desc = function (underTest, description, cb) {
     underTest = '[' + underTest + ']';
     describe(underTest + ' - ' + description, cb);
+  };
+
+  desc.skip = function (underTest, description, cb) {
+    underTest = '[' + underTest + ']';
+    describe.skip(underTest + ' - ' + description, cb);
   };
 
   var mockResponse = {
@@ -110,12 +113,6 @@ define([
     return minsub;
   };
 
-  var shallowWithStore = function (component, store) {
-    var context = { store: store };
-
-    return Enzyme.shallow(React.createElement(component), { context: context });
-  };
-
   var wrapContains = function (ctx, type, str) {
     return ctx.find(type).findWhere(function (n) {
       return n.type() === type && n.text().indexOf(str) > -1;
@@ -127,239 +124,243 @@ define([
     this.w = new ExportWidget();
     var minsub = withServer(new MinPubSub());
     this.w.activate(minsub.beehive.getHardenedInstance());
-    this.mockStore = configureStore.default([]);
+  };
+
+  var teardown = function () {
+    this.sb.restore();
+    this.w.destroy();
+    this.w = null;
   };
 
   var test = function () {
+    describe('Export Widget (export_widget.spec.js)', function () {
+      desc('Closer', 'Dumb Component', function () {
+        beforeEach(init);
+        afterEach(teardown);
 
-    desc('Closer', 'Dumb Component', function () {
-      beforeEach(init);
-
-      it('renders correctly', function () {
-        var props = { onClick: _.noop };
-        var wrapper = Enzyme.shallow(React.createElement(Closer, props));
-        expect(wrapper.find('a').exists()).to.eql(true);
-      });
-
-      it('clicking the link fires passed in handler', function () {
-        var props = { onClick: sinon.spy() };
-        var wrapper = Enzyme.shallow(React.createElement(Closer, props));
-        wrapper.find('a').simulate('click', { preventDefault: _.noop });
-        expect(props.onClick.calledOnce).to.eql(true);
-      });
-    });
-
-    desc('Export', 'Dumb Component', function () {
-      beforeEach(init);
-
-      it('renders correctly', function () {
-        var props = {
-          output: '',
-          isFetching: false,
-          onDownloadFile: sinon.spy(),
-          onCopy: sinon.spy()
-        };
-        var wrapper = Enzyme.shallow(React.createElement(Export, props));
-        expect(wrapper.find('textarea').exists()).to.eql(true);
-        var buttons = wrapper.find('button');
-        expect(wrapper.wrap(buttons.get(0)).text()).to.have.string('Download');
-        expect(wrapper.find(ClipboardBtn).exists()).to.eql(true);
-      });
-
-      it('shows progress bar when fetching', function () {
-        var props = {
-          output: '',
-          isFetching: true,
-          progress: 0,
-          onDownloadFile: sinon.spy(),
-          onCopy: sinon.spy()
-        };
-        var wrapper = Enzyme.shallow(React.createElement(Export, props));
-        var textArea = wrapper.find('textarea');
-        var buttons = wrapper.find('button');
-        var progress = wrapper.find('div.progress-bar');
-        expect(textArea.prop('disabled')).to.eql(true);
-        expect(wrapper.wrap(buttons.get(0)).prop('disabled')).to.eql(true);
-        expect(progress.exists()).to.eql(true);
-      });
-
-      it('updates progress bar', function () {
-        var props = {
-          output: '',
-          isFetching: true,
-          progress: 0,
-          onDownloadFile: sinon.spy(),
-          onCopy: sinon.spy()
-        };
-        var wrapper = Enzyme.shallow(React.createElement(Export, props));
-        var progress = wrapper.find('div.progress-bar');
-        expect(progress.prop('style').width).to.equal('0%');
-        wrapper = Enzyme.shallow(React.createElement(Export, _.assign({}, props, { progress: 25 })));
-        progress = wrapper.find('div.progress-bar');
-        expect(progress.prop('style').width).to.equal('25%');
-      });
-    });
-
-    desc('Setup', 'Dumb Component', function () {
-      beforeEach(init);
-
-      it('renders correctly', function () {
-        var props = {
-          formats: [{ value: 'test', label: 'TEST', id: '0' }],
-          format: { value: 'test', label: 'TEST', id: '0' },
-          setFormat: sinon.spy(),
-          onApply: sinon.spy(),
-          onCancel: sinon.spy(),
-          count: '0',
-          setCount: sinon.spy(),
-          maxCount: 0,
-          onGetNext: sinon.spy(),
-          totalRecs: 0,
-          onReset: sinon.spy(),
-          showSlider: true,
-          showReset: true,
-          disabled: false
-        };
-        var wrapper = Enzyme.shallow(React.createElement(Setup, props));
-        var dropdown = wrapper.find('select');
-        var applyButton = wrapper.find('button');
-
-        expect(dropdown.exists()).to.eql(true);
-        expect(applyButton.exists()).to.eql(true);
-
-        var options = dropdown.find('option');
-        var option = wrapper.wrap(options.get(0));
-
-        expect(options.length).to.eql(1);
-        expect(option.props()).to.eql({ value: '0', children: 'TEST' });
-      });
-
-      it('disables elements correctly', function () {
-        var props = {
-          formats: [{ value: 'test', label: 'TEST', id: '0' }],
-          format: { value: 'test', label: 'TEST', id: '0' },
-          setFormat: sinon.spy(),
-          onApply: sinon.spy(),
-          onCancel: sinon.spy(),
-          count: '0',
-          setCount: sinon.spy(),
-          maxCount: 0,
-          onGetNext: sinon.spy(),
-          totalRecs: 0,
-          onReset: sinon.spy(),
-          showSlider: true,
-          showReset: true,
-          disabled: true
-        };
-        var wrapper = Enzyme.shallow(React.createElement(Setup, props));
-        var dropdown = wrapper.find('select');
-        var applyBtn = wrapContains(wrapper, 'button', 'Apply');
-        var resetBtn = wrapContains(wrapper, 'button', 'Reset');
-        var getNextBtn = wrapContains(wrapper, 'button', 'Get Next');
-        var cancelBtn = wrapContains(wrapper, 'button', 'Cancel');
-
-        expect(dropdown.prop('disabled')).to.eql(true);
-        expect(applyBtn.prop('disabled')).to.eql(true);
-        expect(resetBtn.exists()).to.eql(false);
-        expect(getNextBtn.exists()).to.eql(false);
-        expect(cancelBtn.exists()).to.eql(true);
-      });
-
-      it('fires handler on change', function () {
-        var props = {
-          formats: [{ value: 'test', label: 'TEST', id: '0' }],
-          format: { value: 'test', label: 'TEST', id: '0' },
-          setFormat: sinon.spy(),
-          onApply: sinon.spy(),
-          onCancel: sinon.spy(),
-          count: '0',
-          setCount: sinon.spy(),
-          maxCount: 0,
-          onGetNext: sinon.spy(),
-          totalRecs: 0,
-          onReset: sinon.spy(),
-          showSlider: true,
-          showReset: true,
-          disabled: false
-        };
-        var wrapper = Enzyme.shallow(React.createElement(Setup, props));
-        var dropdown = wrapper.find('select');
-        dropdown.simulate('change', { target: { value: '1' } });
-        expect(props.setFormat.calledOnce).to.eql(true);
-      });
-
-      it('fires handler on click', function () {
-        var props = {
-          formats: [{ value: 'test', label: 'TEST', id: '0' }],
-          format: { value: 'test', label: 'TEST', id: '0' },
-          setFormat: sinon.spy(),
-          onApply: sinon.spy(),
-          onCancel: sinon.spy(),
-          count: '0',
-          setCount: sinon.spy(),
-          maxCount: 0,
-          onGetNext: sinon.spy(),
-          totalRecs: 0,
-          onReset: sinon.spy(),
-          showSlider: true,
-          showReset: true,
-          disabled: false
-        };
-        var wrapper = Enzyme.shallow(React.createElement(Setup, props));
-        var applyBtn = wrapContains(wrapper, 'button', 'Apply');
-        applyBtn.simulate('click');
-        expect(props.onApply.calledOnce).to.eql(true);
-      });
-    });
-
-    desc('ClipboardBtn', 'Copy to clipboard button', function () {
-      beforeEach(init);
-
-      it('renders correctly', function () {
-        var props = {
-          disabled: false,
-          target: '',
-          onCopy: sinon.spy()
-        };
-        var wrapper = Enzyme.shallow(React.createElement(ClipboardBtn, props));
-        var btn = wrapper.find('button');
-        expect(btn.exists()).to.eql(true);
-        expect(btn.text()).to.have.string('Copy');
-      });
-    });
-
-    desc('Widget', 'Main Widget', function () {
-      beforeEach(init);
-
-      it('extends base widget', function () {
-        expect(this.w instanceof BaseWidget).to.eql(true);
-      });
-
-      it('state is updated after render for query', function () {
-        this.w.renderWidgetForCurrentQuery({
-          currentQuery: { toJSON: _.constant({ q: 'star' })},
-          numFound: 268110,
-          format: 'bibtex'
+        it('renders correctly', function () {
+          var props = {onClick: _.noop};
+          var wrapper = Enzyme.shallow(React.createElement(Closer, props));
+          expect(wrapper.find('a').exists()).to.eql(true);
+          wrapper = null;
         });
-        var state = this.w.store.getState();
-        expect(state.exports).to.eql({
-          "isFetching": false,
-          "output": "got call for bibtex",
-          "progress": 100,
-          "ids": [
-            "2018NewA...60...69B",
-            "2018NewA...60...48C",
-            "2018NewA...60....1P",
-            "2018CNSNS..57..276X",
-            "2018CNSNS..57...26D"
-          ],
-          "count": 500,
-          "page": 0,
-          "maxCount": 500,
-          "batchSize": 500,
-          "ignore": false,
-          "totalRecs": 268110,
-          "snapshot": {
+
+        it('clicking the link fires passed in handler', function () {
+          var props = {onClick: sinon.spy()};
+          var wrapper = Enzyme.shallow(React.createElement(Closer, props));
+          wrapper.find('a').simulate('click', {preventDefault: _.noop});
+          expect(props.onClick.calledOnce).to.eql(true);
+          
+          wrapper = null;
+        });
+      });
+
+      desc('Export', 'Dumb Component', function () {
+        beforeEach(init);
+        afterEach(teardown);
+
+        it('renders correctly', function () {
+          var props = {
+            output: '',
+            isFetching: false,
+            onDownloadFile: sinon.spy(),
+            onCopy: sinon.spy()
+          };
+          var wrapper = Enzyme.shallow(React.createElement(Export, props));
+          expect(wrapper.find('textarea').exists()).to.eql(true);
+          var buttons = wrapper.find('button');
+          expect(wrapper.wrap(buttons.get(0)).text()).to.have.string('Download');
+          expect(wrapper.find(ClipboardBtn).exists()).to.eql(true);
+          wrapper = null;
+        });
+
+        it('shows progress bar when fetching', function () {
+          var props = {
+            output: '',
+            isFetching: true,
+            progress: 0,
+            onDownloadFile: sinon.spy(),
+            onCopy: sinon.spy()
+          };
+          var wrapper = Enzyme.shallow(React.createElement(Export, props));
+          var textArea = wrapper.find('textarea');
+          var buttons = wrapper.find('button');
+          var progress = wrapper.find('div.progress-bar');
+          expect(textArea.prop('disabled')).to.eql(true);
+          expect(wrapper.wrap(buttons.get(0)).prop('disabled')).to.eql(true);
+          expect(progress.exists()).to.eql(true);
+          wrapper = null;
+        });
+
+        it('updates progress bar', function () {
+          var props = {
+            output: '',
+            isFetching: true,
+            progress: 0,
+            onDownloadFile: sinon.spy(),
+            onCopy: sinon.spy()
+          };
+          var wrapper = Enzyme.shallow(React.createElement(Export, props));
+          var progress = wrapper.find('div.progress-bar');
+          expect(progress.prop('style').width).to.equal('0%');
+          wrapper = Enzyme.shallow(React.createElement(Export, _.assign({}, props, {progress: 25})));
+          progress = wrapper.find('div.progress-bar');
+          expect(progress.prop('style').width).to.equal('25%');
+          wrapper = null;
+        });
+      });
+
+      desc('Setup', 'Dumb Component', function () {
+        beforeEach(init);
+        afterEach(teardown);
+
+        it('renders correctly', function () {
+          var props = {
+            formats: [{value: 'test', label: 'TEST', id: '0'}],
+            format: {value: 'test', label: 'TEST', id: '0'},
+            setFormat: sinon.spy(),
+            onApply: sinon.spy(),
+            onCancel: sinon.spy(),
+            count: '0',
+            setCount: sinon.spy(),
+            maxCount: 0,
+            onGetNext: sinon.spy(),
+            totalRecs: 0,
+            onReset: sinon.spy(),
+            showSlider: true,
+            showReset: true,
+            disabled: false
+          };
+          var wrapper = Enzyme.shallow(React.createElement(Setup, props));
+          var dropdown = wrapper.find('select');
+          var applyButton = wrapper.find('button');
+
+          expect(dropdown.exists()).to.eql(true);
+          expect(applyButton.exists()).to.eql(true);
+
+          var options = dropdown.find('option');
+          var option = wrapper.wrap(options.get(0));
+
+          expect(options.length).to.eql(1);
+          expect(option.props()).to.eql({value: '0', children: 'TEST'});
+          wrapper = null;
+        });
+
+        it('disables elements correctly', function () {
+          var props = {
+            formats: [{value: 'test', label: 'TEST', id: '0'}],
+            format: {value: 'test', label: 'TEST', id: '0'},
+            setFormat: sinon.spy(),
+            onApply: sinon.spy(),
+            onCancel: sinon.spy(),
+            count: '0',
+            setCount: sinon.spy(),
+            maxCount: 0,
+            onGetNext: sinon.spy(),
+            totalRecs: 0,
+            onReset: sinon.spy(),
+            showSlider: true,
+            showReset: true,
+            disabled: true
+          };
+          var wrapper = Enzyme.shallow(React.createElement(Setup, props));
+          var dropdown = wrapper.find('select');
+          var applyBtn = wrapContains(wrapper, 'button', 'Apply');
+          var resetBtn = wrapContains(wrapper, 'button', 'Reset');
+          var getNextBtn = wrapContains(wrapper, 'button', 'Get Next');
+          var cancelBtn = wrapContains(wrapper, 'button', 'Cancel');
+
+          expect(dropdown.prop('disabled')).to.eql(true);
+          expect(applyBtn.prop('disabled')).to.eql(true);
+          expect(resetBtn.exists()).to.eql(false);
+          expect(getNextBtn.exists()).to.eql(false);
+          expect(cancelBtn.exists()).to.eql(true);
+          wrapper = null;
+        });
+
+        it('fires handler on change', function () {
+          var props = {
+            formats: [{value: 'test', label: 'TEST', id: '0'}],
+            format: {value: 'test', label: 'TEST', id: '0'},
+            setFormat: sinon.spy(),
+            onApply: sinon.spy(),
+            onCancel: sinon.spy(),
+            count: '0',
+            setCount: sinon.spy(),
+            maxCount: 0,
+            onGetNext: sinon.spy(),
+            totalRecs: 0,
+            onReset: sinon.spy(),
+            showSlider: true,
+            showReset: true,
+            disabled: false
+          };
+          var wrapper = Enzyme.shallow(React.createElement(Setup, props));
+          var dropdown = wrapper.find('select');
+          dropdown.simulate('change', {target: {value: '1'}});
+          expect(props.setFormat.calledOnce).to.eql(true);
+          wrapper = null;
+        });
+
+        it('fires handler on click', function () {
+          var props = {
+            formats: [{value: 'test', label: 'TEST', id: '0'}],
+            format: {value: 'test', label: 'TEST', id: '0'},
+            setFormat: sinon.spy(),
+            onApply: sinon.spy(),
+            onCancel: sinon.spy(),
+            count: '0',
+            setCount: sinon.spy(),
+            maxCount: 0,
+            onGetNext: sinon.spy(),
+            totalRecs: 0,
+            onReset: sinon.spy(),
+            showSlider: true,
+            showReset: true,
+            disabled: false
+          };
+          var wrapper = Enzyme.shallow(React.createElement(Setup, props));
+          var applyBtn = wrapContains(wrapper, 'button', 'Apply');
+          applyBtn.simulate('click');
+          expect(props.onApply.calledOnce).to.eql(true);
+          wrapper = null;
+        });
+      });
+
+      desc('ClipboardBtn', 'Copy to clipboard button', function () {
+        beforeEach(init);
+        afterEach(teardown);
+
+        it('renders correctly', function () {
+          var props = {
+            disabled: false,
+            target: '',
+            onCopy: sinon.spy()
+          };
+          var wrapper = Enzyme.shallow(React.createElement(ClipboardBtn, props));
+          var btn = wrapper.find('button');
+          expect(btn.exists()).to.eql(true);
+          expect(btn.text()).to.have.string('Copy');
+          wrapper = null;
+        });
+      });
+
+      desc('Widget', 'Main Widget', function () {
+        beforeEach(init);
+        afterEach(teardown);
+
+        it('extends base widget', function () {
+          expect(this.w instanceof BaseWidget).to.eql(true);
+        });
+
+        it('state is updated after render for query', function () {
+          this.w.renderWidgetForCurrentQuery({
+            currentQuery: {toJSON: _.constant({q: 'star'})},
+            numFound: 268110,
+            format: 'bibtex'
+          });
+          var state = this.w.store.getState();
+          expect(state.exports).to.eql({
             "isFetching": false,
             "output": "got call for bibtex",
             "progress": 100,
@@ -375,38 +376,38 @@ define([
             "maxCount": 500,
             "batchSize": 500,
             "ignore": false,
-            "totalRecs": 268110
-          }
+            "totalRecs": 268110,
+            "snapshot": {
+              "isFetching": false,
+              "output": "got call for bibtex",
+              "progress": 100,
+              "ids": [
+                "2018NewA...60...69B",
+                "2018NewA...60...48C",
+                "2018NewA...60....1P",
+                "2018CNSNS..57..276X",
+                "2018CNSNS..57...26D"
+              ],
+              "count": 500,
+              "page": 0,
+              "maxCount": 500,
+              "batchSize": 500,
+              "ignore": false,
+              "totalRecs": 268110
+            }
+          });
         });
-      });
 
-      it('state is updated after render for bibcodes', function () {
-        this.w.renderWidgetForListOfBibcodes([
-          "2018NewA...60...69B",
-          "2018NewA...60...48C",
-          "2018NewA...60....1P",
-          "2018CNSNS..57..276X",
-          "2018CNSNS..57...26D"
-        ], { format: 'aastex' });
-        var state = this.w.store.getState();
-        expect(state.exports).to.eql({
-          "isFetching": false,
-          "output": "got call for aastex",
-          "progress": 100,
-          "ids": [
+        it('state is updated after render for bibcodes', function () {
+          this.w.renderWidgetForListOfBibcodes([
             "2018NewA...60...69B",
             "2018NewA...60...48C",
             "2018NewA...60....1P",
             "2018CNSNS..57..276X",
             "2018CNSNS..57...26D"
-          ],
-          "count": 5,
-          "page": 0,
-          "maxCount": 500,
-          "batchSize": 500,
-          "ignore": false,
-          "totalRecs": 5,
-          "snapshot": {
+          ], {format: 'aastex'});
+          var state = this.w.store.getState();
+          expect(state.exports).to.eql({
             "isFetching": false,
             "output": "got call for aastex",
             "progress": 100,
@@ -422,12 +423,30 @@ define([
             "maxCount": 500,
             "batchSize": 500,
             "ignore": false,
-            "totalRecs": 5
-          }
+            "totalRecs": 5,
+            "snapshot": {
+              "isFetching": false,
+              "output": "got call for aastex",
+              "progress": 100,
+              "ids": [
+                "2018NewA...60...69B",
+                "2018NewA...60...48C",
+                "2018NewA...60....1P",
+                "2018CNSNS..57..276X",
+                "2018CNSNS..57...26D"
+              ],
+              "count": 5,
+              "page": 0,
+              "maxCount": 500,
+              "batchSize": 500,
+              "ignore": false,
+              "totalRecs": 5
+            }
+          });
         });
       });
     });
   };
 
-  describe('Export Widget (' + module.id.replace(/^.*[\\\/]/, '') + ')', sinon.test(test));
+  sinon.test(test)();
 });

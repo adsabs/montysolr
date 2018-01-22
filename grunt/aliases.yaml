@@ -13,7 +13,6 @@ setup:
     - 'copy:discovery_vars'
     - 'copy:libraries'
     - 'exec:convert_enzyme'
-    - 'exec:convert_redux_mock_store'
     - 'sass'
     - 'curl:google-analytics'
 
