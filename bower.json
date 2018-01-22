@@ -33,8 +33,7 @@
     "react-redux": "https://cdnjs.cloudflare.com/ajax/libs/react-redux/4.4.5/react-redux.js",
     "redux": "https://cdnjs.cloudflare.com/ajax/libs/redux/3.5.2/redux.js",
     "redux-thunk": "https://cdnjs.cloudflare.com/ajax/libs/redux-thunk/2.1.0/redux-thunk.min.js",
-    "classnames": "^2.2.5",
-    "seiyria-bootstrap-slider": "^10.0.0"
+    "classnames": "^2.2.5"
   },
   "devDependencies": {
     "chai": "~1.8.0",

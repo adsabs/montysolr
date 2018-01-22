@@ -203,7 +203,7 @@ require.config({
     'mocha': 'libs/mocha/mocha',
     'moment' : 'libs/momentjs/moment',
     'persist-js': 'libs/persist-js/src/persist',
-    'react' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-with-addons',
+    'react' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-with-addons.min',
     'react-backbone': 'libs/react-backbone/react.backbone',
     'react-dom' : '//cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.min',
     'react-prop-types': 'libs/react-prop-types/index',

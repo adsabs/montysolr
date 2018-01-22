@@ -68,7 +68,6 @@
     "react-addons-test-utils": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
-    "redux-test-utils": "^0.2.2",
     "time-grunt": "^1.4.0"
   },
   "peerDependencies": {
