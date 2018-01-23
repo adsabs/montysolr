@@ -73,7 +73,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 		assertU(addDocs("date", "1976-01-02T00:30:00Z"));
 		assertU(addDocs("date", "1976-12-30T00:30:00Z")); // year 76 had only 30 days in Dec
 		assertU(addDocs("date", "1977-01-01T00:30:00Z"));
-
+		
     assertU(commit());
     assertQ(req("q", "*:*"), "//*[@numFound='16']");
     

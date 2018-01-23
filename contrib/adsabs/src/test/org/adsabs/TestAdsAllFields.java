@@ -177,6 +177,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  ", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
 			  ", \"eid\": \"00001\"" +
 			  ", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
+			  // entry_date --> see below
 			  ", \"esources\": [\"AUTHOR_HTML\", \"PUB_PDF\"]" +
 			  // Field that contains both grant ids and grant agencies.
 			  ", \"grant\": [\"NASA\", \"123456-78\", \"NSF-AST\", \"0618398\"]" +
@@ -502,9 +503,35 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
 		);
-
-
-
+		
+		/*
+		 * entdate - human readable form of entry_date
+		 * entry_date
+		 */
+		assertQ(req("q", "entry_date:\"2017-09-19T11:01:32.809Z\""),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		
+		assertQ(req("q", "pubdate:2013-08-05"),
+        "//*[@numFound='1']"
+    );
+		setDebug(true);
+		assertQ(req("q", "entdate:2017-09-19"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		setDebug(false);
+		assertQ(req("q", "entdate:2017-09"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		assertQ(req("q", "entdate:2017"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+    );
+		
+    
 		// order/gaps are important
 		assert h.query(req("q", "recid:100"))
  			.contains("<arr name=\"email\">" +

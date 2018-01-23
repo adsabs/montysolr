@@ -61,7 +61,7 @@ public class TestAqpSLGMultiAnalyzer extends AqpTestAbstractCase {
     // two tokens at the same position:
     assertEquals("(multi multi2) foo", qp.parse("multi foo", "").toString());
     assertEquals("foo (multi multi2)", qp.parse("foo multi", "").toString());
-    assertEquals("(multi multi2) (multi multi2)", qp.parse("multi multi", "")
+    assertEquals("(multi multi2)", qp.parse("multi multi", "")
         .toString());
     Query q = qp.parse("(foo multi) +(bar multi)", "");
     assertEquals("foo (multi multi2) +(bar (multi multi2))",
