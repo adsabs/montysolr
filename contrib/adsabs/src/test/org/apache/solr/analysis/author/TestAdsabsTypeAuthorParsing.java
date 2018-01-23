@@ -2424,53 +2424,49 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       
       System.out.println(escapeUnicode(vals[i]));
       
-      if (tp.debugParser) {
-        System.out.println(escapeUnicode(vals[i]));
-        
-        
-        boolean failed = true;
-        try {
-  	      assertQueryEquals(req("defType", "aqp", "q", author_field + ":" + vals[i]),
-  	          vals[i+1],
-  	          null);
-  	      assertQ(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]), vals[i+2].split(";"));
-  	      failed = false;
-        }
-        finally {
-        	if (failed) {
-        	  
-            System.out.println(escapeUnicode(vals[i]));
-            System.out.println("Running test for " + author_field + ":" + vals[i]);
-            String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
-            
-            ArrayList<String> out = new ArrayList<String>();
-            Matcher m = Pattern.compile("numFound=\\\"(\\d+)").matcher(response);
-            Matcher m2 = Pattern.compile("<doc><str name=\\\"id\\\">(\\d+)</str><arr name=\\\"" + author_field + "\\\"><str>([^<]*)</str></arr></doc>").matcher(response);
-            m.find();
-            String numFound = m.group(1);
-            while (m2.find()) {
-              out.add(String.format("%0$3s\t%2$-23s", m2.group(1), m2.group(2)));
+      
+      boolean failed = true;
+      try {
+	      assertQueryEquals(req("defType", "aqp", "q", author_field + ":" + vals[i]),
+	          vals[i+1],
+	          null);
+	      assertQ(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]), vals[i+2].split(";"));
+	      failed = false;
+      }
+      finally {
+      	if (failed) {
+      	  
+          System.out.println(escapeUnicode(vals[i]));
+          System.out.println("Running test for " + author_field + ":" + vals[i]);
+          String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
+          
+          ArrayList<String> out = new ArrayList<String>();
+          Matcher m = Pattern.compile("numFound=\\\"(\\d+)").matcher(response);
+          Matcher m2 = Pattern.compile("<doc><str name=\\\"id\\\">(\\d+)</str><arr name=\\\"" + author_field + "\\\"><str>([^<]*)</str></arr></doc>").matcher(response);
+          m.find();
+          String numFound = m.group(1);
+          while (m2.find()) {
+            out.add(String.format("%0$3s\t%2$-23s", m2.group(1), m2.group(2)));
+          }
+          Collections.sort(out);
+          System.out.print("                             // " + vals[i] + " numFound=" + numFound);
+          int j=0;
+          for (String s: out) {
+            if (j%3==0) {
+              System.out.print("\n                             // ");
             }
-            Collections.sort(out);
-            System.out.print("                             // " + vals[i] + " numFound=" + numFound);
-            int j=0;
-            for (String s: out) {
-              if (j%3==0) {
-                System.out.print("\n                             // ");
-              }
-              System.out.print(s);
-              j++;
-            }
-            System.out.println();
-        	  
-        	  QParser qParser = getParser(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]));
-            Query q = qParser.parse();
-            String actual = q.toString("field");
-        		System.out.println("Offending test case: " + escapeUnicode(vals[i]) + "\nexpected vs actual: \n" + escapeUnicode(vals[i+1]) + "\n" + escapeUnicode(actual));
-        		
-        		
-        	}
-        }
+            System.out.print(s);
+            j++;
+          }
+          System.out.println();
+      	  
+      	  QParser qParser = getParser(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]));
+          Query q = qParser.parse();
+          String actual = q.toString("field");
+      		System.out.println("Offending test case: " + escapeUnicode(vals[i]) + "\nexpected vs actual: \n" + escapeUnicode(vals[i+1]) + "\n" + escapeUnicode(actual));
+      		
+      		
+      	}
       }
     }
   }

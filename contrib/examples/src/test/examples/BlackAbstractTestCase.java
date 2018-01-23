@@ -102,14 +102,14 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		if (ename == null) {
 			throw new IllegalStateException("Please call setEName() first");
 		}
-		System.setProperty("solr.solr.home", getExampleHome() + "/solr");
+		System.setProperty("solr.solr.home", getExampleHome() + "/server/solr");
 		
 		envInit();
 		
-		schemaString = getConf("solr/collection1/conf/schema.xml");
+		schemaString = getConf("server/solr/collection1/schema.xml");
 
-    configString = getConf("solr/collection1/conf/solrconfig.xml");
-    initCore(configString, schemaString, getConf("solr/"));
+    configString = getConf("server/solr/collection1/solrconfig.xml");
+    initCore(configString, schemaString, getConf("server/solr/"));
 		
 	}
 	
