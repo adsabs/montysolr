@@ -2,6 +2,15 @@ package org.apache.solr.handler;
 
 import monty.solr.util.MontySolrSetup;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+
+import org.apache.solr.common.util.NamedList;
+import org.apache.solr.handler.batch.BatchHandler;
+import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.util.AbstractSolrTestCase;
 import org.junit.BeforeClass;
 
@@ -52,6 +61,29 @@ public class TestReplicationEventListener extends AbstractSolrTestCase {
         "//*[@numFound='1']",
         "//doc/str[@name='id'][.='3']"
     );
-				
+		
+		ReplicationCoordinatorHandler handler = new ReplicationCoordinatorHandler();
+    NamedList<Object> defaults = new NamedList<Object>();
+    handler.init(defaults);
+    
+    SolrQueryRequest req = req("event", "give-me-delay", "hostid", "foo");
+    float[] answers = new float[10];
+    for (int i=0; i < answers.length; i++) {
+      SolrQueryResponse rsp = getResponse(handler, req);
+      answers[i] = (float) rsp.getValues().get("delay");
+    }
+    // run two full cycles
+		assertArrayEquals(new float[] {900.0f, 0.0f, 0.0f, 300.0f, 600.0f, 900.0f, 0.0f, 0.0f, 300.0f, 600.0f}, answers, 0.1f);
 	}
+	
+	private SolrQueryResponse getResponse(ReplicationCoordinatorHandler handler, SolrQueryRequest req) throws IOException, InterruptedException {
+    SolrQueryResponse rsp = new SolrQueryResponse();
+    try {
+      h.getCore().execute(handler, req, rsp);
+      return rsp;
+    }
+    finally {
+      req.close();
+    }
+  }
 }
