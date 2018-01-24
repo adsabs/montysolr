@@ -226,7 +226,7 @@ define([
       }
       var message = 'Log in was unsuccessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade : true}));
-      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_fail");
+      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "login_fail", message);
     },
 
     logoutSuccess : function (response, status, jqXHR) {
@@ -248,7 +248,7 @@ define([
       var error = (xhr.responseJSON && xhr.responseJSON.error)  ? xhr.responseJSON.error : "error unknown";
       var message = 'Registration was unsuccessful (' + error + ')';
       pubsub.publish(pubsub.ALERT, new ApiFeedback({code: 0, msg: message, type : "danger", fade: true}));
-      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "register_fail");
+      pubsub.publish(pubsub.USER_ANNOUNCEMENT, "register_fail", message);
     },
 
     resetPassword1Success :function(response, status, jqXHR){

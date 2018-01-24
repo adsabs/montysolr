@@ -30,4 +30,15 @@
         </div>
 
     </form>
+
+    {{#if hasError}}
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1 text-center">
+            <div class="alert alert-danger">
+                <p>{{errorMsg}}</p>
+                <p><a class="link" id="dismiss-error">Dismiss</a></p>
+            </div>
+        </div>
+    </div>
+    {{/if}}
 </div>
