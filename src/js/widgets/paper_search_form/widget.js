@@ -33,13 +33,20 @@ define([
 
     events: {
       "keyup .paper-form input" : "checkPaperFormDisabled",
+      "enter .paper-form input" : "submitPaperForm",
       "click .paper-form button[type=submit]" : "submitPaperForm",
 
       "keyup .bibcode-form textarea" : "checkBibcodeFormDisabled",
+      "enter .bibcode-form textarea" : "submitBibcodeForm",
       "click .bibcode-form button[type=submit]" : "submitBibcodeForm"
     },
 
     onRender : function(e){
+      this.$('.paper-form input, .bibcode-form textarea', this.$el).keyup(function (e) {
+        if (e.keyCode === 13) {
+          $(this).trigger('enter');
+        }
+      });
       this.$("#pub-input").autocomplete({ source : AutocompleteData, minLength : 2 , autoFocus : true });
     },
 
@@ -79,6 +86,12 @@ define([
 
       terms = _.filter(terms, function(t){if (t){return t}});
 
+      if (_.isEmpty(terms)) {
+        this.$('.paper-form button[type=submit]').html('<i class="fa fa-search"></i> Search');
+        this.checkPaperFormDisabled();
+        return false;
+      }
+
       this.trigger("submit", terms.join(" "));
       e.preventDefault();
     },
@@ -89,6 +102,12 @@ define([
       this.$(".bibcode-form button[type=submit]").html('<i class="icon-loading"/>  Loading...');
       var terms = this.$(".bibcode-form textarea").val().split(/\s+/);
       terms = _.filter(terms, function(t){if (t){return t}});
+
+      if (_.isEmpty(terms)) {
+        this.$('.bibcode-form button[type=submit]').html('<i class="fa fa-search"></i> Search');
+        this.checkBibcodeFormDisabled();
+        return false;
+      }
 
       this.trigger("submit-bigquery", terms);
     }
@@ -142,4 +161,4 @@ define([
 
   return FormWidget;
 
-})
+});
