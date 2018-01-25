@@ -146,7 +146,6 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 				"tv.fl", "abstract",
 				"indent", "true"
 		),
-		"//lst[@name='termVectors']/str[@name='uniqueKeyFieldName'][contains(text(),'id')]",
 		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='allsky']/int[@name='tf']",
 		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='allsky']/int[@name='df']",
 		"//lst[@name='termVectors']/lst/lst[@name='abstract']/lst[@name='allsky']/double[@name='tf-idf']",
@@ -162,7 +161,6 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 				"tv.fl", "title",
 				"indent", "true"
 		),
-		"//lst[@name='termVectors']/str[@name='uniqueKeyFieldName'][contains(text(),'id')]",
 		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='allsky']/int[@name='tf']",
 		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='allsky']/int[@name='df']",
 		"//lst[@name='termVectors']/lst/lst[@name='title']/lst[@name='allsky']/double[@name='tf-idf']",

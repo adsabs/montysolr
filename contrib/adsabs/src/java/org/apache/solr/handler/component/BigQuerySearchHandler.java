@@ -70,6 +70,7 @@ public class BigQuerySearchHandler extends SearchHandler
         IgnoreFirstIteratorArrayList<ContentStream> il = new IgnoreFirstIteratorArrayList<ContentStream>();
         for (ContentStream cs: csms) {
           il.add(cs);
+          log.debug("processing content stream:" + cs.getContentType() + " " + cs.getSize());
         }
         ((SolrQueryRequestBase) req).setContentStreams(il);
       }
