@@ -21,12 +21,15 @@ define([
   ApiTargets, ApiQuery, ApiRequest, BaseWidget, App, ACTIONS, actions, reducers
 ) {
 
+  /**
+   * Main entry point
+   * this is where react will take over control of the view
+   */
   var View = Backbone.View.extend({
     initialize: function (options) {
       _.assign(this, options);
     },
     render: function () {
-      console.log('RENDER');
       ReactDOM.render(
         <ReactRedux.Provider store={this.store}>
           <App/>
@@ -41,34 +44,68 @@ define([
   });
 
   var Widget = BaseWidget.extend({
-    initialize: function (options) {
-      options = options || {};
+
+    /**
+     * Initialize the widget
+     */
+    initialize: function () {
+
+      // setup the thunk middleware
       var middleware = Redux.applyMiddleware(
         ReduxThunk.default.withExtraArgument(this)
       );
+
+      // add redux devtools extension hook (safe for production)
       const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
         || Redux.compose;
+
+      // setup the store
       this.store = Redux.createStore(reducers, composeEnhancers(middleware));
+
+      // create the view, passing in store
       this.view = new View({ store: this.store });
     },
+
+    /**
+     * Activate the widget
+     *
+     * @param {object} beehive
+     */
     activate: function (beehive) {
       this.setBeeHive(beehive);
       this.activateWidget();
     },
+
+    /**
+     * Take the current query object and fetch corresponding affiliation data
+     *
+     * @param {object} currentQuery
+     */
     renderWidgetForCurrentQuery: function ({ currentQuery }) {
       const pubsub = this.getPubSub();
+
+      // do nothing if we don't get a query
       if (currentQuery) {
         const q = currentQuery.clone();
         q.unlock();
+
+        // get the first 1000 rows
         q.set('rows', 1000);
         q.set('fl', 'bibcode');
         const req = this.composeRequest(q);
+
         req.set('options', {
+
+          // extract ids
           done: res => {
             const ids = _.map(res.response.docs, 'bibcode');
             this.fetchAffiliationData(ids);
           },
+
+          // handle errors
           fail: () => this.onError(),
+
+          // stop loading after this either way
           always: () => {
             this.store.dispatch({ type: ACTIONS.setLoading, value: false });
           }
@@ -78,14 +115,31 @@ define([
         this.store.dispatch({ type: ACTIONS.fetchData });
       }
     },
+
+    /**
+     * Take an array of ids and fetch corresponding affiliation data
+     *
+     * @param {Array} ids
+     * @returns {*}
+     */
     renderWidgetForListOfBibcodes: function (ids) {
       return this.fetchAffiliationData(ids);
     },
+
+    /**
+     * Take an array of ids and fetch affiliation data about them
+     * this will actually make the request
+     *
+     * @param {Array} ids
+     */
     fetchAffiliationData: function (ids) {
       const pubsub = this.getPubSub();
       const $dd = $.Deferred();
 
+      // update the current count of items we are exporting
       this.store.dispatch({ type: ACTIONS.setCount, value: ids.length });
+
+      // start loading (pending) action
       this.store.dispatch({ type: ACTIONS.fetchData });
 
       const req = new ApiRequest({
@@ -100,6 +154,7 @@ define([
         }
       });
 
+      // when done set the data into the store
       $dd.done(data => {
         try {
           data = JSON.parse(data).data;
@@ -109,8 +164,10 @@ define([
         }
       });
 
+      // handle errors
       $dd.fail(() => this.onError());
 
+      // stop loading either way
       $dd.always(() => this.store.dispatch({
         type: ACTIONS.setLoading, value: false
       }));
@@ -118,6 +175,12 @@ define([
       pubsub.publish(pubsub.EXECUTE_REQUEST, req);
       return $dd.promise();
     },
+
+    /**
+     * Export the current data
+     *
+     * @param {object} data
+     */
     exportAffiliationData: function (data) {
       const pubsub = this.getPubSub();
       const $dd = $.Deferred();
@@ -135,8 +198,10 @@ define([
         }
       });
 
+      // handle errors
       $dd.fail(() => this.onError());
 
+      // stop loading either way
       $dd.always(() => this.store.dispatch({
         type: ACTIONS.setLoading, value: false
       }));
@@ -144,10 +209,18 @@ define([
       pubsub.publish(pubsub.EXECUTE_REQUEST, req);
       return $dd.promise();
     },
+
+    /**
+     * Close the widget
+     */
     closeWidget: function () {
       const pubsub = this.getPubSub();
       pubsub.publish(pubsub.NAVIGATE, "results-page");
     },
+
+    /**
+     * Show an error message
+     */
     onError: function () {
       const { dispatch } = this.store;
       dispatch(actions.showMessage(

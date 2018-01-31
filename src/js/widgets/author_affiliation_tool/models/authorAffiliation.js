@@ -3,6 +3,16 @@ define([
   'underscore'
 ], function (_) {
 
+  /**
+   * Parse and format author affiliation data
+   *
+   * This factory will create a new entry for the table that has an author and all
+   * their corresponding affiliations and active dates.
+   *
+   * @param {string} author
+   * @param {array} affs
+   * @returns {{id: string, selected: boolean, author: *, affiliations: Array, lastActiveDates: Array}}
+   */
   const authorAffiliationFactory = function (author, affs) {
 
     let out = {

@@ -1,6 +1,6 @@
 
 define([
-    'js/widgets/export/widget',
+    'es6!js/widgets/export/widget.jsx',
     'js/components/api_query',
     'js/components/json_response'
   ],
@@ -28,6 +28,7 @@ define([
         _.bindAll(this, "setCurrentQuery", "processResponse");
         var pubsub = this.getPubSub();
         pubsub.subscribe(pubsub.DELIVERING_RESPONSE, this.processResponse);
+        ExportWidget.prototype.activate.call(this, beehive);
       },
 
       ingestBroadcastedPayload: function(data) {

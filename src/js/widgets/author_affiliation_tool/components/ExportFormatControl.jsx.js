@@ -3,6 +3,9 @@ define([
   'react'
 ], function (React) {
 
+  /**
+   * Dropdown containing export format strings for the user to select
+   */
   const ExportFormatControl = ({ formats, format, onChange }) => (
     <select
       onChange={e => onChange(e.target.value)}

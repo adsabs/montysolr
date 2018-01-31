@@ -117,6 +117,21 @@ define([
     },
 
     /**
+     * Attaches a general handler to all api feedback codes
+     *
+     * Includes the positive error codes and api request failures
+     *
+     * @param {function} handler - handler function
+     */
+    attachGeneralHandler: function (handler) {
+      _.forEach(ApiFeedback.CODES, _.bind(function (code) {
+        if (code > 0 || code === ApiFeedback.CODES.API_REQUEST_ERROR) {
+          this.__widgetHandlerManager.on(code, handler);
+        }
+      }, this));
+    },
+
+    /**
      * Detaches a particular handler from all codes
      *
      * @param cb

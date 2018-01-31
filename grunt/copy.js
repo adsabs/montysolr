@@ -108,6 +108,15 @@ module.exports = function (grunt) {
           src: 'jsonpath*.js',
           dest: 'src/libs/jsonpath',
           expand: true
+        },
+        {
+          cwd: 'node_modules/prop-types',
+          src: 'prop-types.js',
+          dest: 'src/libs/react-prop-types/',
+          expand: true,
+          rename: function (dest, src) {
+            return dest + src.replace('prop-types', 'index');
+          }
         }
       ]
     },

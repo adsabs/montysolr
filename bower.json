@@ -26,7 +26,7 @@
     "require-handlebars-plugin": "1.0.0",
     "requirejs": "2.1.8",
     "requirejs-plugins": "~1.0.3",
-    "clipboard": "1.5.10",
+    "clipboard": "1.7.1",
     "es5-shim": "~4.5.9",
     "select2": "4.0.3",
     "MathJax": "~2.5.3",

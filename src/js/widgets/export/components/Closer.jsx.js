@@ -1,17 +1,9 @@
 'use strict';
 
 define([
-  'react'
-], function (React) {
+'react', 'react-prop-types'
+], function (React, ReactPropTypes) {
 
-  const style = {
-    position: 'absolute',
-    right: '5px'
-  };
-
-  /**
-   * A simple closer link that looks like an `X`
-   */
   const Closer = ({ onClick }) => {
 
     const handleClick = (e) => {
@@ -20,10 +12,14 @@ define([
     };
 
     return (
-      <a href="#" style={style} onClick={e => handleClick(e)}>
+      <a href="#" className="pull-right" onClick={e => handleClick(e)}>
         <i className="fa fa-times fa-2x"/>
       </a>
     );
+  };
+
+  Closer.propTypes = {
+    onClick: ReactPropTypes.func.isRequired
   };
 
   return Closer;
