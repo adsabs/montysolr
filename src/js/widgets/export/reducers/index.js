@@ -51,22 +51,91 @@ define([
   };
 
   // format collection reducer
-  const formats = (state = [
-    { value: 'bibtex', id: '0', label: 'BibTeX' },
-    { value: 'bibtexabs', id: '1', label: 'BibTeX ABS' },
-    // { value: 'ads', id: '2', label: 'Classic ADS' },
-    { value: 'endnote', id: '3', label: 'Endnote' },
-    { value: 'procite', id: '4', label: 'Procite' },
-    { value: 'ris', id: '5', label: 'RIS' },
-    { value: 'refworks', id: '6', label: 'RefWorks' },
-    { value: 'medlars', id: '7', label: 'MEDLARS' },
-    { value: 'dcxml', id: '8', label: 'DC-XML' },
-    { value: 'refxml', id: '9', label: 'REF-XML' },
-    { value: 'refabsxml', id: '10', label: 'REFABS-XML' },
-    { value: 'aastex', id: '11', label: 'AASTeX' },
-    { value: 'icarus', id: '12', label: 'Icarus' },
-    { value: 'mnras', id: '13', label: 'MNRAS' },
-    { value: 'soph', id: '14', label: 'SOPH' }
+  const formats = (state = [{
+      value: 'bibtex',
+      id: '0',
+      label: 'BibTeX',
+      help: 'BibTeX format',
+      ext: 'bbl'
+    }, {
+      value: 'bibtexabs',
+      id: '1',
+      label: 'BibTeX ABS',
+      help: 'BibTeX with abstracts',
+      ext: 'bbl'
+    }, {
+      value: 'endnote',
+      id: '2',
+      label: 'EndNote',
+      help: 'EndNote format',
+      ext: 'enw'
+    }, {
+      value: 'procite',
+      id: '3',
+      label: 'ProCite',
+      help: 'ProCite format',
+      ext: 'txt'
+    }, {
+      value: 'ris',
+      id: '4',
+      label: 'RIS',
+      help: 'Research Information Systems (RIS) format',
+      ext: 'txt'
+    }, {
+      value: 'refworks',
+      id: '5',
+      label: 'RefWorks',
+      help: 'RefWorks format',
+      ext: 'txt'
+    }, {
+      value: 'medlars',
+      id: '6',
+      label: 'MEDLARS',
+      help: 'Medical Literature Analysis and Retrieval System (MEDLARS) format',
+      ext: 'txt'
+    }, {
+      value: 'dcxml',
+      id: '7',
+      label: 'DC-XML',
+      help: 'Dublin Core XML format',
+      ext: 'xml'
+    }, {
+      value: 'refxml',
+      id: '8',
+      label: 'REF-XML',
+      help: 'ADS link data in XML format',
+      ext: 'xml'
+    }, {
+      value: 'refabsxml',
+      id: '9',
+      label: 'REFABS-XML',
+      help: 'ADS records in XML format',
+      ext: 'xml'
+    }, {
+      value: 'aastex',
+      id: '10',
+      label: 'AASTeX',
+      help: 'LaTeX format for AAS journals',
+      ext: 'txt'
+    }, {
+      value: 'icarus',
+      id: '11',
+      label: 'Icarus',
+      help: 'LaTeX format for use in Icarus',
+      ext: 'txt'
+    }, {
+      value: 'mnras',
+      id: '12',
+      label: 'MNRAS',
+      help: 'LaTeX format for use in MNRAS',
+      ext: 'txt'
+    }, {
+      value: 'soph',
+      id: '13',
+      label: 'Solar Physics',
+      help: 'LaTeX format for use in Solar Physics',
+      ext: 'txt'
+    }
   ], action) => {
     switch (action.type) {
       case SET_FORMATS:

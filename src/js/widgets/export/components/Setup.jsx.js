@@ -22,7 +22,7 @@ define([
             onChange={e => setFormat(e.target.value)}
             disabled={disabled}
           >
-            {formats.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
+            {formats.map(f => <option key={f.id} value={f.id} title={f.help}>{f.label}</option>)}
           </select>
         </div>
         { disabled &&

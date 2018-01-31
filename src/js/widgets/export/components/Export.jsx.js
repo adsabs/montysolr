@@ -39,14 +39,14 @@ define([
         <div className="col-sm-12 btn-group">
           <button
             className="btn btn-default"
-            disabled={isFetching}
+            disabled={isFetching || _.isEmpty(output)}
             onClick={onDownloadFile}
           >
             <i className="fa fa-download fa-fw"/>
             Download to File
           </button>
           <ClipboardBtn
-            disabled={isFetching}
+            disabled={isFetching || _.isEmpty(output)}
             onCopy={onCopy}
             target=".export-textarea"
           />

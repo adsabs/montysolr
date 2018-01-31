@@ -216,8 +216,8 @@ define([
 
         it('renders correctly', function () {
           var props = {
-            formats: [{value: 'test', label: 'TEST', id: '0'}],
-            format: {value: 'test', label: 'TEST', id: '0'},
+            formats: [{value: 'test', label: 'TEST', id: '0', help: 'help'}],
+            format: {value: 'test', label: 'TEST', id: '0', help: 'help'},
             setFormat: sinon.spy(),
             onApply: sinon.spy(),
             onCancel: sinon.spy(),
@@ -242,7 +242,7 @@ define([
           var option = wrapper.wrap(options.get(0));
 
           expect(options.length).to.eql(1);
-          expect(option.props()).to.eql({value: '0', children: 'TEST'});
+          expect(option.props()).to.eql({value: '0', children: 'TEST', title: 'help' });
           wrapper = null;
         });
 

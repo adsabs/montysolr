@@ -234,7 +234,7 @@ define([
     let blob = new Blob([state.exports.output], {
       type: 'text/plain;charset=utf-8'
     });
-    saveAs(blob, `export-${state.format.value}.txt`)
+    saveAs(blob, `export-${state.format.value}.${state.format.ext}`)
   };
 
   return actions;
