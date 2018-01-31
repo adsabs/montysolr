@@ -38,8 +38,8 @@ public class ReplicationEventListener implements SolrEventListener {
   private SolrCore core;
   private String masterUrl = null;
   private String coordinatorEndpoint = "/coordinator";
-  private HttpSolrClient httpClient;
-  private int randHostId = new Random().nextInt(Integer.MAX_VALUE);
+  private HttpSolrClient httpClient = null;
+  private static final int randHostId = new Random().nextInt(Integer.MAX_VALUE);
   
   public ReplicationEventListener(SolrCore core) {
     this.core = core;
@@ -48,9 +48,16 @@ public class ReplicationEventListener implements SolrEventListener {
   public void init(NamedList args) {
     this.args = args.clone();
     masterUrl  = findMasterUrl(core.getSolrConfig());
+    if (masterUrl == null) {
+      log.info("Slave coordination is disabled because masterUrl == null");
+      return;
+    }
     String foo = (String) args.get("endpoint");
     if (foo != null)
       coordinatorEndpoint = foo;
+    
+    log.info("Slave coordination will query: " + masterUrl + coordinatorEndpoint);
+    
     latch = new CountDownLatch(1);
     barrier = new CyclicBarrier(1);
     numberOfTimesCalled = new AtomicInteger(0);
@@ -68,6 +75,10 @@ public class ReplicationEventListener implements SolrEventListener {
   @Override
   public void newSearcher(SolrIndexSearcher newSearcher,
       SolrIndexSearcher currentSearcher) {
+    
+    if (httpClient == null)
+      return;
+    
     if (currentSearcher == null || masterUrl == null)
       return; // initialization, don't do anything
     

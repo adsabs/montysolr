@@ -165,11 +165,12 @@
 
     <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
 
-    <!-- 
     <listener event="newSearcher" 
       class="org.apache.solr.handler.ReplicationEventListener"
-      enable="${montysolr.warmSearcher:true}" />
-       -->
+      enable="${montysolr.coordinate:true}">
+      <str name="endpoint">/replicoordinator</str>
+    </listener>
+    
     <!-- set montysolr.warmSeacher to 'false' if you want to just replicate/build
          index and you don't care to have citation cache (it speeds up indexing) -->
     <listener event="newSearcher" 
@@ -453,7 +454,11 @@
     </lst>
   </requestHandler>
   
-  <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy" /> 
+  <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy" />
+  
+  <requestHandler name="/replicoordinator" class="solr.ReplicationCoordinatorHandler" >
+    
+  </requestHandler> 
 
   <!--  disabled SpellCheck see original solrconfig.xml or http://wiki.apache.org/solr/SpellCheckComponent -->
 

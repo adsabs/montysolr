@@ -40,10 +40,6 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		SolrCore core = h.getCore();
 		String data;
 		
-		//data = direct.request("/invenio/update?wt=json", null);
-		
-		//data = direct.request("/invenio/update?wt=json&last_recid=10549598", null);
-		
 		// add some empty docs
 		assertU(adoc("id","1","recid","1", "bibcode", "b1"));
 		assertU(adoc("id","2","recid","2", "bibcode", "b2"));
@@ -185,6 +181,13 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 		//data = direct.request("/select?q=author:goodman&debugQuery=true&wt=json", null);
 		//System.out.println(data);
+		
+		data = direct.request("/replicoordinator?hostid=foo&wt=json", null);
+		assert data.contains("maxDelay");
+		assert data.contains("cycles");
+		
+		data = direct.request("/replicoordinator?hostid=foo&event=give-me-delay&wt=json", null);
+		assert data.contains("delay");
 
 	}
 	

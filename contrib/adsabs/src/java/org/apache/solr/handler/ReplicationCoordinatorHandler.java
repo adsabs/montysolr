@@ -2,6 +2,7 @@ package org.apache.solr.handler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +119,18 @@ public class ReplicationCoordinatorHandler extends RequestHandlerBase {
         currentPosition = 0;
       rsp.add("delay", cycles[currentPosition] * maxDelay);
       currentPosition++;
+    }
+    else {
+      rsp.add("instances", counters);
+      rsp.add("numInstances", numInstances);
+      StringBuilder sb = new StringBuilder();
+      for (float f: cycles) {
+        sb.append(Float.toString(f*maxDelay));
+        sb.append(" ");
+      }
+      rsp.add("cycles", sb.toString());
+      rsp.add("maxDelay", maxDelay);
+      rsp.add("currentPosition", currentPosition);
     }
     
   }
