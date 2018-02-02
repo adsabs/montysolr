@@ -11,6 +11,7 @@ import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.RegexpQuery;
@@ -311,6 +312,28 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+      // fuzzy search for authors
+      assertQueryEquals(req("defType", "aqp", "q", "author:kurtz~2"),
+        "author:kurtz,~2",
+        FuzzyQuery.class);
+      
+      // levenshtein automata only considers distances (and max is 2)
+      assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~0.8"),
+          "author:hoffmann, w~2",
+          FuzzyQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~3"),
+          "author:hoffmann, w~2",
+          FuzzyQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~1"),
+          "author:hoffmann, w~1",
+          FuzzyQuery.class);
+      
+      
+      assertQueryEquals(req("defType", "aqp", "q", "author:\"Hoffmann, W.\"~2"),
+          "author:hoffmann, w~2",
+          FuzzyQuery.class);
+      
+
         // inconsistency disabling synonyms: #39
         assertQueryEquals(req("defType", "aqp", "q", "full:bremßtrahlung"),
           "(ack:bremßtrahlung ack:bremsstrahlung ack:syn::brehmen) "

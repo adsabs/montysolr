@@ -82,7 +82,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		
 		
 		
-		set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY, true);
+		set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY, false);
 		set(AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY, 2.0f);
 		
 		// Now inside the solrconfig.xml

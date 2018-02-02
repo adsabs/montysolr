@@ -109,6 +109,11 @@ public class ReplicationEventListener implements SolrEventListener {
   
   private Integer contactReplicatorCoordinator(String verb, String retrieve) {
     NamedList<Object> r = request(verb, null);
+    if (r == null) {
+      log.error("No response received from the master url");
+      return 0;
+    }
+    
     Object out = r.get(retrieve);
     
     if (out == null) {

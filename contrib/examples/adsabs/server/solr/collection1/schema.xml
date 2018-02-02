@@ -1575,6 +1575,9 @@
 
 		<field name="author_nosyn" type="author_short_name_rage"
 			indexed="false" stored="false" />
+	    
+	    <field name="author_fuzzy" type="author_short_name_rage"
+            indexed="false" stored="false" />
 
 		<field name="author_notrans_nosyn" type="author_short_name_rage"
 			indexed="false" stored="false" />

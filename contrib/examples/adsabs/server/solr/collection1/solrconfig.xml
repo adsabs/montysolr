@@ -663,6 +663,7 @@
        <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count,page_count,data_count</str>
        <str name="aqp.authorFields">author,first_author</str>
        <str name="aqp.humanized.dates">pubdate:date,entdate:entry_date</str>
+       <str name="aqp.force.fuzzy.phrases">author,first_author</str>
     </lst>
   </queryParser>
   
@@ -692,6 +693,7 @@
        <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count,page_count,data_count</str>
        <str name="aqp.authorFields">author,first_author</str>
        <str name="aqp.humanized.dates">pubdate:date,entdate:entry_date:timestamp</str>
+       <str name="aqp.force.fuzzy.phrases">author,first_author</str>
     </lst>
   </queryParser>
   

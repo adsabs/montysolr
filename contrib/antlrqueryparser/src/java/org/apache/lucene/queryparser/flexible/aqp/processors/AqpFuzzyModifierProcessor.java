@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -52,7 +53,22 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
 
       if (child instanceof QuotedFieldQueryNode
           || child instanceof WildcardQueryNode) {
-
+        
+        if (child instanceof QuotedFieldQueryNode && config.has(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER)) {
+          Map<String, String> c = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+          
+          if (c.containsKey("aqp.force.fuzzy.phrases")) {
+            FieldQueryNode fn = (FieldQueryNode) child;
+           
+            // if this is a phrase, but we want to treat it as a fuzzy field
+            for (String f: c.get("aqp.force.fuzzy.phrases").split(",")) {
+              if (f.equals(fn.getFieldAsString())) {
+                return makeFuzzyNode(config, fn, fuzzy);
+              }
+            }
+          }
+        }
+        
         if (fuzzy.intValue() < fuzzy) {
 
           if (config
@@ -69,19 +85,8 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
       } else if (child instanceof FieldQueryNode) {
 
         FieldQueryNode fn = (FieldQueryNode) child;
-
-        if (config
-            .has(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) != false
-            && config
-                .get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) == true) {
-          if (fuzzy > 0.0f && fuzzy <= 1.0f) {
-            return new SlowFuzzyQueryNode(fn.getFieldAsString(),
-                fn.getTextAsString(), fuzzy, fn.getBegin(), fn.getEnd());
-          }
-        }
-
-        return new FuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(),
-            fuzzy, fn.getBegin(), fn.getEnd());
+        return makeFuzzyNode(config, fn, fuzzy);
+        
 
       } else {
         throw new QueryNodeException(new MessageImpl(
@@ -102,6 +107,21 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
   protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
       throws QueryNodeException {
     return children;
+  }
+  
+  private QueryNode makeFuzzyNode(QueryConfigHandler config, FieldQueryNode fn, Float fuzzy) {
+    if (config
+        .has(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) != false
+        && config
+            .get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) == true) {
+      if (fuzzy > 0.0f && fuzzy <= 1.0f) {
+        return new SlowFuzzyQueryNode(fn.getFieldAsString(),
+            fn.getTextAsString(), fuzzy, fn.getBegin(), fn.getEnd());
+      }
+    }
+
+    return new FuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(),
+        fuzzy, fn.getBegin(), fn.getEnd());
   }
 
 }
