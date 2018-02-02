@@ -89,21 +89,17 @@ public class ReplicationEventListener implements SolrEventListener {
       
       notifyCoordinator("delaying-index", Integer.toString(delayInSecs));
       
+      log.info("Delaying index activation by: " + delayInSecs);
+      
       // simulate a slow searcher listener
-      barrier.await(delayInSecs, TimeUnit.SECONDS);
+      Thread.sleep(delayInSecs * 1000);
       
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       log.warn("Delaying interrupted");
       notifyCoordinator("delay-interrupted", e.toString());
       throw new RuntimeException(e);
-    } catch (BrokenBarrierException e) {
-      log.error("Broken barrier, we are not delaying index deployment any more.");
-      notifyCoordinator("congestion-problem", "we have waited too long, another thread tried to open a searcher"); // this will never happe IFF there is only one write thread
-    } catch (TimeoutException e) {
-      log.error("Time barrier timed out");
-      notifyCoordinator("activating-new-index", "timeout :" + delayInSecs);
-    }
+    } 
     
     notifyCoordinator("activating-index", Integer.toString(delayInSecs));
     barrier.reset();
@@ -113,13 +109,26 @@ public class ReplicationEventListener implements SolrEventListener {
   
   private Integer contactReplicatorCoordinator(String verb, String retrieve) {
     NamedList<Object> r = request(verb, null);
-    String out = (String) r.get(retrieve);
+    Object out = r.get(retrieve);
+    
     if (out == null) {
       log.error("Error contacting/getting data from coordinator.");
       return 0;
     }
+    
     try {
-      return Integer.parseInt(out);
+      if (out instanceof String) {
+        return Integer.parseInt((String) out);
+      }
+      else if (out instanceof Integer) {
+        return (Integer) out;
+      }
+      else if (out instanceof Float) {
+        return ((Float) out).intValue();
+      }
+      
+      log.error("Received something unexpected from coordinator: " + out);
+      return 0;
     }
     catch (Exception e ) {
       return 0;
