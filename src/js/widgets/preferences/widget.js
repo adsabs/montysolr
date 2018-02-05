@@ -125,11 +125,11 @@ define([
         var adsOrcidUserInfo = this.getBeeHive().getService("OrcidApi").getADSUserData();
 
         //doing it at once so there's no flicker of rapid rendering as different vals change
-        $.when(orcidProfile, adsOrcidUserInfo).done(function(profile, ads){
+        $.when(orcidProfile, adsOrcidUserInfo).done(function(orcid, ads){
           var data = {userSubmitted : ads};
           try {
-            var firstName = profile.getFirstName();
-            var lastName = profile.getLastName();
+            var firstName = orcid["orcid-bio"]["personal-details"]["given-names"]["value"];
+            var lastName = orcid["orcid-bio"]["personal-details"]["family-name"]["value"];
             //unchangeable orcid name
             data.orcidName =  lastName + ", " + firstName;
             data.prettyOrcidName = firstName + " " + lastName;

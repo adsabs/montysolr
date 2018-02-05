@@ -59,7 +59,6 @@
     "grunt-saucelabs": "~8.6.1",
     "grunt-string-replace": "^1.2.0",
     "istanbul": "^0.4.5",
-    "jsonpath": "^0.2.12",
     "load-grunt-config": "^0.19.2",
     "mocha-phantomjs-core": "^2.1.2",
     "needle": "~0.7.1",

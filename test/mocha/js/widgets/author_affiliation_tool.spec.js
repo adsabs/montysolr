@@ -47,29 +47,20 @@ define([
 
   var test = function () {
     var init = function () {
-      var self = this;
-      this.testSpies = {
-        authorAffSearch: sinon.spy(),
-        searchQuery: sinon.spy(),
-        authorAffExport: sinon.spy()
-      };
-      var beehive = new (MinPubSub.extend({
+      var minpubsub = new (MinPubSub.extend({
         request: function (apiRequest) {
           switch(apiRequest.get('target')) {
             case 'author-affiliation/search':
-              self.testSpies.authorAffSearch();
               _.delay(function () {
                 apiRequest.get('options').done(JSON.stringify(mockResponse));
               }, 10); break;
             case 'search/query':
-              self.testSpies.authorAffSearch();
               _.delay(function () {
                 apiRequest.get('options').done({
                   response: { docs: [{ bibcode: 'foo' }, { bibcode: 'bar' }] }
                 });
               }, 10); break;
             case 'author-affiliation/export':
-              self.testSpies.authorAffExport();
               _.delay(function () {
                 apiRequest.get('options').done({ file: 'SUCCESS' });
               }, 10); break;
@@ -81,17 +72,16 @@ define([
               }
           }
         }
-      }))({ verbose: false }).beehive.getHardenedInstance();
+      }))({ verbose: false });
       this.w = new AuthorAffiliationWidget();
-      this.w.activate(beehive);
+      this.w.activate(minpubsub.beehive.getHardenedInstance());
       this.component = React.createElement(ReactRedux.Provider, {
         store: this.w.store
       }, React.createElement(App));
     };
 
     var teardown = function () {
-      this.testSpies = null;
-      this.w.destroy();
+      this.w && this.w.destroy && this.w.destroy();
       this.w = null;
       this.component = null;
     };

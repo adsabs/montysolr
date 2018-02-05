@@ -197,7 +197,6 @@ require.config({
     'jquery' : '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
     'jquery-ui' : '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min',
-    'jsonpath': 'libs/jsonpath/jsonpath',
     'marionette' : 'libs/marionette/backbone.marionette',
     'mathjax' : '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML&amp;delayStartupUntil=configured',
     'mocha': 'libs/mocha/mocha',

@@ -107,9 +107,7 @@ define([
     'orcid': [
      '/modules/orcid/orcid_api.spec',
      '/modules/orcid/orcid_extension.spec',
-     '/modules/orcid/orcid_widget.spec',
-     '/modules/orcid/work.spec',
-     '/modules/orcid/profile.spec'
+     '/modules/orcid/orcid_widget.spec'
     ],
     'qb': [
      '/components/query_builder/plugin.spec',
@@ -119,8 +117,8 @@ define([
      '/components/query_builder/plugin.testcases.spec'
     ],
     'wraps': [
-      '/wraps/alerts_mediator.spec'
-    ]
+     '/wraps/alerts_mediator.spec'
+   ]
   };
 
   // discovery is an aggregation of all suites in one

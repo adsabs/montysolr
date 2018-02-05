@@ -83,76 +83,62 @@ define([
     });
 
     it ("the table should be sortable", function(){
-      try {
 
-        var w = new LibrariesWidget();
+      var w = new LibrariesWidget();
 
-        var minsub = new (MinSub.extend({
-          request: function (apiRequest) {
-            return {some: 'foo'}
-          }
-        }))({verbose: false});
-
-        minsub.beehive.addObject("LibraryController", fakeLibraryController);
-
-        w.activate(minsub.beehive.getHardenedInstance());
-
-        $("#test").append(w.render().el);
-
-        w.setSubView({view: "libraries"});
-
-        //default sort is ascending by title
-
-        expect($("#test tbody tr h3").map(function (e) {
-          return this.textContent
-        }).get()).to.eql(["Aliens Among Us", "Everything Sun", "Space Travel and Me", "Space Travel and You"]);
-
-        //title (desc)
-        $("#test button.s-sort-active").click();
-
-        expect($("#test tbody tr h3").map(function (e) {
-          return this.textContent
-        }).get()).to.eql(["Space Travel and You", "Space Travel and Me", "Everything Sun", "Aliens Among Us"]);
-
-        //sort by num papers (desc)
-
-        $("#test thead th").eq(3).find("button").click();
-        $("#test thead th").eq(3).find("button").click();
-
-
-        expect($("#test tbody td:nth-of-type(4)").map(function (e) {
-          return this.textContent
-        }).get()).to.eql(['4000', '400', '300', '0']);
-
-        //sort by permission
-
-        $("#test thead th").eq(4).find("button").click();
-
-        expect($("#test tbody td:nth-of-type(5)").map(function (e) {
-          return this.textContent
-        }).get()).to.eql(["read", "write", "admin", "owner"]);
-
-        //sort by date last modified (desc)
-
-        $("#test thead th").eq(5).find("button").click();
-        $("#test thead th").eq(5).find("button").click();
-
-
-        var dates = $("#test tbody td:nth-of-type(6)").map(function (i, d) {
-          return $(d).text()
-        }).get();
-
-        if (dates[0] === "Jun 11 2015, 3:57pm") {
-          expect(dates).to.eql(["Jun 11 2015, 3:57pm", "Jun 11 2014, 3:57pm", "Jun 11 2013, 3:57pm", "Jun 11 2012, 3:57pm"])
+      var minsub = new (MinSub.extend({
+        request: function(apiRequest) {
+          return {some: 'foo'}
         }
-        else {
+      }))({verbose: false});
+
+      minsub.beehive.addObject("LibraryController", fakeLibraryController);
+
+      w.activate(minsub.beehive.getHardenedInstance());
+
+      $("#test").append(w.render().el);
+
+      w.setSubView({view : "libraries"});
+
+      //default sort is ascending by title
+
+      expect($("#test tbody tr h3").map(function(e){return this.textContent}).get()).to.eql(["Aliens Among Us", "Everything Sun", "Space Travel and Me", "Space Travel and You"]);
+
+      //title (desc)
+      $("#test button.s-sort-active").click();
+
+      expect($("#test tbody tr h3").map(function(e){return this.textContent}).get()).to.eql(["Space Travel and You", "Space Travel and Me", "Everything Sun", "Aliens Among Us"]);
+
+      //sort by num papers (desc)
+
+      $("#test thead th").eq(3).find("button").click();
+      $("#test thead th").eq(3).find("button").click();
+
+
+      expect($("#test tbody td:nth-of-type(4)").map(function(e){return this.textContent}).get()).to.eql(  [ '4000', '400', '300', '0' ] );
+
+      //sort by permission
+
+      $("#test thead th").eq(4).find("button").click();
+
+      expect($("#test tbody td:nth-of-type(5)").map(function(e){return this.textContent}).get()).to.eql(["read", "write", "admin", "owner"]);
+
+      //sort by date last modified (desc)
+
+      $("#test thead th").eq(5).find("button").click();
+      $("#test thead th").eq(5).find("button").click();
+
+
+        var dates = $("#test tbody td:nth-of-type(6)").map(function(i,d){return $(d).text()}).get();
+
+        if (dates[0] === "Jun 11 2015, 3:57pm"){
+          expect(dates).to.eql(["Jun 11 2015, 3:57pm","Jun 11 2014, 3:57pm","Jun 11 2013, 3:57pm","Jun 11 2012, 3:57pm"])
+        }
+      else {
           //hack, assume UTC
-          expect(dates).to.eql(["Jun 11 2015, 7:57pm", "Jun 11 2014, 7:57pm", "Jun 11 2013, 7:57pm", "Jun 11 2012, 7:57pm"])
+          expect(dates).to.eql(["Jun 11 2015, 7:57pm","Jun 11 2014, 7:57pm","Jun 11 2013, 7:57pm","Jun 11 2012, 7:57pm"])
         }
 
-      } catch (e) {
-        console.log(e);
-      }
     })
 
 
