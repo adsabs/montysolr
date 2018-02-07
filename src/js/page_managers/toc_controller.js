@@ -1,12 +1,11 @@
 define([
+    'underscore',
     "marionette",
     './controller',
-    './toc_widget'
+    './toc_widget',
+    'analytics'
   ],
-  function (Marionette,
-            BasicPageManagerController,
-            TOCWidget
-    ) {
+  function (_, Marionette, BasicPageManagerController, TOCWidget, analytics) {
 
     /*
      * need to provide a toc template for the toc view when you inherit from this
@@ -97,6 +96,13 @@ define([
         }
         else if (event == 'widget-selected') {
           this.getPubSub().publish(this.getPubSub().NAVIGATE, data.idAttribute, data);
+
+          var bibcode = widget.model.get('bibcode');
+          var target = data.idAttribute.toLowerCase().replace('show', '');
+          analytics('send', 'event', 'interaction', 'toc-link-followed', {
+            target: target,
+            bibcode: bibcode
+          });
         }
         else if (event == 'broadcast-payload') {
           this.broadcast('page-manager-message', event, data);
