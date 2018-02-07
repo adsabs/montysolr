@@ -24,7 +24,7 @@ define([
      '/components/query_mediator.spec',
      '/components/query_validator.spec',
      '/components/services_container.spec',
-    // '/components/analytics.spec', // too slow
+    '/components/analytics.spec', // too slow
      '/components/application.spec',
      '/components/api_query_updater.spec',
      '/components/api_feedback.spec',
