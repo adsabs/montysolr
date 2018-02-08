@@ -57,6 +57,8 @@ define([
         'mouseleave .letter-icon': "hideLinks",
         'focusout .letter-icon': "hideLinks",
         'click .letter-icon a' : "emitAnalyticsEvent",
+        'click #show-all-authors': 'showAllAuthors',
+        'click #show-less-authors': 'showLessAuthors',
         //only relevant to results view for the moment
         'click .show-full-abstract' : "showFullAbstract",
         'click .hide-full-abstract' : "hideFullAbstract",
@@ -78,6 +80,18 @@ define([
 
       emitAnalyticsEvent : function(e){
         analytics('send', 'event', 'interaction', 'letter-link-followed', $(e.target).text());
+      },
+
+      showAllAuthors: function (e) {
+        e.preventDefault();
+        this.$('.s-results-authors.less-authors').addClass('hidden');
+        this.$('.s-results-authors.all-authors').removeClass('hidden');
+      },
+
+      showLessAuthors: function (e) {
+        e.preventDefault();
+        this.$('.s-results-authors.less-authors').removeClass('hidden');
+        this.$('.s-results-authors.all-authors').addClass('hidden');
       },
 
       showFullAbstract : function(){

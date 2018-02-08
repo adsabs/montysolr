@@ -226,14 +226,16 @@ define([
           }
 
           if (d.author) {
-            var l = shownAuthors.length - 1;
-            d.authorFormatted = _.map(shownAuthors, function (d, i) {
+            var format = function (d, i, arr) {
+              var l = arr.length - 1;
               if (i === l || l === 0) {
                 return d; //last one, or only one
               } else {
                 return d + ";";
               }
-            })
+            };
+            d.authorFormatted = _.map(shownAuthors, format);
+            d.allAuthorFormatted = _.map(d.author, format);
           }
 
           if (h.highlights && h.highlights.length > 0){
