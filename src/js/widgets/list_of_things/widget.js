@@ -124,6 +124,33 @@ define([
         }
       },
 
+      /**
+       * Get the current query from either our own apiResponse or from
+       * the application local storage
+       *
+       * @param {ApiResponse} apiResponse - the response from the api
+       * @returns {string} - the query string
+       * @private
+       */
+      _getCurrentQueryString: function (apiResponse) {
+        var q = '';
+        var res = (apiResponse)
+          ? apiResponse
+          : this.getBeeHive().getObject('AppStorage').getCurrentQuery();
+
+        // check for simbids
+        if (!_.isUndefined(res)) {
+          q = res.getApiQuery().get('q');
+
+          // if there is a simbid, look to see if there is a translated string
+          if (_.isEmpty(q) || q.indexOf('simbid') > -1) {
+            q = [res.get('responseHeader.params.__original_query')];
+          }
+        }
+
+        return q;
+      },
+
       processResponse: function (apiResponse) {
 
         var docs = this.extractDocs(apiResponse);
@@ -142,7 +169,7 @@ define([
           this.view.collection.reset(this.hiddenCollection.getVisibleModels());
           this.view.model.set('query', false);
         } else {
-          this.view.model.set('query', apiResponse.getApiQuery().get('q'));
+          this.view.model.set('query', this._getCurrentQueryString(apiResponse));
         }
 
         // XXX:rca - hack, to be solved later
