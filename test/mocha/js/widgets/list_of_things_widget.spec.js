@@ -47,6 +47,21 @@ define(['marionette',
         done();
       });
 
+      it('_getCurrentQueryString correctly gets query string', function () {
+        var w = new ListOfThings();
+        var opts = function (o, e) {
+          return {
+            getApiQuery: function () {
+              return { get: _.constant([o]) }
+            },
+            get: _.constant(e)
+          }
+        };
+
+        expect(w._getCurrentQueryString(opts('test'))).to.eql(['test']);
+        expect(w._getCurrentQueryString(opts('simbid', 'blah'))).to.eql(['blah']);
+      });
+
 
       it("the collection supports pagination operations'", function (done) {
         var coll = new PaginatedCollection();
@@ -538,6 +553,6 @@ define(['marionette',
         expect(triggerSpy.lastCall.args[1].action).to.eql('orcid-update');
         */
       });
-    })
+    });
 
   });
