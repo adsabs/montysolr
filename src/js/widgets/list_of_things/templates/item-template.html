@@ -120,14 +120,31 @@
 
 <div class="row">
     <div class="col-xs-10 col-xs-offset-1">
+
         {{#if authorFormatted}}
-        <ul class="list-inline just-authors s-results-authors" aria-label="authors">
+        <ul class="list-inline just-authors s-results-authors less-authors" aria-label="authors">
             {{#each authorFormatted}}
-            <li class="article-author">{{this}}</li>
+                <li class="article-author">{{this}}</li>
             {{/each}}
+
             {{#if extraAuthors}}
-            <li><em>and {{extraAuthors}} more</em></li>
+            <li>
+                <a href="#" id="show-all-authors">
+                    <em>and {{extraAuthors}} more</em>
+                </a>
+            </li>
             {{/if}}
+        </ul>
+
+        <ul class="list-inline just-authors s-results-authors all-authors hidden" aria-label="authors">
+            {{#each allAuthorFormatted}}
+                <li class="article-author">{{this}}</li>
+            {{/each}}
+            <li>
+                <a href="#" id="show-less-authors">
+                    <em>show less</em>
+                </a>
+            </li>
         </ul>
         {{else}}
             <span class="text-faded">no author information available</span>

@@ -213,8 +213,11 @@ define([
         var widget = _getWidget();
         minsub.publish(minsub.START_SEARCH, new ApiQuery({q: "star"}));
         setTimeout(function () {
-          var authorsString = $('.just-authors', widget.view.$el).last().text().trim().replace(/[\n\s]+\W/g, ' ');
+          var authorsString = $('.just-authors.less-authors', widget.view.$el).last().text().trim().replace(/[\n\s]+\W/g, ' ');
           expect(authorsString).to.equal('Montmerle, T.; Fake Author 1; Fake Author 2 and 3 more');
+
+          authorsString = $('.just-authors.all-authors', widget.view.$el).last().text().trim().replace(/[\n\s]+\W/g, ' ');
+          expect(authorsString).to.equal('Montmerle, T.; Fake Author 1; Fake Author 2; Fake Author 3; fake Author 4; Fake Author 6 show less');
           done();
         }, 5);
       });
@@ -356,7 +359,8 @@ define([
           expect($w.find("h3:last").text().trim()).to.eql("Diffuse high-energy radiation from regions of massive star formation.");
 
           //checking render order of more than 3 authors
-          expect($w.find(".just-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2and3more");
+          expect($w.find(".just-authors.less-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2and3more");
+          expect($w.find(".just-authors.all-authors:last").text().replace(/\s+/g, '')).to.eql("Montmerle,T.;FakeAuthor1;FakeAuthor2;FakeAuthor3;fakeAuthor4;FakeAuthor6showless");
           done();
         }, 5);
       });
