@@ -101,8 +101,13 @@ define([
      * On Apply, the export process is begun
      */
     handleApplyClick() {
-      const { dispatch } = this.props;
-      dispatch(fetchUsingQuery()).done(() => dispatch(fetchUsingIds()));
+      const { dispatch, ids, query } = this.props;
+
+      if (_.isEmpty(query) && !_.isEmpty(ids)) {
+        dispatch(fetchUsingIds());
+      } else {
+        dispatch(fetchUsingQuery()).done(() => dispatch(fetchUsingIds()));
+      }
     }
 
     /**
@@ -254,7 +259,9 @@ define([
     showCloser: state.main.showCloser,
     showSlider: state.main.showSlider,
     splitCols: state.main.splitCols,
-    showReset: state.main.showReset
+    showReset: state.main.showReset,
+    ids: state.exports.ids,
+    query: state.main.query
   });
 
   return ReactRedux.connect(mapStateToProps)(App);

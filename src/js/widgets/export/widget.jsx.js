@@ -219,6 +219,8 @@ define([
       }
     },
 
+    processResponse: _.noop,
+
     /**
      * Export the list of identifiers as an ADS Classic result
      *
