@@ -87,6 +87,7 @@
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="after"/>
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
                       synonyms="author_generated.translit"
                       ignoreCase="true"
@@ -94,6 +95,7 @@
                       tokenizerFactory="solr.KeywordTokenizerFactory"
                       builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
                       inclOrig="true" />
+                <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="before"/>
 				<!-- now remove the query variants, they were used only to discover upgraded
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"

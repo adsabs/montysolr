@@ -52,7 +52,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 		assertU(adoc("id","10","recid","10", "bibcode", "b10", "citation", "b11"));
 		assertU(adoc("id","11","recid","11", "bibcode", "b11", "citation", "b10"));
-		assertU(adoc("id","12","recid","12", "bibcode", "b12", "citation", "b10"));
+		assertU(adoc("id","12","recid","12", "bibcode", "b12", "citation", "b10", "author", "Peñaloza, C."));
 		
 		assertU(commit("waitSearcher", "true"));
 		
@@ -188,6 +188,15 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 		data = direct.request("/replicoordinator?hostid=foo&event=give-me-delay&wt=json", null);
 		assert data.contains("delay");
+		
+		assertQ(req("q", "author:\"A PicaK, Ales\"", 
+        "debugQuery", "true"), 
+        "//*[@numFound='1']"
+    );
+		assertQ(req("q", "author:\"A PicaK, Ales\"", 
+        "debugQuery", "true"), 
+        "//*[@numFound='1']"
+    );
 
 	}
 	

@@ -78,7 +78,11 @@ public class NewSolrSynonymParser extends NewSynonymFilterFactory.SynonymParser 
   
   private void addInternal(BufferedReader in) throws IOException {
     String line = null;
+    int ii = 0;
+    int jj = 0;
+    
     while ((line = in.readLine()) != null) {
+      ii += 1;
       if (line.length() == 0 || line.charAt(0) == '#') {
         continue; // ignore empty lines and comments
       }
@@ -124,9 +128,11 @@ public class NewSolrSynonymParser extends NewSynonymFilterFactory.SynonymParser 
       for (int i = 0; i < inputs.length; i++) {
         for (int j = 0; j < outputs.length; j++) {
           add(inputs[i], outputs[j], false);
+            jj += 1;
         }
       }
     }
+    System.out.println("ii=" + ii + " jj=" + jj);
   }
   
   private static String[] split(String s, String separator) {

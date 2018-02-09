@@ -152,7 +152,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "MULLER, WILLIAM => MÜLLER, WILLIAM",
           "MUELLER, WILLIAM => MÜLLER, WILLIAM",
           "Boser,=>Böser,",
-          "Boser, S=>Böser, S"
+          "Boser, S=>Böser, S",
+          "Boser, Samuel=>Böser, Samuel",
+          "A Picak, Ales=>PičáK, Aleš",
+          "Penaloza, C H=>Peñaloza, C H",
+          "Penaloza, C=>Peñaloza, C",
+          "Penaloza, Camilo H=>Peñaloza, Camilo H",
+          "Penaloza, Camilo=>Peñaloza, Camilo",
+          "Penaloza, F=>Peñaloza, F"
       }
       ));
 
@@ -568,7 +575,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"author:böser, s author:böser, s* author:böser, author:boeser, s author:boeser, s* author:boeser, author:boser, s author:boser, s* author:boser,",
         		"//*[@numFound='4']"
         		);
-        
+  	
+  	testAuthorQuery(
+        "\"Penaloza, Camilo H\"", 
+            "author:penaloza, camilo h author:penaloza, camilo h* author:penaloza, c h author:penaloza, c h* author:penaloza, camilo author:penaloza, c author:penaloza, author:peñaloza, camilo h author:peñaloza, camilo h* author:peñaloza, c h author:peñaloza, c h* author:peñaloza, camilo author:peñaloza, c author:peñaloza, author:peñaloza, camilo h author:peñaloza, camilo h* author:peñaloza, c h author:peñaloza, c h* author:peñaloza, camilo author:peñaloza, c author:peñaloza,",
+            "//*[@numFound='0']"
+            );
     
   	// reported by Alex
   	// [author:"van Dokkum" bibstem:"Natur" author:"Conroy" ]
