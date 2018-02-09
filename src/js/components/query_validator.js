@@ -42,8 +42,8 @@ define([
      * @returns {Array}
      */
     var parseTokens = function (q) {
-      var splitter = new RegExp(/[:(]/);
-      var tokens = q.split(/\s+/);
+      var splitter = new RegExp(/:/);
+      var tokens = q.split(/\s+\b/);
       var parsedTokens = [];
       for (var j = 0; j < tokens.length; j++) {
         var subTokens = tokens[j].split(splitter);
@@ -53,9 +53,6 @@ define([
           // Unable to split or nested fields, either way continue on
           continue;
         }
-
-        // clean value of closing paren, if necessary
-        subTokens[1] = subTokens[1].replace(')', '');
 
         parsedTokens.push(new QueryToken(subTokens[0], subTokens[1], tokens[j]));
       }
@@ -106,8 +103,13 @@ define([
       // any confirmed match will make query invalid
       var validators = [
         completeValidation,
-        new Validator(/^("")?$/),
-        new Validator(/^"?\^"?$/)
+        new Validator(/^$/),          // matches -> ``
+        new Validator(/^""$/),        // matches -> `foo:""`
+        new Validator(/^\(\)$/),      // matches -> `foo:()`
+        new Validator(/^\(\^\)$/),    // matches -> `foo:(^)`
+        new Validator(/^\(""\)$/),    // matches -> `foo:("^")`
+        new Validator(/^\("\^"\)$/),  // matches -> `foo:("^")`
+        new Validator(/^"\^"$/),      // matches -> `foo:"^"`
       ];
 
       // Attempt to parse the query string to tokens
