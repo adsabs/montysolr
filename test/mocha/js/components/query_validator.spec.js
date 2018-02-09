@@ -11,7 +11,7 @@ define([
     };
   };
 
-  describe('Query Validator', function () {
+  describe('Query Validator (query_validator.spec.js)', function () {
     var qv;
     beforeEach(function () {
       qv = new QueryValidator();
@@ -25,9 +25,9 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.false;
+      expect(res.result).to.eql(false);
       expect(res.tests.length).to.equal(1);
-      expect(res.tests[0].result).to.be.false;
+      expect(res.tests[0].result).to.eql(false);
       expect(res.tests[0].token).to.equal('abs:""')
     });
 
@@ -36,33 +36,33 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.false;
+      expect(res.result).to.eql(false);
       expect(res.tests.length).to.equal(1);
-      expect(res.tests[0].result).to.be.false;
+      expect(res.tests[0].result).to.eql(false);
       expect(res.tests[0].token).to.equal('abs:"^"')
     });
 
     it('correctly parses single input with paren', function () {
-      var q = getMockQuery('citation("")');
+      var q = getMockQuery('citation:("")');
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.false;
+      expect(res.result).to.eql(false);
       expect(res.tests.length).to.equal(1);
-      expect(res.tests[0].result).to.be.false;
-      expect(res.tests[0].token).to.equal('citation("")')
+      expect(res.tests[0].result).to.eql(false);
+      expect(res.tests[0].token).to.equal('citation:("")')
     });
 
     it('correctly parses empty input', function () {
       var q = getMockQuery('');
       var res = qv.validate(q);
-      expect(res.result).to.be.true;
+      expect(res.result).to.eql(true);
     });
 
     it('correctly parses multiple empty input', function () {
       var q = getMockQuery('', '', '', '     ', '    ');
       var res = qv.validate(q);
-      expect(res.result).to.be.true;
+      expect(res.result).to.eql(true);
     });
 
     it('correctly parses multiple input', function () {
@@ -70,21 +70,21 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.false;
+      expect(res.result).to.eql(false);
       expect(res.tests.length).to.equal(5);
-      expect(res.tests[0].result).to.be.false;
+      expect(res.tests[0].result).to.eql(false);
       expect(res.tests[0].token).to.equal('abs:""');
 
-      expect(res.tests[1].result).to.be.false;
+      expect(res.tests[1].result).to.eql(false);
       expect(res.tests[1].token).to.equal('bibcode:""');
 
-      expect(res.tests[2].result).to.be.false;
+      expect(res.tests[2].result).to.eql(false);
       expect(res.tests[2].token).to.equal('full:""');
 
-      expect(res.tests[3].result).to.be.false;
+      expect(res.tests[3].result).to.eql(false);
       expect(res.tests[3].token).to.equal('author:""');
 
-      expect(res.tests[4].result).to.be.false;
+      expect(res.tests[4].result).to.eql(false);
       expect(res.tests[4].token).to.equal('bibgroup:""');
     });
 
@@ -93,13 +93,13 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.false;
+      expect(res.result).to.eql(false);
       expect(res.tests.length).to.equal(2);
 
-      expect(res.tests[0].result).to.be.false;
+      expect(res.tests[0].result).to.eql(false);
       expect(res.tests[0].token).to.equal('bibcode:""');
 
-      expect(res.tests[1].result).to.be.false;
+      expect(res.tests[1].result).to.eql(false);
       expect(res.tests[1].token).to.equal('author:""');
     });
 
@@ -108,8 +108,17 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.true;
-      expect(res.tests).to.be.undefined;
+      expect(res.result).to.eql(true);
+      expect(res.tests).to.eql(undefined);
+    });
+
+    it('correctly handles spaces inside value', function () {
+      var q = getMockQuery('foo:"     " foo:(   ) foo:"^   " foo:"   ^   " foo:("   ")');
+      var res = qv.validate(q);
+
+      expect(res).to.be.instanceOf(Object);
+      expect(res.result).to.eql(true);
+      expect(res.tests).to.eql(undefined);
     });
 
     it('correctly handles nested fields', function () {
@@ -117,7 +126,7 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.true;
+      expect(res.result).to.eql(true);
     });
 
     it('correctly handles garbled inputs', function () {
@@ -125,7 +134,7 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.true;
+      expect(res.result).to.eql(true);
     });
 
     it('correctly handles mixture of garbled and bad inputs', function () {
@@ -133,10 +142,10 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.false;
+      expect(res.result).to.eql(false);
       expect(res.tests.length).to.equal(1);
 
-      expect(res.tests[0].result).to.be.false;
+      expect(res.tests[0].result).to.eql(false);
       expect(res.tests[0].token).to.equal('abs:""');
     });
 
@@ -145,7 +154,7 @@ define([
       var res = qv.validate(q);
 
       expect(res).to.be.instanceOf(Object);
-      expect(res.result).to.be.true;
+      expect(res.result).to.eql(true);
     });
   });
 });
