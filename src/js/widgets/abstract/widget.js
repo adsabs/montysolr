@@ -31,6 +31,8 @@ define([
 
     ) {
 
+    var MAX_COMMENTS = 3;
+
     var AbstractModel = Backbone.Model.extend({
       defaults: function () {
         return {
@@ -112,6 +114,25 @@ define([
           }
         }
 
+        if (doc.comment) {
+
+          if (!_.isArray(doc.comment)) {
+            doc.comment = [doc.comment];
+          }
+
+          var tmp = doc.comment;
+          // attempt to parse it out
+          try {
+            doc.comment = doc.comment[0].split(';');
+          } catch (e) {
+
+            // do nothing
+            doc.comment = tmp;
+          }
+          doc.hasExtraComments = doc.comment.length > MAX_COMMENTS;
+          doc.commentList = _.first(doc.comment, MAX_COMMENTS);
+        }
+
         return doc;
       }
     });
@@ -129,11 +150,31 @@ define([
       template: abstractTemplate,
 
       events: {
+        "click #show-all-comments": "showAllComments",
+        "click #show-less-comments": "showLessComments",
         "click #toggle-aff": "toggleAffiliation",
         "click #toggle-more-authors": "toggleMoreAuthors",
         'click a[data-target="more-authors"]': 'toggleMoreAuthors',
         'click a[target="prev"]': 'onClick',
         'click a[target="next"]': 'onClick'
+      },
+
+      showAllComments: function (e) {
+        e.preventDefault();
+        var m = this.model;
+        m.set({
+          'commentList': m.get('comment'),
+          'showAllComments': true
+        });
+      },
+
+      showLessComments: function (e) {
+        e.preventDefault();
+        var m = this.model;
+        m.set({
+          'commentList': _.first(m.get('comment'), MAX_COMMENTS),
+          'showAllComments': false
+        });
       },
 
       toggleMoreAuthors: function (ev) {
@@ -207,7 +248,7 @@ define([
       },
 
       defaultQueryArguments: {
-        fl: 'title,abstract,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,page',
+        fl: 'title,abstract,comment,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,page',
         rows: 40
       },
 
