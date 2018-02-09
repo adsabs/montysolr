@@ -83,8 +83,11 @@
 }
 
 .s-quick-add {
-  padding-left: 0.5%;
   max-height: 40px;
+
+  @media(max-width: $screen-sm-min) {
+    margin-bottom: 5px;
+  }
 
   button {
     font-size: 14px;
