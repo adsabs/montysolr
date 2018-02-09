@@ -44,7 +44,9 @@ define(['underscore',
         this._cache = null;
         this.debug = options.debug || false;
         this.queryUpdater = new ApiQueryUpdater('QueryMediator');
-        this.failedRequestsCache = this._getNewCache();
+        this.failedRequestsCache = this._getNewCache({
+          'expiresAfterWrite': 5
+        });
         this.maxRetries = options.maxRetries || 3;
         this.recoveryDelayInMs = _.isNumber(options.recoveryDelayInMs) ? options.recoveryDelayInMs : 700;
         this.__searchCycle = {waiting:{}, inprogress: {}, done: {}, failed: {}};
