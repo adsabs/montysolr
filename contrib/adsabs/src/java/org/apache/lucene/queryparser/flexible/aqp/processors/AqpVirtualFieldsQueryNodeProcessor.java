@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
@@ -69,6 +70,7 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
   @Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
 
+    
     return node;
 
   }
@@ -87,17 +89,71 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
 
   @Override
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
+    
+    Map<String, Map<String, Float>> fields;
+    
+    if (node instanceof AqpNearQueryNode) {
+      
+      List<QueryNode> children = node.getChildren();
+      String fldName = null;
+      boolean canPass = true;
+      
+      assert children.size() > 1;
+      
+      for (QueryNode child: children) {
+        if (fldName == null)
+          fldName = (String) ((FieldableNode) child).getField();
+        
+        if (!((FieldableNode) child).getField().equals(fldName))
+          canPass = false;
+      }
+      
+      if (canPass) {
+        fields = getFields();
+        LinkedList<QueryNode> proximityClauses = new LinkedList<QueryNode>();
+        if (fldName != null && fields.containsKey(fldName)) {
+          Map<String, Float> realFields = fields.get(fldName);
+          if (realFields != null && realFields.size() > 0) {
+            
+            for (Entry<String, Float> en: realFields.entrySet()) {
+              
+              LinkedList<QueryNode> perFieldChildren = new LinkedList<QueryNode>();
+              
+              for (QueryNode child: children) {
+                try {
+                  FieldableNode newNode = (FieldableNode) child.cloneTree();
+                  newNode.setField(en.getKey());
+                  
+                  if (en.getValue() != null && en.getValue() != 1.0f) {
+                    perFieldChildren.add(new BoostQueryNode(newNode, en.getValue()));
+                  }
+                  else {
+                    perFieldChildren.add(newNode);
+                  }
 
-    if (node instanceof FieldableNode) {
+                } catch (CloneNotSupportedException e) {
+                  // should never happen
+                }
+
+              }
+              
+              proximityClauses.add(new AqpNearQueryNode(perFieldChildren, ((AqpNearQueryNode) node).getSlop()));
+            }
+
+            GroupQueryNode n = new GroupQueryNode(new OrQueryNode(proximityClauses));
+            n.setTag("virtual-field", fldName);
+            this.processChildren = false;
+            return n;
+          }
+        }
+      }
+      
+    } 
+    else if (node instanceof FieldableNode) {
+      
       this.processChildren = false;
       FieldableNode fieldNode = (FieldableNode) node;
-
-      Map<String, Map<String, Float>> fields = getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS);
-      
-      if (fields == null) {
-        throw new IllegalArgumentException(
-            "AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS should be set on the QueryConfigHandler");
-      }
+      fields = getFields();
       
       if (fieldNode.getField() != null && fields.containsKey(fieldNode.getField())) {
         
@@ -137,8 +193,9 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
 
             }
 
-            return new GroupQueryNode(new OrQueryNode(children));
-
+            GroupQueryNode n = new GroupQueryNode(new OrQueryNode(children));
+            n.setTag("virtual-field", fieldNode.getField());
+            return n;
           }
 
         }
@@ -151,6 +208,16 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
 
   }
 
+  private Map<String, Map<String, Float>> getFields() {
+
+    Map<String, Map<String, Float>> fields = getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS);
+    
+    if (fields == null) {
+      throw new IllegalArgumentException(
+          "AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS should be set on the QueryConfigHandler");
+    }
+    return fields;
+  }
 
 	@Override
   protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
