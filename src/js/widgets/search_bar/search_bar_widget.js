@@ -461,8 +461,15 @@ define([
           //newVal = df + ":\"" + selected + "\"";
           //
           switch (label) {
-            case 'fields':
+            case 'fields': {
+                if (val === 'first-author') {
+                  val = 'author';
+                  selected = selected.replace(/"/, '"^');
+                } else if (val === 'year') {
+                  selected = selected.replace(/"/g, '');
+                }
                 newVal = val + ":" + selected;
+              }
               break;
             case 'operators':
                 newVal = val + "(" + selected + ")";
