@@ -136,9 +136,6 @@ define([
       const pubsub = this.getPubSub();
       const $dd = $.Deferred();
 
-      // update the current count of items we are exporting
-      this.store.dispatch({ type: ACTIONS.setCount, value: ids.length });
-
       // start loading (pending) action
       this.store.dispatch({ type: ACTIONS.fetchData });
 

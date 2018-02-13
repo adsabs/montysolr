@@ -87,8 +87,7 @@ define([
     }
 
     render() {
-      const { data, formats, format,
-        count, message, loading, exporting } = this.props;
+      const { data, formats, format, message, loading, exporting } = this.props;
       return (
         <div>
 
@@ -102,7 +101,7 @@ define([
               {/* Only show title banner if we are not loading */}
               {!loading &&
                 <div className="col-xs-12" style={{ fontSize: 24 }}>
-                  Viewing Author Affiliation Data for <strong>{count}</strong> Records
+                  Viewing Affiliation Data For <strong>{data.length}</strong> Authors
                 </div>
               }
 
@@ -214,7 +213,6 @@ define([
     data: state.data,
     formats: state.formats,
     format: state.format,
-    count: state.count,
     message: state.message,
     loading: state.loading,
     exporting: state.exporting
