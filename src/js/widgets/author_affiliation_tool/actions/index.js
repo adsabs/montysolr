@@ -332,6 +332,22 @@ define([
         message: message,
         show: true
       }});
+    },
+
+    updateYear: (year) => (dispatch, getState, widget) => {
+      const state = getState();
+
+      try {
+        year = Number(year);
+      } catch (e) {
+        year = state.year;
+      }
+
+      // set the new year
+      dispatch({ type: ACTIONS.setYear, value: year });
+
+      // restart the search
+      widget.fetchAffiliationData(state.ids, state.currentYear - year);
     }
   };
 

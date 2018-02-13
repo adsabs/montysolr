@@ -1,7 +1,10 @@
 'use strict';
 define([
-  'es6!../constants/actionNames'
-], function (ACTIONS) {
+  'es6!../constants/actionNames',
+  'moment'
+], function (ACTIONS, Moment) {
+
+  const currentYear = Number((new Moment()).year());
 
   // Initial state
   const initialState = {
@@ -16,10 +19,12 @@ define([
     ],
     format: '| Lastname, Firstname | Affiliation | Last Active Date | [csv]',
     toggle: false,
-    count: 0,
+    year: currentYear - 4,
+    currentYear: currentYear,
     message: { type: 'success', message: '', show: false },
     loading: false,
-    exporting: false
+    exporting: false,
+    ids: []
   };
 
   // Reducers
@@ -38,13 +43,13 @@ define([
       case ACTIONS.setFormat:
         return { ...state, format: action.value };
 
-      // Reset the current count
-      case ACTIONS.setCount:
-        return { ...state, count: action.value };
+      // Reset the current year
+      case ACTIONS.setYear:
+        return { ...state, year: action.value };
 
       // Start loading
       case ACTIONS.fetchData:
-        return { ...state, loading: true };
+        return { ...state, loading: true, ids: action.value };
 
       // set the current message
       case ACTIONS.setMessage:

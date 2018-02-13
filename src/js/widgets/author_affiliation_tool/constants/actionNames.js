@@ -6,6 +6,7 @@ define([], function () {
     fetchData: 'FETCHING_DATA',
     setLoading: 'SET_LOADING',
     setData: 'SET_DATA',
+    setYear: 'SET_YEAR',
     setToggle: 'SET_TOGGLE',
     setFormat: 'SET_FORMAT',
     setCount: 'SET_COUNT',

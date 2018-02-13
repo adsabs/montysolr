@@ -17,13 +17,21 @@ define([
   ExportFormatControl, SelectionButtons, Row, Message, Loading, Closer
 ) {
 
+  const getYears = (currentYear) => {
+    return _.map(_.range(1, 100), (i) => {
+      let year = currentYear - i;
+      return (<option key={year} value={year}>{year}</option>);
+    });
+  };
+
   // actions
   const {
     toggleSelection,
     toggleAll,
     reset,
     doExport,
-    closeWidget
+    closeWidget,
+    updateYear
   } = actions;
 
   /**
@@ -86,8 +94,15 @@ define([
       dispatch(toggleSelection(authorData, affData));
     }
 
+    onYearChange(year) {
+      const { dispatch } = this.props;
+      dispatch(updateYear(year));
+    }
+
     render() {
-      const { data, formats, format, message, loading, exporting } = this.props;
+      const {
+        data, formats, format, message, loading, exporting, year, currentYear
+      } = this.props;
       return (
         <div>
 
@@ -96,12 +111,28 @@ define([
 
           {/* Main Container */}
           <div className="container auth-aff-tool">
-            <div className="row" style={{ marginTop: 10 }}>
+            <div className="row" style={{ marginTop: 40 }}>
 
               {/* Only show title banner if we are not loading */}
               {!loading &&
-                <div className="col-xs-12" style={{ fontSize: 24 }}>
-                  Viewing Affiliation Data For <strong>{data.length}</strong> Authors
+                <div>
+                  <div className="col-xs-8" style={{ fontSize: 24 }}>
+                    Viewing Affiliation Data For <strong>{data.length}</strong> Authors (Since {year})
+                  </div>
+                  <div className="col-xs-3 text-right" style={{ marginTop: 4 }}>
+                    Start Year:
+                  </div>
+                  <div className="col-xs-1">
+                    <select
+                      id="year-select"
+                      className="form-control input-sm"
+                      title="Select the start year"
+                      value={year}
+                      onChange={val => this.onYearChange(val.target.value)}
+                    >
+                      {getYears(currentYear)}
+                    </select>
+                  </div>
                 </div>
               }
 
@@ -215,7 +246,9 @@ define([
     format: state.format,
     message: state.message,
     loading: state.loading,
-    exporting: state.exporting
+    exporting: state.exporting,
+    currentYear: state.currentYear,
+    year: state.year
   });
 
   return ReactRedux.connect(mapStateToProps)(App);

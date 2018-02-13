@@ -130,20 +130,26 @@ define([
      * Take an array of ids and fetch affiliation data about them
      * this will actually make the request
      *
-     * @param {Array} ids
+     * @param {Array} [ids=[]] ids - the list of identifiers
+     * @param {number} [offset=4] offset - the years to go back
      */
-    fetchAffiliationData: function (ids) {
+    fetchAffiliationData: function (ids=[], offset=4) {
       const pubsub = this.getPubSub();
       const $dd = $.Deferred();
 
       // start loading (pending) action
-      this.store.dispatch({ type: ACTIONS.fetchData });
+      this.store.dispatch({ type: ACTIONS.fetchData, value: ids });
 
       const req = new ApiRequest({
         target: ApiTargets.AUTHOR_AFFILIATION_SEARCH,
-        query: new ApiQuery({ bibcode: ids }),
+        query: new ApiQuery({
+          bibcode: ids,
+          numyears: offset,
+        }),
         options : {
-          type : 'POST',
+          type : 'post',
+          processData: false,
+          dataType: 'json',
           contentType : 'application/json',
           done: (...args) => $dd.resolve(...args),
           fail: (...args) => $dd.reject(...args),
@@ -213,6 +219,7 @@ define([
     closeWidget: function () {
       const pubsub = this.getPubSub();
       pubsub.publish(pubsub.NAVIGATE, "results-page");
+      this.view.destroy();
     },
 
     /**
