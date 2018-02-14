@@ -686,6 +686,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("author:accomazzi property:refereed apj", kwa, "+author:accomazzi +(property:refereed apj property:\"refereed apj\")");
   }
   
+  
 	public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabs.class);
     }
