@@ -20,6 +20,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
+import org.apache.lucene.search.spans.SpanQuery;
 import org.junit.BeforeClass;
 
 
@@ -82,7 +83,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             File multiSynonymsFile = createTempFile(new String[]{
                     "hubble\0space\0telescope, HST",
                     "r\0s\0t, RST",
-                    "dark\0energy, DE"
+                    "dark\0energy, DE",
+                    "very\0large\0array, VLA"
             });
             replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiSynonymsFile.getAbsolutePath() + "\"");
 
@@ -312,6 +314,62 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+    	assertQueryEquals(req("defType", "aqp", 
+  			  "q", "foo NEAR5 bar"),
+  		      "spanNear([all:foo, all:bar], 5, true)",
+  		      SpanNearQuery.class);
+    	setDebug(true);
+    	assertQueryEquals(req("defType", "aqp", 
+    			  "q", "full:(foo NOT bar)"),
+    		      "spanNear([all:foo, all:bar], 5, true)",
+    		      SpanNearQuery.class);
+    	assertQueryEquals(req("defType", "aqp", 
+  			  "q", "full:(foo NEAR5 bar)"),
+  		      "spanNear([all:foo, all:bar], 5, true)",
+  		      SpanNearQuery.class);
+    	assertQueryEquals(req("defType", "aqp", 
+			  "q", "foo NEAR5 bar", "qf", "title body"),
+		      "spanNear([all:foo, all:bar], 5, true)",
+		      SpanNearQuery.class);
+    	
+	  //verification for https://github.com/romanchyla/montysolr/issues/45
+      // expansion of synonyms inside a virtual field together with nested boolean query
+      // VLBA doesn't have a synonym, VLA has multi-synonym; VLA must be the same
+	  assertQueryEquals(req("defType", "aqp", 
+			  "q", "full:(VLBA OR Chandra)"),
+		      "(ack:acr::vlba (abstract:acr::vlba)^2.0 (title:acr::vlba)^2.0 body:acr::vlba keyword:acr::vlba) "
+		      + "(ack:chandra (abstract:chandra)^2.0 (title:chandra)^2.0 body:chandra keyword:chandra)",
+		      BooleanQuery.class);
+	  
+	  assertQueryEquals(req("defType", "aqp", 
+			  "q", "full:(\"Very Large Array\" OR \"Very Long Baseline Array\")"),
+		      "((ack:\"very large array\" ack:syn::very large array ack:syn::acr::vla) (abstract:\"very large array\" abstract:syn::very large array abstract:syn::acr::vla)^2.0 (title:\"very large array\" title:syn::very large array title:syn::acr::vla)^2.0 (body:\"very large array\" body:syn::very large array body:syn::acr::vla) (keyword:\"very large array\" keyword:syn::very large array keyword:syn::acr::vla)) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
+		      BooleanQuery.class);
+	  
+	  assertQueryEquals(req("defType", "aqp", 
+			  "q", "full:(VLA OR \"Very Long Baseline Array\")"),
+		      "((ack:acr::vla ack:syn::very large array ack:syn::acr::vla) (abstract:acr::vla abstract:syn::very large array abstract:syn::acr::vla)^2.0 (title:acr::vla title:syn::very large array title:syn::acr::vla)^2.0 (body:acr::vla body:syn::very large array body:syn::acr::vla) (keyword:acr::vla keyword:syn::very large array keyword:syn::acr::vla)) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
+		      BooleanQuery.class);
+	  
+	  assertQueryEquals(req("defType", "aqp", 
+			  "q", "full:(HST OR Chandra)"),
+		      "((ack:acr::hst ack:syn::hubble space telescope ack:syn::acr::hst) "
+		      + "(abstract:acr::hst abstract:syn::hubble space telescope abstract:syn::acr::hst)^2.0 "
+		      + "(title:acr::hst title:syn::hubble space telescope title:syn::acr::hst)^2.0 "
+		      + "(body:acr::hst body:syn::hubble space telescope body:syn::acr::hst) "
+		      + "(keyword:acr::hst keyword:syn::hubble space telescope keyword:syn::acr::hst)) "
+		      + "(ack:chandra (abstract:chandra)^2.0 (title:chandra)^2.0 body:chandra keyword:chandra)",
+		      BooleanQuery.class);
+	  
+	  
+	  assertQueryEquals(req("defType", "aqp", 
+			  "q", "abs:(HST OR baz)"),
+		      "((abstract:acr::hst abstract:syn::hubble space telescope abstract:syn::acr::hst) "
+		      + "(title:acr::hst title:syn::hubble space telescope title:syn::acr::hst) "
+		      + "(keyword:acr::hst keyword:syn::hubble space telescope keyword:syn::acr::hst)) "
+		      + "(abstract:baz title:baz keyword:baz)",
+		      BooleanQuery.class);
+    	  
       // fuzzy search for authors
       assertQueryEquals(req("defType", "aqp", "q", "author:kurtz~2"),
         "author:kurtz,~2",
