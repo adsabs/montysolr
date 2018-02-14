@@ -314,23 +314,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
-    	assertQueryEquals(req("defType", "aqp", 
-  			  "q", "foo NEAR5 bar"),
-  		      "spanNear([all:foo, all:bar], 5, true)",
-  		      SpanNearQuery.class);
-    	setDebug(true);
-    	assertQueryEquals(req("defType", "aqp", 
-    			  "q", "full:(foo NOT bar)"),
-    		      "spanNear([all:foo, all:bar], 5, true)",
-    		      SpanNearQuery.class);
-    	assertQueryEquals(req("defType", "aqp", 
-  			  "q", "full:(foo NEAR5 bar)"),
-  		      "spanNear([all:foo, all:bar], 5, true)",
-  		      SpanNearQuery.class);
-    	assertQueryEquals(req("defType", "aqp", 
-			  "q", "foo NEAR5 bar", "qf", "title body"),
-		      "spanNear([all:foo, all:bar], 5, true)",
-		      SpanNearQuery.class);
     	
 	  //verification for https://github.com/romanchyla/montysolr/issues/45
       // expansion of synonyms inside a virtual field together with nested boolean query
@@ -370,6 +353,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		      + "(abstract:baz title:baz keyword:baz)",
 		      BooleanQuery.class);
     	  
+      // https://github.com/romanchyla/montysolr/issues/78
+      // make proximity operators work with virtual fields
+      assertQueryEquals(req("defType", "aqp", "q", " full:\"frew\" NEAR2 full:\"j\""),
+          "spanNear([ack:frew, ack:j], 2, true) spanNear([(abstract:frew)^2.0, (abstract:j)^2.0], 2, true) spanNear([(title:frew)^2.0, (title:j)^2.0], 2, true) spanNear([body:frew, body:j], 2, true) spanNear([keyword:frew, keyword:j], 2, true)",
+          BooleanQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", " full:\"HST\" NEAR2 full:\"proposal\""),
+          "spanNear([spanOr([ack:acr::hst, ack:syn::hubble space telescope, ack:syn::acr::hst]), ack:proposal], 2, true) spanNear([(spanOr([abstract:acr::hst, abstract:syn::hubble space telescope, abstract:syn::acr::hst]))^2.0, (abstract:proposal)^2.0], 2, true) spanNear([(spanOr([title:acr::hst, title:syn::hubble space telescope, title:syn::acr::hst]))^2.0, (title:proposal)^2.0], 2, true) spanNear([spanOr([body:acr::hst, body:syn::hubble space telescope, body:syn::acr::hst]), body:proposal], 2, true) spanNear([spanOr([keyword:acr::hst, keyword:syn::hubble space telescope, keyword:syn::acr::hst]), keyword:proposal], 2, true)",
+          BooleanQuery.class);
+      
+      // yeah, if you don't specify any field, then i'll refuse to serve you anything useful!
+      assertQueryEquals(req("defType", "aqp", "q", " HST NEAR2 galaxy"),
+          "spanNear([spanOr([spanOr([all:acr::hst, all:syn::hubble space telescope, all:syn::acr::hst])]), all:galaxy], 2, true)",
+          SpanNearQuery.class);
+      
+      
       // fuzzy search for authors
       assertQueryEquals(req("defType", "aqp", "q", "author:kurtz~2"),
         "author:kurtz,~2",
