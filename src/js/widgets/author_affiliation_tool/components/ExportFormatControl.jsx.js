@@ -10,6 +10,7 @@ define([
     <select
       onChange={e => onChange(e.target.value)}
       value={format}
+      id="export-format-control"
       className="form-control"
       title="Select a format"
     >
