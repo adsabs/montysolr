@@ -131,9 +131,10 @@ define([
      * this will actually make the request
      *
      * @param {Array} [ids=[]] ids - the list of identifiers
-     * @param {number} [offset=4] offset - the years to go back
+     * @param {number} [numyears=4] numyears - the years to go back
+     * @param {number} [maxauthor=4] maxauthor - max number of authors to list
      */
-    fetchAffiliationData: function (ids=[], offset=4) {
+    fetchAffiliationData: function (ids=[], numyears=4, maxauthor=3) {
       const pubsub = this.getPubSub();
       const $dd = $.Deferred();
 
@@ -142,10 +143,7 @@ define([
 
       const req = new ApiRequest({
         target: ApiTargets.AUTHOR_AFFILIATION_SEARCH,
-        query: new ApiQuery({
-          bibcode: ids,
-          numyears: offset,
-        }),
+        query: new ApiQuery({ bibcode: ids, numyears, maxauthor }),
         options : {
           type : 'post',
           processData: false,
@@ -219,7 +217,6 @@ define([
     closeWidget: function () {
       const pubsub = this.getPubSub();
       pubsub.publish(pubsub.NAVIGATE, "results-page");
-      this.view.destroy();
     },
 
     /**

@@ -17,10 +17,12 @@ define([
   ExportFormatControl, SelectionButtons, Row, Message, Loading, Closer
 ) {
 
-  const getYears = (currentYear) => {
-    return _.map(_.range(1, 100), (i) => {
-      let year = currentYear - i;
-      return (<option key={year} value={year}>{year}</option>);
+  const makeOptions = (arr, allVal) => {
+    return _.map(arr, (i) => {
+      if (i === 'All') {
+        return (<option key={allVal} value={allVal}>All</option>);
+      }
+      return (<option key={i} value={i}>{i}</option>);
     });
   };
 
@@ -31,7 +33,8 @@ define([
     reset,
     doExport,
     closeWidget,
-    updateYear
+    updateYear,
+    updateAuthor
   } = actions;
 
   /**
@@ -99,9 +102,14 @@ define([
       dispatch(updateYear(year));
     }
 
+    onAuthorChange(author) {
+      const { dispatch } = this.props;
+      dispatch(updateAuthor(author));
+    }
+
     render() {
       const {
-        data, formats, format, message, loading, exporting, year, currentYear
+        data, formats, format, message, loading, exporting, year, author, currentYear
       } = this.props;
       return (
         <div>
@@ -116,22 +124,45 @@ define([
               {/* Only show title banner if we are not loading */}
               {!loading &&
                 <div>
-                  <div className="col-xs-8" style={{ fontSize: 24 }}>
-                    Viewing Affiliation Data For <strong>{data.length}</strong> Authors (Since {year})
-                  </div>
-                  <div className="col-xs-3 text-right" style={{ marginTop: 4 }}>
-                    Start Year:
-                  </div>
-                  <div className="col-xs-1">
-                    <select
-                      id="year-select"
-                      className="form-control input-sm"
-                      title="Select the start year"
-                      value={year}
-                      onChange={val => this.onYearChange(val.target.value)}
-                    >
-                      {getYears(currentYear)}
-                    </select>
+                  <h4 className="col-xs-12 col-sm-6" style={{ marginTop: 0 }}>
+                    Viewing Affiliation Data For <strong>{data.length}</strong> Authors<br/>
+                    <small>
+                      {((year !== 10000) ? `From ${currentYear - year} to ${currentYear}` : '')}
+                      {(year !== 10000 && author !== 0) && ' | ' }
+                      {((author !== 0) ? `${author} authors from each work` : '')}
+                    </small>
+                  </h4>
+                  <div className="col-xs-12 col-sm-6">
+                    <div className="col-xs-12 col-sm-offset-4 col-sm-8 no-padding-right">
+                      <div className="col-xs-3 text-right" style={{ marginTop: 4 }}>
+                        <label htmlFor="max-author-select">Authors:</label>
+                      </div>
+                      <div className="col-xs-3 no-padding-right">
+                        <select
+                          id="max-author-select"
+                          className="form-control input-sm"
+                          title="Select the number of authors from each article to be included (default is 4)"
+                          value={author}
+                          onChange={val => this.onAuthorChange(val.target.value)}
+                        >
+                          {makeOptions([1, 2, 3, 4, 5, 10, 'All'], 0)}
+                        </select>
+                      </div>
+                      <div className="col-xs-3 text-right" style={{ marginTop: 4 }}>
+                        <label htmlFor="year-select">Years:</label>
+                      </div>
+                      <div className="col-xs-3 no-padding-right">
+                        <select
+                          id="year-select"
+                          className="form-control input-sm"
+                          title="Select the number of years to include in the results (default is 4)"
+                          value={year}
+                          onChange={val => this.onYearChange(val.target.value)}
+                        >
+                          {makeOptions([1, 2, 3, 4, 5, 10, 'All'], 10000)}
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
               }
@@ -150,7 +181,7 @@ define([
               // if not loading, we can show the top/bottom bar
               <div>
                 <div className="row">
-                  <div className="col-xs-6">
+                  <div className="col-xs-12 col-sm-6">
 
                     {/* Export format selector (dropdown) */}
                     <ExportFormatControl
@@ -160,7 +191,7 @@ define([
                     />
 
                   </div>
-                  <div className="col-xs-2">
+                  <div className="col-xs-12 col-sm-2">
                     <button
                       className="btn btn-primary"
                       onClick={() => this.doExport()}
@@ -174,7 +205,7 @@ define([
                       }
                     </button>
                   </div>
-                  <div className="col-xs-4">
+                  <div className="col-xs-12 col-sm-4">
 
                     {/* Buttons that perform actions on the whole set */}
                     <SelectionButtons
@@ -211,25 +242,37 @@ define([
                   <Message {...message}/>
                 </div>
                 <div className="row">
-                  <div className="col-xs-6">
+                  <div className="col-xs-12 col-sm-6">
 
-                    {/* Export format dropdown */}
+                    {/* Export format selector (dropdown) */}
                     <ExportFormatControl
                       formats={formats}
                       format={format}
                       onChange={val => this.onFormatSelection(val)}
                     />
+
                   </div>
-                  <div className="col-xs-2">
+                  <div className="col-xs-12 col-sm-2">
                     <button
                       className="btn btn-primary"
                       onClick={() => this.doExport()}
-                    >Export</button>
+                      disabled={!!exporting}
+                    >
+                      {/* If exporting, show a loading icon in the button */}
+                      {
+                        exporting ?
+                          <i className="fa fa-spinner fa-fw fa-spin"/>
+                          : 'Export'
+                      }
+                    </button>
                   </div>
-                  <div className="col-xs-4">
+                  <div className="col-xs-12 col-sm-4">
+
+                    {/* Buttons that perform actions on the whole set */}
                     <SelectionButtons
                       onClick={(type) => this.onSelectionClick(type)}
                     />
+
                   </div>
                 </div>
               </div>
@@ -248,7 +291,8 @@ define([
     loading: state.loading,
     exporting: state.exporting,
     currentYear: state.currentYear,
-    year: state.year
+    year: state.year,
+    author: state.author
   });
 
   return ReactRedux.connect(mapStateToProps)(App);

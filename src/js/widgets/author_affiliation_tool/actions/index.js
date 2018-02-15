@@ -347,7 +347,23 @@ define([
       dispatch({ type: ACTIONS.setYear, value: year });
 
       // restart the search
-      widget.fetchAffiliationData(state.ids, state.currentYear - year);
+      widget.fetchAffiliationData(state.ids, year, state.author);
+    },
+
+    updateAuthor: (author) => (dispatch, getState, widget) => {
+      const state = getState();
+
+      try {
+        author = Number(author);
+      } catch (e) {
+        author = state.author;
+      }
+
+      // update the number of authors
+      dispatch({ type: ACTIONS.setAuthor, value: author });
+
+      // fetch data
+      widget.fetchAffiliationData(state.ids, state.year, author);
     }
   };
 
