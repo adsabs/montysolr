@@ -95,6 +95,7 @@ define([
      '/widgets/sort_widget.spec.js',
      '/widgets/citation_helper_widget.spec.js',
      '/widgets/author_affiliation_tool.spec.js',
+     '/widgets/simbad_object_facet.spec',
 
      //TBD 24/09/14 '/widgets/similar_widget.spec.js',
      '/widgets/tabs_widget.spec.js',

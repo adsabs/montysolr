@@ -59,7 +59,6 @@ define([
       q.set("facet.offset", offset);
       // set prefix from 0/ to 1/
       if (id) q.set("facet.prefix", id.replace("0/", "1/"));
-
       var req = this.composeRequest(q);
       pubsub.publish(pubsub.DELIVERING_REQUEST, req);
 
@@ -73,7 +72,6 @@ define([
     widget.translateSimbid = function(apiResponse, id) {
 
       var that = this;
-
       var simbids = apiResponse.toJSON().facet_counts.facet_fields.simbad_object_facet_hier
         .map(function(id, i) {
           if (i % 2 == 0) return id.split("/")[id.split("/").length - 1]
@@ -97,11 +95,10 @@ define([
                 return facetVal;
               }
               return facet;
-            }, this);
+            }, this)
         that.store.dispatch(that.actions.data_received(enhancedResponse, id));
-
       };
-
+      
       var request = new ApiRequest({
         target: ApiTargets.SERVICE_OBJECTS,
         options: {
@@ -114,7 +111,8 @@ define([
         }
       });
 
-      this.getBeeHive().getService("Api").request(request);
+	  var pubsub = this.getPubSub();
+	  pubsub.publish(pubsub.EXECUTE_REQUEST, request);
     };
 
     widget.submitFilter = function(operator) {
