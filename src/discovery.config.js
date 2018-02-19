@@ -114,6 +114,7 @@ require.config({
         GrantsFacet: 'js/wraps/grants_facet',
         KeywordFacet: 'js/wraps/keyword_facet',
 		    ObjectFacet: 'js/wraps/simbad_object_facet',
+        NedObjectFacet: 'js/wraps/ned_object_facet',
         RefereedFacet: 'js/wraps/refereed_facet',
         VizierFacet: 'js/wraps/vizier_facet',
         GraphTabs : 'js/wraps/graph_tabs',
