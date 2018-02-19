@@ -11,7 +11,8 @@ define([], function () {
     setFormat: 'SET_FORMAT',
     setCount: 'SET_COUNT',
     setMessage: 'SET_MESSAGE',
-    setExporting: 'SET_EXPORTING'
+    setExporting: 'SET_EXPORTING',
+    setAuthor: 'SET_AUTHOR'
   };
 
   return target;

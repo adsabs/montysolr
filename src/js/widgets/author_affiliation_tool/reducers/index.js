@@ -19,11 +19,12 @@ define([
     ],
     format: '| Lastname, Firstname | Affiliation | Last Active Date | [csv]',
     toggle: false,
-    year: currentYear - 4,
+    year: 4,
     currentYear: currentYear,
     message: { type: 'success', message: '', show: false },
     loading: false,
     exporting: false,
+    author: 3,
     ids: []
   };
 
@@ -46,6 +47,10 @@ define([
       // Reset the current year
       case ACTIONS.setYear:
         return { ...state, year: action.value };
+
+      // updates the current number of authors
+      case ACTIONS.setAuthor:
+        return { ...state, author: action.value };
 
       // Start loading
       case ACTIONS.fetchData:
