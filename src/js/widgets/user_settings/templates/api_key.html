@@ -21,7 +21,7 @@
             <br/>
             <p> This API token allows you to access ADS data programmatically. For instance, to fetch the first few bibcodes for the query "star", make the following request: </p>
             <p>
-                <code> curl -H 'Authorization: Bearer:{{#if access_token}}{{access_token}}{{else}}[YOUR TOKEN HERE]{{/if}}' 'http://api.adsabs.harvard.edu/v1/search/query?q=star&fl=bibcode'</code>
+                <code> curl -H 'Authorization: Bearer:{{#if access_token}}{{access_token}}{{else}}[YOUR TOKEN HERE]{{/if}}' 'https://api.adsabs.harvard.edu/v1/search/query?q=star&fl=bibcode'</code>
             </p>
             <p>
                 <i>(If you've generated a token, you can copy-paste the preceding line directly into your terminal)</i>
