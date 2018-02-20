@@ -97,6 +97,7 @@ define([
           'fq_data_facet': 'Data',
           'fq_vizier_facet': 'Vizier',
           'fq_simbad_object_facet_hier': 'Object',
+          'fq_ned_object_facet_hier': 'Object',
           'fq_grant': 'Grant',
           'fq_visualization_author': 'Author Network',
           'fq_visualization_paper': 'Paper Network',
@@ -409,6 +410,9 @@ define([
             break;
           case 'fq_simbad_object_facet_hier':
             s = s.replace(/simbad_object_facet_hier:0\\\//g, '');
+            break;
+          case 'fq_ned_object_facet_hier':
+            s = s.replace(/ned_object_facet_hier:0\\\//g, '');
             break;
           case 'fq_doctype':
             s = s.replace(/doctype:/g, '');
