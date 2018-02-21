@@ -127,8 +127,8 @@ define([
                   <h4 className="col-xs-12 col-sm-6" style={{ marginTop: 0 }}>
                     Viewing Affiliation Data For <strong>{data.length}</strong> Authors<br/>
                     <small>
-                      {((year !== 10000) ? `From ${currentYear - year} to ${currentYear}` : '')}
-                      {(year !== 10000 && author !== 0) && ' | ' }
+                      {((year !== currentYear) ? `From ${currentYear - year} to ${currentYear}` : '')}
+                      {(year !== currentYear && author !== 0) && ' | ' }
                       {((author !== 0) ? `${author} authors from each work` : '')}
                     </small>
                   </h4>
@@ -141,7 +141,7 @@ define([
                         <select
                           id="max-author-select"
                           className="form-control input-sm"
-                          title="Select the number of authors from each article to be included (default is 4)"
+                          title="Select the number of authors from each article to be included (default is 3)"
                           value={author}
                           onChange={val => this.onAuthorChange(val.target.value)}
                         >
@@ -159,7 +159,7 @@ define([
                           value={year}
                           onChange={val => this.onYearChange(val.target.value)}
                         >
-                          {makeOptions([1, 2, 3, 4, 5, 10, 'All'], 10000)}
+                          {makeOptions([1, 2, 3, 4, 5, 10, 'All'], currentYear)}
                         </select>
                       </div>
                     </div>
