@@ -143,7 +143,7 @@ define([
           q = res.getApiQuery().get('q');
 
           // if there is a simbid, look to see if there is a translated string
-          if (_.isEmpty(q) || q.indexOf('simbid') > -1) {
+          if (_.isEmpty(q) || q[0].indexOf('simbid') > -1) {
             q = [res.get('responseHeader.params.__original_query')];
           }
         }
