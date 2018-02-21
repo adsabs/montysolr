@@ -143,9 +143,15 @@ define([
     // starting an export
     dispatch(requestExport());
 
+    // get the current count, which the user selected
+    let count = exports.count < exports.batchSize ? exports.count : exports.batchSize;
+
+    // only grab the first n records
+    let ids = _.take(exports.ids, count);
+
     // setting up a new query using our current ids
     const q = new ApiQuery();
-    q.set('bibcode', exports.ids);
+    q.set('bibcode', ids);
     const req = composeRequest(q);
     req.set({
       target: ApiTargets.EXPORT + format.value,
