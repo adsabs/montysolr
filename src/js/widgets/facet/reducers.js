@@ -183,11 +183,8 @@ define([
       });
 
       //now reduce the result with the preprocessors (if they exist)
-      return preprocessors.reduce(function(data, fn) {
-        return fn(data);
-      }, data);
-
-    }
+      return _.compose.apply(_, preprocessors)(data);
+    };
 
     reducer.dataReceived = function(state, data, id) {
       var facets = data.facet_counts.facet_fields[Object.keys(data.facet_counts.facet_fields)[0]];
