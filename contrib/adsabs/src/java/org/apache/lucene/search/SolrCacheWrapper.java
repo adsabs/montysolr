@@ -3,10 +3,9 @@ package org.apache.lucene.search;
 import java.lang.ref.SoftReference;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.solr.search.CitationLRUCache;
-import org.apache.solr.search.SolrCache;
+import org.apache.solr.search.CitationCache;
 
-public abstract class SolrCacheWrapper<T extends SolrCache<?,?>> implements CacheWrapper {
+public abstract class SolrCacheWrapper<T extends CitationCache<?,?>> implements CacheWrapper {
 
   protected SoftReference<T> cache;
 	private String str;
@@ -65,9 +64,9 @@ public abstract class SolrCacheWrapper<T extends SolrCache<?,?>> implements Cach
   }
 	
 	
-	public static class ReferencesCache extends SolrCacheWrapper<CitationLRUCache<Object, Integer>> {
+	public static class ReferencesCache extends SolrCacheWrapper<CitationCache<Object, Integer>> {
 
-		public ReferencesCache(CitationLRUCache<Object, Integer> cache) {
+		public ReferencesCache(CitationCache<Object, Integer> cache) {
 	    super(cache);
     }
 		
@@ -85,9 +84,9 @@ public abstract class SolrCacheWrapper<T extends SolrCache<?,?>> implements Cach
 	  }
 	}
 	
-	public static class CitationsCache extends SolrCacheWrapper<CitationLRUCache<Object, Integer>> {
+	public static class CitationsCache extends SolrCacheWrapper<CitationCache<Object, Integer>> {
 
-		public CitationsCache(CitationLRUCache<Object, Integer> cache) {
+		public CitationsCache(CitationCache<Object, Integer> cache) {
 	    super(cache);
     }
 		

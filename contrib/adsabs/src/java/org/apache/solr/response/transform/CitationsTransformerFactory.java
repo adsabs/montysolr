@@ -30,7 +30,7 @@ import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.CitationLRUCache;
+import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.SolrIndexSearcher;
 
 /**
@@ -57,7 +57,7 @@ public class CitationsTransformerFactory extends TransformerFactory
   public DocTransformer create(String field, SolrParams params, SolrQueryRequest req) {
   	
   	SolrIndexSearcher searcher = req.getSearcher();
-  	CitationLRUCache<Object,Integer> cache = (CitationLRUCache<Object,Integer>) searcher.getCache(cacheName);
+  	CitationCache<Object,Integer> cache = (CitationCache<Object,Integer>) searcher.getCache(cacheName);
   	
   	if (cache == null) {
   		throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot find cache: " + cacheName);
@@ -91,10 +91,10 @@ class CitationsTransform extends DocTransformer
 	private String[] counts;
 	private String[] values;
 	private BinaryDocValues idMapping;
-	private CitationLRUCache<Object,Integer> cache;
+	private CitationCache<Object,Integer> cache;
 
   public CitationsTransform( String display,
-  		CitationLRUCache<Object,Integer> cache,
+  		CitationCache<Object,Integer> cache,
   		String counts, String values, 
   		BinaryDocValues idMapping )
   {

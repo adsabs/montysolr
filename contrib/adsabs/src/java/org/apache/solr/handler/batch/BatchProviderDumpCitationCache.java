@@ -10,6 +10,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.CitationLRUCache;
 
 /**
@@ -36,7 +37,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  File jobFile = new File(workDir + "/" + jobid);
 		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
 		
-		CitationLRUCache<Object, Integer> cache = (CitationLRUCache<Object, Integer>) req.getSearcher().getCache(cacheName);
+		CitationCache<Object, Integer> cache = (CitationCache<Object, Integer>) req.getSearcher().getCache(cacheName);
     
 		if (cache == null) {
       throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot find cache: " + cacheName);
@@ -48,7 +49,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	  BytesRef ret = new BytesRef();
 	  boolean first = true;
 	  
-	  Iterator<int[][]> it = cache.getCitationsIterator();
+	  Iterator<int[][]> it = cache.getCitationGraph();
 	  
 	  
 	  

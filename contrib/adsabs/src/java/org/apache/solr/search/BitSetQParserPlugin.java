@@ -284,7 +284,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
   						FixedBitSet translatedBitSet = new FixedBitSet(reader.maxDoc());
   						
   						
-    					SolrCacheWrapper<SolrCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
+    					SolrCacheWrapper<CitationCache<Object,Integer>> cacheWrapper = super.getCache(fieldName);
     					if (cacheWrapper != null) { // we are lucky and we have a cache that can translate values for us
     						for (int i = bits.nextSetBit(0); i >= 0 && i < DocIdSetIterator.NO_MORE_DOCS; i = bits.nextSetBit(i+1)) {
     					     if (fieldIsInt) {
@@ -376,11 +376,11 @@ public class BitSetQParserPlugin extends QParserPlugin {
 			// for csv, we can assume that every doc has the same fields (?)
 			Iterator<SolrInputField> fi = d.iterator();
 			
-			HashMap<String, SolrCacheWrapper<SolrCache<Object,Integer>>> translators = new HashMap<String, SolrCacheWrapper<SolrCache<Object,Integer>>>();
+			HashMap<String, SolrCacheWrapper<CitationCache<Object,Integer>>> translators = new HashMap<String, SolrCacheWrapper<CitationCache<Object,Integer>>>();
 			
 			while (fi.hasNext()) {
 				SolrInputField field = fi.next();
-				SolrCacheWrapper<SolrCache<Object,Integer>> cache = getCache(field.getName());
+				SolrCacheWrapper<CitationCache<Object,Integer>> cache = getCache(field.getName());
 				if (cache == null) {
 					throw new SolrException(ErrorCode.BAD_REQUEST, "Uff, uff, I have no idea how to map this field (" + field.getName() + ") values into docids! Call 911");
 				}
@@ -389,7 +389,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 			
 			for (SolrInputDocument doc: docs) {
 				for (SolrInputField f: doc.values()) {
-					SolrCacheWrapper<SolrCache<Object,Integer>> c = translators.get(f.getName());
+					SolrCacheWrapper<CitationCache<Object,Integer>> c = translators.get(f.getName());
 					for (Object o: f.getValues()) {
 						int v = c.getLuceneDocId(0, o);
 						if (v == -1)
@@ -402,14 +402,14 @@ public class BitSetQParserPlugin extends QParserPlugin {
 		}
 		
     @SuppressWarnings("unchecked")
-    public SolrCacheWrapper<SolrCache<Object, Integer>> getCache(String field) {
+    public SolrCacheWrapper<CitationCache<Object, Integer>> getCache(String field) {
 			
-			SolrCache<Object, Integer> sCache = null;
+			CitationCache<Object, Integer> sCache = null;
 			if (cacheMapping.containsKey(field)) {
-				sCache = (SolrCache<Object, Integer>) req.getSearcher().getCache(cacheMapping.get(field));
+				sCache = (CitationCache<Object, Integer>) req.getSearcher().getCache(cacheMapping.get(field));
 			}
 			else {
-				sCache = (SolrCache<Object, Integer>) req.getSearcher().getCache(field);
+				sCache = (CitationCache<Object, Integer>) req.getSearcher().getCache(field);
 			}
 			
 			
@@ -417,7 +417,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
 				return null;
 			}
 			
-			return new SolrCacheWrapper<SolrCache<Object, Integer>>(sCache) {
+			return new SolrCacheWrapper<CitationCache<Object, Integer>>(sCache) {
         @Override
 				public int getLuceneDocId(int sourceDocid, Object sourceValue) {
 					// extra checking necessary (we cannot be sure

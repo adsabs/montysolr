@@ -26,7 +26,7 @@
 			precisionStep="8" omitNorms="true" positionIncrementGap="0" />
 
 		<fieldType name="date" class="solr.TrieDateField" omitNorms="true"
-			precisionStep="0" positionIncrementGap="0" />
+			precisionStep="0" positionIncrementGap="0" docValues="true"/>
 		<fieldType name="tdate" class="solr.TrieDateField"
 			omitNorms="true" precisionStep="6" positionIncrementGap="0" />
 
@@ -1434,10 +1434,10 @@
 
      -->
 		<field name="cite_read_boost" type="tfloat" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
 
 		<field name="classic_factor" type="int" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
 
     <!--
     @api.doc
@@ -1479,10 +1479,10 @@
      -->
 
 		<field name="citation_count" type="int" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
 
 		<field name="read_count" type="int" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true"/>
+		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
 
 		<!--
 		  technical metadata; values are a JSON string that is stored and used for search result

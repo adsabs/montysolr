@@ -22,7 +22,7 @@ import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.util.BytesRefBuilder;
 import org.apache.lucene.util.LegacyNumericUtils;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.CitationLRUCache;
+import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.junit.BeforeClass;
 
@@ -152,7 +152,7 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 		tempReq = req("test");
 		SolrIndexSearcher searcher = tempReq.getSearcher();
 		
-		final CitationLRUCache cache = (CitationLRUCache) searcher.getCache("citations-cache-from-references");
+		final CitationCache cache = (CitationCache) searcher.getCache("citations-cache-from-references");
 		assert cache != null;
 		
 		@SuppressWarnings("rawtypes")

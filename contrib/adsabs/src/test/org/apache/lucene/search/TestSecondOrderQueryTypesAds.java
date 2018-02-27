@@ -19,6 +19,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.CitationLRUCache;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QParserPlugin;
@@ -123,7 +124,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   	
   	
   	
-    final CitationLRUCache cache = (CitationLRUCache) tempReq.getSearcher().getCache("citations-cache-from-references");
+    final CitationCache cache = (CitationCache) tempReq.getSearcher().getCache("citations-cache-from-references");
 		
 		assert cache != null;
 		

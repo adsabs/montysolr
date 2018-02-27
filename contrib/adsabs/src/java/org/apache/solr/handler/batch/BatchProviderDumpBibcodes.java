@@ -12,7 +12,7 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.CitationLRUCache;
+import org.apache.solr.search.CitationCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public class BatchProviderDumpBibcodes extends BatchProvider {
 	  // but since we are using the bibcodes in the second-order
 	  // search, the lookup cache is already available
 	  
-	  CitationLRUCache<Object, Integer> cache = (CitationLRUCache<Object, Integer>) locReq.getSearcher().getCache(cacheName);
+	  CitationCache<Object, Integer> cache = (CitationCache<Object, Integer>) locReq.getSearcher().getCache(cacheName);
 	  
 	  if (cache == null) {
       throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot find cache: " + cacheName);

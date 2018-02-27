@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * will always be constructed in its entirety.
  * 
  */
-public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,V> {
+public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCache<K,V> {
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   
   /* An instance of this class will be shared across multiple instances
@@ -229,7 +229,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements SolrCache<K,
    * 
    * The first comes references, the second are citations
    */
-  public  Iterator<int[][]> getCitationsIterator() {
+  public  Iterator<int[][]> getCitationGraph() {
   	return ((RelationshipLinkedHashMap<K,V>) relationships).getRelationshipsIterator();
   }
   

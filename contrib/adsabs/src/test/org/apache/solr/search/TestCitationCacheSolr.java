@@ -670,7 +670,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 
   private int[][][] getCache(CitationLRUCache cache) {
   	int[][][] results = new int[cache.getCitationsIteratorSize()][2][];
-		Iterator<int[][]> it = cache.getCitationsIterator();
+		Iterator<int[][]> it = cache.getCitationGraph();
 		
 		int j = 0;
 		while (it.hasNext()) {
@@ -691,7 +691,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
   }
   
   private void printCache(CitationLRUCache cache) {
-  	Iterator cci = cache.getCitationsIterator();
+  	Iterator cci = cache.getCitationGraph();
 		int ii = 0;
 		while (cci.hasNext()) {
 			int[][] dta = (int[][]) cci.next();

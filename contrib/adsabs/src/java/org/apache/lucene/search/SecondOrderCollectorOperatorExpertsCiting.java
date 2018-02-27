@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
-import org.apache.solr.search.CitationLRUCache;
+import org.apache.solr.search.CitationCache;
 
 /**
  * Finds papers that are cited by our search. And then adjusts the score so that
@@ -18,12 +18,12 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	protected String referenceField;
 	protected String[] uniqueIdField;
 	protected String boostField;
-	private SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache;
+	private SolrCacheWrapper<CitationCache<Object, Integer>> cache;
 	private LuceneCacheWrapper<NumericDocValues> boostCache;
   private int hashCode;
 	
 	public SecondOrderCollectorOperatorExpertsCiting(
-	      SolrCacheWrapper<CitationLRUCache<Object, Integer>> cache, 
+	      SolrCacheWrapper<CitationCache<Object, Integer>> cache, 
 	      LuceneCacheWrapper<NumericDocValues> boostWrapper) {
 		super();
 		

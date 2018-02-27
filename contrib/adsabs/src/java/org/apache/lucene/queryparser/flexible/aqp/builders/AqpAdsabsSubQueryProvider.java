@@ -56,7 +56,7 @@ import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.AqpFunctionQParser;
 import org.apache.solr.search.BoostQParserPlugin;
-import org.apache.solr.search.CitationLRUCache;
+import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.DisMaxQParserPlugin;
 import org.apache.solr.search.ExtendedDismaxQParserPlugin;
 import org.apache.solr.search.FieldQParserPlugin;
@@ -455,8 +455,8 @@ AqpFunctionQueryBuilderProvider {
 				}
 				
 				@SuppressWarnings("unchecked")
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
@@ -597,8 +597,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 								
 				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorCitedBy(citationsWrapper), false);
@@ -640,8 +640,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-        SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+        SolrCacheWrapper<CitationCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				
 				return new SecondOrderQuery(innerQuery, 
@@ -727,8 +727,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-        SolrCacheWrapper<CitationLRUCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+        SolrCacheWrapper<CitationCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
@@ -769,8 +769,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				//TODO: make configurable the name of the field				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
@@ -804,8 +804,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
@@ -837,8 +837,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
@@ -851,8 +851,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-				SolrCacheWrapper<CitationLRUCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
-						(CitationLRUCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+				SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
+						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorCites(citationsWrapper, new String[] {citationSearchRefField}), false);
@@ -1021,7 +1021,7 @@ AqpFunctionQueryBuilderProvider {
 
 				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
-				final CitationLRUCache cache = (CitationLRUCache) req.getSearcher().getCache("citations-cache");
+				final CitationCache cache = (CitationCache) req.getSearcher().getCache("citations-cache");
 				if (!cache.isWarmingOrWarmed()) {
 					cache.warm(req.getSearcher(), cache);
 				}
