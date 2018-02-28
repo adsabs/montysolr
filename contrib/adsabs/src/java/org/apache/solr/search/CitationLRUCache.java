@@ -632,7 +632,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
   	
   	IndexSchema schema = searcher.getCore().getLatestSchema();
   	List<LeafReaderContext> leaves = searcher.getIndexReader().getContext().leaves();
-  	
+  
   	Bits liveDocs;
   	LeafReader lr;
   	Transformer transformer;
@@ -719,7 +719,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
                 dv.setDocument(docId);
                 for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
                   final BytesRef value = dv.lookupOrd(ord);
-                  setter.set(docBase, docId, value.utf8ToString());
+                  setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply tokenization, doc values ignore it
                 }
               }
             };
@@ -733,7 +733,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
                 BytesRef v = dv.get(docId);
                 if (v.length == 0)
                   return;
-                setter.set(docBase, docId, v.utf8ToString());
+                setter.set(docBase, docId, v.utf8ToString().toLowerCase());
               }
             };
   	        break;
@@ -992,7 +992,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
     		addReference(sourceDocid, (Integer) this.get(value));
     	}
     	else {
-    		//addReference(sourceDocid, -1);
+    	  log.warn("Would like to add reference " + value + " but cannot map it to the lucene id");
     	}
     }
     public void addReference(int sourceDocid, Integer targetDocid) {
@@ -1005,7 +1005,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
     		addCitation(sourceDocid, (Integer) this.get(value));
     	}
     	else {
-    		//addCitation(sourceDocid, -1);
+    		log.warn("Would like to add citation " + value + " but cannot map it to the lucene id");
     	}
     }
     
