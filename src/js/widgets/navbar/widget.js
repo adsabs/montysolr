@@ -264,26 +264,17 @@ define([
       if (this.model.get("orcidLoggedIn")) {
         //set the orcid username into the model
         var that = this;
-        orcidApi.getUserProfile().done(function (info) {
+        orcidApi.getUserProfile()
+        .done(function (profile) {
 
-          try {
-            //this info might not be available
-            var firstName = info["orcid-bio"]["personal-details"]["given-names"]["value"];
-            var lastName = info["orcid-bio"]["personal-details"]["family-name"]["value"];
-            that.model.set("orcidFirstName", firstName);
-            that.model.set("orcidLastName", lastName);
-            that.model.set("orcidQueryName", lastName + ', ' + firstName);
-
-          } catch(e){
-            that.model.unset("orcidFirstName", firstName);
-            that.model.unset("orcidLastName", lastName);
-            that.model.unset("orcidQueryName", lastName + ', ' + firstName);
-            that.model.unset("orcidName", "unknown" );
-          }
+          var firstName = profile.getFirstName();
+          var lastName = profile.getLastName();
+          that.model.set("orcidFirstName", firstName);
+          that.model.set("orcidLastName", lastName);
+          that.model.set("orcidQueryName", lastName + ', ' + firstName);
 
           //this will always be available
-          that.model.set("orcidURI", info["orcid-identifier"]["uri"]);
-
+          that.model.set("orcidURI", profile.getOrcid());
         });
       }
 
