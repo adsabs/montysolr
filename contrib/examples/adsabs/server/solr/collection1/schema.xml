@@ -1028,16 +1028,20 @@
 
 
 		<field name="identifier" type="identifier_string" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+		  />
 
-		<field name="alternate_bibcode" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="alternate_bibcode" type="identifier_string" indexed="true" stored="true"
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+		  />
 
 		<field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}"
-			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+			/>
 
 		<field name="bibstem_facet" type="bibstem_facet" indexed="true"
-			stored="${storeAll:false}" omitNorms="true" omitTermFreqAndPositions="true"/>
+			stored="${storeAll:false}" omitNorms="true" omitTermFreqAndPositions="true"
+			/>
 
 
 
@@ -1286,10 +1290,14 @@
 		  omitNorms="true" />
 
 		<field name="reference" type="identifier_string" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+		  docValues="true"
+		  />
 
 	    <field name="citation" type="identifier_string" indexed="true" stored="true"
-          multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+          multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+          docValues="true"
+          />
 
 		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
           multiValued="true" omitNorms="true"/>

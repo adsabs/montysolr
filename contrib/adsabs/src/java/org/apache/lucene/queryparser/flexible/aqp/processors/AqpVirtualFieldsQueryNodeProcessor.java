@@ -101,6 +101,10 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
       assert children.size() > 1;
       
       for (QueryNode child: children) {
+        if (!(child instanceof FieldableNode)) { // this disallows virtual:(foo bar*) NEAR virtual:(baz bat)
+          canPass = false;
+          break;
+        }
         if (fldName == null)
           fldName = (String) ((FieldableNode) child).getField();
         

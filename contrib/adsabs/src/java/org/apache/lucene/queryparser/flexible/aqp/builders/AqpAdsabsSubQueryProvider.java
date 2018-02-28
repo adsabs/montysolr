@@ -695,8 +695,8 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				SolrQueryRequest req = fp.getReq();
 				try {
-					return JoinUtil.createJoinQuery("reference", true, "bibcode", innerQuery, 
-							req.getSearcher(), ScoreMode.None); // will not work properly iff mode=Avg|Max
+					return JoinUtil.createJoinQuery("bibcode", false, "citation", innerQuery, 
+							req.getSearcher(), ScoreMode.Avg);
 				} catch (IOException e) {
 					throw new SyntaxError(e.getMessage());
 				}

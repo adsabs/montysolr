@@ -75,6 +75,17 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
 		assertQ(req("q", "citations(bibcode:A)"),
 				"//*[@numFound='0']"
 		);
+		assertQ(req("q", "joincitations(bibcode:B)"),
+		    "//*[@numFound='2']",
+		    "//result/doc/str[@name='bibcode']='A'",
+		    "//result/doc/str[@name='bibcode']='D'"
+		    );
+		assertQ(req("q", "joinreferences(bibcode:A)"),
+		    "//*[@numFound='3']",
+		    "//result/doc/str[@name='bibcode']='B'",
+		    "//result/doc/str[@name='bibcode']='C'",
+		    "//result/doc/str[@name='bibcode']='D'"
+		    );
 
 		assertQ(req("q", "citations(bibcode:B)"),
 				"//*[@numFound='2']",
@@ -82,11 +93,6 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
 				"//result/doc/str[@name='bibcode']='D'"
 		);
 
-		assertQ(req("q", "joincitations(bibcode:B)"),
-				"//*[@numFound='2']",
-				"//result/doc/str[@name='bibcode']='A'",
-				"//result/doc/str[@name='bibcode']='D'"
-		);
 
 		assertQ(req("q", "references(bibcode:A)"),
 				"//*[@numFound='3']",
@@ -95,12 +101,6 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
 				"//result/doc/str[@name='bibcode']='D'"
 		);
 
-		assertQ(req("q", "joinreferences(bibcode:A)"),
-				"//*[@numFound='3']",
-				"//result/doc/str[@name='bibcode']='B'",
-				"//result/doc/str[@name='bibcode']='C'",
-				"//result/doc/str[@name='bibcode']='D'"
-		);
 		
 
 	}
