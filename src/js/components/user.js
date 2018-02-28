@@ -97,9 +97,10 @@ define([
 
           // Only run if there is actually authData stored in the user object
           if (orcidApi.authData !== null) {
-            orcidApi.checkAccessOrcidApiAccess().fail(function() {
-              var status_code = arguments[0][0].status;
-              if (status_code == 401) {
+            orcidApi.checkAccessOrcidApiAccess().fail(function (xHr) {
+              var statusCode = xHr && xHr.status;
+
+              if (statusCode && statusCode === '401') {
                 orcidApi.signOut();
                 user.setOrcidMode(0);
               }
