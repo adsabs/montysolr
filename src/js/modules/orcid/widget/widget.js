@@ -14,6 +14,7 @@ define([
       'hbs!js/modules/orcid/widget/templates/container-template',
       'js/mixins/papers_utils',
       'js/components/api_query',
+      'js/components/api_feedback',
       'js/components/json_response',
       'hbs!js/modules/orcid/widget/templates/empty-template',
       'js/modules/orcid/extension'
@@ -29,6 +30,7 @@ define([
         ContainerTemplate,
         PapersUtilsMixin,
         ApiQuery,
+        ApiFeedback,
         JsonResponse,
         EmptyViewTemplate,
         OrcidExtension
@@ -52,18 +54,19 @@ define([
             "click .search-author-name" : function(){
               var searchTerm, viewThis = this;
               var orcidName = this.model.get("orcidLastName") + ", " + this.model.get("orcidFirstName");
-               that.getBeeHive().getService("OrcidApi").getADSUserData().done(function(data){
-                 if (data && data.nameVariations){
+              var oApi = that.getBeeHive().getService('OrcidApi');
+
+              var searchTerm = "author:\"" + orcidName + "\"";
+              oApi.getADSUserData()
+                .done(function(data){
+                  if (data && data.nameVariations){
                    data.nameVariations.push(orcidName);
                    searchTerm = "author:(\"" + data.nameVariations.join("\" OR \"") +  "\")";
-                 }
-                 else {
-                   searchTerm = "author:\"" + orcidName + "\"";
-                 }
+                  }
 
-                 viewThis.trigger("search-author-name", searchTerm);
-
-               }); //end done function
+               }).always(function () {
+                viewThis.trigger("search-author-name", searchTerm);
+              }); //end done function
             } // end click handler
           });
 
@@ -242,34 +245,53 @@ define([
           var self = this;
           if (oApi) {
 
-            if (!oApi.hasAccess())
-              return;
+            if (!oApi.hasAccess()) {
+              return
+            }
 
             self.model.set("loading", true);
 
-            oApi.getOrcidProfileInAdsFormat()
-                .done(function(data) {
-                  var response = new JsonResponse(data);
-                  var params = response.get('responseHeader.params');
+            var profile = oApi.getUserProfile();
 
-                  // name/surname can be empty
-                  params = _.reduce(_.pairs(params), function(p, v) {
-                    if (v[1])
-                      p[v[0]] = v[1];
-                    return p;
-                  }, {});
+            profile.done(function gotProfile(profile) {
+              var response = new JsonResponse(profile.toADSFormat());
+              var params = response.get('responseHeader.params');
 
-                  response.setApiQuery(new ApiQuery(params));
-                  self.processResponse(response);
-                  self.model.set({
-                    orcidID : params.orcid,
-                    orcidUserName : params.firstName + " " + params.lastName,
-                    orcidFirstName : params.firstName,
-                    orcidLastName : params.lastName,
-                    loading: false,
-                    totalPapers  : response.get("response.docs") ? response.get("response.docs").length : "0"
-                  });
-                });
+              var firstName = params.firstName;
+              var lastName = params.lastName;
+
+              self.model.set({
+                orcidID: params.orcid,
+                orcidUserName: firstName + ' ' + lastName,
+                orcidFirstName: firstName,
+                orcidLastName: lastName,
+                totalPapers: response.get('response.numFound') || 0,
+                loading: false
+              });
+
+              response.setApiQuery(new ApiQuery(params));
+              self.processResponse(response);
+            });
+
+            profile.fail(function () {
+              self.model.set({
+                loading: false
+              });
+              var title = 'Something Went Wrong';
+              var msg = [
+                'We were unable to retrieve your profile from ORCiD',
+                'Please reload the page to try again',
+                '',
+                '<button onclick="location.reload()" class="btn btn-primary" role="button">Reload</button>'
+              ];
+              var pubSub = self.getPubSub();
+              pubSub.publish(pubSub.ALERT, new ApiFeedback({
+                title: title,
+                msg: msg.join('<br/>'),
+                modal: true,
+                type: 'warning'
+              }));
+            });
           }
         },
 
