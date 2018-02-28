@@ -25,12 +25,32 @@ define([
     helpers
     ) {
 
+    var getMinSub = function () {
+      var minsub = new MinimalPubsub({ verbose: false });
+      minsub.beehive.addObject('DynamicConfig', {
+        orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+        orcidApiEndpoint: 'https://api.orcid.org',
+        orcidRedirectUrlBase: 'http://localhost:8000'
+      });
+      return minsub;
+    };
+
+    var getOrcidApi = function (beehive) {
+      var oModule = new OrcidModule();
+      oModule.activate(beehive);
+      var oApi = beehive.getService('OrcidApi');
+      oApi.saveAccessData({
+        "access_token":"4274a0f1-36a1-4152-9a6b-4246f166bafe",
+        "orcid":"0000-0001-8178-9506"
+      });
+      return oApi;
+    };
+
     describe("Orcid Widget (orcid_widget.spec.js)", function () {
-      var minsub, beehive, notifier;
       // this is useful if you want to test widget getting data from Orcid
       // it simulates pubsub response
       beforeEach(function (done) {
-        minsub = new (MinimalPubsub.extend({
+        var minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
 
             var target = apiRequest.get('target');
@@ -99,13 +119,18 @@ define([
             }
           }
         }))({verbose: false});
+        minsub.beehive.addObject('DynamicConfig', {
+          orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
+          orcidApiEndpoint: 'https://api.orcid.org',
+          orcidRedirectUrlBase: 'http://localhost:8000'
+        });
 
-        beehive = minsub.beehive;
+        this.minsub = minsub;
+        this.beehive = minsub.beehive;
         done();
       });
 
       afterEach(function (done) {
-        minsub.destroy();
         var ta = $('#test');
         if (ta) {
           ta.empty();
@@ -120,29 +145,11 @@ define([
         done();
       });
 
-      var _getWidget = function () {
+      var _getWidget = function (beehive) {
         var widget = new OrcidWidget();
 
-        widget.activate(minsub.beehive.getHardenedInstance());
+        widget.activate(beehive.getHardenedInstance());
         return widget;
-      };
-
-      var getOrcidApi = function () {
-        beehive.addObject('DynamicConfig', {
-          orcidClientId: 'APP-P5ANJTQRRTMA6GXZ',
-          orcidApiEndpoint: 'https://api.orcid.org',
-          orcidRedirectUrlBase: 'http://localhost:8000',
-          orcidLoginEndpoint: 'https://api.orcid.org/oauth/authorize'
-        });
-        var oModule = new OrcidModule();
-        oModule.activate(beehive);
-
-        var oApi = beehive.getService('OrcidApi');
-        oApi.saveAccessData({
-          "access_token":"4274a0f1-36a1-4152-9a6b-4246f166bafe",
-          "orcid":"0000-0001-8178-9506"
-        });
-        return oApi;
       };
 
       var defaultResponse = function () {
@@ -161,12 +168,12 @@ define([
             return orcidMode;
           },
         };
-        minsub.beehive.removeObject("User");
-        minsub.beehive.addObject("User", fakeUser);
+        this.minsub.beehive.removeObject("User");
+        this.minsub.beehive.addObject("User", fakeUser);
 
-        var orcidApi = getOrcidApi();
+        var orcidApi = getOrcidApi(this.minsub.beehive);
         sinon.stub(orcidApi, 'hasAccess', function() {return true});
-        var widget = _getWidget();
+        var widget = _getWidget(this.minsub.beehive);
 
         var profile = new Profile(helpers.getMock('profile'));
         var response = new JsonResponse(profile.toADSFormat());
@@ -220,7 +227,7 @@ define([
 
       it("should show a loading view before orcid profile is loaded", function(){
 
-        var orcidApi = getOrcidApi();
+        var orcidApi = getOrcidApi(this.minsub.beehive);
         orcidApi.saveAccessData({access: true});
         orcidApi.getUserProfile = function() {
           return $.Deferred()
@@ -234,29 +241,25 @@ define([
           getLocalStorage : function(){return { perPage : 50 }},
           isOrcidModeOn: function() {
             return orcidMode;
-          },
+          }
         };
-        minsub.beehive.removeObject("User");
-        minsub.beehive.addObject("User", fakeUser);
+        this.minsub.beehive.removeObject("User");
+        this.minsub.beehive.addObject("User", fakeUser);
 
-
-        var widget = _getWidget();
+        var widget = _getWidget(this.minsub.beehive);
+        widget.getBeeHive().getService('OrcidApi').hasAccess = _.constant(true);
 
         var $w = widget.render().$el;
         $('#test').append($w);
 
-
         widget.onShow();
 
-
         expect($("#test .s-results-control-row-container").text().replace(/\s{2,}/g, "")).to.eql("My ORCID Papers(3)ORCID Username: Tim HostetlerORCID ID: 0000-0001-9790-1275To share this list of your ORCID papers:Search for your ORCID ID in ADS (orcid:0000-0001-9790-1275)You can then share the url of your results:https://ui.adsabs.harvard.edu/#search/q=orcid%3A0000-0001-9790-1275&sort=date+descPlease note that claims take up to 24 hours to be indexed in ADS.To claim papers in ORCID and add to this listclick here to search your name in ADSLearn more about using ORCID with ADS")
-
-
       });
 
       it("should allow the user to search in ADS when search button is clicked", function(done){
 
-        var orcidApi = getOrcidApi();
+        var orcidApi = getOrcidApi(this.minsub.beehive);
         orcidApi.saveAccessData({access: true});
         orcidApi.getUserProfile = function() {
           return $.Deferred()
@@ -278,11 +281,11 @@ define([
             return orcidMode;
           },
         };
-        minsub.beehive.removeObject("User");
-        minsub.beehive.addObject("User", fakeUser);
+        this.minsub.beehive.removeObject("User");
+        this.minsub.beehive.addObject("User", fakeUser);
 
-        var widget = _getWidget();
-        widget.activate(minsub.beehive.getHardenedInstance());
+        var widget = _getWidget(this.minsub.beehive);
+        widget.getBeeHive().getService('OrcidApi').hasAccess = _.constant(true);
 
         var publishStub = sinon.stub(widget.getPubSub(), "publish");
 
@@ -330,7 +333,7 @@ define([
         minsub.beehive.removeObject("User");
         minsub.beehive.addObject("User", fakeUser);
 
-        var wid = _getWidget();
+        var wid = _getWidget(this.minsub.beehive);
         wid.activate(minsub.beehive.getHardenedInstance());
         wid.onShow();
         setTimeout(function() {
@@ -393,7 +396,7 @@ define([
 
         var orcidApi = getOrcidApi();
         sinon.stub(orcidApi, 'hasAccess', function() {return true});
-        var widget = _getWidget();
+        var widget = _getWidget(this.minsub.beehive);
 
         var response = new JsonResponse(data);
         response.setApiQuery(new ApiQuery(response.get('responseHeader.params')));
