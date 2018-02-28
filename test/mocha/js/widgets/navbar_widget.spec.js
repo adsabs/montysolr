@@ -36,15 +36,16 @@ define([
       u.activate(minsub.beehive);
       minsub.beehive.addObject("User", u);
 
-
-      var profileInfo = {"orcid-identifier": {"uri": "foo"}, "orcid-bio":{"personal-details": {"family-name": {"value" : "Chyla"}, "given-names": {"value": "Roman"}}}}
-
       minsub.beehive.addService('OrcidApi', {
         hasAccess: function() {return true},
         getHardenedInstance: function() {return this},
         getUserProfile : function(){
           var d = $.Deferred();
-          d.resolve(profileInfo);
+          d.resolve({
+            getFirstName: _.constant('Testy'),
+            getLastName: _.constant('Tester'),
+            getOrcid: _.constant('')
+          });
           return d
         },
         getOrcidVal: new OrcidApi().getOrcidVal
@@ -70,7 +71,7 @@ define([
 
       //orcid signed in, orcid mode on automatically
 
-      expect($(".orcid-dropdown h4").text()).to.eql(" Signed in to ORCID as  Roman Chyla");
+      expect($(".orcid-dropdown h4").text()).to.eql(" Signed in to ORCID as  Testy Tester");
       expect($("input.orcid-mode").is(":checked")).to.eql(true);
 
       //orcid signed in, orcid mode off
@@ -165,8 +166,12 @@ define([
         getHardenedInstance: function() {return this},
         getUserProfile : function(){
           var d = $.Deferred();
-          d.resolve(profileInfo);
-          return d
+          d.resolve({
+            getFirstName: _.constant(''),
+            getLastName: _.constant(''),
+            getOrcid: _.constant('')
+          });
+          return d;
         }
       });
 
