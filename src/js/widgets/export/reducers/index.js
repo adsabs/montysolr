@@ -241,7 +241,8 @@ define([
     showSlider: true,
     origin: 'results-page',
     showReset: true,
-    splitCols: true
+    splitCols: true,
+    autoSubmit: false
   }, action) => {
     switch (action.type) {
       case SET_SHOW_CLOSER:
@@ -255,6 +256,7 @@ define([
           showSlider: action.origin === 'results-page',
           splitCols: action.origin === 'results-page',
           showReset: action.origin === 'results-page',
+          autoSubmit: action.origin !== 'results-page',
           origin: action.origin
         };
       default:

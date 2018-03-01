@@ -8,7 +8,7 @@ define([
   const Setup = ({
        onApply, setFormat, disabled, onCancel, batchSize, hasMore, onReset,
        format, formats, count, setCount, maxCount, onGetNext, totalRecs,
-        showSlider, showReset, remaining
+        showSlider, showReset, remaining, autoSubmit
     }) => (
     <div>
       <div className="row">
@@ -54,6 +54,7 @@ define([
 
       <div className="row">
         <div className="col-sm-12 btn-toolbar">
+          {!autoSubmit &&
           <button
             className="btn btn-primary"
             onClick={onApply}
@@ -61,6 +62,7 @@ define([
           >
             Apply
           </button>
+          }
           {!disabled && showReset &&
           <button
             className="btn btn-info"
@@ -77,7 +79,7 @@ define([
               Get Next {remaining} Record(s)
             </button>
           }
-          {disabled &&
+          {disabled && !autoSubmit &&
             <button
               className="btn btn-warning"
               onClick={onCancel}
@@ -112,7 +114,8 @@ define([
     totalRecs: ReactPropTypes.number.isRequired,
     onReset: ReactPropTypes.func.isRequired,
     showSlider: ReactPropTypes.bool.isRequired,
-    showReset: ReactPropTypes.bool.isRequired
+    showReset: ReactPropTypes.bool.isRequired,
+    autoSubmit: ReactPropTypes.bool.isRequired
   };
 
   return Setup;

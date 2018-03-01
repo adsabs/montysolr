@@ -123,9 +123,12 @@ define([
      * @param {string} id - format id
      */
     handleFormatChange(id) {
-      const { dispatch, formats } = this.props;
+      const { dispatch, formats, autoSubmit } = this.props;
       let format = _.find(formats, { id: id });
       dispatch(setFormat(format));
+
+      // if autoSubmit, then hit apply as the format changes
+      autoSubmit && this.handleApplyClick();
     }
 
     /**
@@ -148,7 +151,8 @@ define([
     render() {
       const {
         format, formats, isFetching, output, batchSize, showCloser, showReset,
-        progress, maxCount, hasError, errorMsg, totalRecs, showSlider, splitCols
+        progress, maxCount, hasError, errorMsg, totalRecs, showSlider, splitCols,
+        autoSubmit
       } = this.props;
       const { count, hasMore, showAlert, alertMsg, remaining } = this.state;
 
@@ -178,6 +182,7 @@ define([
                 hasMore={hasMore}
                 showSlider={showSlider}
                 showReset={showReset}
+                autoSubmit={autoSubmit}
                 remaining={remaining}
                 onReset={this.handleResetClick}
                 onApply={this.handleApplyClick}
@@ -241,7 +246,8 @@ define([
     showCloser: ReactPropTypes.bool.isRequired,
     showSlider: ReactPropTypes.bool.isRequired,
     splitCols: ReactPropTypes.bool.isRequired,
-    showReset: ReactPropTypes.bool.isRequired
+    showReset: ReactPropTypes.bool.isRequired,
+    autoSubmit: ReactPropTypes.bool.isRequired
   };
 
   const mapStateToProps = state => ({
@@ -258,6 +264,7 @@ define([
     totalRecs: state.exports.totalRecs,
     showCloser: state.main.showCloser,
     showSlider: state.main.showSlider,
+    autoSubmit: state.main.autoSubmit,
     splitCols: state.main.splitCols,
     showReset: state.main.showReset,
     ids: state.exports.ids,
