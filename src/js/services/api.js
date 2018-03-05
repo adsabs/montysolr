@@ -170,6 +170,51 @@ define([
 
       this.modifyRequestOptions(opts, request);
 
+      // use the native fetch api for sending the request
+      // this can help with downloading blob and other non-text responses
+      if (options.useFetch && options.fetchOptions) {
+        var fetchOpts = _.assign({
+          credentials: 'include',
+          mode: 'cors',
+          timeout: this.defaultTimeoutInMs
+        }, options.fetchOptions);
+
+        fetchOpts.headers = _.assign({
+          'Content-Type': opts.contentType
+        }, opts.headers, options.fetchOptions.headers);
+
+        var prom = window.fetch(opts.url, fetchOpts).then(function (response) {
+
+          self.always.call(opts.context, response);
+
+          if (_.isFunction(opts.always)) {
+            opts.always.call(opts.context, response);
+          }
+
+          // handle any response errors (404, 500, etc.)
+          if (!response.ok) {
+            (opts.fail || self.fail).call(opts.context, response);
+            throw Error(response.statusText);
+          }
+
+          // otherwise call done
+          (opts.done || self.done).call(opts.context, response);
+        })
+
+        // handle network errors
+        .catch(function (error) {
+          (opts.fail || self.fail).call(opts.context, error);
+          throw Error(error);
+        });
+
+        // add a done property to the promise so it plays well with
+        // methods expecting jquery
+        return _.extend(prom, {
+          done: prom.then,
+          fail: prom.catch
+        });
+      }
+
       var jqXhr = $.ajax(opts)
         .always(opts.always ? [this.always, opts.always] : this.always)
         .done(opts.done || this.done)

@@ -12,7 +12,8 @@ define([], function () {
     setCount: 'SET_COUNT',
     setMessage: 'SET_MESSAGE',
     setExporting: 'SET_EXPORTING',
-    setAuthor: 'SET_AUTHOR'
+    setAuthor: 'SET_AUTHOR',
+    appReset: 'APP_RESET'
   };
 
   return target;

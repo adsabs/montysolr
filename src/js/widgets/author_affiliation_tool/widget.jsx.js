@@ -188,11 +188,16 @@ define([
 
       const req = new ApiRequest({
         target: ApiTargets.AUTHOR_AFFILIATION_EXPORT,
-        query: new ApiQuery(data),
+        query: new ApiQuery(),
         options : {
-          type : 'POST',
-          contentType : 'application/json',
-          dataType: 'text',
+          useFetch: true,
+          fetchOptions: {
+            body: JSON.stringify(data),
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          },
           done: (...args) => $dd.resolve(...args),
           fail: (...args) => $dd.reject(...args),
           always: (...args) => $dd.always(...args)
@@ -215,8 +220,10 @@ define([
      * Close the widget
      */
     closeWidget: function () {
+      const { dispatch } = this.store;
       const pubsub = this.getPubSub();
       pubsub.publish(pubsub.NAVIGATE, "results-page");
+      dispatch(actions.appReset());
     },
 
     /**

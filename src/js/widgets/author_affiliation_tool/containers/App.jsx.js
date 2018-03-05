@@ -159,7 +159,7 @@ define([
                           value={year}
                           onChange={val => this.onYearChange(val.target.value)}
                         >
-                          {makeOptions([1, 2, 3, 4, 5, 10, 'All'], currentYear)}
+                          {makeOptions([1, 2, 3, 4, 5, 10, 'All'], 0)}
                         </select>
                       </div>
                     </div>

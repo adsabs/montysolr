@@ -68,6 +68,9 @@ define([
       case ACTIONS.setLoading:
         return { ...state, loading: action.value };
 
+      case ACTIONS.appReset:
+        return initialState;
+
       // return the current state
       default: return state;
     }
