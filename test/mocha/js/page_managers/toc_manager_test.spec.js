@@ -200,9 +200,7 @@ define([
 
           var view = pageManager.show();
 
-          expect(pageManager.widgets.tocWidget.collection.get("ShowPaperExport__bibtex").get("category")).to.eql("export")
-          expect(pageManager.widgets.tocWidget.collection.get("ShowPaperExport__aastex").get("category")).to.eql("export")
-          expect(pageManager.widgets.tocWidget.collection.get("ShowPaperExport__endnote").get("category")).to.eql("export")
+          expect(pageManager.widgets.tocWidget.collection.get("ShowPaperExport__bibtex").get("category")).to.eql("export");
 
           var spy = sinon.spy();
           var pubsub = app.getService('PubSub').getHardenedInstance();
@@ -211,21 +209,20 @@ define([
 
           pageManager.widgets.tocWidget.resetActiveStates();
 
-          view.$("a[data-widget-id=ShowPaperExport__aastex]").click();
+          view.$("a[data-widget-id=ShowPaperExport__bibtex]").click();
 
           expect(spy.args[0][0]).to.eql("ShowPaperExport");
           expect(spy.args[0][1]["idAttribute"]).to.eql("ShowPaperExport");
-          expect(spy.args[0][1]["href"]).to.eql("/abs//export/aastex");
+          expect(spy.args[0][1]["href"]).to.eql("/abs//export/bibtex");
 
 
-      pageManager.widgets.ShowPaperExport.setSubView = sinon.spy();
+          pageManager.widgets.ShowPaperExport.setSubView = sinon.spy();
 
           //should both set the toc nav collection properly, and tell the export widget which view to show
-          pageManager.setActive("ShowPaperExport", "aastex");
+          pageManager.setActive("ShowPaperExport", "bibtex");
 
-          expect(pageManager.widgets.ShowPaperExport.setSubView.calledWith("aastex")).to.be.true;
-          expect(pageManager.widgets.tocWidget.collection.get("ShowPaperExport__bibtex").get("isSelected")).to.be.false;
-          expect(pageManager.widgets.tocWidget.collection.get("ShowPaperExport__aastex").get("isSelected")).to.be.true;
+          expect(pageManager.widgets.ShowPaperExport.setSubView.calledWith("bibtex")).to.eql(true);
+          expect(pageManager.widgets.tocWidget.collection.get("ShowPaperExport__bibtex").get("isSelected")).to.eql(true);
 
 
         });
