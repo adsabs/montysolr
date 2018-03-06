@@ -228,30 +228,30 @@ define([
     var work = {};
     var worktype = function(adsType) {
       var oType = {
-        article: 'JOURNAL-ARTICLE',
-        inproceedings: 'CONFERENCE-PAPER',
-        abstract: 'CONFERENCE-ABSTRACT',
-        eprint: 'WORKING-PAPER',
+        article: 'JOURNAL_ARTICLE',
+        inproceedings: 'CONFERENCE_PAPER',
+        abstract: 'CONFERENCE_ABSTRACT',
+        eprint: 'WORKING_PAPER',
         phdthesis: 'DISSERTATION',
-        techreport: 'RESEARCH-TECHNIQUE',
-        inbook: 'BOOK-CHAPTER',
-        circular: 'RESEARCH-TOOL',
+        techreport: 'RESEARCH_TECHNIQUE',
+        inbook: 'BOOK_CHAPTER',
+        circular: 'RESEARCH_TOOL',
         misc: 'OTHER',
         book: 'BOOK',
         proceedings: 'BOOK',
-        bookreview: 'BOOK-REVIEW',
-        erratum: 'JOURNAL-ARTICLE',
+        bookreview: 'BOOK_REVIEW',
+        erratum: 'JOURNAL_ARTICLE',
         proposal: 'OTHER',
-        newsletter: 'NEWSLETTER-ARTICLE',
-        catalog: 'DATA-SET',
-        intechreport: 'RESEARCH-TECHNIQUE',
+        newsletter: 'NEWSLETTER_ARTICLE',
+        catalog: 'DATA_SET',
+        intechreport: 'RESEARCH_TECHNIQUE',
         mastersthesis: 'DISSERTATION',
         obituary: 'OTHER',
         pressrelease: 'OTHER',
-        software: 'RESEARCH-TECHNIQUE',
-        talk: 'LECTURE-SPEECH'
+        software: 'RESEARCH_TECHNIQUE',
+        talk: 'LECTURE_SPEECH'
       };
-      return oType[adsType] || 'JOURNAL-ARTICLE';
+      return oType[adsType] || 'JOURNAL_ARTICLE';
     };
     try {
 
