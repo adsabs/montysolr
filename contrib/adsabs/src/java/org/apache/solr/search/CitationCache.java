@@ -6,8 +6,8 @@ import java.util.Iterator;
  * Main API to deal with citation graph. Implementations are free to use lucene's
  * inverted index, docvalues or other ways of getting data.
  *
- * @param <K>
- * @param <V>
+ * @param <K> - typically a string, representing a bibcode
+ * @param <V> - typically a list of ints, representing lucene docids
  */
 public interface CitationCache<K,V> extends SolrCache<K, V> {
   
@@ -15,7 +15,7 @@ public interface CitationCache<K,V> extends SolrCache<K, V> {
    * Retrieve list of documents that *cite* our
    * lucene docid
    * 
-   * @param docid
+   * @param docid - lucene docid
    * @return list of docids
    */
   public int[] getCitations(int docid);
@@ -24,7 +24,7 @@ public interface CitationCache<K,V> extends SolrCache<K, V> {
    * Retrieve list of documents that *cite* our
    * value (e.g. bibcode)
    * 
-   * @param key
+   * @param key - value (i.e. bibcode)
    * @return list of docids
    */
   public int[] getCitations(K key);
@@ -33,7 +33,7 @@ public interface CitationCache<K,V> extends SolrCache<K, V> {
    * Retrieve list of documents that are cited by our
    * lucene docid
    * 
-   * @param docid
+   * @param docid - lucene docid
    * @return list of docids
    */
   public int[] getReferences(int docid);
@@ -42,7 +42,7 @@ public interface CitationCache<K,V> extends SolrCache<K, V> {
    * Retrieve list of documents that are cited by our
    * value (e.g. bibcode)
    * 
-   * @param key
+   * @param key - value (i.e. bibcode)
    * @return list of docids
    */
   public int[] getReferences(K key);

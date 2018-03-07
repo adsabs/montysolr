@@ -154,11 +154,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				 *
 				 */
 				 ", \"bibstem\": [\"JNuM\", \"JNuM..455\"]" +
-				 ", \"body\": \"Some fulltext hashimoto\"" +
+				 ", \"body\": \"Some fulltext hashimoto added\"" +
 				 ", \"caption\": [\"caption1 captionFoo\", \"caption2\"]" +
 				 ", \"citation\": [\"2014JNuM..455...10C\", \"2014JNuM..455...10D\"]" +
 				 ", \"cite_read_boost\": 0.52" +
 				 ", \"citation_count\": 10" +
+				 ", \"citation_count_norm\": 0.2" +
 				 ", \"classic_factor\": 5002" +
 				 ", \"comment\": [\"comment1 commentFoo\", \"comment2\"]" +
 				 ", \"database\": [\"ASTRONOMY\", \"PHYSICS\"]" +
@@ -516,12 +517,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "pubdate:2013-08-05"),
         "//*[@numFound='1']"
     );
-		setDebug(true);
 		assertQ(req("q", "entdate:2017-09-19"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
-		setDebug(false);
 		assertQ(req("q", "entdate:2017-09"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
@@ -859,6 +858,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
+		assertQ(req("q", "body:\"fulltext hashimoto\""),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']"
+		);
+		assertQ(req("q", "body:(fulltext NEAR2 added)"),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']"
+		);
 
 
 		/*
@@ -1032,11 +1039,24 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "citation_count:[0 TO 10]"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
-    );
+				);
 		assertQ(req("q", "citation_count:[0 TO *]"),
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
-    );
+				);
+		
+		
+		/*
+		 * citation_count_norm
+		 */
+		assertQ(req("q", "citation_count_norm:[0 TO 1]"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+				);
+		assertQ(req("q", "citation_count_norm:0.2"),
+        "//doc/int[@name='recid'][.='100']",
+        "//*[@numFound='1']"
+				);
 
 		
 		/*

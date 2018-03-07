@@ -1126,16 +1126,14 @@
 
 
 		<field name="title" type="ads_text" indexed="true" stored="true"
-	      multiValued="true" termVectors="true" termOffsets="true"
-	      termPositions="true"/>
+	      multiValued="true"/>
 	    <field name="title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 		<field name="alternate_title" type="ads_text" indexed="true" stored="true"
-		  multiValued="true" termVectors="true" />
+		  multiValued="true" />
 	    <field name="alternate_title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
-		<field name="abstract" type="ads_text" indexed="true" stored="true"
-			termVectors="true" termOffsets="true" termPositions="true" />
+		<field name="abstract" type="ads_text" indexed="true" stored="true"/>
         <field name="abstract_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 
@@ -1391,8 +1389,7 @@
 		<field name="full" type="ads_text" indexed="false" stored="false"/>
 		<field name="full_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
-		<field name="body" type="ads_text" indexed="true" stored="true"
-			termVectors="true" termOffsets="true" termPositions="true" />
+		<field name="body" type="ads_text" indexed="true" stored="true"/>
 		<field name="body_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
         
         <field name="caption" type="ads_text" indexed="true" stored="true" 
@@ -1479,6 +1476,15 @@
     * citation_count
 
       The number of citations associated with this record
+      
+    * citation_count_norm
+
+      Normalized citation count per author (excluding editors, reviewers etc),
+      computed as:
+       
+        citation_count_norm = (citation_count / max(author_count, 1))
+      
+      @since 63.1.0.14
 
     * read_count
 
@@ -1488,6 +1494,9 @@
 
 		<field name="citation_count" type="int" indexed="true" stored="true"
 		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
+		  
+		<field name="citation_count_norm" type="tfloat" indexed="true" stored="true"
+          omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
 
 		<field name="read_count" type="int" indexed="true" stored="true"
 		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>

@@ -389,7 +389,7 @@ public class CitationLRUCacheDocValues<K,V> extends SolrCacheBase implements Cit
     
     
     List<String> fields = getFields(searcher, this.identifierFields);
-    CitationLRUCache<K,V> other = (CitationLRUCache<K,V>)old;
+    CitationLRUCacheDocValues<K,V> other = (CitationLRUCacheDocValues<K,V>)old;
 
     // collect ids of documents that need to be reloaded/regenerated during this
     // warmup run
@@ -877,7 +877,6 @@ public class CitationLRUCacheDocValues<K,V> extends SolrCacheBase implements Cit
   public class RelationshipLinkedHashMap<K,V> extends LinkedHashMap<K,V> {
     public List<String> referenceFields;
     public List<String> citationFields;
-    private Bit
     private static final long serialVersionUID = -356203002886265188L;
 		int slimit;
 		List<ArrayIntList> references;
