@@ -877,6 +877,7 @@ public class CitationLRUCacheDocValues<K,V> extends SolrCacheBase implements Cit
   public class RelationshipLinkedHashMap<K,V> extends LinkedHashMap<K,V> {
     public List<String> referenceFields;
     public List<String> citationFields;
+    private Bit
     private static final long serialVersionUID = -356203002886265188L;
 		int slimit;
 		List<ArrayIntList> references;
