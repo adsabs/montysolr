@@ -60,6 +60,7 @@
             waitSeconds: 30
         };
 
+        // Progress Bar
         (function () {
           var progressBar = document.getElementById('app_loading_progress');
           var message = document.getElementById('app_loading_message');
@@ -78,6 +79,7 @@
           window.__setAppLoadingProgress(5, 'Downloading Assets');
           window.__PAGE_LOAD_TIMESTAMP = new Date();
 
+          // Show a reload button if the page is taking too long
           setTimeout(function check () {
             if (progressValue !== 100) {
               var msg = 'Loading the application is taking a long time... ';

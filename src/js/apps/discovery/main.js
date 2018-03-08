@@ -20,13 +20,9 @@ define(['config', 'module'], function(config, module) {
       'js/components/application',
       'js/mixins/discovery_bootstrap',
       'js/mixins/api_access',
+      'analytics',
       'es5-shim'
-    ],
-    function(Router,
-      Application,
-      DiscoveryBootstrap,
-      ApiAccess
-    ) {
+    ], function(Router, Application, DiscoveryBootstrap, ApiAccess, analytics) {
 
       var updateProgress = (typeof window.__setAppLoadingProgress === 'function') ?
         window.__setAppLoadingProgress : function () {};
@@ -53,7 +49,6 @@ define(['config', 'module'], function(config, module) {
 
         var pubsub = app.getService('PubSub');
         pubsub.publish(pubsub.getCurrentPubSubKey(), pubsub.APP_LOADED);
-
 
         // set some important urls, parameters before doing anything
         app.configure();
@@ -90,6 +85,21 @@ define(['config', 'module'], function(config, module) {
             window.bbb = app;
           }
 
+          // app is loaded, send timing event
+
+          if (__PAGE_LOAD_TIMESTAMP) {
+            var time = new Date() - __PAGE_LOAD_TIMESTAMP;
+            analytics('send', {
+              hitType: 'timing',
+              timingCategory: 'Application',
+              timingVar: 'Loaded',
+              timingValue: time
+            });
+            if (debug) {
+              console.log('Application Started: ' + time + 'ms');
+            }
+
+          }
         }).fail(function () {
           app.redirect('500.html');
         });
@@ -104,8 +114,4 @@ define(['config', 'module'], function(config, module) {
       });
 
     });
-
-
-
-
 });
