@@ -960,7 +960,7 @@ public class CitationLRUCacheDocValues<K,V> extends SolrCacheBase implements Cit
     		addReference(sourceDocid, (Integer) this.get(value));
     	}
     	else {
-    	  log.warn("Would like to add reference " + value + " but cannot map it to the lucene id");
+    	  log.debug("Would like to add reference " + value + " but cannot map it to the lucene id");
     	}
     }
     public void addReference(int sourceDocid, Integer targetDocid) {
@@ -973,7 +973,7 @@ public class CitationLRUCacheDocValues<K,V> extends SolrCacheBase implements Cit
     		addCitation(sourceDocid, (Integer) this.get(value));
     	}
     	else {
-    		log.warn("Would like to add citation " + value + " but cannot map it to the lucene id");
+    		log.debug("Would like to add citation " + value + " but cannot map it to the lucene id");
     	}
     }
     
