@@ -35,6 +35,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	private float adsPart;
 	private CacheWrapper cache;
 	private LuceneCacheWrapper<NumericDocValues> boostCache;
+  private float highestClassicFactor;
 
 	public SecondOrderCollectorAdsClassicScoringFormula(SolrCacheWrapper cache, LuceneCacheWrapper<NumericDocValues> boostCache, float ratio) {
 		this.cache = cache;
@@ -67,6 +68,10 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 			
 			if (s > highestLuceneScore)
 				highestLuceneScore = s;
+			
+			float cf = getClassicBoostFactor(doc);
+			if (cf > highestClassicFactor)
+			  highestClassicFactor = cf;
 				
 			
 			hits.add(new CollectorDoc(doc+docBase, s, -1, scorer.freq()));
@@ -91,7 +96,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 		try {
 			if (!organized) {
 				for (CollectorDoc hit: hits) {
-					hit.score = (this.lucenePart * hit.score / highestLuceneScore) + (this.adsPart * getClassicBoostFactor(hit.doc));
+					hit.score = (this.lucenePart * hit.score / highestLuceneScore) + (this.adsPart * getClassicBoostFactor(hit.doc) / highestClassicFactor);
 				}
 			}
 		}
