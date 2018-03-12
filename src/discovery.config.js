@@ -281,6 +281,7 @@ require.config({
         exports: "MathJax",
         init: function () {
           MathJax.Hub.Config({
+            messageStyle: 'none',
             HTML: ["input/TeX","output/HTML-CSS"],
             TeX: { extensions: ["AMSmath.js","AMSsymbols.js"],
               equationNumbers: { autoNumber: "AMS" } },
