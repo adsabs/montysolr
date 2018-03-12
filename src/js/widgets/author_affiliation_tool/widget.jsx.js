@@ -84,6 +84,9 @@ define([
     renderWidgetForCurrentQuery: function ({ currentQuery }) {
       const pubsub = this.getPubSub();
 
+      // reset on load
+      this.store.dispatch(actions.appReset());
+
       // do nothing if we don't get a query
       if (currentQuery) {
         const q = currentQuery.clone();
@@ -123,6 +126,9 @@ define([
      * @returns {*}
      */
     renderWidgetForListOfBibcodes: function (ids) {
+
+      // reset on load
+      this.store.dispatch(actions.appReset());
       return this.fetchAffiliationData(ids);
     },
 
@@ -220,10 +226,8 @@ define([
      * Close the widget
      */
     closeWidget: function () {
-      const { dispatch } = this.store;
       const pubsub = this.getPubSub();
       pubsub.publish(pubsub.NAVIGATE, "results-page");
-      dispatch(actions.appReset());
     },
 
     /**
