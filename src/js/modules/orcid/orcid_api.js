@@ -543,7 +543,11 @@ define([
             var oldWork = cacheEntry.work;
 
             // check to see if the work is an error message, { error: {...} }
-            if (work.error) {
+            if (!work) {
+
+              // something weird going on with work, just reject
+              promise.reject();
+            } else if (work.error) {
 
               // check to see if it's just a conflict
               if (work.error['response-code'] === 409) {
