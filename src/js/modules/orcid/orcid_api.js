@@ -1011,7 +1011,7 @@ define([
           Then we can add some metadata like whether it was an ADS sourced
           record or not
            */
-          var updateRecord = function (k, v, out) {
+          var updateRecord = function (v, k, out) {
 
             // db is always 'identifier:xxx'
             var key = ('identifier:' + v).toLowerCase();
@@ -1038,7 +1038,7 @@ define([
             if (_.isArray(value)) {
               _.each(value, updateRecord);
             } else {
-              updateRecord(key, value, out);
+              updateRecord(value, key, out);
             }
           });
 
