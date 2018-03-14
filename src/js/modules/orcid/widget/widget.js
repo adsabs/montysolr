@@ -207,6 +207,9 @@ define([
       var start = 0;
       var docs = PaginationMixin.addPaginationToDocs(docs, start);
       _.each(docs, function (d,i) {
+
+        // let each doc know if it's on the orcid widget page
+        d.isOrcidWidget = true;
         docs[i] = PapersUtilsMixin.prepareDocForViewing(d);
       });
       return docs;
