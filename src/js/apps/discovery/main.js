@@ -20,17 +20,17 @@ define(['config', 'module'], function(config, module) {
       'js/components/application',
       'js/mixins/discovery_bootstrap',
       'js/mixins/api_access',
+      'analytics',
       'es5-shim'
-    ],
-    function(Router,
-      Application,
-      DiscoveryBootstrap,
-      ApiAccess
-      ) {
+    ], function(Router, Application, DiscoveryBootstrap, ApiAccess, analytics) {
+
+      var updateProgress = (typeof window.__setAppLoadingProgress === 'function') ?
+        window.__setAppLoadingProgress : function () {};
+
       Application.prototype.shim();
 
       // at the beginning, we don't know anything about ourselves...
-      var debug = window.location.href.indexOf('debug=true') > -1 ? true : false;
+      var debug = window.location.href.indexOf('debug=true') > -1;
 
       // app object will load everything
       var app = new (Application.extend(DiscoveryBootstrap))({'debug': debug, timeout: 30000});
@@ -38,8 +38,11 @@ define(['config', 'module'], function(config, module) {
       // load the objects/widgets/modules (using discovery.config.js)
       var defer = app.loadModules(module.config());
 
+      updateProgress(20, 'Starting Application');
+
       // after they are loaded; we'll kick off the application
       defer.done(function() {
+        updateProgress(50, 'Modules Loaded');
 
         // this will activate all loaded modules
         app.activate();
@@ -50,7 +53,9 @@ define(['config', 'module'], function(config, module) {
         // set some important urls, parameters before doing anything
         app.configure();
 
+        updateProgress(95, 'Finishing Up...');
         app.bootstrap().done(function (data) {
+          updateProgress(100);
 
           app.onBootstrap(data);
           pubsub.publish(pubsub.getCurrentPubSubKey(), pubsub.APP_BOOTSTRAPPED);
@@ -80,6 +85,21 @@ define(['config', 'module'], function(config, module) {
             window.bbb = app;
           }
 
+          // app is loaded, send timing event
+
+          if (__PAGE_LOAD_TIMESTAMP) {
+            var time = new Date() - __PAGE_LOAD_TIMESTAMP;
+            analytics('send', {
+              hitType: 'timing',
+              timingCategory: 'Application',
+              timingVar: 'Loaded',
+              timingValue: time
+            });
+            if (debug) {
+              console.log('Application Started: ' + time + 'ms');
+            }
+
+          }
         }).fail(function () {
           app.redirect('500.html');
         });
@@ -94,8 +114,4 @@ define(['config', 'module'], function(config, module) {
       });
 
     });
-
-
-
-
 });
