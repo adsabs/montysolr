@@ -30,10 +30,5 @@ module.exports = {
   'coveralls-report': {
     cmd: 'cat test/coverage/reports/lcov/lcov.info | ./node_modules/coveralls/bin/coveralls.js'
   },
-  'kubernetes-build': {
-    cmd: 'git checkout kubernetes && git rebase origin master'
-  },
-  'return-to-working-branch': {
-    cmd: 'git checkout -'
-  }
+  'server': 'node server'
 };

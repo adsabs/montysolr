@@ -6,19 +6,17 @@
  */
 module.exports = {
   options: {
-    // some defaults
-    background: true
+    output: 'Listening on port.*',
+    script: './server.js'
   },
-  dev: {
+  once: {
     options: {
-      port: '<%= local.port_development || 8000 %>',
-      script: 'server.js'
+      background: true
     }
   },
-  release: {
+  server: {
     options: {
-      port: '<%= local.port_production || 5000 %>',
-      script: 'server.js'
+      background: false
     }
   }
 };

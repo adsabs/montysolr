@@ -7,7 +7,7 @@
 module.exports = {
   install: {
     options: {
-      cleanTargetDir: true,
+      prune: true,
       targetDir: './src/libs'
     }
   }
