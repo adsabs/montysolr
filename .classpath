@@ -68,6 +68,7 @@
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/gunit-3.5.2.jar"/>
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/hamcrest-core-1.1.jar"/>
 	<classpathentry kind="lib" path="contrib/antlrqueryparser/lib/ST4-4.0.8.jar"/>
+	<classpathentry kind="lib" path="contrib/adsabs/lib/log4j-api-2.10.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/apache-solr-63"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-common-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-icu-6.3.0-SNAPSHOT.jar"/>
@@ -133,5 +134,6 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit4-ant-2.4.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/randomizedtesting-runner-2.4.0.jar"/>
 	<classpathentry kind="lib" path="lib/luke-with-deps.jar"/>
+	<classpathentry kind="lib" path="contrib/adsabs/lib/log4j-core-2.10.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
