@@ -7,7 +7,7 @@
 module.exports = function (grunt) {
 
   return {
-    libraries: {
+    libs: {
       files: [
         {
           cwd: 'node_modules/file-saver',
@@ -73,8 +73,9 @@ module.exports = function (grunt) {
         },
         {
           cwd: 'bower_components/bootstrap-sass/assets/stylesheets/',
-          src: ['*', '**'],
-          expand: true
+          src: '**',
+          expand: true,
+          dest: 'src/libs/bootstrap-sass'
         },
         {
           src: ['bower_components/react/*.js'],

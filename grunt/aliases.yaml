@@ -3,120 +3,55 @@
 
 default: 'setup'
 
-## Project/Environment Setup
-
-setup:
-  description: 'Setup the development environment'
-  tasks:
-    - 'exec:npm_install'
-    - 'bower:setup'
-    - 'copy:discovery_vars'
-    - 'copy:libraries'
-    - 'exec:convert_enzyme'
-    - 'sass'
-    - 'curl:google-analytics'
-
-'bower:setup':
-  description: 'Clean up, run bower and amd-ify the js files'
-  tasks:
-    - 'clean:bower'
-    - 'bower'
-    - 'exec:convert_dsjslib'
-
-## Server Tasks
-
-server:
-  description: 'Start small web server, watch for development changes'
-  tasks:
-    - 'env:dev'
-    - 'sass'
-    - 'autoprefixer'
-    - 'express:dev'
-    - 'concurrent:serverTasks'
-
-'server:watch':
-  description: 'Start small web server, watch for development changes'
-  tasks:
-    - 'env:dev'
-    - 'sass'
-    - 'autoprefixer'
-    - 'express:dev'
-    - 'watch:server'
-
+# Local Server
+server: 'express:server'
 'server:release':
-  description: 'Start small web server, watch for development changes'
-  tasks:
-    - 'env:release'
-    - 'express:release'
-    - 'watch:release'
+  - 'env:release'
+  - 'express:server'
+server:once: 'express:once'
+'server:release:once':
+  - 'env:release'
+  - 'express:once'
 
-## Testing Tasks
+# 3rd Party Assets
+assets:
+  - 'clean:libs'
+  - 'concurrent:install'
+  - 'copy:libs'
+  - 'concurrent:convert'
 
-test: 'test:once'
+# CSS Processing
+css:
+  - 'sass'
+  - 'autoprefixer'
 
-'test:web':
-  description: 'Run tests using the local web server, re-run on changes'
-  tasks:
-    - 'env:dev'
-    - 'watch:mocha-runner:all'
-
-'test:once':
-  description: 'Run tests once, without watching for changes'
-  tasks:
-    - 'env:dev'
-    - 'express:dev'
-    - 'mocha-runner:all'
-
-'test:sandbox':
-  description: 'Test the sandbox, re-run on changes'
-  tasks:
-    - 'env:dev'
-    - 'watch:mocha-runner:all'
+# Testing
+test:
+  - 'server:once'
+  - 'mocha-runner:all'
 
 'test:release':
-  description: 'Run tests in a release environment, on local web server'
-  tasks:
-    - 'env:release'
-    - 'express:dev'
-    - 'mocha-runner:all'
-
-'test:server':
-  description: 'Runs the test server only'
-  tasks:
-    - 'env:dev'
-    - 'express:dev'
-    - 'watch:server'
-
-'test:local':
-  description: 'Test locally, watch for changes'
-  tasks:
-    - 'env:dev'
-    - 'watch:mocha-runner:all'
+  - 'server:release:once'
+  - 'mocha-runner:all'
 
 coverage:
-  description: 'Generate the test coverage report'
-  tasks:
-    - 'clean:coverage'
-    - 'exec:nyc-instrument'
-    - 'mocha-runner:coverage'
-    - 'coverage-report:coveralls'
-    - 'exec:coveralls-report'
+  - 'clean:coverage'
+  - 'exec:nyc-instrument'
+  - 'mocha-runner:coverage'
+  - 'coverage-report:coveralls'
+  - 'exec:coveralls-report'
 
-sauce:
-  description: 'Run the SauceLabs tests'
-  tasks:
-    - 'env:dev'
-    - 'sass'
-    - 'autoprefixer'
-    - 'exec:git_describe'
-    - 'express:dev'
-    - 'saucelabs-mocha'
+# Initial Setup
+setup:
+  - 'assets'
+  - 'copy:discovery_vars'
+  - 'sass'
 
-## Building/Releases
-
+# Release
 release:
   description: 'Build the assets and prepare for a release'
   tasks:
+    - 'assets'
     - 'clean:release'
     - 'copy:release'
     - 'compile-handlebars:index'
@@ -126,28 +61,7 @@ release:
     - 'requirejs:release_concatenated'
     - 'uglify:release'
     - 'requirejs:release_css'
-    - 'hash_require:js'
-    - 'hash_require:css'
+    - 'concurrent:hash_require'
     - 'copy:keep_original'
     - 'copy:bumblebee_app'
     - 'assemble'
-
-deploy:
-  tasks:
-    - 'deploy:master'
-    - 'exec:kubernetes-build'
-    - 'release'
-    - 'deploy:kubernetes'
-    - 'exec:return-to-working-branch'
-
-'deploy:master':
-  description: 'deploy master onto build repo'
-  tasks:
-    - 'clean:deploy'
-    - 'buildcontrol:master'
-
-'deploy:kubernetes':
-  description: 'deploy kubernetes onto build repo'
-  tasks:
-    - 'clean:deploy'
-    - 'buildcontrol:kubernetes'

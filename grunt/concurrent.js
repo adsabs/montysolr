@@ -5,8 +5,17 @@
  * @module grunt/concurrent
  */
 module.exports = {
-  serverTasks: [
-    'watch:server',
-    'watch:styles'
+  install: [
+    'bower:install',
+    'exec:npm_install',
+    'curl:google-analytics'
+  ],
+  convert: [
+    'exec:convert_enzyme',
+    'exec:convert_dsjslib'
+  ],
+  hash_require: [
+    'hash_require:js',
+    'hash_require:css'
   ]
 };

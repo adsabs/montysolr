@@ -25,10 +25,9 @@ module.exports = {
       '!dist/libs/requirejs/require.js',
     ]
   },
-  bower: {
+  libs: {
     src: [
-      './bower_components',
-      'test/reports'
+      'src/libs'
     ]
   },
   coverage: {
