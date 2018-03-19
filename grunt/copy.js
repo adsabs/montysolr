@@ -10,6 +10,15 @@ module.exports = function (grunt) {
     libraries: {
       files: [
         {
+          cwd: 'node_modules/file-saver',
+          src: 'FileSaver.min.js',
+          dest: 'src/libs/file-saver/',
+          expand: true,
+          rename: function (dest, src) {
+            return dest + src.replace('FileSaver.min', 'index');
+          }
+        },
+        {
           src: 'bower_components/lodash/dist/*',
           dest: 'src/libs/lodash/',
           expand: true,

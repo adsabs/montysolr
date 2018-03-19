@@ -191,7 +191,7 @@ require.config({
     'enzyme': 'libs/enzyme/enzyme',
     'es5-shim' : 'libs/es5-shim/es5-shim',
     'es6': 'libs/requirejs-babel-plugin/es6',
-    'filesaver' : 'libs/FileSaver/FileSaver',
+    'filesaver' : 'libs/file-saver/index',
     'google-analytics': "//www.google-analytics.com/analytics",
     'google-recaptcha' : '//www.google.com/recaptcha/api.js?&render=explicit&onload=onRecaptchaLoad',
     'hbs': 'libs/require-handlebars-plugin/hbs',
