@@ -460,25 +460,28 @@ define([
                     var idx = model.resultsIndex;
                     self.hiddenCollection.remove(model);
                     var models = self.hiddenCollection.models;
-                    for (var i = idx; i < models.length; i++) {
-                      var m = models[i];
+                    _.forEach(_.rest(models, idx), function (m) {
                       m.set('resultsIndex', m.get('resultsIndex') - 1);
                       m.set('indexToShow', m.get('indexToShow') - 1);
-                    }
+                    });
 
                     var showRange = self.model.get('showRange');
                     var range = _.range(showRange[0], showRange[1] + 1);
                     var visible = [];
                     _.forEach(range, function (i) {
-                      models[i].set('visible', true);
-                      models[i].resultsIndex = i;
-                      models[i].set('resultsIndex', i);
-                      models[i].set('indexToShow', i + 1);
-                      visible.push(models[i]);
+                      if (models[i] && models[i].set) {
+                        models[i].set('visible', true);
+                        models[i].resultsIndex = i;
+                        models[i].set('resultsIndex', i);
+                        models[i].set('indexToShow', i + 1);
+                        visible.push(models[i]);
+                      }
                     });
                     self.hiddenCollection.reset(models);
                     self.collection.reset(visible);
 
+                    // reset the total number of papers
+                    self.model.set('totalPapers', models.length);
                   } else {
                     // reset orcid actions
                     model.set('orcid', self._getOrcidInfo({}));
