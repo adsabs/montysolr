@@ -33,6 +33,47 @@ define([
       WidgetClass.prototype.activate = function (beehive) {
         this.setBeeHive(beehive);
         activate.apply(this, arguments);
+        var pubsub = beehive.hasService('PubSub') && beehive.getService('PubSub');
+        pubsub.subscribe(pubsub.CUSTOM_EVENT, _.bind(this.onCustomEvent));
+      };
+
+      WidgetClass.prototype.onCustomEvent = function (event, bibcodes) {
+
+        /**
+         * Find the models for each of the bibcodes
+         * Filter out ones that can't perform the action
+         * Trigger the action on each of the views
+         */
+        var orcidAction = _.bind(function (action, bibcodes) {
+          var models = _.filter(this.collection.models, function (m) {
+            return _.contains(bibcodes, m.get('bibcode'));
+          });
+
+          // go through each model and grab the view for triggering
+          _.forEach(models, _.bind(function (m) {
+
+            // only continue if the model has the action available
+            var actions = _.map(m.get('orcid').actions, 'action');
+
+            if (_.contains(actions, action)) {
+              var view = this.view.children.findByModel(m);
+
+              if (view) {
+                view.trigger('OrcidAction', {
+                  action: action,
+                  view: view,
+                  model: m
+                });
+              }
+            }
+          }, this));
+        }, this);
+
+        switch (event) {
+          case 'orcid-bulk-claim': orcidAction('orcid-add', bibcodes); break;
+          case 'orcid-bulk-update': orcidAction('orcid-update', bibcodes); break;
+          case 'orcid-bulk-delete': orcidAction('orcid-delete', bibcodes); break;
+        }
       };
 
       /**
@@ -451,45 +492,56 @@ define([
 
               model.set('orcid', {pending: true});
 
+              var deleteSuccess = function () {
+
+                // Remove entry from collection after delete
+                if (self.orcidWidget) {
+                  var idx = model.resultsIndex;
+                  self.hiddenCollection.remove(model);
+                  var models = self.hiddenCollection.models;
+                  _.forEach(_.rest(models, idx), function (m) {
+                    m.set('resultsIndex', m.get('resultsIndex') - 1);
+                    m.set('indexToShow', m.get('indexToShow') - 1);
+                  });
+
+                  var showRange = self.model.get('showRange');
+                  var range = _.range(showRange[0], showRange[1] + 1);
+                  var visible = [];
+                  _.forEach(range, function (i) {
+                    if (models[i] && models[i].set) {
+                      models[i].set('visible', true);
+                      models[i].resultsIndex = i;
+                      models[i].set('resultsIndex', i);
+                      models[i].set('indexToShow', i + 1);
+                      visible.push(models[i]);
+                    }
+                  });
+                  self.hiddenCollection.reset(models);
+                  self.collection.reset(visible);
+
+                  // reset the total number of papers
+                  self.model.set('totalPapers', models.length);
+                } else {
+                  // reset orcid actions
+                  model.set('orcid', self._getOrcidInfo({}));
+                }
+                self.trigger('orcidAction:' + action, model);
+              };
+
               var performDelete = function (work) {
                 orcidApi.deleteWork(work.getPutCode())
-                .done(function deleteSuccess() {
+                .done(deleteSuccess)
+                .fail(function deleteFail(xhr, error, state) {
 
-                  // Remove entry from collection after delete
-                  if (self.orcidWidget) {
-                    var idx = model.resultsIndex;
-                    self.hiddenCollection.remove(model);
-                    var models = self.hiddenCollection.models;
-                    _.forEach(_.rest(models, idx), function (m) {
-                      m.set('resultsIndex', m.get('resultsIndex') - 1);
-                      m.set('indexToShow', m.get('indexToShow') - 1);
-                    });
-
-                    var showRange = self.model.get('showRange');
-                    var range = _.range(showRange[0], showRange[1] + 1);
-                    var visible = [];
-                    _.forEach(range, function (i) {
-                      if (models[i] && models[i].set) {
-                        models[i].set('visible', true);
-                        models[i].resultsIndex = i;
-                        models[i].set('resultsIndex', i);
-                        models[i].set('indexToShow', i + 1);
-                        visible.push(models[i]);
-                      }
-                    });
-                    self.hiddenCollection.reset(models);
-                    self.collection.reset(visible);
-
-                    // reset the total number of papers
-                    self.model.set('totalPapers', models.length);
-                  } else {
-                    // reset orcid actions
-                    model.set('orcid', self._getOrcidInfo({}));
+                  /*
+                    record not found, treat like the delete worked
+                    Subsequent deletes on an already deleted entity can cause
+                    404s
+                   */
+                  if (state === 'NOT FOUND') {
+                    return deleteSuccess();
                   }
-                  self.trigger('orcidAction:' + action, model);
-                })
 
-                .fail(function deleteFail() {
                   var msg = 'Error deleting record, please try again';
                   console.error.apply(console, [msg].concat(arguments));
                   model.set('orcid', _.extend(oldOrcid, {

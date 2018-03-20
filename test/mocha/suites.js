@@ -63,7 +63,6 @@ define([
      '/widgets/api_request_widget.spec.js',
      '/widgets/api_response_widget.spec.js',
      '/widgets/base_widget.spec.js',
-     //
      '/widgets/breadcrumb_widget.spec.js',
      '/widgets/bubble_chart.spec.js',
      '/widgets/citation_graph_facet_widget.spec.js',
@@ -84,6 +83,7 @@ define([
      '/widgets/metrics_widget.spec.js',
      '/widgets/navbar_widget.spec.js',
      '/widgets/network_widget.spec.js',
+     '/widgets/orcid_selector_widget.spec.js',
      '/widgets/paper_network_widget.spec.js',
      '/widgets/preferences_widget.spec.js',
      '/widgets/query_info_widget.spec.js',

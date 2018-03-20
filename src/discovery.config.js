@@ -105,6 +105,7 @@ require.config({
         Metrics :  'js/widgets/metrics/widget',
         CitationHelper: 'js/widgets/citation_helper/widget',
         OrcidBigWidget: 'js/modules/orcid/widget/widget',
+        OrcidSelector: 'es6!js/widgets/orcid-selector/widget.jsx',
 
         AuthorFacet: 'js/wraps/author_facet',
         BibgroupFacet: 'js/wraps/bibgroup_facet',
@@ -195,6 +196,7 @@ require.config({
     'google-analytics': "//www.google-analytics.com/analytics",
     'google-recaptcha' : '//www.google.com/recaptcha/api.js?&render=explicit&onload=onRecaptchaLoad',
     'hbs': 'libs/require-handlebars-plugin/hbs',
+    'immutable': 'libs/immutable/index',
     'jquery' : '//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min',
     'jquery-querybuilder': 'libs/jQuery-QueryBuilder/query-builder',
     'jquery-ui' : '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min',
@@ -210,6 +212,7 @@ require.config({
     'react-prop-types': 'libs/react-prop-types/index',
     'react-redux' : 'libs/react-redux/index',
     'redux' : 'libs/redux/index',
+    'redux-immutable': 'libs/redux-immutable/index',
     'redux-thunk' : 'libs/redux-thunk/index',
     'select2' : 'libs/select2/select2',
     'sinon': '../bower_components/sinon/index',
@@ -296,6 +299,10 @@ require.config({
           MathJax.Hub.Startup.onload();
           return MathJax;
         }
+    },
+
+    'redux-immutable': {
+      deps: ['immutable']
     }
   },
 

@@ -83,11 +83,14 @@ define([
       initialize: function() {
         this.userData = {};
         this.addCache = [];
+        this.deleteCache = [];
         this.getUserProfileCache = [];
         this.authData = null;
         this.addWait = 3000;
+        this.deleteWait = 1500;
         this.profileWait = 500;
         this.maxAddChunkSize = 100;
+        this.maxDeleteChunkSize = 10;
         this.db = {};
         this.clearDBWait = 30000;
         this.dbUpdatePromise = null;
@@ -121,6 +124,7 @@ define([
         }
         this._addWork = _.debounce(this._addWork, this.addWait);
         this._getUserProfile = _.debounce(this._getUserProfile, this.profileWait);
+        this._deleteWork = _.debounce(this._deleteWork, this.deleteWait);
       },
 
       /**
@@ -161,6 +165,7 @@ define([
             + "&redirect_uri=" + encodeURIComponent(this.config.redirectUrlBase +
             (targetRoute || '/#/user/orcid'))
         });
+
         //make sure to redirect to the proper page after sign in
         this.getPubSub().publish(this.getPubSub().ORCID_ANNOUNCEMENT, "login");
       },
@@ -259,22 +264,24 @@ define([
         var api = this.getBeeHive().getService('Api');
         var promise = $.Deferred();
 
-        var r = api.request(
-          new ApiRequest({target: this.config.exchangeTokenUrl, query: new ApiQuery({code: oAuthCode})}),
-          {
-            url: this.config.exchangeTokenUrl,
-            done: function () {
-              promise.resolve.apply(promise, arguments);
-            },
-            headers: {
-              Accept: 'application/json',
-              Authorization: api.access_token
-            }
+        var opts = {
+          url: this.config.exchangeTokenUrl,
+          done: _.bind(promise.resolve, promise),
+          fail: _.bind(promise.reject, promise),
+          always: _.bind(promise.always, promise),
+          headers: {
+            Accept: 'application/json',
+            Authorization: api.access_token
           }
-        );
-        r.fail(function (jqXHR, textStatus, errorThrown) {
-          promise.reject.apply(promise, arguments);
-        });
+        };
+
+        api.request(
+          new ApiRequest({
+            target: this.config.exchangeTokenUrl,
+            query: new ApiQuery({
+              code: oAuthCode
+            })
+          }), opts);
         return promise.promise();
       },
 
@@ -341,12 +348,9 @@ define([
         }
         var $dd = $.Deferred();
         var prom = this.sendData(url, data, options || {});
-        prom.done(function () {
-          $dd.resolve.apply($dd, arguments);
-        });
-        prom.fail(function () {
-          $dd.reject.apply($dd, arguments);
-        });
+        prom.done(_.bind($dd.resolve, $dd));
+        prom.fail(_.bind($dd.reject, $dd));
+        prom.always(_.bind($dd.always, $dd));
         return $dd.promise();
       },
 
@@ -364,7 +368,7 @@ define([
         var request = this.createRequest(this.getUrl('profile'));
 
         // get everything so far in the cache
-        var cache = self.getUserProfileCache.slice(0);
+        var cache = self.getUserProfileCache.splice(0);
 
         request.done(function (profile) {
           _.forEach(cache, function (promise) {
@@ -408,11 +412,10 @@ define([
        */
       getWork: function (putCode) {
         var $dd = $.Deferred();
-        this.createRequest(this.getUrl('works', putCode)).done(function (work) {
-          $dd.resolve(new Work(work));
-        }).fail(function () {
-          $dd.reject.apply($dd, arguments);
-        });
+        this.createRequest(this.getUrl('works', putCode))
+          .done(function (work) {
+            $dd.resolve(new Work(work));
+          }).fail(_.bind($dd.reject, $dd));
         return $dd.promise();
       },
 
@@ -438,9 +441,7 @@ define([
         }
 
         var reqs = $.when.apply($, proms);
-        reqs.done(function () {
-          $dd.resolve(arguments);
-        });
+        reqs.done(_.bind($dd.resolve, $dd));
         reqs.fail(function () {
 
           // we are passed an array for EACH argument, so passing the whole thing
@@ -478,10 +479,84 @@ define([
        * @returns {jQuery.Promise} - promise for the request
        */
       deleteWork: function (putCode) {
-        var url = this.getUrl('works', putCode);
-        var prom = this.createRequest(url, { method: 'DELETE' });
-        prom.done(_.bind(this.setDirty, this));
-        return prom;
+        if (!_.isNumber(putCode)) {
+          throw new TypeError('putcode should be a number');
+        }
+        var $dd = $.Deferred();
+        this.deleteCache.push({
+
+          // create unique request id to ride along with request
+          id: _.uniqueId(),
+          putCode: putCode,
+          promise: $dd
+        });
+        this._deleteWork.call(this);
+        return $dd.promise();
+      },
+
+      /**
+       * Debounced method that takes chunks of deletes and fires them off
+       * in batches, this way we don't send 100 at once.
+       */
+      _deleteWork: function () {
+        var self = this;
+        var cachedDeletes = this.deleteCache.slice(0);
+        var chunk;
+        var promises = [];
+        var chunks = [];
+
+        // chunk up the deletes
+        for (var i = 0; i < cachedDeletes.length; i += this.maxDeleteChunkSize) {
+          chunk = cachedDeletes.slice(i, i + this.maxDeleteChunkSize);
+          chunks.push(chunk);
+        }
+
+        // take each chunk, loop through them creating a request for each
+        _.forEach(chunks, function (c, i) {
+          _.forEach(c, function (del) {
+
+            // add the promise object to array for checking later
+            promises.push(del.promise.promise());
+
+            // staggered delays, for example:
+            // 1st request -> wait 3 seconds
+            // 2nd request -> wait 6 seconds
+            // 3rd request -> wait 9 seconds
+            // ...
+            _.delay(function () {
+
+              // create the request for each delete
+              var request = self.createRequest(self.getUrl('works', del.putCode), {
+                beforeSend: function (xhr) {
+                  xhr._id = del.id
+                },
+                method: 'DELETE'
+              });
+
+              // apply the promise handlers
+              request
+                .done(_.bind(del.promise.resolve, del.promise))
+                .fail(_.bind(del.promise.reject, del.promise))
+                .always(_.bind(del.promise.always, del.promise));
+
+              // remove the entry from the cache
+              var idx = self.deleteCache.indexOf(del);
+              self.deleteCache.splice(idx, idx + 1);
+            }, self.deleteWait * i);
+          });
+        });
+
+        // resolve remaining promises
+        var finalizeCacheEntries = function () {
+
+          self.deleteCache = _.reduce(self.deleteCache, function (res, entry) {
+            entry.promise.state() === 'pending' ?
+              entry.promise.reject() : res.push(entry);
+            return res;
+          }, []);
+        };
+
+        $.when.apply($, promises).always(finalizeCacheEntries);
       },
 
       /**
@@ -560,26 +635,20 @@ define([
               // no errors, resolve with the new work, { work: {...} }
               promise.resolve(new Work(work.work));
             }
-            _.remove(self.addCache, cacheEntry);
+
+            // remove from the cache
+            var idx = self.addCache.indexOf(cacheEntry);
+            self.addCache.splice(idx, idx + 1);
           });
         });
 
         // on fail, reject the promises
-        prom.fail(function (responseIds) {
-          if (!_.isArray(responseIds) || _.isEmpty(responseIds)) {
-            console.error('no cache values found on failure');
-          }
-          var args = arguments;
-          var indexedIds = _.indexBy(self.addCache, 'id');
-          _.forEach(responseIds, function (id) {
-            var entry = indexedIds[id];
-            if (entry) {
-              _.remove(self.addCache, entry);
-              entry.promise.reject.apply(entry.promise, args);
-            } else {
-              console.error('no cache entry', self);
-            }
-          });
+        prom.fail(function () {
+          self.addCache = _.reduce(self.addCache, function (res, entry) {
+            entry.promise.state() === 'pending' ?
+              entry.promise.reject() : res.push(entry);
+            return res;
+          }, []);
         });
       },
 
@@ -634,7 +703,7 @@ define([
 
             // build response object, indexed by ids
             _.forEach(ids, function (id, idx) {
-              res[id] = works[idx].work;
+              res[id] = works[idx];
             });
 
             return res;
@@ -670,9 +739,9 @@ define([
           contentType: 'application/json',
           cache: !!this.dbUpdatePromise, // true = do not generate _ parameters (let browser cache responses)
           timeout: this.orcidApiTimeout,
-          done: function () {
-            result.resolve.apply(result, arguments);
-          }
+          done: _.bind(result.resolve, result),
+          fail: _.bind(result.reject, result),
+          always: _.bind(result.always, result)
         };
 
         if (data) {
@@ -688,8 +757,7 @@ define([
             "text json": function(input) {input = input || '{}'; return $.parseJSON(input)},
             "text xml": $.parseXML
           }
-        }
-        else {
+        } else {
           options.data = null; // to prevent api.request() from adding {} to the url params
         }
 
@@ -697,21 +765,26 @@ define([
 
         var api = this.getBeeHive().getService('Api');
 
-        if (!options.headers)
+        if (!options.headers) {
           options.headers = {};
+        }
 
         options.headers.Authorization = api.access_token;
-        if (!options.headers["Orcid-Authorization"] && this.authData)
+        if (!options.headers["Orcid-Authorization"] && this.authData) {
           options.headers["Orcid-Authorization"] = "Bearer " + this.authData.access_token;
-        if (!options.headers["Content-Type"])
+        }
+        if (!options.headers["Content-Type"]) {
           options.headers["Content-Type"] = "application/json";
-        if (!options.headers["Accept"])
+        }
+        if (!options.headers["Accept"]) {
           options.headers["Accept"] = "application/json";
+        }
 
-        api.request(new ApiRequest({target: url, query: new ApiQuery(), options: options}))
-          .fail(function() {
-            result.reject.apply(result, arguments);
-          });
+        api.request(new ApiRequest({
+          target: url,
+          query: new ApiQuery(),
+          options: options
+        }));
         return result.promise();
       },
 
@@ -1045,16 +1118,12 @@ define([
           return out;
         };
 
-        var fail = function () {
-          dd.reject.apply(dd, arguments);
-        };
-
         if (this.needsUpdate()) {
           this.updateDatabase()
             .done(function () {
               dd.resolve(getRecordMetaData(adsWork));
             })
-            .fail(fail);
+            .fail(_.bind(dd.reject, dd));
         } else {
           dd.resolve(getRecordMetaData(adsWork));
         }

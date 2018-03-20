@@ -10,7 +10,7 @@ module.exports = function (grunt) {
     libs: {
       files: [
         {
-          cwd: 'node_modules/file-saver',
+          cwd: 'node_modules/file-saver/dist',
           src: 'FileSaver.min.js',
           dest: 'src/libs/file-saver/',
           expand: true,
@@ -126,6 +126,15 @@ module.exports = function (grunt) {
           expand: true,
           rename: function (dest, src) {
             return dest + src.replace('prop-types', 'index');
+          }
+        },
+        {
+          cwd: 'node_modules/immutable/dist',
+          src: 'immutable.min.js',
+          dest: 'src/libs/immutable/',
+          expand: true,
+          rename: function (dest, src) {
+            return dest + src.replace('immutable.min', 'index');
           }
         }
       ]
