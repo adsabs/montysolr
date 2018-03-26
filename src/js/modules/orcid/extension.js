@@ -171,6 +171,7 @@ define([
                 self.trigger('orcid-update-finished');
               }
             });
+
             recInfo.fail(function (data) {
               counter -= 1;
 
@@ -450,7 +451,7 @@ define([
 
                   model.set({
                     orcid: self._getOrcidInfo(recInfo),
-                    'source_name': work.getSourceName()
+                    'source_name': work.sources.join('; ')
                   });
 
                   self.trigger('orcidAction:' + action, model);

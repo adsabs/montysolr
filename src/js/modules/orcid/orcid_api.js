@@ -372,7 +372,7 @@ define([
 
         request.done(function (profile) {
           _.forEach(cache, function (promise) {
-            promise.resolve(new Profile(profile));
+            promise.resolve(self._reconcileProfileWorks(profile));
           });
         });
 
@@ -382,6 +382,85 @@ define([
             promise.reject.apply(promise, args);
           });
         });
+      },
+
+      /**
+       * Reconcile the works contained in the incoming profile.
+       * Since it's possible for an ORCiD record to contain multiple sources,
+       * we have to figure out the best one to pick.
+       *
+       * The user can selected a "preferred" source, but since we can only match
+       * on items that have enough information (bibcode, doi, etc), we have to search
+       * through them all to find the best one.
+       *
+       * @param {object} rawProfile - the incoming profile
+       * @returns {Profile} - the new profile (with reconciled works)
+       */
+      _reconcileProfileWorks: function (rawProfile) {
+        /*
+          1. Source is ADS
+          2. Has Bibcode
+          3. Has DOI
+          4. Other
+        */
+        var self = this;
+        var profile = new Profile(rawProfile);
+        var works = _.map(profile.getWorksDeep(), function (work, idx) {
+          var w;
+
+          // only operate on arrays > 1
+          if (work.length > 1) {
+            var workWithBibcode, workWithDoi;
+            _.forEach(work, function (item) {
+
+              // check if the source is ADS
+              var isADS = self.isSourcedByADS(item);
+
+              // grab an array of external ids ['bibcode', 'doi', '...']
+              var exIds = item.getExternalIdType();
+              var hasBibcode = exIds.indexOf('bibcode') > -1;
+              var hasDoi = exIds.indexOf('doi') > -1;
+
+              // if it's sourced by ADS, use that one and break out of loop
+              if (isADS) {
+                w = item;
+                return false;
+              }
+
+              // grab the first one that has a bibcode
+              if (hasBibcode && !workWithBibcode) {
+                workWithBibcode = item;
+              }
+
+              // grab the first one that has a doi
+              if (hasDoi && !workWithDoi) {
+                workWithDoi = item;
+              }
+            });
+
+            // w will be defined if we found an ADS-sourced work
+            // otherwise, set the work accordingly below
+            if (!w && workWithBibcode) {
+              w = workWithBibcode;
+            } else if (!w && workWithDoi) {
+              w = workWithDoi;
+            } else if (!w) {
+              w = work[0];
+            }
+
+            // set the work's list of sources based on the full list from orcid
+            w.sources = _.map(work, function (_w) {
+              return _w.getSourceName();
+            });
+          }
+
+          // take the first work if we haven't found an array to process
+          return w ? w : work[0];
+        });
+
+        // set the new works
+        profile.setWorks(works);
+        return profile;
       },
 
       /**
