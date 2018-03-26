@@ -19,7 +19,7 @@ define([
    * @constructor
    */
   var Profile = function Profile(profile) {
-    this._root = profile;
+    this._root = profile || {};
     this.works = [];
 
     /**
