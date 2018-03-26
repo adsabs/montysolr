@@ -722,12 +722,27 @@ define([
         });
 
         // on fail, reject the promises
-        prom.fail(function () {
-          self.addCache = _.reduce(self.addCache, function (res, entry) {
-            entry.promise.state() === 'pending' ?
-              entry.promise.reject() : res.push(entry);
-            return res;
-          }, []);
+        // this should receive a list of ids which we can finish up with
+        prom.fail(function (ids) {
+          var args = arguments;
+          _.forEach(ids, function (id) {
+
+            // find the cache entry
+            var idx = _.findIndex(self.addCache, { id: id });
+            if (idx >= 0) {
+
+              // grab reference to promise
+              var promise = self.addCache[idx].promise;
+
+              // remove entry from cache
+              self.addCache.splice(idx, idx + 1);
+
+              // if it is still pending, reject it now
+              if (promise.state() === 'pending') {
+                promise.reject.apply(promise, args);
+              }
+            }
+          });
         });
       },
 
@@ -789,9 +804,9 @@ define([
           }, {});
 
           $dd.resolve(obj);
-        }, function () {
+        }, function (xhr) {
           self.setDirty();
-          $dd.reject.apply($dd, arguments);
+          $dd.reject.apply($dd, [xhr.cacheIds].concat(arguments));
         });
 
         return $dd.promise();
@@ -1085,8 +1100,7 @@ define([
            * unset (-1) so that it won't be counted as an orcid record.
            *
            */
-          var querySuccess = function () {
-            var ids = _.flatten(arguments);
+          var querySuccess = function (ids) {
 
             // Update each orcid record with identifier info gained from ADS
             _.each(db, function (v, key) {
@@ -1100,6 +1114,7 @@ define([
               }
             });
 
+            self._combineDatabaseWorks(db);
             finishUpdate(db);
           };
 
@@ -1124,6 +1139,41 @@ define([
         }
 
         return self.dbUpdatePromise.promise();
+      },
+
+      /**
+       * Looks at the identifier of the work and attempts to
+       * detect if a bibcode has a child within the other entries
+       * of the database.
+       *
+       * @param {object} db - the database object
+       * @returns {object} db - the update database object
+       */
+      _combineDatabaseWorks: function (db) {
+
+        // loop through each entry of the database
+        _.forEach(db, function (data, identifier) {
+
+          // we can only do this for entries with data and bibcodes
+          if (_.isUndefined(data) || _.isUndefined(data.bibcode)) {
+            return true;
+          }
+
+          // remove 'identifier:' from front of key
+          var key = identifier.split(':')[1];
+
+          // add an children property to the current (parent entry)
+          _.forEach(db, function (entry, subKey) {
+
+            // excluding our parent, see if the key matches the bibcode
+            if (entry.bibcode === key && subKey !== identifier) {
+              data.children = data.children || [];
+              data.children.push(entry.putcode);
+            }
+          });
+        });
+
+        return db;
       },
 
       /**
@@ -1181,6 +1231,10 @@ define([
               }
               out.putcode = rec.putcode;
               out.bibcode = rec.bibcode;
+
+              if (rec.children) {
+                out.children = rec.children;
+              }
             }
           };
 
