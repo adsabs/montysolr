@@ -3,10 +3,13 @@ package org.apache.solr.handler.batch;
 import java.io.File;
 
 import org.apache.solr.request.SolrQueryRequest;
+import org.junit.BeforeClass;
+
+import monty.solr.util.MontySolrSetup;
 
 public class TestBatchProviderDumpCitationCache extends BatchProviderTest {
 
-
+	
 	public void test() throws Exception {
 
 		assertU(adoc("id", "11", "bibcode", "b1", "reference", "b2", "reference", "b3", "reference", "b4", "b", "test"));

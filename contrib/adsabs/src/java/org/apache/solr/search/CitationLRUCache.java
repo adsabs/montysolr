@@ -17,6 +17,11 @@
 
 package org.apache.solr.search;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -41,13 +46,24 @@ import org.apache.lucene.index.SortedDocValues;
 import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.index.SortedSetDocValues;
 import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.IOContext;
+import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.params.MapSolrParams;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.batch.BatchHandlerRequestQueue;
+import org.apache.solr.handler.batch.BatchProviderDumpCitationCache;
+import org.apache.solr.handler.batch.BatchProviderI;
+import org.apache.solr.request.LocalSolrQueryRequest;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -56,6 +72,7 @@ import org.apache.solr.schema.TextField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.uninverting.UninvertingReader;
 import org.apache.solr.uninverting.UninvertingReader.Type;
+import org.apache.solr.util.RefCounted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,6 +134,8 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
 	// citation data outside solr and prepare everything there...
 	private boolean incremental = false;
 	private boolean reuseCache;
+
+	private boolean dumpCache = false;
 	
 
 
@@ -131,6 +150,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
     
     incremental  = "true".equals(((String)args.get("incremental")));
     reuseCache  = "true".equals(((String)args.get("reuseCache")));
+    dumpCache  = "true".equals(((String)args.get("dumpCache")));
     
     citationFields = new String[0];
     referenceFields = new String[0];
@@ -360,10 +380,60 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
       }
     	sourceReaderHashCode = searcher.hashCode();
     }
+    
+    if (dumpCache) {
+    	try {
+    		persistCitationCache(searcher);
+    	}
+    	catch (IOException e) {
+    		throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
+    	}
+    }
+    
     warmupTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - warmingStartTime, TimeUnit.NANOSECONDS);
   }
   
-  private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
+	private void persistCitationCache(SolrIndexSearcher searcher) throws IOException {
+		
+		
+		long generation = -1;
+		try {
+			generation = searcher.getIndexReader().getIndexCommit().getGeneration();
+		} catch (IOException e) {
+			throw new IOException("Cannot obtain generation and cannot dump the citation cache", e);
+		}
+
+		Directory dir = searcher.getIndexReader().directory();
+		IndexOutput out = null;
+		
+		try {
+			out = dir.createOutput("citation_cache", new IOContext());
+			Iterator<int[][]> it = this.getCitationGraph();
+			while (it.hasNext()) {
+			      int[][] data = it.next();
+			      int[] references = data[0];
+				  	if (references != null && references.length > 0) {
+				  		for (int luceneDocId: references) {
+				  		  if (luceneDocId == -1)
+				  		    continue;
+				  		  out.writeInt(luceneDocId);
+				  		  for (int ref: references) {
+				  			  out.writeInt(ref);
+				  		  }
+				  		  out.writeString("\n");
+				  	}
+				  }
+			  }
+			
+		} 
+		finally {
+			if (out != null)
+				out.close();
+		}
+	}
+  
+
+private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
   	
   	List<String> fields = getFields(searcher, this.identifierFields);
   	
