@@ -52,9 +52,24 @@ define([
    * @param work
    * @constructor
    */
-  var Work = function Work(work) {
+  var Work = function Work(work, options) {
     work = work || {};
+
+    // find the inner summary as the root
     this._root = (work['work-summary']) ? work['work-summary'][0] : work;
+
+    var sources = '';
+    Object.defineProperty(this, 'sources', {
+      set: function (data) {
+        sources = data;
+      },
+      get: function () {
+        if (sources.length > 0) {
+          return sources;
+        }
+        return [this.getSourceName()];
+      }
+    });
 
     /**
      * Get the value at path
@@ -109,7 +124,7 @@ define([
         title: [this.getTitle()],
         formattedDate: this.getFormattedPubDate(),
         abstract: this.getShortDescription(),
-        source_name: this.getSourceName(),
+        source_name: this.sources.join('; '),
         pub: this.getJournalTitle(),
         _work: this
       });

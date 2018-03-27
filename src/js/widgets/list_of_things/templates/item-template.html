@@ -211,10 +211,12 @@
                 Claim in ORCID
             </button>
             {{else}}
-            <button class="btn {{#if orcid.error}}btn-danger{{else}}btn-default{{/if}} btn-sm orcid-action"  data-action="orcid-view" {{#if orcid.error}}title="{{orcid.error}}"{{/if}}>
-                <img src="../../styles/img/orcid-inactive.svg" alt="orcid logo inactive" class="s-orcid-img" title=""/>
-                Record not known to ADS
-            </button>
+            <div class="panel panel-default" style="box-shadow: none">
+                <div class="panel-body">
+                    <img src="../../styles/img/orcid-inactive.svg" alt="orcid logo inactive" class="s-orcid-img" title=""/>
+                    Record not known to ADS
+                </div>
+            </div>
             {{/if}}
 
 

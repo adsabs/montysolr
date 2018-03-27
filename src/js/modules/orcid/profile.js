@@ -19,7 +19,8 @@ define([
    * @constructor
    */
   var Profile = function Profile(profile) {
-    this._root = profile;
+    this._root = profile || {};
+    this.works = [];
 
     /**
      * search profile for value at specified path
@@ -39,12 +40,35 @@ define([
 
     /**
      * Gets all the work summaries from the profile
+     * Shallow (only grabs the first entry)
      *
      * @returns {Work[]} - the array of Work summaries
      */
     this.getWorks = function () {
+      return this.works;
+    };
+
+    /**
+     * Set the profile works
+     *
+     * @param {*} works
+     */
+    this.setWorks = function (works) {
+      this.works = works;
+      return this;
+    };
+
+    /**
+     * Pull all arrays of works from the profile
+     * grabs all works, not just the first
+     *
+     * @returns {[]Work[]} - the array of arrays of Work summaries
+     */
+    this.getWorksDeep = function () {
       return _.map(this.getWorkSummaries(), function (w) {
-        return new Work(w);
+        return _.map(w['work-summary'], function (subWork) {
+          return new Work(subWork);
+        });
       });
     };
 
@@ -100,6 +124,11 @@ define([
       }
       return obj;
     }, this);
+
+    // to maintain old behavior, make sure works is filled when the profile is created
+    this.works = _.map(this.getWorkSummaries(), function (w) {
+      return new Work(w);
+    });
   };
 
   return Profile;

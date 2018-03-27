@@ -372,7 +372,7 @@ define([
 
         request.done(function (profile) {
           _.forEach(cache, function (promise) {
-            promise.resolve(new Profile(profile));
+            promise.resolve(self._reconcileProfileWorks(profile));
           });
         });
 
@@ -382,6 +382,85 @@ define([
             promise.reject.apply(promise, args);
           });
         });
+      },
+
+      /**
+       * Reconcile the works contained in the incoming profile.
+       * Since it's possible for an ORCiD record to contain multiple sources,
+       * we have to figure out the best one to pick.
+       *
+       * The user can selected a "preferred" source, but since we can only match
+       * on items that have enough information (bibcode, doi, etc), we have to search
+       * through them all to find the best one.
+       *
+       * @param {object} rawProfile - the incoming profile
+       * @returns {Profile} - the new profile (with reconciled works)
+       */
+      _reconcileProfileWorks: function (rawProfile) {
+        /*
+          1. Source is ADS
+          2. Has Bibcode
+          3. Has DOI
+          4. Other
+        */
+        var self = this;
+        var profile = new Profile(rawProfile);
+        var works = _.map(profile.getWorksDeep(), function (work, idx) {
+          var w;
+
+          // only operate on arrays > 1
+          if (work.length > 1) {
+            var workWithBibcode, workWithDoi;
+            _.forEach(work, function (item) {
+
+              // check if the source is ADS
+              var isADS = self.isSourcedByADS(item);
+
+              // grab an array of external ids ['bibcode', 'doi', '...']
+              var exIds = item.getExternalIdType();
+              var hasBibcode = exIds.indexOf('bibcode') > -1;
+              var hasDoi = exIds.indexOf('doi') > -1;
+
+              // if it's sourced by ADS, use that one and break out of loop
+              if (isADS) {
+                w = item;
+                return false;
+              }
+
+              // grab the first one that has a bibcode
+              if (hasBibcode && !workWithBibcode) {
+                workWithBibcode = item;
+              }
+
+              // grab the first one that has a doi
+              if (hasDoi && !workWithDoi) {
+                workWithDoi = item;
+              }
+            });
+
+            // w will be defined if we found an ADS-sourced work
+            // otherwise, set the work accordingly below
+            if (!w && workWithBibcode) {
+              w = workWithBibcode;
+            } else if (!w && workWithDoi) {
+              w = workWithDoi;
+            } else if (!w) {
+              w = work[0];
+            }
+
+            // set the work's list of sources based on the full list from orcid
+            w.sources = _.map(work, function (_w) {
+              return _w.getSourceName();
+            });
+          }
+
+          // take the first work if we haven't found an array to process
+          return w ? w : work[0];
+        });
+
+        // set the new works
+        profile.setWorks(works);
+        return profile;
       },
 
       /**
@@ -643,12 +722,27 @@ define([
         });
 
         // on fail, reject the promises
-        prom.fail(function () {
-          self.addCache = _.reduce(self.addCache, function (res, entry) {
-            entry.promise.state() === 'pending' ?
-              entry.promise.reject() : res.push(entry);
-            return res;
-          }, []);
+        // this should receive a list of ids which we can finish up with
+        prom.fail(function (ids) {
+          var args = arguments;
+          _.forEach(ids, function (id) {
+
+            // find the cache entry
+            var idx = _.findIndex(self.addCache, { id: id });
+            if (idx >= 0) {
+
+              // grab reference to promise
+              var promise = self.addCache[idx].promise;
+
+              // remove entry from cache
+              self.addCache.splice(idx, idx + 1);
+
+              // if it is still pending, reject it now
+              if (promise.state() === 'pending') {
+                promise.reject.apply(promise, args);
+              }
+            }
+          });
         });
       },
 
@@ -710,9 +804,9 @@ define([
           }, {});
 
           $dd.resolve(obj);
-        }, function () {
+        }, function (xhr) {
           self.setDirty();
-          $dd.reject.apply($dd, arguments);
+          $dd.reject.apply($dd, [xhr.cacheIds].concat(arguments));
         });
 
         return $dd.promise();
@@ -1006,8 +1100,7 @@ define([
            * unset (-1) so that it won't be counted as an orcid record.
            *
            */
-          var querySuccess = function () {
-            var ids = _.flatten(arguments);
+          var querySuccess = function (ids) {
 
             // Update each orcid record with identifier info gained from ADS
             _.each(db, function (v, key) {
@@ -1021,6 +1114,7 @@ define([
               }
             });
 
+            self._combineDatabaseWorks(db);
             finishUpdate(db);
           };
 
@@ -1045,6 +1139,41 @@ define([
         }
 
         return self.dbUpdatePromise.promise();
+      },
+
+      /**
+       * Looks at the identifier of the work and attempts to
+       * detect if a bibcode has a child within the other entries
+       * of the database.
+       *
+       * @param {object} db - the database object
+       * @returns {object} db - the update database object
+       */
+      _combineDatabaseWorks: function (db) {
+
+        // loop through each entry of the database
+        _.forEach(db, function (data, identifier) {
+
+          // we can only do this for entries with data and bibcodes
+          if (_.isUndefined(data) || _.isUndefined(data.bibcode)) {
+            return true;
+          }
+
+          // remove 'identifier:' from front of key
+          var key = identifier.split(':')[1];
+
+          // add an children property to the current (parent entry)
+          _.forEach(db, function (entry, subKey) {
+
+            // excluding our parent, see if the key matches the bibcode
+            if (entry.bibcode === key && subKey !== identifier) {
+              data.children = data.children || [];
+              data.children.push(entry.putcode);
+            }
+          });
+        });
+
+        return db;
       },
 
       /**
@@ -1102,6 +1231,10 @@ define([
               }
               out.putcode = rec.putcode;
               out.bibcode = rec.bibcode;
+
+              if (rec.children) {
+                out.children = rec.children;
+              }
             }
           };
 

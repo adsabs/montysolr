@@ -165,12 +165,25 @@ define([
                 if (model) {
                   model.set('orcid', actions);
                 }
+
+                if (rInfo.children) {
+                  _.forEach(rInfo.children, function (putcode) {
+                    var childModel = _.find(self.hiddenCollection.models, function (m) {
+                      return m.get('_work').getPutCode() === putcode;
+                    });
+
+                    if (childModel) {
+                      self.removeModel(childModel);
+                    }
+                  });
+                }
               }
 
               if (counter === 0) {
                 self.trigger('orcid-update-finished');
               }
             });
+
             recInfo.fail(function (data) {
               counter -= 1;
 
@@ -205,10 +218,6 @@ define([
             });
           }
         });
-
-        if (counter === 0) {
-          self.trigger('orcid-update-finished', docs);
-        }
 
         return docs;
       };
@@ -247,7 +256,7 @@ define([
 
               if (exIds.bibcode === wIds.bibcode || doi) {
                 m.set({
-                  'source_name': w.getSourceName(),
+                  'source_name': w.sources.join('; '),
                   '_work': w
                 });
               }
@@ -423,6 +432,34 @@ define([
         return $dd.promise();
       };
 
+      WidgetClass.prototype.removeModel = function (model) {
+        var idx = model.resultsIndex;
+        this.hiddenCollection.remove(model);
+        var models = this.hiddenCollection.models;
+        _.forEach(_.rest(models, idx), function (m) {
+          m.set('resultsIndex', m.get('resultsIndex') - 1);
+          m.set('indexToShow', m.get('indexToShow') - 1);
+        });
+
+        var showRange = this.model.get('showRange');
+        var range = _.range(showRange[0], showRange[1] + 1);
+        var visible = [];
+        _.forEach(range, function (i) {
+          if (models[i] && models[i].set) {
+            models[i].set('visible', true);
+            models[i].resultsIndex = i;
+            models[i].set('resultsIndex', i);
+            models[i].set('indexToShow', i + 1);
+            visible.push(models[i]);
+          }
+        });
+        this.hiddenCollection.reset(models);
+        this.collection.reset(visible);
+
+        // reset the total number of papers
+        this.model.set('totalPapers', models.length);
+      };
+
       WidgetClass.prototype.onAllInternalEvents = function(ev, arg1, arg2) {
         if (ev === 'childview:OrcidAction') {
           var self = this;
@@ -450,7 +487,7 @@ define([
 
                   model.set({
                     orcid: self._getOrcidInfo(recInfo),
-                    'source_name': work.getSourceName()
+                    'source_name': work.sources.join('; ')
                   });
 
                   self.trigger('orcidAction:' + action, model);
@@ -496,31 +533,7 @@ define([
 
                 // Remove entry from collection after delete
                 if (self.orcidWidget) {
-                  var idx = model.resultsIndex;
-                  self.hiddenCollection.remove(model);
-                  var models = self.hiddenCollection.models;
-                  _.forEach(_.rest(models, idx), function (m) {
-                    m.set('resultsIndex', m.get('resultsIndex') - 1);
-                    m.set('indexToShow', m.get('indexToShow') - 1);
-                  });
-
-                  var showRange = self.model.get('showRange');
-                  var range = _.range(showRange[0], showRange[1] + 1);
-                  var visible = [];
-                  _.forEach(range, function (i) {
-                    if (models[i] && models[i].set) {
-                      models[i].set('visible', true);
-                      models[i].resultsIndex = i;
-                      models[i].set('resultsIndex', i);
-                      models[i].set('indexToShow', i + 1);
-                      visible.push(models[i]);
-                    }
-                  });
-                  self.hiddenCollection.reset(models);
-                  self.collection.reset(visible);
-
-                  // reset the total number of papers
-                  self.model.set('totalPapers', models.length);
+                  self.removeModel(model);
                 } else {
                   // reset orcid actions
                   model.set('orcid', self._getOrcidInfo({}));
