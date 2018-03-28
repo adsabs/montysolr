@@ -191,7 +191,10 @@ define([
           //used by link generator mixin
           d.link_server = link_server;
           d.identifier = d.bibcode;
-          d.encodedIdentifier = encodeURIComponent(d.identifier);
+
+          // make sure undefined doesn't become "undefined"
+          d.encodedIdentifier = _.isUndefined(d.identifier) ? 
+            d.identifier : encodeURIComponent(d.identifier);
           var h = {};
 
           if (_.keys(highlights).length) {

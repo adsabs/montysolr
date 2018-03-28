@@ -77,8 +77,6 @@ define([
         var pubsub = this.getPubSub(), query = new ApiQuery({q : searchTerm, sort: 'date desc'});
         pubsub.publish(pubsub.START_SEARCH, query);
       });
-
-      this.on('orcid-update-finished', this.mergeDuplicateRecords);
     },
 
     orcidWidget : true,

@@ -58,18 +58,34 @@ define([
     // find the inner summary as the root
     this._root = (work['work-summary']) ? work['work-summary'][0] : work;
 
-    var sources = '';
-    Object.defineProperty(this, 'sources', {
-      set: function (data) {
-        sources = data;
-      },
-      get: function () {
-        if (sources.length > 0) {
-          return sources;
-        }
+    this.sources = [];
+
+    /**
+     * get the sources array
+     * if the array is empty, it returns an array containing the single source name
+     * 
+     * @returns {Array} - the sources
+     */
+    this.getSources = function () {
+      if (_.isEmpty(this.sources)) {
         return [this.getSourceName()];
       }
-    });
+
+      return this.sources;
+    };
+
+    /**
+     * Set the sources array
+     * 
+     * @param {Array} sources
+     * @returns {Array} - the sources
+     */
+    this.setSources = function (sources) {
+      if (_.isArray(sources)) {
+        this.sources = sources;
+      }
+      return this.sources;
+    };
 
     /**
      * Get the value at path
@@ -124,7 +140,7 @@ define([
         title: [this.getTitle()],
         formattedDate: this.getFormattedPubDate(),
         abstract: this.getShortDescription(),
-        source_name: this.sources.join('; '),
+        source_name: this.getSources().join('; '),
         pub: this.getJournalTitle(),
         _work: this
       });
@@ -182,8 +198,9 @@ define([
       var ids = this.getExternalIds();
       var out = {};
       _.eachRight(props, function (p) {
-        if (ids[p]) {
-          out = p;
+        if (_.isString(ids[p])) {
+          out = ids[p];
+          return false;
         }
       });
       return out;
