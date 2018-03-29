@@ -12,7 +12,8 @@ define([
     'js/components/api_query_updater',
     'js/components/api_targets',
     'js/modules/orcid/work',
-    'js/mixins/dependon'
+    'js/components/api_feedback',
+    'js/mixins/dependon',
   ],
 
   function (
@@ -21,7 +22,8 @@ define([
     ApiRequest,
     ApiQueryUpdater,
     ApiTargets,
-    Work
+    Work,
+    ApiFeedback
     ) {
 
     return function(WidgetClass) {
@@ -140,6 +142,8 @@ define([
        */
       WidgetClass.prototype.addOrcidInfo = function (docs) {
         var self = this;
+        var isRetry = false;
+
         // add orcid info to the documents
         var orcidApi = this.getBeeHive().getService('OrcidApi');
 
@@ -147,77 +151,130 @@ define([
           return docs;
         }
 
-        var recInfo;
-        var counter = 0;
+        // find all pending models, and update them with an error state
+        var setPendingToError = _.debounce(function () {
 
-        _.each(docs, function(d) {
-          recInfo = orcidApi.getRecordInfo(d);
-          if (recInfo.state() === 'pending') {
-            counter += 1;
-            recInfo.done(function(rInfo) {
-              counter -= 1;
+          // go through the current models, and if something is pending
+          // make it show an error
+          _.forEach(self.hiddenCollection.models, function (m) {
+            var orcid = m.get('orcid');
+            if (orcid.pending) {
+              orcid = _.extend({}, orcid, {
+                pending: false,
+                error: 'Error while applying Orcid Data'
+              });
+              m.set('orcid', orcid);
+            }
+          });
+        }, 100);
 
-              var actions = self._getOrcidInfo(rInfo);
+        // find all pending models, and update them to a default state
+        var setPendingToDefaultActions = _.debounce(function () {
 
-              // get the model for this document
-              if (self.hiddenCollection && self.hiddenCollection.findWhere) {
-                var model = self.hiddenCollection.findWhere({ bibcode: d.bibcode });
+          var defaultActions = self._getOrcidInfo({});
+
+          // go through the current models, and if something is pending
+          // make it show an error
+          _.forEach(self.hiddenCollection.models, function (m) {
+            if (m.get('orcid') && m.get('orcid').pending) {
+              m.set('orcid', defaultActions);
+            }
+          });
+        }, 100);
+
+        // attempt to find the model to update and update it's orcid actions
+        var onSuccess = function () {
+          _.forEach(_.toArray(arguments), function (info, i) {
+
+            // since the order is maintain from the promises we can grab by index
+            var work = docs[i];
+
+            // make sure the doc has any information we gained
+            if (_.isString(info.bibcode) && !_.isUndefined(work.identifier)) {
+              work.identifier = info.bibcode;
+            } else if (_.isArray(info.doi) && !_.isUndefined(work.identifier)) {
+              work.identifier = info.doi;
+            }
+
+            var model = _.find(self.hiddenCollection.models, function (m) {
+
+              // do our best to find the match
+              return (_.isPlainObject(work._work) && work._work === m.get('_work'))
+                || (_.isString(work.bibcode) && work.bibcode === m.get('bibcode'))
+                || (_.isArray(work.doi) && work.doi === m.get('doi'))
+                || (!_.isUndefined(work.identifier) && work.identifier === m.get('identifier'));
+            });
+
+            // found the model, update it
+            if (model) {
+              var sources, orcidPath;
+
+              // grab the array of sources, if it exists 
+              if (_.isPlainObject(work._work)) {
+                sources = work._work.getSources();
+                orcidPath = '//' + work._work.getSourceOrcidIdHost() + '/' + work._work.getPath();
+              }
+
+              // get the new set of actions, also set the source name
+              var actions = self._getOrcidInfo(info);
+
+              model.set({
+                orcid: actions,
+                source_name: _.isArray(sources) ? sources.join('; ') : model.get('source_name'),
+                orcidWorkPath: orcidPath
+              });
+            } else {
+              _.defer(setPendingToDefaultActions);
+            }
+
+            // if entry has children, remove them
+            if (_.isArray(info.children)) {
+              _.forEach(info.children, function (putcode) {
+                var model = _.find(self.hiddenCollection.models, function (m) {
+                  return _.isString(putcode) && putcode === m.get('_work').getPutCode();
+                });
+
                 if (model) {
-                  model.set('orcid', actions);
+                  self.removeModel(model);
+                } else {
+                  _.defer(setPendingToDefaultActions);
                 }
+              });
+            }
+          });
+        };
 
-                if (rInfo.children) {
-                  _.forEach(rInfo.children, function (putcode) {
-                    var childModel = _.find(self.hiddenCollection.models, function (m) {
-                      return m.get('_work').getPutCode() === putcode;
-                    });
+        // retry once, then just set everything still pending to errored
+        var onFail = function () {
 
-                    if (childModel) {
-                      self.removeModel(childModel);
-                    }
-                  });
-                }
-              }
-
-              if (counter === 0) {
-                self.trigger('orcid-update-finished');
-              }
-            });
-
-            recInfo.fail(function (data) {
-              counter -= 1;
-
-              // very likely, the request timed out
-              // keep the actions and let user redo the operation
-              if (self.collection && self.collection.findWhere) {
-                var model = self.collection.findWhere({bibcode: d.bibcode});
-                if (model) {
-                  var o = _.extend({}, model.get('orcid') || {});
-                  delete o.pending;
-                  o.error = 'Orcid API reported error';
-                  model.set('orcid', o); //TODO: distinguish different types of errors
-                }
-              }
-
-              if (counter === 0) {
-                self.trigger('orcid-update-finished');
-              }
-            });
-            d.orcid = {pending: true};
+          if (!isRetry) {
+            isRetry = true;
+            return getDocInfo();
           }
-          else {
-            recInfo.done(function(rInfo) {
-              d.orcid = self._getOrcidInfo(rInfo);
-              // enhance the ORCID record with an identifier
-              // the bibcode, if there, was discovered from our api
-              if (!d.identifier && rInfo.bibcode) {
-                d.identifier = rInfo.bibcode;
-              } else if (!d.identifier && rInfo.doi) {
-                d.identifier = rInfo.doi;
-              }
-            });
-          }
-        });
+
+          // set everything pending to be an error
+          _.defer(setPendingToError);
+        };
+
+        // set all docs to pending and start the async doc info requests
+        var getDocInfo = function () {
+          var promises = [];
+
+          _.each(docs, function (d) {
+
+            // set the orcid prop to pending
+            d.orcid = _.extend({}, d.orcid, { pending: true });
+            promises.push(orcidApi.getRecordInfo(d));
+          });
+
+          // wait for all the promises to resolve
+          $.when.apply($, promises).then(onSuccess, onFail).always(function () {
+            self.trigger('orcid-update-finished');
+          });
+        };
+
+        // start the process
+        getDocInfo();
 
         return docs;
       };
@@ -226,7 +283,7 @@ define([
         var self = this;
         _.forEach(this.hiddenCollection.models, function (hiddenModel) {
           var match = _.find(self.collection.models, function (model) {
-            return model.get('bibcode') === hiddenModel.get('bibcode');
+            return model.get('_work') === hiddenModel.get('_work');
           });
 
           if (match && match.get('orcid').pending) {
@@ -249,14 +306,14 @@ define([
         oApi.getUserProfile().done(function (profile) {
           var works = profile.getWorks();
           _.forEach(modelsToUpdate, function (m) {
-            var exIds = _.pick(m.attributes, ['bibcode', 'doi']);
+            var exIds = _.flatten(_.values(_.pick(m.attributes, ['bibcode', 'doi', 'identifier'])));
             _.forEach(works, function (w) {
-              var wIds = w.getExternalIds();
-              var doi = _.any(exIds.doi, wIds.doi);
-
-              if (exIds.bibcode === wIds.bibcode || doi) {
+              var wIds = _.flatten(_.values(w.getExternalIds()));
+              var idMatch = _.intersection(exIds, wIds).length > 0;
+            
+              if ((_.isPlainObject(m._work) && m._work === w) || idMatch) {
                 m.set({
-                  'source_name': w.sources.join('; '),
+                  'source_name': w.getSources().join('; '),
                   '_work': w
                 });
               }
@@ -269,7 +326,7 @@ define([
         docs = processDocs.apply(this, arguments);
         var user = this.getBeeHive().getObject('User');
         //for results list only show if orcidModeOn, for orcid big widget show always
-        if (user && user.isOrcidModeOn() || this.orcidWidget ){
+        if (user && user.isOrcidModeOn() || this.orcidWidget ) {
           var result = this.addOrcidInfo(docs);
           if (pagination.numFound !== result.length) {
             _.extend(pagination, this.getPaginationInfo(apiResponse, docs));
@@ -303,8 +360,13 @@ define([
           var adsWork = adsResponse.response &&
             adsResponse.response.docs && adsResponse.response.docs[0];
 
-          model.attributes = _.extend(model.attributes,
-            fullOrcidWork.toADSFormat(), adsWork);
+          var parsedOrcidWork = fullOrcidWork.toADSFormat();
+
+          parsedOrcidWork = _.isPlainObject(parsedOrcidWork) ? parsedOrcidWork : {};
+          adsWork = _.isPlainObject(adsWork) ? adsWork : {};
+
+          // extend the current model with our new information
+          model.set(_.extend({}, model.attributes, parsedOrcidWork, adsWork));
 
           final.resolve(model);
         };
@@ -406,7 +468,7 @@ define([
             var msg = 'Could not find a matching ORCiD Record';
             console.error.apply(console, [msg].concat(arguments));
             model.set('orcid', _.extend(oldOrcid, {
-              pending: null,
+              pending: false,
               error: msg
             }));
           }
@@ -417,7 +479,7 @@ define([
           var msg = 'Error retrieving ORCiD profile';
           console.error.apply(console, [msg].concat(arguments));
           model.set('orcid', _.extend(oldOrcid, {
-            pending: null,
+            pending: false,
             error: msg
           }));
         };
@@ -487,7 +549,7 @@ define([
 
                   model.set({
                     orcid: self._getOrcidInfo(recInfo),
-                    'source_name': work.sources.join('; ')
+                    'source_name': work.getSources().join('; ')
                   });
 
                   self.trigger('orcidAction:' + action, model);
@@ -507,7 +569,7 @@ define([
                   var msg = 'Failed to add entry, please try again';
                   console.error.apply(console, [msg].concat(arguments));
                   model.set('orcid', _.extend(oldOrcid, {
-                    pending: null,
+                    pending: false,
                     error: msg
                   }));
                 })
@@ -520,7 +582,7 @@ define([
                 var msg = 'There was a problem adding the record, try again';
                 console.error.apply(console, [msg].concat(arguments));
                 model.set('orcid', _.extend(oldOrcid, {
-                  pending: null,
+                  pending: false,
                   error: msg
                 }));
               }
@@ -558,7 +620,7 @@ define([
                   var msg = 'Error deleting record, please try again';
                   console.error.apply(console, [msg].concat(arguments));
                   model.set('orcid', _.extend(oldOrcid, {
-                    pending: null,
+                    pending: false,
                     error: msg
                   }));
                 });
@@ -575,13 +637,29 @@ define([
 
               model.set('orcid', {pending: true});
 
+              var failedUpdating = function () {
+                var msg = 'Error updating record, please try again';
+                console.error.apply(console, [msg].concat(arguments));
+                model.set('orcid', _.extend(oldOrcid, {
+                  pending: false,
+                  error: msg
+                }));
+              };
+
               self.mergeADSAndOrcidData(model)
 
               // done merging, begin update
               .done(function (model) {
                 var putCode = model.get('_work').getPutCode();
 
-                orcidApi.updateWork(Work.adsToOrcid(model.attributes, putCode))
+                var work = Work.adsToOrcid(model.attributes, putCode);
+                if (_.isNull(work)) {
+
+                  // if something went wrong parsing the work, fail it here
+                  return failedUpdating(work);
+                }
+
+                orcidApi.updateWork(work)
 
                 // update successful
                 .done(function doneUpdating(orcidWork) {
@@ -596,17 +674,10 @@ define([
                 })
 
                 // update failed, update model accordingly
-                .fail(function failedUpdating() {
-                  var msg = 'Error updating record, please try again';
-                  console.error.apply(console, [msg].concat(arguments));
-                  model.set('orcid', _.extend(oldOrcid, {
-                    pending: null,
-                    error: msg
-                  }));
-                });
+                .fail(failedUpdating);
 
                 // update the model with the updated data
-                model.set(model.attributes, {silent: true});
+                model.set(model.attributes, { silent: true });
               })
 
               // merging failed, update the model
@@ -614,7 +685,7 @@ define([
                 var msg = 'Failed to merge ORCiD and ADS data';
                 console.error.apply(console, [msg].concat(arguments));
                 model.set('orcid', _.extend(oldOrcid, {
-                  pending: null,
+                  pending: false,
                   error: msg
                 }));
               });
@@ -626,7 +697,13 @@ define([
               orcidApi.signOut();
             },
             'orcid-view': function (model) {
-              // do nothing for now
+
+              // send them to the work on their orcid profile
+              var url = model.get('orcidWorkPath');
+              if (_.isString(url)) {
+                var win = window.open(url, '_blank');
+                win.focus();
+              }
             }
           };
           handlers[action] && handlers[action](data.model);

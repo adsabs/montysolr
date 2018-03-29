@@ -94,7 +94,7 @@ define([
         this.db = {};
         this.clearDBWait = 30000;
         this.dbUpdatePromise = null;
-        this.maxQuerySize = 50;
+        this.maxQuerySize = 100;
         this.queryUpdater = new ApiQueryUpdater('orcid_api');
         this.orcidApiTimeout = 30000; // 30 seconds
         this.adsQueryTimeout = 10; // 10 seconds
@@ -449,9 +449,9 @@ define([
             }
 
             // set the work's list of sources based on the full list from orcid
-            w.sources = _.map(work, function (_w) {
+            w.setSources(_.map(work, function (_w) {
               return _w.getSourceName();
-            });
+            }));
           }
 
           // take the first work if we haven't found an array to process
@@ -992,20 +992,18 @@ define([
         }
 
         // reformat array as 'identifier:xxx OR identifier:xxx'
-        var q = _(query.identifier)
-          .map(function (v) {
-            return 'identifier:' + v;
-          })
-          .filter('length')
-          .value()
-          .join(' OR ');
+        var q = _.filter(query.identifier, function (i) {
+
+            // grab only non-empty entries
+            return !_.isEmpty(i.trim()) || i === 'NONE';
+          }).join(' OR ');
 
         // don't let an empty query string through
         if (_.isEmpty(q)) {
           return null;
         }
 
-        return new ApiQuery({ q: q });
+        return new ApiQuery({ q: 'identifier:(' + q + ')' });
       },
 
       /**
@@ -1046,10 +1044,17 @@ define([
           _.forEach(works, function addIdsToDatabase(w, i) {
             var key = 'identifier:';
             var ids = w.getExternalIds();
-            if (ids.bibcode) {
+
+            if (_.has(ids, 'bibcode')) {
               key += ids.bibcode;
-            } else if (ids.doi) {
+            } else if (_.has(ids, 'doi')) {
               key += ids.doi;
+            } else if (_.has(ids, 'null')) {
+              key += 'NONE';
+            } else if (!_.isEmpty(ids)) {
+
+              // grab the first value
+              key += _.values(ids)[0];
             }
 
             if (key) {
@@ -1213,7 +1218,7 @@ define([
           Then we can add some metadata like whether it was an ADS sourced
           record or not
            */
-          var updateRecord = function (v, k, out) {
+          var updateRecord = function (v, k) {
 
             // db is always 'identifier:xxx'
             var key = ('identifier:' + v).toLowerCase();
@@ -1229,12 +1234,7 @@ define([
               if (rec.idx > -1) {
                 out.isKnownToADS = true;
               }
-              out.putcode = rec.putcode;
-              out.bibcode = rec.bibcode;
-
-              if (rec.children) {
-                out.children = rec.children;
-              }
+              out = _.extend({}, out, rec)
             }
           };
 
