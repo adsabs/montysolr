@@ -47,6 +47,7 @@ import org.apache.lucene.index.SortedNumericDocValues;
 import org.apache.lucene.index.SortedSetDocValues;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.util.Bits;
@@ -72,6 +73,7 @@ import org.apache.solr.schema.TextField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.uninverting.UninvertingReader;
 import org.apache.solr.uninverting.UninvertingReader.Type;
+import org.apache.solr.util.FileUtils;
 import org.apache.solr.util.RefCounted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -407,7 +409,7 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
 		IndexOutput out = null;
 		
 		try {
-			out = dir.createOutput("citation_cache", new IOContext());
+			out = dir.createTempOutput("citation_cache", "tmp", new IOContext());
 			Iterator<int[][]> it = this.getCitationGraph();
 			while (it.hasNext()) {
 			      int[][] data = it.next();
@@ -427,11 +429,35 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
 			
 		} 
 		finally {
-			if (out != null)
+			if (out != null) {
 				out.close();
+				try {
+				  dir.rename(out.getName(), "citation_cache");
+				  dir.syncMetaData();
+				  dir.copyFrom(dir, "citation_cache", 
+              new File(searcher.getCore().getResourceLoader().getConfigDir() + File.separator + "citation_cache").getAbsolutePath(), IOContext.DEFAULT);
+				  //moveCitationCacheToConfDir(searcher);
+				}
+				catch (IOException e) {
+				  dir.deleteFile("citation_cache");
+				  dir.rename(out.getName(), "citation_cache");
+				  dir.syncMetaData();
+				  dir.copyFrom(dir, "citation_cache", 
+				      new File(searcher.getCore().getResourceLoader().getConfigDir() + File.separator + "citation_cache").getAbsolutePath(), IOContext.DEFAULT);
+				  //moveCitationCacheToConfDir(searcher);
+				}
+			}
 		}
 	}
   
+private void moveCitationCacheToConfDir(SolrIndexSearcher searcher) throws IOException {
+  SolrCore core = searcher.getCore();
+  File source = new File(core.getIndexDir() + File.separator + "citation_cache");
+  File target = new File(core.getResourceLoader().getConfigDir() + File.separator + "citation_cache");
+  if (!source.exists())
+    throw new IOException(source + " does not exist");
+  FileUtils.copyFile(source, target);
+}
 
 private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> old) throws IOException {
   	

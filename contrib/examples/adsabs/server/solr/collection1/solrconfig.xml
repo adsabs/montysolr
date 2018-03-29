@@ -158,6 +158,7 @@
               identifierFields="bibcode:sorted,alternate_bibcode"
               citationFields="citation"
               reuseCache="${montysolr.reuseCache:true}"
+              dumpCache="true"
               />
               
     <enableLazyFieldLoading>true</enableLazyFieldLoading>
@@ -457,7 +458,12 @@
     </lst>
   </requestHandler>
   
-  <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy" />
+  <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy">
+    <lst name="master">
+	    <str name="replicateAfter">commit</str>
+	    <str name="confFiles">citation_cache</str>
+    </lst>
+  </requestHandler>
   
   <requestHandler name="/replicoordinator" class="solr.ReplicationCoordinatorHandler" >
     
