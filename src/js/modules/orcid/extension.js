@@ -209,10 +209,15 @@ define([
             if (model) {
               var sources, orcidPath;
 
-              // grab the array of sources, if it exists 
+              // grab the array of sources, if it exists
               if (_.isPlainObject(work._work)) {
                 sources = work._work.getSources();
-                orcidPath = '//' + work._work.getSourceOrcidIdHost() + '/' + work._work.getPath();
+                var host = work._work.getSourceOrcidIdHost();
+                var path = work._work.getPath();
+
+                if (_.isString(host) && _.isString(path)) {
+                  orcidPath = '//' + host + '/' + path;
+                }
               }
 
               // get the new set of actions, also set the source name
@@ -310,7 +315,7 @@ define([
             _.forEach(works, function (w) {
               var wIds = _.flatten(_.values(w.getExternalIds()));
               var idMatch = _.intersection(exIds, wIds).length > 0;
-            
+
               if ((_.isPlainObject(m._work) && m._work === w) || idMatch) {
                 m.set({
                   'source_name': w.getSources().join('; '),
@@ -352,9 +357,11 @@ define([
         var oApi = self.getBeeHive().getService('OrcidApi');
 
         /**
+         * Take the full orcid work (not summary) and extend the current matched
+         * model with the data from each source
          *
-         * @param fullOrcidWork
-         * @param adsResponse
+         * @param {Work} fullOrcidWork
+         * @param {object} adsResponse
          */
         var onRecieveFullADSWork = function (fullOrcidWork, adsResponse) {
           var adsWork = adsResponse.response &&
@@ -372,7 +379,7 @@ define([
         };
 
         /**
-         *
+         * reject on failure
          */
         var onADSFailure = function () {
           console.error('Error retrieving doc from ADS');
@@ -380,7 +387,7 @@ define([
         };
 
         /**
-         *
+         * reject on failure
          */
         var onOrcidFailure = function () {
           console.error('Error retrieving doc from ORCiD');
@@ -388,8 +395,10 @@ define([
         };
 
         /**
+         * After getting back the full orcid work, we
+         * create a new query to find an ADS match
          *
-         * @param fullOrcidWork
+         * @param {Work} fullOrcidWork - the full orcid work record
          */
         var onRecieveFullOrcidWork = function (fullOrcidWork) {
           var identifier = model.get('identifier') ||
@@ -449,7 +458,7 @@ define([
         var exIds = _.pick(model.attributes, ['bibcode', 'doi']);
         var oldOrcid = _.clone(model.get('orcid') || {});
         var profile = null;
-        if (!_profile) {
+        if (_.isUndefined(_profile)) {
           profile = oApi.getUserProfile();
         }
 
@@ -484,7 +493,7 @@ define([
           }));
         };
 
-        if (!_profile) {
+        if (_.isUndefined(_profile)) {
           profile.done(success);
           profile.fail(fail);
         } else {
@@ -494,6 +503,12 @@ define([
         return $dd.promise();
       };
 
+      /**
+       * Remove a particular model from the collection and do some
+       * clean up on the view to make sure things show up okay
+       *
+       * @param {Backbone.Model} model - the model to be removed
+       */
       WidgetClass.prototype.removeModel = function (model) {
         var idx = model.resultsIndex;
         this.hiddenCollection.remove(model);
@@ -522,10 +537,16 @@ define([
         this.model.set('totalPapers', models.length);
       };
 
-      WidgetClass.prototype.onAllInternalEvents = function(ev, arg1, arg2) {
+      /**
+       * Called when any internal event is triggered
+       *
+       * @param {string} ev - the event
+       * @param {object} arg1 - extra event information
+       * @param {object} data - event action data
+       */
+      WidgetClass.prototype.onAllInternalEvents = function(ev, arg1, data) {
         if (ev === 'childview:OrcidAction') {
           var self = this;
-          var data = arg2;
           var action = data.action;
           var orcidApi = this.getBeeHive().getService('OrcidApi');
           var oldOrcid = _.clone(data.model.get('orcid') || {});
