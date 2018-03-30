@@ -31,7 +31,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -259,6 +261,14 @@ public class CitationLRUCache<K,V> extends SolrCacheBase implements CitationCach
   	synchronized (relationships) {
   		return ((RelationshipLinkedHashMap<K,V>) relationships).relationshipsDataSize();
   	}
+  }
+  
+  public void insertCitation(int sourceDocid, int targetDocid) {
+      ((CitationLRUCache<K, V>.RelationshipLinkedHashMap<K, V>) relationships).addCitation(sourceDocid, targetDocid);
+  }
+  
+  public void insertReference(int sourceDocid, int targetDocid) {
+    ((CitationLRUCache<K, V>.RelationshipLinkedHashMap<K, V>) relationships).addReference(sourceDocid, targetDocid);
   }
   
   public int[] getCitations(K key) {
@@ -911,6 +921,10 @@ private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K,V> ol
   	}
   	out.append(")");
   	return out.toString();
+  }
+  
+  public Iterator<Entry<K, V>> getDictionary() {
+    return relationships.entrySet().iterator();
   }
   
   public static class SimpleRegenerator implements CacheRegenerator {

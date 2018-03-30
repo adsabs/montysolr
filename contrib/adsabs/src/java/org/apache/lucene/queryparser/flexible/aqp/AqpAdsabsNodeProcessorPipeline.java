@@ -22,6 +22,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerPr
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsCarefulAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExpandAuthorSearchProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsExtractMultisynonymsProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFieldNodePreAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsFixQPOSITIONProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsMODIFIERProcessor;
@@ -204,7 +205,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
       // positions; so we extract these and add them next to the edismax generated query
       // 28/10/13 - I've finally modified edismax (to call our aqp) when building
       // a query, so this is being taken care off by us
-      // add(new AqpAdsabsExtractMultisynonymsProcessor());
+      add(new AqpAdsabsExtractMultisynonymsProcessor());
       
     }
 		

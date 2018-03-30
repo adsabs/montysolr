@@ -207,16 +207,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 BooleanQuery.class);
         // the same as above + enhanced by multisynonym
         // i expect to see syn::r s t, syn::acr::rst
+        setDebug(false);
         assertQueryEquals(req("defType", "aqp",
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
-                "aqp.unfielded.phrase.edismax.synonym.workaround", "true",
+                "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
                 "q", "author:accomazzi, alberto property:refereed r s t",
                 "qf", "title keyword^0.5"),
                 "+((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) "
                 + "(((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) "
                 +"+((+property:refereed +((keyword:r)^0.5 | title:r) +((keyword:s)^0.5 | title:s) +((keyword:t)^0.5 | title:t)) property:refereedrst)",
                 BooleanQuery.class);
+        
+        // +((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) +((+property:refereed +((keyword:r)^0.5 | title:r) +((keyword:s)^0.5 | title:s) +((keyword:t)^0.5 | title:t)) ((title:syn::r s t)^1.0 (title:syn::acr::rst)^1.0 (keyword:syn::r s t)^0.45 (keyword:syn::acr::rst)^0.45 property:refereedrst))
 
 
         //#238 - single synonyms were caught by the multi-synonym component

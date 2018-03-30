@@ -1,6 +1,8 @@
 package org.apache.solr.search;
 
 import java.util.Iterator;
+import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * Main API to deal with citation graph. Implementations are free to use lucene's
@@ -10,6 +12,24 @@ import java.util.Iterator;
  * @param <V> - typically a list of ints, representing lucene docids
  */
 public interface CitationCache<K,V> extends SolrCache<K, V> {
+  
+  
+  /**
+   * Creates a connection
+   * 
+   * @param sourceDocId
+   * @param targetDocId
+   */
+  public void insertCitation(int sourceDocId, int targetDocId);
+  
+  
+  /**
+   * Creates a connection
+   * 
+   * @param sourceDocId
+   * @param targetDocId
+   */
+  public void insertReference(int sourceDocId, int targetDocId);
   
   /**
    * Retrieve list of documents that *cite* our
@@ -66,5 +86,14 @@ public interface CitationCache<K,V> extends SolrCache<K, V> {
    * The first comes references, the second are citations
    * @return iterator over list of ints[]
    */
-  public  Iterator<int[][]> getCitationGraph();
+  public Iterator<int[][]> getCitationGraph();
+  
+  /**
+   * Returns key:value pairs for each entry in the citation cache.
+   * The keys are the values (bibcodes, indentifiers) and the values
+   * are lucene docids.
+   * 
+   * @return iterator over set of kv pairs
+   */
+  public Iterator<Entry<K, V>> getDictionary();
 }
