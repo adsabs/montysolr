@@ -15,6 +15,14 @@ public interface CitationCache<K,V> extends SolrCache<K, V> {
   
   
   /**
+   * Creates/intializes internal datastructures needed to hold
+   * citations/references
+   * 
+   *  @param maxDocs - int, number of rows (possible lucene docids)
+   */
+  public void initializeCitationCache(int maxDocs);
+	
+  /**
    * Creates a connection
    * 
    * @param sourceDocId
@@ -96,4 +104,10 @@ public interface CitationCache<K,V> extends SolrCache<K, V> {
    * @return iterator over set of kv pairs
    */
   public Iterator<Entry<K, V>> getDictionary();
+  
+  /**
+   * Returns the highest lucene docid ever used/stored by the cache
+   * @return - int lucene docid
+   */
+  public int getHighestDocid();
 }

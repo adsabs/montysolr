@@ -10,10 +10,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import org.apache.lucene.store.DataInput;
@@ -37,14 +40,16 @@ public class CitationCacheReaderWriter {
   }
   
   @SuppressWarnings("unchecked")
-  public void persist(SolrIndexSearcher searcher, CitationCache cache) throws IOException {
+  public void persist(CitationCache cache, long generation) throws IOException {
     
     OutputStreamDataOutput gs = getOutputStream(GENERATION);
     OutputStreamDataOutput ds = getOutputStream(DICTIONARY);
     OutputStreamDataOutput rs = getOutputStream(REFERENCES);
     OutputStreamDataOutput cs = getOutputStream(CITATIONS);
     
-    gs.writeLong(getIndexGeneration(searcher));
+    // write number of entries - important for efficiently reading stuff back
+    gs.writeLong(generation);
+    gs.writeInt(cache.getHighestDocid());
     
     Iterator<int[][]> it = cache.getCitationGraph();
     int i = 0;
@@ -62,7 +67,7 @@ public class CitationCacheReaderWriter {
       
       if (citations != null && citations.length > 0) {
         for (int c: citations)
-          rs.writeInt(c);
+          cs.writeInt(c);
       }
       
       rs.writeByte((byte) '\n');
@@ -70,25 +75,29 @@ public class CitationCacheReaderWriter {
       i += 1;
     }
     
-    // write number of entries - important for efficiently reading stuff back
     gs.writeInt(i);
     gs.close();
     
+    
     // memory hog, TODO: make it more efficient?
-    List<Set<String>> out = new ArrayList<Set<String>>(i);
+    Map<Integer, Set<String>> out = new HashMap<Integer, Set<String>>(i);
     Entry<String, Integer> en;
     String k;
     Integer v;
+    Integer maxV = 0;
     Iterator<Entry<String, Integer>> di = cache.getDictionary();
     while (di.hasNext()) {
       en = di.next();
       k = en.getKey();
       v = en.getValue();
       
+      if (v > maxV)
+    	  maxV = v;
+      
       if (out.get(v) == null) {
         HashSet<String> x = new HashSet<String>();
         x.add(k);
-        out.add(v, x);
+        out.put(v, x);
       }
       else {
         out.get(v).add(k);
@@ -96,9 +105,9 @@ public class CitationCacheReaderWriter {
     }
     
     HashSet<String> empty = new HashSet<String>();
-    for (Set<String> s: out) {
-      if (s != null) {
-        ds.writeSetOfStrings(s);
+    for ( i=0; i<=cache.getHighestDocid(); i++) {
+      if (out.containsKey(i)) {
+        ds.writeSetOfStrings(out.get(i));
       }
       else {
         ds.writeSetOfStrings(empty);
@@ -119,23 +128,25 @@ public class CitationCacheReaderWriter {
   public void load(CitationCache cache) throws IOException {
     Metadata m = loadMetadata();
     
+    cache.initializeCitationCache(m.maxDocs);
+    
     BufferedDataInput ci = openInputStream(CITATIONS);
     BufferedDataInput ri = openInputStream(REFERENCES);
     BufferedDataInput di = openInputStream(DICTIONARY);
     
     Set<String> s;
     int i = 0;
-    while ((s = di.readSetOfStrings()) != null) {
+    while (i <= m.maxDocs && (s = di.readSetOfStrings()) != null) {
       if (s.size() > 0) {
         for (String k: s)
           cache.put(k, i);
       }
       i += 1;
     }
-    ci.close();
+    di.close();
     
     int j = 0;
-    while (j < m.maxDocs) {
+    while (j <= m.maxDocs) {
       while (ci.peek() != '\n') {
         cache.insertCitation(j, ci.readInt());
       }
@@ -152,14 +163,14 @@ public class CitationCacheReaderWriter {
   }
 
   private OutputStreamDataOutput getOutputStream(String fname) throws FileNotFoundException {
-    File f = new File(targetDir + File.pathSeparator + fname);
+    File f = new File(targetDir + File.separator + fname);
     if (f.exists())
       f.delete();
     return new OutputStreamDataOutput(new FileOutputStream(f));
   }
   
   
-  private long getIndexGeneration(SolrIndexSearcher searcher) {
+  public static long getIndexGeneration(SolrIndexSearcher searcher) {
     long generation = -1;
     try {
       generation = searcher.getIndexReader().getIndexCommit().getGeneration();
@@ -169,15 +180,31 @@ public class CitationCacheReaderWriter {
     return generation;
   }
   
+	public static long getCacheGeneration(File cacheDir) {
+		long generation = -2;
+		File f = new File(cacheDir.getAbsolutePath() + File.separator + GENERATION);
+
+		if (f.exists()) {
+			try {
+				BufferedDataInput gi = new BufferedDataInput(new FileInputStream(f));
+				generation = gi.readLong();
+				gi.close();
+			} catch (IOException e) {
+				// NOOP
+			}
+		}
+		return generation;
+	}
+  
   private BufferedDataInput openInputStream(String fname) throws IOException {
-    File f = new File(targetDir + File.pathSeparator + fname);
+    File f = new File(targetDir + File.separator + fname);
     if (!f.exists())
       throw new IOException(f.getAbsolutePath() + " does not exist");
     return new BufferedDataInput(new FileInputStream(f));
   }
   
-  private Metadata loadMetadata() throws IOException {
-    File f = new File(targetDir + File.pathSeparator + GENERATION);
+  public Metadata loadMetadata() throws IOException {
+    File f = new File(targetDir + File.separator + GENERATION);
     long generation = -1;
     int maxDocs = 0;
     
@@ -187,10 +214,10 @@ public class CitationCacheReaderWriter {
       maxDocs = gi.readInt();
     }       
     else { // generation was not sync'ed - we can go the hard route
-      f = new File(targetDir + File.pathSeparator + REFERENCES);
+      f = new File(targetDir + File.separator + REFERENCES);
       
       if (!f.exists())
-        f = new File(targetDir + File.pathSeparator + CITATIONS);
+        f = new File(targetDir + File.separator + CITATIONS);
         if (! f.exists())
           throw new IOException("Cannot find .gen or .cit or .ref input files");
        
@@ -209,7 +236,7 @@ public class CitationCacheReaderWriter {
     return g;
   }
   
-  private class BufferedDataInput extends DataInput {
+  public static class BufferedDataInput extends DataInput {
     
     private FileInputStream is;
 
@@ -231,13 +258,15 @@ public class CitationCacheReaderWriter {
     }
     
     public int peek() throws IOException {
-      is.mark(1);
-      return is.read();
+      long p = is.getChannel().position();
+      int b = is.read();
+      is.getChannel().position(p);
+      return b;
     }
     
   }
   
-  private class Metadata {
+  public static class Metadata {
     public long generation = -1;
     public int maxDocs = 0;
   }

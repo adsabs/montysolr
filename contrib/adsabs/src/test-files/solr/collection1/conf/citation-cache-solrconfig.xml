@@ -43,6 +43,18 @@
               referenceFields="reference"
               />
               
+    <cache name="citations-cache-from-dump"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              citationFields="citation"
+              referenceFields="reference"
+              loadDumpedCache="true"
+              />
+              
   </query>  
   
   
