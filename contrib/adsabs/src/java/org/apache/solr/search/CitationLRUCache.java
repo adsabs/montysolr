@@ -221,8 +221,8 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 			// increment local inserts regardless of state???
 			// it does make it more consistent with the current size...
 			inserts++;
-			if ((int) value > maxDocid)
-				maxDocid = (int) value;
+			if (value instanceof Integer && (Integer) value > maxDocid)
+				maxDocid = (Integer) value;
 			return relationships.put(key, value);
 		}
 	}
@@ -1023,7 +1023,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
 			// i was hoping thi sis not necessary, but set(index, value)
 			// throws errors otherwise
-			for (int i = 0; i <= maxDocSize; i++) {
+			for (int i = 0; i < maxDocSize; i++) {
 				references.add(null);
 				citations.add(null);
 			}
@@ -1132,7 +1132,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
 	@Override
 	public void initializeCitationCache(int maxDocs) {
-		relationships = new RelationshipLinkedHashMap<K, V>(maxDocs+1, 0.75f, true, 1024, 100f);
+		relationships = new RelationshipLinkedHashMap<K, V>(maxDocs, 0.75f, true, 1024, 100f);
 		((RelationshipLinkedHashMap) relationships).initializeCitationCache(maxDocs);
 		if (stats == null)
 			stats = new CumulativeStats();

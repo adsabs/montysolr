@@ -128,7 +128,7 @@ public class CitationCacheReaderWriter {
   public void load(CitationCache cache) throws IOException {
     Metadata m = loadMetadata();
     
-    cache.initializeCitationCache(m.maxDocs);
+    cache.initializeCitationCache(m.maxDocs+1);
     
     BufferedDataInput ci = openInputStream(CITATIONS);
     BufferedDataInput ri = openInputStream(REFERENCES);

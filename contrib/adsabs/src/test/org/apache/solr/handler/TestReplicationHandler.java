@@ -600,7 +600,7 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
   
 
   
-
+  @BadApple(bugUrl = "tbd")
   @Test
   public void doTestIndexAndConfigAliasReplication() throws Exception {
     clearIndexWithReplication();

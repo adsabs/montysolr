@@ -205,7 +205,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
       // positions; so we extract these and add them next to the edismax generated query
       // 28/10/13 - I've finally modified edismax (to call our aqp) when building
       // a query, so this is being taken care off by us
-      add(new AqpAdsabsExtractMultisynonymsProcessor());
+      // 02/04/2018 - leaving the component here as it might be useful for *some*
+      // situations; but deactivating it
+      // add(new AqpAdsabsExtractMultisynonymsProcessor());
       
     }
 		
