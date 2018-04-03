@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.stream.Stream;
 
 import monty.solr.util.MontySolrAbstractTestCase;
@@ -47,6 +48,7 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 		
 		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
 			"citation-cache-solrconfig.xml";
+		System.out.println(System.getProperties());
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
 

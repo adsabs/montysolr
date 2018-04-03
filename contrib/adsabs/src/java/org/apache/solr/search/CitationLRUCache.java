@@ -377,7 +377,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 		if (isAutowarmingOn()) {
 			isWarming = true;
 			boolean buildMe = true;
-			if (loadCache) {
+			if (loadCache && getCacheStorageDir(searcher) != null) {
 				CitationCacheReaderWriter ccrw = getCitationCacheReaderWriter(searcher);
 				if (ccrw.getCacheGeneration(getCacheStorageDir(searcher)) == ccrw.getIndexGeneration(searcher)) {
 					log.info("Trying to load persisted cache " + name());
@@ -424,7 +424,16 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 	}
 	
 	private File getCacheStorageDir(SolrIndexSearcher searcher) {
-		return new File(searcher.getCore().getResourceLoader().getConfigDir());
+		File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
+		try {
+		  assert f.exists();
+		  assert f.isDirectory();
+		  assert f.canWrite();
+		}
+		catch (Exception e) {
+		  return null;
+		}
+		return f;
 	}
 	
 	private CitationCacheReaderWriter getCitationCacheReaderWriter(SolrIndexSearcher searcher) {
