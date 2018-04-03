@@ -187,7 +187,7 @@ define([
       expect(n.view.$("li.register").length).to.eql(0);
 
       expect(n.view.$(".btn.btn-link.dropdown-toggle").length).to.eql(2);
-      expect(n.view.$(".btn.btn-link.dropdown-toggle").text().trim()).to.eql('Learn \n                    \n                      Account');
+      expect(n.view.$(".btn.btn-link.dropdown-toggle").text().trim()).to.eql('About \n                    \n                      Account');
       expect(n.view.$(".dropdown-menu:last li:first").text().trim()).to.eql("You are signed in as  bumblebee");
 
       //lack of username indicates user is logged out
