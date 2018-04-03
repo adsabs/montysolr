@@ -170,6 +170,7 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
       int docid = es.getKey();
       int docids[] = es.getValue();
       for (int reference: docids) {
+    	  System.out.println("FOOO " + reference + " " + cache.getHighestDocid());
         List<Integer> a = Arrays.stream(citations.get(reference)).boxed().collect(Collectors.toList());
         List<Integer> b = Arrays.stream(citationsWrapper.getLuceneDocIds(reference)).boxed().collect(Collectors.toList());
         assertTrue(a.contains(docid));

@@ -380,29 +380,29 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 			if (loadCache) {
 				CitationCacheReaderWriter ccrw = getCitationCacheReaderWriter(searcher);
 				if (ccrw.getCacheGeneration(getCacheStorageDir(searcher)) == ccrw.getIndexGeneration(searcher)) {
-					log.info("Trying to load persisted cache");
+					log.info("Trying to load persisted cache " + name());
 					try {
 						ccrw.load(this);
 						buildMe = false;
-						log.info("Warming cache done (# entries:" + relationships.size() + "): " + searcher);
+						log.info("Warming cache done " + name() + " (# entries:" + relationships.size() + "): " + searcher);
 					} catch (IOException e) {
-						log.error("Failed loading persisted cache", e);
+						log.error("Failed loading persisted cache " + name(), e);
 					}
 				}
 				else {
-					log.info("Will not load the cache; current index generation differs");
+					log.info("Will not load the cache " + name() + " current index generation differs");
 				}
 			}
 			
 			if (buildMe) {
 				try {
-					log.info("Warming cache (" + name() + "): " + searcher);
+					log.info("Building cache (" + name() + "): " + searcher);
 					if (this.incremental) {
 						warmIncrementally(searcher, old);
 					} else {
 						warmRebuildEverything(searcher, old);
 					}
-					log.info("Warming cache done (# entries:" + relationships.size() + "): " + searcher);
+					log.info("Warming cache " + name() + " done (# entries:" + relationships.size() + "): " + searcher);
 				} catch (IOException e) {
 					throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
 				}

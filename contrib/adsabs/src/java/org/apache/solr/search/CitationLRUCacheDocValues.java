@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1054,5 +1055,34 @@ public class CitationLRUCacheDocValues<K,V> extends SolrCacheBase implements Cit
 	    }
 	
     }
-  };
+  }
+	@Override
+	public void initializeCitationCache(int maxDocs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void insertCitation(int sourceDocId, int targetDocId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void insertReference(int sourceDocId, int targetDocId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Iterator<Entry<K, V>> getDictionary() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getHighestDocid() {
+		// TODO Auto-generated method stub
+		return 0;
+	};
 }
