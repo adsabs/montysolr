@@ -51,6 +51,7 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 	}
 
 	private CitationLRUCache cache;
+	private Path tmpdir;
 	
 
 	public void createCache() throws Exception {
@@ -75,7 +76,7 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 		m.put("referenceFields", "reference");
 		m.put("citationFields", "citation");
 		
-		cache.initializeCitationCache(10);
+		cache.initializeCitationCache(10+1);
 		
 		for (int i=0; i<11; i++) {
 			cache.put("b" + i, i);
@@ -110,12 +111,22 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+		tmpdir = Files.createTempDirectory("citation-cache");
 		createCache();
 	}
 	
 	@Override
 	public void tearDown() throws Exception {
+		File cfg = new File(h.getCore().getResourceLoader().getConfigDir());
+		for (File c: cfg.listFiles()) {
+			if (c.getPath().contains("citation_cache"))
+				c.delete();
+		}
 		super.tearDown();
+		for (File f: tmpdir.toFile().listFiles()) {
+			f.delete();
+		}
+		tmpdir.toFile().delete();
 		
 	}
 	
@@ -126,7 +137,6 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 	@Test
 	public void test() throws IOException, Exception {
 		//System.out.println(formatCache(cache));
-		Path tmpdir = Files.createTempDirectory("citation-cache");
 	
 		CitationCacheReaderWriter rw = new CitationCacheReaderWriter(tmpdir.toFile());
 		rw.persist(cache, 1);
