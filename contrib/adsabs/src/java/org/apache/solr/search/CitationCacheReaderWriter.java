@@ -39,6 +39,10 @@ public class CitationCacheReaderWriter {
     assert targetDir.canWrite();
   }
   
+  public String getTargetDir() {
+    return targetDir.toString();
+  }
+  
   @SuppressWarnings("unchecked")
   public void persist(CitationCache cache, long generation) throws IOException {
     
@@ -122,7 +126,7 @@ public class CitationCacheReaderWriter {
   
   /**
    * Load/unpack data from the files stored on disk.
-   * @throws IOException 
+   * @throws IOException - when we fail loading
    */
   @SuppressWarnings("unchecked")
   public void load(CitationCache cache) throws IOException {

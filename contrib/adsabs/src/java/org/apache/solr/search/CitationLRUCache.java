@@ -376,7 +376,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 		long warmingStartTime = System.nanoTime();
 		if (isAutowarmingOn()) {
 			isWarming = true;
+			
 			boolean buildMe = true;
+			
 			if (loadCache && getCacheStorageDir(searcher) != null) {
 				CitationCacheReaderWriter ccrw = getCitationCacheReaderWriter(searcher);
 				if (ccrw.getCacheGeneration(getCacheStorageDir(searcher)) == ccrw.getIndexGeneration(searcher)) {
@@ -390,7 +392,8 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 					}
 				}
 				else {
-					log.info("Will not load the cache " + name() + " current index generation differs");
+					log.info("Will not load the cache {} current index generation differs; dump:{} != index:{}", 
+					    name(), ccrw.getCacheGeneration(getCacheStorageDir(searcher)), ccrw.getIndexGeneration(searcher));
 				}
 			}
 			
@@ -410,7 +413,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
 			sourceReaderHashCode = searcher.hashCode();
 			
-			if (dumpCache) {
+			if (dumpCache && buildMe) {
 				try {
 					persistCitationCache(searcher);
 				} catch (IOException e) {
@@ -445,6 +448,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 		
 		CitationCacheReaderWriter ccrw = getCitationCacheReaderWriter(searcher);
 		ccrw.persist(this, ccrw.getIndexGeneration(searcher));
+		log.info("Persisted {} into {}", name(), ccrw.getTargetDir());
 	}
 
 
