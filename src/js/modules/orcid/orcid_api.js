@@ -688,11 +688,12 @@ function (
         // workResponse will be in ID:WORK format
         _.forEach(workResponse, function (work, id) {
           var cacheEntry = _.find(self.addCache, function (e) {
-            e.id = id;
+            return e.id === id;
           });
 
           if (!cacheEntry) {
-            throw new Error('No Cache Entry Found');
+            console.error('No Cache entry found');
+            return true;
           }
 
           var promise = cacheEntry.promise;

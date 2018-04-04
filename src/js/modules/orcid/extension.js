@@ -91,7 +91,7 @@ function (
      *
      * @returns {object} - orcid action options
      */
-    WidgetClass.prototype._getOrcidInfo = function (recInfo) {
+    WidgetClass.prototype._getOrcidInfo = _.memoize(function (recInfo) {
       var msg = { actions: {}, provenance: null };
 
       if (recInfo.isCreatedByOthers && recInfo.isCreatedByADS) {
@@ -123,8 +123,18 @@ function (
         msg.provenance = null;
       }
       return msg;
-    };
+    }, function (ret) {
 
+      return [
+        ret.isCreatedByADS, ret.isCreatedByOthers, ret.isKnownToADS, ret.provenance
+      ];
+    });
+
+    /**
+     * Set the pending state on a set of docs
+     * @param {array} docs the docs the update
+     * @param {boolean} pending the new pending state
+     */
     WidgetClass.prototype._setDocsToPending = function (docs, pending) {
       _.forEach(docs, function (d) {
         var p = _.isBoolean(pending) ? pending : true;
@@ -144,9 +154,6 @@ function (
       var self = this;
       var failRetry = false;
       var getDocInfo = _.noop;
-
-      // start the docs to pending
-      this._setDocsToPending(docs);
 
       // add orcid info to the documents
       var orcidApi = this.getBeeHive().getService('OrcidApi');
@@ -187,12 +194,20 @@ function (
       }, 100);
 
       // attempt to find the model to update and update it's orcid actions
-      var onSuccess = function () {
-
-        _.forEach(_.toArray(arguments), function (info, i) {
+      var onSuccess = function (documents, count) {
+        _.forEach(_.rest(arguments), function (info, i) {
 
           // since the order is maintain from the promises we can grab by index
-          var work = _.clone(docs[i]);
+          var work = documents[i];
+
+          // get the new set of actions
+          var actions = self._getOrcidInfo(info);
+
+          // if the record was created by ADS, we can update it now
+          if (info.sourcedByADS && _.isUndefined(work.source_name)) {
+            work.source_name = 'NASA Astrophysics Data System';
+          }
+          work.orcid = _.extend({}, work.orcid, actions, { pending: false });
 
           // make sure the doc has any information we gained
           if (_.isUndefined(work.identifier)) {
@@ -234,8 +249,6 @@ function (
               }
             }
 
-            // get the new set of actions, also set the source name
-            var actions = self._getOrcidInfo(info);
             if (_.isUndefined(model.get('identifier')) && self.orcidWidget) {
               model.set('identifier', work.identifier);
             }
@@ -246,7 +259,9 @@ function (
               orcidWorkPath: orcidPath
             });
           } else {
-            _.defer(setPendingToDefaultActions);
+            if (count < 60) {
+              _.delay(_.bind(onSuccess, self, [work], count + 1), 500);
+            }
           }
 
           // if entry has children, remove them
@@ -259,7 +274,7 @@ function (
               if (model) {
                 self.removeModel(model);
               } else {
-                _.defer(setPendingToDefaultActions);
+                // do nothing
               }
             });
           }
@@ -267,11 +282,11 @@ function (
       };
 
       // retry once, then just set everything still pending to errored
-      var onFail = function () {
+      var onFail = function (documents) {
 
         if (!failRetry) {
           failRetry = true;
-          return getDocInfo();
+          return getDocInfo(documents);
         }
 
         // set everything pending to be an error
@@ -279,40 +294,39 @@ function (
       };
 
       // set all docs to pending and start the async doc info requests
-      getDocInfo = function () {
-        var promises = [];
+      getDocInfo = function (documents) {
+        var promises = _.map(documents, function (d) {
+          return orcidApi.getRecordInfo(d).done(function (info) {
 
-        _.each(docs, function (d) {
-          promises.push(orcidApi.getRecordInfo(d));
+            // if the record was created by ADS, we can update it now
+            if (info.sourcedByADS && _.isUndefined(d.source_name)) {
+              d.source_name = 'NASA Astrophysics Data System';
+            }
+
+            // no matter what, update the docs asap
+            d.orcid = _.extend({}, d.orcid, self._getOrcidInfo(info), { pending: false });
+          });
         });
+
+
+        // start the docs to pending
+        self._setDocsToPending(documents);
 
         // wait for all the promises to resolve
-        $.when.apply($, promises).then(onSuccess, onFail).always(function () {
-          self.trigger('orcid-update-finished');
-        });
+        $.when.apply($, promises).then(
+          _.partial(onSuccess, documents),
+          _.partial(onFail, documents)
+        );
       };
 
-      // check if the colllection is empty, if so we may need to wait a bit
-      if (_.isEmpty(self.hiddenCollection.models)) {
-        var pubsub = self.getPubSub();
-        var onFeedback = function (feedback) {
-          switch(feedback.code) {
-            case ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START:
-            case ApiFeedback.CODES.SEARCH_CYCLE_FINISHED: {
-              getDocInfo();
-              pubsub.unsubscribe(pubsub.FEEDBACK, onFeedback);
-            }
-          }
-        };
-        pubsub.subscribe(pubsub.FEEDBACK, onFeedback);
-      } else {
-        // start the process
-        getDocInfo();
-      }
-
+      getDocInfo(docs);
       return docs;
     };
 
+    /**
+     * Sync up the collection with orid information currently on the
+     * hidden collection
+     */
     WidgetClass.prototype._paginationUpdate = function () {
       var self = this;
       _.forEach(this.hiddenCollection.models, function (hiddenModel) {
@@ -326,12 +340,19 @@ function (
       });
     };
 
-    WidgetClass.prototype._updateModelsWithOrcid = function () {
-      var modelsToUpdate = _.filter(this.collection.models, function (m) {
+    /**
+     * update the models with orcid information
+     * @param {number=} tries - number of current retries
+     */
+    WidgetClass.prototype._updateModelsWithOrcid = function (models, tries) {
+      var modelsToUpdate = _.filter(models || this.hiddenCollection.models, function (m) {
         return !m.has('_work') && (m.has('bibcode') || m.has('doi'));
       });
 
       if (_.isEmpty(modelsToUpdate)) {
+        if (tries < 60) {
+          _.delay(_.bind(self._updateModelsWithOrcid, self, null, tries + 1), 500);
+        }
         return;
       }
 
@@ -345,27 +366,39 @@ function (
             var wIds = _.flatten(_.values(w.getExternalIds()));
             var idMatch = _.intersection(exIds, wIds).length > 0;
 
-            if ((_.isPlainObject(m._work) && m._work === w) || idMatch) {
+            if (idMatch) {
               m.set({
                 source_name: w.getSources().join('; '),
                 _work: w
               });
+            } else {
+              if (tries < 60) {
+                _.delay(_.bind(self._updateModelsWithOrcid, self, [m], tries + 1), 500);
+              }
             }
           });
         });
       });
     };
 
+    /**
+     * if orcidMode is on, update the set of new docs with orcid information
+     * @param {ApiResponse} apiResponse - the response from the api
+     * @param {array} docs - set of docs to be processed
+     * @param {object} pagination - pagination data (i.e. start, page, etc)
+     */
     WidgetClass.prototype.processDocs = function (apiResponse, docs, pagination) {
       docs = processDocs.apply(this, arguments);
       var user = this.getBeeHive().getObject('User');
       // for results list only show if orcidModeOn, for orcid big widget show always
       if ((user && user.isOrcidModeOn()) || this.orcidWidget) {
-        var result = this.addOrcidInfo(docs);
+        var params = apiResponse.get('responseHeader.params');
+        var docsSoFar = parseInt(params.start) + parseInt(params.rows);
+        var result = this.addOrcidInfo(docs, docsSoFar);
         if (pagination.numFound !== result.length) {
           _.extend(pagination, this.getPaginationInfo(apiResponse, docs));
         }
-        this._updateModelsWithOrcid();
+        _.delay(_.bind(this._updateModelsWithOrcid, this), 1000);
         return result;
       }
       return docs;
@@ -411,7 +444,6 @@ function (
        * reject on failure
        */
       var onADSFailure = function () {
-        console.error('Error retrieving doc from ADS');
         final.reject.apply(final, arguments);
       };
 
@@ -419,7 +451,6 @@ function (
        * reject on failure
        */
       var onOrcidFailure = function () {
-        console.error('Error retrieving doc from ORCiD');
         final.reject.apply(final, arguments);
       };
 
