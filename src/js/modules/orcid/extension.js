@@ -12,6 +12,7 @@ define([
   'js/components/api_query_updater',
   'js/components/api_targets',
   'js/modules/orcid/work',
+  'js/components/api_feedback',
   'js/mixins/dependon',
 ],
 function (
@@ -20,7 +21,8 @@ function (
   ApiRequest,
   ApiQueryUpdater,
   ApiTargets,
-  Work
+  Work,
+  ApiFeedback
 ) {
 
   return function (WidgetClass) {
@@ -123,6 +125,13 @@ function (
       return msg;
     };
 
+    WidgetClass.prototype._setDocsToPending = function (docs, pending) {
+      _.forEach(docs, function (d) {
+        var p = _.isBoolean(pending) ? pending : true;
+        d.orcid = _.extend({}, d.orcid, { pending: p });
+      });
+    };
+
     /**
      * Takes in a set of documents, should be a result of a search or orcid
      * record page.  In either case, it will match the models by bibcode and
@@ -135,6 +144,9 @@ function (
       var self = this;
       var failRetry = false;
       var getDocInfo = _.noop;
+
+      // start the docs to pending
+      this._setDocsToPending(docs);
 
       // add orcid info to the documents
       var orcidApi = this.getBeeHive().getService('OrcidApi');
@@ -176,12 +188,6 @@ function (
 
       // attempt to find the model to update and update it's orcid actions
       var onSuccess = function () {
-
-        // check if the colllection is empty, if so we may need to wait a bit
-        if (_.isEmpty(self.hiddenCollection.models)) {
-
-          return;
-        }
 
         _.forEach(_.toArray(arguments), function (info, i) {
 
@@ -277,9 +283,6 @@ function (
         var promises = [];
 
         _.each(docs, function (d) {
-
-          // set the orcid prop to pending
-          d.orcid = _.extend({}, d.orcid, { pending: true });
           promises.push(orcidApi.getRecordInfo(d));
         });
 
@@ -289,8 +292,23 @@ function (
         });
       };
 
-      // start the process
-      getDocInfo();
+      // check if the colllection is empty, if so we may need to wait a bit
+      if (_.isEmpty(self.hiddenCollection.models)) {
+        var pubsub = self.getPubSub();
+        var onFeedback = function (feedback) {
+          switch(feedback.code) {
+            case ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START:
+            case ApiFeedback.CODES.SEARCH_CYCLE_FINISHED: {
+              getDocInfo();
+              pubsub.unsubscribe(pubsub.FEEDBACK, onFeedback);
+            }
+          }
+        };
+        pubsub.subscribe(pubsub.FEEDBACK, onFeedback);
+      } else {
+        // start the process
+        getDocInfo();
+      }
 
       return docs;
     };
