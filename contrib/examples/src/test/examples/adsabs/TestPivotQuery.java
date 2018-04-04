@@ -19,10 +19,10 @@ public class TestPivotQuery extends MontySolrQueryTestCase {
 				
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
 		schemaString = MontySolrSetup.getMontySolrHome()
-					+ "/contrib/examples/adsabs/server/solr/collection1/schema.xml";
+					+ "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
 		
 		configString = MontySolrSetup.getMontySolrHome()
-					+ "/contrib/examples/adsabs/server/solr/collection1/solrconfig.xml";
+					+ "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
 		
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}

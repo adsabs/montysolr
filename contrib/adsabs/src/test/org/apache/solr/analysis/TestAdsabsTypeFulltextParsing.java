@@ -110,7 +110,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 	public static void beforeClass() throws Exception {
 		
 		makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
-		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1",
+		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
 		      MontySolrSetup.getSolrHome() + "/example/solr/collection1"
 		    });
 				
@@ -119,7 +119,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
 		
 		configString = MontySolrSetup.getMontySolrHome()
-			    + "/contrib/examples/adsabs/server/solr/collection1/solrconfig.xml";
+			    + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
 		
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
 	}
@@ -132,7 +132,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      */
 
     String configFile = MontySolrSetup.getMontySolrHome()
-    		+ "/contrib/examples/adsabs/server/solr/collection1/schema.xml";
+    		+ "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
 
     File newConfig;
     try {
