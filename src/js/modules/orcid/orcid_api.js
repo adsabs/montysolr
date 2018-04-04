@@ -87,8 +87,8 @@ function (
       this.getUserProfileCache = [];
       this.authData = null;
       this.addWait = 3000;
-      this.deleteWait = 1500;
-      this.profileWait = 500;
+      this.deleteWait = 100;
+      this.profileWait = 100;
       this.maxAddChunkSize = 100;
       this.maxDeleteChunkSize = 10;
       this.db = {};

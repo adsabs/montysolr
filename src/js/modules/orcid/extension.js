@@ -186,7 +186,7 @@ function (
         _.forEach(_.toArray(arguments), function (info, i) {
 
           // since the order is maintain from the promises we can grab by index
-          var work = docs[i];
+          var work = _.clone(docs[i]);
 
           // make sure the doc has any information we gained
           if (_.isUndefined(work.identifier)) {
@@ -194,6 +194,12 @@ function (
               work.identifier = info.bibcode;
             } else if (_.isArray(info.doi)) {
               work.identifier = info.doi[0];
+            } else if (_.isPlainObject(work._work)) {
+              var type = work._work.getExternalIdType();
+              type = _.isArray(type) ? type[0] : type;
+              if (_.isString(type)) {
+                work.identifier = work._work.getExternalIds()[type];
+              }
             }
           }
 
@@ -224,6 +230,9 @@ function (
 
             // get the new set of actions, also set the source name
             var actions = self._getOrcidInfo(info);
+            if (_.isUndefined(model.get('identifier')) && self.orcidWidget) {
+              model.set('identifier', work.identifier);
+            }
 
             model.set({
               orcid: actions,
