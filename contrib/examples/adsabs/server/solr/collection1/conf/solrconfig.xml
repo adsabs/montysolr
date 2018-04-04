@@ -467,7 +467,7 @@
   <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy">
     <lst name="master">
 	    <str name="replicateAfter">commit</str>
-	    <str name="confFiles">citation_cache.gen,citation_cache.dict,citation_cache.refs,citation_cache.cit</str>
+	    <str name="confFiles">citation_cache.gen,citation_cache.dict,citation_cache.refs,citation_cache.cit,ads_text_multi.synonyms,ads_text_simple.synonyms,ads_text.kill,ads_text.kill_sens,author_curated.synonyms,author_generated.translit,stopwords.txt</str>
     </lst>
   </requestHandler>
   
