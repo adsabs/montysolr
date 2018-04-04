@@ -193,8 +193,6 @@ define([
 
       it('handles a successful getRecordInfo request', function (done) {
         var w = _getWidget();
-        var spy = sinon.spy();
-        w.widget.on('orcid-update-finished', spy);
 
         var oApi = minsub.beehive.getService('OrcidApi');
         var d = $.Deferred();
@@ -207,7 +205,6 @@ define([
 
         // widgets are in the 'loading' state
         expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(1);
-        expect(spy.called).to.eql(false);
 
         // simulate the data has arrived
         d.resolve({
@@ -218,14 +215,11 @@ define([
         // the widget displays orcid actions
         expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(0);
         expect(w.widget.view.children.findByIndex(1).$el.find('.orcid-update').length).to.eql(1);
-        expect(spy.called).to.eql(true);
         done();
       });
 
       it('handles a rejected getRecordInfo request', function (done) {
         var w = _getWidget();
-        var spy = sinon.spy();
-        w.widget.on('orcid-update-finished', spy);
 
         var oApi = minsub.beehive.getService('OrcidApi');
         var d = $.Deferred();
@@ -238,7 +232,6 @@ define([
 
         // widgets are in the 'loading' state
         expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(1);
-        expect(spy.called).to.eql(false);
 
         // simulate error
         d.reject();
@@ -246,10 +239,9 @@ define([
         _.delay(function () {
           // the widget displays orcid actions
           expect(w.widget.view.children.findByIndex(1).$el.find('.s-orcid-loading').length).to.eql(0);
-          expect(spy.called).to.eql(true);
-  
+
           // but the style is 'default' should be default actions
-          expect(w.widget.view.children.findByIndex(1).$el.find('button.btn-default').length).to.eql(1);
+          expect(w.widget.view.children.findByIndex(1).$el.find('button.btn-danger').length).to.eql(1);
           done();
         }, 500);
       });
@@ -282,7 +274,7 @@ define([
         widget.mergeADSAndOrcidData(model);
         expect(widget.getPubSub().publish.called).to.eql(true);
         expect(widget.getPubSub().publish.lastCall.args[1].get('query').get('q')).to.eql(['identifier:foo']);
-        
+
         done();
       });
     })
