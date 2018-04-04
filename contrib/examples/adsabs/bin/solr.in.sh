@@ -84,6 +84,7 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k \
 -Dmontysolr.batch.workdir=${MONTYSOLR_INDEX_DIR:-./server/solr/collection1/data/}/batch-handler \
 -Dmontysolr.enable.write=${MONTYSOLR_ENABLE_WRITE:-false} \
 -Dmontysolr.warmSearcher=${MONTYSOLR_WARM_SEARCHER:-false} \
+-Dmontysolr.load.citation_cache=${MONTYSOLR_LOAD_CITATION_CACHE:-true} \
 -Dmontysolr.maxDocs=${MONTYSOLR_MAX_DOCS:-40000} \
 -Dmontysolr.maxTime=${MONTYSOLR_MAX_TIME:-1800000} \
 -Dsolr.cache.size=${SOLR_CACHE_SIZE:-512} \

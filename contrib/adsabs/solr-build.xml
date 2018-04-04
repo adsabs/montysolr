@@ -38,6 +38,8 @@
   </path>
   <path id="test.classpath">
     <path refid="run.classpath"/>
+  	<!-- this is necessary to see the stderr output //-->
+  	<pathelement path="${common.dir}/../solr/test-framework/src/test-files/"/>
     <path refid="solr.test.base.classpath"/>
     <pathelement location="${common.dir}/build/antlrqueryparser/classes/test"/>
     <fileset dir="extra-lib"/>

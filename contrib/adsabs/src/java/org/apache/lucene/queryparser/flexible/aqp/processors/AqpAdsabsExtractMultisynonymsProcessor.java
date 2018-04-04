@@ -92,7 +92,7 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 			Map<String, String> args = getQueryConfigHandler().get(
 	    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
 			
-			if (!args.containsKey("aqp.unfielded.phrase.edismax.synonym.workaround")) {
+			if (!args.containsKey("aqp.unfielded.phrase.edismax.synonym.workaround") || args.get("aqp.unfielded.phrase.edismax.synonym.workaround") == "false") {
 				return queryTree;
 			}
 			
@@ -184,6 +184,13 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 					new StringReader(value));
 			source.reset();
 		} catch (IOException e1) {
+		  if (source != null) {
+        try {
+          source.close();
+        } catch (IOException e) {
+          // NOOP
+        }
+		  }
 			return null;
 		}
 
@@ -226,9 +233,15 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 				lastTokenEnd = end;
 			}
 		} catch (IOException e) {
-			// pass
+		  // noop
+		} finally {
+		  try {
+        source.close();
+      } catch (IOException e2) {
+        // NOOP
+      }
 		}
-		
+
 		return out;
 	}
 
