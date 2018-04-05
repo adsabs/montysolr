@@ -56,7 +56,7 @@ define([
 
       activate: function (beehive) {
         this.setBeeHive(beehive.getHardenedInstance())
-        pubsub = this.getBeeHive().getService('PubSub');
+        var pubsub = this.getBeeHive().getService('PubSub');
 
         pubsub.subscribe(pubsub.INVITING_REQUEST, _.bind(this.updateCurrentQuery, this));
         pubsub.subscribe(pubsub.USER_ANNOUNCEMENT, _.bind(this.handleUserAnnouncement, this));
@@ -147,6 +147,7 @@ define([
           query: apiQuery
         });
         var defer = $.Deferred();
+        var pubsub = this.getPubSub();
         pubsub.subscribeOnce(pubsub.DELIVERING_RESPONSE, _.bind(function(data) {
           defer.resolve(data);
         }), this);

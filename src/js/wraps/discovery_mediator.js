@@ -82,8 +82,9 @@ define([
       if (feedback.numFound > 1000) {
         app.getWidget('SearchWidget').done(function(widget) {
           // make the search form pulsate little bit
-          if (widget.view && widget.view.highlightFields)
-            search.view.highlightFields();
+          if (widget.view && widget.view.highlightFields) {
+            widget.view.highlightFields();
+          }
         });
       }
 

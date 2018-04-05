@@ -484,11 +484,11 @@ define([
           allReferences2 = _.flatten(_.pluck(links2, "overlap"));
 
           _.each(_.intersection(allReferences1, allReferences2), function (s) {
-            percent1 = _.filter(allReferences1, function (b) {
+            var percent1 = _.filter(allReferences1, function (b) {
               return b == s
             }).length / allReferences1.length;
 
-            percent2 = _.filter(allReferences2, function (b) {
+            var percent2 = _.filter(allReferences2, function (b) {
               return b == s
             }).length / allReferences2.length;
 
@@ -528,7 +528,7 @@ define([
           });
 
           //make a copy
-          summaryData = $.extend({}, groupData);
+          var summaryData = $.extend({}, groupData);
           summaryData.processedTopCommonReferences = [];
           summaryData.titleWords = _.keys(groupData.node_label);
 
@@ -544,7 +544,7 @@ define([
               return n[1]
             }).reverse();
           //using OLD ID because it is the one that joins the group to the detail nodes
-          filteredNodes = this.getAllNodes(groupData.id);
+          var filteredNodes = this.getAllNodes(groupData.id);
           topNodes = _.sortBy(filteredNodes, function (o) {
             return o.citation_count;
           }).reverse();
@@ -693,8 +693,8 @@ define([
       getAllLinks: function (id) {
         var fullGraph = this.model.get("graphData").fullGraph;
         var indexes = [];
-        links = [],
-          filteredNodes = [];
+        var links = [];
+        var filteredNodes = [];
 
         _.each(fullGraph.nodes, function (n, i) {
           if (n.group === id) {

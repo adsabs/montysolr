@@ -193,7 +193,7 @@ define([
           d.identifier = d.bibcode;
 
           // make sure undefined doesn't become "undefined"
-          d.encodedIdentifier = _.isUndefined(d.identifier) ? 
+          d.encodedIdentifier = _.isUndefined(d.identifier) ?
             d.identifier : encodeURIComponent(d.identifier);
           var h = {};
 
@@ -220,6 +220,7 @@ define([
           }
 
           var maxAuthorNames = 3;
+          var shownAuthors;
 
           if (d.author && d.author.length > maxAuthorNames) {
             d.extraAuthors = d.author.length - maxAuthorNames;

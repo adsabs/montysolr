@@ -139,7 +139,7 @@ define([
       if (!this.collection.find({'id': pageManagerName})) {
         this.collection.add({'id': pageManagerName});
       }
-      
+
       var pageManagerModel = this.collection.find({id: pageManagerName});
 
       //if the model does not already reference the actual manager widget, add it now
@@ -159,7 +159,7 @@ define([
         pageManagerWidget.assemble(app);
       }
       else {
-        console.error('eeeek, ' + pageManager + ' has no assemble() method!');
+        console.error('eeeek, ' + pageManagerName + ' has no assemble() method!');
       }
 
       // it's a new page

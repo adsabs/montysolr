@@ -87,7 +87,7 @@ define([
                   self.getPubSub().publish(result.signal, result.arguments);
                   break;
                 default:
-                  throw new Exception('Unknown action type:' + result);
+                  throw new Error('Unknown action type:' + result);
               }
 
               // close the widget immediately

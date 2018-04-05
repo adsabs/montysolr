@@ -56,12 +56,21 @@ define([
      '/page_managers/all_tests.spec.js',
      '/page_managers/toc_controller.spec.js',
      '/page_managers/toc_manager_test.spec.js',
+<<<<<<< HEAD
      '/widgets/authentication_widget.spec.js',
      '/widgets/abstract_widget.spec.js',
+=======
+     '/widgets/abstract_widget.spec.js',
+     '/widgets/authentication_widget.spec.js',
+>>>>>>> 45e28aae... moreblah
      '/widgets/alerts_widget.spec.js',
      '/widgets/api_query_widget.spec.js',
      '/widgets/api_request_widget.spec.js',
      '/widgets/api_response_widget.spec.js',
+<<<<<<< HEAD
+=======
+     '/widgets/author_affiliation_tool.spec.js',
+>>>>>>> 45e28aae... moreblah
      '/widgets/base_widget.spec.js',
      '/widgets/breadcrumb_widget.spec.js',
      '/widgets/bubble_chart.spec.js',
