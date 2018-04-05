@@ -6,17 +6,17 @@ define([
   'analytics'
 ], function ($, require, _, analytics) {
 
-  var before = function () {
+  var init = function () {
     this.sb = sinon.sandbox.create();
   };
 
-  var after = function () {
+  var teardown = function () {
     this.sb.restore();
   };
 
   describe("Analytics (analytics.spec.js)", function () {
-    beforeEach(before);
-    afterEach(after);
+    beforeEach(init);
+    afterEach(teardown);
 
     // beforeEach(function (done) {
     //   // squire can inject mock module, but it can't help us simulate failure
