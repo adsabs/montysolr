@@ -12,7 +12,7 @@ define([
     ){
 
   describe("Widget Paginator (Widget Mixin)", function(){
-
+    var fakeResponse;
     beforeEach(function(){
 
       fakeResponse = new ApiResponse(TestData());

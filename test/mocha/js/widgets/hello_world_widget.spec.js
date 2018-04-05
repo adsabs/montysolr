@@ -24,7 +24,7 @@ define([
     describe("Hello Worlds Widget (hello_world_widget.spec.js)", function () {
 
       beforeEach(function () {
-        this.minsub = minsub = new (MinimalPubSub.extend({
+        this.minsub = new (MinimalPubSub.extend({
           request: function (apiRequest) {
             return TestData();
           }

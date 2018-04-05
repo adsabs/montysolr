@@ -230,7 +230,7 @@ define([
         signOut : orcidSignOutSpy,
         getUserProfile : function(){
           var d = $.Deferred();
-          d.resolve(profileInfo);
+          d.resolve({});
           return d
         }
       });
