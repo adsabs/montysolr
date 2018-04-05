@@ -41,99 +41,20 @@ define([
     ObjectFacet
 ) {
 
-  // var desc = function (underTest, description, cb) {
-  //   underTest = '[' + underTest + ']';
-  //   describe(underTest + ' - ' + description, cb);
-  // };
-
-  // desc.skip = function (underTest, description, cb) {
-  //   underTest = '[' + underTest + ']';
-  //   describe.skip(underTest + ' - ' + description, cb);
-  // };
-
-  // var withServer = function (minsub) {
-  //   var server = sinon.fakeServer.create();
-  //   var reqCache = [];
-
-  //   server.respondWith('POST', /objects/, function (xhr) {
-	//   var apiData = ObjectApiResponse();
-	//   console.log('responding to POST request');
-  //     xhr.respond(200, {
-  //       'Content-Type': 'application/json'
-  //     }, JSON.stringify(apiData));
-  //   });
-
-  //   server.respondWith('GET', /facet\.prefix=(\d)/, function (xhr, facet_prefix) {
-	//   var facetData = ObjectSolrResponse(parseInt(facet_prefix));
-	//   console.log('getting facet data for level: ' + facet_prefix);
-  //     xhr.respond(200, {
-  //       'Content-Type': 'application/json'
-  //     }, JSON.stringify(facetData));
-  //   });
-
-  //   var sendRequest = function (url, options, data) {
-  //     var $dd = $.Deferred();
-
-  //     $.ajax(url, _.extend(options, {
-  //       data: JSON.stringify(data),
-  //       dataType: 'json',
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       }
-  //     }))
-  //     .done(function () {
-  //       options && options.done && options.done.apply(this, arguments);
-  //       $dd.resolve.apply($dd, arguments);
-  //     })
-  //     .fail(function () {
-  //       options && options.fail && options.fail.apply(this, arguments);
-  //       $dd.reject.apply($dd, arguments);
-  //     });
-
-  //     server.respond();
-  //     return $dd.promise().done(function (res) {
-  //       reqCache.pop().call(null, new JSONResponse(res));
-  //     });
-  //   };
-
-  //   minsub.request = _.constant('');
-
-  //   sinon.stub(minsub.pubsub, 'subscribeOnce', function (key, action, cb) {
-  //     reqCache.push(cb);
-  //   });
-
-  //   sinon.stub(minsub.pubsub, 'subscribe', function (key, action, cb) {
-  //     reqCache.push(cb);
-  //   });
-
-  //   sinon.stub(minsub.pubsub, 'publish', function (key, action, apiRequest) {
-	//   var query = (apiRequest.has('query')) ? '?' + apiRequest.get('query').url() : '';
-	//   var url = apiRequest.get('target') + query;
-  //     var options = apiRequest.get('options');
-  //     var data = (options && options.data) || {};
-  //     return sendRequest(url, options, data);
-  //   });
-
-  //   return minsub;
-  // };
-
   var init = function () {
     this.sb = sinon.sandbox.create();
     this.w = new ObjectFacet();
     this.pubsub = new (MinPubSub.extend({
-      request: this.sb.stub(),
-      publish: this.sb.stub(),
-      subscribe: this.sb.stub(),
-      subscribeOnce: this.sb.stub()
+      request: this.sb.stub()
     }))({ verbose: false });
   };
 
   var teardown = function () {
     this.sb.restore();
-
+    this.pubsub.destroy();
   };
 
-  describe.only('NED Object Facet Widget (ned_object_facet.spec.js)', function () {
+  describe('NED Object Facet Widget (ned_object_facet.spec.js)', function () {
     describe('Main Widget', function () {
       beforeEach(init);
       afterEach(teardown);
@@ -143,89 +64,100 @@ define([
         done();
       });
 
-      it('state is updated after render for query', function (done) {
+      it('state is updated after render for query with no id', function (done) {
         const w = new ObjectFacet();
+        const getPubSub = this.sb.stub(w, 'getPubSub');
+        const pubStubs = {
+          DELIVERING_RESPONSE: '0',
+          DELIVERING_REQUEST: '1',
+          publish: this.sb.stub(),
+          subscribe: this.sb.stub(),
+          subscribeOnce: this.sb.stub()
+        };
+        getPubSub.returns(pubStubs);
+
         w.activate(this.pubsub.beehive);
         w.setCurrentQuery(new ApiQuery({ q: 'star' }));
         w.store.dispatch(w.actions.fetch_data());
+
+        // there is a subscription first
+        expect(pubStubs.subscribeOnce.calledOnce).to.eql(true);
+        expect(pubStubs.subscribeOnce.args[0][0]).to.eql(pubStubs.DELIVERING_RESPONSE);
+
+        // grab the callback
+        const callback = pubStubs.subscribeOnce.args[0][1];
+
+        expect(pubStubs.publish.calledOnce).to.eql(true);
+        expect(pubStubs.publish.args[0][0]).to.eql(pubStubs.DELIVERING_REQUEST);
+
+        const expectedRequest = {"q":["star"],"facet":["true"],"facet.mincount":["1"],"facet.limit":[20],"fl":["id"],"facet.prefix":["0/"],"facet.field":["ned_object_facet_hier"],"facet.offset":[0]};
+        let actualRequest = pubStubs.publish.args[0][1];
+        actualRequest = actualRequest.toJSON().query = actualRequest.get('query').toJSON();
+        expect(actualRequest).to.eql(expectedRequest);
+
+        // fire off the callback
+        callback({ toJSON: _.constant(ObjectSolrResponse(0)) });
+
+        // check the store for the facet details
+        const state = w.store.getState();
+        const prop = ObjectSolrResponse(0).facet_counts.facet_fields.ned_object_facet_hier;
+        const expectedFacets = _.filter(prop, _.isString);
+
+        expect(state.children).to.eql(expectedFacets);
+        expect(state.state.open).to.eql(false);
+        expect(state.state.selected).to.eql([]);
+
+        done();
+      });
+
+      it('state is updated after render for query with id', function (done) {
+        const w = new ObjectFacet();
+        const getPubSub = this.sb.stub(w, 'getPubSub');
+        const pubStubs = {
+          publish: this.sb.stub(),
+          subscribe: this.sb.stub(),
+          subscribeOnce: this.sb.stub()
+        };
+        getPubSub.returns(pubStubs);
+
+        w.activate(this.pubsub.beehive);
+        w.setCurrentQuery(new ApiQuery({ q: 'star' }));
+        w.store.dispatch(w.actions.fetch_data());
+        const state = function () { return w.store.getState(); };
+
+        // grab the callback
+        const firstCallback = pubStubs.subscribeOnce.args[0][1];
+        firstCallback({ toJSON: _.constant(ObjectSolrResponse(0)) });
+
+        const id = '0/galaxy';
+        w.store.dispatch(w.actions.select_facet(id));
+        expect(state().facets[id].children).to.eql([]);
+
+        w.store.dispatch(w.actions.data_received(ObjectSolrResponse(1), id));
+        const prop = ObjectSolrResponse(1).facet_counts.facet_fields.ned_object_facet_hier;
+        const expectedFacets = _.filter(prop, _.isString);
+        expect(state().facets[id].children).to.eql(expectedFacets);
+
+        // make a request
+        w.store.dispatch(w.actions.fetch_data(id));
+        const secondCallback = pubStubs.subscribeOnce.args[1][1];
+        const data = ObjectApiResponse();
+        secondCallback({ toJSON: _.constant(ObjectSolrResponse(1)) });
+
+        expect(w).to.have.property('_nedidCache');
+
+        const expectedCache = {};
+        _.forEach(data, function (id) {
+          expectedCache['1/galaxy/' + data[id.id].canonical] = id.id;
+        });
+
+        const thirdCallback = pubStubs.publish.args[2][1].toJSON().options.done;
+        thirdCallback(ObjectApiResponse());
+
+        expect(w._nedidCache).to.deep.equal(expectedCache);
+
         done();
       });
     });
   });
-
-
-
-
-
-
-  // var test = function () {
-  //   describe('SIMBAD Object Facet Widget (ned_object_facet.spec.js)', function () {
-
-  //     desc('Widget', 'Main Widget', function () {
-  //       beforeEach(init);
-  //       afterEach(teardown);
-
-  //       it('extends base widget', function () {
-  //         expect(this.w instanceof BaseWidget).to.eql(true);
-  //       });
-
-  //       it('state is updated after render for query', function () {
-
-  //         this.w.setCurrentQuery(new MinPubSub.prototype.T.QUERY({
-  //           q: 'star'
-  //         }));
-	// 	  var id;
-	// 	  this.w.store.dispatch(this.w.actions.fetch_data(id));
-	// 	  // This should have fired off a Solr request and populated the 4 top level facets
-	// 	  var state = this.w.store.getState();
-	// 	  // Get the expected top level facet entries from the mock data and remove the counts
-	// 	  var expected_facets = ObjectSolrResponse(0).facet_counts.facet_fields.ned_object_facet_hier;
-	// 	  expected_facets = expected_facets.filter(function(el) {
-	// 	  	if (typeof el === 'string') {
-	// 	  		return el
-	// 	  	};
-	// 	  });
-	// 	  // Does the generated top level facet contain the entries from the mock data?
-	// 	  expect(state.children).to.eql(expected_facets);
-	// 	  // and they should be closed
-	// 	  expect(state.state.open).to.eql(false)
-  //         expect(state.state.selected).to.eql([]);
-	// 	  // Next we open the first top level facet
-	// 	  id = '0/galaxy';
-	// 	  this.w.store.dispatch(this.w.actions.select_facet(id));
-	// 	  state = this.w.store.getState();
-	// 	  expect(state.facets[id].children).to.eql([]);
-	// 	  // Update the facet with hierarchical data
-  //         this.w.store.dispatch(this.w.actions.data_received(ObjectSolrResponse(1), id));
-	// 	  state = this.w.store.getState();
-	// 	  var expected_galaxies = ObjectSolrResponse(1).facet_counts.facet_fields.ned_object_facet_hier;
-	// 	  expected_galaxies = expected_galaxies.filter(function(el) {
-	// 	  	if (typeof el === 'string') {
-	// 	  		return el
-	// 	  	};
-	// 	  });
-	// 	  // Now we expect the next level entries to be there
-	// 	  expect(state.facets[id].children).to.eql(expected_galaxies);
-	// 	  // Now we need to open the "Galaxy" and force the translation of the SIMBAD identifiers
-	// 	  this.w.store.dispatch(this.w.actions.fetch_data(id));
-	// 	  state = this.w.store.getState();
-	// 	  // The widget should now have a cached map of SIMBAD identifiers
-	// 	  expect(this.w).to.have.property('_nedidCache');
-	// 	  // The cache should have the contents expected from the mock data
-	// 	  // First build the hash with expected data from the mock data
-	// 	  var expected_cache = {};
-	// 	  var objectData = ObjectApiResponse();
-	// 	  for (var nedid in objectData) {
-	// 		  var facetName = '1/galaxy/' + objectData[nedid].canonical;
-	// 		  expected_cache[facetName] = nedid
-	// 	  };
-	// 	  // Now compare this with the contents of the cache assigned to the widget
-	// 	  expect(this.w._nedidCache).to.eql(expected_cache);
-  //       });
-
-  //     });
-  //   });
-  // };
-
-  // sinon.test(test)();
 });
