@@ -51,6 +51,7 @@ setup:
 release:
   description: 'Build the assets and prepare for a release'
   tasks:
+    - 'env:prod'
     - 'assets'
     - 'clean:release'
     - 'copy:release'
