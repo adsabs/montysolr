@@ -139,11 +139,11 @@ module.exports = function (grunt) {
         },
         {
           cwd: 'node_modules/immutable/dist',
-          src: 'immutable.min.js',
+          src: 'immutable.js',
           dest: 'src/libs/immutable/',
           expand: true,
           rename: function (dest, src) {
-            return dest + src.replace('immutable.min', 'index');
+            return dest + src.replace('immutable', 'index');
           }
         }
       ]

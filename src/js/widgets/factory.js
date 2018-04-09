@@ -1,7 +1,7 @@
 define(['backbone', 'marionette',
-  'js/components/api_query', 'js/components/api_request'
+  'js/components/api_query', 'js/components/api_request', 'js/widgets/base/base_widget'
 ], function(
-  Backbone, Marionette, ApiQuery, ApiRequest) {
+  Backbone, Marionette, ApiQuery, ApiRequest, BaseWidget) {
 
     var Factory = {
       createSimpleWidget: function(view, coll) {

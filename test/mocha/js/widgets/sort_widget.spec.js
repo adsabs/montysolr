@@ -12,7 +12,7 @@ define([
     ],
   function($, _, ApiResponse, ApiRequest, ApiQuery, MinimalPubSub, SortWidget, SortApp, ApiFeedback) {
 
-    var before = function () {
+    var init = function () {
       var minsub = new (MinimalPubSub.extend({
         request: function () {}
       }))({ verbose: false });
@@ -25,7 +25,7 @@ define([
       }, this);
     };
 
-    var after = function () {
+    var teardown = function () {
       this.w.destroy();
       this.w = null;
       this.sb.restore();
@@ -34,8 +34,8 @@ define([
 
     describe("Sort Widget (sort_widget.spec.js)", function (){
 
-      beforeEach(before);
-      afterEach(after);
+      beforeEach(init);
+      afterEach(teardown);
 
       it('updates query and locks on new search', function (done) {
         var self = this;
@@ -149,13 +149,13 @@ define([
         });
         this.w.store.dispatch(SortApp.setQuery(query));
         this.w.store.dispatch(SortApp.setSort('date'));
-        
+
         _.delay(function () {
           expect(spy.calledOnce).to.eql(true);
           done();
         }, 500);
       });
-      
+
       it('changing sort direction, fires new search', function (done) {
         var query = {
           q: ['test foo'],
@@ -167,7 +167,7 @@ define([
         });
         this.w.store.dispatch(SortApp.setQuery(query));
         this.w.store.dispatch(SortApp.setDirection('desc'));
-        
+
         _.delay(function () {
           expect(spy.calledOnce).to.eql(true);
           done();

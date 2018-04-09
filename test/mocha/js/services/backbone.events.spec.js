@@ -156,7 +156,7 @@ define(['backbone', 'underscore'], function(Backbone, _) {
     // it fails (!!!) - so we can use context to differentiate between module (if we can
     // guarantee that modules are passing the same context all the time) and we use
     // _.bind() to provide context to the callback
-    spy = sinon.spy();
+    var spy = sinon.spy();
 
     _.each(_.range(r), function(element, index, list) {
       funcs.push(function() {spy1.call(spy1, arguments)});

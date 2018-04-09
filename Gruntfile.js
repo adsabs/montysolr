@@ -10,8 +10,8 @@ module.exports = function(grunt) {
       staticMappings: {
         express: 'grunt-express-server',
         hash_require: 'grunt-hash-required',
-        buildcontrol: 'grunt-build-control',
-        bower: 'grunt-bower-task'
+        bower: 'grunt-bower-task',
+        uglify: 'grunt-contrib-uglify-es'
       }
     }
   });

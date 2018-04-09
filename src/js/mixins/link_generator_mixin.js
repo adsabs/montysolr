@@ -44,7 +44,7 @@ var linkGenerator = {
       case "openurl":
         return adsClassicBaseUrl + "cgi-bin/nph-data_query?bibcode=" + id + "&link_type=OPENURL";
       default:
-        throw new Exception('Unknown type: ' + type);
+        throw new Error('Unknown type: ' + type);
 
     }
   },

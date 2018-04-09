@@ -22,7 +22,7 @@ define([
       var btnType = "btn-primary-faded";
       var dropdownTitle = "Visualize";
 
-      widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle });
+      var widget = new DropdownWidget({links: links, btnType: btnType, dropdownTitle: dropdownTitle });
       $("#test").append(widget.render().el);
 
       expect($("#test").find("li:first").text().trim()).to.eql("Author Network");

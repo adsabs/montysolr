@@ -7,7 +7,7 @@ define(['underscore'
 
     var Transition = function (endpoint, options) {
       if (!_.isString(endpoint)) {
-        throw new Exception('Endpoint name must be a string');
+        throw new Error('Endpoint name must be a string');
       }
       this.endpoint = endpoint;
       _.extend(this, options);
@@ -17,7 +17,7 @@ define(['underscore'
       trigger: false,
       replace: false,
       execute: function () {
-        throw new Exception("You must override this method");
+        throw new Error("You must override this method");
       }
     });
 

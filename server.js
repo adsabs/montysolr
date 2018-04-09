@@ -34,7 +34,7 @@ let config = {
   }
 };
 
-if (process.env.NODE_ENV === 'release') {
+if (process.env.SERVER_ENV === 'release') {
   config = Object.assign(config, { root: '/dist' });
 }
 

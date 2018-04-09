@@ -30,15 +30,9 @@ define(
 
                 var first_author = "Han, Hillary S. W.";
 
-                parsed_first_author = openURL.parseAuthor(first_author);
+                var parsed_first_author = openURL.parseAuthor(first_author);
                 expect(parsed_first_author['lastname']).to.eql('Han');
                 expect(parsed_first_author['firstnames']).to.eql('Hillary S. W.');
-
-                var first_author = undefined;
-                parsed_first_author = openURL.parseAuthor(first_author);
-                expect(parsed_first_author['lastname']).to.eql(false);
-                expect(parsed_first_author['firstnames']).to.eql(false);
-
             });
 
             it('parses page arrays correctly', function(){
@@ -52,7 +46,7 @@ define(
 
                 var page_in = ['3460'];
                 var page_expected = '3460';
-                page_parsed = openURL.parseFirstPage(page_in);
+                var page_parsed = openURL.parseFirstPage(page_in);
                 expect(page_parsed).to.eql(page_expected);
 
                 var page_in = ['3460-3461'];
@@ -77,7 +71,7 @@ define(
 
                 var rft_id_out = ['info:doi/10.1023/A:1014597702936', 'info:bibcode/bibcode'];
 
-                doi_parsed = openURL.parseRFTInfo(metadata);
+                var doi_parsed = openURL.parseRFTInfo(metadata);
                 expect(doi_parsed).to.eql(rft_id_out);
             });
 
@@ -88,7 +82,7 @@ define(
                  * to genre 'article'.
                  */
                 var openURL = new OpenURLGenerator();
-                doctype_parsed = openURL.parseGenre(undefined);
+                var doctype_parsed = openURL.parseGenre(undefined);
 
                 expect(doctype_parsed).to.eql('article');
 
@@ -113,7 +107,7 @@ define(
                 var phd_bibcode = "2015PhDT........35L";
                 var masters_bibcode = "2015MsT..........1S";
 
-                degree_type = openURL.parseDegree(phd_bibcode);
+                var degree_type = openURL.parseDegree(phd_bibcode);
                 expect(degree_type).to.eql('PhD');
 
                 degree_type = openURL.parseDegree(masters_bibcode);

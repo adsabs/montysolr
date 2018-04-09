@@ -35,7 +35,7 @@ define([
       activate: function (beehive) {
         this.setBeeHive(beehive);
         if (!this.hasPubSub()) {
-          throw new Exception("Ooops! Who configured this #@$%! There is no PubSub service!")
+          throw new Error("Ooops! Who configured this #@$%! There is no PubSub service!")
         }
       },
 

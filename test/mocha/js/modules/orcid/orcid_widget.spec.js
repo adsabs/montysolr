@@ -49,6 +49,7 @@ define([
     describe("Orcid Widget (orcid_widget.spec.js)", function () {
       // this is useful if you want to test widget getting data from Orcid
       // it simulates pubsub response
+      var orcidMode;
       beforeEach(function (done) {
         var minsub = new (MinimalPubsub.extend({
           request: function(apiRequest) {
@@ -330,11 +331,11 @@ define([
             return orcidMode;
           },
         };
-        minsub.beehive.removeObject("User");
-        minsub.beehive.addObject("User", fakeUser);
+        this.minsub.beehive.removeObject("User");
+        this.minsub.beehive.addObject("User", fakeUser);
 
         var wid = _getWidget(this.minsub.beehive);
-        wid.activate(minsub.beehive.getHardenedInstance());
+        wid.activate(this.minsub.beehive.getHardenedInstance());
         wid.onShow();
         setTimeout(function() {
           var $w = wid.render().$el;
@@ -392,7 +393,7 @@ define([
             return orcidMode;
           },
         };
-        minsub.beehive.addObject("User", fakeUser);
+        this.minsub.beehive.addObject("User", fakeUser);
 
         var orcidApi = getOrcidApi();
         sinon.stub(orcidApi, 'hasAccess', function() {return true});

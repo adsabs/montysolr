@@ -226,7 +226,7 @@ define([
     });
 
     it("can also have a variant that renders a single thumbnail and, when clicked, triggers a nav event to the main widget", function(){
-
+      var apiRequest, graphicsRequest;
       var g = new GraphicsWidget({sidebar : true});
       g.processResponse(new JsonResponse(testData))
       $("#test").append(g.view.el);

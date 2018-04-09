@@ -360,7 +360,7 @@ define(['underscore',
             cycle.done[firstReqKey] = data;
             delete cycle.inprogress[firstReqKey];
 
-            var numFound = undefined;
+            var numFound;
             if (response.response && response.response.numFound) {
               numFound = response.response.numFound;
             }

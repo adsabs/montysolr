@@ -70,7 +70,7 @@ define(['jquery',
 
       var numFound;
 
-      p = widget.loadBibcodeData("sampleBib1")
+      var p = widget.loadBibcodeData("sampleBib1")
 
       p.done(function(n){numFound= n});
 

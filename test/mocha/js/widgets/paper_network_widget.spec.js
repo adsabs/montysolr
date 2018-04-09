@@ -18962,7 +18962,7 @@ define([
 
       var linkNum = d3.selectAll(".link")[0].length;
 
-      actualLinkNum = _.filter(testDataBig.data.summaryGraph.links, function (l) {
+      var actualLinkNum = _.filter(testDataBig.data.summaryGraph.links, function (l) {
         if (l.source !== l.target) {
           return true
         }

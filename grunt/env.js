@@ -8,20 +8,24 @@
  * @module grunt/env
  */
 module.exports = {
-  qa: {
-    NODE_ENV: 'production',
-    TARGET: 'qa'
+  dev: {
+    NODE_ENV: 'development',
+    SERVER_ENV: 'dev',
+    TARGET: 'dev'
   },
   prod: {
     NODE_ENV: 'production',
+    SERVER_ENV: 'dev',
     TARGET: 'prod'
   },
-  dev: {
-    NODE_ENV: 'development',
-    TARGET: 'dev'
+  'release-prod': {
+    NODE_ENV: 'production',
+    SERVER_ENV: 'release',
+    TARGET: 'prod'
   },
-  release: {
-    NODE_ENV: 'release',
+  'release-dev': {
+    NODE_ENV: 'development',
+    SERVER_ENV: 'release',
     TARGET: 'dev'
   }
 };

@@ -94,11 +94,11 @@ define([
 
           _.each(yearRange, function (year) {
             var stringYear = year + "";
-            refCount = _.filter(refData, function (d) {
+            var refCount = _.filter(refData, function (d) {
               return d.value === stringYear
             })[0];
             refCount = refCount ? refCount.count : 0;
-            nonRefCount = _.filter(nonRefData, function (d) {
+            var nonRefCount = _.filter(nonRefData, function (d) {
               return d.value === stringYear
             })[0];
             nonRefCount = nonRefCount ? nonRefCount.count : 0;

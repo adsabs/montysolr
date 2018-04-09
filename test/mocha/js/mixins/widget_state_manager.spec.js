@@ -11,7 +11,7 @@ define([
   };
   _.extend(MockWidget.prototype, stateManager);
 
-  var before = function () {
+  var init = function () {
     this.sb = sinon.sandbox.create();
     var minsub = new MinimalPubsub({verbose: false});
     minsub.getCurrentPubSubKey = _.constant(minsub.key);
@@ -22,11 +22,19 @@ define([
     this.widget.activate(minsub.beehive.getHardenedInstance());
   };
 
+  var teardown = function () {
+    this.sb.restore();
+    this.subSpy = null;
+    this.getPubSubKeySpy = null;
+    this.widget = null;
+  }
+
   describe('Widget State Manager (widget_state_manager.spec.js)', function () {
     describe('Feedback Management', function () {
 
       describe('activation', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('attaches handlerManager property', function () {
           expect(this.widget.hasOwnProperty('__widgetHandlerManager')).to.eql(true);
@@ -41,7 +49,8 @@ define([
       });
 
       describe('attachHandler', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('attaches handler to code', function () {
           var handler = this.sb.spy();
@@ -66,7 +75,8 @@ define([
       });
 
       describe('detachHandler', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('detaches handler from code', function () {
           var handler = this.sb.spy();
@@ -100,7 +110,8 @@ define([
       });
 
       describe('fireHandlers', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('fires handler attached to a code', function () {
           var handler = this.sb.spy();
@@ -132,7 +143,8 @@ define([
     describe('State Management', function () {
 
       describe('activation', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('attaches state property', function () {
           expect(this.widget.hasOwnProperty('__state')).to.eql(true);
@@ -141,7 +153,8 @@ define([
       });
 
       describe('getState', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('calling getState returns current state', function () {
           expect(this.widget.getState()).to.eql(this.widget.__state);
@@ -150,7 +163,8 @@ define([
       });
 
       describe('updateState', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('updates state properly', function () {
           var w = this.widget;
@@ -192,7 +206,8 @@ define([
       });
 
       describe('onStateChange', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('gets new and previous state', function () {
           var w = this.widget;
@@ -205,7 +220,8 @@ define([
       });
 
       describe('properly fires state handlers', function () {
-        beforeEach(before);
+        beforeEach(init);
+        afterEach(teardown);
 
         it('fires off handler for current state', function () {
           var w = this.widget;
