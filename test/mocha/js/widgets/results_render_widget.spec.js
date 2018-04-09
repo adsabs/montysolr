@@ -118,7 +118,7 @@ define([
                 "true"
               ],
               "fl": [
-                "title,abstract,comment,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,page,links_data,property,email"
+                "title,abstract,comment,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,page,links_data,property,email,doctype"
               ],
               "rows": [
                 25
@@ -128,7 +128,7 @@ define([
               ]
             });
 
-          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Ccomment%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Cpage%2Clinks_data%2Cproperty%2Cemail&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*%20*%3A*&rows=25&start=0');
+          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Ccomment%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Cpage%2Clinks_data%2Cproperty%2Cemail%2Cdoctype&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star%20isbn%3A*%20*%3A*&rows=25&start=0');
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);
@@ -168,7 +168,7 @@ define([
               "true"
             ],
             "fl": [
-              "title,abstract,comment,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,page,links_data,property,email"
+              "title,abstract,comment,bibcode,author,keyword,id,citation_count,[citations],pub,aff,volume,pubdate,doi,pub_raw,page,links_data,property,email,doctype"
             ],
             "rows": [
               25
@@ -181,7 +181,7 @@ define([
             ]
           });
 
-          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Ccomment%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Cpage%2Clinks_data%2Cproperty%2Cemail&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star&rows=25&start=0');
+          expect(widget.model.get('currentQuery').url()).to.eql('fl=title%2Cabstract%2Ccomment%2Cbibcode%2Cauthor%2Ckeyword%2Cid%2Ccitation_count%2C%5Bcitations%5D%2Cpub%2Caff%2Cvolume%2Cpubdate%2Cdoi%2Cpub_raw%2Cpage%2Clinks_data%2Cproperty%2Cemail%2Cdoctype&hl=true&hl.fl=title%2Cabstract%2Cbody%2Cack&hl.maxAnalyzedChars=150000&hl.q=star&hl.requireFieldMatch=true&hl.usePhraseHighlighter=true&q=star&rows=25&start=0');
           expect(widget.collection.length).to.eql(10);
           done();
         }, 50);

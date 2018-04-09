@@ -328,12 +328,12 @@ define([
 
         // returns an orcid conflict error msg
         sb.stub(oApi, '_addWorks', function () {
-          var val = { work: { error: { 'response-code': 409 }}};
+          var val = { 0: { error: { 'response-code': 409 }}};
           return $.Deferred().resolve(val).promise();
         });
 
         var $dd = $.Deferred();
-        oApi.addCache.push({ id: 0, work: { test: 'old' }, promise: $dd });
+        oApi.addCache.push({ id: '0', work: { test: 'old' }, promise: $dd });
         oApi._addWork();
         $dd.done(function (work) {
 
@@ -348,12 +348,12 @@ define([
 
         // returns an orcid generic error msg
         sb.stub(oApi, '_addWorks', function () {
-          var val = { work: { error: {}}};
+          var val = { 0: { error: { 'response-code': 999 }}};
           return $.Deferred().resolve(val).promise();
         });
 
         var $dd = $.Deferred();
-        oApi.addCache.push({ id: 0, work: { test: 'old' }, promise: $dd });
+        oApi.addCache.push({ id: '0', work: { test: 'old' }, promise: $dd });
         oApi._addWork();
         $dd.done(function () { expect(false); });
         $dd.fail(function () {
@@ -371,7 +371,7 @@ define([
         });
 
         var $dd = $.Deferred();
-        oApi.addCache.push({ id: 0, work: { test: 'old' }, promise: $dd });
+        oApi.addCache.push({ id: '0', work: { test: 'old' }, promise: $dd });
         oApi._addWork();
         $dd.done(function (orcidWork) {
 
@@ -384,9 +384,9 @@ define([
 
       it('removes cache items as they are used', function (done) {
         oApi.addCache = [
-          { id: 0, work: {}, promise: $.Deferred() },
-          { id: 1, work: {}, promise: $.Deferred() },
-          { id: 2, work: {}, promise: $.Deferred() }
+          { id: '0', work: {}, promise: $.Deferred() },
+          { id: '1', work: {}, promise: $.Deferred() },
+          { id: '2', work: {}, promise: $.Deferred() }
         ];
         oApi._addWork();
         _.delay(function () {

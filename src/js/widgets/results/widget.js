@@ -82,7 +82,7 @@ define([
         'hl.maxAnalyzedChars': '150000',
         'hl.requireFieldMatch': 'true',
         'hl.usePhraseHighlighter': 'true',
-        fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,citation_count,[citations],pub,aff,email,volume,pubdate,doi',
+        fl     : 'title,abstract,bibcode,author,keyword,id,links_data,property,citation_count,[citations],pub,aff,email,volume,pubdate,doi,doctype',
         rows : 25,
         start : 0
       },
