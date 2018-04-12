@@ -21,8 +21,6 @@ define([
     analytics
     ) {
 
-    var genericErrorMessage = '<h4><strong>Something went wrong</strong></h4>' +
-    'Please <a onclick="window.location.reload()" href="' + window.location.href + '">reload</a> to try again';
 
     var handlers = {};
 
@@ -99,6 +97,11 @@ define([
     };
 
 
+    /**
+     * This applies to the first request submitted by the user; from the search
+     * form. So it is (perhaps not always) admissible to bother them with modal
+     * messages.
+     */
     handlers[ApiFeedback.CODES.SEARCH_CYCLE_FAILED_TO_START] = function(feedback) {
       var apiRequest = feedback.request;
       var xhr = feedback.error.jqXHR || {}; // when the response comes from cache, it's empty
@@ -113,6 +116,16 @@ define([
         msg: xhr.statusText
       };
 
+      function getAccessTokenStump() {
+        var a = app.getService('Api');
+        if (a && a.access_token) {
+          return a.access_token.slice(30);
+        }
+        else {
+          return 'no access token';
+        }
+      };
+
       analytics('send', 'event', 'error', 'search', xhr.statusText);
 
       if (xhr && apiRequest) {
@@ -122,8 +135,30 @@ define([
         errorDetails.query = apiRequest.get('query').toJSON();
 
         switch(xhr.status) {
+          case 403:
+            analytics('send', 'event', 'error', 'access-denied', 'request=' + apiRequest.url() + ' token=...' + getAccessTokenStump());
+            alerts.alert(new ApiFeedback({
+              code: ApiFeedback.CODES.ALERT,
+              msg: "We are sorry, you do not have permission to access: " + target + ". This is likely our fault (misconfiguration) and the ADS team has been notified.",
+              modal: true
+            }));
+            return;
+          case 429:
+            alerts.alert(new ApiFeedback({
+              code: ApiFeedback.CODES.ALERT,
+              msg: "We are sorry, it looks like you have exhausted allowed quota for: " + target + ". The limits will be reset in (usually) in 24 hours. If you believe this is an error or if you need to do something special, please contact us using the feedback button and describe what you are trying to accomplish. We may be able to help or provide efficient way of searching through ADS database. We also have an API that can be useful!",
+              modal: true
+            }));
+            return;
+          case 405: // method not allowed
+            analytics('send', 'event', 'error', 'access-denied', 'request=' + apiRequest.url() + ' token=...' + getAccessTokenStump);
+            alerts.alert(new ApiFeedback({
+              code: ApiFeedback.CODES.ALERT,
+              msg: "I am afraid you have just discovered a glitch in our system. (Congratulations!). What you are trying to do should be possible. It is likely a mis-configuration. Please try to reload the webpage; if problem persists - then send us an angry email and wait for a day.",
+              modal: true
+            }));
+            return;
           case 401: // unauthorized
-          case 404: // for some unknow reason (yet) - 401 comes marked as 404
             // check the Api is working
             app.getApiAccess({reconnect: true})
               .done(function() {
@@ -134,22 +169,23 @@ define([
                   app.getController('QueryMediator').resetFailures();
                   self.getPubSub().publish(self.getPubSub().START_SEARCH, apiRequest.get('query'));
                 }, fail: function() {
+                  analytics('send', 'event', 'error', 'unauthorized', 'request=' + apiRequest.url() + ' token=...' + getAccessTokenStump());
                   alerts.alert(new ApiFeedback({
-                    msg: genericErrorMessage,
+                    msg: "Seems like you are not authorized to access: " + target ,
                     modal: true,
                     type: "danger"
                   }));
                 }});
               })
               .fail(function() {
+                // TODO: check the status response (if API is down, we shouldn't tell them to reload)
                 alerts.alert(new ApiFeedback({
                   code: ApiFeedback.CODES.DANGER,
-                  msg: genericErrorMessage,
+                  msg: "The security token used to access our API has expired and we are unable to refresh it (though we tried). You will have to reload the webpage. Sorry about that!",
                   modal: true
                 }));
               });
             return;
-            break;
         }
 
 
@@ -219,14 +255,34 @@ define([
         }
       }
 
-      if (!resolved) {
-
-        alerts.alert(new ApiFeedback({
-          code: ApiFeedback.CODES.ALERT,
-          msg: genericErrorMessage,
-          modal: true
-        }));
+      // generic situation; do not use modal - display stuff in the top area
+      // here we deal with a serious situation; the API is probably down or has
+      // problems; and this is likely the second time we are seeing it (usually
+      // query mediator has already tried to recover from these errors)
+      
+      analytics('send', 'event', 'error', 'unrecoverable-' + xhr.status, 'request=' + apiRequest.url() + ' token=...' + getAccessTokenStump);
+      
+      var msg;
+      switch(xhr.status) {
+        case 504: // gateway timeout
+        case 408: // proxy timeout
+          msg = "This particular query is taking too long. Please wait a moment and retry. If the problem persits, our backend is likely overwhelmed and will be sluggish for a little longer."
+          break;
+        case 500: // server error
+        case 502: // bad gateway
+        case 503: // service unavailable
+          msg = "We are experiencing troubles accessing: " + target + " Probably the ADS backend service is down or is dealing with some other serious issues (terrorist attack, nuclear explosion, asteroids etc). Please be patient, our systems have been notified!"
+          break;
+        default:
+          msg = "Today, we are double unlucky. Not only are you experiencing 'unrecoverable' error. In addition to this, you have to read this lame default message. Sorry about that. We have been notified about the problem."
+          break;
       }
+
+      alerts.alert(new ApiFeedback({
+        code: ApiFeedback.CODES.ALERT,
+        msg: msg,
+        modal: false
+      }));
 
     };
 

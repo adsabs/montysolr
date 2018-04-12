@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * WARNING: this is a DEVELOPMENT server; DO NOT USE it in production!
  *

@@ -18,7 +18,8 @@ define(['underscore',
     'js/components/api_feedback',
     'js/components/json_response',
     'js/components/api_targets',
-    'js/components/api_query'
+    'js/components/api_query',
+    'analytics'
   ],
   function(
     _,
@@ -33,7 +34,8 @@ define(['underscore',
     ApiFeedback,
     JsonResponse,
     ApiTargets,
-    ApiQuery
+    ApiQuery,
+    analytics
     ) {
 
 
@@ -683,8 +685,12 @@ define(['underscore',
         if (status) {
           switch(status) {
             case 408: // proxy timeout
-            case 504: // gateway timeout
+            case 409: // conflict
+            case 500: // server error
+            case 502: // bad gateway
             case 503: // service unavailable
+            case 504: // gateway timeout
+              analytics('send', 'event', 'introspection', 'retrying', status); 
               setTimeout(function() {
                 // we can remove the entry from the cache, because
                 // if they eventually succeed, sender will receive
@@ -707,7 +713,7 @@ define(['underscore',
               break;
 
             default:
-            //TBD
+              analytics('send', 'event', 'introspection', 'not-retrying', status); 
           }
         }
       },

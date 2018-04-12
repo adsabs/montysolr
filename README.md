@@ -32,7 +32,7 @@ dev setup - linux
 =================
 
 ```bash
-  $ sudo apt-get install node npm phantomjs
+  $ sudo apt-get install nodejs npm phantomjs
   $ sudo npm install -g grunt-cli
 
   # if you don't have 'node' but 'nodejs' (on DEBIAN), you also need:

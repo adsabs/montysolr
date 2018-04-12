@@ -130,7 +130,7 @@ define([
           if (defer.state() === 'resolved') {
             return;
           }
-          defer.reject();
+          defer.reject(new Error('Timed out while loading modules'));
         }, timeout);
       }
       else {

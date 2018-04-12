@@ -22,10 +22,16 @@ define(['config', 'module'], function(config, module) {
       'js/mixins/api_access',
       'analytics',
       'es5-shim'
-    ], function(Router, Application, DiscoveryBootstrap, ApiAccess, analytics) {
+    ], function(Router, 
+      Application, 
+      DiscoveryBootstrap, 
+      ApiAccess, 
+      analytics) {
 
       var updateProgress = (typeof window.__setAppLoadingProgress === 'function') ?
         window.__setAppLoadingProgress : function () {};
+
+      var timeStart = Date.now();
 
       Application.prototype.shim();
 
@@ -43,6 +49,9 @@ define(['config', 'module'], function(config, module) {
       // after they are loaded; we'll kick off the application
       defer.done(function() {
         updateProgress(50, 'Modules Loaded');
+        var timeLoaded = Date.now();
+
+        analytics('send', 'event', 'timer', 'modules-loaded', timeLoaded - timeStart); 
 
         // this will activate all loaded modules
         app.activate();
@@ -63,6 +72,8 @@ define(['config', 'module'], function(config, module) {
           pubsub.publish(pubsub.getCurrentPubSubKey(), pubsub.APP_STARTING);
           app.start(Router);
           pubsub.publish(pubsub.getCurrentPubSubKey(), pubsub.APP_STARTED);
+
+          analytics('send', 'event', 'timer', 'app-booted', Date.now() - timeLoaded); 
 
           //some global event handlers, not sure if right place
           $("body").on("click", "button.toggle-menu", function(e){
@@ -101,10 +112,18 @@ define(['config', 'module'], function(config, module) {
 
           }
         }).fail(function () {
-          app.redirect('500.html');
+          
+          analytics('send', 'event', 'introspection', 'failed-load', arguments); 
+
+          if (!debug) {
+            app.redirect('500.html');
+          }
         });
 
       }).fail(function() {
+
+        analytics('send', 'event', 'introspection', 'failed-reloading', arguments); 
+
         if (debug){
           //so error messages remain in the console
           return
