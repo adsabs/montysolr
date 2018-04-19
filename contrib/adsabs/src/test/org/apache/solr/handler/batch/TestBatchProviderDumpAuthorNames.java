@@ -30,6 +30,9 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     assertU(adoc(F.ID, "16", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk"));
     assertU(adoc(F.ID, "17", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk  "));
     assertU(commit());
+    
+    assertU(adoc(F.ID, "18", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "González-Alfonso, E"));
+    assertU(commit());
 		
 		
 		BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
@@ -65,7 +68,10 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
         "ahguşan, Adrian D=>ǎguşan, Adrian D",
         "ahguşan, Adrian Dr=>ǎguşan, Adrian Dr",
         "ahguşan, A D=>ǎguşan, A D",
-        "!a=>á,"
+        "!a=>á,",
+        "Gonzalez Alfonso,=>González Alfonso,",
+        "Gonzalez Alfonso, E=>González Alfonso, E",
+        "Gonzaelez Alfonso, E=>González Alfonso, E",
 				}
 		);
 	}
