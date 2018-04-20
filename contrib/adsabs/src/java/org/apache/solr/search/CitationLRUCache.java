@@ -155,7 +155,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
 		citationFields = new String[0];
 		referenceFields = new String[0];
-
+		
 		if (args.containsKey("referenceFields") && ((String) args.get("referenceFields")).trim().length() > 0) {
 			referenceFields = ((String) args.get("referenceFields")).split(",");
 		}
@@ -413,7 +413,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
 			sourceReaderHashCode = searcher.hashCode();
 			
-			if (dumpCache && buildMe) {
+			if (dumpCache && buildMe && getCitationCacheReaderWriter(searcher) != null) {
 				try {
 					persistCitationCache(searcher);
 				} catch (IOException e) {
@@ -432,6 +432,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 		  assert f.exists();
 		  assert f.isDirectory();
 		  assert f.canWrite();
+		}
+		catch (AssertionError ae) {
+		  return null;
 		}
 		catch (Exception e) {
 		  return null;

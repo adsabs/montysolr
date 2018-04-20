@@ -22,6 +22,7 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,12 +49,15 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 		
 		configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" + 
 			"citation-cache-solrconfig.xml";
-		System.out.println(System.getProperties());
-		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+		
+    tmpdir = Files.createTempDirectory("citation-cache", PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx")));
+    
+    initCore(configString, schemaString, tmpdir.getFileName().toString());
+
 	}
 
 	private CitationLRUCache cache;
-	private Path tmpdir;
+	private static Path tmpdir;
 	
 
 	public void createCache() throws Exception {
@@ -112,23 +116,23 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 	
 	@Override
 	public void setUp() throws Exception {
+    
 		super.setUp();
-		tmpdir = Files.createTempDirectory("citation-cache");
 		createCache();
 	}
 	
 	@Override
 	public void tearDown() throws Exception {
-		File cfg = new File(h.getCore().getResourceLoader().getConfigDir());
-		for (File c: cfg.listFiles()) {
-			if (c.getPath().contains("citation_cache"))
-				c.delete();
-		}
-		super.tearDown();
+//		File cfg = new File(h.getCore().getResourceLoader().getConfigDir());
+//		for (File c: cfg.listFiles()) {
+//			if (c.getPath().contains("citation_cache"))
+//				c.delete();
+//		}
 		for (File f: tmpdir.toFile().listFiles()) {
 			f.delete();
 		}
-		tmpdir.toFile().delete();
+//		tmpdir.toFile().delete();
+		super.tearDown();
 		
 	}
 	
