@@ -99,7 +99,9 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
             String[] vals = d.getValues(f);
             
             for (String s: vals) {
-            	//System.out.println(s);
+              //System.out.println(s);
+              //System.out.println(AuthorUtils.normalizeAuthor(s));
+              
               TokenStream ts = analyzer.tokenStream(targetAnalyzer, new StringReader(s));
               ts.reset();
               
@@ -217,22 +219,16 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       public String formatEntry(String key, Set<String>values) {
         List<String> rows = new ArrayList<String>();
 
-        // remove all but the first comma
-        //System.out.println("before replace " + key);
-        key = key.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1"); //"agusan, Adrian, , Dr" -> "agusan, Adrian Dr"
-        key = AuthorUtils.normalizeAuthor(key);
-        //System.out.println("after replace " + key);
-            
-        String[] nameParts = key.split(" ");
+        
+        
+        String[] nameParts = carefullySplitName(key);
         if (nameParts.length > 1) {
+        	
           //nameParts[0] = nameParts[0].replace(",", "\\,");
           String[][] otherNames = new String[values.size()][];
           int n = 0;
           for (String name: values) {
-          	// remove all but the first comma
-          	name = name.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
-	        	name = AuthorUtils.normalizeAuthor(name);
-            otherNames[n++] = name.split(" ");
+            otherNames[n++] = carefullySplitName(name);
             //otherNames[n-1][0] = otherNames[n-1][0].replace(",", "\\,"); 
           }
           int cycle=0;
@@ -299,6 +295,31 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
           }
         }
         return false;
+      }
+      
+      private String[] carefullySplitName(String name) {
+    	  
+    	  // remove all but the first comma
+          //System.out.println("before replace " + name);
+          
+    	  name = name.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
+    	  name = AuthorUtils.normalizeAuthor(name);
+    	  //System.out.println("after replace " + name);
+
+    	  String[] out = new String[0];
+    	  
+    	  String[] twoParts = name.split(",");
+    	  if (twoParts.length > 1) {
+	        String[] names = twoParts[1].trim().split(" ");
+	        out = new String[names.length + 1];
+	        out[0] = twoParts[0] + ",";
+	        int x = 1;
+	        for (String r: names) {
+	        	out[x] = names[x-1];
+	        	x++;
+	        }
+    	  }
+    	  return out;
       }
     };
 	}
