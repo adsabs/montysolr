@@ -860,7 +860,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 //		assertQueryEquals(req("defType", "aqp", "q", "title:xxx +title:(-foo bar)"), 
 //        "+title:xxx -title:foo +title:bar",
 //        BooleanQuery.class);
-
+        
+        
+        assertU(adoc("id", "57", "bibcode", "b57", "author", "Kurtz, M.", "author", "Foo, Bar"));
+        assertU(commit("waitSearcher", "true"));
 
         // regex
         assertQueryEquals(req("defType", "aqp", "q", "author:/^Kurtz,\\WM./"),
@@ -869,6 +872,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "author:/^kurtz,\\Wm./"),
                 "author:/^kurtz,\\Wm./",
                 RegexpQuery.class);
+        setDebug(true);
+        dumpDoc(0, "id", "author");
+        assertQ(req("q", "author:/kurtz,\\Wm/"), "//*[@numFound='1']");
+        assertQ(req("q", "author:/^Kurtz,\\WM./"), "//*[@numFound='1']");
 
         // this is treated as regex, but because it is unfielded search
         // it ends up in the unfielded_search field. Feature or a bug?

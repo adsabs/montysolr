@@ -152,7 +152,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "MULLER, WILLIAM => MÜLLER, WILLIAM",
           "MUELLER, WILLIAM => MÜLLER, WILLIAM",
           "Boser,=>Böser,",
-          "Boser, S=>Böser, S"
+          "Boser, S=>Böser, S",
+          "Gonzaelez Alfonso,=>González Alfonso,",
+          "Gonzaelez Alfonso, E=>González Alfonso, E",
+          "Gonzalez Alfonso, E=>González Alfonso, E",
+          "Chyelkovae,=>Chýlková,"
       }
       ));
 
@@ -302,6 +306,18 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "408", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D Sik"));
     assertU(adoc(F.ID, "409", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D-Sik"));
     
+    
+    assertU(adoc(F.ID, "500", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "González Alfonso, E"));
+    assertU(adoc(F.ID, "501", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzaelez Alfonso, E"));
+    assertU(adoc(F.ID, "502", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzalez Alfonso, E"));
+    assertU(adoc(F.ID, "503", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "González-Alfonso, E"));
+    assertU(adoc(F.ID, "504", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzaelez-Alfonso, E"));
+    assertU(adoc(F.ID, "505", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzalez-Alfonso, E"));
+    assertU(adoc(F.ID, "506", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "González, Alfonso"));
+    assertU(adoc(F.ID, "507", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzaelez, Alfonso"));
+    assertU(adoc(F.ID, "508", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzalez, Alfonso"));
+    
+    
     assertU(commit());
 
     // persist the transliteration map after new docs were indexed
@@ -346,6 +362,18 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
   
   public void testAuthorParsingUseCases() throws Exception {
+    
+    
+    // searching for ascii version finds also the utf (for hyphenated names)
+    testAuthorQuery("\"chyelkovae\"", 
+        "author:chyelkovae, author:chyelkovae,* author:chýlková, author:chýlková,* author:chylkova, author:chylkova,*", 
+        "//*[@numFound='0']");
+    testAuthorQuery("\"Gonzalez-Alfonso, E\"", 
+        "author:gonzalez alfonso, e author:gonzalez alfonso, e* author:gonzalez alfonso, author:gonzález alfonso, e author:gonzález alfonso, e* author:gonzález alfonso, author:gonzaelez alfonso, e author:gonzaelez alfonso, e* author:gonzaelez alfonso,", 
+        "//*[@numFound='6']");
+    testAuthorQuery("\"Gonzalez Alfonso, E\"", 
+        "author:gonzalez alfonso, e author:gonzalez alfonso, e* author:gonzalez alfonso, author:gonzález alfonso, e author:gonzález alfonso, e* author:gonzález alfonso, author:gonzaelez alfonso, e author:gonzaelez alfonso, e* author:gonzaelez alfonso,", 
+        "//*[@numFound='6']");
     
     // issue #57: https://github.com/romanchyla/montysolr/issues/57
     testAuthorQuery("\"Moon, Dae-Sik\"", 

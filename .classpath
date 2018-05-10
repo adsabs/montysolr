@@ -98,7 +98,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-spatial-extras-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-spatial3d-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-suggest-6.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-test-framework-6.3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-test-framework-6.3.0-SNAPSHOT.jar" sourcepath="/apache-solr-63"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/asm-5.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/asm-commons-5.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/curator-client-2.8.0.jar"/>

@@ -39,9 +39,9 @@ public class AqpLuceneQParserPlugin extends QParserPlugin {
 			
 			return new AqpLuceneQParser(parser, qstr, localParams, params, req);
 		} catch (QueryNodeParseException e) {
-			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e.getLocalizedMessage());
+			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e.getLocalizedMessage());
 		} catch (Exception e) {
-			throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, e.getLocalizedMessage());
+			throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e.getLocalizedMessage());
 		}
 	}
 }
