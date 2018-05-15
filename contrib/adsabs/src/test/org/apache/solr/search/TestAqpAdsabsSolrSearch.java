@@ -13,7 +13,9 @@ import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PrefixQuery;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.TermQuery;
@@ -317,7 +319,26 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
-    	
+      // allow to set scoring method for a given field
+      BooleanQuery q = (BooleanQuery) assertQueryEquals(req("defType", "aqp", 
+          "q", "author:riess", "aqp.qprefix.scoring.author", "boolean"),
+            "author:riess, author:riess,*",
+            BooleanQuery.class);
+      assertEquals(((PrefixQuery) q.clauses().get(1).getQuery()).getRewriteMethod(), MultiTermQuery.SCORING_BOOLEAN_REWRITE);
+      
+      q = (BooleanQuery) assertQueryEquals(req("defType", "aqp", 
+          "q", "author:riess", "aqp.qprefix.scoring.author", "constant_boolean"),
+            "author:riess, author:riess,*",
+            BooleanQuery.class);
+      assertEquals(((PrefixQuery) q.clauses().get(1).getQuery()).getRewriteMethod(), MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE);
+      
+      q = (BooleanQuery) assertQueryEquals(req("defType", "aqp", 
+          "q", "author:riess", "aqp.qprefix.scoring.author", "constant"),
+            "author:riess, author:riess,*",
+            BooleanQuery.class);
+      assertEquals(((PrefixQuery) q.clauses().get(1).getQuery()).getRewriteMethod(), MultiTermQuery.CONSTANT_SCORE_REWRITE);
+      
+    
 	  //verification for https://github.com/romanchyla/montysolr/issues/45
       // expansion of synonyms inside a virtual field together with nested boolean query
       // VLBA doesn't have a synonym, VLA has multi-synonym; VLA must be the same
@@ -872,7 +893,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "author:/^kurtz,\\Wm./"),
                 "author:/^kurtz,\\Wm./",
                 RegexpQuery.class);
-        setDebug(true);
+        
         dumpDoc(0, "id", "author");
         assertQ(req("q", "author:/kurtz,\\Wm/"), "//*[@numFound='1']");
         assertQ(req("q", "author:/^Kurtz,\\WM./"), "//*[@numFound='1']");

@@ -34,7 +34,7 @@ import org.apache.solr.util.DateMathParser;
  * @see QueryConfigHandler
  * 
  */
-public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorImpl {
+public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcessorImpl {
 
 	private DateMathParser dmp;
   private Map<String, TargetField> dehumnzdDates;
@@ -52,11 +52,11 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
       return dehumnzdDates;
     
     dehumnzdDates = new HashMap<String, TargetField>();
-    Object pairs = _getConfigVal("aqp.humanized.dates");
+    Object pairs = getConfigVal("aqp.humanized.dates");
     if (pairs != null) {
       
-      String datef = (String) _getConfigVal("aqp.dateFormat");
-      String timef = (String) _getConfigVal("aqp.timestampFormat");
+      String datef = (String) getConfigVal("aqp.dateFormat");
+      String timef = (String) getConfigVal("aqp.timestampFormat");
       
       SimpleDateFormat ddf = new SimpleDateFormat(datef, Locale.US);
       ddf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -256,14 +256,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends QueryNodeProcessorIm
 		return children;
 	}
 	
-	private Object _getConfigVal(String key) {
-    Map<String, String> args = getQueryConfigHandler().get(
-        AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
-    if (args.containsKey(key)) {
-      return args.get(key);
-    }
-    return null;
-  }
+	
 	
 	class TargetField {
 	  public String fieldname;

@@ -72,7 +72,7 @@ import org.apache.solr.util.SolrPluginUtils;
  *    qf = list of edismax fields
  */
 
-public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorImpl {
+public class AqpAdsabsExtractMultisynonymsProcessor extends AqpQueryNodeProcessorImpl {
 
 	private CharTermAttribute termAtt;
 	private float boostCorrection = 0.9f;
@@ -89,8 +89,7 @@ public class AqpAdsabsExtractMultisynonymsProcessor extends QueryNodeProcessorIm
 				&& config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
 				.getRequest() != null) {
 			
-			Map<String, String> args = getQueryConfigHandler().get(
-	    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+			Map<String, String> args = getConfigMap();
 			
 			if (!args.containsKey("aqp.unfielded.phrase.edismax.synonym.workaround") || args.get("aqp.unfielded.phrase.edismax.synonym.workaround") == "false") {
 				return queryTree;

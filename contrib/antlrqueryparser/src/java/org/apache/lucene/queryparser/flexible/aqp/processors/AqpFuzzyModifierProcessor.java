@@ -13,7 +13,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
@@ -40,7 +40,7 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
  * 
  * 
  */
-public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
+public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl implements
     QueryNodeProcessor {
 
   @Override
@@ -54,8 +54,8 @@ public class AqpFuzzyModifierProcessor extends QueryNodeProcessorImpl implements
       if (child instanceof QuotedFieldQueryNode
           || child instanceof WildcardQueryNode) {
         
-        if (child instanceof QuotedFieldQueryNode && config.has(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER)) {
-          Map<String, String> c = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+        if (child instanceof QuotedFieldQueryNode && hasConfigMap()) {
+          Map<String, String> c = getConfigMap();
           
           if (c.containsKey("aqp.force.fuzzy.phrases")) {
             FieldQueryNode fn = (FieldQueryNode) child;

@@ -314,6 +314,12 @@
        <str name="aqp.unfielded.ignore.fields">entdate pubdate year</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
+       <str name="aqp.qprefix.scoring.author">boolean</str>
+       <str name="aqp.qwildcard.scoring.author">boolean</str>
+       <str name="aqp.qregex.scoring.author">boolean</str>
+       <str name="aqp.qprefix.scoring.first_author">boolean</str>
+       <str name="aqp.qwildcard.scoring.first_author">boolean</str>
+       <str name="aqp.qregex.scoring.first_author">boolean</str>
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -335,7 +341,12 @@
        <str name="aqp.unfielded.ignore.fields">entdate pubdate year</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
-       
+       <str name="aqp.qprefix.scoring.author">boolean</str>
+       <str name="aqp.qwildcard.scoring.author">boolean</str>
+       <str name="aqp.qregex.scoring.author">boolean</str>
+       <str name="aqp.qprefix.scoring.first_author">boolean</str>
+       <str name="aqp.qwildcard.scoring.first_author">boolean</str>
+       <str name="aqp.qregex.scoring.first_author">boolean</str>
      </lst>
     <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -381,6 +392,12 @@
        <str name="aqp.unfielded.ignore.fields">entdate pubdate year</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
+       <str name="aqp.qprefix.scoring.author">boolean</str>
+       <str name="aqp.qwildcard.scoring.author">boolean</str>
+       <str name="aqp.qregex.scoring.author">boolean</str>
+       <str name="aqp.qprefix.scoring.first_author">boolean</str>
+       <str name="aqp.qwildcard.scoring.first_author">boolean</str>
+       <str name="aqp.qregex.scoring.first_author">boolean</str>
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>

@@ -363,7 +363,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
     
-    
     // searching for ascii version finds also the utf (for hyphenated names)
     testAuthorQuery("\"chyelkovae\"", 
         "author:chyelkovae, author:chyelkovae,* author:chýlková, author:chýlková,* author:chylkova, author:chylkova,*", 

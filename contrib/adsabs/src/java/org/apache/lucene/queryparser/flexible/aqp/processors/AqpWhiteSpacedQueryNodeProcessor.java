@@ -31,7 +31,7 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
  * 		aqp.unfielded.tokens.function.name - name of the function
  *            that receives the input  {@link AqpFunctionQueryNode}
  */
-public class AqpWhiteSpacedQueryNodeProcessor extends QueryNodeProcessorImpl implements
+public class AqpWhiteSpacedQueryNodeProcessor extends AqpQueryNodeProcessorImpl implements
 		QueryNodeProcessor {
   
   
@@ -49,7 +49,7 @@ public class AqpWhiteSpacedQueryNodeProcessor extends QueryNodeProcessorImpl imp
 	          "Missing FunctionQueryBuilder provider"));
 	    }
 	    
-	    String funcName = getFuncName();
+	    String funcName = getConfigVal("aqp.unfielded.tokens.function.name", "edismax_combined_aqp");
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
 	    String field = ((FieldQueryNode) node).getFieldAsString();
 	    if (field.equals(config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD))) {
@@ -102,14 +102,4 @@ public class AqpWhiteSpacedQueryNodeProcessor extends QueryNodeProcessorImpl imp
 		return children;
 	}
 	
-	private String getFuncName() {
-		
-		String key = "aqp.unfielded.tokens.function.name";
-		Map<String, String> args = getQueryConfigHandler().get(
-    		AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
-		if (args.containsKey(key)) {
-			return args.get(key);
-		}
-		return "edismax_combined_aqp";
-	}
 }

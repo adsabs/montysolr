@@ -24,18 +24,21 @@
   </description>
 
   <property name="antlrqueryparser.jar" value="${common.dir}/build/antlrqueryparser/lucene-antlrqueryparser-${version}.jar"/>
+	
   <import file="../contrib-build.xml"/>
-    
   <path id="classpath">
     <pathelement path="${common.dir}/build/antlrqueryparser/lucene-antlrqueryparser-${version}.jar"/>
     <fileset dir="lib"/>
     <path refid="solr.base.classpath"/>
+  	<pathelement path="${common.dir}/build/antlrqueryparser/classes/java"/>
   </path>
+	
   <path id="run.classpath">
     <path refid="classpath"/>
     <pathelement location="${build.dir}/classes/java"/>
     <pathelement location="src/jython"/>
   </path>
+	
   <path id="test.classpath">
     <path refid="run.classpath"/>
   	<!-- this is necessary to see the stderr output //-->

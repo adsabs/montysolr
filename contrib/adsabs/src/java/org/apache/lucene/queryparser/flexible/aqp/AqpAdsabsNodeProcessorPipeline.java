@@ -40,6 +40,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsSynonymNod
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBOOSTProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpBibcodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpCLAUSEProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpChangeRewriteMethodProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpDEFOPProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFIELDProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
@@ -283,6 +284,12 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpOptimizationProcessor());
 		
 		
+		/**
+		 * Allow us to apply different scoring methods to particular
+		 * combination of query types and fields
+		 */
+		
+		add(new AqpChangeRewriteMethodProcessor());
 	}
 
 }
