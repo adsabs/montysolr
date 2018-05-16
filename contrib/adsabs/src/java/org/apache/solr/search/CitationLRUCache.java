@@ -444,6 +444,8 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 	
 	private CitationCacheReaderWriter getCitationCacheReaderWriter(SolrIndexSearcher searcher) {
 		File confDir = getCacheStorageDir(searcher);
+		if (confDir == null)
+		    return null;
 		return new CitationCacheReaderWriter(confDir);
 	}
 	
