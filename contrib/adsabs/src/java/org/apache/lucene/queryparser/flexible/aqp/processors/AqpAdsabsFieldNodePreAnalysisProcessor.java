@@ -167,7 +167,8 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
         			}
         		}
         		else {
-        			fieldNode.setValue(normalizedDate);
+        			fieldNode.setValue(moveDate(targetDateField, normalizedDate, dateWithoutOffset, 
+        			    "", "", "/DAY+0SECOND"));
         		}
         	}
         	else { // upper bound

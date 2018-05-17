@@ -484,12 +484,15 @@
   <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy">
     <lst name="master">
 	    <str name="replicateAfter">commit</str>
-	    <str name="confFiles">citation_cache.gen,citation_cache.dict,citation_cache.refs,citation_cache.cit,ads_text_multi.synonyms,ads_text_simple.synonyms,ads_text.kill,ads_text.kill_sens,author_curated.synonyms,author_generated.translit,stopwords.txt</str>
+	    <str name="confFiles">${montysolr.replication.confFiles:citation_cache.gen,citation_cache.dict,citation_cache.refs,citation_cache.cit,ads_text_multi.synonyms,ads_text_simple.synonyms,ads_text.kill,ads_text.kill_sens,author_curated.synonyms,author_generated.translit,stopwords.txt}</str>
     </lst>
   </requestHandler>
   
   <requestHandler name="/replicoordinator" class="solr.ReplicationCoordinatorHandler" >
-    
+    <str name="maxDelay">${montysolr.stagger.maxDelay:900}</str>
+    <str name="numInstances">${montysolr.stagger.numInstances:6}</str>
+    <str name="numTop">${montysolr.stagger.numTop:2}</str>
+    <str name="numBottom">${montysolr.stagger.numBottom:1}</str>
   </requestHandler> 
 
   <!--  disabled SpellCheck see original solrconfig.xml or http://wiki.apache.org/solr/SpellCheckComponent -->

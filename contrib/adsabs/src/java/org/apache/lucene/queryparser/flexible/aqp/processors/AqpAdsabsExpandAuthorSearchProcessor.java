@@ -210,7 +210,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
             nn.append(nameParts[0]);
             for (int i=1;i<nameParts.length-1;i++) {
               if (nameParts[i].length()==1 && origNameInfo.parts[i].length()==1) {
-                nn.append(" " + nameParts[i] + "[^\\s]+");
+                nn.append(" " + nameParts[i] + "[^ ]+");
                 parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString(), fqn.getBegin(), fqn.getEnd()));
               }
               else {

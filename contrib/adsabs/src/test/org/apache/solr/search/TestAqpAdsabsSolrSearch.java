@@ -220,7 +220,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 + "(((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) "
                 +"+((+property:refereed +((keyword:r)^0.5 | title:r) +((keyword:s)^0.5 | title:s) +((keyword:t)^0.5 | title:t)) property:refereedrst)",
                 BooleanQuery.class);
-        
+
         // +((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) +((+property:refereed +((keyword:r)^0.5 | title:r) +((keyword:s)^0.5 | title:s) +((keyword:t)^0.5 | title:t)) ((title:syn::r s t)^1.0 (title:syn::acr::rst)^1.0 (keyword:syn::r s t)^0.45 (keyword:syn::acr::rst)^0.45 property:refereedrst))
 
 
@@ -884,6 +884,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         
         
         assertU(adoc("id", "57", "bibcode", "b57", "author", "Kurtz, M.", "author", "Foo, Bar"));
+        assertU(adoc("id", "58", "bibcode", "b58", "author", "Kurtz, M J", "author", "Foo, Bar"));
+        assertU(adoc("id", "59", "bibcode", "b59", "author", "Kurtz, w", "author", "Foo, Bar"));
+        
         assertU(commit("waitSearcher", "true"));
 
         // regex
@@ -894,9 +897,29 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "author:/^kurtz,\\Wm./",
                 RegexpQuery.class);
         
+        setDebug(true);
+        
+        assertQueryEquals(req("q", "author:/kurtz, ~( )+/"), "", RegexpQuery.class);
+        
+        setDebug(false);
+        assertQ(req("q", "author:/kurtz, [^\\w]+/"), "//*[@numFound='2']");
+        assertQ(req("q", "author:/kurtz,[^\\w]+/"), "//*[@numFound='0']");
+        assertQueryEquals(req("q", "author:/kurtz, ~( )+/"), "author:/kurtz, ~( )+/", RegexpQuery.class);
         dumpDoc(0, "id", "author");
-        assertQ(req("q", "author:/kurtz,\\Wm/"), "//*[@numFound='1']");
-        assertQ(req("q", "author:/^Kurtz,\\WM./"), "//*[@numFound='1']");
+        assertQ(req("q", "author:/kurtz, m/"), "//*[@numFound='1']");
+        //assertQ(req("q", "author:\"kurtz, m\""), "//*[@numFound='1']");
+        //assertQ(req("q", "author:/kurtz, ~( )+/"), "//*[@numFound='1']");
+        
+        assertQ(req("q", "author:/kurtz, [^ ]+/"), 
+            "//*[@numFound='1']",
+            "//doc/str[@name='id'][.='57']");
+        assertQ(req("q", "author:/kurtz,[^ ]+/"), "//*[@numFound='0']");
+        
+        assertQ(req("q", "author:/kurtz, [^ ]+ [^ ]+/"),
+            "//*[@numFound='1']",
+            "//doc/str[@name='id'][.='58']");
+        assertQ(req("q", "author:/kurtz, [^ ]+[^ ]+/"), "//*[@numFound='0']");
+        
 
         // this is treated as regex, but because it is unfielded search
         // it ends up in the unfielded_search field. Feature or a bug?

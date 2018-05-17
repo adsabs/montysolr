@@ -1340,6 +1340,20 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "entry_date:[\"2017-09-19T11:01:32.810Z\" TO \"2017-09-19T11:01:32.811Z\"]"),
         "//*[@numFound='0']"
         );
+
+    assertQ(req("q", "entdate:[\"2017-09-19\" TO \"2017-09-30\"]"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "entdate:[\"2017-09-19\" TO \"2017-10\"]"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "entdate:[\"2017-09-19\" TO \"2018\"]"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    assertQ(req("q", "entdate:[\"2017-09-19\" TO *]"),
+        "//doc[1]/int[@name='recid'][.='100']"
+        );
+    
     
     for (String s: "metadata orcid fulltext nonbib metrics".split(" ")) {
       assertQ(req("q", s + "_ctime:\"2017-09-19T11:01:32.809Z\""),

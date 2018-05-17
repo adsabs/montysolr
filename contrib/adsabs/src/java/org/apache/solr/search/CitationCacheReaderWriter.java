@@ -150,11 +150,19 @@ public class CitationCacheReaderWriter {
     di.close();
     
     int j = 0;
+    int p0; 
+    int p1;
+    p0 = p1 = 0;
     while (j <= m.maxDocs) {
-      while (ci.peek() != '\n') {
+      while ((p0 = ci.peek()) != '\n') {
+        if (p0 == -1)
+            break;
         cache.insertCitation(j, ci.readInt());
       }
-      while (ri.peek() != '\n') {
+      
+      while ((p1 = ri.peek()) != '\n') {
+        if (p1 == -1)
+          break;
         cache.insertReference(j, ri.readInt());
       }
       ci.readByte();
