@@ -1159,7 +1159,13 @@
 
 		<field name="first_author_norm" type="normalized_text_ascii_notokenization"
 			indexed="true" stored="true" />
-
+			
+		<field name="book_author" type="author" indexed="true" stored="true"
+            multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
+        
+        <field name="editor" type="author" indexed="true" stored="true"
+            multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
+            
 		<field name="aff" type="affiliation_text" indexed="true" stored="true"
 			multiValued="true" omitNorms="true"/>
 

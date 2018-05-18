@@ -155,6 +155,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				 */
 				 ", \"bibstem\": [\"JNuM\", \"JNuM..455\"]" +
 				 ", \"body\": \"Some fulltext hashimoto added\"" +
+				 ", \"book_author\": [\"book, author\", \"book, fauthor\"]" +
 				 ", \"caption\": [\"caption1 captionFoo\", \"caption2\"]" +
 				 ", \"citation\": [\"2014JNuM..455...10C\", \"2014JNuM..455...10D\"]" +
 				 ", \"cite_read_boost\": 0.52" +
@@ -164,18 +165,19 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				 ", \"comment\": [\"comment1 commentFoo\", \"comment2\"]" +
 				 ", \"database\": [\"ASTRONOMY\", \"PHYSICS\"]" +
 
-        ", \"data\": [\"NED:15\", \"CDS:5\"]" +
-        ", \"data_count\": 20" +
+		        ", \"data\": [\"NED:15\", \"CDS:5\"]" +
+		        ", \"data_count\": 20" +
 				 // it is solr format for the pubdate, must be in the right format
 				 // we need to add 30 minutes to every day; this allows us to search
 				 // for ranges effectively; thus:
 				 // 2013-08-5 -> 2013-08-05T00:30:00Z
 				 // 2013-08   -> 2013-08-01T00:30:00Z
 				 // 2013      -> 2013-01-01T00:30:00Z
-        ", \"date\": \"2013-08-05T00:30:00Z\"" +
+				 ", \"date\": \"2013-08-05T00:30:00Z\"" +
 				", \"doctype\": \"article\"" +
 				", \"doctype_facet_hier\": [\"0/Article\", \"1/Article/Book chapter\"]" +
 			  ", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
+			  ", \"editor\": [\"t' Hooft, van X\"]" +
 			  ", \"eid\": \"00001\"" +
 			  ", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
 			  // entry_date --> see below
@@ -345,14 +347,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 		
 		/*
-     * caption
-     */
-    assertQ(req("q", "caption:caption1"),
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='100']");
-    assertQ(req("q", "caption:captionfoo"),
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='100']");
+	     * caption
+	     */
+	    assertQ(req("q", "caption:caption1"),
+	        "//*[@numFound='1']",
+	        "//doc/int[@name='recid'][.='100']");
+	    assertQ(req("q", "caption:captionfoo"),
+	        "//*[@numFound='1']",
+	        "//doc/int[@name='recid'][.='100']");
     
 		
 		/*
@@ -398,6 +400,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"<str>t' Hooft, van X</str>" +
 				"<str>Anders, John Michael</str>" +
 				"<str>Einstein, A</str></arr>");
+		
+		/*
+		 * book_author
+		 */
+		assertQ(req("q", "book_author:\"book, fauthor\""),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']");
 		
 		/*
 		 * author_count
@@ -477,6 +486,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		);
 
 
+		/*
+		 * editor
+		 */
+		assertQ(req("q", "editor:\"'t hooft, v x\""),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']");
+				
 
 		/*
 		 * email

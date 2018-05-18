@@ -29,6 +29,7 @@ import org.apache.lucene.search.LuceneCacheWrapper;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
+import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.SecondOrderCollector;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.SecondOrderCollectorAdsClassicScoringFormula;
@@ -640,11 +641,11 @@ AqpFunctionQueryBuilderProvider {
 				Query innerQuery = fp.parseNestedQuery();
 				
 				@SuppressWarnings("unchecked")
-        SolrCacheWrapper<CitationCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
+				SolrCacheWrapper<CitationCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
 						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
 				
-				return new SecondOrderQuery(innerQuery, 
+					return new SecondOrderQuery(innerQuery, 
 						new SecondOrderCollectorCitesRAM(referencesWrapper), false);
 			}
 		});
@@ -1017,7 +1018,7 @@ AqpFunctionQueryBuilderProvider {
 		// so we have to do it ourselves
 		parsers.put("warm_cache", new AqpSubqueryParserFull() {
 			@SuppressWarnings("unchecked")
-      public Query parse(FunctionQParser fp) throws SyntaxError {
+				public Query parse(FunctionQParser fp) throws SyntaxError {
 
 				final SolrQueryRequest req = fp.getReq();
 				@SuppressWarnings("rawtypes")
@@ -1026,6 +1027,30 @@ AqpFunctionQueryBuilderProvider {
 					cache.warm(req.getSearcher(), cache);
 				}
 				return new MatchNoDocsQuery();
+			}
+		});
+		
+		/* @api.doc
+		 * 
+		 * def constant(query):
+		 * 		"""
+		 *    Applies constant score (that can be set by boost factor)
+		 *    
+		 *    Example: 
+		 *    
+		 *    	```constant(title:hubble^2)```
+		 *    
+		 *    
+		 *    @since 63.1.0.24
+		 *    """
+		 *    return "constant(%s)" % (query,)
+		 *    
+		 */
+		parsers.put("constant", new AqpSubqueryParserFull() {
+			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
+				Query innerQuery = fp.parseNestedQuery();
+				
+				return new ConstantScoreQuery(innerQuery);
 			}
 		});
 			

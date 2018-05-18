@@ -72,6 +72,15 @@ public class AqpChangeRewriteMethodProcessor extends
     else if ("boolean".equals(method)) {
       node.setTag(MultiTermRewriteMethodProcessor.TAG_ID, MultiTermQuery.SCORING_BOOLEAN_REWRITE);
     }
+    else if ("topterms_blended".equals(method)) {
+      node.setTag(MultiTermRewriteMethodProcessor.TAG_ID, new MultiTermQuery.TopTermsBlendedFreqScoringRewrite(1024));
+    }
+    else if ("topterms".equals(method)) {
+        node.setTag(MultiTermRewriteMethodProcessor.TAG_ID, new MultiTermQuery.TopTermsScoringBooleanQueryRewrite(1024));
+    }
+    else if ("topterms_boosted".equals(method)) {
+        node.setTag(MultiTermRewriteMethodProcessor.TAG_ID, new MultiTermQuery.TopTermsBoostOnlyBooleanQueryRewrite(1024));
+    }
     else {
       throw new QueryNodeException(new MessageImpl(
           QueryParserMessages.PARAMETER_VALUE_NOT_SUPPORTED, "Unknown rewrite method: \"" + method + "\""));

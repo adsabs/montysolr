@@ -10,6 +10,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -319,6 +320,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+    	// constant() score
+	    assertQueryEquals(req("defType", "aqp", "q", "constant(title:foo)"),
+	            "ConstantScore(title:foo)", ConstantScoreQuery.class);
+	    assertQueryEquals(req("defType", "aqp", "q", "constant(title:foo^2)"),
+	            "ConstantScore((title:foo)^2.0)", ConstantScoreQuery.class);
+	    
       // allow to set scoring method for a given field
       BooleanQuery q = (BooleanQuery) assertQueryEquals(req("defType", "aqp", 
           "q", "author:riess", "aqp.qprefix.scoring.author", "boolean"),
@@ -338,6 +345,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             BooleanQuery.class);
       assertEquals(((PrefixQuery) q.clauses().get(1).getQuery()).getRewriteMethod(), MultiTermQuery.CONSTANT_SCORE_REWRITE);
       
+      
+      q = (BooleanQuery) assertQueryEquals(req("defType", "aqp", 
+          "q", "author:riess", "aqp.qprefix.scoring.author", "topterms"),
+            "author:riess, author:riess,*",
+            BooleanQuery.class);
+      assertEquals(((PrefixQuery) q.clauses().get(1).getQuery()).getRewriteMethod().getClass(), MultiTermQuery.TopTermsScoringBooleanQueryRewrite.class);
     
 	  //verification for https://github.com/romanchyla/montysolr/issues/45
       // expansion of synonyms inside a virtual field together with nested boolean query
@@ -831,7 +844,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "SecondOrderQuery(title:foo, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, lucene=0.5, adsPart=0.5))", SecondOrderQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "cr(title:foo, 0.4)"),
                 "SecondOrderQuery(title:foo, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, lucene=0.4, adsPart=0.6))", SecondOrderQuery.class);
-
+        
+        
     }
 
 
