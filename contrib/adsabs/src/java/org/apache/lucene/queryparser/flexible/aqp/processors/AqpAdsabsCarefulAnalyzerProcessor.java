@@ -139,7 +139,7 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 	  else if(node instanceof AqpAdsabsRegexQueryNode) {
 	    field = ((FieldQueryNode) node).getFieldAsString();
 	    value = ((FieldQueryNode) node).getText().toString();
-	    for (String suffix: new String[]{"_regex", ""}) {
+	    for (String suffix: new String[]{"_regex",}) {
   	    if (hasAnalyzer(field + suffix)) {
   	      tokens =  analyze(field + suffix, value);
   	      
