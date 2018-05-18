@@ -496,13 +496,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp",
                 "q", "first_author:\"kurtz, m j\""
                 ),
-                "first_author:kurtz, m j first_author:kurtz, m j* first_author:/kurtz, m[^\\s]+/ first_author:/kurtz, m[^\\s]+ j.*/ first_author:kurtz, m first_author:kurtz,",
+                "first_author:kurtz, m j first_author:kurtz, m j* first_author:/kurtz, m[^ ]+/ first_author:/kurtz, m[^ ]+ j.*/ first_author:kurtz, m first_author:kurtz,",
                 BooleanQuery.class
         );
         assertQueryEquals(req("defType", "aqp",
                 "q", "author:\"^kurtz, m j\""
                 ),
-                "spanPosRange(spanOr([author:kurtz, m j, SpanMultiTermQueryWrapper(author:kurtz, m j*), SpanMultiTermQueryWrapper(author:/kurtz, m[^\\s]+/), SpanMultiTermQueryWrapper(author:/kurtz, m[^\\s]+ j.*/), author:kurtz, m, author:kurtz,]), 0, 1)",
+                "spanPosRange(spanOr([author:kurtz, m j, SpanMultiTermQueryWrapper(author:kurtz, m j*), SpanMultiTermQueryWrapper(author:/kurtz, m[^ ]+/), SpanMultiTermQueryWrapper(author:/kurtz, m[^ ]+ j.*/), author:kurtz, m, author:kurtz,]), 0, 1)",
                 SpanPositionRangeQuery.class
         );
 
@@ -659,7 +659,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "spanPosRange(spanOr([author:two,, SpanMultiTermQueryWrapper(author:two,*)]), 0, 1)",
                 SpanPositionRangeQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "one ^two, j k"),
-                "+all:one +spanPosRange(spanOr([author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), SpanMultiTermQueryWrapper(author:/two, j[^\\s]+/), SpanMultiTermQueryWrapper(author:/two, j[^\\s]+ k.*/), author:two, j, author:two,]), 0, 1)",
+                "+all:one +spanPosRange(spanOr([author:two, j k, SpanMultiTermQueryWrapper(author:two, j k*), SpanMultiTermQueryWrapper(author:/two, j[^ ]+/), SpanMultiTermQueryWrapper(author:/two, j[^ ]+ k.*/), author:two, j, author:two,]), 0, 1)",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "one \"^phrase, author\"", "qf", "title author"),
                 "+(((author:one, author:one,*)) | title:one) +spanPosRange(spanOr([author:phrase, author, SpanMultiTermQueryWrapper(author:phrase, author *), author:phrase, a, SpanMultiTermQueryWrapper(author:phrase, a *), author:phrase,]), 0, 1)",
@@ -668,7 +668,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // author expansion can generate regexes, so we should deal with them (actually we ignore them)
         assertQueryEquals(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A. K. B.\", 1)"),
-                "spanPosRange(spanOr([author:accomazzi, a k b, SpanMultiTermQueryWrapper(author:accomazzi, a k b*), SpanMultiTermQueryWrapper(author:/accomazzi, a[^\\s]+/), SpanMultiTermQueryWrapper(author:/accomazzi, a[^\\s]+ k[^\\s]+/), SpanMultiTermQueryWrapper(author:/accomazzi, a[^\\s]+ k[^\\s]+ b.*/), author:accomazzi, a, author:accomazzi,]), 0, 1)",
+                "spanPosRange(spanOr([author:accomazzi, a k b, SpanMultiTermQueryWrapper(author:accomazzi, a k b*), SpanMultiTermQueryWrapper(author:/accomazzi, a[^ ]+/), SpanMultiTermQueryWrapper(author:/accomazzi, a[^ ]+ k[^ ]+/), SpanMultiTermQueryWrapper(author:/accomazzi, a[^ ]+ k[^ ]+ b.*/), author:accomazzi, a, author:accomazzi,]), 0, 1)",
                 SpanPositionRangeQuery.class);
 
 
@@ -849,7 +849,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
 
-    public void test() throws Exception {
+    public void testSearch() throws Exception {
 
 
         // search for all docs with a field
@@ -898,9 +898,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         
         
         assertU(adoc("id", "57", "bibcode", "b57", "author", "Kurtz, M.", "author", "Foo, Bar"));
-        assertU(adoc("id", "58", "bibcode", "b58", "author", "Kurtz, M J", "author", "Foo, Bar"));
-        assertU(adoc("id", "59", "bibcode", "b59", "author", "Kurtz, w", "author", "Foo, Bar"));
-        
+	assertU(adoc("id", "58", "bibcode", "b58", "author", "Kurtz, M J", "author", "Foo, Bar"));
+        assertU(adoc("id", "59", "bibcode", "b59", "author", "Mason, James Paul"));
         assertU(commit("waitSearcher", "true"));
 
         // regex
@@ -912,28 +911,26 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 RegexpQuery.class);
         
         setDebug(true);
-        
-        assertQueryEquals(req("q", "author:/kurtz, ~( )+/"), "", RegexpQuery.class);
-        
+
+	assertQueryEquals(req("q", "author:/kurtz, ~( )+/"), "", RegexpQuery.class);
+
         setDebug(false);
-        assertQ(req("q", "author:/kurtz, [^\\w]+/"), "//*[@numFound='2']");
-        assertQ(req("q", "author:/kurtz,[^\\w]+/"), "//*[@numFound='0']");
-        assertQueryEquals(req("q", "author:/kurtz, ~( )+/"), "author:/kurtz, ~( )+/", RegexpQuery.class);
         dumpDoc(0, "id", "author");
-        assertQ(req("q", "author:/kurtz, m/"), "//*[@numFound='1']");
-        //assertQ(req("q", "author:\"kurtz, m\""), "//*[@numFound='1']");
-        //assertQ(req("q", "author:/kurtz, ~( )+/"), "//*[@numFound='1']");
-        
-        assertQ(req("q", "author:/kurtz, [^ ]+/"), 
+
+        assertQ(req("q", "author:/kurtz, [^ ]+/"),
             "//*[@numFound='1']",
             "//doc/str[@name='id'][.='57']");
         assertQ(req("q", "author:/kurtz,[^ ]+/"), "//*[@numFound='0']");
-        
+
         assertQ(req("q", "author:/kurtz, [^ ]+ [^ ]+/"),
             "//*[@numFound='1']",
             "//doc/str[@name='id'][.='58']");
-        assertQ(req("q", "author:/kurtz, [^ ]+[^ ]+/"), "//*[@numFound='0']");
-        
+	assertQ(req("q", "author:/mason, j[^ ]+ p[^ ]+/"), "//*[@numFound='1']");
+	assertQ(req("q", "author:/mason, james p[^ ]+/"), "//*[@numFound='1']");
+	assertQ(req("q", "author:/mason, james paul/"), "//*[@numFound='1']");
+	assertQ(req("q", "author:/mason, j[^ ]+/"), "//*[@numFound='0']");
+	assertQ(req("q", "author:/mason, p[^ ]+/"), "//*[@numFound='0']");
+
 
         // this is treated as regex, but because it is unfielded search
         // it ends up in the unfielded_search field. Feature or a bug?
@@ -951,8 +948,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "author:(/kurtz, m.*/)"),
                 "author:/kurtz, m.*/",
                 RegexpQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "abstract:/nas\\S+/"),
-                "abstract:/nas\\S+/",
+        assertQueryEquals(req("defType", "aqp", "q", "abstract:/nas[^ ]+/"),
+                "abstract:/nas[^ ]+/",
                 RegexpQuery.class);
 
 
@@ -995,7 +992,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
     }
-
+    
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabsSolrSearch.class);
     }
