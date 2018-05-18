@@ -898,24 +898,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         
         
         assertU(adoc("id", "57", "bibcode", "b57", "author", "Kurtz, M.", "author", "Foo, Bar"));
-	assertU(adoc("id", "58", "bibcode", "b58", "author", "Kurtz, M J", "author", "Foo, Bar"));
+        assertU(adoc("id", "58", "bibcode", "b58", "author", "Kurtz, M J", "author", "Foo, Bar"));
         assertU(adoc("id", "59", "bibcode", "b59", "author", "Mason, James Paul"));
         assertU(commit("waitSearcher", "true"));
 
         // regex
-        assertQueryEquals(req("defType", "aqp", "q", "author:/^Kurtz,\\WM./"),
-                "author:/^Kurtz,\\WM./",
-                RegexpQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "author:/^kurtz,\\Wm./"),
-                "author:/^kurtz,\\Wm./",
-                RegexpQuery.class);
-        
-        setDebug(true);
-	assertQueryEquals(req("q", "author:/kurtz, ~( )+/"), "", RegexpQuery.class);
-
-        setDebug(false);
-        dumpDoc(0, "id", "author");
-
         assertQ(req("q", "author:/kurtz, [^ ]+/"),
             "//*[@numFound='1']",
             "//doc/str[@name='id'][.='57']");
@@ -924,11 +911,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("q", "author:/kurtz, [^ ]+ [^ ]+/"),
             "//*[@numFound='1']",
             "//doc/str[@name='id'][.='58']");
-	assertQ(req("q", "author:/mason, j[^ ]+ p[^ ]+/"), "//*[@numFound='1']");
-	assertQ(req("q", "author:/mason, james p[^ ]+/"), "//*[@numFound='1']");
-	assertQ(req("q", "author:/mason, james paul/"), "//*[@numFound='1']");
-	assertQ(req("q", "author:/mason, j[^ ]+/"), "//*[@numFound='0']");
-	assertQ(req("q", "author:/mason, p[^ ]+/"), "//*[@numFound='0']");
+		assertQ(req("q", "author:/mason, j[^ ]+ p[^ ]+/"), "//*[@numFound='1']");
+		assertQ(req("q", "author:/mason, james p[^ ]+/"), "//*[@numFound='1']");
+		assertQ(req("q", "author:/mason, james paul/"), "//*[@numFound='1']");
+		assertQ(req("q", "author:/mason, j[^ ]+/"), "//*[@numFound='0']");
+		assertQ(req("q", "author:/mason, p[^ ]+/"), "//*[@numFound='0']");
 
 
         // this is treated as regex, but because it is unfielded search

@@ -94,6 +94,7 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k \
 -Dsolr.maxBufferedDocs=${SOLR_MAX_BUFFERED_DOCS:-50000} \
 -Dmontysolr.logdir=${SOLR_LOGS_DIR} \
 -DhostContext=${SOLR_HOST_CONTEXT:-solr} \
+${MONTYSOLR_EXTRA_JAVA_OPTS}
 "
 
 # Anything you add to the SOLR_OPTS variable will be included in the java
