@@ -911,7 +911,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 RegexpQuery.class);
         
         setDebug(true);
-
 	assertQueryEquals(req("q", "author:/kurtz, ~( )+/"), "", RegexpQuery.class);
 
         setDebug(false);
