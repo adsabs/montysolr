@@ -31,7 +31,8 @@ public class CitationCacheReaderWriter {
   
   public CitationCacheReaderWriter(File targetDir) {
     this.targetDir = targetDir;
-    
+
+    assert targetDir != null;
     if (! targetDir.exists())
       targetDir.mkdirs();
     

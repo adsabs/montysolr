@@ -307,8 +307,9 @@ solr.version=${solr.version}
 		</copy>
 
 		<!-- copy solr/webapp jars -->
+		<mkdir dir="${solr.real.location}/server/solr-webapp/webapp/WEB-INF/lib" />
 		<copy todir="${build.dir}/solrjars-extracted/solr">
-			<fileset dir="${solr.real.location}/server/solr-webapp/webapp/WEB-INF/lib">
+		    <fileset dir="${solr.real.location}/server/solr-webapp/webapp/WEB-INF/lib">
 				<include name="**/**.jar"/>
 			</fileset>
 		</copy>
