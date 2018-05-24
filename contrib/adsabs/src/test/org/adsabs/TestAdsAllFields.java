@@ -388,6 +388,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * here we really test only the import mechanism, the order of authors
 		 * and duplication. The parsing logic has its own unittest
 		 */
+		setDebug(true);
 		assertQ(req("q", "author:\"Einstein, A\""),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']");

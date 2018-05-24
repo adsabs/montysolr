@@ -53,9 +53,11 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.StandardBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpConstantQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpConstantQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 
 /**
@@ -90,6 +92,7 @@ public class AqpStandardQueryTreeBuilder extends AqpQueryTreeBuilder implements
         new StandardBooleanQueryNodeBuilder());
     setBuilder(MultiPhraseQueryNode.class, new MultiPhraseQueryNodeBuilder());
     setBuilder(MatchAllDocsQueryNode.class, new MatchAllDocsQueryNodeBuilder());
+    setBuilder(AqpConstantQueryNode.class, new AqpConstantQueryNodeBuilder(this));
   }
 
 

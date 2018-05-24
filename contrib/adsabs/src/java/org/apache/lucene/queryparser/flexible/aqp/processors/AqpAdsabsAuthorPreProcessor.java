@@ -5,11 +5,11 @@ import java.util.Map;
 
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpConstantQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 
 /**
  * Looks at the QueryNode(s) and prepares them for analysis. This must happen
@@ -24,7 +24,7 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
  * @see AqpAdsabsExpandAuthorSearchProcessor
  * 
  */
-public class AqpAdsabsAuthorPreProcessor extends QueryNodeProcessorImpl {
+public class AqpAdsabsAuthorPreProcessor extends AqpQueryNodeProcessorImpl {
 
   private Map<String, int[]> fieldMap;
 
@@ -49,12 +49,23 @@ public class AqpAdsabsAuthorPreProcessor extends QueryNodeProcessorImpl {
       
       FieldQueryNode fqn = ((FieldQueryNode) node);
       if (fieldMap.containsKey(fqn.getFieldAsString())) {
+        String field = fqn.getFieldAsString();
         String[] nameParts = fqn.getTextAsString().split(" ");
         if (node instanceof WildcardQueryNode) { 
           if (nameParts[nameParts.length-1].replace("*","").length() > 1) return node;
           // make "kurtz, m*" a simple case
-          return new FieldQueryNode(fqn.getField(), fqn.getTextAsString().replace("*", "").trim(), fqn.getBegin(), fqn.getEnd());
+          node = new FieldQueryNode(fqn.getField(), fqn.getTextAsString().replace("*", "").trim(), fqn.getBegin(), fqn.getEnd());
         }
+        
+        if (hasConfigMap() && getConfigVal("aqp.constant_scoring.fields", null) != null) {
+          String[] fields = getConfigVal("aqp.constant_scoring.fields").split(",");
+          for (String f: fields) {
+            if (field.equals(f))
+              return new AqpConstantQueryNode(node);
+          }
+        }
+        
+        return node;
       }
     }
     return node;
