@@ -41,11 +41,11 @@ public class AdsQParserPlugin extends QParserPlugin {
 		
 		for (int i=0; i<defs.size(); i++) {
 		  String fName = defs.getName(i);
-      if (fName.startsWith("aqp.")) {
-        defaultConfig.params.put(fName, (String) defs.getVal(i));
-      }
-    }
-		
+	      if (fName.startsWith("aqp.")) {
+	        defaultConfig.params.put(fName, (String) defs.getVal(i));
+	      }
+	    }
+			
 	}
 
 
