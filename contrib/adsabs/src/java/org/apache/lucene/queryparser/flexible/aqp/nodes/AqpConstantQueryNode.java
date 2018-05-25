@@ -7,13 +7,13 @@ import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 public class AqpConstantQueryNode extends QueryNodeImpl implements QueryNode {
 
   public AqpConstantQueryNode(QueryNode nested) {
+    setLeaf(false);
     allocate();
-    setLeaf(true);
-    getChildren().add(nested);
+    add(nested);
   }
-
+  
   @Override
-  public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
+  public String toString() {
     StringBuffer bo = new StringBuffer();
     bo.append("<constant>\n");
     for (QueryNode child: this.getChildren()) {
@@ -21,6 +21,11 @@ public class AqpConstantQueryNode extends QueryNodeImpl implements QueryNode {
     }
     bo.append("</constant>");
     return bo.toString();
+  }
+  
+  @Override
+  public CharSequence toQueryString(EscapeQuerySyntax escapeSyntaxParser) {
+    return "constant(" + this.getChildren().get(0).toQueryString(escapeSyntaxParser) + ")";
   }
 
 }

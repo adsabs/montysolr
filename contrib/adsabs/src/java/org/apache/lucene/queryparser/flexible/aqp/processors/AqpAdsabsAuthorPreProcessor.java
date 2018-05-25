@@ -56,15 +56,6 @@ public class AqpAdsabsAuthorPreProcessor extends AqpQueryNodeProcessorImpl {
           // make "kurtz, m*" a simple case
           node = new FieldQueryNode(fqn.getField(), fqn.getTextAsString().replace("*", "").trim(), fqn.getBegin(), fqn.getEnd());
         }
-        
-        if (hasConfigMap() && getConfigVal("aqp.constant_scoring.fields", null) != null) {
-          String[] fields = getConfigVal("aqp.constant_scoring.fields").split(",");
-          for (String f: fields) {
-            if (field.equals(f))
-              return new AqpConstantQueryNode(node);
-          }
-        }
-        
         return node;
       }
     }

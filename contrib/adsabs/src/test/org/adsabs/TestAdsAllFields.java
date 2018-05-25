@@ -386,15 +386,27 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * author
 		 *
 		 * here we really test only the import mechanism, the order of authors
-		 * and duplication. The parsing logic has its own unittest
+		 * and duplication and constant scoring. The parsing logic has its own unittest
 		 */
-		setDebug(true);
-		assertQ(req("q", "author:\"Einstein, A\""),
+		assertQ(req("q", "author:\"Einstein, A\"", 
+		    "aqp.constant_scoring", "author^13",
+		    "fl", "recid,score"),
 				"//*[@numFound='1']",
-				"//doc/int[@name='recid'][.='100']");
-		assertQ(req("q", "author:\"Einstein, A\" AND author:\"Anders\""),
+				"//doc/int[@name='recid'][.='100']",
+				"//doc/float[@name='score'][.='13.0']"
+				);
+		assertQ(req("q", "author:\"Einstein, A\" AND author:\"Anders\"",
+		    "aqp.constant_scoring", "author^13",
+        "fl", "recid,score"),
 				"//*[@numFound='1']",
-				"//doc/int[@name='recid'][.='100']");
+				"//doc/int[@name='recid'][.='100']",
+				"//doc/float[@name='score'][.='26.0']");
+		assertQ(req("q", "author:\"Einstein, A\" OR author:\"Anders\"",
+        "aqp.constant_scoring", "author^13",
+        "fl", "recid,score"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']",
+        "//doc/float[@name='score'][.='26.0']");
 
 		assert h.query(req("q", "author:\"Einstein, A\""))
 				.contains("<arr name=\"author_norm\">" +
