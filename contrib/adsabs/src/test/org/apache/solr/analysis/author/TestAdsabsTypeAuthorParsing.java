@@ -126,7 +126,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
           "DE ZEEUW, TIM=>DE ZEEUW, P TIM",
           "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,",
-          "grant, carolyn s; stern grant, carolyn; stern, carolyn p"
+          "grant, carolyn s; stern grant, carolyn; stern, carolyn p",
+          "orlitova, ivana; stoklasova, ivana",
+          "orlitova; stoklasova"
       });
 
       // automatically harvested variations of author names (collected during indexing)
@@ -362,6 +364,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
   
   public void testAuthorParsingUseCases() throws Exception {
+    
+    // stoklasova == orlitova; it should produce the same query
+    testAuthorQuery("\"stoklasova\"", 
+        "author:stoklasova, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:stoklasova,*", 
+        "//*[@numFound='0']");
+    testAuthorQuery("\"orlitova\"", 
+        "author:orlitova, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:orlitova,*", 
+        "//*[@numFound='0']");
     
     // searching for ascii version finds also the utf (for hyphenated names)
     testAuthorQuery("\"chyelkovae\"", 

@@ -104,19 +104,19 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
               
               TokenStream ts = analyzer.tokenStream(targetAnalyzer, new StringReader(s));
               ts.reset();
-              
+              authorInput = s;
 						  while(ts.incrementToken()) {
 						  	termAtt = ts.getAttribute(CharTermAttribute.class);
 						  	typeAtt = ts.getAttribute(TypeAttribute.class);
               
-						  	if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
-						  		addTokensToSynMap();
-						      authorInput = termAtt.toString();
-						      //System.out.println("authorInput " + authorInput);
-						    }
-						  	else {
+//						  	if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
+//						  		addTokensToSynMap();
+//						      authorInput = termAtt.toString();
+//						      //System.out.println("authorInput " + authorInput);
+//						    }
+//						  	else {
 						  		tokenBuffer.add(termAtt.toString());
-						  	}
+//						  	}
 						  }
 						  
 						  addTokensToSynMap();

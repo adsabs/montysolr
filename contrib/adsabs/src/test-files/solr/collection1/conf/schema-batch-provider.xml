@@ -23,8 +23,8 @@
       positionIncrementGap="0">
       <analyzer type="query">
         <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.analysis.author.AuthorTransliterationFactory" inputType="null"/>
         <filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-        <filter class="solr.analysis.author.AuthorTransliterationFactory" />
         <filter class="solr.analysis.author.AuthorCollectorFactory"
           tokenTypes="AUTHOR_INPUT,AUTHOR_TRANSLITERATED"
           emitTokens="true" />

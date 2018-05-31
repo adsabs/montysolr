@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,7 +88,7 @@ public class AuthorUtils {
 		HashSet<String> synonyms = new HashSet<String>();
 		
 		// include original
-		// synonyms.add(a);
+		synonyms.add(a);
 		
 		// downgrade to ascii
 		String downgraded = foldToAscii(a);
@@ -98,7 +99,7 @@ public class AuthorUtils {
 		synonyms.add(transAcc);
 		
 		// handle russian name stuff
-		HashSet<String> transRus = transliterateRussianNames(new String[] {a, downgraded, transAcc});
+		HashSet<String> transRus = transliterateRussianNames(synonyms);
 		synonyms.addAll(transRus);
 		
 		// remove the original input from the set
@@ -183,7 +184,7 @@ public class AuthorUtils {
 	
 	// XXX: this doesn't look right to me, the fifth step gets (possibly)
 	// 5 times more items than the first step
-	public static HashSet<String> transliterateRussianNames(String[] in) {
+	public static HashSet<String> transliterateRussianNames(Set<String> in) {
 		HashSet<String> synonyms = new HashSet<String>();
 		for (String s : in) {
 			HashSet<String> syn = new HashSet<String>();

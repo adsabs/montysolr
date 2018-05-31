@@ -73,7 +73,7 @@ public final class AuthorTransliterationFilter extends TokenFilter {
 
   private boolean genVariants() {
     //log.debug("generating name variants for: " + authorName);
-    ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(termAtt.toString());
+    ArrayList<String> synonyms = AuthorUtils.getAsciiTransliteratedVariants(termAtt.toString().toUpperCase());
     if (synonyms != null && synonyms.size() > 0) {
       //log.debug("variants: " + synonyms);
       transliterationStack = synonyms;

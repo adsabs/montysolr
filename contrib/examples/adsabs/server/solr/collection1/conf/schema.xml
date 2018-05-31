@@ -48,8 +48,8 @@
 			positionIncrementGap="0">
 			<analyzer type="query"> <!-- it must be query type!!! -->
 				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
+				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_INPUT,AUTHOR_TRANSLITERATED"
 					emitTokens="true" />
