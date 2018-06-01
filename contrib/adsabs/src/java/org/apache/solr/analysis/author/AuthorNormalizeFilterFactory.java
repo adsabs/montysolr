@@ -11,8 +11,14 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
  */
 public class AuthorNormalizeFilterFactory extends TokenFilterFactory {
 
-	public AuthorNormalizeFilterFactory(Map<String,String> args) {
+	private boolean keepApostrophes;
+
+  public AuthorNormalizeFilterFactory(Map<String,String> args) {
     super(args);
+    if (args.containsKey("keepApostrophe")) {
+      String inputType = args.remove("keepApostrophe");
+      if (inputType.equals("true")) keepApostrophes = true;
+    } 
     if (!args.isEmpty()) {
       throw new IllegalArgumentException("Unknown parameter(s): " + args);
     }
@@ -22,6 +28,6 @@ public class AuthorNormalizeFilterFactory extends TokenFilterFactory {
 	 * @see org.apache.solr.analysis.TokenFilterFactory#create(org.apache.lucene.analysis.TokenStream)
 	 */
 	public AuthorNormalizeFilter create(TokenStream input) {
-		return new AuthorNormalizeFilter(input);
+		return new AuthorNormalizeFilter(input, keepApostrophes);
 	}
 }

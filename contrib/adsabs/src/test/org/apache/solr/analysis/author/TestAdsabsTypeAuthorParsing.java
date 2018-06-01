@@ -590,7 +590,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"first_author:boser, s first_author:boser, s* first_author:boser, first_author:böser, s first_author:böser, s* first_author:böser, first_author:boeser, s first_author:boeser, s* first_author:boeser,",
         		"//*[@numFound='1']",
     		"\"Böser, S\"", 
-        		"first_author:böser, s first_author:böser, s* first_author:böser, first_author:boser, s first_author:boser, s* first_author:boser, first_author:boeser, s first_author:boeser, s* first_author:boeser,",
+        		"first_author:böser, s first_author:böser, s* first_author:böser, first_author:boeser, s first_author:boeser, s* first_author:boeser, first_author:boser, s first_author:boser, s* first_author:boser,",
         		"//*[@numFound='1']"
         		);
   	
