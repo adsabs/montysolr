@@ -184,7 +184,9 @@ public class TestAuthorUtils extends TestCase {
 		expected.add("FOOVI, IURI");
 		expected.add("FOOVII, IURI");
 		expected.add("FOOVII, YURI");
-		HashSet<String> actual = AuthorUtils.transliterateRussianNames(new String[] {"FOOVI, YURI"});
+		HashSet<String> t = new HashSet<String>();
+		t.add("FOOVI, YURI");
+		HashSet<String> actual = AuthorUtils.transliterateRussianNames(t);
 		assertEquals(expected, actual);
 	}
 	

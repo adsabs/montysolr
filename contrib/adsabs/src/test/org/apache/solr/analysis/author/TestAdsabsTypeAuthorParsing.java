@@ -126,7 +126,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
           "DE ZEEUW, TIM=>DE ZEEUW, P TIM",
           "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,",
-          "grant, carolyn s; stern grant, carolyn; stern, carolyn p"
+          "grant, carolyn s; stern grant, carolyn; stern, carolyn p",
+          "orlitova, ivana; stoklasova, ivana",
+          "orlitova; stoklasova"
       });
 
       // automatically harvested variations of author names (collected during indexing)
@@ -363,6 +365,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
     
+    // stoklasova == orlitova; it should produce the same query
+    testAuthorQuery("\"stoklasova\"", 
+        "author:stoklasova, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:stoklasova,*", 
+        "//*[@numFound='0']");
+    testAuthorQuery("\"orlitova\"", 
+        "author:orlitova, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:orlitova,*", 
+        "//*[@numFound='0']");
+    
     // searching for ascii version finds also the utf (for hyphenated names)
     testAuthorQuery("\"chyelkovae\"", 
         "author:chyelkovae, author:chyelkovae,* author:chýlková, author:chýlková,* author:chylkova, author:chylkova,*", 
@@ -580,7 +590,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		"first_author:boser, s first_author:boser, s* first_author:boser, first_author:böser, s first_author:böser, s* first_author:böser, first_author:boeser, s first_author:boeser, s* first_author:boeser,",
         		"//*[@numFound='1']",
     		"\"Böser, S\"", 
-        		"first_author:böser, s first_author:böser, s* first_author:böser, first_author:boser, s first_author:boser, s* first_author:boser, first_author:boeser, s first_author:boeser, s* first_author:boeser,",
+        		"first_author:böser, s first_author:böser, s* first_author:böser, first_author:boeser, s first_author:boeser, s* first_author:boeser, first_author:boser, s first_author:boser, s* first_author:boser,",
         		"//*[@numFound='1']"
         		);
   	

@@ -11,9 +11,15 @@ public final class AuthorNormalizeFilter extends TokenFilter {
 
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+  private boolean keepApostrophes = false;
 
   public AuthorNormalizeFilter(TokenStream input) {
     super(input);
+  }
+  
+  public AuthorNormalizeFilter(TokenStream input, boolean keepApostrophes) {
+    super(input);
+    this.keepApostrophes  = keepApostrophes;
   }
 
   /* (non-Javadoc)
@@ -26,8 +32,9 @@ public final class AuthorNormalizeFilter extends TokenFilter {
 //    if (setIntoPayload ) {
 //      payloadAtt.setPayload(new BytesRef(termAtt.toString()));
 //    }
+    String normalized;
     
-    String normalized = AuthorUtils.normalizeAuthor(termAtt.toString());
+    normalized = AuthorUtils.normalizeAuthor(termAtt.toString(), keepApostrophes);
     //System.out.println("normalized="+normalized);
     termAtt.setEmpty().append(normalized);
     typeAtt.setType(AuthorUtils.AUTHOR_INPUT);

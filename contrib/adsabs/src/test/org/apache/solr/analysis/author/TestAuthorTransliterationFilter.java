@@ -37,7 +37,7 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 		
 		TokenStream stream = factory.create(new TestFilter(tokenizer));
 		
-		String[] expected = { "Müller, Bill", "Mueller, Bill", "Muller, Bill" };
+		String[] expected = { "Müller, Bill", "Mueller, Bill".toUpperCase(), "Muller, Bill".toUpperCase() };
 		assertTokenStreamContents(stream, expected);
 	}
 	
@@ -48,7 +48,7 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
     AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
     TokenStream stream = factory.create(new TestFilter(tokenizer));
     
-    String[] expected = { "Jeřábková, Tereza", "Jerhaebkovae, Tereza", "Jerabkova, Tereza"};
+    String[] expected = { "Jeřábková, Tereza", "Jerhaebkovae, Tereza".toUpperCase(), "Jerabkova, Tereza".toUpperCase()};
     assertTokenStreamContents(stream, expected);
   }
 }

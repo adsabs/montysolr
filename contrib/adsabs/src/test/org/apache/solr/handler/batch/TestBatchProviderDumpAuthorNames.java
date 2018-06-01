@@ -13,14 +13,14 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     // index some data
     assertU(adoc(F.ID, "1", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk,"));
     assertU(adoc(F.ID, "2", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M."));
-    assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Marel"));
+    assertU(adoc(F.ID, "3", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk,       Marel"));
     assertU(adoc(F.ID, "4", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja"));
-    assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja Karel"));
+    assertU(adoc(F.ID, "5", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja     Karel"));
     assertU(commit());
     
     assertU(adoc(F.ID, "7", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Molja K"));
     assertU(adoc(F.ID, "8", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, M K"));
-    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel Molja"));
+    assertU(adoc(F.ID, "9", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel     Molja"));
     assertU(adoc(F.ID, "10", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, Karel M"));
     assertU(adoc(F.ID, "11", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Adamčuk, K Molja"));
     assertU(adoc(F.ID, "12", F.BIBCODE, "xxxxxxxxxxx12", F.AUTHOR, "ǎguşan, Adrian, , Dr"));
@@ -32,6 +32,8 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     assertU(commit());
     
     assertU(adoc(F.ID, "18", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "González-Alfonso, E"));
+    assertU(adoc(F.ID, "19", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Sil'chenko, E"));
+    assertU(adoc(F.ID, "20", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "SAV'E, E"));
     assertU(commit());
 		
 		
@@ -47,31 +49,34 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     
 		checkFile(tmpDir + "/00000", 
 				new String[]{
-        "Adamcuk, Molja Karel=>Adamčuk, Molja Karel",
-        "Adamcuk, Molja K=>Adamčuk, Molja K",
+        "adamcuk, molja karel=>adamčuk, molja karel",
+        "adamcuk, molja k=>adamčuk, molja k",
         //"Adamcuk, M Karel=>Adamčuk, M Karel",
-        "Adamcuk, M K=>Adamčuk, M K",
-        "Adamcuk, M=>Adamčuk, M",
-        "Adamchuk, Molja Karel=>Adamčuk, Molja Karel",
-        "Adamchuk, Molja K=>Adamčuk, Molja K",
+        "adamcuk, m k=>adamčuk, m k",
+        "adamcuk, m=>adamčuk, m",
+        "adamchuk, molja karel=>adamčuk, molja karel",
+        "adamchuk, molja k=>adamčuk, molja k",
         //"Adamczuk, M Karel=>Adamčuk, M Karel",
-        "Adamchuk, M K=>Adamčuk, M K",
-        "Adamchuk, M=>Adamčuk, M",
-        "Adamcuk, Karel Molja=>Adamčuk, Karel Molja",
-        "Adamcuk, Karel M=>Adamčuk, Karel M",
-        "!ahguşan, Adrian, , Dr=>ǎguşan, Adrian, , Dr",
-        "!agusan, Adrian, ,=>ǎguşan, Adrian, ,",
-        "!ahguşan, A ,=>ǎguşan, A ,",
-        "!agusan, A , D=>ǎguşan, A , D",
-        "agusan, Adrian Dr=>ǎguşan, Adrian Dr",
-        "agusan, A=>ǎguşan, A",
-        "ahguşan, Adrian D=>ǎguşan, Adrian D",
-        "ahguşan, Adrian Dr=>ǎguşan, Adrian Dr",
-        "ahguşan, A D=>ǎguşan, A D",
+        "adamchuk, m k=>adamčuk, m k",
+        "adamchuk, m=>adamčuk, m",
+        "adamcuk, karel molja=>adamčuk, karel molja",
+        "adamcuk, karel m=>adamčuk, karel m",
+        "!ahguşan, adrian, , dr=>ǎguşan, adrian, , dr",
+        "!agusan, adrian, ,=>ǎguşan, adrian, ,",
+        "!ahguşan, a ,=>ǎguşan, a ,",
+        "!agusan, a , d=>ǎguşan, a , d",
+        "agusan, adrian dr=>ǎguşan, adrian dr",
+        "agusan, a=>ǎguşan, a",
+        "ahguşan, adrian d=>ǎguşan, adrian d",
+        "ahguşan, adrian dr=>ǎguşan, adrian dr",
+        "ahguşan, a d=>ǎguşan, a d",
         "!a=>á,",
-        "Gonzalez Alfonso,=>González Alfonso,",
-        "Gonzalez Alfonso, E=>González Alfonso, E",
-        "Gonzaelez Alfonso, E=>González Alfonso, E",
+        "gonzalez alfonso,=>gonzález alfonso,",
+        "gonzalez alfonso, e=>gonzález alfonso, e",
+        "gonzaelez alfonso, e=>gonzález alfonso, e",
+        "savye, e=>sav e, e",
+        "silchenko,=>sil chenko,", // this is cleaned up "sil'chenko"
+        "!sil'chenko,=>sil chenko,"
 				}
 		);
 	}

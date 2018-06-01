@@ -101,10 +101,11 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
             for (String s: vals) {
               //System.out.println(s);
               //System.out.println(AuthorUtils.normalizeAuthor(s));
+              s = s.toLowerCase();
               
               TokenStream ts = analyzer.tokenStream(targetAnalyzer, new StringReader(s));
               ts.reset();
-              
+              authorInput = s;
 						  while(ts.incrementToken()) {
 						  	termAtt = ts.getAttribute(CharTermAttribute.class);
 						  	typeAtt = ts.getAttribute(TypeAttribute.class);
@@ -115,7 +116,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 						      //System.out.println("authorInput " + authorInput);
 						    }
 						  	else {
-						  		tokenBuffer.add(termAtt.toString());
+						  		tokenBuffer.add(termAtt.toString().toLowerCase());
 						  	}
 						  }
 						  
@@ -218,17 +219,19 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       @Override
       public String formatEntry(String key, Set<String>values) {
         List<String> rows = new ArrayList<String>();
-
+        boolean hadApostrophe = false;
         
         
-        String[] nameParts = carefullySplitName(key);
+        String[] nameParts = carefullySplitName(key, true);
         if (nameParts.length > 1) {
         	
           //nameParts[0] = nameParts[0].replace(",", "\\,");
           String[][] otherNames = new String[values.size()][];
           int n = 0;
           for (String name: values) {
-            otherNames[n++] = carefullySplitName(name);
+            if (name.contains("'"))
+              hadApostrophe = true;
+            otherNames[n++] = carefullySplitName(name, false);
             //otherNames[n-1][0] = otherNames[n-1][0].replace(",", "\\,"); 
           }
           int cycle=0;
@@ -254,7 +257,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
         // cleanup entries, keep only those that have non-ascii character
         StringBuffer toReturn = new StringBuffer();
         for (String row: rows) {
-        	if (hasNonAscii(row)) {
+        	if (hadApostrophe || hasNonAscii(row)) {
         		toReturn.append(row);
         		toReturn.append("\n");
         	}
@@ -264,7 +267,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       
       private boolean hasNonAscii(String s) {
       	for (char c: s.toCharArray()) {
-      		if ((int)c > 128) {
+      		if ((int)c > 128 ) {
       			return true;
       		}
       	}
@@ -297,13 +300,13 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
         return false;
       }
       
-      private String[] carefullySplitName(String name) {
+      private String[] carefullySplitName(String name, boolean keepApostrophe) {
     	  
     	  // remove all but the first comma
           //System.out.println("before replace " + name);
           
     	  name = name.replaceAll("\\G((?!^).*?|[^,]*,.*?),", "$1");
-    	  name = AuthorUtils.normalizeAuthor(name);
+    	  name = AuthorUtils.normalizeAuthor(name, keepApostrophe);
     	  //System.out.println("after replace " + name);
 
     	  String[] out = new String[0];

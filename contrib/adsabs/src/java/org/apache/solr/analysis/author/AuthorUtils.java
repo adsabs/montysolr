@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,28 +27,38 @@ public class AuthorUtils {
 	// original, which may miss diacritics: "(?<=\\b\\p{L})\\.(?=\\s*\\b)" \P{M}\p{M}*+
 	// [^,\\-\\w\\s\\{N}\\p{L}\\p{M}*+]
 	static Pattern n1 = Pattern.compile("[^,\\-\\s\\p{N}\\p{L}\\p{M}]");
+	static Pattern n1b = Pattern.compile("[^,\\-\\s\\'\\p{N}\\p{L}\\p{M}]");
 	// to normalize spaces
 	static Pattern n2 = Pattern.compile("\\s+");
 	// to normalize non escaped commas
 	static Pattern n3 = Pattern.compile("(?<!\\\\),\\s*");
 	// deal with word delimiters
 	static Pattern n4 = Pattern.compile("(?<=\\p{L})\\'\\s*");
+	
 	public static String normalizeAuthor(String a) {
-		a = n4.matcher(a).replaceAll("-");
-		a = n0.matcher(a).replaceAll(" ");
-		a = n1.matcher(a).replaceAll("");
-		a = n3.matcher(a).replaceAll(", ");
-		a = n2.matcher(a.trim()).replaceAll(" ");
-		
-		
-		if (!(a.contains(","))) // || a.contains(" ")
-		  a = a + ",";
-		// do this at the end, we want to see the space instead of '-'
-		a = a.replace('-', ' ');
-		// normalize spaces once again
-		a = n2.matcher(a.trim()).replaceAll(" ");
-		return a;
+		return normalizeAuthor(a, false);
 	}
+	
+	public static String normalizeAuthor(String a, boolean keepApostrophe) {
+	  if (!keepApostrophe)
+	    a = n4.matcher(a).replaceAll("-");
+    a = n0.matcher(a).replaceAll(" ");
+    if (keepApostrophe)
+      a = n1b.matcher(a).replaceAll("");
+    else
+      a = n1.matcher(a).replaceAll("");
+    a = n3.matcher(a).replaceAll(", ");
+    a = n2.matcher(a.trim()).replaceAll(" ");
+    
+    
+    if (!(a.contains(","))) // || a.contains(" ")
+      a = a + ",";
+    // do this at the end, we want to see the space instead of '-'
+    a = a.replace('-', ' ');
+    // normalize spaces once again
+    a = n2.matcher(a.trim()).replaceAll(" ");
+    return a;
+  }
 	
 	/**
 	 * this whole thing become obsolete when we included the python
@@ -85,9 +96,10 @@ public class AuthorUtils {
 	
 	public static ArrayList<String> getAsciiTransliteratedVariants(String a) {
 		HashSet<String> synonyms = new HashSet<String>();
+		a = a.toUpperCase();
 		
 		// include original
-		// synonyms.add(a);
+		synonyms.add(a);
 		
 		// downgrade to ascii
 		String downgraded = foldToAscii(a);
@@ -98,11 +110,17 @@ public class AuthorUtils {
 		synonyms.add(transAcc);
 		
 		// handle russian name stuff
-		HashSet<String> transRus = transliterateRussianNames(new String[] {a, downgraded, transAcc});
+		HashSet<String> transRus = transliterateRussianNames(synonyms);
 		synonyms.addAll(transRus);
+		
+		// apostrophes are now preserved in the index
+		// so we need to generate translits for those
+		if (a.contains("'"))
+		  synonyms.add(a.replace("'", ""));
 		
 		// remove the original input from the set
 		synonyms.remove(a);
+		
 		return new ArrayList<String>(synonyms);
 	}
 	
@@ -183,7 +201,7 @@ public class AuthorUtils {
 	
 	// XXX: this doesn't look right to me, the fifth step gets (possibly)
 	// 5 times more items than the first step
-	public static HashSet<String> transliterateRussianNames(String[] in) {
+	public static HashSet<String> transliterateRussianNames(Set<String> in) {
 		HashSet<String> synonyms = new HashSet<String>();
 		for (String s : in) {
 			HashSet<String> syn = new HashSet<String>();
