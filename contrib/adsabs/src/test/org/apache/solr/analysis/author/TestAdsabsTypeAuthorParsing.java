@@ -128,7 +128,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,",
           "grant, carolyn s; stern grant, carolyn; stern, carolyn p",
           "orlitova, ivana; stoklasova, ivana",
-          "orlitova; stoklasova"
+          "orlitova,; stoklasova,"
       });
 
       // automatically harvested variations of author names (collected during indexing)
@@ -158,7 +158,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "Gonzaelez Alfonso,=>González Alfonso,",
           "Gonzaelez Alfonso, E=>González Alfonso, E",
           "Gonzalez Alfonso, E=>González Alfonso, E",
-          "Chyelkovae,=>Chýlková,"
+          "Chyelkovae,=>Chýlková,",
+          "stoklasova,=>stoklasová,",
+          "orlitova,=>orlitová,"
       }
       ));
 
@@ -364,13 +366,24 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
   
   public void testAuthorParsingUseCases() throws Exception {
+    // stoklasova == orlitova == orlitová == stoklasová; it should produce the same query
+    // wrong output (missing is "orlitová, *")
+    // author:stoklasova, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:stoklasova,* author:stoklasová, author:stoklasová,* author:stoklasovae, author:stoklasovae,*",
+    // expected:
+    // author:orlitova, author:stoklasová,* author:orlitova, ivana author:orlitova, ivana * author:stoklasova, i author:stoklasova, i * author:stoklasova, ivana author:stoklasova, ivana * author:orlitova, i author:orlitova, i * author:orlitova,* author:stoklasova, author:stoklasova,* author:orlitová, author:orlitová,* author:orlitovae, author:orlitovae,* author:stoklasová, author:stoklasovae, author:stoklasovae,*
+    // TODO: optimize the query, remove the clauses that match the doc twice
     
-    // stoklasova == orlitova; it should produce the same query
     testAuthorQuery("\"stoklasova\"", 
-        "author:stoklasova, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:stoklasova,*", 
+        "author:orlitova, author:stoklasová, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:orlitova,* author:stoklasova, author:stoklasova,* author:orlitová, author:orlitová,* author:orlitovae, author:orlitovae,* author:stoklasová,* author:stoklasovae, author:stoklasovae,*", 
         "//*[@numFound='0']");
     testAuthorQuery("\"orlitova\"", 
-        "author:orlitova, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:orlitova,*", 
+        "author:orlitova, author:stoklasová, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:orlitova,* author:stoklasova, author:stoklasova,* author:orlitová, author:orlitová,* author:orlitovae, author:orlitovae,* author:stoklasová,* author:stoklasovae, author:stoklasovae,*", 
+        "//*[@numFound='0']");
+    testAuthorQuery("\"orlitová\"", 
+        "author:orlitova, author:stoklasová, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:orlitova,* author:stoklasova, author:stoklasova,* author:orlitová, author:orlitová,* author:orlitovae, author:orlitovae,* author:stoklasová,* author:stoklasovae, author:stoklasovae,*", 
+        "//*[@numFound='0']");
+    testAuthorQuery("\"stoklasová\"", 
+        "author:orlitova, author:stoklasová, author:orlitova, ivana author:stoklasova, i author:stoklasova, ivana author:orlitova, i author:orlitova,* author:stoklasova, author:stoklasova,* author:orlitová, author:orlitová,* author:orlitovae, author:orlitovae,* author:stoklasová,* author:stoklasovae, author:stoklasovae,*", 
         "//*[@numFound='0']");
     
     // searching for ascii version finds also the utf (for hyphenated names)

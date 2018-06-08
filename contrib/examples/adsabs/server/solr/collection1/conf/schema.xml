@@ -82,6 +82,14 @@
 				<!--  detect cases when we should bail-out and not attempt author search -->
 				<filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
 				   maxlen="5" />
+				<!-- downgrade; if necessary and discover synonyms that will be used
+				 to seed the next stages -->
+			   <filter class="solr.analysis.author.AuthorTransliterationFactory"
+                inputType="AUTHOR_INPUT" />
+			   <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+                synonyms="author_curated.synonyms" format="semicolon"
+                ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+                    
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
@@ -154,13 +162,17 @@
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk,"
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!--  detect cases when we should bail-out and not attempt author search -->
-        <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-           maxlen="5" />
+                <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+                   maxlen="5" />
+                <!-- discover synonyms that will be used to seed the next stages -->
+               <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+                synonyms="author_curated.synonyms" format="semicolon"
+                ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- generate ADS style extra search clauses (they will be used to find
 					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk,
 					p kolja" "adamcuk, p k" "adamcuk," (if plainSurname=true) -->
@@ -170,8 +182,8 @@
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk,
 					k", "adamguk, k" -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-          synonyms="author_curated.synonyms" format="semicolon"
-          ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+                  synonyms="author_curated.synonyms" format="semicolon"
+                  ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
@@ -204,25 +216,28 @@
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk,"
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!--  detect cases when we should bail-out and not attempt author search -->
-        <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-           maxlen="5" />
+                <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+                   maxlen="5" />
+                <!-- discover synonyms that will be used to seed the next stages -->
+                <filter class="solr.analysis.author.AuthorTransliterationFactory"
+                 inputType="AUTHOR_INPUT" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-          synonyms="author_generated.translit"
-          ignoreCase="true"
-          expand="true"
-          tokenizerFactory="solr.KeywordTokenizerFactory"
-          builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
-          inclOrig="true" />
+                  synonyms="author_generated.translit"
+                  ignoreCase="true"
+                  expand="true"
+                  tokenizerFactory="solr.KeywordTokenizerFactory"
+                  builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+                  inclOrig="true" />
 				<!-- now remove the query variants, they were used only to discover upgraded
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -271,25 +286,25 @@
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk,"
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!--  detect cases when we should bail-out and not attempt author search -->
-        <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-           maxlen="5" />
+                <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+                   maxlen="5" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-          synonyms="author_generated.translit"
-          ignoreCase="true"
-          expand="true"
-          tokenizerFactory="solr.KeywordTokenizerFactory"
-          builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
-          inclOrig="true" />
+                  synonyms="author_generated.translit"
+                  ignoreCase="true"
+                  expand="true"
+                  tokenizerFactory="solr.KeywordTokenizerFactory"
+                  builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+                  inclOrig="true" />
 				<!-- now remove the query variants, they were used only to discover upgraded
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -310,8 +325,8 @@
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk,
 					k", "adamguk, k" -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-          synonyms="author_curated.synonyms" format="semicolon"
-          ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+                  synonyms="author_curated.synonyms" format="semicolon"
+                  ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
@@ -348,18 +363,25 @@
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-        <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!-- if necessary, we will transliterate in order to match more synonyms -->
 				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
 				<!-- we will use the standard synonym file (as used by the author type
 					above) but import it in a special way -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-          format="semicolon"
+                    format="semicolon"
 					synonyms="author_curated.synonyms" ignoreCase="true" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$MakeAllShortNames"
 					inclOrig="true"/>
+				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+                      synonyms="author_generated.translit"
+                      ignoreCase="true"
+                      expand="true"
+                      tokenizerFactory="solr.KeywordTokenizerFactory"
+                      builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+                      inclOrig="true" />
 				<!-- remove the transliterated variants, they were used only to discover
 					synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
