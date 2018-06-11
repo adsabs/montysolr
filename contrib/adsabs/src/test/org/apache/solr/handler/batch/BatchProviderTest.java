@@ -46,9 +46,9 @@ public class BatchProviderTest extends AbstractSolrTestCase {
 	
 	protected void checkFile(String file, String... expected) throws IOException {
     List<String> lines = h.getCore().getResourceLoader().getLines(file);
-    for (String l : lines) {
-    	System.out.println(l);
-    }
+//    for (String l : lines) {
+//    	System.out.println(l);
+//    }
     for (String t: expected) {
       if (t.substring(0,1).equals("!")) {
         assertFalse("Present: " + t + "\n" + lines, lines.contains(t.substring(1)));

@@ -277,7 +277,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
       private String join(String[] name, int v) {
         StringBuffer out = new StringBuffer();
         boolean notFirst = false;
-        for (int i=0;i<=v && i<out.length();i++) {
+        for (int i=0;i<=v && i<name.length;i++) {
           if (notFirst) out.append(" ");
           out.append(name[i]);
           notFirst=true;
