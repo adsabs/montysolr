@@ -73,7 +73,7 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 		if (input.endsWith("$")) {
 			throw new QueryNodeException(new MessageImpl(
 					"Invalid argument: $",
-					"We do not support the syntax for finding the last author, you can use range"));
+					"We do not support the syntax for finding the last author, you can use range pos(author:\"xxx\", 1, 5)"));
 			
 			//input = input.substring(0, input.length()-1);
 			//end = -1;
@@ -112,7 +112,20 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 		
 		String fieldName = getFieldName(node, "author");
 		List<OriginalInput> values = new ArrayList<OriginalInput>();
-		values.add(new OriginalInput(fieldName + ":" + input, subChild.getInputTokenStart(), subChild.getInputTokenEnd()));
+		
+		// was it old syntax =author:"^...." ?
+		String prefix = "";
+		QueryNode p = node;
+		int i = 3;
+		while (i != 0 && p != null) {
+		  p = p.getParent();
+		  i -= 1;
+		}
+		if (p != null && p.getChildren().get(0) instanceof AqpANTLRNode &&
+		    ((AqpANTLRNode) p.getChildren().get(0)).getTokenName().equals("EQUAL")) {
+		    prefix = "=";
+	  }
+		values.add(new OriginalInput(prefix + fieldName + ":" + input, subChild.getInputTokenStart(), subChild.getInputTokenEnd()));
 		values.add(new OriginalInput(String.valueOf(start), -1, -1));
 		values.add(new OriginalInput(String.valueOf(end), -1, -1));
 		

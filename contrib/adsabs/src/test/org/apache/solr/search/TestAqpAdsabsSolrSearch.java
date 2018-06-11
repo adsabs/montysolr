@@ -320,6 +320,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+      // https://github.com/romanchyla/montysolr/issues/101
+      assertQueryEquals(req("defType", "aqp", "q", "=author:\"foo, bar\""),
+          "author:foo, bar", TermQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"foo, bar\", 1)"),
+          "spanPosRange(author:foo, bar, 0, 1)", SpanPositionRangeQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "=author:\"^foo, bar\""),
+          "spanPosRange(author:foo, bar, 0, 1)", SpanPositionRangeQuery.class);
+      
+      
     	// constant() score
 	    assertQueryEquals(req("defType", "aqp", "q", "constant(title:foo)"),
 	            "ConstantScore(title:foo)", ConstantScoreQuery.class);
