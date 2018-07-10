@@ -1321,6 +1321,8 @@ public class AqpExtendedDismaxQParser extends QParser {
           }
           // nl.add("aqp.df.fields", "title abstract^.7");
           nl.add("qf", req.getParams().get("qf", ""));
+          nl.add("aqp.constant_scoring", req.getParams().get("aqp.constant_scoring", ""));
+          
           String qs = getQueryStr();
           if (localParams != null && localParams.getBool("aqp.exact.search")) {
             qs = "=" + qs;

@@ -116,17 +116,34 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
     public void testUnfieldedSearch() throws Exception {
-		
-		/*
-		 * Unfielded search should be expanded automatically by edismax
-		 * 
-		 * However, edismax is not smart enough to deal properly with boolean clauses
-		 * and default operators, so I have decided to use the edismax on the "value"
-		 * level only. First, we parse the query, then we pass it to the 'adismax'
-		 * query parser (a modified edismax) to expand it; adismax will use aqp 
-		 * to build the individual queries - so it is best of both worlds
-		 *  
-		 */
+      
+      // have constant scoring work even for unfielded searches
+      assertQueryEquals(req("defType", "aqp", "q", "foo bar",
+          "qf", "bibcode^5 title^10",
+          "aqp.constant_scoring", "bibcode^6"),
+          "+(((ConstantScore(bibcode:foo))^6.0)^5.0 | (title:foo)^10.0) +(((ConstantScore(bibcode:bar))^6.0)^5.0 | (title:bar)^10.0)",
+          BooleanQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "foo bar",
+          "qf", "bibcode^1 title^10",
+          "aqp.constant_scoring", "bibcode^6"),
+          "+((ConstantScore(bibcode:foo))^6.0 | (title:foo)^10.0) +((ConstantScore(bibcode:bar))^6.0 | (title:bar)^10.0)",
+          BooleanQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "foo bar",
+          "qf", "bibcode^5 title^10",
+          "aqp.constant_scoring", ""),
+          "+((bibcode:foo)^5.0 | (title:foo)^10.0) +((bibcode:bar)^5.0 | (title:bar)^10.0)",
+          BooleanQuery.class);
+      
+  		/*
+  		 * Unfielded search should be expanded automatically by edismax
+  		 * 
+  		 * However, edismax is not smart enough to deal properly with boolean clauses
+  		 * and default operators, so I have decided to use the edismax on the "value"
+  		 * level only. First, we parse the query, then we pass it to the 'adismax'
+  		 * query parser (a modified edismax) to expand it; adismax will use aqp 
+  		 * to build the individual queries - so it is best of both worlds
+  		 *  
+  		 */
         // first the individual elements explicitly (notice edismax differs from adismax)
         assertQueryEquals(req("defType", "aqp", "q", "adismax(MÜLLER)",
                 "qf", "author^2.3 title abstract^0.4"),
@@ -319,6 +336,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
     public void testSpecialCases() throws Exception {
+      
+      // another method for constant scoring for fields (this time applied universally; to 
+      // every query type used in a field)
+      assertQueryEquals(req("defType", "aqp", "aqp.constant_scoring", "author^1", "q", "=author:\"foo\""),
+          "ConstantScore(author:foo,)", ConstantScoreQuery.class);
       
       // https://github.com/romanchyla/montysolr/issues/101
       assertQueryEquals(req("defType", "aqp", "q", "=author:\"foo, bar\""),
