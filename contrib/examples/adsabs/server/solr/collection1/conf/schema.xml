@@ -1886,14 +1886,6 @@
           indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
 
-	<!--
-	    we define a dynamic field to match anything.
-	    it prevents document rejection on adds when they have one more or fields
-	    not explicitly defined in the schema.  this allows us to more easily
-	    evolve the schema.  This dynamic field should be the last one declared.
-	-->
-	<dynamicField name="*" type="ignored" multiValued="true" />
-	
 	</fields>
 
 	<uniqueKey>id</uniqueKey>
