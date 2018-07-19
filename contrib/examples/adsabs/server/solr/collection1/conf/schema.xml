@@ -81,7 +81,7 @@
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!--  detect cases when we should bail-out and not attempt author search -->
 				<filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-				   maxlen="5" />
+				   maxlen="6" />
 				<!-- downgrade; if necessary and discover synonyms that will be used
 				 to seed the next stages -->
 			   <filter class="solr.analysis.author.AuthorTransliterationFactory"
@@ -168,7 +168,7 @@
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!--  detect cases when we should bail-out and not attempt author search -->
                 <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-                   maxlen="5" />
+                   maxlen="6" />
                 <!-- discover synonyms that will be used to seed the next stages -->
                <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
                 synonyms="author_curated.synonyms" format="semicolon"
@@ -222,7 +222,7 @@
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!--  detect cases when we should bail-out and not attempt author search -->
                 <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-                   maxlen="5" />
+                   maxlen="6" />
                 <!-- discover synonyms that will be used to seed the next stages -->
                 <filter class="solr.analysis.author.AuthorTransliterationFactory"
                  inputType="AUTHOR_INPUT" />
@@ -292,7 +292,7 @@
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!--  detect cases when we should bail-out and not attempt author search -->
                 <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-                   maxlen="5" />
+                   maxlen="6" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"

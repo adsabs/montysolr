@@ -293,6 +293,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "id:100"),
 				"//*[@numFound='1']"
 		);
+		
 
 		/*
 		 * id - str type, the unique id key, we do no processing

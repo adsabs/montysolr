@@ -337,6 +337,27 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+      // make sure the cache key of the query is different
+      Query aq = assertQueryEquals(req("defType", "aqp", "q", "author:\"Accomazzi, A\" abs:\"ADS\" year:2000-2015"),
+          "+(author:accomazzi, a author:accomazzi, a* author:accomazzi,) +(abstract:acr::ads title:acr::ads keyword:acr::ads) +year:[2000 TO 2015]", 
+          BooleanQuery.class);
+      Query bq = assertQueryEquals(req("defType", "aqp", "q", "abs:\"ADS\" year:2000-2015"),
+          "+(abstract:acr::ads title:acr::ads keyword:acr::ads) +year:[2000 TO 2015]", 
+          BooleanQuery.class);
+      Query cq = assertQueryEquals(req("defType", "aqp", "q", "author:\"Accomazzi, A\" abs:\"ADS\" year:2000-2015"),
+          "+(author:accomazzi, a author:accomazzi, a* author:accomazzi,) +(abstract:acr::ads title:acr::ads keyword:acr::ads) +year:[2000 TO 2015]", 
+          BooleanQuery.class);
+      
+      System.out.println(aq.hashCode());
+      System.out.println(bq.hashCode());
+      System.out.println(cq.hashCode());
+      
+      assertNotSame(aq, bq);
+      assertNotSame(aq, cq);
+      
+      assertTrue(aq.hashCode() != bq.hashCode());
+      assertTrue(aq.hashCode() == cq.hashCode());
+      
       // another method for constant scoring for fields (this time applied universally; to 
       // every query type used in a field)
       assertQueryEquals(req("defType", "aqp", "aqp.constant_scoring", "author^1", "q", "=author:\"foo\""),
