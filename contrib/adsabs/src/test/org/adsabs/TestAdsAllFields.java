@@ -390,7 +390,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * and duplication and constant scoring. The parsing logic has its own unittest
 		 */
 		assertQ(req("q", "author:\"Einstein, A\"", 
-		    "aqp.constant_scoring", "author^13",
+		    "aqp.constant_scoring", "author^13 title^12",
 		    "fl", "recid,score"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']",
@@ -1236,12 +1236,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 		// TODO: I am too tired now to find out why the sorting is weird
 		// but found it must be!
-    //assertQ(req("q", "topn(5, recid:[1 TO 10], \"recid desc\")", "fl", "recid"),
-		//		"//*[@numFound='5']",
-		//		"//doc[1]/int[@name='recid'][.='7']",
-		//		"//doc[2]/int[@name='recid'][.='6']",
-		//		"//doc[3]/int[@name='recid'][.='5']",
-		//		"//doc[4]/int[@name='recid'][.='4']");
+    assertQ(req("q", "topn(5, recid:[1 TO 10], \"recid desc\")", "fl", "recid"),
+				"//*[@numFound='5']",
+				"//doc[1]/int[@name='recid'][.='7']",
+				"//doc[2]/int[@name='recid'][.='6']",
+				"//doc[3]/int[@name='recid'][.='5']",
+				"//doc[4]/int[@name='recid'][.='4']");
 
 		// trending() - what people read
 		assertQ(req("q", "trending(*:*)"),

@@ -337,6 +337,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+      
       // make sure the cache key of the query is different
       Query aq = assertQueryEquals(req("defType", "aqp", "q", "author:\"Accomazzi, A\" abs:\"ADS\" year:2000-2015"),
           "+(author:accomazzi, a author:accomazzi, a* author:accomazzi,) +(abstract:acr::ads title:acr::ads keyword:acr::ads) +year:[2000 TO 2015]", 
