@@ -119,7 +119,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
       if (statFields.containsKey(field)) {
         node = new AqpConstantQueryNode(node);
         Float boost = statFields.get(field);
-        if (boost != 1.0f) {
+        if (boost != null && boost != 1.0f) {
           node = new BoostQueryNode(node, boost);
         }
       }
