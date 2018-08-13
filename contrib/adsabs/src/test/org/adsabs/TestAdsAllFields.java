@@ -221,6 +221,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"read_count\": 50" +
 				", \"reader\": [\"abaesrwersdlfkjsd\", \"asfasdflkjsdfsldj\"]" +
 				", \"reference\": [\"2014JNuM..455...10R\", \"2014JNuM..455...10T\"]" +
+				", \"series\": \"s123\"" +
 				", \"simbad_object_facet_hier\": [\"0/HII Region\", \"1/HII Region/9000000\"]" +
 				", \"simbtype\": [\"Galaxy\", \"HII Region\"]" +
 				", \"simbid\": [5, 3000001]" +
@@ -852,6 +853,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='100']"
 		);
 
+
+		/*
+		 * series
+		 */
+		assertQ(req("q", "series:\"s123\""),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']"
+		);
 
 		/*
 		 * unfielded search

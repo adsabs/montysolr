@@ -1130,6 +1130,9 @@
 		<field name="issue" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
 
+		<field name="series" type="normalized_text_ascii" indexed="true" stored="true"
+		  omitNorms="true" />
+
 		<field name="issn" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
