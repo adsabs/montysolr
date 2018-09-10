@@ -34,6 +34,7 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     assertU(adoc(F.ID, "18", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "González-Alfonso, E"));
     assertU(adoc(F.ID, "19", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Sil'chenko, E"));
     assertU(adoc(F.ID, "20", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "SAV'E, E"));
+    assertU(adoc(F.ID, "21", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wyrzykowski, Ł"));
     assertU(commit());
 		
 		
@@ -76,7 +77,8 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
         "gonzaelez alfonso, e=>gonzález alfonso, e",
         "savye, e=>sav e, e",
         "silchenko,=>sil chenko,", // this is cleaned up "sil'chenko"
-        "!sil'chenko,=>sil chenko,"
+        "!sil'chenko,=>sil chenko,",
+        "wyrzykowski, l=>wyrzykowski, ł",
 				}
 		);
 	}

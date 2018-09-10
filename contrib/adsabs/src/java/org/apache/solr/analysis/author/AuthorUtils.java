@@ -174,6 +174,9 @@ public class AuthorUtils {
 				continue;
 			}
 			switch (c) {
+			  case '\u0141':
+			    replacement = 'L';
+			    break;
 				case '\u0308':
 					replacement = 'E';
 					break;
