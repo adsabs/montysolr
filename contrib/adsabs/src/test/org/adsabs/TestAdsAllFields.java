@@ -124,12 +124,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 			  ", \"abstract\": \"all no-sky survey q'i quotient\"" +
 			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
-			  ", \"aff_abbrev\": [\"-\", \"NASA Kavli\", \"Einstein institute\"]" +
-			  ", \"aff_canonical\": [\"-\", \"NASA Kavli\", \"Einstein institute\"]" +
-			  ", \"aff_facet\": [\"-\", \"NASA Kavli\", \"Einstein institute\"]" +	
-			  ", \"aff_facet_heir\": [\"0/-\", \"1/NASA Kavli\", \"2/Einstein institute\", \"1/CfA\"]" +
-			  ", \"aff_id\": [\"-\", \"A123;45678\", \"A545\"]" +
-			  ", \"aff_raw\": [\"-\", \"NASA Kavli\", \"Einstein institute\"]" +
+		          ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
+			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
+			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
+			  ", \"aff_facet_heir\": [\"1812/61814\", \"8264/61814\", \"1812/A1036\", \"-\"]" +
+			  ", \"aff_id\": [\"61814\", \"A1036\", \"-\"]" +
+			  ", \"aff_raw\": [\"-\", \"Center for Astrophysics, 60 Garden Street, Cambridge MA 02138, USA\", \"Department of Astronomy, Harvard University, 60 Garden St., Cambridge, MA 02130, USA\"]" +
 			  ", \"alternate_bibcode\": [\"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\"]" +
 			  ", \"alternate_title\": \"This is of the alternate\"" +
 
