@@ -26,8 +26,11 @@ public class AuthorUtils {
 	// and some special characters
 	// original, which may miss diacritics: "(?<=\\b\\p{L})\\.(?=\\s*\\b)" \P{M}\p{M}*+
 	// [^,\\-\\w\\s\\{N}\\p{L}\\p{M}*+]
+	
+	
 	static Pattern n1 = Pattern.compile("[^,\\-\\s\\p{N}\\p{L}\\p{M}]");
 	static Pattern n1b = Pattern.compile("[^,\\-\\s\\'\\p{N}\\p{L}\\p{M}]");
+	
 	// to normalize spaces
 	static Pattern n2 = Pattern.compile("\\s+");
 	// to normalize non escaped commas

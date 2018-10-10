@@ -45,6 +45,9 @@ public class TestAuthorUtils extends TestCase {
 		assertEquals("Moon, Dae Sik", AuthorUtils.normalizeAuthor("Moon, Dae-Sik"));
 		assertEquals("Moon, Dae Sik", AuthorUtils.normalizeAuthor("Moon, Dae -Sik"));
 		assertEquals("Moon, Dae Sik", AuthorUtils.normalizeAuthor("Moon, Dae - Sik "));
+		assertEquals("áéíóůÁÉÍÓŮ,", AuthorUtils.normalizeAuthor("áéíóůÁÉÍÓŮ"));
+		// this character gets removed ⻉
+		assertEquals("\u8349,", AuthorUtils.normalizeAuthor("\u8349")); // 草
 	}
 
 	public void testParseAuthor() throws Exception {
