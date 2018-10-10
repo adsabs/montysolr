@@ -265,7 +265,7 @@ public class BM25SimilarityADS extends Similarity {
     /** precomputed norm[256] with k1 * ((1 - b) + b * dl / avgdl) */
     private final float cache[];
 
-    BM25Stats(String field, Explanation idf, float avgdl, float cache[]) {
+    BM25StatsADS(String field, Explanation idf, float avgdl, float cache[]) {
       this.field = field;
       this.idf = idf;
       this.avgdl = avgdl;
@@ -287,7 +287,7 @@ public class BM25SimilarityADS extends Similarity {
     } 
   }
 
-  private Explanation explainTFNorm(int doc, Explanation freq, BM25Stats stats, NumericDocValues norms) {
+  private Explanation explainTFNorm(int doc, Explanation freq, BM25StatsADS  stats, NumericDocValues norms) {
     List<Explanation> subs = new ArrayList<>();
     subs.add(freq);
     subs.add(Explanation.match(k1, "parameter k1"));
@@ -307,7 +307,7 @@ public class BM25SimilarityADS extends Similarity {
     }
   }
 
-  private Explanation explainScore(int doc, Explanation freq, BM25Stats stats, NumericDocValues norms) {
+  private Explanation explainScore(int doc, Explanation freq, BM25StatsADS stats, NumericDocValues norms) {
     Explanation boostExpl = Explanation.match(stats.boost, "boost");
     List<Explanation> subs = new ArrayList<>();
     if (boostExpl.getValue() != 1.0f)
@@ -327,7 +327,7 @@ public class BM25SimilarityADS extends Similarity {
   
   /** 
    * Returns the <code>k1</code> parameter
-   * @see #BM25Similarity(float, float) 
+   * @see #BM25SimilarityADS(float, float) 
    */
   public final float getK1() {
     return k1;
@@ -335,7 +335,7 @@ public class BM25SimilarityADS extends Similarity {
   
   /**
    * Returns the <code>b</code> parameter 
-   * @see #BM25Similarity(float, float) 
+   * @see #BM25SimilarityADS(float, float) 
    */
   public final float getB() {
     return b;
