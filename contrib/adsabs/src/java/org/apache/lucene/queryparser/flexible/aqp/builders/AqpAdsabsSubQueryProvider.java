@@ -1053,6 +1053,13 @@ AqpFunctionQueryBuilderProvider {
 				return new ConstantScoreQuery(innerQuery);
 			}
 		});
+		
+		parsers.put("bigquery", new AqpSubqueryParserFull() {
+      public Query parse(FunctionQParser fp) throws SyntaxError {         
+        QParser q = fp.subQuery(fp.getString(), "bitset");
+        return q.getQuery();
+      }
+    });
 			
 	};
 	

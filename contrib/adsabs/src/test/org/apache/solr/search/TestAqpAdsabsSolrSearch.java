@@ -24,6 +24,9 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.util.BitSet;
+import org.apache.lucene.util.FixedBitSet;
+import org.apache.solr.common.util.NamedList;
 import org.junit.BeforeClass;
 
 
@@ -732,18 +735,18 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 		
 		
 				
-		/*
-		TODO: i don't yet have the implementations for these
-		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
-		
-		assertQueryEquals("simbad(20 54 05.689 +37 01 17.38)", null, "");
-		assertQueryEquals("simbad(10:12:45.3-45:17:50)", null, "");
-		assertQueryEquals("simbad(15h17m-11d10m)", null, "");
-		assertQueryEquals("simbad(15h17+89d15)", null, "");
-		assertQueryEquals("simbad(275d11m15.6954s+17d59m59.876s)", null, "");
-		assertQueryEquals("simbad(12.34567h-17.87654d)", null, "");
-		assertQueryEquals("simbad(350.123456d-17.33333d <=> 350.123456-17.33333)", null, "");
-		*/
+    		/*
+    		TODO: i don't yet have the implementations for these
+    		assertQueryEquals("funcA(funcB(funcC(value, \"phrase value\", nestedFunc(0, 2))))", null, "");
+    		
+    		assertQueryEquals("simbad(20 54 05.689 +37 01 17.38)", null, "");
+    		assertQueryEquals("simbad(10:12:45.3-45:17:50)", null, "");
+    		assertQueryEquals("simbad(15h17m-11d10m)", null, "");
+    		assertQueryEquals("simbad(15h17+89d15)", null, "");
+    		assertQueryEquals("simbad(275d11m15.6954s+17d59m59.876s)", null, "");
+    		assertQueryEquals("simbad(12.34567h-17.87654d)", null, "");
+    		assertQueryEquals("simbad(350.123456d-17.33333d <=> 350.123456-17.33333)", null, "");
+    		*/
 
 
         //topn sorted - added 15Aug2013
@@ -769,12 +772,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "SecondOrderQuery(author:accomazzi, author:accomazzi,*, collector=SecondOrderCollectorTopN(5))",
                 SecondOrderQuery.class);
 		
-    /*
-     * It is different if Aqp handles the boolean operations or if 
-     * edismax() does it. 
-     * 
-     * Aqp has more control, see: https://issues.apache.org/jira/browse/SOLR-4141
-     */
+      /*
+       * It is different if Aqp handles the boolean operations or if 
+       * edismax() does it. 
+       * 
+       * Aqp has more control, see: https://issues.apache.org/jira/browse/SOLR-4141
+       */
 
         assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat)", "qf", "title^1 abstract^0.5"), //edismax
                 "((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
@@ -811,9 +814,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "qf", "author^2.3 title abstract^0.4"),
                 "*:*", MatchAllDocsQuery.class);
     
-    /*
-     * raw() function operator
-     */
+      /*
+       * raw() function operator
+       */
 
         // TODO: #234
         // need to add a processor which puts these local values into a request object
@@ -964,11 +967,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("q", "author:/kurtz, [^ ]+ [^ ]+/"),
             "//*[@numFound='1']",
             "//doc/str[@name='id'][.='58']");
-		assertQ(req("q", "author:/mason, j[^ ]+ p[^ ]+/"), "//*[@numFound='1']");
-		assertQ(req("q", "author:/mason, james p[^ ]+/"), "//*[@numFound='1']");
-		assertQ(req("q", "author:/mason, james paul/"), "//*[@numFound='1']");
-		assertQ(req("q", "author:/mason, j[^ ]+/"), "//*[@numFound='0']");
-		assertQ(req("q", "author:/mason, p[^ ]+/"), "//*[@numFound='0']");
+    		assertQ(req("q", "author:/mason, j[^ ]+ p[^ ]+/"), "//*[@numFound='1']");
+    		assertQ(req("q", "author:/mason, james p[^ ]+/"), "//*[@numFound='1']");
+    		assertQ(req("q", "author:/mason, james paul/"), "//*[@numFound='1']");
+    		assertQ(req("q", "author:/mason, j[^ ]+/"), "//*[@numFound='0']");
+    		assertQ(req("q", "author:/mason, p[^ ]+/"), "//*[@numFound='0']");
 
 
         // this is treated as regex, but because it is unfielded search
@@ -1030,6 +1033,24 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryParseException(req("defType", "aqp", "q", "arxivvvv:1002.1524"));
 
 
+    }
+    
+    public void testSubquery() throws Exception {
+      // fixedbitset has to be one bit larger; also we need to round up num of bits
+      int size = ((100 + 8)/8) * 8;
+      BitSet bitSet = new FixedBitSet(size);
+      bitSet.set(1);
+      bitSet.set(10);
+      
+      BitSetQParserPlugin bqp = new BitSetQParserPlugin();
+      bqp.init(new NamedList(){});
+      
+      assertQueryEquals(req("defType", "aqp", "q", "*:* AND bigquery(fq_foo)", 
+          "fq_foo", 
+          "{!bitset compression=none} " + bqp.encodeBase64(bqp.toByteArray(bitSet))
+          ),
+          "",
+          BooleanQuery.class);
     }
     
     public static junit.framework.Test suite() {
