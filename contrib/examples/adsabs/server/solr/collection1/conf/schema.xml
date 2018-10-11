@@ -59,7 +59,7 @@
 		<fieldType name="author" class="solr.TextField"
 			positionIncrementGap="0">
 			<analyzer type="index">
-				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<tokenizer class="org.apache.lucene.analysis.pattern.SimplePatternSplitTokenizerFactory" pattern="[|]"/>
 				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />

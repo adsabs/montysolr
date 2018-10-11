@@ -287,7 +287,8 @@ public class BM25SimilarityADS extends Similarity {
     } 
   }
 
-  private Explanation explainTFNorm(int doc, Explanation freq, BM25StatsADS stats, NumericDocValues norms) {
+  private Explanation explainTFNorm(int doc, Explanation freq, BM25StatsADS  stats, NumericDocValues norms) {
+
     List<Explanation> subs = new ArrayList<>();
     subs.add(freq);
     subs.add(Explanation.match(k1, "parameter k1"));
@@ -327,7 +328,7 @@ public class BM25SimilarityADS extends Similarity {
   
   /** 
    * Returns the <code>k1</code> parameter
-   * @see #BM25Similarity(float, float) 
+   * @see #BM25SimilarityADS(float, float) 
    */
   public final float getK1() {
     return k1;
@@ -335,7 +336,7 @@ public class BM25SimilarityADS extends Similarity {
   
   /**
    * Returns the <code>b</code> parameter 
-   * @see #BM25Similarity(float, float) 
+   * @see #BM25SimilarityADS(float, float) 
    */
   public final float getB() {
     return b;

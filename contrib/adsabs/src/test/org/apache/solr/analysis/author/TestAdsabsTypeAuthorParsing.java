@@ -321,8 +321,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "507", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzaelez, Alfonso"));
     assertU(adoc(F.ID, "508", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gonzalez, Alfonso"));
     
+    assertU(adoc(F.ID, "600", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Foo, Bar|Other, Name|" + '\u8349',
+                          F.AUTHOR, "Baz, Baz|\\u8349")); // 草
     
     assertU(commit());
+    
+    //dumpDoc(null, "id", "author");
 
     // persist the transliteration map after new docs were indexed
     // and reload synonym chain harvested during indexing
@@ -366,6 +370,30 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
   
   public void testAuthorParsingUseCases() throws Exception {
+    // multiple names
+    testAuthorQuery("\"other, name\"",
+        "author:other, name author:other, name * author:other, n author:other, n * author:other,",
+        "//*[@numFound='1']");
+    testAuthorQuery("\u8349",
+        "author:\u8349, author:\u8349,*", // author:草, author:草,*
+        "//*[@numFound='1']");
+    testAuthorQuery("\"baz, baz\"",
+        "author:baz, baz author:baz, baz * author:baz, b author:baz, b * author:baz,",
+        "//*[@numFound='1']");
+    
+    // should not find anything, even though the names are there indexed next to each other
+    assertQ(req("q", "author:\"foo, * other, *\"", "debugQuery", "true"),
+        "//*[@numFound='0']"
+    );
+    assertQ(req("q", "author:\"foo, *\"", "debugQuery", "true"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='600']"
+    );
+    assertQ(req("q", "author:\"other, *\"", "debugQuery", "true"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='600']"
+    );
+    
     
     // 6-length author names; and in the second case of 'hillary' we should not allow m[^ ]* h[^ ]* d.*
     // but only m[^ ]* hillary d.*
