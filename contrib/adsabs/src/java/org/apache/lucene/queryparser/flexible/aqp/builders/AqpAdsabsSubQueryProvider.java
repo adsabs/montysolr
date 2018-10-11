@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,10 +49,19 @@ import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.common.util.ContentStreamBase;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.handler.batch.BatchHandlerRequestData;
+import org.apache.solr.handler.batch.BatchProvider;
+import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
@@ -1055,9 +1065,50 @@ AqpFunctionQueryBuilderProvider {
 		});
 		
 		parsers.put("bigquery", new AqpSubqueryParserFull() {
-      public Query parse(FunctionQParser fp) throws SyntaxError {         
-        QParser q = fp.subQuery(fp.getString(), "bitset");
-        return q.getQuery();
+      public Query parse(FunctionQParser fp) throws SyntaxError {
+
+        SolrQueryRequest req = fp.getReq();
+        String input = fp.getString();
+        
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("qt", "bitset");
+        
+        List<ContentStream> streams = new ArrayList<ContentStream>(1);
+        
+        if (req.getContentStreams() != null) {
+          ContentStream lcs = null;
+          for (ContentStream cs: req.getContentStreams()) {
+            if (input.equals(cs.getName())) {
+              streams.add(cs);
+            }
+            lcs = cs;
+          }
+          if (streams.size() == 0 && lcs != null)
+            streams.add(lcs);
+        }
+        
+        SolrQueryRequestBase locReq = (SolrQueryRequestBase) new LocalSolrQueryRequest(req.getCore(), params);
+        locReq.setContentStreams(streams);
+        
+        String filter = req.getParams().get(input.substring(1, input.length()-1));
+        String qString;
+        if (filter != null) {
+          qString = filter + " *:*";
+        }
+        else {
+          qString = "*:*";
+        }
+        
+        Query q;
+        
+        try {
+          q = QParser.getParser(qString, locReq).getQuery();
+        } catch( SyntaxError e ){
+          throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query bigquery("+input+")",e);
+        }
+        
+        
+        return q;
       }
     });
 			
