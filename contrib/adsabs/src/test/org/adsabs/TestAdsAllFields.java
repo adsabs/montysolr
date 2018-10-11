@@ -124,6 +124,12 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 			  ", \"abstract\": \"all no-sky survey q'i quotient\"" +
 			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
+		          ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
+			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
+			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
+			  ", \"aff_facet_heir\": [\"1812/61814\", \"8264/61814\", \"1812/A1036\", \"-\"]" +
+			  ", \"aff_id\": [\"61814\", \"A1036\", \"-\"]" +
+			  ", \"aff_raw\": [\"-\", \"Center for Astrophysics, 60 Garden Street, Cambridge MA 02138, USA\", \"Department of Astronomy, Harvard University, 60 Garden St., Cambridge, MA 02130, USA\"]" +
 			  ", \"alternate_bibcode\": [\"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\"]" +
 			  ", \"alternate_title\": \"This is of the alternate\"" +
 
@@ -217,6 +223,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"property\": [\"Catalog\", \"Nonarticle\", \"Data\"]" +
 				// must be: "yyyy-MM-dd (metadata often is just: yyyy-MM|yyyy)
 				", \"pubdate\": \"2013-08-05\"" +
+		                ", \"publisher\": \"Academic Press\"" +
 				", \"pubnote\": [\"pubnote1 pubnoteFoo\", \"pubnote2\"]" +
 				", \"read_count\": 50" +
 				", \"reader\": [\"abaesrwersdlfkjsd\", \"asfasdflkjsdfsldj\"]" +
@@ -228,6 +235,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"title\": \"This is of the title\"" +
 
 				", \"update_timestamp\": \"2010-03-04T22:01:32.809Z\"" +
+				", \"version\": \"1.2.3\"" +		    
 				", \"volume\": \"l24\"" +
 				", \"year\": \"2013\"" +
 				
@@ -619,6 +627,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']");
 
+		/*
+		 * version
+		 */
+		assertQ(req("q", "volume:l.2.3"),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']");
+		assertQ(req("q", "volume:v24"),
+				"//*[@numFound='0']");
 
 
 		/*
@@ -831,6 +847,15 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "abstract:\"q'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
 		assertQ(req("q", "abstract:\"q\\\\'i\"", "fl", "recid,abstract,title"), "//*[@numFound='1']");
 
+
+		/*
+		 * publisher
+		 */
+
+		assertQ(req("q", "publisher:Academic Press"),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']"
+    );
 		
 		/*
 		 * pubnote

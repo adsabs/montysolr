@@ -288,6 +288,7 @@ public class BM25SimilarityADS extends Similarity {
   }
 
   private Explanation explainTFNorm(int doc, Explanation freq, BM25StatsADS  stats, NumericDocValues norms) {
+
     List<Explanation> subs = new ArrayList<>();
     subs.add(freq);
     subs.add(Explanation.match(k1, "parameter k1"));

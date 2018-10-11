@@ -1108,6 +1108,13 @@
       In ADS this field contains a language of the main title. Currently, this value
       is present in a very small portion of records (try searching for lang:*)
 
+    * publisher
+
+      the name of the publisher
+
+    * version
+
+      initially asclepias version, available to be used more widely
 
      -->
 		<field name="pub" type="normalized_text_ascii" indexed="true" stored="true"
@@ -1141,7 +1148,12 @@
 
 		<field name="lang" type="normalized_text_ascii_notokenization" indexed="true" stored="${storeAll:false}"
 			omitNorms="true" omitTermFreqAndPositions="true"/>
+		
+		<field name="publisher" type="normalized_text_ascii" indexed="true" stored="true"
+		  omitNorms="true" />
 
+		<field name="version" type="string" indexed="true" stored="true"
+		  omitNorms="true" />
 
 		<field name="date" type="tdate" indexed="true" stored="true"
 			omitNorms="true" omitTermFreqAndPositions="true"/>
@@ -1193,6 +1205,19 @@
             
 		<field name="aff" type="affiliation_text" indexed="true" stored="true"
 			multiValued="true" omitNorms="true"/>
+		<field name="aff_abbrev" type="affiliation_text" indexed="true" stored="true"
+		       multiValued="true" omitNorms="true"/>
+		<field name="aff_canonical" type="affiliation_text" indexed="true" stored="true"
+			multiValued="true" omitNorms="true"/>
+		<field name="aff_facet" type="string" indexed="true" stored="${storeAll:false}"
+		       multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="aff_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
+		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="aff_id" type="affiliation_text" indexed="true" stored="true"
+		       multiValued="true" omitNorms="true"/>
+		<field name="aff_raw" type="normalized_text_ascii" indexed="true" stored="true"
+		  omitNorms="true" />
+
 
 		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
 			multiValued="true" omitNorms="true"/>
@@ -1887,7 +1912,6 @@
         
         <field name="esources" type="normalized_string"
           indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
-
 
 	</fields>
 
