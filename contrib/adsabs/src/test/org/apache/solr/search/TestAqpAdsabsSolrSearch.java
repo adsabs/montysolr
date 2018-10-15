@@ -1045,11 +1045,24 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       BitSetQParserPlugin bqp = new BitSetQParserPlugin();
       bqp.init(new NamedList(){});
       
-      assertQueryEquals(req("defType", "aqp", "q", "*:* AND bigquery(fq_foo)", 
+      String stream1 = bqp.encodeBase64(bqp.toByteArray(bitSet));
+      bitSet.set(5);;
+      String stream2 = bqp.encodeBase64(bqp.toByteArray(bitSet));
+
+      assertQueryEquals(req("defType", "aqp", "q", "*:* AND docs(fq_foo)", 
           "fq_foo", 
-          "{!bitset compression=none} " + bqp.encodeBase64(bqp.toByteArray(bitSet))
+          "{!bitset compression=none} " + stream1
           ),
-          "",
+          "+*:* +BitSetQuery(2)",
+          BooleanQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "docs(foo) OR docs(bar)", 
+          "foo", 
+          "{!bitset compression=none} " + stream1,
+          "bar", 
+          "{!bitset compression=none} " + stream2
+          ),
+          "BitSetQuery(2) BitSetQuery(3)",
           BooleanQuery.class);
     }
     

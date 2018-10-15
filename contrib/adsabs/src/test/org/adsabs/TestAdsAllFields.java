@@ -1446,5 +1446,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc[1]/int[@name='recid'][.='100']"
         );
     
+    
+    /*
+     * bigquery as a normal query
+     * 
+     */
+    // this is just encoded bitset with values of 1,10
+    String stream = "QCAAAAAAAAAAAAAAAA==";
+    assertQ(req("defType", "aqp", "q", "*:* AND docs(fq_foo)", 
+          "fq_foo", 
+          "{!bitset compression=none} " + stream
+          ),
+          "//*[@numFound='2']");
 	}
 }

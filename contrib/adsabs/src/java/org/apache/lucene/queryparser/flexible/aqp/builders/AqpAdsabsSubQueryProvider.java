@@ -1064,51 +1064,58 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		
-		parsers.put("bigquery", new AqpSubqueryParserFull() {
+		parsers.put("docs", new AqpSubqueryParserFull() {
       public Query parse(FunctionQParser fp) throws SyntaxError {
 
         SolrQueryRequest req = fp.getReq();
         String input = fp.getString();
+        String filterName = input.substring(1, input.length()-1);
         
-        ModifiableSolrParams params = new ModifiableSolrParams();
-        params.set("qt", "bitset");
         
+        // pick the content stream (actually a filter)
         List<ContentStream> streams = new ArrayList<ContentStream>(1);
-        
         if (req.getContentStreams() != null) {
           ContentStream lcs = null;
           for (ContentStream cs: req.getContentStreams()) {
-            if (input.equals(cs.getName())) {
+            if (filterName.equals(cs.getName())) {
               streams.add(cs);
             }
-            lcs = cs;
           }
-          if (streams.size() == 0 && lcs != null)
-            streams.add(lcs);
         }
+        
+        
+        // create a new local request with just this one content stream
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("qt", "bitset");
         
         SolrQueryRequestBase locReq = (SolrQueryRequestBase) new LocalSolrQueryRequest(req.getCore(), params);
-        locReq.setContentStreams(streams);
-        
-        String filter = req.getParams().get(input.substring(1, input.length()-1));
-        String qString;
-        if (filter != null) {
-          qString = filter + " *:*";
-        }
-        else {
-          qString = "*:*";
-        }
-        
-        Query q;
-        
         try {
-          q = QParser.getParser(qString, locReq).getQuery();
-        } catch( SyntaxError e ){
-          throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query bigquery("+input+")",e);
+          locReq.setContentStreams(streams);
+          
+          // stream can also be in local params...
+          String filter = req.getParams().get(filterName);
+          String qString;
+          if (filter != null) {
+            qString = filter.trim();
+          }
+          else {
+            qString = "*:*";
+          }
+          params.set("q", qString);
+          
+          Query q;
+          
+          try {
+            q = QParser.getParser(qString, locReq).getQuery();
+          } catch( SyntaxError e ){
+            throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query bigquery("+input+")",e);
+          }
+          
+          return q;
         }
-        
-        
-        return q;
+        finally {
+          locReq.close();
+        }
       }
     });
 			
