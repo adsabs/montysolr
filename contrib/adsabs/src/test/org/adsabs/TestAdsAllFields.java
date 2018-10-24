@@ -127,7 +127,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		          ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
 			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
 			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
-			  ", \"aff_facet_heir\": [\"1812/61814\", \"8264/61814\", \"1812/A1036\", \"-\"]" +
+			  ", \"aff_facet_hier\": [\"1812/61814\", \"8264/61814\", \"1812/A1036\", \"-\"]" +
 			  ", \"aff_id\": [\"61814\", \"A1036\", \"-\"]" +
 			  ", \"aff_raw\": [\"-\", \"Center for Astrophysics, 60 Garden Street, Cambridge MA 02138, USA\", \"Department of Astronomy, Harvard University, 60 Garden St., Cambridge, MA 02130, USA\"]" +
 			  ", \"alternate_bibcode\": [\"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\"]" +
@@ -294,6 +294,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertU(adoc("id", "56", "bibcode", "b56", "author", "Bond, J"));
 		assertU(adoc("id", "57", "bibcode", "b57", "author", "Bond,"));
 
+		assertU(adoc("id", "60", "bibcode", "b60", "abstract", "all no-sky survey"));
+		
 		assertU(commit("waitSearcher", "true"));
 
 		assertQ(req("q", "*:*"),
@@ -630,11 +632,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * version
 		 */
-		assertQ(req("q", "volume:l.2.3"),
+		assertQ(req("q", "version:1.2.3"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']");
-		assertQ(req("q", "volume:v24"),
-				"//*[@numFound='0']");
 
 
 		/*
@@ -831,11 +831,11 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 */
 
 		assertQ(req("q", "abstract:no-sky"),
-				"//*[@numFound='1']",
+				"//*[@numFound='2']",
 				"//doc/int[@name='recid'][.='100']"
 		);
 		assertQ(req("q", "abstract:nosky"),
-				"//*[@numFound='1']",
+				"//*[@numFound='2']",
 				"//doc/int[@name='recid'][.='100']"
 		);
 
@@ -1483,5 +1483,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
           "{!bitset compression=none} " + stream
           ),
           "//*[@numFound='2']");
+    
+    
+    /*
+     * similar() query
+     */
+    assertQ(req("q", "similar(recid:100)"),
+        "//doc[1]/int[@name='recid'][.='60']"
+        );
 	}
 }

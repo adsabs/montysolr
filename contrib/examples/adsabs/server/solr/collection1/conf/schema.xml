@@ -1216,7 +1216,7 @@
 		<field name="aff_id" type="affiliation_text" indexed="true" stored="true"
 		       multiValued="true" omitNorms="true"/>
 		<field name="aff_raw" type="normalized_text_ascii" indexed="true" stored="true"
-		  omitNorms="true" />
+		  omitNorms="true" multiValued="true" />
 
 
 		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"

@@ -14,6 +14,7 @@ import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
@@ -340,6 +341,29 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testSpecialCases() throws Exception {
       
+      assertU(adoc("id", "2", "bibcode", "XXX", "abstract", "foo bar baz",
+                  "title", "title bitle"));
+      assertU(commit("waitSearcher", "true"));
+      
+      assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"),
+          "MatchNoDocsQuery(\"\")",
+          MatchNoDocsQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX)"),
+          "+like:foo bar baz  -BitSetQuery(1)",
+          BooleanQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX, title)"),
+          "+like:title bitle  -BitSetQuery(1)",
+          BooleanQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX, title abstract)"),
+          "+like:foo bar baz title bitle  -BitSetQuery(1)",
+          BooleanQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, *:*), title abstract)"),
+          "+like:foo bar baz title bitle  -BitSetQuery(4)",
+          BooleanQuery.class);
       
       // make sure the cache key of the query is different
       Query aq = assertQueryEquals(req("defType", "aqp", "q", "author:\"Accomazzi, A\" abs:\"ADS\" year:2000-2015"),

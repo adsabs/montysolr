@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.LeafReader;
@@ -22,6 +23,7 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.search.BitSetQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
@@ -29,6 +31,7 @@ import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.LuceneCacheWrapper;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.SecondOrderCollector;
@@ -44,11 +47,13 @@ import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.SolrCacheWrapper;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.ModifiableSolrParams;
@@ -1116,6 +1121,82 @@ AqpFunctionQueryBuilderProvider {
         finally {
           locReq.close();
         }
+      }
+    });
+		
+		/**
+		 * 
+		 */
+		parsers.put("similar", new AqpSubqueryParserFull() {
+      public Query parse(FunctionQParser fp) throws SyntaxError {         
+        QParser aqp = fp.subQuery(fp.parseId(), "aqp");
+        Query innerQuery = aqp.parse();
+        String[] fieldsToLoad;
+        
+        if (fp.hasMoreArguments()) {
+          fieldsToLoad = fp.parseId().split(" ");
+        }
+        else {
+          fieldsToLoad = new String[] {"abstract"};
+        }
+        
+        HashSet<String> docFields = new HashSet<String>();
+        for (String f: fieldsToLoad) {
+          docFields.add(f);
+        }
+        
+        
+
+        SolrQueryRequest req = fp.getReq();
+        SolrIndexSearcher searcher = req.getSearcher();
+        
+
+        final StringBuilder text = new StringBuilder();
+        FixedBitSet toIgnore = new FixedBitSet(searcher.maxDoc());
+        
+        TopDocs topDocs;
+        
+        try {
+          topDocs = searcher.search(innerQuery, 200);
+          if (topDocs.totalHits == 0)
+            return new MatchNoDocsQuery();
+          
+          for (ScoreDoc d: topDocs.scoreDocs) {
+            toIgnore.set(d.doc);
+            Document vals = searcher.doc(d.doc, docFields);
+            for (String f: docFields) {
+              for (String x: vals.getValues(f)) {
+                text.append(x);
+                text.append(" ");
+              }
+            }
+          }
+         
+        } catch (IOException e) {
+          throw new SyntaxError(e.getMessage(), e);
+        }
+        
+        
+        Analyzer analyzer = req.getSchema().getIndexAnalyzer();
+        MoreLikeThisQuery mlt = new MoreLikeThisQuery(text.toString(), fieldsToLoad, 
+            analyzer, fieldsToLoad[0]);
+        
+        if (topDocs.totalHits > 2) {
+          mlt.setMinTermFrequency(2);
+          mlt.setMinDocFreq(2);
+        } else {
+          mlt.setMinTermFrequency(0);
+          mlt.setMinDocFreq(1);
+        }
+        
+        mlt.setPercentTermsToMatch(0.0f);
+        mlt.setMaxQueryTerms(500);
+        
+        BooleanQuery.Builder query = new BooleanQuery.Builder();
+        query.add(mlt, BooleanClause.Occur.MUST);
+        query.add(new BitSetQuery(toIgnore), BooleanClause.Occur.MUST_NOT);
+        
+        return query.build();
       }
     });
 			
