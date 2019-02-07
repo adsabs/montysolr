@@ -225,6 +225,7 @@ public class CitationCacheReaderWriter {
       BufferedDataInput gi = openInputStream(GENERATION);
       generation = gi.readLong();
       maxDocs = gi.readInt();
+      gi.close();
     }       
     else { // generation was not sync'ed - we can go the hard route
       f = new File(targetDir + File.separator + REFERENCES);
