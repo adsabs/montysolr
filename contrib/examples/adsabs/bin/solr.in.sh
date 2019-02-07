@@ -26,11 +26,11 @@
 SOLR_JAVA_MEM="-d64 -Xmx${SOLR_MEMORY_MX:-1024m} -Xms${SOLR_MEMORY_MS:-1024m}"
 
 # Enable verbose GC logging
-GC_LOG_OPTS="-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails \
--XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime"
+GC_LOG_OPTS=${GC_LOG_OPTS:-"-verbose:gc -XX:+PrintHeapAtGC -XX:+PrintGCDetails \
+-XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime"}
 
 # These GC settings have shown to work well for a number of common Solr workloads
-GC_TUNE="-XX:NewRatio=3 \
+GC_TUNE=${GC_TUNE:-"-XX:NewRatio=3 \
 -XX:SurvivorRatio=4 \
 -XX:TargetSurvivorRatio=90 \
 -XX:MaxTenuringThreshold=8 \
@@ -43,7 +43,7 @@ GC_TUNE="-XX:NewRatio=3 \
 -XX:CMSInitiatingOccupancyFraction=50 \
 -XX:CMSMaxAbortablePrecleanTime=6000 \
 -XX:+CMSParallelRemarkEnabled \
--XX:+ParallelRefProcEnabled"
+-XX:+ParallelRefProcEnabled"}
 
 # Set the ZooKeeper connection string if using an external ZooKeeper ensemble
 # e.g. host1:2181,host2:2181/chroot
@@ -63,7 +63,7 @@ GC_TUNE="-XX:NewRatio=3 \
 # Set to true to activate the JMX RMI connector to allow remote JMX client applications
 # to monitor the JVM hosting Solr; set to "false" to disable that behavior
 # (false is recommended in production environments)
-ENABLE_REMOTE_JMX_OPTS="false"
+ENABLE_REMOTE_JMX_OPTS=${ENABLE_REMOTE_JMX_OPTS:-"false"}
 
 # The script will use SOLR_PORT+10000 for the RMI_PORT or you can set it here
 # RMI_PORT=18983
@@ -77,7 +77,7 @@ SOLR_PORT=${MONTYSOLR_JETTY_PORT:-9983}
 
 
 # Set the thread stack size
-SOLR_OPTS="$SOLR_OPTS -Xss256k \
+SOLR_OPTS="${SOLR_OPTS} -Xss256k \
 -Dsolr.data.dir=${MONTYSOLR_INDEX_DIR:-./server/solr/collection1/data} \
 -Dpython.path=${MONTYSOLR_PYTHON_PATH:-./server/resources} \
 -Dmontysolr.reuseCache=${MONTYSOLR_REUSE_CACHE:-false} \
@@ -90,6 +90,7 @@ SOLR_OPTS="$SOLR_OPTS -Xss256k \
 -Dsolr.cache.size=${SOLR_CACHE_SIZE:-512} \
 -Dsolr.cache.initialSize=${SOLR_CACHE_INITIAL_SIZE:-512} \
 -Dsolr.cache.autowarmCount=${SOLR_CACHE_AUTOWARM_COUNT:-128} \
+-Dsolr.cache.maxRamMB=${SOLR_CACHE_MAX_RAM_MB:-128} \
 -Dsolr.ramBufferSize=${SOLR_RAM_BUFFER_SIZE:-1000} \
 -Dsolr.maxBufferedDocs=${SOLR_MAX_BUFFERED_DOCS:-50000} \
 -Dmontysolr.logdir=${SOLR_LOGS_DIR} \

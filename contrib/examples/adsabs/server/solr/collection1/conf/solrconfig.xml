@@ -130,6 +130,7 @@
                      size="${solr.cache.size:512}"
                      initialSize="${solr.cache.initialSize:512}"
                      autowarmCount="${solr.cache.autowarmCount:128}"
+		                 maxRamMB="${solr.cache.maxRamMB:128}"
                      />
    
     <documentCache class="solr.LRUCache"
