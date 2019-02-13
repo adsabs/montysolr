@@ -121,22 +121,22 @@
     <slowQueryThresholdMillis>1000</slowQueryThresholdMillis>
 
     <filterCache class="solr.FastLRUCache"
-                 size="${solr.cache.size:512}"
-                 initialSize="${solr.cache.initialSize:512}"
-                 autowarmCount="${solr.cache.autowarmCount:128}"
+                 size="${solr.filterCache.size:512}"
+                 initialSize="${solr.filterCache.initialSize:512}"
+                 autowarmCount="${solr.filterCache.autowarmCount:128}"
                  />
 
     <queryResultCache class="solr.LRUCache"
-                     size="${solr.cache.size:512}"
-                     initialSize="${solr.cache.initialSize:512}"
-                     autowarmCount="${solr.cache.autowarmCount:128}"
-		                 maxRamMB="${solr.cache.maxRamMB:128}"
+                     size="${solr.queryResultCache.size:512}"
+                     initialSize="${solr.queryResultCache.initialSize:512}"
+                     autowarmCount="${solr.queryResultCache.autowarmCount:128}"
+                     maxRamMB="${solr.queryResultCache.maxRamMB:128}"
                      />
    
     <documentCache class="solr.LRUCache"
-                   size="${solr.cache.size:512}"
-                   initialSize="${solr.cache.initialSize:512}"
-                   autowarmCount="${solr.cache.autowarmCount:128}"
+                   size="${solr.documentCache.size:512}"
+                   initialSize="${solr.documentCache.initialSize:512}"
+                   autowarmCount="${solr.documentCache.autowarmCount:128}"
                    />
     
     <!-- 
@@ -152,9 +152,9 @@
      -->
     <cache name="citations-cache"
               class="solr.CitationLRUCache"
-              size="${solr.cache.size:512}"
-              initialSize="${solr.cache.initialSize:512}"
-              autowarmCount="${solr.cache.autowarmCount:128}"
+              size="${solr.citationCache.size:512}"
+              initialSize="${solr.citationCache.initialSize:512}"
+              autowarmCount="${solr.citationCache.autowarmCount:128}"
               regenerator="solr.CitationLRUCache$SimpleRegenerator"
               identifierFields="bibcode:sorted,alternate_bibcode"
               citationFields="citation"
