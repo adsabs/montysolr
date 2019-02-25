@@ -48,6 +48,6 @@ class HumanParser(JythonNameParser):
                 start = input.find("' ")
                 end = start + 2
                 while end+1 < len(input) and input[end+1] == ' ':
-                    end =+ 1 
+                    end += 1 
                 input = input.replace(input[start:end], "'")
         return input
