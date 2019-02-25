@@ -53,6 +53,10 @@ public class TestJythonNameParser extends LuceneTestCase {
         //System.out.println(i);
       }
     }
+
+    res = instance.parse_human_name("Stephen M'   Donald");
+    assertEquals(res.get("First"), "Stephen");
+    assertEquals(res.get("Last"), "M'Donald");
     
   }
   
