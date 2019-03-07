@@ -1207,6 +1207,9 @@
 			multiValued="true" omitNorms="true"/>
 		<field name="aff_abbrev" type="affiliation_text" indexed="true" stored="true"
 		       multiValued="true" omitNorms="true"/>
+		<!-- contents of institution is the same as aff_abbrev -->
+		<field name="institution" type="affiliation_text" indexed="true" stored="true"
+		       multiValued="true" omitNorms="true"/>
 		<field name="aff_canonical" type="affiliation_text" indexed="true" stored="true"
 			multiValued="true" omitNorms="true"/>
 		<field name="aff_facet" type="string" indexed="true" stored="${storeAll:false}"
