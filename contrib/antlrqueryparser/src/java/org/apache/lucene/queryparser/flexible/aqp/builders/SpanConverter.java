@@ -94,10 +94,14 @@ public class SpanConverter {
       return getSpanQuery(container);
     }
     else {
-      throw new QueryNodeException(new MessageImpl(
-          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
-          "DisjunctionQuery is not compatible with the proximity search: "
-          + q.getClass().getName()));
+      // we assume it is OR query case
+      List<Query> disjuncts = q.getDisjuncts();
+      BooleanQuery.Builder bQuery = new BooleanQuery.Builder();
+      for (Query qa: disjuncts) {
+        bQuery.add(qa, Occur.SHOULD);
+      }
+      container.query = bQuery.build();
+      return getSpanQuery(container);
     }
   }
 

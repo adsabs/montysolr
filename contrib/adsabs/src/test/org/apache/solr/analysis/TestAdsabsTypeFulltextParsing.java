@@ -25,6 +25,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
+import org.apache.lucene.search.SynonymQuery;
 import org.apache.lucene.search.TermQuery;
 
 import java.io.File;
@@ -60,7 +61,7 @@ import org.junit.BeforeClass;
  *   
  * We must do different things during indexing and querying
  * 
- *  indexing: mirrors,hubble|hubble space telescope|hst,space,telescope
+ *  indexing: mirrors,hubble|syn::hubble space telescope|syn::hst,space,telescope
  *  querying: +mirrors +(hubble space telescope | hst)
  *  
  * 
@@ -86,7 +87,7 @@ import org.junit.BeforeClass;
  *     Massachusets Institute of Technology
  *     
  *   It is expanded into:
- *     0: massachusets|mit|massachusets institute of technology
+ *     0: massachusets|syn::mit|syn::massachusets institute of technology
  *     1: institute
  *     2: (null, removed by the stop filter)
  *     3: technology
@@ -233,6 +234,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   
   public void testMultiTokens() throws Exception {
     
+    setDebug(true);
     //dumpDoc(null, "id", "title");
     assertQueryEquals(req("q", "title:\"bubble pace telescope multi-pace foobar\"", "defType", "aqp"), 
         "title:\"bubble (pace syn::lunar) telescope multi (pace syn::lunar) foobar\" "
@@ -553,8 +555,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // simple case
     assertQueryEquals(req("q", "title:\"hubble space telescope\"", "defType", "aqp"), 
-        "title:\"hubble space telescope\" title:syn::hubble space telescope title:syn::acr::hst", 
-        BooleanQuery.class);
+        "(title:\"hubble space telescope\" | Synonym(title:syn::acr::hst title:syn::hubble space telescope))", 
+        DisjunctionMaxQuery.class);
     assertQ(req("q", "title:\"hubble space telescope\""), 
     		"//*[@numFound='2']",
     		"//doc/str[@name='id'][.='4']",
@@ -564,9 +566,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // preceded by something
     // TODO: remove 'title:' after #147 is solved
     assertQueryEquals(req("q", "title:\"mirrors of the hubble space telescope\"", "defType", "aqp"), 
-        "title:\"mirrors hubble space telescope\"" +
-        " title:\"mirrors (syn::hubble space telescope syn::acr::hst)\"", 
-        BooleanQuery.class);
+        "(title:\"mirrors hubble space telescope\" | title:\"mirrors (syn::hubble space telescope syn::acr::hst)\")", 
+        DisjunctionMaxQuery.class);
     
     assertQ(req("q", "title:\"mirrors hubble space telescope\""), 
     		"//*[@numFound='2']",
@@ -584,9 +585,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // query followed by something
     assertQueryEquals(req("q", "title:\"hubble space telescope goes home\"", "defType", "aqp"), 
-        "title:\"hubble space telescope goes home\"" +
-        " title:\"(syn::hubble space telescope syn::acr::hst) ? ? goes home\"~2", 
-        BooleanQuery.class);
+        "(title:\"hubble space telescope goes home\"" +
+        " | title:\"(syn::hubble space telescope syn::acr::hst) ? ? goes home\"~2)", 
+        DisjunctionMaxQuery.class);
     assertQ(req("q", "title:\"hubble space telescope goes home\""), 
     		"//*[@numFound='1']",
     		"//doc/str[@name='id'][.='4']"
@@ -597,9 +598,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // surrounded by something
     assertQueryEquals(req("q", "title:\"mirrors of the hubble space telescope goes home\"", "defType", "aqp"), 
-        "title:\"mirrors hubble space telescope goes home\"" +
-        " title:\"mirrors (syn::hubble space telescope syn::acr::hst) ? ? goes home\"~2", 
-        BooleanQuery.class);
+        "(title:\"mirrors hubble space telescope goes home\"" +
+        " | title:\"mirrors (syn::hubble space telescope syn::acr::hst) ? ? goes home\"~2)", 
+        DisjunctionMaxQuery.class);
     assertQ(req("q", "title:\"mirrors of the hubble space telescope goes home\""), 
     		"//*[@numFound='1']",
     		"//doc/str[@name='id'][.='4']"
@@ -613,11 +614,12 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      * Synonym expansion 1token->many
      */
     assertQueryEquals(req("q", "title:HST", "defType", "aqp"), 
-        "title:acr::hst title:syn::hubble space telescope title:syn::acr::hst", BooleanQuery.class);
+        "Synonym(title:acr::hst title:syn::acr::hst title:syn::hubble space telescope)", 
+        SynonymQuery.class);
     
     
     assertQueryEquals(req("q", "HST goes home", "defType", "aqp"), 
-        "+((all:acr::hst all:syn::hubble space telescope all:syn::acr::hst)) +all:goes +all:home",
+        "+Synonym(all:acr::hst all:syn::acr::hst all:syn::hubble space telescope) +all:goes +all:home",
         BooleanQuery.class);
 
     
@@ -626,11 +628,11 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      */
     
     assertQueryEquals(req("q", "\"Massachusets Institute of Technology\"", "defType", "aqp"), 
-    		"(all:syn::massachusets institute of technology all:syn::acr::mit)",
-    		BooleanQuery.class);
+    		"Synonym(all:syn::acr::mit all:syn::massachusets institute of technology)",
+    		SynonymQuery.class);
     assertQueryEquals(req("q", "\"massachusets institute of technology\"", "defType", "aqp"), 
-    		"(all:syn::massachusets institute of technology all:syn::acr::mit)", 
-        BooleanQuery.class);
+    		"Synonym(all:syn::acr::mit all:syn::massachusets institute of technology)", 
+        SynonymQuery.class);
     
     //TODO: this doesn't work because stop filter is at the end of the chain, move it up?
 //    assertQueryEquals(req("q", "\"Massachusets Institute of the Technology\"", "defType", "aqp"), 
@@ -662,22 +664,28 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     //one-token stopword one-token
     assertQueryEquals(req("q", "HST at MIT", "defType", "aqp"), 
-        "+((all:acr::hst all:syn::hubble space telescope all:syn::acr::hst)) +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit))", BooleanQuery.class);
+        "+Synonym(all:acr::hst all:syn::acr::hst all:syn::hubble space telescope) +Synonym(all:acr::mit all:syn::acr::mit all:syn::massachusets institute of technology)", 
+        BooleanQuery.class);
     //one-token word one-token
     assertQueryEquals(req("q", "HST bum MIT", "defType", "aqp"), 
-        "+((all:acr::hst all:syn::hubble space telescope all:syn::acr::hst)) +all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit))", BooleanQuery.class);
+        "+Synonym(all:acr::hst all:syn::acr::hst all:syn::hubble space telescope) +all:bum +Synonym(all:acr::mit all:syn::acr::mit all:syn::massachusets institute of technology)", 
+        BooleanQuery.class);
     //one-token stopword multi-token
     assertQueryEquals(req("q", "\"HST at Massachusets Institute of Technology\"", "defType", "aqp"), 
-        "all:\"(acr::hst syn::hubble space telescope syn::acr::hst) (syn::massachusets institute of technology syn::acr::mit)\"", MultiPhraseQuery.class);
+        "all:\"(acr::hst syn::hubble space telescope syn::acr::hst) (syn::massachusets institute of technology syn::acr::mit)\"", 
+        MultiPhraseQuery.class);
     //one-token word multi-token
     assertQueryEquals(req("q", "\"HST bum Massachusets Institute of Technology\"", "defType", "aqp"), 
-        "all:\"(acr::hst syn::hubble space telescope syn::acr::hst) bum (syn::massachusets institute of technology syn::acr::mit)\"", MultiPhraseQuery.class);
+        "all:\"(acr::hst syn::hubble space telescope syn::acr::hst) bum (syn::massachusets institute of technology syn::acr::mit)\"", 
+        MultiPhraseQuery.class);
     //multi-token stopword single-token
     assertQueryEquals(req("q", "\"hubble space telescope at MIT\"", "defType", "aqp"), 
-    		"(all:\"hubble space telescope (acr::mit syn::massachusets institute of technology syn::acr::mit)\" all:\"(syn::hubble space telescope syn::acr::hst) ? ? (acr::mit syn::massachusets institute of technology syn::acr::mit)\"~2)", BooleanQuery.class);
+    		"(all:\"hubble space telescope (acr::mit syn::massachusets institute of technology syn::acr::mit)\" | all:\"(syn::hubble space telescope syn::acr::hst) ? ? (acr::mit syn::massachusets institute of technology syn::acr::mit)\"~2)", 
+    		DisjunctionMaxQuery.class);
     //multi-token word single-token
     assertQueryEquals(req("q", "\"hubble space telescope bum MIT\"", "defType", "aqp"), 
-    		"(all:\"hubble space telescope bum (acr::mit syn::massachusets institute of technology syn::acr::mit)\" all:\"(syn::hubble space telescope syn::acr::hst) ? ? bum (acr::mit syn::massachusets institute of technology syn::acr::mit)\"~2)", BooleanQuery.class);
+    		"(all:\"hubble space telescope bum (acr::mit syn::massachusets institute of technology syn::acr::mit)\" | all:\"(syn::hubble space telescope syn::acr::hst) ? ? bum (acr::mit syn::massachusets institute of technology syn::acr::mit)\"~2)", 
+    		DisjunctionMaxQuery.class);
     
     
     // synonyms hidden inside other words:
@@ -700,12 +708,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         MultiPhraseQuery.class);
     //word multi-token stopword single-token word
     assertQueryEquals(req("q", "\"foo hubble space telescope at MIT bar\"", "defType", "aqp"), 
-        "(all:\"foo hubble space telescope (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\" all:\"foo (syn::hubble space telescope syn::acr::hst) ? ? (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\"~2)", 
-        BooleanQuery.class);
+        "(all:\"foo hubble space telescope (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\" "
+        + "| all:\"foo (syn::hubble space telescope syn::acr::hst) ? ? (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\"~2)", 
+        DisjunctionMaxQuery.class);
     //word multi-token word single-token word
     assertQueryEquals(req("q", "\"foo hubble space telescope bum MIT bar\"", "defType", "aqp"), 
-    		"(all:\"foo hubble space telescope bum (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\" all:\"foo (syn::hubble space telescope syn::acr::hst) ? ? bum (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\"~2)", 
-        BooleanQuery.class);
+    		"(all:\"foo hubble space telescope bum (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\" "
+    		+ "| all:\"foo (syn::hubble space telescope syn::acr::hst) ? ? bum (acr::mit syn::massachusets institute of technology syn::acr::mit) bar\"~2)", 
+    		DisjunctionMaxQuery.class);
     
     
     /**
@@ -723,17 +733,17 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      * 
      */
     assertQueryEquals(req("q", "HubbleSpaceMicroscope bum MIT BX", "defType", "aqp"), 
-        "+all:hubblespacemicroscope +all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx", 
+        "+all:hubblespacemicroscope +all:bum +Synonym(all:acr::mit all:syn::acr::mit all:syn::massachusets institute of technology) +all:acr::bx", 
         BooleanQuery.class);
     assertQueryEquals(req("q", "Hubble.Space.Microscope -bum MIT BX", "defType", "aqp"), 
-        "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) -all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx",
+        "+((+all:hubble +all:space +all:microscope) | Synonym(all:hubblespacemicroscope all:syn::acr::hsm all:syn::hubble space microscope)) -all:bum +Synonym(all:acr::mit all:syn::acr::mit all:syn::massachusets institute of technology) +all:acr::bx",
         BooleanQuery.class);
     assertQueryEquals(req("q", "Hubble.Space.Microscope -bum MIT BX", "defType", "aqp"), 
-        "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) -all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx",
+        "+((+all:hubble +all:space +all:microscope) | Synonym(all:hubblespacemicroscope all:syn::acr::hsm all:syn::hubble space microscope)) -all:bum +Synonym(all:acr::mit all:syn::acr::mit all:syn::massachusets institute of technology) +all:acr::bx",
         BooleanQuery.class);
 
     assertQueryEquals(req("q", "Hubble-Space-Microscope bum MIT BX", "defType", "aqp"), 
-        "+(((+all:hubble +all:space +all:microscope) (all:syn::hubble space microscope all:syn::acr::hsm all:hubblespacemicroscope))) +all:bum +((all:acr::mit all:syn::massachusets institute of technology all:syn::acr::mit)) +all:acr::bx", 
+        "+((+all:hubble +all:space +all:microscope) | Synonym(all:hubblespacemicroscope all:syn::acr::hsm all:syn::hubble space microscope)) +all:bum +Synonym(all:acr::mit all:syn::acr::mit all:syn::massachusets institute of technology) +all:acr::bx", 
         BooleanQuery.class);
     
     /*
@@ -747,12 +757,12 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "all:hst", TermQuery.class);
 
     assertQueryEquals(req("q", "HST OR Hst", "defType", "aqp"), 
-        "((all:acr::hst all:syn::hubble space telescope all:syn::acr::hst)) all:hst", 
+        "Synonym(all:acr::hst all:syn::acr::hst all:syn::hubble space telescope) all:hst", 
         BooleanQuery.class);
 
 
     //TODO: add the corresponding searches, but this shows we are indexing  properly
-    //dumpDoc(null, "id", F.ADS_TEXT_TYPE);
+    dumpDoc(null, "id", "title");
   }
   
   public void testOtherCases() throws Exception {
@@ -772,8 +782,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // test that the two lines in the synonym file get merged and produce correct synonym expansion
     assertQueryEquals(req("q", "ABC", "defType", "aqp"), 
-        "(all:acr::abc all:syn::acr::abc all:syn::astrophysics business center all:syn::astrophysics business commons)", 
-        BooleanQuery.class);
+        "Synonym(all:acr::abc all:syn::acr::abc all:syn::astrophysics business center all:syn::astrophysics business commons)", 
+        SynonymQuery.class);
     
     
     // "all-sky" is indexed as "all", "sky", "all-sky"

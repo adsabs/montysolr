@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
@@ -35,7 +36,9 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
           return ((ModifierQueryNode) c).getChild();
         }
       }
-    } else if (node instanceof AqpBooleanQueryNode) {
+    } else if (node instanceof AqpBooleanQueryNode && 
+        node.getTag(AqpQueryTreeBuilder.SYNONYMS) != null &&
+        (boolean) node.getTag(AqpQueryTreeBuilder.SYNONYMS) != true) {
 
       List<QueryNode> children = node.getChildren();
       String thisOp = ((AqpBooleanQueryNode) node).getOperator();

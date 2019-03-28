@@ -150,12 +150,12 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		//add(new WildcardQueryNodeProcessor());
 		
 		
-	    // expands to multiple fields if field=null (ie. unfielded search)
+	  // expands to multiple fields if field=null (ie. unfielded search)
 		// however, this solution is the old-style lucene mechanism which 
 		// was superseded by edismax() function calls; it works when
 		// ConfigurationKeys.MULTI_FIELDS are not empty. It is kept here 
 		// because of unittest compatibility
-	    add(new MultiFieldQueryNodeProcessor()); 
+	  add(new MultiFieldQueryNodeProcessor()); 
 		add(new AqpNullDefaultFieldProcessor());
 		
 		// expands virtual fields into real fields, that can be analyzed
@@ -176,18 +176,18 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		 * doing some other acrobatics
 		 */
 		
-	    // ADS specific modification of the tree before the analysis
+	  // ADS specific modification of the tree before the analysis
 		// helps with syntactic sugar 
 		add(new AqpAdsabsFieldNodePreAnalysisProcessor()); 
 		
-	    // translate the field name before we try to find the tokenizer chain
+	  // translate the field name before we try to find the tokenizer chain
 		// useful when you want to use particular analyzer for several fields
 		// but you don't want to define these fields as separate indexes
 		add(new AqpFieldMapperProcessor()); 
 		
 		// was the old-time behaviour, before the AqpDEFOPMarkPlainNodes() was
 		// modifying the AST; now this is obsolete, we solve it elsewhere
-	    // find synonyms if we have 'plain word token group', this processor
+	  // find synonyms if we have 'plain word token group', this processor
 		// add(new AqpMultiWordProcessor()); 
 		
 		
@@ -213,21 +213,21 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
     }
 		
 		add(new LegacyNumericQueryNodeProcessor());
-        add(new LegacyNumericRangeQueryNodeProcessor());
+    add(new LegacyNumericRangeQueryNodeProcessor());
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		
-        // simply wraps into non-analyzed node; possibly to remove because we now use 
+    // simply wraps into non-analyzed node; possibly to remove because we now use 
 		// AqpAdsabsCarefulAnalyzerProcessor below
 		add(new AqpAdsabsSynonymNodeProcessor());  
 		
 
-	    // ADS is doing lots of things with regard to parsing author searches
+	  // ADS is doing lots of things with regard to parsing author searches
 		// here we clean up author searches before analysis stage
 		add(new AqpAdsabsAuthorPreProcessor()); 
 		
 		
-  	    // the main analysis happens here (but not for wildcard nodes and similar
+  	// the main analysis happens here (but not for wildcard nodes and similar
 		// non-analyzed nodes), these will stay untouched
 		add(new AqpAdsabsAnalyzerProcessor()); 
 		
