@@ -122,7 +122,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-map-reduce-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-morphlines-cell-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-morphlines-core-6.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-solrj-6.3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-solrj-6.3.0-SNAPSHOT.jar" sourcepath="/apache-solr-63"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-test-framework-6.3.0-SNAPSHOT.jar" sourcepath="/apache-solr-63"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-uima-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-velocity-6.3.0-SNAPSHOT.jar"/>

@@ -151,11 +151,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         // first the individual elements explicitly (notice edismax differs from adismax)
         assertQueryEquals(req("defType", "aqp", "q", "adismax(MÜLLER)",
                 "qf", "author^2.3 title abstract^0.4"),
-                "("
-                + "((abstract:acr::müller abstract:acr::muller))^0.4 | "
-                + "((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*))^2.3 | "
-                + "((title:acr::müller title:acr::muller))"
-                + ")",
+                "((Synonym(abstract:acr::muller abstract:acr::müller))^0.4 | ((author:müller, | author:müller,* | author:mueller, | author:mueller,* | author:muller, | author:muller,*))^2.3 | Synonym(title:acr::muller title:acr::müller))",
                 DisjunctionMaxQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "edismax(MÜLLER)",
                 "qf", "author^2.3 title abstract^0.4"),
@@ -170,25 +166,21 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         // unfielded search should handle authors like adismax (with expansions)
         assertQueryEquals(req("defType", "aqp", "q", "MÜLLER",
                 "qf", "author^2.3 title abstract^0.4"),
-                "("
-                + "((abstract:acr::müller abstract:acr::muller))^0.4 | "
-                + "((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*))^2.3 | "
-                + "((title:acr::müller title:acr::muller))"
-                + ")",
+                "((Synonym(abstract:acr::muller abstract:acr::müller))^0.4 | ((author:müller, | author:müller,* | author:mueller, | author:mueller,* | author:muller, | author:muller,*))^2.3 | Synonym(title:acr::muller title:acr::müller))",
                 DisjunctionMaxQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "\"forman, c\"",
                 "qf", "author^2.3 title abstract^0.4"),
-                "((abstract:\"forman c\")^0.4 | ((author:forman, c author:forman, christine author:jones, c author:jones, christine author:forman, c* author:forman,))^2.3 | title:\"forman c\")",
+                "((abstract:\"forman c\")^0.4 | ((author:forman, c | author:forman, christine | author:jones, c | author:jones, christine | author:forman, c* | author:forman,))^2.3 | title:\"forman c\")",
                 DisjunctionMaxQuery.class);
 
         // now add a normal element
         assertQueryEquals(req("defType", "aqp", "q", "title:foo or MÜLLER",
                 "qf", "author^2.3 title abstract^0.4"),
-                "title:foo (((abstract:acr::müller abstract:acr::muller))^0.4 | ((author:müller, author:müller,* author:mueller, author:mueller,* author:muller, author:muller,*))^2.3 | ((title:acr::müller title:acr::muller)))",
+                "title:foo ((Synonym(abstract:acr::muller abstract:acr::müller))^0.4 | ((author:müller, | author:müller,* | author:mueller, | author:mueller,* | author:muller, | author:muller,*))^2.3 | Synonym(title:acr::muller title:acr::müller))",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "title:foo or \"forman, c\"",
                 "qf", "author^2.3 title abstract^0.4"),
-                "title:foo ((abstract:\"forman c\")^0.4 | ((author:forman, c author:forman, christine author:jones, c author:jones, christine author:forman, c* author:forman,))^2.3 | title:\"forman c\")",
+                "title:foo ((abstract:\"forman c\")^0.4 | ((author:forman, c | author:forman, christine | author:jones, c | author:jones, christine | author:forman, c* | author:forman,))^2.3 | title:\"forman c\")",
                 BooleanQuery.class);
 
 
@@ -221,13 +213,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "qf", "title keyword",
                 "q", "author:accomazzi, alberto property:refereed r s t"),
-                "+("
-                + "(+((author:accomazzi, author:accomazzi,*)) +(keyword:alberto | title:alberto)) "
-                + "(((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)"
-                + ") "
-                + "+("
-                + "(+property:refereed +(keyword:r | title:r) +(keyword:s | title:s) +(keyword:t | title:t)) property:refereedrst"
-                + ")",
+                "+((+((author:accomazzi, author:accomazzi,*)) +(keyword:alberto | title:alberto)) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)) +((+property:refereed +(keyword:r | title:r) +(keyword:s | title:s) +(keyword:t | title:t)) property:refereedrst)",
                 BooleanQuery.class);
         // the same as above + enhanced by multisynonym
         // i expect to see syn::r s t, syn::acr::rst
@@ -950,10 +936,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // #375
         assertQueryEquals(req("defType", "aqp", "q", "author:\"Civano, F\" -author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"),
-                "+(author:civano, f author:civano, f* author:civano,) -(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
+                "+(author:civano, f | author:civano, f* | author:civano,) -(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "author:\"Civano, F\" +author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"),
-                "+(author:civano, f author:civano, f* author:civano,) +(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
+                "+(author:civano, f | author:civano, f* | author:civano,) +(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "title:xxx -title:(foo OR bar)"),
                 "+title:xxx -(title:foo title:bar)",
