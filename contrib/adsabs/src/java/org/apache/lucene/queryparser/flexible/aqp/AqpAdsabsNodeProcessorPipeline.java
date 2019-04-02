@@ -208,7 +208,10 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
       // a query, so this is being taken care off by us
       // 02/04/2018 - leaving the component here as it might be useful for *some*
       // situations; but deactivating it
-      // add(new AqpAdsabsExtractMultisynonymsProcessor());
+      // 02/04/2019 - activating it again, as I spent 1-2 hours trying to figure out
+      // why i had a mistake in unittests :) - will only be used when
+      // aqp.unfielded.phrase.edismax.synonym.workaround=true
+      add(new AqpAdsabsExtractMultisynonymsProcessor());
       
     }
 		

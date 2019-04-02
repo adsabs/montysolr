@@ -926,6 +926,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
+		
 		assertQ(req("q", "body:(fulltext NEAR2 added)"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"

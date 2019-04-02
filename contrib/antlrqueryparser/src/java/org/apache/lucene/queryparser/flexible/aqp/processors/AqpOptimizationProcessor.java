@@ -37,8 +37,8 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
         }
       }
     } else if (node instanceof AqpBooleanQueryNode && 
-        node.getTag(AqpQueryTreeBuilder.SYNONYMS) != null &&
-        (boolean) node.getTag(AqpQueryTreeBuilder.SYNONYMS) != true) {
+        (node.getTag(AqpQueryTreeBuilder.SYNONYMS) == null ||
+        (boolean) node.getTag(AqpQueryTreeBuilder.SYNONYMS) == false)) {
 
       List<QueryNode> children = node.getChildren();
       String thisOp = ((AqpBooleanQueryNode) node).getOperator();
