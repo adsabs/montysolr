@@ -18,11 +18,11 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.List;
 
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
@@ -32,9 +32,18 @@ import org.apache.lucene.search.MultiTermQuery;
 
 public class AqpChangeRewriteMethodProcessor extends
   AqpQueryNodeProcessorImpl {
+  boolean first = true;
 
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
+    
+    if (first && getConfigVal("aqp.classic_scoring.modifier", "") != "") {
+      // TODO: i don't want to make the source field be changed with URL params
+      // but i'd like it to be configurable
+      node = new AqpAdsabsScoringQueryNode(node, "classic_factor", Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));
+    }
+    first = false;
     return node;
+    
   }
 
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {

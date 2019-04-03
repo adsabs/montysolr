@@ -1080,6 +1080,17 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           BooleanQuery.class);
     }
     
+    public void testCustomScoring() throws Exception {
+      
+      assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
+          "(abstract:\"dark energy\" | Synonym(abstract:syn::acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:syn::acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:syn::acr::de keyword:syn::dark energy))",
+          BooleanQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"",
+          "aqp.classic_scoring.modifier", "0.6"),
+          "custom((abstract:\"dark energy\" | Synonym(abstract:syn::acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:syn::acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:syn::acr::de keyword:syn::dark energy)), sum(float(classic_factor),const(0.6)))",
+          BooleanQuery.class);
+    }
+    
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabsSolrSearch.class);
     }

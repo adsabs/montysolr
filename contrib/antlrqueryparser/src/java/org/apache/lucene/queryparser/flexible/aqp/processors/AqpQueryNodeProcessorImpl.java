@@ -14,7 +14,7 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
  * @see org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl
  */
 public abstract class AqpQueryNodeProcessorImpl extends QueryNodeProcessorImpl {
-  
+  protected static Map<String, String> empty = new HashMap<String, String>();
   public boolean hasConfigMap() {
     return getQueryConfigHandler().get(
         AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER) != null;
@@ -26,7 +26,7 @@ public abstract class AqpQueryNodeProcessorImpl extends QueryNodeProcessorImpl {
     Map<String, String> args = getQueryConfigHandler().get(
         AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
     if (args == null)
-      return new HashMap<String, String>();
+      return empty;
     return args;
   }
   
