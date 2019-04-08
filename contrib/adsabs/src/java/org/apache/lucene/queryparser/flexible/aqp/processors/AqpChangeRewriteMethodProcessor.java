@@ -39,7 +39,7 @@ public class AqpChangeRewriteMethodProcessor extends
     if (first && getConfigVal("aqp.classic_scoring.modifier", "") != "") {
       // TODO: i don't want to make the source field be changed with URL params
       // but i'd like it to be configurable
-      node = new AqpAdsabsScoringQueryNode(node, "classic_factor", Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));
+      node = new AqpAdsabsScoringQueryNode(node, "cite_read_boost", Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));
     }
     first = false;
     return node;
