@@ -3,6 +3,7 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
@@ -482,7 +483,9 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 		public QueryNode buildQueryElement(List<QueryNode> samePositionElements) {
 			if (samePositionElements.size() > 1) { // synonymous tokens at the same position/offset
 				isMultiDimensional = true;
-				return new AqpOrQueryNode(samePositionElements);
+				AqpOrQueryNode q = new AqpOrQueryNode(samePositionElements);
+				q.setTag(AqpQueryTreeBuilder.SYNONYMS, true);
+				return q;
 			}
 			else {
 				return samePositionElements.get(0);
@@ -496,7 +499,9 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 	    	return mainQueryClauses.get(0);
 	    }
 	    else {
-	    	return new AqpOrQueryNode(mainQueryClauses);
+	    	AqpOrQueryNode mainQ = new AqpOrQueryNode(mainQueryClauses);
+	    	mainQ.setTag(AqpQueryTreeBuilder.SYNONYMS, true);
+	    	return mainQ;
 	    }
     }
 	}

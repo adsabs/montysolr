@@ -24,6 +24,7 @@ import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
+import org.apache.lucene.search.SynonymQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -69,6 +70,8 @@ public class SpanConverter {
 		      ((BoostQuery) q).getBoost());
 		} else if (q instanceof MatchNoDocsQuery) {
       return new EmptySpanQuery(container.query);
+		} else if (q instanceof SynonymQuery) {
+      return wrapBoost(convertSynonymToSpan(container), boost);
 		} else {
 			
 				SpanQuery wrapped = wrapNonConvertible(container);
@@ -94,10 +97,14 @@ public class SpanConverter {
       return getSpanQuery(container);
     }
     else {
-      throw new QueryNodeException(new MessageImpl(
-          QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
-          "DisjunctionQuery is not compatible with the proximity search: "
-          + q.getClass().getName()));
+      // we assume it is OR query case
+      List<Query> disjuncts = q.getDisjuncts();
+      BooleanQuery.Builder bQuery = new BooleanQuery.Builder();
+      for (Query qa: disjuncts) {
+        bQuery.add(qa, Occur.SHOULD);
+      }
+      container.query = bQuery.build();
+      return getSpanQuery(container);
     }
   }
 
@@ -179,6 +186,30 @@ public class SpanConverter {
 				+ q.getClass().getName()));
 	}
 
+	/**
+	 * Convert Synonym query, essentially will treat it the same way as 
+	 * boolean OR query
+	 * 
+	 * @param container
+	 * @return
+	 * @throws QueryNodeException
+	 */
+	protected SpanQuery convertSynonymToSpan(SpanConverterContainer container) 
+   throws QueryNodeException {
+     SynonymQuery q = (SynonymQuery) container.query;
+     SpanQuery[] spanClauses = new SpanQuery[q.getTerms().size()];
+     
+     int i = 0;
+     for (Term t : q.getTerms()) {
+       TermQuery sq = new TermQuery(t);
+       SpanQuery result = getSpanQuery(new SpanConverterContainer(sq, 1, false));
+       spanClauses[i] = result;
+       i++;
+     }
+     
+     return new SpanOrQuery(spanClauses);
+   }
+	 
 	class Leaf {
 		public List<BooleanClause> members = new ArrayList<BooleanClause>();
 		public BooleanClause left;

@@ -34,7 +34,9 @@ import org.apache.lucene.search.Query;
  */
 public class AqpQueryTreeBuilder extends QueryTreeBuilder implements
     StandardQueryBuilder {
-
+  
+  public final static String SYNONYMS = "Treat_as_synonyms";
+  
   private boolean debug = false;
   private int counter = 0;
   

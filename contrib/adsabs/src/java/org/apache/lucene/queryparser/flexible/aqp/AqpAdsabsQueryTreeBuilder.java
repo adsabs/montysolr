@@ -1,18 +1,21 @@
 package org.apache.lucene.queryparser.flexible.aqp;
 
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsIdentifierNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpBooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpConstantQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeRegexBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpNearQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpScoringQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlopQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSlowFuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.IgnoreQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpConstantQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
@@ -73,7 +76,7 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(AqpAdsabsRegexQueryNode.class, new AqpFieldQueryNodeRegexBuilder());
 		setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
-		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
+		setBuilder(BooleanQueryNode.class, new AqpBooleanQueryNodeBuilder());
 		setBuilder(SlowFuzzyQueryNode.class, new AqpSlowFuzzyQueryNodeBuilder());
 		setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());
 		setBuilder(BoostQueryNode.class, new BoostQueryNodeBuilder());
@@ -93,6 +96,7 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(AqpNearQueryNode.class,	new AqpNearQueryNodeBuilder());
 		setBuilder(OpaqueQueryNode.class,	new IgnoreQueryNodeBuilder());
 		setBuilder(AqpConstantQueryNode.class, new AqpConstantQueryNodeBuilder(this));
+		setBuilder(AqpAdsabsScoringQueryNode.class, new AqpScoringQueryNodeBuilder());
 		
 	}
 
