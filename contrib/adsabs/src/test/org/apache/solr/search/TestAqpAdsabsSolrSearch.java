@@ -7,6 +7,7 @@ import java.io.IOException;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.queries.CustomScoreQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
@@ -1088,7 +1089,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"",
           "aqp.classic_scoring.modifier", "0.6"),
           "custom((abstract:\"dark energy\" | Synonym(abstract:syn::acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:syn::acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:syn::acr::de keyword:syn::dark energy)), sum(float(classic_factor),const(0.6)))",
-          BooleanQuery.class);
+          CustomScoreQuery.class);
+      
+      // TODO: params get passed recursively, not what we want in this case
+      // i tried many things but have to refresh my memory on the flow 
+      //assertQueryEquals(req("defType", "aqp", "q", "foo bar aqp(baz)",
+      //    "aqp.classic_scoring.modifier", "0.6",
+      //    "qf", "title keyword"),
+      //    "",
+      //    CustomScoreQuery.class);
     }
     
     public static junit.framework.Test suite() {
