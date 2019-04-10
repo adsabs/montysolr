@@ -472,8 +472,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * aff - must be the same order as authors
 		 */
-		assertQ(req("q", "aff:NASA"), "//*[@numFound='0']");
-
+		assertQ(req("q", "aff:NASA"),
+			"//doc/int[@name='recid'][.='100']",
+			"//*[@numFound='1']"
+		);
 		assertQ(req("q", "aff:NASA AND author:\"Anders\""),
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
@@ -508,7 +510,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "institution:\"foo bar\""),
 			"//*[@numFound='1']"
 		);
-
+		assertQ(req("q", "institution:\"baz\""),
+			    "//*[@numFound='0']");
 
 		//the order/gaps need to be preserved
 
@@ -522,7 +525,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']"
 		);
 		assertQ(req("q", "=aff:\"acr::nasa\" AND recid:100"),
-			"//*[@numFound='0']" 
+			"//*[@numFound='1']" 
 		);
 
 
