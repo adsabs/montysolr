@@ -1111,7 +1111,7 @@ AqpFunctionQueryBuilderProvider {
           Query q;
           
           try {
-            q = QParser.getParser(qString, locReq).getQuery();
+            q = QParser.getParser(qString, "bitset", locReq).getQuery();
           } catch( SyntaxError e ){
             throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query bigquery("+input+")",e);
           }
