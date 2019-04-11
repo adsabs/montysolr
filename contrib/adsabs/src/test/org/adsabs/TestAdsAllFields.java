@@ -1485,6 +1485,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
           ),
           "//*[@numFound='2']");
     
+    // without local parameters
+    assertQ(req("defType", "aqp", "q", "*:* AND docs(fq_foo)", 
+          "fq_foo", 
+          stream
+          ),
+          "//*[@numFound='2']");
+    
     
     /*
      * similar() query
