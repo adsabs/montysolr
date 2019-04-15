@@ -71,11 +71,11 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     assertQ(req("q", "aff:xfoo"), "//*[@numFound='0']");
 
     assertQueryEquals(req("q", "aff:\"Pasadena, CA 91125\"", "qt", "aqp"), 
-    		"aff:\"pasadena acr::ca 91125\"", 
+    		"aff:\"pasadena ca 91125\"",
     		PhraseQuery.class
     		);
     assertQueryEquals(req("q", "aff:\"Pasadena, CA(91125)\"", "qt", "aqp"), 
-    		"aff:\"pasadena acr::ca 91125\"", 
+    		"aff:\"pasadena ca 91125\"",
     		PhraseQuery.class
     		);
     

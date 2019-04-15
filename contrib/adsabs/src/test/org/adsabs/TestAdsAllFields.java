@@ -125,6 +125,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  ", \"abstract\": \"all no-sky survey q'i quotient\"" +
 			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
 		          ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
+		          ", \"institution\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\", \"foo/bar baz\"]" +
 			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
 			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
 			  ", \"aff_facet_hier\": [\"1812/61814\", \"8264/61814\", \"1812/A1036\", \"-\"]" +
@@ -472,8 +473,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * aff - must be the same order as authors
 		 */
 		assertQ(req("q", "aff:NASA"),
-				"//doc/int[@name='recid'][.='100']",
-				"//*[@numFound='1']"
+			"//doc/int[@name='recid'][.='100']",
+			"//*[@numFound='1']"
 		);
 		assertQ(req("q", "aff:NASA AND author:\"Anders\""),
 				"//doc/int[@name='recid'][.='100']",
@@ -494,6 +495,23 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='100']"
 		);
 
+		assertQ(req("q", "institution:\"foo\""),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']"
+		);
+		assertQ(req("q", "institution:\"bar baz\""),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']"
+		);
+		assertQ(req("q", "institution:\"foo/bar baz\""),
+				"//*[@numFound='1']",
+				"//doc/int[@name='recid'][.='100']"
+		);
+		assertQ(req("q", "institution:\"foo bar\""),
+			"//*[@numFound='1']"
+		);
+		assertQ(req("q", "institution:\"baz\""),
+			    "//*[@numFound='0']");
 
 		//the order/gaps need to be preserved
 
@@ -507,7 +525,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']"
 		);
 		assertQ(req("q", "=aff:\"acr::nasa\" AND recid:100"),
-				"//*[@numFound='1']"
+			"//*[@numFound='1']" 
 		);
 
 
