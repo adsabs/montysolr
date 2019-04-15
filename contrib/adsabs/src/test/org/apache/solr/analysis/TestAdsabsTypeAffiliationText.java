@@ -21,6 +21,7 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.junit.BeforeClass;
 
@@ -71,11 +72,11 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     assertQ(req("q", "aff:xfoo"), "//*[@numFound='0']");
 
     assertQueryEquals(req("q", "aff:\"Pasadena, CA 91125\"", "qt", "aqp"), 
-    		"aff:\"pasadena acr::ca 91125\"", 
+    		"aff:\"pasadena acr::ca 91125\"",
     		PhraseQuery.class
     		);
     assertQueryEquals(req("q", "aff:\"Pasadena, CA(91125)\"", "qt", "aqp"), 
-    		"aff:\"pasadena acr::ca 91125\"", 
+    		"aff:\"pasadena acr::ca 91125\"",
     		PhraseQuery.class
     		);
     
