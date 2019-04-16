@@ -509,20 +509,22 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='100']"
 		);
 		assertQ(req("q", "institution:\"foo bar\""),
-			"//*[@numFound='1']"
+			"//*[@numFound='0']"
 		);
 		assertQ(req("q", "institution:\"baz\""),
-			    "//*[@numFound='1']");
-		
-		// TODO: @spacemansteve
-		// add tests for all aff_* fields
-		// depending on whether they are affiliation_text
-		// or affiliation_token types they must match 
-		// differently - insitution above is "affiliation_text"
-		// that's why it matches 'baz' if it was 'affiliation_token'
-		// it would not match it
+			    "//*[@numFound='0']");
 
-		//the order/gaps need to be preserved
+		assertQ(req("q", "aff:\"Kavli\""),
+			"//*[@numFound='1']");
+		assertQ(req("q", "aff_canonical:\"Harvard\""),
+			"//*[@numFound='1']");
+		// assertQ(req("q", "aff_facet:\"A1234\""),
+		//  	"//*[@numFound='1']");
+		assertQ(req("q", "aff_id:\"61814\""),
+			"//*[@numFound='1']");
+		assertQ(req("q", "aff_raw:\"Harvard\""),
+			"//*[@numFound='1']");
+
 
 		assert h.query(req("q", "recid:100"))
  			.contains("<arr name=\"aff\">" +
