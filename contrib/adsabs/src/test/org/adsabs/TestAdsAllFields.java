@@ -22,8 +22,15 @@ package org.adsabs;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.common.util.ContentStreamBase;
+import org.apache.solr.common.util.ContentStreamBase.StringStream;
+import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TrieIntField;
@@ -1194,7 +1201,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * for more complete tests, look at: TestAdsabsTypeDateParsing
 		 */
 
-		dumpDoc(null, "title");
+		
 		assertQ(req("q", "title:datetest"),
 				"//*[@numFound='6']");
 		assertQ(req("q", "pubdate:[1976 TO 1977]"),
@@ -1513,6 +1520,38 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
           "{!bitset compression=none} " + stream
           ),
           "//*[@numFound='2']");
+    
+    // sending bibcodes as a stream
+    SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","docs(fq_foo)");
+    List<ContentStream> streams = new ArrayList<ContentStream>(1);
+    ContentStreamBase cs = new ContentStreamBase.StringStream("bibcode\nb1\nb2");
+    cs.setName("fq_foo");
+    cs.setContentType("big-query/csv");
+    streams.add(cs);
+    req.setContentStreams(streams);
+    
+    assertQ(req,
+        "//*[@numFound='2']",
+        "//doc/str[@name='id'][.='0']",
+        "//doc/str[@name='id'][.='1']"
+    );
+    
+    
+    setDebug(true);
+    req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","docs(fq_foo) OR docs(fq_bar)");
+    StringStream cs2 = new ContentStreamBase.StringStream("bibcode\nb3\nb4");
+    cs2.setName("fq_bar");
+    cs2.setContentType("big-query/csv");
+    streams.add(cs2);
+    req.setContentStreams(streams);
+    
+    assertQ(req,
+        "//*[@numFound='4']",
+        "//doc/str[@name='id'][.='0']",
+        "//doc/str[@name='id'][.='1']",
+        "//doc/str[@name='id'][.='2']",
+        "//doc/str[@name='id'][.='3']"
+    );
     
     // without local parameters
     //assertQ(req("defType", "aqp", "q", "*:* AND docs(fq_foo)", 

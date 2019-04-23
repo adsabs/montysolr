@@ -1091,7 +1091,7 @@ AqpFunctionQueryBuilderProvider {
         
         // create a new local request with just this one content stream
         ModifiableSolrParams params = new ModifiableSolrParams();
-        params.set("qt", "bitset");
+        params.set("defType", "bitset");
         
         SolrQueryRequestBase locReq = (SolrQueryRequestBase) new LocalSolrQueryRequest(req.getCore(), params);
         try {
@@ -1109,6 +1109,9 @@ AqpFunctionQueryBuilderProvider {
           params.set("q", qString);
           
           Query q;
+          
+          if (streams.size() == 0 && qString.equals("*:*"))
+              throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query, missing stream for bigquery("+input+")");
           
           try {
             q = QParser.getParser(qString, "bitset", locReq).getQuery();

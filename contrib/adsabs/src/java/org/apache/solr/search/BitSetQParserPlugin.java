@@ -30,6 +30,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.Base64;
 import org.apache.solr.common.util.ContentStream;
@@ -100,7 +101,9 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	@Override
 	public QParser createParser(String qstr, SolrParams localParams,
 			SolrParams params, SolrQueryRequest req) {
-		
+	  
+	  if (localParams == null)
+	    localParams = new ModifiableSolrParams();
 		
 		return new QParser(qstr, localParams, params, req) {
 
