@@ -520,6 +520,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		);
 		assertQ(req("q", "institution:\"baz\""),
 			    "//*[@numFound='0']");
+		
+		// inst -> institution (synonym)
+		assertQ(req("q", "inst:\"foo\""),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='100']"
+    );
+		
 
 		assertQ(req("q", "aff:\"Kavli\""),
 			"//*[@numFound='1']");

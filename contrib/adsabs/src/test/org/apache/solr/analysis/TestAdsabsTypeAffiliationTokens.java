@@ -57,49 +57,49 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
 
   public void test() throws Exception {
 
-    assertU(addDocs("aff_abbrev", "foo bar", "aff_abbrev", "bar baz/hey"));
-    assertU(addDocs("aff_abbrev", "Kavli Institute/Dept of Physics"));
+    assertU(addDocs("institution", "foo bar", "institution", "bar baz/hey"));
+    assertU(addDocs("institution", "Kavli Institute/Dept of Physics"));
     assertU(commit());
     
     // make sure docs are there
     assertQ(req("q", "*:*"), "//*[@numFound>='2']");
     
     // query parsing tests
-    assertQueryEquals(req("q", "aff_abbrev:\"Foo Bar\""), 
-        "aff_abbrev:foo bar",
+    assertQueryEquals(req("q", "institution:\"Foo Bar\""), 
+        "institution:foo bar",
         TermQuery.class
         );
     // it is not visible here, but tokens are: foo bar, baz
-    assertQueryEquals(req("q", "aff_abbrev:\"Foo Bar/Baz\""), 
-        "aff_abbrev:\"foo bar baz\"",
+    assertQueryEquals(req("q", "institution:\"Foo Bar/Baz\""), 
+        "institution:\"foo bar baz\"",
         PhraseQuery.class
         );
     
     // test matches
-    assertQ(req("q", "aff_abbrev:\"foo bar\""), 
+    assertQ(req("q", "institution:\"foo bar\""), 
         "//*[@numFound='1']",
         "//doc/str[@name='id'][.='0']"
         );
-    assertQ(req("q", "aff_abbrev:\"bar baz\""), 
+    assertQ(req("q", "institution:\"bar baz\""), 
         "//*[@numFound='1']",
         "//doc/str[@name='id'][.='0']"
         );
-    assertQ(req("q", "aff_abbrev:HEY"), 
+    assertQ(req("q", "institution:HEY"), 
         "//*[@numFound='1']",
         "//doc/str[@name='id'][.='0']"
         );
-    assertQ(req("q", "aff_abbrev:\"bar BAZ/heY\""), 
+    assertQ(req("q", "institution:\"bar BAZ/heY\""), 
         "//*[@numFound='1']",
         "//doc/str[@name='id'][.='0']"
         );
     
     // only match full tokens
-    assertQ(req("q", "aff_abbrev:foo"), "//*[@numFound='0']");
-    assertQ(req("q", "aff_abbrev:\"baz/hey\""), "//*[@numFound='0']");
+    assertQ(req("q", "institution:foo"), "//*[@numFound='0']");
+    assertQ(req("q", "institution:\"baz/hey\""), "//*[@numFound='0']");
     
 
     // check the affiliation is there stored as one string
-    assert h.query(req("q", "aff_abbrev:\"Kavli Institute/Dept of Physics\""))
+    assert h.query(req("q", "institution:\"Kavli Institute/Dept of Physics\""))
  		.contains("<str>Kavli Institute/Dept of Physics</str>"
         );
     
