@@ -1083,7 +1083,7 @@
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
 		  />
 
-		<field name="bibstem" type="bibstem" indexed="true" stored="${storeAll:false}"
+		<field name="bibstem" type="bibstem" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
 			/>
 
