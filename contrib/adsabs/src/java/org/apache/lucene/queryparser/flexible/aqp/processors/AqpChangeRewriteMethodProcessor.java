@@ -17,9 +17,14 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -29,6 +34,9 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
 import org.apache.lucene.search.MultiTermQuery;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.request.SolrQueryRequest;
 
 public class AqpChangeRewriteMethodProcessor extends
   AqpQueryNodeProcessorImpl {
@@ -39,7 +47,19 @@ public class AqpChangeRewriteMethodProcessor extends
     if (first && getConfigVal("aqp.classic_scoring.modifier", "") != "") {
       // TODO: i don't want to make the source field be changed with URL params
       // but i'd like it to be configurable
-      node = new AqpAdsabsScoringQueryNode(node, "cite_read_boost", Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));
+      
+      SolrQueryRequest req = this.getQueryConfigHandler()
+          .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+          .getRequest();
+      
+      ModifiableSolrParams params = new ModifiableSolrParams(req.getParams());
+      params.remove("aqp.classic_scoring.modifier");
+      req.setParams(params);
+      
+      
+      node = new AqpAdsabsScoringQueryNode(node, "cite_read_boost", 
+          Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));
+      
     }
     first = false;
     return node;

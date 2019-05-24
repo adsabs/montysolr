@@ -1083,21 +1083,36 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     
     public void testCustomScoring() throws Exception {
       
+      
       assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
           "(abstract:\"dark energy\" | Synonym(abstract:syn::acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:syn::acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:syn::acr::de keyword:syn::dark energy))",
           BooleanQuery.class);
+      
       assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"",
           "aqp.classic_scoring.modifier", "0.6"),
           "custom((abstract:\"dark energy\" | Synonym(abstract:syn::acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:syn::acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:syn::acr::de keyword:syn::dark energy)), sum(float(cite_read_boost),const(0.6)))",
           CustomScoreQuery.class);
       
-      // TODO: params get passed recursively, not what we want in this case
-      // i tried many things but have to refresh my memory on the flow 
-      //assertQueryEquals(req("defType", "aqp", "q", "foo bar aqp(baz)",
-      //    "aqp.classic_scoring.modifier", "0.6",
-      //    "qf", "title keyword"),
-      //    "",
-      //    CustomScoreQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "author:\"foo, bar\"",
+          "aqp.classic_scoring.modifier", "0.5"),
+          "custom((author:foo, bar | author:foo, bar * | author:foo, b | author:foo, b * | author:foo,), sum(float(cite_read_boost),const(0.5)))",
+          CustomScoreQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "author:\"^foo, bar\"",
+          "no.classic_scoring.modifier", "0.5"),
+          "spanPosRange(spanOr([author:foo, bar, SpanMultiTermQueryWrapper(author:foo, bar *), author:foo, b, SpanMultiTermQueryWrapper(author:foo, b *), author:foo,]), 0, 1)",
+          SpanPositionRangeQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "author:\"^foo, bar\"",
+          "aqp.classic_scoring.modifier", "0.5"),
+          "custom(spanPosRange(spanOr([author:foo, bar, SpanMultiTermQueryWrapper(author:foo, bar *), author:foo, b, SpanMultiTermQueryWrapper(author:foo, b *), author:foo,]), 0, 1), sum(float(cite_read_boost),const(0.5)))",
+          CustomScoreQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "foo bar aqp(baz)",
+          "aqp.classic_scoring.modifier", "0.6",
+          "qf", "title keyword"),
+          "custom(+(keyword:foo | title:foo) +(keyword:bar | title:bar) +(keyword:baz | title:baz), sum(float(cite_read_boost),const(0.6)))",
+          CustomScoreQuery.class);
+      
     }
     
     public static junit.framework.Test suite() {
