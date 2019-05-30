@@ -8,9 +8,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
-
 import java.text.*;
+import static net.gcardone.junidecode.Junidecode.unidecode;
 
 public class AuthorUtils {
 	
@@ -128,10 +127,10 @@ public class AuthorUtils {
 	}
 	
 	public static String foldToAscii(String a) {
-		char[] in = a.toCharArray();
-		char[] out = new char[in.length * 4];
-		int outPos = ASCIIFoldingFilter.foldToASCII(in, 0, out, 0, in.length);
-		return String.copyValueOf(out).trim();
+	  String b = unidecode(a.trim());
+	  if (b.contains(" ,"))
+	    b = b.replace(" ,", ",");
+	  return b;
 	}
 	
 	/*

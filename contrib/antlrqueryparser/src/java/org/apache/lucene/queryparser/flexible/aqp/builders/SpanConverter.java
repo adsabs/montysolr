@@ -190,9 +190,6 @@ public class SpanConverter {
 	 * Convert Synonym query, essentially will treat it the same way as 
 	 * boolean OR query
 	 * 
-	 * @param container
-	 * @return
-	 * @throws QueryNodeException
 	 */
 	protected SpanQuery convertSynonymToSpan(SpanConverterContainer container) 
    throws QueryNodeException {

@@ -69,6 +69,16 @@ public class TestAuthorUtils extends TestCase {
 		expected.add("GOEMEZ, HECTOR Q");
 		actual = AuthorUtils.getAsciiTransliteratedVariants("GÓMEZ, HECTOR Q");
 		assertEquals(expected, new HashSet<String>(actual));
+		
+		assertEquals("zazolc gesla jazn", AuthorUtils.foldToAscii("zażółć gęślą jaźń"));
+		
+		expected.clear();
+		expected.add("GUERÇO, R");
+		expected.add("GUERCO, R");
+		actual = AuthorUtils.getAsciiTransliteratedVariants("guerço, r");
+		assertEquals(expected, new HashSet<String>(actual));
+		
+		assertEquals("aeiouyAEIOUY", AuthorUtils.foldToAscii("áéíóůýÁÉÍÓŮÝ"));
 	}
 	
 	public void testTransliterate() {

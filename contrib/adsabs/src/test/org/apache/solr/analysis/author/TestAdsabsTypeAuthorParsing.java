@@ -376,7 +376,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "author:other, name | author:other, name * | author:other, n | author:other, n * | author:other,",
         "//*[@numFound='1']");
     testAuthorQuery("\u8349",
-        "author:\u8349, | author:\u8349,*", // | author:草, | author:草,*
+        "author:cao,* | author: cao, | author:\u8349, | author:\u8349,*", // | author:草, | author:草,*
         "//*[@numFound='1']");
     testAuthorQuery("\"baz, baz\"",
         "author:baz, baz | author:baz, baz * | author:baz, b | author:baz, b * | author:baz,",

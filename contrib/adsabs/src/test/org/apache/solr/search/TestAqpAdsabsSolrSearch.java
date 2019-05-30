@@ -1113,6 +1113,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "custom(+(keyword:foo | title:foo) +(keyword:bar | title:bar) +(keyword:baz | title:baz), sum(float(cite_read_boost),const(0.6)))",
           CustomScoreQuery.class);
       
+      // when used in conjunction with constant scoring, constant overrides custom
+      setDebug(true);
+      assertQueryEquals(req("defType", "aqp", 
+          "q", "^accomazzi",
+          "aqp.constant_scoring", "author^5",
+          "qf", "author title"),
+          "foo",
+          CustomScoreQuery.class);
+      assertQueryEquals(req("defType", "aqp", 
+          "q", "^accomazzi",
+          "aqp.classic_scoring.modifier", "0.5",
+          "aqp.constant_scoring", "author^5",
+          "qf", "author title"),
+          "foo",
+          CustomScoreQuery.class);
+      
     }
     
     public static junit.framework.Test suite() {
