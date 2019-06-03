@@ -194,6 +194,9 @@
             	<include name="**/*.jar" />
                 <include name="*.jar" />
             </fileset>
+			<fileset dir="${basedir}/../adsabs">
+                <include name="extra-lib/junidecode*.jar" />
+            </fileset>
         </copy>
 		
 		<!-- copy over our configuration files -->
@@ -212,7 +215,7 @@
         </copy>
 		
 		<!-- fix some solr problems -->
-		<chmod perm="ugo-x">
+		<chmod perm="ugo+x">
             <fileset dir="${build.dir}/${example.name}/bin">
                 <include name="solr" />
             </fileset>
