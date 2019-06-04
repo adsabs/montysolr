@@ -135,6 +135,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       // automatically harvested variations of author names (collected during indexing)
       // it will be enriched by the indexing
       File generatedTransliterations = createTempFile(formatSynonyms(new String[]{
+          "wyrzykowsky, l=>wyrzykowski, l;wyrzykowski, ł",
           "ADAMCHuk, m => ADAMČuk, m",
           "ADAMCuk, m => ADAMČuk, m",
           "ADAMCZuk, m => ADAMČuk, m",
@@ -325,6 +326,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assertU(adoc(F.ID, "600", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Foo, Bar|Other, Name|" + '\u8349',
                           F.AUTHOR, "Baz, Baz|\\u8349")); // 草
     
+    assertU(adoc(F.ID, "601", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wyrzykowski, Ł"));
+    
     assertU(commit());
     
     //dumpDoc(null, "id", "author");
@@ -371,6 +374,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
   
   public void testAuthorParsingUseCases() throws Exception {
+    
+    // multiple synonyms in the file are separated with semicolon
+    testAuthorQuery("\"wyrzykowsky, l\"",
+        "wyrzykowski, | wyrzykowski, l | wyrzykowski, l* | wyrzykowski, ł | wyrzykowski, ł* | wyrzykowskii, | wyrzykowskii, l | wyrzykowskii, l* | wyrzykowskii, ł | wyrzykowskii, ł* | wyrzykowskij, | wyrzykowskij, l | wyrzykowskij, l* | wyrzykowskij, ł | wyrzykowskij, ł* | wyrzykowskiy, | wyrzykowskiy, l | wyrzykowskiy, l* | wyrzykowskiy, ł | wyrzykowskiy, ł* | wyrzykowsky, | wyrzykowsky, l | wyrzykowsky, l* | wyrzykowsky, ł | wyrzykowsky, ł* | wyrzykowskyi, | wyrzykowskyi, l | wyrzykowskyi, l* | wyrzykowskyi, ł | wyrzykowskyi, ł*",
+        "//*[@numFound='1']");
+    
     // multiple names
     testAuthorQuery("\"other, name\"",
         "author:other, name | author:other, name * | author:other, n | author:other, n * | author:other,",
