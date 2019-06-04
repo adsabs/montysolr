@@ -208,7 +208,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
           if (regexIsPossible(nameParts, origNameInfo.parts)) {
             StringBuffer nn = new StringBuffer();
             nn.append(nameParts[0]);
-            for (int i=1;i<nameParts.length-1;i++) {
+            for (int i=1;i<nameParts.length-1 && i<origNameInfo.parts.length;i++) {
               if (nameParts[i].length()==1 && origNameInfo.parts[i].length()==1) {
                 nn.append(" " + nameParts[i] + "[^ ]*");
                 parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString(), fqn.getBegin(), fqn.getEnd()));
@@ -220,7 +220,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
             
             nn.append(" " + nameParts[nameParts.length-1]);
             
-            if (nameParts[nameParts.length-1].length()==1 && origNameInfo.parts[nameParts.length-1].length()==1) {
+            if (nameParts.length-1<origNameInfo.parts.length && nameParts[nameParts.length-1].length()==1 && origNameInfo.parts[nameParts.length-1].length()==1) {
               parentChildren.add(new AqpAdsabsRegexQueryNode(fqn.getField(), nn.toString() + ".*", fqn.getBegin(), fqn.getEnd()));
             }
             else {
