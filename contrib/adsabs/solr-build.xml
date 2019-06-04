@@ -31,8 +31,7 @@
     <fileset dir="lib"/>
     <path refid="solr.base.classpath"/>
   	<pathelement path="${common.dir}/build/antlrqueryparser/classes/java"/>
-  	<pathelement path="extra-lib/junidecode-*.jar"/>
-  	
+    <fileset dir="extra-lib/" includes="junidecode*.jar"/>  	
   </path>
 	
   <path id="run.classpath">
