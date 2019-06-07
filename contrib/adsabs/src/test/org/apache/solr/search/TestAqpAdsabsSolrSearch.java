@@ -330,6 +330,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
       
+      // custom scoring should be possible even with constant scores
+      assertQueryEquals(req("defType", "aqp", 
+          "aqp.constant_scoring", "author^1",
+          "aqp.classic_scoring.modifier", "0.6",
+          "q", "=author:\"foo\""),
+          "custom(ConstantScore(author:foo,), sum(float(cite_read_boost),const(0.6)))", 
+          CustomScoreQuery.class);
+
+      assertQueryEquals(req("defType", "aqp", 
+          "aqp.constant_scoring", "author^1",
+          "aqp.classic_scoring.modifier", "0.6",
+          "q", "=author:\"^foo\""),
+          "custom(ConstantScore(spanPosRange(author:foo,, 0, 1)), sum(float(cite_read_boost),const(0.6)))", 
+          CustomScoreQuery.class);
+      
+      
       assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"),
           "MatchNoDocsQuery(\"\")",
           MatchNoDocsQuery.class);
@@ -368,9 +384,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "+(author:accomazzi, a | author:accomazzi, a* | author:accomazzi,) +(abstract:acr::ads title:acr::ads keyword:acr::ads) +year:[2000 TO 2015]", 
           BooleanQuery.class);
       
-      System.out.println(aq.hashCode());
-      System.out.println(bq.hashCode());
-      System.out.println(cq.hashCode());
+      //System.out.println(aq.hashCode());
+      //System.out.println(bq.hashCode());
+      //System.out.println(cq.hashCode());
       
       assertNotSame(aq, bq);
       assertNotSame(aq, cq);

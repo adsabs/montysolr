@@ -395,6 +395,12 @@ AqpFunctionQueryBuilderProvider {
 					}
 				}
 				
+				boolean wrapConstant = false;
+				if (query instanceof ConstantScoreQuery) {
+				  query = ((ConstantScoreQuery) query).getQuery();
+				  wrapConstant = true;
+				}
+				
 
 				SpanQuery spanQuery;
 				try {
@@ -405,7 +411,11 @@ AqpFunctionQueryBuilderProvider {
 					throw ex;
 				}
 
-				return new SpanPositionRangeQuery(spanQuery, (start-1)*positionIncrementGap , end*positionIncrementGap); //lucene counts from zeroes
+				query = new SpanPositionRangeQuery(spanQuery, (start-1)*positionIncrementGap , end*positionIncrementGap); //lucene counts from zeroes
+				if (wrapConstant)
+				  query = new ConstantScoreQuery(query);
+				
+				return query;
 			}
 		});
 
