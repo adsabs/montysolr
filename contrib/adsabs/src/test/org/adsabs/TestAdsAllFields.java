@@ -1544,7 +1544,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     );
     
     
-    setDebug(true);
+    
     req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","docs(fq_foo) OR docs(fq_bar)");
     StringStream cs2 = new ContentStreamBase.StringStream("bibcode\nb3\nb4");
     cs2.setName("fq_bar");
@@ -1558,6 +1558,23 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='1']",
         "//doc/str[@name='id'][.='2']",
         "//doc/str[@name='id'][.='3']"
+    );
+    
+    
+    req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","bibcode:b3 docs(fq_bar)");
+    req.setContentStreams(streams);
+    
+    assertQ(req,
+        "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='2']"
+    );
+    
+    req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","docs(fq_bar) bibcode:b3");
+    req.setContentStreams(streams);
+    
+    assertQ(req,
+        "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='2']"
     );
     
     // without local parameters

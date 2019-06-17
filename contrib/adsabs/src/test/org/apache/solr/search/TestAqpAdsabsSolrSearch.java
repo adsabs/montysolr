@@ -1071,7 +1071,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       int size = ((100 + 8)/8) * 8;
       BitSet bitSet = new FixedBitSet(size);
       bitSet.set(1);
-      bitSet.set(10);
+      bitSet.set(2);
       
       BitSetQParserPlugin bqp = new BitSetQParserPlugin();
       bqp.init(new NamedList(){});
@@ -1079,6 +1079,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       String stream1 = bqp.encodeBase64(bqp.toByteArray(bitSet));
       bitSet.set(5);;
       String stream2 = bqp.encodeBase64(bqp.toByteArray(bitSet));
+      
+      assertU(addDocs("id", "0", "bibcode", "b0"));
+      assertU(addDocs("id", "1", "bibcode", "b1"));
+      assertU(addDocs("id", "2", "bibcode", "b2"));
+      assertU(addDocs("id", "3", "bibcode", "b3"));
+      assertU(addDocs("id", "4", "bibcode", "b4"));
+      assertU(addDocs("id", "5", "bibcode", "b5"));
+      assertU(commit("waitSearcher", "true"));
 
       assertQueryEquals(req("defType", "aqp", "q", "*:* AND docs(fq_foo)", 
           "fq_foo", 
@@ -1095,6 +1103,48 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           ),
           "BitSetQuery(2) BitSetQuery(3)",
           BooleanQuery.class);
+      
+      assertQueryEquals(req("defType", "aqp", "q", "docs(foo) AND docs(bar)", 
+          "foo", 
+          "{!bitset compression=none} " + stream1,
+          "bar", 
+          "{!bitset compression=none} " + stream2
+          ),
+          "+BitSetQuery(2) +BitSetQuery(3)",
+          BooleanQuery.class);
+      
+      assertQ(req("defType", "aqp", "q", "docs(foo) OR docs(bar)", 
+          "foo", 
+          "{!bitset compression=none} " + stream1,
+          "bar", 
+          "{!bitset compression=none} " + stream2
+          ),
+          "//*[@numFound='3']",
+          "//doc/str[@name='id'][.='1']",
+          "//doc/str[@name='id'][.='2']",
+          "//doc/str[@name='id'][.='5']"
+          );
+      
+      assertQ(req("defType", "aqp", "q", "docs(foo) AND docs(bar)", 
+          "foo", 
+          "{!bitset compression=none} " + stream1,
+          "bar", 
+          "{!bitset compression=none} " + stream2
+          ),
+          "//*[@numFound='2']",
+          "//doc/str[@name='id'][.='1']",
+          "//doc/str[@name='id'][.='2']"
+          );
+      
+      assertQ(req("defType", "aqp", "q", "docs(bar) bibcode:b1", 
+          "foo", 
+          "{!bitset compression=none} " + stream1,
+          "bar", 
+          "{!bitset compression=none} " + stream2
+          ),
+          "//*[@numFound='1']",
+          "//doc/str[@name='id'][.='1']"
+          );
     }
     
     public void testCustomScoring() throws Exception {
