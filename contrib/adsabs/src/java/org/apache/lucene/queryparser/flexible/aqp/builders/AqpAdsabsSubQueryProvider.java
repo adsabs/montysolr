@@ -396,6 +396,11 @@ AqpFunctionQueryBuilderProvider {
 				}
 				
 				boolean wrapConstant = false;
+				float boostFactor = 1.0f;
+				if (query instanceof BoostQuery) {
+				  boostFactor = ((BoostQuery) query).getBoost();
+				  query = ((BoostQuery) query).getQuery();
+				}
 				if (query instanceof ConstantScoreQuery) {
 				  query = ((ConstantScoreQuery) query).getQuery();
 				  wrapConstant = true;
@@ -414,7 +419,8 @@ AqpFunctionQueryBuilderProvider {
 				query = new SpanPositionRangeQuery(spanQuery, (start-1)*positionIncrementGap , end*positionIncrementGap); //lucene counts from zeroes
 				if (wrapConstant)
 				  query = new ConstantScoreQuery(query);
-				
+				if (boostFactor != 1.0f)
+				  query = new BoostQuery(query, boostFactor);
 				return query;
 			}
 		});

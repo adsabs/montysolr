@@ -1179,20 +1179,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "custom(+(keyword:foo | title:foo) +(keyword:bar | title:bar) +(keyword:baz | title:baz), sum(float(cite_read_boost),const(0.6)))",
           CustomScoreQuery.class);
       
-      // when used in conjunction with constant scoring, constant overrides custom
-      setDebug(true);
+      // when used in conjunction with constant scoring, custom modifies constant (but it won't replace it)
       assertQueryEquals(req("defType", "aqp", 
           "q", "^accomazzi",
           "aqp.constant_scoring", "author^5",
           "qf", "author title"),
-          "foo",
-          CustomScoreQuery.class);
+          "(ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0",
+          BoostQuery.class);
       assertQueryEquals(req("defType", "aqp", 
           "q", "^accomazzi",
           "aqp.classic_scoring.modifier", "0.5",
           "aqp.constant_scoring", "author^5",
           "qf", "author title"),
-          "foo",
+          "custom((ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0, sum(float(cite_read_boost),const(0.5)))",
           CustomScoreQuery.class);
       
     }
