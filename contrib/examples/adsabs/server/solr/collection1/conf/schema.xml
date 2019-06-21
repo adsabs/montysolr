@@ -840,22 +840,34 @@
 		</fieldType>
 
 
-    <!-- test: TestAdsabsTypeAffiliationText -->
-    <fieldType name="affiliation_tokens" class="solr.TextField">
+    <!-- test: TestAdsabsTypeAffiliationTokens -->
+    <fieldType name="affiliation_tokens" class="solr.TextField"
+        positionIncrementGap="100">
 		<analyzer type="index">
             <charFilter class="solr.HTMLStripCharFilterFactory"/>
 
 	        <!-- tokenize on | or / -->
-	        <tokenizer class="solr.PatternTokenizerFactory" pattern="[\|\/]"
+	        <tokenizer class="solr.PatternTokenizerFactory" pattern="[\;]"
 	          group="-1" />
+	        <filter class="solr.WordDelimiterFilterFactory"
+	           generateWordParts="1"
+	           generateNumberParts="0"
+	           splitOnCaseChange="0"
+	           splitOnNumerics="0"
+	           catenateWords="0"
+	           catenateNumbers="0"
+	           catenateAll="0"
+	           preserveOriginal="1"
+	           stemEnglishPossessive="0"
+	           types="wdafftypes.txt"
+	           />
             <filter class="solr.LowerCaseFilterFactory" />
 			<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 		<analyzer type="query">
             <charFilter class="solr.HTMLStripCharFilterFactory"/>
 
-            <!-- tokenize on | or / -->
-            <tokenizer class="solr.PatternTokenizerFactory" pattern="[\|\/]"
+            <tokenizer class="solr.PatternTokenizerFactory" pattern="[\/\;]"
               group="-1" />
             <filter class="solr.LowerCaseFilterFactory" />
             <filter class="solr.TrimFilterFactory" />

@@ -59,6 +59,10 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
 
     assertU(addDocs("institution", "foo bar", "institution", "bar baz/hey"));
     assertU(addDocs("institution", "Kavli Institute/Dept of Physics"));
+    assertU(addDocs("institution", "U Catania/Dep Phy Ast; -",
+        "institution", "U Catania/Dep Phy Ast; -; -; INFN/Catania",
+        "institution", "U Catania/Dep Phy Ast; -"
+        ));
     assertU(commit());
     
     // make sure docs are there
@@ -103,6 +107,29 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
  		.contains("<str>Kavli Institute/Dept of Physics</str>"
         );
     
+    //"U Catania/Dep Phy Ast; -; -; INFN/Catania"
+    assertQ(req("q", "institution:\"U Catania\""), "//*[@numFound='1']");
+    assertQ(req("q", "institution:\"Dep Phy Ast\""), "//*[@numFound='1']");
+    assertQ(req("q", "institution:\"U Catania/Dep Phy Ast\""), "//*[@numFound='1']");
+    
+    // must not happen if positionIncrementGap > 0
+    assertQ(req("q", "institution:\"Catania/U Catania\""), "//*[@numFound='0']");
+    
+    // this is ok, it's expected
+    assertQ(req("q", "institution:\"-;INFN\""), "//*[@numFound='1']");
+    assertQ(req("q", "institution:\"-;-\""), "//*[@numFound='1']");
+    
+    assertQ(req("q", "pos(institution:\"U Catania/Dep Phy Ast\", 1)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"U Catania\", 1)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"Dep Phy Ast\", 1)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"-\", 1)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"INFN/Catania\", 1)"), "//*[@numFound='0']");
+    assertQ(req("q", "pos(institution:\"INFN\", 1)"), "//*[@numFound='0']");
+    assertQ(req("q", "pos(institution:\"Catania\", 1)"), "//*[@numFound='0']");
+    
+    assertQ(req("q", "pos(institution:\"INFN/Catania\", 2)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"INFN\", 2)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"Catania\", 2)"), "//*[@numFound='1']");
   }
   
 

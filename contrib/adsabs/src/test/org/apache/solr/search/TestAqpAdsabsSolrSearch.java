@@ -330,6 +330,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
       
+      // topn() with score sorting
+      assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, score desc)"),
+          "SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc))",
+          SecondOrderQuery.class);
+      
       // custom scoring should be possible even with constant scores
       assertQueryEquals(req("defType", "aqp", 
           "aqp.constant_scoring", "author^1",
@@ -787,6 +792,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc\")"),
                 "SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc))",
                 SecondOrderQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc,citation_count desc\")"),
+            "SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc,citation_count desc))",
+            SecondOrderQuery.class);
 
         // topN - added Aug2013
         assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*)"),

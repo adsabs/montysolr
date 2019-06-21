@@ -1,0 +1,259 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# A customized type mapping for WordDelimiterFilterFactory
+# the allowable types are: LOWER, UPPER, ALPHA, DIGIT, ALPHANUM, SUBWORD_DELIM
+# 
+# the default for any character without a mapping is always computed from 
+# Unicode character properties
+
+# '\t'
+\u0009 => ALPHANUM
+# '\n'
+\u000a => ALPHANUM
+# '\x0b'
+\u000b => ALPHANUM
+# '\x0c'
+\u000c => ALPHANUM
+# '\r'
+\u000d => ALPHANUM
+# '\x0e'
+\u000e => ALPHANUM
+# '\x0f'
+\u000f => ALPHANUM
+# '\x10'
+\u0010 => ALPHANUM
+# '\x11'
+\u0011 => ALPHANUM
+# '\x12'
+\u0012 => ALPHANUM
+# '\x13'
+\u0013 => ALPHANUM
+# '\x14'
+\u0014 => ALPHANUM
+# '\x15'
+\u0015 => ALPHANUM
+# '\x16'
+\u0016 => ALPHANUM
+# '\x17'
+\u0017 => ALPHANUM
+# '\x18'
+\u0018 => ALPHANUM
+# '\x19'
+\u0019 => ALPHANUM
+# '\x1a'
+\u001a => ALPHANUM
+# '\x1b'
+\u001b => ALPHANUM
+# '\x1c'
+\u001c => ALPHANUM
+# '\x1d'
+\u001d => ALPHANUM
+# '\x1e'
+\u001e => ALPHANUM
+# '\x1f'
+\u001f => ALPHANUM
+# ' '
+\u0020 => ALPHANUM
+# '!'
+\u0021 => ALPHANUM
+# '"'
+\u0022 => ALPHANUM
+# '#'
+\u0023 => ALPHANUM
+# '$'
+\u0024 => ALPHANUM
+# '%'
+\u0025 => ALPHANUM
+# '&'
+\u0026 => ALPHANUM
+# "'"
+\u0027 => ALPHANUM
+# '('
+\u0028 => ALPHANUM
+# ')'
+\u0029 => ALPHANUM
+# '*'
+\u002a => ALPHANUM
+# '+'
+\u002b => ALPHANUM
+# ','
+\u002c => ALPHANUM
+# '-'
+\u002d => ALPHANUM
+# '.'
+\u002e => ALPHANUM
+# '/'
+\u002f => SUBWORD_DELIM
+# '0'
+\u0030 => ALPHANUM
+# '1'
+\u0031 => ALPHANUM
+# '2'
+\u0032 => ALPHANUM
+# '3'
+\u0033 => ALPHANUM
+# '4'
+\u0034 => ALPHANUM
+# '5'
+\u0035 => ALPHANUM
+# '6'
+\u0036 => ALPHANUM
+# '7'
+\u0037 => ALPHANUM
+# '8'
+\u0038 => ALPHANUM
+# '9'
+\u0039 => ALPHANUM
+# ':'
+\u003a => ALPHANUM
+# ';'
+\u003b => ALPHANUM
+# '<'
+\u003c => ALPHANUM
+# '='
+\u003d => ALPHANUM
+# '>'
+\u003e => ALPHANUM
+# '?'
+\u003f => ALPHANUM
+# '@'
+\u0040 => ALPHANUM
+# 'A'
+\u0041 => ALPHANUM
+# 'B'
+\u0042 => ALPHANUM
+# 'C'
+\u0043 => ALPHANUM
+# 'D'
+\u0044 => ALPHANUM
+# 'E'
+\u0045 => ALPHANUM
+# 'F'
+\u0046 => ALPHANUM
+# 'G'
+\u0047 => ALPHANUM
+# 'H'
+\u0048 => ALPHANUM
+# 'I'
+\u0049 => ALPHANUM
+# 'J'
+\u004a => ALPHANUM
+# 'K'
+\u004b => ALPHANUM
+# 'L'
+\u004c => ALPHANUM
+# 'M'
+\u004d => ALPHANUM
+# 'N'
+\u004e => ALPHANUM
+# 'O'
+\u004f => ALPHANUM
+# 'P'
+\u0050 => ALPHANUM
+# 'Q'
+\u0051 => ALPHANUM
+# 'R'
+\u0052 => ALPHANUM
+# 'S'
+\u0053 => ALPHANUM
+# 'T'
+\u0054 => ALPHANUM
+# 'U'
+\u0055 => ALPHANUM
+# 'V'
+\u0056 => ALPHANUM
+# 'W'
+\u0057 => ALPHANUM
+# 'X'
+\u0058 => ALPHANUM
+# 'Y'
+\u0059 => ALPHANUM
+# 'Z'
+\u005a => ALPHANUM
+# '['
+\u005b => ALPHANUM
+# '\\'
+\u005c => ALPHANUM
+# ']'
+\u005d => ALPHANUM
+# '^'
+\u005e => ALPHANUM
+# '_'
+\u005f => ALPHANUM
+# '`'
+\u0060 => ALPHANUM
+# 'a'
+\u0061 => ALPHANUM
+# 'b'
+\u0062 => ALPHANUM
+# 'c'
+\u0063 => ALPHANUM
+# 'd'
+\u0064 => ALPHANUM
+# 'e'
+\u0065 => ALPHANUM
+# 'f'
+\u0066 => ALPHANUM
+# 'g'
+\u0067 => ALPHANUM
+# 'h'
+\u0068 => ALPHANUM
+# 'i'
+\u0069 => ALPHANUM
+# 'j'
+\u006a => ALPHANUM
+# 'k'
+\u006b => ALPHANUM
+# 'l'
+\u006c => ALPHANUM
+# 'm'
+\u006d => ALPHANUM
+# 'n'
+\u006e => ALPHANUM
+# 'o'
+\u006f => ALPHANUM
+# 'p'
+\u0070 => ALPHANUM
+# 'q'
+\u0071 => ALPHANUM
+# 'r'
+\u0072 => ALPHANUM
+# 's'
+\u0073 => ALPHANUM
+# 't'
+\u0074 => ALPHANUM
+# 'u'
+\u0075 => ALPHANUM
+# 'v'
+\u0076 => ALPHANUM
+# 'w'
+\u0077 => ALPHANUM
+# 'x'
+\u0078 => ALPHANUM
+# 'y'
+\u0079 => ALPHANUM
+# 'z'
+\u007a => ALPHANUM
+# '{'
+\u007b => ALPHANUM
+# '|'
+\u007c => ALPHANUM
+# '}'
+\u007d => ALPHANUM
+# '~'
+\u007e => ALPHANUM
+
+
