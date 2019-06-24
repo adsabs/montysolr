@@ -557,7 +557,7 @@ AqpFunctionQueryBuilderProvider {
 					throw new SyntaxError("This query is empty: " + eqp.getString());
 				}
 
-				String sortOrRank = "score"; 
+				String sortOrRank = "score desc"; 
 				if (fp.hasMoreArguments()) {
 					sortOrRank = fp.parseId();
 				}
@@ -568,13 +568,13 @@ AqpFunctionQueryBuilderProvider {
 					sortOrRank = sortOrRank.substring(1, sortOrRank.length()-1);
 				}
 
-
-				if (sortOrRank.equals("score")) {
+				SortSpec sortSpec = SortSpecParsing.parseSortSpec(sortOrRank, fp.getReq());
+				
+				if (sortSpec.getSort() == null) {
 					return new SecondOrderQuery(innerQuery, 
 							new SecondOrderCollectorTopN(topN));
 				}
 				else {
-					SortSpec sortSpec = SortSpecParsing.parseSortSpec(sortOrRank, fp.getReq());
 
 					SolrIndexSearcher searcher = fp.getReq().getSearcher();
 

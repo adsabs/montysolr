@@ -121,6 +121,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         return newConfig.getAbsolutePath();
     }
+    
+    @Override
+    public void tearDown() throws Exception {
+      assertU(delQ("*:*"));
+      assertU(commit("waitSearcher", "true"));
+      super.tearDown();
+    }
 
 
     public void testUnfieldedSearch() throws Exception {
@@ -332,7 +339,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       
       // topn() with score sorting
       assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, score desc)"),
-          "SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc))",
+          "SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2))",
+          SecondOrderQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, \"score desc,bibcode asc\")"),
+          "SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2, info=score desc,bibcode asc))",
           SecondOrderQuery.class);
       
       // custom scoring should be possible even with constant scores
