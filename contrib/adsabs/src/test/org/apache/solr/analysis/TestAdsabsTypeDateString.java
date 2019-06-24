@@ -257,7 +257,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
      */
     
     for (int i=1900; i<2025; i++) {
-      assertQ(req("q", "year:1976"), 
+      assertQ(req("q", "year:" + new Integer(i).toString()), 
           "//*[@numFound='1']"
           );
     }
@@ -265,6 +265,21 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     assertQ(req("q", "year:1900-1950"), 
         "//*[@numFound='51']"
         );
-  }
+    
+    assertQ(req("q", "year:[* TO 1950]"), 
+        "//*[@numFound='51']"
+        );
+    assertQ(req("q", "year:-1950"), 
+        "//*[@numFound='51']"
+        );
+    
+    assertQ(req("q", "year:[1900 TO *]"), 
+        "//*[@numFound='125']"
+        );
+    assertQ(req("q", "year:1900-"), 
+        "//*[@numFound='125']"
+        );
+    
+    }
   
 }

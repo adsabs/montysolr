@@ -67,7 +67,7 @@ public class AqpQDATEProcessor extends AqpQProcessorPost {
 			}
 			else {
 				lower = input.substring(0, input.length()-1);
-				upper = "*";
+				upper = "*"; 
 				
 				lower_start = start_point + input.indexOf(lower);
 				lower_end = lower_start + lower.length();
