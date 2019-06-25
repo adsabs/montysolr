@@ -364,6 +364,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
     
     // now the multi-token version
+    setDebug(true);
     assertQueryEquals(req("q", "title:\"modified newtonian dynamics\"", "defType", "aqp"), 
         "(title:\"modified newtonian dynamics\" "
         + "| Synonym(title:syn::acr::mond title:syn::modified newtonian dynamics))", 

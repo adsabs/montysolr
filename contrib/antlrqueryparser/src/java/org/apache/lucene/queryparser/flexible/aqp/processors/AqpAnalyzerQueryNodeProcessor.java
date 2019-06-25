@@ -82,7 +82,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
 
 public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
-  public String TYPE_ATTRIBUTE = "token_type_attribute";
+  public static String TYPE_ATTRIBUTE = "token_type_attribute";
   private Analyzer analyzer;
 
   private boolean positionIncrementsEnabled;

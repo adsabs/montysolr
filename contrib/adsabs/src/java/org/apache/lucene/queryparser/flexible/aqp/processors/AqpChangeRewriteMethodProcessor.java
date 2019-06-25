@@ -16,24 +16,30 @@
  */
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
 import org.apache.lucene.search.MultiTermQuery;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -87,8 +93,58 @@ public class AqpChangeRewriteMethodProcessor extends
         setRewriteMethod(node, method);
       }
     }
+    else if (node instanceof MultiPhraseQueryNode) {
+      if (getConfigVal("aqp.multiphrase.keep_only_synonym", null) != null) {
+        node = simplifyMultiphrase(node);
+      }
+    }
     
     return node;
+  }
+
+  private QueryNode simplifyMultiphrase(QueryNode node) {
+    // will inspect multiphrase children, discover those that fall on the same
+    // position and will only keep one of them (so that we avoid double scoring)
+    List<QueryNode> children = node.getChildren();
+
+    if (children != null) {
+      TreeMap<Integer, List<QueryNode>> positionTermMap = new TreeMap<>();
+
+      for (QueryNode child : children) {
+        FieldQueryNode termNode = (FieldQueryNode) child;
+        
+        List<QueryNode> termList = positionTermMap.get(termNode
+            .getPositionIncrement());
+
+        if (termList == null) {
+          termList = new LinkedList<>();
+          positionTermMap.put(termNode.getPositionIncrement(), termList);
+
+        }
+
+        termList.add(termNode);
+
+      }
+
+      for (int positionIncrement : positionTermMap.keySet()) {
+        List<QueryNode> termList = positionTermMap.get(positionIncrement);
+        if (termList.size() > 1) {
+          LinkedList newList = new LinkedList<>();
+          for (QueryNode n: termList) {
+            String t = (String) n.getTag(AqpAnalyzerQueryNodeProcessor.TYPE_ATTRIBUTE);
+            if (t != null && t.equals("SYNONYM")) {
+              newList.add(n);
+              break;
+            }
+          }
+          if (newList.size() == 0)
+            newList.add(termList.get(0));
+          positionTermMap.put(positionIncrement, newList);
+        }
+      }
+      
+      return node;
+    }
   }
 
   private void setRewriteMethod(QueryNode node, String method) throws QueryNodeException {
