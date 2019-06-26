@@ -2,6 +2,8 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -395,7 +397,11 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			//if (nodeRetrieved > 0) {
 	    	ArrayList<QueryNode> copyOfNodes = new ArrayList<QueryNode>(payload.size());
 	    	for (QueryNode n: payload) {
-	    		copyOfNodes.add(n.cloneTree());
+	    	  QueryNode nClone = n.cloneTree();
+	    	  for (Entry<String, Object> e: n.getTagMap().entrySet()) {
+	    	    nClone.setTag(e.getKey(), e.getValue());
+	    	  }
+	    		copyOfNodes.add(nClone);
 	    	}
 	    	oneQuery.add(copyOfNodes);
 	    //}

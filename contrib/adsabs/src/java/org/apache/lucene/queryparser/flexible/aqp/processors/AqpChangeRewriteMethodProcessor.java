@@ -16,9 +16,11 @@
  */
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.lucene.index.Term;
@@ -47,7 +49,8 @@ import org.apache.solr.request.SolrQueryRequest;
 public class AqpChangeRewriteMethodProcessor extends
   AqpQueryNodeProcessorImpl {
   boolean first = true;
-
+  private Set<String> types = null;
+  
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
     
     if (first && getConfigVal("aqp.classic_scoring.modifier", "") != "") {
@@ -94,15 +97,24 @@ public class AqpChangeRewriteMethodProcessor extends
       }
     }
     else if (node instanceof MultiPhraseQueryNode) {
-      if (getConfigVal("aqp.multiphrase.keep_only_synonym", null) != null) {
-        node = simplifyMultiphrase(node);
+      if (getConfigVal("aqp.multiphrase.keep_one", null) != null) {
+        
+        if (types == null) {
+          types = new HashSet<String>();
+          for (String s: getConfigVal("aqp.multiphrase.keep_one").split(",")) {
+            types.add(s);
+          }
+        }
+        
+        node = simplifyMultiphrase(node, types);
       }
     }
     
     return node;
   }
 
-  private QueryNode simplifyMultiphrase(QueryNode node) {
+  private QueryNode simplifyMultiphrase(QueryNode node, Set<String> typesToKeep) {
+    
     // will inspect multiphrase children, discover those that fall on the same
     // position and will only keep one of them (so that we avoid double scoring)
     List<QueryNode> children = node.getChildren();
@@ -126,25 +138,33 @@ public class AqpChangeRewriteMethodProcessor extends
 
       }
 
+      LinkedList newList = new LinkedList<>();
       for (int positionIncrement : positionTermMap.keySet()) {
         List<QueryNode> termList = positionTermMap.get(positionIncrement);
         if (termList.size() > 1) {
-          LinkedList newList = new LinkedList<>();
+          int added = 0;
           for (QueryNode n: termList) {
             String t = (String) n.getTag(AqpAnalyzerQueryNodeProcessor.TYPE_ATTRIBUTE);
-            if (t != null && t.equals("SYNONYM")) {
+            if (t != null && typesToKeep.contains(t)) {
               newList.add(n);
+              added += 1;
               break;
             }
           }
-          if (newList.size() == 0)
+          if (added == 0)
             newList.add(termList.get(0));
-          positionTermMap.put(positionIncrement, newList);
+        }
+        else {
+          newList.add(termList.get(0));
         }
       }
       
-      return node;
+      // it's guaranteed to be a simple phrase
+      
+      node.set(newList);
+      
     }
+    return node;
   }
 
   private void setRewriteMethod(QueryNode node, String method) throws QueryNodeException {

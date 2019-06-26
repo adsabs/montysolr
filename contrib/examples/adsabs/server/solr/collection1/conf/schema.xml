@@ -469,7 +469,7 @@
 					an acronym but keep the type information (if it is a synonym, it will remain
 					SYNONYM) which is important for the query parsing -->
 				<filter class="solr.AcronymTokenFilterFactory" emitBoth="true"
-					prefix="acr::" />
+					prefix="acr::" setType="ACRONYM"/>
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="false"
@@ -490,7 +490,7 @@
 				<filter class="solr.TrimFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				
-				<!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/>-->
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/>
 			</analyzer>
 			<analyzer type="query">
                 <charFilter class="solr.HTMLStripCharFilterFactory"/>
@@ -556,7 +556,7 @@
 					an acronym but do not change its type, if it was a SYNONYM, it is important
 					information for query parsing -->
 				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
-					prefix="acr::" />
+					prefix="acr::" setType="ACRONYM"/>
 
 				<!-- add a prefix to all synonyms -->
 				<filter class="solr.analysis.ResetFilterFactory"
@@ -633,7 +633,7 @@
           an acronym but do not change its type, if it was a SYNONYM, it is important
           information for query parsing -->
         <filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
-          prefix="acr::" />
+          prefix="acr::" setType="ACRONYM"/>
 
 
         <!-- remove stop words - first the case sensitively -->
