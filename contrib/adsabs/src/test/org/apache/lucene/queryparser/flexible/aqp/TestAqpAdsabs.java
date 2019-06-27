@@ -146,7 +146,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("-2011", null, "date:[\\* TO 2011]");
 		assertQueryEquals("-2009", null, "date:[\\* TO 2009]");
 		assertQueryEquals("2009-", null, "date:[2009 TO \\*]");
-		assertQueryEquals("year:2000-", null, "year:[2000 TO \\*]");
+		assertQueryEquals("year:2000-", null, "year:[2000 TO 2222]");
 		assertQueryEquals("2000-", null, "date:[2000 TO \\*]");
 		
 		// i don't think we should try to guess this as a date
@@ -190,7 +190,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("+a:[this TO that]", null, "a:[this TO that]");
 		assertQueryEquals("+a:[   this TO that   ]", null, "a:[this TO that]");
 		
-		assertQueryEquals("year:[2000 TO *]", null, "year:[2000 TO \\*]");
+		assertQueryEquals("year:[2000 TO *]", null, "year:[2000 TO 2222]");
 		
 	}
 	

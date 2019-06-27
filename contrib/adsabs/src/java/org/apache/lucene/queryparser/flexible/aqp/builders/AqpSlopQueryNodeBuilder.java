@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -57,9 +58,7 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
     if (query instanceof PhraseQuery) {
     	if (defaultValue == 0) {
 	    	int[] pos = ((PhraseQuery) query).getPositions();
-	    	if (pos[pos.length-1] > pos.length) {
-	    		defaultValue = pos[pos.length-1] - pos.length + 1;
-	    	}
+	    	defaultValue = (pos[pos.length-1] - pos[0]) - (pos.length-1);
     	}
     	
     	if (defaultValue <= 1) return query;
@@ -72,22 +71,26 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
     	query = builder.build();
 
     } else {
+      int gap = 0;
+      // examine terms that made the multi-phrase query
+      for (QueryNode child: queryNode.getChildren().get(0).getChildren()) {
+        if (child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE) != null) {
+          gap = (Integer) child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
+          if (gap > defaultValue)
+            defaultValue = gap;
+        }
+      }
+      // fallback
     	if (defaultValue == 0) {
 	    	int[] pos = ((MultiPhraseQuery) query).getPositions();
-	    	if (pos[pos.length-1] > pos.length) {
-	    		defaultValue = pos[pos.length-1] - pos.length + 1;
-	    	}
+	    	defaultValue = (pos[pos.length-1] - pos[0]) - (pos.length-1);
     	}
     	
     	if (defaultValue <= 1) return query;
     	
-      MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder();
+      MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder((MultiPhraseQuery) query);
       builder.setSlop(defaultValue);
-      int[] positions = ((MultiPhraseQuery) query).getPositions();
-      Term[][] terms = ((MultiPhraseQuery) query).getTermArrays();
-      for (int i=0; i < terms.length; i++) {
-        builder.add(terms[i], positions[i]);
-      }
+      
       query = builder.build();
     }
 

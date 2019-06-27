@@ -6,7 +6,6 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpConstantQueryNodeB
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeRegexBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpMultiPhraseQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpNearQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpScoringQueryNodeBuilder;
@@ -91,7 +90,7 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(TermRangeQueryNode.class, new TermRangeQueryNodeBuilder());
 		setBuilder(SlopQueryNode.class, new AqpSlopQueryNodeBuilder());
 		setBuilder(StandardBooleanQueryNode.class, new StandardBooleanQueryNodeBuilder());
-		setBuilder(MultiPhraseQueryNode.class, new AqpMultiPhraseQueryNodeBuilder());
+		setBuilder(MultiPhraseQueryNode.class, new MultiPhraseQueryNodeBuilder());
 		setBuilder(MatchAllDocsQueryNode.class,	new MatchAllDocsQueryNodeBuilder());
 		setBuilder(AqpFunctionQueryNode.class,	new AqpFunctionQueryNodeBuilder());
 		setBuilder(AqpNearQueryNode.class,	new AqpNearQueryNodeBuilder());
