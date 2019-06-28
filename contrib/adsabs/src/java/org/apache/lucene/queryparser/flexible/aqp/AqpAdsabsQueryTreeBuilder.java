@@ -3,6 +3,7 @@ package org.apache.lucene.queryparser.flexible.aqp;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsIdentifierNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpBooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpConstantQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpDisjunctQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeRegexBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryNodeBuilder;
@@ -17,6 +18,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpConstantQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpDisjunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
@@ -97,6 +99,7 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(OpaqueQueryNode.class,	new IgnoreQueryNodeBuilder());
 		setBuilder(AqpConstantQueryNode.class, new AqpConstantQueryNodeBuilder(this));
 		setBuilder(AqpAdsabsScoringQueryNode.class, new AqpScoringQueryNodeBuilder());
+		setBuilder(AqpDisjunctionQueryNode.class, new AqpDisjunctQueryNodeBuilder());
 		
 	}
 

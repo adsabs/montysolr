@@ -279,6 +279,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         // the unfielded search should be exapnded with the phrase "x r s t"
         // and "r s t" should be properly analyzed into: "x rst" OR "x r s t"
         assertQueryEquals(req("defType", "aqp",
+            "q", "r s t",
+            "aqp.unfielded.tokens.strategy", "disjuncts",
+            "aqp.unfielded.tokens.new.type", "simple",
+            "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
+            "qf", "title^0.9 keyword^0.7"),
+            "((+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) "
+            + "| (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t)))^0.9))",
+            DisjunctionMaxQuery.class);
+        assertQueryEquals(req("defType", "aqp",
                 "q", "r s t",
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
