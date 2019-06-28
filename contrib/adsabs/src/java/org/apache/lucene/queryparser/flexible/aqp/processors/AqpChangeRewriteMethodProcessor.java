@@ -16,24 +16,32 @@
  */
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
+import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
 import org.apache.lucene.search.MultiTermQuery;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -41,7 +49,8 @@ import org.apache.solr.request.SolrQueryRequest;
 public class AqpChangeRewriteMethodProcessor extends
   AqpQueryNodeProcessorImpl {
   boolean first = true;
-
+  private Set<String> types = null;
+  
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
     
     if (first && getConfigVal("aqp.classic_scoring.modifier", "") != "") {
@@ -87,7 +96,74 @@ public class AqpChangeRewriteMethodProcessor extends
         setRewriteMethod(node, method);
       }
     }
+    else if (node instanceof MultiPhraseQueryNode) {
+      if (getConfigVal("aqp.multiphrase.keep_one", null) != null) {
+        
+        if (types == null) {
+          types = new HashSet<String>();
+          for (String s: getConfigVal("aqp.multiphrase.keep_one").split(",")) {
+            types.add(s);
+          }
+        }
+        
+        node = simplifyMultiphrase(node, types);
+      }
+    }
     
+    return node;
+  }
+
+  private QueryNode simplifyMultiphrase(QueryNode node, Set<String> typesToKeep) {
+    
+    // will inspect multiphrase children, discover those that fall on the same
+    // position and will only keep one of them (so that we avoid double scoring)
+    List<QueryNode> children = node.getChildren();
+
+    if (children != null) {
+      TreeMap<Integer, List<QueryNode>> positionTermMap = new TreeMap<>();
+
+      for (QueryNode child : children) {
+        FieldQueryNode termNode = (FieldQueryNode) child;
+        
+        List<QueryNode> termList = positionTermMap.get(termNode
+            .getPositionIncrement());
+
+        if (termList == null) {
+          termList = new LinkedList<>();
+          positionTermMap.put(termNode.getPositionIncrement(), termList);
+
+        }
+
+        termList.add(termNode);
+
+      }
+
+      LinkedList newList = new LinkedList<>();
+      for (int positionIncrement : positionTermMap.keySet()) {
+        List<QueryNode> termList = positionTermMap.get(positionIncrement);
+        if (termList.size() > 1) {
+          int added = 0;
+          for (QueryNode n: termList) {
+            String t = (String) n.getTag(AqpAnalyzerQueryNodeProcessor.TYPE_ATTRIBUTE);
+            if (t != null && typesToKeep.contains(t)) {
+              newList.add(n);
+              added += 1;
+              break;
+            }
+          }
+          if (added == 0)
+            newList.add(termList.get(0));
+        }
+        else {
+          newList.add(termList.get(0));
+        }
+      }
+      
+      // it's guaranteed to be a simple phrase
+      
+      node.set(newList);
+      
+    }
     return node;
   }
 

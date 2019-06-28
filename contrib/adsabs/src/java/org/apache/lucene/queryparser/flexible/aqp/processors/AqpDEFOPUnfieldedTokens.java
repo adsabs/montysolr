@@ -11,6 +11,7 @@ import java.util.Set;
 import org.antlr.runtime.CharStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpDisjunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpImmutableGroupQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpWhiteSpacedQueryNode;
@@ -287,6 +288,19 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 			AqpOrQueryNode orNode = new AqpOrQueryNode(orClauses);
 			newChildren.add(orNode);
 		}
+		else if (operationMode.equals("disjuncts")) {
+		  // the same as above, but the score will be only the maximum of one of the branches
+		  AqpWhiteSpacedQueryNode normalNode = (AqpWhiteSpacedQueryNode) createReplacementNode(newGroup, "simple");
+      AqpWhiteSpacedQueryNode phraseNode = normalNode.cloneTree();
+      
+      phraseNode.setValue("\"" + phraseNode.getValue() + "\"");
+      
+      ArrayList<QueryNode> orClauses = new ArrayList<QueryNode>();
+      orClauses.add(normalNode);
+      orClauses.add(phraseNode);
+      AqpDisjunctionQueryNode disjNode = new AqpDisjunctionQueryNode(orClauses, getDisjunctTieBreaker());
+      newChildren.add(disjNode);
+		}
 		else {
 			throw new ParseException(new MessageImpl("Unknown strategy: " + operationMode));
 		}
@@ -463,6 +477,13 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 		  return "tag";
 		return (String) obj;
 	}
+	
+	private Float getDisjunctTieBreaker() {
+    Object obj = _getConfigVal("aqp.unfielded.tokens.tiebreaker");
+    if (obj == null)
+      return 0.0f;
+    return (Float) obj;
+  }
 	
 	private Set<String> aqpIgnorableFields = null;
 	private Set<String> getIgnoredFields() {

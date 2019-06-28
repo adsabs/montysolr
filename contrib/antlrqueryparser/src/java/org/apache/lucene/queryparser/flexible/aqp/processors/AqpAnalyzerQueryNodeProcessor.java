@@ -82,7 +82,9 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
 
 public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
-  public String TYPE_ATTRIBUTE = "token_type_attribute";
+  public static String TYPE_ATTRIBUTE = "token_type_attribute";
+  public static String MAX_MULTI_TOKEN_SIZE = "max_multi_token";
+  
   private Analyzer analyzer;
 
   private boolean positionIncrementsEnabled;
@@ -151,6 +153,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
           typeAtt = buffer.getAttribute(TypeAttribute.class);
         }
   
+        CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
+        int maxMultiTokenSynonymSize = 0;
         
         while (buffer.incrementToken()) {
           numTokens++;
@@ -161,6 +165,17 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
   
           } else {
             severalTokensAtSamePosition = true;
+            
+            if (buffer.hasAttribute(CharTermAttribute.class)) {
+              int x = 0;
+              for (int i=0; i<termAtt.length(); i++) {
+                if (termAtt.charAt(i) == ' ')
+                  x += 1;
+              }
+              
+              if (x > maxMultiTokenSynonymSize)
+                maxMultiTokenSynonymSize = x;
+            }
           }
   
         }
@@ -178,7 +193,6 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
           return new NoTokenFoundQueryNode();
         }
   
-        CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
   
         int offsetStart = -1;
         int offsetEnd = -1;
@@ -239,6 +253,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                   offsetEnd);
               if (typeAtt != null)
                 fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+              if (maxMultiTokenSynonymSize > 0)
+                fq.setTag(MAX_MULTI_TOKEN_SIZE, maxMultiTokenSynonymSize+1);
               children.add(fq);
   
             }
@@ -301,6 +317,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
               FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
                   offsetEnd);
               fq.setTag(TYPE_ATTRIBUTE, tokenType);
+              if (maxMultiTokenSynonymSize > 0)
+                fq.setTag(MAX_MULTI_TOKEN_SIZE, maxMultiTokenSynonymSize+1);
               multiTerms.add(fq);
   
             }
@@ -355,6 +373,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                 offsetStart, offsetEnd);
             if (typeAtt != null)
               newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+            if (maxMultiTokenSynonymSize > 0)
+              newFieldNode.setTag(MAX_MULTI_TOKEN_SIZE, maxMultiTokenSynonymSize+1);
   
             if (this.positionIncrementsEnabled) {
               position += positionIncrement;
