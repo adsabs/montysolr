@@ -3,6 +3,8 @@ package org.apache.solr.search;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
@@ -29,7 +31,10 @@ import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.FixedBitSet;
+import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.util.RefCounted;
 import org.junit.BeforeClass;
 
@@ -1110,6 +1115,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       assertU(addDocs("id", "0", "bibcode", "b0"));
       assertU(addDocs("id", "1", "bibcode", "b1"));
       assertU(addDocs("id", "2", "bibcode", "b2"));
+      assertU(commit("waitSearcher", "true"));
       assertU(addDocs("id", "3", "bibcode", "b3"));
       assertU(addDocs("id", "4", "bibcode", "b4"));
       assertU(addDocs("id", "5", "bibcode", "b5"));
@@ -1172,6 +1178,43 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "//*[@numFound='1']",
           "//doc/str[@name='id'][.='1']"
           );
+      
+      // sending bibcodes as a stream
+      List<ContentStream> streams = new ArrayList<ContentStream>(1);
+      ContentStreamBase cs = new ContentStreamBase.StringStream("bibcode\nb0\nb1\nb3");
+      cs.setName("fq_foo");
+      cs.setContentType("big-query/csv");
+      streams.add(cs);
+      
+      cs = new ContentStreamBase.StringStream("bibcode\nb0\nb2\nb4");
+      cs.setName("fq_bar");
+      cs.setContentType("big-query/csv");
+      streams.add(cs);
+      
+      
+      SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) OR docs(fq_bar)) AND bibcode:b4");
+      req.setContentStreams(streams);
+      
+      assertQ(req,
+          "//*[@numFound='1']",
+          "//doc/str[@name='bibcode'][.='b4']"
+      );
+      
+      
+      req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) AND docs(fq_bar)) AND bibcode:b4");
+      req.setContentStreams(streams);
+      assertQ(req,
+          "//*[@numFound='0']"
+      );
+      
+      req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) AND docs(fq_bar)) OR bibcode:b4");
+      req.setContentStreams(streams);
+      assertQ(req,
+          "//*[@numFound='2']",
+          "//doc/str[@name='bibcode'][.='b0']",
+          "//doc/str[@name='bibcode'][.='b4']"
+      );
+      
     }
     
     public void testCustomScoring() throws Exception {

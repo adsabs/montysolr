@@ -43,7 +43,7 @@ public class BasedBitSetIterator extends DocIdSetIterator {
 
   @Override
   public int advance(int target) {
-    if (target+base >= upperBound) {
+    if (target == NO_MORE_DOCS || target+base >= upperBound) {
       return doc = NO_MORE_DOCS;
     }
     doc = bits.nextSetBit(target+base);
