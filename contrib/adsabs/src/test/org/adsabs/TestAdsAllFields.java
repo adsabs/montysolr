@@ -708,7 +708,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "bibgroup:CFA"), "//*[@numFound='1']");
 		assertQ(req("q", "bibgroup:cf*"), "//*[@numFound='1']");
 		assertQ(req("q", "bibgroup:CF*"), "//*[@numFound='1']");
-		assertQ(req("q", "bibgroup:?FA"), "//*[@numFound='1']");
+		assertQ(req("q", "bibgroup:?FA", "qt", "/query", "aqp.allow.leading_wildcard", "true"), 
+		    "//*[@numFound='1']");
 
 		// facets are case sensitive and  you must get the exact wording
 		// TODO: shall we be consistent and turn *everything* to lowercase?
@@ -1332,10 +1333,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		// test we can search for all docs that have certain field
-		assertQ(req("q", "reference:*"),
+		assertQ(req("q", "reference:*", "qt", "/query", "aqp.allow.leading_wildcard", "true"),
 				"//doc[1]/int[@name='recid'][.='100']"
 		);
-		assertQ(req("q", "id:?"), // but works only for text fields
+		assertQ(req("q", "id:?", "qt", "/query", "aqp.allow.leading_wildcard", "true"), // but works only for text fields
 				"//*[@numFound='8']"
 		);
 

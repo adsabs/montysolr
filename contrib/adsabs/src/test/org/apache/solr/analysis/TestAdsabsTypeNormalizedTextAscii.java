@@ -116,10 +116,10 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
       assertQ(req("q", f + ":\"fivejets\""), "//*[@numFound='0']");
       assertQ(req("q", f + ":\"onejets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='6']");
       assertQ(req("q", f + ":\"one-jets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='6']");
-      assertQ(req("q", f + ":\"*jets\""), "//*[@numFound='2']", "//doc[1]/str[@name='id'][.='6']"); // curiously also finds 'jets' (id 5.)
+      assertQ(req("q", f + ":\"*jets\"", "qt", "/query", "aqp.allow.leading_wildcard", "true"), "//*[@numFound='2']", "//doc[1]/str[@name='id'][.='6']"); // curiously also finds 'jets' (id 5.)
       assertQ(req("q", f + ":\"jets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='9']");
       assertQ(req("q", f + ":\"jets*\""), "//*[@numFound='2']", "//doc[1]/str[@name='id'][.='7']"); // also 'jets' (id 5.)
-      assertQ(req("q", f + ":\"*jets*\""), "//*[@numFound='4']");
+      assertQ(req("q", f + ":\"*jets*\"", "qt", "/query", "aqp.allow.leading_wildcard", "true"), "//*[@numFound='4']");
       
       // find only 'jets' (where the word stood alone)
       assertQ(req("q", f + ":\"jets\""), "//*[@numFound='1']", "//doc[1]/str[@name='id'][.='9']");

@@ -318,6 +318,7 @@
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>
+       <str name="aqp.allow.leading_wildcard">false</str>
      </lst>
      <arr name="last-components">
       <str>wordcloud</str>
@@ -339,6 +340,7 @@
      </lst>
     <lst name="invariants">
        <str name="echoParams">explicit</str>
+       <str name="aqp.allow.leading_wildcard">false</str>
     </lst>
     <arr name="last-components">
       <str>tvComponent</str>
@@ -356,6 +358,7 @@
 		</lst>
 		<lst name="invariants">
 	       <str name="echoParams">explicit</str>
+	       <str name="aqp.allow.leading_wildcard">false</str>
 	     </lst>
 	</requestHandler> 
 
@@ -381,6 +384,8 @@
        <str name="aqp.unfielded.ignore.fields">entdate pubdate year</str>
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
+       <str name="aqp.allow.leading_wildcard">true</str>
+       
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>
