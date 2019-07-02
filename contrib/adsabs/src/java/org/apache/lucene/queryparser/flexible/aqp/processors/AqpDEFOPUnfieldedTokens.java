@@ -482,7 +482,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
     Object obj = _getConfigVal("aqp.unfielded.tokens.tiebreaker");
     if (obj == null)
       return 0.0f;
-    return (Float) obj;
+    return Float.valueOf((String) obj);
   }
 	
 	private Set<String> aqpIgnorableFields = null;
