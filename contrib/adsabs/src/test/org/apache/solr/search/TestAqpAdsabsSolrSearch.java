@@ -979,11 +979,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // search for all docs with a field
         assertQueryEquals(req("defType", "aqp", "q", "title:*", 
-            "qt", "/query", "aqp.allow.leading_wildcard", "true"),
+            "aqp.allow.leading_wildcard", "true"),
                 "title:*",
                 PrefixQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "title:?",
-            "qt", "/query"),
+            "aqp.allow.leading_wildcard", "true"),
                 "title:?",
                 WildcardQuery.class);
 

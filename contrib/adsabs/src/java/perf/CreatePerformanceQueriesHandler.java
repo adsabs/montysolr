@@ -359,6 +359,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 		SolrParams oldParams = req.getParams();
 		ModifiableSolrParams newParams = new ModifiableSolrParams(oldParams);
 		newParams.set(CommonParams.DF, fieldName);
+		newParams.set("aqp.allow.leading_wildcard", "true");
 		req.setParams(newParams);
 		
 		String defType = req.getParams().get(QueryParsing.DEFTYPE, QParserPlugin.DEFAULT_QTYPE);
