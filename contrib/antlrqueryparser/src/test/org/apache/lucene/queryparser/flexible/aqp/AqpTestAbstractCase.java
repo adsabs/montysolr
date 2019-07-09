@@ -168,6 +168,22 @@ public class AqpTestAbstractCase extends LuceneTestCase {
   }
 
   public void assertQueryEqualsAllowLeadingWildcard(String query, Analyzer a,
+      String result, Class<?> clazz) throws Exception {
+    Query q = getQueryAllowLeadingWildcard(query, a);
+    String s = q.toString("field");
+    if (!s.equals(result)) {
+      fail("Query /" + query + "/ yielded /" + s + "/, expecting /" + result
+          + "/");
+    }
+    if (clazz != null) {
+      if (!q.getClass().isAssignableFrom(clazz)) {
+        debugFail(q.toString(), result,
+            "Query is not: " + clazz + " but: " + q.getClass());
+      }      
+    }
+  }
+  
+  public void assertQueryEqualsAllowLeadingWildcard(String query, Analyzer a,
       String result) throws Exception {
     Query q = getQueryAllowLeadingWildcard(query, a);
     String s = q.toString("field");

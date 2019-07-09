@@ -965,7 +965,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='11']"
         );
 
-    assertQ(req("q", "title" + ":*sky"), "//*[@numFound='4']", 
+    assertQ(req("qt", "/query",
+        "aqp.allow.leading_wildcard", "true",
+        "q", "title" + ":*sky"), "//*[@numFound='4']", 
         "//doc/str[@name='id'][.='10']",
         "//doc/str[@name='id'][.='11']",
         "//doc/str[@name='id'][.='12']",

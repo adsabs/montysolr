@@ -77,7 +77,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 		set(ConfigurationKeys.DEFAULT_DATE_RANGE_FIELD, "date");
 		set(ConfigurationKeys.DEFAULT_IDENTIFIER_FIELD, "identifier");
 		
-		set(StandardQueryConfigHandler.ConfigurationKeys.ALLOW_LEADING_WILDCARD, true);
+		set(StandardQueryConfigHandler.ConfigurationKeys.ALLOW_LEADING_WILDCARD, false);
 		
 		
 		

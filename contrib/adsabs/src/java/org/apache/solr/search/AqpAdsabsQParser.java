@@ -244,6 +244,11 @@ public class AqpAdsabsQParser extends QParser {
 		
 		config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS).putAll(defaultConfig.virtualFields);
 		
+		if (params.get("aqp.allow.leading_wildcard", null) != null) {
+		  config.set(StandardQueryConfigHandler.ConfigurationKeys.ALLOW_LEADING_WILDCARD, 
+		      params.getBool("aqp.allow.leading_wildcard", false));
+		}
+		
 	}
 	
 

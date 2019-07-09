@@ -311,9 +311,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
 		
 		assertQueryEquals("te*t", null, "te*t", WildcardQuery.class);
-		assertQueryEquals("*te*t", null, "*te*t", WildcardQuery.class);
-		assertQueryEquals("*te*t*", null, "*te*t*", WildcardQuery.class);
-		assertQueryEquals("?te*t?", null, "?te*t?", WildcardQuery.class);
+		assertQueryEqualsAllowLeadingWildcard("*te*t", null, "*te*t");
+		assertQueryEqualsAllowLeadingWildcard("*te*t*", null, "*te*t*");
+		assertQueryEqualsAllowLeadingWildcard("?te*t?", null, "?te*t?");
 		assertQueryEquals("te?t", null, "te?t", WildcardQuery.class);
 		assertQueryEquals("te??t", null, "te??t", WildcardQuery.class);
 		
@@ -328,9 +328,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("\"te*t phrase\"", null, "te*t phrase", WildcardQuery.class);
 		assertQueryEquals("\"test* phrase\"", null, "test* phrase", WildcardQuery.class);
 		assertQueryEquals("\"te*t phrase\"", null, "te*t phrase", WildcardQuery.class);
-		assertQueryEquals("\"*te*t phrase\"", null, "*te*t phrase", WildcardQuery.class);
-		assertQueryEquals("\"*te*t* phrase\"", null, "*te*t* phrase", WildcardQuery.class);
-		assertQueryEquals("\"?te*t? phrase\"", null, "?te*t? phrase", WildcardQuery.class);
+		assertQueryEqualsAllowLeadingWildcard("\"*te*t phrase\"", null, "*te*t phrase");
+		assertQueryEqualsAllowLeadingWildcard("\"*te*t* phrase\"", null, "*te*t* phrase");
+		assertQueryEqualsAllowLeadingWildcard("\"?te*t? phrase\"", null, "?te*t? phrase");
 		assertQueryEquals("\"te?t phrase\"", null, "te?t phrase", WildcardQuery.class);
 		assertQueryEquals("\"te??t phrase\"", null, "te??t phrase", WildcardQuery.class);
 		assertQueryEquals("\"te*?t phrase\"", null, "te*?t phrase", WildcardQuery.class);
@@ -339,7 +339,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("*", null, "*:*", MatchAllDocsQuery.class);
 		assertQueryEquals("*:*", null, "*:*", MatchAllDocsQuery.class);
 		
-		assertQueryEquals("?", null, "?", WildcardQuery.class);
+		assertQueryEqualsAllowLeadingWildcard("?", null, "?");
 		
 		
 		// XXX: in fact, in the WildcardQuery, even escaped start \* will become *
@@ -347,14 +347,14 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// character, to have it differently, WildcardTermEnum class would have 
 		// to think of skipping \* and \?
 		
-		q = assertQueryEquals("*t\\*a", null, "*t*a", WildcardQuery.class); 
+		assertQueryEqualsAllowLeadingWildcard("*t\\*a", null, "*t*a"); 
 		
-		assertQueryEquals("*t*a\\*", null, "*t*a*", WildcardQuery.class);
-		assertQueryEquals("*t*a\\?", null, "*t*a?", WildcardQuery.class);
-		assertQueryEquals("*t*\\a", null, "*t*a", WildcardQuery.class);
+		assertQueryEqualsAllowLeadingWildcard("*t*a\\*", null, "*t*a*");
+		assertQueryEqualsAllowLeadingWildcard("*t*a\\?", null, "*t*a?");
+		assertQueryEqualsAllowLeadingWildcard("*t*\\a", null, "*t*a");
 		
-		assertQueryEquals("title:*", null, "title:*", PrefixQuery.class);
-		assertQueryEquals("doi:*", null, "doi:*", PrefixQuery.class);
+		assertQueryEqualsAllowLeadingWildcard("title:*", null, "title:*", PrefixQuery.class);
+		assertQueryEqualsAllowLeadingWildcard("doi:*", null, "doi:*", PrefixQuery.class);
 		
 	}
 	
@@ -379,7 +379,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		KeywordAnalyzer kwa = new KeywordAnalyzer();
 		assertQueryEquals("keyword:\"planets and satellites\"", wsa, "keyword:\"planets and satellites\"", PhraseQuery.class);
 		
-		assertQueryEquals("full:*", null, "full:*", PrefixQuery.class);
+		assertQueryEqualsAllowLeadingWildcard("full:*", null, "full:*", PrefixQuery.class);
 		
 		assertQueryEquals("weak lensing", null, "+weak +lensing");
 		assertQueryEquals("+contact +binaries -eclipsing", null, "+contact +binaries -eclipsing");
