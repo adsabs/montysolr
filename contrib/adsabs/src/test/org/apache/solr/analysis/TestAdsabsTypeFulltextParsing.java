@@ -114,15 +114,35 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 		        new String[] {MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
 		      MontySolrSetup.getSolrHome() + "/example/solr/collection1"
 		    });
-				
+		
+		System.setProperty("solr.directoryFactory","solr.StandardDirectoryFactory");
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
 		schemaString = getSchemaFile();
 
 		
-		configString = MontySolrSetup.getMontySolrHome()
-			    + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
+		configString = getConfigFile();
 		
 		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+	}
+	
+	public static String getConfigFile() {
+	  String configFile = MontySolrSetup.getMontySolrHome()
+        + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
+
+    File newConfig;
+    try {
+
+      newConfig = duplicateFile(new File(configFile));
+      
+      replaceInFile(newConfig, "solr.SchemaCodecFactory", "solr.SimpleTextCodecFactory");
+      
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new IllegalStateException(e.getMessage());
+    }
+
+    return newConfig.getAbsolutePath();
+	  
 	}
 	
   public static String getSchemaFile() {
@@ -170,13 +190,20 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           "bubble\0pace\0telescope,BPT\n" +
           "GBT,Green\0bank\0telescope\n" +
           "gamma\0ray,gammaray,gamma\0rays,gammarays\n" +
-          "black\0hole,BH"
+          "black\0hole,BH\n" +
+          // this is from ads synonyms
+//          "ADS,aitken\0double\0stars\n" + 
+//          "ADS,astrophysics\0data\0system\n" + 
+//          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime\n" +
+//          "ADS,astrophysics\0data\0system\n" +
+          
+          "ADS,aitken\0double\0stars,astrophysics\0data\0system,anti\0de\0sitter\0space,antidesitter\0spacetime\n"
           
       });
       
       replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiTokenSynonymsFile.getAbsolutePath() + "\"");
       replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + simpleTokenSynonymsFile.getAbsolutePath() + "\"");
-
+      
     } catch (IOException e) {
       e.printStackTrace();
       throw new IllegalStateException(e.getMessage());
@@ -229,8 +256,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "402", "bibcode", "xxxxxxxxxx402", "title", "A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$ ray Sources for Radio Millisecond Pulsars"));
     assertU(adoc("id", "403", "bibcode", "xxxxxxxxxx403", "title", "A 350-MHz GBT Survey of 50 Faint Fermi γ ray Sources for Radio Millisecond Pulsars"));
     
-    assertU(adoc("id", "500", "bibcode", "xxxxxxxxxx500", "title", "Observations of a BH event horizon"));
-    assertU(adoc("id", "501", "bibcode", "xxxxxxxxxx501", "title", "Observations of a black hole event horizon"));
+    assertU(adoc("id", "500", "bibcode", "xxxxxxxxxx500", "title", "Observations of a BH event horizon",
+        "keyword", "one ADS two"));
+    assertU(adoc("id", "501", "bibcode", "xxxxxxxxxx501", "title", "Observations of a black hole event horizon",
+        "keyword", "one Astrophysics Data System two"));
     
     assertU(commit());
   }
