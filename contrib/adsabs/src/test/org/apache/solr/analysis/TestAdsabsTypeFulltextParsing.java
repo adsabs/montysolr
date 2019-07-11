@@ -192,12 +192,13 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           "gamma\0ray,gammaray,gamma\0rays,gammarays\n" +
           "black\0hole,BH\n" +
           // this is from ads synonyms
-//          "ADS,aitken\0double\0stars\n" + 
-//          "ADS,astrophysics\0data\0system\n" + 
-//          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime\n" +
-//          "ADS,astrophysics\0data\0system\n" +
+          "ADS,aitken\0double\0stars\n" + 
+          "ADS,astrophysics\0data\0system\n" + 
+          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime\n" +
+          "ADS,astrophysics\0data\0system\n"
           
-          "ADS,aitken\0double\0stars,astrophysics\0data\0system,anti\0de\0sitter\0space,antidesitter\0spacetime\n"
+          // and this is how it would be if it was one line
+          //"ADS,aitken\0double\0stars,astrophysics\0data\0system,anti\0de\0sitter\0space,antidesitter\0spacetime\n"
           
       });
       
@@ -294,7 +295,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "title:\"black hole\"",
         "aqp.multiphrase.keep_one", "SYNONYM"),
-        "(title:\"black hole\" | Synonym(title:acr::bh title:syn::black hole))",
+        "(title:\"black hole\" | Synonym(title:acr::bh title:syn::bh title:syn::black hole))",
         DisjunctionMaxQuery.class);
     assertQ(req("q", "title:\"black hole\"", "aqp.multiphrase.keep_one", "SYNONYM"), 
         "//*[@numFound='2']",
@@ -314,7 +315,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // default (just to show the difference in treatment)
     assertQueryEquals(req("q", "title:\"observations black hole\""),
-        "(title:\"observations black hole\" | title:\"observations (syn::black hole acr::bh)\"~2)",
+        "(title:\"observations black hole\" | title:\"observations (syn::black hole syn::bh acr::bh)\"~2)",
         DisjunctionMaxQuery.class);
     
     // btw our analyzer chain outputs all multi synonyms during indexing (but only canonical synonym for single ones)
@@ -354,7 +355,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
     assertQueryEquals(req("q", "title:\"BH\"",
         "aqp.multiphrase.keep_one", "SYNONYM"),
-        "Synonym(title:acr::bh title:syn::black hole)",
+        "Synonym(title:acr::bh title:bh title:syn::bh title:syn::black hole)",
         SynonymQuery.class);
     assertQ(req("q", "title:\"BH\"", "aqp.multiphrase.keep_one", "SYNONYM"), 
         "//*[@numFound='2']",
@@ -364,7 +365,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "title:\"observations BH\"",
         "aqp.multiphrase.keep_one", "SYNONYM"),
-        "title:\"observations syn::black hole\"~2",
+        "title:\"observations syn::bh\"~2",
         MultiPhraseQuery.class);
     assertQ(req("q", "title:\"observations BH\"", "aqp.multiphrase.keep_one", "SYNONYM"), 
         "//*[@numFound='2']",
@@ -373,7 +374,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
     
     assertQueryEquals(req("q", "title:\"BH event\""),
-        "title:\"(acr::bh syn::black hole) event\"~2",
+        "title:\"(bh acr::bh syn::black hole syn::bh) event\"~2",
         MultiPhraseQuery.class);
     assertQ(req("q", "title:\"BH event\"", "aqp.multiphrase.keep_one", "SYNONYM"), 
         "//*[@numFound='2']",
@@ -383,7 +384,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "title:\"observations BH event\"",
         "aqp.multiphrase.keep_one", "SYNONYM"),
-        "title:\"observations syn::black hole event\"~2",
+        "title:\"observations syn::bh event\"~2",
         MultiPhraseQuery.class);
     assertQ(req("q", "title:\"BH\"", "aqp.multiphrase.keep_one", "SYNONYM"), 
         "//*[@numFound='2']",
@@ -420,8 +421,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQueryEquals(req("q", "title:\"bubble pace telescope multi-pace foobar\"", "defType", "aqp"), 
         "(title:\"bubble (pace syn::lunar) telescope multi (pace syn::lunar) foobar\"~3 "
         + "| title:\"bubble (pace syn::lunar) telescope ? multipace foobar\"~3 "
-        + "| title:\"(syn::bubble pace telescope acr::bpt) ? ? multi (pace syn::lunar) foobar\"~3 "
-        + "| title:\"(syn::bubble pace telescope acr::bpt) ? ? ? multipace foobar\"~3)",
+        + "| title:\"(syn::bubble pace telescope syn::bpt acr::bpt) ? ? multi (pace syn::lunar) foobar\"~3 "
+        + "| title:\"(syn::bubble pace telescope syn::bpt acr::bpt) ? ? ? multipace foobar\"~3)",
         DisjunctionMaxQuery.class);
     assertQ(req("q", "title" + ":\"bubble pace telescope multi-pace foobar\""), "//*[@numFound='1']",
         "//doc/str[@name='id'][.='17']");
@@ -431,8 +432,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     //    DisjunctionMaxQuery.class);
     
     // UPPER-CASE vs lower-case
-    assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp", "df", "title"),
-        	"((+title:acr::nag5 +title:acr::abcd) | title:acr::nag5abcd)",
+    assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp", "df", "title", "fl", "id,title"),
+        	"((+Synonym(title:acr::nag5 title:nag5) +Synonym(title:abcd title:acr::abcd)) | Synonym(title:acr::nag5abcd title:nag5abcd))",
         	DisjunctionMaxQuery.class);
     assertQ(req("q", "NAG5-ABCD", "df", "title"), 
     		"//*[@numFound='3']",
@@ -640,7 +641,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='18']"
         );
     
- // make sure the unfielded search is expanded properly (by edismax) - we use it just here
+    // make sure the unfielded search is expanded properly (by edismax) - we use it just here
     // HOWEVER: maybe it should do expansion inside each clause? now it favors docs with matches in all fields (which is fine)
     assertQueryEquals(req("q", "hubble space telescope", "defType", "aqp", "qf", "title^2.0 keyword^1.5"), 
         "(((title:hubble title:syn::hubble space telescope title:acr::hst title:space title:telescope)^2.0) " +
@@ -656,7 +657,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     		"//doc/str[@name='id'][.='4']"
         );
     
- // surrounded by stop words
+    // surrounded by stop words
     assertQueryEquals(req("q", "title:(mirrors of the hubble space telescope the goes home)", "defType", "aqp"), 
         //"spanNear([all:mirrors, all:hubble, all:space, all:telescope, all:goes, all:home], 5, true)" +
         //" spanNear([all:mirrors, spanOr([all:syn::hubble space telescope, all:acr::hst]), all:goes, all:home], 5, true)",
@@ -695,7 +696,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     		"//doc/str[@name='id'][.='4']"
         );
     
- // different modifier (synonym must not be found)
+    // different modifier (synonym must not be found)
     assertQueryEquals(req("q", "hubble space -telescope", "defType", "aqp"), 
         "+(all:hubble all:space) -all:telescope", BooleanQuery.class);
     
@@ -743,8 +744,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // simple case
     assertQueryEquals(req("q", "title:\"hubble space telescope\"", "defType", "aqp"), 
-        "(title:\"hubble space telescope\" | Synonym(title:acr::hst title:syn::hubble space telescope))", 
+        "(title:\"hubble space telescope\" | Synonym(title:acr::hst title:syn::hst title:syn::hubble space telescope))", 
         DisjunctionMaxQuery.class);
+    
     assertQ(req("q", "title:\"hubble space telescope\""), 
     		"//*[@numFound='2']",
     		"//doc/str[@name='id'][.='4']",
@@ -754,7 +756,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // preceded by something
     // TODO: remove 'title:' after #147 is solved
     assertQueryEquals(req("q", "title:\"mirrors of the hubble space telescope\"", "defType", "aqp"), 
-        "(title:\"mirrors hubble space telescope\" | title:\"mirrors (syn::hubble space telescope acr::hst)\"~3)", 
+        "(title:\"mirrors hubble space telescope\" | title:\"mirrors (syn::hubble space telescope syn::hst acr::hst)\"~3)", 
         DisjunctionMaxQuery.class);
     
     assertQ(req("q", "title:\"mirrors hubble space telescope\""), 
@@ -774,7 +776,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // query followed by something
     assertQueryEquals(req("q", "title:\"hubble space telescope goes home\"", "defType", "aqp"), 
         "(title:\"hubble space telescope goes home\"" +
-        " | title:\"(syn::hubble space telescope acr::hst) ? ? goes home\"~3)", 
+        " | title:\"(syn::hubble space telescope syn::hst acr::hst) ? ? goes home\"~3)", 
         DisjunctionMaxQuery.class);
     assertQ(req("q", "title:\"hubble space telescope goes home\""), 
     		"//*[@numFound='1']",
@@ -787,7 +789,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // surrounded by something
     assertQueryEquals(req("q", "title:\"mirrors of the hubble space telescope goes home\"", "defType", "aqp"), 
         "(title:\"mirrors hubble space telescope goes home\"" +
-        " | title:\"mirrors (syn::hubble space telescope acr::hst) ? ? goes home\"~3)", 
+        " | title:\"mirrors (syn::hubble space telescope syn::hst acr::hst) ? ? goes home\"~3)", 
         DisjunctionMaxQuery.class);
     assertQ(req("q", "title:\"mirrors of the hubble space telescope goes home\""), 
     		"//*[@numFound='1']",
@@ -802,12 +804,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      * Synonym expansion 1token->many
      */
     assertQueryEquals(req("q", "title:HST", "defType", "aqp"), 
-        "Synonym(title:acr::hst title:syn::hubble space telescope)", 
+        "Synonym(title:acr::hst title:hst title:syn::hst title:syn::hubble space telescope)", 
         SynonymQuery.class);
+    assertQ(req("q", "title:HST"), 
+        "//*[@numFound='2']",
+        "//doc/str[@name='id'][.='4']",
+        "//doc/str[@name='id'][.='5']");
     
     
     assertQueryEquals(req("q", "HST goes home", "defType", "aqp"), 
-        "+Synonym(all:acr::hst all:syn::hubble space telescope) +all:goes +all:home",
+        "+Synonym(all:acr::hst all:syn::hst all:syn::hubble space telescope) +all:goes +all:home",
         BooleanQuery.class);
 
     
@@ -816,19 +822,19 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      */
     
     assertQueryEquals(req("q", "\"Massachusets Institute of Technology\"", "defType", "aqp"), 
-    		"Synonym(all:acr::mit all:syn::massachusets institute of technology)",
+    		"Synonym(all:acr::mit all:syn::mit all:syn::massachusets institute of technology)",
     		SynonymQuery.class);
     assertQueryEquals(req("q", "\"massachusets institute of technology\"", "defType", "aqp"), 
-    		"Synonym(all:acr::mit all:syn::massachusets institute of technology)", 
+    		"Synonym(all:acr::mit all:syn::mit all:syn::massachusets institute of technology)", 
         SynonymQuery.class);
     
     //TODO: this doesn't work because stop filter is at the end of the chain, move it up?
-//    assertQueryEquals(req("q", "\"Massachusets Institute of the Technology\"", "defType", "aqp"), 
-//    		"(all:syn::massachusets institute of technology all:acr::mit)",
-//    		BooleanQuery.class);
-//    assertQueryEquals(req("q", "\"Massachusets Institute Technology\"", "defType", "aqp"), 
-//    		"(all:syn::massachusets institute of technology all:acr::mit)", 
-//        BooleanQuery.class);
+    //    assertQueryEquals(req("q", "\"Massachusets Institute of the Technology\"", "defType", "aqp"), 
+    //    		"(all:syn::massachusets institute of technology all:acr::mit)",
+    //    		BooleanQuery.class);
+    //    assertQueryEquals(req("q", "\"Massachusets Institute Technology\"", "defType", "aqp"), 
+    //    		"(all:syn::massachusets institute of technology all:acr::mit)", 
+    //        BooleanQuery.class);
     
 
     /*
@@ -958,7 +964,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   	// #147 - parsing of WDDF tokens
   	// analyzer operation. eg. XXX-YYYY => (XXX AND YYY) OR XXXYYY
   	assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp"), 
-        "((+all:acr::nag5 +all:acr::abcd) | all:acr::nag5abcd)", 
+        "((+Synonym(all:acr::nag5 all:nag5) +Synonym(all:abcd all:acr::abcd)) | Synonym(all:acr::nag5abcd all:nag5abcd))", 
         DisjunctionMaxQuery.class);
   	
   	
@@ -970,8 +976,15 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     // test that the two lines in the synonym file get merged and produce correct synonym expansion
     assertQueryEquals(req("q", "ABC", "defType", "aqp"), 
-        "Synonym(all:acr::abc all:syn::astrophysics business center all:syn::astrophysics business commons)", 
+        "Synonym(all:abc all:acr::abc all:syn::abc all:syn::astrophysics business center all:syn::astrophysics business commons)", 
         SynonymQuery.class);
+    // rca: 07/09/2019 - discovered, that when you search for ABC, it produces the correct output
+    //      but if you were to search for full-name, it only uses the synonyms that were present
+    //      on that line in the synonym input; so in this case the 'astrophysics business commons'
+    //      is completely ignored; that's a feature that we cat take advantage of!
+    assertQueryEquals(req("q", "\"astrophysics business center\"", "defType", "aqp"), 
+        "(all:\"astrophysics business center\" | Synonym(all:acr::abc all:syn::abc all:syn::astrophysics business center))", 
+        DisjunctionMaxQuery.class);
     
     
     // "all-sky" is indexed as "all", "sky", "all-sky"
@@ -1046,17 +1059,17 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQueryEquals(req(
         "q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$ ray Sources for Radio Millisecond Pulsars\"", 
         "defType", "aqp"), 
-        "(title:\"350 (mhz syn::mhz) (acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
-        + "| title:\"350 (mhz syn::mhz) (acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
-        + "| title:\"350mhz (acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
-        + "| title:\"350mhz (acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3)", 
+        "(title:\"350 (mhz syn::mhz) (gbt acr::gbt syn::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
+        + "| title:\"350 (mhz syn::mhz) (gbt acr::gbt syn::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
+        + "| title:\"350mhz (gbt acr::gbt syn::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma) ray (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
+        + "| title:\"350mhz (gbt acr::gbt syn::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3)", 
         DisjunctionMaxQuery.class);
     
     assertQueryEquals(req(
         "q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\"", 
         "defType", "aqp"), 
-        "(title:\"350 (mhz syn::mhz) (acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
-        + "| title:\"350mhz (acr::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3)",
+        "(title:\"350 (mhz syn::mhz) (gbt acr::gbt syn::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3 "
+        + "| title:\"350mhz (gbt acr::gbt syn::gbt syn::green bank telescope) (survey syn::survey) 50 (faint syn::faint) (fermi syn::fermi) (gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source) (radio syn::radio) (millisecond syn::millisecond) (pulsars syn::pulsars)\"~3)",
         DisjunctionMaxQuery.class);
     
     //dumpDoc(null, "title");

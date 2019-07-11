@@ -555,7 +555,7 @@
 				<!-- if the original or synonym contains UPPERCASE variant, mark it as
 					an acronym but do not change its type, if it was a SYNONYM, it is important
 					information for query parsing -->
-				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
+				<filter class="solr.AcronymTokenFilterFactory" emitBoth="true"
 					prefix="acr::" setType="ACRONYM"/>
 
 				<!-- add a prefix to all synonyms -->
@@ -583,7 +583,7 @@
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
                 
-                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="final"/> -->
+                <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/>
 			</analyzer>
 		</fieldType>
 

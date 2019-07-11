@@ -16,6 +16,7 @@
  */
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.search.SolrIndexSearcher;
 
 public class AqpChangeRewriteMethodProcessor extends
   AqpQueryNodeProcessorImpl {
@@ -67,8 +69,7 @@ public class AqpChangeRewriteMethodProcessor extends
       
       
       node = new AqpAdsabsScoringQueryNode(node, "cite_read_boost", 
-          Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));
-      
+          Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));      
     }
     first = false;
     return node;
@@ -106,22 +107,33 @@ public class AqpChangeRewriteMethodProcessor extends
           }
         }
         
-        node = simplifyMultiphrase(node, types);
+        try {
+          node = simplifyMultiphrase(node, types);
+        } catch (IOException e) {
+          throw new QueryNodeException(e);
+        }
       }
     }
     
     return node;
   }
 
-  private QueryNode simplifyMultiphrase(QueryNode node, Set<String> typesToKeep) {
+  private QueryNode simplifyMultiphrase(QueryNode node, Set<String> typesToKeep) throws IOException {
     
     // will inspect multiphrase children, discover those that fall on the same
     // position and will only keep one of them (so that we avoid double scoring)
+    
+    SolrQueryRequest req = this.getQueryConfigHandler()
+        .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+        .getRequest();
+    SolrIndexSearcher searcher = req.getSearcher();
+    
+    
     List<QueryNode> children = node.getChildren();
-
     if (children != null) {
       TreeMap<Integer, List<QueryNode>> positionTermMap = new TreeMap<>();
-
+      
+      // first group nodes into positions
       for (QueryNode child : children) {
         FieldQueryNode termNode = (FieldQueryNode) child;
         
@@ -131,28 +143,135 @@ public class AqpChangeRewriteMethodProcessor extends
         if (termList == null) {
           termList = new LinkedList<>();
           positionTermMap.put(termNode.getPositionIncrement(), termList);
-
         }
 
         termList.add(termNode);
-
       }
+      
 
       LinkedList newList = new LinkedList<>();
       for (int positionIncrement : positionTermMap.keySet()) {
+        
         List<QueryNode> termList = positionTermMap.get(positionIncrement);
         if (termList.size() > 1) {
+          
+          // there exists two situations:
+          //   1. user input was short and resulted in multi-token synonym
+          //   2. user input was series of tokens that were identified as multi-token synonym
+          // here we have to decide what scenario it is and for
+          //   1. pick the most-frequent synonym
+          //   2. pick the least-frequent synonym
+          // we'll use the information about the original input token begin and end
+          // positions, to guess what situation we are in
+          
+          int equalLength = 0;
+          int fromShortToLongForm = 0;
+          int fromLongToShort = 0;
+          int begin = 0;
+          int end = 0;
+          int len = 0;
+          String text;
+          FieldQueryNode maxTerm = null;
+          FieldQueryNode minTerm = null;
+          int termFreq;
+          int minFreqTerm = Integer.MAX_VALUE;
+          int maxFreqTerm = Integer.MIN_VALUE;
+          
+          // first decide one scenarios 1. xor 2.
+          for (QueryNode n: termList) {
+            
+            String t = (String) n.getTag(AqpAnalyzerQueryNodeProcessor.TYPE_ATTRIBUTE);
+            if (t != null && !typesToKeep.contains(t)) {
+              continue;
+            }
+            
+            FieldQueryNode termNode = (FieldQueryNode) n;
+            begin = termNode.getBegin();
+            end = termNode.getEnd();
+            text = termNode.getTextAsString();
+            len = text.length() - 5;
+            
+            if (len > (end - begin)) {
+              fromShortToLongForm++;
+            }
+            else if (len < (end - begin)) {
+              fromLongToShort++;
+            }
+            else {
+              equalLength++;
+            }
+            
+            // careful, 0 means the term does not exist
+            termFreq = searcher.docFreq(new Term(termNode.getFieldAsString(), text));
+            
+            // we'll ignore unknown terms
+            if (termFreq > 0) {
+              if (termFreq < minFreqTerm) {
+                minTerm = termNode;
+                minFreqTerm = termFreq;
+              }
+              else if (termFreq == minFreqTerm && text.length() > minTerm.getValue().length()) {
+                minTerm = termNode;
+              }
+              
+              if (termFreq > maxFreqTerm) {
+                maxTerm = termNode;
+                maxFreqTerm = termFreq;
+              }
+              else if (termFreq == maxFreqTerm && text.length() < minTerm.getValue().length()) {
+                maxTerm = termNode;
+              }
+            }
+            
+          }
+          
+          String strategy = null;
+          if (fromShortToLongForm > fromLongToShort) {
+            strategy = "mostFrequent";
+          }
+          else if (fromLongToShort > fromShortToLongForm) {
+            strategy = "leastFrequent"; 
+          }
+          else {
+            strategy = "cantDecide"; // they were equal lengths
+          }
+          
+          
+          
           int added = 0;
           for (QueryNode n: termList) {
             String t = (String) n.getTag(AqpAnalyzerQueryNodeProcessor.TYPE_ATTRIBUTE);
             if (t != null && typesToKeep.contains(t)) {
-              newList.add(n);
-              added += 1;
-              break;
+              if (strategy.equals("mostFrequent") && n.equals(maxTerm)) {
+                newList.add(n);
+                added += 1;
+                break;
+              }
+              else if (strategy.equals("leastFrequent") && n.equals(minTerm)) {
+                newList.add(n);
+                added += 1;
+                break;
+              }
+              else if (strategy.equals("cantDecide")) {
+                newList.add(n);
+                added += 1;
+                break;                
+              }
             }
           }
-          if (added == 0)
-            newList.add(termList.get(0));
+          
+          if (added == 0) { // we didn't find any type that would satisfy the condition
+            if (strategy.equals("mostFrequent") && maxTerm != null) {
+              newList.add(maxTerm);
+            }
+            else if (strategy.equals("leastFrequent") && minTerm != null) {
+              newList.add(minTerm);
+            }
+            else if (strategy.equals("cantDecide")) {
+              newList.add(termList.get(0));                
+            }
+          }
+          
         }
         else {
           newList.add(termList.get(0));
@@ -160,7 +279,6 @@ public class AqpChangeRewriteMethodProcessor extends
       }
       
       // it's guaranteed to be a simple phrase
-      
       node.set(newList);
       
     }
