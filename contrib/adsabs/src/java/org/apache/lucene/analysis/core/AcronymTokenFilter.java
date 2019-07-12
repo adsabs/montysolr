@@ -25,6 +25,8 @@ public final class AcronymTokenFilter extends TokenFilter {
 
   // controls index-time vs. query-time behavior
   private boolean emitBoth;
+  
+  private boolean emitSynonym = true;
 
   private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -64,14 +66,19 @@ public final class AcronymTokenFilter extends TokenFilter {
     	}
 
       if (!emitBoth) {
-      	if (this.tokenType != null) {
-      		typeAtt.setType(this.tokenType);
-      	}
-        return true;
+        if (emitSynonym && "SYNONYM".equals(typeAtt.type())) {
+          // pass; if SYNONYM emit both
+        }
+        else {
+          if (this.tokenType != null) {
+            typeAtt.setType(this.tokenType);
+          }
+          return true;          
+        }
       }
       currentState = captureState();
       termAtt.setEmpty().append(origTerm);
-
+      
     }
 
     return true;

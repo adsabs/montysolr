@@ -492,12 +492,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  
 	  assertQueryEquals(req("defType", "aqp", 
 			  "q", "full:(\"Very Large Array\" OR \"Very Long Baseline Array\")"),
-		      "((ack:\"very large array\" | Synonym(ack:acr::vla ack:syn::very large array)) ((abstract:\"very large array\" | Synonym(abstract:acr::vla abstract:syn::very large array)))^2.0 ((title:\"very large array\" | Synonym(title:acr::vla title:syn::very large array)))^2.0 (body:\"very large array\" | Synonym(body:acr::vla body:syn::very large array)) (keyword:\"very large array\" | Synonym(keyword:acr::vla keyword:syn::very large array))) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
+		      "((ack:\"very large array\" | Synonym(ack:acr::vla ack:syn::very large array ack:syn::vla)) ((abstract:\"very large array\" | Synonym(abstract:acr::vla abstract:syn::very large array abstract:syn::vla)))^2.0 ((title:\"very large array\" | Synonym(title:acr::vla title:syn::very large array title:syn::vla)))^2.0 (body:\"very large array\" | Synonym(body:acr::vla body:syn::very large array body:syn::vla)) (keyword:\"very large array\" | Synonym(keyword:acr::vla keyword:syn::very large array keyword:syn::vla))) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
 		      BooleanQuery.class);
 	  
 	  assertQueryEquals(req("defType", "aqp", 
 			  "q", "full:(VLA OR \"Very Long Baseline Array\")"),
-		      "(Synonym(ack:acr::vla ack:syn::very large array) (Synonym(abstract:acr::vla abstract:syn::very large array))^2.0 (Synonym(title:acr::vla title:syn::very large array))^2.0 Synonym(body:acr::vla body:syn::very large array) Synonym(keyword:acr::vla keyword:syn::very large array)) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
+		      "(Synonym(ack:acr::vla ack:syn::very large array ack:syn::vla) (Synonym(abstract:acr::vla abstract:syn::very large array))^2.0 (Synonym(title:acr::vla title:syn::very large array))^2.0 Synonym(body:acr::vla body:syn::very large array) Synonym(keyword:acr::vla keyword:syn::very large array)) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
 		      BooleanQuery.class);
 	  
 	  assertQueryEquals(req("defType", "aqp", 
@@ -583,7 +583,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       
         // disable synonyms (also for virtual fiels) - #36
         assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
-          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy))",
+          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy))",
           BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
             "abstract:\"dark energy\" title:\"dark energy\" keyword:\"dark energy\"",
@@ -1234,12 +1234,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       
       
       assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
-          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy))",
+          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy))",
           BooleanQuery.class);
       
       assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"",
           "aqp.classic_scoring.modifier", "0.6"),
-          "custom((abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy)), sum(float(cite_read_boost),const(0.6)))",
+          "custom((abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy)), sum(float(cite_read_boost),const(0.6)))",
           CustomScoreQuery.class);
       
       assertQueryEquals(req("defType", "aqp", "q", "author:\"foo, bar\"",
