@@ -6,6 +6,8 @@
 package org.apache.lucene.analysis.core;
 
 import java.io.IOException;
+import java.util.Set;
+
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -14,10 +16,11 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 /**
  *
- * @author jluker
- * 
  * Checks if the token is an acronym (is present in the HashMap) and 
  * adds the full name after the term (depends on the value of emitBoth)
+ * 
+ * emitBoth=false has the following meaning; it will emit SYNONYM token
+ * type and eat any other type.
  */
 public final class AcronymTokenFilter extends TokenFilter {
   public static final int ACRONYM_MIN_LENGTH = 2;
@@ -25,8 +28,7 @@ public final class AcronymTokenFilter extends TokenFilter {
 
   // controls index-time vs. query-time behavior
   private boolean emitBoth;
-  
-  private boolean emitSynonym = true;
+  private Set<String> allowedTypes = null;
 
   private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
   private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -35,11 +37,13 @@ public final class AcronymTokenFilter extends TokenFilter {
 	private String prefix;
 	private String tokenType;
 
-  public AcronymTokenFilter(TokenStream in, boolean emitBoth, String prefix, String tokenType) {
+  public AcronymTokenFilter(TokenStream in, boolean emitBoth, Set<String> allowedTypes, 
+      String prefix, String tokenType) {
     super(in);
     this.emitBoth = emitBoth;
     this.prefix = prefix;
     this.tokenType = tokenType;
+    this.allowedTypes = allowedTypes;
   }
 
   @Override
@@ -66,8 +70,8 @@ public final class AcronymTokenFilter extends TokenFilter {
     	}
 
       if (!emitBoth) {
-        if (emitSynonym && "SYNONYM".equals(typeAtt.type())) {
-          // pass; if SYNONYM emit both
+        if (allowedTypes != null && allowedTypes.contains(typeAtt.type())) {
+          // pass; allow it to be emitted
         }
         else {
           if (this.tokenType != null) {

@@ -555,7 +555,7 @@
 				<!-- if the original or synonym contains UPPERCASE variant, mark it as
 					an acronym but do not change its type, if it was a SYNONYM, it is important
 					information for query parsing -->
-				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
+				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false" allowTypes="SYNONYM"
 					prefix="acr::" setType="ACRONYM"/>
 
 				<!-- add a prefix to all synonyms -->
