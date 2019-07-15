@@ -240,7 +240,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "true",
                 "q", "author:accomazzi, alberto property:refereed r s t",
                 "qf", "title keyword^0.5"),
-                "+((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)) +((+property:refereed +((keyword:r)^0.5 | title:r) +((keyword:s)^0.5 | title:s) +((keyword:t)^0.5 | title:t)) ((title:syn::r s t)^1.0 (title:acr::rst)^1.0 (keyword:syn::r s t)^0.45 (keyword:acr::rst)^0.45 property:refereedrst))",
+                "+((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) "
+                + "(author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)) "
+                + "+((+property:refereed "
+                + "+((keyword:r)^0.5 | title:r) "
+                + "+((keyword:s)^0.5 | title:s) "
+                + "+((keyword:t)^0.5 | title:t)) "
+                + "((title:syn::r s t)^1.0 (title:syn::rst)^1.0 (title:acr::rst)^1.0 "
+                +  "(keyword:syn::r s t)^0.45 (keyword:syn::rst)^0.45 (keyword:acr::rst)^0.45 "
+                + "property:refereedrst))",
                 BooleanQuery.class);
 
         // +((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) +((+property:refereed +((keyword:r)^0.5 | title:r) +((keyword:s)^0.5 | title:s) +((keyword:t)^0.5 | title:t)) ((title:syn::r s t)^1.0 (title:acr::rst)^1.0 (keyword:syn::r s t)^0.45 (keyword:acr::rst)^0.45 property:refereedrst))
@@ -290,7 +298,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
             "qf", "title^0.9 keyword^0.7"),
             "((+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) "
-            + "| (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t)))^0.9))",
+            + "| (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9))",
             DisjunctionMaxQuery.class);
         assertQueryEquals(req("defType", "aqp",
             "q", "r s t",
@@ -300,7 +308,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
             "qf", "title^0.9 keyword^0.7"),
             "((+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) "
-            + "| (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t)))^0.9))~0.5",
+            + "| (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9))~0.5",
             DisjunctionMaxQuery.class);
         
         assertQueryEquals(req("defType", "aqp",
@@ -309,7 +317,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
                 "qf", "title^0.9 keyword^0.7"),
-                "(+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t)))^0.9)",
+                "(+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9)",
                 BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp",
@@ -318,7 +326,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
                 "qf", "title^0.9 keyword_norm^0.7"),
-                "(+((keyword_norm:x)^0.7 | (title:x)^0.9) +((keyword_norm:r)^0.7 | (title:r)^0.9) +((keyword_norm:s)^0.7 | (title:s)^0.9) +((keyword_norm:t)^0.7 | (title:t)^0.9) +((keyword_norm:y)^0.7 | (title:y)^0.9)) ((keyword_norm:\"x r s t y\")^0.7 | ((title:\"x r s t y\" | title:\"x (syn::r s t acr::rst) ? ? y\"~3))^0.9)",
+                "(+((keyword_norm:x)^0.7 | (title:x)^0.9) +((keyword_norm:r)^0.7 | (title:r)^0.9) "
+                + "+((keyword_norm:s)^0.7 | (title:s)^0.9) +((keyword_norm:t)^0.7 | (title:t)^0.9) "
+                + "+((keyword_norm:y)^0.7 | (title:y)^0.9)) "
+                + "((keyword_norm:\"x r s t y\")^0.7 "
+                + "| ((title:\"x r s t y\" | title:\"x (syn::r s t syn::rst acr::rst) ? ? y\"~3))^0.9)",
                 BooleanQuery.class);
 
 
@@ -492,30 +504,39 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 	  
 	  assertQueryEquals(req("defType", "aqp", 
 			  "q", "full:(\"Very Large Array\" OR \"Very Long Baseline Array\")"),
-		      "((ack:\"very large array\" | Synonym(ack:acr::vla ack:syn::very large array)) ((abstract:\"very large array\" | Synonym(abstract:acr::vla abstract:syn::very large array)))^2.0 ((title:\"very large array\" | Synonym(title:acr::vla title:syn::very large array)))^2.0 (body:\"very large array\" | Synonym(body:acr::vla body:syn::very large array)) (keyword:\"very large array\" | Synonym(keyword:acr::vla keyword:syn::very large array))) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
+		      "((ack:\"very large array\" | Synonym(ack:acr::vla ack:syn::very large array ack:syn::vla)) ((abstract:\"very large array\" | Synonym(abstract:acr::vla abstract:syn::very large array abstract:syn::vla)))^2.0 ((title:\"very large array\" | Synonym(title:acr::vla title:syn::very large array title:syn::vla)))^2.0 (body:\"very large array\" | Synonym(body:acr::vla body:syn::very large array body:syn::vla)) (keyword:\"very large array\" | Synonym(keyword:acr::vla keyword:syn::very large array keyword:syn::vla))) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
 		      BooleanQuery.class);
 	  
 	  assertQueryEquals(req("defType", "aqp", 
 			  "q", "full:(VLA OR \"Very Long Baseline Array\")"),
-		      "(Synonym(ack:acr::vla ack:syn::very large array) (Synonym(abstract:acr::vla abstract:syn::very large array))^2.0 (Synonym(title:acr::vla title:syn::very large array))^2.0 Synonym(body:acr::vla body:syn::very large array) Synonym(keyword:acr::vla keyword:syn::very large array)) (ack:\"very long baseline array\" (abstract:\"very long baseline array\")^2.0 (title:\"very long baseline array\")^2.0 body:\"very long baseline array\" keyword:\"very long baseline array\")",
+		      "(Synonym(ack:acr::vla ack:syn::very large array ack:syn::vla) "
+		      + "(Synonym(abstract:acr::vla abstract:syn::very large array abstract:syn::vla))^2.0 "
+		      + "(Synonym(title:acr::vla title:syn::very large array title:syn::vla))^2.0 "
+		      + "Synonym(body:acr::vla body:syn::very large array body:syn::vla) "
+		      + "Synonym(keyword:acr::vla keyword:syn::very large array keyword:syn::vla)) "
+		      + "(ack:\"very long baseline array\" "
+		      + "(abstract:\"very long baseline array\")^2.0 "
+		      + "(title:\"very long baseline array\")^2.0 "
+		      + "body:\"very long baseline array\" "
+		      + "keyword:\"very long baseline array\")",
 		      BooleanQuery.class);
 	  
 	  assertQueryEquals(req("defType", "aqp", 
 			  "q", "full:(HST OR Chandra)"),
-		      "(Synonym(ack:acr::hst ack:syn::hubble space telescope) "
-		      + "(Synonym(abstract:acr::hst abstract:syn::hubble space telescope))^2.0 "
-		      + "(Synonym(title:acr::hst title:syn::hubble space telescope))^2.0 "
-		      + "Synonym(body:acr::hst body:syn::hubble space telescope) "
-		      + "Synonym(keyword:acr::hst keyword:syn::hubble space telescope)) "
+		      "(Synonym(ack:acr::hst ack:syn::hst ack:syn::hubble space telescope) "
+		      + "(Synonym(abstract:acr::hst abstract:syn::hst abstract:syn::hubble space telescope))^2.0 "
+		      + "(Synonym(title:acr::hst title:syn::hst title:syn::hubble space telescope))^2.0 "
+		      + "Synonym(body:acr::hst body:syn::hst body:syn::hubble space telescope) "
+		      + "Synonym(keyword:acr::hst keyword:syn::hst keyword:syn::hubble space telescope)) "
 		      + "(ack:chandra (abstract:chandra)^2.0 (title:chandra)^2.0 body:chandra keyword:chandra)",
 		      BooleanQuery.class);
 	  
 	  
 	  assertQueryEquals(req("defType", "aqp", 
 			  "q", "abs:(HST OR baz)"),
-		      "(Synonym(abstract:acr::hst abstract:syn::hubble space telescope) "
-		      + "Synonym(title:acr::hst title:syn::hubble space telescope) "
-		      + "Synonym(keyword:acr::hst keyword:syn::hubble space telescope)) "
+		      "(Synonym(abstract:acr::hst abstract:syn::hst abstract:syn::hubble space telescope) "
+		      + "Synonym(title:acr::hst title:syn::hst title:syn::hubble space telescope) "
+		      + "Synonym(keyword:acr::hst keyword:syn::hst keyword:syn::hubble space telescope)) "
 		      + "(abstract:baz title:baz keyword:baz)",
 		      BooleanQuery.class);
     	  
@@ -526,12 +547,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           BooleanQuery.class);
       
       assertQueryEquals(req("defType", "aqp", "q", " full:\"HST\" NEAR2 full:\"proposal\""),
-          "spanNear([spanOr([ack:acr::hst, ack:syn::hubble space telescope]), ack:proposal], 2, true) spanNear([(spanOr([abstract:acr::hst, abstract:syn::hubble space telescope]))^2.0, (abstract:proposal)^2.0], 2, true) spanNear([(spanOr([title:acr::hst, title:syn::hubble space telescope]))^2.0, (title:proposal)^2.0], 2, true) spanNear([spanOr([body:acr::hst, body:syn::hubble space telescope]), body:proposal], 2, true) spanNear([spanOr([keyword:acr::hst, keyword:syn::hubble space telescope]), keyword:proposal], 2, true)",
+          "spanNear([spanOr([ack:acr::hst, ack:syn::hst, ack:syn::hubble space telescope]), ack:proposal], 2, true) spanNear([(spanOr([abstract:acr::hst, abstract:syn::hst, abstract:syn::hubble space telescope]))^2.0, (abstract:proposal)^2.0], 2, true) spanNear([(spanOr([title:acr::hst, title:syn::hst, title:syn::hubble space telescope]))^2.0, (title:proposal)^2.0], 2, true) spanNear([spanOr([body:acr::hst, body:syn::hst, body:syn::hubble space telescope]), body:proposal], 2, true) spanNear([spanOr([keyword:acr::hst, keyword:syn::hst, keyword:syn::hubble space telescope]), keyword:proposal], 2, true)",
           BooleanQuery.class);
       
       // yeah, if you don't specify any field, then i'll refuse to serve you anything useful!
       assertQueryEquals(req("defType", "aqp", "q", " HST NEAR2 galaxy"),
-          "spanNear([spanOr([all:acr::hst, all:syn::hubble space telescope]), all:galaxy], 2, true)",
+          "spanNear([spanOr([all:acr::hst, all:syn::hst, all:syn::hubble space telescope]), all:galaxy], 2, true)",
           SpanNearQuery.class);
       
       
@@ -583,7 +604,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       
         // disable synonyms (also for virtual fiels) - #36
         assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
-          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy))",
+          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de))",
           BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
             "abstract:\"dark energy\" title:\"dark energy\" keyword:\"dark energy\"",
@@ -1234,12 +1255,17 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       
       
       assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
-          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy))",
+          "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) "
+          + "(title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) "
+          + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de))",
           BooleanQuery.class);
       
       assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"",
           "aqp.classic_scoring.modifier", "0.6"),
-          "custom((abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy)), sum(float(cite_read_boost),const(0.6)))",
+          "custom((abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) "
+          + "(title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) "
+          + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de)), "
+          + "sum(float(cite_read_boost),const(0.6)))",
           CustomScoreQuery.class);
       
       assertQueryEquals(req("defType", "aqp", "q", "author:\"foo, bar\"",

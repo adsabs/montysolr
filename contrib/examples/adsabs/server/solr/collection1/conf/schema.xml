@@ -490,7 +490,7 @@
 				<filter class="solr.TrimFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/>
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
 			</analyzer>
 			<analyzer type="query">
                 <charFilter class="solr.HTMLStripCharFilterFactory"/>
@@ -555,12 +555,17 @@
 				<!-- if the original or synonym contains UPPERCASE variant, mark it as
 					an acronym but do not change its type, if it was a SYNONYM, it is important
 					information for query parsing -->
-				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
+				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false" allowTypes="SYNONYM"
 					prefix="acr::" setType="ACRONYM"/>
 
 				<!-- add a prefix to all synonyms -->
 				<filter class="solr.analysis.ResetFilterFactory"
 					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
+					
+				<!-- only pass SYNONYM and ACRONYM tokens
+				<filter class="solr.analysis.author.AuthorCollectorFactory"
+                    tokenTypes="word"
+                    emitTokens="false" /> -->
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="false"
@@ -583,7 +588,7 @@
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
                 
-                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="final"/> -->
+                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/> -->
 			</analyzer>
 		</fieldType>
 
