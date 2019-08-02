@@ -213,6 +213,7 @@
           <str name="facet.field">vizier_facet</str>
           <str name="facet.field">grant_facet_hier</str>
           <str name="facet.field">database</str>
+          <str name="facet.field">simbad_object_facet_hier</str>
           <str name="f.full.hl.snippets">4</str>
           <str name="hl.requireFieldMatch">true</str>
         </lst>
@@ -252,6 +253,7 @@
           <str name="facet.field">vizier_facet</str>
           <str name="facet.field">grant_facet_hier</str>
           <str name="facet.field">database</str>
+          <str name="facet.field">simbad_object_facet_hier</str>
           <str name="f.full.hl.snippets">4</str>
           <str name="hl.requireFieldMatch">true</str>
         </lst>
