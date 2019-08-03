@@ -295,20 +295,29 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
      */
     //setDebug(true);
     assertQueryEquals(req("q", "title:\"black hole\"",
-        "aqp.multiphrase.keep_one", "SYNONYM"),
-        "(title:\"black hole\" | Synonym(title:acr::bh title:syn::bh title:syn::black hole))",
+        "aqp.multiphrase.keep_one", "SYNONYM",
+        "aqp.multiphrase.fields", "title"),
+        "(title:\"black hole\" | Synonym(title:syn::black hole))",
         DisjunctionMaxQuery.class);
-    assertQ(req("q", "title:\"black hole\"", "aqp.multiphrase.keep_one", "SYNONYM"), 
+    assertQ(req("q", "title:\"black hole\"", 
+        "aqp.multiphrase.keep_one", "SYNONYM",
+        "aqp.multiphrase.fields", "title"
+        ), 
         "//*[@numFound='2']",
         "//doc/str[@name='id'][.='500']",
         "//doc/str[@name='id'][.='501']"
         );
     
     assertQueryEquals(req("q", "title:\"observations black hole\"",
-        "aqp.multiphrase.keep_one", "SYNONYM"),
+        "aqp.multiphrase.keep_one", "SYNONYM",
+        "aqp.multiphrase.fields", "title"
+        ),
         "(title:\"observations black hole\" | title:\"observations syn::black hole\"~2)",
         DisjunctionMaxQuery.class);
-    assertQ(req("q", "title:\"observations black hole\"", "aqp.multiphrase.keep_one", "SYNONYM"), 
+    assertQ(req("q", "title:\"observations black hole\"", 
+        "aqp.multiphrase.keep_one", "SYNONYM",
+        "aqp.multiphrase.fields", "title"
+        ), 
         "//*[@numFound='2']",
         "//doc/str[@name='id'][.='500']",
         "//doc/str[@name='id'][.='501']"
