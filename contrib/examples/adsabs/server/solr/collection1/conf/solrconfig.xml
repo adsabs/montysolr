@@ -217,7 +217,6 @@
           <str name="facet.field">aff_facet_hier</str>
           <str name="facet.field">doctype_facet_hier</str>
           <str name="facet.field">first_author_facet_hier</str>
-          <str name="facet.field">grant_facet_hier</str>
           <str name="facet.field">ned_object_facet_hier</str>
 
           <str name="f.full.hl.snippets">4</str>
@@ -263,7 +262,6 @@
           <str name="facet.field">aff_facet_hier</str>
           <str name="facet.field">doctype_facet_hier</str>
           <str name="facet.field">first_author_facet_hier</str>
-          <str name="facet.field">grant_facet_hier</str>
           <str name="facet.field">ned_object_facet_hier</str>
 
           <str name="f.full.hl.snippets">4</str>
