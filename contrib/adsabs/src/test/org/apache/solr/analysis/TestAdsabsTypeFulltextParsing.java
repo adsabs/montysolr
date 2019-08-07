@@ -247,6 +247,11 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "150", "bibcode", "xxxxxxxxxx150", "title", "nag5-abcd"));
     assertU(adoc("id", "151", "bibcode", "xxxxxxxxxx151", "title", "nag5abcd"));
     assertU(adoc("id", "152", "bibcode", "xxxxxxxxxx152", "title", "nag5 abcd"));
+    assertU(adoc("id", "153", "bibcode", "xxxxxxxxxx153", "title", "NGC 1"));
+    assertU(adoc("id", "154", "bibcode", "xxxxxxxxxx154", "title", "NGC-1"));
+    assertU(adoc("id", "155", "bibcode", "xxxxxxxxxx155", "title", "N-1"));
+    assertU(adoc("id", "156", "bibcode", "xxxxxxxxxx156", "title", "N 1"));
+    assertU(adoc("id", "157", "bibcode", "xxxxxxxxxx157", "title", "NGC1"));
     
     assertU(adoc("id", "318", "bibcode", "xxxxxxxxxx318", "title", "creation of a thesaurus", "pub", "creation of a thesaurus"));
     assertU(adoc("id", "382", "bibcode", "xxxxxxxxxx382", "title", "xhtml <tags> should be <SUB>fooxx</SUB> <xremoved>"));
@@ -970,7 +975,96 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   }
   
   public void testOtherCases() throws Exception {
+    
+    // change to NGC tokenizer in the schema; we want to index both
+    // variants, but during search time only query for the concat version
+    
+    assertQ(req("q", "title" + ":NGC"), 
+        "//*[@numFound='4']", 
+        "//doc/str[@name='id'][.='153']", //NGC 1
+        "//doc/str[@name='id'][.='154']", //NGC-1
+        "//doc/str[@name='id'][.='155']", //N-1
+        "//doc/str[@name='id'][.='156']"  //N 1
+        //"//doc/str[@name='id'][.='157']" //NGC1
+        );
+    
+    assertQueryEquals(req("q", "title:\"NGC 1\"", "defType", "aqp"), 
+        "title:acr::ngc1", 
+        TermQuery.class);
+    assertQ(req("q", "title" + ":NGC 1", "indent", "true"), 
+        "//*[@numFound='5']", 
+        "//doc/str[@name='id'][.='153']",
+        "//doc/str[@name='id'][.='154']",
+        "//doc/str[@name='id'][.='155']",
+        "//doc/str[@name='id'][.='156']",
+        "//doc/str[@name='id'][.='157']"
+        );
+    
+    
+    assertQueryEquals(req("q", "title:\"NGC-1\"", "defType", "aqp"), 
+        "title:acr::ngc1",
+        TermQuery.class);
+    assertQ(req("q", "title" + ":NGC-1"), 
+        "//*[@numFound='5']", 
+        "//doc/str[@name='id'][.='153']",
+        "//doc/str[@name='id'][.='154']",
+        "//doc/str[@name='id'][.='155']",
+        "//doc/str[@name='id'][.='156']",
+        "//doc/str[@name='id'][.='157']" //NGC1
+        );
+    
+    assertQueryEquals(req("q", "title:\"N-1\"", "defType", "aqp"), 
+        "title:n1",
+        TermQuery.class);
+    assertQ(req("q", "title" + ":N-1"), 
+        "//*[@numFound='2']", 
+        "//doc/str[@name='id'][.!='153']",
+        "//doc/str[@name='id'][.!='154']",
+        "//doc/str[@name='id'][.='155']",
+        "//doc/str[@name='id'][.='156']",
+        "//doc/str[@name='id'][.!='157']"
+        );
+    
+    // this finds 0 because during indexing, we'd turn the two
+    // tokens into 'n1' - and this search 
+    assertQueryEquals(req("q", "title:\"N 1\"", "defType", "aqp"), 
+        "title:n1",
+        TermQuery.class);
+    assertQ(req("q", "title" + ":\"N 1\""), 
+        "//*[@numFound='2']", 
+        "//doc/str[@name='id'][.!='153']",
+        "//doc/str[@name='id'][.!='154']",
+        "//doc/str[@name='id'][.='155']",
+        "//doc/str[@name='id'][.='156']",
+        "//doc/str[@name='id'][.!='157']" //NGC1
+        );
+    
+    assertQueryEquals(req("q", "title:\"NGC1\"", "defType", "aqp"),
+        "title:acr::ngc1", 
+        TermQuery.class);
+    assertQ(req("q", "title" + ":NGC1"), 
+        "//*[@numFound='5']", 
+        "//doc/str[@name='id'][.='153']",
+        "//doc/str[@name='id'][.='154']",
+        "//doc/str[@name='id'][.='155']",
+        "//doc/str[@name='id'][.='156']",
+        "//doc/str[@name='id'][.='157']"
+        );
   	
+    assertQueryEquals(req("q", "=title:\"NGC 1\"", "defType", "aqp"), 
+        "title:\"acr::ngc 1\"", 
+        PhraseQuery.class);
+    assertQ(req("q", "=title" + ":NGC 1"), 
+        "//*[@numFound='4']", 
+        "//doc/str[@name='id'][.='153']",
+        "//doc/str[@name='id'][.='154']",
+        "//doc/str[@name='id'][.='155']",
+        "//doc/str[@name='id'][.='156']",
+        "//doc/str[@name='id'][.!='157']"
+        );
+    
+
+    
   	// #147 - parsing of WDDF tokens
   	// analyzer operation. eg. XXX-YYYY => (XXX AND YYY) OR XXXYYY
   	assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp"), 
