@@ -1215,13 +1215,15 @@
 		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="author_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+      docValues="true"/>
 		  
 		<field name="author_count" type="int" indexed="true" stored="false"
 		  omitNorms="true" omitTermFreqAndPositions="true"/> 
 
 		<field name="first_author_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+      docValues="true"/>
 
 		<field name="first_author" type="author" indexed="true" stored="true" />
 
@@ -1246,7 +1248,8 @@
 		<field name="aff_facet" type="string" indexed="true" stored="${storeAll:false}"
 		       multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 		<field name="aff_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+      docValues="true"/>
 		<field name="aff_id" type="affiliation_tokens" indexed="true" stored="true"
 		       multiValued="true" omitNorms="true"/>
 		<field name="aff_raw" type="normalized_text_ascii" indexed="true" stored="true"
@@ -1424,7 +1427,8 @@
         multiValued="true" omitNorms="true"/>
 
 	  <field name="grant_facet_hier" type="string" indexed="true"
-		stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+      stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+      docValues="true"/>
 
 
     <!--
@@ -1558,7 +1562,8 @@
 		  omitNorms="true"/>
 
 		<field name="simbad_object_facet_hier" type="string" indexed="true"
-			stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+      stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+      docValues="true"/>
 
     <!--
     @api.doc
@@ -1723,7 +1728,8 @@
 	      indexed="true" stored="true" required="false" />
 	      
 	    <field name="doctype_facet_hier" type="string" indexed="true"
-            stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+        stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+        docValues="true"/>
 
 		<!-- a field holding tokenizer chain for the unfield search (very important
 			to have if you require multi-word token expansion and unfielded search expansion
@@ -1777,7 +1783,8 @@
             stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
             
         <field name="ned_object_facet_hier" type="normalized_string" indexed="true"
-            stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+          stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+          docValues="true"/>
 	  
 
         <!--
