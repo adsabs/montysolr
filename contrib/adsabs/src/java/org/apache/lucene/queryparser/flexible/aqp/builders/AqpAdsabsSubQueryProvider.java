@@ -1085,7 +1085,7 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		
-		parsers.put("docs", new AqpSubqueryParserFull() {
+	parsers.put("docs", new AqpSubqueryParserFull() {
       public Query parse(FunctionQParser fp) throws SyntaxError {
 
         SolrQueryRequest req = fp.getReq();
@@ -1143,99 +1143,147 @@ AqpFunctionQueryBuilderProvider {
       }
     });
 		
-	/**
-	 * 
-	 */
+  /* @api.doc
+   * 
+   * def similar(queryOrText, fields, maxQueryTerms, docToSearch, minTermFreq, minDocFreq, percentToMatch):
+   *    """
+   *    Finds similar documents:
+   *    
+   *      @param queryOrText: string, this can be a query or input
+   *      @param fields: list of fields separated by spaces, or special token 'input'
+   *        which means "use the query as is, as input"
+   *      @param maxQueryTerms: modifies similarity search, only this many terms will
+   *        be considered during the search (those terms are NOT the first X collected,
+   *        but they will be the first X terms weighted by TFIDF)
+   *      @param docToSearch: how many documents to collect in the first phase, is ignored
+   *        when fields='input'
+   *      @param minTermFreq: term is selected only if its frequency is this or higher
+   *      @param minDocFreq: selected term must be present in at least that many documents
+   *      @param percentToMatch: ratio of terms that have to be present in the selected
+   *        documents, default is 0.0f. For example, if 100 terms was used to discover 
+   *        similar docs, and if the ratio was 0.3f - then 30 terms must be present in the
+   *        docs that are returned.
+   *      
+   *    
+   *    Example: 
+   *    
+   *      ```similar(title:hubble^2, abstract, 100)```
+   *      
+   *      Will find all documents that have 'hubble' in title, will collect first and use their terms
+   *      to discover similar documents in abstract. It will only use 100 search tokens.
+   *    
+   *    
+   *    @since 63.1.0.24
+   *    @since 63.1.0.57  - exposed parameters to modify similar() behaviour
+   *    """
+   *    return "similar(%s)" % (query,)
+   *    
+   */
 	parsers.put("similar", new AqpSubqueryParserFull() {
-      public Query parse(FunctionQParser fp) throws SyntaxError {         
-        QParser aqp = fp.subQuery(fp.parseId(), "aqp");
-        Query innerQuery = aqp.parse();
-        String[] fieldsToLoad;
+      public Query parse(FunctionQParser fp) throws SyntaxError {
+        String input = fp.parseId();
         
-        if (fp.hasMoreArguments()) {
-          fieldsToLoad = fp.parseId().split(" ");
-        }
-        else {
-          fieldsToLoad = new String[] {"abstract"};
-        }
-        
-        HashSet<String> docFields = new HashSet<String>();
-        for (String f: fieldsToLoad) {
-          docFields.add(f);
-        }
+        String toLoad = "abstract";
+        if (fp.hasMoreArguments())
+          toLoad = fp.parseId();
         
         int maxQueryTerms = 500;
         if (fp.hasMoreArguments())
-        	maxQueryTerms = fp.parseInt();
+          maxQueryTerms = Math.min(fp.parseInt(), maxQueryTerms);
         
         int docToSearch = 200;
         if (fp.hasMoreArguments())
-        	docToSearch = fp.parseInt();
+          docToSearch = Math.min(fp.parseInt(), docToSearch);
         
         int minTermFrequency = 2;
         if (fp.hasMoreArguments())
-        	minTermFrequency = fp.parseInt();
+          minTermFrequency = Math.max(fp.parseInt(), 1);
         
         int minDocFrequency = 2;
         if (fp.hasMoreArguments())
-        	minDocFrequency = fp.parseInt();
+          minDocFrequency = Math.max(fp.parseInt(), 1);
         
         float percentToMatch = 0.0f;
         if (fp.hasMoreArguments())
-        	percentToMatch = fp.parseFloat();
-        		
+          percentToMatch = fp.parseFloat();
         
-
-        SolrQueryRequest req = fp.getReq();
-        SolrIndexSearcher searcher = req.getSearcher();
-        
-
         final StringBuilder text = new StringBuilder();
-        FixedBitSet toIgnore = new FixedBitSet(searcher.maxDoc());
+        SolrQueryRequest req = fp.getReq();
+        FixedBitSet toIgnore = null;
+        String[] fieldsToLoad;
         
-        TopDocs topDocs;
-        
-        try {
-          topDocs = searcher.search(innerQuery, docToSearch);
-          if (topDocs.totalHits == 0)
-            return new MatchNoDocsQuery();
+        if (toLoad.equals("input")) {
+          text.append(input);
+          fieldsToLoad = new String[] {"abstract"};
+        }
+        else {
           
-          for (ScoreDoc d: topDocs.scoreDocs) {
-            toIgnore.set(d.doc);
-            Document vals = searcher.doc(d.doc, docFields);
-            for (String f: docFields) {
-              for (String x: vals.getValues(f)) {
-                text.append(x);
-                text.append(" ");
+          QParser aqp = fp.subQuery(input, "aqp");
+          Query innerQuery = aqp.parse();
+          fieldsToLoad = toLoad.split(" ");
+          
+          HashSet<String> docFields = new HashSet<String>();
+          for (String f: fieldsToLoad) {
+            docFields.add(f);
+          }
+          
+          SolrIndexSearcher searcher = req.getSearcher();
+          
+
+          toIgnore = new FixedBitSet(searcher.maxDoc());
+          
+          TopDocs topDocs;
+          
+          try {
+            topDocs = searcher.search(innerQuery, docToSearch);
+            if (topDocs.totalHits == 0)
+              return new MatchNoDocsQuery();
+            
+            for (ScoreDoc d: topDocs.scoreDocs) {
+              toIgnore.set(d.doc);
+              Document vals = searcher.doc(d.doc, docFields);
+              for (String f: docFields) {
+                for (String x: vals.getValues(f)) {
+                  text.append(x);
+                  text.append(" ");
+                }
               }
             }
+            
+            // set some better defaults when it is a rare doc
+            if (topDocs.totalHits < 2) {
+              minTermFrequency = 0;
+              minDocFrequency = 1;
+            }
+           
+          } catch (IOException e) {
+            throw new SyntaxError(e.getMessage(), e);
           }
-         
-        } catch (IOException e) {
-          throw new SyntaxError(e.getMessage(), e);
+          
         }
+        
         
         
         Analyzer analyzer = req.getSchema().getIndexAnalyzer();
         MoreLikeThisQuery mlt = new MoreLikeThisQuery(text.toString(), fieldsToLoad, 
             analyzer, fieldsToLoad[0]);
         
-        if (topDocs.totalHits > 2) {
-          mlt.setMinTermFrequency(minTermFrequency);
-          mlt.setMinDocFreq(minDocFrequency);
-        } else {
-          mlt.setMinTermFrequency(0);
-          mlt.setMinDocFreq(1);
-        }
+        mlt.setMinTermFrequency(minTermFrequency);
+        mlt.setMinDocFreq(minDocFrequency);
         
         mlt.setPercentTermsToMatch(percentToMatch);
         mlt.setMaxQueryTerms(maxQueryTerms);
         
-        BooleanQuery.Builder query = new BooleanQuery.Builder();
-        query.add(mlt, BooleanClause.Occur.MUST);
-        query.add(new BitSetQuery(toIgnore), BooleanClause.Occur.MUST_NOT);
+        if (toIgnore != null) {
+          BooleanQuery.Builder query = new BooleanQuery.Builder();
+          query.add(mlt, BooleanClause.Occur.MUST);
+          query.add(new BitSetQuery(toIgnore), BooleanClause.Occur.MUST_NOT);
+          return query.build();
+        }
+        else {
+          return mlt;
+        }
         
-        return query.build();
       }
     });
 			

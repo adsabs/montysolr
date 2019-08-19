@@ -10,6 +10,7 @@ import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.queries.CustomScoreQuery;
+import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
@@ -373,6 +374,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       assertU(adoc("id", "2", "bibcode", "XXX", "abstract", "foo bar baz",
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
+      
+      // similar()
+      assertQueryEquals(req("defType", "aqp", "q", "similar(foo bar baz, input)"),
+          "like:foo bar baz",
+          MoreLikeThisQuery.class);
+      assertQueryEquals(req("defType", "aqp", "q", "similar(recid:2, title)"),
+          "+like:title bitle  -BitSetQuery(1)",
+          BooleanQuery.class);
+
       
       // topn() with score sorting
       assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, score desc)"),

@@ -61,7 +61,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-join-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-memory-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-misc-6.3.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queries-6.3.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queries-6.3.0-SNAPSHOT.jar" sourcepath="/apache-solr-63"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queryparser-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-replicator-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-sandbox-6.3.0-SNAPSHOT.jar"/>
