@@ -1143,10 +1143,10 @@ AqpFunctionQueryBuilderProvider {
       }
     });
 		
-		/**
-		 * 
-		 */
-		parsers.put("similar", new AqpSubqueryParserFull() {
+	/**
+	 * 
+	 */
+	parsers.put("similar", new AqpSubqueryParserFull() {
       public Query parse(FunctionQParser fp) throws SyntaxError {         
         QParser aqp = fp.subQuery(fp.parseId(), "aqp");
         Query innerQuery = aqp.parse();
@@ -1164,6 +1164,26 @@ AqpFunctionQueryBuilderProvider {
           docFields.add(f);
         }
         
+        int maxQueryTerms = 500;
+        if (fp.hasMoreArguments())
+        	maxQueryTerms = fp.parseInt();
+        
+        int docToSearch = 200;
+        if (fp.hasMoreArguments())
+        	docToSearch = fp.parseInt();
+        
+        int minTermFrequency = 2;
+        if (fp.hasMoreArguments())
+        	minTermFrequency = fp.parseInt();
+        
+        int minDocFrequency = 2;
+        if (fp.hasMoreArguments())
+        	minDocFrequency = fp.parseInt();
+        
+        float percentToMatch = 0.0f;
+        if (fp.hasMoreArguments())
+        	percentToMatch = fp.parseFloat();
+        		
         
 
         SolrQueryRequest req = fp.getReq();
@@ -1176,7 +1196,7 @@ AqpFunctionQueryBuilderProvider {
         TopDocs topDocs;
         
         try {
-          topDocs = searcher.search(innerQuery, 200);
+          topDocs = searcher.search(innerQuery, docToSearch);
           if (topDocs.totalHits == 0)
             return new MatchNoDocsQuery();
           
@@ -1201,15 +1221,15 @@ AqpFunctionQueryBuilderProvider {
             analyzer, fieldsToLoad[0]);
         
         if (topDocs.totalHits > 2) {
-          mlt.setMinTermFrequency(2);
-          mlt.setMinDocFreq(2);
+          mlt.setMinTermFrequency(minTermFrequency);
+          mlt.setMinDocFreq(minDocFrequency);
         } else {
           mlt.setMinTermFrequency(0);
           mlt.setMinDocFreq(1);
         }
         
-        mlt.setPercentTermsToMatch(0.0f);
-        mlt.setMaxQueryTerms(500);
+        mlt.setPercentTermsToMatch(percentToMatch);
+        mlt.setMaxQueryTerms(maxQueryTerms);
         
         BooleanQuery.Builder query = new BooleanQuery.Builder();
         query.add(mlt, BooleanClause.Occur.MUST);
