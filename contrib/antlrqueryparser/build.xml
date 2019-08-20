@@ -99,6 +99,10 @@
 			<include name="**/stringtemplate*.jar"/>
 			<include name="**/gunit*.jar"/>
 		</fileset>
+		
+        <!-- for view/try/dot targets - link to classes built upstream -->
+        <pathelement location="${prop.solr.real.location}/build/contrib/solr-adsabs/classes/java/"/>
+        <pathelement location="${prop.lucene.real.location}/build/antlrqueryparser/classes/java"/>
 	</path>
 
 	<path id="test.classpath">
