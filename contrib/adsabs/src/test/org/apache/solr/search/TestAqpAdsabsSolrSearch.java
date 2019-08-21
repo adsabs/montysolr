@@ -375,6 +375,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
       
+      
       // similar()
       assertQueryEquals(req("defType", "aqp", "q", "similar(foo bar baz, input)"),
           "like:foo bar baz",

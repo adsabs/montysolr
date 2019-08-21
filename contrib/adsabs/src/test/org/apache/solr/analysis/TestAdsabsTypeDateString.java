@@ -21,6 +21,7 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.LegacyNumericRangeQuery;
 import org.junit.BeforeClass;
@@ -85,6 +86,22 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     
     // test the query parser does the right thing
     //setDebug(true);
+    
+    // added symbolic date math parsing
+    assertQueryEquals(req("defType", "aqp", "q", "date:[\"1976-12-30T00:30:00Z\" TO \"1977-12-30T00:30:00Z\"]"),
+        "date:[220753800000 TO 252289800000]",
+        LegacyNumericRangeQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "date:[\"1976-12-30T00:30:00Z\" TO \"1976-12-30T00:30:00Z+1YEAR\"]"),
+        "date:[220753800000 TO 252289800000]",
+        LegacyNumericRangeQuery.class);
+    
+    // will become: 1972-05-21T17:33:18.772Z
+    assertQueryEquals(req("defType", "aqp", "q", "date:\"1972-05-20T17:33:18.772Z+1DAY\""),
+        "date:[75317598000 TO 75317598000]",
+        LegacyNumericRangeQuery.class);
+    assertQueryEquals(req("defType", "aqp", "q", "date:\"1972-05-21T17:33:18.772Z\""),
+        "date:[75317598000 TO 75317598000]",
+        LegacyNumericRangeQuery.class);
     
     // 2012-01-01T00:00:00 - 2012-02-01T00:00:00 (excl)
     assertQueryEquals(req("q", "pubdate:2012-01", "defType", "aqp"), 
