@@ -294,13 +294,24 @@ public class AqpChangeRewriteMethodProcessor extends
       
       String strategy = null;
       if (fromShortToLongForm > fromLongToShort) {
-        strategy = "mostFrequent";
+        strategy = "mostFrequent"; // pick the shortest
       }
       else if (fromLongToShort > fromShortToLongForm) {
-        strategy = "leastFrequent"; 
+        strategy = "leastFrequent"; // pick the longest
       }
-      else {
-        strategy = "cantDecide"; // they were equal lengths
+      else { // they were equal lengths
+        strategy = "cantDecide"; 
+        if (minTerm != null && maxTerm != null) {
+          int diffMax = Math.abs(len - (maxTerm.getEnd() - maxTerm.getBegin()));
+          int diffMin = Math.abs(len - (minTerm.getEnd() - minTerm.getBegin()));
+          
+          if (diffMax < diffMin) { // longer term is closer to input
+            strategy = "leastFrequent";
+          }
+          else if (diffMin < diffMax) { // shorter term is closer to the user input length
+            strategy = "mostFrequent";
+          }
+        }
       }
       
       
