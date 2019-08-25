@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.util.DateMathParser;
 
 public final class DateNormalizerTokenFilter extends TokenFilter {
@@ -52,6 +53,20 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
     }
     if (string.length()<10) {
       normalDate = false;
+    }
+    
+    // we allow symbolic date math logic; if parsed
+    // then the date will always be moved into the first
+    // 30 mins of the day
+    try {
+      Date date = dmp.parseMath(null, string);
+      dmp.setNow(date);
+      date = dmp.parseMath("/DAY" + this.offset);
+      return sdf.format(date);
+    } catch (SolrException e) {
+      // pass
+    } catch (ParseException e) {
+      // pass
     }
     
     for (SimpleDateFormat f: this.format) {

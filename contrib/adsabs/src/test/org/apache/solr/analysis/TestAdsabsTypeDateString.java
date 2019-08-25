@@ -87,6 +87,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     // test the query parser does the right thing
     //setDebug(true);
     
+    
     // added symbolic date math parsing
     assertQueryEquals(req("defType", "aqp", "q", "date:[\"1976-12-30T00:30:00Z\" TO \"1977-12-30T00:30:00Z\"]"),
         "date:[220753800000 TO 252289800000]",
@@ -295,6 +296,14 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         );
     assertQ(req("q", "year:1900-"), 
         "//*[@numFound='125']"
+        );
+    
+    /*
+     * symbolic date math
+     */
+    
+    assertQ(req("q", "pubdate:[NOW-60YEARS TO *] foo", "qf", "title keyword"), 
+        "//*[@numFound='1']"
         );
     
     }
