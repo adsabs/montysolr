@@ -380,6 +380,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       assertQueryEquals(req("defType", "aqp", "q", "similar(foo bar baz, input)"),
           "like:foo bar baz",
           MoreLikeThisQuery.class);
+      // default docfreq=2, termfreq=2
+      assertQ(req("q", "similar(foo bar baz, input, 100, 100, 2, 2)"),
+          "//*[@numFound='0']");
+      // change defaults
+      assertQ(req("q", "similar(foo bar baz, input, 100, 100, 1, 1)"),
+          "//*[@numFound='1']",
+          "//doc/str[@name='id'][.='2']");
+      
       assertQueryEquals(req("defType", "aqp", "q", "similar(recid:2, title)"),
           "+like:title bitle  -BitSetQuery(1)",
           BooleanQuery.class);
