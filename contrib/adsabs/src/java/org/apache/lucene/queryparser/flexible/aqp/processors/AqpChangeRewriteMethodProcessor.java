@@ -232,17 +232,21 @@ public class AqpChangeRewriteMethodProcessor extends
       // positions, to guess what situation we are in
       
       int equalLength = 0;
-      int fromShortToLongForm = 0;
-      int fromLongToShort = 0;
+      int userInputLen = 0;
+      int numTokens = 0;
+      int tokenLongerThanInput = 0;
+      int tokenShorterThanInput = 0;
       int begin = 0;
       int end = 0;
       int len = 0;
       String text;
-      FieldQueryNode maxTerm = null;
-      FieldQueryNode minTerm = null;
+      FieldQueryNode maxFreqTerm = null;
+      FieldQueryNode minFreqTerm = null;
+      FieldQueryNode closestLenTerm = null;
       int termFreq;
-      int minFreqTerm = Integer.MAX_VALUE;
-      int maxFreqTerm = Integer.MIN_VALUE;
+      int minFreq = Integer.MAX_VALUE;
+      int maxFreq = Integer.MIN_VALUE;
+      Integer closestLen = null;
       
       // first decide one scenarios 1. xor 2.
       for (QueryNode n: termList) {
@@ -256,54 +260,70 @@ public class AqpChangeRewriteMethodProcessor extends
         begin = termNode.getBegin();
         end = termNode.getEnd();
         text = termNode.getTextAsString();
-        len = text.length() - 5;
+        len = text.length() - (text.indexOf("::") + 2);
+        userInputLen += len;
+        numTokens++;
         
-        if (len > (end - begin)) {
-          fromShortToLongForm++;
-        }
-        else if (len < (end - begin)) {
-          fromLongToShort++;
-        }
-        else {
+        // how many times the current token fits into the user input
+        // anything below 1.0 means the current token is longer than 
+        // what user typed
+        
+        float ratio = (float)(end-begin) / (float)len;
+        
+        if (ratio == 1.0f) {
           equalLength++;
         }
+        else if (ratio < 1.2f) { // we give it bit of slack
+          tokenLongerThanInput++;
+        }
+        else {
+          tokenShorterThanInput++;
+        }
+        
+        if (closestLen == null || Math.abs((end-begin)-len) < closestLen) {
+          closestLen = Math.abs((end-begin)-len);
+          closestLenTerm = termNode;
+        }
+        
         
         // careful, 0 means the term does not exist
         termFreq = searcher.docFreq(new Term(termNode.getFieldAsString(), text));
         
         // we'll ignore unknown terms
         if (termFreq > 0) {
-          if (termFreq < minFreqTerm) {
-            minTerm = termNode;
-            minFreqTerm = termFreq;
+          if (termFreq < minFreq) {
+            minFreqTerm = termNode;
+            minFreq = termFreq;
           }
-          else if (termFreq == minFreqTerm && text.length() > minTerm.getValue().length()) {
-            minTerm = termNode;
+          else if (termFreq == minFreq && text.length() > minFreqTerm.getValue().length()) {
+            minFreqTerm = termNode; // if same docfreq, pick longer ones
           }
           
-          if (termFreq > maxFreqTerm) {
-            maxTerm = termNode;
-            maxFreqTerm = termFreq;
+          if (termFreq > maxFreq) {
+            maxFreqTerm = termNode;
+            maxFreq = termFreq;
           }
-          else if (termFreq == maxFreqTerm && text.length() < minTerm.getValue().length()) {
-            maxTerm = termNode;
+          else if (termFreq == maxFreq && text.length() < minFreqTerm.getValue().length()) {
+            maxFreqTerm = termNode; // if same frequency, pick shorter one
           }
         }
         
       }
       
       String strategy = null;
-      if (fromShortToLongForm > fromLongToShort) {
-        strategy = "mostFrequent"; // pick the shortest
+      if (tokenLongerThanInput > tokenShorterThanInput) {
+        strategy = "mostFrequent"; // most tokens are longer than input (i.e. user typed acronym)
+                                   // pick the shortest - i.e. more frequent term
       }
-      else if (fromLongToShort > fromShortToLongForm) {
-        strategy = "leastFrequent"; // pick the longest
+      else if (tokenShorterThanInput > tokenLongerThanInput) {
+        strategy = "leastFrequent"; // most tokens were equal or shorter than the user's input
+                                    // pick the longest - i.e. more specific term
       }
       else { // they were equal lengths
         strategy = "cantDecide"; 
-        if (minTerm != null && maxTerm != null) {
-          int diffMax = Math.abs(len - (maxTerm.getEnd() - maxTerm.getBegin()));
-          int diffMin = Math.abs(len - (minTerm.getEnd() - minTerm.getBegin()));
+        if (minFreqTerm != null && maxFreqTerm != null) {
+          float diffMax = Math.abs((float)userInputLen/numTokens - ((FieldQueryNode) maxFreqTerm).getTextAsString().length());
+          float diffMin = Math.abs((float)userInputLen/numTokens - ((FieldQueryNode) minFreqTerm).getTextAsString().length());
           
           if (diffMax < diffMin) { // longer term is closer to input
             strategy = "leastFrequent";
@@ -316,38 +336,19 @@ public class AqpChangeRewriteMethodProcessor extends
       
       
       
-      int added = 0;
-      for (QueryNode n: termList) {
-        String t = (String) n.getTag(AqpAnalyzerQueryNodeProcessor.TYPE_ATTRIBUTE);
-        if (t != null && typesToKeep.contains(t)) {
-          if (strategy.equals("mostFrequent") && n.equals(maxTerm)) {
-            newList.add(n);
-            added += 1;
-            break;
-          }
-          else if (strategy.equals("leastFrequent") && n.equals(minTerm)) {
-            newList.add(n);
-            added += 1;
-            break;
-          }
-          else if (strategy.equals("cantDecide")) {
-            newList.add(n);
-            added += 1;
-            break;                
-          }
-        }
+      if (strategy.equals("mostFrequent") && maxFreqTerm != null) {
+        newList.add(maxFreqTerm);
+      }
+      else if (strategy.equals("leastFrequent") && minFreqTerm != null) {
+        newList.add(minFreqTerm);
+      }
+      else if (strategy.equals("cantDecide")) {
+        newList.add(closestLenTerm);
       }
       
-      if (added == 0) { // we didn't find any type that would satisfy the condition
-        if (strategy.equals("mostFrequent") && maxTerm != null) {
-          newList.add(maxTerm);
-        }
-        else if (strategy.equals("leastFrequent") && minTerm != null) {
-          newList.add(minTerm);
-        }
-        else if (strategy.equals("cantDecide")) {
-          newList.add(termList.get(0));                
-        }
+      
+      if (newList.size() == 0) { // we didn't find any type that would satisfy the condition
+        newList.add(termList.get(0));                
       }
       
     }

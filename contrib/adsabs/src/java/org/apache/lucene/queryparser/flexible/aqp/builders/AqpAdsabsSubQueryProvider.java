@@ -1210,17 +1210,22 @@ AqpFunctionQueryBuilderProvider {
         final StringBuilder text = new StringBuilder();
         SolrQueryRequest req = fp.getReq();
         FixedBitSet toIgnore = null;
-        String[] fieldsToLoad;
+        String[] fieldsToLoad = toLoad.split(" ");
         
-        if (toLoad.equals("input")) {
+        if (toLoad.indexOf("input") > -1) {
           text.append(input);
-          fieldsToLoad = new String[] {"abstract"};
+          if (toLoad.length() > 5) {
+            fieldsToLoad = toLoad.substring(toLoad.indexOf("input")+6).split(" ");
+          }
+          else {
+            fieldsToLoad = new String[] {"abstract"};
+          }
         }
         else {
           
+          fieldsToLoad = toLoad.split(" ");
           QParser aqp = fp.subQuery(input, "aqp");
           Query innerQuery = aqp.parse();
-          fieldsToLoad = toLoad.split(" ");
           
           HashSet<String> docFields = new HashSet<String>();
           for (String f: fieldsToLoad) {

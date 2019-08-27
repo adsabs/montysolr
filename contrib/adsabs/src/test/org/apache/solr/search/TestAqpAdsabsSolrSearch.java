@@ -381,10 +381,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "like:foo bar baz",
           MoreLikeThisQuery.class);
       // default docfreq=2, termfreq=2
-      assertQ(req("q", "similar(foo bar baz, input, 100, 100, 2, 2)"),
+      assertQ(req("q", "similar(foo bar baz, input abstract, 100, 100, 2, 2)"),
           "//*[@numFound='0']");
       // change defaults
-      assertQ(req("q", "similar(foo bar baz, input, 100, 100, 1, 1)"),
+      assertQ(req("q", "similar(foo bar baz, input abstract, 100, 100, 1, 1)"),
           "//*[@numFound='1']",
           "//doc/str[@name='id'][.='2']");
       

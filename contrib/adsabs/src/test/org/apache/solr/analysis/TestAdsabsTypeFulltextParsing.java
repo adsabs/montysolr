@@ -274,6 +274,28 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   
   public void testMultiTokens() throws Exception {
     
+    // make sure the correct synonym is picked in absence of docfreq info
+    assertQueryEquals(req("q", "title:(\"antidesitter spacetime\" application)",
+        "aqp.multiphrase.keep_one", "SYNONYM",
+        "aqp.multiphrase.fields", "title"),
+        "+(title:\"antidesitter spacetime\" | Synonym(title:syn::antidesitter spacetime)) +title:application",
+        BooleanQuery.class);
+    
+    // now add some docfreq
+    assertU(adoc("id", "1000", "bibcode", "xxxxxxxxxx1000",
+        "title", "antidesitter spacetime application"));
+    assertU(adoc("id", "1001", "bibcode", "xxxxxxxxxx1001",
+        "title", "anti de sitter space application"));
+    assertU(adoc("id", "1002", "bibcode", "xxxxxxxxxx1002",
+        "title", "NASA ADS"));
+    assertU(commit());
+    
+    assertQueryEquals(req("q", "title:(\"antidesitter spacetime\" application)",
+        "aqp.multiphrase.keep_one", "SYNONYM",
+        "aqp.multiphrase.fields", "title"),
+        "+(title:\"antidesitter spacetime\" | Synonym(title:syn::antidesitter spacetime)) +title:application",
+        BooleanQuery.class);
+    
     
     // for relevancy scoring we want to avoid double-counting
     // so all of these below will use new aqp.multiphrase.keep parameter
