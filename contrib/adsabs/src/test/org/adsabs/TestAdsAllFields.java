@@ -410,19 +410,22 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 */
 		assertQ(req("q", "author:\"Einstein, A\"", 
 		    "aqp.constant_scoring", "author^13 title^12",
+		    "aqp.classic_scoring.modifier", "0.48",
 		    "fl", "recid,score"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']",
-				"//doc/float[@name='score'][.='13.0']"
+				"//doc/float[@name='score'][.='13.0']" // 13.00 * (cite_read_boost + aqp.classic_scoring.modifier) 
 				);
 		assertQ(req("q", "author:\"Einstein, A\" AND author:\"Anders\"",
 		    "aqp.constant_scoring", "author^13",
+		    "aqp.classic_scoring.modifier", "0.48",
         "fl", "recid,score"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']",
 				"//doc/float[@name='score'][.='26.0']");
 		assertQ(req("q", "author:\"Einstein, A\" OR author:\"Anders\"",
         "aqp.constant_scoring", "author^13",
+        "aqp.classic_scoring.modifier", "0.48",
         "fl", "recid,score"),
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='100']",

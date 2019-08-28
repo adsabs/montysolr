@@ -138,6 +138,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testUnfieldedSearch() throws Exception {
       
+      
       // have constant scoring work even for unfielded searches
       assertQueryEquals(req("defType", "aqp", "q", "foo bar",
           "qf", "bibcode^5 title^10",
@@ -375,6 +376,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
       
+      assertQ(req("q", "similar(foo bar baz title bitle, input abstract title, 100, 100, 1, 1)"),
+          "//*[@numFound='1']",
+          "//doc/str[@name='id'][.='2']");
       
       // similar()
       assertQueryEquals(req("defType", "aqp", "q", "similar(foo bar baz, input)"),

@@ -116,7 +116,7 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
       }
       
       Map<String, Float> statFields = getStaticFields();
-      if (statFields.containsKey(field)) {
+      if (statFields.containsKey(field) && node.getParent() != null && !(node.getParent() instanceof TermRangeQueryNode)) {
         node = new AqpConstantQueryNode(node);
         Float boost = statFields.get(field);
         if (boost != null && boost != 1.0f) {

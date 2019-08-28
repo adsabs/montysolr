@@ -764,12 +764,15 @@ AqpFunctionQueryBuilderProvider {
 				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
-				SecondOrderQuery outerQuery = new SecondOrderQuery( // references
+				SecondOrderQuery outerQuery = 
+				 new SecondOrderQuery( // references
 						new SecondOrderQuery( // topn
-								new SecondOrderQuery(innerQuery, // classic_relevance
-										new SecondOrderCollectorAdsClassicScoringFormula(referencesWrapper, boostWrapper)), 
+								//new SecondOrderQuery(innerQuery, // classic_relevance
+								//		new SecondOrderCollectorAdsClassicScoringFormula(referencesWrapper, boostWrapper)),
+								    innerQuery,
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitesRAM(referencesWrapper));
+				
 				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT_NORM);
 				return outerQuery;
 			};
@@ -841,12 +844,15 @@ AqpFunctionQueryBuilderProvider {
 				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
-				SecondOrderQuery outerQuery = new SecondOrderQuery( // citations
+				SecondOrderQuery outerQuery = 
+				 new SecondOrderQuery( // citations
 						new SecondOrderQuery( // topn
-								new SecondOrderQuery(innerQuery, // classic_relevance
-										new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper)), 
+						    innerQuery,
+								//new SecondOrderQuery(innerQuery, // classic_relevance
+								//		new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper)), 
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitedBy(citationsWrapper));
+				
 				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
 				return outerQuery;
 			};

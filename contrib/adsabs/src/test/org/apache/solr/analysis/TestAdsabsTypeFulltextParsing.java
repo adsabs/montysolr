@@ -1222,12 +1222,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQ(req("q", "title:\"GBT Survey of 50 Faint Fermi\"~2"), 
         "//*[@numFound>='4']");
     
-    assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\""), 
+    
+    assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\"",
+        "indent", "true",
+        "debugQuery", "true"), 
         "//*[@numFound='4']",
         "//doc/str[@name='id'][.='400']",
         "//doc/str[@name='id'][.='401']",
         "//doc/str[@name='id'][.='402']",
-        "//doc/str[@name='id'][.='403']");
+        "//doc/str[@name='id'][.='403']"
+        );
     assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ ray Sources for Radio Millisecond Pulsars\""), 
         "//*[@numFound='4']",
         "//doc/str[@name='id'][.='400']",
