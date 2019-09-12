@@ -698,7 +698,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 	 * Given the set of fields, we'll look inside them and retrieve (into memory)
 	 * all values
 	 */
-	private void unInvertedTheDamnThing(SolrIndexSearcher searcher, List<String> fields, KVSetter setter)
+	private void unInvertedTheDamnThing(SolrIndexSearcher searcher, List<String> fields, final KVSetter setter)
 			throws IOException {
 
 		IndexSchema schema = searcher.getCore().getLatestSchema();
@@ -712,7 +712,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 			liveDocs = leave.reader().getLiveDocs();
 			lr = leave.reader();
 			FieldInfos fInfo = lr.getFieldInfos();
-			for (String field : fields) {
+			for (final String field : fields) {
 
 				FieldInfo fi = fInfo.fieldInfo(field);
 
