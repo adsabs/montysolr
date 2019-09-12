@@ -2530,7 +2530,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     assert vals.length%3==0;
     for (int i=0;i<vals.length;i=i+3) {
       
-      System.out.println(escapeUnicode(vals[i]));
+      //System.out.println(escapeUnicode(vals[i]));
       
       
       boolean failed = true;
