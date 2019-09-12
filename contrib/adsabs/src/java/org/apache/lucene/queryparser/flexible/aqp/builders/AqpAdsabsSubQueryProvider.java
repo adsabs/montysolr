@@ -773,7 +773,7 @@ AqpFunctionQueryBuilderProvider {
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitesRAM(referencesWrapper));
 				
-				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT_NORM);
+				outerQuery.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
 				return outerQuery;
 			};
 		});
@@ -1096,7 +1096,7 @@ AqpFunctionQueryBuilderProvider {
 
         SolrQueryRequest req = fp.getReq();
         String input = fp.getString();
-        String filterName = input.substring(1, input.length()-1);
+        String filterName = input.substring(1, input.length()-1).trim();
         
         
         // pick the content stream (actually a filter)
@@ -1189,11 +1189,11 @@ AqpFunctionQueryBuilderProvider {
       public Query parse(FunctionQParser fp) throws SyntaxError {
         String input = fp.parseId();
         
-        String toLoad = "abstract";
+        String toLoad = "abstract title";
         if (fp.hasMoreArguments())
           toLoad = fp.parseId();
         
-        int maxQueryTerms = 500;
+        int maxQueryTerms = 100;
         if (fp.hasMoreArguments())
           maxQueryTerms = Math.min(fp.parseInt(), maxQueryTerms);
         

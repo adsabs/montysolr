@@ -1222,7 +1222,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQ(req("q", "title:\"GBT Survey of 50 Faint Fermi\"~2"), 
         "//*[@numFound>='4']");
     
-    
+    //TODO: this test is intentionally left failing; it used to work until the scoring changes (i'd like to 
+    // investigate more how the multi-token affects recall)
     assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\"",
         "indent", "true",
         "debugQuery", "true"), 

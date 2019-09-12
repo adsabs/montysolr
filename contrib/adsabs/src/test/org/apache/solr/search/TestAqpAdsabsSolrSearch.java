@@ -426,7 +426,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           MatchNoDocsQuery.class);
       
       assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX)"),
-          "+like:foo bar baz  -BitSetQuery(1)",
+          "+like:foo bar baz title bitle  -BitSetQuery(1)",
           BooleanQuery.class);
       
       assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX, title)"),
@@ -979,11 +979,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // useful() - ads classic implementation
         assertQueryEquals(req("defType", "aqp", "q", "useful(author:foo)"),
-                "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, lucene=0.5, adsPart=0.5)), collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitesRAM(cache:citations-cache))",
+                "SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitesRAM(cache:citations-cache))",
                 SecondOrderQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful(author:foo OR title:body)"),
-                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, lucene=0.5, adsPart=0.5)), collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitesRAM(cache:citations-cache))",
+                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitesRAM(cache:citations-cache))",
                 BooleanQuery.class);
 
 
@@ -997,11 +997,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // reviews() - ADS classic impl
         assertQueryEquals(req("defType", "aqp", "q", "reviews(author:foo)"),
-                "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, lucene=0.5, adsPart=0.5)), collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews(author:foo OR title:body)"),
-                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] cite_read_boost, lucene=0.5, adsPart=0.5)), collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 BooleanQuery.class);
 
         // reviews2() - original impl
@@ -1249,7 +1249,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       streams.add(cs);
       
       
-      SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) OR docs(fq_bar)) AND bibcode:b4");
+      SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) OR docs(fq_bar)) AND bibcode:b4", "debugQuery", "true");
       req.setContentStreams(streams);
       
       assertQ(req,
