@@ -290,6 +290,8 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
           if (nameParts[i].length() > 1) {
             nameParts[i] = nameParts[i].substring(0, 1);
             for (String[] other: otherNames) {
+            	if (other.length <= i)
+            		continue;
               if (other[i] == null || other[i].length() < 2)
                 return false;  // this may happen if synonyms map the name to a shorter version, my solution is to stop processing (cheap?)
               other[i] = other[i].substring(0, 1);
