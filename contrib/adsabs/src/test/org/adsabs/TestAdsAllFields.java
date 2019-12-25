@@ -25,6 +25,8 @@ import monty.solr.util.MontySolrSetup;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.common.util.ContentStream;
@@ -386,6 +388,16 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "comment:commentfoo"),
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='100']");
+		
+	  /*
+	   * collection
+	   * 
+	   * mapped to search inside database
+	   */
+		
+		assertQ(req("q", "collection:astronomy"), "//*[@numFound='1']");
+    assertQ(req("q", "collection:ASTRONOMY"), "//*[@numFound='1']");
+    assertQ(req("q", "collection:ASTRONOM*"), "//*[@numFound='1']");
 		
 		/*
 		 * doi:
@@ -1595,5 +1607,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "similar(recid:100)"),
         "//doc[1]/int[@name='recid'][.='60']"
         );
+    
+    
+    /*
+     * these are the cases that depend on the default parameters specified in the
+     * solrcofig.xml; here we just test what came up as bugs
+     */
+    assertQueryEquals(req("q", "aff:\"ASTRO 3D\""), 
+        "(aff:\"acr::astro (3d 3d)\" | aff:\"acr::astro 3 d\")", 
+        DisjunctionMaxQuery.class);
 	}
 }

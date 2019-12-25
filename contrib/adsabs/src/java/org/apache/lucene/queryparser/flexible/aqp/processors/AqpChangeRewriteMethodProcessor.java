@@ -342,7 +342,7 @@ public class AqpChangeRewriteMethodProcessor extends
       else if (strategy.equals("leastFrequent") && minFreqTerm != null) {
         newList.add(minFreqTerm);
       }
-      else if (strategy.equals("cantDecide")) {
+      else if (strategy.equals("cantDecide") && closestLenTerm != null) {
         newList.add(closestLenTerm);
       }
       

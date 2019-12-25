@@ -65,7 +65,7 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
 
     assertU(commit());
     
-    //dumpDoc(null, F.ID, "aff");
+    //dumpDoc(null, "aff");
     //System.err.println(h.query(req("q", "aff:foo1")));
     
     assertQ(req("q", "*:*"), "//*[@numFound>='2']");
