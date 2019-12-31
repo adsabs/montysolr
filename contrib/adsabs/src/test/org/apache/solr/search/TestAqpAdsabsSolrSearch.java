@@ -12,6 +12,7 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.queries.CustomScoreQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
+import org.apache.lucene.sandbox.queries.SlowFuzzyQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.ConstantScoreQuery;
@@ -586,14 +587,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       
       // levenshtein automata only considers distances (and max is 2)
       assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~0.8"),
-          "author:hoffmann, w~2",
-          FuzzyQuery.class);
+          "author:hoffmann, w~0.8",
+          SlowFuzzyQuery.class);
       assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~3"),
           "author:hoffmann, w~2",
           FuzzyQuery.class);
       assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~1"),
-          "author:hoffmann, w~1",
-          FuzzyQuery.class);
+          "author:hoffmann, w~1.0",
+          SlowFuzzyQuery.class);
       
       
       assertQueryEquals(req("defType", "aqp", "q", "author:\"Hoffmann, W.\"~2"),

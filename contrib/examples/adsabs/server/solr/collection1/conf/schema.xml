@@ -89,7 +89,6 @@
 			   <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
                 synonyms="author_curated.synonyms" format="semicolon"
                 ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
-                    
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
