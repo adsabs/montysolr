@@ -1236,23 +1236,23 @@
             multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
             
 		<field name="aff" type="affiliation_text" indexed="true" stored="true"
-			multiValued="true" omitNorms="true"/>
+			  multiValued="true" omitNorms="true"/>
 		<field name="aff_abbrev" type="affiliation_text" indexed="true" stored="true"
-		       multiValued="true" omitNorms="true"/>
+		      multiValued="true" omitNorms="true"/>
 		<!-- contents of institution is the same as aff_abbrev -->
 		<field name="institution" type="affiliation_tokens" indexed="true" stored="true"
 		       multiValued="true" omitNorms="true"/>
 		<field name="aff_canonical" type="affiliation_text" indexed="true" stored="true"
-			multiValued="true" omitNorms="true"/>
+			   multiValued="true" omitNorms="true"/>
 		<field name="aff_facet" type="string" indexed="true" stored="${storeAll:false}"
 		       multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 		<field name="aff_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
-      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-      docValues="true"/>
+		       multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+		       docValues="true"/>
 		<field name="aff_id" type="affiliation_tokens" indexed="true" stored="true"
 		       multiValued="true" omitNorms="true"/>
 		<field name="aff_raw" type="normalized_text_ascii" indexed="true" stored="true"
-		  omitNorms="true" multiValued="true" />
+		       omitNorms="true" multiValued="true" />
 
 
 		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
