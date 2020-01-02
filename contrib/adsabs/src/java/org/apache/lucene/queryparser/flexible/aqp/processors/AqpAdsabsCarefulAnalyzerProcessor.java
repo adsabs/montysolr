@@ -5,12 +5,15 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -75,7 +78,7 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
 	    if (value.indexOf('?') > -1) {
 	      qmarkPosition = value.indexOf('?');
 	    }
-	    
+	    // if wildcard in the middle, we can't deal with it. return
 	    if (asteriskPosition > 0 && asteriskPosition+1 < value.length()
 	        || qmarkPosition > 0 && qmarkPosition+1 < value.length()
 	        || asteriskPosition > -1 && qmarkPosition > -1)
@@ -126,12 +129,28 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
           if (tokens.length > 1)
             return node; // break, let the analyzer decide the fate
           
+          
           if (!tokens[0].equals(value)) {
-            return new FuzzyQueryNode(field, 
-                tokens[0], 
-              ((FuzzyQueryNode)node).getSimilarity(),
-              ((FuzzyQueryNode)node).getBegin(),
-              ((FuzzyQueryNode)node).getEnd());
+          	
+          	QueryConfigHandler config = getQueryConfigHandler();
+          	Map<String, String> args = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+          	
+          	
+          	if (node.getClass().equals(SlowFuzzyQueryNode.class) 
+          			&& args != null && args.getOrDefault("aqp.allow.slow.fuzzy", "true") == "true") {
+          		return new SlowFuzzyQueryNode(field, 
+          				tokens[0], 
+          				((FuzzyQueryNode)node).getSimilarity(),
+          				((FuzzyQueryNode)node).getBegin(),
+          				((FuzzyQueryNode)node).getEnd());
+          	}
+          	else {
+          		return new FuzzyQueryNode(field, 
+          				tokens[0], 
+          				((FuzzyQueryNode)node).getSimilarity(),
+          				((FuzzyQueryNode)node).getBegin(),
+          				((FuzzyQueryNode)node).getEnd());          		
+          	}
           }
         }
 	    }

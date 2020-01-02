@@ -42,6 +42,7 @@ public class AuthorUtils {
 	}
 	
 	public static String normalizeAuthor(String a, boolean keepApostrophe) {
+		boolean hasWildcards = a.indexOf('*') > -1 || a.indexOf('?') > -1; // \*\? should never be encountered here 
 	  if (!keepApostrophe)
 	    a = n4.matcher(a).replaceAll("-");
     a = n0.matcher(a).replaceAll(" ");
@@ -53,7 +54,7 @@ public class AuthorUtils {
     a = n2.matcher(a.trim()).replaceAll(" ");
     
     
-    if (!(a.contains(","))) // || a.contains(" ")
+    if (!hasWildcards && !(a.contains(","))) // || a.contains(" ")
       a = a + ",";
     // do this at the end, we want to see the space instead of '-'
     a = a.replace('-', ' ');

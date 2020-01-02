@@ -65,6 +65,12 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
     for (String individual: original.split(";")) {
     	
+    	// skip processing wildcards
+    	if (individual.indexOf('*') > -1 || individual.indexOf('?') > -1) {
+    		buffer.add(individual);
+    		continue;
+    	}
+    	
     	Map<String,String> parsedName = jythonParser.parse_human_name(individual);
 
     	if (parsedName != null) {

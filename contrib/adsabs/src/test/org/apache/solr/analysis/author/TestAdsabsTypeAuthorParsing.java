@@ -25,7 +25,9 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
+import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.QParser;
@@ -374,6 +376,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
   
   public void testAuthorParsingUseCases() throws Exception {
+  	
+  	assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
+  	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
+  	
+  	testAuthorQuery("Adamč*",
+  			"adamč*",
+  			"//*[@numFound='11']");
     
     // multiple synonyms in the file are separated with semicolon
     testAuthorQuery("\"wyrzykowsky, l\"",
@@ -392,14 +401,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "//*[@numFound='1']");
     
     // should not find anything, even though the names are there indexed next to each other
-    assertQ(req("q", "author:\"foo, * other, *\"", "debugQuery", "true"),
+    assertQ(req("q", "author:\"foo, * other, *\""),
         "//*[@numFound='0']"
     );
-    assertQ(req("q", "author:\"foo, *\"", "debugQuery", "true"),
+    assertQ(req("q", "author:\"foo, *\""),
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='600']"
     );
-    assertQ(req("q", "author:\"other, *\"", "debugQuery", "true"),
+    assertQ(req("q", "author:\"other, *\""),
         "//*[@numFound='1']",
         "//doc/int[@name='recid'][.='600']"
     );
