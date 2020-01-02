@@ -695,6 +695,7 @@
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
+          <str name="aff">aff_abbrev aff_canonical aff_id institution^2 aff_raw^0.5</str>
        </lst>
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        <str name="aqp.defaultField">unfielded_search</str>
@@ -725,6 +726,7 @@
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
+          <str name="aff">aff_abbrev aff_canonical aff_id institution^2 aff_raw^0.5</str>
        </lst>
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        <str name="aqp.defaultField">unfielded_search</str>

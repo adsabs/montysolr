@@ -21,8 +21,12 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
+import org.apache.lucene.search.SynonymQuery;
 import org.apache.lucene.search.TermQuery;
 import org.junit.BeforeClass;
 
@@ -44,8 +48,7 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
     System.setProperty("solr.allow.unsafe.resourceloading", "true");
     
     
-    schemaString = MontySolrSetup.getMontySolrHome()
-        + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
+    schemaString = getSchemaFile();
       
     configString = MontySolrSetup.getMontySolrHome()
         + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
@@ -53,7 +56,38 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
     initCore(configString, schemaString, MontySolrSetup.getSolrHome()
 			    + "/example/solr");
   }
-  
+
+	public static String getSchemaFile() {
+
+		/*
+		 * For purposes of the test, we make a copy of the schema.xml, and create
+		 * our own synonym files
+		 */
+
+		String configFile = MontySolrSetup.getMontySolrHome()
+		    + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
+
+		File newConfig;
+		try {
+
+			newConfig = duplicateFile(new File(configFile));
+
+			
+			File simpleTokenSynonymsFile = createTempFile(
+			    new String[] { "id1,id2\n"
+			        + "ror.1,foo,bar"
+			        });
+
+			replaceInFile(newConfig, "synonyms=\"aff_id.synonyms\"",
+			    "synonyms=\"" + simpleTokenSynonymsFile.getAbsolutePath() + "\"");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalStateException(e.getMessage());
+		}
+
+		return newConfig.getAbsolutePath();
+	}
 
   public void test() throws Exception {
 
@@ -64,6 +98,13 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
         "institution", "U Catania/Dep Phy Ast; -"
         ));
     assertU(commit());
+    
+    
+    // test synonyms
+    assertQueryEquals(req("q", "aff_id:\"ror.1\""), 
+        "Synonym(aff_id:bar aff_id:foo aff_id:ror.1)",
+        SynonymQuery.class
+        );
     
     // make sure docs are there
     assertQ(req("q", "*:*"), "//*[@numFound>='2']");

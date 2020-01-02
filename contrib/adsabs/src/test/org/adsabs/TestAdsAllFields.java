@@ -132,14 +132,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  //", \"recid\": 100" +
 
 			  ", \"abstract\": \"all no-sky survey q'i quotient\"" +
-			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
-        ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
-        ", \"institution\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\", \"foo/bar baz\"]" +
+			  ", \"aff_id\": [\"61814\", \"A1036\", \"-\"]" +
+			  ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
 			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
+			  ", \"aff_raw\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
+        ", \"institution\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\", \"foo/bar baz\"]" +
 			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
 			  ", \"aff_facet_hier\": [\"1/1812/61814\", \"1/8264/61814\", \"1/1812/A1036\", \"-\"]" +
-			  ", \"aff_id\": [\"61814\", \"A1036\", \"-\"]" +
-			  ", \"aff_raw\": [\"-\", \"Center for Astrophysics, 60 Garden Street, Cambridge MA 02138, USA\", \"Department of Astronomy, Harvard University, 60 Garden St., Cambridge, MA 02130, USA\"]" +
+
 			  ", \"alternate_bibcode\": [\"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\"]" +
 			  ", \"alternate_title\": \"This is of the alternate\"" +
 
@@ -449,6 +449,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"<str>Anders, John Michael</str>" +
 				"<str>Einstein, A</str></arr>");
 		
+		assertQ(req("q", "author:\"t' Hoof*\""),
+				"//*[@numFound='3']"
+				);
+		
 		/*
 		 * book_author
 		 */
@@ -492,7 +496,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		/*
-		 * aff - must be the same order as authors
+		 * aff - is a virtual field; 
+		 * all aff_ fields must be the same order as authors
 		 */
 		
 		assertQ(req("q", "aff:NASA"),
@@ -551,22 +556,26 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		//  	"//*[@numFound='1']");
 		assertQ(req("q", "aff_id:\"61814\""),
 			"//*[@numFound='1']");
-		assertQ(req("q", "aff_raw:\"Harvard\""),
+		assertQ(req("q", "aff_raw:\"02138\""),
+			"//*[@numFound='1']");
+		assertQ(req("q", "aff_canonical:\"Smithsonian\""),
+			"//*[@numFound='1']");
+		assertQ(req("q", "institution:\"Harvard U/Dep Ast\""),
 			"//*[@numFound='1']");
 
 
 		assert h.query(req("q", "recid:100"))
- 			.contains("<arr name=\"aff\">" +
+ 			.contains("<arr name=\"aff_raw\">" +
 				"<str>-</str>" +
 				"<str>NASA Kavli space center, Cambridge, MA 02138, USA</str>" +
         "<str>Einstein institute, Zurych, Switzerland</str></arr>"
         );
-		assertQ(req("q", "pos(aff:kavli, 2) AND recid:100"),
-				"//*[@numFound='1']"
-		);
 		assertQ(req("q", "=aff:\"acr::nasa\" AND recid:100"),
 			"//*[@numFound='1']" 
 		);
+		assertQ(req("q", "pos(aff_raw:kavli, 2) AND recid:100"),
+				"//*[@numFound='1']"
+				);
 
 
 		/*
@@ -1614,7 +1623,11 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
      * solrcofig.xml; here we just test what came up as bugs
      */
     assertQueryEquals(req("q", "aff:\"ASTRO 3D\""), 
-        "(aff:\"acr::astro (3d 3d)\" | aff:\"acr::astro 3 d\")", 
-        DisjunctionMaxQuery.class);
+        "(aff_abbrev:\"acr::astro (3d 3d)\" | aff_abbrev:\"acr::astro 3 d\") "
+        + "(institution:astro 3d)^2.0 "
+        + "aff_id:astro 3d "
+        + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\") "
+        + "((aff_raw:\"acr::astro (3d 3d)\" | aff_raw:\"acr::astro 3 d\"))^0.5", 
+        BooleanQuery.class);
 	}
 }
