@@ -55,83 +55,83 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
 
   public void test() throws Exception {
 
-    assertU(addDocs("aff_raw", "W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA"));
-    assertU(addDocs("aff_raw", "W.K. Kellogg <xfoo> Radiation Laboratory, California Institute of Technology, Pasadena, CA(91125), USA"));
-    assertU(addDocs("aff_raw", "IMCCE/Observatoire de Paris"));
-    assertU(addDocs("aff_raw", "INAF - Osservatorio Astronomico di Brera, via E. Bianchi 46, I-23807 Merate, Italy;",
-    		            "aff_raw", "INAF - IASF Milano, via E. Bassini 15, I-20133 Milano, Italy"));
-    assertU(addDocs("aff_raw", "Instituto de Astrofísica de Andalucía (IAA-CSIC) foo:doo"));
-    assertU(addDocs("aff_raw", "foo1", "aff_raw", "foo2", "aff_raw", "-", "aff_raw", "foo4"));
+    assertU(addDocs("aff", "W.K. Kellogg Radiation Laboratory, California Institute of Technology, Pasadena, CA 91125, USA"));
+    assertU(addDocs("aff", "W.K. Kellogg <xfoo> Radiation Laboratory, California Institute of Technology, Pasadena, CA(91125), USA"));
+    assertU(addDocs("aff", "IMCCE/Observatoire de Paris"));
+    assertU(addDocs("aff", "INAF - Osservatorio Astronomico di Brera, via E. Bianchi 46, I-23807 Merate, Italy;",
+    		            "aff", "INAF - IASF Milano, via E. Bassini 15, I-20133 Milano, Italy"));
+    assertU(addDocs("aff", "Instituto de Astrofísica de Andalucía (IAA-CSIC) foo:doo"));
+    assertU(addDocs("aff", "foo1", "aff", "foo2", "aff", "-", "aff", "foo4"));
 
     assertU(commit());
     
-    //dumpDoc(null, "aff_raw");
-    //System.err.println(h.query(req("q", "aff_raw:foo1")));
+    //dumpDoc(null, "aff");
+    //System.err.println(h.query(req("q", "aff:foo1")));
     
     assertQ(req("q", "*:*"), "//*[@numFound>='2']");
-    assertQ(req("q", "aff_raw:xfoo"), "//*[@numFound='0']");
+    assertQ(req("q", "aff:xfoo"), "//*[@numFound='0']");
 
-    assertQueryEquals(req("q", "aff_raw:\"Pasadena, CA 91125\"", "qt", "aqp"), 
-    		"aff_raw:\"pasadena acr::ca 91125\"",
+    assertQueryEquals(req("q", "aff:\"Pasadena, CA 91125\"", "qt", "aqp"), 
+    		"aff:\"pasadena acr::ca 91125\"",
     		PhraseQuery.class
     		);
-    assertQueryEquals(req("q", "aff_raw:\"Pasadena, CA(91125)\"", "qt", "aqp"), 
-    		"aff_raw:\"pasadena acr::ca 91125\"",
+    assertQueryEquals(req("q", "aff:\"Pasadena, CA(91125)\"", "qt", "aqp"), 
+    		"aff:\"pasadena acr::ca 91125\"",
     		PhraseQuery.class
     		);
     
-    assertQ(req("q", "aff_raw:\"Pasadena, CA 91125\""), 
+    assertQ(req("q", "aff:\"Pasadena, CA 91125\""), 
     		"//*[@numFound='2']", 
     		"//doc/str[@name='id'][.='0']",
     		"//doc/str[@name='id'][.='1']"
     		);
     
-    assertQ(req("q", "aff_raw:IMCCE"), 
+    assertQ(req("q", "aff:IMCCE"), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='2']"
     		);
     
-    assertQ(req("q", "aff_raw:imcce"), 
+    assertQ(req("q", "aff:imcce"), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='2']"
     		);
     
-    assertQ(req("q", "aff_raw:IASF"), 
+    assertQ(req("q", "aff:IASF"), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='3']"
     		);
     
-    assertQ(req("q", "aff_raw:iasf"), 
+    assertQ(req("q", "aff:iasf"), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='3']"
     		);
     
-    assertQ(req("q", "aff_raw:IAA-CSIC"), 
+    assertQ(req("q", "aff:IAA-CSIC"), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='4']"
     		);
     
-    assertQ(req("q", "aff_raw:IAACSIC"), 
+    assertQ(req("q", "aff:IAACSIC"), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='4']"
     		);
-    assertQ(req("q", "aff_raw:iaa-csic"), 
+    assertQ(req("q", "aff:iaa-csic"), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='4']"
     		);
     
-    assertQ(req("q", "aff_raw:\"INAF - IASF\""), 
+    assertQ(req("q", "aff:\"INAF - IASF\""), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='3']"
     		);
-    assertQ(req("q", "aff_raw:\"inaf - iasf\""), 
+    assertQ(req("q", "aff:\"inaf - iasf\""), 
     		"//*[@numFound='1']", 
     		"//doc/str[@name='id'][.='3']"
     		);
 
     
-    assert h.query(req("q", "aff_raw:foo1"))
- 		.contains("<arr name=\"aff_raw\">" +
+    assert h.query(req("q", "aff:foo1"))
+ 		.contains("<arr name=\"aff\">" +
 				"<str>foo1</str>" +
 				"<str>foo2</str>" +
                 "<str>-</str>" +

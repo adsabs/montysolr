@@ -135,7 +135,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  ", \"aff_id\": [\"61814\", \"A1036\", \"-\"]" +
 			  ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
 			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
-			  ", \"aff_raw\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
+			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
         ", \"institution\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\", \"foo/bar baz\"]" +
 			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
 			  ", \"aff_facet_hier\": [\"1/1812/61814\", \"1/8264/61814\", \"1/1812/A1036\", \"-\"]" +
@@ -496,29 +496,29 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		/*
-		 * aff - is a virtual field; 
+		 * affil - is a virtual field; 
 		 * all aff_ fields must be the same order as authors
 		 */
 		
-		assertQ(req("q", "aff:NASA"),
+		assertQ(req("q", "affil:NASA"),
 			"//doc/int[@name='recid'][.='100']",
 			"//*[@numFound='1']"
 		);
-		assertQ(req("q", "aff:NASA AND author:\"Anders\""),
+		assertQ(req("q", "affil:NASA AND author:\"Anders\""),
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
 		);
-		assertQ(req("q", "aff:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
-		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']"); // same here
-		assertQ(req("q", "aff:kavli"), // otherwise case-insensitive
+		assertQ(req("q", "affil:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
+		assertQ(req("q", "affil:KAVLI"), "//*[@numFound='0']"); // same here
+		assertQ(req("q", "affil:kavli"), // otherwise case-insensitive
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
-		assertQ(req("q", "aff:Kavli"),
+		assertQ(req("q", "affil:Kavli"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
-		assertQ(req("q", "aff:\"kavli space\""),
+		assertQ(req("q", "affil:\"kavli space\""),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
@@ -548,7 +548,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     );
 		
 
-		assertQ(req("q", "aff:\"Kavli\""),
+		assertQ(req("q", "affil:\"Kavli\""),
 			"//*[@numFound='1']");
 		assertQ(req("q", "aff_canonical:\"Harvard\""),
 			"//*[@numFound='1']");
@@ -556,7 +556,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		//  	"//*[@numFound='1']");
 		assertQ(req("q", "aff_id:\"61814\""),
 			"//*[@numFound='1']");
-		assertQ(req("q", "aff_raw:\"02138\""),
+		assertQ(req("q", "aff:\"02138\""),
 			"//*[@numFound='1']");
 		assertQ(req("q", "aff_canonical:\"Smithsonian\""),
 			"//*[@numFound='1']");
@@ -565,15 +565,15 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		assert h.query(req("q", "recid:100"))
- 			.contains("<arr name=\"aff_raw\">" +
+ 			.contains("<arr name=\"aff\">" +
 				"<str>-</str>" +
 				"<str>NASA Kavli space center, Cambridge, MA 02138, USA</str>" +
         "<str>Einstein institute, Zurych, Switzerland</str></arr>"
         );
-		assertQ(req("q", "=aff:\"acr::nasa\" AND recid:100"),
+		assertQ(req("q", "=affil:\"acr::nasa\" AND recid:100"),
 			"//*[@numFound='1']" 
 		);
-		assertQ(req("q", "pos(aff_raw:kavli, 2) AND recid:100"),
+		assertQ(req("q", "pos(aff:kavli, 2) AND recid:100"),
 				"//*[@numFound='1']"
 				);
 
@@ -1622,12 +1622,11 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
      * these are the cases that depend on the default parameters specified in the
      * solrcofig.xml; here we just test what came up as bugs
      */
-    assertQueryEquals(req("q", "aff:\"ASTRO 3D\""), 
-        "(aff_abbrev:\"acr::astro (3d 3d)\" | aff_abbrev:\"acr::astro 3 d\") "
-        + "(institution:astro 3d)^2.0 "
-        + "aff_id:astro 3d "
-        + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\") "
-        + "((aff_raw:\"acr::astro (3d 3d)\" | aff_raw:\"acr::astro 3 d\"))^0.5", 
+    assertQueryEquals(req("q", "affil:\"ASTRO 3D\""), 
+        "((aff:\"acr::astro (3d 3d)\" | aff:\"acr::astro 3 d\"))^0.5 "
+        + "(aff_abbrev:\"acr::astro (3d 3d)\" | aff_abbrev:\"acr::astro 3 d\") "
+        + "(institution:astro 3d)^2.0 aff_id:astro 3d "
+        + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\")",
         BooleanQuery.class);
 	}
 }

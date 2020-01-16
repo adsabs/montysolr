@@ -1200,8 +1200,9 @@
 
 
 		<field name="title" type="ads_text" indexed="true" stored="true"
-	      multiValued="true"/>
-	    <field name="title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+	      multiValued="true" 
+	      />
+    <field name="title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
 
 		<field name="alternate_title" type="ads_text" indexed="true" stored="true"
 		  multiValued="true" />
@@ -1242,7 +1243,7 @@
     <field name="editor" type="author" indexed="true" stored="true"
             multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
 
-    <!--  TODO: remove once index has been rebuilt -->            
+                
 		<field name="aff" type="affiliation_text" indexed="true" stored="true"
                      multiValued="true" omitNorms="true"/>
 		<field name="aff_abbrev" type="affiliation_text" indexed="true" stored="true"
@@ -1259,6 +1260,7 @@
 		       docValues="true"/>
 		<field name="aff_id" type="affiliation_tokens" indexed="true" stored="true"
 		       multiValued="true" omitNorms="true"/>
+		<!--  TODO: remove once index has been rebuilt -->
 		<field name="aff_raw" type="affiliation_text" indexed="true" stored="true"
 		       omitNorms="true" multiValued="true" />
 

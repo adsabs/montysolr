@@ -141,7 +141,13 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	
 	/*
 	 * This is only for printing/debugging, DO NOT use this for testing!!!
-	 * This method can go away
+	 * 
+	 * It will only work if the field(s) are indexed with stored positions
+	 * i.e. 
+	 * 
+	 * <field name="title" ..... termVectors="true" termPositions="true"/>
+	 * 
+	 * Also, the codec used must NOT be SimpleTextCodec
 	 */
 	public void dumpDoc(Integer docId, String...fields) throws Exception {
 		//DirectoryReader reader = h.getCore().getSearcher().get().getIndexReader();
@@ -162,7 +168,7 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 			docs = new int[]{docId};
 		}
 		
-		DocReconstructor reconstructor = new DocReconstructor(reader, fields, 10);
+		DocReconstructor reconstructor = new DocReconstructor(reader, fields, -1);
 		Reconstructed d;
 		
 		for (Integer dd: docs) {

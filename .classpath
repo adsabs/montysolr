@@ -91,7 +91,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solrj-lib/woodstox-core-asl-4.4.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit4-ant-2.4.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/randomizedtesting-runner-2.4.0.jar"/>
-	<classpathentry kind="lib" path="lib/luke-with-deps.jar"/>
+	<classpathentry kind="lib" path="lib/luke-with-deps.jar" sourcepath="/home/rchyla/Downloads/luke-luke-6.6.0/src/main/java"/>
 	<classpathentry kind="lib" path="contrib/adsabs/extra-lib/junidecode-0.5.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lucene-libs/lucene-test-framework-6.3.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>

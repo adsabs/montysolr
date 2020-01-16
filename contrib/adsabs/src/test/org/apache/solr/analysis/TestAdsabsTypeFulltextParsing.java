@@ -104,6 +104,7 @@ import org.junit.BeforeClass;
  *   TODO: the analyzer for the synonyms must use the same StopFilters as the query chain
  * 
  */
+
 public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 	
 	
@@ -134,7 +135,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
       newConfig = duplicateFile(new File(configFile));
       
-      replaceInFile(newConfig, "solr.SchemaCodecFactory", "solr.SimpleTextCodecFactory");
+      //replaceInFile(newConfig, "solr.SchemaCodecFactory", "solr.SimpleTextCodecFactory");
       
     } catch (IOException e) {
       e.printStackTrace();
@@ -1224,6 +1225,35 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     //TODO: this test is intentionally left failing; it used to work until the scoring changes (i'd like to 
     // investigate more how the multi-token affects recall)
+    dumpDoc(null, "title", "bibcode");
+    assertQ(req("q", "title:\"γ-ray Sources\"",
+        "indent", "true",
+        "debugQuery", "true"), 
+        "//*[@numFound='4']",
+        "//doc/str[@name='id'][.='400']",
+        "//doc/str[@name='id'][.='401']",
+        "//doc/str[@name='id'][.='402']",
+        "//doc/str[@name='id'][.='403']"
+        );
+    assertQ(req("q", "title:\"γ ray Sources\"",
+        "indent", "true",
+        "debugQuery", "true"), 
+        "//*[@numFound='4']",
+        "//doc/str[@name='id'][.='400']",
+        "//doc/str[@name='id'][.='401']",
+        "//doc/str[@name='id'][.='402']",
+        "//doc/str[@name='id'][.='403']"
+        );
+    assertQ(req("q", "title:\"$\\gamma$ ray Sources\"",
+        "indent", "true",
+        "debugQuery", "true"), 
+        "//*[@numFound='4']",
+        "//doc/str[@name='id'][.='400']",
+        "//doc/str[@name='id'][.='401']",
+        "//doc/str[@name='id'][.='402']",
+        "//doc/str[@name='id'][.='403']"
+        );
+    
     assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\"",
         "indent", "true",
         "debugQuery", "true"), 
@@ -1241,6 +1271,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='403']");
     
     
+    //assertU(adoc("id", "402", "bibcode", "xxxxxxxxxx402", "title", 
+      //"A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$ ray Sources for Radio Millisecond Pulsars"));
+    //assertU(adoc("id", "403", "bibcode", "xxxxxxxxxx403", "title", 
+      //"A 350-MHz GBT Survey of 50 Faint Fermi γ ray Sources for Radio Millisecond Pulsars"));
     
     
   }
