@@ -858,16 +858,14 @@
 	    </analyzer>
 	    <analyzer type="query">
 	            <charFilter class="solr.HTMLStripCharFilterFactory"/>
-	
 	            <tokenizer class="solr.PatternTokenizerFactory" pattern="[\/\;]"
 	              group="-1" />
 							<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
 								synonyms="aff_id.synonyms" 
 								ignoreCase="true" 
 								expand="true"
-								format="solr"
+								format="semicolon"
 								tokenizerFactory="solr.KeywordTokenizerFactory"
-                builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
 								inclOrig="true" />
 	            <filter class="solr.LowerCaseFilterFactory" />
 	            <filter class="solr.TrimFilterFactory" />
