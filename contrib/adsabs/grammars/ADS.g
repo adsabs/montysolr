@@ -26,6 +26,7 @@ tokens {
   QPOSITION;
   QFUNC;
   QDELIMITER;
+  QIDENTIFIER;
   QCOORDINATE;
   QREGEX;
   XMETA;
@@ -118,7 +119,8 @@ value
   :
   REGEX -> ^(QREGEX REGEX) 
   |range_term_in -> ^(QRANGEIN range_term_in)
-//  | range_term_ex -> ^(QRANGEEX range_term_ex) 
+//  | range_term_ex -> ^(QRANGEEX range_term_ex)
+  | identifier -> ^(QIDENTIFIER identifier)
   | coordinate -> ^(QCOORDINATE coordinate)
   | normal -> ^(QNORMAL normal) 
   | truncated -> ^(QTRUNCATED truncated)  
@@ -312,6 +314,20 @@ semicolon
 date  : 
   //a=NUMBER '/' b=NUMBER '/' c=NUMBER -> ^(QDATE $a $b $c)
   DATE_TOKEN
+  ;
+
+identifier  
+  : 
+  //IDENTIFIER  
+  ('doi:' -> QNORMAL["doi"]
+  |'arxiv:' -> QNORMAL["arxiv"]
+  |'arXiv:'  -> QNORMAL["arxiv"])
+  (TERM_NORMAL -> $identifier TERM_NORMAL
+  | PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
+  | PHRASE -> $identifier ^(QPHRASE PHRASE)
+  | NUMBER  -> $identifier NUMBER
+  | STAR -> $identifier ^(QANYTHING STAR)
+  )
   ;
 
   

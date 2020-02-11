@@ -80,7 +80,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
  * @see TokenStream
  */
 
-public class AqpAnalyzerQueryNodeProcessor extends AqpQueryNodeProcessorImpl {
+public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
   public static String TYPE_ATTRIBUTE = "token_type_attribute";
   public static String MAX_MULTI_TOKEN_SIZE = "max_multi_token";
