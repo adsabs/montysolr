@@ -119,7 +119,7 @@ value
   :
   REGEX -> ^(QREGEX REGEX) 
   |range_term_in -> ^(QRANGEIN range_term_in)
-//  | range_term_ex -> ^(QRANGEEX range_term_ex)
+//  | range_term_ex -> ^(QRANGEEX range_term_ex) 
   | identifier -> ^(QIDENTIFIER identifier)
   | coordinate -> ^(QCOORDINATE coordinate)
   | normal -> ^(QNORMAL normal) 
@@ -329,7 +329,6 @@ identifier
   | STAR -> $identifier ^(QANYTHING STAR)
   )
   ;
-
   
 coordinate
   :

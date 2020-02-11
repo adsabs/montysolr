@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g 2020-02-10 19:29:05
+// $ANTLR 3.5.2 /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g 2016-11-01 17:36:02
 
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 
@@ -97,15 +97,15 @@ public class ADSLexer extends Lexer {
 	public ADSLexer(CharStream input, RecognizerSharedState state) {
 		super(input,state);
 	}
-	@Override public String getGrammarFileName() { return "/dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g"; }
+	@Override public String getGrammarFileName() { return "/dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g"; }
 
 	// $ANTLR start "T__70"
 	public final void mT__70() throws RecognitionException {
 		try {
 			int _type = T__70;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:11:7: ( '#' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:11:9: '#'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:11:7: ( '#' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:11:9: '#'
 			{
 			match('#'); 
 			}
@@ -124,8 +124,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = T__71;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:12:7: ( '<=>' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:12:9: '<=>'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:12:7: ( '<=>' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:12:9: '<=>'
 			{
 			match("<=>"); 
 
@@ -145,8 +145,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = T__72;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:13:7: ( '=' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:13:9: '='
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:13:7: ( '=' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:13:9: '='
 			{
 			match('='); 
 			}
@@ -165,8 +165,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = T__73;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:14:7: ( 'arXiv:' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:14:9: 'arXiv:'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:14:7: ( 'arXiv:' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:14:9: 'arXiv:'
 			{
 			match("arXiv:"); 
 
@@ -186,8 +186,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = T__74;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:15:7: ( 'arxiv:' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:15:9: 'arxiv:'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:15:7: ( 'arxiv:' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:15:9: 'arxiv:'
 			{
 			match("arxiv:"); 
 
@@ -207,8 +207,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = T__75;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:16:7: ( 'doi:' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:16:9: 'doi:'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:16:7: ( 'doi:' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:16:9: 'doi:'
 			{
 			match("doi:"); 
 
@@ -228,8 +228,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = LPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:359:9: ( '(' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:359:11: '('
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:358:9: ( '(' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:358:11: '('
 			{
 			match('('); 
 			}
@@ -248,8 +248,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = RPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:361:9: ( ')' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:361:11: ')'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:360:9: ( ')' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:360:11: ')'
 			{
 			match(')'); 
 			}
@@ -268,8 +268,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = LBRACK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:363:9: ( '[' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:363:11: '['
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:362:9: ( '[' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:362:11: '['
 			{
 			match('['); 
 			}
@@ -288,8 +288,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = RBRACK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:365:9: ( ']' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:365:11: ']'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:364:9: ( ']' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:364:11: ']'
 			{
 			match(']'); 
 			}
@@ -308,8 +308,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = COLON;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:367:9: ( ':' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:367:11: ':'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:366:9: ( ':' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:366:11: ':'
 			{
 			match(':'); 
 			}
@@ -328,8 +328,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = PLUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:369:7: ( '+' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:369:9: '+'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:368:7: ( '+' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:368:9: '+'
 			{
 			match('+'); 
 			}
@@ -348,8 +348,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = MINUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:371:7: ( '-' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:371:9: '-'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:370:7: ( '-' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:370:9: '-'
 			{
 			match('-'); 
 			}
@@ -368,8 +368,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = STAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:373:7: ( '*' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:373:9: '*'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:372:7: ( '*' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:372:9: '*'
 			{
 			match('*'); 
 			}
@@ -388,10 +388,10 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = QMARK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:375:8: ( ( '?' )+ )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:375:10: ( '?' )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:374:8: ( ( '?' )+ )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:374:10: ( '?' )+
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:375:10: ( '?' )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:374:10: ( '?' )+
 			int cnt1=0;
 			loop1:
 			while (true) {
@@ -403,7 +403,7 @@ public class ADSLexer extends Lexer {
 
 				switch (alt1) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:375:10: '?'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:374:10: '?'
 					{
 					match('?'); 
 					}
@@ -433,11 +433,11 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = CARAT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:382:7: ( '^' ( NUMBER )? )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:382:9: '^' ( NUMBER )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:381:7: ( '^' ( NUMBER )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:381:9: '^' ( NUMBER )?
 			{
 			match('^'); 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:382:13: ( NUMBER )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:381:13: ( NUMBER )?
 			int alt2=2;
 			int LA2_0 = input.LA(1);
 			if ( ((LA2_0 >= '0' && LA2_0 <= '9')) ) {
@@ -445,7 +445,7 @@ public class ADSLexer extends Lexer {
 			}
 			switch (alt2) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:382:13: NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:381:13: NUMBER
 					{
 					mNUMBER(); 
 
@@ -470,11 +470,11 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = TILDE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:384:7: ( '~' ( NUMBER )? )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:384:9: '~' ( NUMBER )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:383:7: ( '~' ( NUMBER )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:383:9: '~' ( NUMBER )?
 			{
 			match('~'); 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:384:13: ( NUMBER )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:383:13: ( NUMBER )?
 			int alt3=2;
 			int LA3_0 = input.LA(1);
 			if ( ((LA3_0 >= '0' && LA3_0 <= '9')) ) {
@@ -482,7 +482,7 @@ public class ADSLexer extends Lexer {
 			}
 			switch (alt3) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:384:13: NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:383:13: NUMBER
 					{
 					mNUMBER(); 
 
@@ -507,8 +507,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = DQUOTE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:386:9: ( '\\\"' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:386:11: '\\\"'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:385:9: ( '\\\"' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:385:11: '\\\"'
 			{
 			match('\"'); 
 			}
@@ -527,8 +527,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = COMMA;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:390:7: ( ',' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:390:9: ','
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:389:7: ( ',' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:389:9: ','
 			{
 			match(','); 
 			}
@@ -547,8 +547,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = SEMICOLON;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:392:10: ( ';' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:392:13: ';'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:391:10: ( ';' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:391:13: ';'
 			{
 			match(';'); 
 			}
@@ -565,8 +565,8 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "AS_CHAR"
 	public final void mAS_CHAR() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:396:3: (~ ( '0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$' ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:395:3: (~ ( '0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 			{
 			if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\u001F')||(input.LA(1) >= '!' && input.LA(1) <= '#')||(input.LA(1) >= '%' && input.LA(1) <= '*')||(input.LA(1) >= '.' && input.LA(1) <= '/')||(input.LA(1) >= ':' && input.LA(1) <= '\uFFFF') ) {
 				input.consume();
@@ -588,8 +588,8 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "ESC_CHAR"
 	public final void mESC_CHAR() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:401:18: ( '\\\\' . )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:401:21: '\\\\' .
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:400:18: ( '\\\\' . )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:400:21: '\\\\' .
 			{
 			match('\\'); 
 			matchAny(); 
@@ -607,8 +607,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = TO;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:403:5: ( 'TO' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:403:7: 'TO'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:402:5: ( 'TO' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:402:7: 'TO'
 			{
 			match("TO"); 
 
@@ -628,11 +628,11 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = AND;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:406:7: ( ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:406:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:405:7: ( ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:405:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) )
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:406:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:406:10: ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:405:9: ( ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:405:10: ( 'a' | 'A' ) ( 'n' | 'N' ) ( 'd' | 'D' )
 			{
 			if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
 				input.consume();
@@ -676,11 +676,11 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = OR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:407:5: ( ( ( 'o' | 'O' ) ( 'r' | 'R' ) ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:407:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:406:5: ( ( ( 'o' | 'O' ) ( 'r' | 'R' ) ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:406:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) )
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:407:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:407:8: ( 'o' | 'O' ) ( 'r' | 'R' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:406:7: ( ( 'o' | 'O' ) ( 'r' | 'R' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:406:8: ( 'o' | 'O' ) ( 'r' | 'R' )
 			{
 			if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
 				input.consume();
@@ -716,8 +716,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = NOT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:408:7: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:408:9: ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:407:7: ( ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:407:9: ( 'n' | 'N' ) ( 'o' | 'O' ) ( 't' | 'T' )
 			{
 			if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
 				input.consume();
@@ -759,8 +759,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = NEAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:409:7: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) ( '0' .. '9' )* )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:409:9: ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) ( '0' .. '9' )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:408:7: ( ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) ( '0' .. '9' )* )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:408:9: ( 'n' | 'N' ) ( 'e' | 'E' ) ( 'a' | 'A' ) ( 'r' | 'R' ) ( '0' .. '9' )*
 			{
 			if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
 				input.consume();
@@ -794,7 +794,7 @@ public class ADSLexer extends Lexer {
 				recover(mse);
 				throw mse;
 			}
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:409:57: ( '0' .. '9' )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:408:57: ( '0' .. '9' )*
 			loop4:
 			while (true) {
 				int alt4=2;
@@ -805,7 +805,7 @@ public class ADSLexer extends Lexer {
 
 				switch (alt4) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 					{
 					if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 						input.consume();
@@ -839,11 +839,11 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = AUTHOR_SEARCH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:415:3: ( '^' ( AS_CHAR )+ ( ',' ( ' ' | AS_CHAR )+ )* ( '$' )? )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:416:3: '^' ( AS_CHAR )+ ( ',' ( ' ' | AS_CHAR )+ )* ( '$' )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:414:3: ( '^' ( AS_CHAR )+ ( ',' ( ' ' | AS_CHAR )+ )* ( '$' )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:415:3: '^' ( AS_CHAR )+ ( ',' ( ' ' | AS_CHAR )+ )* ( '$' )?
 			{
 			match('^'); 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:416:7: ( AS_CHAR )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:415:7: ( AS_CHAR )+
 			int cnt5=0;
 			loop5:
 			while (true) {
@@ -855,7 +855,7 @@ public class ADSLexer extends Lexer {
 
 				switch (alt5) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\u001F')||(input.LA(1) >= '!' && input.LA(1) <= '#')||(input.LA(1) >= '%' && input.LA(1) <= '*')||(input.LA(1) >= '.' && input.LA(1) <= '/')||(input.LA(1) >= ':' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -876,7 +876,7 @@ public class ADSLexer extends Lexer {
 				cnt5++;
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:416:16: ( ',' ( ' ' | AS_CHAR )+ )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:415:16: ( ',' ( ' ' | AS_CHAR )+ )*
 			loop7:
 			while (true) {
 				int alt7=2;
@@ -887,10 +887,10 @@ public class ADSLexer extends Lexer {
 
 				switch (alt7) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:416:17: ',' ( ' ' | AS_CHAR )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:415:17: ',' ( ' ' | AS_CHAR )+
 					{
 					match(','); 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:416:21: ( ' ' | AS_CHAR )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:415:21: ( ' ' | AS_CHAR )+
 					int cnt6=0;
 					loop6:
 					while (true) {
@@ -902,7 +902,7 @@ public class ADSLexer extends Lexer {
 
 						switch (alt6) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 							{
 							if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '#')||(input.LA(1) >= '%' && input.LA(1) <= '*')||(input.LA(1) >= '.' && input.LA(1) <= '/')||(input.LA(1) >= ':' && input.LA(1) <= '\uFFFF') ) {
 								input.consume();
@@ -931,7 +931,7 @@ public class ADSLexer extends Lexer {
 				}
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:416:40: ( '$' )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:415:40: ( '$' )?
 			int alt8=2;
 			int LA8_0 = input.LA(1);
 			if ( (LA8_0=='$') ) {
@@ -939,7 +939,7 @@ public class ADSLexer extends Lexer {
 			}
 			switch (alt8) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:416:40: '$'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:415:40: '$'
 					{
 					match('$'); 
 					}
@@ -963,7 +963,7 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = DATE_RANGE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:450:3: ( '-' INT INT INT INT | INT INT INT INT '-' ( INT INT INT INT )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:449:3: ( '-' INT INT INT INT | INT INT INT INT '-' ( INT INT INT INT )? )
 			int alt10=2;
 			int LA10_0 = input.LA(1);
 			if ( (LA10_0=='-') ) {
@@ -981,7 +981,7 @@ public class ADSLexer extends Lexer {
 
 			switch (alt10) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:451:3: '-' INT INT INT INT
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:450:3: '-' INT INT INT INT
 					{
 					match('-'); 
 					mINT(); 
@@ -995,7 +995,7 @@ public class ADSLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:452:5: INT INT INT INT '-' ( INT INT INT INT )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:451:5: INT INT INT INT '-' ( INT INT INT INT )?
 					{
 					mINT(); 
 
@@ -1006,7 +1006,7 @@ public class ADSLexer extends Lexer {
 					mINT(); 
 
 					match('-'); 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:452:25: ( INT INT INT INT )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:451:25: ( INT INT INT INT )?
 					int alt9=2;
 					int LA9_0 = input.LA(1);
 					if ( ((LA9_0 >= '0' && LA9_0 <= '9')) ) {
@@ -1014,7 +1014,7 @@ public class ADSLexer extends Lexer {
 					}
 					switch (alt9) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:452:26: INT INT INT INT
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:451:26: INT INT INT INT
 							{
 							mINT(); 
 
@@ -1047,8 +1047,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = FUNC_NAME;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:464:3: ( TERM_NORMAL '(' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:465:3: TERM_NORMAL '('
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:463:3: ( TERM_NORMAL '(' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:464:3: TERM_NORMAL '('
 			{
 			mTERM_NORMAL(); 
 
@@ -1069,8 +1069,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = WS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:469:5: ( ( ' ' | '\\t' | '\\r' | '\\n' | '\\u3000' ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:469:9: ( ' ' | '\\t' | '\\r' | '\\n' | '\\u3000' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:468:5: ( ( ' ' | '\\t' | '\\r' | '\\n' | '\\u3000' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:468:9: ( ' ' | '\\t' | '\\r' | '\\n' | '\\u3000' )
 			{
 			if ( (input.LA(1) >= '\t' && input.LA(1) <= '\n')||input.LA(1)=='\r'||input.LA(1)==' '||input.LA(1)=='\u3000' ) {
 				input.consume();
@@ -1095,8 +1095,8 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "INT"
 	public final void mINT() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:478:13: ( '0' .. '9' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:477:13: ( '0' .. '9' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 			{
 			if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 				input.consume();
@@ -1118,10 +1118,10 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "TERM_START_CHAR"
 	public final void mTERM_START_CHAR() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:483:3: ( (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' ) | ESC_CHAR ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:484:3: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' ) | ESC_CHAR )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:482:3: ( (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' ) | ESC_CHAR ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:483:3: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' ) | ESC_CHAR )
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:484:3: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' ) | ESC_CHAR )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:483:3: (~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' ) | ESC_CHAR )
 			int alt11=2;
 			int LA11_0 = input.LA(1);
 			if ( ((LA11_0 >= '\u0000' && LA11_0 <= '\b')||(LA11_0 >= '\u000B' && LA11_0 <= '\f')||(LA11_0 >= '\u000E' && LA11_0 <= '\u001F')||(LA11_0 >= '$' && LA11_0 <= '\'')||LA11_0=='.'||(LA11_0 >= '0' && LA11_0 <= '9')||LA11_0=='<'||LA11_0=='>'||(LA11_0 >= '@' && LA11_0 <= 'Z')||(LA11_0 >= '_' && LA11_0 <= 'z')||LA11_0=='|'||(LA11_0 >= '\u007F' && LA11_0 <= '\u2FFF')||(LA11_0 >= '\u3001' && LA11_0 <= '\uFFFF')) ) {
@@ -1139,7 +1139,7 @@ public class ADSLexer extends Lexer {
 
 			switch (alt11) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:484:4: ~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' )
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:483:4: ~ ( ' ' | '\\t' | '\\n' | '\\r' | '\\u3000' | '\\\"' | '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '!' | ':' | '~' | '^' | '?' | '*' | '\\\\' | ',' | '=' | '#' | ';' | '/' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '\b')||(input.LA(1) >= '\u000B' && input.LA(1) <= '\f')||(input.LA(1) >= '\u000E' && input.LA(1) <= '\u001F')||(input.LA(1) >= '$' && input.LA(1) <= '\'')||input.LA(1)=='.'||(input.LA(1) >= '0' && input.LA(1) <= '9')||input.LA(1)=='<'||input.LA(1)=='>'||(input.LA(1) >= '@' && input.LA(1) <= 'Z')||(input.LA(1) >= '_' && input.LA(1) <= 'z')||input.LA(1)=='|'||(input.LA(1) >= '\u007F' && input.LA(1) <= '\u2FFF')||(input.LA(1) >= '\u3001' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -1152,7 +1152,7 @@ public class ADSLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:491:6: ESC_CHAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:490:6: ESC_CHAR
 					{
 					mESC_CHAR(); 
 
@@ -1173,10 +1173,10 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "TERM_CHAR"
 	public final void mTERM_CHAR() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:495:3: ( ( TERM_START_CHAR | '+' | '-' | '=' | '#' | '/' ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:3: ( TERM_START_CHAR | '+' | '-' | '=' | '#' | '/' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:494:3: ( ( TERM_START_CHAR | '+' | '-' | '=' | '#' | '/' ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:3: ( TERM_START_CHAR | '+' | '-' | '=' | '#' | '/' )
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:3: ( TERM_START_CHAR | '+' | '-' | '=' | '#' | '/' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:3: ( TERM_START_CHAR | '+' | '-' | '=' | '#' | '/' )
 			int alt12=6;
 			int LA12_0 = input.LA(1);
 			if ( ((LA12_0 >= '\u0000' && LA12_0 <= '\b')||(LA12_0 >= '\u000B' && LA12_0 <= '\f')||(LA12_0 >= '\u000E' && LA12_0 <= '\u001F')||(LA12_0 >= '$' && LA12_0 <= '\'')||LA12_0=='.'||(LA12_0 >= '0' && LA12_0 <= '9')||LA12_0=='<'||LA12_0=='>'||(LA12_0 >= '@' && LA12_0 <= 'Z')||LA12_0=='\\'||(LA12_0 >= '_' && LA12_0 <= 'z')||LA12_0=='|'||(LA12_0 >= '\u007F' && LA12_0 <= '\u2FFF')||(LA12_0 >= '\u3001' && LA12_0 <= '\uFFFF')) ) {
@@ -1206,38 +1206,38 @@ public class ADSLexer extends Lexer {
 
 			switch (alt12) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:4: TERM_START_CHAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:4: TERM_START_CHAR
 					{
 					mTERM_START_CHAR(); 
 
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:23: '+'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:23: '+'
 					{
 					match('+'); 
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:29: '-'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:29: '-'
 					{
 					match('-'); 
 					}
 					break;
 				case 4 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:35: '='
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:35: '='
 					{
 					match('='); 
 					}
 					break;
 				case 5 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:41: '#'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:41: '#'
 					{
 					match('#'); 
 					}
 					break;
 				case 6 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:496:47: '/'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:495:47: '/'
 					{
 					match('/'); 
 					}
@@ -1259,12 +1259,12 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = DATE_TOKEN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:502:3: ( INT ( INT )? ( '/' | MINUS | '.' ) INT ( INT )? ( '/' | MINUS | '.' ) INT INT ( INT INT )? )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:503:3: INT ( INT )? ( '/' | MINUS | '.' ) INT ( INT )? ( '/' | MINUS | '.' ) INT INT ( INT INT )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:501:3: ( INT ( INT )? ( '/' | MINUS | '.' ) INT ( INT )? ( '/' | MINUS | '.' ) INT INT ( INT INT )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:502:3: INT ( INT )? ( '/' | MINUS | '.' ) INT ( INT )? ( '/' | MINUS | '.' ) INT INT ( INT INT )?
 			{
 			mINT(); 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:503:7: ( INT )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:502:7: ( INT )?
 			int alt13=2;
 			int LA13_0 = input.LA(1);
 			if ( ((LA13_0 >= '0' && LA13_0 <= '9')) ) {
@@ -1272,7 +1272,7 @@ public class ADSLexer extends Lexer {
 			}
 			switch (alt13) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 					{
 					if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 						input.consume();
@@ -1297,7 +1297,7 @@ public class ADSLexer extends Lexer {
 			}
 			mINT(); 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:503:32: ( INT )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:502:32: ( INT )?
 			int alt14=2;
 			int LA14_0 = input.LA(1);
 			if ( ((LA14_0 >= '0' && LA14_0 <= '9')) ) {
@@ -1305,7 +1305,7 @@ public class ADSLexer extends Lexer {
 			}
 			switch (alt14) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 					{
 					if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 						input.consume();
@@ -1332,7 +1332,7 @@ public class ADSLexer extends Lexer {
 
 			mINT(); 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:503:61: ( INT INT )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:502:61: ( INT INT )?
 			int alt15=2;
 			int LA15_0 = input.LA(1);
 			if ( ((LA15_0 >= '0' && LA15_0 <= '9')) ) {
@@ -1340,7 +1340,7 @@ public class ADSLexer extends Lexer {
 			}
 			switch (alt15) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:503:62: INT INT
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:502:62: INT INT
 					{
 					mINT(); 
 
@@ -1367,10 +1367,10 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = NUMBER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:507:3: ( ( INT )+ ( '.' ( INT )+ )? )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:508:3: ( INT )+ ( '.' ( INT )+ )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:506:3: ( ( INT )+ ( '.' ( INT )+ )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:507:3: ( INT )+ ( '.' ( INT )+ )?
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:508:3: ( INT )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:507:3: ( INT )+
 			int cnt16=0;
 			loop16:
 			while (true) {
@@ -1382,7 +1382,7 @@ public class ADSLexer extends Lexer {
 
 				switch (alt16) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 					{
 					if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 						input.consume();
@@ -1403,7 +1403,7 @@ public class ADSLexer extends Lexer {
 				cnt16++;
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:508:8: ( '.' ( INT )+ )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:507:8: ( '.' ( INT )+ )?
 			int alt18=2;
 			int LA18_0 = input.LA(1);
 			if ( (LA18_0=='.') ) {
@@ -1411,10 +1411,10 @@ public class ADSLexer extends Lexer {
 			}
 			switch (alt18) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:508:9: '.' ( INT )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:507:9: '.' ( INT )+
 					{
 					match('.'); 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:508:13: ( INT )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:507:13: ( INT )+
 					int cnt17=0;
 					loop17:
 					while (true) {
@@ -1426,7 +1426,7 @@ public class ADSLexer extends Lexer {
 
 						switch (alt17) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 							{
 							if ( (input.LA(1) >= '0' && input.LA(1) <= '9') ) {
 								input.consume();
@@ -1466,8 +1466,8 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "M_NUMBER"
 	public final void mM_NUMBER() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:511:18: ( NUMBER 'm' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:512:3: NUMBER 'm'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:510:18: ( NUMBER 'm' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:511:3: NUMBER 'm'
 			{
 			mNUMBER(); 
 
@@ -1484,8 +1484,8 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "H_NUMBER"
 	public final void mH_NUMBER() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:514:18: ( NUMBER 'h' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:515:3: NUMBER 'h'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:513:18: ( NUMBER 'h' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:514:3: NUMBER 'h'
 			{
 			mNUMBER(); 
 
@@ -1502,8 +1502,8 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "D_NUMBER"
 	public final void mD_NUMBER() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:517:18: ( NUMBER 'd' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:518:3: NUMBER 'd'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:516:18: ( NUMBER 'd' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:517:3: NUMBER 'd'
 			{
 			mNUMBER(); 
 
@@ -1520,8 +1520,8 @@ public class ADSLexer extends Lexer {
 	// $ANTLR start "S_NUMBER"
 	public final void mS_NUMBER() throws RecognitionException {
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:520:18: ( NUMBER 's' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:521:3: NUMBER 's'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:519:18: ( NUMBER 's' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:520:3: NUMBER 's'
 			{
 			mNUMBER(); 
 
@@ -1540,8 +1540,8 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = HOUR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:524:3: ( INT INT COLON INT INT COLON NUMBER ( PLUS | MINUS ) INT INT COLON INT INT COLON NUMBER )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:525:3: INT INT COLON INT INT COLON NUMBER ( PLUS | MINUS ) INT INT COLON INT INT COLON NUMBER
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:523:3: ( INT INT COLON INT INT COLON NUMBER ( PLUS | MINUS ) INT INT COLON INT INT COLON NUMBER )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:524:3: INT INT COLON INT INT COLON NUMBER ( PLUS | MINUS ) INT INT COLON INT INT COLON NUMBER
 			{
 			mINT(); 
 
@@ -1595,12 +1595,12 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = TERM_NORMAL;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:529:3: ( TERM_START_CHAR ( TERM_CHAR )* )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:530:3: TERM_START_CHAR ( TERM_CHAR )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:528:3: ( TERM_START_CHAR ( TERM_CHAR )* )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:529:3: TERM_START_CHAR ( TERM_CHAR )*
 			{
 			mTERM_START_CHAR(); 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:530:19: ( TERM_CHAR )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:529:19: ( TERM_CHAR )*
 			loop19:
 			while (true) {
 				int alt19=2;
@@ -1611,7 +1611,7 @@ public class ADSLexer extends Lexer {
 
 				switch (alt19) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:530:21: TERM_CHAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:529:21: TERM_CHAR
 					{
 					mTERM_CHAR(); 
 
@@ -1639,14 +1639,14 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = TERM_TRUNCATED;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:534:15: ( ( STAR | QMARK ) ( ( TERM_CHAR )+ ( QMARK | STAR ) )+ ( TERM_CHAR )* | TERM_START_CHAR ( ( TERM_CHAR )* ( QMARK | STAR ) )+ ( TERM_CHAR )* | ( STAR | QMARK ) ( TERM_CHAR )+ )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:533:15: ( ( STAR | QMARK ) ( ( TERM_CHAR )+ ( QMARK | STAR ) )+ ( TERM_CHAR )* | TERM_START_CHAR ( ( TERM_CHAR )* ( QMARK | STAR ) )+ ( TERM_CHAR )* | ( STAR | QMARK ) ( TERM_CHAR )+ )
 			int alt31=3;
 			alt31 = dfa31.predict(input);
 			switch (alt31) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:3: ( STAR | QMARK ) ( ( TERM_CHAR )+ ( QMARK | STAR ) )+ ( TERM_CHAR )*
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:3: ( STAR | QMARK ) ( ( TERM_CHAR )+ ( QMARK | STAR ) )+ ( TERM_CHAR )*
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:3: ( STAR | QMARK )
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:3: ( STAR | QMARK )
 					int alt20=2;
 					int LA20_0 = input.LA(1);
 					if ( (LA20_0=='*') ) {
@@ -1664,14 +1664,14 @@ public class ADSLexer extends Lexer {
 
 					switch (alt20) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:4: STAR
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:4: STAR
 							{
 							mSTAR(); 
 
 							}
 							break;
 						case 2 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:9: QMARK
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:9: QMARK
 							{
 							mQMARK(); 
 
@@ -1680,7 +1680,7 @@ public class ADSLexer extends Lexer {
 
 					}
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:16: ( ( TERM_CHAR )+ ( QMARK | STAR ) )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:16: ( ( TERM_CHAR )+ ( QMARK | STAR ) )+
 					int cnt23=0;
 					loop23:
 					while (true) {
@@ -1688,9 +1688,9 @@ public class ADSLexer extends Lexer {
 						alt23 = dfa23.predict(input);
 						switch (alt23) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:17: ( TERM_CHAR )+ ( QMARK | STAR )
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:17: ( TERM_CHAR )+ ( QMARK | STAR )
 							{
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:17: ( TERM_CHAR )+
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:17: ( TERM_CHAR )+
 							int cnt21=0;
 							loop21:
 							while (true) {
@@ -1702,7 +1702,7 @@ public class ADSLexer extends Lexer {
 
 								switch (alt21) {
 								case 1 :
-									// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:17: TERM_CHAR
+									// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:17: TERM_CHAR
 									{
 									mTERM_CHAR(); 
 
@@ -1717,7 +1717,7 @@ public class ADSLexer extends Lexer {
 								cnt21++;
 							}
 
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:28: ( QMARK | STAR )
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:28: ( QMARK | STAR )
 							int alt22=2;
 							int LA22_0 = input.LA(1);
 							if ( (LA22_0=='?') ) {
@@ -1735,14 +1735,14 @@ public class ADSLexer extends Lexer {
 
 							switch (alt22) {
 								case 1 :
-									// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:29: QMARK
+									// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:29: QMARK
 									{
 									mQMARK(); 
 
 									}
 									break;
 								case 2 :
-									// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:35: STAR
+									// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:35: STAR
 									{
 									mSTAR(); 
 
@@ -1762,7 +1762,7 @@ public class ADSLexer extends Lexer {
 						cnt23++;
 					}
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:43: ( TERM_CHAR )*
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:43: ( TERM_CHAR )*
 					loop24:
 					while (true) {
 						int alt24=2;
@@ -1773,7 +1773,7 @@ public class ADSLexer extends Lexer {
 
 						switch (alt24) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:535:44: TERM_CHAR
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:534:44: TERM_CHAR
 							{
 							mTERM_CHAR(); 
 
@@ -1788,11 +1788,11 @@ public class ADSLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:5: TERM_START_CHAR ( ( TERM_CHAR )* ( QMARK | STAR ) )+ ( TERM_CHAR )*
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:5: TERM_START_CHAR ( ( TERM_CHAR )* ( QMARK | STAR ) )+ ( TERM_CHAR )*
 					{
 					mTERM_START_CHAR(); 
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:21: ( ( TERM_CHAR )* ( QMARK | STAR ) )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:21: ( ( TERM_CHAR )* ( QMARK | STAR ) )+
 					int cnt27=0;
 					loop27:
 					while (true) {
@@ -1800,9 +1800,9 @@ public class ADSLexer extends Lexer {
 						alt27 = dfa27.predict(input);
 						switch (alt27) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:22: ( TERM_CHAR )* ( QMARK | STAR )
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:22: ( TERM_CHAR )* ( QMARK | STAR )
 							{
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:22: ( TERM_CHAR )*
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:22: ( TERM_CHAR )*
 							loop25:
 							while (true) {
 								int alt25=2;
@@ -1813,7 +1813,7 @@ public class ADSLexer extends Lexer {
 
 								switch (alt25) {
 								case 1 :
-									// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:22: TERM_CHAR
+									// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:22: TERM_CHAR
 									{
 									mTERM_CHAR(); 
 
@@ -1825,7 +1825,7 @@ public class ADSLexer extends Lexer {
 								}
 							}
 
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:33: ( QMARK | STAR )
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:33: ( QMARK | STAR )
 							int alt26=2;
 							int LA26_0 = input.LA(1);
 							if ( (LA26_0=='?') ) {
@@ -1843,14 +1843,14 @@ public class ADSLexer extends Lexer {
 
 							switch (alt26) {
 								case 1 :
-									// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:34: QMARK
+									// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:34: QMARK
 									{
 									mQMARK(); 
 
 									}
 									break;
 								case 2 :
-									// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:40: STAR
+									// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:40: STAR
 									{
 									mSTAR(); 
 
@@ -1870,7 +1870,7 @@ public class ADSLexer extends Lexer {
 						cnt27++;
 					}
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:48: ( TERM_CHAR )*
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:48: ( TERM_CHAR )*
 					loop28:
 					while (true) {
 						int alt28=2;
@@ -1881,7 +1881,7 @@ public class ADSLexer extends Lexer {
 
 						switch (alt28) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:536:49: TERM_CHAR
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:535:49: TERM_CHAR
 							{
 							mTERM_CHAR(); 
 
@@ -1896,9 +1896,9 @@ public class ADSLexer extends Lexer {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:537:5: ( STAR | QMARK ) ( TERM_CHAR )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:536:5: ( STAR | QMARK ) ( TERM_CHAR )+
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:537:5: ( STAR | QMARK )
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:536:5: ( STAR | QMARK )
 					int alt29=2;
 					int LA29_0 = input.LA(1);
 					if ( (LA29_0=='*') ) {
@@ -1916,14 +1916,14 @@ public class ADSLexer extends Lexer {
 
 					switch (alt29) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:537:6: STAR
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:536:6: STAR
 							{
 							mSTAR(); 
 
 							}
 							break;
 						case 2 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:537:11: QMARK
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:536:11: QMARK
 							{
 							mQMARK(); 
 
@@ -1932,7 +1932,7 @@ public class ADSLexer extends Lexer {
 
 					}
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:537:18: ( TERM_CHAR )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:536:18: ( TERM_CHAR )+
 					int cnt30=0;
 					loop30:
 					while (true) {
@@ -1944,7 +1944,7 @@ public class ADSLexer extends Lexer {
 
 						switch (alt30) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:537:18: TERM_CHAR
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:536:18: TERM_CHAR
 							{
 							mTERM_CHAR(); 
 
@@ -1977,12 +1977,12 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = PHRASE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:542:3: ( DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' | '?' | '*' ) )+ DQUOTE )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:543:3: DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' | '?' | '*' ) )+ DQUOTE
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:541:3: ( DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' | '?' | '*' ) )+ DQUOTE )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:542:3: DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' | '?' | '*' ) )+ DQUOTE
 			{
 			mDQUOTE(); 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:543:10: ( ESC_CHAR |~ ( '\\\"' | '\\\\' | '?' | '*' ) )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:542:10: ( ESC_CHAR |~ ( '\\\"' | '\\\\' | '?' | '*' ) )+
 			int cnt32=0;
 			loop32:
 			while (true) {
@@ -1997,14 +1997,14 @@ public class ADSLexer extends Lexer {
 
 				switch (alt32) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:543:11: ESC_CHAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:542:11: ESC_CHAR
 					{
 					mESC_CHAR(); 
 
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:543:20: ~ ( '\\\"' | '\\\\' | '?' | '*' )
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:542:20: ~ ( '\\\"' | '\\\\' | '?' | '*' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= ')')||(input.LA(1) >= '+' && input.LA(1) <= '>')||(input.LA(1) >= '@' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2043,12 +2043,12 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = PHRASE_ANYTHING;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:546:17: ( DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' ) )+ DQUOTE )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:547:3: DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' ) )+ DQUOTE
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:545:17: ( DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' ) )+ DQUOTE )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:546:3: DQUOTE ( ESC_CHAR |~ ( '\\\"' | '\\\\' ) )+ DQUOTE
 			{
 			mDQUOTE(); 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:547:10: ( ESC_CHAR |~ ( '\\\"' | '\\\\' ) )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:546:10: ( ESC_CHAR |~ ( '\\\"' | '\\\\' ) )+
 			int cnt33=0;
 			loop33:
 			while (true) {
@@ -2063,14 +2063,14 @@ public class ADSLexer extends Lexer {
 
 				switch (alt33) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:547:11: ESC_CHAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:546:11: ESC_CHAR
 					{
 					mESC_CHAR(); 
 
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:547:20: ~ ( '\\\"' | '\\\\' )
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:546:20: ~ ( '\\\"' | '\\\\' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '!')||(input.LA(1) >= '#' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2109,12 +2109,12 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = LOCAL_PARAMS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:550:15: ( '{!' ( ESC_CHAR |~ ( '}' | '\\\\' ) )+ '}' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:551:3: '{!' ( ESC_CHAR |~ ( '}' | '\\\\' ) )+ '}'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:549:15: ( '{!' ( ESC_CHAR |~ ( '}' | '\\\\' ) )+ '}' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:550:3: '{!' ( ESC_CHAR |~ ( '}' | '\\\\' ) )+ '}'
 			{
 			match("{!"); 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:551:8: ( ESC_CHAR |~ ( '}' | '\\\\' ) )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:550:8: ( ESC_CHAR |~ ( '}' | '\\\\' ) )+
 			int cnt34=0;
 			loop34:
 			while (true) {
@@ -2129,14 +2129,14 @@ public class ADSLexer extends Lexer {
 
 				switch (alt34) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:551:9: ESC_CHAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:550:9: ESC_CHAR
 					{
 					mESC_CHAR(); 
 
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:551:18: ~ ( '}' | '\\\\' )
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:550:18: ~ ( '}' | '\\\\' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '|')||(input.LA(1) >= '~' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2174,11 +2174,11 @@ public class ADSLexer extends Lexer {
 		try {
 			int _type = REGEX;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:553:7: ( '/' ( ESC_CHAR |~ ( '/' | '\\\\' ) )+ '/' )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:554:3: '/' ( ESC_CHAR |~ ( '/' | '\\\\' ) )+ '/'
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:552:7: ( '/' ( ESC_CHAR |~ ( '/' | '\\\\' ) )+ '/' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:553:3: '/' ( ESC_CHAR |~ ( '/' | '\\\\' ) )+ '/'
 			{
 			match('/'); 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:554:7: ( ESC_CHAR |~ ( '/' | '\\\\' ) )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:553:7: ( ESC_CHAR |~ ( '/' | '\\\\' ) )+
 			int cnt35=0;
 			loop35:
 			while (true) {
@@ -2193,14 +2193,14 @@ public class ADSLexer extends Lexer {
 
 				switch (alt35) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:554:8: ESC_CHAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:553:8: ESC_CHAR
 					{
 					mESC_CHAR(); 
 
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:554:17: ~ ( '/' | '\\\\' )
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:553:17: ~ ( '/' | '\\\\' )
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '.')||(input.LA(1) >= '0' && input.LA(1) <= '[')||(input.LA(1) >= ']' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -2235,271 +2235,271 @@ public class ADSLexer extends Lexer {
 
 	@Override
 	public void mTokens() throws RecognitionException {
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:8: ( T__70 | T__71 | T__72 | T__73 | T__74 | T__75 | LPAREN | RPAREN | LBRACK | RBRACK | COLON | PLUS | MINUS | STAR | QMARK | CARAT | TILDE | DQUOTE | COMMA | SEMICOLON | TO | AND | OR | NOT | NEAR | AUTHOR_SEARCH | DATE_RANGE | FUNC_NAME | WS | DATE_TOKEN | NUMBER | HOUR | TERM_NORMAL | TERM_TRUNCATED | PHRASE | PHRASE_ANYTHING | LOCAL_PARAMS | REGEX )
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:8: ( T__70 | T__71 | T__72 | T__73 | T__74 | T__75 | LPAREN | RPAREN | LBRACK | RBRACK | COLON | PLUS | MINUS | STAR | QMARK | CARAT | TILDE | DQUOTE | COMMA | SEMICOLON | TO | AND | OR | NOT | NEAR | AUTHOR_SEARCH | DATE_RANGE | FUNC_NAME | WS | DATE_TOKEN | NUMBER | HOUR | TERM_NORMAL | TERM_TRUNCATED | PHRASE | PHRASE_ANYTHING | LOCAL_PARAMS | REGEX )
 		int alt36=38;
 		alt36 = dfa36.predict(input);
 		switch (alt36) {
 			case 1 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:10: T__70
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:10: T__70
 				{
 				mT__70(); 
 
 				}
 				break;
 			case 2 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:16: T__71
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:16: T__71
 				{
 				mT__71(); 
 
 				}
 				break;
 			case 3 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:22: T__72
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:22: T__72
 				{
 				mT__72(); 
 
 				}
 				break;
 			case 4 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:28: T__73
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:28: T__73
 				{
 				mT__73(); 
 
 				}
 				break;
 			case 5 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:34: T__74
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:34: T__74
 				{
 				mT__74(); 
 
 				}
 				break;
 			case 6 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:40: T__75
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:40: T__75
 				{
 				mT__75(); 
 
 				}
 				break;
 			case 7 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:46: LPAREN
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:46: LPAREN
 				{
 				mLPAREN(); 
 
 				}
 				break;
 			case 8 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:53: RPAREN
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:53: RPAREN
 				{
 				mRPAREN(); 
 
 				}
 				break;
 			case 9 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:60: LBRACK
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:60: LBRACK
 				{
 				mLBRACK(); 
 
 				}
 				break;
 			case 10 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:67: RBRACK
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:67: RBRACK
 				{
 				mRBRACK(); 
 
 				}
 				break;
 			case 11 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:74: COLON
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:74: COLON
 				{
 				mCOLON(); 
 
 				}
 				break;
 			case 12 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:80: PLUS
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:80: PLUS
 				{
 				mPLUS(); 
 
 				}
 				break;
 			case 13 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:85: MINUS
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:85: MINUS
 				{
 				mMINUS(); 
 
 				}
 				break;
 			case 14 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:91: STAR
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:91: STAR
 				{
 				mSTAR(); 
 
 				}
 				break;
 			case 15 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:96: QMARK
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:96: QMARK
 				{
 				mQMARK(); 
 
 				}
 				break;
 			case 16 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:102: CARAT
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:102: CARAT
 				{
 				mCARAT(); 
 
 				}
 				break;
 			case 17 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:108: TILDE
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:108: TILDE
 				{
 				mTILDE(); 
 
 				}
 				break;
 			case 18 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:114: DQUOTE
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:114: DQUOTE
 				{
 				mDQUOTE(); 
 
 				}
 				break;
 			case 19 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:121: COMMA
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:121: COMMA
 				{
 				mCOMMA(); 
 
 				}
 				break;
 			case 20 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:127: SEMICOLON
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:127: SEMICOLON
 				{
 				mSEMICOLON(); 
 
 				}
 				break;
 			case 21 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:137: TO
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:137: TO
 				{
 				mTO(); 
 
 				}
 				break;
 			case 22 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:140: AND
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:140: AND
 				{
 				mAND(); 
 
 				}
 				break;
 			case 23 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:144: OR
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:144: OR
 				{
 				mOR(); 
 
 				}
 				break;
 			case 24 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:147: NOT
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:147: NOT
 				{
 				mNOT(); 
 
 				}
 				break;
 			case 25 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:151: NEAR
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:151: NEAR
 				{
 				mNEAR(); 
 
 				}
 				break;
 			case 26 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:156: AUTHOR_SEARCH
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:156: AUTHOR_SEARCH
 				{
 				mAUTHOR_SEARCH(); 
 
 				}
 				break;
 			case 27 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:170: DATE_RANGE
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:170: DATE_RANGE
 				{
 				mDATE_RANGE(); 
 
 				}
 				break;
 			case 28 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:181: FUNC_NAME
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:181: FUNC_NAME
 				{
 				mFUNC_NAME(); 
 
 				}
 				break;
 			case 29 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:191: WS
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:191: WS
 				{
 				mWS(); 
 
 				}
 				break;
 			case 30 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:194: DATE_TOKEN
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:194: DATE_TOKEN
 				{
 				mDATE_TOKEN(); 
 
 				}
 				break;
 			case 31 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:205: NUMBER
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:205: NUMBER
 				{
 				mNUMBER(); 
 
 				}
 				break;
 			case 32 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:212: HOUR
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:212: HOUR
 				{
 				mHOUR(); 
 
 				}
 				break;
 			case 33 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:217: TERM_NORMAL
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:217: TERM_NORMAL
 				{
 				mTERM_NORMAL(); 
 
 				}
 				break;
 			case 34 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:229: TERM_TRUNCATED
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:229: TERM_TRUNCATED
 				{
 				mTERM_TRUNCATED(); 
 
 				}
 				break;
 			case 35 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:244: PHRASE
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:244: PHRASE
 				{
 				mPHRASE(); 
 
 				}
 				break;
 			case 36 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:251: PHRASE_ANYTHING
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:251: PHRASE_ANYTHING
 				{
 				mPHRASE_ANYTHING(); 
 
 				}
 				break;
 			case 37 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:267: LOCAL_PARAMS
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:267: LOCAL_PARAMS
 				{
 				mLOCAL_PARAMS(); 
 
 				}
 				break;
 			case 38 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:1:280: REGEX
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:1:280: REGEX
 				{
 				mREGEX(); 
 
@@ -2594,7 +2594,7 @@ public class ADSLexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "534:1: TERM_TRUNCATED : ( ( STAR | QMARK ) ( ( TERM_CHAR )+ ( QMARK | STAR ) )+ ( TERM_CHAR )* | TERM_START_CHAR ( ( TERM_CHAR )* ( QMARK | STAR ) )+ ( TERM_CHAR )* | ( STAR | QMARK ) ( TERM_CHAR )+ );";
+			return "533:1: TERM_TRUNCATED : ( ( STAR | QMARK ) ( ( TERM_CHAR )+ ( QMARK | STAR ) )+ ( TERM_CHAR )* | TERM_START_CHAR ( ( TERM_CHAR )* ( QMARK | STAR ) )+ ( TERM_CHAR )* | ( STAR | QMARK ) ( TERM_CHAR )+ );";
 		}
 		@Override
 		public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
@@ -2829,7 +2829,7 @@ public class ADSLexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "()+ loopback of 535:16: ( ( TERM_CHAR )+ ( QMARK | STAR ) )+";
+			return "()+ loopback of 534:16: ( ( TERM_CHAR )+ ( QMARK | STAR ) )+";
 		}
 		@Override
 		public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
@@ -3042,7 +3042,7 @@ public class ADSLexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "()+ loopback of 536:21: ( ( TERM_CHAR )* ( QMARK | STAR ) )+";
+			return "()+ loopback of 535:21: ( ( TERM_CHAR )* ( QMARK | STAR ) )+";
 		}
 		@Override
 		public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {

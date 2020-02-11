@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g 2020-02-10 19:29:04
+// $ANTLR 3.5.2 /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g 2016-11-01 17:36:02
 
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 
@@ -126,7 +126,7 @@ public class ADSParser extends UnforgivingParser {
 		return adaptor;
 	}
 	@Override public String[] getTokenNames() { return ADSParser.tokenNames; }
-	@Override public String getGrammarFileName() { return "/dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g"; }
+	@Override public String getGrammarFileName() { return "/dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g"; }
 
 
 	public static class mainQ_return extends ParserRuleReturnScope {
@@ -137,7 +137,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "mainQ"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:44:1: mainQ : ( clauseOr )+ EOF -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:44:1: mainQ : ( clauseOr )+ EOF -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
 	public final ADSParser.mainQ_return mainQ() throws RecognitionException {
 		ADSParser.mainQ_return retval = new ADSParser.mainQ_return();
 		retval.start = input.LT(1);
@@ -152,10 +152,10 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_clauseOr=new RewriteRuleSubtreeStream(adaptor,"rule clauseOr");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:44:7: ( ( clauseOr )+ EOF -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:45:3: ( clauseOr )+ EOF
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:44:7: ( ( clauseOr )+ EOF -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:45:3: ( clauseOr )+ EOF
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:45:3: ( clauseOr )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:45:3: ( clauseOr )+
 			int cnt1=0;
 			loop1:
 			while (true) {
@@ -167,7 +167,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt1) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:45:3: clauseOr
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:45:3: clauseOr
 					{
 					pushFollow(FOLLOW_clauseOr_in_mainQ188);
 					clauseOr1=clauseOr();
@@ -203,7 +203,7 @@ public class ADSParser extends UnforgivingParser {
 			root_0 = (Object)adaptor.nil();
 			// 45:17: -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 			{
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:45:20: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:45:20: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 				{
 				Object root_1 = (Object)adaptor.nil();
 				root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "DEFOP"), root_1);
@@ -254,7 +254,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "clauseOr"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:49:1: clauseOr : (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:49:1: clauseOr : (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* ;
 	public final ADSParser.clauseOr_return clauseOr() throws RecognitionException {
 		ADSParser.clauseOr_return retval = new ADSParser.clauseOr_return();
 		retval.start = input.LT(1);
@@ -269,11 +269,11 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_clauseAnd=new RewriteRuleSubtreeStream(adaptor,"rule clauseAnd");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:50:3: ( (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:50:5: (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:50:3: ( (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )* )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:50:5: (first= clauseAnd -> $first) ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:50:5: (first= clauseAnd -> $first)
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:50:6: first= clauseAnd
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:50:5: (first= clauseAnd -> $first)
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:50:6: first= clauseAnd
 			{
 			pushFollow(FOLLOW_clauseAnd_in_clauseOr224);
 			first=clauseAnd();
@@ -304,7 +304,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:50:33: ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:50:33: ( or others= clauseAnd -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ ) )*
 			loop2:
 			while (true) {
 				int alt2=2;
@@ -315,7 +315,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt2) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:50:34: or others= clauseAnd
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:50:34: or others= clauseAnd
 					{
 					pushFollow(FOLLOW_or_in_clauseOr233);
 					or3=or();
@@ -341,7 +341,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 50:54: -> ^( OPERATOR[\"OR\"] ( clauseAnd )+ )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:50:57: ^( OPERATOR[\"OR\"] ( clauseAnd )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:50:57: ^( OPERATOR[\"OR\"] ( clauseAnd )+ )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "OR"), root_1);
@@ -400,7 +400,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "clauseAnd"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:53:1: clauseAnd : (first= clauseNot -> $first) ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )* ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:53:1: clauseAnd : (first= clauseNot -> $first) ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )* ;
 	public final ADSParser.clauseAnd_return clauseAnd() throws RecognitionException {
 		ADSParser.clauseAnd_return retval = new ADSParser.clauseAnd_return();
 		retval.start = input.LT(1);
@@ -415,11 +415,11 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_clauseNot=new RewriteRuleSubtreeStream(adaptor,"rule clauseNot");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:54:3: ( (first= clauseNot -> $first) ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )* )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:54:5: (first= clauseNot -> $first) ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:54:3: ( (first= clauseNot -> $first) ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )* )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:54:5: (first= clauseNot -> $first) ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )*
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:54:5: (first= clauseNot -> $first)
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:54:6: first= clauseNot
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:54:5: (first= clauseNot -> $first)
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:54:6: first= clauseNot
 			{
 			pushFollow(FOLLOW_clauseNot_in_clauseAnd266);
 			first=clauseNot();
@@ -450,7 +450,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:54:34: ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:54:34: ( and others= clauseNot -> ^( OPERATOR[\"AND\"] ( clauseNot )+ ) )*
 			loop3:
 			while (true) {
 				int alt3=2;
@@ -461,7 +461,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt3) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:54:35: and others= clauseNot
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:54:35: and others= clauseNot
 					{
 					pushFollow(FOLLOW_and_in_clauseAnd276);
 					and4=and();
@@ -487,7 +487,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 54:56: -> ^( OPERATOR[\"AND\"] ( clauseNot )+ )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:54:59: ^( OPERATOR[\"AND\"] ( clauseNot )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:54:59: ^( OPERATOR[\"AND\"] ( clauseNot )+ )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "AND"), root_1);
@@ -546,7 +546,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "clauseNot"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:57:1: clauseNot : (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:57:1: clauseNot : (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* ;
 	public final ADSParser.clauseNot_return clauseNot() throws RecognitionException {
 		ADSParser.clauseNot_return retval = new ADSParser.clauseNot_return();
 		retval.start = input.LT(1);
@@ -561,11 +561,11 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_clauseNear=new RewriteRuleSubtreeStream(adaptor,"rule clauseNear");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:58:3: ( (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:58:5: (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:58:3: ( (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )* )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:58:5: (first= clauseNear -> $first) ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:58:5: (first= clauseNear -> $first)
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:58:6: first= clauseNear
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:58:5: (first= clauseNear -> $first)
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:58:6: first= clauseNear
 			{
 			pushFollow(FOLLOW_clauseNear_in_clauseNot309);
 			first=clauseNear();
@@ -596,7 +596,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:58:34: ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:58:34: ( not others= clauseNear -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ ) )*
 			loop4:
 			while (true) {
 				int alt4=2;
@@ -614,7 +614,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt4) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:58:35: not others= clauseNear
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:58:35: not others= clauseNear
 					{
 					pushFollow(FOLLOW_not_in_clauseNot318);
 					not5=not();
@@ -640,7 +640,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 58:57: -> ^( OPERATOR[\"NOT\"] ( clauseNear )+ )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:58:60: ^( OPERATOR[\"NOT\"] ( clauseNear )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:58:60: ^( OPERATOR[\"NOT\"] ( clauseNear )+ )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "NOT"), root_1);
@@ -699,7 +699,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "clauseNear"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:61:1: clauseNear : (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:61:1: clauseNear : (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* ;
 	public final ADSParser.clauseNear_return clauseNear() throws RecognitionException {
 		ADSParser.clauseNear_return retval = new ADSParser.clauseNear_return();
 		retval.start = input.LT(1);
@@ -714,11 +714,11 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_near=new RewriteRuleSubtreeStream(adaptor,"rule near");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:62:3: ( (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:62:5: (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:62:3: ( (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )* )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:62:5: (first= clauseBasic -> $first) ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:62:5: (first= clauseBasic -> $first)
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:62:6: first= clauseBasic
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:62:5: (first= clauseBasic -> $first)
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:62:6: first= clauseBasic
 			{
 			pushFollow(FOLLOW_clauseBasic_in_clauseNear353);
 			first=clauseBasic();
@@ -749,7 +749,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:62:35: ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:62:35: ( near others= clauseBasic -> ^( near ( clauseBasic )+ ) )*
 			loop5:
 			while (true) {
 				int alt5=2;
@@ -760,7 +760,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt5) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:62:36: near others= clauseBasic
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:62:36: near others= clauseBasic
 					{
 					pushFollow(FOLLOW_near_in_clauseNear362);
 					near6=near();
@@ -786,7 +786,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 62:60: -> ^( near ( clauseBasic )+ )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:62:63: ^( near ( clauseBasic )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:62:63: ^( near ( clauseBasic )+ )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot(stream_near.nextNode(), root_1);
@@ -845,7 +845,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "clauseBasic"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:65:1: clauseBasic : ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ^( CLAUSE ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) | atom );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:65:1: clauseBasic : ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ^( CLAUSE ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) | atom );
 	public final ADSParser.clauseBasic_return clauseBasic() throws RecognitionException {
 		ADSParser.clauseBasic_return retval = new ADSParser.clauseBasic_return();
 		retval.start = input.LT(1);
@@ -887,7 +887,7 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_func_name=new RewriteRuleSubtreeStream(adaptor,"rule func_name");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:66:3: ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ^( CLAUSE ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) | atom )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:66:3: ( ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) ) ) | ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )? -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) ) | ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN -> ^( CLAUSE ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) | atom )
 			int alt16=5;
 			int LA16_0 = input.LA(1);
 			if ( (LA16_0==PLUS) ) {
@@ -996,9 +996,9 @@ public class ADSParser extends UnforgivingParser {
 
 			switch (alt16) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:4: ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:4: ( ( lmodifier )? func_name )=> ( lmodifier )? func_name ( clauseOr )+ RPAREN ( rmodifier )?
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:30: ( lmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:30: ( lmodifier )?
 					int alt6=2;
 					int LA6_0 = input.LA(1);
 					if ( (LA6_0==MINUS||LA6_0==PLUS||LA6_0==70||LA6_0==72) ) {
@@ -1006,7 +1006,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt6) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:30: lmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:30: lmodifier
 							{
 							pushFollow(FOLLOW_lmodifier_in_clauseBasic407);
 							lmodifier7=lmodifier();
@@ -1023,7 +1023,7 @@ public class ADSParser extends UnforgivingParser {
 					state._fsp--;
 					if (state.failed) return retval;
 					if ( state.backtracking==0 ) stream_func_name.add(func_name8.getTree());
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:51: ( clauseOr )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:51: ( clauseOr )+
 					int cnt7=0;
 					loop7:
 					while (true) {
@@ -1035,7 +1035,7 @@ public class ADSParser extends UnforgivingParser {
 
 						switch (alt7) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:51: clauseOr
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:51: clauseOr
 							{
 							pushFollow(FOLLOW_clauseOr_in_clauseBasic412);
 							clauseOr9=clauseOr();
@@ -1057,7 +1057,7 @@ public class ADSParser extends UnforgivingParser {
 					RPAREN10=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_clauseBasic416); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN10);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:69: ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:69: ( rmodifier )?
 					int alt8=2;
 					int LA8_0 = input.LA(1);
 					if ( (LA8_0==CARAT||LA8_0==TILDE) ) {
@@ -1065,7 +1065,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt8) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:69: rmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:69: rmodifier
 							{
 							pushFollow(FOLLOW_rmodifier_in_clauseBasic418);
 							rmodifier11=rmodifier();
@@ -1078,7 +1078,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: lmodifier, RPAREN, clauseOr, func_name, rmodifier
+					// elements: rmodifier, clauseOr, lmodifier, func_name, RPAREN
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -1091,36 +1091,36 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 68:4: -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) ) )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:68:7: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:68:7: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) ) )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(CLAUSE, "CLAUSE"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:68:16: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:68:16: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) ) )
 						{
 						Object root_2 = (Object)adaptor.nil();
 						root_2 = (Object)adaptor.becomeRoot((Object)adaptor.create(MODIFIER, "MODIFIER"), root_2);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:68:27: ( lmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:68:27: ( lmodifier )?
 						if ( stream_lmodifier.hasNext() ) {
 							adaptor.addChild(root_2, stream_lmodifier.nextTree());
 						}
 						stream_lmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:68:38: ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:68:38: ^( TMODIFIER ( rmodifier )? ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN ) )
 						{
 						Object root_3 = (Object)adaptor.nil();
 						root_3 = (Object)adaptor.becomeRoot((Object)adaptor.create(TMODIFIER, "TMODIFIER"), root_3);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:68:50: ( rmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:68:50: ( rmodifier )?
 						if ( stream_rmodifier.hasNext() ) {
 							adaptor.addChild(root_3, stream_rmodifier.nextTree());
 						}
 						stream_rmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:68:61: ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:68:61: ^( QFUNC func_name ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) RPAREN )
 						{
 						Object root_4 = (Object)adaptor.nil();
 						root_4 = (Object)adaptor.becomeRoot((Object)adaptor.create(QFUNC, "QFUNC"), root_4);
 						adaptor.addChild(root_4, stream_func_name.nextTree());
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:68:79: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:68:79: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 						{
 						Object root_5 = (Object)adaptor.nil();
 						root_5 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "DEFOP"), root_5);
@@ -1157,9 +1157,9 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:5: ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:5: ( lmodifier LPAREN ( clauseOr )+ RPAREN )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:44: ( lmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:44: ( lmodifier )?
 					int alt9=2;
 					int LA9_0 = input.LA(1);
 					if ( (LA9_0==MINUS||LA9_0==PLUS||LA9_0==70||LA9_0==72) ) {
@@ -1167,7 +1167,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt9) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:44: lmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:44: lmodifier
 							{
 							pushFollow(FOLLOW_lmodifier_in_clauseBasic477);
 							lmodifier12=lmodifier();
@@ -1182,7 +1182,7 @@ public class ADSParser extends UnforgivingParser {
 					LPAREN13=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_clauseBasic480); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN13);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:62: ( clauseOr )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:62: ( clauseOr )+
 					int cnt10=0;
 					loop10:
 					while (true) {
@@ -1194,7 +1194,7 @@ public class ADSParser extends UnforgivingParser {
 
 						switch (alt10) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:62: clauseOr
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:62: clauseOr
 							{
 							pushFollow(FOLLOW_clauseOr_in_clauseBasic482);
 							clauseOr14=clauseOr();
@@ -1216,7 +1216,7 @@ public class ADSParser extends UnforgivingParser {
 					RPAREN15=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_clauseBasic485); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN15);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:79: ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:79: ( rmodifier )?
 					int alt11=2;
 					int LA11_0 = input.LA(1);
 					if ( (LA11_0==CARAT||LA11_0==TILDE) ) {
@@ -1224,7 +1224,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt11) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:79: rmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:79: rmodifier
 							{
 							pushFollow(FOLLOW_rmodifier_in_clauseBasic487);
 							rmodifier16=rmodifier();
@@ -1250,31 +1250,31 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 70:4: -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:70:7: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:70:7: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(CLAUSE, "CLAUSE"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:70:16: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:70:16: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
 						{
 						Object root_2 = (Object)adaptor.nil();
 						root_2 = (Object)adaptor.becomeRoot((Object)adaptor.create(MODIFIER, "MODIFIER"), root_2);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:70:27: ( lmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:70:27: ( lmodifier )?
 						if ( stream_lmodifier.hasNext() ) {
 							adaptor.addChild(root_2, stream_lmodifier.nextTree());
 						}
 						stream_lmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:70:38: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:70:38: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
 						{
 						Object root_3 = (Object)adaptor.nil();
 						root_3 = (Object)adaptor.becomeRoot((Object)adaptor.create(TMODIFIER, "TMODIFIER"), root_3);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:70:50: ( rmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:70:50: ( rmodifier )?
 						if ( stream_rmodifier.hasNext() ) {
 							adaptor.addChild(root_3, stream_rmodifier.nextTree());
 						}
 						stream_rmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:70:61: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:70:61: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 						{
 						Object root_4 = (Object)adaptor.nil();
 						root_4 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "DEFOP"), root_4);
@@ -1307,9 +1307,9 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:5: ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:5: ( LPAREN ( clauseOr )+ RPAREN rmodifier )=> ( lmodifier )? LPAREN ( clauseOr )+ RPAREN ( rmodifier )?
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:43: ( lmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:43: ( lmodifier )?
 					int alt12=2;
 					int LA12_0 = input.LA(1);
 					if ( (LA12_0==MINUS||LA12_0==PLUS||LA12_0==70||LA12_0==72) ) {
@@ -1317,7 +1317,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt12) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:43: lmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:43: lmodifier
 							{
 							pushFollow(FOLLOW_lmodifier_in_clauseBasic539);
 							lmodifier17=lmodifier();
@@ -1332,7 +1332,7 @@ public class ADSParser extends UnforgivingParser {
 					LPAREN18=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_clauseBasic542); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN18);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:61: ( clauseOr )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:61: ( clauseOr )+
 					int cnt13=0;
 					loop13:
 					while (true) {
@@ -1344,7 +1344,7 @@ public class ADSParser extends UnforgivingParser {
 
 						switch (alt13) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:61: clauseOr
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:61: clauseOr
 							{
 							pushFollow(FOLLOW_clauseOr_in_clauseBasic544);
 							clauseOr19=clauseOr();
@@ -1366,7 +1366,7 @@ public class ADSParser extends UnforgivingParser {
 					RPAREN20=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_clauseBasic547); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN20);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:78: ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:78: ( rmodifier )?
 					int alt14=2;
 					int LA14_0 = input.LA(1);
 					if ( (LA14_0==CARAT||LA14_0==TILDE) ) {
@@ -1374,7 +1374,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt14) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:78: rmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:78: rmodifier
 							{
 							pushFollow(FOLLOW_rmodifier_in_clauseBasic549);
 							rmodifier21=rmodifier();
@@ -1387,7 +1387,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: lmodifier, rmodifier, clauseOr
+					// elements: rmodifier, lmodifier, clauseOr
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -1400,31 +1400,31 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 72:4: -> ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:72:7: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:72:7: ^( CLAUSE ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) ) )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(CLAUSE, "CLAUSE"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:72:16: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:72:16: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ) )
 						{
 						Object root_2 = (Object)adaptor.nil();
 						root_2 = (Object)adaptor.becomeRoot((Object)adaptor.create(MODIFIER, "MODIFIER"), root_2);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:72:27: ( lmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:72:27: ( lmodifier )?
 						if ( stream_lmodifier.hasNext() ) {
 							adaptor.addChild(root_2, stream_lmodifier.nextTree());
 						}
 						stream_lmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:72:38: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:72:38: ^( TMODIFIER ( rmodifier )? ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
 						{
 						Object root_3 = (Object)adaptor.nil();
 						root_3 = (Object)adaptor.becomeRoot((Object)adaptor.create(TMODIFIER, "TMODIFIER"), root_3);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:72:50: ( rmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:72:50: ( rmodifier )?
 						if ( stream_rmodifier.hasNext() ) {
 							adaptor.addChild(root_3, stream_rmodifier.nextTree());
 						}
 						stream_rmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:72:61: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:72:61: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 						{
 						Object root_4 = (Object)adaptor.nil();
 						root_4 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "DEFOP"), root_4);
@@ -1457,12 +1457,12 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 4 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:73:5: ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:73:5: ( LPAREN )=> LPAREN ( clauseOr )+ RPAREN
 					{
 					LPAREN22=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_clauseBasic595); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN22);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:73:24: ( clauseOr )+
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:73:24: ( clauseOr )+
 					int cnt15=0;
 					loop15:
 					while (true) {
@@ -1474,7 +1474,7 @@ public class ADSParser extends UnforgivingParser {
 
 						switch (alt15) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:73:24: clauseOr
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:73:24: clauseOr
 							{
 							pushFollow(FOLLOW_clauseOr_in_clauseBasic597);
 							clauseOr23=clauseOr();
@@ -1510,11 +1510,11 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 74:5: -> ^( CLAUSE ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:74:8: ^( CLAUSE ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:74:8: ^( CLAUSE ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(CLAUSE, "CLAUSE"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:74:17: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:74:17: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 						{
 						Object root_2 = (Object)adaptor.nil();
 						root_2 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "DEFOP"), root_2);
@@ -1541,7 +1541,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 5 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:75:5: atom
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:75:5: atom
 					{
 					root_0 = (Object)adaptor.nil();
 
@@ -1584,7 +1584,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "atom"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:79:1: atom : ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:79:1: atom : ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) );
 	public final ADSParser.atom_return atom() throws RecognitionException {
 		ADSParser.atom_return retval = new ADSParser.atom_return();
 		retval.start = input.LT(1);
@@ -1607,7 +1607,7 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_value=new RewriteRuleSubtreeStream(adaptor,"rule value");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:80:3: ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:80:3: ( ( lmodifier )? field multi_value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) ) | ( lmodifier )? ( field )? value ( rmodifier )? -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) ) )
 			int alt22=2;
 			switch ( input.LA(1) ) {
 			case PLUS:
@@ -1966,9 +1966,9 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt22) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:81:3: ( lmodifier )? field multi_value ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:81:3: ( lmodifier )? field multi_value ( rmodifier )?
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:81:3: ( lmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:81:3: ( lmodifier )?
 					int alt17=2;
 					int LA17_0 = input.LA(1);
 					if ( (LA17_0==MINUS||LA17_0==PLUS||LA17_0==70||LA17_0==72) ) {
@@ -1976,7 +1976,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt17) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:81:3: lmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:81:3: lmodifier
 							{
 							pushFollow(FOLLOW_lmodifier_in_atom648);
 							lmodifier26=lmodifier();
@@ -1998,7 +1998,7 @@ public class ADSParser extends UnforgivingParser {
 					state._fsp--;
 					if (state.failed) return retval;
 					if ( state.backtracking==0 ) stream_multi_value.add(multi_value28.getTree());
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:81:32: ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:81:32: ( rmodifier )?
 					int alt18=2;
 					int LA18_0 = input.LA(1);
 					if ( (LA18_0==CARAT||LA18_0==TILDE) ) {
@@ -2006,7 +2006,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt18) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:81:32: rmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:81:32: rmodifier
 							{
 							pushFollow(FOLLOW_rmodifier_in_atom655);
 							rmodifier29=rmodifier();
@@ -2019,7 +2019,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: lmodifier, rmodifier, field, multi_value
+					// elements: rmodifier, field, multi_value, lmodifier
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -2032,27 +2032,27 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 82:4: -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:82:7: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:82:7: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) ) )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(MODIFIER, "MODIFIER"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:82:18: ( lmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:82:18: ( lmodifier )?
 						if ( stream_lmodifier.hasNext() ) {
 							adaptor.addChild(root_1, stream_lmodifier.nextTree());
 						}
 						stream_lmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:82:29: ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:82:29: ^( TMODIFIER ( rmodifier )? ^( FIELD field multi_value ) )
 						{
 						Object root_2 = (Object)adaptor.nil();
 						root_2 = (Object)adaptor.becomeRoot((Object)adaptor.create(TMODIFIER, "TMODIFIER"), root_2);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:82:41: ( rmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:82:41: ( rmodifier )?
 						if ( stream_rmodifier.hasNext() ) {
 							adaptor.addChild(root_2, stream_rmodifier.nextTree());
 						}
 						stream_rmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:82:52: ^( FIELD field multi_value )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:82:52: ^( FIELD field multi_value )
 						{
 						Object root_3 = (Object)adaptor.nil();
 						root_3 = (Object)adaptor.becomeRoot((Object)adaptor.create(FIELD, "FIELD"), root_3);
@@ -2076,9 +2076,9 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:83:5: ( lmodifier )? ( field )? value ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:83:5: ( lmodifier )? ( field )? value ( rmodifier )?
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:83:5: ( lmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:83:5: ( lmodifier )?
 					int alt19=2;
 					int LA19_0 = input.LA(1);
 					if ( (LA19_0==MINUS||LA19_0==PLUS||LA19_0==70||LA19_0==72) ) {
@@ -2086,7 +2086,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt19) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:83:5: lmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:83:5: lmodifier
 							{
 							pushFollow(FOLLOW_lmodifier_in_atom689);
 							lmodifier30=lmodifier();
@@ -2098,7 +2098,7 @@ public class ADSParser extends UnforgivingParser {
 
 					}
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:83:16: ( field )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:83:16: ( field )?
 					int alt20=2;
 					int LA20_0 = input.LA(1);
 					if ( (LA20_0==TERM_NORMAL) ) {
@@ -2109,7 +2109,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt20) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:83:16: field
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:83:16: field
 							{
 							pushFollow(FOLLOW_field_in_atom692);
 							field31=field();
@@ -2126,7 +2126,7 @@ public class ADSParser extends UnforgivingParser {
 					state._fsp--;
 					if (state.failed) return retval;
 					if ( state.backtracking==0 ) stream_value.add(value32.getTree());
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:83:29: ( rmodifier )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:83:29: ( rmodifier )?
 					int alt21=2;
 					int LA21_0 = input.LA(1);
 					if ( (LA21_0==CARAT||LA21_0==TILDE) ) {
@@ -2134,7 +2134,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt21) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:83:29: rmodifier
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:83:29: rmodifier
 							{
 							pushFollow(FOLLOW_rmodifier_in_atom697);
 							rmodifier33=rmodifier();
@@ -2147,7 +2147,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: lmodifier, rmodifier, field, value
+					// elements: value, lmodifier, rmodifier, field
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -2160,31 +2160,31 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 84:3: -> ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:84:6: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:84:6: ^( MODIFIER ( lmodifier )? ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) ) )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(MODIFIER, "MODIFIER"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:84:17: ( lmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:84:17: ( lmodifier )?
 						if ( stream_lmodifier.hasNext() ) {
 							adaptor.addChild(root_1, stream_lmodifier.nextTree());
 						}
 						stream_lmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:84:28: ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:84:28: ^( TMODIFIER ( rmodifier )? ^( FIELD ( field )? value ) )
 						{
 						Object root_2 = (Object)adaptor.nil();
 						root_2 = (Object)adaptor.becomeRoot((Object)adaptor.create(TMODIFIER, "TMODIFIER"), root_2);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:84:40: ( rmodifier )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:84:40: ( rmodifier )?
 						if ( stream_rmodifier.hasNext() ) {
 							adaptor.addChild(root_2, stream_rmodifier.nextTree());
 						}
 						stream_rmodifier.reset();
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:84:51: ^( FIELD ( field )? value )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:84:51: ^( FIELD ( field )? value )
 						{
 						Object root_3 = (Object)adaptor.nil();
 						root_3 = (Object)adaptor.becomeRoot((Object)adaptor.create(FIELD, "FIELD"), root_3);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:84:59: ( field )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:84:59: ( field )?
 						if ( stream_field.hasNext() ) {
 							adaptor.addChild(root_3, stream_field.nextTree());
 						}
@@ -2238,7 +2238,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "field"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:91:1: field : TERM_NORMAL COLON -> TERM_NORMAL ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:91:1: field : TERM_NORMAL COLON -> TERM_NORMAL ;
 	public final ADSParser.field_return field() throws RecognitionException {
 		ADSParser.field_return retval = new ADSParser.field_return();
 		retval.start = input.LT(1);
@@ -2254,8 +2254,8 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleTokenStream stream_TERM_NORMAL=new RewriteRuleTokenStream(adaptor,"token TERM_NORMAL");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:92:3: ( TERM_NORMAL COLON -> TERM_NORMAL )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:93:3: TERM_NORMAL COLON
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:92:3: ( TERM_NORMAL COLON -> TERM_NORMAL )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:93:3: TERM_NORMAL COLON
 			{
 			TERM_NORMAL34=(Token)match(input,TERM_NORMAL,FOLLOW_TERM_NORMAL_in_field756); if (state.failed) return retval; 
 			if ( state.backtracking==0 ) stream_TERM_NORMAL.add(TERM_NORMAL34);
@@ -2314,7 +2314,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "range_term_in"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:98:1: range_term_in options {greedy=true; } : LBRACK (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:98:1: range_term_in options {greedy=true; } : LBRACK (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK ;
 	public final ADSParser.range_term_in_return range_term_in() throws RecognitionException {
 		ADSParser.range_term_in_return retval = new ADSParser.range_term_in_return();
 		retval.start = input.LT(1);
@@ -2336,14 +2336,14 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_range_value=new RewriteRuleSubtreeStream(adaptor,"rule range_value");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:100:3: ( LBRACK (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:101:8: LBRACK (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:100:3: ( LBRACK (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:101:8: LBRACK (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) ) ( ( TO )? b= range_value -> $a ( $b)? )? RBRACK
 			{
 			LBRACK36=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_range_term_in802); if (state.failed) return retval; 
 			if ( state.backtracking==0 ) stream_LBRACK.add(LBRACK36);
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:102:8: (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:102:9: a= range_value
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:102:8: (a= range_value -> $a ^( QANYTHING QANYTHING[\"*\"] ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:102:9: a= range_value
 			{
 			pushFollow(FOLLOW_range_value_in_range_term_in814);
 			a=range_value();
@@ -2366,7 +2366,7 @@ public class ADSParser extends UnforgivingParser {
 			// 102:23: -> $a ^( QANYTHING QANYTHING[\"*\"] )
 			{
 				adaptor.addChild(root_0, stream_a.nextTree());
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:102:29: ^( QANYTHING QANYTHING[\"*\"] )
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:102:29: ^( QANYTHING QANYTHING[\"*\"] )
 				{
 				Object root_1 = (Object)adaptor.nil();
 				root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QANYTHING, "QANYTHING"), root_1);
@@ -2382,7 +2382,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:103:8: ( ( TO )? b= range_value -> $a ( $b)? )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:103:8: ( ( TO )? b= range_value -> $a ( $b)? )?
 			int alt24=2;
 			int LA24_0 = input.LA(1);
 			if ( (LA24_0==DATE_TOKEN||LA24_0==NUMBER||(LA24_0 >= PHRASE && LA24_0 <= PHRASE_ANYTHING)||LA24_0==STAR||LA24_0==TERM_NORMAL||LA24_0==TERM_TRUNCATED||LA24_0==TO) ) {
@@ -2390,9 +2390,9 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt24) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:103:9: ( TO )? b= range_value
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:103:9: ( TO )? b= range_value
 					{
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:103:9: ( TO )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:103:9: ( TO )?
 					int alt23=2;
 					int LA23_0 = input.LA(1);
 					if ( (LA23_0==TO) ) {
@@ -2403,7 +2403,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt23) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:103:9: TO
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:103:9: TO
 							{
 							TO37=(Token)match(input,TO,FOLLOW_TO_in_range_term_in837); if (state.failed) return retval; 
 							if ( state.backtracking==0 ) stream_TO.add(TO37);
@@ -2419,7 +2419,7 @@ public class ADSParser extends UnforgivingParser {
 					if (state.failed) return retval;
 					if ( state.backtracking==0 ) stream_range_value.add(b.getTree());
 					// AST REWRITE
-					// elements: a, b
+					// elements: b, a
 					// token labels: 
 					// rule labels: a, b, retval
 					// token list labels: 
@@ -2435,7 +2435,7 @@ public class ADSParser extends UnforgivingParser {
 					// 103:28: -> $a ( $b)?
 					{
 						adaptor.addChild(root_0, stream_a.nextTree());
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:103:35: ( $b)?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:103:35: ( $b)?
 						if ( stream_b.hasNext() ) {
 							adaptor.addChild(root_0, stream_b.nextTree());
 						}
@@ -2485,7 +2485,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "value"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:118:1: value : ( REGEX -> ^( QREGEX REGEX ) | range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | match_all -> ^( QANYTHING match_all ) | STAR -> ^( QTRUNCATED STAR ) | LOCAL_PARAMS -> ^( XMETA LOCAL_PARAMS ) | COMMA -> ^( QDELIMITER COMMA ) | SEMICOLON -> ^( QDELIMITER SEMICOLON ) );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:118:1: value : ( REGEX -> ^( QREGEX REGEX ) | range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | match_all -> ^( QANYTHING match_all ) | STAR -> ^( QTRUNCATED STAR ) | LOCAL_PARAMS -> ^( XMETA LOCAL_PARAMS ) | COMMA -> ^( QDELIMITER COMMA ) | SEMICOLON -> ^( QDELIMITER SEMICOLON ) );
 	public final ADSParser.value_return value() throws RecognitionException {
 		ADSParser.value_return retval = new ADSParser.value_return();
 		retval.start = input.LT(1);
@@ -2535,7 +2535,7 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_quoted_truncated=new RewriteRuleSubtreeStream(adaptor,"rule quoted_truncated");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:119:3: ( REGEX -> ^( QREGEX REGEX ) | range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | match_all -> ^( QANYTHING match_all ) | STAR -> ^( QTRUNCATED STAR ) | LOCAL_PARAMS -> ^( XMETA LOCAL_PARAMS ) | COMMA -> ^( QDELIMITER COMMA ) | SEMICOLON -> ^( QDELIMITER SEMICOLON ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:119:3: ( REGEX -> ^( QREGEX REGEX ) | range_term_in -> ^( QRANGEIN range_term_in ) | identifier -> ^( QIDENTIFIER identifier ) | coordinate -> ^( QCOORDINATE coordinate ) | normal -> ^( QNORMAL normal ) | truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | DATE_RANGE -> ^( QDATE DATE_RANGE ) | AUTHOR_SEARCH -> ^( QPOSITION AUTHOR_SEARCH ) | QMARK -> ^( QTRUNCATED QMARK ) | match_all -> ^( QANYTHING match_all ) | STAR -> ^( QTRUNCATED STAR ) | LOCAL_PARAMS -> ^( XMETA LOCAL_PARAMS ) | COMMA -> ^( QDELIMITER COMMA ) | SEMICOLON -> ^( QDELIMITER SEMICOLON ) )
 			int alt25=16;
 			switch ( input.LA(1) ) {
 			case REGEX:
@@ -2648,7 +2648,7 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt25) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:120:3: REGEX
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:120:3: REGEX
 					{
 					REGEX39=(Token)match(input,REGEX,FOLLOW_REGEX_in_value883); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_REGEX.add(REGEX39);
@@ -2667,7 +2667,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 120:9: -> ^( QREGEX REGEX )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:120:12: ^( QREGEX REGEX )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:120:12: ^( QREGEX REGEX )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QREGEX, "QREGEX"), root_1);
@@ -2684,7 +2684,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:121:4: range_term_in
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:121:4: range_term_in
 					{
 					pushFollow(FOLLOW_range_term_in_in_value897);
 					range_term_in40=range_term_in();
@@ -2705,7 +2705,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 121:18: -> ^( QRANGEIN range_term_in )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:121:21: ^( QRANGEIN range_term_in )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:121:21: ^( QRANGEIN range_term_in )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QRANGEIN, "QRANGEIN"), root_1);
@@ -2722,7 +2722,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:123:5: identifier
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:123:5: identifier
 					{
 					pushFollow(FOLLOW_identifier_in_value912);
 					identifier41=identifier();
@@ -2743,7 +2743,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 123:16: -> ^( QIDENTIFIER identifier )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:123:19: ^( QIDENTIFIER identifier )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:123:19: ^( QIDENTIFIER identifier )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QIDENTIFIER, "QIDENTIFIER"), root_1);
@@ -2760,7 +2760,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 4 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:124:5: coordinate
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:124:5: coordinate
 					{
 					pushFollow(FOLLOW_coordinate_in_value926);
 					coordinate42=coordinate();
@@ -2781,7 +2781,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 124:16: -> ^( QCOORDINATE coordinate )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:124:19: ^( QCOORDINATE coordinate )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:124:19: ^( QCOORDINATE coordinate )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QCOORDINATE, "QCOORDINATE"), root_1);
@@ -2798,7 +2798,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 5 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:125:5: normal
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:125:5: normal
 					{
 					pushFollow(FOLLOW_normal_in_value940);
 					normal43=normal();
@@ -2819,7 +2819,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 125:12: -> ^( QNORMAL normal )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:125:15: ^( QNORMAL normal )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:125:15: ^( QNORMAL normal )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QNORMAL, "QNORMAL"), root_1);
@@ -2836,7 +2836,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 6 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:126:5: truncated
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:126:5: truncated
 					{
 					pushFollow(FOLLOW_truncated_in_value955);
 					truncated44=truncated();
@@ -2857,7 +2857,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 126:15: -> ^( QTRUNCATED truncated )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:126:18: ^( QTRUNCATED truncated )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:126:18: ^( QTRUNCATED truncated )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QTRUNCATED, "QTRUNCATED"), root_1);
@@ -2874,7 +2874,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 7 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:127:5: quoted
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:127:5: quoted
 					{
 					pushFollow(FOLLOW_quoted_in_value971);
 					quoted45=quoted();
@@ -2895,7 +2895,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 127:12: -> ^( QPHRASE quoted )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:127:15: ^( QPHRASE quoted )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:127:15: ^( QPHRASE quoted )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QPHRASE, "QPHRASE"), root_1);
@@ -2912,7 +2912,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 8 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:128:5: quoted_truncated
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:128:5: quoted_truncated
 					{
 					pushFollow(FOLLOW_quoted_truncated_in_value985);
 					quoted_truncated46=quoted_truncated();
@@ -2933,7 +2933,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 128:22: -> ^( QPHRASETRUNC quoted_truncated )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:128:25: ^( QPHRASETRUNC quoted_truncated )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:128:25: ^( QPHRASETRUNC quoted_truncated )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QPHRASETRUNC, "QPHRASETRUNC"), root_1);
@@ -2950,7 +2950,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 9 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:129:5: DATE_RANGE
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:129:5: DATE_RANGE
 					{
 					DATE_RANGE47=(Token)match(input,DATE_RANGE,FOLLOW_DATE_RANGE_in_value999); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_DATE_RANGE.add(DATE_RANGE47);
@@ -2969,7 +2969,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 129:16: -> ^( QDATE DATE_RANGE )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:129:19: ^( QDATE DATE_RANGE )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:129:19: ^( QDATE DATE_RANGE )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QDATE, "QDATE"), root_1);
@@ -2986,7 +2986,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 10 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:130:5: AUTHOR_SEARCH
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:130:5: AUTHOR_SEARCH
 					{
 					AUTHOR_SEARCH48=(Token)match(input,AUTHOR_SEARCH,FOLLOW_AUTHOR_SEARCH_in_value1013); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_AUTHOR_SEARCH.add(AUTHOR_SEARCH48);
@@ -3005,7 +3005,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 130:19: -> ^( QPOSITION AUTHOR_SEARCH )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:130:22: ^( QPOSITION AUTHOR_SEARCH )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:130:22: ^( QPOSITION AUTHOR_SEARCH )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QPOSITION, "QPOSITION"), root_1);
@@ -3022,7 +3022,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 11 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:131:5: QMARK
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:131:5: QMARK
 					{
 					QMARK49=(Token)match(input,QMARK,FOLLOW_QMARK_in_value1027); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_QMARK.add(QMARK49);
@@ -3041,7 +3041,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 131:11: -> ^( QTRUNCATED QMARK )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:131:14: ^( QTRUNCATED QMARK )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:131:14: ^( QTRUNCATED QMARK )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QTRUNCATED, "QTRUNCATED"), root_1);
@@ -3058,7 +3058,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 12 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:132:5: match_all
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:132:5: match_all
 					{
 					pushFollow(FOLLOW_match_all_in_value1041);
 					match_all50=match_all();
@@ -3079,7 +3079,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 132:15: -> ^( QANYTHING match_all )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:132:18: ^( QANYTHING match_all )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:132:18: ^( QANYTHING match_all )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QANYTHING, "QANYTHING"), root_1);
@@ -3096,7 +3096,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 13 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:133:5: STAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:133:5: STAR
 					{
 					STAR51=(Token)match(input,STAR,FOLLOW_STAR_in_value1055); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_STAR.add(STAR51);
@@ -3115,7 +3115,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 133:10: -> ^( QTRUNCATED STAR )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:133:13: ^( QTRUNCATED STAR )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:133:13: ^( QTRUNCATED STAR )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QTRUNCATED, "QTRUNCATED"), root_1);
@@ -3132,7 +3132,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 14 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:134:5: LOCAL_PARAMS
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:134:5: LOCAL_PARAMS
 					{
 					LOCAL_PARAMS52=(Token)match(input,LOCAL_PARAMS,FOLLOW_LOCAL_PARAMS_in_value1069); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_LOCAL_PARAMS.add(LOCAL_PARAMS52);
@@ -3151,7 +3151,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 134:18: -> ^( XMETA LOCAL_PARAMS )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:134:21: ^( XMETA LOCAL_PARAMS )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:134:21: ^( XMETA LOCAL_PARAMS )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(XMETA, "XMETA"), root_1);
@@ -3168,7 +3168,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 15 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:135:5: COMMA
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:135:5: COMMA
 					{
 					COMMA53=(Token)match(input,COMMA,FOLLOW_COMMA_in_value1084); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_COMMA.add(COMMA53);
@@ -3187,7 +3187,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 135:11: -> ^( QDELIMITER COMMA )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:135:14: ^( QDELIMITER COMMA )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:135:14: ^( QDELIMITER COMMA )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QDELIMITER, "QDELIMITER"), root_1);
@@ -3204,7 +3204,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 16 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:136:5: SEMICOLON
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:136:5: SEMICOLON
 					{
 					SEMICOLON54=(Token)match(input,SEMICOLON,FOLLOW_SEMICOLON_in_value1098); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_SEMICOLON.add(SEMICOLON54);
@@ -3223,7 +3223,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 136:15: -> ^( QDELIMITER SEMICOLON )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:136:18: ^( QDELIMITER SEMICOLON )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:136:18: ^( QDELIMITER SEMICOLON )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QDELIMITER, "QDELIMITER"), root_1);
@@ -3269,7 +3269,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "range_value"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:142:1: range_value : ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:142:1: range_value : ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) );
 	public final ADSParser.range_value_return range_value() throws RecognitionException {
 		ADSParser.range_value_return retval = new ADSParser.range_value_return();
 		retval.start = input.LT(1);
@@ -3292,7 +3292,7 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_quoted_truncated=new RewriteRuleSubtreeStream(adaptor,"rule quoted_truncated");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:143:3: ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:143:3: ( truncated -> ^( QTRUNCATED truncated ) | quoted -> ^( QPHRASE quoted ) | quoted_truncated -> ^( QPHRASETRUNC quoted_truncated ) | date -> ^( QNORMAL date ) | normal -> ^( QNORMAL normal ) | STAR -> ^( QANYTHING STAR ) )
 			int alt26=6;
 			switch ( input.LA(1) ) {
 			case TERM_TRUNCATED:
@@ -3335,7 +3335,7 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt26) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:144:3: truncated
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:144:3: truncated
 					{
 					pushFollow(FOLLOW_truncated_in_range_value1129);
 					truncated55=truncated();
@@ -3356,7 +3356,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 144:13: -> ^( QTRUNCATED truncated )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:144:16: ^( QTRUNCATED truncated )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:144:16: ^( QTRUNCATED truncated )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QTRUNCATED, "QTRUNCATED"), root_1);
@@ -3373,7 +3373,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:145:5: quoted
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:145:5: quoted
 					{
 					pushFollow(FOLLOW_quoted_in_range_value1143);
 					quoted56=quoted();
@@ -3394,7 +3394,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 145:12: -> ^( QPHRASE quoted )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:145:15: ^( QPHRASE quoted )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:145:15: ^( QPHRASE quoted )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QPHRASE, "QPHRASE"), root_1);
@@ -3411,7 +3411,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:146:5: quoted_truncated
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:146:5: quoted_truncated
 					{
 					pushFollow(FOLLOW_quoted_truncated_in_range_value1157);
 					quoted_truncated57=quoted_truncated();
@@ -3432,7 +3432,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 146:22: -> ^( QPHRASETRUNC quoted_truncated )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:146:25: ^( QPHRASETRUNC quoted_truncated )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:146:25: ^( QPHRASETRUNC quoted_truncated )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QPHRASETRUNC, "QPHRASETRUNC"), root_1);
@@ -3449,7 +3449,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 4 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:147:5: date
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:147:5: date
 					{
 					pushFollow(FOLLOW_date_in_range_value1171);
 					date58=date();
@@ -3470,7 +3470,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 147:10: -> ^( QNORMAL date )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:147:13: ^( QNORMAL date )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:147:13: ^( QNORMAL date )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QNORMAL, "QNORMAL"), root_1);
@@ -3487,7 +3487,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 5 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:148:5: normal
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:148:5: normal
 					{
 					pushFollow(FOLLOW_normal_in_range_value1185);
 					normal59=normal();
@@ -3508,7 +3508,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 148:12: -> ^( QNORMAL normal )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:148:15: ^( QNORMAL normal )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:148:15: ^( QNORMAL normal )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QNORMAL, "QNORMAL"), root_1);
@@ -3525,7 +3525,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 6 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:149:5: STAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:149:5: STAR
 					{
 					STAR60=(Token)match(input,STAR,FOLLOW_STAR_in_range_value1200); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_STAR.add(STAR60);
@@ -3544,7 +3544,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 149:10: -> ^( QANYTHING STAR )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:149:13: ^( QANYTHING STAR )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:149:13: ^( QANYTHING STAR )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QANYTHING, "QANYTHING"), root_1);
@@ -3590,7 +3590,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "func_name"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:152:1: func_name : FUNC_NAME ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:152:1: func_name : FUNC_NAME ;
 	public final ADSParser.func_name_return func_name() throws RecognitionException {
 		ADSParser.func_name_return retval = new ADSParser.func_name_return();
 		retval.start = input.LT(1);
@@ -3602,8 +3602,8 @@ public class ADSParser extends UnforgivingParser {
 		Object FUNC_NAME61_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:153:3: ( FUNC_NAME )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:154:3: FUNC_NAME
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:153:3: ( FUNC_NAME )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:154:3: FUNC_NAME
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -3644,7 +3644,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "multi_value"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:159:1: multi_value : LPAREN multiClause RPAREN -> ^( CLAUSE multiClause ) ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:159:1: multi_value : LPAREN multiClause RPAREN -> ^( CLAUSE multiClause ) ;
 	public final ADSParser.multi_value_return multi_value() throws RecognitionException {
 		ADSParser.multi_value_return retval = new ADSParser.multi_value_return();
 		retval.start = input.LT(1);
@@ -3662,8 +3662,8 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_multiClause=new RewriteRuleSubtreeStream(adaptor,"rule multiClause");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:160:3: ( LPAREN multiClause RPAREN -> ^( CLAUSE multiClause ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:161:3: LPAREN multiClause RPAREN
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:160:3: ( LPAREN multiClause RPAREN -> ^( CLAUSE multiClause ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:161:3: LPAREN multiClause RPAREN
 			{
 			LPAREN62=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_multi_value1242); if (state.failed) return retval; 
 			if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN62);
@@ -3690,7 +3690,7 @@ public class ADSParser extends UnforgivingParser {
 			root_0 = (Object)adaptor.nil();
 			// 161:29: -> ^( CLAUSE multiClause )
 			{
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:161:32: ^( CLAUSE multiClause )
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:161:32: ^( CLAUSE multiClause )
 				{
 				Object root_1 = (Object)adaptor.nil();
 				root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(CLAUSE, "CLAUSE"), root_1);
@@ -3734,7 +3734,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "multiClause"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:166:1: multiClause : ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:166:1: multiClause : ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) ;
 	public final ADSParser.multiClause_return multiClause() throws RecognitionException {
 		ADSParser.multiClause_return retval = new ADSParser.multiClause_return();
 		retval.start = input.LT(1);
@@ -3746,10 +3746,10 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleSubtreeStream stream_clauseOr=new RewriteRuleSubtreeStream(adaptor,"rule clauseOr");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:167:3: ( ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:172:3: ( clauseOr )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:167:3: ( ( clauseOr )+ -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:172:3: ( clauseOr )+
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:172:3: ( clauseOr )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:172:3: ( clauseOr )+
 			int cnt27=0;
 			loop27:
 			while (true) {
@@ -3761,7 +3761,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt27) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:172:3: clauseOr
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:172:3: clauseOr
 					{
 					pushFollow(FOLLOW_clauseOr_in_multiClause1284);
 					clauseOr65=clauseOr();
@@ -3794,7 +3794,7 @@ public class ADSParser extends UnforgivingParser {
 			root_0 = (Object)adaptor.nil();
 			// 172:13: -> ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 			{
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:172:16: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:172:16: ^( OPERATOR[\"DEFOP\"] ( clauseOr )+ )
 				{
 				Object root_1 = (Object)adaptor.nil();
 				root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, "DEFOP"), root_1);
@@ -3845,7 +3845,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "match_all"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:233:1: match_all : STAR COLON STAR ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:233:1: match_all : STAR COLON STAR ;
 	public final ADSParser.match_all_return match_all() throws RecognitionException {
 		ADSParser.match_all_return retval = new ADSParser.match_all_return();
 		retval.start = input.LT(1);
@@ -3861,8 +3861,8 @@ public class ADSParser extends UnforgivingParser {
 		Object STAR68_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:234:3: ( STAR COLON STAR )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:235:3: STAR COLON STAR
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:234:3: ( STAR COLON STAR )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:235:3: STAR COLON STAR
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -3915,7 +3915,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "normal"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:237:1: normal : ( TERM_NORMAL | NUMBER | TO );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:237:1: normal : ( TERM_NORMAL | NUMBER | TO );
 	public final ADSParser.normal_return normal() throws RecognitionException {
 		ADSParser.normal_return retval = new ADSParser.normal_return();
 		retval.start = input.LT(1);
@@ -3927,8 +3927,8 @@ public class ADSParser extends UnforgivingParser {
 		Object set69_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:238:3: ( TERM_NORMAL | NUMBER | TO )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:238:3: ( TERM_NORMAL | NUMBER | TO )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -3975,7 +3975,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "truncated"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:247:1: truncated : TERM_TRUNCATED ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:247:1: truncated : TERM_TRUNCATED ;
 	public final ADSParser.truncated_return truncated() throws RecognitionException {
 		ADSParser.truncated_return retval = new ADSParser.truncated_return();
 		retval.start = input.LT(1);
@@ -3987,8 +3987,8 @@ public class ADSParser extends UnforgivingParser {
 		Object TERM_TRUNCATED70_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:248:3: ( TERM_TRUNCATED )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:249:3: TERM_TRUNCATED
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:248:3: ( TERM_TRUNCATED )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:249:3: TERM_TRUNCATED
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -4029,7 +4029,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "quoted_truncated"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:253:1: quoted_truncated : PHRASE_ANYTHING ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:253:1: quoted_truncated : PHRASE_ANYTHING ;
 	public final ADSParser.quoted_truncated_return quoted_truncated() throws RecognitionException {
 		ADSParser.quoted_truncated_return retval = new ADSParser.quoted_truncated_return();
 		retval.start = input.LT(1);
@@ -4041,8 +4041,8 @@ public class ADSParser extends UnforgivingParser {
 		Object PHRASE_ANYTHING71_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:254:3: ( PHRASE_ANYTHING )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:255:3: PHRASE_ANYTHING
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:254:3: ( PHRASE_ANYTHING )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:255:3: PHRASE_ANYTHING
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -4083,7 +4083,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "quoted"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:258:1: quoted : PHRASE ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:258:1: quoted : PHRASE ;
 	public final ADSParser.quoted_return quoted() throws RecognitionException {
 		ADSParser.quoted_return retval = new ADSParser.quoted_return();
 		retval.start = input.LT(1);
@@ -4095,8 +4095,8 @@ public class ADSParser extends UnforgivingParser {
 		Object PHRASE72_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:258:9: ( PHRASE )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:259:3: PHRASE
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:258:9: ( PHRASE )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:259:3: PHRASE
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -4137,7 +4137,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "lmodifier"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:263:1: lmodifier : ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:263:1: lmodifier : ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] );
 	public final ADSParser.lmodifier_return lmodifier() throws RecognitionException {
 		ADSParser.lmodifier_return retval = new ADSParser.lmodifier_return();
 		retval.start = input.LT(1);
@@ -4159,7 +4159,7 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleTokenStream stream_MINUS=new RewriteRuleTokenStream(adaptor,"token MINUS");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:263:10: ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:263:10: ( PLUS -> PLUS[\"+\"] | MINUS -> MINUS[\"-\"] | '=' -> EQUAL[\"=\"] | '#' -> HASH[\"#\"] )
 			int alt28=4;
 			switch ( input.LA(1) ) {
 			case PLUS:
@@ -4190,7 +4190,7 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt28) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:264:3: PLUS
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:264:3: PLUS
 					{
 					PLUS73=(Token)match(input,PLUS,FOLLOW_PLUS_in_lmodifier1453); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_PLUS.add(PLUS73);
@@ -4219,7 +4219,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:265:5: MINUS
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:265:5: MINUS
 					{
 					MINUS74=(Token)match(input,MINUS,FOLLOW_MINUS_in_lmodifier1464); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_MINUS.add(MINUS74);
@@ -4248,7 +4248,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:266:5: '='
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:266:5: '='
 					{
 					char_literal75=(Token)match(input,72,FOLLOW_72_in_lmodifier1475); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_72.add(char_literal75);
@@ -4277,7 +4277,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 4 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:267:5: '#'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:267:5: '#'
 					{
 					char_literal76=(Token)match(input,70,FOLLOW_70_in_lmodifier1486); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_70.add(char_literal76);
@@ -4335,7 +4335,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "rmodifier"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:272:1: rmodifier : ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:272:1: rmodifier : ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) );
 	public final ADSParser.rmodifier_return rmodifier() throws RecognitionException {
 		ADSParser.rmodifier_return retval = new ADSParser.rmodifier_return();
 		retval.start = input.LT(1);
@@ -4355,7 +4355,7 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleTokenStream stream_TILDE=new RewriteRuleTokenStream(adaptor,"token TILDE");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:272:11: ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:272:11: ( TILDE ( CARAT )? -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE ) | CARAT ( TILDE )? -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? ) )
 			int alt31=2;
 			int LA31_0 = input.LA(1);
 			if ( (LA31_0==TILDE) ) {
@@ -4374,12 +4374,12 @@ public class ADSParser extends UnforgivingParser {
 
 			switch (alt31) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:273:3: TILDE ( CARAT )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:273:3: TILDE ( CARAT )?
 					{
 					TILDE77=(Token)match(input,TILDE,FOLLOW_TILDE_in_rmodifier1507); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_TILDE.add(TILDE77);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:273:9: ( CARAT )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:273:9: ( CARAT )?
 					int alt29=2;
 					int LA29_0 = input.LA(1);
 					if ( (LA29_0==CARAT) ) {
@@ -4387,7 +4387,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt29) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:273:9: CARAT
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:273:9: CARAT
 							{
 							CARAT78=(Token)match(input,CARAT,FOLLOW_CARAT_in_rmodifier1509); if (state.failed) return retval; 
 							if ( state.backtracking==0 ) stream_CARAT.add(CARAT78);
@@ -4398,7 +4398,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: TILDE, CARAT
+					// elements: CARAT, TILDE
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -4411,11 +4411,11 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 273:16: -> ^( BOOST ( CARAT )? ) ^( FUZZY TILDE )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:273:19: ^( BOOST ( CARAT )? )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:273:19: ^( BOOST ( CARAT )? )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(BOOST, "BOOST"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:273:27: ( CARAT )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:273:27: ( CARAT )?
 						if ( stream_CARAT.hasNext() ) {
 							adaptor.addChild(root_1, stream_CARAT.nextNode());
 						}
@@ -4424,7 +4424,7 @@ public class ADSParser extends UnforgivingParser {
 						adaptor.addChild(root_0, root_1);
 						}
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:273:35: ^( FUZZY TILDE )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:273:35: ^( FUZZY TILDE )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(FUZZY, "FUZZY"), root_1);
@@ -4441,12 +4441,12 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:274:5: CARAT ( TILDE )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:274:5: CARAT ( TILDE )?
 					{
 					CARAT79=(Token)match(input,CARAT,FOLLOW_CARAT_in_rmodifier1532); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_CARAT.add(CARAT79);
 
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:274:11: ( TILDE )?
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:274:11: ( TILDE )?
 					int alt30=2;
 					int LA30_0 = input.LA(1);
 					if ( (LA30_0==TILDE) ) {
@@ -4454,7 +4454,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					switch (alt30) {
 						case 1 :
-							// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:274:11: TILDE
+							// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:274:11: TILDE
 							{
 							TILDE80=(Token)match(input,TILDE,FOLLOW_TILDE_in_rmodifier1534); if (state.failed) return retval; 
 							if ( state.backtracking==0 ) stream_TILDE.add(TILDE80);
@@ -4465,7 +4465,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 
 					// AST REWRITE
-					// elements: TILDE, CARAT
+					// elements: CARAT, TILDE
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -4478,7 +4478,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 274:18: -> ^( BOOST CARAT ) ^( FUZZY ( TILDE )? )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:274:21: ^( BOOST CARAT )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:274:21: ^( BOOST CARAT )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(BOOST, "BOOST"), root_1);
@@ -4486,11 +4486,11 @@ public class ADSParser extends UnforgivingParser {
 						adaptor.addChild(root_0, root_1);
 						}
 
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:274:36: ^( FUZZY ( TILDE )? )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:274:36: ^( FUZZY ( TILDE )? )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(FUZZY, "FUZZY"), root_1);
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:274:44: ( TILDE )?
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:274:44: ( TILDE )?
 						if ( stream_TILDE.hasNext() ) {
 							adaptor.addChild(root_1, stream_TILDE.nextNode());
 						}
@@ -4537,7 +4537,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "boost"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:278:1: boost : ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:278:1: boost : ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? ;
 	public final ADSParser.boost_return boost() throws RecognitionException {
 		ADSParser.boost_return retval = new ADSParser.boost_return();
 		retval.start = input.LT(1);
@@ -4553,11 +4553,11 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleTokenStream stream_CARAT=new RewriteRuleTokenStream(adaptor,"token CARAT");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:278:7: ( ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:279:3: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:278:7: ( ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:279:3: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( BOOST NUMBER ) )?
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:279:3: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:279:4: CARAT
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:279:3: ( CARAT -> ^( BOOST NUMBER[\"DEF\"] ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:279:4: CARAT
 			{
 			CARAT81=(Token)match(input,CARAT,FOLLOW_CARAT_in_boost1565); if (state.failed) return retval; 
 			if ( state.backtracking==0 ) stream_CARAT.add(CARAT81);
@@ -4576,7 +4576,7 @@ public class ADSParser extends UnforgivingParser {
 			root_0 = (Object)adaptor.nil();
 			// 279:10: -> ^( BOOST NUMBER[\"DEF\"] )
 			{
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:279:13: ^( BOOST NUMBER[\"DEF\"] )
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:279:13: ^( BOOST NUMBER[\"DEF\"] )
 				{
 				Object root_1 = (Object)adaptor.nil();
 				root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(BOOST, "BOOST"), root_1);
@@ -4592,7 +4592,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:280:3: ( NUMBER -> ^( BOOST NUMBER ) )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:280:3: ( NUMBER -> ^( BOOST NUMBER ) )?
 			int alt32=2;
 			int LA32_0 = input.LA(1);
 			if ( (LA32_0==NUMBER) ) {
@@ -4600,7 +4600,7 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt32) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:280:4: NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:280:4: NUMBER
 					{
 					NUMBER82=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_boost1581); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER82);
@@ -4619,7 +4619,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 280:11: -> ^( BOOST NUMBER )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:280:14: ^( BOOST NUMBER )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:280:14: ^( BOOST NUMBER )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(BOOST, "BOOST"), root_1);
@@ -4668,7 +4668,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "fuzzy"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:283:1: fuzzy : ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:283:1: fuzzy : ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? ;
 	public final ADSParser.fuzzy_return fuzzy() throws RecognitionException {
 		ADSParser.fuzzy_return retval = new ADSParser.fuzzy_return();
 		retval.start = input.LT(1);
@@ -4684,11 +4684,11 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleTokenStream stream_TILDE=new RewriteRuleTokenStream(adaptor,"token TILDE");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:283:7: ( ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:284:3: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:283:7: ( ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )? )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:284:3: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) ) ( NUMBER -> ^( FUZZY NUMBER ) )?
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:284:3: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:284:4: TILDE
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:284:3: ( TILDE -> ^( FUZZY NUMBER[\"DEF\"] ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:284:4: TILDE
 			{
 			TILDE83=(Token)match(input,TILDE,FOLLOW_TILDE_in_fuzzy1606); if (state.failed) return retval; 
 			if ( state.backtracking==0 ) stream_TILDE.add(TILDE83);
@@ -4707,7 +4707,7 @@ public class ADSParser extends UnforgivingParser {
 			root_0 = (Object)adaptor.nil();
 			// 284:10: -> ^( FUZZY NUMBER[\"DEF\"] )
 			{
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:284:13: ^( FUZZY NUMBER[\"DEF\"] )
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:284:13: ^( FUZZY NUMBER[\"DEF\"] )
 				{
 				Object root_1 = (Object)adaptor.nil();
 				root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(FUZZY, "FUZZY"), root_1);
@@ -4723,7 +4723,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:285:3: ( NUMBER -> ^( FUZZY NUMBER ) )?
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:285:3: ( NUMBER -> ^( FUZZY NUMBER ) )?
 			int alt33=2;
 			int LA33_0 = input.LA(1);
 			if ( (LA33_0==NUMBER) ) {
@@ -4731,7 +4731,7 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt33) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:285:4: NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:285:4: NUMBER
 					{
 					NUMBER84=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_fuzzy1622); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER84);
@@ -4750,7 +4750,7 @@ public class ADSParser extends UnforgivingParser {
 					root_0 = (Object)adaptor.nil();
 					// 285:11: -> ^( FUZZY NUMBER )
 					{
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:285:14: ^( FUZZY NUMBER )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:285:14: ^( FUZZY NUMBER )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(FUZZY, "FUZZY"), root_1);
@@ -4799,7 +4799,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "not"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:288:1: not : ( ( AND NOT )=> AND NOT | NOT );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:288:1: not : ( ( AND NOT )=> AND NOT | NOT );
 	public final ADSParser.not_return not() throws RecognitionException {
 		ADSParser.not_return retval = new ADSParser.not_return();
 		retval.start = input.LT(1);
@@ -4815,7 +4815,7 @@ public class ADSParser extends UnforgivingParser {
 		Object NOT87_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:288:5: ( ( AND NOT )=> AND NOT | NOT )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:288:5: ( ( AND NOT )=> AND NOT | NOT )
 			int alt34=2;
 			int LA34_0 = input.LA(1);
 			if ( (LA34_0==AND) && (synpred5_ADS())) {
@@ -4834,7 +4834,7 @@ public class ADSParser extends UnforgivingParser {
 
 			switch (alt34) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:289:3: ( AND NOT )=> AND NOT
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:289:3: ( AND NOT )=> AND NOT
 					{
 					root_0 = (Object)adaptor.nil();
 
@@ -4854,7 +4854,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:290:5: NOT
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:290:5: NOT
 					{
 					root_0 = (Object)adaptor.nil();
 
@@ -4897,7 +4897,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "and"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:293:1: and : AND ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:293:1: and : AND ;
 	public final ADSParser.and_return and() throws RecognitionException {
 		ADSParser.and_return retval = new ADSParser.and_return();
 		retval.start = input.LT(1);
@@ -4909,8 +4909,8 @@ public class ADSParser extends UnforgivingParser {
 		Object AND88_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:293:7: ( AND )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:294:3: AND
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:293:7: ( AND )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:294:3: AND
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -4951,7 +4951,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "or"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:297:1: or : OR ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:297:1: or : OR ;
 	public final ADSParser.or_return or() throws RecognitionException {
 		ADSParser.or_return retval = new ADSParser.or_return();
 		retval.start = input.LT(1);
@@ -4963,8 +4963,8 @@ public class ADSParser extends UnforgivingParser {
 		Object OR89_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:297:5: ( OR )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:298:3: OR
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:297:5: ( OR )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:298:3: OR
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -5005,7 +5005,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "near"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:301:1: near : ( NEAR -> ^( OPERATOR[$NEAR] ) ) ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:301:1: near : ( NEAR -> ^( OPERATOR[$NEAR] ) ) ;
 	public final ADSParser.near_return near() throws RecognitionException {
 		ADSParser.near_return retval = new ADSParser.near_return();
 		retval.start = input.LT(1);
@@ -5018,11 +5018,11 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleTokenStream stream_NEAR=new RewriteRuleTokenStream(adaptor,"token NEAR");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:301:7: ( ( NEAR -> ^( OPERATOR[$NEAR] ) ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:302:3: ( NEAR -> ^( OPERATOR[$NEAR] ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:301:7: ( ( NEAR -> ^( OPERATOR[$NEAR] ) ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:302:3: ( NEAR -> ^( OPERATOR[$NEAR] ) )
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:302:3: ( NEAR -> ^( OPERATOR[$NEAR] ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:302:4: NEAR
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:302:3: ( NEAR -> ^( OPERATOR[$NEAR] ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:302:4: NEAR
 			{
 			NEAR90=(Token)match(input,NEAR,FOLLOW_NEAR_in_near1716); if (state.failed) return retval; 
 			if ( state.backtracking==0 ) stream_NEAR.add(NEAR90);
@@ -5041,7 +5041,7 @@ public class ADSParser extends UnforgivingParser {
 			root_0 = (Object)adaptor.nil();
 			// 302:9: -> ^( OPERATOR[$NEAR] )
 			{
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:302:12: ^( OPERATOR[$NEAR] )
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:302:12: ^( OPERATOR[$NEAR] )
 				{
 				Object root_1 = (Object)adaptor.nil();
 				root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(OPERATOR, NEAR90), root_1);
@@ -5086,7 +5086,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "comma"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:305:1: comma : ( COMMA )+ ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:305:1: comma : ( COMMA )+ ;
 	public final ADSParser.comma_return comma() throws RecognitionException {
 		ADSParser.comma_return retval = new ADSParser.comma_return();
 		retval.start = input.LT(1);
@@ -5098,13 +5098,13 @@ public class ADSParser extends UnforgivingParser {
 		Object COMMA91_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:305:7: ( ( COMMA )+ )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:306:3: ( COMMA )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:305:7: ( ( COMMA )+ )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:306:3: ( COMMA )+
 			{
 			root_0 = (Object)adaptor.nil();
 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:306:3: ( COMMA )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:306:3: ( COMMA )+
 			int cnt35=0;
 			loop35:
 			while (true) {
@@ -5116,7 +5116,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt35) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:306:3: COMMA
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:306:3: COMMA
 					{
 					COMMA91=(Token)match(input,COMMA,FOLLOW_COMMA_in_comma1739); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
@@ -5166,7 +5166,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "semicolon"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:309:1: semicolon : ( SEMICOLON )+ ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:309:1: semicolon : ( SEMICOLON )+ ;
 	public final ADSParser.semicolon_return semicolon() throws RecognitionException {
 		ADSParser.semicolon_return retval = new ADSParser.semicolon_return();
 		retval.start = input.LT(1);
@@ -5178,13 +5178,13 @@ public class ADSParser extends UnforgivingParser {
 		Object SEMICOLON92_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:310:3: ( ( SEMICOLON )+ )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:311:3: ( SEMICOLON )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:310:3: ( ( SEMICOLON )+ )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:311:3: ( SEMICOLON )+
 			{
 			root_0 = (Object)adaptor.nil();
 
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:311:3: ( SEMICOLON )+
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:311:3: ( SEMICOLON )+
 			int cnt36=0;
 			loop36:
 			while (true) {
@@ -5196,7 +5196,7 @@ public class ADSParser extends UnforgivingParser {
 
 				switch (alt36) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:311:3: SEMICOLON
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:311:3: SEMICOLON
 					{
 					SEMICOLON92=(Token)match(input,SEMICOLON,FOLLOW_SEMICOLON_in_semicolon1756); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
@@ -5246,7 +5246,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "date"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:314:1: date : DATE_TOKEN ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:314:1: date : DATE_TOKEN ;
 	public final ADSParser.date_return date() throws RecognitionException {
 		ADSParser.date_return retval = new ADSParser.date_return();
 		retval.start = input.LT(1);
@@ -5258,8 +5258,8 @@ public class ADSParser extends UnforgivingParser {
 		Object DATE_TOKEN93_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:314:7: ( DATE_TOKEN )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:316:3: DATE_TOKEN
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:314:7: ( DATE_TOKEN )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:316:3: DATE_TOKEN
 			{
 			root_0 = (Object)adaptor.nil();
 
@@ -5300,7 +5300,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "identifier"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:319:1: identifier : ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) ) ;
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:319:1: identifier : ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) ) ;
 	public final ADSParser.identifier_return identifier() throws RecognitionException {
 		ADSParser.identifier_return retval = new ADSParser.identifier_return();
 		retval.start = input.LT(1);
@@ -5334,10 +5334,10 @@ public class ADSParser extends UnforgivingParser {
 		RewriteRuleTokenStream stream_TERM_NORMAL=new RewriteRuleTokenStream(adaptor,"token TERM_NORMAL");
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:320:3: ( ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) ) )
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:322:3: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:320:3: ( ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:322:3: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] ) ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) )
 			{
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:322:3: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:322:3: ( 'doi:' -> QNORMAL[\"doi\"] | 'arxiv:' -> QNORMAL[\"arxiv\"] | 'arXiv:' -> QNORMAL[\"arxiv\"] )
 			int alt37=3;
 			switch ( input.LA(1) ) {
 			case 75:
@@ -5363,7 +5363,7 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt37) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:322:4: 'doi:'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:322:4: 'doi:'
 					{
 					string_literal94=(Token)match(input,75,FOLLOW_75_in_identifier1797); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_75.add(string_literal94);
@@ -5392,7 +5392,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:323:4: 'arxiv:'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:323:4: 'arxiv:'
 					{
 					string_literal95=(Token)match(input,74,FOLLOW_74_in_identifier1807); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_74.add(string_literal95);
@@ -5421,7 +5421,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:324:4: 'arXiv:'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:324:4: 'arXiv:'
 					{
 					string_literal96=(Token)match(input,73,FOLLOW_73_in_identifier1817); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_73.add(string_literal96);
@@ -5452,7 +5452,7 @@ public class ADSParser extends UnforgivingParser {
 
 			}
 
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:325:3: ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:325:3: ( TERM_NORMAL -> $identifier TERM_NORMAL | PHRASE_ANYTHING -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING ) | PHRASE -> $identifier ^( QPHRASE PHRASE ) | NUMBER -> $identifier NUMBER | STAR -> $identifier ^( QANYTHING STAR ) )
 			int alt38=5;
 			switch ( input.LA(1) ) {
 			case TERM_NORMAL:
@@ -5488,13 +5488,13 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt38) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:325:4: TERM_NORMAL
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:325:4: TERM_NORMAL
 					{
 					TERM_NORMAL97=(Token)match(input,TERM_NORMAL,FOLLOW_TERM_NORMAL_in_identifier1829); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_TERM_NORMAL.add(TERM_NORMAL97);
 
 					// AST REWRITE
-					// elements: TERM_NORMAL, identifier
+					// elements: identifier, TERM_NORMAL
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -5518,7 +5518,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:326:5: PHRASE_ANYTHING
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:326:5: PHRASE_ANYTHING
 					{
 					PHRASE_ANYTHING98=(Token)match(input,PHRASE_ANYTHING,FOLLOW_PHRASE_ANYTHING_in_identifier1842); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_PHRASE_ANYTHING.add(PHRASE_ANYTHING98);
@@ -5538,7 +5538,7 @@ public class ADSParser extends UnforgivingParser {
 					// 326:22: -> $identifier ^( QPHRASETRUNC PHRASE_ANYTHING )
 					{
 						adaptor.addChild(root_0, stream_retval.nextTree());
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:326:37: ^( QPHRASETRUNC PHRASE_ANYTHING )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:326:37: ^( QPHRASETRUNC PHRASE_ANYTHING )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QPHRASETRUNC, "QPHRASETRUNC"), root_1);
@@ -5555,7 +5555,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:327:5: PHRASE
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:327:5: PHRASE
 					{
 					PHRASE99=(Token)match(input,PHRASE,FOLLOW_PHRASE_in_identifier1860); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_PHRASE.add(PHRASE99);
@@ -5575,7 +5575,7 @@ public class ADSParser extends UnforgivingParser {
 					// 327:12: -> $identifier ^( QPHRASE PHRASE )
 					{
 						adaptor.addChild(root_0, stream_retval.nextTree());
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:327:27: ^( QPHRASE PHRASE )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:327:27: ^( QPHRASE PHRASE )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QPHRASE, "QPHRASE"), root_1);
@@ -5592,7 +5592,7 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 4 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:328:5: NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:328:5: NUMBER
 					{
 					NUMBER100=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_identifier1877); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_NUMBER.add(NUMBER100);
@@ -5622,13 +5622,13 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 5 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:329:5: STAR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:329:5: STAR
 					{
 					STAR101=(Token)match(input,STAR,FOLLOW_STAR_in_identifier1891); if (state.failed) return retval; 
 					if ( state.backtracking==0 ) stream_STAR.add(STAR101);
 
 					// AST REWRITE
-					// elements: STAR, identifier
+					// elements: identifier, STAR
 					// token labels: 
 					// rule labels: retval
 					// token list labels: 
@@ -5642,7 +5642,7 @@ public class ADSParser extends UnforgivingParser {
 					// 329:10: -> $identifier ^( QANYTHING STAR )
 					{
 						adaptor.addChild(root_0, stream_retval.nextTree());
-						// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:329:25: ^( QANYTHING STAR )
+						// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:329:25: ^( QANYTHING STAR )
 						{
 						Object root_1 = (Object)adaptor.nil();
 						root_1 = (Object)adaptor.becomeRoot((Object)adaptor.create(QANYTHING, "QANYTHING"), root_1);
@@ -5691,7 +5691,7 @@ public class ADSParser extends UnforgivingParser {
 
 
 	// $ANTLR start "coordinate"
-	// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:334:1: coordinate : ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' );
+	// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:333:1: coordinate : ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' );
 	public final ADSParser.coordinate_return coordinate() throws RecognitionException {
 		ADSParser.coordinate_return retval = new ADSParser.coordinate_return();
 		retval.start = input.LT(1);
@@ -5745,7 +5745,7 @@ public class ADSParser extends UnforgivingParser {
 		Object string_literal123_tree=null;
 
 		try {
-			// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:335:3: ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' )
+			// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:334:3: ( HOUR | H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER | H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER | D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER | H_NUMBER ( PLUS | MINUS ) D_NUMBER | '<=>' )
 			int alt39=6;
 			switch ( input.LA(1) ) {
 			case HOUR:
@@ -5804,12 +5804,12 @@ public class ADSParser extends UnforgivingParser {
 			}
 			switch (alt39) {
 				case 1 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:339:3: HOUR
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:338:3: HOUR
 					{
 					root_0 = (Object)adaptor.nil();
 
 
-					HOUR102=(Token)match(input,HOUR,FOLLOW_HOUR_in_coordinate1933); if (state.failed) return retval;
+					HOUR102=(Token)match(input,HOUR,FOLLOW_HOUR_in_coordinate1932); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					HOUR102_tree = (Object)adaptor.create(HOUR102);
 					adaptor.addChild(root_0, HOUR102_tree);
@@ -5818,18 +5818,18 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 2 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:341:3: H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:340:3: H_NUMBER M_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER
 					{
 					root_0 = (Object)adaptor.nil();
 
 
-					H_NUMBER103=(Token)match(input,H_NUMBER,FOLLOW_H_NUMBER_in_coordinate1942); if (state.failed) return retval;
+					H_NUMBER103=(Token)match(input,H_NUMBER,FOLLOW_H_NUMBER_in_coordinate1941); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					H_NUMBER103_tree = (Object)adaptor.create(H_NUMBER103);
 					adaptor.addChild(root_0, H_NUMBER103_tree);
 					}
 
-					M_NUMBER104=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1944); if (state.failed) return retval;
+					M_NUMBER104=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1943); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					M_NUMBER104_tree = (Object)adaptor.create(M_NUMBER104);
 					adaptor.addChild(root_0, M_NUMBER104_tree);
@@ -5847,13 +5847,13 @@ public class ADSParser extends UnforgivingParser {
 						MismatchedSetException mse = new MismatchedSetException(null,input);
 						throw mse;
 					}
-					D_NUMBER106=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1952); if (state.failed) return retval;
+					D_NUMBER106=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1951); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					D_NUMBER106_tree = (Object)adaptor.create(D_NUMBER106);
 					adaptor.addChild(root_0, D_NUMBER106_tree);
 					}
 
-					M_NUMBER107=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1954); if (state.failed) return retval;
+					M_NUMBER107=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1953); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					M_NUMBER107_tree = (Object)adaptor.create(M_NUMBER107);
 					adaptor.addChild(root_0, M_NUMBER107_tree);
@@ -5862,18 +5862,18 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 3 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:343:3: H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:342:3: H_NUMBER NUMBER ( PLUS | MINUS ) D_NUMBER NUMBER
 					{
 					root_0 = (Object)adaptor.nil();
 
 
-					H_NUMBER108=(Token)match(input,H_NUMBER,FOLLOW_H_NUMBER_in_coordinate1963); if (state.failed) return retval;
+					H_NUMBER108=(Token)match(input,H_NUMBER,FOLLOW_H_NUMBER_in_coordinate1962); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					H_NUMBER108_tree = (Object)adaptor.create(H_NUMBER108);
 					adaptor.addChild(root_0, H_NUMBER108_tree);
 					}
 
-					NUMBER109=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_coordinate1965); if (state.failed) return retval;
+					NUMBER109=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_coordinate1964); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					NUMBER109_tree = (Object)adaptor.create(NUMBER109);
 					adaptor.addChild(root_0, NUMBER109_tree);
@@ -5891,13 +5891,13 @@ public class ADSParser extends UnforgivingParser {
 						MismatchedSetException mse = new MismatchedSetException(null,input);
 						throw mse;
 					}
-					D_NUMBER111=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1973); if (state.failed) return retval;
+					D_NUMBER111=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1972); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					D_NUMBER111_tree = (Object)adaptor.create(D_NUMBER111);
 					adaptor.addChild(root_0, D_NUMBER111_tree);
 					}
 
-					NUMBER112=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_coordinate1975); if (state.failed) return retval;
+					NUMBER112=(Token)match(input,NUMBER,FOLLOW_NUMBER_in_coordinate1974); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					NUMBER112_tree = (Object)adaptor.create(NUMBER112);
 					adaptor.addChild(root_0, NUMBER112_tree);
@@ -5906,24 +5906,24 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 4 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:345:3: D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:344:3: D_NUMBER M_NUMBER S_NUMBER ( PLUS | MINUS ) D_NUMBER M_NUMBER S_NUMBER
 					{
 					root_0 = (Object)adaptor.nil();
 
 
-					D_NUMBER113=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1984); if (state.failed) return retval;
+					D_NUMBER113=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1983); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					D_NUMBER113_tree = (Object)adaptor.create(D_NUMBER113);
 					adaptor.addChild(root_0, D_NUMBER113_tree);
 					}
 
-					M_NUMBER114=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1986); if (state.failed) return retval;
+					M_NUMBER114=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1985); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					M_NUMBER114_tree = (Object)adaptor.create(M_NUMBER114);
 					adaptor.addChild(root_0, M_NUMBER114_tree);
 					}
 
-					S_NUMBER115=(Token)match(input,S_NUMBER,FOLLOW_S_NUMBER_in_coordinate1988); if (state.failed) return retval;
+					S_NUMBER115=(Token)match(input,S_NUMBER,FOLLOW_S_NUMBER_in_coordinate1987); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					S_NUMBER115_tree = (Object)adaptor.create(S_NUMBER115);
 					adaptor.addChild(root_0, S_NUMBER115_tree);
@@ -5941,19 +5941,19 @@ public class ADSParser extends UnforgivingParser {
 						MismatchedSetException mse = new MismatchedSetException(null,input);
 						throw mse;
 					}
-					D_NUMBER117=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1996); if (state.failed) return retval;
+					D_NUMBER117=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate1995); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					D_NUMBER117_tree = (Object)adaptor.create(D_NUMBER117);
 					adaptor.addChild(root_0, D_NUMBER117_tree);
 					}
 
-					M_NUMBER118=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1998); if (state.failed) return retval;
+					M_NUMBER118=(Token)match(input,M_NUMBER,FOLLOW_M_NUMBER_in_coordinate1997); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					M_NUMBER118_tree = (Object)adaptor.create(M_NUMBER118);
 					adaptor.addChild(root_0, M_NUMBER118_tree);
 					}
 
-					S_NUMBER119=(Token)match(input,S_NUMBER,FOLLOW_S_NUMBER_in_coordinate2000); if (state.failed) return retval;
+					S_NUMBER119=(Token)match(input,S_NUMBER,FOLLOW_S_NUMBER_in_coordinate1999); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					S_NUMBER119_tree = (Object)adaptor.create(S_NUMBER119);
 					adaptor.addChild(root_0, S_NUMBER119_tree);
@@ -5962,12 +5962,12 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 5 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:347:3: H_NUMBER ( PLUS | MINUS ) D_NUMBER
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:346:3: H_NUMBER ( PLUS | MINUS ) D_NUMBER
 					{
 					root_0 = (Object)adaptor.nil();
 
 
-					H_NUMBER120=(Token)match(input,H_NUMBER,FOLLOW_H_NUMBER_in_coordinate2009); if (state.failed) return retval;
+					H_NUMBER120=(Token)match(input,H_NUMBER,FOLLOW_H_NUMBER_in_coordinate2008); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					H_NUMBER120_tree = (Object)adaptor.create(H_NUMBER120);
 					adaptor.addChild(root_0, H_NUMBER120_tree);
@@ -5985,7 +5985,7 @@ public class ADSParser extends UnforgivingParser {
 						MismatchedSetException mse = new MismatchedSetException(null,input);
 						throw mse;
 					}
-					D_NUMBER122=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate2017); if (state.failed) return retval;
+					D_NUMBER122=(Token)match(input,D_NUMBER,FOLLOW_D_NUMBER_in_coordinate2016); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					D_NUMBER122_tree = (Object)adaptor.create(D_NUMBER122);
 					adaptor.addChild(root_0, D_NUMBER122_tree);
@@ -5994,12 +5994,12 @@ public class ADSParser extends UnforgivingParser {
 					}
 					break;
 				case 6 :
-					// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:349:3: '<=>'
+					// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:348:3: '<=>'
 					{
 					root_0 = (Object)adaptor.nil();
 
 
-					string_literal123=(Token)match(input,71,FOLLOW_71_in_coordinate2026); if (state.failed) return retval;
+					string_literal123=(Token)match(input,71,FOLLOW_71_in_coordinate2025); if (state.failed) return retval;
 					if ( state.backtracking==0 ) {
 					string_literal123_tree = (Object)adaptor.create(string_literal123);
 					adaptor.addChild(root_0, string_literal123_tree);
@@ -6030,10 +6030,10 @@ public class ADSParser extends UnforgivingParser {
 
 	// $ANTLR start synpred1_ADS
 	public final void synpred1_ADS_fragment() throws RecognitionException {
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:4: ( ( lmodifier )? func_name )
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:5: ( lmodifier )? func_name
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:4: ( ( lmodifier )? func_name )
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:5: ( lmodifier )? func_name
 		{
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:5: ( lmodifier )?
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:5: ( lmodifier )?
 		int alt40=2;
 		int LA40_0 = input.LA(1);
 		if ( (LA40_0==MINUS||LA40_0==PLUS||LA40_0==70||LA40_0==72) ) {
@@ -6041,7 +6041,7 @@ public class ADSParser extends UnforgivingParser {
 		}
 		switch (alt40) {
 			case 1 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:67:5: lmodifier
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:67:5: lmodifier
 				{
 				pushFollow(FOLLOW_lmodifier_in_synpred1_ADS399);
 				lmodifier();
@@ -6065,8 +6065,8 @@ public class ADSParser extends UnforgivingParser {
 
 	// $ANTLR start synpred2_ADS
 	public final void synpred2_ADS_fragment() throws RecognitionException {
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:5: ( lmodifier LPAREN ( clauseOr )+ RPAREN )
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:6: lmodifier LPAREN ( clauseOr )+ RPAREN
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:5: ( lmodifier LPAREN ( clauseOr )+ RPAREN )
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:6: lmodifier LPAREN ( clauseOr )+ RPAREN
 		{
 		pushFollow(FOLLOW_lmodifier_in_synpred2_ADS465);
 		lmodifier();
@@ -6075,7 +6075,7 @@ public class ADSParser extends UnforgivingParser {
 
 		match(input,LPAREN,FOLLOW_LPAREN_in_synpred2_ADS467); if (state.failed) return;
 
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:23: ( clauseOr )+
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:23: ( clauseOr )+
 		int cnt41=0;
 		loop41:
 		while (true) {
@@ -6087,7 +6087,7 @@ public class ADSParser extends UnforgivingParser {
 
 			switch (alt41) {
 			case 1 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:69:23: clauseOr
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:69:23: clauseOr
 				{
 				pushFollow(FOLLOW_clauseOr_in_synpred2_ADS469);
 				clauseOr();
@@ -6115,12 +6115,12 @@ public class ADSParser extends UnforgivingParser {
 
 	// $ANTLR start synpred3_ADS
 	public final void synpred3_ADS_fragment() throws RecognitionException {
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:5: ( LPAREN ( clauseOr )+ RPAREN rmodifier )
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:6: LPAREN ( clauseOr )+ RPAREN rmodifier
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:5: ( LPAREN ( clauseOr )+ RPAREN rmodifier )
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:6: LPAREN ( clauseOr )+ RPAREN rmodifier
 		{
 		match(input,LPAREN,FOLLOW_LPAREN_in_synpred3_ADS528); if (state.failed) return;
 
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:13: ( clauseOr )+
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:13: ( clauseOr )+
 		int cnt42=0;
 		loop42:
 		while (true) {
@@ -6132,7 +6132,7 @@ public class ADSParser extends UnforgivingParser {
 
 			switch (alt42) {
 			case 1 :
-				// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:71:13: clauseOr
+				// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:71:13: clauseOr
 				{
 				pushFollow(FOLLOW_clauseOr_in_synpred3_ADS530);
 				clauseOr();
@@ -6165,8 +6165,8 @@ public class ADSParser extends UnforgivingParser {
 
 	// $ANTLR start synpred4_ADS
 	public final void synpred4_ADS_fragment() throws RecognitionException {
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:73:5: ( LPAREN )
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:73:6: LPAREN
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:73:5: ( LPAREN )
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:73:6: LPAREN
 		{
 		match(input,LPAREN,FOLLOW_LPAREN_in_synpred4_ADS590); if (state.failed) return;
 
@@ -6177,8 +6177,8 @@ public class ADSParser extends UnforgivingParser {
 
 	// $ANTLR start synpred5_ADS
 	public final void synpred5_ADS_fragment() throws RecognitionException {
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:289:3: ( AND NOT )
-		// /dvt/workspace/montysolr6/contrib/adsabs/grammars/ADS.g:289:4: AND NOT
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:289:3: ( AND NOT )
+		// /dvt/workspace2/montysolr/contrib/adsabs/grammars/ADS.g:289:4: AND NOT
 		{
 		match(input,AND,FOLLOW_AND_in_synpred5_ADS1648); if (state.failed) return;
 
@@ -6374,28 +6374,28 @@ public class ADSParser extends UnforgivingParser {
 	public static final BitSet FOLLOW_PHRASE_in_identifier1860 = new BitSet(new long[]{0x0000000000000002L});
 	public static final BitSet FOLLOW_NUMBER_in_identifier1877 = new BitSet(new long[]{0x0000000000000002L});
 	public static final BitSet FOLLOW_STAR_in_identifier1891 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_HOUR_in_coordinate1933 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_H_NUMBER_in_coordinate1942 = new BitSet(new long[]{0x0000000080000000L});
-	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1944 = new BitSet(new long[]{0x0000008020000000L});
-	public static final BitSet FOLLOW_set_in_coordinate1946 = new BitSet(new long[]{0x0000000000010000L});
-	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1952 = new BitSet(new long[]{0x0000000080000000L});
-	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1954 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_H_NUMBER_in_coordinate1963 = new BitSet(new long[]{0x0000000400000000L});
-	public static final BitSet FOLLOW_NUMBER_in_coordinate1965 = new BitSet(new long[]{0x0000008020000000L});
-	public static final BitSet FOLLOW_set_in_coordinate1967 = new BitSet(new long[]{0x0000000000010000L});
-	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1973 = new BitSet(new long[]{0x0000000400000000L});
-	public static final BitSet FOLLOW_NUMBER_in_coordinate1975 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1984 = new BitSet(new long[]{0x0000000080000000L});
-	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1986 = new BitSet(new long[]{0x1000000000000000L});
-	public static final BitSet FOLLOW_S_NUMBER_in_coordinate1988 = new BitSet(new long[]{0x0000008020000000L});
-	public static final BitSet FOLLOW_set_in_coordinate1990 = new BitSet(new long[]{0x0000000000010000L});
-	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1996 = new BitSet(new long[]{0x0000000080000000L});
-	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1998 = new BitSet(new long[]{0x1000000000000000L});
-	public static final BitSet FOLLOW_S_NUMBER_in_coordinate2000 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_H_NUMBER_in_coordinate2009 = new BitSet(new long[]{0x0000008020000000L});
-	public static final BitSet FOLLOW_set_in_coordinate2011 = new BitSet(new long[]{0x0000000000010000L});
-	public static final BitSet FOLLOW_D_NUMBER_in_coordinate2017 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_71_in_coordinate2026 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_HOUR_in_coordinate1932 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_H_NUMBER_in_coordinate1941 = new BitSet(new long[]{0x0000000080000000L});
+	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1943 = new BitSet(new long[]{0x0000008020000000L});
+	public static final BitSet FOLLOW_set_in_coordinate1945 = new BitSet(new long[]{0x0000000000010000L});
+	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1951 = new BitSet(new long[]{0x0000000080000000L});
+	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1953 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_H_NUMBER_in_coordinate1962 = new BitSet(new long[]{0x0000000400000000L});
+	public static final BitSet FOLLOW_NUMBER_in_coordinate1964 = new BitSet(new long[]{0x0000008020000000L});
+	public static final BitSet FOLLOW_set_in_coordinate1966 = new BitSet(new long[]{0x0000000000010000L});
+	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1972 = new BitSet(new long[]{0x0000000400000000L});
+	public static final BitSet FOLLOW_NUMBER_in_coordinate1974 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1983 = new BitSet(new long[]{0x0000000080000000L});
+	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1985 = new BitSet(new long[]{0x1000000000000000L});
+	public static final BitSet FOLLOW_S_NUMBER_in_coordinate1987 = new BitSet(new long[]{0x0000008020000000L});
+	public static final BitSet FOLLOW_set_in_coordinate1989 = new BitSet(new long[]{0x0000000000010000L});
+	public static final BitSet FOLLOW_D_NUMBER_in_coordinate1995 = new BitSet(new long[]{0x0000000080000000L});
+	public static final BitSet FOLLOW_M_NUMBER_in_coordinate1997 = new BitSet(new long[]{0x1000000000000000L});
+	public static final BitSet FOLLOW_S_NUMBER_in_coordinate1999 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_H_NUMBER_in_coordinate2008 = new BitSet(new long[]{0x0000008020000000L});
+	public static final BitSet FOLLOW_set_in_coordinate2010 = new BitSet(new long[]{0x0000000000010000L});
+	public static final BitSet FOLLOW_D_NUMBER_in_coordinate2016 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_71_in_coordinate2025 = new BitSet(new long[]{0x0000000000000002L});
 	public static final BitSet FOLLOW_lmodifier_in_synpred1_ADS399 = new BitSet(new long[]{0x0000000000100000L});
 	public static final BitSet FOLLOW_func_name_in_synpred1_ADS402 = new BitSet(new long[]{0x0000000000000002L});
 	public static final BitSet FOLLOW_lmodifier_in_synpred2_ADS465 = new BitSet(new long[]{0x0000000010000000L});
