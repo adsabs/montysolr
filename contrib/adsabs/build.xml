@@ -47,7 +47,6 @@
         <symlink link="${include.location}/ivy.xml" resource="${basedir}/ivy.xml" failonerror="true"/>
         <symlink link="${include.location}/build.xml" resource="${basedir}/solr-build.xml" failonerror="true"/>
     </target>
-    
 
 
 </project>

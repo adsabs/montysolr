@@ -1,11 +1,21 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 
 /**
  * This processor prevents analysis to happen for nodes that are 
@@ -53,9 +63,36 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
       return node;
     }
 
+    // TODO: set immutable max that cannot be reset?
     String fv = null;
+    int maxValueLength = Integer.valueOf(getConfigVal("aqp.maxPhraseLength", "100"));
+    
     if (node instanceof FieldQueryNode) {
       fv = ((FieldQueryNode) node).getTextAsString();
+      if (fv.length() >= maxValueLength) {
+        String fName = getConfigVal("aqp.longPhraseFunction", "similar");
+        
+        QueryConfigHandler config = getQueryConfigHandler();
+        
+        if (!config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
+          throw new QueryNodeException(new MessageImpl(
+              "Invalid configuration",
+              "Missing FunctionQueryBuilder provider"));
+        }
+        
+        AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
+                        .getBuilder(fName, (QueryNode) node, config);
+        
+        if (builder == null) {
+          throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
+              "Unknown function \"" + fName + "\"" ));
+        }
+        
+        List<OriginalInput> values = new ArrayList<OriginalInput>();
+        values.add(new OriginalInput(fv, ((FieldQueryNode) node).getBegin(), ((FieldQueryNode) node).getEnd()));
+        values.add(new OriginalInput("input " + ((FieldQueryNode) node).getFieldAsString(), -1, -1));
+        return new AqpFunctionQueryNode(fName, builder, values);
+      }
     }
     QueryNode rn = super.postProcessNode(node);
     if (rn != node || node instanceof FieldQueryNode 
