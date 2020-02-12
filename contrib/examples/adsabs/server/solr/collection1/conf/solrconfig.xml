@@ -340,6 +340,7 @@
      <lst name="invariants">
        <str name="echoParams">explicit</str>
        <str name="aqp.allow.leading_wildcard">false</str>
+       <str name="aqp.maxAbsolutePhraseLength">500</str>
      </lst>
      <arr name="last-components">
       <str>wordcloud</str>

@@ -66,9 +66,11 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
       return node;
     }
 
-    // TODO: set immutable max that cannot be reset?
+
     String fv = null;
-    int maxValueLength = Integer.valueOf(getConfigVal("aqp.maxPhraseLength", "100"));
+    int maxValueLength = Integer.min(
+        Integer.valueOf(getConfigVal("aqp.maxPhraseLength", "150")),
+        Integer.valueOf(getConfigVal("aqp.maxAbsolutePhraseLength", "500")));          ;
     
     if (node instanceof FieldQueryNode) {
       fv = ((FieldQueryNode) node).getTextAsString();
@@ -93,7 +95,14 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
         
         List<OriginalInput> values = new ArrayList<OriginalInput>();
         values.add(new OriginalInput(fv, ((FieldQueryNode) node).getBegin(), ((FieldQueryNode) node).getEnd()));
+        // input abstract, 30, 0, 1, 1, 0.5)
         values.add(new OriginalInput("input " + ((FieldQueryNode) node).getFieldAsString(), -1, -1));
+        values.add(new OriginalInput("30", -1, -1));
+        values.add(new OriginalInput("0", -1, -1));
+        values.add(new OriginalInput("1", -1, -1));
+        values.add(new OriginalInput("1", -1, -1));
+        values.add(new OriginalInput("0.5", -1, -1));
+        
         return new AqpFunctionQueryNode(fName, builder, values);
       }
     }
