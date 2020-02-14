@@ -1331,6 +1331,9 @@ AqpFunctionQueryBuilderProvider {
 		}
 		AqpFunctionQParser parser = new AqpFunctionQParser("", localParams, 
 				reqAttr.getParams(), req);
+		
+		// TODO: builder is reusing parser object; that may be bad if two threads
+		// are accessing it. Not happening now, but ...
 		return new AqpSubQueryTreeBuilder(provider, parser);
 
 	}

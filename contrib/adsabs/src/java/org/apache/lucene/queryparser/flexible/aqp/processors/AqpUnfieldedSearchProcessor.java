@@ -33,7 +33,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQuer
  * @see AnalyzerQueryNodeProcessor
  *
  */
-public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implements
+public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl implements
 		QueryNodeProcessor {
   
   ADSEscapeQuerySyntaxImpl escaper = new ADSEscapeQuerySyntaxImpl();
@@ -102,6 +102,9 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	        (node.getParent() instanceof AqpAdsabsSynonymQueryNode && ((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated() == false)) {
           subQuery = "{!adismax aqp.exact.search=true}" + subQuery;
         }
+	    else if (getConfigVal("aqp.maxPhraseLength", null) != null) {
+	      subQuery = "{!adismax aqp.maxPhraseLength=" + getConfigVal("aqp.maxPhraseLength") + "}" + subQuery;
+	    }
 	    
 	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
 	    fValues.add(new OriginalInput(subQuery, -1, -1));

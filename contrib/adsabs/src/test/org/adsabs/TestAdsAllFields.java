@@ -1638,6 +1638,17 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQueryEquals(req("q", "abs:\"We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7\""), 
         "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7", 
         BooleanQuery.class);
+    // unfielded also must become like query
+    assertQueryEquals(req("q", "\"Evaluated bimolecular ion molecule gas phase kinetics\"",
+        "qf", "title abstract",
+        "aqp.maxPhraseLength", "10"),
+        "(like:Evaluated bimolecular ion molecule gas phase kinetics | like:Evaluated bimolecular ion molecule gas phase kinetics)",
+        DisjunctionMaxQuery.class);
+    
+    // check it can deal with unfielded search
+    assertQ(req("q", "\"We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7.  Within this survey path, we identify 4 DLAs definedas absorbers with Hicolumn densityNHi≥1020.3cm−2, which implies an incidence per absorptionlengthℓDLA(X) = 0.017+0.014−0.008at a median survey path redshift ofz= 0.623. While our estimateofℓDLA(X) is lower than earlier estimates atz≈0 from Hi21 cm emission studies, the results areconsistent within the measurement uncertainties. Our dataset is too small to properly sample theNHifrequency distribution functionf(NHi, X), but the observed distribution agrees with previousestimates atz >2. Adopting thez >2 shape off(NHi, X), we infer an Himass density atz∼0.6 ofρDLAHi= 0.25+0.20−0.12×108M⊙Mpc−3. This is significantly lower than previous estimates from targetedDLA surveys with the HST, but consistent with results from low-zHi21 cm observations, and suggeststhat the neutral gas density of the universe has been decreasingover the past 10 Gyrs.\""),
+        "//*[@numFound='6']"
+        );
 
     
     
