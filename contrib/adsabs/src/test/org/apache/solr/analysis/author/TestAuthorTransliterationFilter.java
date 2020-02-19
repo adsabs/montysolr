@@ -28,27 +28,22 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 	}
 	
 	public void testAuthorSynonyms() throws Exception {
-		Reader reader = new StringReader("Müller, Bill");
-		Tokenizer tokenizer = new KeywordTokenizer();
-		tokenizer.setReader(reader);
 		
-	  	
-		AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
-		
-		TokenStream stream = factory.create(new TestFilter(tokenizer));
-		
-		String[] expected = { "Müller, Bill", "Mueller, Bill".toUpperCase(), "Muller, Bill".toUpperCase() };
-		assertTokenStreamContents(stream, expected);
+		checkIt("Müller, Bill", "Müller, Bill", "Mueller, Bill", "Muller, Bill");
+		checkIt("Peißker, L", "Peißker, L", "Peissker, L");
+    
 	}
 	
 	public void testAccents() throws Exception {
-    Reader reader = new StringReader("Jeřábková, Tereza");
+	  checkIt("Jeřábková, Tereza", "Jeřábková, Tereza", "Jerhaebkovae, Tereza", "Jerabkova, Tereza");
+  }
+	
+	private void checkIt(String input, String... expected) throws Exception {
+	  Reader reader = new StringReader(input);
     Tokenizer tokenizer = new KeywordTokenizer();
     tokenizer.setReader(reader);
     AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
     TokenStream stream = factory.create(new TestFilter(tokenizer));
-    
-    String[] expected = { "Jeřábková, Tereza", "Jerhaebkovae, Tereza".toUpperCase(), "Jerabkova, Tereza".toUpperCase()};
     assertTokenStreamContents(stream, expected);
-  }
+	}
 }
