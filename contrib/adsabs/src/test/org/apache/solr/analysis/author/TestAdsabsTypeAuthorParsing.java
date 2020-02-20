@@ -658,7 +658,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	testAuthorQuery(
         "\"Boser, S\"", 
         		"first_author:boser, s | first_author:boser, s* | first_author:boser, | first_author:böser, s | first_author:böser, s* | first_author:böser, | first_author:boeser, s | first_author:boeser, s* | first_author:boeser,",
-        		"//*[@numFound='1']",
+        		"//*[@numFound='1']");
+  	//setDebug(true);
+  	testAuthorQuery(
     		"\"Böser, S\"", 
         		"first_author:böser, s | first_author:böser, s* | first_author:böser, | first_author:boeser, s | first_author:boeser, s* | first_author:boeser, | first_author:boser, s | first_author:boser, s* | first_author:boser,",
         		"//*[@numFound='1']"
@@ -2628,9 +2630,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     if (actual.startsWith("("))
       actual = actual.substring(1, actual.length()-1);
     
-    String[] ex = expected.split("(\\s\\|\\s|\\s)*[a-z]+\\:");
+    String[] ex = expected.split("(\\s\\|\\s|\\s)*[a-z_]+\\:");
     Arrays.sort(ex);
-    String[] ac = actual.split("(\\s\\|\\s|\\s)*[a-z]+\\:");
+    String[] ac = actual.split("(\\s\\|\\s|\\s)*[a-z_]+\\:");
     Arrays.sort(ac);
     StringBuffer exs = new StringBuffer();
     for (String s: ex) {
