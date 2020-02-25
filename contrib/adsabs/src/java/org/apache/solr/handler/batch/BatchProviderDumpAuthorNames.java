@@ -99,8 +99,8 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
             String[] vals = d.getValues(f);
             
             for (String s: vals) {
-              System.out.println(s);
-              System.out.println(AuthorUtils.normalizeAuthor(s));
+              //System.out.println(s);
+              //System.out.println(AuthorUtils.normalizeAuthor(s));
               s = s.toLowerCase();
               
               TokenStream ts = analyzer.tokenStream(targetAnalyzer, new StringReader(s));
