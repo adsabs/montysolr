@@ -99,8 +99,8 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
             String[] vals = d.getValues(f);
             
             for (String s: vals) {
-              //System.out.println(s);
-              //System.out.println(AuthorUtils.normalizeAuthor(s));
+              System.out.println(s);
+              System.out.println(AuthorUtils.normalizeAuthor(s));
               s = s.toLowerCase();
               
               TokenStream ts = analyzer.tokenStream(targetAnalyzer, new StringReader(s));
@@ -290,7 +290,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
           if (nameParts[i].length() > 1) {
             nameParts[i] = nameParts[i].substring(0, 1);
             for (String[] other: otherNames) {
-              if (other[i] == null || other[i].length() < 2)
+              if (other.length <= i || other[i] == null || other[i].length() < 2)
                 return false;  // this may happen if synonyms map the name to a shorter version, my solution is to stop processing (cheap?)
               other[i] = other[i].substring(0, 1);
             }
