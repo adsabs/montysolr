@@ -83,7 +83,8 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
     		else {
     			if (parsedName.containsKey("First") && parsedName.containsKey("Middle")) {
     				// should never happen
-    				throw new SolrException(ErrorCode.BAD_REQUEST, "We cannot reliably parse author name: " + individual);
+    			  return false;
+    				//throw new SolrException(ErrorCode.BAD_REQUEST, "We cannot reliably parse author name: " + individual);
     			}
     			else if (parsedName.containsKey("First")) {
     				newIndividual = (parsedName.get("First") + ","); // we treat it as surname

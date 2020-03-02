@@ -294,6 +294,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
       AqpWhiteSpacedQueryNode phraseNode = normalNode.cloneTree();
       
       phraseNode.setValue("\"" + phraseNode.getValue() + "\"");
+      normalNode.setText(escape(normalNode.getText()));
       
       ArrayList<QueryNode> orClauses = new ArrayList<QueryNode>();
       orClauses.add(normalNode);
@@ -307,7 +308,32 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 	  
   }
 
-	private void fixTheFieldProblem(List<NodeInfo> newGroup) {
+	private CharSequence escape(CharSequence text) {
+    StringBuffer out = new StringBuffer();
+    char prev = 0;
+    char c = 0;
+    for (int i = 0; i < text.length(); i++) {
+      c = text.charAt(i);
+      if (prev == '\\') {
+        out.append(c);
+        prev = c;
+        continue;
+      }
+        
+      if (c == ':' || c == ',') {
+        out.append('\\');
+        out.append(c);
+      }
+      else {
+        out.append(c);
+      }
+      prev = c;
+      
+    }
+    return out.subSequence(0, out.length());
+  }
+
+  private void fixTheFieldProblem(List<NodeInfo> newGroup) {
 	  NodeInfo firstNode = newGroup.get(0);
 	  String f = firstNode.getField();
 	  if (f != null) {

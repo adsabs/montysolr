@@ -377,6 +377,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
       
+      assertQEx("INVALID_SYNTAX", req("q", "author:\"^\"de marco year:2015"), 400);
+        
+      
       assertQ(req("q", "similar(foo bar baz title bitle, input abstract title, 100, 100, 1, 1)"),
           "//*[@numFound='1']",
           "//doc/str[@name='id'][.='2']");
