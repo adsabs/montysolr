@@ -1223,7 +1223,7 @@
       multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
       docValues="true"/>
 		  
-		<field name="author_count" type="int" indexed="true" stored="false"
+		<field name="author_count" type="int" indexed="true" stored="true"
 		  omitNorms="true" omitTermFreqAndPositions="true"/> 
 
 		<field name="first_author_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
