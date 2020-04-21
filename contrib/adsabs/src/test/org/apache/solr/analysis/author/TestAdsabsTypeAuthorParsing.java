@@ -28,6 +28,7 @@ import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.QParser;
@@ -377,6 +378,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+    assertQueryEquals(req("q", "author:\"van dok*, h\""), "author:van dok*, h", WildcardQuery.class);
+    assertQ(req("q", "author:\"van dok*, h\""),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='222']"
+    );
+    
+    assertQueryEquals(req("q", "author:\"^acco*\""), "spanPosRange(SpanMultiTermQueryWrapper(author:acco*), 0, 1)", SpanPositionRangeQuery.class);
   	assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
   	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
   	
