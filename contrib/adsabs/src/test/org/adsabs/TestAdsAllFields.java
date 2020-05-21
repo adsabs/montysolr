@@ -449,7 +449,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='100']",
         "//doc/float[@name='score'][.='26.0']");
 
-		assert h.query(req("q", "author:\"Einstein, A\""))
+		assert h.query(req("q", "author:\"Einstein, A\"", "fl", "author_norm"))
 				.contains("<arr name=\"author_norm\">" +
 				"<str>t' Hooft, van X</str>" +
 				"<str>Anders, John Michael</str>" +
@@ -570,7 +570,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			"//*[@numFound='1']");
 
 
-		assert h.query(req("q", "recid:100"))
+		assert h.query(req("q", "recid:100", "fl", "aff"))
  			.contains("<arr name=\"aff\">" +
 				"<str>-</str>" +
 				"<str>NASA Kavli space center, Cambridge, MA 02138, USA</str>" +
@@ -646,7 +646,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		
     
 		// order/gaps are important
-		assert h.query(req("q", "recid:100"))
+		assert h.query(req("q", "recid:100", "fl", "email"))
  			.contains("<arr name=\"email\">" +
 				"<str>-</str>" +
 				"<str>anders@email.com</str>" +
@@ -667,7 +667,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
-    assert h.query(req("q", "recid:100"))
+    assert h.query(req("q", "recid:100", "fl", "orcid_pub"))
     .contains("<arr name=\"orcid_pub\">" +
       "<str>1111-2222-3333-4444</str>" +
       "<str>-</str>" +
@@ -1293,7 +1293,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * links_data (generated and stored as JSON for display purposes)
 		 * ids_data (generated and stored as JSON for display purposes)
 		 */
-		assertQ(req("q", "id:100"),
+		assertQ(req("q", "id:100", "fl", "links_data"),
 				"//doc/arr[@name='links_data']/str[contains(text(),'MAST')]",
 				"//doc/arr[@name='links_data']/str[contains(text(),'{\"foo\": [\"bar\", \"baz\"], \"one\": {\"two\": \"three\"}}')]"
 				);
@@ -1469,7 +1469,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "page_range:23"),
         "//*[@numFound='0']" // not searchable
         );
-    assertQ(req("q", "page:55"),
+    assertQ(req("q", "page:55", "fl", "page_range"),
         "//doc[1]/str[@name='page_range'][.='23-55s']"
         );
     
@@ -1540,7 +1540,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "data:(nEd OR foo)"),
         "//doc[1]/int[@name='recid'][.='100']"
         );
-    assertQ(req("q", "data:\"NED:999\""), // numbers should be ignored in search, but stored
+    assertQ(req("q", "data:\"NED:999\"", "fl", "recid,data"), // numbers should be ignored in search, but stored
         "//doc[1]/int[@name='recid'][.='100']",
         "//doc[1]/arr[@name='data']/str[contains(text(),'NED:15')]"
         );
@@ -1549,7 +1549,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
      * esources
      * 
      */
-    assertQ(req("q", "esources:pub_pDF"),
+    assertQ(req("q", "esources:pub_pDF", "fl", "recid"),
         "//doc[1]/int[@name='recid'][.='100']"
         );
     
@@ -1626,7 +1626,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     /*
      * similar() query
      */
-    assertQ(req("q", "similar(recid:100)"),
+    assertQ(req("q", "similar(recid:100)", "fl", "recid"),
         "//doc[1]/int[@name='recid'][.='60']"
         );
     
