@@ -1,4 +1,7 @@
-def parse(lines, docid):
+import sys
+import pprint
+
+def parse(lines, docid, fvalue):
     out = [[] for x in range(1000)]
     seqs = ['field', 'term', 'doc', 'freq', 'pos']
     ix = 0
@@ -11,16 +14,17 @@ def parse(lines, docid):
         if l == '':
             i+= 1
             continue
-        if ix > 3:
-            print 'processing', l, term
+        #print l
         parts = l.split(' ', 1)
         if len(parts) <= 1:
             i+= 1
             continue
         key, value = parts[0], parts[1]
+        
+        
         if key == seqs[ix]:
             if key == 'field':
-                if value == 'title':
+                if value == fvalue:
                     ix += 1
                 else:
                     ix = 0
@@ -28,11 +32,23 @@ def parse(lines, docid):
                 term = value
                 ix += 1
             elif key == 'doc':
-                if value != docid:
-                    i += 1
-                    ix -= 1
-                    continue
                 doc = value
+                if value != docid:
+                    j = i
+                    while j+1 < len(lines):
+                        k = lines[j+1].strip().split(' ', 1)[0]
+                        if k == 'pos' or k == 'freq':
+                            i+=1
+                            j+=1
+                        elif k == 'term':
+                            i += 1
+                            ix -= 1
+                            break
+                        else:
+                            break
+                    i += 1
+                    #ix -= 1
+                    continue
                 ix += 1
             elif key == 'freq':
                 freq = value
@@ -43,16 +59,19 @@ def parse(lines, docid):
                     maxpos = pos
                 out[pos].append(term)
                 j = i
-                print 'adding', term, 'position', pos
+                #print 'adding', term, 'position', pos
                 while j+1 < len(lines) and lines[j+1].strip().split(' ', 1)[0] == 'pos':
                     pos = int(lines[j+1].strip().split(' ', 1)[1])
                     if pos > maxpos:
                         maxpos = pos
                     out[pos].append(term)
-                    print 'adding', term, 'position', pos
+                    #print 'adding', term, 'position', pos
                     j += 1
-                i = j
-                ix = 1
+                    i += 1
+
+                ix -= 3
+                term = None
+                
         i += 1
 
 
@@ -88,3 +107,8 @@ def parse(lines, docid):
  (18, []),
  (19, [])]
  """
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        lines = open(sys.argv[1], 'r').read().split('\n')
+        pprint.pprint(list(enumerate(parse(lines, sys.argv[2], sys.argv[3]))))
