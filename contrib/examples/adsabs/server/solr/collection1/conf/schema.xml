@@ -461,10 +461,6 @@
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
-				<!-- add a prefix to all synonyms -->
-				<filter class="solr.analysis.ResetFilterFactory"
-					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
-
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="false"
@@ -479,7 +475,10 @@
 					SYNONYM) which is important for the query parsing -->
 				<filter class="solr.AcronymTokenFilterFactory" emitBoth="true"
 					prefix="acr::" setType="ACRONYM"/>
-
+                
+                <!-- add a prefix to all synonyms -->
+                <filter class="solr.analysis.ResetFilterFactory"
+                    incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
 
 				<!-- we emit ASCIIField version of the token (at the same position):
 					this is rather crazy/expensive behaviour given that ads_text is used on fulltext,
@@ -542,8 +541,8 @@
 					inclOrig="true" />
 
 
-				<!-- MOND => [] mond => mond, lunar [SYNONYM] hubble space telescope
-					=> HST [SYNONYM], hubble space telescope [SYNONYM], hubble, space, telescope
+				<!-- MOND => [] mond => mond, lunar [SYNONYM] 
+				hubble space telescope	=> HST [SYNONYM], hubble space telescope [SYNONYM], hubble, space, telescope
 					[original], spazio [SYNONYM] -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
 					synonyms="ads_text_simple.synonyms" ignoreCase="false" expand="true"
@@ -551,11 +550,6 @@
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
-
-
-				<!-- add a prefix to all synonyms -->
-				<filter class="solr.analysis.ResetFilterFactory"
-					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
 					
 				<!-- only pass SYNONYM and ACRONYM tokens
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -570,13 +564,18 @@
 				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="true"
 					words="ads_text.kill"
 					/>
+					
 
 				<!-- if the original or synonym contains UPPERCASE variant, mark it as
 					an acronym but do not change its type, if it was a SYNONYM, it is important
 					information for query parsing -->
 				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false" allowTypes="SYNONYM"
 					prefix="acr::" setType="ACRONYM"/>
-
+					
+				<!-- add a prefix to all synonyms -->
+                <filter class="solr.analysis.ResetFilterFactory"
+                    incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
+                
 
 				<!-- we emit ASCIIField version of the token (at the same position) -->
 				<filter class="solr.ASCIIDuplicatingFilterFactory" />

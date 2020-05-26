@@ -69,6 +69,12 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     //System.err.println(h.query(req("q", "aff:foo1")));
     
     assertQ(req("q", "*:*"), "//*[@numFound>='2']");
+    
+    assertQueryEquals(req("q", "aff:\"Institut d’Astrophysique\"", "aqp.multiphrase.keep_one", "SYNONYM", "qt", "aqp"), 
+        "(aff:\"institut d'astrophysique\" | aff:\"institut d astrophysique\")",
+        DisjunctionMaxQuery.class
+        );
+
     assertQ(req("q", "aff:xfoo"), "//*[@numFound='0']");
 
     assertQueryEquals(req("q", "aff:\"Pasadena, CA 91125\"", "qt", "aqp"), 
@@ -130,7 +136,7 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     		);
 
     
-    assert h.query(req("q", "aff:foo1"))
+    assert h.query(req("q", "aff:foo1", "fl", "aff"))
  		.contains("<arr name=\"aff\">" +
 				"<str>foo1</str>" +
 				"<str>foo2</str>" +

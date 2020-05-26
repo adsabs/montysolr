@@ -166,7 +166,7 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
     
 
     // check the affiliation is there stored as one string
-    assert h.query(req("q", "institution:\"Kavli Institute/Dept of Physics\""))
+    assert h.query(req("q", "institution:\"Kavli Institute/Dept of Physics\"", "fl", "institution"))
  		.contains("<str>Kavli Institute/Dept of Physics</str>"
         );
     
