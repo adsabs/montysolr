@@ -8,7 +8,7 @@ import org.apache.lucene.index.NumericDocValues;
 
 /**
  * This is a toy example for testing the ADS Classic relevance
- * computtation. I know it is most likely inefficient and most
+ * computation. I know it is most likely inefficient and most
  * likely it relies on a boost factor that needs more work,
  * nevertheless a test can be done...
  *

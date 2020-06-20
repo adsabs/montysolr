@@ -118,7 +118,7 @@ AqpFunctionQueryBuilderProvider {
     SchemaField field = fp.getReq().getSchema().getField(fieldname);
     try {
       cacheWrapper = LuceneCacheWrapper.getFloatCache(
-          "cite_read_boost", UninvertingReader.Type.SORTED_SET_FLOAT, 
+          field.getName(), UninvertingReader.Type.SORTED_SET_FLOAT, 
           fp.getReq().getSearcher().getSlowAtomicReader());
     } catch (IOException e) {
       throw new SyntaxError("Naughty, naughty server error", e);
@@ -810,7 +810,7 @@ AqpFunctionQueryBuilderProvider {
 				//TODO: make configurable the name of the field				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 
-				return new SecondOrderQuery(innerQuery, 
+				return new SecondOrderQuery(new SecondOrderQuery(innerQuery, new SecondOrderCollectorTopN(200)) , 
 						new SecondOrderCollectorOperatorExpertsCiting(citationsWrapper, boostWrapper));
 			}
 		});
@@ -821,7 +821,7 @@ AqpFunctionQueryBuilderProvider {
 		 * def reviews(query):
 		 * 		"""
 		 *    What is cited by experts; this mimics the ADS Classic implementation
-		 *    is: ```citations(topn(200, classic_relevance(Q)))```
+		 *    is: ```citations(topn(200, Q, "citations desc"))```
 		 *    
 		 *    In other words, this will first find papers using the query, 
 		 *    it will re-score them using the ADS classic ranking formula,
@@ -830,6 +830,18 @@ AqpFunctionQueryBuilderProvider {
 		 *    
 		 *    @experimental
 		 *    @since 40.2.0.0
+		 *    
+		 *    @change 63.1.1.20
+		 *    Added second argument to adjust how much weight is given to the text
+		 *    features and how much citations are going to be the predominant factor.
+		 *    For example ratio of '1.0' means that final score will be calculated
+		 *    based on the match of query against the text. Ratio of '0.0' means that
+		 *    citations is what governs the order of the inner topn(200) papers.
+		 *    Default is 0.0 and the range must be between 0.0 and 1.0f
+		 *    
+		 *    Changed the implementation from ```citations(topn(200, classic_relevance(Q)))```
+		 *    to ```citations(topn(200, Q, "citations desc"))```
+		 *    
 		 *    """
 		 *    return "reviews(%s)" % (query,)
 		 *     
@@ -842,14 +854,18 @@ AqpFunctionQueryBuilderProvider {
 				SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
 						(CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 				
-				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
+				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "citation_count");
+				
+				float textWeightRatio = 0.0f; // 0.0f == all what matters are citations
+        if (fp.hasMoreArguments())
+          textWeightRatio = fp.parseFloat();
 				
 				SecondOrderQuery outerQuery = 
 				 new SecondOrderQuery( // citations
 						new SecondOrderQuery( // topn
-						    innerQuery,
-								//new SecondOrderQuery(innerQuery, // classic_relevance
-								//		new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper)), 
+						    //innerQuery,
+								new SecondOrderQuery(innerQuery, // sort by citations
+										new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostWrapper, textWeightRatio)),  
 										new SecondOrderCollectorTopN(200)),
 										new SecondOrderCollectorCitedBy(citationsWrapper));
 				
@@ -880,7 +896,7 @@ AqpFunctionQueryBuilderProvider {
 				
 				LuceneCacheWrapper<NumericDocValues> boostWrapper = getLuceneCache(fp, "cite_read_boost");
 				
-				return new SecondOrderQuery(innerQuery, 
+				return new SecondOrderQuery(new SecondOrderQuery(innerQuery, new SecondOrderCollectorTopN(200)), 
 						new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostWrapper));
 			}
 		});
