@@ -336,6 +336,9 @@
        <str name="aqp.classic_scoring.modifier">0.5</str>
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
+       
+       <str name="q.op">AND</str>
+       <str name="df">all</str>
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -361,6 +364,9 @@
        <str name="aqp.classic_scoring.modifier">0.5</str>
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
+       
+       <str name="q.op">AND</str>
+       <str name="df">all</str>
      </lst>
     <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -379,6 +385,9 @@
 		<str name="mlt.mintf">1</str>
 		<str name="mlt.mindf">1</str>
 		<str name="mlt.match.include">false</str>
+		
+		<str name="q.op">AND</str>
+        <str name="df">all</str>
 		</lst>
 		<lst name="invariants">
 	       <str name="echoParams">explicit</str>
@@ -410,6 +419,8 @@
        <str name="useFastVectorHighlighter">true</str>
        <str name="aqp.allow.leading_wildcard">true</str>
        
+       <str name="q.op">AND</str>
+       <str name="df">all</str>
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>

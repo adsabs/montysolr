@@ -323,35 +323,6 @@ public class AqpQueryParser extends QueryParserHelper {
     getQueryConfigHandler().set(ConfigurationKeys.DEFAULT_OPERATOR, operator);
   }
 
-  /**
-   * Set to <code>true</code> to allow leading wildcard characters.
-   * <p>
-   * When set, <code>*</code> or <code>?</code> are allowed as the first
-   * character of a PrefixQuery and WildcardQuery. Note that this can produce
-   * very slow queries on big indexes.
-   * <p>
-   * Default: false.
-   */
-  public void setLowercaseExpandedTerms(boolean lowercaseExpandedTerms) {
-    getQueryConfigHandler().set(ConfigurationKeys.LOWERCASE_EXPANDED_TERMS,
-        lowercaseExpandedTerms);
-  }
-
-  /**
-   * @see #setLowercaseExpandedTerms(boolean)
-   */
-  public boolean getLowercaseExpandedTerms() {
-    Boolean lowercaseExpandedTerms = getQueryConfigHandler().get(
-        ConfigurationKeys.LOWERCASE_EXPANDED_TERMS);
-
-    if (lowercaseExpandedTerms == null) {
-      return true;
-
-    } else {
-      return lowercaseExpandedTerms;
-    }
-
-  }
 
   /**
    * Set to <code>true</code> to allow leading wildcard characters.
@@ -467,14 +438,6 @@ public class AqpQueryParser extends QueryParserHelper {
 
   }
 
-  public void setNumericConfigMap(Map<String, LegacyNumericConfig> numericConfigMap) {
-    getQueryConfigHandler().set(ConfigurationKeys.LEGACY_NUMERIC_CONFIG_MAP,
-        numericConfigMap);
-  }
-
-  public Map<String, LegacyNumericConfig> getNumericConfigMap() {
-    return getQueryConfigHandler().get(ConfigurationKeys.LEGACY_NUMERIC_CONFIG_MAP);
-  }
 
   /**
    * Set locale used by date range parsing.

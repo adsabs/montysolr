@@ -215,7 +215,6 @@ public class AqpTestAbstractCase extends LuceneTestCase {
   public void assertWildcardQueryEquals(String query, boolean lowercase,
       String result, boolean allowLeadingWildcard) throws Exception {
     AqpQueryParser qp = getParser(null);
-    qp.setLowercaseExpandedTerms(lowercase);
     qp.setAllowLeadingWildcard(allowLeadingWildcard);
     Query q = qp.parse(query, "field");
     String s = q.toString("field");

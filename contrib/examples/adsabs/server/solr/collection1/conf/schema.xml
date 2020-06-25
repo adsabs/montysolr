@@ -444,6 +444,7 @@
 				<filter
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 
+                <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="index:1"/>
                 
 				<!-- find synonyms, first multi-tokens -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
@@ -1965,11 +1966,6 @@
 
 	<uniqueKey>id</uniqueKey>
 
-	<!-- field for the QueryParser to use when an explicit fieldname is absent -->
-	<defaultSearchField>all</defaultSearchField>
-
-	<!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
-	<solrQueryParser defaultOperator="AND" />
 
 	<copyField source="id" dest="recid" />
 

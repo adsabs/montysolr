@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
-import org.apache.lucene.document.FieldType.LegacyNumericType;
+import org.apache.lucene.document.FloatPoint;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
@@ -27,7 +27,7 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.standard.config.LegacyNumericConfig;
+import org.apache.lucene.queryparser.flexible.standard.config.PointsConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.search.Query;
@@ -118,9 +118,6 @@ public class AqpAdsabsQParser extends QParser {
 		  if (namedParams.containsKey("aqp.defaultField")) {
 		    defaultField = namedParams.get("aqp.defaultField");
 		  }
-		  else {
-	      defaultField = getReq().getSchema().getDefaultSearchFieldName();
-	    }
 		}
 		
 		if (defaultField != null) {
@@ -137,9 +134,6 @@ public class AqpAdsabsQParser extends QParser {
 		  if (namedParams.containsKey("aqp.defaultOperator")) {
 		    opParam = namedParams.get("aqp.defaultOperator");
 		  }
-		  else {
-	      opParam = getReq().getSchema().getQueryParserDefaultOperator();
-	    }
 		}
 		
 		if (opParam != null) {
@@ -213,12 +207,12 @@ public class AqpAdsabsQParser extends QParser {
 		}
 
 
-		HashMap<String, LegacyNumericConfig> ncm = new HashMap<String, LegacyNumericConfig>();
-		config.set(StandardQueryConfigHandler.ConfigurationKeys.LEGACY_NUMERIC_CONFIG_MAP, ncm);
+		HashMap<String, PointsConfig> ncm = new HashMap<String, PointsConfig>();
+		config.set(StandardQueryConfigHandler.ConfigurationKeys.POINTS_CONFIG_MAP, ncm);
 
 		if (namedParams.containsKey("aqp.floatFields")) {
       for (String f: namedParams.get("aqp.floatFields").split(",")) {
-        ncm.put(f, new LegacyNumericConfig(8, new MaxNumberFormat(Float.MAX_VALUE), LegacyNumericType.FLOAT)); //UPGRADE: todo
+        ncm.put(f, new PointsConfig((NumberFormat)new MaxNumberFormat(Float.MAX_VALUE), Float.class));
       }
     }
 
@@ -227,7 +221,7 @@ public class AqpAdsabsQParser extends QParser {
 		      ? namedParams.get("aqp.dateFormat") : "yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
 		  sdf.setTimeZone(UTC);
       for (String f: namedParams.get("aqp.dateFields").split(",")) {
-        ncm.put(f, new LegacyNumericConfig(6, new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), LegacyNumericType.LONG));
+        ncm.put(f, new PointsConfig(new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), Long.class));
       }
     }
 		
@@ -236,14 +230,14 @@ public class AqpAdsabsQParser extends QParser {
           ? namedParams.get("aqp.timestampFormat") : "yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ROOT);
       sdf.setTimeZone(UTC);
       for (String f: namedParams.get("aqp.timestampFields").split(",")) {
-        ncm.put(f, new LegacyNumericConfig(6, new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), LegacyNumericType.LONG));
+        ncm.put(f, new PointsConfig(new MaxNumberFormat(new NumberDateFormat(sdf), Long.MAX_VALUE), Long.class));
       }
     }
 		
     // when precision step=0 (ie use the default solr value), then it is Integer.MAX_VALUE
 		if (namedParams.containsKey("aqp.intFields")) {
       for (String f: namedParams.get("aqp.intFields").split(",")) {
-        ncm.put(f, new LegacyNumericConfig(Integer.MAX_VALUE, new MaxNumberFormat(Integer.MAX_VALUE), LegacyNumericType.INT));
+        ncm.put(f, new PointsConfig(new MaxNumberFormat(Integer.MAX_VALUE), Integer.class));
       }
     }
 		
