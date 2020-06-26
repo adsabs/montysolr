@@ -84,18 +84,4 @@ public class AdsConfigHandler extends RequestHandlerBase {
 	    return sb.toString();
 	}
 
-
-
-	@Override
-	public String getSource() {
-		return "";
-	}
-
-
-	@Override
-	public String getVersion() {
-		return "";
-	}
-
-
 }

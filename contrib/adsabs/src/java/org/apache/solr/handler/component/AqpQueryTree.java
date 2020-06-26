@@ -103,9 +103,4 @@ public class AqpQueryTree extends SearchComponent {
     return null;
   }
   
-  @Override
-  public String getSource() {
-    return null;
-  }
-  
 }

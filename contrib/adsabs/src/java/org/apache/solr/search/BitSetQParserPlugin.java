@@ -313,7 +313,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
     						
     						Map<String, UninvertingReader.Type> mapping = new HashMap();
     		        mapping.put(fieldName, UninvertingReader.Type.INTEGER_POINT);
-    		        UninvertingReader uninvertingReader = new UninvertingReader(reader, mapping);
+    		        UninvertingReader uninvertingReader = (UninvertingReader) UninvertingReader.wrap(reader, mapping::get);
     		        NumericDocValues cache;
                 try {
                   cache = uninvertingReader.getNumericDocValues(fieldName);

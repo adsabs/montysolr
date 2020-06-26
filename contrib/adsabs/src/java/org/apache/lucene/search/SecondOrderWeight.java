@@ -21,15 +21,6 @@ public class SecondOrderWeight extends Weight {
 
   }
 
-  @Override
-  public float getValueForNormalization() throws IOException {
-    return innerWeight.getValueForNormalization();
-  }
-
-  @Override
-  public void normalize(float norm, float topLevelBoost) {
-    innerWeight.normalize(norm, topLevelBoost);
-  }
 
   @Override
   public Scorer scorer(LeafReaderContext context) throws IOException {
@@ -48,6 +39,12 @@ public class SecondOrderWeight extends Weight {
   @Override
   public Explanation explain(LeafReaderContext context, int doc) throws IOException {
     return Explanation.match(0.0f, "nested, result of", innerWeight.explain(context, doc));
+  }
+
+
+  @Override
+  public boolean isCacheable(LeafReaderContext ctx) {
+    return innerWeight.isCacheable(ctx);
   }
 
 

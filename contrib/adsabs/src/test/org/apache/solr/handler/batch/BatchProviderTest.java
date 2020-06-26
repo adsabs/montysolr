@@ -5,10 +5,10 @@ import java.util.List;
 
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.solr.util.AbstractSolrTestCase;
+import org.apache.solr.SolrTestCaseJ4;
 import org.junit.BeforeClass;
 
-public class BatchProviderTest extends AbstractSolrTestCase {
+public class BatchProviderTest extends SolrTestCaseJ4 {
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -24,7 +24,6 @@ public class BatchProviderTest extends AbstractSolrTestCase {
 	}
 	
 	
-	@Override
 	public String getSolrHome() {
 		return MontySolrSetup.getMontySolrHome();
 	}

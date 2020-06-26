@@ -638,7 +638,7 @@ public class CitationLRUCacheDocValues<K,V> extends SolrCacheBase implements Cit
           else {
             continue;
           }
-          unReader = new UninvertingReader(lr, mapping);
+          unReader = UninvertingReader.wrap(lr, mapping::get);
   	    }
   	    else {
   	      unReader = lr;

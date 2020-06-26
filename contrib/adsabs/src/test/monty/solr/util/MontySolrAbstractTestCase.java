@@ -16,14 +16,14 @@ import java.util.regex.Pattern;
 import monty.solr.util.MontySolrTestCaseJ4;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.servlet.DirectSolrConnection;
-import org.apache.solr.util.AbstractSolrTestCase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 
-public abstract class MontySolrAbstractTestCase extends AbstractSolrTestCase {
+public abstract class MontySolrAbstractTestCase extends SolrTestCaseJ4 {
 
 	@BeforeClass
 	public static void beforeClassMontySolrTestCase() throws Exception {

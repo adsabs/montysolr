@@ -430,7 +430,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 				if (queries == null)
 				  continue;
 				TermQuery oq = new TermQuery(new Term("original", original));
-				int ho = searcher.search(oq, 1).totalHits;
+				long ho = searcher.search(oq, 1).totalHits;
 				for (Query q: queries) {
 				  if (q == null) continue;
 					Builder bq = new BooleanQuery.Builder();
@@ -441,7 +441,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase{
 					  Query query = bq.build();
 					  //System.out.println(query.toString());
 					  //System.out.println("q: " + searcher.search(q, 10).totalHits);
-						int no = searcher.search(query, 1).totalHits;
+						long no = searcher.search(query, 1).totalHits;
 						if (no != 1) {
 							System.out.println("Results differ: " + oq + " <<>> " + q + "   [" + ho + " : " + no + "]");
 							if (store == true) {

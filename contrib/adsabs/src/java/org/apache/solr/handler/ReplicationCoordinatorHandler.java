@@ -151,26 +151,10 @@ public class ReplicationCoordinatorHandler extends RequestHandlerBase {
     }
   }
 
-
-
-  @Override
-  public String getSource() {
-    return "";
-  }
-
-
-  @Override
-  public String getVersion() {
-    return "";
-  }
-
   @Override
   public String getDescription() {
     // TODO Auto-generated method stub
     return null;
   }
-
-  
-
 }
 

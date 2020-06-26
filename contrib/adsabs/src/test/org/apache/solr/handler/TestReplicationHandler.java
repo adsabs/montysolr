@@ -166,11 +166,7 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
     try {
       // setup the client...
       final String baseUrl = buildUrl(port) + "/" + DEFAULT_TEST_CORENAME;
-      HttpSolrClient client = getHttpSolrClient(baseUrl);
-      client.setConnectionTimeout(15000);
-      client.setSoTimeout(60000);
-      client.setDefaultMaxConnectionsPerHost(100);
-      client.setMaxTotalConnections(100);
+      HttpSolrClient client = getHttpSolrClient(baseUrl, 15000, 60000);
       return client;
     }
     catch (Exception ex) {
