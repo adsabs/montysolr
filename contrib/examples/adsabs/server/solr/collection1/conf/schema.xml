@@ -1261,6 +1261,10 @@
 		<!--  TODO: remove once index has been rebuilt -->
 		<field name="aff_raw" type="affiliation_text" indexed="true" stored="true"
 		       omitNorms="true" multiValued="true" />
+		
+		<! -- for Unified Astronomy Thesaurus -->
+		<field name="uat" type="affiliation_tokens" indexed="true" stored="true"
+		       multiValued="true" omitNorms="true"/>
 
 
 		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
