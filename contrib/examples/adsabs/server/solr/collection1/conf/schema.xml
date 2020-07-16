@@ -872,6 +872,47 @@
 	    </analyzer>
 	  </fieldType>
     
+
+    <!-- test: this is a copy of affiliation_token
+        the test is in TestAdsabsTypeAffiliationTokens -->
+    <fieldType name="uat_tokens" class="solr.TextField"
+        positionIncrementGap="100">
+            <analyzer type="index">
+              <charFilter class="solr.HTMLStripCharFilterFactory"/>
+    
+                <!-- tokenize on | or / -->
+                <tokenizer class="solr.PatternTokenizerFactory" pattern="[\:]"
+                  group="-1" />
+                <filter class="solr.WordDelimiterFilterFactory"
+                   generateWordParts="1"
+                   generateNumberParts="0"
+                   splitOnCaseChange="0"
+                   splitOnNumerics="0"
+                   catenateWords="0"
+                   catenateNumbers="0"
+                   catenateAll="0"
+                   preserveOriginal="1"
+                   stemEnglishPossessive="0"
+                   types="wdafftypes.txt"
+                   />
+              <filter class="solr.LowerCaseFilterFactory" />
+                    <filter class="solr.TrimFilterFactory" />
+        </analyzer>
+        <analyzer type="query">
+                <charFilter class="solr.HTMLStripCharFilterFactory"/>
+                <tokenizer class="solr.PatternTokenizerFactory" pattern="[\/\:]"
+                  group="-1" />
+                            <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+                                synonyms="aff_id.synonyms" 
+                                ignoreCase="true" 
+                                expand="true"
+                                format="semicolon"
+                                tokenizerFactory="solr.KeywordTokenizerFactory"
+                                inclOrig="true" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.TrimFilterFactory" />
+        </analyzer>
+      </fieldType>
     
 
     
@@ -1262,8 +1303,8 @@
 		<field name="aff_raw" type="affiliation_text" indexed="true" stored="true"
 		       omitNorms="true" multiValued="true" />
 		
-		<! -- for Unified Astronomy Thesaurus -->
-		<field name="uat" type="affiliation_tokens" indexed="true" stored="true"
+		<!-- for Unified Astronomy Thesaurus -->
+		<field name="uat" type="uat_tokens" indexed="true" stored="true"
 		       multiValued="true" omitNorms="true"/>
 
 
