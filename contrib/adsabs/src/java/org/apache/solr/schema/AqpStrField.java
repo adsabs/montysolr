@@ -70,7 +70,7 @@ public class AqpStrField extends StrField {
   **/
   
   @Override
-  public IndexableField createField(SchemaField field, Object value, float boost) {
+  public IndexableField createField(SchemaField field, Object value) {
     if (!field.indexed() && !field.stored()) {
       return null;
     }
@@ -83,17 +83,8 @@ public class AqpStrField extends StrField {
     }
     if (val==null) return null;
 
-    org.apache.lucene.document.FieldType newType = new org.apache.lucene.document.FieldType();
-    newType.setTokenized(true); // force it
-    newType.setStored(field.stored());
-    newType.setOmitNorms(field.omitNorms());
-    newType.setIndexOptions(field.indexed() ? getIndexOptions(field, val) : IndexOptions.NONE);
-    newType.setStoreTermVectors(field.storeTermVector());
-    newType.setStoreTermVectorOffsets(field.storeTermOffsets());
-    newType.setStoreTermVectorPositions(field.storeTermPositions());
-    newType.setStoreTermVectorPayloads(field.storeTermPayloads());
-
-    return createField(field.getName(), val, newType, boost);
+    // TODO:rca - verify the field gets indexed properly
+    return createField(field.getName(), val, field);
   }
   
   /**

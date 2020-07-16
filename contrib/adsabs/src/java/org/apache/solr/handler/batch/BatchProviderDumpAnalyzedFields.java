@@ -99,7 +99,6 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 		HashMap<String, String> descr = new HashMap<String, String>();
 		descr.put("query", query.toString());
 		descr.put("indexDir", se.getPath());
-		descr.put("indexVersion", se.getVersion());
 		descr.put("maxDoc", Integer.toString(se.maxDoc()));
 		descr.put("date", new Date().toString()); 
 

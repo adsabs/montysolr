@@ -114,13 +114,17 @@ class CitationsTransform extends DocTransformer
   }
 
   @Override
-  public void transform(SolrDocument doc, int docid, float score) {
+  public void transform(SolrDocument doc, int docid) {
     if( docid >= 0) {
-      doc.setField( name, generate(doc, docid) );
+      try {
+        doc.setField( name, generate(doc, docid) );
+      } catch (IOException e) {
+        throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, e);
+      }
     }
   }
 
-	private Map generate(SolrDocument doc, int docid) {
+	private Map generate(SolrDocument doc, int docid) throws IOException {
 	  HashMap<String, Object> data = new HashMap<String, Object>();
 	  
 	  if (counts.length > 0) {
@@ -149,7 +153,7 @@ class CitationsTransform extends DocTransformer
 
 	
 	
-	private List<String> getCitationValues(SolrDocument doc, int docid) {
+	private List<String> getCitationValues(SolrDocument doc, int docid) throws IOException {
 		ArrayList<String> data = new ArrayList<String>();
 		BytesRef ret = new BytesRef();
 		int[] citations = cache.getCitations(docid);
@@ -159,8 +163,10 @@ class CitationsTransform extends DocTransformer
 				if (citations[i] < 0) // unresolved refs = -1
 					continue;
 				if (idMapping != null) {
-					ret = idMapping.get(citations[i]);
-					data.add(ret.utf8ToString());
+				  if (idMapping.advanceExact(citations[i])) {
+				    ret = idMapping.binaryValue();
+				    data.add(ret.utf8ToString());				    
+				  }
 				}
 				else {
 					data.add(Integer.toString(citations[i]));
@@ -170,7 +176,7 @@ class CitationsTransform extends DocTransformer
 	  return data;
   }
 
-	private List<String> getReferenceValues(SolrDocument doc, int docid) {
+	private List<String> getReferenceValues(SolrDocument doc, int docid) throws IOException {
 		ArrayList<String> data = new ArrayList<String>();
 		BytesRef ret = new BytesRef();
 		int[] references = cache.getReferences(docid);
@@ -180,8 +186,10 @@ class CitationsTransform extends DocTransformer
 				if (references[i] < 0) // unresolved refs = -1
 					continue;
 				if (idMapping != null) {
-					ret = idMapping.get(references[i]);
-					data.add(ret.utf8ToString());
+				  if (idMapping.advanceExact(references[i])) {
+				    ret = idMapping.binaryValue();
+				    data.add(ret.utf8ToString());				    
+				  }
 				}
 				else {
 					data.add(Integer.toString(references[i]));

@@ -25,9 +25,8 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 		int[] v = cache.getLuceneDocIds(doc+docBase);
 		if (v == null) return;
 		float s = scorer.score();
-		float freq = (float) v.length;
 		for (int citingDoc: v) {
-			hits.add(new CollectorDoc(citingDoc, s, -1, freq));
+			hits.add(new CollectorDoc(citingDoc, s, v.length));
 		}
 		
 	}

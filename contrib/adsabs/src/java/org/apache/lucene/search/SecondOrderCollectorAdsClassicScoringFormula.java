@@ -74,7 +74,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 			  highestClassicFactor = cf;
 				
 			
-			hits.add(new CollectorDoc(doc+docBase, s, -1, scorer.freq()));
+			hits.add(new CollectorDoc(doc+docBase, s, -1));
 
 	}
 

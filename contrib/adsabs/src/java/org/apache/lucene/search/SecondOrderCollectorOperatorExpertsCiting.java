@@ -77,7 +77,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		for (int docid: references) {
 			if (docid > 0) {
 				//System.out.println("expert: doc=" + (doc+docBase) + "(score:" + s + ") adding=" + docid + " (score:" + (s + boostCache[docid]) + ")" + " freq=" + references.length) ;
-				hits.add(new CollectorDoc(docid, s + boostCache.getFloat(docid), -1, 1));
+				hits.add(new CollectorDoc(docid, s + boostCache.getFloat(docid), references.length));
 			}
 		}
 	}

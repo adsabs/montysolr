@@ -405,7 +405,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 					Entry<Integer, Float[]> nextItem = es.next();
 					Integer docid = nextItem.getKey();
 					for (Float f: nextItem.getValue()) {
-						hits.add(new CollectorDoc(docid, f, -1, 1));
+						hits.add(new CollectorDoc(docid, f, 1));
 					}
 				}
 			}

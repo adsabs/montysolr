@@ -38,12 +38,6 @@ public class SecondOrderListOfDocsScorer extends Scorer {
 		
     
     @Override
-    public int freq() throws IOException {
-      return 1;
-    }
-
-
-    @Override
     public DocIdSetIterator iterator() {
       if (hits.size() == 0)
         return null;

@@ -326,15 +326,21 @@ public class BitSetQParserPlugin extends QParserPlugin {
 	    					log.warn("We are translating values for a field without a cache: {}. Terrible, terrible idea!", fieldName);
 	    					
 	    					int docid = 0; // lucene docid
-	    					int maxDoc = reader.maxDoc();
-	    					int docValue;
-	    					while(docid < maxDoc) {
-	    						docValue = (int) cache.get(docid);
-	    						if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
-	    							translatedBitSet.set(docid);
-	    						}
-	    						docid++;
-	    					}
+	    					
+	    					// TODO:rca - verify the cache has been moved to the iterator's position
+	    					DocIdSetIterator iterator = DocIdSetIterator.all(reader.maxDoc());
+	    					try {
+                  while (iterator.nextDoc() != iterator.NO_MORE_DOCS) {
+                    if (cache.advanceExact(iterator.docID())) {
+                      int docValue = (int) cache.longValue();
+                      if (docValue < bits.length() && docValue > 0 && bits.get(docValue)) {
+                        translatedBitSet.set(iterator.docID());
+                      }                      
+                    }
+                  }
+                } catch (IOException e) {
+                  throw new SolrException(ErrorCode.SERVER_ERROR, e);
+                }
     					
 	    					bits = translatedBitSet;
     					}
