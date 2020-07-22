@@ -31,8 +31,7 @@ import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.util.SolrPluginUtils;
-import org.apache.solr.util.stats.Timer;
-import org.apache.solr.util.stats.TimerContext;
+import com.codahale.metrics.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +60,7 @@ public class BigQuerySearchHandler extends SearchHandler
   public void handleRequest(SolrQueryRequest req, SolrQueryResponse rsp) {
     PluginInfo pluginInfo = this.getPluginInfo();
     numRequests.incrementAndGet();
-    TimerContext timer = requestTimes.time();
+    Timer.Context timer = requestTimes.time();
     try {
       if(pluginInfo != null && pluginInfo.attributes.containsKey(USEPARAM)) req.getContext().put(USEPARAM,pluginInfo.attributes.get(USEPARAM));
       

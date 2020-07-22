@@ -36,24 +36,22 @@ import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.BoostQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.DummyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.FuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.GroupQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.LegacyNumericRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.MatchAllDocsQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.MatchNoDocsQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.ModifierQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.MultiPhraseQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.PhraseQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.standard.builders.PointRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.PrefixWildcardQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.StandardBooleanQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.standard.builders.SynonymQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.TermRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.WildcardQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.nodes.LegacyNumericQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.LegacyNumericRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.PointRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.StandardBooleanQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.SynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.search.AqpAdsabsQParser;
@@ -87,11 +85,9 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(TokenizedPhraseQueryNode.class, new PhraseQueryNodeBuilder());
 		setBuilder(MatchNoDocsQueryNode.class, new MatchNoDocsQueryNodeBuilder());
 		setBuilder(PrefixWildcardQueryNode.class, new PrefixWildcardQueryNodeBuilder());
-		setBuilder(LegacyNumericQueryNode.class, new DummyQueryNodeBuilder()); //TODO: convert to new
-		setBuilder(LegacyNumericRangeQueryNode.class, new LegacyNumericRangeQueryNodeBuilder());
+		setBuilder(PointRangeQueryNode.class, new PointRangeQueryNodeBuilder());
 		setBuilder(TermRangeQueryNode.class, new TermRangeQueryNodeBuilder());
 		setBuilder(SlopQueryNode.class, new AqpSlopQueryNodeBuilder());
-		setBuilder(StandardBooleanQueryNode.class, new StandardBooleanQueryNodeBuilder());
 		setBuilder(MultiPhraseQueryNode.class, new MultiPhraseQueryNodeBuilder());
 		setBuilder(MatchAllDocsQueryNode.class,	new MatchAllDocsQueryNodeBuilder());
 		setBuilder(AqpFunctionQueryNode.class,	new AqpFunctionQueryNodeBuilder());
@@ -100,6 +96,8 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(AqpConstantQueryNode.class, new AqpConstantQueryNodeBuilder(this));
 		setBuilder(AqpAdsabsScoringQueryNode.class, new AqpScoringQueryNodeBuilder());
 		setBuilder(AqpDisjunctionQueryNode.class, new AqpDisjunctQueryNodeBuilder());
+		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
+		setBuilder(SynonymQueryNode.class, new SynonymQueryNodeBuilder());
 		
 	}
 

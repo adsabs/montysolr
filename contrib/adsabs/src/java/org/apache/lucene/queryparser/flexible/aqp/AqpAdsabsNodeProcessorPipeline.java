@@ -12,11 +12,13 @@ import org.apache.lucene.queryparser.flexible.standard.processors.FuzzyQueryNode
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.PointQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.PointRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.RegexpQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreProcessor;
@@ -215,8 +217,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
       
     }
 		
-		add(new LegacyNumericQueryNodeProcessor());
-    add(new LegacyNumericRangeQueryNodeProcessor());
+		add(new PointQueryNodeProcessor());
+    add(new PointRangeQueryNodeProcessor());
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		
@@ -244,7 +246,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 	  
 		// lowercase everything else which wasn't caught by the previous steps
 		// a special case are non-analyzed nodes - these are left =UnTouchEd
-		add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
+		// add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
+		add(new WildcardQueryNodeProcessor());
+		add(new RegexpQueryNodeProcessor());
 
 		
 		// author search: 'kurtz, michael' is expanded with "kurtz, michael *" ...

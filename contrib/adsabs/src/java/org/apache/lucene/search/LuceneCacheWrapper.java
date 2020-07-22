@@ -80,8 +80,16 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 		  }
 			@Override
 			public float getFloat(int docid) {
-				long v = this.cache.get().get(docid);
-				return (float) v;
+			  NumericDocValues ref = this.cache.get();
+				try {
+          if (ref.advanceExact(docid)) {
+            return (float) ref.longValue();
+          }
+        } catch (IOException e) {
+          // TODO:rca - propagate instead?
+          e.printStackTrace();
+        }
+				return 0.0f;
 			}
 		};
 		

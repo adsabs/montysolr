@@ -11,7 +11,6 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.sandbox.queries.SlowFuzzyQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -207,7 +206,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("this (+(that)^7)", null, "+this +(that)^7.0");
 		
 		assertQueryEquals("roam~", null, "roam~2", FuzzyQuery.class);
-		assertQueryEquals("roam~0.8", null, "roam~0.8", SlowFuzzyQuery.class);
+		assertQueryEquals("roam~0.8", null, "roam~0.8", FuzzyQuery.class);
 		assertQueryEquals("roam~0.899999999", null, "roam~0.9");
 		
 		
