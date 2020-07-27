@@ -195,8 +195,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           // this is from ads synonyms
           "ADS,aitken\0double\0stars\n" + 
           "ADS,astrophysics\0data\0system\n" + 
-          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime\n" +
-          "ADS,astrophysics\0data\0system\n"
+          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime\n" + 
+          "ADS,astrophysics\0data\0system\n" + 
+          "VLBA,very\0long\0baseline\0array\n",
           
           // and this is how it would be if it was one line
           //"ADS,aitken\0double\0stars,astrophysics\0data\0system,anti\0de\0sitter\0space,antidesitter\0spacetime\n"
@@ -274,11 +275,20 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "601", "bibcode", "xxxxxxxxxx601",
         "title", "the hubble constant: a summary of the HST program for the luminosity calibration of type Ia supernovae by means of cepheids"));
     
+    assertU(adoc("id", "602", "bibcode", "xxxxxxxxxx602", 
+        "title", "Very Long Baseline Array (VLBA) is a ten-antennaaaah"));
+    
     assertU(commit());
   }
   
   
   public void testMultiTokens() throws Exception {
+    
+    // this multitoken is onthe first position
+    assertQ(req("q", "title:\"very long baseline array\""), 
+        "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='602']"
+        );
     
     // make sure the correct synonym is picked in absence of docfreq info
     assertQueryEquals(req("q", "title:(\"antidesitter spacetime\" application)",
