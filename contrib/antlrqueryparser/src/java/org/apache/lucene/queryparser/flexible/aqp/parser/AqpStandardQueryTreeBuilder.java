@@ -29,28 +29,26 @@ import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.BoostQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.DummyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.FuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.GroupQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.LegacyNumericRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.MatchAllDocsQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.MatchNoDocsQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.ModifierQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.MultiPhraseQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.PhraseQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.standard.builders.PointRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.PrefixWildcardQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.RegexpQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.SlopQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.builders.StandardBooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
+import org.apache.lucene.queryparser.flexible.standard.builders.SynonymQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.TermRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.WildcardQueryNodeBuilder;
-import org.apache.lucene.queryparser.flexible.standard.nodes.LegacyNumericQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.LegacyNumericRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.PointRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.StandardBooleanQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.SynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFieldQueryNodeBuilder;
@@ -74,8 +72,7 @@ public class AqpStandardQueryTreeBuilder extends AqpQueryTreeBuilder implements
     setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
     setBuilder(SlowFuzzyQueryNode.class, new AqpSlowFuzzyQueryNodeBuilder());
     setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());
-    setBuilder(LegacyNumericQueryNode.class, new DummyQueryNodeBuilder());
-    setBuilder(LegacyNumericRangeQueryNode.class, new LegacyNumericRangeQueryNodeBuilder());
+    setBuilder(PointRangeQueryNode.class, new PointRangeQueryNodeBuilder());
     setBuilder(BoostQueryNode.class, new BoostQueryNodeBuilder());
     setBuilder(ModifierQueryNode.class, new ModifierQueryNodeBuilder());
     setBuilder(WildcardQueryNode.class, new WildcardQueryNodeBuilder());
@@ -86,10 +83,10 @@ public class AqpStandardQueryTreeBuilder extends AqpQueryTreeBuilder implements
     setBuilder(TermRangeQueryNode.class, new TermRangeQueryNodeBuilder());
     setBuilder(RegexpQueryNode.class, new RegexpQueryNodeBuilder());
     setBuilder(SlopQueryNode.class, new SlopQueryNodeBuilder());
-    setBuilder(StandardBooleanQueryNode.class,
-        new StandardBooleanQueryNodeBuilder());
     setBuilder(MultiPhraseQueryNode.class, new MultiPhraseQueryNodeBuilder());
     setBuilder(MatchAllDocsQueryNode.class, new MatchAllDocsQueryNodeBuilder());
+    setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
+    setBuilder(SynonymQueryNode.class, new SynonymQueryNodeBuilder());
   }
 
 

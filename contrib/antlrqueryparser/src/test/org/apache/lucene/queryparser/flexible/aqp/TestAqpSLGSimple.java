@@ -99,12 +99,6 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
     assertQueryMatch(qp, "term~1", "field", "field:term~1");
     assertQueryMatch(qp, "term~2", "field", "field:term~2");
 
-    qp.setAllowSlowFuzzy(true);
-    assertQueryMatch(qp, "term~", "field", "field:term~0.5");
-    assertQueryMatch(qp, "term~0.1", "field", "field:term~0.1");
-    assertQueryMatch(qp, "term~0.2", "field", "field:term~0.2");
-    qp.setAllowSlowFuzzy(false);
-
     assertQueryMatch(qp, "something", "field", "field:something");
 
     assertQueryMatch(qp, "x:something", "field", "x:something");
@@ -134,17 +128,6 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 
     assertQueryMatch(qp, "x:one NOT y:two -three^0.5", "field",
         "+(+x:one -y:two) -(field:three)^0.5");
-
-    qp.setAllowSlowFuzzy(true);
-    assertQueryMatch(qp, "one NOT two -three~0.2", "field",
-        "+(+field:one -field:two) -field:three~0.2");
-
-    assertQueryMatch(qp, "one NOT two NOT three~0.2", "field",
-        "+field:one -field:two -field:three~0.2");
-
-    assertQueryMatch(qp, "one two^0.5 three~0.2", "field",
-        "+field:one +(field:two)^0.5 +field:three~0.2");
-    qp.setAllowSlowFuzzy(false);
 
     assertQueryMatch(qp, "one NOT two -three~0.2", "field",
         "+(+field:one -field:two) -field:three~2");

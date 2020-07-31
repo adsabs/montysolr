@@ -283,16 +283,6 @@ public class AqpQueryParser extends QueryParserHelper {
         AqpStandardQueryConfigHandler.ConfigurationKeys.IMPLICIT_FUZZY, value);
   }
 
-  public Boolean getAllowSlowFuzzy() {
-    return getQueryConfigHandler().get(
-        AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY);
-  }
-
-  public void setAllowSlowFuzzy(Boolean value) {
-    getQueryConfigHandler()
-        .set(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY,
-            value);
-  }
 
   /********************************************************************
    * Everything below is simpy copy of the StandardQueryParser *

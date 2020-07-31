@@ -108,13 +108,6 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
     q = mfqp.parse("one^2 two", null);
     assertEquals("(b:one t:one)^2.0 (b:two t:two)", q.toString());
 
-    mfqp.setAllowSlowFuzzy(true);
-    q = mfqp.parse("one~ two", null);
-    assertEquals("(b:one~0.5 t:one~0.5) (b:two t:two)", q.toString());
-
-    q = mfqp.parse("one~0.8 two^2", null);
-    assertEquals("(b:one~0.8 t:one~0.8) (b:two t:two)^2.0", q.toString());
-
     q = mfqp.parse("one* two*", null);
     assertEquals("(b:one* t:one*) (b:two* t:two*)", q.toString());
 
