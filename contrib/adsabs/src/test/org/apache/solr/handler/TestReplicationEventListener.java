@@ -8,6 +8,7 @@ import java.io.StringWriter;
 
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.batch.BatchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
@@ -49,9 +50,6 @@ public class TestReplicationEventListener extends SolrTestCaseJ4 {
 		assertU(adoc("id", "6", "bibcode", "b6"));		
 		assertU(commit());
 	}
-	
-	
-	
 	
 	
 	public void test() throws Exception {

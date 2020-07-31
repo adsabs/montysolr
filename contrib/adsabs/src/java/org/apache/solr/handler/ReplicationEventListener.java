@@ -16,6 +16,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.core.CloseHook;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrEventListener;
@@ -62,6 +63,22 @@ public class ReplicationEventListener implements SolrEventListener {
     barrier = new CyclicBarrier(1);
     numberOfTimesCalled = new AtomicInteger(0);
     httpClient = new Builder(masterUrl).build();
+    
+    core.addCloseHook(new CloseHook() {
+      @Override
+      public void preClose(SolrCore core) {
+        log.info("Solr core is being closed - shutting down HTTP client");
+        try {
+          httpClient.close();
+        } catch (IOException e) {
+        }
+      }
+
+      @Override
+      public void postClose(SolrCore core) {
+      }
+
+    });
   }
   
   @Override

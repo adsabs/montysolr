@@ -85,7 +85,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit4-ant-2.7.2.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/randomizedtesting-runner-2.7.2.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lucene-libs/lucene-test-framework-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="/apache-solr-77/solr/core/lib/commons-io-2.5.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/antlr-3.5.2.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/antlr-runtime-3.5.2.jar"/>
@@ -111,5 +111,6 @@
 	<classpathentry kind="lib" path="contrib/adsabs/extra-lib/junidecode-0.5.jar"/>
 	<classpathentry kind="lib" path="lib/luke-swing-with-deps.jar"/>
 	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/solr/core/lib/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/lucene/replicator/lib/httpclient-4.5.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

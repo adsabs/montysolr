@@ -648,6 +648,7 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
 
     slave.setTestPort(masterJetty.getLocalPort());
     slave.copyConfigFile(slave.getSolrConfigFile(), "solrconfig.xml");
+    
 
     slaveJetty.stop();
     slaveJetty = createJetty(slave);
