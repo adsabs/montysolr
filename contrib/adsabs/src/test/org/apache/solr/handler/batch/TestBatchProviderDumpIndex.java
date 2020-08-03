@@ -34,10 +34,10 @@ public class TestBatchProviderDumpIndex extends BatchProviderTest {
 		
 		checkFile(tmpDir + "/00000", 
 				"{\"id\":1,\"bibcode\":\"xxxxxxxxxxxx1\",\"title\":\"green wall\"}",
-				",{\"id\":5,\"bibcode\":\"xxxxxxxxxxxx5\",\"title\":\"no fight\"}",
-				",{\"id\":6,\"bibcode\":\"xxxxxxxxxxxx6\",\"title\":\"for peace\"}",
-				",{\"id\":7,\"bibcode\":\"xxxxxxxxxxxx7\",\"title\":\"no fight\"}",
-				",{\"id\":8,\"bibcode\":\"xxxxxxxxxxxx8\",\"title\":\"for peace\"}"
+				"{\"id\":5,\"bibcode\":\"xxxxxxxxxxxx5\",\"title\":\"no fight\"}",
+				"{\"id\":6,\"bibcode\":\"xxxxxxxxxxxx6\",\"title\":\"for peace\"}",
+				"{\"id\":7,\"bibcode\":\"xxxxxxxxxxxx7\",\"title\":\"no fight\"}",
+				"{\"id\":8,\"bibcode\":\"xxxxxxxxxxxx8\",\"title\":\"for peace\"}"
 		);
 
 		// request set of fields
@@ -48,10 +48,10 @@ public class TestBatchProviderDumpIndex extends BatchProviderTest {
 		
 		checkFile(tmpDir + "/00000", 
 				"{\"id\":1,\"bibcode\":\"xxxxxxxxxxxx1\"}",
-				",{\"id\":5,\"bibcode\":\"xxxxxxxxxxxx5\"}",
-				",{\"id\":6,\"bibcode\":\"xxxxxxxxxxxx6\"}",
-				",{\"id\":7,\"bibcode\":\"xxxxxxxxxxxx7\"}",
-				",{\"id\":8,\"bibcode\":\"xxxxxxxxxxxx8\"}"
+				"{\"id\":5,\"bibcode\":\"xxxxxxxxxxxx5\"}",
+				"{\"id\":6,\"bibcode\":\"xxxxxxxxxxxx6\"}",
+				"{\"id\":7,\"bibcode\":\"xxxxxxxxxxxx7\"}",
+				"{\"id\":8,\"bibcode\":\"xxxxxxxxxxxx8\"}"
 		);
 		
 	}

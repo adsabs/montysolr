@@ -1,6 +1,7 @@
 package org.apache.solr.handler.batch;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import monty.solr.util.MontySolrSetup;
@@ -44,7 +45,15 @@ public class BatchProviderTest extends SolrTestCaseJ4 {
 	}
 	
 	protected void checkFile(String file, String... expected) throws IOException {
-    List<String> lines = h.getCore().getResourceLoader().getLines(file);
+    StringBuffer input = new StringBuffer();
+    for (String l: h.getCore().getResourceLoader().getLines(file)) {
+//      if (l.startsWith("{")) {
+//        input.append("\n");
+//      }
+      input.append(l);
+    }
+    String lines = input.toString();
+//    List<String> lines =  h.getCore().getResourceLoader().getLines(file);
 //    for (String l : lines) {
 //    	System.out.println(l);
 //    }

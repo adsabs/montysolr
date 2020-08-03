@@ -303,7 +303,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		Query q = null;
 		q = assertQueryEquals("te?t", null, "te?t", WildcardQuery.class);
 		
-		q = assertQueryEquals("test*", null, "test*", WildcardQuery.class);
+		q = assertQueryEquals("test*", null, "test*", PrefixQuery.class);
 	    assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
 	    
 	    q = assertQueryEquals("test?", null, "test?", WildcardQuery.class);

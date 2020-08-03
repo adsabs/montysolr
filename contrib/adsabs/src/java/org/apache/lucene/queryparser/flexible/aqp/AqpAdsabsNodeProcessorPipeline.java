@@ -64,6 +64,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTMODIFIERProcess
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTreeRewriteProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpVirtualFieldsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpWhiteSpacedQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpWildcardQueryNodeProcessor;
 import org.apache.solr.search.AqpAdsabsQParser;
 
 /**
@@ -247,7 +248,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		// lowercase everything else which wasn't caught by the previous steps
 		// a special case are non-analyzed nodes - these are left =UnTouchEd
 		// add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
-		add(new WildcardQueryNodeProcessor());
+		add(new AqpWildcardQueryNodeProcessor());
 		add(new RegexpQueryNodeProcessor());
 
 		
