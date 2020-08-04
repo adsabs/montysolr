@@ -1395,24 +1395,31 @@ public class AqpExtendedDismaxQParser extends QParser {
     }
     
     private String getQueryStr() {
+      String x = null;
+      if (vals == null) {
+        x = val;
+      }
+      else {
+        x = String.join(" ", vals);
+      }
       switch (type) {
         case PHRASE:
-          return field + ":" + "\"" + val + "\"" + (slop != 0 ? "~" + slop : "");
+          return field + ":" + "\"" + x + "\"" + (slop != 0 ? "~" + slop : "");
         case FIELD:
-          return field + ":" + escape(val) + (slop != 0 ? "^" + slop : "");
+          return field + ":" + escape(x) + (slop != 0 ? "^" + slop : "");
         case PREFIX:
-          return field + ":" + "\"" + val + "*\"";
+          return field + ":" + "\"" + escape(x) + "*\"";
         case WILDCARD: 
-          return field + ":" + "\"" + val + "\"";
+          return field + ":" + "\"" + escape(x) + "\"";
         case FUZZY: 
-          return field + ":" + "\"" + val + "\"" + "~" + flt;
+          return field + ":" + "\"" + escape(x) + "\"" + "~" + flt;
         case RANGE: 
           return field + ":" + (bool ? "{" : "[") + 
             val + " TO " + 
             val2 != null && val2.length() > 1 ? val2 : "*" +
             (bool2 ? "}" : "]");
       } 
-      return field + ":" + escape(val);
+      return field + ":" + escape(x);
     }
     
     private Query originalGetQuery() {

@@ -377,8 +377,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
-  	assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
-  	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
+  	assertQueryEquals(req("q", "author:acco*"), "author:acco*", PrefixQuery.class);
+  	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", PrefixQuery.class);
   	
   	testAuthorQuery("Adamč*",
   			"adamč*",
@@ -543,7 +543,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             "author:goodman, | author:goodman,*",
             "//*[@numFound='0']"
             );
-  	
   	
     // 'xxx' will be removed from the author (at least in the modified version)
 	  assertQueryEquals(req("defType", "aqp", "q", "author:\"accomazzi, alberto, xxx.\""), 
@@ -789,8 +788,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     // test proper order of authors - ticket: #98
     //System.out.println(h.query(req("q", String.format("%s:130", F.ID))));
-    assertQ(req("q", String.format("%s:130", F.ID)), "//*[@numFound='1']");
-    assert h.query(req("q", String.format("%s:130", F.ID)))
+    assertQ(req("q", String.format("%s:130", F.ID), "fl", "author"), "//*[@numFound='1']");
+    assert h.query(req("q", String.format("%s:130", F.ID), "indent", "false"))
       .contains("<arr name=\"author\"><str>Author, A</str><str>Author, B</str><str>Author, C</str></arr>");
     
 
@@ -2527,11 +2526,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     /*
      * Test we are not mixing/concatenating fields - Ticket #346 
      */
-    testAuthorQuery(
-        "\"obama,\" boooo", "+(author:obama, | author:obama,*) +all:boooo", 
-        "//*[@numFound='0']"
-        );
-
+    assertQueryEquals(req("q", "author:\"obama,\" boooo", "df", "all"), "+(author:obama, | author:obama,*) +all:boooo", BooleanQuery.class);
+    
   }
 
 
@@ -2657,7 +2653,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     if (clazz != null) {
       if (!q.getClass().isAssignableFrom(clazz)) {
-        tp.debugFail("Query is not: " + clazz + " but: " + q.getClass(), expected, "-->" + q.toString());
+        tp.debugFail("Query is not: " + clazz + " but: " + q.getClass());
       }
     }
 

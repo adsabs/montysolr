@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,6 +17,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
 
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -45,6 +47,7 @@ import org.apache.solr.schema.StrField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.uninverting.UninvertingReader;
+import org.apache.solr.uninverting.UninvertingReader.Type;
 import org.apache.solr.update.AddUpdateCommand;
 import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.slf4j.Logger;
@@ -307,16 +310,16 @@ public class BitSetQParserPlugin extends QParserPlugin {
     					}
     					else {
     					
-    						if (!fieldIsInt) {
+    						if (!fieldIsInt || !field.isUninvertible()) {
     							throw new SolrException(ErrorCode.BAD_REQUEST, "You make me sad - this field: " + fieldName + " is not indexed as integer :(");
     						}
     						
-    						Map<String, UninvertingReader.Type> mapping = new HashMap();
-    		        mapping.put(fieldName, UninvertingReader.Type.INTEGER_POINT);
-    		        UninvertingReader uninvertingReader = (UninvertingReader) UninvertingReader.wrap(reader, mapping::get);
+    		        LeafReader irReader = UninvertingReader.wrap(reader, 
+                    Collections.singletonMap(fieldName, UninvertingReader.Type.INTEGER_POINT)::get);
+    		        
     		        NumericDocValues cache;
                 try {
-                  cache = uninvertingReader.getNumericDocValues(fieldName);
+                  cache = irReader.getNumericDocValues(fieldName);
                 } catch (IOException e) {
                   return translatedBitSet;
                 }

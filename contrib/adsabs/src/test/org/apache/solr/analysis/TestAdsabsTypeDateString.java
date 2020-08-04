@@ -23,7 +23,7 @@ import monty.solr.util.MontySolrSetup;
 
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.LegacyNumericRangeQuery;
+import org.apache.lucene.search.PointRangeQuery;
 import org.junit.BeforeClass;
 
 /**
@@ -91,61 +91,61 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     // added symbolic date math parsing
     assertQueryEquals(req("defType", "aqp", "q", "date:[\"1976-12-30T00:30:00Z\" TO \"1977-12-30T00:30:00Z\"]"),
         "date:[220753800000 TO 252289800000]",
-        LegacyNumericRangeQuery.class);
+        PointRangeQuery.class);
     assertQueryEquals(req("defType", "aqp", "q", "date:[\"1976-12-30T00:30:00Z\" TO \"1976-12-30T00:30:00Z+1YEAR\"]"),
         "date:[220753800000 TO 252289800000]",
-        LegacyNumericRangeQuery.class);
+        PointRangeQuery.class);
     
     // will become: 1972-05-21T17:33:18.772Z
     assertQueryEquals(req("defType", "aqp", "q", "date:\"1972-05-20T17:33:18.772Z+1DAY\""),
         "date:[75317598000 TO 75317598000]",
-        LegacyNumericRangeQuery.class);
+        PointRangeQuery.class);
     assertQueryEquals(req("defType", "aqp", "q", "date:\"1972-05-21T17:33:18.772Z\""),
         "date:[75317598000 TO 75317598000]",
-        LegacyNumericRangeQuery.class);
+        PointRangeQuery.class);
     
     // 2012-01-01T00:00:00 - 2012-02-01T00:00:00 (excl)
     assertQueryEquals(req("q", "pubdate:2012-01", "defType", "aqp"), 
     		"date:[1325376000000 TO 1328054400000}", 
-    		LegacyNumericRangeQuery.class);
+    		PointRangeQuery.class);
     assertQueryEquals(req("q", "pubdate:2012-00", "defType", "aqp"), 
     		"date:[1325376000000 TO 1328054400000}", 
-    		LegacyNumericRangeQuery.class);
+    		PointRangeQuery.class);
     
     // 2012-01-01T00:00:00 - 2013-01-01T00:00:00 (excl)
     assertQueryEquals(req("q", "pubdate:2012", "defType", "aqp"), 
     		"date:[1325376000000 TO 1356998400000}", 
-    		LegacyNumericRangeQuery.class);
+    		PointRangeQuery.class);
     // 2012-01-01T00:00:00 - 2012-01-01T23:59:59
     assertQueryEquals(req("q", "pubdate:[2012]", "defType", "aqp"), 
     		"date:[1325376000000 TO 1325462399000]", 
-    		LegacyNumericRangeQuery.class);
+    		PointRangeQuery.class);
     // 1012-01-01T00:00:01 - 2012-12-31T23:59:59
     // NOTE: the date parsing is tricky (calendars were changed in 1582)
     // so it actually produces 1011-12-26; but I think we can ignore it
     assertQueryEquals(req("q", "pubdate:[* TO 2012]", "defType", "aqp"), 
     		"date:[-30231619199000 TO 1356998399000]", 
-    		LegacyNumericRangeQuery.class);
+    		PointRangeQuery.class);
     
     // 2012-01-01T00:00:00 - 3011-12-31T23:59:59
     assertQueryEquals(req("q", "pubdate:[2012 TO *]", "defType", "aqp"), 
     		"date:[1325376000000 TO 32882284799000]", 
-    		LegacyNumericRangeQuery.class);
+    		PointRangeQuery.class);
     
     // 2012-01-01T00:00:00 - 2013-12-31T23:59:59
     assertQueryEquals(req("q", "pubdate:[2012 TO 2013]", "defType", "aqp"), 
     		"date:[1325376000000 TO 1388534399000]", 
-    		LegacyNumericRangeQuery.class);
+    		PointRangeQuery.class);
     
     // 2012-01-01T00:00:00 - 2013-01-31T23:59:59
     assertQueryEquals(req("q", "pubdate:[2012-01 TO 2013-01]", "defType", "aqp"), 
     		"date:[1325376000000 TO 1359676799000]", 
-    		LegacyNumericRangeQuery.class);    
+    		PointRangeQuery.class);    
     
     // 2012-01-01T00:30:00 - 2013-01-01T23:59:59
     assertQueryEquals(req("q", "pubdate:[2012-01-01 TO 2013-01-1]", "defType", "aqp"), 
     		"date:[1325377800000 TO 1357084799000]", 
-    		LegacyNumericRangeQuery.class);    
+    		PointRangeQuery.class);    
     
     assertQ(req("q", "pubdate:2012"), "//*[@numFound='5']", 
         "//doc/str[@name='id'][.='0']",
@@ -164,21 +164,21 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     // 'zero' hour docs, you must search for '2012-01' or specify the 
     // hour precisely
     assertQueryEquals(req("q", "pubdate:2012-10-01", "defType", "aqp"), 
-    		"date:[1349051400000 TO 1349136000000}", LegacyNumericRangeQuery.class);
+    		"date:[1349051400000 TO 1349136000000}", PointRangeQuery.class);
     assertQ(req("q", "pubdate:2012-10-01"), 
         "//*[@numFound='2']", 
         "//doc/str[@name='id'][.='1']",
         "//doc/str[@name='id'][.='2']"
         );
     
-    assertQueryEquals(req("q", "pubdate:2012-11", "defType", "aqp"), "date:[1351728000000 TO 1354320000000}", LegacyNumericRangeQuery.class);
+    assertQueryEquals(req("q", "pubdate:2012-11", "defType", "aqp"), "date:[1351728000000 TO 1354320000000}", PointRangeQuery.class);
     assertQ(req("q", "pubdate:2012-11"), 
         "//*[@numFound='1']", 
         "//doc/str[@name='id'][.='3']");
     
     // notice, the pubdate search fails, but when we use date it works
     assertQueryEquals(req("q", "pubdate:2012-12-02", "defType", "aqp"), 
-    		"date:[1354408200000 TO 1354492800000}", LegacyNumericRangeQuery.class);
+    		"date:[1354408200000 TO 1354492800000}", PointRangeQuery.class);
     assertQ(req("q", "pubdate:2012-12-02"), "//*[@numFound='0']");
     
     assertQ(req("q", "date:2012-12-01T00\\:00\\:00Z"), 
@@ -188,7 +188,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     
     
     assertQueryEquals(req("q", "pubdate:[2012-10-00 TO 2012-12-02]", "defType", "aqp"), 
-    		"date:[1349049600000 TO 1354492799000]", LegacyNumericRangeQuery.class);
+    		"date:[1349049600000 TO 1354492799000]", PointRangeQuery.class);
     
 
     // search for any article from the 10th month
@@ -259,7 +259,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 		assertQueryEquals(req("q", "indexstamp:[\"2012-10-01T00:00:00.000Z\" TO \"2021-12-01T00:00:00.000Z\"]", 
         "defType", "aqp"), 
         "indexstamp:[1349049600000 TO 1638316800000]", 
-        LegacyNumericRangeQuery.class);
+        PointRangeQuery.class);
     assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00.000\" TO \"2021-12-01T00:00:00.000Z\"]", "indent", "true"), 
       "//*[@numFound='141']"
       );

@@ -76,7 +76,6 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(FieldQueryNode.class, new AqpFieldQueryNodeBuilder());
 		setBuilder(AqpAdsabsRegexQueryNode.class, new AqpFieldQueryNodeRegexBuilder());
 		setBuilder(AqpNonAnalyzedQueryNode.class, new AqpFieldQueryNodeBuilder());
-		setBuilder(BooleanQueryNode.class, new AqpBooleanQueryNodeBuilder());
 		setBuilder(SlowFuzzyQueryNode.class, new AqpSlowFuzzyQueryNodeBuilder());
 		setBuilder(FuzzyQueryNode.class, new FuzzyQueryNodeBuilder());
 		setBuilder(BoostQueryNode.class, new BoostQueryNodeBuilder());
@@ -96,7 +95,7 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(AqpConstantQueryNode.class, new AqpConstantQueryNodeBuilder(this));
 		setBuilder(AqpAdsabsScoringQueryNode.class, new AqpScoringQueryNodeBuilder());
 		setBuilder(AqpDisjunctionQueryNode.class, new AqpDisjunctQueryNodeBuilder());
-		setBuilder(BooleanQueryNode.class, new BooleanQueryNodeBuilder());
+		setBuilder(BooleanQueryNode.class, new AqpBooleanQueryNodeBuilder());
 		setBuilder(SynonymQueryNode.class, new SynonymQueryNodeBuilder());
 		
 	}

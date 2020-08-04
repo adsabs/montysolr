@@ -20,7 +20,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.util.BytesRefBuilder;
-import org.apache.lucene.util.LegacyNumericUtils;
+import org.apache.solr.legacy.LegacyNumericUtils;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.SolrIndexSearcher;

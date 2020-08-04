@@ -133,7 +133,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
     
-		LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache(
+		 LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache(
 		    "boost_const", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getSlowAtomicReader());
 		LuceneCacheWrapper<NumericDocValues> boostOne = LuceneCacheWrapper.getFloatCache(
 		    "boost_1", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getSlowAtomicReader());

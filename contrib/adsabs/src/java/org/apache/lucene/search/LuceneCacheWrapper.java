@@ -66,7 +66,7 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 		
 	  Map<String, UninvertingReader.Type> mapping = new HashMap<String, UninvertingReader.Type>();
     mapping.put(fieldName, type);
-    UninvertingReader uninvertingReader = (UninvertingReader) UninvertingReader.wrap(reader, mapping::get);
+    LeafReader uninvertingReader = UninvertingReader.wrap(reader, mapping::get);
     NumericDocValues values = uninvertingReader.getNumericDocValues(fieldName);
     
     if (values == null)
