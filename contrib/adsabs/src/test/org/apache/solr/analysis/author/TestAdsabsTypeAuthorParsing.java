@@ -377,8 +377,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
-  	assertQueryEquals(req("q", "author:acco*"), "author:acco*", PrefixQuery.class);
-  	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", PrefixQuery.class);
+  	assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
+  	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
   	
   	testAuthorQuery("Adamč*",
   			"adamč*",

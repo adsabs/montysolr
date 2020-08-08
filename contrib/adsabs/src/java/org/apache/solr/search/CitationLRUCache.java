@@ -787,12 +787,13 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 						public void process(int docBase, int docId) throws IOException {
 							if (errs > 5)
 								return;
-							dv.advanceExact(docId);
-							for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
-								final BytesRef value = dv.lookupOrd(ord);
-								setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply
-																								// tokenization, doc
-																								// values ignore it
+							if (dv.advanceExact(docId)) {
+							  for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
+							    final BytesRef value = dv.lookupOrd(ord);
+							    setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply
+							    // tokenization, doc
+							    // values ignore it
+							  }							  
 							}
 						}
 					};

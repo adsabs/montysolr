@@ -49,7 +49,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFieldMapperProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpGroupQueryOptimizerProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpLowercaseExpandedTermsQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpNormalizeFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOptimizationProcessor;
@@ -245,10 +245,11 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsCarefulAnalyzerProcessor());
 		
 	  
-		// lowercase everything else which wasn't caught by the previous steps
+		// normalize values
 		// a special case are non-analyzed nodes - these are left =UnTouchEd
-		// add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
-		add(new AqpWildcardQueryNodeProcessor());
+		add(new AqpNormalizeFieldQueryNodeProcessor());
+		// add(new AqpWildcardQueryNodeProcessor());
+		
 		add(new RegexpQueryNodeProcessor());
 
 		

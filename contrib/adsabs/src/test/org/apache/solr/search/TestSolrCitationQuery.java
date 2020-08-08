@@ -68,7 +68,8 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
 		assertQ(req("q", "*:*"),
 				"//*[@numFound='6']"
 		);
-
+		
+		setDebug(true);
 		assertQ(req("q", "bibcode:A"),
 				"//*[@numFound='1']",
 				"//result/doc[1]/str[@name='bibcode']='A'"
