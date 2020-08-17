@@ -444,7 +444,7 @@
 				<filter
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 
-                <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="index:1"/>
+                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="index:1"/> -->
                 
 				<!-- find synonyms, first multi-tokens -->
 				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
@@ -587,8 +587,7 @@
 
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-                
-                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/> -->
+                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/>  -->
 			</analyzer>
 		</fieldType>
 
@@ -694,23 +693,23 @@
 
 
 		<!-- docvalues can be stored only as strfields; but we want to apply special
-		      tokenizer chains; so that's what AqpStrField allows; be careful to use
+		      tokenizer chains; so that's what solr.SortableTextField allows; be careful to use
 		      appropriate tokenizer class (whitespace is only for multitoken fiels). -->
-		<fieldType name="identifier_string" class="org.apache.solr.schema.AqpStrField">
+		<fieldType name="identifier_string" class="solr.SortableTextField">
 		   <analyzer type="index">
                 <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="solr.ASCIIFoldingFilterFactory" />
+                <filter class="solr.ASCIIFoldingFilterFactory" preserveOriginal="false"/>
                 <filter class="solr.LowerCaseFilterFactory" />
                 <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
                     replacement="" replace="all" />
                 <filter class="solr.TrimFilterFactory" />
                 <filter
           class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
+                <!-- filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexerx"/> -->
             </analyzer>
             <analyzer type="query">
                 <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="solr.ASCIIFoldingFilterFactory" />
+                <filter class="solr.ASCIIFoldingFilterFactory" preserveOriginal="false"/>
                 <filter class="solr.LowerCaseFilterFactory" />
                 <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
                     replacement="" replace="all" />
@@ -719,7 +718,7 @@
             </analyzer>
         </fieldType>
         
-        <fieldType name="normalized_string" class="org.apache.solr.schema.AqpStrField">
+        <fieldType name="normalized_string" class="solr.SortableTextField">
            <analyzer type="index">
                 <tokenizer class="solr.KeywordTokenizerFactory" />
                 <filter class="solr.LowerCaseFilterFactory" />
@@ -1962,6 +1961,7 @@
         <field name="esources" type="normalized_string"
           indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
+        <field name="query_normalizer" type="normalized_string" indexed="false" stored="false" multiValued="false" omitTermFreqAndPositions="true" />
 	</fields>
 
 	<uniqueKey>id</uniqueKey>

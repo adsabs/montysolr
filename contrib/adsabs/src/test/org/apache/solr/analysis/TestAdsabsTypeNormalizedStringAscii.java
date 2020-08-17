@@ -33,7 +33,7 @@ public class TestAdsabsTypeNormalizedStringAscii extends MontySolrQueryTestCase 
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		
+	  //System.setProperty("solr.directoryFactory", "solr.StandardDirectoryFactory");
 		makeResourcesVisible(Thread.currentThread().getContextClassLoader(), new String[] {
 			    MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
 		      MontySolrSetup.getSolrHome() + "/example/solr/collection1"
@@ -55,6 +55,7 @@ public class TestAdsabsTypeNormalizedStringAscii extends MontySolrQueryTestCase 
   public void test() throws Exception {
     
     String[] fs = new String[]{"bibcode", "identifier", "title"}; // single-val-string, multi-val-string, text
+    
     assertU(addDocs(fs, "Bílá kobyla skočila přes čtyřista"));
     assertU(addDocs(fs, "třicet-tři stříbrných střech"));
     assertU(addDocs(fs, "A ještě TřistaTřicetTři stříbrných stovek"));

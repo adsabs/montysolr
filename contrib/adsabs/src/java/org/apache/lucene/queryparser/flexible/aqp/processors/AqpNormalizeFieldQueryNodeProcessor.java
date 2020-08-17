@@ -3,8 +3,10 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.config.ConfigurationKey;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -13,6 +15,7 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.solr.request.SolrQueryRequest;
 
 
 public class AqpNormalizeFieldQueryNodeProcessor extends
@@ -34,8 +37,18 @@ QueryNodeProcessorImpl {
       CharSequence text = txtNode.getText();
 
       Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
+      
       if (analyzer != null) {
-        text = analyzer.normalize(txtNode.getFieldAsString(), text.toString()).utf8ToString();
+        String field = txtNode.getFieldAsString();
+        if (hasAnalyzer(field + "_query_normalizer")) {
+          text = analyzer.normalize(field + "_query_normalizer", text.toString()).utf8ToString();
+        }
+        else if (hasAnalyzer("query_normalizer")) {
+          text = analyzer.normalize("query_normalizer", text.toString()).utf8ToString();          
+        }
+        else {
+          text = analyzer.normalize(field, text.toString()).utf8ToString();
+        }
         txtNode.setText(text);
       }      
     }
@@ -52,5 +65,15 @@ QueryNodeProcessorImpl {
   protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
       throws QueryNodeException {
     return children;
+  }
+  
+  private boolean hasAnalyzer(String fieldName) {
+    SolrQueryRequest req = this.getQueryConfigHandler()
+    .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+    .getRequest();
+    if (req == null || req.getSchema().hasExplicitField(fieldName)) {
+      return true;
+    }
+    return false;
   }
 }
