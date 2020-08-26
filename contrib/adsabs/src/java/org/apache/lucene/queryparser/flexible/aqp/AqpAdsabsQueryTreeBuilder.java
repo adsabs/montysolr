@@ -36,6 +36,7 @@ import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.TokenizedPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.BoostQueryNodeBuilder;
+import org.apache.lucene.queryparser.flexible.standard.builders.DummyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.FuzzyQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.GroupQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.MatchAllDocsQueryNodeBuilder;
@@ -49,6 +50,7 @@ import org.apache.lucene.queryparser.flexible.standard.builders.SynonymQueryNode
 import org.apache.lucene.queryparser.flexible.standard.builders.TermRangeQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.WildcardQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.PointQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PointRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.SynonymQueryNode;
@@ -84,6 +86,7 @@ public class AqpAdsabsQueryTreeBuilder extends AqpQueryTreeBuilder {
 		setBuilder(TokenizedPhraseQueryNode.class, new PhraseQueryNodeBuilder());
 		setBuilder(MatchNoDocsQueryNode.class, new MatchNoDocsQueryNodeBuilder());
 		setBuilder(PrefixWildcardQueryNode.class, new PrefixWildcardQueryNodeBuilder());
+		setBuilder(PointQueryNode.class, new DummyQueryNodeBuilder());
 		setBuilder(PointRangeQueryNode.class, new PointRangeQueryNodeBuilder());
 		setBuilder(TermRangeQueryNode.class, new TermRangeQueryNodeBuilder());
 		setBuilder(SlopQueryNode.class, new AqpSlopQueryNodeBuilder());

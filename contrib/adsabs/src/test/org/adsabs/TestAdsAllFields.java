@@ -34,6 +34,7 @@ import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.IntPointField;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.servlet.DirectSolrConnection;
@@ -97,7 +98,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertTrue(field.indexed() == true && field.stored() == true && field.isRequired() == false
 				&& field.multiValued() == false);
 		field.checkSortability();
-		assertTrue(field.getType().getClass().isAssignableFrom(TrieIntField.class));
+		assertTrue(field.getType().getClass().isAssignableFrom(IntPointField.class));
 
 		// check field ID is copied to field RECID
 //		List<CopyField> copyFields = schema.getCopyFieldsList("id");
@@ -326,7 +327,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * recid - recid is a int field
 		 */
-
 		assertQ(req("q", "recid:100"), "//*[@numFound='1']");
 		assertQ(req("q", "recid:0100"), "//*[@numFound='1']");
 		assertQ(req("q", "recid:[99 TO 100]"), "//*[@numFound='1']");

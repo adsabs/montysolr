@@ -218,9 +218,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   @Override
   public void setUp() throws Exception {
   	super.setUp();
+  	assertU(adoc("id", "603", "bibcode", "xxxxxxxxxx603",
+        "title", "THE HUBBLE constant: a summary of the Hubble Space Telescope program"));
+  	assertU(adoc("id", "605", "bibcode", "xxxxxxxxxx604",
+        "title", "MIT and anti de sitter space-time"));
+  	assertU(adoc("id", "11", "bibcode", "xxxxxxxxxxx11", "title", "All-sky"));
   	
     assertU(adoc("id", "1", "bibcode", "xxxxxxxxxxxx1", "title", "Bílá kobyla skočila přes čtyřista"));
-    assertU(adoc("id", "2", "bibcode", "xxxxxxxxxxxx2", "title", "třicet-tři stříbrných střech"));
+    //assertU(adoc("id", "2", "bibcode", "xxxxxxxxxxxx2", "title", "třicet-tři stříbrných střech"));
     assertU(adoc("id", "3", "bibcode", "xxxxxxxxxxxx3", "title", "A ještě TřistaTřicetTři stříbrných křepeliček"));
     assertU(adoc("id", "4", "bibcode", "xxxxxxxxxxxx4", "title", "Mirrors of the hubble space telescope goes home"));
     assertU(adoc("id", "5", "bibcode", "xxxxxxxxxxxx5", "title", "Mirrors of the HST second"));
@@ -228,27 +233,28 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "7", "bibcode", "xxxxxxxxxxxx7", "title", "Mirrors of the HubbleSpaceTelescope fourth"));
     assertU(adoc("id", "8", "bibcode", "xxxxxxxxxxxx8", "title", "Take Massachusets Institute of Technology (MIT)"));
     assertU(adoc("id", "9", "bibcode", "xxxxxxxxxxxx9", "title", "MIT developed new network protocols"));
-    assertU(adoc("id", "10", "bibcode", "xxxxxxxxxxx10", "title", "No-sky data survey"));
-    assertU(adoc("id", "11", "bibcode", "xxxxxxxxxxx11", "title", "All-sky data survey"));
+    //assertU(adoc("id", "10", "bibcode", "xxxxxxxxxxx10", "title", "No-sky data survey"));
+    //assertU(adoc("id", "11", "bibcode", "xxxxxxxxxxx11", "title", "All-sky data survey"));
     assertU(adoc("id", "12", "bibcode", "xxxxxxxxxxx12", "title", "NoSky data survey"));
     assertU(adoc("id", "13", "bibcode", "xxxxxxxxxxx13", "title", "AllSky data survey"));
     assertU(adoc("id", "14", "bibcode", "xxxxxxxxxxx14", "title", "Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions"));
     assertU(adoc("id", "15", "bibcode", "xxxxxxxxxxx15", "title", "MOND test"));
     assertU(adoc("id", "16", "bibcode", "xxxxxxxxxxx16", "title", "mond test"));
-    assertU(adoc("id", "17", "bibcode", "xxxxxxxxxxx17", "title", "bubble pace telescope multi-pace foobar"));
+    //assertU(adoc("id", "17", "bibcode", "xxxxxxxxxxx17", "title", "bubble pace telescope multi-pace foobar"));
     assertU(adoc("id", "18", "bibcode", "xxxxxxxxxxx18", "title", "Mirrors of the Hubble fooox Space Telescope"));
     assertU(adoc("id", "19", "bibcode", "xxxxxxxxxxx19", "title", "BPT MIT"));
-    assertU(adoc("id", "20", "bibcode", "xxxxxxxxxxx20", "title", "bubble pace telescope multi-foo"));
-    assertU(adoc("id", "21", "bibcode", "xxxxxxxxxxx21", "title", "BPT multi-foo"));
+    //assertU(adoc("id", "20", "bibcode", "xxxxxxxxxxx20", "title", "bubble pace telescope multi-foo"));
+    //assertU(adoc("id", "21", "bibcode", "xxxxxxxxxxx21", "title", "BPT multi-foo"));
+    //assertU(adoc("id", "21", "bibcode", "xxxxxxxxxxx21", "title", "multi-foo"));
     
-    assertU(adoc("id", "147", "bibcode", "xxxxxxxxxx147", "title", "NAG5-ABCD"));
+    //assertU(adoc("id", "147", "bibcode", "xxxxxxxxxx147", "title", "NAG5-ABCD"));
     assertU(adoc("id", "148", "bibcode", "xxxxxxxxxx148", "title", "NAG5ABCD"));
     assertU(adoc("id", "149", "bibcode", "xxxxxxxxxx149", "title", "NAG5 ABCD"));
-    assertU(adoc("id", "150", "bibcode", "xxxxxxxxxx150", "title", "nag5-abcd"));
+    //assertU(adoc("id", "150", "bibcode", "xxxxxxxxxx150", "title", "nag5-abcd"));
     assertU(adoc("id", "151", "bibcode", "xxxxxxxxxx151", "title", "nag5abcd"));
     assertU(adoc("id", "152", "bibcode", "xxxxxxxxxx152", "title", "nag5 abcd"));
-    assertU(adoc("id", "153", "bibcode", "xxxxxxxxxx153", "title", "NGC 1"));
-    assertU(adoc("id", "154", "bibcode", "xxxxxxxxxx154", "title", "NGC-1"));
+    //assertU(adoc("id", "153", "bibcode", "xxxxxxxxxx153", "title", "NGC 1"));
+    //assertU(adoc("id", "154", "bibcode", "xxxxxxxxxx154", "title", "NGC-1"));
     assertU(adoc("id", "155", "bibcode", "xxxxxxxxxx155", "title", "N-1"));
     assertU(adoc("id", "156", "bibcode", "xxxxxxxxxx156", "title", "N 1"));
     assertU(adoc("id", "157", "bibcode", "xxxxxxxxxx157", "title", "NGC1"));
@@ -257,10 +263,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "382", "bibcode", "xxxxxxxxxx382", "title", "xhtml <tags> should be <SUB>fooxx</SUB> <xremoved>"));
 
     // greek letter should not be a problem, #604
-    assertU(adoc("id", "400", "bibcode", "xxxxxxxxxx400", "title", "A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$-ray Sources for Radio Millisecond Pulsars"));
-    assertU(adoc("id", "401", "bibcode", "xxxxxxxxxx401", "title", "A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars"));
-    assertU(adoc("id", "402", "bibcode", "xxxxxxxxxx402", "title", "A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$ ray Sources for Radio Millisecond Pulsars"));
-    assertU(adoc("id", "403", "bibcode", "xxxxxxxxxx403", "title", "A 350-MHz GBT Survey of 50 Faint Fermi γ ray Sources for Radio Millisecond Pulsars"));
+    //assertU(adoc("id", "400", "bibcode", "xxxxxxxxxx400", "title", "A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$-ray Sources for Radio Millisecond Pulsars"));
+    //assertU(adoc("id", "401", "bibcode", "xxxxxxxxxx401", "title", "A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars"));
+    //assertU(adoc("id", "402", "bibcode", "xxxxxxxxxx402", "title", "A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$ ray Sources for Radio Millisecond Pulsars"));
+    //assertU(adoc("id", "403", "bibcode", "xxxxxxxxxx403", "title", "A 350-MHz GBT Survey of 50 Faint Fermi γ ray Sources for Radio Millisecond Pulsars"));
     
     assertU(adoc("id", "500", "bibcode", "xxxxxxxxxx500", "title", "Observations of a BH event horizon",
         "keyword", "one ADS two"));
