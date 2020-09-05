@@ -443,7 +443,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='100']",
         "//doc/float[@name='score'][.='26.0']");
 
-		assert h.query(req("q", "author:\"Einstein, A\""))
+		assert h.query(req("q", "author:\"Einstein, A\"", "fl", "author_norm"))
 				.contains("<arr name=\"author_norm\">" +
 				"<str>t' Hooft, van X</str>" +
 				"<str>Anders, John Michael</str>" +

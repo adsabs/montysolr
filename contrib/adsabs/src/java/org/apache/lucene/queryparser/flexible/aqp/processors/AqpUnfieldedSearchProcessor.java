@@ -70,6 +70,7 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	      
 	      if (node instanceof QuotedFieldQueryNode) {
 	      	subQuery = "\"" + subQuery + "\"";
+	      	local.add("sow=false");
 	      }
 	      if (node.getParent() instanceof SlopQueryNode) {
 	      	subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
@@ -107,7 +108,7 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	    
 	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
 	    if (local.size() > 0) {
-	      subQuery = "{!adismax " + String.join(" ", local) + "}" + subQuery;
+	      subQuery = "{!adismax " + String.join(" ", local).trim() + "}" + subQuery;
 	    }
 	    fValues.add(new OriginalInput(subQuery, -1, -1));
 	    return new AqpFunctionQueryNode(funcName, builder, fValues);

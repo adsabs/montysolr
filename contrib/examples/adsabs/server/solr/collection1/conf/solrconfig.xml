@@ -702,6 +702,7 @@
     -->
   <queryParser name="lucene" class="solr.AdsQParserPlugin">
     <lst name="defaults">
+       <str name="df">all</str>
        <lst name="virtual-fields">
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
@@ -733,6 +734,7 @@
        Make sure you are never referencing virtual field
        from inside another virtual field
       -->
+       <str name="df">all</str>
        <lst name="virtual-fields">
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
@@ -759,7 +761,11 @@
   
   <!-- ADS own modified breed of edismax (this one calls aqp for individual
        queries) because we are MUCH better in handling them -->
-  <queryParser name="adismax" class="solr.AqpExtendedDismaxQParserPlugin" />
+  <queryParser name="adismax" class="solr.AqpExtendedDismaxQParserPlugin">
+    <lst name="defaults">
+        <str name="df">all</str>
+    </lst>
+  </queryParser>
     
   
   

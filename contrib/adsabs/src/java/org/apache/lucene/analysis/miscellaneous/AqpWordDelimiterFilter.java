@@ -306,7 +306,7 @@ public final class AqpWordDelimiterFilter extends TokenFilter {
         
         if (bufferedPos < bufferedLen) {
           if (bufferedPos == 0) {
-            // sorter.sort(0, bufferedLen); SILLYPANTIE
+             sorter.sort(0, bufferedLen); //SILLYPANTIE
           }
           clearAttributes();
           restoreState(buffered[bufferedPos++]);

@@ -1136,7 +1136,7 @@ AqpFunctionQueryBuilderProvider {
               throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query, missing stream for bigquery("+input+")");
           
           try {
-            q = QParser.getParser(qString, "bitset", locReq).getQuery();
+            q = QParser.getParser(qString, "bitset", true, locReq).getQuery();
           } catch( SyntaxError e ){
             throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query bigquery("+input+")",e);
           }

@@ -17,6 +17,7 @@
 
 package org.apache.solr.search;
 
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
@@ -28,13 +29,21 @@ import org.apache.solr.request.SolrQueryRequest;
  */
 public class AqpExtendedDismaxQParserPlugin extends QParserPlugin {
   public static final String NAME = "adismax";
+  NamedList defaults = null;
 
   @Override
   public void init(NamedList args) {
+    if (args.get("defaults", 0) != null) {
+      NamedList defs = (NamedList) args.get("defaults");
+      defaults = defs.clone();
+    }
   }
 
   @Override
   public QParser createParser(String qstr, SolrParams localParams, SolrParams params, SolrQueryRequest req) {
+    if (params.get("df", null) == null && defaults.get("df") != null) {
+      params = new ModifiableSolrParams(params).set("df", (String) defaults.get("df"));
+    }
     return new AqpExtendedDismaxQParser(qstr, localParams, params, req);
   }
 }

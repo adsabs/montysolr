@@ -589,7 +589,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "author:hoffmann, w~2",
           FuzzyQuery.class);
       assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~1"),
-          "author:hoffmann, w~1.0",
+          "author:hoffmann, w~1",
           FuzzyQuery.class);
       
       

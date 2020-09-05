@@ -469,7 +469,7 @@
 
 				<!-- split all-sky into [all, sky, allsky] -->
 				<filter
-					class="org.apache.lucene.analysis.miscellaneous.AqpWordDelimiterFilterFactory"
+					class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
@@ -558,7 +558,7 @@
 
 
 				<filter
-					class="org.apache.lucene.analysis.miscellaneous.AqpWordDelimiterFilterFactory"
+					class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
@@ -752,7 +752,7 @@
 				<filter class="solr.TrimFilterFactory" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-				<!-- filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexerx"/> -->
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexerx"/>
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
@@ -762,7 +762,7 @@
 				<filter class="solr.PatternReplaceFilterFactory"
 					pattern="(doi:|arxiv:|\-|_| )" replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
-				<!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/> -->
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>
 			</analyzer>
 		</fieldType>
 
@@ -1043,7 +1043,7 @@
 			omitTermFreqAndPositions="true" />
 		<field name="bibcode" type="identifier_string" indexed="true"
 			multiValued="false" stored="true" required="true" omitNorms="true"
-			omitTermFreqAndPositions="true" />
+			omitTermFreqAndPositions="true"/>
 
 
 		<!-- @api.doc * doi Digital object indentifier * identifier Identifier 

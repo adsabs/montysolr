@@ -129,13 +129,12 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     		"//doc/str[@name='id'][.='3']"
     		);
 
-    
-    assert h.query(req("q", "aff_raw:foo1", "fl", "aff_raw"))
+    assert h.query(req("q", "aff_raw:foo1", "fl", "aff_raw", "indent", "false"))
  		.contains("<arr name=\"aff_raw\">" +
 				"<str>foo1</str>" +
 				"<str>foo2</str>" +
-                "<str>-</str>" +
-                "<str>foo4</str>"
+        "<str>-</str>" +
+        "<str>foo4</str>"
         );
     
   }
