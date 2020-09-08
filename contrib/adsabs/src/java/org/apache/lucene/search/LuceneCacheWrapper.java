@@ -83,7 +83,7 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 			  NumericDocValues ref = this.cache.get();
 				try {
           if (ref.advanceExact(docid)) {
-            return (float) ref.longValue();
+            return Float.intBitsToFloat((int)ref.longValue());
           }
         } catch (IOException e) {
           // TODO:rca - propagate instead?

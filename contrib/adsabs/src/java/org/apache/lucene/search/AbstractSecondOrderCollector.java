@@ -24,6 +24,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 	protected float ensureCapacityRatio = 0.25f;
 	protected FinalValueType compactingType = FinalValueType.MAX_VALUE;
   protected LeafReaderContext context;
+  private float maxScore = 0.0f;
 
 	public AbstractSecondOrderCollector() {
 		lock = new ReentrantLock();
@@ -253,11 +254,19 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 		if (hits.size() < 1)
 			return;
 		// find the max value
-		float maxV = hits.get(0).score;
-		for (CollectorDoc d: hits) {
-			if (d.score > maxV)
-				maxV = d.score;
+		float maxV = 1.0f;
+		if (this.maxScore > 0.0f) {
+		  maxV = maxScore;
 		}
+		else {
+		  maxV = hits.get(0).score;
+		  for (CollectorDoc d: hits) {
+		    if (d.score > maxV)
+		      maxV = d.score;
+		  }		  
+		}
+		if (maxV == 1.0f)
+		  return;
 		// normalize the scores
 		for (CollectorDoc d: hits) {
 			d.score = d.score / maxV;
@@ -383,6 +392,9 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 			currDoc.score = (float) score/ (float) seenTimes;
 			currDoc.shardIndex = seenTimes;
 		}
+		if (currDoc.score > maxScore )
+		  maxScore = currDoc.score;
+		
 		newHits.add(currDoc);
 		hits = newHits;
 	}
