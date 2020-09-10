@@ -443,7 +443,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='100']",
         "//doc/float[@name='score'][.='26.0']");
 
-		assert h.query(req("q", "author:\"Einstein, A\"", "fl", "author_norm"))
+		assert h.query(req("q", "author:\"Einstein, A\"", "fl", "author_norm", "indent", "false"))
 				.contains("<arr name=\"author_norm\">" +
 				"<str>t' Hooft, van X</str>" +
 				"<str>Anders, John Michael</str>" +
@@ -564,7 +564,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			"//*[@numFound='1']");
 
 
-		assert h.query(req("q", "recid:100"))
+		assert h.query(req("q", "recid:100", "indent", "false"))
  			.contains("<arr name=\"aff_raw\">" +
 				"<str>-</str>" +
 				"<str>NASA Kavli space center, Cambridge, MA 02138, USA</str>" +
@@ -640,7 +640,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		
     
 		// order/gaps are important
-		assert h.query(req("q", "recid:100"))
+		assert h.query(req("q", "recid:100", "indent", "false", "fl", "email"))
  			.contains("<arr name=\"email\">" +
 				"<str>-</str>" +
 				"<str>anders@email.com</str>" +
@@ -661,7 +661,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
-    assert h.query(req("q", "recid:100"))
+    assert h.query(req("q", "recid:100", "indent", "false", "fl", "orcid_pub"))
     .contains("<arr name=\"orcid_pub\">" +
       "<str>1111-2222-3333-4444</str>" +
       "<str>-</str>" +

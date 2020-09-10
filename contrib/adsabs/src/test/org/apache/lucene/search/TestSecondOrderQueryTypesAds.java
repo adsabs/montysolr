@@ -133,7 +133,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
     
-		 LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache(
+    LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache(
 		    "boost_const", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
 		LuceneCacheWrapper<NumericDocValues> boostOne = LuceneCacheWrapper.getFloatCache(
 		    "boost_1", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
@@ -178,31 +178,48 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostTwo),
   			Arrays.asList(8,10,11));
   	
-  	// 11 is referenced twice (but we should see no change in order)
+  	
+  	// since 7.x we can't reuse the docvalues (they are no longer random access; but sequential)
+  	boostConstant = LuceneCacheWrapper.getFloatCache(
+        "boost_const", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostOne = LuceneCacheWrapper.getFloatCache(
+        "boost_1", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostTwo = LuceneCacheWrapper.getFloatCache(
+        "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    
+    // 11 is referenced twice (but we should see no change in order)
   	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostConstant),
   			Arrays.asList(8,10,11));
   	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostOne),
   			Arrays.asList(8,10,11));
   	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostTwo),
-  			Arrays.asList(8,10,11));
+  			Arrays.asList(11, 8, 10));
   	
   	
     
-    
+  	// since 7.x we can't reuse the docvalues (they are no longer random access; but sequential)
+    boostConstant = LuceneCacheWrapper.getFloatCache(
+        "boost_const", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostOne = LuceneCacheWrapper.getFloatCache(
+        "boost_1", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostTwo = LuceneCacheWrapper.getFloatCache(
+        "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
     
     // ADS Classic scoring formula
   	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostConstant),
   			Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 20));
   	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostOne),
-  			Arrays.asList(3, 7, 8, 9, 16, 17, 6, 18, 19, 0, 1, 2, 4, 10, 11, 20, 5));
+  			Arrays.asList(3, 7, 8, 9, 16, 17, 18, 19, 0, 1, 2, 4, 10, 11, 20, 6, 5));
   	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostTwo),
-  			Arrays.asList(5, 0, 1, 10, 11, 3, 2, 4, 6, 7, 8, 9, 16, 17, 18, 19, 20));
+  			Arrays.asList(5, 6, 0, 1, 10, 11, 3, 2, 4, 7, 8, 9, 16, 17, 18, 19, 20));
   	
    // topN()
+  	boostTwo = LuceneCacheWrapper.getFloatCache(
+        "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
   	testQ2((Query) new SecondOrderQuery(new MatchAllDocsQuery(), 
   			new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostTwo)), 
   			new SecondOrderCollectorTopN(2),
-  			Arrays.asList(5,0));
+  			Arrays.asList(5,6));
   	testQ2("*:*", new SecondOrderCollectorTopN(2),
   			Arrays.asList(0,1));
   	
@@ -370,11 +387,11 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 				arrExpected[i] = u;
 				i++;
 			}
-			System.out.println("expected:" + Arrays.toString(arrExpected));
-			;
-			System.out.println("results:" + Arrays.toString(resultIds));
-			;
-			System.out.println(results);
+//			System.out.println("expected:" + Arrays.toString(arrExpected));
+//			;
+//			System.out.println("results:" + Arrays.toString(resultIds));
+//			;
+//			System.out.println(results);
 			assertArrayEquals(arrExpected, resultIds);
 		} finally {
 			r.close();

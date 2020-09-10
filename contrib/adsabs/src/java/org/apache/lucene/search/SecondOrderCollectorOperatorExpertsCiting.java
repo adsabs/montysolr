@@ -80,7 +80,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		//s = s / (vals.length + 100); // this would contribute only a part of the score to each citation
 		for (int docid: references) {
 			if (docid > 0) {
-				System.out.println("expert: doc=" + (doc+docBase) + "(boost:" + bc + ") adding=" + docid + " (score:" + (s) + ")" + " freq=" + references.length) ;
+				//System.out.println("expert: doc=" + (doc+docBase) + "(boost:" + bc + ") adding=" + docid + " (score:" + (s) + ")" + " freq=" + references.length) ;
 				hits.add(new CollectorDoc(docid, s, references.length));
 			}
 		}

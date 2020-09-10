@@ -30,6 +30,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   public void collect(int doc) throws IOException {
   	int[] related = cache.getLuceneDocIds(doc+docBase);
   	
+  	//System.out.println("Collecting: doc=" + doc + "docBase:" +docBase);
     if (related == null) return;
     //float s = scorer.score();
     float s = 0.5f; // lucene score doesn't make sense for us;
