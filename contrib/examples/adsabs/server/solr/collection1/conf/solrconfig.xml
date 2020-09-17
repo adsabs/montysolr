@@ -764,6 +764,7 @@
   <queryParser name="adismax" class="solr.AqpExtendedDismaxQParserPlugin">
     <lst name="defaults">
         <str name="df">all</str>
+        <bool name="sow">true</bool>
     </lst>
   </queryParser>
     

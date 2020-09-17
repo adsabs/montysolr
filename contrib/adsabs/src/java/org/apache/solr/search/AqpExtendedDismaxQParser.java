@@ -120,6 +120,7 @@ public class AqpExtendedDismaxQParser extends QParser {
   public AqpExtendedDismaxQParser(String qstr, SolrParams localParams, SolrParams params, SolrQueryRequest req) {
     super(qstr, localParams, params, req);
     config = this.createConfiguration(qstr,localParams,params,req);
+    config.splitOnWhitespace = true;
   }
   
   @Override

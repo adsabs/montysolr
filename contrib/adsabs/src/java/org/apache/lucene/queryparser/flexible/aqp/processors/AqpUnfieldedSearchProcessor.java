@@ -57,7 +57,6 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	          "Missing FunctionQueryBuilder provider"));
 	    }
 	    List<String> local = new ArrayList<String>();
-	    //local.add("pow=false");
 	    
 	    String funcName = "edismax_combined_aqp"; //"edismax_always_aqp"; //"edismax_combined_aqp";
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
@@ -70,7 +69,7 @@ public class AqpUnfieldedSearchProcessor extends QueryNodeProcessorImpl implemen
 	      
 	      if (node instanceof QuotedFieldQueryNode) {
 	      	subQuery = "\"" + subQuery + "\"";
-	      	local.add("sow=false");
+	      	//local.add("sow=false");
 	      }
 	      if (node.getParent() instanceof SlopQueryNode) {
 	      	subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();

@@ -17,6 +17,8 @@
 
 package org.apache.solr.search;
 
+import java.util.Iterator;
+
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -29,7 +31,7 @@ import org.apache.solr.request.SolrQueryRequest;
  */
 public class AqpExtendedDismaxQParserPlugin extends QParserPlugin {
   public static final String NAME = "adismax";
-  NamedList defaults = null;
+  NamedList<Object> defaults = null;
 
   @Override
   public void init(NamedList args) {
@@ -41,9 +43,20 @@ public class AqpExtendedDismaxQParserPlugin extends QParserPlugin {
 
   @Override
   public QParser createParser(String qstr, SolrParams localParams, SolrParams params, SolrQueryRequest req) {
-    if (params.get("df", null) == null && defaults.get("df") != null) {
-      params = new ModifiableSolrParams(params).set("df", (String) defaults.get("df"));
-    }
+    ModifiableSolrParams xparams = new ModifiableSolrParams(params).set("df", (String) defaults.get("df"));
+    defaults.forEach((k, v) -> {
+      if (xparams.get(k, null) == null)
+        if (v instanceof Boolean) {
+          xparams.set(k, (Boolean) v);
+        }
+        else if (v instanceof String) {
+          xparams.set(k, (String)v );
+        }
+        else {
+          throw new Error("Unsupported type in the defaults: key=" + k);
+        }
+    });
+    params = xparams;
     return new AqpExtendedDismaxQParser(qstr, localParams, params, req);
   }
 }
