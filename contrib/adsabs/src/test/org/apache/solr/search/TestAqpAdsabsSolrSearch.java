@@ -648,7 +648,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         
         // full - virtual field with wrong date
         assertQueryEquals(req("defType", "aqp", "q", "full:(\"15-52-15050\" OR \"15-32-21062\")"),
-          "((ack:\"15 52 15050\" | ack:155215050) ((abstract:\"15 52 15050\" | abstract:155215050))^2.0 ((title:\"15 52 15050\" | title:155215050))^2.0 (body:\"15 52 15050\" | body:155215050) (keyword:\"15 52 15050\" | keyword:155215050)) ((ack:\"15 32 21062\" | ack:153221062) ((abstract:\"15 32 21062\" | abstract:153221062))^2.0 ((title:\"15 32 21062\" | title:153221062))^2.0 (body:\"15 32 21062\" | body:153221062) (keyword:\"15 32 21062\" | keyword:153221062))",
+          "((ack:155215050 | ack:\"15 52 15050\") ((abstract:155215050 | abstract:\"15 52 15050\"))^2.0 ((title:155215050 | title:\"15 52 15050\"))^2.0 (body:155215050 | body:\"15 52 15050\") (keyword:155215050 | keyword:\"15 52 15050\")) ((ack:153221062 | ack:\"15 32 21062\") ((abstract:153221062 | abstract:\"15 32 21062\"))^2.0 ((title:153221062 | title:\"15 32 21062\"))^2.0 (body:153221062 | body:\"15 32 21062\") (keyword:153221062 | keyword:\"15 32 21062\"))",
           BooleanQuery.class);
 
       
@@ -691,7 +691,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         //  )
         // +author_facet_hier:0/Murray, S
 
-        //setDebug(true);
         assertQueryEquals(req("defType", "aqp",
                 "q", "stephen murray author_facet_hier:\"0/Murray, S\"",
                 "qf", "abstract title",
@@ -699,12 +698,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                "+("
-                + "(+(Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) "
-                +  "+(abstract:murray | title:murray)) "
-                + "(abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")"
-                + ") "
-                + "+author_facet_hier:0/Murray, S",
+                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
                 BooleanQuery.class
         );
 
@@ -715,13 +709,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                //"+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
-                "+("
-                + "(+(Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) "
-                +  "+(abstract:murray | title:murray)) "
-                + "(abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")"
-                + ") "
-                + "+author_facet_hier:0/Murray, S",
+                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
                 BooleanQuery.class
         );
         assertQueryEquals(req("defType", "aqp",
@@ -914,14 +902,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax
-                "+((abstract:dog)^0.5 | title:dog) +((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
+                "((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5", "q.op", "OR"), //aqp
                 "((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
-                "+((abstract:dog)^0.5 | title:dog) +((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5", "q.op", "AND"), //aqp
+                "+(+((abstract:dog)^0.5 | title:dog)) +(+((abstract:cat)^0.5 | title:cat))", BooleanQuery.class);
 
+        assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
+            "+((abstract:dog)^0.5 | title:dog) +((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
         // make sure the *:* query is not parsed by edismax
         assertQueryEquals(req("defType", "aqp", "q", "*",
@@ -946,11 +936,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
         // if we use the solr analyzer to parse the query, all is configured to remove stopwords
-        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"),
+        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but", "df", "all"),
                 "((all:dog) (all:cat)) title:bat", BooleanQuery.class);
 
         // but pub is normalized_string with a different analyzer and should retain 'but'
-        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but"),
+        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but", "df", "all"),
                 "((all:dog) (all:cat)) title:bat pub:but", BooleanQuery.class);
 
 
@@ -1247,7 +1237,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       streams.add(cs);
       
       
-      SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) OR docs(fq_bar)) AND bibcode:b4", "debugQuery", "true");
+      SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) OR docs(fq_bar)) AND bibcode:b4");
       req.setContentStreams(streams);
       
       assertQ(req,

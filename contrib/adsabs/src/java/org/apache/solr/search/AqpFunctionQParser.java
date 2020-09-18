@@ -28,6 +28,23 @@ public class AqpFunctionQParser extends FunctionQParser {
 			SolrParams params, SolrQueryRequest req) {
 		super(qstr, localParams, params, req);
 	}
+	
+	/** Create a new QParser for parsing an embedded sub-query */
+	@Override
+  public QParser subQuery(String q, String defaultType) throws SyntaxError {
+	  if (recurseCount++ >= 100) {
+      throw new SyntaxError("Infinite Recursion detected parsing query '" + qstr + "'");
+    }
+    if (defaultType == null && localParams != null) {
+      // if not passed, try and get the defaultType from local params
+      defaultType = localParams.get(QueryParsing.DEFTYPE);
+    }
+    QParser nestedParser = getParser(q, defaultType, true, getReq());
+    nestedParser.flags = this.flags;  // TODO: this would be better passed in to the constructor... change to a ParserContext object?
+    nestedParser.recurseCount = recurseCount;
+    recurseCount--;
+    return nestedParser;
+  }
 
 	private int currChild = -1;
 	private AqpFunctionQueryNode qNode = null;

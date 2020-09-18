@@ -170,7 +170,7 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		parsers.put(DisMaxQParserPlugin.NAME, new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				QParser q = fp.subQuery(fp.getString(), DisMaxQParserPlugin.NAME);
 				return simplify(q.getQuery());
 			}
