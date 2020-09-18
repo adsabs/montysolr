@@ -187,6 +187,21 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "qf", "author^2.3 title abstract^0.4"),
                 "((Synonym(abstract:acr::muller abstract:acr::müller))^0.4 | ((author:müller, | author:müller,* | author:mueller, | author:mueller,* | author:muller, | author:muller,*))^2.3 | Synonym(title:acr::muller title:acr::müller))",
                 DisjunctionMaxQuery.class);
+        setDebug(true);
+        assertQueryEquals(req("defType", "edismax",
+            "aqp.unfielded.tokens.strategy", "multiply",
+            "aqp.unfielded.tokens.new.type", "simple",
+            "qf", "title keyword",
+            "q", "property:refereed r s t"),
+            "",
+            BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp",
+            "aqp.unfielded.tokens.strategy", "multiply",
+            "aqp.unfielded.tokens.new.type", "simple",
+            "qf", "title keyword",
+            "q", "property:refereed r s t"),
+            "",
+            BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "\"forman, c\"",
                 "qf", "author^2.3 title abstract^0.4"),
                 "((abstract:\"forman c\")^0.4 | ((author:forman, c | author:forman, christine | author:jones, c | author:jones, christine | author:forman, c* | author:forman,))^2.3 | title:\"forman c\")",

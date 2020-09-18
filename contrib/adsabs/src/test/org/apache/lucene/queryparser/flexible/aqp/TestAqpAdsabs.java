@@ -359,8 +359,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public void testEscaped() throws Exception {
+	  setDebug(true);
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		assertQueryEquals("\\(1\\+1\\)\\:2", wsa, "(1+1):2", TermQuery.class);
+		assertQueryEquals("th*is", wsa, "th*is", WildcardQuery.class);
 		assertQueryEquals("th\\*is", wsa, "th*is", TermQuery.class);
 		assertQueryEquals("a\\\\\\\\+b", wsa, "a\\\\+b", TermQuery.class);
 		assertQueryEquals("a\\u0062c", wsa, "abc", TermQuery.class);

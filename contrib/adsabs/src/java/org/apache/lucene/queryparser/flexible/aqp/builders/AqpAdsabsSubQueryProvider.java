@@ -945,8 +945,10 @@ AqpFunctionQueryBuilderProvider {
 		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
 			public Query parse(FunctionQParser fp) throws SyntaxError {
 				final String original = fp.getString();
+				System.out.println("edismax fed: " + original);
 				QParser eqp = fp.subQuery(original, "adismax");
 				Query q = eqp.getQuery();
+				System.out.println("edismax produced: " + q);
 				return simplify(q);
 			}
 			protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {

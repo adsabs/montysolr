@@ -140,7 +140,9 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		LuceneCacheWrapper<NumericDocValues> boostTwo = LuceneCacheWrapper.getFloatCache(
 		    "boost_2", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getSlowAtomicReader());
 		
-  	
+		System.out.println(Float.toString(boostConstant.getFloat(0)));
+    System.out.println(Float.toString(boostOne.getFloat(0)));
+    System.out.println(Float.toString(boostTwo.getFloat(0)));
   	
 		// expecting 4 results with various order, simply based on the boost factor
   	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostConstant),
@@ -366,11 +368,11 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 				arrExpected[i] = u;
 				i++;
 			}
-			//System.out.println("expected:" + Arrays.toString(arrExpected));
+			System.out.println("expected:" + Arrays.toString(arrExpected));
 			;
-			//System.out.println("results:" + Arrays.toString(resultIds));
+			System.out.println("results:" + Arrays.toString(resultIds));
 			;
-			//System.out.println(results);
+			System.out.println(results);
 			assertArrayEquals(arrExpected, resultIds);
 		} finally {
 			r.close();

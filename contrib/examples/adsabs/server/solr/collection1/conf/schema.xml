@@ -478,7 +478,7 @@
                 
                 <!-- add a prefix to all synonyms -->
                 <filter class="solr.analysis.ResetFilterFactory"
-                    incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" range="1,2147483647" />
+                    incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" range="0,2147483647" />
 
 				<!-- we emit ASCIIField version of the token (at the same position):
 					this is rather crazy/expensive behaviour given that ads_text is used on fulltext,
@@ -489,7 +489,7 @@
 				<filter class="solr.TrimFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				
-				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/>
 			</analyzer>
 			<analyzer type="query">
                 <charFilter class="solr.HTMLStripCharFilterFactory"/>

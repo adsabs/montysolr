@@ -8,6 +8,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 
@@ -49,6 +50,7 @@ final class DiagnoseFilter extends TokenFilter {
 	private final CharTermAttribute termAtt;
 	private final OffsetAttribute offsetAtt;
 	private final String msg;
+  private final PositionLengthAttribute posLen;
 
 	public DiagnoseFilter(TokenStream input, String msg) {
 		super(input);
@@ -57,6 +59,7 @@ final class DiagnoseFilter extends TokenFilter {
 		typeAtt = addAttribute(TypeAttribute.class);
 		termAtt = addAttribute(CharTermAttribute.class);
 		offsetAtt = addAttribute(OffsetAttribute.class);
+		posLen = addAttribute(PositionLengthAttribute.class);
 	}
 
 	/*
@@ -70,8 +73,10 @@ final class DiagnoseFilter extends TokenFilter {
 		if (!input.incrementToken()) return false;
 
 		System.out.println("stage:" + (msg != null ? msg : "null") + 
-				" term=" + termAtt.toString() + " pos="
-				+ posIncrAtt.getPositionIncrement() + " type=" + typeAtt.type()
+				" term=" + termAtt.toString() + " posInc="
+				+ posIncrAtt.getPositionIncrement()
+				+ " posLen=" + posLen.getPositionLength()
+				+ " type=" + typeAtt.type()
 				+ " offsetStart=" + offsetAtt.startOffset() + " offsetEnd="
 				+ offsetAtt.endOffset());
 

@@ -104,6 +104,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         "date:[75317598000 TO 75317598000]",
         LegacyNumericRangeQuery.class);
     
+    setDebug(true);
     // 2012-01-01T00:00:00 - 2012-02-01T00:00:00 (excl)
     assertQueryEquals(req("q", "pubdate:2012-01", "defType", "aqp"), 
     		"date:[1325376000000 TO 1328054400000}", 

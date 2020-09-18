@@ -177,7 +177,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       		"radio, radios, nonradio, radioed, radiobereich, adio, miniradio, radido => radio\n" +
       		"pulsars, pulsar, psr, pulser, psrs, pulsare, pulsares, pulars, pulsary, puslsar, interpulsars, pusar, nonpulsar, psro, rontgenpulsare, pulsarlike, pulsarpsr => pulsars\n" +
       		"millisecond, milliseconds, submillisecond, millisec, milliseconde, millesecond, millisekunden, milliseond, millisecnd => millisecond\n" +
-      		"fermi, fermilab => fermi\n"
+      		"fermi, fermilab => fermi\n",
+      		"space => universe\n"
       });
       
       File multiTokenSynonymsFile = createTempFile(new String[]{
@@ -195,9 +196,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           // this is from ads synonyms
           "ADS,aitken\0double\0stars\n" + 
           "ADS,astrophysics\0data\0system\n" + 
-          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime\n" + 
+          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime,antidesitter\0space\n" + 
           "ADS,astrophysics\0data\0system\n" + 
-          "VLBA,very\0long\0baseline\0array\n",
+          "VLBA,very\0long\0baseline\0array\n" +
+          "space,universe"
           
           // and this is how it would be if it was one line
           //"ADS,aitken\0double\0stars,astrophysics\0data\0system,anti\0de\0sitter\0space,antidesitter\0spacetime\n"
@@ -277,6 +279,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     assertU(adoc("id", "602", "bibcode", "xxxxxxxxxx602", 
         "title", "Very Long Baseline Array (VLBA) is a ten-antennaaaah"));
+    assertU(adoc("id", "603", "bibcode", "xxxxxxxxxx603",
+        "title", "THE HUBBLE constant: a summary of the hubble space telescope program"));
+    assertU(adoc("id", "604", "bibcode", "xxxxxxxxxx604",
+        "title", "MIT and antidesitter space-time"));
+    assertU(adoc("id", "605", "bibcode", "xxxxxxxxxx604",
+        "title", "MIT and anti de sitter space-time"));
+    assertU(adoc("id", "606", "bibcode", "xxxxxxxxxx604",
+        "title", "Massachusets Institute of Technology and antidesitter space-time"));
     
     assertU(commit());
   }
