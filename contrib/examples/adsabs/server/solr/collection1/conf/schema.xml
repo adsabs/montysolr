@@ -527,9 +527,9 @@
 				<filter class="solr.TrimFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 
-				<filter
-					class="org.apache.solr.analysis.DiagnoseFilterFactory"
-					msg="indexer" />
+				<!-- <filter
+                    class="org.apache.solr.analysis.DiagnoseFilterFactory"
+                    msg="indexer" /> -->
 			</analyzer>
 			<analyzer type="query">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
@@ -752,7 +752,6 @@
 				<filter class="solr.TrimFilterFactory" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexerx"/>
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
@@ -762,7 +761,6 @@
 				<filter class="solr.PatternReplaceFilterFactory"
 					pattern="(doi:|arxiv:|\-|_| )" replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>
 			</analyzer>
 		</fieldType>
 
