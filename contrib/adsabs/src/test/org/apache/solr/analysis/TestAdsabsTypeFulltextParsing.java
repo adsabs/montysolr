@@ -104,6 +104,7 @@ import org.junit.BeforeClass;
  *   TODO: the analyzer for the synonyms must use the same StopFilters as the query chain
  * 
  */
+
 public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 	
 	
@@ -176,7 +177,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
       		"radio, radios, nonradio, radioed, radiobereich, adio, miniradio, radido => radio\n" +
       		"pulsars, pulsar, psr, pulser, psrs, pulsare, pulsares, pulars, pulsary, puslsar, interpulsars, pusar, nonpulsar, psro, rontgenpulsare, pulsarlike, pulsarpsr => pulsars\n" +
       		"millisecond, milliseconds, submillisecond, millisec, milliseconde, millesecond, millisekunden, milliseond, millisecnd => millisecond\n" +
-      		"fermi, fermilab => fermi\n"
+      		"fermi, fermilab => fermi\n",
+      		"space => universe\n"
       });
       
       File multiTokenSynonymsFile = createTempFile(new String[]{
@@ -194,8 +196,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
           // this is from ads synonyms
           "ADS,aitken\0double\0stars\n" + 
           "ADS,astrophysics\0data\0system\n" + 
-          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime\n" +
-          "ADS,astrophysics\0data\0system\n"
+          "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime,antidesitter\0space\n" + 
+          "ADS,astrophysics\0data\0system\n" + 
+          "VLBA,very\0long\0baseline\0array\n" +
+          "space,universe"
           
           // and this is how it would be if it was one line
           //"ADS,aitken\0double\0stars,astrophysics\0data\0system,anti\0de\0sitter\0space,antidesitter\0spacetime\n"
@@ -237,7 +241,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertU(adoc("id", "11", "bibcode", "xxxxxxxxxxx11", "title", "All-sky data survey"));
     assertU(adoc("id", "12", "bibcode", "xxxxxxxxxxx12", "title", "NoSky data survey"));
     assertU(adoc("id", "13", "bibcode", "xxxxxxxxxxx13", "title", "AllSky data survey"));
-    assertU(adoc("id", "14", "bibcode", "xxxxxxxxxxx14", "title", "Modified Newtonian Dynamics (MOND): Observational Phenomenology and Relativistic Extensions"));
+    assertU(adoc("id", "14", "bibcode", "xxxxxxxxxxx14", "title", "Modified Newtonian Dynamics: Observational Phenomenology and Relativistic Extensions"));
     assertU(adoc("id", "15", "bibcode", "xxxxxxxxxxx15", "title", "MOND test"));
     assertU(adoc("id", "16", "bibcode", "xxxxxxxxxxx16", "title", "mond test"));
     assertU(adoc("id", "17", "bibcode", "xxxxxxxxxxx17", "title", "bubble pace telescope multi-pace foobar"));
@@ -274,11 +278,33 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "keyword", "one Astrophysics Data System two"));
     assertU(adoc("id", "502", "bibcode", "xxxxxxxxxx502",
         "keyword", "one ads two"));
+    assertU(adoc("id", "600", "bibcode", "xxxxxxxxxx600",
+        "title", "THE HUBBLE constant: A SUMMARY OF THE HST PROGRAM FOR THE LUMINOSITY CALIBRATION OF TYPE Ia SUPERNOVAE BY MEANS OF CEPHEIDS"));
+    assertU(adoc("id", "601", "bibcode", "xxxxxxxxxx601",
+        "title", "the hubble constant: a summary of the HST program for the luminosity calibration of type Ia supernovae by means of cepheids"));
+    
+    assertU(adoc("id", "602", "bibcode", "xxxxxxxxxx602", 
+        "title", "Very Long Baseline Array (VLBA) is a ten-antennaaaah"));
+    assertU(adoc("id", "603", "bibcode", "xxxxxxxxxx603",
+        "title", "THE HUBBLE constant: a summary of the hubble space telescope program"));
+    assertU(adoc("id", "604", "bibcode", "xxxxxxxxxx604",
+        "title", "MIT and antidesitter space-time"));
+    assertU(adoc("id", "605", "bibcode", "xxxxxxxxxx604",
+        "title", "MIT and anti de sitter space-time"));
+    assertU(adoc("id", "606", "bibcode", "xxxxxxxxxx604",
+        "title", "Massachusets Institute of Technology and antidesitter space-time"));
+    
     assertU(commit());
   }
   
   
   public void testMultiTokens() throws Exception {
+    
+    // this multitoken is onthe first position
+    assertQ(req("q", "title:\"very long baseline array\""), 
+        "//*[@numFound='1']",
+        "//doc/str[@name='id'][.='602']"
+        );
     
     // make sure the correct synonym is picked in absence of docfreq info
     assertQueryEquals(req("q", "title:(\"antidesitter spacetime\" application)",
@@ -360,6 +386,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     assertQueryEquals(req("q", "title:\"observations black hole\""),
         "(title:\"observations black hole\" | title:\"observations (syn::black hole syn::bh acr::bh)\"~2)",
         DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "title:\"observations BH\""),
+        "title:\"observations (acr::bh syn::black hole syn::bh)\"~2",
+        MultiPhraseQuery.class);
     
     // btw our analyzer chain outputs all multi synonyms during indexing (but only canonical synonym for single ones)
     // that makes sense because we don't know how the user/author are writing them; but because we output all of them
@@ -539,8 +568,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "Synonym(all:mond all:syn::lunar)", 
         SynonymQuery.class);
     assertQ(req("q", "title" + ":mond"), 
-    		"//*[@numFound='5']",
-    		"//doc/str[@name='id'][.='14']",
+    		"//*[@numFound='4']",
     		"//doc/str[@name='id'][.='15']",
         "//doc/str[@name='id'][.='16']",
         "//doc/str[@name='id'][.='17']",
@@ -550,9 +578,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "Synonym(all:mond all:syn::lunar)", 
         SynonymQuery.class);
     assertQ(req("q", "title" + ":Mond"), 
-    		"//*[@numFound='5']",
+    		"//*[@numFound='4']",
     		"//doc/str[@name='id'][.='17']", // orig 'space' -> syn:lunar; look at the synonym file to understand
-    		"//doc/str[@name='id'][.='14']",
     		"//doc/str[@name='id'][.='15']",
         "//doc/str[@name='id'][.='16']",
         "//doc/str[@name='id'][.='20']");
@@ -592,8 +619,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "(title:\"modified newtonian dynamics\" "
         + "| Synonym(title:acr::mond title:syn::modified newtonian dynamics title:syn::mond))", 
         DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "title:\"MOND\"", "defType", "aqp"), 
+        "Synonym(title:acr::mond title:syn::modified newtonian dynamics title:syn::mond)", 
+        SynonymQuery.class);
     assertQ(req("q", "title" + ":\"modified newtonian dynamics\""), "//*[@numFound='2']",
     		"//doc/str[@name='id'][.='14']",
+        "//doc/str[@name='id'][.='15']");
+    assertQ(req("q", "title" + ":\"MOND\""), "//*[@numFound='2']",
+        "//doc/str[@name='id'][.='14']",
         "//doc/str[@name='id'][.='15']");
     
     
@@ -784,9 +817,12 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         DisjunctionMaxQuery.class);
     
     assertQ(req("q", "title:\"hubble space telescope\""), 
-    		"//*[@numFound='2']",
+    		"//*[@numFound='4']",
     		"//doc/str[@name='id'][.='4']",
-        "//doc/str[@name='id'][.='5']");
+        "//doc/str[@name='id'][.='5']",
+        "//doc/str[@name='id'][.='600']",
+        "//doc/str[@name='id'][.='601']"
+        );
     
     
     // preceded by something
@@ -843,7 +879,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "Synonym(title:acr::hst title:syn::hst title:syn::hubble space telescope)", 
         SynonymQuery.class);
     assertQ(req("q", "title:HST"), 
-        "//*[@numFound='2']",
+        "//*[@numFound='4']",
         "//doc/str[@name='id'][.='4']",
         "//doc/str[@name='id'][.='5']");
     
@@ -996,6 +1032,91 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
   }
   
   public void testOtherCases() throws Exception {
+    
+    
+    /**
+     * 
+     * input:
+     * 
+     * THE HUBBLE constant: A SUMMARY OF THE HST PROGRAM FOR THE LUMINOSITY CALIBRATION OF TYPE Ia SUPERNOVAE BY MEANS OF CEPHEIDS
+     * 
+     * this is how it gets indexed internally (before moving acronym filter after stop filters):
+     * 
+     * [(0, ['acr::the']),
+         (1, ['acr::hubble', 'hubble']),
+         (2, ['constant']),
+         (3, ['acr::of', 'acr::summary', 'acr::the', 'summary']),
+         (4, ['acr::hst', 'hst', 'syn::hst', 'syn::hubble space telescope']),
+         (5, ['acr::for', 'acr::program', 'acr::the', 'program']),
+         (6, ['acr::luminosity', 'luminosity']),
+         (7, ['acr::calibration', 'acr::of', 'calibration']),
+         (8, ['acr::type', 'type']),
+         (9, ['ia']),
+         (10, ['acr::supernovae', 'supernovae']),
+         (11, ['acr::by', 'by']),
+         (12, ['acr::means', 'acr::of', 'means']),
+         (13, ['acr::cepheids', 'cepheids']),
+         (14, []),
+         (15, []),
+         (16, []),
+         (17, []),
+         (18, []),
+         (19, [])]
+         
+        with stop filters before acronyms
+        
+        [(0, []),
+         (1, ['acr::hubble']),
+         (2, ['constant']),
+         (3, ['acr::summary', 'summary']),
+         (4, []),
+         (5, ['acr::program', 'program']),
+         (6, ['acr::luminosity', 'luminosity']),
+         (7, ['acr::calibration', 'calibration']),
+         (8, ['acr::type', 'type']),
+         (9, ['ia']),
+         (10, ['acr::supernovae', 'supernovae']),
+         (11, ['acr::by', 'by']),
+         (12, ['acr::means', 'means']),
+         (13, ['acr::cepheids', 'cepheids']),
+                 
+        and this how it got parsed before the change:
+        
+        title:"acr::the acr::hubble constant acr::summary acr::of acr::the (acr::hst syn::hubble space telescope syn::hst) acr::program acr::for acr::the acr::luminosity acr::calibration acr::of acr::type ia acr::supernovae acr::by acr::means acr::of acr::cepheids"~3
+        
+        [(0, 'acr::the'),
+         (1, 'acr::hubble'),
+         (2, 'constant'),
+         (3, 'acr::summary'),
+         (4, 'acr::of'),
+         (5, 'acr::the'),
+         (6, '(acr::hst syn::hubble space telescope syn::hst)'),
+         (7, 'acr::program'),
+         (8, 'acr::for'),
+         (9, 'acr::the'),
+         (10, 'acr::luminosity'),
+         (11, 'acr::calibration'),
+         (12, 'acr::of'),
+         (13, 'acr::type'),
+         (14, 'ia'),
+         (15, 'acr::supernovae'),
+         (16, 'acr::by'),
+         (17, 'acr::means'),
+         (18, 'acr::of'),
+         (19, 'acr::cepheids')]
+
+
+     */
+    assertQueryEquals(req("q", "title:\"THE HUBBLE constant: A SUMMARY OF THE HST PROGRAM FOR THE LUMINOSITY CALIBRATION OF TYPE Ia SUPERNOVAE BY MEANS OF CEPHEIDS\""), 
+        "title:\"acr::hubble constant acr::summary (acr::hst syn::hubble space telescope syn::hst) acr::program acr::luminosity acr::calibration acr::type ia acr::supernovae acr::by acr::means acr::cepheids\"~3", 
+        MultiPhraseQuery.class);
+    assertQ(req("q", "title:\"THE HUBBLE constant: A SUMMARY OF THE HST PROGRAM FOR THE LUMINOSITY CALIBRATION OF TYPE Ia SUPERNOVAE BY MEANS OF CEPHEIDS\""), 
+        "//*[@numFound='1']", 
+        "//doc/str[@name='id'][.='600']");
+    assertQ(req("q", "title:\"the hubble constant: a summary of the HST program for the luminosity calibration of type Ia supernovae by means of cepheids\""), 
+        "//*[@numFound='2']", 
+        "//doc/str[@name='id'][.='600']",
+        "//doc/str[@name='id'][.='601']");
     
     // change to NGC tokenizer in the schema; we want to index both
     // variants, but during search time only query for the concat version
@@ -1219,6 +1340,98 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     //TODO: this test is intentionally left failing; it used to work until the scoring changes (i'd like to 
     // investigate more how the multi-token affects recall)
+    /**
+     * 1. A 350-MHz GBT Survey of 50 Faint Fermi γ-ray
+     * 
+     * gets indexed as:
+     * 
+     * [(0, []),
+         (1, []),
+         (2, ['350mhz', 'syn::mhz']),
+         (3, ['gbt', 'syn::gbt', 'syn::green bank telescope']),
+         (4, ['syn::survey']),
+         (5, ['50']),
+         (6, ['faint', 'syn::faint']),
+         (7, ['fermi', 'syn::fermi']),
+         (8,
+          ['syn::gamma',
+           'syn::gamma ray',
+           'syn::gamma rays',
+           'syn::gammaray',
+           'syn::gammarays']),
+         (9,
+          ['gammaray',
+           'ray',
+           'syn::gamma ray',
+           'syn::gamma rays',
+           'syn::gammaray',
+           'syn::gammarays']),
+         (10, ['syn::source']),
+         (11, ['syn::radio']),
+         (12, ['millisecond', 'syn::millisecond'])]
+         
+         while 
+         
+         2. A 350-MHz GBT Survey of 50 Faint Fermi γ ray
+         
+         gets indexed as:
+         
+         [(0, []),
+         (1, []),
+         (2, ['350mhz', 'syn::mhz']),
+         (3, ['syn::gbt', 'syn::green bank telescope']),
+         (4, ['syn::survey']),
+         (5, ['50']),
+         (6, ['faint', 'syn::faint']),
+         (7, ['fermi', 'syn::fermi']),
+         (8,
+          ['syn::gamma',
+           'syn::gamma ray',
+           'syn::gamma rays',
+           'syn::gammaray',
+           'syn::gammarays']),
+         (9, ['ray']),
+         (10, ['syn::source']),
+         (11, ['syn::radio']),
+         (12, ['millisecond', 'syn::millisecond'])]
+     */
+    dumpDoc(null, "title", "bibcode");
+    
+    assertQueryEquals(req("q", "title:\"γ ray Sources\""), 
+        "(title:\"(gamma syn::gamma) ray (sources syn::source)\"~2 | title:\"(syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) ? (sources syn::source)\"~2)", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "title:\"γ-ray Sources\""), 
+        "title:\"(gamma syn::gamma syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (ray gammaray syn::gamma ray syn::gammaray syn::gamma rays syn::gammarays) (sources syn::source)\"~2", 
+        MultiPhraseQuery.class);
+    
+    assertQ(req("q", "title:\"γ ray Sources\"",
+        "indent", "true",
+        "debugQuery", "true"), 
+        "//*[@numFound='4']",
+        "//doc/str[@name='id'][.='400']",
+        "//doc/str[@name='id'][.='401']",
+        "//doc/str[@name='id'][.='402']",
+        "//doc/str[@name='id'][.='403']"
+        );
+    assertQ(req("q", "title:\"$\\gamma$ ray Sources\"",
+        "indent", "true",
+        "debugQuery", "true"), 
+        "//*[@numFound='4']",
+        "//doc/str[@name='id'][.='400']",
+        "//doc/str[@name='id'][.='401']",
+        "//doc/str[@name='id'][.='402']",
+        "//doc/str[@name='id'][.='403']"
+        );
+    assertQ(req("q", "title:\"γ-ray Sources\"",
+        "indent", "true",
+        "debugQuery", "true"), 
+        "//*[@numFound='4']",
+        "//doc/str[@name='id'][.='400']",
+        "//doc/str[@name='id'][.='401']",
+        "//doc/str[@name='id'][.='402']",
+        "//doc/str[@name='id'][.='403']"
+        );
+    
     assertQ(req("q", "title:\"A 350-MHz GBT Survey of 50 Faint Fermi γ-ray Sources for Radio Millisecond Pulsars\"",
         "indent", "true",
         "debugQuery", "true"), 
@@ -1236,6 +1449,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "//doc/str[@name='id'][.='403']");
     
     
+    //assertU(adoc("id", "402", "bibcode", "xxxxxxxxxx402", "title", 
+      //"A 350-MHz GBT Survey of 50 Faint Fermi $\\gamma$ ray Sources for Radio Millisecond Pulsars"));
+    //assertU(adoc("id", "403", "bibcode", "xxxxxxxxxx403", "title", 
+      //"A 350-MHz GBT Survey of 50 Faint Fermi γ ray Sources for Radio Millisecond Pulsars"));
     
     
   }

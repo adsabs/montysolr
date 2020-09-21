@@ -129,6 +129,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 
 	public void setQueryNode(AqpFunctionQueryNode node) {
 		this.qNode = node;
+		this.currChild = -1;
 		if (node.getOriginalInput() != null) {
 			sp = new StrParser(node.getOriginalInput().value);
 		}

@@ -186,6 +186,21 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "qf", "author^2.3 title abstract^0.4"),
                 "((Synonym(abstract:acr::muller abstract:acr::müller))^0.4 | ((author:müller, | author:müller,* | author:mueller, | author:mueller,* | author:muller, | author:muller,*))^2.3 | Synonym(title:acr::muller title:acr::müller))",
                 DisjunctionMaxQuery.class);
+        setDebug(true);
+        assertQueryEquals(req("defType", "edismax",
+            "aqp.unfielded.tokens.strategy", "multiply",
+            "aqp.unfielded.tokens.new.type", "simple",
+            "qf", "title keyword",
+            "q", "property:refereed r s t"),
+            "",
+            BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp",
+            "aqp.unfielded.tokens.strategy", "multiply",
+            "aqp.unfielded.tokens.new.type", "simple",
+            "qf", "title keyword",
+            "q", "property:refereed r s t"),
+            "",
+            BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "\"forman, c\"",
                 "qf", "author^2.3 title abstract^0.4"),
                 "((abstract:\"forman c\")^0.4 | ((author:forman, c | author:forman, christine | author:jones, c | author:jones, christine | author:forman, c* | author:forman,))^2.3 | title:\"forman c\")",
@@ -377,6 +392,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       assertU(adoc("id", "2", "bibcode", "XXX", "abstract", "foo bar baz",
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
+      
+      assertQEx("INVALID_SYNTAX", req("q", "author:\"^\"de marco year:2015"), 400);
+        
       
       assertQ(req("q", "similar(foo bar baz title bitle, input abstract title, 100, 100, 1, 1)"),
           "//*[@numFound='1']",
@@ -978,27 +996,33 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // useful2() - original implementation
         assertQueryEquals(req("defType", "aqp", "q", "useful2(author:foo)"),
-                "SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
+                "SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) useful2(author:foo OR title:body)"),
-                "+(all:x all:z) +SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
+                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorOperatorExpertsCiting(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
 
 
         // reviews() - ADS classic impl
         assertQueryEquals(req("defType", "aqp", "q", "reviews(author:foo)"),
-                "SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                //"SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "SecondOrderQuery(SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] citation_count, lucene=0.0, adsPart=1.0)), collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews(author:foo OR title:body)"),
-                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                //"+(all:x all:z) +SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorAdsClassicScoringFormula(cache=citations-cache, boost=float[] citation_count, lucene=0.0, adsPart=1.0)), collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 BooleanQuery.class);
 
         // reviews2() - original impl
         assertQueryEquals(req("defType", "aqp", "q", "reviews2(author:foo)"),
-                "SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", SecondOrderQuery.class);
+                //"SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", 
+            "SecondOrderQuery(SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))",
+            SecondOrderQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "all:(x OR z) reviews2(author:foo OR title:body)"),
-                "+(all:x all:z) +SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))", BooleanQuery.class);
+                //"+(all:x all:z) +SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))",
+                "+(all:x all:z) +SecondOrderQuery(SecondOrderQuery((author:foo, author:foo,*) title:body, collector=SecondOrderCollectorTopN(200)), collector=SecondOrderCollectorCitingTheMostCited(cache=citations-cache, boost=float[] cite_read_boost))",
+                BooleanQuery.class);
 
         // classic_relevance() - cr()
         assertQueryEquals(req("defType", "aqp", "q", "classic_relevance(title:foo)"),

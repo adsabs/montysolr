@@ -25,6 +25,7 @@ import monty.solr.util.MontySolrSetup;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.TermRangeQuery;
@@ -136,7 +137,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  ", \"aff_id\": [\"61814\", \"A1036\", \"-\"]" +
 			  ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
 			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
-			  ", \"aff_raw\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
+			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
         ", \"institution\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\", \"foo/bar baz\"]" +
 			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
 			  ", \"aff_facet_hier\": [\"1/1812/61814\", \"1/8264/61814\", \"1/1812/A1036\", \"-\"]" +
@@ -316,7 +317,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//*[@numFound='1']"
 		);
 		
-
+		
+				
 		/*
 		 * id - str type, the unique id key, we do no processing
 		 */
@@ -411,6 +413,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "doi:\"doi:žščřďťň:123456789\""), "//*[@numFound='1']");
 		//assertQ(req("q", "doi:\"doi:žščŘĎŤŇ?123456789\""), "//*[@numFound='1']");
 		assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='0']");
+		
+		// failing now, will need to mess with grammar first
+//		assertQ(req("q", "doi:(\"doi:ŽŠČŘĎŤŇ:123456789\" OR \"ŽŠČŘĎŤŇ:123456789\")"), 
+//		    "//*[@numFound='1']");
 
 
 
@@ -496,29 +502,29 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		/*
-		 * aff - is a virtual field; 
+		 * affil - is a virtual field; 
 		 * all aff_ fields must be the same order as authors
 		 */
 		
-		assertQ(req("q", "aff:NASA"),
+		assertQ(req("q", "affil:NASA"),
 			"//doc/int[@name='recid'][.='100']",
 			"//*[@numFound='1']"
 		);
-		assertQ(req("q", "aff:NASA AND author:\"Anders\""),
+		assertQ(req("q", "affil:NASA AND author:\"Anders\""),
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
 		);
-		assertQ(req("q", "aff:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
-		assertQ(req("q", "aff:KAVLI"), "//*[@numFound='0']"); // same here
-		assertQ(req("q", "aff:kavli"), // otherwise case-insensitive
+		assertQ(req("q", "affil:SPACE"), "//*[@numFound='0']"); // be case sensitive with uppercased query terms
+		assertQ(req("q", "affil:KAVLI"), "//*[@numFound='0']"); // same here
+		assertQ(req("q", "affil:kavli"), // otherwise case-insensitive
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
-		assertQ(req("q", "aff:Kavli"),
+		assertQ(req("q", "affil:Kavli"),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
-		assertQ(req("q", "aff:\"kavli space\""),
+		assertQ(req("q", "affil:\"kavli space\""),
 				"//*[@numFound='1']",
 				"//doc/int[@name='recid'][.='100']"
 		);
@@ -548,7 +554,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     );
 		
 
-		assertQ(req("q", "aff:\"Kavli\""),
+		assertQ(req("q", "affil:\"Kavli\""),
 			"//*[@numFound='1']");
 		assertQ(req("q", "aff_canonical:\"Harvard\""),
 			"//*[@numFound='1']");
@@ -556,7 +562,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		//  	"//*[@numFound='1']");
 		assertQ(req("q", "aff_id:\"61814\""),
 			"//*[@numFound='1']");
-		assertQ(req("q", "aff_raw:\"02138\""),
+		assertQ(req("q", "aff:\"02138\""),
 			"//*[@numFound='1']");
 		assertQ(req("q", "aff_canonical:\"Smithsonian\""),
 			"//*[@numFound='1']");
@@ -570,10 +576,10 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"<str>NASA Kavli space center, Cambridge, MA 02138, USA</str>" +
         "<str>Einstein institute, Zurych, Switzerland</str></arr>"
         );
-		assertQ(req("q", "=aff:\"acr::nasa\" AND recid:100"),
+		assertQ(req("q", "=affil:\"acr::nasa\" AND recid:100"),
 			"//*[@numFound='1']" 
 		);
-		assertQ(req("q", "pos(aff_raw:kavli, 2) AND recid:100"),
+		assertQ(req("q", "pos(aff:kavli, 2) AND recid:100"),
 				"//*[@numFound='1']"
 				);
 
@@ -1164,6 +1170,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				"//doc/int[@name='recid'][.='100']",
 				"//*[@numFound='1']"
 		);
+		
+		// special case, subquery
+    assertQ(req("q", "bibcode:2014JNuM..455...10B", "fl", "bibcode,cites:[subquery]",
+        "cites.fl", "bibcode,pubdate,author", "cites.q", "citations({! f=bibcode v=$row.bibcode})"
+        ),
+        "/response/result[@numFound=1]",
+        "/response/result/doc/result[@name='cites'][@numFound='2']");
 
 		/*
 		 * citation_count
@@ -1280,7 +1293,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		 * links_data (generated and stored as JSON for display purposes)
 		 * ids_data (generated and stored as JSON for display purposes)
 		 */
-		assertQ(req("q", "id:100"),
+		assertQ(req("q", "id:100", "fl", "links_data"),
 				"//doc/arr[@name='links_data']/str[contains(text(),'MAST')]",
 				"//doc/arr[@name='links_data']/str[contains(text(),'{\"foo\": [\"bar\", \"baz\"], \"one\": {\"two\": \"three\"}}')]"
 				);
@@ -1456,7 +1469,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "page_range:23"),
         "//*[@numFound='0']" // not searchable
         );
-    assertQ(req("q", "page:55"),
+    assertQ(req("q", "page:55", "fl", "page_range"),
         "//doc[1]/str[@name='page_range'][.='23-55s']"
         );
     
@@ -1527,7 +1540,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     assertQ(req("q", "data:(nEd OR foo)"),
         "//doc[1]/int[@name='recid'][.='100']"
         );
-    assertQ(req("q", "data:\"NED:999\""), // numbers should be ignored in search, but stored
+    assertQ(req("q", "data:\"NED:999\"", "fl", "recid,data"), // numbers should be ignored in search, but stored
         "//doc[1]/int[@name='recid'][.='100']",
         "//doc[1]/arr[@name='data']/str[contains(text(),'NED:15')]"
         );
@@ -1536,7 +1549,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
      * esources
      * 
      */
-    assertQ(req("q", "esources:pub_pDF"),
+    assertQ(req("q", "esources:pub_pDF", "fl", "recid"),
         "//doc[1]/int[@name='recid'][.='100']"
         );
     
@@ -1613,21 +1626,41 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     /*
      * similar() query
      */
-    assertQ(req("q", "similar(recid:100)"),
+    assertQ(req("q", "similar(recid:100)", "fl", "recid"),
         "//doc[1]/int[@name='recid'][.='60']"
         );
+    
+    // this must be turned into mlt query because the input is too long (protection kicks in)
+    assertQueryEquals(req("q", "abstract:\"We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7\""), 
+        "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7", MoreLikeThisQuery.class);
+
+    // MoreLikeThisQuery doesn't show the field name, but i have verified it is MLT in three title, abstract, keyword fields
+    assertQueryEquals(req("q", "abs:\"We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7\""), 
+        "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7", 
+        BooleanQuery.class);
+    // unfielded also must become like query
+    assertQueryEquals(req("q", "\"Evaluated bimolecular ion molecule gas phase kinetics\"",
+        "qf", "title abstract",
+        "aqp.maxPhraseLength", "10"),
+        "(like:Evaluated bimolecular ion molecule gas phase kinetics | like:Evaluated bimolecular ion molecule gas phase kinetics)",
+        DisjunctionMaxQuery.class);
+    
+    // check it can deal with unfielded search
+    assertQ(req("q", "\"We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7.  Within this survey path, we identify 4 DLAs definedas absorbers with Hicolumn densityNHi≥1020.3cm−2, which implies an incidence per absorptionlengthℓDLA(X) = 0.017+0.014−0.008at a median survey path redshift ofz= 0.623. While our estimateofℓDLA(X) is lower than earlier estimates atz≈0 from Hi21 cm emission studies, the results areconsistent within the measurement uncertainties. Our dataset is too small to properly sample theNHifrequency distribution functionf(NHi, X), but the observed distribution agrees with previousestimates atz >2. Adopting thez >2 shape off(NHi, X), we infer an Himass density atz∼0.6 ofρDLAHi= 0.25+0.20−0.12×108M⊙Mpc−3. This is significantly lower than previous estimates from targetedDLA surveys with the HST, but consistent with results from low-zHi21 cm observations, and suggeststhat the neutral gas density of the universe has been decreasingover the past 10 Gyrs.\""),
+        "//*[@numFound='6']"
+        );
+
     
     
     /*
      * these are the cases that depend on the default parameters specified in the
      * solrcofig.xml; here we just test what came up as bugs
      */
-    assertQueryEquals(req("q", "aff:\"ASTRO 3D\""), 
-        "(aff_abbrev:\"acr::astro (3d 3d)\" | aff_abbrev:\"acr::astro 3 d\") "
-        + "(institution:astro 3d)^2.0 "
-        + "aff_id:astro 3d "
-        + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\") "
-        + "((aff_raw:\"acr::astro (3d 3d)\" | aff_raw:\"acr::astro 3 d\"))^0.5", 
+    assertQueryEquals(req("q", "affil:\"ASTRO 3D\""), 
+        "((aff:\"acr::astro (3d 3d)\" | aff:\"acr::astro 3 d\"))^0.5 "
+        + "(aff_abbrev:\"acr::astro (3d 3d)\" | aff_abbrev:\"acr::astro 3 d\") "
+        + "(institution:astro 3d)^2.0 aff_id:astro 3d "
+        + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\")",
         BooleanQuery.class);
 	}
 }

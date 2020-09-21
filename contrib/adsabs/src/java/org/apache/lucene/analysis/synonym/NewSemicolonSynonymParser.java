@@ -24,7 +24,7 @@ public class NewSemicolonSynonymParser extends NewSynonymFilterFactory.SynonymPa
     try {
       addInternal(br);
     } catch (IllegalArgumentException e) {
-      ParseException ex = new ParseException("Invalid synonym rule at line " + br.getLineNumber(), 0);
+      ParseException ex = new ParseException("Invalid synonym rule at line " + br.getLineNumber() + " " + br.readLine(), 0);
       ex.initCause(e);
       throw ex;
     } finally {

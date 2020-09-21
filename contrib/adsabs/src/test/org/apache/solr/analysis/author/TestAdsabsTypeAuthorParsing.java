@@ -28,6 +28,7 @@ import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.QParser;
@@ -377,7 +378,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+    assertQueryEquals(req("q", "author:\"van dok*, h\""), "author:van dok*, h", WildcardQuery.class);
+    assertQ(req("q", "author:\"van dok*, h\""),
+        "//*[@numFound='1']",
+        "//doc/int[@name='recid'][.='222']"
+    );
+    
+    assertQueryEquals(req("q", "author:\"^acco*\""), "spanPosRange(SpanMultiTermQueryWrapper(author:acco*), 0, 1)", SpanPositionRangeQuery.class);
   	assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
+  	setDebug(true);
   	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
   	
   	testAuthorQuery("Adamč*",
@@ -545,6 +554,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             );
   	
     // 'xxx' will be removed from the author (at least in the modified version)
+  	setDebug(true);
 	  assertQueryEquals(req("defType", "aqp", "q", "author:\"accomazzi, alberto, xxx.\""), 
         "author:accomazzi, alberto, xxx | author:accomazzi, alberto, xxx * | author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a xxx | author:accomazzi, a xxx * | author:accomazzi, alberto, x | author:accomazzi, alberto, x * | author:accomazzi, a x | author:accomazzi, a x * | author:accomazzi, alberto, | author:accomazzi, alberto, * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,",
         DisjunctionMaxQuery.class);
@@ -657,7 +667,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   	testAuthorQuery(
         "\"Boser, S\"", 
         		"first_author:boser, s | first_author:boser, s* | first_author:boser, | first_author:böser, s | first_author:böser, s* | first_author:böser, | first_author:boeser, s | first_author:boeser, s* | first_author:boeser,",
-        		"//*[@numFound='1']",
+        		"//*[@numFound='1']");
+  	//setDebug(true);
+  	testAuthorQuery(
     		"\"Böser, S\"", 
         		"first_author:böser, s | first_author:böser, s* | first_author:böser, | first_author:boeser, s | first_author:boeser, s* | first_author:boeser, | first_author:boser, s | first_author:boser, s* | first_author:boser,",
         		"//*[@numFound='1']"
@@ -2624,9 +2636,9 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     if (actual.startsWith("("))
       actual = actual.substring(1, actual.length()-1);
     
-    String[] ex = expected.split("(\\s\\|\\s|\\s)*[a-z]+\\:");
+    String[] ex = expected.split("(\\s\\|\\s|\\s)*[a-z_]+\\:");
     Arrays.sort(ex);
-    String[] ac = actual.split("(\\s\\|\\s|\\s)*[a-z]+\\:");
+    String[] ac = actual.split("(\\s\\|\\s|\\s)*[a-z_]+\\:");
     Arrays.sort(ac);
     StringBuffer exs = new StringBuffer();
     for (String s: ex) {

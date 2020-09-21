@@ -136,6 +136,20 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		tp.setDebug(v);
 	}
 	
+	/*
+	 * This is only for printing/debugging, DO NOT use this for testing!!!
+	 * 
+	 * It will only work if the field(s) are indexed with stored positions
+	 * i.e. 
+	 * 
+	 * <field name="title" ..... termVectors="true" termPositions="true"/>
+	 * 
+	 * Also, the codec used must NOT be SimpleTextCodec
+	 */
+	public void dumpDoc(Integer docId, String...fields) throws Exception {
+    throw new Exception("Disabled");
+	}
+	
 	
   public String addDocs(String[] fields, String...values) {
     ArrayList<String> vals = new ArrayList<String>(Arrays.asList(values));

@@ -41,27 +41,27 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     CharTermAttribute termAtt = ts.getAttribute(CharTermAttribute.class);
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertEquals(termAtt.toString(), "MÜLLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertEquals(termAtt.toString(), "MUELLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertEquals(termAtt.toString(), "MULLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertEquals(termAtt.toString(), "MÜller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertEquals(termAtt.toString(), "MUEller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertEquals(termAtt.toString(), "MUller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     assertFalse(ts.incrementToken());
@@ -79,11 +79,11 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     termAtt = ts.getAttribute(CharTermAttribute.class);
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertEquals(termAtt.toString(), "MÜLLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertEquals(termAtt.toString(), "MÜller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     assertFalse(ts.incrementToken());
@@ -103,11 +103,11 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     termAtt = ts.getAttribute(CharTermAttribute.class);
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertEquals(termAtt.toString(), "MÜLLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertEquals(termAtt.toString(), "MÜller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     assertFalse(ts.incrementToken());
@@ -126,27 +126,27 @@ public class TestAuthorCollectorFactory extends BaseTokenStreamTestCase {
     termAtt = ts.getAttribute(CharTermAttribute.class);
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜLLER, BILL"));
+    assertEquals(termAtt.toString(), "MÜLLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertEquals(termAtt.toString(), "MUELLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertEquals(termAtt.toString(), "MULLER, BILL");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MÜller, Bill"));
+    assertEquals(termAtt.toString(), "MÜller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MUELLER, BILL"));
+    assertEquals(termAtt.toString(), "MUEller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     ts.incrementToken();
-    assertTrue(termAtt.toString().equals("MULLER, BILL"));
+    assertEquals(termAtt.toString(), "MUller, Bill");
     assertTrue(typeAtt.type().equals(AuthorUtils.AUTHOR_TRANSLITERATED));
     
     assertFalse(ts.incrementToken());

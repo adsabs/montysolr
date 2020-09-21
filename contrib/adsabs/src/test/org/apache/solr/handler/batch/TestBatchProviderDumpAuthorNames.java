@@ -3,6 +3,7 @@ package org.apache.solr.handler.batch;
 import java.io.File;
 
 import org.adsabs.solr.AdsConfig.F;
+import org.apache.solr.analysis.author.AuthorUtils;
 import org.apache.solr.request.SolrQueryRequest;
 
 public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
@@ -35,6 +36,7 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
     assertU(adoc(F.ID, "19", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Sil'chenko, E"));
     assertU(adoc(F.ID, "20", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "SAV'E, E"));
     assertU(adoc(F.ID, "21", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wyrzykowski, Ł"));
+    assertU(adoc(F.ID, "22", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Peißker, L"));
     assertU(commit());
 		
 		
@@ -79,6 +81,7 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
         "silchenko,=>sil chenko,", // this is cleaned up "sil'chenko"
         "!sil'chenko,=>sil chenko,",
         "wyrzykowski, l=>wyrzykowski, ł",
+        "peissker, l=>peißker, l",
 				}
 		);
 	}

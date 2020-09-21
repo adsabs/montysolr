@@ -307,6 +307,7 @@
      <lst name="defaults">
        <str name="wt">json</str>
        <int name="rows">10</int>
+       <str name="fl">title abstract author bibcode identifier volume page bibstem doctype pubdate pub pub_raw citation_count read_count esources</str>
        <!-- 
        ADSLABS:12/12: this can be overrided by url params. 
        But unfielded search will not work if you use "df" parameter!
@@ -343,6 +344,7 @@
      <lst name="invariants">
        <str name="echoParams">explicit</str>
        <str name="aqp.allow.leading_wildcard">false</str>
+       <str name="aqp.maxAbsolutePhraseLength">500</str>
      </lst>
      <arr name="last-components">
       <str>wordcloud</str>
@@ -707,7 +709,7 @@
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
-          <str name="aff">aff_abbrev aff_canonical aff_id institution^2 aff_raw^0.5</str>
+          <str name="affil">aff_abbrev aff_canonical aff_id institution^2 aff^0.5</str>
        </lst>
        <str name="aqp.unfieldedSearchField">all</str>
        <str name="aqp.defaultField">unfielded_search</str>
@@ -739,7 +741,7 @@
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
-          <str name="aff">aff_abbrev aff_canonical aff_id institution^2 aff_raw^0.5</str>
+          <str name="affil">aff_abbrev aff_canonical aff_id institution^2 aff^0.5</str>
        </lst>
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        <str name="aqp.defaultField">unfielded_search</str>
@@ -798,6 +800,9 @@
     <str name="cache-name">citations-cache</str>
     <str name="resolution-field">bibcode</str>
   </transformer>
+
+  <transformer name="fields" class="org.apache.solr.response.transform.FieldTransformerFactory" >
+  </transformer>  
   
   <queryParser name="bitset" class="solr.search.BitSetQParserPlugin">
     <lst name="defaults">

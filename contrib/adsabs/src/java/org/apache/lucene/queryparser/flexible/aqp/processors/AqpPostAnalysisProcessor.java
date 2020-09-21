@@ -52,7 +52,7 @@ import org.apache.solr.common.params.SolrParams;
  *  </pre>
  *
  */
-public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
+public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
 
   
 	@Override
@@ -220,17 +220,22 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 	 */
 	protected List<List<List<QueryNode>>> extractQueries(QueryNode node) throws QueryNodeException {
 			
+	    List<List<List<QueryNode>>> queries;
 			List<QueryNode> children = node.getChildren();
+			
 			NodeOfQuery graph = new NodeOfQuery(-1, -1);
+			int maxDepth = 0;
+			Integer maxAllowedDepth = Integer.valueOf(getConfigVal("aqp.maxPathLength", "100"));
 			
 			for (QueryNode child : children) {
 				//System.out.println("addToken(): " + child);
-				graph.consume(child);
+				maxDepth = graph.consume(child);
+				if (maxDepth > maxAllowedDepth)
+				  throw new QueryNodeException(new MessageImpl("Query exceed maxAllowedDepth of " + maxAllowedDepth + " tokens for query redistribution"));
 			}
 			
 			//System.out.println(graph.toString());
 			
-			List<List<List<QueryNode>>> queries;
 			try {
 	      queries = graph.traverseGraphFindAllQueries();
       } catch (CloneNotSupportedException e) {
@@ -289,6 +294,7 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 					      + "\" endPos=\"" + this.endPos + "\"/>\n");
 			for (QueryNode child: payload) {
 				sb.append(ind + "<payload>" + child + "</payload>\n");
+				System.out.println(ind + "<payload>" + child + "</payload>\n");
 			}
 			for (NodeOfQuery child: children) {
 				sb.append(ind + "<child>\n");
@@ -299,22 +305,27 @@ public class AqpPostAnalysisProcessor extends QueryNodeProcessorImpl {
 			return sb.toString();
 		}
 		
-		public void consume(QueryNode qnode) {
+		public int consume(QueryNode qnode) {
+		  return consume(qnode, 0);
+		}
+		
+		private int consume(QueryNode qnode, int depth) {
 			FieldQueryNode node = ((FieldQueryNode) qnode);
 			boolean descended = false;
 			for (NodeOfQuery child: children) {
 				if (child.startPos == node.getBegin() && child.endPos == node.getEnd()) {
 					child.addPayload(node);
-					return;
+					return depth;
 				}
 				if (child.startPos < node.getBegin() && child.endPos < node.getEnd()) {
-					child.consume(qnode);
+					depth  = child.consume(qnode, depth + 1);
 					descended = true;
 				}
 			}
 			if (descended == false && node.getBegin() > this.startPos) {
 				children.add(new NodeOfQuery(node));
 			}
+			return depth;
 		}
 		
 		public void addPayload(QueryNode node) {

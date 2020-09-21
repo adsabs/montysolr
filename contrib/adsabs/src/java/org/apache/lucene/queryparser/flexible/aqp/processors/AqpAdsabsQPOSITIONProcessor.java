@@ -56,7 +56,9 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 		AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
 		String input = subChild.getTokenInput();
 		
-		if (input.equals("^~")) {
+		input = input.trim();
+		
+		if (input.equals("^~") || input.equals("^") || input.equals("")) {
 			throw new QueryNodeException(new MessageImpl(
 	                QueryParserMessages.INVALID_SYNTAX,
 	                "^~ is very concise and therefore cool, but I am afraid you must tell me more. Try something like: word^0.5~"));

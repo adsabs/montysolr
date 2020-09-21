@@ -106,9 +106,9 @@ public abstract class BlackAbstractTestCase extends MontySolrAbstractTestCase {
 		
 		envInit();
 		
-		schemaString = getConf("server/solr/collection1/schema.xml");
+		schemaString = getConf("server/solr/collection1/conf/schema.xml");
 
-    configString = getConf("server/solr/collection1/solrconfig.xml");
+    configString = getConf("server/solr/collection1/conf/solrconfig.xml");
     initCore(configString, schemaString, getConf("server/solr/"));
 		
 	}

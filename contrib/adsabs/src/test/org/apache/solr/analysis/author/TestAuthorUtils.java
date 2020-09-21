@@ -1,9 +1,13 @@
 package org.apache.solr.analysis.author;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.solr.analysis.author.AuthorUtils;
 
 import junit.framework.TestCase;
@@ -48,6 +52,7 @@ public class TestAuthorUtils extends TestCase {
 		assertEquals("áéíóůÁÉÍÓŮ,", AuthorUtils.normalizeAuthor("áéíóůÁÉÍÓŮ"));
 		// this character gets removed ⻉
 		assertEquals("\u8349,", AuthorUtils.normalizeAuthor("\u8349")); // 草
+		
 	}
 
 	public void testParseAuthor() throws Exception {
@@ -59,128 +64,107 @@ public class TestAuthorUtils extends TestCase {
 	}
 
 	public void testASCIIFolding() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("MULLER, BILL");
-		expected.add("MUELLER, BILL");
-		ArrayList<String> actual = AuthorUtils.getAsciiTransliteratedVariants("MÜLLER, BILL");
-		assertEquals(expected, new HashSet<String>(actual));
-		expected.clear();
-		expected.add("GOMEZ, HECTOR Q");
-		expected.add("GOEMEZ, HECTOR Q");
-		actual = AuthorUtils.getAsciiTransliteratedVariants("GÓMEZ, HECTOR Q");
-		assertEquals(expected, new HashSet<String>(actual));
 		
 		assertEquals("zazolc gesla jazn", AuthorUtils.foldToAscii("zażółć gęślą jaźń"));
-		
-		expected.clear();
-		expected.add("GUERÇO, R");
-		expected.add("GUERCO, R");
-		actual = AuthorUtils.getAsciiTransliteratedVariants("guerço, r");
-		assertEquals(expected, new HashSet<String>(actual));
-		
 		assertEquals("aeiouyAEIOUY", AuthorUtils.foldToAscii("áéíóůýÁÉÍÓŮÝ"));
+		assertEquals("peissker", AuthorUtils.foldToAscii("peißker"));
 	}
 	
-	public void testTransliterate() {
-		HashMap<String,String> testMap = new HashMap<String,String>();
-		testMap.put("Ü", "UE");
-		testMap.put("ä", "ae");
-		testMap.put("č", "ch");
-		for (String k : testMap.keySet()) {
-			String expected = testMap.get(k);
-			String actual = AuthorUtils.transliterateAccents(k);
-			assertEquals(expected, actual);
-		}
+
+  public void testTransliterate() {
+    check(AuthorUtils.getAsciiTransliteratedVariants("MÜLLER, BILL"), "MULLER, BILL", "MUELLER, BILL");
+    check(AuthorUtils.getAsciiTransliteratedVariants("GÓMEZ, HECTOR Q"), "GOMEZ, HECTOR Q", "GOEMEZ, HECTOR Q");
+    check(AuthorUtils.getAsciiTransliteratedVariants("guer\u00E7o, r"), "guerco, r", "guerc\u0327o, r"); // guerço, r - in unicode guer\u00E7o
+    
+		assertEquals("FUE", AuthorUtils.transliterateAccents("FÜ"));
+		assertEquals("fae", AuthorUtils.transliterateAccents("fä"));
+		assertEquals("ch", AuthorUtils.transliterateAccents("č"));
 	}
 	
 	// for reference implementation
 	// see: 
 	public void testTransRussianApostrophes() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("FOOIEYE, BAR");
-		expected.add("FOOYEYE, BAR");
-		expected.add("FOOEYE, BAR");
-		HashSet<String> input = new HashSet<String>();
-		input.add("FOO'EYE, BAR");
-		HashSet<String> actual = AuthorUtils.translitRussianApostrophes(input.iterator());
-		assertEquals(expected, actual);
+	  check(AuthorUtils.translitRussianApostrophes((
+        new HashSet<String>(){{add("FOO'EYE, BAR");}}).iterator()), 
+        "FOOEYE, BAR", "FOOYEYE, BAR", "FOOIEYE, BAR");
+	  check(AuthorUtils.translitRussianApostrophes((
+        new HashSet<String>(){{add("Foo'eye, BAR");}}).iterator()), 
+        "Fooeye, BAR", "Fooyeye, BAR", "Fooieye, BAR");
 	}
 		
 	public void testTransRussianLastNames1() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("FOOYEV, BAR");
-		expected.add("FOOJEV, BAR");
-		expected.add("FOOIEV, BAR");
-		HashSet<String> input = new HashSet<String>();
-		input.add("FOOEV, BAR");
-		HashSet<String> actual = AuthorUtils.translitRussianLastNames1(input.iterator());
-		assertEquals(expected, actual);
-	}	
+		
+		check(AuthorUtils.translitRussianLastNames1((
+		    new HashSet<String>(){{add("FOOEV, BAR");}}).iterator()), 
+		    "FOOYEV, BAR", "FOOJEV, BAR", "FOOIEV, BAR");
+		
+		check(AuthorUtils.translitRussianLastNames1((
+        new HashSet<String>(){{add("Fooev, BAR");}}).iterator()), 
+        "Fooyev, BAR", "Foojev, BAR", "Fooiev, BAR");
+	}
+	
 	
 	public void testTransRussianLastNames2() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("FOONIIA, BAR");
-		expected.add("FOONIYA, BAR");
-		HashSet<String> input = new HashSet<String>();
-		input.add("FOONIA, BAR");
-		HashSet<String> actual = AuthorUtils.translitRussianLastNames2(input.iterator());
-		assertEquals(expected, actual);
+		check(AuthorUtils.translitRussianLastNames2((
+        new HashSet<String>(){{add("FOONIA, BAR");}}).iterator()), 
+		    "FOONIIA, BAR", "FOONIYA, BAR");
+		check(AuthorUtils.translitRussianLastNames2((
+        new HashSet<String>(){{add("Foonia, BAR");}}).iterator()), 
+        "Fooniia, BAR", "Fooniya, BAR");
 	}
 	
 	public void testTransRussianLastNames3() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("FOODYAN, BAR");
-		expected.add("FOODIAN, BAR");
-		expected.add("FOODJAN, BAR");
-		HashSet<String> input = new HashSet<String>();
-		input.add("FOODJAN, BAR");
-		HashSet<String> actual = AuthorUtils.translitRussianLastNames3(input.iterator());
-		assertEquals(expected, actual);
+	  check(AuthorUtils.translitRussianLastNames3((
+        new HashSet<String>(){{add("FOODJAN, BAR");}}).iterator()), 
+        "FOODYAN, BAR", "FOODIAN, BAR", "FOODJAN, BAR");
+	  check(AuthorUtils.translitRussianLastNames3((
+        new HashSet<String>(){{add("Foodjan, BAR");}}).iterator()), 
+        "Foodyan, BAR", "Foodian, BAR", "Foodjan, BAR");
 	}
 		
 	public void testTransRussianLastNames4() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("FOOKAYA, BAR");
-		expected.add("FOOKAJA, BAR");
-		expected.add("FOOKAIA, BAR");
-		HashSet<String> input = new HashSet<String>();
-		input.add("FOOKAYA, BAR");
-		HashSet<String> actual = AuthorUtils.translitRussianLastNames4(input.iterator());
-		assertEquals(expected, actual);
+	  check(AuthorUtils.translitRussianLastNames4((
+        new HashSet<String>(){{add("FOOKAYA, BAR");}}).iterator()), 
+        "FOOKAYA, BAR", "FOOKAJA, BAR", "FOOKAIA, BAR");
+	  check(AuthorUtils.translitRussianLastNames4((
+        new HashSet<String>(){{add("Fookaya, BAR");}}).iterator()), 
+        "Fookaya, BAR", "Fookaja, BAR", "Fookaia, BAR");
 	}
 		
 	public void testTransRussianLastNames5() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("FOOKYI, BAR");
-		expected.add("FOOKII, BAR");
-		expected.add("FOOKY, BAR");
-		expected.add("FOOKI, BAR");
-		expected.add("FOOKIY, BAR");
-		expected.add("FOOKIJ, BAR");
-		expected.add("FOOVYI, BAR");
-		expected.add("FOOVII, BAR");
-		expected.add("FOOVY, BAR");
-		expected.add("FOOVI, BAR");
-		expected.add("FOOVIY, BAR");
-		expected.add("FOOVIJ, BAR");
-		HashSet<String> input = new HashSet<String>();
-		input.add("FOOKI, BAR");
-		input.add("FOOVI, BAR");
-		HashSet<String> actual = AuthorUtils.translitRussianLastNames5(input.iterator());
-		assertEquals(expected, actual);
+		
+		check(AuthorUtils.translitRussianLastNames5((
+        new HashSet<String>(){{add("FOOKI, BAR");}}).iterator()), 
+        "FOOKYI, BAR", "FOOKII, BAR", "FOOKY, BAR", "FOOKI, BAR", "FOOKIY, BAR", "FOOKIJ, BAR");
+
+    check(AuthorUtils.translitRussianLastNames5((
+        new HashSet<String>(){{add("Fooki, BAR");}}).iterator()), 
+        "Fookyi, BAR", "Fookii, BAR", "Fooky, BAR", "Fooki, BAR", "Fookiy, BAR", "Fookij, BAR");
+
+		check(AuthorUtils.translitRussianLastNames5((
+        new HashSet<String>(){{add("FOOVI, BAR");}}).iterator()), 
+        "FOOVYI, BAR", "FOOVII, BAR", "FOOVY, BAR", "FOOVI, BAR", "FOOVIY, BAR", "FOOVIJ, BAR");
+
+    check(AuthorUtils.translitRussianLastNames5((
+        new HashSet<String>(){{add("Foovi, BAR");}}).iterator()), 
+        "Foovyi, BAR", "Foovii, BAR", "Foovy, BAR", "Foovi, BAR", "Fooviy, BAR", "Foovij, BAR");
+
 	}
 		
 	public void testTransRussianFirstNames() {
-		HashSet<String> expected = new HashSet<String>();
-		expected.add("FOOBAR, YURI");
-		expected.add("FOOBAR, IURI");
-		expected.add("FOOBAR, YAGNI");
-		expected.add("FOOBAR, IAGNI");
-		HashSet<String> input = new HashSet<String>();
-		input.add("FOOBAR, YURI");
-		input.add("FOOBAR, IAGNI");
-		HashSet<String> actual = AuthorUtils.translitRussianFirstNames(input.iterator());
-		assertEquals(expected, actual);
+	  
+	  check(AuthorUtils.translitRussianFirstNames((
+        new HashSet<String>(){{add("FOO, YURI");}}).iterator()), 
+        "FOO, YURI", "FOO, IURI");
+	  check(AuthorUtils.translitRussianFirstNames((
+        new HashSet<String>(){{add("FOO, Yuri");}}).iterator()), 
+        "FOO, Yuri", "FOO, Iuri");
+	  
+	  check(AuthorUtils.translitRussianFirstNames((
+        new HashSet<String>(){{add("FOO, IAGNI");}}).iterator()), 
+        "FOO, YAGNI", "FOO, IAGNI");
+	  
+	  
 	}
 	
 	public void testTransRussianNames() {
@@ -219,4 +203,24 @@ public class TestAuthorUtils extends TestCase {
 		HashSet<String> actual = new HashSet<String>(AuthorUtils.getAsciiTransliteratedVariants("FOO'EYE, BÄR"));
 		assertEquals(expected, actual);
 	}
+	
+	private void check(HashSet<String> result, String...expected) {
+    String[] actual = new String[result.size()];
+    int i = 0;
+    for (String n: result) {
+      actual[i++] = n;
+    }
+    Arrays.sort(actual);
+    Arrays.sort(expected);
+    assertEquals(Arrays.toString(expected), Arrays.toString(actual));
+  }
+  
+  private void check(ArrayList<String> result, String...expected) {
+//    System.out.println(StringUtils.escape(result.toString()));
+//    System.out.println(StringUtils.escape(Arrays.toString(expected)));
+    
+    assertEquals(Arrays.toString(expected), result.toString());
+    
+  }
+
 }

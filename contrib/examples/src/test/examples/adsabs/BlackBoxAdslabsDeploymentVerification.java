@@ -64,11 +64,11 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		// assertU(commit());  
 		
 		assertQ(req("q", "*:*"),"//*[@numFound>'6']");
-		assertQ(req("q", "id:*"),"//*[@numFound>'6']");
+		assertQ(req("q", "bibcode:b*"),"//*[@numFound>'6']");
 		
 		SolrQueryRequestBase req = (SolrQueryRequestBase) req(
 				"qt", "/bigquery",
-				"q","id:*", 
+				"q","bibcode:b*", 
 				"fq","{!bitset compression=none}");
 		List<ContentStream> streams = new ArrayList<ContentStream>(1);
     ContentStreamBase cs = new ContentStreamBase.StringStream("bibcode\nb2\nx5");
@@ -113,13 +113,15 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 		
 		
+		assert direct.request("/select?q=Chinese Astronomy and Astrophysics, Volume 17, Issue 3, p. 321-326.&wt=json&debugQuery=true", null)
+		  .contains("numFound");
 		
 		
 	  // #231 - use 'aqp' as a default parser also for filter queries
     assert direct.request("/select?q=*:*&fq={!aqp}author:\"Civano, F\"&debugQuery=true&wt=json", null)
-      .contains("author:civano, f author:civano, f* author:civano,");
+      .contains("author:civano, f | author:civano, f*");
     assert direct.request("/select?q=*:*&fq=author:\"Civano, F\"&debugQuery=true&wt=json", null)
-      .contains("author:civano, f author:civano, f* author:civano,");
+      .contains("author:civano, f | author:civano, f*");
     
     // check we are using synonym for translation
     data = direct.request("/select?q=AAS&debugQuery=true&wt=json", null);

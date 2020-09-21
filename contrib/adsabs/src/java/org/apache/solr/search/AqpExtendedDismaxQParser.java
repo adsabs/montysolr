@@ -1352,8 +1352,11 @@ public class AqpExtendedDismaxQParser extends QParser {
           nl.add("aqp.constant_scoring", req.getParams().get("aqp.constant_scoring", ""));
           
           String qs = getQueryStr();
-          if (localParams != null && localParams.getBool("aqp.exact.search")) {
+          if (localParams != null && localParams.getBool("aqp.exact.search", false)) {
             qs = "=" + qs;
+          }
+          if (localParams != null && localParams.get("aqp.maxPhraseLength", null) != null) {
+            nl.add("aqp.maxPhraseLength", localParams.get("aqp.maxPhraseLength"));
           }
           // nl.add(CommonParams.DF, field);
           nl.add(CommonParams.Q, qs);

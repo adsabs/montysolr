@@ -75,9 +75,9 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
 			
 			File simpleTokenSynonymsFile = createTempFile(
 			    new String[] { "id1,id2\n"
-			        + "ror.1,foo,bar\n"
-			    		+ "A00001,04m5j1k67,000000010742471X,Q601956,grid.5117.2\n\n"
-			    		+ "A00002,01aj84f44,0000000119562722,Q924265,grid.7048.b\n"
+			        + "ror.1;foo;bar\n"
+			    		+ "A00001;Aalborg U;Aalborg University;RID1004;04m5j1k67;000000010742471X;Q601956;grid.5117.2;\n\n"
+			    		+ "A00002;Aarhus U;Aarhus University;RID1006;01aj84f44;0000000119562722;Q924265;grid.7048.b;\n"
 			    		});
 
 			replaceInFile(newConfig, "synonyms=\"aff_id.synonyms\"",
@@ -112,18 +112,21 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
         SynonymQuery.class
         );
     assertQueryEquals(req("q", "aff_id:\"A00001\""), 
-        "Synonym(aff_id:000000010742471x aff_id:04m5j1k67 aff_id:a00001 aff_id:grid.5117.2 aff_id:q601956)",
+        "Synonym(aff_id:000000010742471x aff_id:04m5j1k67 aff_id:a00001 aff_id:aalborg u aff_id:aalborg university aff_id:grid.5117.2 aff_id:q601956 aff_id:rid1004)",
         SynonymQuery.class
         );
     assertQueryEquals(req("q", "aff_id:\"a00001\""), 
-        "Synonym(aff_id:000000010742471x aff_id:04m5j1k67 aff_id:a00001 aff_id:grid.5117.2 aff_id:q601956)",
+        "Synonym(aff_id:000000010742471x aff_id:04m5j1k67 aff_id:a00001 aff_id:aalborg u aff_id:aalborg university aff_id:grid.5117.2 aff_id:q601956 aff_id:rid1004)",
         SynonymQuery.class
         );
     assertQueryEquals(req("q", "aff_id:\"04m5j1k67\""), 
-        "Synonym(aff_id:000000010742471x aff_id:04m5j1k67 aff_id:a00001 aff_id:grid.5117.2 aff_id:q601956)",
+        "Synonym(aff_id:000000010742471x aff_id:04m5j1k67 aff_id:a00001 aff_id:aalborg u aff_id:aalborg university aff_id:grid.5117.2 aff_id:q601956 aff_id:rid1004)",
         SynonymQuery.class
         );
-    
+    assertQueryEquals(req("q", "aff_id:\"Aalborg U\""), 
+        "Synonym(aff_id:000000010742471x aff_id:04m5j1k67 aff_id:a00001 aff_id:aalborg u aff_id:aalborg university aff_id:grid.5117.2 aff_id:q601956 aff_id:rid1004)",
+        SynonymQuery.class
+        );
     
     // make sure docs are there
     assertQ(req("q", "*:*"), "//*[@numFound>='2']");
@@ -163,7 +166,7 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
     
 
     // check the affiliation is there stored as one string
-    assert h.query(req("q", "institution:\"Kavli Institute/Dept of Physics\""))
+    assert h.query(req("q", "institution:\"Kavli Institute/Dept of Physics\"", "fl", "institution"))
  		.contains("<str>Kavli Institute/Dept of Physics</str>"
         );
     

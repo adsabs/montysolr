@@ -9,7 +9,7 @@ public class AqpAdsabsFixQPOSITIONProcessor extends AqpQProcessor {
 
 	@Override
 	public boolean nodeIsWanted(AqpANTLRNode node) {
-		if (node.getTokenLabel().equals("QNORMAL") || node.getTokenLabel().equals("QPHRASE")) {
+		if (node.getTokenLabel().equals("QNORMAL") || node.getTokenLabel().startsWith("QPHRASE")) {
 			return true;
 		}
 		return false;

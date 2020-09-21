@@ -387,11 +387,6 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 				arrExpected[i] = u;
 				i++;
 			}
-//			System.out.println("expected:" + Arrays.toString(arrExpected));
-//			;
-//			System.out.println("results:" + Arrays.toString(resultIds));
-//			;
-//			System.out.println(results);
 			assertArrayEquals(arrExpected, resultIds);
 		} finally {
 			r.close();

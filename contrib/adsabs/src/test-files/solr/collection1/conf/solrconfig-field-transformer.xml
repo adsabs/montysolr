@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+
+  <query>
+  </query>  
+  
+  <transformer name="fields" class="org.apache.solr.response.transform.FieldTransformerFactory" >
+  </transformer>
+</config>

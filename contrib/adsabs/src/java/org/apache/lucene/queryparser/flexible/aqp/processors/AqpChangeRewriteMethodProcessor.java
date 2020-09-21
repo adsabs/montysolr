@@ -247,6 +247,7 @@ public class AqpChangeRewriteMethodProcessor extends
       int minFreq = Integer.MAX_VALUE;
       int maxFreq = Integer.MIN_VALUE;
       Integer closestLen = null;
+      int oldSize = newList.size();
       
       // first decide one scenarios 1. xor 2.
       for (QueryNode n: termList) {
@@ -347,8 +348,18 @@ public class AqpChangeRewriteMethodProcessor extends
       }
       
       
-      if (newList.size() == 0) { // we didn't find any type that would satisfy the condition
-        newList.add(termList.get(0));                
+      if (newList.size() == oldSize) { // we didn't find any type that would satisfy the condition
+        QueryNode picked = termList.get(0);
+        // pick the longest if you can
+        int x = 0;
+        for (QueryNode t: termList) {
+          int l = ((FieldQueryNode) t).getTextAsString().length();
+          if (l > x) {
+            x = l;
+            picked = t;
+          }
+        }
+        newList.add(picked);                
       }
       
     }
