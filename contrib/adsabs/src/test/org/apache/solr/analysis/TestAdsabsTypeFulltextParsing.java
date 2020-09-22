@@ -790,7 +790,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         "title:\"hubble space telescope\"", 
         PhraseQuery.class);
     assertQ(req("q", "=title:\"Hubble Space Telescope\""), 
-        "//*[@numFound='1']",
+        "//*[@numFound='2']",
         "//doc/str[@name='id'][.='4']"
         );
     //setDebug(true);
@@ -817,7 +817,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         DisjunctionMaxQuery.class);
     
     assertQ(req("q", "title:\"hubble space telescope\""), 
-    		"//*[@numFound='4']",
+    		"//*[@numFound='6']",
     		"//doc/str[@name='id'][.='4']",
         "//doc/str[@name='id'][.='5']",
         "//doc/str[@name='id'][.='600']",

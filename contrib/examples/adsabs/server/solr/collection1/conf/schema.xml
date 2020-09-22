@@ -7,28 +7,21 @@
 			sortMissingLast="true" omitNorms="true" />
 		<fieldType name="boolean" class="solr.BoolField"
 			sortMissingLast="true" omitNorms="true" />
-		<fieldType name="int" class="solr.TrieIntField"
-			precisionStep="0" omitNorms="true" positionIncrementGap="0" />
-		<fieldType name="float" class="solr.TrieFloatField"
-			precisionStep="0" omitNorms="true" positionIncrementGap="0" />
-		<fieldType name="long" class="solr.TrieLongField"
-			precisionStep="0" omitNorms="true" positionIncrementGap="0" />
-		<fieldType name="double" class="solr.TrieDoubleField"
-			precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+		<fieldType name="int" class="solr.IntPointField"
+			omitNorms="true" positionIncrementGap="0" />
+		<fieldType name="float" class="solr.FloatPointField"
+			omitNorms="true" positionIncrementGap="0" />
+		<fieldType name="long" class="solr.LongPointField"
+			omitNorms="true" positionIncrementGap="0" />
+		<fieldType name="double" class="solr.DoublePointField"
+			omitNorms="true" positionIncrementGap="0" />
 
-		<fieldType name="tint" class="solr.TrieIntField"
-			precisionStep="8" omitNorms="true" positionIncrementGap="0" />
-		<fieldType name="tfloat" class="solr.TrieFloatField"
-			precisionStep="8" omitNorms="true" positionIncrementGap="0" />
-		<fieldType name="tlong" class="solr.TrieLongField"
-			precisionStep="8" omitNorms="true" positionIncrementGap="0" />
-		<fieldType name="tdouble" class="solr.TrieDoubleField"
-			precisionStep="8" omitNorms="true" positionIncrementGap="0" />
+		<fieldType name="tfloat" class="solr.FloatPointField"
+			omitNorms="true" positionIncrementGap="0" 
+			docValues="true" multiValued="false"/>
 
-		<fieldType name="date" class="solr.TrieDateField" omitNorms="true"
-			precisionStep="0" positionIncrementGap="0" docValues="true"/>
-		<fieldType name="tdate" class="solr.TrieDateField"
-			omitNorms="true" precisionStep="6" positionIncrementGap="0" />
+		<fieldType name="date" class="solr.DatePointField"
+			omitNorms="true" positionIncrementGap="0" />
 
 		<fieldtype name="ignored" stored="false" indexed="false"
 			multiValued="true" class="solr.StrField" />
@@ -36,114 +29,127 @@
 
 		<!-- Author parsing section madness (START) -->
 
-		<!-- Attention, all author_ types are very delicate! Always verify changes
-			with: TestAdsabsTypeAuthorParsing we have the following types: author author_notrans_nosyn
-			(public name: author_exact) author_notrans author_nosyn author_short_name_rage
+		<!-- Attention, all author_ types are very delicate! Always verify changes 
+			with: TestAdsabsTypeAuthorParsing we have the following types: author author_notrans_nosyn 
+			(public name: author_exact) author_notrans author_nosyn author_short_name_rage 
 			(used only by query parser) author_collector (used only by dump-index component) -->
 
-		<!-- The purpose of the collector is just to harvest the author transliterations,
-			we do it separately, not during the indexing (for speed/memory/control concerns)
+		<!-- The purpose of the collector is just to harvest the author transliterations, 
+			we do it separately, not during the indexing (for speed/memory/control concerns) 
 			testcase: TestBatchProviderDumpAuthorNames -->
 		<fieldType name="author_collector" class="solr.TextField"
 			positionIncrementGap="0">
 			<analyzer type="query"> <!-- it must be query type!!! -->
 				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" keepApostrophe="true"/>
-				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory"
+					keepApostrophe="true" />
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory" />
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
-					tokenTypes="AUTHOR_INPUT,AUTHOR_TRANSLITERATED"
-					emitTokens="true" />
+					tokenTypes="AUTHOR_INPUT,AUTHOR_TRANSLITERATED" emitTokens="true" />
 			</analyzer>
 		</fieldType>
 
 		<fieldType name="author" class="solr.TextField"
 			positionIncrementGap="0">
 			<analyzer type="index">
-				<tokenizer class="org.apache.lucene.analysis.pattern.SimplePatternSplitTokenizerFactory" pattern="[|]"/>
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<tokenizer
+					class="org.apache.lucene.analysis.pattern.SimplePatternSplitTokenizerFactory"
+					pattern="[|]" />
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 
-			<!--  If you update the normalization components (ie. add new steps; especially
-			      at the beginning, then you should also review the code inside:
-			      AqpAdsabsExpandAuthorSearchProcessor.normalizeAuthorName()
-			 -->
+			<!-- If you update the normalization components (ie. add new steps; especially 
+				at the beginning, then you should also review the code inside: AqpAdsabsExpandAuthorSearchProcessor.normalizeAuthorName() -->
 
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-				<filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
-				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk,"
+				<filter
+					class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<!--  detect cases when we should bail-out and not attempt author search -->
-				<filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-				   maxlen="6" />
-				<!-- downgrade; if necessary and discover synonyms that will be used
-				 to seed the next stages -->
-			   <filter class="solr.analysis.author.AuthorTransliterationFactory"
-                inputType="AUTHOR_INPUT" />
-			   <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                synonyms="author_curated.synonyms" format="semicolon"
-                ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!-- detect cases when we should bail-out and not attempt author search -->
+				<filter
+					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+					maxlen="6" />
+				<!-- downgrade; if necessary and discover synonyms that will be used 
+					to seed the next stages -->
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory"
+					inputType="AUTHOR_INPUT" />
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_curated.synonyms" format="semicolon"
+					ignoreCase="true" expand="true"
+					tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                      synonyms="author_generated.translit"
-                      ignoreCase="true"
-                      expand="true"
-                      tokenizerFactory="solr.KeywordTokenizerFactory"
-                      builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
-                      inclOrig="true" />
-				<!-- now remove the query variants, they were used only to discover upgraded
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_generated.translit" ignoreCase="true"
+					expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
+					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+					inclOrig="true" />
+				<!-- now remove the query variants, they were used only to discover upgraded 
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
-				<!-- downgrade everything back to ascii (we now will have both ASCII
+				<!-- downgrade everything back to ascii (we now will have both ASCII 
 					and UTF8 forms) -->
-				<filter class="solr.analysis.author.AuthorTransliterationFactory"
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="null" />
-				<!-- generate ADS style extra search clauses (they will be used to find
-					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk,
+				<!-- generate ADS style extra search clauses (they will be used to find 
+					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk, 
 					p kolja" "adamcuk, p k" "adamcuk," (if plainSurname=true) -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
-				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk,
+				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                    synonyms="author_curated.synonyms" format="semicolon"
-					ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_curated.synonyms" format="semicolon"
+					ignoreCase="true" expand="true"
+					tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
-				<!-- optionally: downgrade the newly found synonyms, so: "adamšuk, k"
+				<!-- optionally: downgrade the newly found synonyms, so: "adamšuk, k" 
 					is extended with" "adamshuk, k", "adamsuk, k" -->
-				<filter class="solr.analysis.author.AuthorTransliterationFactory"
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="SYNONYM" />
 				<!-- lowercase normalize everything -->
 				<filter class="solr.LowerCaseFilterFactory" />
-				<!-- reset posIncrement - somtimes synonym expansion causes position
+				<!-- reset posIncrement - somtimes synonym expansion causes position 
 					bumps but make sure we skip the first token -->
 				<filter class="solr.analysis.ResetFilterFactory"
 					posIncrement="0" range="1,100" />
-				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja"
-					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk,
+				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja" 
+					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk, 
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true" addShortenedMultiName="true"
-					addWildcards="false" lookAtPayloadForOrigAuthor="false" />
-				<!-- deal with multiple occurences of the same (can happen because of
+					acronymVariations="1" plainSurname="true"
+					addShortenedMultiName="true" addWildcards="false"
+					lookAtPayloadForOrigAuthor="false" />
+				<!-- deal with multiple occurences of the same (can happen because of 
 					the overlapping synonyms) -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
@@ -161,45 +167,53 @@
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
-				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk,"
+				<filter
+					class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<!--  detect cases when we should bail-out and not attempt author search -->
-                <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-                   maxlen="6" />
-                <!-- discover synonyms that will be used to seed the next stages -->
-               <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                synonyms="author_curated.synonyms" format="semicolon"
-                ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
-				<!-- generate ADS style extra search clauses (they will be used to find
-					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk,
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!-- detect cases when we should bail-out and not attempt author search -->
+				<filter
+					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+					maxlen="6" />
+				<!-- discover synonyms that will be used to seed the next stages -->
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_curated.synonyms" format="semicolon"
+					ignoreCase="true" expand="true"
+					tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<!-- generate ADS style extra search clauses (they will be used to find 
+					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk, 
 					p kolja" "adamcuk, p k" "adamcuk," (if plainSurname=true) -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
-				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk,
+				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                  synonyms="author_curated.synonyms" format="semicolon"
-                  ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_curated.synonyms" format="semicolon"
+					ignoreCase="true" expand="true"
+					tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
 				<!-- lowercase normalize everything -->
 				<filter class="solr.LowerCaseFilterFactory" />
-				<!-- reset posIncrement - somtimes synonym expansion causes position
+				<!-- reset posIncrement - somtimes synonym expansion causes position 
 					bumps but make sure we skip the first token -->
 				<filter class="solr.analysis.ResetFilterFactory"
 					posIncrement="0" range="1,100" />
-				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja"
-					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk,
+				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja" 
+					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk, 
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true" addShortenedMultiName="true"
-					addWildcards="false" lookAtPayloadForOrigAuthor="false" />
-				<!-- deal with multiple occurences of the same (can happen because of
+					acronymVariations="1" plainSurname="true"
+					addShortenedMultiName="true" addWildcards="false"
+					lookAtPayloadForOrigAuthor="false" />
+				<!-- deal with multiple occurences of the same (can happen because of 
 					the overlapping synonyms) -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
@@ -215,53 +229,58 @@
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
-				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk,"
+				<filter
+					class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<!--  detect cases when we should bail-out and not attempt author search -->
-                <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-                   maxlen="6" />
-                <!-- discover synonyms that will be used to seed the next stages -->
-                <filter class="solr.analysis.author.AuthorTransliterationFactory"
-                 inputType="AUTHOR_INPUT" />
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!-- detect cases when we should bail-out and not attempt author search -->
+				<filter
+					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+					maxlen="6" />
+				<!-- discover synonyms that will be used to seed the next stages -->
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory"
+					inputType="AUTHOR_INPUT" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                  synonyms="author_generated.translit"
-                  ignoreCase="true"
-                  expand="true"
-                  tokenizerFactory="solr.KeywordTokenizerFactory"
-                  builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
-                  inclOrig="true" />
-				<!-- now remove the query variants, they were used only to discover upgraded
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_generated.translit" ignoreCase="true"
+					expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
+					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+					inclOrig="true" />
+				<!-- now remove the query variants, they were used only to discover upgraded 
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
-				<!-- downgrade everything back to ascii (we now will have both ASCII
+				<!-- downgrade everything back to ascii (we now will have both ASCII 
 					and UTF8 forms) -->
-				<filter class="solr.analysis.author.AuthorTransliterationFactory"
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="null" />
 				<!-- lowercase normalize everything -->
 				<filter class="solr.LowerCaseFilterFactory" />
-				<!-- reset posIncrement - somtimes synonym expansion causes position
+				<!-- reset posIncrement - somtimes synonym expansion causes position 
 					bumps but make sure we skip the first token -->
 				<filter class="solr.analysis.ResetFilterFactory"
 					posIncrement="0" range="1,100" />
-				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja"
-					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk,
+				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja" 
+					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk, 
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true" addShortenedMultiName="true"
-					addWildcards="false" lookAtPayloadForOrigAuthor="false" />
-				<!-- deal with multiple occurences of the same (can happen because of
+					acronymVariations="1" plainSurname="true"
+					addShortenedMultiName="true" addWildcards="false"
+					lookAtPayloadForOrigAuthor="false" />
+				<!-- deal with multiple occurences of the same (can happen because of 
 					the overlapping synonyms) -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
@@ -271,82 +290,90 @@
 
 		<!-- Author: Transliteration NO, Synonym expansion NO -->
 
-		<fieldType name="author_notrans_nosyn" class="solr.TextField"
-			positionIncrementGap="0">
+		<fieldType name="author_notrans_nosyn"
+			class="solr.TextField" positionIncrementGap="0">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory" />
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
-					tokenTypes="AUTHOR_TRANSLITERATED"
-					emitTokens="false" />
+					tokenTypes="AUTHOR_TRANSLITERATED" emitTokens="false" />
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
-				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk,"
+				<filter
+					class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+				<!-- normalize order and surname form: eg. "adamcuk" becomes "adamcuk," 
 					and "adamczuk, k" becomes "adamczuk, k" -->
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<!--  detect cases when we should bail-out and not attempt author search -->
-                <filter class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-                   maxlen="6" />
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<!-- detect cases when we should bail-out and not attempt author search -->
+				<filter
+					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
+					maxlen="6" />
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                  synonyms="author_generated.translit"
-                  ignoreCase="true"
-                  expand="true"
-                  tokenizerFactory="solr.KeywordTokenizerFactory"
-                  builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
-                  inclOrig="true" />
-				<!-- now remove the query variants, they were used only to discover upgraded
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_generated.translit" ignoreCase="true"
+					expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
+					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+					inclOrig="true" />
+				<!-- now remove the query variants, they were used only to discover upgraded 
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
-				<!-- downgrade everything back to ascii (we now will have both ASCII
+				<!-- downgrade everything back to ascii (we now will have both ASCII 
 					and UTF8 forms) -->
-				<filter class="solr.analysis.author.AuthorTransliterationFactory"
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="null" />
-				<!-- generate ADS style extra search clauses (they will be used to find
-					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk,
+				<!-- generate ADS style extra search clauses (they will be used to find 
+					synonyms): "adamcuk, piotr kolja" is expanded with: "adamcuk, piotr k" "adamcuk, 
 					p kolja" "adamcuk, p k" "adamcuk," (if plainSurname=true) -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
-				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk,
+				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                  synonyms="author_curated.synonyms" format="semicolon"
-                  ignoreCase="true" expand="true" tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_curated.synonyms" format="semicolon"
+					ignoreCase="true" expand="true"
+					tokenizerFactory="solr.KeywordTokenizerFactory" />
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
-				<!-- optionally: downgrade the newly found synonyms, so: "adamšuk, k"
+				<!-- optionally: downgrade the newly found synonyms, so: "adamšuk, k" 
 					is extended with" "adamshuk, k", "adamsuk, k" -->
-				<filter class="solr.analysis.author.AuthorTransliterationFactory"
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="SYNONYM" />
 				<!-- lowercase normalize everything -->
 				<filter class="solr.LowerCaseFilterFactory" />
-				<!-- reset posIncrement - somtimes synonym expansion causes position
+				<!-- reset posIncrement - somtimes synonym expansion causes position 
 					bumps but make sure we skip the first token -->
 				<filter class="solr.analysis.ResetFilterFactory"
 					posIncrement="0" range="1,100" />
-				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja"
-					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk,
+				<!-- generate ADS style extra search clauses: "adamcuk, piotr kolja" 
+					is extended with: "adamcuk, piotr k" "adamcuk, p kolja" "adamcuk, p k" "adamcuk, 
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true" addShortenedMultiName="true"
-					addWildcards="false" lookAtPayloadForOrigAuthor="false" />
-				<!-- deal with multiple occurences of the same (can happen because of
+					acronymVariations="1" plainSurname="true"
+					addShortenedMultiName="true" addWildcards="false"
+					lookAtPayloadForOrigAuthor="false" />
+				<!-- deal with multiple occurences of the same (can happen because of 
 					the overlapping synonyms) -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
@@ -354,38 +381,41 @@
 			</analyzer>
 		</fieldType>
 
-		<!-- the following type is not used by any field, but it is used by the
-			query parser to upgrade the short author name "jones, c" into its long form
-			synonym "forman, christine" Believe me, you don't want to read about reasons
+		<!-- the following type is not used by any field, but it is used by the 
+			query parser to upgrade the short author name "jones, c" into its long form 
+			synonym "forman, christine" Believe me, you don't want to read about reasons 
 			for doing it this way. -->
-		<fieldType name="author_short_name_rage" class="solr.TextField">
+		<fieldType name="author_short_name_rage"
+			class="solr.TextField">
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
-                <filter class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
-				<filter class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<filter
+					class="solr.analysis.author.PythonicAuthorNormalizeFilterFactory" />
+				<filter
+					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<!-- if necessary, we will transliterate in order to match more synonyms -->
-				<filter class="solr.analysis.author.AuthorTransliterationFactory" />
-				<!-- we will use the standard synonym file (as used by the author type
+				<filter
+					class="solr.analysis.author.AuthorTransliterationFactory" />
+				<!-- we will use the standard synonym file (as used by the author type 
 					above) but import it in a special way -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                    format="semicolon"
-					synonyms="author_curated.synonyms" ignoreCase="true" expand="true"
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					format="semicolon" synonyms="author_curated.synonyms"
+					ignoreCase="true" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$MakeAllShortNames"
-					inclOrig="true"/>
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                      synonyms="author_generated.translit"
-                      ignoreCase="true"
-                      expand="true"
-                      tokenizerFactory="solr.KeywordTokenizerFactory"
-                      builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
-                      inclOrig="true" />
-				<!-- remove the transliterated variants, they were used only to discover
+					inclOrig="true" />
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="author_generated.translit" ignoreCase="true"
+					expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
+					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+					inclOrig="true" />
+				<!-- remove the transliterated variants, they were used only to discover 
 					synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
-					tokenTypes="AUTHOR_TRANSLITERATED"
-					emitTokens="false" />
+					tokenTypes="AUTHOR_TRANSLITERATED" emitTokens="false" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
@@ -399,43 +429,47 @@
 
 
 
-		<!-- Be careful, this chain is very 'delicate'! always run
-		     unittest: TestAdsabsTypeFulltext -->
-		<!-- the tokenizing part needs more work, probably using synonyms to match
+		<!-- Be careful, this chain is very 'delicate'! always run unittest: TestAdsabsTypeFulltext -->
+		<!-- the tokenizing part needs more work, probably using synonyms to match 
 			patterns? -->
-		<fieldType name="ads_text" class="solr.TextField" positionIncrementGap="0">
+		<fieldType name="ads_text" class="solr.TextField">
 			<analyzer type="index">
-            <charFilter class="solr.HTMLStripCharFilterFactory"/>
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
 
-				<!-- AA: rewrite these common astronomy compound names so that the WDFF
+				<!-- AA: rewrite these common astronomy compound names so that the WDFF 
 					will index both the short and long versions of them -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3 M$3" />
+					pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b"
+					replacement="$1-$3 M$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3 A$3" />
+					pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b"
+					replacement="$1-$3 A$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(?i:(N)(-|\s+)([0-9]+[A-Z]*))\b" replacement="NGC-$3 N$3" />
+					pattern="\b(?i:(N)(-|\s+)([0-9]+[A-Z]*))\b"
+					replacement="NGC-$3 N$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b(?i:([34]CR?|ADS|H[DHR]|IC|[MW]|MKN|NGC|PKS|PSR[BJ]?|SAO|UGC|UT)(-|\s+)([0-9]+[A-Z]*))\b"
 					replacement="$1-$3" />
 
-				<!-- tokenize on empty space (if it is not a hyphen connecting other
+				<!-- tokenize on empty space (if it is not a hyphen connecting other 
 					words) -->
-				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)"
-					group="-1" />
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
 
-				<!-- rca: i am not sure i understand, why isn't it: (\s*\-+\s*)+ and
+				<!-- rca: i am not sure i understand, why isn't it: (\s*\-+\s*)+ and 
 					the WDFF should be able to handle these cases anyway -->
-				<filter class="solr.PatternReplaceFilterFactory" pattern="-?\s+-?"
-					replacement="-" replace="all" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$"
-					replacement="$2" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="-?\s+-?" replacement="-" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2" />
 
-			    <!--  translate math symbols and others into their ascii representation -->
-			    <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+				<!-- translate math symbols and others into their ascii representation -->
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
 				<!-- split all-sky into [all, sky, allsky] -->
-				<filter class="org.apache.lucene.analysis.miscellaneous.AqpWordDelimiterFilterFactory"
+				<filter
+					class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
@@ -444,59 +478,66 @@
 				<filter
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 
-                
-                
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="index:1"/> -->
+
 				<!-- find synonyms, first multi-tokens -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
 					synonyms="ads_text_multi.synonyms" ignoreCase="false" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
-				<!-- now find simple synonyms (it may catch tokens that are part of the
+				<!-- now find simple synonyms (it may catch tokens that are part of the 
 					multi-token synonym) -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-					synonyms="ads_text_simple.synonyms" ignoreCase="false" expand="true"
-					tokenizerFactory="solr.KeywordTokenizerFactory"
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="ads_text_simple.synonyms" ignoreCase="false"
+					expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
+				<!-- add a prefix to all synonyms -->
+				<filter class="solr.analysis.ResetFilterFactory"
+					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
+
+				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
+					an acronym but keep the type information (if it is a synonym, it will remain 
+					SYNONYM) which is important for the query parsing -->
+				<filter class="solr.AcronymTokenFilterFactory"
+					emitBoth="true" prefix="acr::" setType="ACRONYM" />
 
 				<!-- remove stop words - first the case sensitively -->
-				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="false"
-					words="ads_text.kill_sens"
-					/>
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="false" words="ads_text.kill_sens" />
 				<!-- remove stop words - then case insensitively -->
-				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="true"
-					words="ads_text.kill"/>
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="true" words="ads_text.kill" />
 
-				<!-- if the original or synonym contains UPPERCASE variant, mark it as
-					an acronym but keep the type information (if it is a synonym, it will remain
-					SYNONYM) which is important for the query parsing -->
-				<filter class="solr.AcronymTokenFilterFactory" emitBoth="true"
-					prefix="acr::" setType="ACRONYM"/>
-                
-                <!-- add a prefix to all synonyms -->
-                <filter class="solr.analysis.ResetFilterFactory"
-                    incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" range="0,2147483647" />
 
-				<!-- we emit ASCIIField version of the token (at the same position):
-					this is rather crazy/expensive behaviour given that ads_text is used on fulltext,
+
+				<!-- we emit ASCIIField version of the token (at the same position): 
+					this is rather crazy/expensive behaviour given that ads_text is used on fulltext, 
 					can we get rid off it? -->
 				<filter class="solr.ASCIIDuplicatingFilterFactory" />
 
 				<!-- final normalization -->
 				<filter class="solr.TrimFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/>
+
+				<!-- <filter
+                    class="org.apache.solr.analysis.DiagnoseFilterFactory"
+                    msg="indexer" /> -->
 			</analyzer>
 			<analyzer type="query">
-                <charFilter class="solr.HTMLStripCharFilterFactory"/>
-				<!-- AA: as above, but we only have one canonical replacement for the
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
+				<!-- AA: as above, but we only have one canonical replacement for the 
 					expression -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1$3" />
+					pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b"
+					replacement="$1$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
@@ -506,76 +547,78 @@
 					replacement="$1$3" />
 
 
-				<!-- tokenize on empty space (if it is not a hyphen connecting other
+				<!-- tokenize on empty space (if it is not a hyphen connecting other 
 					words) -->
-				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)"
-					group="-1" />
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
 
-			    <!--  translate math symbols and others into their ascii representation -->
-                <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+				<!-- translate math symbols and others into their ascii representation -->
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
 
-				<filter class="org.apache.lucene.analysis.miscellaneous.AqpWordDelimiterFilterFactory"
+				<filter
+					class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
-					 />
-                
-                <!--  <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query:split"/> -->
-                
-				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond =>
+					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query:split"/> -->
+
+				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 
 					mond Hubble Space Telescope => hubble space telescope -->
 				<filter
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 
-				<!-- search synonyms, first multi-tokens; includeOrig=true affects only
-					simple synonyms; for multi-tokens orig.parts are always returned. MOND =
-					MOND, modified newtonian dynamics hubble space telescope => HST [SYNONYM],
-					hubble space telescope [SYNONYM], hubble space telescope [original] Warning:
-					be sure you understand how inclOrig influences different types of synonym
+				<!-- search synonyms, first multi-tokens; includeOrig=true affects only 
+					simple synonyms; for multi-tokens orig.parts are always returned. MOND = 
+					MOND, modified newtonian dynamics hubble space telescope => HST [SYNONYM], 
+					hubble space telescope [SYNONYM], hubble space telescope [original] Warning: 
+					be sure you understand how inclOrig influences different types of synonym 
 					rules ie. synonym1,synonym2 => synonym vs. synonym1,synonym2 -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
 					synonyms="ads_text_multi.synonyms" ignoreCase="false" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
 
-				<!-- MOND => [] mond => mond, lunar [SYNONYM] 
-				hubble space telescope	=> HST [SYNONYM], hubble space telescope [SYNONYM], hubble, space, telescope
+				<!-- MOND => [] mond => mond, lunar [SYNONYM] hubble space telescope 
+					=> HST [SYNONYM], hubble space telescope [SYNONYM], hubble, space, telescope 
 					[original], spazio [SYNONYM] -->
-				<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-					synonyms="ads_text_simple.synonyms" ignoreCase="false" expand="true"
-					tokenizerFactory="solr.KeywordTokenizerFactory"
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="ads_text_simple.synonyms" ignoreCase="false"
+					expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
-					
-				<!-- only pass SYNONYM and ACRONYM tokens
-				<filter class="solr.analysis.author.AuthorCollectorFactory"
-                    tokenTypes="word"
-                    emitTokens="false" /> -->
+
+				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
+					an acronym but do not change its type, if it was a SYNONYM, it is important 
+					information for query parsing -->
+				<filter class="solr.AcronymTokenFilterFactory"
+					emitBoth="false" allowTypes="SYNONYM" prefix="acr::"
+					setType="ACRONYM" />
+
+				<!-- add a prefix to all synonyms -->
+				<filter class="solr.analysis.ResetFilterFactory"
+					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
+
+				<!-- only pass SYNONYM and ACRONYM tokens <filter class="solr.analysis.author.AuthorCollectorFactory" 
+					tokenTypes="word" emitTokens="false" /> -->
 
 				<!-- remove stop words - first the case sensitively -->
-				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="false"
-					words="ads_text.kill_sens"
-					/>
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="false" words="ads_text.kill_sens" />
 				<!-- remove stop words - then case insensitively -->
-				<filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="true"
-					words="ads_text.kill"
-					/>
-					
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="true" words="ads_text.kill" />
 
-				<!-- if the original or synonym contains UPPERCASE variant, mark it as
-					an acronym but do not change its type, if it was a SYNONYM, it is important
-					information for query parsing -->
-				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false" allowTypes="SYNONYM"
-					prefix="acr::" setType="ACRONYM"/>
-					
-				<!-- add a prefix to all synonyms -->
-                <filter class="solr.analysis.ResetFilterFactory"
-                    incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
-                
+
 
 				<!-- we emit ASCIIField version of the token (at the same position) -->
 				<filter class="solr.ASCIIDuplicatingFilterFactory" />
@@ -586,77 +629,77 @@
 
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-                
-                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/> -->
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/> -->
 			</analyzer>
 		</fieldType>
 
 
-		<!-- ads_text_nosyn to enable exact searches; only used for querying;
-    test: TestAdsabsTypeFullText -->
+		<!-- ads_text_nosyn to enable exact searches; only used for querying; test: 
+			TestAdsabsTypeFullText -->
 
-    <fieldType name="ads_text_nosyn" class="solr.TextField">
-      <analyzer type="query">
-        <charFilter class="solr.HTMLStripCharFilterFactory"/>
-        
-        <!-- tokenize on empty space (if it is not a hyphen connecting other
-          words) -->
-        <tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])\s+(?!-)"
-          group="-1" />
+		<fieldType name="ads_text_nosyn" class="solr.TextField">
+			<analyzer type="query">
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
 
-        <!--  translate math symbols and others into their ascii representation -->
-        <filter class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+				<!-- tokenize on empty space (if it is not a hyphen connecting other 
+					words) -->
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
 
-
-        <filter class="solr.WordDelimiterFilterFactory"
-          generateWordParts="1" generateNumberParts="1" catenateWords="0"
-          catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-          splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+				<!-- translate math symbols and others into their ascii representation -->
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
 
-        <!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond =>
-          mond Hubble Space Telescope => hubble space telescope -->
-        <filter
-          class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
+				<filter class="solr.WordDelimiterFilterFactory"
+					generateWordParts="1" generateNumberParts="1" catenateWords="0"
+					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
+					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
 
 
-
-        <!-- if the original or synonym contains UPPERCASE variant, mark it as
-          an acronym but do not change its type, if it was a SYNONYM, it is important
-          information for query parsing -->
-        <filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
-          prefix="acr::" setType="ACRONYM"/>
-
-
-        <!-- remove stop words - first the case sensitively -->
-        <filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="false"
-          words="ads_text.kill_sens"
-          />
-        <!-- remove stop words - then case insensitively -->
-        <filter class="org.apache.lucene.analysis.core.AqpStopFilterFactory" ignoreCase="true"
-          words="ads_text.kill"
-          />
+				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 
+					mond Hubble Space Telescope => hubble space telescope -->
+				<filter
+					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 
 
 
-        <!-- we emit ASCIIField version of the token (at the same position) -->
-        <filter class="solr.ASCIIDuplicatingFilterFactory" />
-
-        <!-- final normalization -->
-        <filter class="solr.TrimFilterFactory" />
-        <filter class="solr.LowerCaseFilterFactory" />
-
-        <filter
-          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-
-        <!-- <filter class="solr.DiagnoseFilterFactory" idString="final"/> -->
-      </analyzer>
-    </fieldType>
+				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
+					an acronym but do not change its type, if it was a SYNONYM, it is important 
+					information for query parsing -->
+				<filter class="solr.AcronymTokenFilterFactory"
+					emitBoth="false" prefix="acr::" setType="ACRONYM" />
 
 
-		<!-- Type date_string is used for properly formatting (translating) the
-			Invenio and user input into the solr format. The real date is stored in the
-			field called 'date' and we require a properly formatted input to search there
+				<!-- remove stop words - first the case sensitively -->
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="false" words="ads_text.kill_sens" />
+				<!-- remove stop words - then case insensitively -->
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="true" words="ads_text.kill" />
+
+
+
+				<!-- we emit ASCIIField version of the token (at the same position) -->
+				<filter class="solr.ASCIIDuplicatingFilterFactory" />
+
+				<!-- final normalization -->
+				<filter class="solr.TrimFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+
+				<!-- <filter class="solr.DiagnoseFilterFactory" idString="final"/> -->
+			</analyzer>
+		</fieldType>
+
+
+		<!-- Type date_string is used for properly formatting (translating) the 
+			Invenio and user input into the solr format. The real date is stored in the 
+			field called 'date' and we require a properly formatted input to search there 
 			unittest: TestAdsabsTypeDateString -->
 
 
@@ -664,11 +707,13 @@
 			positionIncrementGap="0">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy|yyyy-MM-dd'T'HH:mm:ss'Z'" />
+				<filter class="solr.DateNormalizerTokenFilterFactory"
+					format="yyyy-MM-dd|yyyy-MM|yyyy|yyyy-MM-dd'T'HH:mm:ss'Z'" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
-				<filter class="solr.DateNormalizerTokenFilterFactory" format="yyyy-MM-dd|yyyy-MM|yyyy|yyyy-MM-dd'T'HH:mm:ss'Z'" />
+				<filter class="solr.DateNormalizerTokenFilterFactory"
+					format="yyyy-MM-dd|yyyy-MM|yyyy|yyyy-MM-dd'T'HH:mm:ss'Z'" />
 			</analyzer>
 		</fieldType>
 
@@ -678,78 +723,80 @@
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="doi:"
-					replacement="" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="doi:" replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="doi:"
-					replacement="" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="doi:" replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 		</fieldType>
 
 
-		<!-- docvalues can be stored only as strfields; but we want to apply special
-		      tokenizer chains; so that's what AqpStrField allows; be careful to use
-		      appropriate tokenizer class (whitespace is only for multitoken fiels). -->
-		<fieldType name="identifier_string" class="org.apache.solr.schema.AqpStrField">
-		   <analyzer type="index">
-                <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="solr.ASCIIFoldingFilterFactory" />
-                <filter class="solr.LowerCaseFilterFactory" />
-                <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
-                    replacement="" replace="all" />
-                <filter class="solr.TrimFilterFactory" />
-                <filter
-          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
-            </analyzer>
-            <analyzer type="query">
-                <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="solr.ASCIIFoldingFilterFactory" />
-                <filter class="solr.LowerCaseFilterFactory" />
-                <filter class="solr.PatternReplaceFilterFactory" pattern="(doi:|arxiv:|\-|_| )"
-                    replacement="" replace="all" />
-                <filter class="solr.TrimFilterFactory" />
-                <!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>-->
-            </analyzer>
-        </fieldType>
-        
-        <fieldType name="normalized_string" class="org.apache.solr.schema.AqpStrField">
-           <analyzer type="index">
-                <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="solr.LowerCaseFilterFactory" />
-                <filter class="solr.TrimFilterFactory" />
-                <filter
-          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-                <!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
-            </analyzer>
-            <analyzer type="query">
-                <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="solr.LowerCaseFilterFactory" />
-                <filter class="solr.TrimFilterFactory" />
-                <!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/>-->
-            </analyzer>
-        </fieldType>
+		<!-- docvalues can be stored only as strfields; but we want to apply special 
+			tokenizer chains; so that's what solr.SortableTextField allows; be careful 
+			to use appropriate tokenizer class (whitespace is only for multitoken fiels). -->
+		<fieldType name="identifier_string"
+			class="solr.SortableTextField">
+			<analyzer type="index">
+				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory"
+					preserveOriginal="false" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(doi:|arxiv:|\-|_| )" replacement="" replace="all" />
+				<filter class="solr.TrimFilterFactory" />
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+			</analyzer>
+			<analyzer type="query">
+				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory"
+					preserveOriginal="false" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(doi:|arxiv:|\-|_| )" replacement="" replace="all" />
+				<filter class="solr.TrimFilterFactory" />
+			</analyzer>
+		</fieldType>
+
+		<fieldType name="normalized_string"
+			class="solr.SortableTextField">
+			<analyzer type="index">
+				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.TrimFilterFactory" />
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="indexer"/> -->
+			</analyzer>
+			<analyzer type="query">
+				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.TrimFilterFactory" />
+				<!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/> -->
+			</analyzer>
+		</fieldType>
 
 
 		<fieldType name="first_string" class="solr.TextField">
 			<analyzer type="index">
-				<tokenizer class="solr.PatternTokenizerFactory" pattern=";"
-					group="-1" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ,]+)(.*)"
-					replacement="$2" replace="all" />
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern=";" group="-1" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-| )*([^- ,]+)(.*)" replacement="$2" replace="all" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
-				<tokenizer class="solr.PatternTokenizerFactory" pattern=";"
-					group="-1" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-| )*([^- ,]+)(.*)"
-					replacement="$2" replace="all" />
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern=";" group="-1" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-| )*([^- ,]+)(.*)" replacement="$2" replace="all" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
@@ -757,211 +804,160 @@
 
 
 
-		<!--
-		  tokenized, normalized, emits only ASCII version, lowercased
-		  test: TestAdsabsTypeNormalizedTextAscii
-		 -->
-		<fieldType name="normalized_text_ascii" class="solr.TextField">
+		<!-- tokenized, normalized, emits only ASCII version, lowercased test: 
+			TestAdsabsTypeNormalizedTextAscii -->
+		<fieldType name="normalized_text_ascii"
+			class="solr.TextField">
 			<analyzer type="index">
 				<tokenizer class="solr.WhitespaceTokenizerFactory" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_)"
-          replacement="" replace="all" />
-        <filter
-          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|_)" replacement="" replace="all" />
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.WhitespaceTokenizerFactory" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_)"
-          replacement="" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|_)" replacement="" replace="all" />
 			</analyzer>
 		</fieldType>
 
-		<!--copy of the chain above but without duplicates removal; this should be
-		    used for situations where papers has multiple values per field; but we
-		    want to keep them in order and not loss any. Example is author, which
-		    has its own affiliation and email
-     -->
-	<fieldType name="normalized_text_ascii_nodedup" class="solr.TextField">
-      <analyzer type="index">
-        <tokenizer class="solr.WhitespaceTokenizerFactory" />
-        <filter class="solr.ASCIIFoldingFilterFactory" />
-        <filter class="solr.LowerCaseFilterFactory" />
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_)"
-          replacement="" replace="all" />
-      </analyzer>
-      <analyzer type="query">
-        <tokenizer class="solr.WhitespaceTokenizerFactory" />
-        <filter class="solr.ASCIIFoldingFilterFactory" />
-        <filter class="solr.LowerCaseFilterFactory" />
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_)"
-          replacement="" replace="all" />
-      </analyzer>
-    </fieldType>
+		<!--copy of the chain above but without duplicates removal; this should 
+			be used for situations where papers has multiple values per field; but we 
+			want to keep them in order and not loss any. Example is author, which has 
+			its own affiliation and email -->
+		<fieldType name="normalized_text_ascii_nodedup"
+			class="solr.TextField">
+			<analyzer type="index">
+				<tokenizer class="solr.WhitespaceTokenizerFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|_)" replacement="" replace="all" />
+			</analyzer>
+			<analyzer type="query">
+				<tokenizer class="solr.WhitespaceTokenizerFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|_)" replacement="" replace="all" />
+			</analyzer>
+		</fieldType>
 
-    <!--
-      Normalize values, emit only ASCII version, lowercased.
-      The difference from the previous is mainly in tokenization,
-      essentially every value is indexed as a whole
+		<!-- Normalize values, emit only ASCII version, lowercased. The difference 
+			from the previous is mainly in tokenization, essentially every value is indexed 
+			as a whole test: TestAdsabsTypeNormalizedStringAscii -->
 
-      test: TestAdsabsTypeNormalizedStringAscii
-     -->
-
-		<fieldType name="normalized_text_ascii_notokenization" class="solr.TextField">
+		<fieldType name="normalized_text_ascii_notokenization"
+			class="solr.TextField">
 			<analyzer type="index">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_| )"
-          replacement="" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|_| )" replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
 				<filter
-          class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="(\-|_| )"
-          replacement="" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|_| )" replacement="" replace="all" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 		</fieldType>
 
 
-    <!-- test: TestAdsabsTypeAffiliationTokens -->
-    <fieldType name="affiliation_tokens" class="solr.TextField"
-        positionIncrementGap="100">
+		<!-- test: TestAdsabsTypeAffiliationTokens -->
+		<fieldType name="affiliation_tokens" class="solr.TextField"
+			positionIncrementGap="100">
 			<analyzer type="index">
-	          <charFilter class="solr.HTMLStripCharFilterFactory"/>
-	
-		        <!-- tokenize on | or / -->
-		        <tokenizer class="solr.PatternTokenizerFactory" pattern="[\;]"
-		          group="-1" />
-		        <filter class="solr.WordDelimiterFilterFactory"
-		           generateWordParts="1"
-		           generateNumberParts="0"
-		           splitOnCaseChange="0"
-		           splitOnNumerics="0"
-		           catenateWords="0"
-		           catenateNumbers="0"
-		           catenateAll="0"
-		           preserveOriginal="1"
-		           stemEnglishPossessive="0"
-		           types="wdafftypes.txt"
-		           />
-	          <filter class="solr.LowerCaseFilterFactory" />
-				    <filter class="solr.TrimFilterFactory" />
-	    </analyzer>
-	    <analyzer type="query">
-	            <charFilter class="solr.HTMLStripCharFilterFactory"/>
-	            <tokenizer class="solr.PatternTokenizerFactory" pattern="[\/\;]"
-	              group="-1" />
-							<filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-								synonyms="aff_id.synonyms" 
-								ignoreCase="true" 
-								expand="true"
-								format="semicolon"
-								tokenizerFactory="solr.KeywordTokenizerFactory"
-								inclOrig="true" />
-	            <filter class="solr.LowerCaseFilterFactory" />
-	            <filter class="solr.TrimFilterFactory" />
-	    </analyzer>
-	  </fieldType>
-    
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
 
-    <!-- test: this is a copy of affiliation_token
-        the test is in TestAdsabsTypeAffiliationTokens -->
-    <fieldType name="uat_tokens" class="solr.TextField"
-        positionIncrementGap="100">
-            <analyzer type="index">
-              <charFilter class="solr.HTMLStripCharFilterFactory"/>
-    
-                <!-- tokenize on | or / -->
-                <tokenizer class="solr.PatternTokenizerFactory" pattern="[\:]"
-                  group="-1" />
-                <filter class="solr.WordDelimiterFilterFactory"
-                   generateWordParts="1"
-                   generateNumberParts="0"
-                   splitOnCaseChange="0"
-                   splitOnNumerics="0"
-                   catenateWords="0"
-                   catenateNumbers="0"
-                   catenateAll="0"
-                   preserveOriginal="1"
-                   stemEnglishPossessive="0"
-                   types="wdafftypes.txt"
-                   />
-              <filter class="solr.LowerCaseFilterFactory" />
-                    <filter class="solr.TrimFilterFactory" />
-        </analyzer>
-        <analyzer type="query">
-                <charFilter class="solr.HTMLStripCharFilterFactory"/>
-                <tokenizer class="solr.PatternTokenizerFactory" pattern="[\/\:]"
-                  group="-1" />
-                            <filter class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-                                synonyms="aff_id.synonyms" 
-                                ignoreCase="true" 
-                                expand="true"
-                                format="semicolon"
-                                tokenizerFactory="solr.KeywordTokenizerFactory"
-                                inclOrig="true" />
-                <filter class="solr.LowerCaseFilterFactory" />
-                <filter class="solr.TrimFilterFactory" />
-        </analyzer>
-      </fieldType>
-    
+				<!-- tokenize on | or / -->
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern="[\;]" group="-1" />
+				<filter class="solr.WordDelimiterFilterFactory"
+					generateWordParts="1" generateNumberParts="0" splitOnCaseChange="0"
+					splitOnNumerics="0" catenateWords="0" catenateNumbers="0"
+					catenateAll="0" preserveOriginal="1" stemEnglishPossessive="0"
+					types="wdafftypes.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.TrimFilterFactory" />
+			</analyzer>
+			<analyzer type="query">
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
 
-    
-    <!-- test: TestAdsabsTypeAffiliationText -->
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern="[\/\;]" group="-1" />
+				<filter
+					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+					synonyms="aff_id.synonyms" ignoreCase="true" expand="true"
+					format="solr" tokenizerFactory="solr.KeywordTokenizerFactory"
+					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+					inclOrig="true" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.TrimFilterFactory" />
+			</analyzer>
+		</fieldType>
 
-    <fieldType name="affiliation_text" class="solr.TextField"
-            positionIncrementGap="100">
+
+
+
+		<!-- test: TestAdsabsTypeAffiliationText -->
+
+		<fieldType name="affiliation_text" class="solr.TextField"
+			positionIncrementGap="100">
 			<analyzer type="index">
-				<charFilter class="solr.HTMLStripCharFilterFactory"/>
-				
-				<!-- tokenize on empty space, comma, semicolon, brackets
-				(but keep a hyphen connecting other  words) -->
-				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])(\s|,|;|\(|\))+(?!-)"
-				  group="-1" />
-				
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
+
+				<!-- tokenize on empty space, comma, semicolon, brackets (but keep a 
+					hyphen connecting other words) -->
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern="(?&lt;![-\s])(\s|,|;|\(|\))+(?!-)" group="-1" />
+
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.WordDelimiterFilterFactory"
-				  generateWordParts="1" generateNumberParts="1" catenateWords="1"
-				  catenateNumbers="1" catenateAll="1" splitOnCaseChange="0"
-				  splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1" />
-				<filter class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
+					generateWordParts="1" generateNumberParts="1" catenateWords="1"
+					catenateNumbers="1" catenateAll="1" splitOnCaseChange="0"
+					splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1" />
+				<filter
+					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 				<filter class="solr.AcronymTokenFilterFactory" prefix="acr::"
-				  setType="ACRONYM" />
-				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.TrimFilterFactory" />
-      </analyzer>
-			<analyzer type="query">
-				<charFilter class="solr.HTMLStripCharFilterFactory"/>
-				<!-- tokenize on empty space, comma, semicolon, brackets
-				(but keep a hyphen connecting other  words) -->
-				<tokenizer class="solr.PatternTokenizerFactory" pattern="(?&lt;![-\s])(\s|,|;|\(|\))+(?!-)"
-				  group="-1" />
-				<filter class="solr.ASCIIFoldingFilterFactory" />
-				<filter class="solr.WordDelimiterFilterFactory"
-				    generateWordParts="1" generateNumberParts="1" catenateWords="1"
-				    catenateNumbers="1" catenateAll="1" splitOnCaseChange="0"
-				    splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1" />
-				<filter
-				    class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
-				<filter class="solr.AcronymTokenFilterFactory" emitBoth="false"
-				    prefix="acr::" setType="ACRONYM" />
+					setType="ACRONYM" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
-    </fieldType>
-         
+			<analyzer type="query">
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
+				<!-- tokenize on empty space, comma, semicolon, brackets (but keep a 
+					hyphen connecting other words) -->
+				<tokenizer class="solr.PatternTokenizerFactory"
+					pattern="(?&lt;![-\s])(\s|,|;|\(|\))+(?!-)" group="-1" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+				<filter class="solr.WordDelimiterFilterFactory"
+					generateWordParts="1" generateNumberParts="1" catenateWords="1"
+					catenateNumbers="1" catenateAll="1" splitOnCaseChange="0"
+					splitOnNumerics="1" stemEnglishPossessive="1" preserveOriginal="1" />
+				<filter
+					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
+				<filter class="solr.AcronymTokenFilterFactory"
+					emitBoth="false" prefix="acr::" setType="ACRONYM" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.TrimFilterFactory" />
+			</analyzer>
+		</fieldType>
 
-		<!-- de-activated <similarity class="org.apache.solr.search.similarities.SweetSpotSimilarityFactory">
-			<str name="min">1000</str> <str name="max">20000</str> <str name="steepness">0.5</str>
+
+		<!-- de-activated <similarity class="org.apache.solr.search.similarities.SweetSpotSimilarityFactory"> 
+			<str name="min">1000</str> <str name="max">20000</str> <str name="steepness">0.5</str> 
 			</similarity> </fieldType> -->
 
 
@@ -977,8 +973,8 @@
 			<analyzer type="query">
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.TrimFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$"
-					replacement="$2" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2" />
 			</analyzer>
 		</fieldType>
 
@@ -995,1032 +991,668 @@
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
-				<filter class="solr.PatternReplaceFilterFactory" pattern="^(.*?)(\.*)$"
-					replacement="$1" />
-				<!-- note: do not use BibstemFF in the query phase, we cannot assume
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="^(.*?)(\.*)$" replacement="$1" />
+				<!-- note: do not use BibstemFF in the query phase, we cannot assume 
 					the input has bibcode form -->
 			</analyzer>
 		</fieldType>
 
-        
-        <fieldType name="normalized_key_number" class="solr.TextField">
-            <analyzer>
-                <tokenizer class="solr.KeywordTokenizerFactory" />
-                <filter class="solr.LowerCaseFilterFactory" />
-                <filter class="solr.PatternReplaceFilterFactory" pattern="(\:[0-9]*)" replacement="" replace="all" />
-                <filter class="solr.TrimFilterFactory" />
-            </analyzer>
-        </fieldType>
+
+		<fieldType name="normalized_key_number"
+			class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\:[0-9]*)" replacement="" replace="all" />
+				<filter class="solr.TrimFilterFactory" />
+			</analyzer>
+		</fieldType>
 
 	</types>
 
 	<fields>
 
-	  <!-- conventions: all field names are ascii, we have several special fields
-	                    they are all identified through their suffix
-
-	                    used by query parser to analyze a field when a specific
-	                    query is built
-
-	                    <field>_wildcard
-	                    <field>_fuzzy
-	                    <field>_regex
-
-	                    Usually, these are only safe to use with the simple types,
-	                    such as normalized_text_ascii_notokenization. You can't hope to get
-	                    a meaningful results if you try to use ads_text for example.
-	                    Besided, these fields should produce ONLY one token (1 in,
-	                    1 out)
-	   -->
+		<!-- conventions: all field names are ascii, we have several special fields 
+			they are all identified through their suffix used by query parser to analyze 
+			a field when a specific query is built <field>_wildcard <field>_fuzzy <field>_regex 
+			Usually, these are only safe to use with the simple types, such as normalized_text_ascii_notokenization. 
+			You can't hope to get a meaningful results if you try to use ads_text for 
+			example. Besided, these fields should produce ONLY one token (1 in, 1 out) -->
 
 
 
-		<!--
-		@api.doc
+		<!-- @api.doc * id Text field with unique string; ID of the document. Example 
+			query: id:5 * recid Integer version of 'id' - this is more efficient for 
+			sorting, and range queries Example query: id:5 * bibcode 19-char long string 
+			(unique) - ADS identifier of a paper Example query: bibcode:1902Sci....15..393S -->
 
-		* id
+		<!-- The uniqueKey index must be implemented using StrField therefore we 
+			cannot use bibcode (and have it lowercased). And for the same reasons, we 
+			cannot have recid to be int. We are getting an error: QueryElevationComponent 
+			requires the schema to have a uniqueKeyField implemented using StrField -->
 
-		  Text field with unique string; ID of the document.
-
-		    Example query:
-
-		      id:5
-
-		* recid
-
-		  Integer version of 'id' - this is more efficient for sorting,
-		  and range queries
-
-			  Example query:
-
-	        id:5
-
-	  * bibcode
-
-	    19-char long string (unique) - ADS identifier of a paper
-
-	       Example query:
-
-           bibcode:1902Sci....15..393S
-		 -->
-
-		 <!-- The uniqueKey index must be implemented using StrField therefore we
-      cannot use bibcode (and have it lowercased). And for the same reasons, we
-      cannot have recid to be int. We are getting an error: QueryElevationComponent
-      requires the schema to have a uniqueKeyField implemented using StrField -->
-
-		<field name="id" type="string" indexed="true" stored="true" multiValued="false"
-			required="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-		<field name="recid" type="int" indexed="true" stored="true" multiValued="false"
-			required="false" omitNorms="true" omitTermFreqAndPositions="true"/>
-		<field name="bibcode" type="identifier_string" indexed="true" multiValued="false"
-			stored="true" required="true" omitNorms="true" omitTermFreqAndPositions="true"
-			/>
+		<field name="id" type="string" indexed="true" stored="true"
+			multiValued="false" required="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+		<field name="recid" type="int" indexed="true" stored="true"
+			multiValued="false" required="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+		<field name="bibcode" type="identifier_string" indexed="true"
+			multiValued="false" stored="true" required="true" omitNorms="true"
+			omitTermFreqAndPositions="true"/>
 
 
-		<!--
-		@api.doc
+		<!-- @api.doc * doi Digital object indentifier * identifier Identifier 
+			under which a paper can be found. This index holds values from several other 
+			fields: - bibcode - doi - alternate_bibcode * alternate_bibcode When a paper 
+			is published, we may decide to assign a new bibcode to the old version of 
+			metatada. The alternate_bibcode can be used for queries that need to find 
+			it using the old (once-known) bibcode. This field is also useful for citation 
+			cache, because reference values (bibcodes) may contain old bibcodes. * bibstem 
+			Bibstems identify publication or publication and volume. Example query: bibstem:Sci 
+			bibstem:Sci.....6 * bibstem_facet Technical field, used for faceting by publication. 
+			It contains only bibstems without volumes (eg. Sci) -->
 
-		* doi
-
-		  Digital object indentifier
-
-		* identifier
-
-		  Identifier under which a paper can be found. This index holds values
-		  from several other fields:
-
-		    - bibcode
-		    - doi
-		    - alternate_bibcode
-
-
-		* alternate_bibcode
-
-		  When a paper is published, we may decide to assign a new bibcode to the
-		  old version of metatada. The alternate_bibcode can be used for queries
-		  that need to find it using the old (once-known) bibcode.
-
-		  This field is also useful for citation cache, because reference values
-		  (bibcodes) may contain old bibcodes.
+		<field name="doi" type="identifier_string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
 
-		* bibstem
+		<field name="identifier" type="identifier_string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-		  Bibstems identify publication or publication and volume.
+		<field name="alternate_bibcode" type="identifier_string"
+			indexed="true" stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-		  Example query:
-
-		    bibstem:Sci
-        bibstem:Sci.....6
-
-		* bibstem_facet
-
-		  Technical field, used for faceting by publication. It contains only
-		  bibstems without volumes (eg. Sci)
-
-		 -->
-
-		<field name="doi" type="identifier_string" indexed="true" stored="true"
-			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-
-		<field name="identifier" type="identifier_string" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-		  />
-
-		<field name="alternate_bibcode" type="identifier_string" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-		  />
-
-		<field name="bibstem" type="bibstem" indexed="true" stored="true"
-			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-			/>
+		<field name="bibstem" type="bibstem" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
 		<field name="bibstem_facet" type="bibstem_facet" indexed="true"
-			stored="${storeAll:false}" omitNorms="true" omitTermFreqAndPositions="true"
-			/>
+			stored="${storeAll:false}" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
 
 
-    <!--
-    @api.doc
+		<!-- @api.doc * pub Publication * pub_raw Full string from the "Journal 
+			field" of the ADS Record * page String value (possibly two) indicating page 
+			range. Not all values are numeric! * year Year when the paper was published 
+			(warning, not all values are numeric) * volume Volume of a journal issue 
+			(if any) of the paper. * issue Issue number in which a paper was published. 
+			* issn ISSN of the publication (applies to journals - ie. periodical publications) 
+			* isbn ISBN of the publication (this applies to books) * lang In ADS this 
+			field contains a language of the main title. Currently, this value is present 
+			in a very small portion of records (try searching for lang:*) * publisher 
+			the name of the publisher * version initially asclepias version, available 
+			to be used more widely -->
+		<field name="pub" type="normalized_text_ascii" indexed="true"
+			stored="true" omitNorms="true" />
 
-    * pub
+		<field name="pub_raw" type="normalized_text_ascii"
+			indexed="true" stored="true" omitNorms="true" />
 
-      Publication
+		<field name="page" type="normalized_string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+		<field name="eid" type="normalized_string" indexed="true"
+			stored="true" multiValued="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-    * pub_raw
+		<field name="year" type="normalized_text_ascii_notokenization"
+			indexed="true" stored="true" multiValued="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-      Full string from the "Journal field" of the ADS Record
+		<field name="volume" type="normalized_text_ascii_notokenization"
+			indexed="true" stored="true" multiValued="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-    * page
+		<field name="issue" type="normalized_text_ascii_notokenization"
+			indexed="true" stored="true" multiValued="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-      String value (possibly two) indicating page range. Not all values are
-      numeric!
+		<field name="series" type="normalized_text_ascii" indexed="true"
+			stored="true" omitNorms="true" />
 
-    * year
+		<field name="issn" type="normalized_text_ascii_notokenization"
+			indexed="true" stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-      Year when the paper was published (warning, not all values are numeric)
+		<field name="isbn" type="normalized_text_ascii_notokenization"
+			indexed="true" stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-    * volume
+		<field name="lang" type="normalized_text_ascii_notokenization"
+			indexed="true" stored="${storeAll:false}" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-      Volume of a journal issue (if any) of the paper.
-
-    * issue
-
-      Issue number in which a paper was published.
-
-    * issn
-
-      ISSN of the publication (applies to journals - ie. periodical publications)
-
-    * isbn
-
-      ISBN of the publication (this applies to books)
-
-    * lang
-
-      In ADS this field contains a language of the main title. Currently, this value
-      is present in a very small portion of records (try searching for lang:*)
-
-    * publisher
-
-      the name of the publisher
-
-    * version
-
-      initially asclepias version, available to be used more widely
-
-     -->
-		<field name="pub" type="normalized_text_ascii" indexed="true" stored="true"
-		  omitNorms="true" />
-
-		<field name="pub_raw" type="normalized_text_ascii" indexed="true"	stored="true"
-		  omitNorms="true" />
-
-		<field name="page" type="normalized_string" indexed="true" stored="true"
-			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-	    <field name="eid" type="normalized_string" indexed="true" stored="true"
-            multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="year" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-			multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="volume" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="issue" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="false" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="series" type="normalized_text_ascii" indexed="true" stored="true"
-		  omitNorms="true" />
-
-		<field name="issn" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="isbn" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="lang" type="normalized_text_ascii_notokenization" indexed="true" stored="${storeAll:false}"
-			omitNorms="true" omitTermFreqAndPositions="true"/>
-		
-		<field name="publisher" type="normalized_text_ascii" indexed="true" stored="true"
-		  omitNorms="true" />
+		<field name="publisher" type="normalized_text_ascii"
+			indexed="true" stored="true" omitNorms="true" />
 
 		<field name="version" type="string" indexed="true" stored="true"
-		  omitNorms="true" />
+			omitNorms="true" />
 
-		<field name="date" type="tdate" indexed="true" stored="true"
-			omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="date" type="date" indexed="true" stored="true"
+			omitNorms="true" omitTermFreqAndPositions="true" />
 
-		<field name="pubdate" type="date_string" indexed="true" stored="true"
-			omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="pubdate" type="date_string" indexed="true"
+			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
 
 		<field name="title" type="ads_text" indexed="true" stored="true"
-	      multiValued="true" 
-	      />
-        <field name="title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+			multiValued="true" />
+		<field name="title_nosyn" type="ads_text_nosyn" indexed="false"
+			stored="false" />
 
-		<field name="alternate_title" type="ads_text" indexed="true" stored="true"
-		  multiValued="true" />
-	    <field name="alternate_title_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+		<field name="alternate_title" type="ads_text" indexed="true"
+			stored="true" multiValued="true" />
+		<field name="alternate_title_nosyn" type="ads_text_nosyn"
+			indexed="false" stored="false" />
 
-		<field name="abstract" type="ads_text" indexed="true" stored="true"/>
-        <field name="abstract_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+		<field name="abstract" type="ads_text" indexed="true"
+			stored="true" />
+		<field name="abstract_nosyn" type="ads_text_nosyn"
+			indexed="false" stored="false" />
 
 
 		<field name="author" type="author" indexed="true" stored="true"
-			multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
+			multiValued="true" omitNorms="true" useDocValuesAsStored="false" />
 
-		<field name="author_norm" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true"/>
+		<field name="author_norm"
+			type="normalized_text_ascii_notokenization" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" />
 
-		<field name="author_facet" type="string" indexed="true" stored="${storeAll:false}"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+		<field name="author_facet" type="string" indexed="true"
+			stored="${storeAll:false}" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-		<field name="author_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
-      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-      docValues="true"/>
-		  
-		<field name="author_count" type="int" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true"/> 
+		<field name="author_facet_hier" type="string" indexed="true"
+			stored="${storeAll:false}" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
 
-		<field name="first_author_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
-      multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-      docValues="true"/>
+		<field name="author_count" type="int" indexed="true"
+			stored="false" omitNorms="true" omitTermFreqAndPositions="true" />
 
-		<field name="first_author" type="author" indexed="true" stored="true" />
+		<field name="first_author_facet_hier" type="string"
+			indexed="true" stored="${storeAll:false}" multiValued="true"
+			omitNorms="true" omitTermFreqAndPositions="true" docValues="true" />
 
-		<field name="first_author_norm" type="normalized_text_ascii_notokenization"
-			indexed="true" stored="true" />
-			
-		<field name="book_author" type="author" indexed="true" stored="true"
-            multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
-        
-    <field name="editor" type="author" indexed="true" stored="true"
-            multiValued="true" omitNorms="true" useDocValuesAsStored="false"/>
+		<field name="first_author" type="author" indexed="true"
+			stored="true" />
 
-                
-		<field name="aff" type="affiliation_text" indexed="true" stored="true"
-                     multiValued="true" omitNorms="true"/>
-		<field name="aff_abbrev" type="affiliation_text" indexed="true" stored="true"
-		      multiValued="true" omitNorms="true"/>
+		<field name="first_author_norm"
+			type="normalized_text_ascii_notokenization" indexed="true"
+			stored="true" />
+
+		<field name="book_author" type="author" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			useDocValuesAsStored="false" />
+
+		<field name="editor" type="author" indexed="true" stored="true"
+			multiValued="true" omitNorms="true" useDocValuesAsStored="false" />
+
+		<!-- TODO: remove once index has been rebuilt -->
+		<field name="aff" type="affiliation_text" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" />
+		<field name="aff_abbrev" type="affiliation_text" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" />
 		<!-- contents of institution is the same as aff_abbrev -->
-		<field name="institution" type="affiliation_tokens" indexed="true" stored="true"
-		       multiValued="true" omitNorms="true"/>
-		<field name="aff_canonical" type="affiliation_text" indexed="true" stored="true"
-			   multiValued="true" omitNorms="true"/>
-		<field name="aff_facet" type="string" indexed="true" stored="${storeAll:false}"
-		       multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-		<field name="aff_facet_hier" type="string" indexed="true" stored="${storeAll:false}"
-		       multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-		       docValues="true"/>
-		<field name="aff_id" type="affiliation_tokens" indexed="true" stored="true"
-		       multiValued="true" omitNorms="true"/>
-		<!--  TODO: remove once index has been rebuilt -->
-		<field name="aff_raw" type="affiliation_text" indexed="true" stored="true"
-		       omitNorms="true" multiValued="true" />
-		
-		<!-- for Unified Astronomy Thesaurus -->
-		<field name="uat" type="uat_tokens" indexed="true" stored="true"
-		       multiValued="true" omitNorms="true"/>
+		<field name="institution" type="affiliation_tokens"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
+		<field name="aff_canonical" type="affiliation_text"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
+		<field name="aff_facet" type="string" indexed="true"
+			stored="${storeAll:false}" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+		<field name="aff_facet_hier" type="string" indexed="true"
+			stored="${storeAll:false}" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
+		<field name="aff_id" type="affiliation_tokens" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" />
+		<field name="aff_raw" type="affiliation_text" indexed="true"
+			stored="true" omitNorms="true" multiValued="true" />
 
 
-		<field name="email" type="normalized_text_ascii" indexed="true" stored="true"
-			multiValued="true" omitNorms="true"/>
+		<field name="email" type="normalized_text_ascii" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" />
 
-        <!-- 
-        @api.doc
-        
-        * orcid
-        
-          Virtual field which by default searches in orcid_pub, orcid_user, orcid_other
-          
-        * orcid_pub
-        
-          ORCID identifiers assigned by publishers.
-          
-        * orcid_user
-        
-          ORCID claims from users who gave ADS consent to expose their public
-          profiles.
-          
-        * orcid_other
-        
-          ORCID claims from users who used Bumblebee claiming interface, but
-          did not give us consent to show their profiles.
-          
-         -->
-		<field name="orcid_pub" type="normalized_text_ascii" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true"/>
-		<field name="orcid_user" type="normalized_text_ascii" indexed="true" stored="true"
-          multiValued="true" omitNorms="true"/>
-    <field name="orcid_other" type="normalized_text_ascii" indexed="true" stored="true"
-      multiValued="true" omitNorms="true"/>
+		<!-- @api.doc * orcid Virtual field which by default searches in orcid_pub, 
+			orcid_user, orcid_other * orcid_pub ORCID identifiers assigned by publishers. 
+			* orcid_user ORCID claims from users who gave ADS consent to expose their 
+			public profiles. * orcid_other ORCID claims from users who used Bumblebee 
+			claiming interface, but did not give us consent to show their profiles. -->
+		<field name="orcid_pub" type="normalized_text_ascii"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
+		<field name="orcid_user" type="normalized_text_ascii"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
+		<field name="orcid_other" type="normalized_text_ascii"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
-    <!--
-    @api.doc
-
-    * keyword
-
-      Free-text keywords; this field also contains arxiv_class values.
-      This field ignores
-
-    * keyword_norm
-
-      Controlled keywords, each entry will have a corresponding keyword_schema
-      value.
-
-    * keyword_schema
-
-      Schema for each controlled keyword.
-
-      @since 40.4.0.0
-
-    * keyword_facet
-
-      This is the normalized version of a controlled keyword (if paper contains it).
-      Very often this value may be missing.
-      
-    * comment
-    
-      Comments associated with the article, e.g. captions of extracted table captions.
-      
-      @see: caption
-      
-    * pubnote
-    
-      Arxiv papers only field. Information about the publication (?)
-      
-      @since 61.1.0.1
-      
-     -->
+		<!-- @api.doc * keyword Free-text keywords; this field also contains arxiv_class 
+			values. This field ignores * keyword_norm Controlled keywords, each entry 
+			will have a corresponding keyword_schema value. * keyword_schema Schema for 
+			each controlled keyword. @since 40.4.0.0 * keyword_facet This is the normalized 
+			version of a controlled keyword (if paper contains it). Very often this value 
+			may be missing. * comment Comments associated with the article, e.g. captions 
+			of extracted table captions. @see: caption * pubnote Arxiv papers only field. 
+			Information about the publication (?) @since 61.1.0.1 -->
 		<field name="keyword" type="ads_text" indexed="true"
-			stored="true" multiValued="true" omitNorms="true"/>
+			stored="true" multiValued="true" omitNorms="true" />
 
-        <field name="keyword_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
-        
-		<field name="keyword_norm" type="normalized_text_ascii_nodedup" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true"/>
+		<field name="keyword_nosyn" type="ads_text_nosyn"
+			indexed="false" stored="false" />
 
-		<field name="keyword_schema" type="normalized_text_ascii_nodedup" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true"/>
+		<field name="keyword_norm" type="normalized_text_ascii_nodedup"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
-	    <field name="keyword_facet" type="string" indexed="true" stored="true"
-	      multiValued="true" omitNorms="true"/>
-	
-	    <field name="arxiv_class" type="normalized_text_ascii" indexed="true" stored="true"
-	      multiValued="true" omitNorms="true"/>
+		<field name="keyword_schema"
+			type="normalized_text_ascii_nodedup" indexed="true" stored="true"
+			multiValued="true" omitNorms="true" />
 
+		<field name="keyword_facet" type="string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" />
 
-
-		<field name="property" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="database" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="bibgroup" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="bibgroup_facet" type="string" indexed="true"	stored="${storeAll:false}"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="data" type="normalized_key_number" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="data_facet" type="string" indexed="true"	stored="${storeAll:false}"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="vizier" type="normalized_text_ascii_notokenization" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="vizier_facet" type="string" indexed="true"	stored="${storeAll:false}"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="thesis" type="affiliation_text" indexed="true"	stored="true"
-		  omitNorms="true" />
-
-		<field name="comment" type="ads_text" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-        
-        <field name="pubnote" type="ads_text" indexed="true" stored="true"
-          multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-          
-		<field name="copyright" type="affiliation_text" indexed="true" stored="true"
-		  omitNorms="true" />
-
-		<field name="reference" type="identifier_string" indexed="true" stored="true"
-		  multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-		  docValues="true"
-		  />
-
-	    <field name="citation" type="identifier_string" indexed="true" stored="true"
-          multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-          docValues="true"
-          />
-
-		<field name="facility" type="normalized_text_ascii" indexed="true" stored="true"
-          multiValued="true" omitNorms="true"/>
+		<field name="arxiv_class" type="normalized_text_ascii"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
 
 
-	  <!--
-	  @api.doc
+		<field name="property"
+			type="normalized_text_ascii_notokenization" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	  * grant
+		<field name="database"
+			type="normalized_text_ascii_notokenization" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	     Field that contains both grant ids and grant agencies.
+		<field name="bibgroup"
+			type="normalized_text_ascii_notokenization" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	     @since 40.3.0.0
+		<field name="bibgroup_facet" type="string" indexed="true"
+			stored="${storeAll:false}" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	  * grant_facet_hier
+		<field name="data" type="normalized_key_number" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	     Hiearchical facet field which containst grant/grant_id.
-	     This field is not suitable for user queries, but rather
-	     for UI components. Term frequencies and positions are
-	     deactivated.
+		<field name="data_facet" type="string" indexed="true"
+			stored="${storeAll:false}" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	  * grant_id
+		<field name="vizier" type="normalized_text_ascii_notokenization"
+			indexed="true" stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	     Index with just the grant ids (e.g. 0618398).
+		<field name="vizier_facet" type="string" indexed="true"
+			stored="${storeAll:false}" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-	     @depracated - use grant instead
+		<field name="thesis" type="affiliation_text" indexed="true"
+			stored="true" omitNorms="true" />
 
-	  * grant_agencies
+		<field name="comment" type="ads_text" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-       Index with just the grant agencies names (e.g. NASA).
+		<field name="pubnote" type="ads_text" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-       @depracated - use grant instead
-	   -->
-	  <field name="grant" type="normalized_text_ascii" indexed="true" stored="true"
-        multiValued="true" omitNorms="true"/>
+		<field name="copyright" type="affiliation_text" indexed="true"
+			stored="true" omitNorms="true" />
 
-	  <field name="grant_facet_hier" type="string" indexed="true"
-      stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-      docValues="true"/>
+		<field name="reference" type="identifier_string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="citation" type="identifier_string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="facility" type="normalized_text_ascii"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
 
-    <!--
-    @api.doc
 
-    * all
+		<!-- @api.doc * grant Field that contains both grant ids and grant agencies. 
+			@since 40.3.0.0 * grant_facet_hier Hiearchical facet field which containst 
+			grant/grant_id. This field is not suitable for user queries, but rather for 
+			UI components. Term frequencies and positions are deactivated. * grant_id 
+			Index with just the grant ids (e.g. 0618398). @depracated - use grant instead 
+			* grant_agencies Index with just the grant agencies names (e.g. NASA). @depracated 
+			- use grant instead -->
+		<field name="grant" type="normalized_text_ascii" indexed="true"
+			stored="true" multiValued="true" omitNorms="true" />
 
-      This index contains values copied from several other fields (the fields
-      are added into one index for faster search). These values come from:
+		<field name="grant_facet_hier" type="string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
 
-       - author_norm
-       - alternate_title
-       - bibcode
-       - doi
-       - identifier
 
-    -->
+		<!-- @api.doc * all This index contains values copied from several other 
+			fields (the fields are added into one index for faster search). These values 
+			come from: - author_norm - alternate_title - bibcode - doi - identifier -->
 		<field name="all" type="ads_text" indexed="true" stored="false"
 			multiValued="true" />
-        <field name="all_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+		<field name="all_nosyn" type="ads_text_nosyn" indexed="false"
+			stored="false" />
 
 
 
-		<!--
-		@api.doc
+		<!-- @api.doc * full This is a virtual field, it doesn't have its own index, 
+			but searches several other indexes @since 40.3.0.0 * body Contains extracted 
+			fulltext minus acknowledgements section @since 40.3.0.0 * ack Contains acknowledgements 
+			extracted from fulltexts (if it was possible to identify them). * caption 
+			Text of the caption string. @since 61.1.0.1 -->
+		<field name="full" type="ads_text" indexed="false"
+			stored="false" />
+		<field name="full_nosyn" type="ads_text_nosyn" indexed="false"
+			stored="false" />
 
-		* full
+		<field name="body" type="ads_text" indexed="true" stored="true" />
+		<field name="body_nosyn" type="ads_text_nosyn" indexed="false"
+			stored="false" />
 
-		  This is a virtual field, it doesn't have its own index, but
-		  searches several other indexes
+		<field name="caption" type="ads_text" indexed="true"
+			stored="true" multiValued="true" />
+		<field name="caption_nosyn" type="ads_text_nosyn"
+			indexed="false" stored="false" />
 
-		  @since 40.3.0.0
-
-		* body
-
-		  Contains extracted fulltext minus acknowledgements section
-
-		  @since 40.3.0.0
-
-		* ack
-
-		  Contains acknowledgements extracted from fulltexts (if it was
-		  possible to identify them).
-		
-		* caption
-		  
-		  Text of the caption string.
-		  
-		  @since 61.1.0.1
-
-		 -->
-		<field name="full" type="ads_text" indexed="false" stored="false"/>
-		<field name="full_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
-
-		<field name="body" type="ads_text" indexed="true" stored="true"/>
-		<field name="body_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
-        
-        <field name="caption" type="ads_text" indexed="true" stored="true" 
-            multiValued="true" />
-        <field name="caption_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
-        
 		<field name="ack" type="ads_text" indexed="true" stored="true" />
-		<field name="ack_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
+		<field name="ack_nosyn" type="ads_text_nosyn" indexed="false"
+			stored="false" />
 
 
-		<!--
-		@api.doc
-
-		* reader
-
-		  This index contains unique identifiers of readers that read the
-		  paper in the past 90 days. This field does not have term frequncies
-		  and positions.
-
-		 -->
+		<!-- @api.doc * reader This index contains unique identifiers of readers 
+			that read the paper in the past 90 days. This field does not have term frequncies 
+			and positions. -->
 		<field name="reader" type="string" indexed="true" stored="true"
-			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
-		<!--
-    @api.doc
+		<!-- @api.doc * cite_read_boost Float values containing normalized (float) 
+			boost factors. These can be used with functional queries to modify ranking 
+			of results. Example: q={!func}product(product(0.5,$scaledQ),product(0.5,field('cite_read_boost'))) 
+			qq={!aqp}black hole fq={!query v=$qq} @since 40.2.0.0 * classic_factor Integer 
+			values containing the boost factor used by ADS Classic. In essence log(1 
+			+ cites + norm_reads) where number of citations has been normalized and the 
+			whole value is multiplied by 5000 and then cast to Integer. @since 40.3.0.0 -->
+		<field name="cite_read_boost" type="tfloat" indexed="true"
+			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
-    * cite_read_boost
+		<field name="classic_factor" type="int" indexed="true"
+			stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			docValues="true" />
 
-      Float values containing normalized (float) boost factors. These
-      can be used with functional queries to modify ranking of results.
+		<!-- @api.doc * simbid An array of integer values corresponding to the 
+			ids of associated objects in the SIMBAD database * simbtype An array of object 
+			types (as recorded in the SIMBAD database). This list will just contain unique 
+			values. * simbad_object_facet_hier The hierarchical facets consisting of 
+			object_type/object_id as above -->
+		<field name="simbid" type="int" indexed="true" stored="true"
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
-      Example:
+		<field name="simbtype" type="normalized_text_ascii"
+			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
-        q={!func}product(product(0.5,$scaledQ),product(0.5,field('cite_read_boost')))
-        qq={!aqp}black hole
-        fq={!query v=$qq}
+		<field name="simbad_object_facet_hier" type="string"
+			indexed="true" stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
 
-      @since 40.2.0.0
+		<!-- @api.doc * citation_count The number of citations associated with 
+			this record * citation_count_norm Normalized citation count per author (excluding 
+			editors, reviewers etc), computed as: citation_count_norm = (citation_count 
+			/ max(author_count, 1)) @since 63.1.0.14 * read_count the number of recent 
+			readers who accessed this record (computed as len(reader)) -->
 
-    * classic_factor
+		<field name="citation_count" type="int" indexed="true"
+			stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			docValues="true" />
 
-      Integer values containing the boost factor used by ADS Classic. In essence
-      log(1 + cites + norm_reads) where number of citations has been normalized
-      and the whole value is multiplied by 5000 and then cast to Integer.
-
-      @since 40.3.0.0
-
-     -->
-		<field name="cite_read_boost" type="tfloat" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
-
-		<field name="classic_factor" type="int" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
-
-    <!--
-    @api.doc
-    * simbid
-
-      An array of integer values corresponding to the ids of associated objects
-      in the SIMBAD database
-
-    * simbtype
-
-      An array of object types (as recorded in the SIMBAD database). This list will
-      just contain unique values.
-
-    * simbad_object_facet_hier
-
-      The hierarchical facets consisting of object_type/object_id as above
-
-     -->
-		<field name="simbid" type="int" indexed="true" stored="true" multiValued="true"
-		  omitNorms="true" omitTermFreqAndPositions="true"/>
-
-		<field name="simbtype" type="normalized_text_ascii" indexed="true" stored="true" multiValued="true"
-		  omitNorms="true"/>
-
-		<field name="simbad_object_facet_hier" type="string" indexed="true"
-      stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-      docValues="true"/>
-
-    <!--
-    @api.doc
-
-    * citation_count
-
-      The number of citations associated with this record
-      
-    * citation_count_norm
-
-      Normalized citation count per author (excluding editors, reviewers etc),
-      computed as:
-       
-        citation_count_norm = (citation_count / max(author_count, 1))
-      
-      @since 63.1.0.14
-
-    * read_count
-
-      the number of recent readers who accessed this record (computed as len(reader))
-
-     -->
-
-		<field name="citation_count" type="int" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
-		  
-		<field name="citation_count_norm" type="tfloat" indexed="true" stored="true"
-          omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
+		<field name="citation_count_norm" type="tfloat" indexed="true"
+			stored="true" omitNorms="true" omitTermFreqAndPositions="true"/>
 
 		<field name="read_count" type="int" indexed="true" stored="true"
-		  omitNorms="true" omitTermFreqAndPositions="true" docValues="true"/>
+			omitNorms="true" omitTermFreqAndPositions="true" docValues="true" />
 
-		<!--
-		  technical metadata; values are a JSON string that is stored and used for search result
-			display
-			-->
-		<field name="links_data" type="string" indexed="false" stored="true"
-			multiValued="true" />
-		<field name="ids_data" type="string" indexed="false" stored="true"
-            multiValued="true" />
+		<!-- technical metadata; values are a JSON string that is stored and used 
+			for search result display -->
+		<field name="links_data" type="string" indexed="false"
+			stored="true" multiValued="true" />
+		<field name="ids_data" type="string" indexed="false"
+			stored="true" multiValued="true" />
 
 
-    <!--
-    @api.doc
+		<!-- @api.doc * indexstamp Each document contains a date when it was indexed. 
+			The format is: YYYY-MM-DD'T'hh:mm:ss.SSS'Z' - ie. you can query with up to 
+			millisecond granularity; note that your query string must be complete and 
+			correct Example query: indexstamp:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"] 
+			* update_timestamp This timestamp can be used to query for latest changes, 
+			the timestamp is controlled by ADS and changes only when a significant change 
+			is made to the document. Usually it excludes updates triggered by citations/reads/fulltext 
+			updates. @since v61.1.0.3 -->
+		<field name="indexstamp" type="date" indexed="true"
+			stored="true" default="NOW" multiValued="false" docValues="true"/>
 
-    * indexstamp
+		<field name="update_timestamp" type="date" indexed="true"
+			stored="true" default="NOW" multiValued="false" docValues="true"/>
 
-      Each document contains a date when it was indexed. The format
-      is: YYYY-MM-DD'T'hh:mm:ss.SSS'Z' - ie. you can query with up to
-      millisecond granularity; note that your query string must be
-      complete and correct
-
-      Example query:
-         indexstamp:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"]
-         
-    * update_timestamp
-    
-      This timestamp can be used to query for latest changes, the timestamp
-      is controlled by ADS and changes only when a significant change is
-      made to the document. Usually it excludes updates triggered by 
-      citations/reads/fulltext updates.
-      
-      @since v61.1.0.3
-      
-     -->
-		<field name="indexstamp" type="tdate" indexed="true" stored="true"
-			default="NOW" multiValued="false" />
-        
-        <field name="update_timestamp" type="tdate" indexed="true" stored="true"
-            default="NOW" multiValued="false" />
-            
-        <field name="_version_" type="long" indexed="true" stored="true" />
+		<field name="_version_" type="long" indexed="true" stored="true" />
 
 
-		<!-- uncomment the following to ignore any fields that don't already match
-			an existing field name or dynamic field, rather than reporting them as an
-			error. alternately, change the type="ignored" to some other type e.g. "text"
+		<!-- uncomment the following to ignore any fields that don't already match 
+			an existing field name or dynamic field, rather than reporting them as an 
+			error. alternately, change the type="ignored" to some other type e.g. "text" 
 			if you want unknown fields indexed and/or stored by default -->
-		<dynamicField name="tmp_*" type="ignored" multiValued="true" />
+		<dynamicField name="tmp_*" type="ignored"
+			multiValued="true" />
 
 
 
-		<!--
-		=================================================
-		collector fields, used just for indexing
-		=================================================
-		 -->
+		<!-- ================================================= collector fields, 
+			used just for indexing ================================================= -->
 
-    <field name="a_100" type="author" indexed="false" stored="false"
-            multiValued="true" />
-    <field name="a_700" type="author" indexed="false" stored="false"
-            multiValued="true" />
-    <field name="a_100_norm" type="author" indexed="false" stored="false"
-            multiValued="true" />
-    <field name="a_700_norm" type="author" indexed="false" stored="false"
-            multiValued="true" />
+		<field name="a_100" type="author" indexed="false" stored="false"
+			multiValued="true" />
+		<field name="a_700" type="author" indexed="false" stored="false"
+			multiValued="true" />
+		<field name="a_100_norm" type="author" indexed="false"
+			stored="false" multiValued="true" />
+		<field name="a_700_norm" type="author" indexed="false"
+			stored="false" multiValued="true" />
 
-		<!--
-		=================================================
-		fields used for special purposes by query parser
-		=================================================
-		-->
+		<!-- ================================================= fields used for 
+			special purposes by query parser ================================================= -->
 
 		<field name="bibcode_wildcard" type="identifier_string"
-          indexed="false" stored="false" required="false" multiValued="false" />
+			indexed="false" stored="false" required="false" multiValued="false" />
 
-	    <field name="doi_wildcard" type="doi_string"
-	      indexed="false" stored="false" required="false" multiValued="true" />
-	
-	    <field name="pub_wildcard" type="normalized_text_ascii"
-	      indexed="false" stored="false" required="false" multiValued="false" />
-	
-	    <field name="issn_wildcard" type="normalized_text_ascii_notokenization"
-	      indexed="false" stored="false" multiValued="false"/>
-	
-	    <field name="isbn_wildcard" type="normalized_text_ascii_notokenization"
-	      indexed="false" stored="false" required="false" multiValued="false" />
+		<field name="doi_wildcard" type="doi_string" indexed="false"
+			stored="false" required="false" multiValued="true" />
+
+		<field name="pub_wildcard" type="normalized_text_ascii"
+			indexed="false" stored="false" required="false" multiValued="false" />
+
+		<field name="issn_wildcard"
+			type="normalized_text_ascii_notokenization" indexed="false"
+			stored="false" multiValued="false" />
+
+		<field name="isbn_wildcard"
+			type="normalized_text_ascii_notokenization" indexed="false"
+			stored="false" required="false" multiValued="false" />
 
 		<field name="author_notrans" type="author_short_name_rage"
 			indexed="false" stored="false" />
 
 		<field name="author_nosyn" type="author_short_name_rage"
 			indexed="false" stored="false" />
-	    
-	    <field name="author_fuzzy" type="author_short_name_rage"
-            indexed="false" stored="false" />
+
+		<field name="author_fuzzy" type="author_short_name_rage"
+			indexed="false" stored="false" />
 
 		<field name="author_notrans_nosyn" type="author_short_name_rage"
 			indexed="false" stored="false" />
 
-		<field name="author_short_name_rage" type="author_short_name_rage"
-			indexed="false" stored="false" />
+		<field name="author_short_name_rage"
+			type="author_short_name_rage" indexed="false" stored="false" />
 
-	    <field name="author_collector" type="author_collector"
-	        indexed="false" stored="false" multiValued="true" />
-	
-	    <field name="reference_wildcard" type="normalized_text_ascii_notokenization"
-            indexed="false" stored="false" required="false" />
+		<field name="author_collector" type="author_collector"
+			indexed="false" stored="false" multiValued="true" />
 
-		<!--
-		@api.doc
+		<field name="reference_wildcard"
+			type="normalized_text_ascii_notokenization" indexed="false"
+			stored="false" required="false" />
 
-	    * doctype
-	
-	      Each document contains document type (non-repeatable field)
-	
-	      Example query:
-	
-	         doctype:book
-	         
-	    * doctype_facet_hier
-	    
-	      Document type displayed in a hierarchy. Example:
-	      
-	           0/Article
-	           1/Article/Book chapter
-	           
-	      @since v61.1.0.1
-		-->
-		
-		<field name="doctype" type="normalized_text_ascii_notokenization"
-	      indexed="true" stored="true" required="false" />
-	      
-	    <field name="doctype_facet_hier" type="string" indexed="true"
-        stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-        docValues="true"/>
+		<!-- @api.doc * doctype Each document contains document type (non-repeatable 
+			field) Example query: doctype:book * doctype_facet_hier Document type displayed 
+			in a hierarchy. Example: 0/Article 1/Article/Book chapter @since v61.1.0.1 -->
 
-		<!-- a field holding tokenizer chain for the unfield search (very important
-			to have if you require multi-word token expansion and unfielded search expansion
+		<field name="doctype"
+			type="normalized_text_ascii_notokenization" indexed="true"
+			stored="true" required="false" />
+
+		<field name="doctype_facet_hier" type="string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
+
+		<!-- a field holding tokenizer chain for the unfield search (very important 
+			to have if you require multi-word token expansion and unfielded search expansion 
 			at the same time -->
 
-		<field name="unfielded_search" type="ads_text"
-			indexed="false" stored="false" multiValued="true" />
-	    <field name="unfielded_search_nosyn" type="ads_text_nosyn" indexed="false" stored="false"/>
-	    
-	    
-	    <!--
-        @api.doc
+		<field name="unfielded_search" type="ads_text" indexed="false"
+			stored="false" multiValued="true" />
+		<field name="unfielded_search_nosyn" type="ads_text_nosyn"
+			indexed="false" stored="false" />
 
-        * nedid
-    
-          String Identified of the NED object
-    
-          Example query:
-    
-             nedid:"X+1"
-             
-          @since v63.1.0.5
-             
-        * nedtype
-        
-          Type of the NED object (the array dimension corresponds to the array of nedid values)
-          
-            
-          Example query:
-          
-            nedtype:type2
-            
-          @since v63.1.0.5
-          
-            
-        * ned_object_facet_hier
-        
-          Hierarchical facet, string field - to allow for browsing NED objects.
-          
-          Example query:
-          
-            ned_object_facet_hier:"0/Other"
-               
-          @since v63.1.0.5
-        -->
-        
-        <field name="nedid" type="normalized_string"
-          indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
-          
-        <field name="nedtype" type="normalized_string" indexed="true"
-            stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"/>
-            
-        <field name="ned_object_facet_hier" type="normalized_string" indexed="true"
-          stored="true" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
-          docValues="true"/>
-	  
 
-        <!--
-        @api.doc
+		<!-- @api.doc * nedid String Identified of the NED object Example query: 
+			nedid:"X+1" @since v63.1.0.5 * nedtype Type of the NED object (the array 
+			dimension corresponds to the array of nedid values) Example query: nedtype:type2 
+			@since v63.1.0.5 * ned_object_facet_hier Hierarchical facet, string field 
+			- to allow for browsing NED objects. Example query: ned_object_facet_hier:"0/Other" 
+			@since v63.1.0.5 -->
 
-            
-        * page_count
-        
-          Number of pages.
-          
-          Example query:
-          
-            page_count:[0 TO 15]
-               
-          @since v63.1.0.5
-          
-        * page_range
-        
-          Page information (original string from the ADS database). This field is not searchable.
-          
-          @since v63.1.0.5
-        -->
-        
-        <field name="page_count" type="int"
-          indexed="true" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
-          
-        <field name="page_range" type="string"
-          indexed="false" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
-          
+		<field name="nedid" type="normalized_string" indexed="true"
+			stored="true" required="false" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-        <!--
-        @api.doc
-    
-        * entry_date
-            
-          format: YYYY-MM-DD'T'hh:mm:ss.SSS'Z'
-          
-          Time when the record was first registered in the ADS database (even though 
-          the search field has millisecond granularity, in practice you can expect
-          at most 24h granularity in the search values)
-    
-          Example query:
-             entry_date:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"]
-             
-          @since v63.1.0.5
-             
-        * metadata_ctime
-        * metadata_mtime
-        * fulltext_ctime
-        * fulltext_mtime
-        * nonbib_ctime
-        * nonbib_mtime
-        * metrics_ctime
-        * metrics_mtime
-        * orcid_ctime
-        * orcid_mtime
-        
-          This timestamp can be used to query for latest changes in the ADS index.
-          
-          ctime = creation timestamp (doesn't change after the first entry)
-          mtime = modificaiton timestamp
-          
-          NOTE: the ctime can change under special circumstance (ie. if we decide
-          to recreate our database from scratch; therefore do not rely on the
-          timestamp to be immutable; it does not change frequently)
-          
-          The prefixex are (hopefully) self explanatory.
-          
-          Example query:
-             fulltext_mtime:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"]
-             
-          @since v61.1.0.3
-          
-         -->
-        <field name="entry_date" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="metadata_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="metadata_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="fulltext_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="fulltext_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="nonbib_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="nonbib_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="metrics_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="metrics_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />	  
-	    <field name="orcid_ctime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        <field name="orcid_mtime" type="tdate" indexed="true" stored="true" multiValued="false" />
-        
-        
-        <!--
-        @api.doc
+		<field name="nedtype" type="normalized_string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-            
-        * entdate
-        
-          Field that allows you search for entry_date (without the annoying precision of entry_date)
-          
-          Example query:
-          
-            entdate:2011
-            entdate:2011-01
-               
-          @since v63.1.0.10
-        -->
-        <field name="entdate" type="date_string" indexed="true" stored="true"
-            omitNorms="true" omitTermFreqAndPositions="true"/>
-        
-        
-        <!--
-        @api.doc
+		<field name="ned_object_facet_hier" type="normalized_string"
+			indexed="true" stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true" />
 
-            
-        * origin
-        
-          Provenance information (data source name) of what was used for merging the metadata records.
-          Mostly useful for internal/curation purposes. This field will contain all sources in the
-          descending order (most important first).
-          
-          Example query:
-          
-            origin:"springer"
-               
-          @since v63.1.0.5
-        -->
-        
-        <field name="origin" type="normalized_string"
-          indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
-        
-        <!--
-        @api.doc
 
-        * data_count
-        
-          Number of all data objects in the article (cummulative sum from all archives).
-          
-          Example query:
-          
-            data_count:[0 TO 15]
-               
-          @since v63.1.0.5
-        -->
-        
-        <field name="data_count" type="int"
-          indexed="true" stored="true" required="false" multiValued="false" omitNorms="true" omitTermFreqAndPositions="true" />
+		<!-- @api.doc * page_count Number of pages. Example query: page_count:[0 
+			TO 15] @since v63.1.0.5 * page_range Page information (original string from 
+			the ADS database). This field is not searchable. @since v63.1.0.5 -->
 
-        <!--
-        @api.doc
+		<field name="page_count" type="int" indexed="true" stored="true"
+			required="false" multiValued="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
-        * esources
-        
-          Sources of fulltext. Available values:
-          
-			PUB_PDF - paper has a link to publisher PDF fulltext
-			PUB_HTML - paper has a link to publisher HTML fulltext
-			ADS_PDF - paper has a link to ADS fulltext
-			ADS_SCAN - paper has a link to ADS scan
-			EPRINT_PDF - paper has a link to an eprint PDF (currently only arXiv, but possibly others in the future)
-			EPRINT_HTML - paper has a link to an eprint HTML (currently only arXiv)
-			AUTHOR_PDF - paper has a link to an author copy in PDF format
-			AUTHOR_HTML - paper has a link to an author copy in HTML format
-          
-          Example query:
-          
-            esources:PUB_PDF
-               
-          @since v63.1.0.6
-        -->
-        
-        <field name="esources" type="normalized_string"
-          indexed="true" stored="true" required="false" multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+		<field name="page_range" type="string" indexed="false"
+			stored="true" required="false" multiValued="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
 
+
+		<!-- @api.doc * entry_date format: YYYY-MM-DD'T'hh:mm:ss.SSS'Z' Time when 
+			the record was first registered in the ADS database (even though the search 
+			field has millisecond granularity, in practice you can expect at most 24h 
+			granularity in the search values) Example query: entry_date:["2013-03-04T22:01:32.809Z" 
+			TO "2023-03-04T22:01:32.809Z"] @since v63.1.0.5 * metadata_ctime * metadata_mtime 
+			* fulltext_ctime * fulltext_mtime * nonbib_ctime * nonbib_mtime * metrics_ctime 
+			* metrics_mtime * orcid_ctime * orcid_mtime This timestamp can be used to 
+			query for latest changes in the ADS index. ctime = creation timestamp (doesn't 
+			change after the first entry) mtime = modificaiton timestamp NOTE: the ctime 
+			can change under special circumstance (ie. if we decide to recreate our database 
+			from scratch; therefore do not rely on the timestamp to be immutable; it 
+			does not change frequently) The prefixex are (hopefully) self explanatory. 
+			Example query: fulltext_mtime:["2013-03-04T22:01:32.809Z" TO "2023-03-04T22:01:32.809Z"] 
+			@since v61.1.0.3 -->
+		<field name="entry_date" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="metadata_ctime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="metadata_mtime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="fulltext_ctime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="fulltext_mtime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="nonbib_ctime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="nonbib_mtime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="metrics_ctime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="metrics_mtime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="orcid_ctime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+		<field name="orcid_mtime" type="date" indexed="true"
+			stored="true" multiValued="false" docValues="true"/>
+
+
+		<!-- @api.doc * entdate Field that allows you search for entry_date (without 
+			the annoying precision of entry_date) Example query: entdate:2011 entdate:2011-01 
+			@since v63.1.0.10 -->
+		<field name="entdate" type="date_string" indexed="true"
+			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+
+		<!-- @api.doc * origin Provenance information (data source name) of what 
+			was used for merging the metadata records. Mostly useful for internal/curation 
+			purposes. This field will contain all sources in the descending order (most 
+			important first). Example query: origin:"springer" @since v63.1.0.5 -->
+
+		<field name="origin" type="normalized_string" indexed="true"
+			stored="true" required="false" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+
+		<!-- @api.doc * data_count Number of all data objects in the article (cummulative 
+			sum from all archives). Example query: data_count:[0 TO 15] @since v63.1.0.5 -->
+
+		<field name="data_count" type="int" indexed="true" stored="true"
+			required="false" multiValued="false" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+
+		<!-- @api.doc * esources Sources of fulltext. Available values: PUB_PDF 
+			- paper has a link to publisher PDF fulltext PUB_HTML - paper has a link 
+			to publisher HTML fulltext ADS_PDF - paper has a link to ADS fulltext ADS_SCAN 
+			- paper has a link to ADS scan EPRINT_PDF - paper has a link to an eprint 
+			PDF (currently only arXiv, but possibly others in the future) EPRINT_HTML 
+			- paper has a link to an eprint HTML (currently only arXiv) AUTHOR_PDF - 
+			paper has a link to an author copy in PDF format AUTHOR_HTML - paper has 
+			a link to an author copy in HTML format Example query: esources:PUB_PDF @since 
+			v63.1.0.6 -->
+
+		<field name="esources" type="normalized_string" indexed="true"
+			stored="true" required="false" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+
+		<field name="query_normalizer" type="normalized_string"
+			indexed="false" stored="false" multiValued="false"
+			omitTermFreqAndPositions="true" />
 	</fields>
 
 	<uniqueKey>id</uniqueKey>
 
-	<!-- field for the QueryParser to use when an explicit fieldname is absent -->
-	<defaultSearchField>all</defaultSearchField>
-
-	<!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
-	<solrQueryParser defaultOperator="AND" />
 
 	<copyField source="id" dest="recid" />
 
-    <copyField source="bibcode" dest="identifier" />
-    <copyField source="alternate_bibcode" dest="identifier" />
-    <copyField source="doi" dest="identifier" />
+	<copyField source="bibcode" dest="identifier" />
+	<copyField source="alternate_bibcode" dest="identifier" />
+	<copyField source="doi" dest="identifier" />
 
 	<copyField source="author_norm" dest="all" />
 	<copyField source="alternate_title" dest="all" />
@@ -2028,6 +1660,6 @@
 	<copyField source="doi" dest="all" />
 	<copyField source="identifier" dest="all" />
 
-  <copyField source="alternate_title" dest="title" />
+	<copyField source="alternate_title" dest="title" />
 
 </schema>

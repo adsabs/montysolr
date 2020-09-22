@@ -307,7 +307,7 @@
      <lst name="defaults">
        <str name="wt">json</str>
        <int name="rows">10</int>
-       <str name="fl">title abstract author bibcode identifier volume page bibstem doctype pubdate pub pub_raw citation_count read_count esources</str>
+       <str name="fl">id recid title abstract author bibcode identifier volume page bibstem doctype pubdate pub pub_raw citation_count read_count esources</str>
        <!-- 
        ADSLABS:12/12: this can be overrided by url params. 
        But unfielded search will not work if you use "df" parameter!
@@ -339,7 +339,7 @@
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
        
        <str name="q.op">AND</str>
-       <str name="df">unfielded_search</str>
+       
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -711,8 +711,8 @@
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
           <str name="affil">aff_abbrev aff_canonical aff_id institution^2 aff^0.5</str>
        </lst>
-       <str name="aqp.unfieldedSearchField">all</str>
-       <str name="aqp.defaultField">unfielded_search</str>
+       <str name="aqp.unfieldedSearchField">unfielded_search</str>
+       
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;inst institution;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
