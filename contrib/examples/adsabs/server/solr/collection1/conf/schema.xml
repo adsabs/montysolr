@@ -497,15 +497,6 @@
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
-				<!-- add a prefix to all synonyms -->
-				<filter class="solr.analysis.ResetFilterFactory"
-					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
-
-				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
-					an acronym but keep the type information (if it is a synonym, it will remain 
-					SYNONYM) which is important for the query parsing -->
-				<filter class="solr.AcronymTokenFilterFactory"
-					emitBoth="true" prefix="acr::" setType="ACRONYM" />
 
 				<!-- remove stop words - first the case sensitively -->
 				<filter
@@ -516,6 +507,15 @@
 					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
 					ignoreCase="true" words="ads_text.kill" />
 
+				<!-- add a prefix to all synonyms -->
+				<filter class="solr.analysis.ResetFilterFactory"
+					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
+
+				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
+					an acronym but keep the type information (if it is a synonym, it will remain 
+					SYNONYM) which is important for the query parsing -->
+				<filter class="solr.AcronymTokenFilterFactory"
+					emitBoth="true" prefix="acr::" setType="ACRONYM" />
 
 
 				<!-- we emit ASCIIField version of the token (at the same position): 
@@ -527,9 +527,9 @@
 				<filter class="solr.TrimFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 
-				<!-- <filter
+				<filter
                     class="org.apache.solr.analysis.DiagnoseFilterFactory"
-                    msg="indexer" /> -->
+                    msg="indexer" />
 			</analyzer>
 			<analyzer type="query">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
@@ -594,6 +594,14 @@
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
 					inclOrig="true" />
 
+				<!-- remove stop words - first the case sensitively -->
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="false" words="ads_text.kill_sens" />
+				<!-- remove stop words - then case insensitively -->
+				<filter
+					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+					ignoreCase="true" words="ads_text.kill" />
 
 				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
 					an acronym but do not change its type, if it was a SYNONYM, it is important 
@@ -609,14 +617,6 @@
 				<!-- only pass SYNONYM and ACRONYM tokens <filter class="solr.analysis.author.AuthorCollectorFactory" 
 					tokenTypes="word" emitTokens="false" /> -->
 
-				<!-- remove stop words - first the case sensitively -->
-				<filter
-					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
-					ignoreCase="false" words="ads_text.kill_sens" />
-				<!-- remove stop words - then case insensitively -->
-				<filter
-					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
-					ignoreCase="true" words="ads_text.kill" />
 
 
 
