@@ -62,7 +62,7 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 				int docid = cache.getLuceneDocId(doc+docBase, v);
 				if (docid == -1)
 					continue;
-				hits.add(new CollectorDoc(docid, s, -1, vals.length));
+				hits.add(new CollectorDoc(docid, s, vals.length));
 			}
 		}
 	}

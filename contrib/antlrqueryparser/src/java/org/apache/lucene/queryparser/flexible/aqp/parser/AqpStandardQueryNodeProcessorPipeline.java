@@ -30,9 +30,8 @@ import org.apache.lucene.queryparser.flexible.standard.processors.BooleanSingleC
 import org.apache.lucene.queryparser.flexible.standard.processors.BoostQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.DefaultPhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.FuzzyQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericRangeQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LowercaseExpandedTermsQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.PointQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.PointRangeQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
@@ -118,9 +117,8 @@ public class AqpStandardQueryNodeProcessorPipeline extends
     add(new FuzzyQueryNodeProcessor());
     add(new MatchAllDocsQueryNodeProcessor());
     add(new OpenRangeQueryNodeProcessor());
-    add(new LegacyNumericQueryNodeProcessor());
-    add(new LegacyNumericRangeQueryNodeProcessor());
-    add(new LowercaseExpandedTermsQueryNodeProcessor());
+    add(new PointQueryNodeProcessor());
+    add(new PointRangeQueryNodeProcessor());
     add(new TermRangeQueryNodeProcessor());
     add(new AllowLeadingWildcardProcessor());
     add(new AnalyzerQueryNodeProcessor());

@@ -12,7 +12,6 @@ import monty.solr.util.MontySolrSetup;
 import org.apache.lucene.queries.CustomScoreQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
-import org.apache.lucene.sandbox.queries.SlowFuzzyQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.ConstantScoreQuery;
@@ -187,21 +186,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "qf", "author^2.3 title abstract^0.4"),
                 "((Synonym(abstract:acr::muller abstract:acr::müller))^0.4 | ((author:müller, | author:müller,* | author:mueller, | author:mueller,* | author:muller, | author:muller,*))^2.3 | Synonym(title:acr::muller title:acr::müller))",
                 DisjunctionMaxQuery.class);
-        setDebug(true);
-        assertQueryEquals(req("defType", "edismax",
-            "aqp.unfielded.tokens.strategy", "multiply",
-            "aqp.unfielded.tokens.new.type", "simple",
-            "qf", "title keyword",
-            "q", "property:refereed r s t"),
-            "",
-            BooleanQuery.class);
-        assertQueryEquals(req("defType", "aqp",
-            "aqp.unfielded.tokens.strategy", "multiply",
-            "aqp.unfielded.tokens.new.type", "simple",
-            "qf", "title keyword",
-            "q", "property:refereed r s t"),
-            "",
-            BooleanQuery.class);
+        
         assertQueryEquals(req("defType", "aqp", "q", "\"forman, c\"",
                 "qf", "author^2.3 title abstract^0.4"),
                 "((abstract:\"forman c\")^0.4 | ((author:forman, c | author:forman, christine | author:jones, c | author:jones, christine | author:forman, c* | author:forman,))^2.3 | title:\"forman c\")",
@@ -241,13 +226,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         // i expect following:
         // edismax receives: 'author:accomazzi, alberto' and also 'author:"accomazzi, alberto"
         //      ""         : 'property:refereed r s t'  and 'property:"refereed r s t"'
-        
         assertQueryEquals(req("defType", "aqp",
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
                 "qf", "title keyword",
                 "q", "author:accomazzi, alberto property:refereed r s t"),
-                "+((+((author:accomazzi, author:accomazzi,*)) +(keyword:alberto | title:alberto)) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)) +((+property:refereed +(keyword:r | title:r) +(keyword:s | title:s) +(keyword:t | title:t)) property:refereedrst)",
+                "+((((author:accomazzi, author:accomazzi,*)) (keyword:alberto | title:alberto)) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)) +((property:refereed (keyword:r | title:r) (keyword:s | title:s) (keyword:t | title:t)) property:refereedrst)",
                 BooleanQuery.class);
         // the same as above + enhanced by multisynonym
         // i expect to see syn::r s t, acr::rst
@@ -258,15 +242,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "true",
                 "q", "author:accomazzi, alberto property:refereed r s t",
                 "qf", "title keyword^0.5"),
-                "+((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) "
-                + "(author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)) "
-                + "+((+property:refereed "
-                + "+((keyword:r)^0.5 | title:r) "
-                + "+((keyword:s)^0.5 | title:s) "
-                + "+((keyword:t)^0.5 | title:t)) "
-                + "((title:syn::r s t)^1.0 (title:syn::rst)^1.0 (title:acr::rst)^1.0 "
-                +  "(keyword:syn::r s t)^0.45 (keyword:syn::rst)^0.45 (keyword:acr::rst)^0.45 "
-                + "property:refereedrst))",
+                "+((((author:accomazzi, author:accomazzi,*)) ((keyword:alberto)^0.5 | title:alberto)) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)) +((property:refereed ((keyword:r)^0.5 | title:r) ((keyword:s)^0.5 | title:s) ((keyword:t)^0.5 | title:t)) ((title:syn::r s t)^1.0 (title:syn::rst)^1.0 (title:acr::rst)^1.0 (keyword:syn::r s t)^0.45 (keyword:syn::rst)^0.45 (keyword:acr::rst)^0.45 property:refereedrst))",
                 BooleanQuery.class);
 
         // +((+((author:accomazzi, author:accomazzi,*)) +((keyword:alberto)^0.5 | title:alberto)) (((author:accomazzi, alberto author:accomazzi, alberto * author:accomazzi, a author:accomazzi, a * author:accomazzi,))~1)) +((+property:refereed +((keyword:r)^0.5 | title:r) +((keyword:s)^0.5 | title:s) +((keyword:t)^0.5 | title:t)) ((title:syn::r s t)^1.0 (title:acr::rst)^1.0 (keyword:syn::r s t)^0.45 (keyword:acr::rst)^0.45 property:refereedrst))
@@ -287,23 +263,40 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
                 "q", "pink elephant"),
-                "(+(Synonym(all:pink all:syn::pinkish)) +(all:elephant)) all:\"(pink syn::pinkish) elephant\"",
+                "((Synonym(all:pink all:syn::pinkish)) (all:elephant)) all:\"(pink syn::pinkish) elephant\"",
                 BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "pink elephant",
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
                 "qf", "title keyword"),
-                "(+(Synonym(keyword:pink keyword:syn::pinkish) | Synonym(title:pink title:syn::pinkish)) +(keyword:elephant | title:elephant)) (keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\")",
+                "((Synonym(keyword:pink keyword:syn::pinkish) | Synonym(title:pink title:syn::pinkish)) (keyword:elephant | title:elephant)) (keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\")",
                 BooleanQuery.class);
+        
+        // if we make q.op to be the default AND (6.x behaviour)
+        assertQueryEquals(req("defType", "aqp", "q", "pink elephant",
+            "aqp.unfielded.tokens.strategy", "multiply",
+            "aqp.unfielded.tokens.new.type", "simple",
+            "qf", "title keyword",
+            "q.op", "AND"),
+            "(+(Synonym(keyword:pink keyword:syn::pinkish) | Synonym(title:pink title:syn::pinkish)) +(keyword:elephant | title:elephant)) (+(keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\"))",
+            BooleanQuery.class);
 
         // when combined, the ADS's default AND operator should be visible +foo
         assertQueryEquals(req("defType", "aqp", "q", "pink elephant title:foo",
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple",
-                "qf", "title keyword"),
-                "+((+(Synonym(keyword:pink keyword:syn::pinkish) | Synonym(title:pink title:syn::pinkish)) +(keyword:elephant | title:elephant)) (keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\")) +title:foo",
+                "qf", "title keyword",
+                "q.op", "AND"),
+                "+((+(Synonym(keyword:pink keyword:syn::pinkish) | Synonym(title:pink title:syn::pinkish)) +(keyword:elephant | title:elephant)) (+(keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\"))) +title:foo",
                 BooleanQuery.class);
+        
+        assertQueryEquals(req("defType", "aqp", "q", "pink elephant title:foo",
+            "aqp.unfielded.tokens.strategy", "multiply",
+            "aqp.unfielded.tokens.new.type", "simple",
+            "qf", "title keyword"),
+            "+(((Synonym(keyword:pink keyword:syn::pinkish) | Synonym(title:pink title:syn::pinkish)) (keyword:elephant | title:elephant)) (keyword:\"(pink syn::pinkish) elephant\" | title:\"(pink syn::pinkish) elephant\")) +title:foo",
+            BooleanQuery.class);
 
 
         // multi-token combined with single token
@@ -315,8 +308,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             "aqp.unfielded.tokens.new.type", "simple",
             "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
             "qf", "title^0.9 keyword^0.7"),
-            "((+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) "
-            + "| (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9))",
+            "((((keyword:r)^0.7 | (title:r)^0.9) ((keyword:s)^0.7 | (title:s)^0.9) ((keyword:t)^0.7 | (title:t)^0.9)) | (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9))",
             DisjunctionMaxQuery.class);
         assertQueryEquals(req("defType", "aqp",
             "q", "r s t",
@@ -325,8 +317,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             "aqp.unfielded.tokens.new.type", "simple",
             "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
             "qf", "title^0.9 keyword^0.7"),
-            "((+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) "
-            + "| (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9))~0.5",
+            "((((keyword:r)^0.7 | (title:r)^0.9) ((keyword:s)^0.7 | (title:s)^0.9) ((keyword:t)^0.7 | (title:t)^0.9)) | (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9))~0.5",
             DisjunctionMaxQuery.class);
         
         assertQueryEquals(req("defType", "aqp",
@@ -335,7 +326,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
                 "qf", "title^0.9 keyword^0.7"),
-                "(+((keyword:r)^0.7 | (title:r)^0.9) +((keyword:s)^0.7 | (title:s)^0.9) +((keyword:t)^0.7 | (title:t)^0.9)) (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9)",
+                "(((keyword:r)^0.7 | (title:r)^0.9) ((keyword:s)^0.7 | (title:s)^0.9) ((keyword:t)^0.7 | (title:t)^0.9)) (((keyword:\"r s t\" | Synonym(keyword:acr::rst keyword:syn::r s t keyword:syn::rst)))^0.7 | ((title:\"r s t\" | Synonym(title:acr::rst title:syn::r s t title:syn::rst)))^0.9)",
                 BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp",
@@ -344,11 +335,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.phrase.edismax.synonym.workaround", "false",
                 "qf", "title^0.9 keyword_norm^0.7"),
-                "(+((keyword_norm:x)^0.7 | (title:x)^0.9) +((keyword_norm:r)^0.7 | (title:r)^0.9) "
-                + "+((keyword_norm:s)^0.7 | (title:s)^0.9) +((keyword_norm:t)^0.7 | (title:t)^0.9) "
-                + "+((keyword_norm:y)^0.7 | (title:y)^0.9)) "
-                + "((keyword_norm:\"x r s t y\")^0.7 "
-                + "| ((title:\"x r s t y\" | title:\"x (syn::r s t syn::rst acr::rst) ? ? y\"~3))^0.9)",
+                "(((keyword_norm:x)^0.7 | (title:x)^0.9) ((keyword_norm:r)^0.7 | (title:r)^0.9) ((keyword_norm:s)^0.7 | (title:s)^0.9) ((keyword_norm:t)^0.7 | (title:t)^0.9) ((keyword_norm:y)^0.7 | (title:y)^0.9)) ((keyword_norm:\"x r s t y\")^0.7 | ((title:\"x r s t y\" | title:\"x (syn::r s t syn::rst acr::rst) ? ? y\"~3))^0.9)",
                 BooleanQuery.class);
 
 
@@ -363,7 +350,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple"
                 ),
-                "(((+(author:accomazzi, author:accomazzi,*) +(((author:alberto, author:alberto,*))^2.3 | title:alberto)))^2.3 | ((+title:accomazzi +(((author:alberto, author:alberto,*))^2.3 | title:alberto)))) (((author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,))^2.3 | (title:\"accomazzi alberto\" | title:accomazzialberto))",
+                "(((+(author:accomazzi, author:accomazzi,*) +(((author:alberto, author:alberto,*))^2.3 | title:alberto)))^2.3 | ((+title:accomazzi +(((author:alberto, author:alberto,*))^2.3 | title:alberto)))) (((author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,))^2.3 | (title:accomazzialberto | title:\"accomazzi alberto\"))",
                 BooleanQuery.class);
 
 
@@ -380,7 +367,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.strategy", "multiply",
                 "aqp.unfielded.tokens.new.type", "simple"
                 ),
-                "(((+(author:accomazzi, author:accomazzi,*) +(((author:alberto, author:alberto,*))^2.3 | title:alberto)))~1) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)",
+                "((+(author:accomazzi, author:accomazzi,*) +(((author:alberto, author:alberto,*))^2.3 | title:alberto))) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)",
                 BooleanQuery.class);
 
 
@@ -604,15 +591,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         FuzzyQuery.class);
       
       // levenshtein automata only considers distances (and max is 2)
-      assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~0.8"),
-          "author:hoffmann, w~0.8",
-          SlowFuzzyQuery.class);
       assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~3"),
           "author:hoffmann, w~2",
           FuzzyQuery.class);
       assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~1"),
-          "author:hoffmann, w~1.0",
-          SlowFuzzyQuery.class);
+          "author:hoffmann, w~1",
+          FuzzyQuery.class);
       
       
       assertQueryEquals(req("defType", "aqp", "q", "author:\"Hoffmann, W.\"~2"),
@@ -668,7 +652,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         
         // full - virtual field with wrong date
         assertQueryEquals(req("defType", "aqp", "q", "full:(\"15-52-15050\" OR \"15-32-21062\")"),
-          "((ack:\"15 52 15050\" | ack:155215050) ((abstract:\"15 52 15050\" | abstract:155215050))^2.0 ((title:\"15 52 15050\" | title:155215050))^2.0 (body:\"15 52 15050\" | body:155215050) (keyword:\"15 52 15050\" | keyword:155215050)) ((ack:\"15 32 21062\" | ack:153221062) ((abstract:\"15 32 21062\" | abstract:153221062))^2.0 ((title:\"15 32 21062\" | title:153221062))^2.0 (body:\"15 32 21062\" | body:153221062) (keyword:\"15 32 21062\" | keyword:153221062))",
+          "((ack:155215050 | ack:\"15 52 15050\") ((abstract:155215050 | abstract:\"15 52 15050\"))^2.0 ((title:155215050 | title:\"15 52 15050\"))^2.0 (body:155215050 | body:\"15 52 15050\") (keyword:155215050 | keyword:\"15 52 15050\")) ((ack:153221062 | ack:\"15 32 21062\") ((abstract:153221062 | abstract:\"15 32 21062\"))^2.0 ((title:153221062 | title:\"15 32 21062\"))^2.0 (body:153221062 | body:\"15 32 21062\") (keyword:153221062 | keyword:\"15 32 21062\"))",
           BooleanQuery.class);
 
       
@@ -711,7 +695,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         //  )
         // +author_facet_hier:0/Murray, S
 
-        //setDebug(true);
         assertQueryEquals(req("defType", "aqp",
                 "q", "stephen murray author_facet_hier:\"0/Murray, S\"",
                 "qf", "abstract title",
@@ -719,12 +702,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                "+("
-                + "(+(Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) "
-                +  "+(abstract:murray | title:murray)) "
-                + "(abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")"
-                + ") "
-                + "+author_facet_hier:0/Murray, S",
+                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
                 BooleanQuery.class
         );
 
@@ -735,13 +713,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                //"+((((((abstract:stephen abstract:syn::stephen)) | ((title:stephen title:syn::stephen))) (abstract:murray | title:murray))~2) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
-                "+("
-                + "(+(Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) "
-                +  "+(abstract:murray | title:murray)) "
-                + "(abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")"
-                + ") "
-                + "+author_facet_hier:0/Murray, S",
+                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
                 BooleanQuery.class
         );
         assertQueryEquals(req("defType", "aqp",
@@ -934,14 +906,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "edismax(dog cat)", "qf", "title^1 abstract^0.5"), //edismax
-                "+((abstract:dog)^0.5 | title:dog) +((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
+                "((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5", "q.op", "OR"), //aqp
                 "((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
-                "+((abstract:dog)^0.5 | title:dog) +((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5", "q.op", "AND"), //aqp
+                "+(+((abstract:dog)^0.5 | title:dog)) +(+((abstract:cat)^0.5 | title:cat))", BooleanQuery.class);
 
+        assertQueryEquals(req("defType", "aqp", "q", "dog cat", "qf", "title^1 abstract^0.5"), //aqp
+            "+((abstract:dog)^0.5 | title:dog) +((abstract:cat)^0.5 | title:cat)", BooleanQuery.class);
 
         // make sure the *:* query is not parsed by edismax
         assertQueryEquals(req("defType", "aqp", "q", "*",
@@ -966,11 +940,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
         // if we use the solr analyzer to parse the query, all is configured to remove stopwords
-        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but"),
+        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat all:but", "df", "all"),
                 "((all:dog) (all:cat)) title:bat", BooleanQuery.class);
 
         // but pub is normalized_string with a different analyzer and should retain 'but'
-        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but"),
+        assertQueryEquals(req("defType", "aqp", "q", "edismax(dog OR cat) OR title:bat OR pub:but", "df", "all"),
                 "((all:dog) (all:cat)) title:bat pub:but", BooleanQuery.class);
 
 
@@ -1049,7 +1023,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
     public void testSearch() throws Exception {
-
 
         // search for all docs with a field
         assertQueryEquals(req("defType", "aqp", "q", "title:*", 
@@ -1274,7 +1247,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       streams.add(cs);
       
       
-      SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) OR docs(fq_bar)) AND bibcode:b4", "debugQuery", "true");
+      SolrQueryRequestBase req = (SolrQueryRequestBase) req("qt", "/bigquery", "q","(docs(fq_foo) OR docs(fq_bar)) AND bibcode:b4");
       req.setContentStreams(streams);
       
       assertQ(req,

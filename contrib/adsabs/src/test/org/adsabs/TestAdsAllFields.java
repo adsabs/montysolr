@@ -35,6 +35,7 @@ import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.IntPointField;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.servlet.DirectSolrConnection;
@@ -98,7 +99,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertTrue(field.indexed() == true && field.stored() == true && field.isRequired() == false
 				&& field.multiValued() == false);
 		field.checkSortability();
-		assertTrue(field.getType().getClass().isAssignableFrom(TrieIntField.class));
+		assertTrue(field.getType().getClass().isAssignableFrom(IntPointField.class));
 
 		// check field ID is copied to field RECID
 //		List<CopyField> copyFields = schema.getCopyFieldsList("id");
@@ -328,7 +329,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		/*
 		 * recid - recid is a int field
 		 */
-
 		assertQ(req("q", "recid:100"), "//*[@numFound='1']");
 		assertQ(req("q", "recid:0100"), "//*[@numFound='1']");
 		assertQ(req("q", "recid:[99 TO 100]"), "//*[@numFound='1']");
@@ -449,7 +449,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='100']",
         "//doc/float[@name='score'][.='26.0']");
 
-		assert h.query(req("q", "author:\"Einstein, A\"", "fl", "author_norm"))
+		assert h.query(req("q", "author:\"Einstein, A\"", "fl", "author_norm", "indent", "false"))
 				.contains("<arr name=\"author_norm\">" +
 				"<str>t' Hooft, van X</str>" +
 				"<str>Anders, John Michael</str>" +
@@ -570,7 +570,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			"//*[@numFound='1']");
 
 
-		assert h.query(req("q", "recid:100", "fl", "aff"))
+		assert h.query(req("q", "recid:100", "indent", "false", "fl", "aff"))
  			.contains("<arr name=\"aff\">" +
 				"<str>-</str>" +
 				"<str>NASA Kavli space center, Cambridge, MA 02138, USA</str>" +
@@ -646,7 +646,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		
     
 		// order/gaps are important
-		assert h.query(req("q", "recid:100", "fl", "email"))
+		assert h.query(req("q", "recid:100", "indent", "false", "fl", "email"))
  			.contains("<arr name=\"email\">" +
 				"<str>-</str>" +
 				"<str>anders@email.com</str>" +
@@ -667,7 +667,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         "//doc/int[@name='recid'][.='100']",
         "//*[@numFound='1']"
     );
-    assert h.query(req("q", "recid:100", "fl", "orcid_pub"))
+    assert h.query(req("q", "recid:100", "indent", "false", "fl", "orcid_pub"))
     .contains("<arr name=\"orcid_pub\">" +
       "<str>1111-2222-3333-4444</str>" +
       "<str>-</str>" +
@@ -1632,14 +1632,19 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     
     // this must be turned into mlt query because the input is too long (protection kicks in)
     assertQueryEquals(req("q", "abstract:\"We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7\""), 
-        "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7", MoreLikeThisQuery.class);
+        "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7", 
+        MoreLikeThisQuery.class);
 
     // MoreLikeThisQuery doesn't show the field name, but i have verified it is MLT in three title, abstract, keyword fields
     assertQueryEquals(req("q", "abs:\"We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7\""), 
-        "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7", 
+        "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 "
+        + "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7 "
+        + "like:We use the Hubble Space Telescope (HST) archive of ultraviolet (UV)quasar spectroscopy toconduct the first blind survey for damped Ly-αabsorbers (DLAs) at low redshift (z <1.6). Ourstatistical sample includes 463 quasars with spectral coverage spanning a total redshift path ∆z=123.3 or an absorption path ∆X= 229.7", 
         BooleanQuery.class);
     // unfielded also must become like query
-    assertQueryEquals(req("q", "\"Evaluated bimolecular ion molecule gas phase kinetics\"",
+    assertQueryEquals(req(
+        "defType", "aqp",
+        "q", "\"Evaluated bimolecular ion molecule gas phase kinetics\"",
         "qf", "title abstract",
         "aqp.maxPhraseLength", "10"),
         "(like:Evaluated bimolecular ion molecule gas phase kinetics | like:Evaluated bimolecular ion molecule gas phase kinetics)",

@@ -1,11 +1,11 @@
 package org.apache.solr.response.transform;
 
+import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.solr.util.AbstractSolrTestCase;
 import org.junit.BeforeClass;
 
-public class TestFieldTransformer extends AbstractSolrTestCase {
+public class TestFieldTransformer extends MontySolrAbstractTestCase {
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {

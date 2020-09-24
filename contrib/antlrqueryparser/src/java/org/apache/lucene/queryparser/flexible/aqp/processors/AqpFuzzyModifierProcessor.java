@@ -110,16 +110,6 @@ public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl impleme
   }
   
   private QueryNode makeFuzzyNode(QueryConfigHandler config, FieldQueryNode fn, Float fuzzy) {
-    if (config
-        .has(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) != false
-        && config
-            .get(AqpStandardQueryConfigHandler.ConfigurationKeys.ALLOW_SLOW_FUZZY) == true) {
-      if (fuzzy > 0.0f && fuzzy <= 1.0f) {
-        return new SlowFuzzyQueryNode(fn.getFieldAsString(),
-            fn.getTextAsString(), fuzzy, fn.getBegin(), fn.getEnd());
-      }
-    }
-
     return new FuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(),
         fuzzy, fn.getBegin(), fn.getEnd());
   }

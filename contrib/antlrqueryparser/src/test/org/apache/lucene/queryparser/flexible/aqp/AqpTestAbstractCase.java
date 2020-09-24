@@ -212,10 +212,9 @@ public class AqpTestAbstractCase extends LuceneTestCase {
     }
   }
 
-  public void assertWildcardQueryEquals(String query, boolean lowercase,
+  public void assertWildcardQueryEquals(String query,
       String result, boolean allowLeadingWildcard) throws Exception {
     AqpQueryParser qp = getParser(null);
-    qp.setLowercaseExpandedTerms(lowercase);
     qp.setAllowLeadingWildcard(allowLeadingWildcard);
     Query q = qp.parse(query, "field");
     String s = q.toString("field");
@@ -223,11 +222,6 @@ public class AqpTestAbstractCase extends LuceneTestCase {
       fail("WildcardQuery /" + query + "/ yielded /" + s + "/, expecting /"
           + result + "/");
     }
-  }
-
-  public void assertWildcardQueryEquals(String query, boolean lowercase,
-      String result) throws Exception {
-    assertWildcardQueryEquals(query, lowercase, result, false);
   }
 
   public void assertWildcardQueryEquals(String query, String result)

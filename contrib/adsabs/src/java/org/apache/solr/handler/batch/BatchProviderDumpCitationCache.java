@@ -60,24 +60,32 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 	    while (it.hasNext()) {
 	      int[][] data = it.next();
 	      int[] references = data[0];
+	      //TODO:rca - have a feeling this has become too convoluted 
+	      // and there must be a better way to un-invert; especially 
+	      // with docvalues
 		  	if (references != null && references.length > 0) {
-		  		ret = uniqueValueCache.get(paperid);
-		  		out.write(ret.utf8ToString());
-		  		out.write("\t");
-		  		first=true;
-		  		for (int luceneDocId: references) {
-		  		  if (luceneDocId == -1)
-		  		    continue;
-			  		ret = uniqueValueCache.get(luceneDocId);
-					  if (ret.length > 0) {
-					  	if (!first) {
-					  		out.write("\t");
-					  	}
-					    out.write(ret.utf8ToString());
-					    first = false;
-					  }
-		  		}
-		  		out.write("\n");
+		  	  if (uniqueValueCache.advanceExact(paperid)) {
+		  	    ret = uniqueValueCache.binaryValue();
+		  	    out.write(ret.utf8ToString());
+		  	    out.write("\t");
+		  	    first=true;
+		  	    for (int luceneDocId: references) {
+		  	      if (luceneDocId == -1)
+		  	        continue;
+		  	      
+		  	      uniqueValueCache.advanceExact(luceneDocId);
+		  	      ret = uniqueValueCache.binaryValue();
+		  	      
+		  	      if (ret.length > 0) {
+		  	        if (!first) {
+		  	          out.write("\t");
+		  	        }
+		  	        out.write(ret.utf8ToString());
+		  	        first = false;
+		  	      }
+		  	    }
+		  	    out.write("\n");		  	    
+		  	  }
 		  	}
 		  	paperid++;
 		  }

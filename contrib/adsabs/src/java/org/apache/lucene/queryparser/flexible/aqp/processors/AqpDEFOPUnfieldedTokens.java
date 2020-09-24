@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.antlr.runtime.CharStream;
-import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpDisjunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpImmutableGroupQueryNode;
@@ -519,7 +518,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 
     aqpIgnorableFields = new HashSet<String>();
     if (obj != null) {
-      String[] vals = StringUtils.split((String) obj);
+      String[] vals = ((String) obj).split("\\s+");
       for (String v: vals) {
         aqpIgnorableFields.add(v);
       }

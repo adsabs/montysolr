@@ -12,11 +12,13 @@ import org.apache.lucene.queryparser.flexible.standard.processors.FuzzyQueryNode
 import org.apache.lucene.queryparser.flexible.standard.processors.MatchAllDocsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericQueryNodeProcessor;
-import org.apache.lucene.queryparser.flexible.standard.processors.LegacyNumericRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.PointQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.PointRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.RegexpQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.PhraseSlopQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.RemoveEmptyNonLeafQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.TermRangeQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.processors.WildcardQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAnalyzerProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAdsabsAuthorPreProcessor;
@@ -47,7 +49,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFUZZYProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFieldMapperProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpGroupQueryOptimizerProcessor;
-import org.apache.lucene.queryparser.flexible.aqp.processors.AqpLowercaseExpandedTermsQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpNormalizeFieldQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpNullDefaultFieldProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOPERATORProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpOptimizationProcessor;
@@ -62,6 +64,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTMODIFIERProcess
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpTreeRewriteProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpVirtualFieldsQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpWhiteSpacedQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpWildcardQueryNodeProcessor;
 import org.apache.solr.search.AqpAdsabsQParser;
 
 /**
@@ -215,8 +218,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
       
     }
 		
-		add(new LegacyNumericQueryNodeProcessor());
-    add(new LegacyNumericRangeQueryNodeProcessor());
+		add(new PointQueryNodeProcessor());
+    add(new PointRangeQueryNodeProcessor());
 		add(new TermRangeQueryNodeProcessor());
 		add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 		
@@ -242,9 +245,12 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
 		add(new AqpAdsabsCarefulAnalyzerProcessor());
 		
 	  
-		// lowercase everything else which wasn't caught by the previous steps
+		// normalize values
 		// a special case are non-analyzed nodes - these are left =UnTouchEd
-		add(new AqpLowercaseExpandedTermsQueryNodeProcessor());
+		add(new AqpNormalizeFieldQueryNodeProcessor());
+		// add(new AqpWildcardQueryNodeProcessor());
+		
+		add(new RegexpQueryNodeProcessor());
 
 		
 		// author search: 'kurtz, michael' is expanded with "kurtz, michael *" ...

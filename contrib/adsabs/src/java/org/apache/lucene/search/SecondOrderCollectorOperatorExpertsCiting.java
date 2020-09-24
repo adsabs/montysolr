@@ -3,6 +3,8 @@ package org.apache.lucene.search;
 import java.io.IOException;
 import java.util.Set;
 
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.solr.search.CitationCache;
@@ -30,7 +32,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		assert cache != null;
 		this.cache = cache;
 		this.boostCache = boostWrapper;
-		setFinalValueType(FinalValueType.AGRESTI_COULL);
+		setFinalValueType(FinalValueType.ARITHM_MEAN);
 	}
 	
 
@@ -40,17 +42,18 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
     // find references froum our doc 
 		int[] references = cache.getLuceneDocIds(doc+docBase);
 		
-		if (references == null) {
+		if (references == null || references.length == 0) {
 			return;
 		}
 		
 		//Document document = reader.document(doc, fieldsToLoad);
 		
-		float s = 0.5f; // lucene score doesn't make sense for us;
+		float s = 0.0f; // lucene score doesn't make sense for us;
 		
 		/*
 		// naive implementation (probably slow)
-		// IndexableField bf = document.getField(boostField);
+		Document document = this.context.reader().document(doc);
+		IndexableField bf = document.getField("boost_1");
 		if (bf != null) {
       s = s + (s * bf.numericValue().floatValue());
     }
@@ -69,15 +72,16 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 		
 		float bc = 0.0f;
 		if ((bc = boostCache.getFloat(doc+docBase)) >  0.0f) {
-			s = s + bc;
+			s = bc / references.length;
 		}
+		
 		
 
 		//s = s / (vals.length + 100); // this would contribute only a part of the score to each citation
 		for (int docid: references) {
 			if (docid > 0) {
-				//System.out.println("expert: doc=" + (doc+docBase) + "(score:" + s + ") adding=" + docid + " (score:" + (s + boostCache[docid]) + ")" + " freq=" + references.length) ;
-				hits.add(new CollectorDoc(docid, s + boostCache.getFloat(docid), -1, 1));
+				//System.out.println("expert: doc=" + (doc+docBase) + "(boost:" + bc + ") adding=" + docid + " (score:" + (s) + ")" + " freq=" + references.length) ;
+				hits.add(new CollectorDoc(docid, s, references.length));
 			}
 		}
 	}
@@ -86,6 +90,7 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 	public void doSetNextReader(LeafReaderContext context)
 			throws IOException {
 		this.docBase = context.docBase;
+		this.context = null;
 	}
 
 	

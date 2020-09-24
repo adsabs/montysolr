@@ -29,7 +29,7 @@
 	<property name="ddash" value="--" />
 
 
-	<property name="solr.branch" value="branch_6_3" />
+	<property name="solr.branch" value="branch_7_7" />
 
 	<import file="common-build.xml"/>
 	<path id="classpath">
@@ -189,6 +189,11 @@ solr.version=${solr.version}
     	<ant target="unlink-upstream"  dir="${common.dir}/contrib/examples"  inheritall="false" />
 	</target>
 
+	<target name="link-contrib" >
+        <ant target="link-upstream"  dir="${common.dir}/contrib/antlrqueryparser"  inheritall="false" />
+        <ant target="link-upstream"  dir="${common.dir}/contrib/adsabs"  inheritall="false" />
+        
+    </target>
 
 
 	<!--

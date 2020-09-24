@@ -643,7 +643,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 			SchemaField fieldInfo = schema.getField(fName);
 			FieldType type = fieldInfo.getType();
 
-			if (type.getNumericType() != null) {
+			if (type.getNumberType() != null) { // todo:rca -- numeric types have grown since this was conceived...
 				synchronized (relationships) {
 					treatIdentifiersAsText = true;
 				}
@@ -682,7 +682,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 	 * Reads values from the DocValue and/or FieldCache and calls the setter
 	 */
 	private class Transformer {
-		public void process(int docBase, int docid) {
+		public void process(int docBase, int docid) throws IOException {
 			throw new NotImplementedException();
 		}
 	}
@@ -743,7 +743,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 					} else {
 						continue;
 					}
-					unReader = new UninvertingReader(lr, mapping);
+					unReader = UninvertingReader.wrap(lr, mapping::get);
 				} else {
 					unReader = lr;
 				}
@@ -754,9 +754,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 						NumericDocValues dv = unReader.getNumericDocValues(field);
 
 						@Override
-						public void process(int docBase, int docId) {
-							int v = (int) dv.get(docId);
-							setter.set(docBase, docId, v);
+						public void process(int docBase, int docId) throws IOException {
+						  if (dv.advanceExact(docId)) {
+						    int v = (int) dv.longValue();
+						    setter.set(docBase, docId, v);						    
+						  }
 						}
 					};
 					break;
@@ -765,12 +767,12 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 						SortedNumericDocValues dv = unReader.getSortedNumericDocValues(field);
 
 						@Override
-						public void process(int docBase, int docId) {
-							dv.setDocument(docId);
-							int max = dv.count();
+						public void process(int docBase, int docId) throws IOException {
+							dv.advanceExact(docId);
+							int max = dv.docValueCount();
 							int v;
 							for (int i = 0; i < max; i++) {
-								v = (int) dv.valueAt(i);
+								v = (int) dv.nextValue();
 								setter.set(docBase, docId, v);
 							}
 						}
@@ -782,15 +784,16 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 						int errs = 0;
 
 						@Override
-						public void process(int docBase, int docId) {
+						public void process(int docBase, int docId) throws IOException {
 							if (errs > 5)
 								return;
-							dv.setDocument(docId);
-							for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
-								final BytesRef value = dv.lookupOrd(ord);
-								setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply
-																								// tokenization, doc
-																								// values ignore it
+							if (dv.advanceExact(docId)) {
+							  for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
+							    final BytesRef value = dv.lookupOrd(ord);
+							    setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply
+							    // tokenization, doc
+							    // values ignore it
+							  }							  
 							}
 						}
 					};
@@ -801,11 +804,13 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 						TermsEnum te;
 
 						@Override
-						public void process(int docBase, int docId) {
-							BytesRef v = dv.get(docId);
-							if (v.length == 0)
-								return;
-							setter.set(docBase, docId, v.utf8ToString().toLowerCase());
+						public void process(int docBase, int docId) throws IOException {
+						  if (dv.advanceExact(docId)) {
+						    BytesRef v = dv.binaryValue();
+						    if (v.length == 0)
+						      return;
+						    setter.set(docBase, docId, v.utf8ToString().toLowerCase());						    
+						  }
 						}
 					};
 					break;

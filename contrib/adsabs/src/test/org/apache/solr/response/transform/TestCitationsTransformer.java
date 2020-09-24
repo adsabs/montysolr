@@ -2,10 +2,10 @@ package org.apache.solr.response.transform;
 
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.solr.util.AbstractSolrTestCase;
+import org.apache.solr.SolrTestCaseJ4;
 import org.junit.BeforeClass;
 
-public class TestCitationsTransformer extends AbstractSolrTestCase {
+public class TestCitationsTransformer extends SolrTestCaseJ4 {
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -21,7 +21,6 @@ public class TestCitationsTransformer extends AbstractSolrTestCase {
 	}
 	
 	
-	@Override
 	public String getSolrHome() {
 		return MontySolrSetup.getMontySolrHome();
 	}

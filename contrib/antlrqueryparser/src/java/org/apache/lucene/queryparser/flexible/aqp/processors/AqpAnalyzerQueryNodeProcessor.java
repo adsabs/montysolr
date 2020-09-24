@@ -45,7 +45,7 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.nodes.StandardBooleanQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 
@@ -258,8 +258,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
               children.add(fq);
   
             }
-            return new GroupQueryNode(new StandardBooleanQueryNode(children,
-                positionCount == 1));
+            return new GroupQueryNode(new BooleanQueryNode(children));
           } else {
             // phrase query:
             MultiPhraseQueryNode mpq = new MultiPhraseQueryNode();

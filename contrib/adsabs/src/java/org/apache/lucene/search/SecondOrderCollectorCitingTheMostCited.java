@@ -30,6 +30,7 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
   public void collect(int doc) throws IOException {
   	int[] related = cache.getLuceneDocIds(doc+docBase);
   	
+  	//System.out.println("Collecting: doc=" + doc + "docBase:" +docBase);
     if (related == null) return;
     //float s = scorer.score();
     float s = 0.5f; // lucene score doesn't make sense for us;
@@ -42,15 +43,13 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
 			s = s + bc;
 		}
     
-    float freq = (float) related.length;
-    
     // find docs that are citing us and set their score to the score of the paper they cite
     // later it will get turned into arithmetic mean 
     for (int docid: related) {
     	if (docid < 0)
     		continue;
     	//System.out.println("expert: doc=" + (doc+docBase) + "(score:" + s + ") adding=" + docid + " (score:" + (s + boostCache[docid]) + ")" + " freq=" + related.length) ;
-      hits.add(new CollectorDoc(docid, s, -1, 1));
+      hits.add(new CollectorDoc(docid, s, related.length));
     }
     
   }

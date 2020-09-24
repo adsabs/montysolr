@@ -6,15 +6,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.handler.batch.BatchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.util.AbstractSolrTestCase;
 import org.junit.BeforeClass;
 
-public class TestCitationCacheReplication extends AbstractSolrTestCase {
+public class TestCitationCacheReplication extends SolrTestCaseJ4 {
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -30,7 +30,6 @@ public class TestCitationCacheReplication extends AbstractSolrTestCase {
 	}
 	
 	
-	@Override
 	public String getSolrHome() {
 		return MontySolrSetup.getMontySolrHome();
 	}

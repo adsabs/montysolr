@@ -170,7 +170,7 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		parsers.put(DisMaxQParserPlugin.NAME, new AqpSubqueryParserFull() {
-			public Query parse(FunctionQParser fp) throws SyntaxError {    		  
+			public Query parse(FunctionQParser fp) throws SyntaxError {
 				QParser q = fp.subQuery(fp.getString(), DisMaxQParserPlugin.NAME);
 				return simplify(q.getQuery());
 			}
@@ -944,12 +944,12 @@ AqpFunctionQueryBuilderProvider {
 		});
 		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
 			public Query parse(FunctionQParser fp) throws SyntaxError {
-				final String original = fp.getString();
-				System.out.println("edismax fed: " + original);
-				QParser eqp = fp.subQuery(original, "adismax");
-				Query q = eqp.getQuery();
-				System.out.println("edismax produced: " + q);
-				return simplify(q);
+			  final String original = fp.getString();
+        //System.out.println("edismax fed: " + original);
+        QParser eqp = fp.subQuery(original, "adismax");
+        Query q = eqp.getQuery();
+        //System.out.println("edismax produced: " + q);
+        return simplify(q);
 			}
 			protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
 				List<Query> parts = query.getDisjuncts();
@@ -1154,7 +1154,7 @@ AqpFunctionQueryBuilderProvider {
               throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query, missing stream for bigquery("+input+")");
           
           try {
-            q = QParser.getParser(qString, "bitset", locReq).getQuery();
+            q = QParser.getParser(qString, "bitset", true, locReq).getQuery();
           } catch( SyntaxError e ){
             throw new SolrException(ErrorCode.BAD_REQUEST,"Invalid query bigquery("+input+")",e);
           }

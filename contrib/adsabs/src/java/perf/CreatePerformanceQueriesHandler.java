@@ -257,7 +257,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
 	public static class FormattedQuery {
 		private String query;
 		private long[] frequencies;
-		private int totalHits = -1;
+		private long totalHits = -1;
 		
 		public FormattedQuery(String query, long...frequencies) {
 			this.query = query;
@@ -450,12 +450,5 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
   public String getDescription() {
     return "Creates a list of queries for performance testing";
   }
-
-
-  @Override
-  public String getSource() {
-    return "$URL: http://github.com/romanchyla/montysolr/contrib/examples/src/java/perf/CreatePerformanceQueriesHandler.java $";
-  }
-  
 
 }

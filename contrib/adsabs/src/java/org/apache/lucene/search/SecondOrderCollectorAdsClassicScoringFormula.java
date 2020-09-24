@@ -69,12 +69,12 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 			if (s > highestLuceneScore)
 				highestLuceneScore = s;
 			
-			float cf = getClassicBoostFactor(doc);
-			if (cf > highestClassicFactor)
-			  highestClassicFactor = cf;
+//			float cf = getClassicBoostFactor(doc+docBase);
+//			if (cf > highestClassicFactor)
+//			  highestClassicFactor = cf;
 				
 			
-			hits.add(new CollectorDoc(doc+docBase, s, -1, scorer.freq()));
+			hits.add(new CollectorDoc(doc+docBase, s, -1));
 
 	}
 
@@ -96,7 +96,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 		try {
 			if (!organized) {
 				for (CollectorDoc hit: hits) {
-					hit.score = (this.lucenePart * hit.score / highestLuceneScore) + (this.adsPart * getClassicBoostFactor(hit.doc) / highestClassicFactor);
+					hit.score = (this.lucenePart * hit.score / highestLuceneScore) + (this.adsPart * getClassicBoostFactor(hit.doc));
 				}
 			}
 		}

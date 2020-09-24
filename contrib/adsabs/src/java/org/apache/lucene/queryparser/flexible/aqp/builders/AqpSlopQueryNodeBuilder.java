@@ -2,6 +2,7 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -22,6 +23,7 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNod
 
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
@@ -56,6 +58,7 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
     
     
     if (query instanceof PhraseQuery) {
+      
     	if (defaultValue == 0) {
 	    	int[] pos = ((PhraseQuery) query).getPositions();
 	    	defaultValue = (pos[pos.length-1] - pos[0]) - (pos.length-1);
@@ -71,15 +74,25 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
     	query = builder.build();
 
     } else {
+      
+      int maxBranchSize = 0;
       int gap = 0;
-      // examine terms that made the multi-phrase query
+      // examine terms that made the multi-phrase query 
       for (QueryNode child: queryNode.getChildren().get(0).getChildren()) {
         if (child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE) != null) {
           gap = (Integer) child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
           if (gap > defaultValue)
             defaultValue = gap;
         }
+        if (child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE) != null) {
+          maxBranchSize = (Integer) child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE);
+        }
       }
+      
+      if (maxBranchSize > 0 && maxBranchSize == ((MultiPhraseQuery)query).getPositions().length) {
+        // return query; // do nothing 
+      }
+      
       // fallback
     	if (defaultValue == 0) {
 	    	int[] pos = ((MultiPhraseQuery) query).getPositions();

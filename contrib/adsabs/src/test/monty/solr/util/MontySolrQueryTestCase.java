@@ -21,9 +21,6 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.search.SyntaxError;
-import org.getopt.luke.DocReconstructor;
-import org.getopt.luke.DocReconstructor.Reconstructed;
-import org.getopt.luke.GrowableStringArray;
 import org.junit.BeforeClass;
 
 public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
@@ -150,93 +147,9 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 	 * Also, the codec used must NOT be SimpleTextCodec
 	 */
 	public void dumpDoc(Integer docId, String...fields) throws Exception {
-		//DirectoryReader reader = h.getCore().getSearcher().get().getIndexReader();
-		SolrQueryRequest sr = req();
-		
-		
-		//IndexReader reader = req.getSearcher().getIndexReader();
-		IndexReader reader = sr.getSearcher().getTopReaderContext().reader();
-		
-		int[] docs;
-		if (docId == null) {
-			docs = new int[reader.numDocs()];
-			for (int i=0;i<docs.length;i++) {
-				docs[i] = i;
-			}
-		}
-		else {
-			docs = new int[]{docId};
-		}
-		
-		DocReconstructor reconstructor = new DocReconstructor(reader, fields, -1);
-		Reconstructed d;
-		
-		for (Integer dd: docs) {
-		  System.out.println("===========================");
-			d = reconstructor.reconstruct(dd);
-			
-			Set<String> fldMap = new HashSet<String>();
-			for (String f: fields) {
-				fldMap.add(f);
-			}
-			
-			System.out.println("STORED FIELDS: " + dd);
-			Map<String, IndexableField[]> sf = d.getStoredFields();
-			for (Entry<String, IndexableField[]> es : sf.entrySet()) {
-				String fld = es.getKey();
-				if (fldMap.size() > 0 && !fldMap.contains(fld)) {
-					continue;
-				}
-				System.out.println("field="+fld);
-				IndexableField[] val = es.getValue();
-				int j=0;
-				for (IndexableField v : val) {
-					System.out.println(" " + j + "\t: " + v.stringValue());
-					j++;
-				}
-			}
-
-      //if (true) continue;
-			
-			System.out.println("INDEXED FIELDS: " + dd);
-      Map<String, GrowableStringArray> rf = d.getReconstructedFields();
-      for (Entry<String, GrowableStringArray> es : rf.entrySet()) {
-        String fld = es.getKey();
-        if (fldMap.size() > 0 && !fldMap.contains(fld)) {
-          continue;
-        }
-        System.out.println(fld);
-        System.out.println(docToString(es.getValue(), "\n"));
-        
-      }
-      
-
-		}
-		sr.close();
+    throw new Exception("Disabled");
 	}
 	
-	private String docToString(GrowableStringArray doc, String separator) {
-		StringBuffer sb = new StringBuffer();
-		String sNull = "null";
-		int k = 0, m = 0;
-		for (int j = 0; j < doc.size(); j++) {
-			if (doc.get(j) == null)
-				k++;
-			else {
-				if (sb.length() > 0) sb.append(separator);
-				if (m > 0 && m % 5 == 0) sb.append('\n');
-				if (k > 0) {
-					sb.append(sNull + "_" + k + separator);
-					k = 0;
-					m++;
-				}
-				sb.append(j + "\t:");
-				sb.append(doc.get(j));
-				m++;
-			}
-		}
-		return sb.toString();
-	}
 	
   public String addDocs(String[] fields, String...values) {
     ArrayList<String> vals = new ArrayList<String>(Arrays.asList(values));

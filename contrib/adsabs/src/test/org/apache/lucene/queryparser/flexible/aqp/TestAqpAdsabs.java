@@ -11,7 +11,6 @@ import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.AqpTestAbstractCase;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.sandbox.queries.SlowFuzzyQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -207,8 +206,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("this (+(that)^7)", null, "+this +(that)^7.0");
 		
 		assertQueryEquals("roam~", null, "roam~2", FuzzyQuery.class);
-		assertQueryEquals("roam~0.8", null, "roam~0.8", SlowFuzzyQuery.class);
-		assertQueryEquals("roam~0.899999999", null, "roam~0.9");
 		
 		
 		assertQueryEquals("roam^", null, "(roam)^1.0");
@@ -220,12 +217,12 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		// this should fail
 		assertQueryNodeException("roam^~");
 		assertQueryEquals("roam^0.8~", null, "(roam~2)^0.8");
-		assertQueryEquals("roam^0.899999999~0.5", null, "(roam~0.5)^0.9");
+		assertQueryEquals("roam^0.899999999~0.5", null, "(roam~2)^0.9");
 		
 		// should this fail?
 		assertQueryEquals("roam~^", null, "(roam~2)^1.0");
-		assertQueryEquals("roam~0.8^", null, "(roam~0.8)^1.0");
-		assertQueryEquals("roam~0.899999999^0.5", null, "(roam~0.9)^0.5");
+		assertQueryEquals("roam~0.8^", null, "(roam~0)^1.0");
+		assertQueryEquals("roam~0.899999999^0.5", null, "(roam~0)^0.5");
 		
 		// with wsa analyzer the 5 is retained as a token
 		assertQueryEquals("this^ 5", wsa, "+(this)^1.0 +5");
@@ -359,7 +356,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 	}
 	
 	public void testEscaped() throws Exception {
-	  setDebug(true);
 		WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 		assertQueryEquals("\\(1\\+1\\)\\:2", wsa, "(1+1):2", TermQuery.class);
 		assertQueryEquals("th*is", wsa, "th*is", WildcardQuery.class);

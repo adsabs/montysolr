@@ -307,7 +307,7 @@
      <lst name="defaults">
        <str name="wt">json</str>
        <int name="rows">10</int>
-       <str name="fl">title abstract author bibcode identifier volume page bibstem doctype pubdate pub pub_raw citation_count read_count esources</str>
+       <str name="fl">id recid title abstract author bibcode identifier volume page bibstem doctype pubdate pub pub_raw citation_count read_count esources</str>
        <!-- 
        ADSLABS:12/12: this can be overrided by url params. 
        But unfielded search will not work if you use "df" parameter!
@@ -337,6 +337,9 @@
        <str name="aqp.classic_scoring.modifier">0.5</str>
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
+       
+       <str name="q.op">AND</str>
+       
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -363,6 +366,9 @@
        <str name="aqp.classic_scoring.modifier">0.5</str>
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
+       
+       <str name="q.op">AND</str>
+       <str name="df">unfielded_search</str>
      </lst>
     <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -381,6 +387,9 @@
 		<str name="mlt.mintf">1</str>
 		<str name="mlt.mindf">1</str>
 		<str name="mlt.match.include">false</str>
+		
+		<str name="q.op">AND</str>
+        <str name="df">unfielded_search</str>
 		</lst>
 		<lst name="invariants">
 	       <str name="echoParams">explicit</str>
@@ -412,6 +421,8 @@
        <str name="useFastVectorHighlighter">true</str>
        <str name="aqp.allow.leading_wildcard">true</str>
        
+       <str name="q.op">AND</str>
+       <str name="df">unfielded_search</str>
      </lst>
      <lst name="invariants">
        <str name="echoParams">explicit</str>
@@ -693,6 +704,7 @@
     -->
   <queryParser name="lucene" class="solr.AdsQParserPlugin">
     <lst name="defaults">
+       <str name="df">all</str>
        <lst name="virtual-fields">
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
@@ -700,7 +712,7 @@
           <str name="affil">aff_abbrev aff_canonical aff_id institution^2 aff^0.5</str>
        </lst>
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
-       <str name="aqp.defaultField">unfielded_search</str>
+       
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;inst institution;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
@@ -724,6 +736,7 @@
        Make sure you are never referencing virtual field
        from inside another virtual field
       -->
+       <str name="df">all</str>
        <lst name="virtual-fields">
           <str name="full">title^2 abstract^2 body keyword ack</str>
           <str name="abs">title abstract keyword</str>
@@ -750,7 +763,12 @@
   
   <!-- ADS own modified breed of edismax (this one calls aqp for individual
        queries) because we are MUCH better in handling them -->
-  <queryParser name="adismax" class="solr.AqpExtendedDismaxQParserPlugin" />
+  <queryParser name="adismax" class="solr.AqpExtendedDismaxQParserPlugin">
+    <lst name="defaults">
+        <str name="df">all</str>
+        <bool name="sow">true</bool>
+    </lst>
+  </queryParser>
     
   
   
@@ -797,9 +815,27 @@
   <searchComponent name="qtree" class="org.apache.solr.handler.component.AqpQueryTree" />
   <requestHandler name="/qtree" class="solr.StandardRequestHandler">
     <lst name="defaults">
-      <str name="echoParams">explicit</str>
-      <int name="rows">10</int>
-      <str name="defType">aqp</str>
+       <lst name="virtual-fields">
+          <str name="full">title^2 abstract^2 body keyword ack</str>
+          <str name="abs">title abstract keyword</str>
+          <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
+          <str name="aff">aff_abbrev aff_canonical aff_id institution^2 aff_raw^0.5</str>
+       </lst>
+       <str name="aqp.unfieldedSearchField">unfielded_search</str>
+       <str name="aqp.defaultField">unfielded_search</str>
+       <str name="aqp.defaultOperator">AND</str>
+       <str name="aqp.fieldMap">arxiv identifier;inst institution;collection database</str>
+       <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
+       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
+       <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
+       <str name="aqp.timestampFormat">yyyy-MM-dd'T'HH:mm:ss.SSS</str>
+       <str name="aqp.dateFields">entry_date,date</str>
+       <str name="aqp.timestampFields">indexstamp,update_timestamp,entry_date,metadata_ctime,metadata_mtime,fulltext_ctime,fulltext_mtime,nonbib_ctime,nonbib_mtime,metrics_ctime,metrics_mtime,orcid_ctime,orcid_mtime</str>
+       <str name="aqp.floatFields">cite_read_boost,citation_count_norm</str>
+       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count,page_count,data_count</str>
+       <str name="aqp.authorFields">author,first_author,book_author,editor</str>
+       <str name="aqp.humanized.dates">pubdate:date,entdate:entry_date:timestamp</str>
+       <str name="aqp.force.fuzzy.phrases">author,first_author,book_author,editor</str>
     </lst>
     <arr name="components">
       <str>qtree</str>

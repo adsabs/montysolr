@@ -76,7 +76,7 @@ class FieldTransform extends DocTransformer
   }
 
   @Override
-  public void transform(SolrDocument doc, int docid, float score) {
+  public void transform(SolrDocument doc, int docid) {
     if( docid >= 0) {
     	Iterator<String> it = fields.getParameterNamesIterator();
     	Map<String, Collection<Object>> docMap = doc.getFieldValuesMap();
@@ -102,6 +102,7 @@ class FieldTransform extends DocTransformer
     	
     }
   }
+
 
 }
 

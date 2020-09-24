@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LegacyNumericTokenStream.LegacyNumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
@@ -33,7 +32,7 @@ import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.search.SolrIndexSearcher;
-import org.noggit.JSONUtil;
+import org.apache.solr.common.util.Utils;
 
 /**
  * Provider that dumps selected fields to disk - it can analyze fields 
@@ -99,14 +98,13 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 		HashMap<String, String> descr = new HashMap<String, String>();
 		descr.put("query", query.toString());
 		descr.put("indexDir", se.getPath());
-		descr.put("indexVersion", se.getVersion());
 		descr.put("maxDoc", Integer.toString(se.maxDoc()));
 		descr.put("date", new Date().toString()); 
 
 		File jobFile = new File(workDir + "/" + params.get("jobid"));
 		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
 		out.write("{\n");
-		out.write("\"description\": " + JSONUtil.toJSON(descr).replace("\n", " ") + ",\n");
+		out.write("\"description\": " + Utils.toJSONString(descr).replace("\n", " ") + ",\n");
 		out.write("\"data\" : [\n");
 		
 		final BatchHandlerRequestQueue batchQueue = queue;
@@ -115,7 +113,6 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 			private LeafReader reader;
 			private int processed = 0;
 			private CharTermAttribute termAtt;
-			private LegacyNumericTermAttribute numAtt;
 			private PositionIncrementAttribute posIncrAtt;
 			private Map<String, List<String>>document = new HashMap<String, List<String>>();
 
@@ -207,7 +204,7 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
 				}
 				// bummer, it doesn't have api for newlines - according to quick googling
 				// control chars should be escaped in JSON, so this should be safe
-				out.write(JSONUtil.toJSON(document, 0).replace("\n", ""));
+				out.write(Utils.toJSONString(document).replace("\n", ""));
 			}
 			
       @Override

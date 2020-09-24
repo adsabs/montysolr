@@ -170,9 +170,4 @@ public class WordCloudComponent extends SearchComponent {
     return "return tokens with TF and IDF for wordcloud";
   }
 
-  @Override
-  public String getSource() {
-    return null;
-  }
-  
 }

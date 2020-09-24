@@ -23,12 +23,11 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 		if (citations == null) {
 			return;
 		}
-		float freq = citations.length;
 		float s = scorer.score();
 		for (int docid: citations) {
 			if (docid == -1)
 				continue;
-			hits.add(new CollectorDoc(docid, s, -1, freq));
+			hits.add(new CollectorDoc(docid, s, citations.length));
 		}
 		
 	}

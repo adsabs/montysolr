@@ -24,6 +24,7 @@
 			<str name="echoParams">explicit</str>
 			<int name="rows">10</int>
 			<str name="defType">aqp</str>
+			<str name="aqp.defaultOperator">AND</str>
 		</lst>
 		<arr name="components">
 			<str>qtree</str>

@@ -123,7 +123,6 @@ public class AqpStandardQueryConfigHandler extends StandardQueryConfigHandler {
     set(ConfigurationKeys.IMPLICIT_BOOST, 1.0f);
     set(ConfigurationKeys.IMPLICIT_FUZZY, 0.5f);
     set(ConfigurationKeys.FEEDBACK, new AqpFeedbackImpl());
-    set(ConfigurationKeys.ALLOW_SLOW_FUZZY, false);
     set(ConfigurationKeys.FIELD_MAPPER, new HashMap<String, String>());
     set(ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS,
         new HashMap<String, String>());

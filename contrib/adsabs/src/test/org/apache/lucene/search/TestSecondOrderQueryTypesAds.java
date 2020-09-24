@@ -83,12 +83,12 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		    "0.1f", "boost_1", "0.1f", "reference", "b100", "date",
 		    "1966-01-03T01:01:00Z"));
 		assertU(adoc("id", "5", "bibcode", "b5", "boost_const", "1.0f", "boost_2",
-		    "0.8f", "boost_1", "0.0f", "date", "1966-01-03T01:01:01Z"));
+		    "0.8f", "boost_1", "0.001f", "date", "1966-01-03T01:01:01Z"));
 
 		assertU(commit());
 
 		assertU(adoc("id", "6", "bibcode", "b6", "boost_const", "1.0f", "boost_2",
-		    "0.1f", "boost_1", "0.5f", "reference", "b5"));
+		    "0.8f", "boost_1", "0.005f", "reference", "b5"));
 		assertU(adoc("id", "7", "bibcode", "b7", "boost_const", "1.0f", "boost_2",
 		    "0.1f", "boost_1", "0.9f"));
 		assertU(adoc("id", "8", "bibcode", "b8", "boost_const", "1.0f", "boost_2",
@@ -133,24 +133,25 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		SolrCacheWrapper referencesWrapper = new SolrCacheWrapper.ReferencesCache(cache);
 		
     
-		LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache(
-		    "boost_const", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getSlowAtomicReader());
+    LuceneCacheWrapper<NumericDocValues> boostConstant = LuceneCacheWrapper.getFloatCache(
+		    "boost_const", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
 		LuceneCacheWrapper<NumericDocValues> boostOne = LuceneCacheWrapper.getFloatCache(
-		    "boost_1", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getSlowAtomicReader());
+		    "boost_1", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
 		LuceneCacheWrapper<NumericDocValues> boostTwo = LuceneCacheWrapper.getFloatCache(
-		    "boost_2", UninvertingReader.Type.SORTED_SET_FLOAT, tempReq.getSearcher().getSlowAtomicReader());
+		    "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
 		
-		System.out.println(Float.toString(boostConstant.getFloat(0)));
-    System.out.println(Float.toString(boostOne.getFloat(0)));
-    System.out.println(Float.toString(boostTwo.getFloat(0)));
+  	
+		assertEquals("Unexpected value from cache", 1.0f, boostConstant.getFloat(0), 0.0f);
+		assertEquals("Unexpected value from cache", 0.1f, boostOne.getFloat(0), 0.0f);
+		assertEquals("Unexpected value from cache", 0.5f, boostTwo.getFloat(0), 0.0f);
   	
 		// expecting 4 results with various order, simply based on the boost factor
   	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostConstant),
   			Arrays.asList(2, 3, 4, 5));
   	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostOne),
-  			Arrays.asList(3, 2, 4, 5));
+  			Arrays.asList(2, 3, 4, 5));
   	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostTwo),
-  			Arrays.asList(5, 3, 2, 4));
+  			Arrays.asList(2, 3, 4, 5));
   	
 
 
@@ -158,9 +159,9 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
     testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostConstant),
   			Arrays.asList(5,2,3,4));
     testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostOne),
-  			Arrays.asList(5,3,2,4));
+  			Arrays.asList(2, 3, 4, 5));
     testQ2("id:1 OR id:6", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostTwo),
-  			Arrays.asList(5,3,2,4));
+  			Arrays.asList(5,2,3,4));
   	
   	
 
@@ -177,31 +178,48 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   	testQ2("id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostTwo),
   			Arrays.asList(8,10,11));
   	
-  	// 11 is referenced twice (but we should see no change in order)
+  	
+  	// since 7.x we can't reuse the docvalues (they are no longer random access; but sequential)
+  	boostConstant = LuceneCacheWrapper.getFloatCache(
+        "boost_const", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostOne = LuceneCacheWrapper.getFloatCache(
+        "boost_1", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostTwo = LuceneCacheWrapper.getFloatCache(
+        "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    
+    // 11 is referenced twice (but we should see no change in order)
   	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostConstant),
   			Arrays.asList(8,10,11));
   	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostOne),
   			Arrays.asList(8,10,11));
   	testQ2("id:6 OR id:9", new SecondOrderCollectorCitingTheMostCited(citationsWrapper, boostTwo),
-  			Arrays.asList(8,10,11));
+  			Arrays.asList(11, 8, 10));
   	
   	
     
-    
+  	// since 7.x we can't reuse the docvalues (they are no longer random access; but sequential)
+    boostConstant = LuceneCacheWrapper.getFloatCache(
+        "boost_const", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostOne = LuceneCacheWrapper.getFloatCache(
+        "boost_1", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+    boostTwo = LuceneCacheWrapper.getFloatCache(
+        "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
     
     // ADS Classic scoring formula
   	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostConstant),
   			Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 20));
   	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostOne),
-  			Arrays.asList(3, 7, 8, 9, 16, 17, 6, 18, 19, 0, 1, 2, 4, 10, 11, 20, 5));
+  			Arrays.asList(3, 7, 8, 9, 16, 17, 18, 19, 0, 1, 2, 4, 10, 11, 20, 6, 5));
   	testQ2("*:*", new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostTwo),
-  			Arrays.asList(5, 0, 1, 10, 11, 3, 2, 4, 6, 7, 8, 9, 16, 17, 18, 19, 20));
+  			Arrays.asList(5, 6, 0, 1, 10, 11, 3, 2, 4, 7, 8, 9, 16, 17, 18, 19, 20));
   	
    // topN()
+  	boostTwo = LuceneCacheWrapper.getFloatCache(
+        "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
   	testQ2((Query) new SecondOrderQuery(new MatchAllDocsQuery(), 
   			new SecondOrderCollectorAdsClassicScoringFormula(citationsWrapper, boostTwo)), 
   			new SecondOrderCollectorTopN(2),
-  			Arrays.asList(5,0));
+  			Arrays.asList(5,6));
   	testQ2("*:*", new SecondOrderCollectorTopN(2),
   			Arrays.asList(0,1));
   	
@@ -291,7 +309,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
   	  		put(1, new Float[] {1.0f, 1.0f});
   	  	}},
   	  	Arrays.asList(1, 0),
-  			Arrays.asList(-0.082f, -0.399f)
+  			Arrays.asList(-0.0004f, -0.1988f)
   			);
     
   }
@@ -336,6 +354,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 				    public void collect(int doc) throws IOException {
 					    Document d = reader.document(doc);
 					    String idValue = d.get("id");
+
 					    // store 'id' instead of docid
 					    results.add(new ScoreDoc(Integer.parseInt(idValue), scorer
 					        .score()));
@@ -368,11 +387,6 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 				arrExpected[i] = u;
 				i++;
 			}
-			System.out.println("expected:" + Arrays.toString(arrExpected));
-			;
-			System.out.println("results:" + Arrays.toString(resultIds));
-			;
-			System.out.println(results);
 			assertArrayEquals(arrExpected, resultIds);
 		} finally {
 			r.close();
@@ -407,7 +421,7 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 					Entry<Integer, Float[]> nextItem = es.next();
 					Integer docid = nextItem.getKey();
 					for (Float f: nextItem.getValue()) {
-						hits.add(new CollectorDoc(docid, f, -1, 1));
+						hits.add(new CollectorDoc(docid, f, 1));
 					}
 				}
 			}

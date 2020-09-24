@@ -36,6 +36,7 @@ public class JSONDumper extends JSONWriter {
 
 	public JSONDumper(Writer writer, SolrQueryRequest req, SolrQueryResponse rsp) {
 	  super(writer, req, rsp);
+	  this.doIndent = false;
   }
 	
 	private Bits liveDocs = null;
@@ -55,6 +56,7 @@ public class JSONDumper extends JSONWriter {
 	public void setBitset(Bits bitSet) {
 		this.liveDocs = bitSet;
   }
+	
 	
 	public void writeResponse() throws IOException {
     Boolean omitHeader = req.getParams().getBool(CommonParams.OMIT_HEADER);

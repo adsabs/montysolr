@@ -1,14 +1,15 @@
 package org.apache.solr.handler.batch;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import monty.solr.util.MontySolrSetup;
 
-import org.apache.solr.util.AbstractSolrTestCase;
+import org.apache.solr.SolrTestCaseJ4;
 import org.junit.BeforeClass;
 
-public class BatchProviderTest extends AbstractSolrTestCase {
+public class BatchProviderTest extends SolrTestCaseJ4 {
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -24,7 +25,6 @@ public class BatchProviderTest extends AbstractSolrTestCase {
 	}
 	
 	
-	@Override
 	public String getSolrHome() {
 		return MontySolrSetup.getMontySolrHome();
 	}
@@ -45,7 +45,15 @@ public class BatchProviderTest extends AbstractSolrTestCase {
 	}
 	
 	protected void checkFile(String file, String... expected) throws IOException {
-    List<String> lines = h.getCore().getResourceLoader().getLines(file);
+    StringBuffer input = new StringBuffer();
+    for (String l: h.getCore().getResourceLoader().getLines(file)) {
+//      if (l.startsWith("{")) {
+//        input.append("\n");
+//      }
+      input.append(l);
+    }
+    String lines = input.toString();
+//    List<String> lines =  h.getCore().getResourceLoader().getLines(file);
 //    for (String l : lines) {
 //    	System.out.println(l);
 //    }

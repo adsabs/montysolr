@@ -335,8 +335,8 @@ public class SpanConverter {
     }
 		
 		@Override
-	  public SpanWeight createWeight(IndexSearcher searcher, boolean needsScores) throws IOException {
-	    return new EmptySpanWeight(this, searcher, null);
+	  public SpanWeight createWeight(IndexSearcher searcher, boolean needsScores, float boost) throws IOException {
+	    return new EmptySpanWeight(this, searcher, null, boost);
 	  }
 		
 
@@ -356,20 +356,11 @@ public class SpanConverter {
 	public static class EmptySpanWeight extends SpanWeight {
 		
 
-    public EmptySpanWeight(SpanQuery query, IndexSearcher searcher, Map<Term, TermContext> termContexts)
+    public EmptySpanWeight(SpanQuery query, IndexSearcher searcher, Map<Term, TermContext> termContexts, float boost)
         throws IOException {
-      super(query, searcher, termContexts);
+      super(query, searcher, termContexts, boost);
     }
 
-    @Override
-    public float getValueForNormalization() throws IOException {
-	    return 1.0f;
-    }
-
-		@Override
-    public void normalize(float norm, float topLevelBoost) {
-			//pass
-    }
 
     @Override
     public void extractTerms(Set<Term> terms) {
@@ -397,6 +388,11 @@ public class SpanConverter {
     public Spans getSpans(LeafReaderContext ctx, Postings requiredPostings) throws IOException {
       // TODO Auto-generated method stub
       return null;
+    }
+
+    @Override
+    public boolean isCacheable(LeafReaderContext ctx) {
+      return false;
     }
 		
 	}

@@ -9,7 +9,7 @@ import java.util.Locale;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CachingTokenFilter;
-import org.apache.lucene.analysis.LegacyNumericTokenStream.LegacyNumericTermAttribute;
+import org.apache.solr.legacy.LegacyNumericTokenStream.LegacyNumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.synonym.SynonymFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;

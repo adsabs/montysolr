@@ -432,32 +432,16 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
      */
     // First prefix queries:
     // by default, convert to lowercase:
-    assertWildcardQueryEquals("Term*", true, "term*");
+    assertWildcardQueryEquals("Term*", "term*");
     // explicitly set lowercase:
-    assertWildcardQueryEquals("term*", true, "term*");
-    assertWildcardQueryEquals("Term*", true, "term*");
-    assertWildcardQueryEquals("TERM*", true, "term*");
-    // explicitly disable lowercase conversion:
-    assertWildcardQueryEquals("term*", false, "term*");
-    assertWildcardQueryEquals("Term*", false, "Term*");
-    assertWildcardQueryEquals("TERM*", false, "TERM*");
+    assertWildcardQueryEquals("term*", "term*");
+    assertWildcardQueryEquals("Term*", "term*");
+    assertWildcardQueryEquals("TERM*", "term*");
     // Then 'full' wildcard queries:
     // by default, convert to lowercase:
     assertWildcardQueryEquals("Te?m", "te?m");
-    // explicitly set lowercase:
-    assertWildcardQueryEquals("te?m", true, "te?m");
-    assertWildcardQueryEquals("Te?m", true, "te?m");
-    assertWildcardQueryEquals("TE?M", true, "te?m");
-    assertWildcardQueryEquals("Te?m*gerM", true, "te?m*germ");
-    // explicitly disable lowercase conversion:
-    assertWildcardQueryEquals("te?m", false, "te?m");
-    assertWildcardQueryEquals("Te?m", false, "Te?m");
-    assertWildcardQueryEquals("TE?M", false, "TE?M");
-    assertWildcardQueryEquals("Te?m*gerM", false, "Te?m*gerM");
     // Fuzzy queries:
     assertWildcardQueryEquals("Term~", "term~2");
-    assertWildcardQueryEquals("Term~", true, "term~2");
-    assertWildcardQueryEquals("Term~", false, "Term~2");
     // Range queries:
 
     // TODO: implement this on QueryParser
@@ -465,24 +449,23 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
     // C]': Lexical error at line 1, column 1. Encountered: "[" (91), after
     // : ""
     assertWildcardQueryEquals("[A TO C]", "[a TO c]");
-    assertWildcardQueryEquals("[A TO C]", true, "[a TO c]");
-    assertWildcardQueryEquals("[A TO C]", false, "[A TO C]");
+    assertWildcardQueryEquals("[A TO C]", "[a TO c]");
     // Test suffix queries: first disallow
     try {
-      assertWildcardQueryEquals("*Term", true, "*term");
+      assertWildcardQueryEquals("*Term", "*term");
       fail();
     } catch (QueryNodeException pe) {
       // expected exception
     }
     try {
-      assertWildcardQueryEquals("?Term", true, "?term");
+      assertWildcardQueryEquals("?Term", "?term");
       fail();
     } catch (QueryNodeException pe) {
       // expected exception
     }
     // Test suffix queries: then allow
-    assertWildcardQueryEquals("*Term", true, "*term", true);
-    assertWildcardQueryEquals("?Term", true, "?term", true);
+    assertWildcardQueryEquals("*Term", "*term", true);
+    assertWildcardQueryEquals("?Term", "?term", true);
   }
 
   public void testLeadingWildcardType() throws Exception {

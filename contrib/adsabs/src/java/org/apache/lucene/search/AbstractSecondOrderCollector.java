@@ -24,6 +24,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 	protected float ensureCapacityRatio = 0.25f;
 	protected FinalValueType compactingType = FinalValueType.MAX_VALUE;
   protected LeafReaderContext context;
+  private float maxScore = 0.0f;
 
 	public AbstractSecondOrderCollector() {
 		lock = new ReentrantLock();
@@ -240,9 +241,12 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 			return;
 		// add 2 upvotes and 2 downvotes to each result
 		// plus penalize the ones that have only few
-		// hits
+		// hits - we are 'misusing' shardIndex for counting
+		// frequency since lucene 7.x removed freq fields
+		// (but second order queries can only run in 
+		// non-sharded environment, so it's dirty but innocent ;-))
 		for (CollectorDoc d: hits) {
-			d.score = ((d.score + 2.001f) / (d.freq + 4)) - (1.0f/(d.freq+0.001f));
+			d.score = ((d.score + 2.001f) / (d.shardIndex + 4)) - (1.0f/(d.shardIndex+0.001f));
 		}
   }
 
@@ -250,11 +254,19 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 		if (hits.size() < 1)
 			return;
 		// find the max value
-		float maxV = hits.get(0).score;
-		for (CollectorDoc d: hits) {
-			if (d.score > maxV)
-				maxV = d.score;
+		float maxV = 1.0f;
+		if (this.maxScore > 0.0f) {
+		  maxV = maxScore;
 		}
+		else {
+		  maxV = hits.get(0).score;
+		  for (CollectorDoc d: hits) {
+		    if (d.score > maxV)
+		      maxV = d.score;
+		  }		  
+		}
+		if (maxV == 1.0f)
+		  return;
 		// normalize the scores
 		for (CollectorDoc d: hits) {
 			d.score = d.score / maxV;
@@ -270,18 +282,18 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 		
 		CollectorDoc currDoc = hits.get(0);
 		
-		float seenTimes = 1.0f;
+		int seenTimes = 1;
 		for (CollectorDoc d : hits) {
 			if (d.doc == currDoc.doc) {
 				if (d.score < currDoc.score) {
 					currDoc.score = d.score;
 				}
-				currDoc.freq = seenTimes++;
+				currDoc.shardIndex = seenTimes++;
 				continue;
 			}
 			newHits.add(currDoc);
 			currDoc = d;
-			seenTimes = 1.0f;
+			seenTimes = 1;
 		}
 		
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
@@ -299,18 +311,18 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 		
 		CollectorDoc currDoc = hits.get(0);
 		
-		float seenTimes = 1.0f;
+		int seenTimes = 1;
 		for (CollectorDoc d : hits) {
 			if (d.doc == currDoc.doc) {
 				if (d.score > currDoc.score) {
 					currDoc.score = d.score;
 				}
-				currDoc.freq = seenTimes++;
+				currDoc.shardIndex = seenTimes++;
 				continue;
 			}
 			newHits.add(currDoc);
 			currDoc = d;
-			seenTimes = 1.0f;
+			seenTimes = 1;
 		}
 		
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
@@ -327,23 +339,23 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 			return;
 		
 		CollectorDoc currDoc = hits.get(0);
-		float seenTimes = 0.0f;
+		int seenTimes = 0;
 
 		for (CollectorDoc d : hits) {
 			if (d.doc == currDoc.doc) {
 				seenTimes += 1.0f;
 				continue;
 			}
-			currDoc.freq = seenTimes;
+			currDoc.shardIndex = seenTimes;
 			currDoc.score = seenTimes;
 			newHits.add(currDoc);
 			currDoc = d;
-			seenTimes = 1.0f;
+			seenTimes = 1;
 		}
 		
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = seenTimes;
-			currDoc.freq = seenTimes;
+			currDoc.shardIndex = seenTimes;
 			newHits.add(currDoc);
 		}
 		hits = newHits;
@@ -357,7 +369,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 			return;
 		
 		CollectorDoc currDoc = hits.get(0);
-		float seenTimes = 0.0f;
+		int seenTimes = 0;
 		float score = 0.0f;
 
 		for (CollectorDoc d : hits) {
@@ -368,7 +380,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 			}
 			if (seenTimes > 1) {
 				currDoc.score = (float) score/seenTimes;
-				currDoc.freq = seenTimes;
+				currDoc.shardIndex = seenTimes;
 			}
 			newHits.add(currDoc);
 			currDoc = d;
@@ -377,9 +389,12 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 		}
 
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
-			currDoc.score = (float) score/seenTimes;
-			currDoc.freq = seenTimes;
+			currDoc.score = (float) score/ (float) seenTimes;
+			currDoc.shardIndex = seenTimes;
 		}
+		if (currDoc.score > maxScore )
+		  maxScore = currDoc.score;
+		
 		newHits.add(currDoc);
 		hits = newHits;
 	}
@@ -392,7 +407,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 			return;
 
 		CollectorDoc currDoc = hits.get(0);
-		float seenTimes = 0.0f;
+		int seenTimes = 0;
 		float score = 1.0f;
 
 		for (CollectorDoc d : hits) {
@@ -407,7 +422,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 
 			if (seenTimes > 1) {
 				currDoc.score = (float) Math.pow(score, 1.0f/seenTimes);
-				currDoc.freq = seenTimes;
+				currDoc.shardIndex = seenTimes;
 			}
 			//System.out.println("adding " + currDoc.toString());
 			newHits.add(currDoc);
@@ -418,7 +433,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 
 		if (newHits.size() == 0 || newHits.get(newHits.size()-1).doc != currDoc.doc) {
 			currDoc.score = (float) Math.pow(score, 1.0f/seenTimes);
-			currDoc.freq = seenTimes;
+			currDoc.shardIndex = seenTimes;
 		}
 		newHits.add(currDoc);
 

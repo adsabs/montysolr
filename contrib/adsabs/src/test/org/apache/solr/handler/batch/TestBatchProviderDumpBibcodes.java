@@ -30,11 +30,11 @@ public class TestBatchProviderDumpBibcodes extends BatchProviderTest {
 		req.close();
 		
 		checkFile(tmpDir + "/" + jobid, 
-				"{\"bibcode\":[\"xxxxxxxxxxxx1\"],\"title\":[\"green wall\"]},",
-				"{\"bibcode\":[\"xxxxxxxxxxxx5\"],\"title\":[\"no fight\"]}]",
-				"!{\"bibcode\":\"xxxxxxxxxxxx6\",\"title\":[\"for peace\"]},",
-				"!{\"bibcode\":\"xxxxxxxxxxxx7\",\"title\":[\"no fight\"]},",
-				"!{\"bibcode\":\"xxxxxxxxxxxx8\",\"title\":[\"for peace\"]},"
+				"{  \"bibcode\":[\"xxxxxxxxxxxx1\"],  \"title\":[\"green wall\"]},",
+				"{  \"bibcode\":[\"xxxxxxxxxxxx5\"],  \"title\":[\"no fight\"]}]",
+				"!{  \"bibcode\":\"xxxxxxxxxxxx6\",  \"title\":[\"for peace\"]},",
+				"!{  \"bibcode\":\"xxxxxxxxxxxx7\",  \"title\":[\"no fight\"]},",
+				"!{  \"bibcode\":\"xxxxxxxxxxxx8\",  \"title\":[\"for peace\"]},"
 		);
 		
 		

@@ -56,6 +56,7 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
 	          "Invalid configuration",
 	          "Missing FunctionQueryBuilder provider"));
 	    }
+	    List<String> local = new ArrayList<String>();
 	    
 	    String funcName = "edismax_combined_aqp"; //"edismax_always_aqp"; //"edismax_combined_aqp";
 	    String subQuery = ((FieldQueryNode) node).getTextAsString();
@@ -68,6 +69,7 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
 	      
 	      if (node instanceof QuotedFieldQueryNode) {
 	      	subQuery = "\"" + subQuery + "\"";
+	      	//local.add("sow=false");
 	      }
 	      if (node.getParent() instanceof SlopQueryNode) {
 	      	subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
@@ -100,13 +102,16 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
 	    // let adismax know that we want exact search
 	    if (node.getTag("aqp.exact") != null || 
 	        (node.getParent() instanceof AqpAdsabsSynonymQueryNode && ((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated() == false)) {
-          subQuery = "{!adismax aqp.exact.search=true}" + subQuery;
+          local.add("aqp.exact.search=true ");
         }
 	    else if (getConfigVal("aqp.maxPhraseLength", null) != null) {
 	      subQuery = "{!adismax aqp.maxPhraseLength=" + getConfigVal("aqp.maxPhraseLength") + "}" + subQuery;
 	    }
 	    
 	    List<OriginalInput> fValues = new ArrayList<OriginalInput>();
+	    if (local.size() > 0) {
+	      subQuery = "{!adismax " + String.join(" ", local).trim() + "}" + subQuery;
+	    }
 	    fValues.add(new OriginalInput(subQuery, -1, -1));
 	    return new AqpFunctionQueryNode(funcName, builder, fValues);
 		}

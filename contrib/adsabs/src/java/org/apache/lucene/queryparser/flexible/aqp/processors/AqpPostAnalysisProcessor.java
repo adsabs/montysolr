@@ -54,6 +54,7 @@ import org.apache.solr.common.params.SolrParams;
  */
 public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
 
+  public static String QUERY_BRANCH_SIZE = "max_branch_size";
   
 	@Override
   protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
@@ -194,9 +195,24 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
 	protected QueryNode buildNewQueryNode (List<List<List<QueryNode>>> queries,
 			QueryBuilder queryBuilder) {
 		List<QueryNode> mainQueryClauses = new ArrayList<QueryNode>();
+		
+		// last bit of info we add
+    // is the number of tokens each branch contains
+    // that can be used later for deciding whether they
+    // need a slope
+    
+    int maxSize = 0;
+    // find the length of the longest query (in tokens)
+    for (List<List<QueryNode>> oneQuery: queries) {
+      if (oneQuery.size() > maxSize)
+        maxSize = oneQuery.size();
+    }
+    
 		for (List<List<QueryNode>> oneQuery: queries) {
 			List<QueryNode> clauses = new ArrayList<QueryNode>();
 			for (List<QueryNode> qElement: oneQuery) {
+			  for (QueryNode qn: qElement)
+			    qn.setTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE, maxSize);
 				clauses.add(queryBuilder.buildQueryElement(qElement));
 			}
 			if (clauses.size() > 1) {

@@ -19,13 +19,18 @@ public class BitSetQuery extends Query {
     }
 
     @Override
-    public Weight createWeight(IndexSearcher searcher, boolean needsScores) throws IOException {
-      return new ConstantScoreWeight(this) {
+    public Weight createWeight(IndexSearcher searcher, boolean needsScores, float boost) throws IOException {
+      return new ConstantScoreWeight(this, boost) {
         @Override
         public Scorer scorer(LeafReaderContext context) throws IOException {
           return new ConstantScoreScorer(this, score(), 
               new BasedBitSetIterator(docs, docs.approximateCardinality(), 
                   context.docBase, context.reader().maxDoc()));
+        }
+
+        @Override
+        public boolean isCacheable(LeafReaderContext ctx) {
+          return true;
         }
       };
     }

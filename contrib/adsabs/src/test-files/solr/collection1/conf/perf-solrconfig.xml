@@ -16,6 +16,7 @@
   <queryParser name="aqp" class="solr.AdsQParserPlugin">
     <lst name="defaults">
        <str name="idfield">recid</str>
+       <str name="aqp.defaultOperator">AND</str>
     </lst>
   </queryParser>
   
