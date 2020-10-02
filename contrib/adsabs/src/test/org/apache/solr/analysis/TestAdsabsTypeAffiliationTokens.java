@@ -101,6 +101,14 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
         ));
     assertU(commit());
     
+    assertQueryEquals(req("q", "aff_id:https\\://ror.org/ror.1"), 
+        "Synonym(aff_id:bar aff_id:foo aff_id:ror.1)",
+        SynonymQuery.class
+        );
+    assertQueryEquals(req("q", "aff_id:\"https://ror.org/ror.1\""), 
+        "Synonym(aff_id:bar aff_id:foo aff_id:ror.1)",
+        SynonymQuery.class
+        );
     
     // test synonyms
     assertQueryEquals(req("q", "aff_id:\"ror.1\""), 
