@@ -355,7 +355,7 @@ public class AqpAdsabsQParser extends QParser {
 			//  QueryConfigHandler config = qParser.getQueryConfigHandler();
 			//  return qParser.parse(getString() + config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE), null);
 			//}
-			return qParser.parse(getString(), null);
+			return qParser.parse(cleanUp(getString()), null);
 		} catch (QueryNodeException e) {
 		  throw new SyntaxError(e);
 		}
@@ -363,8 +363,24 @@ public class AqpAdsabsQParser extends QParser {
 		  throw new SyntaxError(e1);
 		}
 	}
+	
 
 	public AqpQueryParser getParser() {
 		return qParser;
 	}
+	
+	private String cleanUp(String queryStr) {
+    int c = 0;
+    boolean touched = false;
+    char[] a = queryStr.toCharArray();
+    while (c < a.length) {
+      if (a[c] == '\u201c' || a[c] == '\u201d') {
+        a[c] = '"';
+        touched = true;
+      }
+      c++;
+    }
+    if (touched) return new String(a);
+    return queryStr;
+  }
 }
