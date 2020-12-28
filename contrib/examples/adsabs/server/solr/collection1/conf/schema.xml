@@ -509,7 +509,7 @@
 
 				<!-- add a prefix to all synonyms -->
 				<filter class="solr.analysis.ResetFilterFactory"
-					incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
+					incomingType="SYNONYM" addPrefix="syn::" posIncrement="1,2147483647" />
 
 				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
 					an acronym but keep the type information (if it is a synonym, it will remain 
