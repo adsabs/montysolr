@@ -386,7 +386,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     assertQueryEquals(req("q", "author:\"^acco*\""), "spanPosRange(SpanMultiTermQueryWrapper(author:acco*), 0, 1)", SpanPositionRangeQuery.class);
   	assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
-  	setDebug(true);
   	assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
   	
   	testAuthorQuery("Adamč*",
@@ -554,7 +553,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             );
   	
     // 'xxx' will be removed from the author (at least in the modified version)
-  	setDebug(true);
 	  assertQueryEquals(req("defType", "aqp", "q", "author:\"accomazzi, alberto, xxx.\""), 
         "author:accomazzi, alberto, xxx | author:accomazzi, alberto, xxx * | author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a xxx | author:accomazzi, a xxx * | author:accomazzi, alberto, x | author:accomazzi, alberto, x * | author:accomazzi, a x | author:accomazzi, a x * | author:accomazzi, alberto, | author:accomazzi, alberto, * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,",
         DisjunctionMaxQuery.class);
