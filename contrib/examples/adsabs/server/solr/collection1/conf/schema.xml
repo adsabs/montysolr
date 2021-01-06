@@ -476,11 +476,6 @@
 				<filter class="solr.AcronymTokenFilterFactory" emitBoth="true"
 					prefix="acr::" setType="ACRONYM"/>
 					
-				<!-- add a prefix to all synonyms -->
-                <filter class="solr.analysis.ResetFilterFactory"
-                    incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
-
-                
                 <!-- add a prefix to all synonyms -->
                 <filter class="solr.analysis.ResetFilterFactory"
                     incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" range="1,2147483647" />
