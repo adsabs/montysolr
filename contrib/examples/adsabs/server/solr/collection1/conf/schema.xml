@@ -86,15 +86,20 @@
 				<filter
 					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="AUTHOR_INPUT" />
+					<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="0:"/>
 				<filter
-					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
-					synonyms="author_curated.synonyms" format="semicolon"
-					ignoreCase="true" expand="true"
-					tokenizerFactory="solr.KeywordTokenizerFactory" />
+                    class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+                    format="semicolon" synonyms="author_curated.synonyms"
+                    ignoreCase="true" expand="true"
+                    tokenizerFactory="solr.KeywordTokenizerFactory"
+                    builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$SimpleShortNames"
+                    inclOrig="true" />
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="0b:"/>
 				<!-- generate combinations to find their upgraded form -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="3" />
+					<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="1:"/>
 				<!-- add UTF-8 variant(s): "adamčuk, k" -->
 				<filter
 					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
@@ -102,6 +107,7 @@
 					expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
 					builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
 					inclOrig="true" />
+					<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="2:"/>
 				<!-- now remove the query variants, they were used only to discover upgraded 
 					forms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
@@ -109,6 +115,7 @@
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
+					<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="3:"/>
 				<!-- downgrade everything back to ascii (we now will have both ASCII 
 					and UTF8 forms) -->
 				<filter
@@ -153,7 +160,7 @@
 					the overlapping synonyms) -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-
+                <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="9:"/>
 			</analyzer>
 		</fieldType>
 
@@ -404,7 +411,7 @@
 					format="semicolon" synonyms="author_curated.synonyms"
 					ignoreCase="true" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory"
-					builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$MakeAllShortNames"
+					builderFactory="org.apache.solr.analysis.author.AuthorShortNameUpgradeFilterFactory$SimpleShortNames"
 					inclOrig="true" />
 				<filter
 					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"

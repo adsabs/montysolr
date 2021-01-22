@@ -127,12 +127,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m",  // hand-made additions
           "MÜLLER, A WILLIAM;MÜLLER, A BILL",
           "MÜLLER, WILLIAM;MÜLLER, BILL",
-          "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
+          //"JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
+          "JONES, C=>Jones,Christine;FORMAN, CHRISTINE", // the famous post-synonym expansion
+          "FORMAN, C=>FORMAN, CHRISTINE;JONES, C", // the famous post-synonym expansion
           "DE ZEEUW, TIM=>DE ZEEUW, P TIM",
           "DE ZEEUW, P TIM=>DE ZEEUW, TIM;DE ZEEUW,",
           "grant, carolyn s; stern grant, carolyn; stern, carolyn p",
           "orlitova, ivana; stoklasova, ivana",
-          "orlitova,; stoklasova,"
+          "orlitova,; stoklasova,",
+          "wedemeyer boehm, s; wedemeyer, s"
       });
 
       // automatically harvested variations of author names (collected during indexing)
@@ -165,7 +168,13 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "Gonzalez Alfonso, E=>González Alfonso, E",
           "Chyelkovae,=>Chýlková,",
           "stoklasova,=>stoklasová,",
-          "orlitova,=>orlitová,"
+          "orlitova,=>orlitová,",
+          "wedemeyer boehm, s=>wedemeyer böhm, s",
+          "wedemeyer boehm, sven=>wedemeyer böhm, sven",
+          "wedemeyer boehm,=>wedemeyer böhm,",
+          "wedemeyer bohm, s=>wedemeyer böhm, s",
+          "wedemeyer bohm, sven=>wedemeyer böhm, sven",
+          "wedemeyer bohm,=>wedemeyer böhm,"
       }
       ));
 
@@ -378,6 +387,32 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+    assertQueryEquals(req("q", "author:\"Wedemeyer, Sven\""), 
+        "wedemeyer boehm, | wedemeyer boehm, s | wedemeyer boehm, s * | wedemeyer boehm, sven | wedemeyer boehm, sven * | wedemeyer bohm, | wedemeyer bohm, s | wedemeyer bohm, s * | wedemeyer bohm, sven | wedemeyer bohm, sven * | wedemeyer böhm, | wedemeyer böhm, s | wedemeyer böhm, s * | wedemeyer böhm, sven | wedemeyer böhm, sven * | wedemeyer, | wedemeyer, s | wedemeyer, s * | wedemeyer, sven | wedemeyer, sven *", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "author:\"wedemeyer, sven\""),
+        "wedemeyer boehm, | wedemeyer boehm, s | wedemeyer boehm, s * | wedemeyer boehm, sven | wedemeyer boehm, sven * | wedemeyer bohm, | wedemeyer bohm, s | wedemeyer bohm, s * | wedemeyer bohm, sven | wedemeyer bohm, sven * | wedemeyer böhm, | wedemeyer böhm, s | wedemeyer böhm, s * | wedemeyer böhm, sven | wedemeyer böhm, sven * | wedemeyer, | wedemeyer, s | wedemeyer, s * | wedemeyer, sven | wedemeyer, sven *", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "author:\"wedemeyer böhm, sven\""),
+        "wedemeyer boehm, | wedemeyer boehm, s | wedemeyer boehm, s * | wedemeyer boehm, sven | wedemeyer boehm, sven * | wedemeyer bohm, | wedemeyer bohm, s | wedemeyer bohm, s * | wedemeyer bohm, sven | wedemeyer bohm, sven * | wedemeyer böhm, | wedemeyer böhm, s | wedemeyer böhm, s * | wedemeyer böhm, sven | wedemeyer böhm, sven * | wedemeyer, | wedemeyer, s | wedemeyer, s * | wedemeyer, sven | wedemeyer, sven *", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "author:\"wedemeyer böhm, s\""),
+        "wedemeyer boehm, | wedemeyer boehm, s | wedemeyer boehm, s* | wedemeyer boehm, sven | wedemeyer boehm, sven * | wedemeyer bohm, | wedemeyer bohm, s | wedemeyer bohm, s* | wedemeyer bohm, sven | wedemeyer bohm, sven * | wedemeyer böhm, | wedemeyer böhm, s | wedemeyer böhm, s* | wedemeyer böhm, sven | wedemeyer böhm, sven * | wedemeyer, | wedemeyer, s | wedemeyer, s* | wedemeyer, sven | wedemeyer, sven *", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "author:\"wedemeyer, s\""),
+        "wedemeyer boehm, | wedemeyer boehm, s | wedemeyer boehm, s* | wedemeyer boehm, sven | wedemeyer boehm, sven * | wedemeyer bohm, | wedemeyer bohm, s | wedemeyer bohm, s* | wedemeyer bohm, sven | wedemeyer bohm, sven * | wedemeyer böhm, | wedemeyer böhm, s | wedemeyer böhm, s* | wedemeyer böhm, sven | wedemeyer böhm, sven * | wedemeyer, | wedemeyer, s | wedemeyer, s* | wedemeyer, sven | wedemeyer, sven *", 
+        DisjunctionMaxQuery.class);
+    assertQueryEquals(req("q", "author:\"wedemeyer böhm, s\""),
+        "wedemeyer boehm, | wedemeyer boehm, s | wedemeyer boehm, s* | wedemeyer boehm, sven | wedemeyer boehm, sven * | wedemeyer bohm, | wedemeyer bohm, s | wedemeyer bohm, s* | wedemeyer bohm, sven | wedemeyer bohm, sven * | wedemeyer böhm, | wedemeyer böhm, s | wedemeyer böhm, s* | wedemeyer böhm, sven | wedemeyer böhm, sven * | wedemeyer, | wedemeyer, s | wedemeyer, s* | wedemeyer, sven | wedemeyer, sven *", 
+        DisjunctionMaxQuery.class);
+    
+    // wedemeyer boehm, sven; wedemeyer, sven
+    // (author:wedemeyer boehm, sven | author:wedemeyer boehm, sven * | author:wedemeyer boehm, s | author:wedemeyer boehm, s * | author:wedemeyer boehm, | author:wedemeyer, sven | author:wedemeyer, sven * | author:wedemeyer, s | author:wedemeyer, s * | author:wedemeyer,)
+    // wedemeyer boehm, s; wedemeyer, s
+    // (author:wedemeyer boehm, s | author:wedemeyer boehm, s * | author:wedemeyer boehm, | author:wedemeyer boehm, sven | author:wedemeyer boehm, sven * | author:wedemeyer, s | author:wedemeyer, s * | author:wedemeyer, | author:wedemeyer, sven | author:wedemeyer, sven *)
+    // wedemeyer boehm, s; wedemeyer boehm, sven; wedemeyer, s; wedemeyer, sven
+    // (author:wedemeyer, sven | author:wedemeyer, sven * | author:wedemeyer, s | author:wedemeyer, s * | author:wedemeyer, | author:wedemeyer boehm, s | author:wedemeyer boehm, s * | author:wedemeyer boehm,)
+    
     assertQueryEquals(req("q", "author:\"van dok*, h\""), "author:van dok*, h", WildcardQuery.class);
     assertQ(req("q", "author:\"van dok*, h\""),
         "//*[@numFound='1']",
@@ -437,7 +472,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // expected:
     // | author:orlitova, | author:stoklasová,* | author:orlitova, ivana | author:orlitova, ivana * | author:stoklasova, i | author:stoklasova, i * | author:stoklasova, ivana | author:stoklasova, ivana * | author:orlitova, i | author:orlitova, i * | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:orlitovae, | author:orlitovae,* | author:stoklasová, | author:stoklasovae, | author:stoklasovae,*
     // TODO: optimize the query, remove the clauses that match the doc twice
-    
+    setDebug(true);
     testAuthorQuery("\"stoklasova\"", 
         "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:orlitovae, | author:orlitovae,* | author:stoklasová,* | author:stoklasovae, | author:stoklasovae,*", 
         "//*[@numFound='0']");
@@ -2414,56 +2449,64 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * 
      */
     
+    setDebug(true);
     testAuthorQuery(
         //must NOT have "jones*", must have "jones, c;jones, christine"
         "forman", "author:forman, | author:forman, c | author:jones, christine | author:jones, c " +
         		      "author:forman, christine | author:forman,*",
-                         "//*[@numFound='7']",
+                         "//*[@numFound='7']"
                          // forman numFound=7
                          // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                          // 113 Forman, C              115  Jones, C               116  Forman, Christopher    
-                         // 117 Forman, C  
+                         // 117 Forman, C
+                         );
+    testAuthorQuery(
         //must NOT have "forman*", must have "forman, c;forman, christine"
         // PLUS - must have other jones's and allen's
         "jones", "author:jones, | author:jones, l | author:allen, l | author:allen, r l " +
         		     "author:allen, lynne | author:jones, r l | author:jones, r lynne | author:jones, lynne " +
         		     "author:allen, r lynne | author:forman, c | author:jones, christine | author:jones, c " +
         		     "author:forman, christine | author:jones,*",
-                          "//*[@numFound='15']",
+                          "//*[@numFound='15']"
                           // jones numFound=15
                           // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                           // 113 Forman, C              114  Jones, Christopher     115  Jones, C               
                           // 117 Forman, C              120  Allen, Lynne           121  Allen, L               
                           // 122 Allen, R Lynne         123  Allen, R L             124  Jones, Lynne           
-                          // 125 Jones, L               126  Jones, R Lynne         127  Jones, R L             
+                          // 125 Jones, L               126  Jones, R Lynne         127  Jones, R L
+                          );
+    testAuthorQuery(
         //must NOT have "jones, c*", must have "jones, christine"
         "\"forman, c\"", "author:forman, c | author:forman, christine | author:forman, c* | author:forman," +
         		             "author:jones, christine | author:jones, c",
-                         "//*[@numFound='7']",
+                         "//*[@numFound='7']"
                          // "forman, c" numFound=7
                          // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                          // 113 Forman, C              115  Jones, C               116  Forman, Christopher    
                          // 117 Forman, C   
-                         
+                         );
+    testAuthorQuery(
         //must NOT have "forman, c*", must have "forman, christine"
         "\"jones, c\"", "author:jones, c | author:jones, christine | author:jones, c* | author:jones," +
         		            "author:forman, christine | author:forman, c",
-                         "//*[@numFound='7']",
+                         "//*[@numFound='7']"
                          // "jones, c" numFound=7
                          // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                          // 113 Forman, C              114  Jones, Christopher     115  Jones, C               
                          // 117 Forman, C                          
-                         
+                    );
+    testAuthorQuery(
         "\"jones, christine\"", 
                         "author:jones, christine | author:jones, christine * | author:jones, c " +
                         "author:jones, c * | author:jones, | author:forman, christine " +
                         "author:forman, christine * | author:forman, c | author:forman, c * " +
                         "author:forman,", 
-                        "//*[@numFound='6']",
+                        "//*[@numFound='6']"
                         // "jones, christine" numFound=6
                         // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                         // 113 Forman, C              115  Jones, C               117  Forman, C 
-                        
+                    );
+    testAuthorQuery(
         "\"forman, christine\"", "author:jones, christine | author:jones, christine * | author:jones, c " +
         		            "author:jones, c * | author:jones, | author:forman, christine | author:forman, christine * " +
         		            "author:forman, c | author:forman, c * | author:forman,", 
