@@ -95,6 +95,10 @@ public class AqpTestAbstractCase extends LuceneTestCase {
   public void setDebug(boolean d) {
     debugParser = d;
   }
+  
+  public boolean getDebug() {
+    return debugParser;
+  }
 
   public void setGrammarName(String name) {
     grammarName = name;
@@ -405,6 +409,7 @@ public class AqpTestAbstractCase extends LuceneTestCase {
       System.err.println("Number of failures: " + ++noFailures);
       System.err.println("query:/" + query + "/ \nexpected:\n" + expected
           + " \nactual:\n" + actual + "/");
+      //assertEquals(expected, actual);
     } else {
       assertEquals(expected, actual);
     }

@@ -81,6 +81,12 @@
 				<filter
 					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
 					maxlen="6" />
+				<filter
+                    class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+                    synonyms="author_generated.translit" ignoreCase="true"
+                    expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
+                    builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$AlwaysIncludeOriginal"
+                    inclOrig="true" />
 				<!-- downgrade; if necessary and discover synonyms that will be used 
 					to seed the next stages -->
 				<filter
@@ -127,13 +133,17 @@
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" />
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="5:"/>
 				<!-- using any of the forms, find the synonyms, eg: "adamšuk, k", "adamčuk, 
 					k", "adamguk, k" -->
+				<!-- 
 				<filter
 					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
 					synonyms="author_curated.synonyms" format="semicolon"
 					ignoreCase="true" expand="true"
 					tokenizerFactory="solr.KeywordTokenizerFactory" />
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="6:"/>
+				 -->
 				<!-- now remove the query variants, they were used only to discover synonyms -->
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_QUERY_VARIANT" emitTokens="false" />
@@ -142,6 +152,7 @@
 				<filter
 					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="SYNONYM" />
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="7:"/>
 				<!-- lowercase normalize everything -->
 				<filter class="solr.LowerCaseFilterFactory" />
 				<!-- reset posIncrement - somtimes synonym expansion causes position 
@@ -155,11 +166,14 @@
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
 					acronymVariations="1" plainSurname="true"
 					addShortenedMultiName="true" addWildcards="false"
-					lookAtPayloadForOrigAuthor="false" />
+					lookAtPayloadForOrigAuthor="false"
+					 />
 				<!-- deal with multiple occurences of the same (can happen because of 
 					the overlapping synonyms) -->
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="8:"/>
 				<filter
-					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+					class="solr.analysis.author.AuthorRemoveDuplicatesTokenFilterFactory"
+					tokenTypes="AUTHOR_INPUT,SYNONYM,AUTHOR_TRANSLITERATED" />
                 <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="9:"/>
 			</analyzer>
 		</fieldType>
@@ -424,8 +438,13 @@
 				<filter class="solr.analysis.author.AuthorCollectorFactory"
 					tokenTypes="AUTHOR_TRANSLITERATED" emitTokens="false" />
 				<filter class="solr.LowerCaseFilterFactory" />
+				<!-- <filter
+					class="solr.analysis.author.AuthorRemoveDuplicatesTokenFilterFactory" />
+				 -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="rage:"/>
+					
 			</analyzer>
 		</fieldType>
 
