@@ -59,7 +59,7 @@
 
 	<property name="common.classpath.excludes" value="**/*.txt,**/*.template,**/*.sha1" />
 
-	<property name="ivy.bootstrap.version" value="2.3.0" />
+	<property name="ivy.bootstrap.version" value="2.5.0" />
 	<property name="ivy.default.configuration" value="*"/>
 	<property name="ivy.sync" value="true"/>
 
@@ -229,7 +229,8 @@
 		<!-- <property name="ivy.settings.uptodate" value="true"/> -->
 	</target>
 
-	<target name="resolve" depends="ivy-availability-check,ivy-configure">
+  <target name="resolve" depends="ivy-availability-check,ivy-configure"/>
+	<target name="resolvex" depends="ivy-availability-check,ivy-configure">
 		<!-- todo, make this a property or something. 
          only special cases need bundles -->
 		<ivy:retrieve type="jar,bundle,test,test-jar,tests" log="download-only"
@@ -237,9 +238,9 @@
 	</target>
 
 	<property name="ivy_install_path" location="${user.home}/.ant/lib" />
-	<property name="ivy_bootstrap_url1" value="http://repo1.maven.org/maven2"/>
+	<property name="ivy_bootstrap_url1" value="https://repo1.maven.org/maven2"/>
 	<!-- you might need to tweak this from china so it works -->
-	<property name="ivy_bootstrap_url2" value="http://uk.maven.org/maven2"/>
+	<property name="ivy_bootstrap_url2" value="https://uk.maven.org/maven2"/>
 	<property name="ivy_checksum_sha1" value="c5ebf1c253ad4959a29f4acfe696ee48cdd9f473"/>
 
 	<target name="ivy-availability-check" unless="ivy.available">
@@ -285,7 +286,7 @@
     </echo>
 		<fail>Ivy is not available</fail>
 	</target>
-	<target name="ivy-bootstrap" description="Download and install Ivy in the users ant lib dir" depends="ivy-bootstrap1,ivy-bootstrap2,ivy-checksum"/>
+	<target name="ivy-bootstrap" description="Download and install Ivy in the users ant lib dir" depends="ivy-bootstrap1,ivy-bootstrap2"/>
 
 	<!-- try to download from repo1.maven.org -->
 	<target name="ivy-bootstrap1">

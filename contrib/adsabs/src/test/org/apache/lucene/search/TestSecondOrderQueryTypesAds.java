@@ -140,10 +140,10 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 		LuceneCacheWrapper<NumericDocValues> boostTwo = LuceneCacheWrapper.getFloatCache(
 		    "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
 		
-  	
-		assertEquals("Unexpected value from cache", 1.0f, boostConstant.getFloat(0), 0.0f);
-		assertEquals("Unexpected value from cache", 0.1f, boostOne.getFloat(0), 0.0f);
-		assertEquals("Unexpected value from cache", 0.5f, boostTwo.getFloat(0), 0.0f);
+
+		assertTrue(1.0f == boostConstant.getFloat(0));
+		assertTrue(0.1f == boostOne.getFloat(0));
+		assertTrue(0.5f == boostTwo.getFloat(0));
   	
 		// expecting 4 results with various order, simply based on the boost factor
   	testQ2("id:1", new SecondOrderCollectorOperatorExpertsCiting(referencesWrapper, boostConstant),
