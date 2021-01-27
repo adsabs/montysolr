@@ -7,7 +7,6 @@ import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +137,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
                     if (seen.contains(shortForm)) continue;
                     seen.add(shortForm);
                     newBr.append(escape(shortForm) + "=>" +
-                        escape(sides[0]) + "," +
+                        sides[0] + "," +
                         buildLine(names));
                     newBr.append("\n");
                   }
@@ -483,8 +482,7 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
               String[] sides = line.split("=>");
               if (sides.length > 1) { // explicit mapping
                 String[] names = getNames(sides[1]);
-                Arrays.sort(names); // from shortest to longest
-                newBr.append(escape(sides[0]));
+                newBr.append(escape(names[0]));
                 newBr.append("=>");
                 boolean first = false;
                 for (String n: names) {
@@ -496,7 +494,6 @@ public class AuthorShortNameUpgradeFilterFactory extends PersistingMapTokenFilte
               }
               else {
                 String[] names = getNames(sides[0]);
-                Arrays.sort(names); // from shortest to longest (important if we want to see synonyms before automatically generated query variants)
                 newBr.append(buildLine(names));
               }
               newBr.append("\n");

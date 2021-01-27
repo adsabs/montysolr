@@ -136,10 +136,6 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
 		tp.setDebug(v);
 	}
 	
-	public boolean getDebug() {
-	  return tp.getDebug();
-	}
-	
 	/*
 	 * This is only for printing/debugging, DO NOT use this for testing!!!
 	 * 

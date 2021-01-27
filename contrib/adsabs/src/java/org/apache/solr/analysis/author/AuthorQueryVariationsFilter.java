@@ -61,7 +61,6 @@ public final class AuthorQueryVariationsFilter extends TokenFilter {
 	
 	private boolean genVariations() {
 	    String authorName = termAtt.toString();
-	    
 	    //log.debug("generating variations for " + authorName);
 	    HashSet<String> variations = AuthorQueryVariations.getQueryVariationsInclRegex(authorName);
 	    if (variations.size() > 0) {
