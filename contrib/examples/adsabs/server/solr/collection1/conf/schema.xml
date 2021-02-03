@@ -463,6 +463,8 @@
 				<filter class="solr.PatternReplaceFilterFactory"
 					pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2" />
 
+                <filter class="solr.LengthTokenFilterFactory" min="1" max="50" />
+                
 				<!-- translate math symbols and others into their ascii representation -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
@@ -642,7 +644,9 @@
 					words) -->
 				<tokenizer class="solr.PatternTokenizerFactory"
 					pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
-
+					
+                <filter class="solr.LengthTokenFilterFactory" min="1" max="50" />
+                
 				<!-- translate math symbols and others into their ascii representation -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
