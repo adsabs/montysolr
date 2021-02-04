@@ -77,7 +77,7 @@ public final class AdsSpecialCharactersFilter extends TokenFilter {
     // Worst-case length required:
     final int maxSizeNeeded = 4 * length;
     if (output.length < maxSizeNeeded) {
-      output = new char[ArrayUtil.oversize(maxSizeNeeded, RamUsageEstimator.NUM_BYTES_CHAR)];
+      output = new char[ArrayUtil.oversize(maxSizeNeeded, Character.BYTES)];
     }
 
     outputPos = foldToASCII(input, 0, output, 0, length);

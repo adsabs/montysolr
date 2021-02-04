@@ -37,7 +37,6 @@ import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.IntPointField;
 import org.apache.solr.schema.SchemaField;
-import org.apache.solr.schema.TrieIntField;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 
@@ -344,7 +343,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertQ(req("q", "bibcode:2014JNuM..*"), "//*[@numFound='5']");
 		assertQ(req("q", "bibcode:2014JnUm..*"), "//*[@numFound='5']");
 		assertQ(req("q", "bibcode:2014JNu?..455...10B"), "//*[@numFound='1']");
-
+		assertQ(req("q", "bibcode:2014JNuM..*", "sort", "bibcode desc,date desc"), "//*[@numFound='5']");
 
 		/*
 		 * alternate_bibcode

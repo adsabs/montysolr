@@ -22,6 +22,8 @@
     <dependencies>
       <dependency org="org.antlr" name="antlr-runtime" rev="3.5.2"/>
       <dependency org="org.python" name="jython-standalone" rev="2.7-b1" transitive="false"/>
+      <dependency org="org.apache.logging.log4j" name="log4j-layout-template-json" rev="2.14.0" transitive="false"/>
+      
       <exclude org="*" ext="*" matcher="regexp" type="${ivy.exclude.types}"/> 
     </dependencies>
 </ivy-module>

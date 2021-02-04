@@ -170,6 +170,13 @@
             </fileset>
 		</copy>
 		
+		<!-- copy log4j json logging (next to other log4j stuff) -->
+        <copy todir="${build.dir}/${example.name}/server/lib/ext" flatten="true">
+        	<fileset dir="${basedir}/lib">
+                <include name="**/log4j*.jar"/>
+            </fileset>
+        </copy>
+		
         <!-- gather and copy the python code to example/python -->
 		<echo>Putting Jython code together into: "${build.dir}/${example.name}/server/resources</echo>
         <copy todir="${build.dir}/${example.name}/server/resources" flatten="false" overwrite="true">
@@ -191,8 +198,10 @@
 		<ivy:retrieve/>
 		<copy todir="${build.dir}/${example.name}/server/solr-webapp/webapp/WEB-INF/lib" flatten="true" overwrite="true" verbose="true">
             <fileset dir="${basedir}/lib">
-            	<include name="**/*.jar" />
-                <include name="*.jar" />
+                <include name="antlr*.jar" />
+            	<include name="hamcrest*.jar" />
+            	<include name="string*.jar" />
+            	<include name="jython*.jar" />
             </fileset>
 			<fileset dir="${basedir}/../adsabs">
                 <include name="extra-lib/junidecode*.jar" />
