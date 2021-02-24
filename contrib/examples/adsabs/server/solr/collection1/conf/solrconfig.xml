@@ -691,7 +691,7 @@
      <lst name="queryParser">
       <str name="defaultField">unfielded_search</str>
       <str name="defaultOperator">AND</str>
-      <str name="fieldMap">arxiv identifier;inst institution;collection database</str>
+      <str name="fieldMap">arxiv identifier;collection database</str>
       <str name="fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author</str>
       <str name="unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
     </lst>
@@ -710,11 +710,12 @@
           <str name="abs">title abstract keyword</str>
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
           <str name="affil">aff_abbrev aff_canonical aff_id institution^2 aff^0.5</str>
+          <str name="inst">aff_id^2 institution</str>
        </lst>
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        
        <str name="aqp.defaultOperator">AND</str>
-       <str name="aqp.fieldMap">arxiv identifier;inst institution;collection database</str>
+       <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
@@ -742,11 +743,12 @@
           <str name="abs">title abstract keyword</str>
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
           <str name="affil">aff_abbrev aff_canonical aff_id institution^2 aff^0.5</str>
+          <str name="inst">aff_id^2 institution</str>
        </lst>
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        <str name="aqp.defaultField">unfielded_search</str>
        <str name="aqp.defaultOperator">AND</str>
-       <str name="aqp.fieldMap">arxiv identifier;inst institution;collection database</str>
+       <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
@@ -820,11 +822,12 @@
           <str name="abs">title abstract keyword</str>
           <str name="orcid">orcid_pub orcid_user^0.9 orcid_other^0.8</str>
           <str name="aff">aff_abbrev aff_canonical aff_id institution^2 aff_raw^0.5</str>
+          <str name="inst">aff_id^2 institution</str>
        </lst>
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        <str name="aqp.defaultField">unfielded_search</str>
        <str name="aqp.defaultOperator">AND</str>
-       <str name="aqp.fieldMap">arxiv identifier;inst institution;collection database</str>
+       <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
