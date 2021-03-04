@@ -92,9 +92,10 @@
        <maxDocs>${montysolr.autoCommit.maxDocs:40000}</maxDocs>
        <maxTime>${montysolr.autoCommit.maxTime:1800000}</maxTime> 
      </autoCommit>
-
+	  
+     <!-- disabled by default -->
      <autoSoftCommit> 
-       <maxTime>${montysolr.autoSoftCommit.maxTime:900000}</maxTime> 
+       <maxTime>${montysolr.autoSoftCommit.maxTime:-1}</maxTime> 
      </autoSoftCommit>
 
 
