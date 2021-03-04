@@ -99,6 +99,7 @@ SOLR_OPTS="${SOLR_OPTS} -Xss256k \
 -Dsolr.maxBufferedDocs=${SOLR_MAX_BUFFERED_DOCS:-50000} \
 -Dsolr.mergePolicy.maxMergeAtOnce=${SOLR_MERGE_POLICY_MAX_MERGE_AT_ONCE:-10} \
 -Dsolr.mergePolicy.segmentsPerTier=${SOLR_MERGE_POLICY_SEGMENTS_PER_TIER:-10} \
+-Dsolr.useCompoundFile=${SOLR_USE_COMPOUND_FILE:-false} \
 -Dmontysolr.logdir=${SOLR_LOGS_DIR} \
 -DhostContext=${SOLR_HOST_CONTEXT:-solr} \
 ${MONTYSOLR_EXTRA_JAVA_OPTS}
