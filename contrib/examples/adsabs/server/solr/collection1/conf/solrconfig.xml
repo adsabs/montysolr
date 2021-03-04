@@ -34,8 +34,6 @@
    
   <indexConfig>
     
-    <maxIndexingThreads>${solr.maxIndexingThreads:8}</maxIndexingThreads>
-    
     <useCompoundFile>${solr.useCompoundFile:false}</useCompoundFile>
 
     <ramBufferSizeMB>${solr.ramBufferSize:1000}</ramBufferSizeMB>
