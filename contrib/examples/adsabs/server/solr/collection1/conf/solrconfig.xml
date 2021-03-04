@@ -34,13 +34,15 @@
    
   <indexConfig>
     
-    <maxIndexingThreads>${solr.maxIndexingThreads:8}</maxIndexingThreads>
-    
     <useCompoundFile>${solr.useCompoundFile:false}</useCompoundFile>
 
     <ramBufferSizeMB>${solr.ramBufferSize:1000}</ramBufferSizeMB>
     <maxBufferedDocs>${solr.maxBufferedDocs:50000}</maxBufferedDocs>
 
+    <mergePolicyFactory class="solr.TieredMergePolicyFactory">
+        <int name="maxMergeAtOnce">${solr.mergePolicy.maxMergeAtOnce:10}</int>
+        <int name="segmentsPerTier">${solr.mergePolicy.segmentsPerTier:10}</int>
+    </mergePolicyFactory>
     
     <!-- When we run several instances sharing the same index, we must
          make sure that only one writer is modifying it; and other 
@@ -87,9 +89,14 @@
     </updateLog>
     
      <autoCommit> 
-       <maxDocs>${montysolr.maxDocs:40000}</maxDocs>
-       <maxTime>${montysolr.maxTime:1800000}</maxTime> 
+       <maxDocs>${montysolr.autoCommit.maxDocs:40000}</maxDocs>
+       <maxTime>${montysolr.autoCommit.maxTime:1800000}</maxTime> 
      </autoCommit>
+	  
+     <!-- disabled by default -->
+     <autoSoftCommit> 
+       <maxTime>${montysolr.autoSoftCommit.maxTime:-1}</maxTime> 
+     </autoSoftCommit>
 
 
     <!-- trigger core reload of the read-only instance of the same datadir
