@@ -89,9 +89,13 @@
     </updateLog>
     
      <autoCommit> 
-       <maxDocs>${montysolr.maxDocs:40000}</maxDocs>
-       <maxTime>${montysolr.maxTime:1800000}</maxTime> 
+       <maxDocs>${montysolr.autoCommit.maxDocs:40000}</maxDocs>
+       <maxTime>${montysolr.autoCommit.maxTime:1800000}</maxTime> 
      </autoCommit>
+
+     <autoSoftCommit> 
+       <maxTime>${montysolr.autoSoftCommit.maxTime:900000}</maxTime> 
+     </autoSoftCommit>
 
 
     <!-- trigger core reload of the read-only instance of the same datadir
