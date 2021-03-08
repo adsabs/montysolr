@@ -39,10 +39,7 @@
     <ramBufferSizeMB>${solr.ramBufferSize:1000}</ramBufferSizeMB>
     <maxBufferedDocs>${solr.maxBufferedDocs:50000}</maxBufferedDocs>
 
-    <mergePolicyFactory class="solr.TieredMergePolicyFactory">
-        <int name="maxMergeAtOnce">${solr.mergePolicy.maxMergeAtOnce:10}</int>
-        <int name="segmentsPerTier">${solr.mergePolicy.segmentsPerTier:10}</int>
-    </mergePolicyFactory>
+
     
     <!-- When we run several instances sharing the same index, we must
          make sure that only one writer is modifying it; and other 

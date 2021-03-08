@@ -16,7 +16,7 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 
-public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implements
+public class AqpAdsabsRegexNodeProcessor extends AqpQueryNodeProcessorImpl implements
 	QueryNodeProcessor  {
 
 	@Override
@@ -32,6 +32,10 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 		    !(node.getParent() instanceof TermRangeQueryNode)) {
 			FieldQueryNode n = (FieldQueryNode) node;
 			String input = n.getTextAsString();
+			
+			String field = n.getFieldAsString();
+			if (!isRegexField(field))
+			  return node;
 			
 			if (input == null) {
 				return node;
@@ -62,7 +66,19 @@ public class AqpAdsabsRegexNodeProcessor extends QueryNodeProcessorImpl implemen
 		return node;
 	}
 	
-	@Override
+	// can be overriden to plug in some configuration
+	protected boolean isRegexField(String field) {
+    String val = getConfigVal("aqp.regex.disallowed.fields", null);
+    if (val == null)
+      return true;
+    for (String f: val.split(";")) {
+      if (f.equals(field))
+        return false;
+    }
+    return true;
+  }
+
+  @Override
 	protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
 			throws QueryNodeException {
 		return children;

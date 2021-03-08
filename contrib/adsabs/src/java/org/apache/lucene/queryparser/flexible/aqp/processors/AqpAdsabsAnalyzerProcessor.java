@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
@@ -19,6 +18,7 @@ import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
 
 /**
  * This processor prevents analysis to happen for nodes that are 
@@ -118,16 +118,16 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
     return rn;
 
   }
-  
-  private Map<String, String> getConfigMap() {
+  protected static Map<String, String> empty = new HashMap<String, String>();
+  public Map<String, String> getConfigMap() {
     Map<String, String> args = getQueryConfigHandler().get(
         AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
     if (args == null)
-      return new HashMap<String, String>();
+      return empty;
     return args;
   }
   
-  private String getConfigVal(String key) {
+  public String getConfigVal(String key) {
     Map<String, String> args = getConfigMap();
     if (args.containsKey(key)) {
       return args.get(key);
@@ -135,12 +135,13 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
     return null;
   }
   
-  private String getConfigVal(String key, String defaultVal) {
+  public String getConfigVal(String key, String defaultVal) {
     Map<String, String> args = getConfigMap();
     if (args.containsKey(key)) {
       return args.get(key);
     }
     return defaultVal;
   }
+  
   
 }

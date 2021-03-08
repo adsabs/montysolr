@@ -78,6 +78,9 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
 			        + "ror.1;foo;bar\n"
 			    		+ "A00001;Aalborg U;Aalborg University;RID1004;04m5j1k67;000000010742471X;Q601956;grid.5117.2;\n\n"
 			    		+ "A00002;Aarhus U;Aarhus University;RID1006;01aj84f44;0000000119562722;Q924265;grid.7048.b;\n"
+			    		+ "A01400;SI/CfA;Center for Astrophysics | Harvard and Smithsonian;Harvard Smithsonian Center for Astrophysics;RID61814;03c3r2d17;Q1133697;grid.455754.2\n"
+			    		+ "AX;SI\n"
+			    		+ "AB=>CfA\n"
 			    		});
 
 			replaceInFile(newConfig, "synonyms=\"aff_id.synonyms\"",
@@ -99,6 +102,16 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
         "institution", "U Catania/Dep Phy Ast; -; -; INFN/Catania",
         "institution", "U Catania/Dep Phy Ast; -"
         ));
+    assertU(addDocs(
+        "institution", "SI/CfA; Harvard U/CfA", 
+        "institution", "Harvard U/Phys; Brown U/Ast",
+        "aff", "SI/CfA")
+        );
+    assertU(addDocs(
+        "institution", "Harvard U/Law; -",
+        "institution", "SI/CfA; Harvard U/CfA", 
+        "aff", "SI/CfA")
+        );
     assertU(commit());
     
     assertQueryEquals(req("q", "aff_id:https\\://ror.org/ror.1"), 
@@ -193,7 +206,7 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
     assertQ(req("q", "pos(institution:\"U Catania/Dep Phy Ast\", 1)"), "//*[@numFound='1']");
     assertQ(req("q", "pos(institution:\"U Catania\", 1)"), "//*[@numFound='1']");
     assertQ(req("q", "pos(institution:\"Dep Phy Ast\", 1)"), "//*[@numFound='1']");
-    assertQ(req("q", "pos(institution:\"-\", 1)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"-\", 1)"), "//*[@numFound='2']");
     assertQ(req("q", "pos(institution:\"INFN/Catania\", 1)"), "//*[@numFound='0']");
     assertQ(req("q", "pos(institution:\"INFN\", 1)"), "//*[@numFound='0']");
     assertQ(req("q", "pos(institution:\"Catania\", 1)"), "//*[@numFound='0']");
@@ -201,6 +214,74 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
     assertQ(req("q", "pos(institution:\"INFN/Catania\", 2)"), "//*[@numFound='1']");
     assertQ(req("q", "pos(institution:\"INFN\", 2)"), "//*[@numFound='1']");
     assertQ(req("q", "pos(institution:\"Catania\", 2)"), "//*[@numFound='1']");
+    
+    // search parts of the affiliation
+    assertQ(req("q", "institution:\"SI\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"CfA\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"Harvard U\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"Law\""), "//*[@numFound='1']");
+    assertQ(req("q", "institution:\"Phys\""), "//*[@numFound='1']");
+    
+    // search parts (but honour position)
+    assertQ(req("q", "pos(institution:\"SI\", 1)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"CfA\", 1)"), "//*[@numFound='1']");
+    assertQ(req("q", "pos(institution:\"Harvard U\", 2)"), "//*[@numFound='2']");
+    assertQ(req("q", "pos(institution:\"CfA\", 2)"), "//*[@numFound='1']");
+    
+    // search parent/child
+    assertQ(req("q", "institution:\"SI/CfA\""), "//*[@numFound='2']");
+    
+    // do the same but as phrase; it should fail because the parser WILL NOT
+    // treat empty space as a delimiter; it considers it part of the token
+    // like 'Harvard U'
+    assertQ(req("q", "institution:\"SI CfA\""), "//*[@numFound='0']");
+    
+    // proximity operator however should yield the record
+    assertQ(req("q", "institution:\"SI\" NEAR1 institution:\"CfA\""), "//*[@numFound='2']");
+    
+    // but not mix up insitutions that were separated by ';' (those affiliations
+    // belong to different authors/persons)
+    assertQ(req("q", "institution:\"Law\" NEAR5 institution:\"CfA\""), "//*[@numFound='0']");
+    
+    // one person however can have multiple affiliations; and they can be searched via proximity
+    assertQ(req("q", "institution:\"Phys\" NEAR5 institution:\"Ast\""), "//*[@numFound='1']");
+    
+    // SI/CfA is also known through identifiers/canonical names - NOTE: the input synonyms
+    // MUST CONTAIN correct entry, i.e. "SI/CfA" - for some reason we used to have "SI CfA"
+    assertQ(req("q", "institution:\"A01400\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"RID61814\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"Harvard Smithsonian Center for Astrophysics\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"03c3r2d17\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"Q1133697\""), "//*[@numFound='2']");
+    assertQ(req("q", "institution:\"grid.455754.2\""), "//*[@numFound='2']");
+
+    
+    // what is the meaning of the pipe? (|) -- it forces our parser to treat the query
+    // as a regex; to not do that we have to set aqp.regex.disallowed.fields
+    assertQ(req("q", "institution:\"Center for Astrophysics | Harvard and Smithsonian\"",
+        "aqp.regex.disallowed.fields", "institution"), "//*[@numFound='2']");
+    
+    // and we also want to find the records via parent/child relationship BUT using
+    // synonyms; so assume that parent (SI) is also known under synonym 'AX' and 
+    // CfA is known under synonym 'AB'; the search "AX/AB" should then find the same
+    // thing as "SI/CfA" -- HOWEVER, note, this feature requires synonym mapping
+    // either of the explicit form:
+    // AX => SI
+    // or more forgiving (and more wasteful):
+    // AX;SI
+    // IMHO this feature is confusing; will bloat the synonym file and users
+    // are going to be confused by it. I'd just say: use canonical forms of 
+    // the synonym. And, and... be aware that if the synonym file contains a cycle
+    // i.e. 'parent/child' entry sharing synonyms with 'child' entry; then the
+    // two will be merged and considered as one:
+    // 
+    // SI/CfA;A01400
+    // CfA;A014000
+    // 
+    // becomes:
+    // SI/CfA;A01400;CfA
+    assertQ(req("q", "institution:\"AX/AB\""), "//*[@numFound='2']");
+    
   }
   
 

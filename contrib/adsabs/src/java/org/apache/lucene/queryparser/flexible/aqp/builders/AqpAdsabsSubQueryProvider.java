@@ -46,6 +46,7 @@ import org.apache.lucene.search.SecondOrderCollectorTopN;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.SolrCacheWrapper;
+import org.apache.lucene.search.SynonymQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopFieldCollector;
@@ -383,7 +384,8 @@ AqpFunctionQueryBuilderProvider {
 				int positionIncrementGap = 1;
 				if (fp.getReq() != null) {
 					IndexSchema schema = fp.getReq().getSchema();
-					SchemaField field = schema.getFieldOrNull(query.toString().split(":")[0]);
+					String f = getField(query);
+					SchemaField field = schema.getFieldOrNull(f);
 					if (field != null) {
 						FieldType fType = field.getType();
 						//if (!fType.isMultiValued()) {
@@ -423,6 +425,34 @@ AqpFunctionQueryBuilderProvider {
 				  query = new BoostQuery(query, boostFactor);
 				return query;
 			}
+
+      private String getField(Query query) throws SyntaxError {
+        
+        if (query instanceof TermQuery) {
+          return ((TermQuery) query).getTerm().field();
+        }
+        else if (query instanceof SynonymQuery) {
+          for (Term t: ((SynonymQuery) query).getTerms()) {
+            return t.field();
+          }
+        }
+        else if (query instanceof BooleanQuery) {
+          HashSet<String> s = new HashSet<String>();
+          for (BooleanClause c: ((BooleanQuery) query).clauses()) {
+            s.add(getField(c.getQuery()));
+          }
+          if (s.size() > 1) {
+            throw new SyntaxError("Illegal state: combining multiple fields is not allowed");
+          }
+          return (String) s.toArray()[0];
+        }
+        else {
+          // last resort
+          return query.toString().split(":")[0];          
+        }
+        
+        return null;
+      }
 		});
 
 		/* @api.doc
