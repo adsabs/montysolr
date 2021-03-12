@@ -892,7 +892,6 @@
 					types="wdafftypes.txt" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="aff_token"/>
 			</analyzer>
 			<analyzer type="query">
 				<charFilter class="solr.PatternReplaceCharFilterFactory" 
@@ -975,7 +974,6 @@
 					setType="ACRONYM" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="aff_text"/>
 			</analyzer>
 			<analyzer type="query">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
