@@ -341,6 +341,7 @@
        <str name="aqp.classic_scoring.modifier">0.5</str>
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
+       <str name="aqp.multiphrase.keep_one.ignore.fields">aff_raw,aff_id,institution</str>
        
        <str name="q.op">AND</str>
        
@@ -370,6 +371,7 @@
        <str name="aqp.classic_scoring.modifier">0.5</str>
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
+       <str name="aqp.multiphrase.keep_one.ignore.fields">aff_raw,aff_id,institution</str>
        
        <str name="q.op">AND</str>
        <str name="df">unfielded_search</str>

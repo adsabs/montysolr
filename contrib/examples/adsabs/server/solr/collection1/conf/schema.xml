@@ -892,6 +892,7 @@
 					types="wdafftypes.txt" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="aff_tokens"/>  -->
 			</analyzer>
 			<analyzer type="query">
 				<charFilter class="solr.PatternReplaceCharFilterFactory" 

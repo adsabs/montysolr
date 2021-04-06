@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -29,11 +28,9 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
-import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
-import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.core.config.FieldConfig;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -44,10 +41,11 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiTermRewriteMethodProcessor;
 import org.apache.lucene.search.MultiTermQuery;
-import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.handler.AdsConfigHandler;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.RefCounted;
 
@@ -56,6 +54,7 @@ public class AqpChangeRewriteMethodProcessor extends
   boolean first = true;
   private Set<String> types = null;
   private Set<String> fields = null;
+  private Set<String> ignoredFields = null;
   
   protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
     
@@ -110,6 +109,37 @@ public class AqpChangeRewriteMethodProcessor extends
             types.add(s);
           }
         }
+        
+        if (getConfigVal("aqp.multiphrase.keep_one.ignore.fields", null) != null) {
+          
+          if (ignoredFields == null) {
+            ignoredFields = new HashSet<String>();
+            for (String s: getConfigVal("aqp.multiphrase.keep_one.ignore.fields").split(",")) {
+              ignoredFields.add(s);
+            }
+          }
+          
+          if (ignoredFields.contains((String)((MultiPhraseQueryNode) node).getField())) {
+            
+            // for ignored fields, we don't want to do proximity search
+            for (QueryNode child: node.getChildren()) {
+              child.setTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE, 0);
+            }
+            
+            return node;
+          }
+        }
+        
+
+        AqpRequestParams reqAttr = this.getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+        if (reqAttr != null) {
+          IndexSchema schema = reqAttr.getRequest().getSchema();
+          FieldType fType = schema.getFieldType((String)((MultiPhraseQueryNode) node).getField());
+          if (fType != null) {
+            node.setTag("field.is.tokenized", fType.isTokenized());
+          }
+        }
+        
         
         try {
           node = simplifyMultiphrase(node, types);

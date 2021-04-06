@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 
@@ -23,13 +24,13 @@ import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProc
 
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.SlopQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PhraseQuery.Builder;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.lucene.search.Query;
 
 /**
