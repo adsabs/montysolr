@@ -360,8 +360,14 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 	  
   }
 
+	
 	private QueryNode createReplacementNode(List<NodeInfo> newGroup, String tt) throws CloneNotSupportedException, QueryNodeException {
 	  String newValue = getConcatenatedValue(newGroup);
+	  
+	  if (newValue != newValue.toLowerCase() && newValue == newValue.toUpperCase() && newGroup.size() > getMaxAllowedAcronym()) {
+	    newValue = newValue.toLowerCase();
+	  }
+	  
 	  String field = "";
 	  if (newGroup.get(0).getField() != null && newGroup.get(0).getField().length() > 0) 
 	  	field = newGroup.get(0).getField() + ":";
@@ -411,7 +417,14 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
 
 	
 
-	/*
+	private int getMaxAllowedAcronym() {
+	  Object obj = _getConfigVal("aqp.unfielded.max.uppercase.tokens");
+    if (obj == null)
+      return 1024; //effectively unlimited
+    return Integer.parseInt((String)obj);
+  }
+
+  /*
 	 * Ufff....this is necessary, because the QueryNodeImpl is NOT
 	 * resetting the parent. sooooo stupid....
 	 */

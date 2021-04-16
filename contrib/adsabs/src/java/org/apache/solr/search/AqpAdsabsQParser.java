@@ -349,6 +349,7 @@ public class AqpAdsabsQParser extends QParser {
 			//  QueryConfigHandler config = qParser.getQueryConfigHandler();
 			//  return qParser.parse(getString() + config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE), null);
 			//}
+		  
 			return qParser.parse(getString(), null);
 		} catch (QueryNodeException e) {
 		  throw new SyntaxError(e);

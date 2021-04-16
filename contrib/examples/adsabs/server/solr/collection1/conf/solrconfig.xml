@@ -342,7 +342,7 @@
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
        <str name="aqp.multiphrase.keep_one.ignore.fields">aff_raw,aff_id,institution</str>
-       
+       <str name="aqp.unfielded.max.uppercase.tokens">2</str>
        <str name="q.op">AND</str>
        
      </lst>
@@ -372,7 +372,7 @@
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
        <str name="aqp.multiphrase.keep_one.ignore.fields">aff_raw,aff_id,institution</str>
-       
+       <str name="aqp.unfielded.max.uppercase.tokens">2</str>
        <str name="q.op">AND</str>
        <str name="df">unfielded_search</str>
      </lst>
@@ -426,7 +426,7 @@
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
        <str name="aqp.allow.leading_wildcard">true</str>
-       
+       <str name="aqp.unfielded.max.uppercase.tokens">2</str>
        <str name="q.op">AND</str>
        <str name="df">unfielded_search</str>
      </lst>

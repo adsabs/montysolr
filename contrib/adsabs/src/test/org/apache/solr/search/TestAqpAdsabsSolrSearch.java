@@ -137,7 +137,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
     public void testUnfieldedSearch() throws Exception {
-      
+
+      // when we generate the phrase search, ignore acronyms
+      assertQueryEquals(req("defType", "aqp",
+          "q", "FOO BAR BAZ",
+          "aqp.unfielded.tokens.strategy", "disjuncts",
+          "aqp.unfielded.tokens.new.type", "simple",
+          "aqp.unfielded.max.uppercase.tokens", "2",
+          "qf", "title"),
+          "(((title:foo) (title:bar) (title:baz)) | title:\"foo bar baz\")",
+          DisjunctionMaxQuery.class);
       
       // have constant scoring work even for unfielded searches
       assertQueryEquals(req("defType", "aqp", "q", "foo bar",
