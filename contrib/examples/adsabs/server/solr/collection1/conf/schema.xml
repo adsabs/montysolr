@@ -1975,11 +1975,6 @@
 
 
 	<copyField source="id" dest="recid" />
-
-	<copyField source="bibcode" dest="identifier" />
-	<copyField source="alternate_bibcode" dest="identifier" />
-	<copyField source="doi" dest="identifier" />
-
 	<copyField source="author_norm" dest="all" />
 	<copyField source="alternate_title" dest="all" />
 	<copyField source="bibcode" dest="all" />
