@@ -110,7 +110,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                     "lensing => mikrolinseneffekt",
                     "pink => pinkish",
                     "stephen, stephens => stephen",
-                    "bremßtrahlung => brehmen"
+                    "bremßtrahlung => brehmen",
+                    "protostars, protostellar, protostar, protosterne, circumprotostellar, protoestrellas, protosellar, prototstars, photostellar, preprotostars, protoetoile, protostellarlike, protostarlike => protostars"
             });
             replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + synonymsFile.getAbsolutePath() + "\"");
 
@@ -383,10 +384,18 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
     public void testSpecialCases() throws Exception {
+    	
+      assertU(adoc("id", "61", "bibcode", "b61", 
+				"title", "A Change of Rotation Profile in the Envelope in the HH 111 Protostellar System: A Transition to a Disk?"));
       
       assertU(adoc("id", "2", "bibcode", "XXX", "abstract", "foo bar baz",
                   "title", "title bitle"));
       assertU(commit("waitSearcher", "true"));
+      
+      assertQ(req("q", "title:\"A Change of Rotation Profile in the Envelope in the HH 111 Protostellar System: A Transition to a Disk\""),
+              "//*[@numFound='1']",
+              "//doc/str[@name='id'][.='61']");
+      
       
       assertQEx("INVALID_SYNTAX", req("q", "author:\"^\"de marco year:2015"), 400);
         
@@ -456,10 +465,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       int md = ir.get().maxDoc();
       ir.decref();
       
-      assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, *:*), title abstract)"),
+      setDebug(true);
+      assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, abstract:foo), title abstract)"),
           "+like:foo bar baz title bitle  -BitSetQuery(" + md + ")",
           BooleanQuery.class);
-      assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, *:*) , title abstract) foo"),
+      assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, abstract:foo) , title abstract) foo"),
           "+(+like:foo bar baz title bitle  -BitSetQuery(" + md + ")) +all:foo",
           BooleanQuery.class);
       

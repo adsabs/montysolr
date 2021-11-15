@@ -619,6 +619,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
   	assertQueryEquals("foo:(A)", null, "foo:a");
   	assertQueryEquals("foo:(A -B)", null, "+foo:a -foo:b");
   	assertQueryEquals("foo:(A B D E)", null, "+foo:a +foo:b +foo:d +foo:e"); // but this is fielded
+  	assertQueryEquals("\"A B D E\"", null, "\"a b d e\"");
   	assertQueryEquals("A B D E", null, "\"a b d e\"");
   	assertQueryEquals("+A B D E", null, "\"a b d e\"");
   	assertQueryEquals("A +B D E", null, "+a +\"b d e\"");

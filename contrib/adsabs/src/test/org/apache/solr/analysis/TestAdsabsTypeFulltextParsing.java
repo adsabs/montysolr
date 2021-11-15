@@ -1131,8 +1131,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
     
     assertQueryEquals(req("q", "title:\"NGC 1\"", "defType", "aqp"), 
-        "title:acr::ngc1", 
-        TermQuery.class);
+        "(title:acr::ngc1 | title:\"acr::ngc 1\")", 
+        DisjunctionMaxQuery.class);
     assertQ(req("q", "title" + ":NGC 1", "indent", "true"), 
         "//*[@numFound='5']", 
         "//doc/str[@name='id'][.='153']",
@@ -1144,8 +1144,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     
     
     assertQueryEquals(req("q", "title:\"NGC-1\"", "defType", "aqp"), 
-        "title:acr::ngc1",
-        TermQuery.class);
+		"(title:acr::ngc1 | title:\"acr::ngc 1\")", 
+        DisjunctionMaxQuery.class);
     assertQ(req("q", "title" + ":NGC-1"), 
         "//*[@numFound='5']", 
         "//doc/str[@name='id'][.='153']",
@@ -1156,8 +1156,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
     
     assertQueryEquals(req("q", "title:\"N-1\"", "defType", "aqp"), 
-        "title:n1",
-        TermQuery.class);
+        "(title:n1 | title:\"n 1\")",
+        DisjunctionMaxQuery.class);
     assertQ(req("q", "title" + ":N-1"), 
         "//*[@numFound='2']", 
         "//doc/str[@name='id'][.!='153']",
@@ -1170,8 +1170,8 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
     // this finds 0 because during indexing, we'd turn the two
     // tokens into 'n1' - and this search 
     assertQueryEquals(req("q", "title:\"N 1\"", "defType", "aqp"), 
-        "title:n1",
-        TermQuery.class);
+        "(title:n1 | title:\"n 1\")",
+        DisjunctionMaxQuery.class);
     assertQ(req("q", "title" + ":\"N 1\""), 
         "//*[@numFound='2']", 
         "//doc/str[@name='id'][.!='153']",

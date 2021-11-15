@@ -137,7 +137,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 			  ", \"aff_abbrev\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\"]" +
 			  ", \"aff_canonical\": [\"Harvard Smithsonian Center for Astrophysics\", \"Harvard University, Department of Astronomy\", \"-\"]" +
 			  ", \"aff\": [\"-\", \"NASA Kavli space center, Cambridge, MA 02138, USA\", \"Einstein institute, Zurych, Switzerland\"]" +
-        ", \"institution\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\", \"foo/bar baz\"]" +
+			  ", \"institution\": [\"CfA\", \"Harvard U/Dep Ast\", \"-\", \"foo/bar baz\"]" +
 			  ", \"aff_facet\": [[\"A1234\", \"facet abbrev/parent abbrev\"]]" +
 			  ", \"aff_facet_hier\": [\"1/1812/61814\", \"1/8264/61814\", \"1/1812/A1036\", \"-\"]" +
 
@@ -193,17 +193,18 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				 ", \"date\": \"2013-08-05T00:30:00Z\"" +
 				", \"doctype\": \"article\"" +
 				", \"doctype_facet_hier\": [\"0/Article\", \"1/Article/Book chapter\"]" +
-			  ", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
-			  ", \"editor\": [\"t' Hooft, van X\"]" +
-			  ", \"eid\": \"00001\"" +
-			  ", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
-			  // entry_date --> see below
-			  ", \"esources\": [\"AUTHOR_HTML\", \"PUB_PDF\"]" +
-			  // Field that contains both grant ids and grant agencies.
-			  ", \"grant\": [\"NASA\", \"123456-78\", \"NSF-AST\", \"0618398\"]" +
-			  // grant_agency/grant_id
-			  ", \"grant_facet_hier\": [\"0/NASA\", \"1/NASA/123456-78\"]" +
-				", \"identifier\": [\"arxiv:1234.5678\", \"ARXIV:hep-ph/1234\"]" +
+				", \"doi\": \"doi:ŽŠČŘĎŤŇ:123456789\"" +
+				", \"editor\": [\"t' Hooft, van X\"]" +
+				", \"eid\": \"00001\"" +
+				", \"email\": [\"-\", \"anders@email.com\", \"-\"]" +
+				// entry_date --> see below
+				", \"esources\": [\"AUTHOR_HTML\", \"PUB_PDF\"]" +
+				// Field that contains both grant ids and grant agencies.
+				", \"grant\": [\"NASA\", \"123456-78\", \"NSF-AST\", \"0618398\"]" +
+				// grant_agency/grant_id
+				", \"grant_facet_hier\": [\"0/NASA\", \"1/NASA/123456-78\"]" +
+				// pipeline is now filling this field (we do no more copyfield)
+				", \"identifier\": [\"arxiv:1234.5678\", \"ARXIV:hep-ph/1234\", \"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\", \"2014JNuM..455...10B\"]" +
 				", \"ids_data\": [\"{whatever: here there MAST}\"]" +
 				", \"issue\": \"24i\"" +
 
@@ -217,9 +218,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"links_data\": [\"{whatever: here there MAST}\"," +
 				    "\"{\\\"foo\\\": [\\\"bar\\\", \\\"baz\\\"], \\\"one\\\": {\\\"two\\\": \\\"three\\\"}}\"]" +
 
-        ", \"nedid\": [\"X+1-5 =6\", \"foo bar\"]" +
-        ", \"nedtype\": [\"Other\", \"type2\"]" +
-        ", \"ned_object_facet_hier\": [ \"0/Other\", \"1/Other/X+1-5 =6\", \"0/type2\", \"1/type2/foo bar\"]" + 
+		        ", \"nedid\": [\"X+1-5 =6\", \"foo bar\"]" +
+		        ", \"nedtype\": [\"Other\", \"type2\"]" +
+		        ", \"ned_object_facet_hier\": [ \"0/Other\", \"1/Other/X+1-5 =6\", \"0/type2\", \"1/type2/foo bar\"]" + 
 
 				", \"orcid_pub\": [\"1111-2222-3333-4444\", \"-\", \"0000-0002-4110-3511\"]" +
 				", \"orcid_user\": [\"-\", \"-\", \"0000-0002-4110-3511\"]" +
@@ -255,14 +256,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 				", \"metadata_ctime\": \"2017-09-19T11:01:32.809Z\"" +   // missing 'Z' (not accepted)
 				", \"metadata_mtime\": \"2017-09-19T11:01:32.809Z\"" +
 				", \"fulltext_ctime\": \"2017-09-19T11:01:32.809Z\"" +
-        ", \"fulltext_mtime\": \"2017-09-19T11:01:32.809Z\"" +
-        ", \"nonbib_ctime\": \"2017-09-19T11:01:32.809Z\"" +
-        ", \"nonbib_mtime\": \"2017-09-19T11:01:32.809Z\"" +
-        ", \"metrics_ctime\": \"2017-09-19T11:01:32.809Z\"" +
-        ", \"metrics_mtime\": \"2017-09-19T11:01:32.809Z\"" +
-        ", \"orcid_ctime\": \"2017-09-19T11:01:32.809Z\"" +
-        ", \"orcid_mtime\": \"2017-09-19T11:01:32.809Z\"" +
-				
+		        ", \"fulltext_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+		        ", \"nonbib_ctime\": \"2017-09-19T11:01:32.809Z\"" +
+		        ", \"nonbib_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+		        ", \"metrics_ctime\": \"2017-09-19T11:01:32.809Z\"" +
+		        ", \"metrics_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+		        ", \"orcid_ctime\": \"2017-09-19T11:01:32.809Z\"" +
+		        ", \"orcid_mtime\": \"2017-09-19T11:01:32.809Z\"" +
+						
 
 			"}" +
 		"}}";
@@ -306,6 +307,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		assertU(adoc("id", "57", "bibcode", "b57", "author", "Bond,"));
 
 		assertU(adoc("id", "60", "bibcode", "b60", "abstract", "all no-sky survey"));
+		
 		
 		assertU(commit("waitSearcher", "true"));
 
