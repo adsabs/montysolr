@@ -1246,18 +1246,18 @@
 			type="normalized_text_ascii_notokenization" indexed="true"
 			stored="true" multiValued="true" omitNorms="true" />
 
-		<field name="author_facet" type="string" indexed="true"
+		<field name="author_facet" type="normalized_string" indexed="true"
 			stored="${storeAll:false}" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
 
-		<field name="author_facet_hier" type="string" indexed="true"
+		<field name="author_facet_hier" type="normalized_string" indexed="true"
 			stored="${storeAll:false}" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" docValues="true" />
 
 		<field name="author_count" type="int" indexed="true"
 			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
-		<field name="first_author_facet_hier" type="string"
+		<field name="first_author_facet_hier" type="normalized_string"
 			indexed="true" stored="${storeAll:false}" multiValued="true"
 			omitNorms="true" omitTermFreqAndPositions="true" docValues="true" />
 

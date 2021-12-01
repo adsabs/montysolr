@@ -138,7 +138,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
     public void testUnfieldedSearch() throws Exception {
-
+    	
+      // NEAR on unfielded search -- will generate error when results have mixed fields
+      assertQueryParseException(req("defType", "aqp",
+	          "q", "foo NEAR2 bar",
+	          "qf", "bibcode^5 title^10",
+	          "aqp.unfielded.tokens.strategy", "disjuncts",
+	          "aqp.unfielded.tokens.new.type", "simple",
+	          "aqp.constant_scoring", "bibcode^6"));
+      
+      assertQueryParseException(req("defType", "aqp",
+	          "q", "foo NEAR2 bar NEAR2 title:baz",
+	          "qf", "bibcode^5 title^10",
+	          "aqp.unfielded.tokens.strategy", "disjuncts",
+	          "aqp.unfielded.tokens.new.type", "simple",
+	          "aqp.constant_scoring", "bibcode^6"));
+    	
       // when we generate the phrase search, ignore acronyms
       assertQueryEquals(req("defType", "aqp",
           "q", "FOO BAR BAZ",
@@ -1063,10 +1078,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // #375
         assertQueryEquals(req("defType", "aqp", "q", "author:\"Civano, F\" -author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"),
-                "+(author:civano, f | author:civano, f* | author:civano,) -(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
+                "+(author:civano, f | author:civano, f* | author:civano,) -(author_facet_hier:civano, fa author_facet_hier:civano, da)",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "author:\"Civano, F\" +author_facet_hier:(\"Civano, Fa\" OR \"Civano, Da\")"),
-                "+(author:civano, f | author:civano, f* | author:civano,) +(author_facet_hier:Civano, Fa author_facet_hier:Civano, Da)",
+                "+(author:civano, f | author:civano, f* | author:civano,) +(author_facet_hier:civano, fa author_facet_hier:civano, da)",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "title:xxx -title:(foo OR bar)"),
                 "+title:xxx -(title:foo title:bar)",

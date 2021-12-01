@@ -431,24 +431,24 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 		    "aqp.constant_scoring", "author^13 title^12",
 		    "aqp.classic_scoring.modifier", "0.48",
 		    "fl", "recid,score"),
-				"//*[@numFound='1']",
-				"//doc/int[@name='recid'][.='100']",
-				"//doc/float[@name='score'][.='13.0']" // 13.00 * (cite_read_boost + aqp.classic_scoring.modifier) 
-				);
+			"//*[@numFound='1']",
+			"//doc/int[@name='recid'][.='100']",
+			"//doc/float[@name='score'][.='13.0']" // 13.00 * (cite_read_boost + aqp.classic_scoring.modifier) 
+			);
 		assertQ(req("q", "author:\"Einstein, A\" AND author:\"Anders\"",
 		    "aqp.constant_scoring", "author^13",
 		    "aqp.classic_scoring.modifier", "0.48",
-        "fl", "recid,score"),
-				"//*[@numFound='1']",
-				"//doc/int[@name='recid'][.='100']",
-				"//doc/float[@name='score'][.='26.0']");
+		    "fl", "recid,score"),
+			"//*[@numFound='1']",
+			"//doc/int[@name='recid'][.='100']",
+			"//doc/float[@name='score'][.='26.0']");
 		assertQ(req("q", "author:\"Einstein, A\" OR author:\"Anders\"",
-        "aqp.constant_scoring", "author^13",
-        "aqp.classic_scoring.modifier", "0.48",
-        "fl", "recid,score"),
-        "//*[@numFound='1']",
-        "//doc/int[@name='recid'][.='100']",
-        "//doc/float[@name='score'][.='26.0']");
+	        "aqp.constant_scoring", "author^13",
+	        "aqp.classic_scoring.modifier", "0.48",
+	        "fl", "recid,score"),
+	        "//*[@numFound='1']",
+	        "//doc/int[@name='recid'][.='100']",
+	        "//doc/float[@name='score'][.='26.0']");
 
 		assert h.query(req("q", "author:\"Einstein, A\"", "fl", "author_norm", "indent", "false"))
 				.contains("<arr name=\"author_norm\">" +
@@ -494,11 +494,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		/*
-		 * author facets
+		 * author facets - should be case insensitive
 		 */
 
 		assertQ(req("q", "author_facet_hier:\"0/Anders, J M\""), "//*[@numFound='1']");
+		assertQ(req("q", "author_facet_hier:\"0/anders, j m\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet_hier:\"1/Anders, J M/Anders, John Michael\""), "//*[@numFound='1']");
+		assertQ(req("q", "author_facet_hier:\"1/Anders, J M/ANDERS, john michael\""), "//*[@numFound='1']");
 		assertQ(req("q", "author_facet_hier:\"1/Einstein, A\""), "//*[@numFound='0']");
 
 
@@ -656,33 +658,33 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
 		/*
-     * orcid, added 30/12/14; they must correspond to the author array
-     * - updated 13/11/15 - orcid field is now a virtual one; and we have
-     *   orcid_pub,_user,_other
-     */
-    assertQ(req("q", "orcid_pub:1111-2222-3333-4444"),
-        "//doc/int[@name='recid'][.='100']",
-        "//*[@numFound='1']"
-    );
-    assertQ(req("q", "orcid_pub:1111*"),
-        "//doc/int[@name='recid'][.='100']",
-        "//*[@numFound='1']"
-    );
-    assert h.query(req("q", "recid:100", "indent", "false", "fl", "orcid_pub"))
-    .contains("<arr name=\"orcid_pub\">" +
-      "<str>1111-2222-3333-4444</str>" +
-      "<str>-</str>" +
-      "<str>0000-0002-4110-3511</str></arr>"
-      );
-    // this is only present in orcid_other
-    assertQ(req("q", "orcid:1111-2222-3333-5555"),
-        "//doc/int[@name='recid'][.='100']",
-        "//*[@numFound='1']"
-    );
-    assertQ(req("q", "orcid_other:1111-2222-3333-5555"),
-        "//doc/int[@name='recid'][.='100']",
-        "//*[@numFound='1']"
-    );
+	     * orcid, added 30/12/14; they must correspond to the author array
+	     * - updated 13/11/15 - orcid field is now a virtual one; and we have
+	     *   orcid_pub,_user,_other
+	     */
+	    assertQ(req("q", "orcid_pub:1111-2222-3333-4444"),
+	        "//doc/int[@name='recid'][.='100']",
+	        "//*[@numFound='1']"
+	    );
+	    assertQ(req("q", "orcid_pub:1111*"),
+	        "//doc/int[@name='recid'][.='100']",
+	        "//*[@numFound='1']"
+	    );
+	    assert h.query(req("q", "recid:100", "indent", "false", "fl", "orcid_pub"))
+	    .contains("<arr name=\"orcid_pub\">" +
+	      "<str>1111-2222-3333-4444</str>" +
+	      "<str>-</str>" +
+	      "<str>0000-0002-4110-3511</str></arr>"
+	      );
+	    // this is only present in orcid_other
+	    assertQ(req("q", "orcid:1111-2222-3333-5555"),
+	        "//doc/int[@name='recid'][.='100']",
+	        "//*[@numFound='1']"
+	    );
+	    assertQ(req("q", "orcid_other:1111-2222-3333-5555"),
+	        "//doc/int[@name='recid'][.='100']",
+	        "//*[@numFound='1']"
+	    );
 
 
 

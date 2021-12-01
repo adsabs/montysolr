@@ -32,7 +32,7 @@ import monty.solr.util.MontySolrSetup;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationsSearch extends MontySolrAbstractTestCase {
 
-	private boolean debug = true;
+	private boolean debug = false;
 	private SolrQueryRequest tempReq;
 	
 	@BeforeClass

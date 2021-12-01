@@ -975,11 +975,11 @@ AqpFunctionQueryBuilderProvider {
 		parsers.put("edismax_combined_aqp", new AqpSubqueryParserFull() { // will decide whether new aqp() parse is needed
 			public Query parse(FunctionQParser fp) throws SyntaxError {
 			  final String original = fp.getString();
-        //System.out.println("edismax fed: " + original);
-        QParser eqp = fp.subQuery(original, "adismax");
-        Query q = eqp.getQuery();
-        //System.out.println("edismax produced: " + q);
-        return simplify(q);
+		        //System.out.println("edismax fed: " + original);
+		        QParser eqp = fp.subQuery(original, "adismax");
+		        Query q = eqp.getQuery();
+		        //System.out.println("edismax produced: " + q);
+		        return simplify(q);
 			}
 			protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
 				List<Query> parts = query.getDisjuncts();
@@ -1019,7 +1019,7 @@ AqpFunctionQueryBuilderProvider {
 			}
 			private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {
 				QParser fParser = getParser();
-				System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
+				//System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
 				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
 				Query q = aqp.getQuery();
 				if (boost != null && boost != 1.0f) {
@@ -1069,8 +1069,8 @@ AqpFunctionQueryBuilderProvider {
 				QParser aqp = fParser.subQuery(field+ ":"+fParser.getString(), "aqp");
 				Query q = aqp.getQuery();
 				if (boost != null && boost != 1.0f) {
-          q = new BoostQuery(q, boost);
-        }
+                  q = new BoostQuery(q, boost);
+                }
 				return q;
 			}
 		});

@@ -16,6 +16,7 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
@@ -53,6 +54,8 @@ public class SpanConverter {
 			return wrapBoost((SpanQuery) q, boost);
 		} else if (q instanceof TermQuery) {
 			return wrapBoost(new SpanTermQuery(((TermQuery) q).getTerm()), boost);
+		} else if (q instanceof ConstantScoreQuery) {
+			return getSpanQuery(new SpanConverterContainer(((ConstantScoreQuery) q).getQuery(), 1, true, 0.0f));
 		} else if (q instanceof WildcardQuery) {
 			return wrapBoost(new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q), boost);
 		} else if (q instanceof PrefixQuery) {
@@ -62,16 +65,16 @@ public class SpanConverter {
 		} else if (q instanceof BooleanQuery) {
 			return wrapBoost(convertBooleanToSpan(container), boost);
 		} else if (q instanceof RegexpQuery) {
-		  return wrapBoost(new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q), boost);
+		    return wrapBoost(new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q), boost);
 		} else if (q instanceof DisjunctionMaxQuery) {
-      return wrapBoost(convertDisjunctionQuery(container), boost);
+			return wrapBoost(convertDisjunctionQuery(container), boost);
 		} else if (q instanceof BoostQuery) {
-		  return wrapBoost(getSpanQuery(new SpanConverterContainer(((BoostQuery) q).getQuery(), 1, true)),
+		    return wrapBoost(getSpanQuery(new SpanConverterContainer(((BoostQuery) q).getQuery(), 1, true)),
 		      ((BoostQuery) q).getBoost());
 		} else if (q instanceof MatchNoDocsQuery) {
-      return new EmptySpanQuery(container.query);
+	        return new EmptySpanQuery(container.query);
 		} else if (q instanceof SynonymQuery) {
-      return wrapBoost(convertSynonymToSpan(container), boost);
+            return wrapBoost(convertSynonymToSpan(container), boost);
 		} else {
 			
 				SpanQuery wrapped = wrapNonConvertible(container);
@@ -113,6 +116,7 @@ public class SpanConverter {
 	    return new SpanBoostQuery(q, boost);
 	  return q;
 	}
+  
   public SpanQuery wrapNonConvertible(SpanConverterContainer container) {
 		if (wrapNonConvertible) {
 			return doWrapping(container);
@@ -150,6 +154,7 @@ public class SpanConverter {
 
 		List<BooleanClause> clauses = q.clauses();
 		SpanQuery[] spanClauses = new SpanQuery[clauses.size()];
+		String field = null;
 		Occur o = null;
 		int i = 0;
 		for (BooleanClause c : clauses) {
@@ -164,21 +169,30 @@ public class SpanConverter {
 			Query sq = c.getQuery();
 			SpanQuery result = getSpanQuery(new SpanConverterContainer(sq, 1, true));
 			spanClauses[i] = result;
+			
 			i++;
 		}
-
-		if (o.equals(Occur.MUST)) {
-			return new SpanNearQuery(spanClauses, container.slop,
-					container.inOrder);
-		} else if (o.equals(Occur.SHOULD)) {
-			return new SpanOrQuery(spanClauses);
-		} else if (o.equals(Occur.MUST_NOT)) {
-			SpanQuery[] exclude = new SpanQuery[spanClauses.length - 1];
-			for (int j = 1; j < spanClauses.length; j++) {
-				exclude[j - 1] = spanClauses[j];
-			}
-			return new SpanNotQuery(spanClauses[0], new SpanOrQuery(exclude));
+		
+		try {
+			if (o.equals(Occur.MUST)) {
+				return new SpanNearQuery(spanClauses, container.slop,
+						container.inOrder);
+			} else if (o.equals(Occur.SHOULD)) {
+				return new SpanOrQuery(spanClauses);
+			} else if (o.equals(Occur.MUST_NOT)) {
+				SpanQuery[] exclude = new SpanQuery[spanClauses.length - 1];
+				for (int j = 1; j < spanClauses.length; j++) {
+					exclude[j - 1] = spanClauses[j];
+				}
+				return new SpanNotQuery(spanClauses[0], new SpanOrQuery(exclude));
+			}			
 		}
+		catch (IllegalArgumentException exc) {
+			throw new QueryNodeException(new MessageImpl(
+					QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
+					"Proximity searches must be executed against the same field; please specify the field explicitly"));
+		}
+		
 
 		throw new QueryNodeException(new MessageImpl(
 				QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),

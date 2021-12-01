@@ -267,7 +267,8 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         "defType", "aqp"), 
         "indexstamp:[1349049600000 TO 1638316800000]", 
         null);
-    assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00.000\" TO \"2021-12-01T00:00:00.000Z\"]", "indent", "true"), 
+		
+    assertQ(req("q", "indexstamp:[\"2012-10-01T00:00:00.000\" TO \"2121-12-01T00:00:00.000Z\"]", "indent", "true"), 
       "//*[@numFound='141']"
       );
     

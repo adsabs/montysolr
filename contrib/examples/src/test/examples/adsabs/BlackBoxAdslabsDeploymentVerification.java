@@ -57,7 +57,7 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 		
 		assertU(commit("waitSearcher", "true"));
 		
-	  // the first search is not auto-warmed (the code seems
+		// the first search is not auto-warmed (the code seems
 		// that seems like a SOLR bug (I checked the SolrIndexSearcher
 		// code and it is right; so i created own function for 
 		// warming warm_cache()
@@ -71,9 +71,9 @@ public class BlackBoxAdslabsDeploymentVerification extends BlackAbstractTestCase
 				"q","bibcode:b*", 
 				"fq","{!bitset compression=none}");
 		List<ContentStream> streams = new ArrayList<ContentStream>(1);
-    ContentStreamBase cs = new ContentStreamBase.StringStream("bibcode\nb2\nx5");
-    cs.setContentType("big-query/csv");
-    streams.add(cs);
+	    ContentStreamBase cs = new ContentStreamBase.StringStream("bibcode\nb2\nx5");
+	    cs.setContentType("big-query/csv");
+	    streams.add(cs);
 		req.setContentStreams(streams);
 		
 		assertQ(req
