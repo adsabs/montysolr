@@ -22,14 +22,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.lucene.index.BinaryDocValues;
-import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.ReaderUtil;
+import org.apache.lucene.queries.function.FunctionValues;
+import org.apache.lucene.queries.function.ValueSource;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.SolrIndexSearcher;
 
@@ -62,25 +66,12 @@ public class CitationsTransformerFactory extends TransformerFactory
   	if (cache == null) {
   		throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot find cache: " + cacheName);
   	}
-  	
-  	Map<Integer, List<Integer>> references = null;
-  	int[][] citations = null;
-  	
-  	
-    BinaryDocValues idMapping = null;
-    if (params.getBool("resolve", false)) {
-    	try {
-	      idMapping = req.getSearcher().getSlowAtomicReader().getSortedDocValues(resolutionField);
-      } catch (IOException e) {
-	      throw new SolrException(ErrorCode.SERVER_ERROR, "Cannot get data for resolving field: " + resolutionField, e);
-      }
-    }
-    
+  	    
     return new CitationsTransform( field,
     		cache,
     		params.get("counts", "citations,references"),
     		params.get("values", ""),
-    		idMapping
+    		params.getBool("resolve", false) ? searcher : null
     		);
   }
 }
@@ -90,19 +81,21 @@ class CitationsTransform extends DocTransformer
   final String name;
 	private String[] counts;
 	private String[] values;
-	private BinaryDocValues idMapping;
 	private CitationCache<Object,Integer> cache;
+  private SolrIndexSearcher searcher;
+  private ValueSourceAccessor vs;
 
   public CitationsTransform( String display,
   		CitationCache<Object,Integer> cache,
   		String counts, String values, 
-  		BinaryDocValues idMapping )
+  		SolrIndexSearcher searcher
+  		)
   {
     this.name = display;
     this.cache = cache;
     this.counts = counts.split("\\s*,\\s*");
     this.values = values.split("\\s*,\\s*");
-    this.idMapping = idMapping;
+    this.searcher = searcher;
     
     
   }
@@ -155,45 +148,42 @@ class CitationsTransform extends DocTransformer
 	
 	private List<String> getCitationValues(SolrDocument doc, int docid) throws IOException {
 		ArrayList<String> data = new ArrayList<String>();
-		BytesRef ret = new BytesRef();
 		int[] citations = cache.getCitations(docid);
 		
 		if (citations != null) {
 			for (int i=0;i<citations.length;i++) {
 				if (citations[i] < 0) // unresolved refs = -1
 					continue;
-				if (idMapping != null) {
-				  if (idMapping.advanceExact(citations[i])) {
-				    ret = idMapping.binaryValue();
-				    data.add(ret.utf8ToString());				    
-				  }
-				}
-				else {
-					data.add(Integer.toString(citations[i]));
-				}
+				data.add(getValue(citations[i]));
 			}
 		}
 	  return data;
   }
 
-	private List<String> getReferenceValues(SolrDocument doc, int docid) throws IOException {
+	private String getValue(int docId) throws IOException {
+	  
+	  if (searcher != null) {
+      if (vs == null) {
+        SchemaField idSchemaField = searcher.getSchema().getField("bibcode");
+        vs = new ValueSourceAccessor(searcher, idSchemaField.getType().getValueSource(idSchemaField, null));
+      }
+      return vs.objectVal(docId).toString();
+    }
+    else {
+      return Integer.toString(docId);
+    }
+	  
+  }
+
+  private List<String> getReferenceValues(SolrDocument doc, int docid) throws IOException {
 		ArrayList<String> data = new ArrayList<String>();
-		BytesRef ret = new BytesRef();
 		int[] references = cache.getReferences(docid);
-		
+
 		if (references != null) {
 			for (int i=0;i<references.length;i++) {
 				if (references[i] < 0) // unresolved refs = -1
 					continue;
-				if (idMapping != null) {
-				  if (idMapping.advanceExact(references[i])) {
-				    ret = idMapping.binaryValue();
-				    data.add(ret.utf8ToString());				    
-				  }
-				}
-				else {
-					data.add(Integer.toString(references[i]));
-				}
+				data.add(getValue(references[i]));
 			}
 		}
 	  return data;
@@ -228,6 +218,46 @@ class CitationsTransform extends DocTransformer
 		}
   }
   
+	
+	static class ValueSourceAccessor {
+    private final List<LeafReaderContext> readerContexts;
+    private final ValueSource valueSource;
+    private final Map fContext;
+    private final FunctionValues[] functionValuesPerSeg;
+    private final int[] functionValuesDocIdPerSeg;
+    private final Map<Integer, Object> cache;
+
+    ValueSourceAccessor(IndexSearcher searcher, ValueSource valueSource) {
+      readerContexts = searcher.getIndexReader().leaves();
+      this.valueSource = valueSource;
+      fContext = ValueSource.newContext(searcher);
+      functionValuesPerSeg = new FunctionValues[readerContexts.size()];
+      functionValuesDocIdPerSeg = new int[readerContexts.size()];
+      cache = new HashMap<Integer, Object>();
+    }
+
+    Object objectVal(int topDocId) throws IOException {
+      if (cache.containsKey(topDocId))
+        return cache.get(topDocId);
+      
+      // lookup segment level stuff:
+      int segIdx = ReaderUtil.subIndex(topDocId, readerContexts);
+      LeafReaderContext rcontext = readerContexts.get(segIdx);
+      int segDocId = topDocId - rcontext.docBase;
+      // unfortunately Lucene 7.0 requires forward only traversal (with no reset method).
+      //   So we need to track our last docId (per segment) and re-fetch the FunctionValues. :-(
+      FunctionValues functionValues = functionValuesPerSeg[segIdx];
+      if (functionValues == null || segDocId < functionValuesDocIdPerSeg[segIdx]) {
+        functionValues = functionValuesPerSeg[segIdx] = valueSource.getValues(fContext, rcontext);
+      }
+      functionValuesDocIdPerSeg[segIdx] = segDocId;
+
+      // get value:
+      Object val = functionValues.objectVal(segDocId);
+      cache.put(topDocId, val);
+      return val;
+    }
+  }
   
   
 }

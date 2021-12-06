@@ -31,28 +31,33 @@ public class TestCitationsTransformer extends SolrTestCaseJ4 {
 
 		assertU(adoc("id", "0", "bibcode", "b0", 
 				"reference", "x2", "reference", "b3", "reference", "b4"));
+		assertU(commit());
 		assertU(adoc("id", "1", "bibcode", "b1", 
 				"reference", "b2", "reference", "b3", "reference", "b4"));
 		assertU(adoc("id", "2", "bibcode", "b2", "alternate_bibcode", "x2", "alternate_bibcode", "x22",
 				"reference", "b2", "reference", "b3", "reference", "b4"));
+		assertU(commit());
 		assertU(adoc("id", "3", "bibcode", "b3", 
 				"reference", "b2", "reference", "b3", "reference", "b4", "reference", "foo"));
 		assertU(adoc("id", "4", "bibcode", "b4", 
 				"reference", "b2", "reference", "b3", "reference", "b4"));
-		
+		assertU(commit());
 		
 		assertU(adoc("id", "5", "bibcode", "b5", "alternate_bibcode", "x5",
 				"reference", "x22", "reference", "b3", "reference", "b4"));
 		assertU(adoc("id", "6", "bibcode", "b6", 
 				"reference", "b2", "reference", "b3", "reference", "b4"));
+		assertU(commit());
 		assertU(adoc("id", "7", "bibcode", "b7", 
 				"reference", "b2", "reference", "b3", "reference", "b4"));
+		assertU(commit());
 		assertU(adoc("id", "8", "bibcode", "b8", 
 				"reference", "x2", "reference", "x22", "reference", "b4"));
-
+		assertU(commit());
 
 		assertU(adoc("id", "9", "bibcode", "b9",
 				"reference", "b2", "reference", "b3", "reference", "b4"));
+		assertU(commit());
 		assertU(adoc("id", "10", "bibcode", "b10",
 				"reference", "b2", "reference", "b3", "reference", "b4"));
 		assertU(adoc("id", "11", "bibcode", "b11"));		
