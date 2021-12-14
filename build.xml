@@ -27,7 +27,7 @@
 	<property name="app.version" value="${solr.version}.${montysolr.version}" />
 	<property name="jar.suffix" value="${app.name}-${app.version}.jar" />
 	<property name="ddash" value="--" />
-
+	<property environment="env"/>
 
 	<property name="solr.branch" value="branch_7_7" />
 
@@ -257,8 +257,15 @@ solr.version=${solr.version}
 	</target>
 
 
-	<target name="build-solr-example" depends="check-solr-location,build-montysolr-dependencies">
-		<echo>Building the Solr example</echo>
+	<target name="build-solr-example" depends="check-solr-location">
+		<echo>Fixing log4j version</echo>
+			<replace file="${lucene.real.location}/ivy-versions.properties"
+				token="org.apache.logging.log4j.version = 2.11.0"
+			    value="org.apache.logging.log4j.version = 2.15.0"
+			         >
+			</replace>
+			
+		<echo>Building the Solr example </echo>
 
 		<exec executable="${ant}" dir="${solr.real.location}" logerror="true">
 			<env key="PATH" value="${ant.home}/bin${path.separator}${env.PATH}" />
