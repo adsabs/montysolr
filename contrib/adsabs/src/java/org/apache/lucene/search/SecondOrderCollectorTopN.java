@@ -57,7 +57,7 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 
   @Override
   public boolean needsScores() {
-    return topCollector.needsScores();
+	  return this.topCollector.needsScores();
   }
 
   @Override

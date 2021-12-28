@@ -1100,7 +1100,7 @@ AqpFunctionQueryBuilderProvider {
 			}
 		});
 		
-	  // helper method; SOLR is not warming up caches when index is opened first time
+		// helper method; SOLR is not warming up caches when index is opened first time
 		// so we have to do it ourselves
 		parsers.put("warm_cache", new AqpSubqueryParserFull() {
 			@SuppressWarnings("unchecked")
@@ -1110,6 +1110,9 @@ AqpFunctionQueryBuilderProvider {
 				@SuppressWarnings("rawtypes")
 				final CitationCache cache = (CitationCache) req.getSearcher().getCache("citations-cache");
 				if (!cache.isWarmingOrWarmed()) {
+					if (cache.size() > 0) {
+						return new MatchNoDocsQuery(); // we only allow it once (solr warms caches after first searcher was opened)
+					}
 					cache.warm(req.getSearcher(), cache);
 				}
 				return new MatchNoDocsQuery();
