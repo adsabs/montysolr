@@ -430,6 +430,11 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
       public boolean needsScores() {
         return false;
       }
+
+		@Override
+		public SecondOrderCollector copy() {
+			return this;
+		}
 			
 		}),
   			new SimpleCollector() { // this one collects results
