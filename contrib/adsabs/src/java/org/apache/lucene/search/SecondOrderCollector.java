@@ -68,4 +68,6 @@ public interface SecondOrderCollector {
 	 */
 	public void setFinalValueType(FinalValueType type);
 
+	
+	public SecondOrderCollector copy();
 }

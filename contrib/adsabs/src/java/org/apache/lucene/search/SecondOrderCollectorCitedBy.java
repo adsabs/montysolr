@@ -47,4 +47,10 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
     return true;
   }
 
+
+  @Override
+  public SecondOrderCollector copy() {
+  	return new SecondOrderCollectorCitedBy(cache);
+  }
+
 }

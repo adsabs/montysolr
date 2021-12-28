@@ -56,31 +56,35 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
 
 
   
-  @Override
-  public String toString() {
-  	return this.getClass().getSimpleName() + "(cache=" + cache.toString() + ", boost=" + boostCache.toString() + ")";
-  }
+  	@Override
+  	public String toString() {
+  		return this.getClass().getSimpleName() + "(cache=" + cache.toString() + ", boost=" + boostCache.toString() + ")";
+  	}
   
-  /** Returns a hash code value for this object. */
-  public int hashCode() {
-    return cache.hashCode() ^ boostCache.hashCode();
-  }
+  	/** Returns a hash code value for this object. */
+  	public int hashCode() {
+  		return cache.hashCode() ^ boostCache.hashCode();
+  	}
   
-  /** Returns true iff <code>o</code> is equal to this. */
-  public boolean equals(Object o) {
-    if (o instanceof SecondOrderCollector) {
-      SecondOrderCollector fq = (SecondOrderCollector) o;
-      return hashCode() == fq.hashCode();
-    }
-    return false;
-  }
+  	/** Returns true iff <code>o</code> is equal to this. */
+  	public boolean equals(Object o) {
+	    if (o instanceof SecondOrderCollector) {
+	      SecondOrderCollector fq = (SecondOrderCollector) o;
+	      return hashCode() == fq.hashCode();
+	    }
+	    return false;
+  	}
 
 
 
-  @Override
-  public boolean needsScores() {
-    return true;
-  }
+  	@Override
+  	public boolean needsScores() {
+  		return true;
+  	}
 
-  
+	@Override
+	public SecondOrderCollector copy() {
+		return new SecondOrderCollectorCitingTheMostCited(cache, boostCache);
+	}
+	
 }

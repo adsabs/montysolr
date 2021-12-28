@@ -9,48 +9,41 @@
 	<classpathentry kind="src" path="contrib/examples/src/java"/>
 	<classpathentry kind="src" path="contrib/examples/src/test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/apache-solr-77"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-common-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-icu-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-kuromoji-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-morfologik-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-nori-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-opennlp-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-phonetic-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-smartcn-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-stempel-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-backward-codecs-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-benchmark-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-classification-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-codecs-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-core-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-demo-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-expressions-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-facet-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-grouping-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-highlighter-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-join-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-memory-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-misc-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queries-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queryparser-7.7.3-SNAPSHOT.jar" sourcepath="/apache-solr-77"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-replicator-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-sandbox-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-spatial-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-spatial-extras-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-spatial3d-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-suggest-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-test-framework-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-analysis-extras-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-analytics-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-cell-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-clustering-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-dataimporthandler-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-dataimporthandler-extras-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-langid-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-ltr-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-prometheus-exporter-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-test-framework-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-velocity-7.7.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-common-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-icu-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-kuromoji-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-morfologik-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-nori-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-opennlp-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-phonetic-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-smartcn-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-analyzers-stempel-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-backward-codecs-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-classification-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-codecs-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-core-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-expressions-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-grouping-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-highlighter-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-join-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-memory-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-misc-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queries-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-queryparser-7.7.4-SNAPSHOT.jar" sourcepath="/apache-solr-77"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-sandbox-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-spatial-extras-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-spatial3d-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/lucene/lucene-suggest-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-analysis-extras-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-analytics-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-cell-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-clustering-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-dataimporthandler-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-dataimporthandler-extras-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-langid-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-ltr-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-prometheus-exporter-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-velocity-7.7.4-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/gmetric4j-1.0.7.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/jetty-continuation-9.4.14.v20181114.jar"/>
@@ -74,17 +67,7 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/disruptor-3.4.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/jcl-over-slf4j-1.7.24.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/jul-to-slf4j-1.7.24.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-1.2-api-2.11.0.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-api-2.11.0.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-core-2.11.0.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-slf4j-impl-2.11.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/slf4j-api-1.7.24.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/ant-1.8.2.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit-4.12.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/junit4-ant-2.7.2.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lib/randomizedtesting-runner-2.7.2.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/test-framework/lucene-libs/lucene-test-framework-7.7.3-SNAPSHOT.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="/apache-solr-77/solr/core/lib/commons-io-2.5.jar"/>
 	<classpathentry kind="lib" path="contrib/adsabs/lib/antlr-3.5.2.jar"/>
@@ -154,34 +137,33 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/jackson-mapper-asl-1.9.13.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/janino-2.7.6.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/joda-time-2.2.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-common-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-kuromoji-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-nori-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-phonetic-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-backward-codecs-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-classification-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-codecs-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-core-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-expressions-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-grouping-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-highlighter-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-join-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-memory-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-misc-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-queries-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-queryparser-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-sandbox-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-spatial-extras-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-spatial3d-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-suggest-7.7.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-common-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-kuromoji-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-nori-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-analyzers-phonetic-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-backward-codecs-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-classification-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-codecs-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-core-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-expressions-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-grouping-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-highlighter-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-join-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-memory-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-misc-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-queries-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-queryparser-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-sandbox-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-spatial-extras-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-spatial3d-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/lucene-suggest-7.7.4-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/noggit-0.8.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/org.restlet-2.3.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/org.restlet.ext.servlet-2.3.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/protobuf-java-3.1.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/rrd4j-3.2.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-adsabs-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-core-7.7.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-solrj-7.7.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-core-7.7.4-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solr-solrj-7.7.4-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/spatial4j-0.7.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/t-digest-3.1.jar"/>
@@ -198,9 +180,13 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solrj-lib/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solrj-lib/woodstox-core-asl-4.4.1.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/solr/solrj-lib/zookeeper-3.4.14.jar"/>
-	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/solr/dist/solr-test-framework-7.7.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/solr/dist/solr-test-framework-7.7.4-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/lucene/test-framework/lib/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/lucene/test-framework/lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/lucene/test-framework/lib/randomizedtesting-runner-2.7.2.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-1.2-api-2.15.0.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-api-2.15.0.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-core-2.15.0.jar"/>
+	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-slf4j-impl-2.15.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

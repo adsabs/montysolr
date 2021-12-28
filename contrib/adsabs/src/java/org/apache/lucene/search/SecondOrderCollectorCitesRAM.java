@@ -8,13 +8,13 @@ import java.io.IOException;
  */
 public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
-  private SolrCacheWrapper cache;
+	private SolrCacheWrapper cache;
 	
-  public SecondOrderCollectorCitesRAM(SolrCacheWrapper cache) {
-    super();
-    assert cache != null;
+  	public SecondOrderCollectorCitesRAM(SolrCacheWrapper cache) {
+  		super();
+  		assert cache != null;
 		this.cache = cache;
-  }
+  	}
 	
 	
 	@Override
@@ -44,8 +44,14 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 	}
 
 
-  @Override
-  public boolean needsScores() {
-    return true;
-  }
+	@Override
+	public boolean needsScores() {
+		return true;
+	}
+
+
+	@Override
+	public SecondOrderCollector copy() {
+		return new SecondOrderCollectorCitesRAM(cache);
+	}
 }

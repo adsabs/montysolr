@@ -11,11 +11,13 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 	private TopDocsCollector topCollector;
 	private int topN;
 	private String detail = null;
+	private Sort sortOrder;
 
-	public SecondOrderCollectorTopN(String detail, int topN, TopDocsCollector collector) {
+	public SecondOrderCollectorTopN(String detail, int topN, Sort sortOrder) {
 		this.topN = topN;
-		topCollector = collector;
+		this.sortOrder = sortOrder;
 		this.detail = detail;
+		this.topCollector = TopFieldCollector.create(sortOrder, topN, false, true, true, true);
 	}
 	
 	public SecondOrderCollectorTopN(int topN) {
@@ -68,5 +70,14 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
   public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
     LeafCollector c = topCollector.getLeafCollector(context);
     return c;
+  }
+  
+  public SecondOrderCollector copy() {
+	  if (sortOrder != null) {
+		  return new SecondOrderCollectorTopN(detail, topN, sortOrder);
+	  }
+	  else {
+		  return new SecondOrderCollectorTopN(topN);		  
+	  }
   }
 }

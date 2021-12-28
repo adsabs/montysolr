@@ -24,7 +24,7 @@ import org.apache.lucene.index.IndexReader;
 
 public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
-  Set<String> fieldsToLoad;
+	Set<String> fieldsToLoad;
 	private SolrCacheWrapper cache;
 	private IndexReader reader;
 	
@@ -33,15 +33,23 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 		assert cache != null;
 		this.cache = cache;
 		fieldsToLoad = new HashSet<String>();
-	  for (String f: referenceFields) {
-	  	fieldsToLoad.add(f);
-	  }
-	  assert fieldsToLoad.size() > 0;
+		for (String f: referenceFields) {
+			fieldsToLoad.add(f);
+		}
+		assert fieldsToLoad.size() > 0;
 	}
 	
-	
-	
-	
+	public SecondOrderCollectorCites(SolrCacheWrapper cache, Set<String> referenceFields) {
+		super();
+		assert cache != null;
+		this.cache = cache;
+		fieldsToLoad = referenceFields;
+		assert fieldsToLoad.size() > 0;
+	}
+
+
+
+
 	@SuppressWarnings("unchecked")
   @Override
 	public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
@@ -81,8 +89,16 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
 
 
 
-  @Override
-  public boolean needsScores() {
-    return true;
-  }
+	@Override
+	public boolean needsScores() {
+		return true;
+	}
+
+
+
+
+	@Override
+	public SecondOrderCollector copy() {
+		return new SecondOrderCollectorCites(cache, fieldsToLoad);
+	}
 }

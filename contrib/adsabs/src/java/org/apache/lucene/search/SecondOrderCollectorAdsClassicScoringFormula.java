@@ -35,9 +35,9 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 	private float adsPart;
 	private CacheWrapper cache;
 	private LuceneCacheWrapper<NumericDocValues> boostCache;
-  private float highestClassicFactor;
+	private float highestClassicFactor;
 
-	public SecondOrderCollectorAdsClassicScoringFormula(SolrCacheWrapper cache, LuceneCacheWrapper<NumericDocValues> boostCache, float ratio) {
+	public SecondOrderCollectorAdsClassicScoringFormula(CacheWrapper cache, LuceneCacheWrapper<NumericDocValues> boostCache, float ratio) {
 		this.cache = cache;
 		this.lucenePart = ratio;
 		this.adsPart = 1.0f - ratio;
@@ -106,21 +106,26 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 		
 		return super.getSubReaderResults(rangeStart, rangeEnd);
 		
-  }
+	  }
+		
+		private float getClassicBoostFactor(int doc) {
+		  return boostCache.getFloat(doc);
+	  }
 	
-	private float getClassicBoostFactor(int doc) {
-	  return boostCache.getFloat(doc);
-  }
-
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "(cache=" + cache.toString() + ", boost=" + boostCache.toString() 
 		+ ", lucene=" + this.lucenePart + ", adsPart=" + this.adsPart + ")";
 	}
 
-  @Override
-  public boolean needsScores() {
-    return true;
-  }
+    @Override
+	public boolean needsScores() {
+    	return true;
+	}
+
+	@Override
+	public SecondOrderCollector copy() {	
+		return new SecondOrderCollectorAdsClassicScoringFormula(cache, boostCache, lucenePart);
+	}
 
 }

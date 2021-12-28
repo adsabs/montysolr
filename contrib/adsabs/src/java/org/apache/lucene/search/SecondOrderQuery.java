@@ -89,8 +89,7 @@ public class SecondOrderQuery extends Query {
 	public Query rewrite(IndexReader reader) throws IOException {
 		Query rewritten = firstOrderQuery.rewrite(reader);
 		if (rewritten != firstOrderQuery) {
-			SecondOrderQuery clone = new SecondOrderQuery(rewritten, this.secondOrderCollector);
-			return clone;
+			return new SecondOrderQuery(rewritten, this.secondOrderCollector.copy());
 		} else {
 			return this;
 		}

@@ -405,6 +405,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       
       assertU(adoc("id", "2", "bibcode", "XXX", "abstract", "foo bar baz",
                   "title", "title bitle"));
+      
       assertU(commit("waitSearcher", "true"));
       
       assertQ(req("q", "title:\"A Change of Rotation Profile in the Envelope in the HH 111 Protostellar System: A Transition to a Disk\""),
@@ -444,6 +445,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
           "SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2, info=score desc,bibcode asc))",
           SecondOrderQuery.class);
       
+      
       // custom scoring should be possible even with constant scores
       assertQueryEquals(req("defType", "aqp", 
           "aqp.constant_scoring", "author^1",
@@ -480,12 +482,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
       int md = ir.get().maxDoc();
       ir.decref();
       
-      setDebug(true);
+      
       assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, abstract:foo), title abstract)"),
-          "+like:foo bar baz title bitle  -BitSetQuery(" + md + ")",
+          "+like:foo bar baz title bitle  -BitSetQuery(" + Integer.toString(md-1) + ")",
           BooleanQuery.class);
       assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, abstract:foo) , title abstract) foo"),
-          "+(+like:foo bar baz title bitle  -BitSetQuery(" + md + ")) +all:foo",
+          "+(+like:foo bar baz title bitle  -BitSetQuery(" + Integer.toString(md-1) + ")) +all:foo",
           BooleanQuery.class);
       
       // make sure the cache key of the query is different
@@ -736,7 +738,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
+                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/murray, s",
                 BooleanQuery.class
         );
 
@@ -747,7 +749,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/Murray, S",
+                "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/murray, s",
                 BooleanQuery.class
         );
         assertQueryEquals(req("defType", "aqp",
@@ -757,7 +759,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "aqp.unfielded.tokens.new.type", "simple",
                 "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"
                 ),
-                "+(+(abstract:stephen | title:stephen) +(abstract:murray | title:murray)) +author_facet_hier:0/Murray, S",
+                "+(+(abstract:stephen | title:stephen) +(abstract:murray | title:murray)) +author_facet_hier:0/murray, s",
                 BooleanQuery.class
         );
 

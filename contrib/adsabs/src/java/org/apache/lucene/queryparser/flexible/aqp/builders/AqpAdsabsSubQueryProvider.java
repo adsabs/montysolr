@@ -46,6 +46,7 @@ import org.apache.lucene.search.SecondOrderCollectorTopN;
 import org.apache.lucene.search.SecondOrderQuery;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.SolrCacheWrapper;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SynonymQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
@@ -290,10 +291,10 @@ AqpFunctionQueryBuilderProvider {
 						throws IOException {
 							this.reader = context.reader();
 						}
-            @Override
-            public boolean needsScores() {
-              return true;
-            }
+			            @Override
+			            public boolean needsScores() {
+			              return true;
+			            }
 					});
 				} catch (IOException e) {
 					throw new SyntaxError(e.getMessage(), e);
@@ -608,15 +609,15 @@ AqpFunctionQueryBuilderProvider {
 
 					SolrIndexSearcher searcher = fp.getReq().getSearcher();
 
-					TopFieldCollector collector;
+					Sort sortOrder;
 					try {
-						collector = TopFieldCollector.create(searcher.weightSort(sortSpec.getSort()), topN, false, true, true);
+						sortOrder = searcher.weightSort(sortSpec.getSort());
 					} catch (IOException e) {
 						throw new SyntaxError("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
 					}
 
 					return new SecondOrderQuery(innerQuery, 
-							new SecondOrderCollectorTopN(sortOrRank, topN, collector));
+							new SecondOrderCollectorTopN(sortOrRank.toString(), topN, sortOrder));
 				}
 			}
 		});
