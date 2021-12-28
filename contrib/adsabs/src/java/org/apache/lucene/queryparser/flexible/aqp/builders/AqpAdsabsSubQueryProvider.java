@@ -601,8 +601,9 @@ AqpFunctionQueryBuilderProvider {
 
 				SortSpec sortSpec = SortSpecParsing.parseSortSpec(sortOrRank, fp.getReq());
 				
+				Query q;
 				if (sortSpec.getSort() == null) {
-					return new SecondOrderQuery(innerQuery, 
+					q = new SecondOrderQuery(innerQuery, 
 							new SecondOrderCollectorTopN(topN));
 				}
 				else {
@@ -616,9 +617,11 @@ AqpFunctionQueryBuilderProvider {
 						throw new SyntaxError("I am sorry, you can't use " + sortOrRank + " for topn() sorting. Reason: " + e.getMessage());
 					}
 
-					return new SecondOrderQuery(innerQuery, 
+					q = new SecondOrderQuery(innerQuery, 
 							new SecondOrderCollectorTopN(sortOrRank.toString(), topN, sortOrder));
 				}
+				
+				return AqpScoringQueryNodeBuilder.wrapQuery(q, "cite_read_boost", 0.5f);
 			}
 		});
 

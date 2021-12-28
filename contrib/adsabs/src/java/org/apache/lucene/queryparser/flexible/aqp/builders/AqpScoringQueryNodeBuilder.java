@@ -23,24 +23,28 @@ import org.apache.lucene.search.Query;
  *  score = lucene_score * ( classic_factor + modifier ) 
  */
 public class AqpScoringQueryNodeBuilder implements StandardQueryBuilder {
-	
+
 
 	public Query build(QueryNode queryNode) throws QueryNodeException {
-	  
-	  AqpAdsabsScoringQueryNode q = (AqpAdsabsScoringQueryNode) queryNode;
-	      
-	  Query query = (Query) queryNode.getChildren().get(0).getTag(
-        QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
-	  
-	  ValueSource vs = new SumFloatFunction(new ValueSource[] {
-	      new FloatFieldSource(q.getSource()), // classic score 
-	      new ConstValueSource(q.getModifier()) // modifier
-	      });
-    
-	  
-	  FunctionQuery functionQuery = new FunctionQuery(vs);
-	  return new CustomScoreQuery(query, functionQuery);
 
-	  }
+		AqpAdsabsScoringQueryNode q = (AqpAdsabsScoringQueryNode) queryNode;
+
+		Query query = (Query) queryNode.getChildren().get(0).getTag(
+				QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+
+		return wrapQuery(query, q.getSource(), q.getModifier());
+
+	}
+
+	public static Query wrapQuery(Query q, String source, float modifier) {
+		ValueSource vs = new SumFloatFunction(new ValueSource[] {
+				new FloatFieldSource(source), // classic score 
+				new ConstValueSource(modifier) // modifier of how much lucene score to use
+		});
+
+
+		FunctionQuery functionQuery = new FunctionQuery(vs);
+		return new CustomScoreQuery(q, functionQuery);
+	}
 
 }
