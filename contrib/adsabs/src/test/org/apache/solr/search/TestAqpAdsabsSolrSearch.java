@@ -412,6 +412,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
               "//*[@numFound='1']",
               "//doc/str[@name='id'][.='61']");
       
+      // check NEAR ignores order
+      assertQ(req("q", "title:(rotation NEAR2 profile)"),
+              "//*[@numFound='1']",
+              "//doc/str[@name='id'][.='61']");
+      assertQ(req("q", "title:(profile NEAR2 rotation)"),
+              "//*[@numFound='1']",
+              "//doc/str[@name='id'][.='61']");
       
       assertQEx("INVALID_SYNTAX", req("q", "author:\"^\"de marco year:2015"), 400);
         

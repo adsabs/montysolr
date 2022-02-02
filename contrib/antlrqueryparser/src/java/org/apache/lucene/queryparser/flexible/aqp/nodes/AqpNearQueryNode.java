@@ -23,7 +23,7 @@ public class AqpNearQueryNode extends QueryNodeImpl implements QueryNode {
 
   private static final long serialVersionUID = 8806759327487974314L;
   private Integer slop = null;
-  private boolean inOrder = true;
+  private boolean inOrder = false;
 
   public AqpNearQueryNode(List<QueryNode> children, int proximity) {
     if (children == null) {
