@@ -146,9 +146,9 @@ public class AuthorQueryVariations {
       HashMap<String,String> parsedAuthor,
       HashSet<String> variations) {
 
-    String last = parsedAuthor.get("last");
-    String first = parsedAuthor.get("first");
-    String middle = parsedAuthor.get("middle");
+    String last = parsedAuthor.get("Last");
+    String first = parsedAuthor.get("First");
+    String middle = parsedAuthor.get("Middle");
 
     if (parsedAuthor.size() == 1 && last != null) {
       variations.add(String.format("%s,.*", last)); // all we got was last name
