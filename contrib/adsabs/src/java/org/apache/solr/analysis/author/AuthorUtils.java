@@ -52,8 +52,8 @@ public class AuthorUtils {
 	/**
 	 * Method used by the tokenizer chain to normalize author names.
 	 * 
-	 * @param a
-	 * @param keepApostrophe
+	 * @param a - author name
+	 * @param keepApostrophe - bool, preserve apostrophe
 	 * @return Normalized string
 	 */
 	public static String normalizeAuthor(String a, boolean keepApostrophe) {
@@ -82,7 +82,7 @@ public class AuthorUtils {
 	/**
 	 * Utility method to split string (author name) into constituting parts
 	 * 
-	 * @param a
+	 * @param a - author name
 	 * @return map with 'last', 'first', 'middle' keys
 	 */
 	public static Map<String,String> parseAuthor(String a) {
@@ -102,8 +102,8 @@ public class AuthorUtils {
 	 * Utility method employed by AuthorTransliterationTokenizer and also by other components
 	 * inside the parser chain to discover other potential reading of the author's name.
 	 * 
-	 * @param a
-	 * @return
+	 * @param a - author name as string
+	 * @return - list of author name variants in ascii form
 	 */
 	public static ArrayList<String> getAsciiTransliteratedVariants(String a) {
 		HashSet<String> synonyms = new HashSet<String>();

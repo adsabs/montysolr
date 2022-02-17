@@ -36,13 +36,13 @@ public class TestAqpExtendedLGSimple extends TestAqpSLGSimple {
     ((AqpQueryTreeBuilder) qp.getQueryBuilder()).setBuilder(AqpNearQueryNode.class,	new AqpNearQueryNodeBuilder());
     
     assertQueryMatch(qp, "this NEAR that", "field",
-        "spanNear([field:this, field:that], 5, true)");
+        "spanNear([field:this, field:that], 5, false)");
 
     assertQueryMatch(qp, "this NEAR3 that", "field",
-    		"spanNear([field:this, field:that], 3, true)");
+    		"spanNear([field:this, field:that], 3, false)");
     
     assertQueryMatch(qp, "this NEAR3 (that OR foo*)", "field",
-				"spanNear([field:this, spanOr([field:that, SpanMultiTermQueryWrapper(field:foo*)])], 3, true)");
+				"spanNear([field:this, spanOr([field:that, SpanMultiTermQueryWrapper(field:foo*)])], 3, false)");
 
     
   }
