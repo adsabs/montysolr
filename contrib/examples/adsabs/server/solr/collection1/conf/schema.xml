@@ -61,8 +61,7 @@
 					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
-				<filter
-					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+				
 			</analyzer>
 
 			<!-- If you update the normalization components (ie. add new steps; especially 

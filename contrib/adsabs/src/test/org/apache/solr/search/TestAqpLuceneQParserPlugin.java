@@ -80,7 +80,7 @@ public class TestAqpLuceneQParserPlugin extends MontySolrAbstractTestCase {
 		SolrQueryRequest r = req(CommonParams.Q, "franklin NEAR hero", CommonParams.DF, "text");
 		QParser parser = a.createParser("franklin NEAR hero", r.getParams(), r.getParams(), r);
 		Query query = parser.parse();
-		assertEquals("spanNear([text:franklin, text:hero], 5, true)", query.toString());
+		assertEquals("spanNear([text:franklin, text:hero], 5, false)", query.toString());
 		r.close();
 		
 		

@@ -12,53 +12,45 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.BaseTokenStreamTestCase;
 
-
 public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
-	
+
 	final class TestFilter extends TokenFilter {
 		private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+
 		public TestFilter(TokenStream input) {
 			super(input);
 		}
+
 		public boolean incrementToken() throws IOException {
-		    if (!input.incrementToken()) return false;
-		    typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
-	        return true;
+			if (!input.incrementToken())
+				return false;
+			typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
+			return true;
 		}
 	}
-	
+
 	public void testAuthorSynonyms() throws Exception {
-		
+
 		checkIt("Müller, Bill", "Müller, Bill", "Mueller, Bill", "Muller, Bill");
 		checkIt("Peißker, L", "Peißker, L", "Peissker, L");
-		
-    
+
 	}
-	
+
 	public void testAccents() throws Exception {
-	  checkIt("Jeřábková, Tereza", "Jeřábková, Tereza", "Jerhaebkovae, Tereza", "Jerabkova, Tereza");
-	  checkIt("Dupré", "Dupré", "Dupree", "Dupre");
-	  checkIt("Duprè", "Duprè", "Dupre", "Duprè"); // Dupre\\xcc\\x80
-	  checkIt("\u0141", "Ł", "L");
-//	  System.out.println("\u0141");
-//	  System.out.println("\u0308E");
-//	  System.out.println("\u030aA");
-//	  System.out.println("\u0301E");
-//	  System.out.println("\u030cH");
-//	  //checkIt("\u0308E", "̈E");
-//	  checkIt("Mendigutıa", "Mendigutia");
-//	  checkIt("\u030aA", "\u030aA", "A");
-//	  checkIt("\u0301E", "E");
-//	  checkIt("\u030cH", "H");
-	  
-  }
-	
+		checkIt("Jeřábková, Tereza", "Jeřábková, Tereza", "Jerabkova, Tereza");
+		checkIt("Dupré", "Dupré", "Dupre,");
+		checkIt("Duprè", "Duprè", "Dupre,"); // Dupre\\xcc\\x80
+		checkIt("\u0141", "Ł", "L,");
+		checkIt("Mendigutıa", "Mendigutıa", "Mendigutia,");
+
+	}
+
 	private void checkIt(String input, String... expected) throws Exception {
-	  Reader reader = new StringReader(input);
-    Tokenizer tokenizer = new KeywordTokenizer();
-    tokenizer.setReader(reader);
-    AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String,String>());
-    TokenStream stream = factory.create(new TestFilter(tokenizer));
-    assertTokenStreamContents(stream, expected);
+		Reader reader = new StringReader(input);
+		Tokenizer tokenizer = new KeywordTokenizer();
+		tokenizer.setReader(reader);
+		AuthorTransliterationFactory factory = new AuthorTransliterationFactory(new HashMap<String, String>());
+		TokenStream stream = factory.create(new TestFilter(tokenizer));
+		assertTokenStreamContents(stream, expected);
 	}
 }

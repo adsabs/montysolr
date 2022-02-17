@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.solr.analysis.WriteableExplicitSynonymMap;
 import org.apache.solr.analysis.WriteableSynonymMap;
 import org.apache.solr.analysis.author.AuthorQueryVariations;
@@ -75,9 +78,9 @@ public class ProcessCuratedAuthorSynonyms {
 		log.debug("withAutoSynonyms: " + withAutoSynonyms.toString());
 		
 		// build a map of name -> variations to be used later
-		final HashMap<String,HashSet<String>> variationsMap = new HashMap<String,HashSet<String>>();
+		final HashMap<String, Set<String>> variationsMap = new HashMap<String,Set<String>>();
 		for (String s : withAutoSynonyms) {
-			HashMap<String,String> parsedAuthor = null;
+			Map<String,String> parsedAuthor = null;
 			try {
 				parsedAuthor = AuthorUtils.parseAuthor(s);
 			} catch (Exception e) {

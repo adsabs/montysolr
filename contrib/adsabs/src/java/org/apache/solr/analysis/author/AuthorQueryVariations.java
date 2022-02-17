@@ -71,9 +71,9 @@ public class AuthorQueryVariations {
 		generateSynonymVariations(parsedAuthor, variations);
 
 		// add the variations that are needed only for the query phase
-		String last = parsedAuthor.get("last");
-		String first = parsedAuthor.get("first");
-		String middle = parsedAuthor.get("middle");
+		String last = parsedAuthor.get("Last");
+		String first = parsedAuthor.get("First");
+		String middle = parsedAuthor.get("Middle");
 
 		if (first != null) {
 			if (middle != null) {
@@ -115,7 +115,7 @@ public class AuthorQueryVariations {
 	 * @param authorString name in the natural form
 	 * @return map with string mappings
 	 */
-	public static HashSet<String> getQueryVariations(String authorString) {
+	public static Set<String> getQueryVariations(String authorString) {
 
 		Map<String, String> parsedAuthor = null;
 		parsedAuthor = AuthorUtils.parseAuthor(authorString);
@@ -128,12 +128,12 @@ public class AuthorQueryVariations {
 		return generateSynonymVariations(parsedAuthor, variations);
 	}
 
-	public static HashSet<String> generateSynonymVariations(HashMap<String, String> parsedAuthor) {
+	public static Set<String> generateSynonymVariations(Map<String, String> parsedAuthor) {
 		HashSet<String> variations = new LinkedHashSet<String>();
 		return generateSynonymVariations(parsedAuthor, variations);
 	}
 
-	protected static HashSet<String> generateSynonymVariations(Map<String, String> parsedAuthor,
+	protected static Set<String> generateSynonymVariations(Map<String, String> parsedAuthor,
 			Set<String> variations) {
 
 		String last = parsedAuthor.get("Last");

@@ -114,11 +114,13 @@ public class AuthorUtils {
 		synonyms.add(a);
 
 		// downgrade to ascii
+		synonyms.add(foldToAscii(a));
+		
+		// work around unidecode not always doing what we want
 		String b = replaceUmlaut(a);
 		if (b != a) {
 			synonyms.add(foldToAscii(b));
 		}
-		synonyms.add(foldToAscii(a));
 
 		// handle russian name stuff
 		HashSet<String> transRus = transliterateRussianNames(synonyms);
@@ -143,6 +145,9 @@ public class AuthorUtils {
 		StringBuilder out = new StringBuilder();
 		for (char c: input.toCharArray()) {
 			switch(c) {
+			case '\u00fc':
+				out.append("ue");
+				break;
 			case '\u00f6':
 				out.append("oe");
 				break;
