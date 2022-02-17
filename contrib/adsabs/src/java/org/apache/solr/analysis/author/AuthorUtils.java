@@ -49,6 +49,13 @@ public class AuthorUtils {
 		return normalizeAuthor(a, false);
 	}
 
+	/**
+	 * Method used by the tokenizer chain to normalize author names.
+	 * 
+	 * @param a
+	 * @param keepApostrophe
+	 * @return Normalized string
+	 */
 	public static String normalizeAuthor(String a, boolean keepApostrophe) {
 		boolean hasWildcards = a.indexOf('*') > -1 || a.indexOf('?') > -1; // \*\? should never be encountered here 
 		if (!keepApostrophe)
@@ -72,6 +79,12 @@ public class AuthorUtils {
 	}
 
 
+	/**
+	 * Utility method to split string (author name) into constituting parts
+	 * 
+	 * @param a
+	 * @return map with 'last', 'first', 'middle' keys
+	 */
 	public static Map<String,String> parseAuthor(String a) {
 		return parseAuthor(a, true);
 	}
@@ -85,17 +98,27 @@ public class AuthorUtils {
 		}
 	}
 
+	/**
+	 * Utility method employed by AuthorTransliterationTokenizer and also by other components
+	 * inside the parser chain to discover other potential reading of the author's name.
+	 * 
+	 * @param a
+	 * @return
+	 */
 	public static ArrayList<String> getAsciiTransliteratedVariants(String a) {
 		HashSet<String> synonyms = new HashSet<String>();
-		//a = a.toUpperCase();
+		
+		a = normalizeAuthor(a, true);
 
 		// include original
 		synonyms.add(a);
 
 		// downgrade to ascii
-		String downgraded = foldToAscii(a);
-		synonyms.add(downgraded);
-
+		String b = replaceUmlaut(a);
+		if (b != a) {
+			synonyms.add(foldToAscii(b));
+		}
+		synonyms.add(foldToAscii(a));
 
 		// handle russian name stuff
 		HashSet<String> transRus = transliterateRussianNames(synonyms);
@@ -112,14 +135,38 @@ public class AuthorUtils {
 		return new ArrayList<String>(synonyms);
 	}
 
-	public static String foldToAscii(String a) {
-		String b = unidecode(a.trim());
-		if (b.contains(" ,"))
-			b = b.replace(" ,", ",");
-		return b;
+	protected static String foldToAscii(String a) {
+		return unidecode(a);
 	}
 
-
+	private static String replaceUmlaut(String input) {
+		StringBuilder out = new StringBuilder();
+		for (char c: input.toCharArray()) {
+			switch(c) {
+			case '\u00f6':
+				out.append("oe");
+				break;
+			case '\u00e4':
+				out.append("ae");
+				break;
+			case '\u00df':
+				out.append("ss");
+				break;
+			case '\u00dc':
+				out.append("UE");
+				break;
+			case '\u00d6':
+				out.append("OE");
+				break;
+			case '\u00c4':
+				out.append("AE");
+				break;
+			default:
+				out.append(c);
+			}
+		}
+		return out.toString();
+	}
 
 	/*
 	 * Splits name into parts (separated by comma and then by space)
@@ -153,7 +200,7 @@ public class AuthorUtils {
 
 	// XXX: this doesn't look right to me, the fifth step gets (possibly)
 	// 5 times more items than the first step
-	public static HashSet<String> transliterateRussianNames(Set<String> in) {
+	private static HashSet<String> transliterateRussianNames(Set<String> in) {
 		HashSet<String> synonyms = new HashSet<String>();
 		for (String s : in) {
 			HashSet<String> syn = new HashSet<String>();
@@ -176,8 +223,8 @@ public class AuthorUtils {
 	 * note that we do not index 'E since the search
 	 * engine simply strips all apostrophes
 	 */
-	static Pattern p0 = Pattern.compile("(?<=\\w{2})'(?=[Ee])");
-	static HashSet<String> translitRussianApostrophes(Iterator<String> itr) {
+	private static Pattern p0 = Pattern.compile("(?<=\\w{2})'(?=[Ee])");
+	private static HashSet<String> translitRussianApostrophes(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
 
 		String x;
@@ -205,8 +252,8 @@ public class AuthorUtils {
 	 * [^IJY]EV$ => IEV$ == YEV$ == JEV$ 
 	 * [^IJY]EVA$ => IEVA$ == YEVA$ == JEVA$ 
 	 */
-	static Pattern p1 = Pattern.compile("(?<![IJYijy])[Ee][Vv](?=[aA]?,)");
-	static HashSet<String> translitRussianLastNames1(Iterator<String> itr) {
+	private static Pattern p1 = Pattern.compile("(?<![IJYijy])[Ee][Vv](?=[aA]?,)");
+	private static HashSet<String> translitRussianLastNames1(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
 		String x;
 		while (itr.hasNext()) {
@@ -233,8 +280,8 @@ public class AuthorUtils {
 	/* russian last names II:
 	 * ([NRBO])IA$ == $1IIA$ == $1IYA$
 	 */
-	static Pattern p2 = Pattern.compile("(?<=[NRBOnrbo])[Ii](?=[Aa],)");
-	static HashSet<String> translitRussianLastNames2(Iterator<String> itr) {
+	private static Pattern p2 = Pattern.compile("(?<=[NRBOnrbo])[Ii](?=[Aa],)");
+	private static HashSet<String> translitRussianLastNames2(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
 		String x;
 		while (itr.hasNext()) {
@@ -258,8 +305,8 @@ public class AuthorUtils {
 	/* russian last names III:
 	 * ([DHKLMNPSZ])IAN$ == $1YAN$ == $1JAN$ 
 	 */
-	static Pattern p3 = Pattern.compile("(?<=[DHKLMNPSZdhklmnpsz])[IJYijy](?=[Aa][Nn],)");
-	static HashSet<String> translitRussianLastNames3(Iterator<String> itr) {
+	private static Pattern p3 = Pattern.compile("(?<=[DHKLMNPSZdhklmnpsz])[IJYijy](?=[Aa][Nn],)");
+	private static HashSet<String> translitRussianLastNames3(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
 		String x;
 		while (itr.hasNext()) {
@@ -285,8 +332,8 @@ public class AuthorUtils {
 	/* russian last names IV:
 	 * AIA$ == AYA$ == AJA$ 
 	 */
-	static Pattern p4 = Pattern.compile("(?<=[KNVknv][Aa])[IJYijy](?=[Aa],)");
-	static HashSet<String> translitRussianLastNames4(Iterator<String> itr) {
+	private static Pattern p4 = Pattern.compile("(?<=[KNVknv][Aa])[IJYijy](?=[Aa],)");
+	private static HashSet<String> translitRussianLastNames4(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
 		String x;
 		while (itr.hasNext()) {
@@ -314,8 +361,8 @@ public class AuthorUtils {
 	 * VI$ == VII$ == VIJ$ == VIY$ = VYI$
 	 * first transform [KVH]I into [KVH]II
 	 */
-	static Pattern p5 = Pattern.compile("(?<=[KVkv])[Ii](?=,)");
-	static HashSet<String> translitRussianLastNames5(Iterator<String> itr) {
+	private static Pattern p5 = Pattern.compile("(?<=[KVkv])[Ii](?=,)");
+	private static HashSet<String> translitRussianLastNames5(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
 		String x;
 		while (itr.hasNext()) {
@@ -348,8 +395,8 @@ public class AuthorUtils {
 	 * ^IU == ^YU
 	 * ^IA == ^YA
 	 */
-	static Pattern p6 = Pattern.compile("(?<=, )[YIyi](?=[AUau])");
-	static HashSet<String> translitRussianFirstNames(Iterator<String> itr) {
+	private static Pattern p6 = Pattern.compile("(?<=, )[YIyi](?=[AUau])");
+	private static HashSet<String> translitRussianFirstNames(Iterator<String> itr) {
 		HashSet<String> syn = new HashSet<String>();
 		String x;
 		while (itr.hasNext()) {
