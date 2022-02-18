@@ -537,14 +537,14 @@
 					expression -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b"
-					replacement="$1$3" />
+					replacement="$1-$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1$3" />
+					pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
-					pattern="\b(?i:(NGC|N)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1$3" />
+					pattern="\b(?i:(NGC|N)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b(?i:([34]CR?|ADS|H[DHR]|IC|[MW]|MKN|NGC|PKS|PSR[BJ]?|SAO|UGC|UT)(-|\s+)([0-9]+[A-Z]*))\b"
-					replacement="$1$3" />
+					replacement="$1-$3" />
 
 
 				<!-- tokenize on empty space (if it is not a hyphen connecting other 
@@ -1248,18 +1248,18 @@
 			type="normalized_text_ascii_notokenization" indexed="true"
 			stored="true" multiValued="true" omitNorms="true" />
 
-		<field name="author_facet" type="string" indexed="true"
+		<field name="author_facet" type="normalized_string" indexed="true"
 			stored="${storeAll:false}" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
 
-		<field name="author_facet_hier" type="string" indexed="true"
+		<field name="author_facet_hier" type="normalized_string" indexed="true"
 			stored="${storeAll:false}" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" docValues="true" />
 
 		<field name="author_count" type="int" indexed="true"
 			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
-		<field name="first_author_facet_hier" type="string"
+		<field name="first_author_facet_hier" type="normalized_string"
 			indexed="true" stored="${storeAll:false}" multiValued="true"
 			omitNorms="true" omitTermFreqAndPositions="true" docValues="true" />
 
@@ -1293,9 +1293,6 @@
                docValues="true"/>
         <field name="aff_id" type="affiliation_tokens" indexed="true" stored="true"
                multiValued="true" omitNorms="true"/>
-        <!--  TODO: remove once index has been rebuilt -->
-        <field name="aff_raw" type="affiliation_text" indexed="true" stored="true"
-               omitNorms="true" multiValued="true" />
         
         <!-- for Unified Astronomy Thesaurus -->
         <field name="uat" type="uat_tokens" indexed="true" stored="true"
