@@ -397,8 +397,8 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("\"jakarta apache\" NOT \"Apache Lucene\"", null, "+\"jakarta apache\" -\"apache lucene\"");
 		assertQueryEquals("(jakarta OR apache) AND website", null, "+(jakarta apache) +website");
 		
-		assertQueryEquals("weak NEAR lensing", null, "spanNear([weak, lensing], 5, true)");
-		assertQueryEquals("weka NEAR2 lensing", null, "spanNear([weka, lensing], 2, true)");
+		assertQueryEquals("weak NEAR lensing", null, "spanNear([weak, lensing], 5, false)");
+		assertQueryEquals("weka NEAR2 lensing", null, "spanNear([weka, lensing], 2, false)");
 		
 		assertQueryEquals("a -b", null, "+a -b");
 		assertQueryEquals("a +b", null, "+a +b");
@@ -485,13 +485,13 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 		assertQueryEquals("m:(a b c OR d)", null, "+m:a +m:b +(m:c m:d)"); 
 		assertQueryEquals("m:(a b c AND d)", null, "+m:a +m:b +(+m:c +m:d)");
 		assertQueryEquals("m:(a b c OR d NOT e)", null, "+m:a +m:b +(m:c (+m:d -m:e))");
-		assertQueryEquals("m:(a b NEAR c)", null, "+m:a +spanNear([m:b, m:c], 5, true)");
-		assertQueryEquals("m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)");
-		assertQueryEquals("-m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, true) +(+m:d +m:e)"); //? should we allow - at the beginning?
+		assertQueryEquals("m:(a b NEAR c)", null, "+m:a +spanNear([m:b, m:c], 5, false)");
+		assertQueryEquals("m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, false) +(+m:d +m:e)");
+		assertQueryEquals("-m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, false) +(+m:d +m:e)"); //? should we allow - at the beginning?
 		
-		assertQueryEquals("m:(a b NEAR2 c)", null, "+m:a +spanNear([m:b, m:c], 2, true)");
-	    assertQueryEquals("m:(a b NEAR3 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 3, true) +(+m:d +m:e)");
-	    assertQueryEquals("-m:(a b NEAR4 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 4, true) +(+m:d +m:e)");
+		assertQueryEquals("m:(a b NEAR2 c)", null, "+m:a +spanNear([m:b, m:c], 2, false)");
+	    assertQueryEquals("m:(a b NEAR3 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 3, false) +(+m:d +m:e)");
+	    assertQueryEquals("-m:(a b NEAR4 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 4, false) +(+m:d +m:e)");
 	    assertQueryNodeException("m:(a b NEAR7 c)"); // by default, only range 1-5 is allowed (in configuration)
     
     
