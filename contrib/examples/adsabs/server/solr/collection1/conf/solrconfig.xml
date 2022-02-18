@@ -39,6 +39,7 @@
     <ramBufferSizeMB>${solr.ramBufferSize:1000}</ramBufferSizeMB>
     <maxBufferedDocs>${solr.maxBufferedDocs:50000}</maxBufferedDocs>
 
+
     
     <!-- When we run several instances sharing the same index, we must
          make sure that only one writer is modifying it; and other 
@@ -88,7 +89,7 @@
        <maxDocs>${montysolr.autoCommit.maxDocs:40000}</maxDocs>
        <maxTime>${montysolr.autoCommit.maxTime:1800000}</maxTime> 
      </autoCommit>
-     
+	  
      <!-- disabled by default -->
      <autoSoftCommit> 
        <maxTime>${montysolr.autoSoftCommit.maxTime:-1}</maxTime> 
@@ -328,6 +329,7 @@
        Modified qf:
        old: first_author^5 author^2 title^1.5 abstract^1.3 identifier^1 bibstem^1 year^2
        new: first_author^0.9 author^0.85 year^0.8 title^0.8 abstract^0.7 identifier^0.8 bibstem^0.8 keyword^0.8
+              
         -->
        <str name="qf">first_author^0.9 author^0.85 year^0.8 title^0.8 abstract^0.7 identifier^0.8 bibstem^0.8 keyword^0.8</str>
        
@@ -370,7 +372,8 @@
        <str name="aqp.classic_scoring.modifier">0.5</str>
        <str name="aqp.constant_scoring">first_author^14 author^13 year^10 bibstem^10</str>
        <str name="aqp.multiphrase.keep_one">SYNONYM</str>
-       
+       <str name="aqp.multiphrase.keep_one.ignore.fields">aff_raw,aff_id,institution</str>
+       <str name="aqp.unfielded.max.uppercase.tokens">2</str>
        <str name="q.op">AND</str>
        <str name="df">unfielded_search</str>
      </lst>
@@ -424,7 +427,7 @@
        <str name="aqp.unfielded.tokens.function.name">edismax_combined_aqp</str>
        <str name="useFastVectorHighlighter">true</str>
        <str name="aqp.allow.leading_wildcard">true</str>
-       
+       <str name="aqp.unfielded.max.uppercase.tokens">2</str>
        <str name="q.op">AND</str>
        <str name="df">unfielded_search</str>
      </lst>
@@ -533,7 +536,7 @@
     <lst name="defaults">
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
-       <str name="qf">first_author^0.9 author^0.85 year^0.8 title^0.8 abstract^0.7 identifier^0.8 bibstem^0.8 keyword^0.8</str>
+       <str name="qf">first_author^5 author^2 title^1.5 abstract^1.3 identifier^1 bibstem^1 year^2</str>
        <str name="defType">aqp</str>
        <str name="aqp.unfielded.tokens.strategy">disjuncts</str>
        <str name="aqp.unfielded.tokens.new.type">simple</str>
@@ -697,7 +700,7 @@
       <str name="defaultOperator">AND</str>
       <str name="fieldMap">arxiv identifier;collection database</str>
       <str name="fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author</str>
-      <str name="unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
+      <str name="unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
     </lst>
   </requestHandler>
   
@@ -721,7 +724,7 @@
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
-       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
+       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
        <str name="aqp.timestampFormat">yyyy-MM-dd'T'HH:mm:ss.SSS</str>
        <str name="aqp.dateFields">entry_date,date</str>
@@ -754,7 +757,7 @@
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
-       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
+       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
        <str name="aqp.timestampFormat">yyyy-MM-dd'T'HH:mm:ss.SSS</str>
        <str name="aqp.dateFields">entry_date,date</str>
@@ -833,7 +836,7 @@
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
-       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
+       <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3 all</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
        <str name="aqp.timestampFormat">yyyy-MM-dd'T'HH:mm:ss.SSS</str>
        <str name="aqp.dateFields">entry_date,date</str>
