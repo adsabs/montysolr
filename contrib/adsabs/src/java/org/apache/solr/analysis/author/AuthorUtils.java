@@ -75,6 +75,7 @@ public class AuthorUtils {
 		a = a.replace('-', ' ');
 		// normalize spaces once again
 		a = n2.matcher(a.trim()).replaceAll(" ");
+		a = a.replaceAll(" ,", ",");
 		return a;
 	}
 
@@ -109,6 +110,8 @@ public class AuthorUtils {
 		HashSet<String> synonyms = new HashSet<String>();
 		
 		a = normalizeAuthor(a, true);
+		//if (a.endsWith(","))
+		//	a = a.substring(0, a.length()-1);
 
 		// include original
 		synonyms.add(a);
@@ -118,7 +121,7 @@ public class AuthorUtils {
 		
 		// work around unidecode not always doing what we want
 		String b = replaceUmlaut(a);
-		if (b != a) {
+		if (!b.equals(a)) {
 			synonyms.add(foldToAscii(b));
 		}
 
@@ -138,7 +141,7 @@ public class AuthorUtils {
 	}
 
 	protected static String foldToAscii(String a) {
-		return unidecode(a);
+		return normalizeAuthor(unidecode(a));
 	}
 
 	private static String replaceUmlaut(String input) {

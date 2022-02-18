@@ -124,7 +124,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ALFONSO, JULIA;ALFONSO-GARZON, JULIA",
           "ALLEN, LYNNE;ALLEN, R LYNNE;JONES, LYNNE;JONES, R LYNNE", // until here copied from: /proj/ads/abstracts/config/author.syn.new
           "ARAGON SALAMANCA, A;ARAGON-SALAMANCA, A;ARAGON, A;SALAMANCA, A", // copied from: /proj/ads/abstracts/config/author.syn
-          "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m",  // hand-made additions
+          "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m;adamchuk, m",  // hand-made additions
           "MÜLLER, A WILLIAM;MÜLLER, A BILL",
           "MÜLLER, WILLIAM;MÜLLER, BILL",
           "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
@@ -160,8 +160,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "MUELLER, WILLIAM => MÜLLER, WILLIAM",
           "Boser,=>Böser,",
           "Boser, S=>Böser, S",
-          "Gonzaelez Alfonso,=>González Alfonso,",
-          "Gonzaelez Alfonso, E=>González Alfonso, E",
+          "Gonzalez Alfonso,=>González Alfonso,",
           "Gonzalez Alfonso, E=>González Alfonso, E",
           "Chyelkovae,=>Chýlková,",
           "stoklasova,=>stoklasová,",
@@ -401,6 +400,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     testAuthorQuery("\"other, name\"",
         "author:other, name | author:other, name * | author:other, n | author:other, n * | author:other,",
         "//*[@numFound='1']");
+    
     testAuthorQuery("\u8349",
         "author:cao,* | author: cao, | author:\u8349, | author:\u8349,*", // | author:草, | author:草,*
         "//*[@numFound='1']");
@@ -439,16 +439,16 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // TODO: optimize the query, remove the clauses that match the doc twice
     
     testAuthorQuery("\"stoklasova\"", 
-        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:orlitovae, | author:orlitovae,* | author:stoklasová,* | author:stoklasovae, | author:stoklasovae,*", 
+        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:stoklasová,*", 
         "//*[@numFound='0']");
     testAuthorQuery("\"orlitova\"", 
-        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:orlitovae, | author:orlitovae,* | author:stoklasová,* | author:stoklasovae, | author:stoklasovae,*", 
+        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:stoklasová,*", 
         "//*[@numFound='0']");
     testAuthorQuery("\"orlitová\"", 
-        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:orlitovae, | author:orlitovae,* | author:stoklasová,* | author:stoklasovae, | author:stoklasovae,*", 
+        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:stoklasová,*", 
         "//*[@numFound='0']");
     testAuthorQuery("\"stoklasová\"", 
-        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:orlitovae, | author:orlitovae,* | author:stoklasová,* | author:stoklasovae, | author:stoklasovae,*", 
+        "author:orlitova, | author:stoklasová, | author:orlitova, ivana | author:stoklasova, i | author:stoklasova, ivana | author:orlitova, i | author:orlitova,* | author:stoklasova, | author:stoklasova,* | author:orlitová, | author:orlitová,* | author:stoklasová,*", 
         "//*[@numFound='0']");
     
     // searching for ascii version finds also the utf (for hyphenated names)
@@ -456,11 +456,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "author:chyelkovae, | author:chyelkovae,* | author:chýlková, | author:chýlková,* | author:chylkova, | author:chylkova,*", 
         "//*[@numFound='0']");
     testAuthorQuery("\"Gonzalez-Alfonso, E\"", 
-        "author:gonzalez alfonso, e | author:gonzalez alfonso, e* | author:gonzalez alfonso, | author:gonzález alfonso, e | author:gonzález alfonso, e* | author:gonzález alfonso, | author:gonzaelez alfonso, e | author:gonzaelez alfonso, e* | author:gonzaelez alfonso,", 
-        "//*[@numFound='6']");
+        "author:gonzalez alfonso, e | author:gonzalez alfonso, e* | author:gonzález alfonso, e | author:gonzález alfonso, e* | author:gonzález alfonso, | author: gonzalez alfonso,",
+        "//*[@numFound='4']");
     testAuthorQuery("\"Gonzalez Alfonso, E\"", 
-        "author:gonzalez alfonso, e | author:gonzalez alfonso, e* | author:gonzalez alfonso, | author:gonzález alfonso, e | author:gonzález alfonso, e* | author:gonzález alfonso, | author:gonzaelez alfonso, e | author:gonzaelez alfonso, e* | author:gonzaelez alfonso,", 
-        "//*[@numFound='6']");
+		"author:gonzalez alfonso, e | author:gonzalez alfonso, e* | author:gonzález alfonso, e | author:gonzález alfonso, e* | author:gonzález alfonso, | author: gonzalez alfonso,", 
+        "//*[@numFound='4']");
     
     // issue #57: https://github.com/romanchyla/montysolr/issues/57
     testAuthorQuery("\"Moon, Dae-Sik\"", 
@@ -938,7 +938,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * <surname>
      * 
      * upgraded && transliterated 
-     * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c|ch)uk" the syn list
+     * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c)uk" the syn list
      */
     
     testAuthorQuery(
