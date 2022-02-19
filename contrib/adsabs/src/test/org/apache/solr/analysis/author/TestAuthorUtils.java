@@ -3,15 +3,8 @@ package org.apache.solr.analysis.author;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.solr.analysis.author.AuthorUtils;
 
 import junit.framework.TestCase;
-
 
 public class TestAuthorUtils extends TestCase {
 
@@ -71,10 +64,9 @@ public class TestAuthorUtils extends TestCase {
 	public void testTransliterate() {
 		check("MÜLLER, BILL", "MULLER, BILL", "MUELLER, BILL");
 		check("GÓMEZ, HECTOR Q", "GOMEZ, HECTOR Q");
-		check("guer\u00E7o, r", "guerco, r"); // guerço,	
+		check("guer\u00E7o, r", "guerco, r"); // guerço,
 	}
 
-	
 	public void testTransliterations() {
 		check("FOO'EYE, BAR", "FOOEYE, BAR", "FOOYEYE, BAR", "FOOIEYE, BAR");
 		check("FOOEV, BAR", "FOOYEV, BAR", "FOOJEV, BAR", "FOOIEV, BAR");
@@ -88,53 +80,30 @@ public class TestAuthorUtils extends TestCase {
 	}
 
 	public void testTransRussianNames() {
-		check("FOOVI, YURI", 
-				"FOOVI, IURI",
-				"FOOVII, IURI",
-				"FOOVII, YURI",
-				"FOOVIJ, IURI",
-				"FOOVIJ, YURI",
-				"FOOVIY, IURI",
-				"FOOVIY, YURI",
-				"FOOVY, IURI",
-				"FOOVY, YURI",
-				"FOOVYI, IURI",
-				"FOOVYI, YURI");
+		check("FOOVI, YURI", "FOOVI, IURI", "FOOVII, IURI", "FOOVII, YURI", "FOOVIJ, IURI", "FOOVIJ, YURI",
+				"FOOVIY, IURI", "FOOVIY, YURI", "FOOVY, IURI", "FOOVY, YURI", "FOOVYI, IURI", "FOOVYI, YURI");
 	}
 
 	public void testGenSynonyms() {
-		check("FOO'EYE, BÄR", 
-				"FOO'EYE, BAER",
-				"FOO'EYE, BAR",
-				"FOOEYE, BAER",
-				"FOOEYE, BAR",
-				"FOOEYE, BÄR",
-				"FOOIEYE, BAER",
-				"FOOIEYE, BAR",
-				"FOOIEYE, BÄR",
-				"FOOYEYE, BAER",
-				"FOOYEYE, BAR",
-				"FOOYEYE, BÄR");
+		check("FOO'EYE, BÄR", "FOO'EYE, BAER", "FOO'EYE, BAR", "FOOEYE, BAER", "FOOEYE, BAR", "FOOEYE, BÄR",
+				"FOOIEYE, BAER", "FOOIEYE, BAR", "FOOIEYE, BÄR", "FOOYEYE, BAER", "FOOYEYE, BAR", "FOOYEYE, BÄR");
 	}
-
 
 	private void check(String a, String... expected) {
 		ArrayList<String> actual = AuthorUtils.getAsciiTransliteratedVariants(a);
-		
+
 		Arrays.sort(expected);
-		
+
 		String[] ac = new String[actual.size()];
 		actual.toArray(ac);
 		Arrays.sort(ac);
-		
-		//System.out.println(a);
-		//System.out.println(Arrays.asList(expected));
-		//System.out.println(Arrays.asList(ac));
-		
+
+		// System.out.println(a);
+		// System.out.println(Arrays.asList(expected));
+		// System.out.println(Arrays.asList(ac));
+
 		assertEquals(Arrays.asList(expected), Arrays.asList(ac));
-		
+
 	}
-
-
 
 }

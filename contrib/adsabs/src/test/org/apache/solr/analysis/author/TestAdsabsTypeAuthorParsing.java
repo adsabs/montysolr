@@ -124,7 +124,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           "ALFONSO, JULIA;ALFONSO-GARZON, JULIA",
           "ALLEN, LYNNE;ALLEN, R LYNNE;JONES, LYNNE;JONES, R LYNNE", // until here copied from: /proj/ads/abstracts/config/author.syn.new
           "ARAGON SALAMANCA, A;ARAGON-SALAMANCA, A;ARAGON, A;SALAMANCA, A", // copied from: /proj/ads/abstracts/config/author.syn
-          "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m;adamchuk, m",  // hand-made additions
+          "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m",  // hand-made additions
           "MÜLLER, A WILLIAM;MÜLLER, A BILL",
           "MÜLLER, WILLIAM;MÜLLER, BILL",
           "JONES, CHRISTINE;FORMAN, CHRISTINE", // the famous post-synonym expansion
@@ -139,21 +139,16 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       // it will be enriched by the indexing
       File generatedTransliterations = createTempFile(formatSynonyms(new String[]{
           "wyrzykowsky, l=>wyrzykowski, l;wyrzykowski, ł",
-          "ADAMCHuk, m => ADAMČuk, m",
           "ADAMCuk, m => ADAMČuk, m",
           "ADAMCZuk, m => ADAMČuk, m",
           //"ADAMCHuk, m K=> ADAMČuk, m K",  => deactivated for test purposes, see <surname>, <1> <2> use case
           //"ADAMCuk, m K=> ADAMČuk, m K", => deactivated for test purposes, see <surname>, <1> <2> use case
           "ADAMCUK, A B=> ADAMČUK, A B",
-          "ADAMCHUK, A B=> ADAMČUK, A B",
           "ADAMCZUK, A B=> ADAMČUK, A B",
-          "ADAMCHuk, mOLJA => ADAMČuk, mOLJA",
           "ADAMCuk, mOLJA => ADAMČuk, mOLJA",
           "ADAMCZuk, mOLJA => ADAMČuk, mOLJA",
-          "ADAMCHuk, mOLJA K=> ADAMČuk, mOLJA K",
           "ADAMCuk, mOLJA K=> ADAMČuk, mOLJA K",
           "ADAMCZuk, mOLJA K=> ADAMČuk, mOLJA K",
-          "ADAMCHUK, => ADAMČUK,",
           "ADAMCUK,=> ADAMČUK,",
           "ADAMCZUK, => ADAMČUK,", // this one is added by hand (no automated transliteration)
           "MULLER, WILLIAM => MÜLLER, WILLIAM",
@@ -908,20 +903,19 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 		   <surname>, <1> <2name>
 		   <surname>, <1> <2>
 		   <surname>, <2>
-       <surname>, <2name>
-       <surname>, <2name> <1>
-       <surname>, <2name> <1name>
-       <surname>, <2> <1name>
-       <surname>, <2> <1>
-       
-       <surname>, <1n*>
-       <surname>, <1*>
-       <surname>, <2n*>
-       <surname>, <2*>
+	       <surname>, <2name>
+	       <surname>, <2name> <1>
+	       <surname>, <2name> <1name>
+	       <surname>, <2> <1name>
+	       <surname>, <2> <1>
+	       
+	       <surname>, <1n*>
+	       <surname>, <1*>
+	       <surname>, <2n*>
+	       <surname>, <2*>
 
-		 - transliteration: adamčuk, m --> adamchuk, m;adamcuk, m
-     - synonym expansion for: ADAMŠuk, m;ADAMGuk, m;ADAMČuk, m
-
+		 	- transliteration: adamčuk, m --> adamcuk, m
+     		- synonym expansion for: ADAMŠuk, m;ADAMGuk, m;ADAMČuk, m
      */
     
     //testAuthorQuery("\"allen, lynne\"", "xxx", "//*[@numFound='']");
@@ -930,7 +924,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     String expected0;
 
     expected = "author:adamčuk, | author:adamčuk,* " + // query variants added by parser
-               "| author:adamchuk, | author:adamchuk,* " +
                "| author:adamcuk, | author:adamcuk,*";
 
 
@@ -940,94 +933,140 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      * upgraded && transliterated 
      * synonym adamšuk IS NOT FOUND because there is no  entry for "adam(č|c)uk" the syn list
      */
-    
     testAuthorQuery(
         //"adAMčuk"
-    		"adAM\u010duk", expected + " | author:adamguk, m | author:adamčuk, m | author:adamšuk, m", 
-        "//*[@numFound='34']"
-        // adamčuk numFound=34
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-        //  61 Adamguk, M.
+		"adAM\u010duk", expected + " | author:adamguk, m | author:adamčuk, m | author:adamšuk, m", 
+        "//*[@numFound='23']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        " 9 Adamčuk, Karel Molja",
+        "10 Adamčuk, Karel M",
+        "11 Adamčuk, K Molja",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "28 Adamcuk, Karel Molja",
+        "29 Adamcuk, Karel M",
+        "30 Adamcuk, K Molja",
+        //"40 Adamchuk,",
+        //"41 Adamchuk, M.",
+        //"42 Adamchuk, Marel",
+        //"43 Adamchuk, Molja",
+        //"44 Adamchuk, Molja Karel",
+        //"45 Adamchuk, M Karel",
+        //"46 Adamchuk, Molja K",
+        //"47 Adamchuk, M K",
+        //"48 Adamchuk, Karel Molja",
+        //"49 Adamchuk, Karel M",
+        //"50 Adamchuk, K Molja",
+        "61 Adamguk, M."
         );
+    
     testAuthorQuery(
-        "adAMcuk", expected, "//*[@numFound='33']"
-        // adamcuk numFound=33
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja
+        "adAMcuk", 
+        expected, 
+        "//*[@numFound='22']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        " 9 Adamčuk, Karel Molja",
+        "10 Adamčuk, Karel M",
+        "11 Adamčuk, K Molja",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "28 Adamcuk, Karel Molja",
+        "29 Adamcuk, Karel M",
+        "30 Adamcuk, K Molja"
         );
+    
     testAuthorQuery(
-        "adAMchuk", expected , "//*[@numFound='33']"
-        // adamchuk numFound=33
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja
+        "adAMchuk", "author:adamchuk, author:adamchuk,*" , "//*[@numFound='11']",
+        "41 Adamchuk, M.",
+        "42 Adamchuk, Marel",
+        "43 Adamchuk, Molja",
+        "44 Adamchuk, Molja Karel",
+        "45 Adamchuk, M Karel",
+        "46 Adamchuk, Molja K",
+        "47 Adamchuk, M K",
+        "48 Adamchuk, Karel Molja",
+        "49 Adamchuk, Karel M",
+        "50 Adamchuk, K Molja"
         );
+    
     testAuthorQuery(
-        "adAMczuk", expected + " | author:adamczuk, | author:adamczuk,*", "//*[@numFound='33']"
-        // adamczuk numFound=33
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
+        "adAMczuk", expected + " | author:adamczuk, | author:adamczuk,*", "//*[@numFound='22']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        " 9 Adamčuk, Karel Molja",
+        "10 Adamčuk, Karel M",
+        "11 Adamčuk, K Molja",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "28 Adamcuk, Karel Molja",
+        "29 Adamcuk, Karel M",
+        "30 Adamcuk, K Molja"
         );
+    
     testAuthorQuery(
         //"adAMšuk"
         "adAM\u0161uk", "author:adamšuk, | author:adamšuk,* " +
-                   "| author:adamshuk, | author:adamshuk,* " +
                    "| author:adamsuk, | author:adamsuk,* " +
                    "| author:adamguk, m | author:adamčuk, m | author:adamšuk, m", 
-                   "//*[@numFound='13']"
-                   // adamšuk numFound=13
-                   //   2 Adamčuk, M.             61  Adamguk, M.             80  Adamshuk,              
-                   //  81 Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-                   //  84 Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-                   //  87 Adamshuk, M K           88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                   //  90 Adamshuk, K Molja   
+       "//*[@numFound='2']",
+       " 2 Adamčuk, M.",
+       "61 Adamguk, M."
        );
-     testAuthorQuery(
-        "adAMguk", "(author:adamguk, | author:adamguk,* " +
-                   "| author:adamguk, m | author:adamčuk, m | author:adamšuk, m)", 
-                   "//*[@numFound='12']"
-                   // adamguk numFound=12
-                   //   2 Adamčuk, M.             60  Adamguk,                61  Adamguk, M.            
-                   //  62 Adamguk, Marel          63  Adamguk, Molja          64  Adamguk, Molja Karel   
-                   //  65 Adamguk, M Karel        66  Adamguk, Molja K        67  Adamguk, M K           
-                   //  68 Adamguk, Karel Molja    69  Adamguk, Karel M        70  Adamguk, K Molja                         
-    );
+    
+	testAuthorQuery("adAMguk",
+				"(author:adamguk, | author:adamguk,* " + "| author:adamguk, m | author:adamčuk, m | author:adamšuk, m)",
+				"//*[@numFound='12']",
+       " 2 Adamčuk, M.",
+       "60 Adamguk,",
+       "61 Adamguk, M.",
+       "62 Adamguk, Marel",
+       "63 Adamguk, Molja",
+       "64 Adamguk, Molja Karel",
+       "65 Adamguk, M Karel",
+       "66 Adamguk, Molja K",
+       "67 Adamguk, M K",
+       "68 Adamguk, Karel Molja",
+       "69 Adamguk, Karel M",
+       "70 Adamguk, K Molja"                         
+ 	);
 
     /**
      * <surname>,
@@ -1037,78 +1076,131 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      */
     testAuthorQuery(
         "\"adamčuk,\"", expected + " | author:adamguk, m | author:adamčuk, m | author:adamšuk, m", 
-        "//*[@numFound='34']",
-        // adamčuk numFound=34
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-        //  61 Adamguk, M.     
-        "\"adamcuk,\"", expected, "//*[@numFound='33']",
-        // adamcuk numFound=33
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-        "\"adamchuk,\"", expected, "//*[@numFound='33']",
-        // adamchuk numFound=33
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-        "\"adamczuk,\"", expected + "author:adamczuk, | author:adamczuk,*", "//*[@numFound='33']",
-        // adamczuk numFound=33
-        //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-        //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-        //   7 Adamčuk, Molja K         8  Adamčuk, M K             9  Adamčuk, Karel Molja   
-        //  10 Adamčuk, Karel M        11  Adamčuk, K Molja        20  Adamcuk,               
-        //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-        //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-        //  27 Adamcuk, M K            28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-        //  30 Adamcuk, K Molja        40  Adamchuk,               41  Adamchuk, M.           
-        //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-        "\"adamšuk,\"", "author:adamšuk, | author:adamšuk,* " +
-                   "author:adamshuk, | author:adamshuk,* " +
-                   "author:adamsuk, | author:adamsuk,* " +
-                   "author:adamguk, m | author:adamčuk, m | author:adamšuk, m", 
-                   "//*[@numFound='13']",
-                   // adamšuk numFound=13
-                   //   2 Adamčuk, M.             61  Adamguk, M.             80  Adamshuk,              
-                   //  81 Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-                   //  84 Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-                   //  87 Adamshuk, M K           88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                   //  90 Adamshuk, K Molja                               
+        "//*[@numFound='23']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        " 9 Adamčuk, Karel Molja",
+        "10 Adamčuk, Karel M",
+        "11 Adamčuk, K Molja",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "28 Adamcuk, Karel Molja",
+        "29 Adamcuk, Karel M",
+        "30 Adamcuk, K Molja",
+        "61 Adamguk, M."
+        );
+    
+    testAuthorQuery(
+        "\"adamcuk,\"", expected, "//*[@numFound='22']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        " 9 Adamčuk, Karel Molja",
+        "10 Adamčuk, Karel M",
+        "11 Adamčuk, K Molja",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "28 Adamcuk, Karel Molja",
+        "29 Adamcuk, Karel M",
+        "30 Adamcuk, K Molja"
+        );
+    
+    testAuthorQuery(
+        "\"adamchuk,\"", "author:adamchuk, author:adamchuk,*", "//*[@numFound='11']",
+        "40 Adamchuk,",
+        "41 Adamchuk, M.",
+        "42 Adamchuk, Marel",
+        "43 Adamchuk, Molja",
+        "44 Adamchuk, Molja Karel",
+        "45 Adamchuk, M Karel",
+        "46 Adamchuk, Molja K",
+        "47 Adamchuk, M K",
+        "48 Adamchuk, Karel Molja",
+        "49 Adamchuk, Karel M",
+        "50 Adamchuk, K Molja"
+        );
+    
+    testAuthorQuery(
+        "\"adamczuk,\"", expected + "author:adamczuk, | author:adamczuk,*", "//*[@numFound='22']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        " 9 Adamčuk, Karel Molja",
+        "10 Adamčuk, Karel M",
+        "11 Adamčuk, K Molja",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "28 Adamcuk, Karel Molja",
+        "29 Adamcuk, Karel M",
+        "30 Adamcuk, K Molja"
+        );
+    
+    // deactivated: "ADAMCuk, m K=> ADAMČuk, m K"
+    // synonyms: "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m"
+    // HOWEVER - synonyms are discovered by the author_short_name_rage processor
+    // it always trips me; basically ADS wants to expand array of author names
+    // by looking for synonyms that were derived from ascii folding UTF-8 synonyms
+    // plus: synonyms are automatically created by stripping first names so that
+    // `adamšuk` will find "ADAMŠuk, m; ADAMGuk, m;ADAMČuk, m" -- ufff...
+    // but we will use them only if the user was searching for the short form
+    // (assuming: ah, they didn't know the first name, let's help 'em...)
+    testAuthorQuery(
+        "\"adamšuk,\"", "adamguk, m | adamsuk, | adamsuk,* | adamčuk, m | adamšuk, | adamšuk, m | adamšuk,*", 
+       "//*[@numFound='2']",
+       " 2 Adamčuk, M.",
+       "61 Adamguk, M."
+       );
+    
+    testAuthorQuery(
         "\"adamguk,\"", "author:adamguk, | author:adamguk,* " +
                    "author:adamguk, m | author:adamčuk, m | author:adamšuk, m", 
-                   "//*[@numFound='12']"
-                   // adamguk numFound=12
-                   //   2 Adamčuk, M.             60  Adamguk,                61  Adamguk, M.            
-                   //  62 Adamguk, Marel          63  Adamguk, Molja          64  Adamguk, Molja Karel   
-                   //  65 Adamguk, M Karel        66  Adamguk, Molja K        67  Adamguk, M K           
-                   //  68 Adamguk, Karel Molja    69  Adamguk, Karel M        70  Adamguk, K Molja       
+                   "//*[@numFound='12']",
+                   " 2 Adamčuk, M.",
+                   "60 Adamguk,",
+                   "61 Adamguk, M.",
+                   "62 Adamguk, Marel",
+                   "63 Adamguk, Molja",
+                   "64 Adamguk, Molja Karel",
+                   "65 Adamguk, M Karel",
+                   "66 Adamguk, Molja K",
+                   "67 Adamguk, M K",
+                   "68 Adamguk, Karel Molja",
+                   "69 Adamguk, Karel M",
+                   "70 Adamguk, K Molja"       
     );
 
 
@@ -1124,113 +1216,164 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
      */
     expected = "author:adamšuk, m | author:adamšuk, m* | author:adamšuk, " +
                 "| author:adamsuk, m | author:adamsuk, m* | author:adamsuk, " +
-                "| author:adamshuk, m | author:adamshuk, m* | author:adamshuk, " +
                 "| author:adamguk, m | author:adamguk, m* | author:adamguk, " +
                 "| author:adamčuk, m | author:adamčuk, m* | author:adamčuk, " +
-                "| author:adamchuk, m | author:adamchuk, m* | author:adamchuk, " +
                 "| author:adamcuk, m | author:adamcuk, m* | author:adamcuk,"; 
     testAuthorQuery(
-        "\"adamčuk,    m\"", expected, "//*[@numFound='40']",
-               // "adamčuk, m" numFound=40
-          //      1  Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-          //      4  Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-          //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-          //     21  Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-          //     24  Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-          //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-          //     42  Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-          //     63  Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-          //     66  Adamguk, Molja K        67  Adamguk, M K            80  Adamshuk,              
-          //     81  Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-          //     84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-          //     87  Adamshuk, M K          
-        "\"adamcuk, m\"", expected, "//*[@numFound='40']",
-               // "adamcuk, m" numFound=40
-          //      1  Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-          //      4  Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-          //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-          //     21  Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-          //     24  Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-          //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-          //     42  Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-          //     63  Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-          //     66  Adamguk, Molja K        67  Adamguk, M K            80  Adamshuk,              
-          //     81  Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-          //     84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-          //     87  Adamshuk, M K          
-        "\"adamchuk, m\"", expected, "//*[@numFound='40']",
-               // "adamchuk, m" numFound=40
-          //      1  Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-          //      4  Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-          //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-          //     21  Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-          //     24  Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-          //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-          //     42  Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-          //     63  Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-          //     66  Adamguk, Molja K        67  Adamguk, M K            80  Adamshuk,              
-          //     81  Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-          //     84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-          //     87  Adamshuk, M K     
+        "\"adamčuk,    m\"", expected, "//*[@numFound='24']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "62 Adamguk, Marel",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
+        );
+    testAuthorQuery(
+        "\"adamcuk, m\"", expected, "//*[@numFound='24']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "62 Adamguk, Marel",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
+        );
+    
+    testAuthorQuery(
+        "\"adamchuk, m\"", "adamchuk, | adamchuk, m | adamchuk, m*", "//*[@numFound='8']",
+        "40 Adamchuk,",
+        "41 Adamchuk, M.",
+        "42 Adamchuk, Marel",
+        "43 Adamchuk, Molja",
+        "44 Adamchuk, Molja Karel",
+        "45 Adamchuk, M Karel",
+        "46 Adamchuk, Molja K",
+        "47 Adamchuk, M K"
+        );
+    
+    testAuthorQuery(
         "\"adamczuk, m\"", expected + "author:adamczuk, m | author:adamczuk, m* | author:adamczuk,", 
-        	    "//*[@numFound='40']",
-               // "adamczuk, m" numFound=40
-          //      1  Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-          //      4  Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-          //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-          //     21  Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-          //     24  Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-          //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-          //     42  Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-          //     63  Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-          //     66  Adamguk, Molja K        67  Adamguk, M K            80  Adamshuk,              
-          //     81  Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-          //     84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-          //     87  Adamshuk, M K   
-        "\"adamšuk, m\"", expected, "//*[@numFound='40']",
-               // "adamšuk, m" numFound=40
-          //      1  Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-          //      4  Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-          //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-          //     21  Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-          //     24  Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-          //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-          //     42  Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-          //     63  Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-          //     66  Adamguk, Molja K        67  Adamguk, M K            80  Adamshuk,              
-          //     81  Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-          //     84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-          //     87  Adamshuk, M K          
-        "\"adamguk, m\"", expected, "//*[@numFound='40']",
-             // "adamguk, m" numFound=40
-          //      1  Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-          //      4  Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-          //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-          //     21  Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-          //     24  Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-          //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-          //     42  Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-          //     63  Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-          //     66  Adamguk, Molja K        67  Adamguk, M K            80  Adamshuk,              
-          //     81  Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-          //     84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-          //     87  Adamshuk, M K     
-        "\"AdAmČuk, m\"", expected, "//*[@numFound='40']", // just for fun
-        "\"ADAMŠuk, m\"", expected, "//*[@numFound='40']",
-        "\"AdAmGuk,    M\"", expected, "//*[@numFound='40']"
-    );
+	    "//*[@numFound='24']",
+	    " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "62 Adamguk, Marel",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
+	    );
+    
+	testAuthorQuery(
+        "\"adamšuk, m\"", expected, "//*[@numFound='24']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "62 Adamguk, Marel",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
+        );
+    	
+	testAuthorQuery(
+        "\"adamguk, m\"", expected, "//*[@numFound='24']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 3 Adamčuk, Marel",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "22 Adamcuk, Marel",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "62 Adamguk, Marel",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
+        );
+    	
+		testAuthorQuery("\"AdAmČuk, m\"", expected, "//*[@numFound='24']"); // just for fun
+		testAuthorQuery("\"ADAMŠuk, m\"", expected, "//*[@numFound='24']");
+		testAuthorQuery("\"AdAmGuk,    M\"", expected, "//*[@numFound='24']");
 
 
     /**
@@ -1244,104 +1387,141 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     expected0 = 
     		       "author:adamčuk, m | author:adamčuk, m * | author:adamčuk, " +
     		       "author:adamcuk, m | author:adamcuk, m * | author:adamcuk, " +
-    		       "author:adamchuk, m | author:adamchuk, m * | author:adamchuk, " +
     		       "author:adamšuk, m | author:adamšuk, m * | author:adamšuk, " +
     		       "author:adamsuk, m | author:adamsuk, m * | author:adamsuk, " +
-    		       "author:adamshuk, m | author:adamshuk, m * | author:adamshuk, " +
     		       "author:adamguk, m | author:adamguk, m * | author:adamguk, ";
 
     expected = expected0 +
                "author:adamčuk, molja | author:adamčuk, molja * " +
-               "author:adamchuk, molja | author:adamchuk, molja * " +
                "author:adamcuk, molja | author:adamcuk, molja *"
                ;
     
     
     testAuthorQuery(
-        "\"adamčuk, molja\"", expected, "//*[@numFound='29']",
-               // "adamčuk, molja" numFound=29
-          //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-          //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-          //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-          //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-          //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-          //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             65  Adamguk, M Karel       
-          //     67  Adamguk, M K            80  Adamshuk,               81  Adamshuk, M.           
-          //     85  Adamshuk, M Karel       87  Adamshuk, M K        
-        "\"adamcuk, molja\"", expected, "//*[@numFound='29']",
-               // "adamcuk, molja" numFound=29
-          //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-          //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-          //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-          //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-          //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-          //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             65  Adamguk, M Karel       
-          //     67  Adamguk, M K            80  Adamshuk,               81  Adamshuk, M.           
-          //     85  Adamshuk, M Karel       87  Adamshuk, M K   
-        "\"adamchuk, molja\"", expected, "//*[@numFound='29']",
-               // "adamchuk, molja" numFound=29
-          //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-          //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-          //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-          //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-          //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-          //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             65  Adamguk, M Karel       
-          //     67  Adamguk, M K            80  Adamshuk,               81  Adamshuk, M.           
-          //     85  Adamshuk, M Karel       87  Adamshuk, M K  
+        "\"adamčuk, molja\"", expected, "//*[@numFound='18']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "65 Adamguk, M Karel",
+        "67 Adamguk, M K"
+        );
+    
+    testAuthorQuery(
+        "\"adamcuk, molja\"", expected, "//*[@numFound='18']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "65 Adamguk, M Karel",
+        "67 Adamguk, M K"
+        );
+    
+    testAuthorQuery(
+        "\"adamchuk, molja\"", "author:adamchuk, molja | author:adamchuk, molja * | author:adamchuk, m | author:adamchuk, m * | author:adamchuk,", 
+        "//*[@numFound='7']",
+        "40 Adamchuk,",
+        "41 Adamchuk, M.",
+        "43 Adamchuk, Molja",
+        "44 Adamchuk, Molja Karel",
+        "45 Adamchuk, M Karel",
+        "46 Adamchuk, Molja K",
+        "47 Adamchuk, M K"
+        );
+    
+    testAuthorQuery(
         "\"adamczuk, molja\"", expected + "author:adamczuk, molja | author:adamczuk, molja * | author:adamczuk, m | author:adamczuk, m * | author:adamczuk,", 
-        		"//*[@numFound='29']",
-               // "adamczuk, molja" numFound=29
-          //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-          //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-          //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-          //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-          //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-          //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-          //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             65  Adamguk, M Karel       
-          //     67  Adamguk, M K            80  Adamshuk,               81  Adamshuk, M.           
-          //     85  Adamshuk, M Karel       87  Adamshuk, M K     
+		"//*[@numFound='18']",
+		" 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "65 Adamguk, M Karel",
+        "67 Adamguk, M K"
+		);
+
         // "adamčuk, molja" is not there (and cannot be, because it is not in
         // synonym map, but synonym "adamšuk, m" is found correctly)
-
+    
+	testAuthorQuery(
         "\"adamšuk, molja\"", expected0 +
                               "author:adamšuk, molja | author:adamšuk, molja * " +
-                              "author:adamshuk, molja | author:adamshuk, molja * " +
-                              "author:adamsuk, molja | author:adamsuk, molja *", "//*[@numFound='23']",
+                              "author:adamsuk, molja | author:adamsuk, molja *", 
+          "//*[@numFound='12']",
           // shorter by two variants, because "adamguk, molja" is already ascii form
           // it doesn't generate: "author:adamshuk, molja | author:adamsuk, molja"
           // that is correct, because "adamšuk, m" is found and transliterated
           // "adamšuk, molja" simply isn't in any synonym list and we tehrefore cannot have it                              
-                  // "adamšuk, molja" numFound=23
-          //      1  Adamčuk,                 2  Adamčuk, M.              6  Adamčuk, M Karel       
-          //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-          //     25  Adamcuk, M Karel        27  Adamcuk, M K            40  Adamchuk,              
-          //     41  Adamchuk, M.            45  Adamchuk, M Karel       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             65  Adamguk, M Karel       
-          //     67  Adamguk, M K            80  Adamshuk,               81  Adamshuk, M.           
-          //     83  Adamshuk, Molja         84  Adamshuk, Molja Karel   85  Adamshuk, M Karel      
-          //     86  Adamshuk, Molja K       87  Adamshuk, M K   
+          " 1 Adamčuk,",
+          " 2 Adamčuk, M.",
+          " 6 Adamčuk, M Karel",
+          " 8 Adamčuk, M K",
+          "20 Adamcuk,",
+          "21 Adamcuk, M.",
+          "25 Adamcuk, M Karel",
+          "27 Adamcuk, M K",
+          "60 Adamguk,",
+          "61 Adamguk, M.",
+          "65 Adamguk, M Karel",
+          "67 Adamguk, M K"
+          );
                               
                               
- 
+	testAuthorQuery(
         "\"adamguk, molja\"", expected0 +
-                              "author:adamguk, molja | author:adamguk, molja *",  "//*[@numFound='23']"
-               // "adamguk, molja" numFound=23
-          //      1  Adamčuk,                 2  Adamčuk, M.              6  Adamčuk, M Karel       
-          //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-          //     25  Adamcuk, M Karel        27  Adamcuk, M K            40  Adamchuk,              
-          //     41  Adamchuk, M.            45  Adamchuk, M Karel       47  Adamchuk, M K          
-          //     60  Adamguk,                61  Adamguk, M.             63  Adamguk, Molja         
-          //     64  Adamguk, Molja Karel    65  Adamguk, M Karel        66  Adamguk, Molja K       
-          //     67  Adamguk, M K            80  Adamshuk,               81  Adamshuk, M.           
-          //     85  Adamshuk, M Karel       87  Adamshuk, M K         
-                              
+                              "author:adamguk, molja | author:adamguk, molja *",  
+          "//*[@numFound='15']",
+          " 1 Adamčuk,",
+          " 2 Adamčuk, M.",
+          " 6 Adamčuk, M Karel",
+          " 8 Adamčuk, M K",
+          "20 Adamcuk,",
+          "21 Adamcuk, M.",
+          "25 Adamcuk, M Karel",
+          "27 Adamcuk, M K",
+          "60 Adamguk,",
+          "61 Adamguk, M.",
+          "63 Adamguk, Molja",
+          "64 Adamguk, Molja Karel",
+          "65 Adamguk, M Karel",
+          "66 Adamguk, Molja K",
+          "67 Adamguk, M K"
     );
 
 
@@ -1370,54 +1550,77 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     		       "author:adamcuk, m k | author:adamcuk, m k* " +
     		       "author:adamcuk, molja " + // ! | author:adamcuk, molja * 
     		       "author:adamcuk, m " + // ! | author:adamcuk, m* 
-    		       "author:adamcuk, " +
-    		       "author:adamchuk, molja k | author:adamchuk, molja k* " +
-    		       "author:adamchuk, m k | author:adamchuk, m k* " +
-    		       "author:adamchuk, molja " + // ! | author:adamchuk, molja * 
-    		       "author:adamchuk, m " + // ! | author:adamchuk, m*
-    		       "author:adamchuk,";
+    		       "author:adamcuk,";
       
 
     testAuthorQuery(
-        "\"adamčuk, molja k\"", expected, "//*[@numFound='21']",
-             // "adamčuk, molja k" numFound=21
-        //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-        //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-        //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-        //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-        //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K       
-        "\"adamcuk, molja k\"", expected, "//*[@numFound='21']",
-             // "adamcuk, molja k" numFound=21
-        //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-        //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-        //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-        //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-        //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-        "\"adamchuk, molja k\"", expected, "//*[@numFound='21']",
-        // this contains 4 more entries because by default, the
-        // transliteration produces only adam(c|ch)uk
-             // "adamchuk, molja k" numFound=21
-        //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-        //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-        //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-        //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-        //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K     
+        "\"adamčuk, molja k\"", expected, "//*[@numFound='14']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K"
+        );
+    
+    testAuthorQuery(
+        "\"adamcuk, molja k\"", expected, "//*[@numFound='14']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K"
+        );
+    
+    testAuthorQuery(
+        "\"adamchuk, molja k\"", "author:adamchuk, molja k | author:adamchuk, molja k* | author:adamchuk, m k | author:adamchuk, m k* | author:adamchuk, molja | author:adamchuk, m | author:adamchuk,", 
+        "//*[@numFound='7']",
+        "40 Adamchuk,",
+        "41 Adamchuk, M.",
+        "43 Adamchuk, Molja",
+        "44 Adamchuk, Molja Karel",
+        "45 Adamchuk, M Karel",
+        "46 Adamchuk, Molja K",
+        "47 Adamchuk, M K"
+        );
+    
+    testAuthorQuery(
         "\"adamczuk, molja k\"", expected + " | author:adamczuk, molja k | author:adamczuk, molja k* | author:adamczuk, m k | author:adamczuk, m k* | author:adamczuk, molja | author:adamczuk, m | author:adamczuk,",  
-                          "//*[@numFound='21']",
-              // "adamczuk, molja k" numFound=21
-        //       1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //       5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-        //       8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-        //      23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-        //      26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-        //      41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //      45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K     
+          "//*[@numFound='14']",
+          " 1 Adamčuk,",
+          " 2 Adamčuk, M.",
+          " 4 Adamčuk, Molja",
+          " 5 Adamčuk, Molja Karel",
+          " 6 Adamčuk, M Karel",
+          " 7 Adamčuk, Molja K",
+          " 8 Adamčuk, M K",
+          "20 Adamcuk,",
+          "21 Adamcuk, M.",
+          "23 Adamcuk, Molja",
+          "24 Adamcuk, Molja Karel",
+          "25 Adamcuk, M Karel",
+          "26 Adamcuk, Molja K",
+          "27 Adamcuk, M K"
+      );
+      
+    testAuthorQuery(
         "\"adamšuk, molja k\"", 
             "author:adamšuk, molja k | author:adamšuk, molja k* " +
             "author:adamšuk, m k | author:adamšuk, m k* " +
@@ -1428,29 +1631,32 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             "author:adamsuk, m k | author:adamsuk, m k* " +
             "author:adamsuk, molja " +
             "author:adamsuk, m " +
-            "author:adamsuk, " +
-            "author:adamshuk, molja k | author:adamshuk, molja k* " +
-            "author:adamshuk, m k | author:adamshuk, m k* " +
-            "author:adamshuk, molja " +
-            "author:adamshuk, m " +
-            "author:adamshuk,", 
-              "//*[@numFound='7']",
-              // "adamšuk, molja k" numFound=7
-        //       80  Adamshuk,               81  Adamshuk, M.            83  Adamshuk, Molja        
-        //       84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-        //       87  Adamshuk, M K          
-              
+            "author:adamsuk,", 
+          "//*[@numFound='0']"
+          //"80 Adamshuk,",
+          //"81 Adamshuk, M.",
+          //"83 Adamshuk, Molja",
+          //"84 Adamshuk, Molja Karel",
+          //"85 Adamshuk, M Karel",
+          //"86 Adamshuk, Molja K",
+          //"87 Adamshuk, M K"          
+      );
+    
+    testAuthorQuery(
         "\"adamguk, molja k\"", 
             "author:adamguk, molja k | author:adamguk, molja k* " +
             "author:adamguk, m k | author:adamguk, m k* " +
             "author:adamguk, molja " +
             "author:adamguk, m " +
             "author:adamguk,", 
-            "//*[@numFound='7']"
-           // "adamguk, molja k" numFound=7
-        // 60  Adamguk,                61  Adamguk, M.             63  Adamguk, Molja         
-        // 64  Adamguk, Molja Karel    65  Adamguk, M Karel        66  Adamguk, Molja K       
-        // 67  Adamguk, M K   
+        "//*[@numFound='7']",
+        "80 Adamshuk,",
+        "81 Adamshuk, M.",
+        "83 Adamshuk, Molja",
+        "84 Adamshuk, Molja Karel",
+        "85 Adamshuk, M Karel",
+        "86 Adamshuk, Molja K",
+        "87 Adamshuk, M K" 
     );
 
 
@@ -1483,12 +1689,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                 "author:adamcuk, m k | author:adamcuk, m k * " +
                 "author:adamcuk, molja " +  // dtto
                 "author:adamcuk, m " +  
-                "author:adamcuk, " +
-                "author:adamchuk, molja k | author:adamchuk, molja k * " +
-                "author:adamchuk, m k | author:adamchuk, m k * " +
-                "author:adamchuk, molja " +  //dtto
-                "author:adamchuk, m " + 
-                "author:adamchuk,";
+                "author:adamcuk,";
     
     //dumpDoc(null, "id", "author");
     
@@ -1496,44 +1697,59 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         "\"adamčuk, molja karel\"", expected0 + " " + 
                                     "author:adamčuk, molja karel | author:adamčuk, molja karel * " +
                                     "author:adamčuk, m karel | author:adamčuk, m karel * " +
-                                    "author:adamchuk, molja karel | author:adamchuk, molja karel * " +
-                                    "author:adamchuk, m karel | author:adamchuk, m karel * " +
                                     "author:adamcuk, molja karel | author:adamcuk, molja karel * " +
                                     "author:adamcuk, m karel | author:adamcuk, m karel *", 
-                                    "//*[@numFound='21']",
-             // "adamčuk, molja karel" numFound=21
-        //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //      5  Adamčuk, Molja Karel     6  Adamčuk, M Karel         7  Adamčuk, Molja K       
-        //      8  Adamčuk, M K            20  Adamcuk,                21  Adamcuk, M.            
-        //     23  Adamcuk, Molja          24  Adamcuk, Molja Karel    25  Adamcuk, M Karel       
-        //     26  Adamcuk, Molja K        27  Adamcuk, M K            40  Adamchuk,              
-        //     41  Adamchuk, M.            43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-        //     45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K    
-                                    
+        "//*[@numFound='14']",
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 5 Adamčuk, Molja Karel",
+        " 6 Adamčuk, M Karel",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K"
+        );
+    
+    testAuthorQuery(
         "\"adamcuk, molja karel\"", expected0 + " " + 
                                     "author:adamcuk, molja karel | author:adamcuk, molja karel * " +
                                     "author:adamcuk, m karel | author:adamcuk, m karel *",
-                                    "//*[@numFound='17']", // because adamcuk, m\w* k\w* is not searched
-             // "adamcuk, molja karel" numFound=17
-        //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-        //     21  Adamcuk, M.             23  Adamcuk, Molja          24  Adamcuk, Molja Karel   
-        //     25  Adamcuk, M Karel        26  Adamcuk, Molja K        27  Adamcuk, M K           
-        //     40  Adamchuk,               41  Adamchuk, M.            43  Adamchuk, Molja        
-        //     46  Adamchuk, Molja K       47  Adamchuk, M K         
-                                    
-        "\"adamchuk, molja karel\"", expected0 + " " + 
-                                    "author:adamchuk, molja karel | author:adamchuk, molja karel * " +
-                                    "author:adamchuk, m karel | author:adamchuk, m karel *",
-                                    "//*[@numFound='17']",
-             // "adamchuk, molja karel" numFound=17
-        //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-        //     21  Adamcuk, M.             23  Adamcuk, Molja          26  Adamcuk, Molja K       
-        //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-        //     43  Adamchuk, Molja         44  Adamchuk, Molja Karel   45  Adamchuk, M Karel      
-        //     46  Adamchuk, Molja K       47  Adamchuk, M K    
-                                    
+        "//*[@numFound='12']", // because adamcuk, m\w* k\w* is not searched
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K"
+        );
+    
+    testAuthorQuery(
+        "\"adamchuk, molja karel\"", 
+        "author:adamchuk, molja karel | author:adamchuk, molja karel * | author:adamchuk, m karel | author:adamchuk, m karel * | author:adamchuk, molja k | author:adamchuk, molja k * | author:adamchuk, m k | author:adamchuk, m k * | author:adamchuk, molja | author:adamchuk, m | author:adamchuk,",
+        "//*[@numFound='7']",
+        "40 Adamchuk,",
+        "41 Adamchuk, M.",
+        "43 Adamchuk, Molja",
+        "44 Adamchuk, Molja Karel",
+        "45 Adamchuk, M Karel",
+        "46 Adamchuk, Molja K",
+        "47 Adamchuk, M K"
+        );
+    
+    
+    testAuthorQuery(
         "\"adamczuk, molja karel\"", expected0 + " " + 
                                     "author:adamczuk, molja karel | author:adamczuk, molja karel * " +
                                     "author:adamczuk, m karel | author:adamczuk, m karel * " +
@@ -1541,14 +1757,20 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     "author:adamczuk, m k | author:adamczuk, m k * " +
                                     "author:adamczuk, molja | author:adamczuk, m " +
                                     "author:adamczuk,",
-                                    "//*[@numFound='15']",//-3 because "č"->"cz" normally doesn't exist
-             // "adamczuk, molja karel" numFound=15
-        //      1  Adamčuk,                 2  Adamčuk, M.              4  Adamčuk, Molja         
-        //      7  Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-        //     21  Adamcuk, M.             23  Adamcuk, Molja          26  Adamcuk, Molja K       
-        //     27  Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-        //     43  Adamchuk, Molja         46  Adamchuk, Molja K       47  Adamchuk, M K
-                                    
+        "//*[@numFound='10']",//-3 because "č"->"cz" normally doesn't exist
+        " 1 Adamčuk,",
+        " 2 Adamčuk, M.",
+        " 4 Adamčuk, Molja",
+        " 7 Adamčuk, Molja K",
+        " 8 Adamčuk, M K",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "23 Adamcuk, Molja",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K"
+        );
+    
+    testAuthorQuery(
         // almost exactly the same as above, the only difference must be the space before *
         "\"adamšuk, molja karel\"", "author:adamšuk, molja k | author:adamšuk, molja k * " +
                                     "author:adamšuk, m k | author:adamšuk, m k * " +
@@ -1560,24 +1782,23 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     "author:adamsuk, molja " +
                                     "author:adamsuk, m " +
                                     "author:adamsuk, " +
-                                    "author:adamshuk, molja k | author:adamshuk, molja k * " +
-                                    "author:adamshuk, m k | author:adamshuk, m k * " +
-                                    "author:adamshuk, molja " +
-                                    "author:adamshuk, m " +
-                                    "author:adamshuk, " + 
                                     // plus variants with karel
                                     "author:adamšuk, molja karel | author:adamšuk, molja karel * " +
                                     "author:adamšuk, m karel | author:adamšuk, m karel * " + 
-                                    "author:adamshuk, molja karel | author:adamshuk, molja karel * " +
-                                    "author:adamshuk, m karel | author:adamshuk, m karel * " +
                                     "author:adamsuk, molja karel | author:adamsuk, molja karel * " +
                                     "author:adamsuk, m karel | author:adamsuk, m karel *",
-                                    "//*[@numFound='7']",
-                 // "adamšuk, molja karel" numFound=7
-          //        80  Adamshuk,               81  Adamshuk, M.            83  Adamshuk, Molja        
-          //        84  Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-          //        87  Adamshuk, M K     
-                                    
+        "//*[@numFound='0']"
+//        "80 Adamshuk,",
+//        "81 Adamshuk, M.",
+//        "83 Adamshuk, Molja",
+//        "84 Adamshuk, Molja Karel",
+//        "85 Adamshuk, M Karel",
+//        "86 Adamshuk, Molja K",
+//        "87 Adamshuk, M K"
+        );
+
+    
+    testAuthorQuery(
         "\"adamguk, molja karel\"", "author:adamguk, molja k | author:adamguk, molja k * " +
                                     "author:adamguk, m k | author:adamguk, m k * " +
                                     "author:adamguk, molja " +
@@ -1586,12 +1807,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     // plus variants with karel
                                     "author:adamguk, molja karel | author:adamguk, molja karel * " +
                                     "author:adamguk, m karel | author:adamguk, m karel *",
-                                    "//*[@numFound='7']"
-             // "adamguk, molja karel" numFound=7
-        //      60  Adamguk,                61  Adamguk, M.             63  Adamguk, Molja         
-        //      64  Adamguk, Molja Karel    65  Adamguk, M Karel        66  Adamguk, Molja K       
-        //      67  Adamguk, M K 
-        
+        "//*[@numFound='7']",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
     );
     
     
@@ -1640,10 +1863,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                 "author:adamcuk, m k | author:adamcuk, m k * " +
                                 "author:adamcuk, m " +  
                                 "author:adamcuk, " +
-                                "author:adamchuk, m karel | author:adamchuk, m karel * " +
-                                "author:adamchuk, m k | author:adamchuk, m k * " +
-                                "author:adamchuk, m " + 
-                                "author:adamchuk, " +
                                 "author:/adamčuk, m[^ ]* karel/ " +
                                 "author:/adamčuk, m[^ ]* karel .*/ " +
                                 "author:/adamčuk, m[^ ]* k/ " +
@@ -1652,23 +1871,26 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                 "author:/adamcuk, m[^ ]* karel .*/ " +
                                 "author:/adamcuk, m[^ ]* k/ " +
                                 "author:/adamcuk, m[^ ]* k .*/ " +
-                                "author:/adamchuk, m[^ ]* karel/ " +
-                                "author:/adamchuk, m[^ ]* karel .*/ " +
-                                "author:/adamchuk, m[^ ]* k/ " +
-                                "author:/adamchuk, m[^ ]* k .*/ " +
-                                "author:/adamchuk, m[^ ]*/ | author:/adamcuk, m[^ ]*/",
-                                 "//*[@numFound='24']"        
-        
-         // "adamčuk, m karel" numFound=24
-         //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-         //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-         //   7 Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-         //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-         //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-         //  27 Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-         //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-         //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K 
+                                "author:/adamcuk, m[^ ]*/",
+         "//*[@numFound='16']",
+         " 1 Adamčuk,",
+         " 2 Adamčuk, M.",
+         " 3 Adamčuk, Marel",
+         " 4 Adamčuk, Molja",
+         " 5 Adamčuk, Molja Karel",
+         " 6 Adamčuk, M Karel",
+         " 7 Adamčuk, Molja K",
+         " 8 Adamčuk, M K",
+         "20 Adamcuk,",
+         "21 Adamcuk, M.",
+         "22 Adamcuk, Marel",
+         "23 Adamcuk, Molja",
+         "24 Adamcuk, Molja Karel",
+         "25 Adamcuk, M Karel",
+         "26 Adamcuk, Molja K",
+         "27 Adamcuk, M K"
     );
+    
     testAuthorQuery(
         "\"adamcuk, m karel\"", "author:adamcuk, m karel | author:adamcuk, m karel * " +
                                 "author:/adamcuk, m[^ ]*/ " +
@@ -1676,15 +1898,18 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                 "author:adamcuk, m k | author:adamcuk, m k * " +
                                 "author:/adamcuk, m[^ ]* k/ | author:/adamcuk, m[^ ]* k .*/ " +
                                 "author:adamcuk, m | author:adamcuk," ,
-                                "//*[@numFound='8']"
-               // If you wonder why it is not the same as above, then know it is because of the
-               // special setup - we are testing various situations (study the synonym and ascii
-               // upgrade setup to understand details)
-                                
-               // "adamcuk, m karel" numFound=8
-        //        20  Adamcuk,                21  Adamcuk, M.             24  Adamcuk, Molja Karel   
-        //        25  Adamcuk, M Karel        26  Adamcuk, Molja K        27  Adamcuk, M K   
+        "//*[@numFound='8']",
+        "20 Adamcuk,",
+        "21 Adamcuk, M.",
+        "24 Adamcuk, Molja Karel",
+        "25 Adamcuk, M Karel",
+        "26 Adamcuk, Molja K",
+        "27 Adamcuk, M K"
+       // If you wonder why it is not the same as above, then know it is because of the
+       // special setup - we are testing various situations (study the synonym and ascii
+       // upgrade setup to understand details)
     );
+    
     testAuthorQuery(
         "\"adamchuk, m karel\"", "author:adamchuk, m karel | author:adamchuk, m karel * " +
                                  "author:/adamchuk, m[^ ]*/ " +
@@ -1692,11 +1917,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                  "author:adamchuk, m k | author:adamchuk, m k * " +
                                  "author:/adamchuk, m[^ ]* k/ | author:/adamchuk, m[^ ]* k .*/ " +
                                  "author:adamchuk, m | author:adamchuk," ,
-                                 "//*[@numFound='8']"
-                // "adamchuk, m karel" numFound=8
-        //         40  Adamchuk,               41  Adamchuk, M.            44  Adamchuk, Molja Karel  
-        //         45  Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K   
+         "//*[@numFound='8']",
+         "40 Adamchuk,",
+         "41 Adamchuk, M.",
+         "44 Adamchuk, Molja Karel",
+         "45 Adamchuk, M Karel",
+         "46 Adamchuk, Molja K",
+         "47 Adamchuk, M K"
     );
+    
     testAuthorQuery(
         "\"adamczuk, m karel\"", "author:adamczuk, m karel | author:adamczuk, m karel * " +
                                  "author:/adamczuk, m[^ ]*/ " +
@@ -1708,7 +1937,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     );
     testAuthorQuery(
         "\"adamšuk, m karel\"", "author:adamšuk, m karel | author:adamšuk, m karel * " +
-                                "author:/adamšuk, m[^ ]*/ | author:/adamshuk, m[^ ]*/ | author:/adamsuk, m[^ ]*/" +
+                                "author:/adamšuk, m[^ ]*/ | author:/adamsuk, m[^ ]*/" +
         		                    "author:/adamšuk, m[^ ]* karel/ | author:/adamšuk, m[^ ]* karel .*/ " +
         		                    "author:adamšuk, m k | author:adamšuk, m k * " +
         		                    "author:/adamšuk, m[^ ]* k/ | author:/adamšuk, m[^ ]* k .*/ " +
@@ -1719,20 +1948,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         		                    "author:adamsuk, m k | author:adamsuk, m k * " +
         		                    "author:/adamsuk, m[^ ]* k/ | author:/adamsuk, m[^ ]* k .*/ " +
         		                    "author:adamsuk, m " +
-        		                    "author:adamsuk, " +
-        		                    "author:adamshuk, m karel | author:adamshuk, m karel * " +
-        		                    "author:/adamshuk, m[^ ]* karel/ | author:/adamshuk, m[^ ]* karel .*/ " +
-        		                    "author:adamshuk, m k | author:adamshuk, m k * " +
-        		                    "author:/adamshuk, m[^ ]* k/ | author:/adamshuk, m[^ ]* k .*/ " +
-        		                    "author:adamshuk, m " +
-        		                    "author:adamshuk,",
-                                "//*[@numFound='8']"
-             // "adamšuk, m karel" numFound=8
-                //  80 Adamshuk,               81  Adamshuk, M.            82  Adamshuk, Marel        
-                //  83 Adamshuk, Molja         84  Adamshuk, Molja Karel   85  Adamshuk, M Karel      
-                //  86 Adamshuk, Molja K       87  Adamshuk, M K                  		                    
+        		                    "author:adamsuk,",
+        "//*[@numFound='0']"
+        //  80 Adamshuk,               81  Adamshuk, M.            82  Adamshuk, Marel        
+        //  83 Adamshuk, Molja         84  Adamshuk, Molja Karel   85  Adamshuk, M Karel      
+        //  86 Adamshuk, Molja K       87  Adamshuk, M K                  		                    
                                 
     );
+    
     testAuthorQuery(
         "\"adamguk, m karel\"", "author:adamguk, m karel | author:adamguk, m karel * " +
                                 "author:/adamguk, m[^ ]*/ " +
@@ -1740,12 +1963,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                 "author:adamguk, m k | author:adamguk, m k * " +
                                 "author:/adamguk, m[^ ]* k/ | author:/adamguk, m[^ ]* k .*/ " +
                                 "author:adamguk, m | author:adamguk," ,
-                                "//*[@numFound='8']"
-               // "adamguk, m karel" numFound=8
-                  //  60 Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-                  //  63 Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-                  //  66 Adamguk, Molja K        67  Adamguk, M K 
-        
+        "//*[@numFound='8']",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "62 Adamguk, Marel",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
     );
     
     
@@ -1774,10 +2000,6 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     		        "author:/adamčuk, a[^ ]*/ | author:/adamčuk, a[^ ]* b.*/ " +
     		        "author:adamčuk, a " +
     		        "author:adamčuk, " +
-    		        "author:adamchuk, a b | author:adamchuk, a b* " +
-    		        "author:/adamchuk, a[^ ]*/ | author:/adamchuk, a[^ ]* b.*/ " +
-    		        "author:adamchuk, a " +
-    		        "author:adamchuk, " +
     		        "author:adamcuk, a b | author:adamcuk, a b* " +
     		        "author:/adamcuk, a[^ ]*/ | author:/adamcuk, a[^ ]* b.*/ " +
     		        "author:adamcuk, a " +
@@ -1786,25 +2008,31 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     testAuthorQuery(
         "\"adamčuk, a b\"", expected ,
-                            "//*[@numFound='3']",
-                            // "adamčuk, a b" numFound=3
-                            //   1 Adamčuk,                20  Adamcuk,                40  Adamchuk,                                          
-                            
+        "//*[@numFound='2']",
+        " 1 Adamčuk,",
+        "20 Adamcuk,"
+        );
+    testAuthorQuery(
         "\"adamcuk, a b\"", expected ,
-                            "//*[@numFound='3']",
-                            // "adamcuk, a b" numFound=3
-                            //   1 Adamčuk,                20  Adamcuk,                40  Adamchuk,              
-                            
-        "\"adamchuk, a b\"", expected ,
-                            "//*[@numFound='3']",
-                            // "adamchuk, a b" numFound=3
-                            //   1 Adamčuk,                20  Adamcuk,                40  Adamchuk,              
-                            
+        "//*[@numFound='2']",
+        " 1 Adamčuk,",
+        "20 Adamcuk,"
+        );
+    
+    testAuthorQuery(
+        "\"adamchuk, a b\"", "author:adamchuk, a b | author:adamchuk, a b* | author:/adamchuk, a[^ ]*/ | author:/adamchuk, a[^ ]* b.*/ | author:adamchuk, a | author:adamchuk," ,
+        "//*[@numFound='1']",
+        "40 Adamchuk,"
+		);
+    
+    testAuthorQuery(        
         "\"adamczuk, a b\"", expected + "author:adamczuk, a b | author:adamczuk, a b* | author:/adamczuk, a[^ ]*/ | author:/adamczuk, a[^ ]* b.*/ | author:adamczuk, a | author:adamczuk,",
-                             "//*[@numFound='3']",
-                             // "adamczuk, a b" numFound=3
-                             //   1 Adamčuk,                20  Adamcuk,                40  Adamchuk,              
-                             
+         "//*[@numFound='2']",
+         " 1 Adamčuk,",
+         "20 Adamcuk,"
+		);
+    
+    testAuthorQuery(        
         "\"adamšuk, m k\"", 
                           "author:adam\u0161uk, m k | author:adam\u0161uk, m k* "
                           + "author:/adam\u0161uk, m[^ ]*/ | author:/adam\u0161uk, m[^ ]* k.*/ "
@@ -1813,26 +2041,24 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                           + "author:adamsuk, m k | author:adamsuk, m k* "
                           + "author:/adamsuk, m[^ ]*/ | author:/adamsuk, m[^ ]* k.*/ "
                           + "author:adamsuk, m "
-                          + "author:adamsuk, "
-                          + "author:adamshuk, m k | author:adamshuk, m k* "
-                          + "author:/adamshuk, m[^ ]*/ | author:/adamshuk, m[^ ]* k.*/ "
-                          + "author:adamshuk, m "
-                          + "author:adamshuk,",         
-                            "//*[@numFound='8']",
-                            //   "adamšuk, m k" numFound=8
-                            //  80 Adamshuk,               81  Adamshuk, M.            82  Adamshuk, Marel        
-                            //  83 Adamshuk, Molja         84  Adamshuk, Molja Karel   85  Adamshuk, M Karel      
-                            //  86 Adamshuk, Molja K       87  Adamshuk, M K          
-                            
+                          + "author:adamsuk,",
+        "//*[@numFound='0']"
+		);
+    
+    testAuthorQuery(
         "\"adamguk, m k\"", "author:adamguk, m k | author:adamguk, m k* " +
         		                "author:/adamguk, m[^ ]*/ | author:/adamguk, m[^ ]* k.*/ " +
         		                "author:adamguk, m " +
         		                "author:adamguk," ,
-                            "//*[@numFound='8']"
-        		                // "adamguk, m k" numFound=8
-                            //  60 Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-                            //  63 Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-                            //  66 Adamguk, Molja K        67  Adamguk, M K
+        "//*[@numFound='8']",
+        "60 Adamguk,",
+        "61 Adamguk, M.",
+        "62 Adamguk, Marel",
+        "63 Adamguk, Molja",
+        "64 Adamguk, Molja Karel",
+        "65 Adamguk, M Karel",
+        "66 Adamguk, Molja K",
+        "67 Adamguk, M K"
     );
     
     
@@ -1846,44 +2072,55 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     testAuthorQuery(
             "\"adamčuk, k\"", "author:adamčuk, k | author:adamčuk, k* | author:adamčuk, " +
-                               "author:adamchuk, k | author:adamchuk, k* | author:adamchuk, " +
                                "author:adamcuk, k | author:adamcuk, k* | author:adamcuk,", 
-                               "//*[@numFound='12']",
-                               // "adamčuk, k" numFound=12
-                               //   1 Adamčuk,                 9  Adamčuk, Karel Molja    10  Adamčuk, Karel M       
-                               //  11 Adamčuk, K Molja        20  Adamcuk,                28  Adamcuk, Karel Molja   
-                               //  29 Adamcuk, Karel M        30  Adamcuk, K Molja        40  Adamchuk,              
-                               //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
-                               
+           "//*[@numFound='8']",
+           " 1 Adamčuk,",
+           " 9 Adamčuk, Karel Molja",
+           "10 Adamčuk, Karel M",
+           "11 Adamčuk, K Molja",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+           );
+    
+    testAuthorQuery(
             "\"adamcuk, k\"", "author:adamcuk, k | author:adamcuk, k* | author:adamcuk,", 
-                               "//*[@numFound='4']",
-                               // "adamcuk, k" numFound=4
-                               //  20 Adamcuk,                28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-                               //  30 Adamcuk, K Molja       
-             
+           "//*[@numFound='4']",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"       
+            );
+    
+     testAuthorQuery(             
             "\"adamchuk, k\"", "author:adamchuk, k | author:adamchuk, k* | author:adamchuk,", 
-                                "//*[@numFound='4']",
-                                // "adamchuk, k" numFound=4
-                                //  40 Adamchuk,               48  Adamchuk, Karel Molja   49  Adamchuk, Karel M      
-                                //  50 Adamchuk, K Molja                                      
-             
+            "//*[@numFound='4']",
+            "40 Adamchuk,",
+            "48 Adamchuk, Karel Molja",
+            "49 Adamchuk, Karel M",
+            "50 Adamchuk, K Molja"
+             );
+     
+     testAuthorQuery(             
             "\"adamczuk, k\"", "author:adamczuk, k | author:adamczuk, k* | author:adamczuk,", 
-                                "//*[@numFound='0']",
-                                // "adamczuk, k" numFound=0                              
-                              
+            "//*[@numFound='0']",
+            ""
+             );
+     
+     testAuthorQuery(                              
             "\"adamšuk, k\"", "author:adamšuk, k | author:adamšuk, k* | author:adamšuk, " +
-                               "author:adamsuk, k | author:adamsuk, k* | author:adamsuk, " +
-                               "author:adamshuk, k | author:adamshuk, k* | author:adamshuk,", 
-                               "//*[@numFound='4']"
-                               // "adamšuk, k" numFound=4
-                               //  80 Adamshuk,               88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                               //  90 Adamshuk, K Molja      
-                               ,
+                               "author:adamsuk, k | author:adamsuk, k* | author:adamsuk,", 
+           "//*[@numFound='0']"
+         );
+     
+     testAuthorQuery(                     
             "\"adamguk, k\"", "author:adamguk, k | author:adamguk, k* | author:adamguk,", 
-                               "//*[@numFound='4']"
-                              // "adamguk, k" numFound=4
-                              //  60 Adamguk,                68  Adamguk, Karel Molja    69  Adamguk, Karel M       
-                              //  70 Adamguk, K Molja    
+           "//*[@numFound='4']",
+           "60 Adamguk,",
+           "68 Adamguk, Karel Molja",
+           "69 Adamguk, Karel M",
+           "70 Adamguk, K Molja"
     );
     
     
@@ -1899,52 +2136,62 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             "\"adamčuk, karel\"", "author:adamčuk, karel | author:adamčuk, karel * " +
             		                  "author:adamčuk, k | author:adamčuk, k * | author:adamčuk, " +
             		                  "author:adamcuk, karel | author:adamcuk, karel * " +
-            		                  "author:adamcuk, k | author:adamcuk, k * | author:adamcuk, " +
-            		                  "author:adamchuk, karel | author:adamchuk, karel * " +
-            		                  "author:adamchuk, k | author:adamchuk, k * | author:adamchuk,", 
-                               "//*[@numFound='12']",
-                               // "adamčuk, karel" numFound=12
-                               //   1 Adamčuk,                 9  Adamčuk, Karel Molja    10  Adamčuk, Karel M       
-                               //  11 Adamčuk, K Molja        20  Adamcuk,                28  Adamcuk, Karel Molja   
-                               //  29 Adamcuk, Karel M        30  Adamcuk, K Molja        40  Adamchuk,              
-                               //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja
-                               
+            		                  "author:adamcuk, k | author:adamcuk, k * | author:adamcuk,", 
+           "//*[@numFound='8']",
+           " 1 Adamčuk,",
+           " 9 Adamčuk, Karel Molja",
+           "10 Adamčuk, Karel M",
+           "11 Adamčuk, K Molja",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+           );
+    
+    testAuthorQuery(
             "\"adamcuk, karel\"", "author:adamcuk, karel | author:adamcuk, karel * " +
                                   "author:adamcuk, k | author:adamcuk, k * | author:adamcuk,",
-                               "//*[@numFound='4']",
-                               // "adamcuk, karel" numFound=4
-                               //  20 Adamcuk,                28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-                               //  30 Adamcuk, K Molja
-                               
+           "//*[@numFound='4']",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+            );
+    
+     testAuthorQuery(
             "\"adamchuk, karel\"", "author:adamchuk, karel | author:adamchuk, karel * " +
                                    "author:adamchuk, k | author:adamchuk, k * | author:adamchuk,", 
-                                "//*[@numFound='4']",
-                                // "adamchuk, karel" numFound=4
-                                //  40 Adamchuk,               48  Adamchuk, Karel Molja   49  Adamchuk, Karel M      
-                                //  50 Adamchuk, K Molja
-                                
+            "//*[@numFound='4']",
+            "40 Adamchuk,",
+            "48 Adamchuk, Karel Molja",
+            "49 Adamchuk, Karel M",
+            "50 Adamchuk, K Molja"
+         );
+     
+     testAuthorQuery(
             "\"adamczuk, karel\"", "author:adamczuk, karel | author:adamczuk, karel * " +
                                    "author:adamczuk, k | author:adamczuk, k * | author:adamczuk,", 
-                                "//*[@numFound='0']",
-                                // "adamczuk, karel" numFound=0
-                                
+            "//*[@numFound='0']"
+         );
+     
+     testAuthorQuery(
             "\"adamšuk, karel\"", "author:adamšuk, karel | author:adamšuk, karel * " +
             		                  "author:adamšuk, k | author:adamšuk, k * | author:adamšuk, " +
-            		                  "author:adamshuk, karel | author:adamshuk, karel * " +
-            		                  "author:adamshuk, k | author:adamshuk, k * | author:adamshuk, " +
             		                  "author:adamsuk, karel | author:adamsuk, karel * " +
             		                  "author:adamsuk, k | author:adamsuk, k * | author:adamsuk,", 
-                               "//*[@numFound='4']",
-                               // "adamšuk, karel" numFound=4
-                               //  80 Adamshuk,               88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                               //  90 Adamshuk, K Molja     
-                               
+           "//*[@numFound='0']"
+           //  80 Adamshuk,               88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
+           //  90 Adamshuk, K Molja     
+         );
+ 
+     testAuthorQuery(                              
             "\"adamguk, karel\"", "author:adamguk, karel | author:adamguk, karel * " +
                                   "author:adamguk, k | author:adamguk, k * | author:adamguk,", 
-                               "//*[@numFound='4']"
-                                  // "adamguk, karel" numFound=4
-                                  //  60 Adamguk,                68  Adamguk, Karel Molja    69  Adamguk, Karel M       
-                                  //  70 Adamguk, K Molja                                         
+           "//*[@numFound='4']",
+           "60 Adamguk,",
+           "68 Adamguk, Karel Molja",
+           "69 Adamguk, Karel M",
+           "70 Adamguk, K Molja"                                         
     );
     
     
@@ -1957,60 +2204,71 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     
     testAuthorQuery(
-            "\"adamčuk, karel m\"", "author:adamčuk, karel m | author:adamčuk, karel m* " +
-                                		"author:adamčuk, k m | author:adamčuk, k m* | author:adamčuk, karel " +
-                                		"author:adamčuk, k | author:adamčuk, | author:adamchuk, karel m " +
-                                		"author:adamchuk, karel m* | author:adamchuk, k m " +
-                                		"author:adamchuk, k m* | author:adamchuk, karel | author:adamchuk, k " +
-                                		"author:adamchuk, | author:adamcuk, karel m | author:adamcuk, karel m* " +
-                                		"author:adamcuk, k m | author:adamcuk, k m* | author:adamcuk, karel " +
-                                		"author:adamcuk, k | author:adamcuk,", 
-                               "//*[@numFound='12']",
-                               // "adamčuk, karel m" numFound=12
-                               //   1 Adamčuk,                 9  Adamčuk, Karel Molja    10  Adamčuk, Karel M       
-                               //  11 Adamčuk, K Molja        20  Adamcuk,                28  Adamcuk, Karel Molja   
-                               //  29 Adamcuk, Karel M        30  Adamcuk, K Molja        40  Adamchuk,              
-                               //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja     
-                               
+            "\"adamčuk, karel m\"", 
+            "author:adamčuk, karel m | author:adamčuk, karel m* | "
+            + "author:adamčuk, k m | author:adamčuk, k m* | "
+            + "author:adamčuk, karel | author:adamčuk, k | "
+            + "author:adamčuk, | "
+            + "author:adamcuk, karel m | author:adamcuk, karel m* | "
+            + "author:adamcuk, k m | author:adamcuk, k m* | "
+            + "author:adamcuk, karel | "
+            + "author:adamcuk, k | "
+            + "author:adamcuk,",
+           "//*[@numFound='8']",
+           " 1 Adamčuk,",
+           " 9 Adamčuk, Karel Molja",
+           "10 Adamčuk, Karel M",
+           "11 Adamčuk, K Molja",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+            );
+    
+    testAuthorQuery(                               
             "\"adamcuk, karel m\"", "author:adamcuk, karel m | author:adamcuk, karel m* | author:adamcuk, k m " +
             		                    "author:adamcuk, k m* | author:adamcuk, karel | author:adamcuk, k | author:adamcuk,",
-                               "//*[@numFound='4']",
-                               // "adamcuk, karel m" numFound=4
-                               //  20 Adamcuk,                28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-                               //  30 Adamcuk, K Molja          
-                               
+           "//*[@numFound='4']",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+            );
+    
+    testAuthorQuery(
             "\"adamchuk, karel m\"", 
                                     "author:adamchuk, karel m | author:adamchuk, karel m* | author:adamchuk, k m " +
                                     "author:adamchuk, k m* | author:adamchuk, karel | author:adamchuk, k | author:adamchuk,", 
-                                "//*[@numFound='4']",
-                                // "adamchuk, karel m" numFound=4
-                                //  40 Adamchuk,               48  Adamchuk, Karel Molja   49  Adamchuk, Karel M      
-                                //  50 Adamchuk, K Molja      
-                                
+            "//*[@numFound='4']",
+            "40 Adamchuk,",
+            "48 Adamchuk, Karel Molja",
+            "49 Adamchuk, Karel M",
+            "50 Adamchuk, K Molja"      
+            );
+    
+    testAuthorQuery(            
             "\"adamczuk, karel m\"", 
                                     "author:adamczuk, karel m | author:adamczuk, karel m* | author:adamczuk, k m " +
                                     "author:adamczuk, k m* | author:adamczuk, karel | author:adamczuk, k | author:adamczuk,", 
-                                "//*[@numFound='0']",
-                                // "adamczuk, karel m" numFound=0
-                                
+            "//*[@numFound='0']"
+            );
+    
+    testAuthorQuery(            
             "\"adamšuk, karel m\"", "author:adamšuk, karel m | author:adamšuk, karel m* | author:adamšuk, k m " +
             		                    "author:adamšuk, k m* | author:adamšuk, karel | author:adamšuk, k | author:adamšuk, " +
             		                    "author:adamsuk, karel m | author:adamsuk, karel m* | author:adamsuk, k m " +
-            		                    "author:adamsuk, k m* | author:adamsuk, karel | author:adamsuk, k | author:adamsuk, " +
-            		                    "author:adamshuk, karel m | author:adamshuk, karel m* | author:adamshuk, k m " +
-            		                    "author:adamshuk, k m* | author:adamshuk, karel | author:adamshuk, k " +
-            		                    "author:adamshuk,", 
-                               "//*[@numFound='4']",
-                               // "adamšuk, karel m" numFound=4
-                               //  80 Adamshuk,               88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                               //  90 Adamshuk, K Molja                                
-                               
+            		                    "author:adamsuk, k m* | author:adamsuk, karel | author:adamsuk, k | author:adamsuk,",
+           "//*[@numFound='0']"                                
+            );
+    
+    testAuthorQuery(           
             "\"adamguk, karel m\"", "author:adamguk, karel m | author:adamguk, karel m* | author:adamguk, k m " +
             		                    "author:adamguk, k m* | author:adamguk, karel | author:adamguk, k | author:adamguk,", 
-                               "//*[@numFound='4']"
-                                    // "adamguk, karel m" numFound=4
-                                    //  60 Adamguk,                68  Adamguk, Karel Molja    69  Adamguk, Karel M       
-                                    //  70 Adamguk, K Molja                		                    
+           "//*[@numFound='4']",
+           "60 Adamguk,",
+           "68 Adamguk, Karel Molja",
+           "69 Adamguk, Karel M",
+           "70 Adamguk, K Molja"                		                    
     );
     
     
@@ -2030,46 +2288,54 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             		                        "author:adamcuk, karel molja | author:adamcuk, karel molja * " +
             		                        "author:adamcuk, k molja | author:adamcuk, k molja * | author:adamcuk, karel m " +
             		                        "author:adamcuk, karel m * | author:adamcuk, k m | author:adamcuk, k m * " +
-            		                        "author:adamcuk, karel | author:adamcuk, k | author:adamcuk, " +
-            		                        "author:adamchuk, karel molja | author:adamchuk, karel molja * " +
-            		                        "author:adamchuk, k molja | author:adamchuk, k molja * " +
-            		                        "author:adamchuk, karel m | author:adamchuk, karel m * " +
-            		                        "author:adamchuk, k m | author:adamchuk, k m * " +
-            		                        "author:adamchuk, karel | author:adamchuk, k | author:adamchuk,", 
-                               "//*[@numFound='12']",
-                               // "adamčuk, karel molja" numFound=12
-                               //   1 Adamčuk,                 9  Adamčuk, Karel Molja    10  Adamčuk, Karel M       
-                               //  11 Adamčuk, K Molja        20  Adamcuk,                28  Adamcuk, Karel Molja   
-                               //  29 Adamcuk, Karel M        30  Adamcuk, K Molja        40  Adamchuk,              
-                               //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja   
-                               
+            		                        "author:adamcuk, karel | author:adamcuk, k | author:adamcuk,",
+           "//*[@numFound='8']",
+           " 1 Adamčuk,",
+           " 9 Adamčuk, Karel Molja",
+           "10 Adamčuk, Karel M",
+           "11 Adamčuk, K Molja",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+           );
+    
+    testAuthorQuery(                           
             "\"adamcuk, karel molja\"", "author:adamcuk, karel molja | author:adamcuk, karel molja * " +
             		                        "author:adamcuk, k molja | author:adamcuk, k molja * " +
             		                        "author:adamcuk, karel m | author:adamcuk, karel m * " +
             		                        "author:adamcuk, k m | author:adamcuk, k m * | author:adamcuk, karel " +
             		                        "author:adamcuk, k | author:adamcuk,",
-                               "//*[@numFound='4']",
-                               // "adamcuk, karel molja" numFound=4
-                               //  20 Adamcuk,                28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-                               //  30 Adamcuk, K Molja
-                               
+           "//*[@numFound='4']",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+            );
+    
+     testAuthorQuery(                               
             "\"adamchuk, karel molja\"", "author:adamchuk, karel molja | author:adamchuk, karel molja * " +
             		                         "author:adamchuk, k molja | author:adamchuk, k molja * " +
             		                         "author:adamchuk, karel m | author:adamchuk, karel m * " +
             		                         "author:adamchuk, k m | author:adamchuk, k m * | author:adamchuk, karel " +
             		                         "author:adamchuk, k | author:adamchuk,", 
-                                "//*[@numFound='4']",
-                                // "adamchuk, karel molja" numFound=4
-                                //  40 Adamchuk,               48  Adamchuk, Karel Molja   49  Adamchuk, Karel M      
-                                //  50 Adamchuk, K Molja    
-                                
+            "//*[@numFound='4']",
+            "40 Adamchuk,",
+            "48 Adamchuk, Karel Molja",
+            "49 Adamchuk, Karel M",
+            "50 Adamchuk, K Molja"   
+             );
+     
+     testAuthorQuery(           
             "\"adamczuk, karel molja\"", "author:adamczuk, karel molja | author:adamczuk, karel molja * " +
             		                         "author:adamczuk, k molja | author:adamczuk, k molja * " +
             		                         "author:adamczuk, karel m | author:adamczuk, karel m * " +
             		                         "author:adamczuk, k m | author:adamczuk, k m * " +
             		                         "author:adamczuk, karel | author:adamczuk, k | author:adamczuk,", 
-                                "//*[@numFound='0']",
-                                
+            "//*[@numFound='0']"
+             );
+     
+     testAuthorQuery(           
             "\"adamšuk, karel molja\"", "author:adamšuk, karel molja | author:adamšuk, karel molja * " +
             		                        "author:adamšuk, k molja | author:adamšuk, k molja * " +
             		                        "author:adamšuk, karel m | author:adamšuk, karel m * " +
@@ -2079,27 +2345,22 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             		                        "author:adamsuk, k molja | author:adamsuk, k molja * " +
             		                        "author:adamsuk, karel m | author:adamsuk, karel m * " +
             		                        "author:adamsuk, k m | author:adamsuk, k m * | author:adamsuk, karel " +
-            		                        "author:adamsuk, k | author:adamsuk, | author:adamshuk, karel molja " +
-            		                        "author:adamshuk, karel molja * | author:adamshuk, k molja " +
-            		                        "author:adamshuk, k molja * | author:adamshuk, karel m " +
-            		                        "author:adamshuk, karel m * | author:adamshuk, k m " +
-            		                        "author:adamshuk, k m * | author:adamshuk, karel " +
-            		                        "author:adamshuk, k | author:adamshuk,", 
-                               "//*[@numFound='4']",
-                               // "adamšuk, karel molja" numFound=4
-                               //  80 Adamshuk,               88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                               //  90 Adamshuk, K Molja  
-                               
+            		                        "author:adamsuk, k | author:adamsuk,",
+               "//*[@numFound='0']"  
+             );
+     
+     testAuthorQuery(          
             "\"adamguk, karel molja\"", "author:adamguk, karel molja | author:adamguk, karel molja * " +
             		                        "author:adamguk, k molja | author:adamguk, k molja * " +
             		                        "author:adamguk, karel m | author:adamguk, karel m * " +
             		                        "author:adamguk, k m | author:adamguk, k m * " +
             		                        "author:adamguk, karel | author:adamguk, k " +
             		                        "author:adamguk,", 
-                               "//*[@numFound='4']"
-                                        // "adamguk, karel molja" numFound=4
-                                        //  60 Adamguk,                68  Adamguk, Karel Molja    69  Adamguk, Karel M       
-                                        //  70 Adamguk, K Molja             		                        
+           "//*[@numFound='4']",
+           "60 Adamguk,",
+           "68 Adamguk, Karel Molja",
+           "69 Adamguk, Karel M",
+           "70 Adamguk, K Molja"             		                        
     );
     
     
@@ -2114,67 +2375,62 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
             "\"adamčuk, k m\"", "author:adamčuk, k m | author:adamčuk, k m* " +
             		                "author:/adamčuk, k[^ ]*/ | author:/adamčuk, k[^ ]* m.*/ " +
             		                "author:adamčuk, k | author:adamčuk, "
-            		                + "author:adamchuk, k m | author:adamchuk, k m* " +
-            		                "author:/adamchuk, k[^ ]*/ | author:/adamchuk, k[^ ]* m.*/ " +
-            		                "author:adamchuk, k | author:adamchuk, "
             		                + "author:adamcuk, k m | author:adamcuk, k m* " +
             		                "author:/adamcuk, k[^ ]*/ | author:/adamcuk, k[^ ]* m.*/ " +
             		                "author:adamcuk, k | author:adamcuk,", 
-                               "//*[@numFound='12']"
-                                // "adamčuk, k m" numFound=12
-                                //   1 Adamčuk,                 9  Adamčuk, Karel Molja    10  Adamčuk, Karel M       
-                                //  11 Adamčuk, K Molja        20  Adamcuk,                28  Adamcuk, Karel Molja   
-                                //  29 Adamcuk, Karel M        30  Adamcuk, K Molja        40  Adamchuk,              
-                                //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja   
-                               );
+           "//*[@numFound='8']",
+           " 1 Adamčuk,",
+           " 9 Adamčuk, Karel Molja",
+           "10 Adamčuk, Karel M",
+           "11 Adamčuk, K Molja",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+           );
+
     testAuthorQuery(
             "\"adamcuk, k m\"", "author:adamcuk, k m | author:adamcuk, k m* " +
             		                "author:/adamcuk, k[^ ]*/ | author:/adamcuk, k[^ ]* m.*/ " +
                                 "author:adamcuk, k | author:adamcuk,", 
-                               "//*[@numFound='4']"
-                               // "adamcuk, k m" numFound=4
-                               //  20 Adamcuk,                29  Adamcuk, Karel M        30  Adamcuk, K Molja   
-                               //  28 Adamcuk, Karel Molja
-                               );
+           "//*[@numFound='4']",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+       );
+    
     testAuthorQuery(
             "\"adamchuk, k m\"", "author:adamchuk, k m | author:adamchuk, k m* " +
             		                 "author:/adamchuk, k[^ ]*/ | author:/adamchuk, k[^ ]* m.*/ " +
                                  "author:adamchuk, k | author:adamchuk,", 
-                                "//*[@numFound='4']"
-                                // "adamchuk, k m" numFound=4
-                                //  40 Adamchuk,               49  Adamchuk, Karel M       50  Adamchuk, K Molja
-                                //  xx Adamchuk, Karel Molja
-                                );
+            "//*[@numFound='4']",
+            ""
+        );
     testAuthorQuery(
             "\"adamczuk, k m\"", "author:adamczuk, k m | author:adamczuk, k m* " +
-            		                 "author:/adamczuk, k[^ ]*/ | author:/adamczuk, k[^ ]* m.*/ " +
+        		                 "author:/adamczuk, k[^ ]*/ | author:/adamczuk, k[^ ]* m.*/ " +
                                  "author:adamczuk, k | author:adamczuk,", 
-                                 "//*[@numFound='0']"
-                                 // "adamczuk, k m" numFound=0
-                                 );
+             "//*[@numFound='0']"
+         );
     testAuthorQuery(
             "\"adamšuk, k m\"", "author:adamšuk, k m | author:adamšuk, k m* " +
             		                "author:/adamšuk, k[^ ]*/ | author:/adamšuk, k[^ ]* m.*/ " +
             		                "author:adamšuk, k | author:adamšuk, " +
-            		                "author:adamshuk, k m | author:adamshuk, k m* " +
-            		                "author:/adamshuk, k[^ ]*/ | author:/adamshuk, k[^ ]* m.*/ " +
-            		                "author:adamshuk, k | author:adamshuk, " +
             		                "author:adamsuk, k m | author:adamsuk, k m* " +
             		                "author:/adamsuk, k[^ ]*/ | author:/adamsuk, k[^ ]* m.*/ " +
             		                "author:adamsuk, k | author:adamsuk,", 
-                               "//*[@numFound='4']"
-                               // "adamšuk, k m" numFound=4
-                               //  80 Adamshuk,               89  Adamshuk, Karel M       90  Adamshuk, K Molja
-            		               //  xx Adamshuk, Karel Molja
-                               );
+           "//*[@numFound='0']"
+		);
+    
     testAuthorQuery(
             "\"adamguk, k m\"", "author:adamguk, k m | author:adamguk, k m* " +
                                 "author:/adamguk, k[^ ]*/ | author:/adamguk, k[^ ]* m.*/ " +
                                 "author:adamguk, k | author:adamguk,", 
-                               "//*[@numFound='4']"
-                                // "adamguk, k m" numFound=4
-                                //  60 Adamguk,                69  Adamguk, Karel M        70  Adamguk, K Molja       
-                                //  xx Adamguk, Karel Molja
+           "//*[@numFound='4']",
+           "60 Adamguk,",
+           "69 Adamguk, Karel M",
+           "70 Adamguk, K Molja"
     );
     
     
@@ -2187,26 +2443,28 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     
     testAuthorQuery(
-            "\"adamčuk, k molja\"", "author:adamčuk, k molja | author:adamčuk, k molja * "
-                + "author:/adamčuk, k[^ ]*/ | author:/adamčuk, k[^ ]* molja/ | author:/adamčuk, k[^ ]* molja .*/ "
-                + "author:adamčuk, k m | author:adamčuk, k m * "
-                + "author:/adamčuk, k[^ ]* m/ | author:/adamčuk, k[^ ]* m .*/ "
-                + "author:adamčuk, k | author:adamčuk, | author:adamchuk, k molja | author:adamchuk, k molja * "
-                + "author:/adamchuk, k[^ ]*/ | author:/adamchuk, k[^ ]* molja/ | author:/adamchuk, k[^ ]* molja .*/ "
-                + "author:adamchuk, k m | author:adamchuk, k m * "
-                + "author:/adamchuk, k[^ ]* m/ | author:/adamchuk, k[^ ]* m .*/ "
-                + "author:adamchuk, k | author:adamchuk, | author:adamcuk, k molja | author:adamcuk, k molja * "
-                + "author:/adamcuk, k[^ ]*/ | author:/adamcuk, k[^ ]* molja/ | author:/adamcuk, k[^ ]* molja .*/ "
-                + "author:adamcuk, k m | author:adamcuk, k m * "
-                + "author:/adamcuk, k[^ ]* m/ | author:/adamcuk, k[^ ]* m .*/ "
-                + "author:adamcuk, k | author:adamcuk,", 
-                               "//*[@numFound='12']"
-                               // "adamčuk, k molja" numFound=12
-                               //   1 Adamčuk,                 9  Adamčuk, Karel Molja    10  Adamčuk, Karel M       
-                               //  11 Adamčuk, K Molja        20  Adamcuk,                28  Adamcuk, Karel Molja   
-                               //  29 Adamcuk, Karel M        30  Adamcuk, K Molja        40  Adamchuk,              
-                               //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja      
+            "\"adamčuk, k molja\"", 
+            "/adamcuk, k[^ ]* m .*/ | /adamcuk, k[^ ]* m/ | "
+            		+ "/adamcuk, k[^ ]* molja .*/ | /adamcuk, k[^ ]* molja/ | "
+            		+ "/adamcuk, k[^ ]*/ | "
+            		+ "/adamčuk, k[^ ]* m .*/ | /adamčuk, k[^ ]* m/ | "
+            		+ "/adamčuk, k[^ ]* molja .*/ | /adamčuk, k[^ ]* molja/ | "
+            		+ "/adamčuk, k[^ ]*/ | "
+            		+ "adamcuk, | adamcuk, k | adamcuk, k m | adamcuk, k m * | "
+            		+ "adamcuk, k molja | adamcuk, k molja * | "
+            		+ "adamčuk, | "
+            		+ "adamčuk, k | adamčuk, k m | adamčuk, k m * | adamčuk, k molja | adamčuk, k molja *",
+           "//*[@numFound='8']",
+           " 1 Adamčuk,",
+           " 9 Adamčuk, Karel Molja",
+           "10 Adamčuk, Karel M",
+           "11 Adamčuk, K Molja",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
     );
+    
     testAuthorQuery(
             "\"adamcuk, k molja\"", 
                                     "author:adamcuk, k molja | author:adamcuk, k molja * " +
@@ -2214,31 +2472,35 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                     "author:adamcuk, k m | author:adamcuk, k m * " +
                                     "author:/adamcuk, k[^ ]* m/ | author:/adamcuk, k[^ ]* m .*/ " +
                                     "author:adamcuk, k | author:adamcuk,", 
-                               "//*[@numFound='4']"
-                               // "adamcuk, k molja" numFound=4
-                               //  20 Adamcuk,                28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-                               //  30 Adamcuk, K Molja       
+           "//*[@numFound='4']",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
     );
+    
     testAuthorQuery(                               
             "\"adamchuk, k molja\"", "author:adamchuk, k molja | author:adamchuk, k molja * " +
                                     "author:/adamchuk, k[^ ]*/ | author:/adamchuk, k[^ ]* molja/ | author:/adamchuk, k[^ ]* molja .*/ " +
                                     "author:adamchuk, k m | author:adamchuk, k m * " +
                                     "author:/adamchuk, k[^ ]* m/ | author:/adamchuk, k[^ ]* m .*/ " +
                                     "author:adamchuk, k | author:adamchuk,", 
-                                "//*[@numFound='4']"
-                                // "adamchuk, k molja" numFound=4
-                                //  40 Adamchuk,               48  Adamchuk, Karel Molja   49  Adamchuk, Karel M      
-                                //  50 Adamchuk, K Molja   
+            "//*[@numFound='4']",
+            "40 Adamchuk,",
+            "48 Adamchuk, Karel Molja",
+            "49 Adamchuk, Karel M",
+            "50 Adamchuk, K Molja"
         );
+    
     testAuthorQuery(                                
             "\"adamczuk, k molja\"", "author:adamczuk, k molja | author:adamczuk, k molja * " +
                                     "author:/adamczuk, k[^ ]*/ | author:/adamczuk, k[^ ]* molja/ | author:/adamczuk, k[^ ]* molja .*/ " +
                                     "author:adamczuk, k m | author:adamczuk, k m * " +
                                     "author:/adamczuk, k[^ ]* m/ | author:/adamczuk, k[^ ]* m .*/ " +
                                     "author:adamczuk, k | author:adamczuk,", 
-                                 "//*[@numFound='0']"
-                                 // "adamczuk, k molja" numFound=0
+             "//*[@numFound='0']"
             );
+    
     testAuthorQuery(         
             "\"adamšuk, k molja\"", "author:adamšuk, k molja | author:adamšuk, k molja * " +
                                 		"author:/adamšuk, k[^ ]*/ | author:/adamšuk, k[^ ]* molja/ | author:/adamšuk, k[^ ]* molja .*/ " +
@@ -2247,26 +2509,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                                 		"author:adamsuk, k molja | author:adamsuk, k molja * " +
                                 		"author:/adamsuk, k[^ ]*/ | author:/adamsuk, k[^ ]* molja/ | author:/adamsuk, k[^ ]* molja .*/ " +
                                 		"author:adamsuk, k m | author:adamsuk, k m * | author:/adamsuk, k[^ ]* m/ " +
-                                		"author:/adamsuk, k[^ ]* m .*/ | author:adamsuk, k | author:adamsuk, " +
-                                		"author:adamshuk, k molja | author:adamshuk, k molja * " +
-                                		"author:/adamshuk, k[^ ]*/ | author:/adamshuk, k[^ ]* molja/ | author:/adamshuk, k[^ ]* molja .*/ " +
-                                		"author:adamshuk, k m | author:adamshuk, k m * | author:/adamshuk, k[^ ]* m/ " +
-                                		"author:/adamshuk, k[^ ]* m .*/ | author:adamshuk, k | author:adamshuk,", 
-                               "//*[@numFound='4']"
-                               // "adamšuk, k molja" numFound=4
-                               //  80 Adamshuk,               88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                               //  90 Adamshuk, K Molja      
+                                		"author:/adamsuk, k[^ ]* m .*/ | author:adamsuk, k | author:adamsuk,",
+           "//*[@numFound='0']"
             );
+    
     testAuthorQuery(       
             "\"adamguk, k molja\"", "author:adamguk, k molja | author:adamguk, k molja * " +
                                 		"author:/adamguk, k[^ ]*/ | author:/adamguk, k[^ ]* molja/ | author:/adamguk, k[^ ]* molja .*/ " +
                                 		"author:adamguk, k m | author:adamguk, k m * " +
                                 		"author:/adamguk, k[^ ]* m/ | author:/adamguk, k[^ ]* m .*/ " +
                                 		"author:adamguk, k | author:adamguk,", 
-                               "//*[@numFound='4']"
-                                    // "adamguk, k molja" numFound=4
-                                    //  60 Adamguk,                68  Adamguk, Karel Molja    69  Adamguk, Karel M       
-                                    //  70 Adamguk, K Molja                                       		
+           "//*[@numFound='4']",
+           "60 Adamguk,",
+           "68 Adamguk, Karel Molja",
+           "69 Adamguk, Karel M",
+           "70 Adamguk, K Molja"
     );
     
     /**
@@ -2280,57 +2537,102 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     expected = "author:adamšuk, m | author:adamšuk, m* | author:adamšuk, " +
               "author:adamsuk, m | author:adamsuk, m* | author:adamsuk, " +
-              "author:adamshuk, m | author:adamshuk, m* | author:adamshuk, " +
               "author:adamguk, m | author:adamguk, m* | author:adamguk, " +
               "author:adamčuk, m | author:adamčuk, m* | author:adamčuk, " +
-              "author:adamchuk, m | author:adamchuk, m* | author:adamchuk, " +
               "author:adamcuk, m | author:adamcuk, m* | author:adamcuk,";
     
     testAuthorQuery(
             "\"adamčuk, m*\"", expected, 
-            "//*[@numFound='40']"
-            // "adamčuk, m*" numFound=40
-            //   1 Adamčuk,                 2  Adamčuk, M.              3  Adamčuk, Marel         
-            //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     6  Adamčuk, M Karel       
-            //   7 Adamčuk, Molja K         8  Adamčuk, M K            20  Adamcuk,               
-            //  21 Adamcuk, M.             22  Adamcuk, Marel          23  Adamcuk, Molja         
-            //  24 Adamcuk, Molja Karel    25  Adamcuk, M Karel        26  Adamcuk, Molja K       
-            //  27 Adamcuk, M K            40  Adamchuk,               41  Adamchuk, M.           
-            //  42 Adamchuk, Marel         43  Adamchuk, Molja         44  Adamchuk, Molja Karel  
-            //  45 Adamchuk, M Karel       46  Adamchuk, Molja K       47  Adamchuk, M K          
-            //  60 Adamguk,                61  Adamguk, M.             62  Adamguk, Marel         
-            //  63 Adamguk, Molja          64  Adamguk, Molja Karel    65  Adamguk, M Karel       
-            //  66 Adamguk, Molja K        67  Adamguk, M K            80  Adamshuk,              
-            //  81 Adamshuk, M.            82  Adamshuk, Marel         83  Adamshuk, Molja        
-            //  84 Adamshuk, Molja Karel   85  Adamshuk, M Karel       86  Adamshuk, Molja K      
-            //  87 Adamshuk, M K
+            "//*[@numFound='24']",
+            " 1 Adamčuk,",
+            " 2 Adamčuk, M.",
+            " 3 Adamčuk, Marel",
+            " 4 Adamčuk, Molja",
+            " 5 Adamčuk, Molja Karel",
+            " 6 Adamčuk, M Karel",
+            " 7 Adamčuk, Molja K",
+            " 8 Adamčuk, M K",
+            "20 Adamcuk,",
+            "21 Adamcuk, M.",
+            "22 Adamcuk, Marel",
+            "23 Adamcuk, Molja",
+            "24 Adamcuk, Molja Karel",
+            "25 Adamcuk, M Karel",
+            "26 Adamcuk, Molja K",
+            "27 Adamcuk, M K",
+            "60 Adamguk,",
+            "61 Adamguk, M.",
+            "62 Adamguk, Marel",
+            "63 Adamguk, Molja",
+            "64 Adamguk, Molja Karel",
+            "65 Adamguk, M Karel",
+            "66 Adamguk, Molja K",
+            "67 Adamguk, M K"
     );
     testAuthorQuery(
-            "\"adamcuk, m*\"", expected, "//*[@numFound='40']",
-            "\"adamchuk, m*\"", expected, "//*[@numFound='40']"
+            "\"adamcuk, m*\"", expected, "//*[@numFound='24']"
+        );
+    
+    testAuthorQuery(
+            "\"adamchuk, m*\"", "author:adamchuk, m | author:adamchuk, m* | author:adamchuk,", 
+            "//*[@numFound='8']",
+            "40 Adamchuk,",
+            "41 Adamchuk, M.",
+            "42 Adamchuk, Marel",
+            "43 Adamchuk, Molja",
+            "44 Adamchuk, Molja Karel",
+            "45 Adamchuk, M Karel",
+            "46 Adamchuk, Molja K",
+            "47 Adamchuk, M K"
     );
     testAuthorQuery(            
-            "\"adamczuk, m*\"", expected + " | author:adamczuk, m | author:adamczuk, m* | author:adamczuk,", "//*[@numFound='40']",
-            "\"adamšuk, m*\"", expected, "//*[@numFound='40']",
-            "\"adamguk, m*\"", expected, "//*[@numFound='40']",
+            "\"adamczuk, m*\"", expected + " | author:adamczuk, m | author:adamczuk, m* | author:adamczuk,", 
+            "//*[@numFound='24']"
+    	);    
+    testAuthorQuery(            
+            "\"adamšuk, m*\"", expected, "//*[@numFound='24']"
+    		);    
+    testAuthorQuery(
+            "\"adamguk, m*\"", expected, "//*[@numFound='24']"
+    		);    
+    testAuthorQuery(
+            "\"adamčuk, mo*\"", "author:adamčuk, mo*", 
+            "//*[@numFound='3']",
+            " 4 Adamčuk, Molja",
+            " 5 Adamčuk, Molja Karel",
+            " 7 Adamčuk, Molja K"
+    		);    
+    testAuthorQuery(
+            "\"adamcuk, mo*\"", "author:adamcuk, mo*", 
+            "//*[@numFound='3']",
+            "23 Adamcuk, Molja",
+            "24 Adamcuk, Molja Karel",
+            "26 Adamcuk, Molja K"
+    		);    
             
-            "\"adamčuk, mo*\"", "author:adamčuk, mo*", "//*[@numFound='3']",
-            // "adamčuk, mo*" numFound=3
-            //   4 Adamčuk, Molja           5  Adamčuk, Molja Karel     7  Adamčuk, Molja K       
-            
-            "\"adamcuk, mo*\"", "author:adamcuk, mo*", "//*[@numFound='3']",
-            // "adamcuk, mo*" numFound=3
-            //  23 Adamcuk, Molja          24  Adamcuk, Molja Karel    26  Adamcuk, Molja K            
-            "\"adamchuk, mo*\"", "author:adamchuk, mo*", "//*[@numFound='3']",
-            // "adamchuk, mo*" numFound=3
-            //  43 Adamchuk, Molja         44  Adamchuk, Molja Karel   46  Adamchuk, Molja K             
-            "\"adamczuk, mo*\"", "author:adamczuk, mo*", "//*[@numFound='0']",
-            // "adamczuk, mo*" numFound=0            
-            "\"adamšuk, mo*\"", "author:adamšuk, mo*", "//*[@numFound='0']",
-            // "adamšuk, mo*" numFound=0            
-            "\"adamguk, mo*\"", "author:adamguk, mo*", "//*[@numFound='3']"
-            // "adamguk, mo*" numFound=3
-            //  63 Adamguk, Molja          64  Adamguk, Molja Karel    66  Adamguk, Molja K             
+    testAuthorQuery(
+            "\"adamchuk, mo*\"", "author:adamchuk, mo*", 
+            "//*[@numFound='3']",
+            "43 Adamchuk, Molja",
+            "44 Adamchuk, Molja Karel",
+            "46 Adamchuk, Molja K"
+    		);
+    
+    testAuthorQuery(
+            "\"adamczuk, mo*\"", "author:adamczuk, mo*", "//*[@numFound='0']"
+    		);
+    
+    testAuthorQuery(
+            "\"adamšuk, mo*\"", "author:adamšuk, mo*", "//*[@numFound='0']"
+    		);
+    
+    testAuthorQuery(
+            "\"adamguk, mo*\"", "author:adamguk, mo*", 
+            "//*[@numFound='3']",
+            "63 Adamguk, Molja",
+            "64 Adamguk, Molja Karel",
+            "66 Adamguk, Molja K"
+             
     );
 
     
@@ -2346,55 +2648,82 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     
     testAuthorQuery(
             "\"adamčuk, k*\"", "author:adamčuk, k | author:adamčuk, k* | author:adamčuk, " +
-            		               "author:adamchuk, k | author:adamchuk, k* | author:adamchuk, " +
             		               "author:adamcuk, k | author:adamcuk, k* | author:adamcuk,", 
-            		               "//*[@numFound='12']",
-                               // "adamčuk, k*" numFound=12
-                               //   1 Adamčuk,                 9  Adamčuk, Karel Molja    10  Adamčuk, Karel M       
-                               //  11 Adamčuk, K Molja        20  Adamcuk,                28  Adamcuk, Karel Molja   
-                               //  29 Adamcuk, Karel M        30  Adamcuk, K Molja        40  Adamchuk,              
-                               //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M       50  Adamchuk, K Molja             		               
+           "//*[@numFound='8']",
+           " 1 Adamčuk,",
+           " 9 Adamčuk, Karel Molja",
+           "10 Adamčuk, Karel M",
+           "11 Adamčuk, K Molja",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+    		);    
+    testAuthorQuery(
             "\"adamcuk, k*\"", "author:adamcuk, k | author:adamcuk, k* | author:adamcuk,", 
-                               "//*[@numFound='4']",
-                               // because there is no synonym mapping for "a, k" (but there is one for "a, m"!)
-                               // "adamcuk, k*" numFound=4
-                               //  20 Adamcuk,                28  Adamcuk, Karel Molja    29  Adamcuk, Karel M       
-                               //  30 Adamcuk, K Molja  
-                               
+            // because there is no synonym mapping for "a, k" (but there is one for "a, m"!)
+           "//*[@numFound='4']",
+           "20 Adamcuk,",
+           "28 Adamcuk, Karel Molja",
+           "29 Adamcuk, Karel M",
+           "30 Adamcuk, K Molja"
+    		);
+    
+    testAuthorQuery(
             "\"adamchuk, k*\"", "author:adamchuk, k | author:adamchuk, k* | author:adamchuk,", 
-                                "//*[@numFound='4']",
+            "//*[@numFound='4']",
+            ""
                                 // "adamchuk, k*" numFound=4
                                 //  40 Adamchuk,               48  Adamchuk, Karel Molja   49  Adamchuk, Karel M      
                                 //  50 Adamchuk, K Molja  
-                                
+    		);    
+    testAuthorQuery(            
             "\"adamczuk, k*\"", "author:adamczuk, k | author:adamczuk, k* | author:adamczuk,", 
-                                "//*[@numFound='0']",
+                                "//*[@numFound='0']"
+    		);    
+    testAuthorQuery(
             "\"adamšuk, k*\"", "author:adamšuk, k | author:adamšuk, k* | author:adamšuk, " +
-                               "author:adamsuk, k | author:adamsuk, k* | author:adamsuk, " +
-                               "author:adamshuk, k | author:adamshuk, k* | author:adamshuk,", 
-                               "//*[@numFound='4']",
-                               // "adamšuk, k*" numFound=4
-                               //  80 Adamshuk,               88  Adamshuk, Karel Molja   89  Adamshuk, Karel M      
-                               //  90 Adamshuk, K Molja 
-                               
+                               "author:adamsuk, k | author:adamsuk, k* | author:adamsuk,", 
+           "//*[@numFound='0']"
+    		);
+    
+    testAuthorQuery(           
             "\"adamguk, k*\"", "author:adamguk, k | author:adamguk, k* | author:adamguk,", 
-                               "//*[@numFound='4']",
-                               // "adamguk, k*" numFound=4
-                               //  60 Adamguk,                68  Adamguk, Karel Molja    69  Adamguk, Karel M       
-                               //  70 Adamguk, K Molja  
-                               
-            "\"adamčuk, ka*\"", "author:adamčuk, ka*", "//*[@numFound='2']",
-            //   9 Adamčuk, Karel Molja    10  Adamčuk, Karel M             
+           "//*[@numFound='4']",
+           "60 Adamguk,",
+           "68 Adamguk, Karel Molja",
+           "69 Adamguk, Karel M",
+           "70 Adamguk, K Molja"  
+    		);    
+    
+    testAuthorQuery(           
+            "\"adamčuk, ka*\"", "author:adamčuk, ka*", 
+            "//*[@numFound='2']",
+            ""
+            //   9 Adamčuk, Karel Molja    10  Adamčuk, Karel M
+    		);    
+    testAuthorQuery(
             "\"adamcuk, ka*\"", "author:adamcuk, ka*", "//*[@numFound='2']",
+            ""
             // "adamcuk, ka*" numFound=2
-            //  28 Adamcuk, Karel Molja    29  Adamcuk, Karel M                 
+            //  28 Adamcuk, Karel Molja    29  Adamcuk, Karel M
+    		);    
+    testAuthorQuery(
             "\"adamchuk, ka*\"", "author:adamchuk, ka*", "//*[@numFound='2']",
+            ""
             // "adamchuk, ka*" numFound=2
-            //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M              
-            "\"adamczuk, ka*\"", "author:adamczuk, ka*", "//*[@numFound='0']",
-            "\"adamšuk, ka*\"", "author:adamšuk, ka*", "//*[@numFound='0']",
-            // "adamšuk, ka*" numFound=0            
-            "\"adamguk, ka*\"", "author:adamguk, ka*", "//*[@numFound='2']"
+            //  48 Adamchuk, Karel Molja   49  Adamchuk, Karel M
+    		);    
+    testAuthorQuery(
+            "\"adamczuk, ka*\"", "author:adamczuk, ka*", "//*[@numFound='0']"
+    		);    
+    testAuthorQuery(
+            "\"adamšuk, ka*\"", "author:adamšuk, ka*", "//*[@numFound='0']"
+            // "adamšuk, ka*" numFound=0
+    		);    
+    testAuthorQuery(
+            "\"adamguk, ka*\"", "author:adamguk, ka*", "//*[@numFound='2']",
+            ""
             // "adamguk, ka*" numFound=2
             //  28 Adamguk, Karel Molja    29  Adamguk, Karel M                 
     );
@@ -2418,56 +2747,69 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         //must NOT have "jones*", must have "jones, c;jones, christine"
         "forman", "author:forman, | author:forman, c | author:jones, christine | author:jones, c " +
         		      "author:forman, christine | author:forman,*",
-                         "//*[@numFound='7']",
+         "//*[@numFound='7']",
+         ""
                          // forman numFound=7
                          // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                          // 113 Forman, C              115  Jones, C               116  Forman, Christopher    
-                         // 117 Forman, C  
+                         // 117 Forman, C
+    		);    
+    testAuthorQuery(
         //must NOT have "forman*", must have "forman, c;forman, christine"
         // PLUS - must have other jones's and allen's
         "jones", "author:jones, | author:jones, l | author:allen, l | author:allen, r l " +
         		     "author:allen, lynne | author:jones, r l | author:jones, r lynne | author:jones, lynne " +
         		     "author:allen, r lynne | author:forman, c | author:jones, christine | author:jones, c " +
         		     "author:forman, christine | author:jones,*",
-                          "//*[@numFound='15']",
+      "//*[@numFound='15']",
+      ""
                           // jones numFound=15
                           // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                           // 113 Forman, C              114  Jones, Christopher     115  Jones, C               
                           // 117 Forman, C              120  Allen, Lynne           121  Allen, L               
                           // 122 Allen, R Lynne         123  Allen, R L             124  Jones, Lynne           
-                          // 125 Jones, L               126  Jones, R Lynne         127  Jones, R L             
+                          // 125 Jones, L               126  Jones, R Lynne         127  Jones, R L
+    		);    
+    testAuthorQuery(
         //must NOT have "jones, c*", must have "jones, christine"
         "\"forman, c\"", "author:forman, c | author:forman, christine | author:forman, c* | author:forman," +
         		             "author:jones, christine | author:jones, c",
-                         "//*[@numFound='7']",
+         "//*[@numFound='7']",
+         ""
                          // "forman, c" numFound=7
                          // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                          // 113 Forman, C              115  Jones, C               116  Forman, Christopher    
                          // 117 Forman, C   
-                         
+    		);    
+    testAuthorQuery(     
         //must NOT have "forman, c*", must have "forman, christine"
         "\"jones, c\"", "author:jones, c | author:jones, christine | author:jones, c* | author:jones," +
         		            "author:forman, christine | author:forman, c",
-                         "//*[@numFound='7']",
+        "//*[@numFound='7']",
+        ""
                          // "jones, c" numFound=7
                          // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                          // 113 Forman, C              114  Jones, Christopher     115  Jones, C               
                          // 117 Forman, C                          
-                         
+    		);    
+    testAuthorQuery(     
         "\"jones, christine\"", 
                         "author:jones, christine | author:jones, christine * | author:jones, c " +
                         "author:jones, c * | author:jones, | author:forman, christine " +
                         "author:forman, christine * | author:forman, c | author:forman, c * " +
                         "author:forman,", 
-                        "//*[@numFound='6']",
+        "//*[@numFound='6']",
+        ""
                         // "jones, christine" numFound=6
                         // 110 Jones, Christine       111  Jones, C               112  Forman, Christine      
                         // 113 Forman, C              115  Jones, C               117  Forman, C 
-                        
+    		);    
+    testAuthorQuery(    
         "\"forman, christine\"", "author:jones, christine | author:jones, christine * | author:jones, c " +
         		            "author:jones, c * | author:jones, | author:forman, christine | author:forman, christine * " +
         		            "author:forman, c | author:forman, c * | author:forman,", 
-        		            "//*[@numFound='6']"
+        "//*[@numFound='6']",
+        ""
     );
     
     
@@ -2541,27 +2883,23 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   }
 
 
-  private void testAuthorQuery(String...vals) throws Exception {
-    assert vals.length%3==0;
-    for (int i=0;i<vals.length;i=i+3) {
-      
-      System.out.println(escapeUnicode(vals[i]));
-      
+  private void testAuthorQuery(String query, String expected, String test, String...vals) throws Exception {
+	  
       
       boolean failed = true;
       try {
-	      assertQueryEquals(req("defType", "aqp", "q", author_field + ":" + vals[i]),
-	          vals[i+1],
+	      assertQueryEquals(req("defType", "aqp", "q", author_field + ":" + query),
+	          expected,
 	          null);
-	      assertQ(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]), vals[i+2].split(";"));
+	      assertQ(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + query), test.split(";"));
 	      failed = false;
       }
       finally {
       	if (failed) {
       	  
-          System.out.println(escapeUnicode(vals[i]));
-          System.out.println("Running test for " + author_field + ":" + vals[i]);
-          String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "q", String.format("%s:%s", author_field, vals[i])));
+          System.out.println(escapeUnicode(query));
+          System.out.println("Running test for " + author_field + ":" + query);
+          String response = h.query(req("fl", "id,author", "rows", "100", "defType", "aqp", "indent", "false", "q", String.format("%s:%s", author_field, query)));
           
           ArrayList<String> out = new ArrayList<String>();
           Matcher m = Pattern.compile("numFound=\\\"(\\d+)").matcher(response);
@@ -2569,29 +2907,27 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
           m.find();
           String numFound = m.group(1);
           while (m2.find()) {
-            out.add(String.format("%0$3s\t%2$-23s", m2.group(1), m2.group(2)));
+            out.add(String.format("%0$2s %s", m2.group(1), m2.group(2)));
           }
           Collections.sort(out);
-          System.out.print("                             // " + vals[i] + " numFound=" + numFound);
-          int j=0;
-          for (String s: out) {
-            if (j%3==0) {
-              System.out.print("\n                             // ");
-            }
-            System.out.print(s);
-            j++;
-          }
-          System.out.println();
+          Arrays.sort(vals);
+          
       	  
-      	  QParser qParser = getParser(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + vals[i]));
+      	  QParser qParser = getParser(req("fl", "id," + author_field, "rows", "100", "q", author_field + ":" + query));
           Query q = qParser.parse();
           String actual = q.toString("field");
-      		System.out.println("Offending test case: " + escapeUnicode(vals[i]) + "\nexpected vs actual: \n" + escapeUnicode(vals[i+1]) + "\n" + escapeUnicode(actual));
+          System.out.println("// expected:" + expected);
+          System.out.println("// actual:" + actual);
+          System.out.println("// " + query + " numFound=" + numFound);
+          for (String s: out) {
+        	  System.out.println("\"" + s + "\",");
+          }
+          System.out.println();
       		
+          assertEquals(Arrays.asList(vals).toString(), out.toString());
       		
       	}
       }
-    }
   }
 
   // Uniquely for Junit 3

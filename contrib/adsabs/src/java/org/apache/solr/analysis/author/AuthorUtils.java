@@ -117,12 +117,12 @@ public class AuthorUtils {
 		synonyms.add(a);
 
 		// downgrade to ascii
-		synonyms.add(foldToAscii(a));
+		synonyms.add(normalizeAuthor(foldToAscii(a), true));
 		
 		// work around unidecode not always doing what we want
 		String b = replaceUmlaut(a);
 		if (!b.equals(a)) {
-			synonyms.add(foldToAscii(b));
+			synonyms.add(normalizeAuthor(foldToAscii(b), true));
 		}
 
 		// handle russian name stuff
@@ -141,7 +141,7 @@ public class AuthorUtils {
 	}
 
 	protected static String foldToAscii(String a) {
-		return normalizeAuthor(unidecode(a));
+		return unidecode(a);
 	}
 
 	private static String replaceUmlaut(String input) {

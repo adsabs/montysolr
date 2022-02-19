@@ -85,7 +85,6 @@
 				<filter
 					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="AUTHOR_INPUT" />
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="author:translit"/>
 				<filter
 					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
 					synonyms="author_curated.synonyms" format="semicolon"
@@ -153,7 +152,7 @@
 					the overlapping synonyms) -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
-				<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="author:end"/>
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="author:end"/> -->
 				
 			</analyzer>
 		</fieldType>
