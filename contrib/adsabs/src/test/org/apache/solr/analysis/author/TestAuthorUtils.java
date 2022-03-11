@@ -77,6 +77,7 @@ public class TestAuthorUtils extends TestCase {
 		check("FOOVI, BAR", "FOOVYI, BAR", "FOOVII, BAR", "FOOVY, BAR", "FOOVIY, BAR", "FOOVIJ, BAR");
 		check("FOO, YURI", "FOO, IURI");
 		check("FOO, IAGNI", "FOO, YAGNI");
+		check("krivodubski, v", "krivodubskii, v", "krivodubskij, v", "krivodubskiy, v", "krivodubsky, v", "krivodubskyi, v");
 	}
 
 	public void testTransRussianNames() {

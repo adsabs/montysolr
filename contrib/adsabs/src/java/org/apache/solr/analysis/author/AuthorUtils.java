@@ -126,7 +126,7 @@ public class AuthorUtils {
 		}
 
 		// handle russian name stuff
-		HashSet<String> transRus = transliterateRussianNames(synonyms);
+		HashSet<String> transRus = transliterateRussianNames(synonyms );
 		synonyms.addAll(transRus);
 
 		// apostrophes are now preserved in the index

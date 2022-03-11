@@ -372,6 +372,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   
   public void testAuthorParsingUseCases() throws Exception {
   	
+	testAuthorQuery("\"krivodubski, v\"",
+			"",
+	        "//*[@numFound='0']"
+	);
+	  
     assertQueryEquals(req("q", "author:\"van dok*, h\""), "author:van dok*, h", WildcardQuery.class);
     assertQ(req("q", "author:\"van dok*, h\""),
         "//*[@numFound='1']",
