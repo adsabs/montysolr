@@ -138,7 +138,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
       // automatically harvested variations of author names (collected during indexing)
       // it will be enriched by the indexing
       File generatedTransliterations = createTempFile(formatSynonyms(new String[]{
-          "wyrzykowsky, l=>wyrzykowski, l;wyrzykowski, ł",
+          "wyrzykowskij, l=>wyrzykowski, l;wyrzykowski, ł",
           "ADAMCuk, m => ADAMČuk, m",
           "ADAMCZuk, m => ADAMČuk, m",
           //"ADAMCHuk, m K=> ADAMČuk, m K",  => deactivated for test purposes, see <surname>, <1> <2> use case
@@ -373,7 +373,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   public void testAuthorParsingUseCases() throws Exception {
   	
 	testAuthorQuery("\"krivodubski, v\"",
-			"",
+			"krivodubski, | krivodubski, v | krivodubski, v* | krivodubskii, | krivodubskii, v | krivodubskii, v* | krivodubskij, | krivodubskij, v | krivodubskij, v* | krivodubskiy, | krivodubskiy, v | krivodubskiy, v* | krivodubskyi, | krivodubskyi, v | krivodubskyi, v*",
+	        "//*[@numFound='0']"
+	);
+	testAuthorQuery("\"krivodubskij, v\"",
+			"krivodubski, | krivodubski, v | krivodubski, v* | krivodubskii, | krivodubskii, v | krivodubskii, v* | krivodubskij, | krivodubskij, v | krivodubskij, v* | krivodubskiy, | krivodubskiy, v | krivodubskiy, v* | krivodubskyi, | krivodubskyi, v | krivodubskyi, v*",
 	        "//*[@numFound='0']"
 	);
 	  
@@ -392,8 +396,8 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
   			"//*[@numFound='11']");
     
     // multiple synonyms in the file are separated with semicolon
-    testAuthorQuery("\"wyrzykowsky, l\"",
-        "wyrzykowski, | wyrzykowski, l | wyrzykowski, l* | wyrzykowski, ł | wyrzykowski, ł* | wyrzykowskii, | wyrzykowskii, l | wyrzykowskii, l* | wyrzykowskii, ł | wyrzykowskii, ł* | wyrzykowskij, | wyrzykowskij, l | wyrzykowskij, l* | wyrzykowskij, ł | wyrzykowskij, ł* | wyrzykowskiy, | wyrzykowskiy, l | wyrzykowskiy, l* | wyrzykowskiy, ł | wyrzykowskiy, ł* | wyrzykowsky, | wyrzykowsky, l | wyrzykowsky, l* | wyrzykowsky, ł | wyrzykowsky, ł* | wyrzykowskyi, | wyrzykowskyi, l | wyrzykowskyi, l* | wyrzykowskyi, ł | wyrzykowskyi, ł*",
+    testAuthorQuery("\"wyrzykowskij, l\"",
+        "wyrzykowski, | wyrzykowski, l | wyrzykowski, l* | wyrzykowski, ł | wyrzykowski, ł* | wyrzykowskii, | wyrzykowskii, l | wyrzykowskii, l* | wyrzykowskii, ł | wyrzykowskii, ł* | wyrzykowskij, | wyrzykowskij, l | wyrzykowskij, l* | wyrzykowskij, ł | wyrzykowskij, ł* | wyrzykowskiy, | wyrzykowskiy, l | wyrzykowskiy, l* | wyrzykowskiy, ł | wyrzykowskiy, ł* | wyrzykowskyi, | wyrzykowskyi, l | wyrzykowskyi, l* | wyrzykowskyi, ł | wyrzykowskyi, ł*",
         "//*[@numFound='1']");
     
     // multiple names

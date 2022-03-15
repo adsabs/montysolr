@@ -188,5 +188,6 @@
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-api-2.15.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-core-2.15.0.jar"/>
 	<classpathentry kind="lib" path="build/solrjars-extracted/jetty/ext/log4j-slf4j-impl-2.15.0.jar"/>
+	<classpathentry kind="lib" path="build/solr-download/apache-solr-77/solr/contrib/extraction/lib/commons-collections4-4.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

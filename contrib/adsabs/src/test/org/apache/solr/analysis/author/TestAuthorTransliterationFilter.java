@@ -42,7 +42,7 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 		checkIt("Duprè", "Duprè", "Dupre,"); // Dupre\\xcc\\x80
 		checkIt("\u0141", "Ł", "L,");
 		checkIt("Mendigutıa", "Mendigutıa", "Mendigutia,");
-		checkIt("krivodubski, v", "krivodubski, v", "krivodubskyi, v", "krivodubsky, v", "krivodubskij, v", "krivodubskiy, v", "krivodubskii, v" );
+		checkIt("krivodubski, v", "krivodubski, v", "krivodubskyi, v", "krivodubskiy, v", "krivodubskij, v", "krivodubskii, v" );
 
 	}
 

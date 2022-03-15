@@ -67,28 +67,53 @@ public class TestAuthorUtils extends TestCase {
 		check("guer\u00E7o, r", "guerco, r"); // guerço,
 	}
 
-	public void testTransliterations() {
-		check("FOO'EYE, BAR", "FOOEYE, BAR", "FOOYEYE, BAR", "FOOIEYE, BAR");
-		check("FOOEV, BAR", "FOOYEV, BAR", "FOOJEV, BAR", "FOOIEV, BAR");
-		check("Fooev, BAR", "Fooyev, BAR", "Foojev, BAR", "Fooiev, BAR");
-		check("FOODJAN, BAR", "FOODYAN, BAR", "FOODIAN, BAR");
-		check("Fookaya, BAR", "Fookaja, BAR", "Fookaia, BAR");
-		check("FOOKI, BAR", "FOOKYI, BAR", "FOOKII, BAR", "FOOKY, BAR", "FOOKIY, BAR", "FOOKIJ, BAR");
-		check("FOOVI, BAR", "FOOVYI, BAR", "FOOVII, BAR", "FOOVY, BAR", "FOOVIY, BAR", "FOOVIJ, BAR");
-		check("FOO, YURI", "FOO, IURI");
-		check("FOO, IAGNI", "FOO, YAGNI");
-		check("krivodubski, v", "krivodubskii, v", "krivodubskij, v", "krivodubskiy, v", "krivodubsky, v", "krivodubskyi, v");
+	public void testRussian() {
+
+		// must work in any direction
+		check("krivodubski, v", "krivodubskii, v", "krivodubskij, v", "krivodubskiy, v", "krivodubskyi, v");
+		check("krivodubskij, v", "krivodubskii, v", "krivodubski, v", "krivodubskiy, v", "krivodubskyi, v");
+		check("krivodubskiy, v", "krivodubski, v", "krivodubskii, v", "krivodubskij, v", "krivodubskyi, v");
+		check("krivodubskyi, v", "krivodubskii, v", "krivodubskij, v", "krivodubskiy, v", "krivodubski, v");
+		
+		// suffix -ki wont be matched because it is not preceded by selected consonant
+		check("peki, v");
+		
+		// this one is
+		check("pelki, v", "pelkii, v", "pelkij, v", "pelkiy, v", "pelkyi, v");
+		
+		// similar (but different suffixes)
+		check("anajev, z", "anayev, z", "anaiev, z", "anaev, z");
+		check("anaev, z", "anayev, z", "anaiev, z", "anajev, z");
+		
+		check("tarzjan,", "tarzian,", "tarzyan,");
+		check("tarzyan,", "tarzian,", "tarzjan,");
+		
+		check("tarjan,");
+		check("taryan,");
+		
+		check("fookaya,", "fookaja,", "fookaia,");
+		
+		// woman's surname
+		check("sarnieva,", "sarneva,", "sarnjeva,", "sarnyeva,");
+		check("sarneva,", "sarnjeva,", "sarnyeva,", "sarnieva,");
+		
+		//old pattern: looks wrong, because k is preceded by o
+		//check("FOOKI, BAR", "FOOKYI, BAR", "FOOKII, BAR", "FOOKY, BAR", "FOOKIY, BAR", "FOOKIJ, BAR");
+		//what we do now:
+		check("fooki,");
+		
+		
+		// first names
+		check("gagarin, yuri", "gagarin, iuri");
+		check("gagarin, iuri", "gagarin, yuri");
+		
+		// german modifications
+		check("foo, BÄR", "foo, BAER", "foo, BAR");
+		
+		// long 'E -> E, IE, YE (seem wrong still)
+		check("f'edorov", "fedorov,", "fiedorov,", "fyedorov,");
 	}
 
-	public void testTransRussianNames() {
-		check("FOOVI, YURI", "FOOVI, IURI", "FOOVII, IURI", "FOOVII, YURI", "FOOVIJ, IURI", "FOOVIJ, YURI",
-				"FOOVIY, IURI", "FOOVIY, YURI", "FOOVY, IURI", "FOOVY, YURI", "FOOVYI, IURI", "FOOVYI, YURI");
-	}
-
-	public void testGenSynonyms() {
-		check("FOO'EYE, BÄR", "FOO'EYE, BAER", "FOO'EYE, BAR", "FOOEYE, BAER", "FOOEYE, BAR", "FOOEYE, BÄR",
-				"FOOIEYE, BAER", "FOOIEYE, BAR", "FOOIEYE, BÄR", "FOOYEYE, BAER", "FOOYEYE, BAR", "FOOYEYE, BÄR");
-	}
 
 	private void check(String a, String... expected) {
 		ArrayList<String> actual = AuthorUtils.getAsciiTransliteratedVariants(a);
@@ -99,9 +124,9 @@ public class TestAuthorUtils extends TestCase {
 		actual.toArray(ac);
 		Arrays.sort(ac);
 
-		// System.out.println(a);
-		// System.out.println(Arrays.asList(expected));
-		// System.out.println(Arrays.asList(ac));
+//		 System.out.println(a);
+//		 System.out.println(Arrays.asList(expected));
+//		 System.out.println(Arrays.asList(ac));
 
 		assertEquals(Arrays.asList(expected), Arrays.asList(ac));
 

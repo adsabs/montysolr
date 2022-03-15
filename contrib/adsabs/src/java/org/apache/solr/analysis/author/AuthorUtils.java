@@ -9,16 +9,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.jython.JythonObjectFactory;
-import org.jython.monty.interfaces.JythonNameParser;
-
-import java.text.*;
+import org.apache.commons.lang3.StringUtils;
 import static net.gcardone.junidecode.Junidecode.unidecode;
 
 public class AuthorUtils {
 
-
+	static final Trie trie = buildTrie();
 	static final NameParser nameParser = new NameParser(); 
 
 	public static final String AUTHOR_QUERY_VARIANT = "AUTHOR_QUERY_VARIANT";
@@ -128,6 +124,7 @@ public class AuthorUtils {
 		// handle russian name stuff
 		HashSet<String> transRus = transliterateRussianNames(synonyms );
 		synonyms.addAll(transRus);
+		synonyms.addAll(translitRussianApostrophes(synonyms.iterator()));
 
 		// apostrophes are now preserved in the index
 		// so we need to generate translits for those
@@ -203,24 +200,130 @@ public class AuthorUtils {
 			return name.split(" ");
 		}
 	}
+	
+	
+	/**
+	 * Build efficient data structure for searching suffixes
+	 * 
+	 */
+	private static Trie buildTrie() {
+		ArrayList<Resolution> patterns = new ArrayList<Resolution>();
+		
+		/* russian last names I:
+		 * [^IJY]EV$ => IEV$ == YEV$ == JEV$ 
+		 * [^IJY]EVA$ => IEVA$ == YEVA$ == JEVA$ 
+		 */
+		patterns.add(new Resolution(new String[]{"ev,", "iev,", "yev,", "jev,"}));
+		patterns.add(new Resolution(new String[]{"eva,", "ieva,", "yeva,", "jeva,"}));
+		
+		
+		/* russian last names II:
+		 * ([NRBO])IA$ == $1IIA$ == $1IYA$
+		 */
+		patterns.add(new Resolution(new String[]{"ia,", "iia,", "iya,"}, "nrbo"));
+		
+		/* russian last names III:
+		 * ([DHKLMNPSZ])IAN$ == $1YAN$ == $1JAN$ 
+		 */
+		patterns.add(new Resolution(new String[]{"ian,", "yan,", "jan,"}, "dhklmnpsz"));
+		
+		/* russian last names IV:
+		 * AIA$ == AYA$ == AJA$ 
+		 */
+		
+		patterns.add(new Resolution(new String[]{"aia,", "aya,", "aja,"}));
+		
+		/* russian last names V:
+		 * KI$ == KII$ == KIJ$ == KIY$ = KYI$
+		 * VI$ == VII$ == VIJ$ == VIY$ = VYI$
+		 * first transform [KVH]I into [KVH]II
+		 */
+		patterns.add(new Resolution(new String[]{"ki,", "kii,", "kij,", "kiy,", "kyi,"}, "dhklmnpsz"));
+		
+		
+		/* russian first names
+		 * ^IU == ^YU
+		 * ^IA == ^YA
+		 * 
+		 * The only detail is that the pattern must be reversed (because we normally search in 
+		 * a reversed version of a name; and comma is missing)
+		 */
+		patterns.add(new Resolution(new String[]{"ui", "uy"}));
+		patterns.add(new Resolution(new String[]{"ai", "ay"}));
+		
+		String reverse;
+		Trie trie = new Trie();
+		
+		for (Resolution resolution: patterns) {
+			for (String s: resolution.suffixes) {
+				reverse = StringUtils.reverse(s);
+				trie.insert(reverse,  resolution);
+			}			
+		}
+		return trie;
+		
+	}
 
+	
+	static Set<String> transliterateRussianName(String name) {
+		// always search lowercase
+		name = name.toLowerCase();
+		HashSet<String> out= new HashSet<String>();
+		out.add(name);
+		
+		String[] parts = splitName(name);
+		String surname = parts[0];
+		StringBuilder first = new StringBuilder();
+		int i = 1;
+		while (i < parts.length) {
+			if (i > 1)
+				first.append(" ");
+			first.append(parts[i]);
+			i += 1;
+		}
+		
+		String rn = StringUtils.reverse(surname);
+		Result result = trie.search(rn);
+		
+		// first modify surnames (suffixes are unique)
+		if (result != null) {
+			Resolution v = result.result;
+			for (String x: v.transform(surname, result.suffix)) {
+				if (first.length() > 0) {
+					out.add(x + " " + first);					
+				}
+				else {
+					out.add(x);
+				}
+			}
+		}
+		
+		// then modify first names (possibly multi-plying output)
+		String rfn = StringUtils.reverse(first.toString());
+		result = trie.search(first.toString());
+		if (result != null) {
+			for (String x: result.result.transform(rfn, result.suffix)) {
+				x = StringUtils.reverse(x);
+				for (String o: out) {
+					parts = splitName(o);
+					out.add(parts[0] + " " + x);
+				};
+			}
+		}
+		out.remove(name); // remove the original
+		return out;
+		
+	}
 
-
-	// XXX: this doesn't look right to me, the fifth step gets (possibly)
-	// 5 times more items than the first step
+	/*
+	 * transliterate all names using Trie search for suffixes
+	 */
 	private static HashSet<String> transliterateRussianNames(Set<String> in) {
 		HashSet<String> synonyms = new HashSet<String>();
 		for (String s : in) {
-			HashSet<String> syn = new HashSet<String>();
-			syn.add(s);
-			syn.addAll(translitRussianApostrophes(syn.iterator()));
-			syn.addAll(translitRussianLastNames1(syn.iterator()));
-			syn.addAll(translitRussianLastNames2(syn.iterator()));
-			syn.addAll(translitRussianLastNames3(syn.iterator()));
-			syn.addAll(translitRussianLastNames4(syn.iterator()));
-			syn.addAll(translitRussianLastNames5(syn.iterator()));
-			syn.addAll(translitRussianFirstNames(syn.iterator()));
-			synonyms.addAll(syn);
+			for (String r: transliterateRussianName(s)) {
+				synonyms.add(r);
+			}
 		}
 		return synonyms;
 	}
@@ -231,198 +334,162 @@ public class AuthorUtils {
 	 * note that we do not index 'E since the search
 	 * engine simply strips all apostrophes
 	 */
-	private static Pattern p0 = Pattern.compile("(?<=\\w{2})'(?=[Ee])");
-	private static HashSet<String> translitRussianApostrophes(Iterator<String> itr) {
-		HashSet<String> syn = new HashSet<String>();
-
-		String x;
-		while (itr.hasNext()) {
-			x = itr.next();
-			Matcher m = p0.matcher(x);
-			if (m.find()) {
-				if (x.charAt(m.end()) == 'E') {
-					syn.add(m.replaceAll("I"));
-					syn.add(m.replaceAll("Y"));
-					syn.add(m.replaceAll(""));			    
-				}
-				else {
-					syn.add(m.replaceAll("i"));
-					syn.add(m.replaceAll("y"));
-					syn.add(m.replaceAll(""));
-				}
+	private static Pattern p0 = Pattern.compile("(?<=\\w{2})\'(?=[Ee])");
+	private static Set<String> translitRussianApostrophes(Iterator<String> it) {
+		Set<String> out = new HashSet<String>();
+		String name;
+		while (it.hasNext()) {
+			name = it.next();
+			if (name.indexOf("'e") >= 1) {
+				//name = name.replaceAll("'e", "__");
+				out.add(name.replaceAll("'e", "ie"));
+				out.add(name.replaceAll("'e", "ye"));
+				out.add(name.replaceAll("'e", "e"));
 			}
+			
 		}
-		//log.debug("apostrophes: " + syn);
-		return syn;
+		
+		return out;
 	}
 
-	/* russian last names I:
-	 * [^IJY]EV$ => IEV$ == YEV$ == JEV$ 
-	 * [^IJY]EVA$ => IEVA$ == YEVA$ == JEVA$ 
-	 */
-	private static Pattern p1 = Pattern.compile("(?<![IJYijy])[Ee][Vv](?=[aA]?,)");
-	private static HashSet<String> translitRussianLastNames1(Iterator<String> itr) {
-		HashSet<String> syn = new HashSet<String>();
-		String x;
-		while (itr.hasNext()) {
-			x = itr.next();
-			Matcher m = p1.matcher(x);
-			if (m.find()) {
-				if (x.charAt(m.start()) == 'E') {
-					syn.add(m.replaceAll("IEV"));
-					syn.add(m.replaceAll("YEV"));
-					syn.add(m.replaceAll("JEV"));
-				}
-				else {
-					syn.add(m.replaceAll("iev"));
-					syn.add(m.replaceAll("yev"));
-					syn.add(m.replaceAll("jev"));
-				}
+	
+	private static class TrieNode {
+	    private char c;
+	    private HashMap<Character, TrieNode> children = new HashMap<>();
+	    private Resolution leaf = null;
 
-			}
-		}
-		//log.debug("last names I: " + syn);
-		return syn;
+	    public TrieNode() {}
+
+	    public TrieNode(char c){
+	        this.c = c;
+	    }
+
+	    public HashMap<Character, TrieNode> getChildren() {
+	        return children;
+	    }
+
+	    public void setChildren(HashMap<Character, TrieNode> children) {
+	        this.children = children;
+	    }
+
+	    public boolean isLeaf() {
+	        return leaf != null;
+	    }
+
+	    public void setLeaf(Resolution res) {
+	        this.leaf = res;
+	    }
+	    
+	    public Resolution getValue() {
+	    	return this.leaf;
+	    }
 	}
+	
+	private static class Trie {
 
-	/* russian last names II:
-	 * ([NRBO])IA$ == $1IIA$ == $1IYA$
-	 */
-	private static Pattern p2 = Pattern.compile("(?<=[NRBOnrbo])[Ii](?=[Aa],)");
-	private static HashSet<String> translitRussianLastNames2(Iterator<String> itr) {
-		HashSet<String> syn = new HashSet<String>();
-		String x;
-		while (itr.hasNext()) {
-			x = itr.next();
-			Matcher m = p2.matcher(x);
-			if (m.find()) {
-				if (x.charAt(m.start()) == 'I') {
-					syn.add(m.replaceAll("II"));
-					syn.add(m.replaceAll("IY"));			    
-				}
-				else {
-					syn.add(m.replaceAll("ii"));
-					syn.add(m.replaceAll("iy"));
-				}
-			}
-		}
-		//log.debug("last names II: " + syn);
-		return syn;
+	    private TrieNode root;
+
+	    public Trie() {
+	        root = new TrieNode();
+	    }
+
+	    public void insert(String word, Resolution res) {
+	        HashMap<Character, TrieNode> children = root.getChildren();
+	        for(int i = 0; i < word.length(); i++) {
+	            char c = word.charAt(i);
+	            TrieNode node;
+	            if(children.containsKey(c)) {
+	                node = children.get(c);
+	            } else { 
+	                node = new TrieNode(c);
+	                children.put(c, node);
+	            }
+	            children = node.getChildren();
+
+	            if(i == word.length() - 1) {
+	                node.setLeaf(res);
+	            }
+	        }
+	    }
+
+	    public Result search(String word) {
+	        HashMap<Character, TrieNode> children = root.getChildren();
+	        Resolution lastFound = null;
+	        int lastI = 0;
+	        
+	        TrieNode node = null;
+	        for(int i = 0; i < word.length(); i++) {
+	            char c = word.charAt(i);
+	            if(children.containsKey(c)) {
+	                node = children.get(c);
+	                children = node.getChildren();
+	                if (node.isLeaf()) {
+	                	lastFound = node.getValue();
+	                	lastI = i;
+	                }
+	            } else { 
+	                node = null;
+	                break;
+	            }
+	        }
+	        if (lastFound == null)
+	        	return null;
+	        return new Result(word.substring(0, lastI+1), lastFound);
+	    }
+
 	}
-
-	/* russian last names III:
-	 * ([DHKLMNPSZ])IAN$ == $1YAN$ == $1JAN$ 
-	 */
-	private static Pattern p3 = Pattern.compile("(?<=[DHKLMNPSZdhklmnpsz])[IJYijy](?=[Aa][Nn],)");
-	private static HashSet<String> translitRussianLastNames3(Iterator<String> itr) {
-		HashSet<String> syn = new HashSet<String>();
-		String x;
-		while (itr.hasNext()) {
-			x = itr.next();
-			Matcher m = p3.matcher(x);
-			if (m.find()) {
-				if (x.charAt(m.start()) == 'I' || x.charAt(m.start()) == 'J' || x.charAt(m.start()) == 'Y') {
-					syn.add(m.replaceAll("I"));
-					syn.add(m.replaceAll("J"));
-					syn.add(m.replaceAll("Y"));			    
-				}
-				else {
-					syn.add(m.replaceAll("i"));
-					syn.add(m.replaceAll("j"));
-					syn.add(m.replaceAll("y"));
-				}
-			}
+	
+	private static class Result { 
+	private String suffix;
+	private Resolution result;
+	
+		Result(String suffix, Resolution res) {
+			this.suffix = suffix;
+			this.result = res;
 		}
-		//log.debug("last names III: " + syn);
-		return syn;
 	}
-
-	/* russian last names IV:
-	 * AIA$ == AYA$ == AJA$ 
-	 */
-	private static Pattern p4 = Pattern.compile("(?<=[KNVknv][Aa])[IJYijy](?=[Aa],)");
-	private static HashSet<String> translitRussianLastNames4(Iterator<String> itr) {
-		HashSet<String> syn = new HashSet<String>();
-		String x;
-		while (itr.hasNext()) {
-			x = itr.next();
-			Matcher m = p4.matcher(x);
-			if (m.find()) {
-				if (x.charAt(m.start()) == 'I' || x.charAt(m.start()) == 'J' || x.charAt(m.start()) == 'Y') {
-					syn.add(m.replaceAll("I"));
-					syn.add(m.replaceAll("J"));
-					syn.add(m.replaceAll("Y"));			    
-				}
-				else {
-					syn.add(m.replaceAll("i"));
-					syn.add(m.replaceAll("j"));
-					syn.add(m.replaceAll("y"));
-				}
-			}
+	
+	private static class Resolution {
+		private String[] suffixes;
+		private String mustMatch = "";
+		private String mustNotMatch = "";
+		Resolution(String[] suffixes) {
+			this.suffixes = suffixes;
+			
 		}
-		//log.debug("last names IV: " + syn);
-		return syn;
-	}
-
-	/* russian last names V:
-	 * KI$ == KII$ == KIJ$ == KIY$ = KYI$
-	 * VI$ == VII$ == VIJ$ == VIY$ = VYI$
-	 * first transform [KVH]I into [KVH]II
-	 */
-	private static Pattern p5 = Pattern.compile("(?<=[KVkv])[Ii](?=,)");
-	private static HashSet<String> translitRussianLastNames5(Iterator<String> itr) {
-		HashSet<String> syn = new HashSet<String>();
-		String x;
-		while (itr.hasNext()) {
-			x = itr.next();
-			Matcher m = p5.matcher(x);
-			if (m.find()) {
-				if (x.charAt(m.start()) == 'I') {
-					syn.add(m.replaceAll("I"));
-					syn.add(m.replaceAll("Y"));
-					syn.add(m.replaceAll("YI"));
-					syn.add(m.replaceAll("IY"));
-					syn.add(m.replaceAll("IJ"));
-					syn.add(m.replaceAll("II"));			    
-				}
-				else {
-					syn.add(m.replaceAll("i"));
-					syn.add(m.replaceAll("y"));
-					syn.add(m.replaceAll("yi"));
-					syn.add(m.replaceAll("iy"));
-					syn.add(m.replaceAll("ij"));
-					syn.add(m.replaceAll("ii"));
-				}
-			}
+		Resolution(String[] suffixes, String mustMatch) {
+			this.suffixes = suffixes;
+			this.mustMatch = mustMatch;
+			
 		}
-		//log.debug("last names V: " + syn);
-		return syn;
-	}
-
-	/* russian first names
-	 * ^IU == ^YU
-	 * ^IA == ^YA
-	 */
-	private static Pattern p6 = Pattern.compile("(?<=, )[YIyi](?=[AUau])");
-	private static HashSet<String> translitRussianFirstNames(Iterator<String> itr) {
-		HashSet<String> syn = new HashSet<String>();
-		String x;
-		while (itr.hasNext()) {
-			x = itr.next();
-			Matcher m = p6.matcher(x);
-			if (m.find()) {
-				if (x.charAt(m.start()) == 'I' || x.charAt(m.start()) == 'Y') {
-					syn.add(m.replaceAll("I"));
-					syn.add(m.replaceAll("Y"));
-				}
-				else {
-					syn.add(m.replaceAll("i"));
-					syn.add(m.replaceAll("y"));			    
-				}
-			}
+		Resolution(String[] suffixes, String mustMatch, String mustNotMatch) {
+			this.suffixes = suffixes;
+			this.mustMatch = mustMatch;
+			this.mustNotMatch = mustNotMatch;
 		}
-		//log.debug("first names: " + syn);
-		return syn;
+		
+		List<String> transform(String surname, String key) {
+			ArrayList<String> out = new ArrayList<String>();
+			//out.add(surname);
+			
+			String prefix = surname.substring(0, surname.length() - key.length());
+			String suffix = surname.substring(surname.length()-key.length());
+			int prevChar = surname.length() - key.length() - 1;
+			
+			for (String s: suffixes) {
+				if (suffix.equals(s))
+					continue;
+				if (this.mustMatch.length() > 0 && (prevChar <= 0 || (mustMatch.indexOf(surname.charAt(prevChar)) == -1))) {
+					continue;					
+				}
+				if (this.mustNotMatch.length() > 0 && (prevChar <= 0 || (mustNotMatch.indexOf(surname.charAt(prevChar)) > -1))) {
+					continue;					
+				}
+				out.add(prefix + s);
+			}
+			
+			return out;
+		}
 	}
 
 }
