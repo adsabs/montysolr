@@ -431,7 +431,6 @@ solr.version=${solr.version}
 		<echo file=".classpath" append="true"><![CDATA["/>
 					<classpathentry combineaccessrules="false" kind="src" path="/lucene_solr_3_1"/>
 					<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-					<classpathentry combineaccessrules="false" kind="src" path="/jetty-6.1.4"/>
 					<classpathentry kind="output" path="bin"/>
 				</classpath>
             ]]> </echo>
