@@ -21,6 +21,9 @@
        which loads ivy-versions.properties as Ivy variables.          -->
 
   <settings defaultResolver="default"/>
+  
+  <!-- Load ivy-versions.properties as Ivy variables ** from inside SOLR project ** -->
+  <properties file="${solr.home}/lucene/ivy-versions.properties" override="false"/>
 
   <property name="local-maven2-dir" value="${user.home}/.m2/repository/" />
 

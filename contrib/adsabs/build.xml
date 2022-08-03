@@ -24,6 +24,7 @@
     </description>
     <property name="solr.nature" value="true"/>
 	<import file="../upstream-include.xml" />
+	
 
 	<!-- with this we'll trick antlrqueryparser into generating grammars for us in our folder -->
 	<import file="../antlrqueryparser/macros.xml" />
