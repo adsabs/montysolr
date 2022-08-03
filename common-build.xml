@@ -39,7 +39,8 @@
 	<property file="${basedir}/build.properties"/>
 	<property file="${common.dir}/build.properties"/>
 	<property name="montysolr.dependencies.dir" location="${common.dir}/build/solrjars-extracted" />
-
+	<property name="solr.home" location="${common.dir}/build/solr-download/apache-solr-${solr.version}"/>
+	
 	<tstamp>
 		<format property="current.year" pattern="yyyy"/>
 		<format property="DSTAMP" pattern="yyyy-MM-dd"/>
