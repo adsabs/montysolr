@@ -297,22 +297,28 @@ public class AuthorUtils {
 				}
 			}
 		}
-		
+
 		// then modify first names (possibly multi-plying output)
 		String rfn = StringUtils.reverse(first.toString());
 		result = trie.search(first.toString());
 		if (result != null) {
+			// collect the set of surname synonyms
+			HashSet<String> surnames = new HashSet<String>();
+			for (String o: out) {
+				parts = splitName(o);
+				surnames.add(parts[0]);
+			}
+			// combine each first name synonym with each surname synonym
 			for (String x: result.result.transform(rfn, result.suffix)) {
 				x = StringUtils.reverse(x);
-				for (String o: out) {
-					parts = splitName(o);
-					out.add(parts[0] + " " + x);
-				};
+				for (String rsurname: surnames) {
+					out.add(rsurname + " " + x);
+				}
 			}
 		}
 		out.remove(name); // remove the original
 		return out;
-		
+
 	}
 
 	/*
