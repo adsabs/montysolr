@@ -68,6 +68,7 @@
 				at the beginning, then you should also review the code inside: AqpAdsabsExpandAuthorSearchProcessor.normalizeAuthorName() -->
 
 			<analyzer type="query">
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="author_query"/> -->
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<!-- deal with natural order queries (this is used only at query time) -->
 				<filter
@@ -779,7 +780,7 @@
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
-				<!--<filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/> -->
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query"/> -->
 			</analyzer>
 		</fieldType>
 
@@ -880,6 +881,8 @@
 		<fieldType name="affiliation_tokens" class="solr.TextField"
 			positionIncrementGap="100">
 			<analyzer type="index">
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/> -->
+			
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
 
 				<!-- tokenize on | or / -->
@@ -1419,11 +1422,11 @@
 
 		<field name="comment" type="ads_text" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="true" />
+			omitTermFreqAndPositions="false" />
 
 		<field name="pubnote" type="ads_text" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="true" />
+			omitTermFreqAndPositions="false" />
 
 		<field name="copyright" type="affiliation_text" indexed="true"
 			stored="true" omitNorms="true" />
