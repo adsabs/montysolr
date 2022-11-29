@@ -1421,12 +1421,10 @@
 			stored="true" omitNorms="true" />
 
 		<field name="comment" type="ads_text" indexed="true"
-			stored="true" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="false" />
+			stored="true" multiValued="true" omitNorms="true" />
 
 		<field name="pubnote" type="ads_text" indexed="true"
-			stored="true" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="false" />
+			stored="true" multiValued="true" omitNorms="true" />
 
 		<field name="copyright" type="affiliation_text" indexed="true"
 			stored="true" omitNorms="true" />
