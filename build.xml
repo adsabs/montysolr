@@ -221,6 +221,8 @@ solr.version=${solr.version}
 			<arg value="checkout" />
 			<arg value="${solr.branch}" />
 		</exec>
+		<echo>Fixing https://maven.restlet.com expired SSL certificate and domain change</echo>
+		<replace file="${solr.home}/lucene/default-nested-ivy-settings.xml" token="maven.restlet.com" value="maven.restlet.talend.com"/>
 		<antcall target="check-solr-location" />
 	</target>
 
