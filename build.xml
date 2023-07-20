@@ -283,7 +283,7 @@ solr.version=${solr.version}
 	</target>
 
 
-	<target name="check-solr-jars-exist" depends="check-solr-location" >
+	<target name="check-solr-jars-exist" depends="build-montysolr-dependencies" >
 		<!-- since on old ant we cannot ignore it -->
 		<mkdir dir="${solr.real.location}/dist" />
 		<mkdir dir="${build.dir}/solrjars-extracted" />
