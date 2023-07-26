@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import static net.gcardone.junidecode.Junidecode.unidecode;
+import com.anyascii.AnyAscii;
 
 public class AuthorUtils {
 
@@ -138,7 +138,7 @@ public class AuthorUtils {
 	}
 
 	protected static String foldToAscii(String a) {
-		return unidecode(a);
+		return AnyAscii.transliterate(a);
 	}
 
 	private static String replaceUmlaut(String input) {
