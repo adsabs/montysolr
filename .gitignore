@@ -23,3 +23,6 @@ lib/
 
 # ignore IDE-specific files
 **/.idea/
+
+# Ignore Gradle project-specific cache directory
+.gradle
