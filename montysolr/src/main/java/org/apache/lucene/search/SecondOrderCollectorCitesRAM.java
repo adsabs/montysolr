@@ -8,50 +8,52 @@ import java.io.IOException;
  */
 public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
-	private SolrCacheWrapper cache;
-	
-  	public SecondOrderCollectorCitesRAM(SolrCacheWrapper cache) {
-  		super();
-  		assert cache != null;
-		this.cache = cache;
-  	}
-	
-	
-	@Override
-	public void collect(int doc) throws IOException {
-		int[] citations = cache.getLuceneDocIds(doc+docBase);
-		if (citations == null) {
-			return;
-		}
-		float s = scorer.score();
-		for (int docid: citations) {
-			if (docid == -1)
-				continue;
-			hits.add(new CollectorDoc(docid, s, citations.length));
-		}
-		
-	}
+    private final SolrCacheWrapper cache;
+
+    public SecondOrderCollectorCitesRAM(SolrCacheWrapper cache) {
+        super();
+        assert cache != null;
+        this.cache = cache;
+    }
 
 
-	@Override
-	public String toString() {
-		return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ")";
-	}
-	
-	/** Returns a hash code value for this object. */
-	public int hashCode() {
-		return 2938572 ^ cache.hashCode();
-	}
+    @Override
+    public void collect(int doc) throws IOException {
+        int[] citations = cache.getLuceneDocIds(doc + docBase);
+        if (citations == null) {
+            return;
+        }
+        float s = scorer.score();
+        for (int docid : citations) {
+            if (docid == -1)
+                continue;
+            hits.add(new CollectorDoc(docid, s, citations.length));
+        }
+
+    }
 
 
-	@Override
-	public boolean needsScores() {
-		return true;
-	}
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ")";
+    }
+
+    /**
+     * Returns a hash code value for this object.
+     */
+    public int hashCode() {
+        return 2938572 ^ cache.hashCode();
+    }
 
 
-	@Override
-	public SecondOrderCollector copy() {
-		return new SecondOrderCollectorCitesRAM(cache);
-	}
+    @Override
+    public boolean needsScores() {
+        return true;
+    }
+
+
+    @Override
+    public SecondOrderCollector copy() {
+        return new SecondOrderCollectorCitesRAM(cache);
+    }
 }

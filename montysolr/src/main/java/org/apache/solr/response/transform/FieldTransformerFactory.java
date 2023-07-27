@@ -16,92 +16,78 @@
  */
 package org.apache.solr.response.transform;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.lucene.index.BinaryDocValues;
-import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.CitationCache;
-import org.apache.solr.search.SolrIndexSearcher;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
- *
  * @since v63.1.1.15
  */
-public class FieldTransformerFactory extends TransformerFactory
-{
-	int defaultV = 10;
-	
-	@Override
-	public void init(NamedList args) {
-    String defaultValue = (String) args.get("default");
-    if (defaultValue != null) {
-    	defaultV = Integer.getInteger(defaultValue);
+public class FieldTransformerFactory extends TransformerFactory {
+    int defaultV = 10;
+
+    @Override
+    public void init(NamedList args) {
+        String defaultValue = (String) args.get("default");
+        if (defaultValue != null) {
+            defaultV = Integer.getInteger(defaultValue);
+        }
     }
-  }
-	
-  @Override
-  public DocTransformer create(String field, SolrParams params, SolrQueryRequest req) {
-    return new FieldTransform(params, defaultV);
-  }
+
+    @Override
+    public DocTransformer create(String field, SolrParams params, SolrQueryRequest req) {
+        return new FieldTransform(params, defaultV);
+    }
 }
 
-class FieldTransform extends DocTransformer
-{
+class FieldTransform extends DocTransformer {
 
-	private SolrParams fields;
-	private int defaultV;
+    private final SolrParams fields;
+    private final int defaultV;
 
-  public FieldTransform(SolrParams params, int defaultV) {
-		fields = params;
-		this.defaultV = defaultV;
-	}
-
-	@Override
-  public String getName()
-  {
-    return "[fields]";
-  }
-
-  @Override
-  public void transform(SolrDocument doc, int docid) {
-    if( docid >= 0) {
-    	Iterator<String> it = fields.getParameterNamesIterator();
-    	Map<String, Collection<Object>> docMap = doc.getFieldValuesMap();
-    	String key;
-
-    	while (it.hasNext()) {
-    		key = it.next();
-    		if (docMap.containsKey(key)) {
-    			Object v = docMap.get(key);
-    			int c = fields.getInt(key, defaultV);
-    			
-    			if (v instanceof List) {
-    				List x = (List) v;
-    				while (x.size() > c) {
-    					x.remove(x.size()-1);
-    				}
-    			}
-    			
-    			
-    		}
-    	}
-    	
-    	
+    public FieldTransform(SolrParams params, int defaultV) {
+        fields = params;
+        this.defaultV = defaultV;
     }
-  }
+
+    @Override
+    public String getName() {
+        return "[fields]";
+    }
+
+    @Override
+    public void transform(SolrDocument doc, int docid) {
+        if (docid >= 0) {
+            Iterator<String> it = fields.getParameterNamesIterator();
+            Map<String, Collection<Object>> docMap = doc.getFieldValuesMap();
+            String key;
+
+            while (it.hasNext()) {
+                key = it.next();
+                if (docMap.containsKey(key)) {
+                    Object v = docMap.get(key);
+                    int c = fields.getInt(key, defaultV);
+
+                    if (v instanceof List) {
+                        List x = (List) v;
+                        while (x.size() > c) {
+                            x.remove(x.size() - 1);
+                        }
+                    }
+
+
+                }
+            }
+
+
+        }
+    }
 
 
 }

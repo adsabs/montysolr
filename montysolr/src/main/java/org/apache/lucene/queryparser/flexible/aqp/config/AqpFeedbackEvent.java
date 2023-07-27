@@ -6,14 +6,14 @@ import org.apache.lucene.util.Attribute;
 
 public interface AqpFeedbackEvent extends Attribute {
 
-  public AqpFeedback.TYPE getType();
+    AqpFeedback.TYPE getType();
 
-  public Class<? extends QueryNodeProcessor> getCaller();
+    Class<? extends QueryNodeProcessor> getCaller();
 
-  public QueryNode getNode();
+    QueryNode getNode();
 
-  public String getMessage();
+    String getMessage();
 
-  public Object[] getArgs();
+    Object[] getArgs();
 
 }

@@ -17,15 +17,14 @@ package org.apache.lucene.analysis.miscellaneous;
  * limitations under the License.
  */
 
-import java.util.Map;
-
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
 import org.apache.lucene.analysis.util.MultiTermAwareComponent;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
-import org.apache.lucene.analysis.TokenStream;
 
-/** 
+import java.util.Map;
+
+/**
  * Factory for {@link ASCIIFoldingFilter}.
  * <pre class="prettyprint" >
  * &lt;fieldType name="text_ascii" class="solr.TextField" positionIncrementGap="100"&gt;
@@ -34,23 +33,22 @@ import org.apache.lucene.analysis.TokenStream;
  *     &lt;filter class="solr.ASCIIFoldingFilterFactory"/&gt;
  *   &lt;/analyzer&gt;
  * &lt;/fieldType&gt;</pre>
- *
  */
 public class AdsSpecialCharactersFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
-  public AdsSpecialCharactersFilterFactory(Map<String, String> args) {
-	  super(args);
-    if (!args.isEmpty()) {
-      throw new IllegalArgumentException("Unknown parameters: " + args);
+    public AdsSpecialCharactersFilterFactory(Map<String, String> args) {
+        super(args);
+        if (!args.isEmpty()) {
+            throw new IllegalArgumentException("Unknown parameters: " + args);
+        }
     }
-  }
 
-	public AdsSpecialCharactersFilter create(TokenStream input) {
-    return new AdsSpecialCharactersFilter(input);
-  }
+    public AdsSpecialCharactersFilter create(TokenStream input) {
+        return new AdsSpecialCharactersFilter(input);
+    }
 
-  @Override
-  public AbstractAnalysisFactory getMultiTermComponent() {
-    return this;
-  }
+    @Override
+    public AbstractAnalysisFactory getMultiTermComponent() {
+        return this;
+    }
 }
 

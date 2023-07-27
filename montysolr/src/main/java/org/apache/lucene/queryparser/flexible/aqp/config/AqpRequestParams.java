@@ -6,19 +6,24 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
 public interface AqpRequestParams extends Attribute {
-	
-	public SolrQueryRequest getRequest();
-	public void setRequest(SolrQueryRequest req);
-	
-	public SolrQueryResponse getResponse();
-	public void setResponse(SolrQueryResponse  rsp);
-	
-	public void setLocalParams(SolrParams localParams);
-	public void setParams(SolrParams params);
 
-	public SolrParams getLocalParams();
-	public SolrParams getParams();
-	
-	public String getQueryString();
-	public void setQueryString(String query);
+    SolrQueryRequest getRequest();
+
+    void setRequest(SolrQueryRequest req);
+
+    SolrQueryResponse getResponse();
+
+    void setResponse(SolrQueryResponse rsp);
+
+    void setLocalParams(SolrParams localParams);
+
+    void setParams(SolrParams params);
+
+    SolrParams getLocalParams();
+
+    SolrParams getParams();
+
+    String getQueryString();
+
+    void setQueryString(String query);
 }

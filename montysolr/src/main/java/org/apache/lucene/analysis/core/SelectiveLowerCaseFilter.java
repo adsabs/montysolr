@@ -17,45 +17,45 @@ package org.apache.lucene.analysis.core;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
+import org.apache.lucene.analysis.CharacterUtils;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.CharacterUtils;
 import org.apache.lucene.util.Version;
+
+import java.io.IOException;
 
 /**
  * Normalizes token text to lower case.
  * <p>You must specify the required {@link Version}
  * compatibility when creating LowerCaseFilter:
  * <p>
- *   As of 3.1, supplementary characters are properly lowercased.
+ * As of 3.1, supplementary characters are properly lowercased.
  */
 public final class SelectiveLowerCaseFilter extends TokenFilter {
-  private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-  
-  /**
-   * Create a new LowerCaseFilter, that normalizes token text to lower case.
-   * 
-   * @param matchVersion version
-   * @param in TokenStream to filter
-   */
-  public SelectiveLowerCaseFilter(Version matchVersion, TokenStream in) {
-    super(in);
-  }
-  
-  @Override
-  public final boolean incrementToken() throws IOException {
-    if (input.incrementToken()) {
-      if (AcronymTokenFilter.termIsAcronym(termAtt.toString())) {
-        return true; // skip lowercasing
-      }
-      CharacterUtils.toLowerCase(termAtt.buffer(), 0, termAtt.length());
-      return true;
-      
-    } else
-      return false;
-  }
-  
+    private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
+
+    /**
+     * Create a new LowerCaseFilter, that normalizes token text to lower case.
+     *
+     * @param matchVersion version
+     * @param in           TokenStream to filter
+     */
+    public SelectiveLowerCaseFilter(Version matchVersion, TokenStream in) {
+        super(in);
+    }
+
+    @Override
+    public boolean incrementToken() throws IOException {
+        if (input.incrementToken()) {
+            if (AcronymTokenFilter.termIsAcronym(termAtt.toString())) {
+                return true; // skip lowercasing
+            }
+            CharacterUtils.toLowerCase(termAtt.buffer(), 0, termAtt.length());
+            return true;
+
+        } else
+            return false;
+    }
+
 }

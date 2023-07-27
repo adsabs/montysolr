@@ -10,20 +10,20 @@ import org.apache.lucene.search.FuzzyQuery;
 @SuppressWarnings("deprecation")
 public class AqpSlowFuzzyQueryNodeBuilder implements StandardQueryBuilder {
 
-  public AqpSlowFuzzyQueryNodeBuilder() {
-    // empty constructor
-  }
+    public AqpSlowFuzzyQueryNodeBuilder() {
+        // empty constructor
+    }
 
-  public FuzzyQuery build(QueryNode queryNode) throws QueryNodeException {
-    SlowFuzzyQueryNode fuzzyNode = (SlowFuzzyQueryNode) queryNode;
+    public FuzzyQuery build(QueryNode queryNode) throws QueryNodeException {
+        SlowFuzzyQueryNode fuzzyNode = (SlowFuzzyQueryNode) queryNode;
 
-    // TODO:rca -- SlowFuzzyQuery was removed in LUCENE-7439
-    // may have to re-add?
-    int editDistance = (int) (fuzzyNode.getTextAsString().length() * fuzzyNode.getSimilarity());
-    return new FuzzyQuery(new Term(fuzzyNode.getFieldAsString(),
-        fuzzyNode.getTextAsString()), editDistance,
-        fuzzyNode.getPrefixLength());
+        // TODO:rca -- SlowFuzzyQuery was removed in LUCENE-7439
+        // may have to re-add?
+        int editDistance = (int) (fuzzyNode.getTextAsString().length() * fuzzyNode.getSimilarity());
+        return new FuzzyQuery(new Term(fuzzyNode.getFieldAsString(),
+                fuzzyNode.getTextAsString()), editDistance,
+                fuzzyNode.getPrefixLength());
 
-  }
+    }
 
 }

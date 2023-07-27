@@ -9,16 +9,16 @@ import org.apache.lucene.search.Query;
 
 public class AqpFunctionQueryNodeBuilder implements StandardQueryBuilder {
 
-	public AqpFunctionQueryNodeBuilder() {
-		// empty constructor
-	}
-	
-	public Query build(QueryNode queryNode) throws QueryNodeException {
-		AqpFunctionQueryNode node = (AqpFunctionQueryNode) queryNode;
-		
-		QueryBuilder builder = node.getBuilder();
-		return (Query) builder.build(node);
-	}
+    public AqpFunctionQueryNodeBuilder() {
+        // empty constructor
+    }
+
+    public Query build(QueryNode queryNode) throws QueryNodeException {
+        AqpFunctionQueryNode node = (AqpFunctionQueryNode) queryNode;
+
+        QueryBuilder builder = node.getBuilder();
+        return (Query) builder.build(node);
+    }
 
 
 }

@@ -22,28 +22,28 @@ import org.jython.monty.interfaces.JythonSimpleClass;
  */
 
 public class TestJythonTestClass extends LuceneTestCase {
-  
-  
-  public void tearDown() throws Exception {
-    System.clearProperty("python.cachedir.skip");
-    System.clearProperty("python.console.encoding");
-    super.tearDown();
-  }
-  
-  public void test() {
+
+
+    public void tearDown() throws Exception {
+        System.clearProperty("python.cachedir.skip");
+        System.clearProperty("python.console.encoding");
+        super.tearDown();
+    }
+
+    public void test() {
 //    PythonInterpreter interp = new PythonInterpreter();
 //    interp.exec("import sys; print sys.path");
 //    interp.exec("sys.path.append('/dvt/workspace/montysolr/contrib/adsabs/src/jython')");
 //    interp.exec("import sys; print sys.path");
-    
-    JythonObjectFactory factory = new JythonObjectFactory(JythonSimpleClass.class, "simple_class", "SimpleClass");
-    
-    JythonSimpleClass instance = (JythonSimpleClass) factory.createObject();
-    
-    instance.set_name("foo-bar");
-    assertEquals("foo-bar", instance.get_name());
-    
-    //interp.exec("print dir(weakref");
-  }
-  
+
+        JythonObjectFactory factory = new JythonObjectFactory(JythonSimpleClass.class, "simple_class", "SimpleClass");
+
+        JythonSimpleClass instance = (JythonSimpleClass) factory.createObject();
+
+        instance.set_name("foo-bar");
+        assertEquals("foo-bar", instance.get_name());
+
+        //interp.exec("print dir(weakref");
+    }
+
 }

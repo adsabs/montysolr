@@ -7,8 +7,8 @@ import org.apache.lucene.search.Query;
 
 public class IgnoreQueryNodeBuilder implements StandardQueryBuilder {
 
-	public Query build(QueryNode queryNode) throws QueryNodeException {
-		return null;
-	}
+    public Query build(QueryNode queryNode) throws QueryNodeException {
+        return null;
+    }
 
 }

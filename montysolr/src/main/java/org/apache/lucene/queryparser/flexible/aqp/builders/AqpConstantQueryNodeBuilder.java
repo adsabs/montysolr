@@ -1,7 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
-import java.util.List;
-
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -10,24 +8,26 @@ import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBui
 import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.Query;
 
+import java.util.List;
+
 public class AqpConstantQueryNodeBuilder implements StandardQueryBuilder {
-	
-	private QueryBuilder root;
 
-  public AqpConstantQueryNodeBuilder(QueryBuilder root) {
-		this.root = root;
-	}
+    private final QueryBuilder root;
 
-	public Query build(QueryNode queryNode) throws QueryNodeException {
-	   List<QueryNode> children = queryNode.getChildren();
-	   if (children.size() != 1)
-	     throw new QueryNodeException(new MessageImpl("The query node must have only one child: " + queryNode.toString())) ;
-	    
-     QueryNode child = children.get(0);
-     Query q = (Query) root.build(child);
-     
-     return new ConstantScoreQuery(q);
+    public AqpConstantQueryNodeBuilder(QueryBuilder root) {
+        this.root = root;
+    }
 
-	  }
+    public Query build(QueryNode queryNode) throws QueryNodeException {
+        List<QueryNode> children = queryNode.getChildren();
+        if (children.size() != 1)
+            throw new QueryNodeException(new MessageImpl("The query node must have only one child: " + queryNode));
+
+        QueryNode child = children.get(0);
+        Query q = (Query) root.build(child);
+
+        return new ConstantScoreQuery(q);
+
+    }
 
 }

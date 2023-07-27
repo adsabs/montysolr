@@ -16,35 +16,35 @@ import org.apache.lucene.search.Query;
 
 /**
  * @author rchyla
- *
+ * <p>
  * Will produce a CustomScoreQuery which combines scores computed by
  * lucene with the value indexed in an index, using formula:
- * 
- *  score = lucene_score * ( classic_factor + modifier ) 
+ * <p>
+ * score = lucene_score * ( classic_factor + modifier )
  */
 public class AqpScoringQueryNodeBuilder implements StandardQueryBuilder {
 
 
-	public Query build(QueryNode queryNode) throws QueryNodeException {
+    public Query build(QueryNode queryNode) throws QueryNodeException {
 
-		AqpAdsabsScoringQueryNode q = (AqpAdsabsScoringQueryNode) queryNode;
+        AqpAdsabsScoringQueryNode q = (AqpAdsabsScoringQueryNode) queryNode;
 
-		Query query = (Query) queryNode.getChildren().get(0).getTag(
-				QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+        Query query = (Query) queryNode.getChildren().get(0).getTag(
+                QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
 
-		return wrapQuery(query, q.getSource(), q.getModifier());
+        return wrapQuery(query, q.getSource(), q.getModifier());
 
-	}
+    }
 
-	public static Query wrapQuery(Query q, String source, float modifier) {
-		ValueSource vs = new SumFloatFunction(new ValueSource[] {
-				new FloatFieldSource(source), // classic score 
-				new ConstValueSource(modifier) // modifier of how much lucene score to use
-		});
+    public static Query wrapQuery(Query q, String source, float modifier) {
+        ValueSource vs = new SumFloatFunction(new ValueSource[]{
+                new FloatFieldSource(source), // classic score
+                new ConstValueSource(modifier) // modifier of how much lucene score to use
+        });
 
 
-		FunctionQuery functionQuery = new FunctionQuery(vs);
-		return new CustomScoreQuery(q, functionQuery);
-	}
+        FunctionQuery functionQuery = new FunctionQuery(vs);
+        return new CustomScoreQuery(q, functionQuery);
+    }
 
 }

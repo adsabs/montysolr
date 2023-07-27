@@ -9,22 +9,22 @@ package org.apache.lucene.queryparser.flexible.aqp;
 
 public class NestedParseException extends RuntimeException {
 
-  private static final long serialVersionUID = -3943145526662562552L;
+    private static final long serialVersionUID = -3943145526662562552L;
 
-  public NestedParseException() {
-    super();
-  }
+    public NestedParseException() {
+        super();
+    }
 
-  public NestedParseException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public NestedParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-  public NestedParseException(String string) {
-    super(string);
-  }
+    public NestedParseException(String string) {
+        super(string);
+    }
 
-  public NestedParseException(Throwable cause) {
-    super(cause);
-  }
+    public NestedParseException(Throwable cause) {
+        super(cause);
+    }
 
 }

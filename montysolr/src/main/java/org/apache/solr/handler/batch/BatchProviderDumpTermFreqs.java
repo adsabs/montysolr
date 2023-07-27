@@ -1,11 +1,5 @@
 package org.apache.solr.handler.batch;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashSet;
-
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.index.Terms;
@@ -19,86 +13,92 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashSet;
+
 /**
  * Provider that dumps selected fields to disk.
  * The resulting file has 3 columns:
- * 
+ * <p>
  * #term #termFreq #docFreq
- * 
+ * <p>
  * You can dump several fields at once, just
  * separate them by a comma
- * 
+ * <p>
  * Parameters:
- * 
- *    field: string, comma separated list of 
- *           field names
+ * <p>
+ * field: string, comma separated list of
+ * field names
  */
 public class BatchProviderDumpTermFreqs extends BatchProvider {
-	public void run(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws Exception {
+    public void run(SolrQueryRequest req, BatchHandlerRequestQueue queue) throws Exception {
 
-		SolrCore core = req.getCore();
-		SolrParams params = req.getParams();
-		IndexSchema schema = core.getLatestSchema();
-	  String jobid = params.get("jobid");
-	  String workDir = params.get("#workdir");
-	  
-		final HashSet<String> fieldsToLoad = new HashSet<String>();
+        SolrCore core = req.getCore();
+        SolrParams params = req.getParams();
+        IndexSchema schema = core.getLatestSchema();
+        String jobid = params.get("jobid");
+        String workDir = params.get("#workdir");
 
-		String[] fields = params.getParams("fields");
-		for (String f: fields) {
-			for (String ff: f.split("( |,)")) {
-				SchemaField field = schema.getFieldOrNull(ff);
-				if (field==null || !field.indexed()) {
-					throw new SolrException(ErrorCode.BAD_REQUEST, "We cannot dump fields that do not exist or are not indexed: " + ff);
-				}
-				fieldsToLoad.add(ff);
-			}
-		}
+        final HashSet<String> fieldsToLoad = new HashSet<String>();
 
-		File jobFile = new File(workDir + "/" + params.get("jobid"));
-		final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024*256);
-		out.write("term");
-		out.write("\t");
-		out.write("termFreq");
-		out.write("\t");
-		out.write("docFreq");
+        String[] fields = params.getParams("fields");
+        for (String f : fields) {
+            for (String ff : f.split("( |,)")) {
+                SchemaField field = schema.getFieldOrNull(ff);
+                if (field == null || !field.indexed()) {
+                    throw new SolrException(ErrorCode.BAD_REQUEST, "We cannot dump fields that do not exist or are not indexed: " + ff);
+                }
+                fieldsToLoad.add(ff);
+            }
+        }
 
-		DirectoryReader ir = req.getSearcher().getIndexReader();
-		TermsEnum reuse = null;
-		int processed = 0;
-		for (String f: fieldsToLoad) {
+        File jobFile = new File(workDir + "/" + params.get("jobid"));
+        final BufferedWriter out = new BufferedWriter(new FileWriter(jobFile), 1024 * 256);
+        out.write("term");
+        out.write("\t");
+        out.write("termFreq");
+        out.write("\t");
+        out.write("docFreq");
 
-			out.write("\n\n# " + f + "\n");
+        DirectoryReader ir = req.getSearcher().getIndexReader();
+        TermsEnum reuse = null;
+        int processed = 0;
+        for (String f : fieldsToLoad) {
 
-			Terms te = MultiFields.getTerms(ir, f);
-			if (te == null) {
-				out.write("# term stats is not available for this field");
-				continue;
-			}
-			reuse = te.iterator();
+            out.write("\n\n# " + f + "\n");
 
-			BytesRef term;
-			while((term = reuse.next()) != null) {
-				out.write(term.utf8ToString());
-				out.write("\t");
-				out.write(Long.toString(reuse.totalTermFreq()));
-				out.write("\t");
-				out.write(Long.toString(reuse.docFreq()));
-				out.write("\n");
+            Terms te = MultiFields.getTerms(ir, f);
+            if (te == null) {
+                out.write("# term stats is not available for this field");
+                continue;
+            }
+            reuse = te.iterator();
 
-				processed++;
-				if (processed % 10000 == 0) {
-					if(queue.isStopped()) { // inside, because queue is synchronized
-						throw new IOException("Collector interrupted - stopping");
-					}
-				}
-			}
-		}
-		out.close();
-	}
-	
-	@Override
-  public String getDescription() {
-	  return "Dumps term, termFreq, and docFreq (for selected fields) to disk in CSV format";
-  }
+            BytesRef term;
+            while ((term = reuse.next()) != null) {
+                out.write(term.utf8ToString());
+                out.write("\t");
+                out.write(Long.toString(reuse.totalTermFreq()));
+                out.write("\t");
+                out.write(Long.toString(reuse.docFreq()));
+                out.write("\n");
+
+                processed++;
+                if (processed % 10000 == 0) {
+                    if (queue.isStopped()) { // inside, because queue is synchronized
+                        throw new IOException("Collector interrupted - stopping");
+                    }
+                }
+            }
+        }
+        out.close();
+    }
+
+    @Override
+    public String getDescription() {
+        return "Dumps term, termFreq, and docFreq (for selected fields) to disk in CSV format";
+    }
 }

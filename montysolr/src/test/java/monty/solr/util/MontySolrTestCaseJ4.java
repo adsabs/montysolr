@@ -13,11 +13,11 @@ import org.apache.solr.core.SolrConfig;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.BaseTestHarness;
 import org.apache.solr.util.TestHarness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
@@ -32,664 +32,663 @@ import java.util.List;
 /**
  * A junit4 Solr test harness that extends LuceneTestCaseJ4. Unlike
  * AbstractSolrTestCase, a new core is not created for each test method.
- * 
+ * <p>
  * This is a modified copy of org.apache.solr.SolrTestCaseJ4
- * 
  */
 public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		log.info("###Starting " + getTestName()); // returns <unknown>???
-	}
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        log.info("###Starting " + getTestName()); // returns <unknown>???
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		log.info("###Ending " + getTestName());
-		super.tearDown();
-	}
+    @Override
+    public void tearDown() throws Exception {
+        log.info("###Ending " + getTestName());
+        super.tearDown();
+    }
+
+    /**
+     * Call initCore in @BeforeClass to instantiate a solr core in your test
+     * class. deleteCore will be called for you via SolrTestCaseJ4 @AfterClass
+     */
+    public static void initCore(String config, String schema) throws Exception {
+        initCore(config, schema, TEST_HOME);
+    }
+
+    /**
+     * Call initCore in @BeforeClass to instantiate a solr core in your test
+     * class. deleteCore will be called for you via SolrTestCaseJ4 @AfterClass
+     */
+    public static void initCore(String config, String schema, String solrHome)
+            throws Exception {
+        startTrackingSearchers();
+        configString = config;
+        schemaString = schema;
+        if (solrHome != null) {
+            System.setProperty("solr.solr.home", solrHome);
+        }
+        initCore();
+    }
+
+    static long numOpens;
+    static long numCloses;
+
+    protected static void startTrackingSearchers() {
+        numOpens = SolrIndexSearcher.numOpens.get();
+        numCloses = SolrIndexSearcher.numCloses.get();
+    }
+
+    protected static void endTrackingSearchers() {
+        long endNumOpens = SolrIndexSearcher.numOpens.get();
+        long endNumCloses = SolrIndexSearcher.numCloses.get();
+
+        if (endNumOpens - numOpens != endNumCloses - numCloses) {
+            String msg = "ERROR: SolrIndexSearcher opens="
+                    + (endNumOpens - numOpens) + " closes="
+                    + (endNumCloses - numCloses);
+            log.error(msg);
+            // fail(msg);
+        }
+    }
+
+    /**
+     * Causes an exception matching the regex pattern to not be logged.
+     */
+    public static void ignoreException(String pattern) {
+        if (SolrException.ignorePatterns == null)
+            SolrException.ignorePatterns = new HashSet<String>();
+        SolrException.ignorePatterns.add(pattern);
+    }
+
+    public static void resetExceptionIgnores() {
+        SolrException.ignorePatterns = null;
+        ignoreException("ignore_exception"); // always ignore "ignore_exception"
+    }
+
+    protected static String getClassName() {
+        StackTraceElement[] stack = new RuntimeException("WhoAmI")
+                .fillInStackTrace().getStackTrace();
+        for (int i = stack.length - 1; i >= 0; i--) {
+            StackTraceElement ste = stack[i];
+            String cname = ste.getClassName();
+            if (cname.indexOf(".lucene.") >= 0 || cname.indexOf(".solr.") >= 0) {
+                return cname;
+            }
+        }
+        return MontySolrTestCaseJ4.class.getName();
+    }
+
+    protected static String getSimpleClassName() {
+        String cname = getClassName();
+        return cname.substring(cname.lastIndexOf('.') + 1);
+    }
+
+    protected static String configString;
+    protected static String schemaString;
+
+    protected static SolrConfig solrConfig;
+    /**
+     * Harness initialized by initTestHarness.
+     *
+     * <p>
+     * For use in test methods as needed.
+     * </p>
+     */
+    protected static TestHarness h;
+    /**
+     * LocalRequestFactory initialized by initTestHarness using sensible
+     * defaults.
+     *
+     * <p>
+     * For use in test methods as needed.
+     * </p>
+     */
+    protected static TestHarness.LocalRequestFactory lrf;
+
+    /**
+     * Subclasses must define this method to return the name of the schema.xml
+     * they wish to use.
+     */
+    public static String getSchemaFile() {
+        return schemaString;
+    }
 
 	/**
-	 * Call initCore in @BeforeClass to instantiate a solr core in your test
-	 * class. deleteCore will be called for you via SolrTestCaseJ4 @AfterClass
-	 */
-	public static void initCore(String config, String schema) throws Exception {
-		initCore(config, schema, TEST_HOME);
-	}
+     * Subclasses must define this method to return the name of the
+     * solrconfig.xml they wish to use.
+     */
+    public static String getSolrConfigFile() {
+        return configString;
+    }
 
-	/**
-	 * Call initCore in @BeforeClass to instantiate a solr core in your test
-	 * class. deleteCore will be called for you via SolrTestCaseJ4 @AfterClass
-	 */
-	public static void initCore(String config, String schema, String solrHome)
-			throws Exception {
-		startTrackingSearchers();
-		configString = config;
-		schemaString = schema;
-		if (solrHome != null) {
-			System.setProperty("solr.solr.home", solrHome);
-		}
-		initCore();
-	}
-
-	static long numOpens;
-	static long numCloses;
-
-	protected static void startTrackingSearchers() {
-		numOpens = SolrIndexSearcher.numOpens.get();
-		numCloses = SolrIndexSearcher.numCloses.get();
-	}
-
-	protected static void endTrackingSearchers() {
-		long endNumOpens = SolrIndexSearcher.numOpens.get();
-		long endNumCloses = SolrIndexSearcher.numCloses.get();
-
-		if (endNumOpens - numOpens != endNumCloses - numCloses) {
-			String msg = "ERROR: SolrIndexSearcher opens="
-					+ (endNumOpens - numOpens) + " closes="
-					+ (endNumCloses - numCloses);
-			log.error(msg);
-			// fail(msg);
-		}
-	}
-
-	/** Causes an exception matching the regex pattern to not be logged. */
-	public static void ignoreException(String pattern) {
-		if (SolrException.ignorePatterns == null)
-			SolrException.ignorePatterns = new HashSet<String>();
-		SolrException.ignorePatterns.add(pattern);
-	}
-
-	public static void resetExceptionIgnores() {
-		SolrException.ignorePatterns = null;
-		ignoreException("ignore_exception"); // always ignore "ignore_exception"
-	}
-
-	protected static String getClassName() {
-		StackTraceElement[] stack = new RuntimeException("WhoAmI")
-				.fillInStackTrace().getStackTrace();
-		for (int i = stack.length - 1; i >= 0; i--) {
-			StackTraceElement ste = stack[i];
-			String cname = ste.getClassName();
-			if (cname.indexOf(".lucene.") >= 0 || cname.indexOf(".solr.") >= 0) {
-				return cname;
-			}
-		}
-		return MontySolrTestCaseJ4.class.getName();
-	}
-
-	protected static String getSimpleClassName() {
-		String cname = getClassName();
-		return cname.substring(cname.lastIndexOf('.') + 1);
-	}
-
-	protected static String configString;
-	protected static String schemaString;
-
-	protected static SolrConfig solrConfig;
-	/**
-	 * Harness initialized by initTestHarness.
-	 * 
-	 * <p>
-	 * For use in test methods as needed.
-	 * </p>
-	 */
-	protected static TestHarness h;
-	/**
-	 * LocalRequestFactory initialized by initTestHarness using sensible
-	 * defaults.
-	 * 
-	 * <p>
-	 * For use in test methods as needed.
-	 * </p>
-	 */
-	protected static TestHarness.LocalRequestFactory lrf;
-
-	/**
-	 * Subclasses must define this method to return the name of the schema.xml
-	 * they wish to use.
-	 */
-	public static String getSchemaFile() {
-		return schemaString;
-	};
-
-	/**
-	 * Subclasses must define this method to return the name of the
-	 * solrconfig.xml they wish to use.
-	 */
-	public static String getSolrConfigFile() {
-		return configString;
-	};
-	
 	public static Path getSolrHome() {
-		return new File(System.getProperty("solr.solr.home")).toPath();
-	}
+        return new File(System.getProperty("solr.solr.home")).toPath();
+    }
 
-	/**
-	 * The directory used to story the index managed by the TestHarness h
-	 */
-	protected static File dataDir;
+    /**
+     * The directory used to story the index managed by the TestHarness h
+     */
+    protected static File dataDir;
 
-	/**
-	 * Initializes things your test might need
-	 * 
-	 * <ul>
-	 * <li>Creates a dataDir in the "java.io.tmpdir"</li>
-	 * <li>initializes the TestHarness h using this data directory, and
-	 * getSchemaPath()</li>
-	 * <li>initializes the LocalRequestFactory lrf using sensible defaults.</li>
-	 * </ul>
-	 * 
-	 */
+    /**
+     * Initializes things your test might need
+     *
+     * <ul>
+     * <li>Creates a dataDir in the "java.io.tmpdir"</li>
+     * <li>initializes the TestHarness h using this data directory, and
+     * getSchemaPath()</li>
+     * <li>initializes the LocalRequestFactory lrf using sensible defaults.</li>
+     * </ul>
+     */
 
-	public static Logger log = LoggerFactory
-			.getLogger(MontySolrTestCaseJ4.class);
+    public static Logger log = LoggerFactory
+            .getLogger(MontySolrTestCaseJ4.class);
 
-	private static String factoryProp;
+    private static String factoryProp;
 
-	public static void initCore() throws Exception {
-		log.info("####initCore");
+    public static void initCore() throws Exception {
+        log.info("####initCore");
 
-		ignoreException("ignore_exception");
-		factoryProp = System.getProperty("solr.directoryFactory");
-		if (factoryProp == null) {
-			System.setProperty("solr.directoryFactory",
-					"solr.RAMDirectoryFactory");
-		}
+        ignoreException("ignore_exception");
+        factoryProp = System.getProperty("solr.directoryFactory");
+        if (factoryProp == null) {
+            System.setProperty("solr.directoryFactory",
+                    "solr.RAMDirectoryFactory");
+        }
 
-		if (dataDir == null) {
-			createTempDir();
-		}
+        if (dataDir == null) {
+            createTempDir();
+        }
 
-		// other methods like starting a jetty instance need these too
-		System.setProperty("solr.test.sys.prop1", "propone");
-		System.setProperty("solr.test.sys.prop2", "proptwo");
+        // other methods like starting a jetty instance need these too
+        System.setProperty("solr.test.sys.prop1", "propone");
+        System.setProperty("solr.test.sys.prop2", "proptwo");
 
-		String configFile = getSolrConfigFile();
-		if (configFile != null) {
-			createCore();
-			
-		}
-		log.info("####initCore end");
-	}
-	
-	public static void createCore() {
-	    solrConfig = TestHarness.createConfig(getSolrHome(), getSolrConfigFile());
-	    h = new TestHarness( dataDir.getAbsolutePath(),
-	            solrConfig,
-	            getSchemaFile());
-	    lrf = h.getRequestFactory
-	            ("standard",0,20,CommonParams.VERSION,"2.2");
-	  }
+        String configFile = getSolrConfigFile();
+        if (configFile != null) {
+            createCore();
 
-	/**
-	 * Subclasses that override setUp can optionally call this method to log the
-	 * fact that their setUp process has ended.
-	 */
-	public void postSetUp() {
-		log.info("####POSTSETUP " + getTestName());
-	}
+        }
+        log.info("####initCore end");
+    }
 
-	/**
-	 * Subclasses that override tearDown can optionally call this method to log
-	 * the fact that the tearDown process has started. This is necessary since
-	 * subclasses will want to call super.tearDown() at the *end* of their
-	 * tearDown method.
-	 */
-	public void preTearDown() {
-		log.info("####PRETEARDOWN " + getTestName());
-	}
+    public static void createCore() {
+        solrConfig = TestHarness.createConfig(getSolrHome(), getSolrConfigFile());
+        h = new TestHarness(dataDir.getAbsolutePath(),
+                solrConfig,
+                getSchemaFile());
+        lrf = h.getRequestFactory
+                ("standard", 0, 20, CommonParams.VERSION, "2.2");
+    }
 
-	/**
-	 * Shuts down the test harness, and makes the best attempt possible to
-	 * delete dataDir, unless the system property "solr.test.leavedatadir" is
-	 * set.
-	 */
-	public static void deleteCore() throws Exception {
-		log.info("###deleteCore");
-		if (h != null) {
-			h.close();
-		}
-		if (dataDir != null) {
-			String skip = System.getProperty("solr.test.leavedatadir");
-			if (null != skip && 0 != skip.trim().length()) {
-				System.err
-						.println("NOTE: per solr.test.leavedatadir, dataDir will not be removed: "
-								+ dataDir.getAbsolutePath());
-			} else {
-				if (!recurseDelete(dataDir)) {
-					System.err.println("!!!! WARNING: best effort to remove "
-							+ dataDir.getAbsolutePath() + " FAILED !!!!!");
-				}
-			}
-		}
+    /**
+     * Subclasses that override setUp can optionally call this method to log the
+     * fact that their setUp process has ended.
+     */
+    public void postSetUp() {
+        log.info("####POSTSETUP " + getTestName());
+    }
 
-		if (factoryProp == null) {
-			System.clearProperty("solr.directoryFactory");
-		}
+    /**
+     * Subclasses that override tearDown can optionally call this method to log
+     * the fact that the tearDown process has started. This is necessary since
+     * subclasses will want to call super.tearDown() at the *end* of their
+     * tearDown method.
+     */
+    public void preTearDown() {
+        log.info("####PRETEARDOWN " + getTestName());
+    }
 
-		dataDir = null;
-		solrConfig = null;
-		h = null;
-		lrf = null;
-		configString = schemaString = null;
+    /**
+     * Shuts down the test harness, and makes the best attempt possible to
+     * delete dataDir, unless the system property "solr.test.leavedatadir" is
+     * set.
+     */
+    public static void deleteCore() throws Exception {
+        log.info("###deleteCore");
+        if (h != null) {
+            h.close();
+        }
+        if (dataDir != null) {
+            String skip = System.getProperty("solr.test.leavedatadir");
+            if (null != skip && 0 != skip.trim().length()) {
+                System.err
+                        .println("NOTE: per solr.test.leavedatadir, dataDir will not be removed: "
+                                + dataDir.getAbsolutePath());
+            } else {
+                if (!recurseDelete(dataDir)) {
+                    System.err.println("!!!! WARNING: best effort to remove "
+                            + dataDir.getAbsolutePath() + " FAILED !!!!!");
+                }
+            }
+        }
 
-		endTrackingSearchers();
-	}
+        if (factoryProp == null) {
+            System.clearProperty("solr.directoryFactory");
+        }
 
-	/**
-	 * Validates an update XML String is successful
-	 */
-	public static void assertU(String update) {
-		assertU(null, update);
-	}
+        dataDir = null;
+        solrConfig = null;
+        h = null;
+        lrf = null;
+        configString = schemaString = null;
 
-	/**
-	 * Validates an update XML String is successful
-	 */
-	public static void assertU(String message, String update) {
-		checkUpdateU(message, update, true);
-	}
+        endTrackingSearchers();
+    }
 
-	/**
-	 * Validates an update XML String failed
-	 */
-	public static void assertFailedU(String update) {
-		assertFailedU(null, update);
-	}
+    /**
+     * Validates an update XML String is successful
+     */
+    public static void assertU(String update) {
+        assertU(null, update);
+    }
 
-	/**
-	 * Validates an update XML String failed
-	 */
-	public static void assertFailedU(String message, String update) {
-		checkUpdateU(message, update, false);
-	}
+    /**
+     * Validates an update XML String is successful
+     */
+    public static void assertU(String message, String update) {
+        checkUpdateU(message, update, true);
+    }
 
-	/**
-	 * Checks the success or failure of an update message
-	 */
-	private static void checkUpdateU(String message, String update,
-			boolean shouldSucceed) {
-		try {
-			String m = (null == message) ? "" : message + " ";
-			if (shouldSucceed) {
-				String res = h.validateUpdate(update);
-				if (res != null)
-					fail(m + "update was not successful: " + res);
-			} else {
-				String res = h.validateErrorUpdate(update);
-				if (res != null)
-					fail(m + "update succeeded, but should have failed: " + res);
-			}
-		} catch (SAXException e) {
-			throw new RuntimeException("Invalid XML", e);
-		}
-	}
+    /**
+     * Validates an update XML String failed
+     */
+    public static void assertFailedU(String update) {
+        assertFailedU(null, update);
+    }
 
-	/**
-	 * Validates a query matches some XPath test expressions and closes the
-	 * query
-	 */
-	public static void assertQ(SolrQueryRequest req, String... tests) {
-		assertQ(null, req, tests);
-	}
+    /**
+     * Validates an update XML String failed
+     */
+    public static void assertFailedU(String message, String update) {
+        checkUpdateU(message, update, false);
+    }
 
-	/**
-	 * Validates a query matches some XPath test expressions and closes the
-	 * query
-	 */
-	public static void assertQ(String message, SolrQueryRequest req,
-			String... tests) {
-		try {
-			String m = (null == message) ? "" : message + " ";
-			String response = h.query(req);
+    /**
+     * Checks the success or failure of an update message
+     */
+    private static void checkUpdateU(String message, String update,
+                                     boolean shouldSucceed) {
+        try {
+            String m = (null == message) ? "" : message + " ";
+            if (shouldSucceed) {
+                String res = h.validateUpdate(update);
+                if (res != null)
+                    fail(m + "update was not successful: " + res);
+            } else {
+                String res = h.validateErrorUpdate(update);
+                if (res != null)
+                    fail(m + "update succeeded, but should have failed: " + res);
+            }
+        } catch (SAXException e) {
+            throw new RuntimeException("Invalid XML", e);
+        }
+    }
 
-			if (req.getParams().getBool("facet", false)) {
-				// add a test to ensure that faceting did not throw an exception
-				// internally, where it would be added to facet_counts/exception
-				String[] allTests = new String[tests.length + 1];
-				System.arraycopy(tests, 0, allTests, 1, tests.length);
-				allTests[0] = "*[count(//lst[@name='facet_counts']/*[@name='exception'])=0]";
-				tests = allTests;
-			}
+    /**
+     * Validates a query matches some XPath test expressions and closes the
+     * query
+     */
+    public static void assertQ(SolrQueryRequest req, String... tests) {
+        assertQ(null, req, tests);
+    }
 
-			String results = h.validateXPath(response, tests);
+    /**
+     * Validates a query matches some XPath test expressions and closes the
+     * query
+     */
+    public static void assertQ(String message, SolrQueryRequest req,
+                               String... tests) {
+        try {
+            String m = (null == message) ? "" : message + " ";
+            String response = h.query(req);
 
-			if (null != results) {
-				String msg = "REQUEST FAILED: xpath=" + results
-						+ "\n\txml response was: " + response
-						+ "\n\trequest was:" + req.getParamString();
+            if (req.getParams().getBool("facet", false)) {
+                // add a test to ensure that faceting did not throw an exception
+                // internally, where it would be added to facet_counts/exception
+                String[] allTests = new String[tests.length + 1];
+                System.arraycopy(tests, 0, allTests, 1, tests.length);
+                allTests[0] = "*[count(//lst[@name='facet_counts']/*[@name='exception'])=0]";
+                tests = allTests;
+            }
 
-				log.error(msg);
-				throw new RuntimeException(msg);
-			}
+            String results = BaseTestHarness.validateXPath(response, tests);
 
-		} catch (XPathExpressionException e1) {
-			throw new RuntimeException("XPath is invalid", e1);
-		} catch (Exception e2) {
-			SolrException.log(log, "REQUEST FAILED: " + req.getParamString(),
-					e2);
-			throw new RuntimeException("Exception during query", e2);
-		}
-	}
+            if (null != results) {
+                String msg = "REQUEST FAILED: xpath=" + results
+                        + "\n\txml response was: " + response
+                        + "\n\trequest was:" + req.getParamString();
 
-	/**
-	 * Validates a query matches some JSON test expressions and closes the
-	 * query. The text expression is of the form path:JSON. To facilitate easy
-	 * embedding in Java strings, the JSON can have double quotes replaced with
-	 * single quotes.
-	 * 
-	 * Please use this with care: this makes it easy to match complete
-	 * structures, but doing so can result in fragile tests if you are matching
-	 * more than what you want to test.
-	 * 
-	 **/
-	public static void assertJQ(SolrQueryRequest req, String... tests)
-			throws Exception {
-		SolrParams params = null;
-		try {
-			params = req.getParams();
-			if (!"json".equals(params.get("wt", "xml"))
-					|| params.get("indent") == null) {
-				ModifiableSolrParams newParams = new ModifiableSolrParams(
-						params);
-				newParams.set("wt", "json");
-				if (params.get("indent") == null)
-					newParams.set("indent", "true");
-				req.setParams(newParams);
-			}
+                log.error(msg);
+                throw new RuntimeException(msg);
+            }
 
-			String response;
-			boolean failed = true;
-			try {
-				response = h.query(req);
-				failed = false;
-			} finally {
-				if (failed) {
-					log.error("REQUEST FAILED: " + req.getParamString());
-				}
-			}
+        } catch (XPathExpressionException e1) {
+            throw new RuntimeException("XPath is invalid", e1);
+        } catch (Exception e2) {
+            SolrException.log(log, "REQUEST FAILED: " + req.getParamString(),
+                    e2);
+            throw new RuntimeException("Exception during query", e2);
+        }
+    }
 
-			for (String test : tests) {
-				String testJSON = test.replace('\'', '"');
+    /**
+     * Validates a query matches some JSON test expressions and closes the
+     * query. The text expression is of the form path:JSON. To facilitate easy
+     * embedding in Java strings, the JSON can have double quotes replaced with
+     * single quotes.
+     * <p>
+     * Please use this with care: this makes it easy to match complete
+     * structures, but doing so can result in fragile tests if you are matching
+     * more than what you want to test.
+     **/
+    public static void assertJQ(SolrQueryRequest req, String... tests)
+            throws Exception {
+        SolrParams params = null;
+        try {
+            params = req.getParams();
+            if (!"json".equals(params.get("wt", "xml"))
+                    || params.get("indent") == null) {
+                ModifiableSolrParams newParams = new ModifiableSolrParams(
+                        params);
+                newParams.set("wt", "json");
+                if (params.get("indent") == null)
+                    newParams.set("indent", "true");
+                req.setParams(newParams);
+            }
 
-				try {
-					failed = true;
-					String err = JSONTestUtil.match(response, testJSON);
-					failed = false;
-					if (err != null) {
-						log.error("query failed JSON validation. error=" + err
-								+ "\n expected =" + testJSON + "\n response = "
-								+ response + "\n request = "
-								+ req.getParamString());
-						throw new RuntimeException(err);
-					}
-				} finally {
-					if (failed) {
-						log.error("JSON query validation threw an exception."
-								+ "\n expected =" + testJSON + "\n response = "
-								+ response + "\n request = "
-								+ req.getParamString());
-					}
-				}
-			}
-		} finally {
-			// restore the params
-			if (params != null && params != req.getParams())
-				req.setParams(params);
-		}
-	}
+            String response;
+            boolean failed = true;
+            try {
+                response = h.query(req);
+                failed = false;
+            } finally {
+                if (failed) {
+                    log.error("REQUEST FAILED: " + req.getParamString());
+                }
+            }
 
-	/** Makes sure a query throws a SolrException with the listed response code */
-	public static void assertQEx(String message, SolrQueryRequest req, int code) {
-		try {
-			h.query(req);
-			fail(message);
-		} catch (SolrException sex) {
-			assertEquals(code, sex.code());
-		} catch (Exception e2) {
-			throw new RuntimeException("Exception during query", e2);
-		}
-	}
+            for (String test : tests) {
+                String testJSON = test.replace('\'', '"');
 
-	public static void assertQEx(String message, SolrQueryRequest req,
-			SolrException.ErrorCode code) {
-		try {
-			h.query(req);
-			fail(message);
-		} catch (SolrException e) {
-			assertEquals(code.code, e.code());
-		} catch (Exception e2) {
-			throw new RuntimeException("Exception during query", e2);
-		}
-	}
+                try {
+                    failed = true;
+                    String err = JSONTestUtil.match(response, testJSON);
+                    failed = false;
+                    if (err != null) {
+                        log.error("query failed JSON validation. error=" + err
+                                + "\n expected =" + testJSON + "\n response = "
+                                + response + "\n request = "
+                                + req.getParamString());
+                        throw new RuntimeException(err);
+                    }
+                } finally {
+                    if (failed) {
+                        log.error("JSON query validation threw an exception."
+                                + "\n expected =" + testJSON + "\n response = "
+                                + response + "\n request = "
+                                + req.getParamString());
+                    }
+                }
+            }
+        } finally {
+            // restore the params
+            if (params != null && params != req.getParams())
+                req.setParams(params);
+        }
+    }
 
-	/**
-	 * @see TestHarness#optimize
-	 */
-	public static String optimize(String... args) {
-		return h.optimize(args);
-	}
+    /**
+     * Makes sure a query throws a SolrException with the listed response code
+     */
+    public static void assertQEx(String message, SolrQueryRequest req, int code) {
+        try {
+            h.query(req);
+            fail(message);
+        } catch (SolrException sex) {
+            assertEquals(code, sex.code());
+        } catch (Exception e2) {
+            throw new RuntimeException("Exception during query", e2);
+        }
+    }
 
-	/**
-	 * @see TestHarness#commit
-	 */
-	public static String commit(String... args) {
-		return h.commit(args);
-	}
+    public static void assertQEx(String message, SolrQueryRequest req,
+                                 SolrException.ErrorCode code) {
+        try {
+            h.query(req);
+            fail(message);
+        } catch (SolrException e) {
+            assertEquals(code.code, e.code());
+        } catch (Exception e2) {
+            throw new RuntimeException("Exception during query", e2);
+        }
+    }
 
-	/**
-	 * Generates a simple &lt;add&gt;&lt;doc&gt;... XML String with no options
-	 * 
-	 * @param fieldsAndValues
-	 *            0th and Even numbered args are fields names odds are field
-	 *            values.
-	 * @see #add
-	 * @see #doc
-	 */
-	public static String adoc(String... fieldsAndValues) {
-		Doc d = doc(fieldsAndValues);
-		return add(d);
-	}
+    /**
+     * @see TestHarness#optimize
+     */
+    public static String optimize(String... args) {
+        return BaseTestHarness.optimize(args);
+    }
 
-	/**
-	 * Generates a simple &lt;add&gt;&lt;doc&gt;... XML String with no options
-	 */
-	public static String adoc(SolrInputDocument sdoc) {
-		List<String> fields = new ArrayList<String>();
-		for (SolrInputField sf : sdoc) {
-			for (Object o : sf.getValues()) {
-				fields.add(sf.getName());
-				fields.add(o.toString());
-			}
-		}
-		return adoc(fields.toArray(new String[fields.size()]));
-	}
+    /**
+     * @see TestHarness#commit
+     */
+    public static String commit(String... args) {
+        return BaseTestHarness.commit(args);
+    }
 
-	/**
-	 * Generates an &lt;add&gt;&lt;doc&gt;... XML String with options on the
-	 * add.
-	 * 
-	 * @param doc
-	 *            the Document to add
-	 * @param args
-	 *            0th and Even numbered args are param names, Odds are param
-	 *            values.
-	 * @see #add
-	 * @see #doc
-	 */
-	public static String add(Doc doc, String... args) {
-		try {
-			StringWriter r = new StringWriter();
+    /**
+     * Generates a simple &lt;add&gt;&lt;doc&gt;... XML String with no options
+     *
+     * @param fieldsAndValues 0th and Even numbered args are fields names odds are field
+     *                        values.
+     * @see #add
+     * @see #doc
+     */
+    public static String adoc(String... fieldsAndValues) {
+        Doc d = doc(fieldsAndValues);
+        return add(d);
+    }
 
-			// this is anoying
-			if (null == args || 0 == args.length) {
-				r.write("<add>");
-				r.write(doc.xml);
-				r.write("</add>");
-			} else {
-				XML.writeUnescapedXML(r, "add", doc.xml, (Object[]) args);
-			}
+    /**
+     * Generates a simple &lt;add&gt;&lt;doc&gt;... XML String with no options
+     */
+    public static String adoc(SolrInputDocument sdoc) {
+        List<String> fields = new ArrayList<String>();
+        for (SolrInputField sf : sdoc) {
+            for (Object o : sf.getValues()) {
+                fields.add(sf.getName());
+                fields.add(o.toString());
+            }
+        }
+        return adoc(fields.toArray(new String[fields.size()]));
+    }
 
-			return r.getBuffer().toString();
-		} catch (IOException e) {
-			throw new RuntimeException(
-					"this should never happen with a StringWriter", e);
-		}
-	}
+    /**
+     * Generates an &lt;add&gt;&lt;doc&gt;... XML String with options on the
+     * add.
+     *
+     * @param doc  the Document to add
+     * @param args 0th and Even numbered args are param names, Odds are param
+     *             values.
+     * @see #add
+     * @see #doc
+     */
+    public static String add(Doc doc, String... args) {
+        try {
+            StringWriter r = new StringWriter();
 
-	/**
-	 * Generates a &lt;delete&gt;... XML string for an ID
-	 * 
-	 * @see TestHarness#deleteById
-	 */
-	public static String delI(String id) {
-		return h.deleteById(id);
-	}
+            // this is anoying
+            if (null == args || 0 == args.length) {
+                r.write("<add>");
+                r.write(doc.xml);
+                r.write("</add>");
+            } else {
+                XML.writeUnescapedXML(r, "add", doc.xml, (Object[]) args);
+            }
 
-	/**
-	 * Generates a &lt;delete&gt;... XML string for an query
-	 * 
-	 * @see TestHarness#deleteByQuery
-	 */
-	public static String delQ(String q) {
-		return h.deleteByQuery(q);
-	}
+            return r.getBuffer().toString();
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "this should never happen with a StringWriter", e);
+        }
+    }
 
-	/**
-	 * Generates a simple &lt;doc&gt;... XML String with no options
-	 * 
-	 * @param fieldsAndValues
-	 *            0th and Even numbered args are fields names, Odds are field
-	 *            values.
-	 * @see TestHarness#makeSimpleDoc
-	 */
-	public static Doc doc(String... fieldsAndValues) {
-		Doc d = new Doc();
-		d.xml = h.makeSimpleDoc(fieldsAndValues).toString();
-		return d;
-	}
+    /**
+     * Generates a &lt;delete&gt;... XML string for an ID
+     *
+     * @see TestHarness#deleteById
+     */
+    public static String delI(String id) {
+        return BaseTestHarness.deleteById(id);
+    }
 
-	public static ModifiableSolrParams params(String... params) {
-		ModifiableSolrParams msp = new ModifiableSolrParams();
-		for (int i = 0; i < params.length; i += 2) {
-			msp.add(params[i], params[i + 1]);
-		}
-		return msp;
-	}
+    /**
+     * Generates a &lt;delete&gt;... XML string for an query
+     *
+     * @see TestHarness#deleteByQuery
+     */
+    public static String delQ(String q) {
+        return BaseTestHarness.deleteByQuery(q);
+    }
 
-	/**
-	 * Generates a SolrQueryRequest using the LocalRequestFactory
-	 * 
-	 * @see #lrf
-	 */
-	public static SolrQueryRequest req(String... q) {
-		return lrf.makeRequest(q);
-	}
+    /**
+     * Generates a simple &lt;doc&gt;... XML String with no options
+     *
+     * @param fieldsAndValues 0th and Even numbered args are fields names, Odds are field
+     *                        values.
+     * @see TestHarness#makeSimpleDoc
+     */
+    public static Doc doc(String... fieldsAndValues) {
+        Doc d = new Doc();
+        d.xml = BaseTestHarness.makeSimpleDoc(fieldsAndValues);
+        return d;
+    }
 
-	/**
-	 * Generates a SolrQueryRequest using the LocalRequestFactory
-	 * 
-	 * @see #lrf
-	 */
-	public static SolrQueryRequest req(String[] params, String... moreParams) {
-		String[] allParams = moreParams;
-		if (params.length != 0) {
-			int len = params.length + moreParams.length;
-			allParams = new String[len];
-			System.arraycopy(params, 0, allParams, 0, params.length);
-			System.arraycopy(moreParams, 0, allParams, params.length,
-					moreParams.length);
-		}
+    public static ModifiableSolrParams params(String... params) {
+        ModifiableSolrParams msp = new ModifiableSolrParams();
+        for (int i = 0; i < params.length; i += 2) {
+            msp.add(params[i], params[i + 1]);
+        }
+        return msp;
+    }
 
-		return lrf.makeRequest(allParams);
-	}
+    /**
+     * Generates a SolrQueryRequest using the LocalRequestFactory
+     *
+     * @see #lrf
+     */
+    public static SolrQueryRequest req(String... q) {
+        return lrf.makeRequest(q);
+    }
 
-	/**
-	 * Generates a SolrQueryRequest
-	 */
-	public static SolrQueryRequest req(SolrParams params, String... moreParams) {
-		ModifiableSolrParams mp = new ModifiableSolrParams(params);
-		for (int i = 0; i < moreParams.length; i += 2) {
-			mp.add(moreParams[i], moreParams[i + 1]);
-		}
-		return new LocalSolrQueryRequest(h.getCore(), mp);
-	}
+    /**
+     * Generates a SolrQueryRequest using the LocalRequestFactory
+     *
+     * @see #lrf
+     */
+    public static SolrQueryRequest req(String[] params, String... moreParams) {
+        String[] allParams = moreParams;
+        if (params.length != 0) {
+            int len = params.length + moreParams.length;
+            allParams = new String[len];
+            System.arraycopy(params, 0, allParams, 0, params.length);
+            System.arraycopy(moreParams, 0, allParams, params.length,
+                    moreParams.length);
+        }
 
-	/** Neccessary to make method signatures un-ambiguous */
-	public static class Doc {
-		public String xml;
+        return lrf.makeRequest(allParams);
+    }
 
-		@Override
-		public String toString() {
-			return xml;
-		}
-	}
+    /**
+     * Generates a SolrQueryRequest
+     */
+    public static SolrQueryRequest req(SolrParams params, String... moreParams) {
+        ModifiableSolrParams mp = new ModifiableSolrParams(params);
+        for (int i = 0; i < moreParams.length; i += 2) {
+            mp.add(moreParams[i], moreParams[i + 1]);
+        }
+        return new LocalSolrQueryRequest(h.getCore(), mp);
+    }
 
-	public static boolean recurseDelete(File f) {
-		if (f.isDirectory()) {
-			for (File sub : f.listFiles()) {
-				if (!recurseDelete(sub)) {
-					System.err.println("!!!! WARNING: best effort to remove "
-							+ sub.getAbsolutePath() + " FAILED !!!!!");
-					return false;
-				}
-			}
-		}
-		return f.delete();
-	}
+    /**
+     * Neccessary to make method signatures un-ambiguous
+     */
+    public static class Doc {
+        public String xml;
 
-	public void clearIndex() {
-		assertU(delQ("*:*"));
-	}
+        @Override
+        public String toString() {
+            return xml;
+        }
+    }
 
-	/**
-	 * Gets a resource from the context classloader as {@link File}. This method
-	 * should only be used, if a real file is needed. To get a stream, code
-	 * should prefer {@link Class#getResourceAsStream} using
-	 * {@code this.getClass()}.
-	 */
-	public static File getFile(String name) {
-		try {
-			File file = new File(name);
-			if (!file.exists()) {
-				file = new File(Thread.currentThread().getContextClassLoader()
-						.getResource(name).toURI());
-			}
-			return file;
-		} catch (Exception e) {
-			/* more friendly than NPE */
-			throw new RuntimeException("Cannot find resource: " + name);
-		}
-	}
+    public static boolean recurseDelete(File f) {
+        if (f.isDirectory()) {
+            for (File sub : f.listFiles()) {
+                if (!recurseDelete(sub)) {
+                    System.err.println("!!!! WARNING: best effort to remove "
+                            + sub.getAbsolutePath() + " FAILED !!!!!");
+                    return false;
+                }
+            }
+        }
+        return f.delete();
+    }
 
-	public static Throwable getRootCause(Throwable t) {
-		Throwable result = t;
-		for (Throwable cause = t; null != cause; cause = cause.getCause()) {
-			result = cause;
-		}
-		return result;
-	}
+    public void clearIndex() {
+        assertU(delQ("*:*"));
+    }
 
-	/**
-	 * ================================================ modifications
-	 * ================================================
-	 */
+    /**
+     * Gets a resource from the context classloader as {@link File}. This method
+     * should only be used, if a real file is needed. To get a stream, code
+     * should prefer {@link Class#getResourceAsStream} using
+     * {@code this.getClass()}.
+     */
+    public static File getFile(String name) {
+        try {
+            File file = new File(name);
+            if (!file.exists()) {
+                file = new File(Thread.currentThread().getContextClassLoader()
+                        .getResource(name).toURI());
+            }
+            return file;
+        } catch (Exception e) {
+            /* more friendly than NPE */
+            throw new RuntimeException("Cannot find resource: " + name);
+        }
+    }
 
-	public static String MONTYSOLR_HOME = MontySolrSetup.getMontySolrHome();
-	private static final String SOLR_HOME = MontySolrSetup.getSolrHome();
-	private static final String SOURCE_HOME = MONTYSOLR_HOME
-			+ "/src/test-files";
-	public static String TEST_HOME = SOURCE_HOME + "/solr";
-	public static String WEBAPP_HOME = new File(SOLR_HOME, "src/webapp/web")
-			.getAbsolutePath();
-	public static String EXAMPLE_HOME = new File(SOLR_HOME, "example/solr")
-			.getAbsolutePath();
-	public static String EXAMPLE_MULTICORE_HOME = new File(SOLR_HOME,
-			"example/multicore").getAbsolutePath();
-	public static String EXAMPLE_SCHEMA = EXAMPLE_HOME + "/collection1/conf/schema.xml";
-	public static String EXAMPLE_CONFIG = EXAMPLE_HOME + "/collection1/conf/solrconfig.xml";
+    public static Throwable getRootCause(Throwable t) {
+        Throwable result = t;
+        for (Throwable cause = t; null != cause; cause = cause.getCause()) {
+            result = cause;
+        }
+        return result;
+    }
+
+    /**
+     * ================================================ modifications
+     * ================================================
+     */
+
+    public static String MONTYSOLR_HOME = MontySolrSetup.getMontySolrHome();
+    private static final String SOLR_HOME = MontySolrSetup.getSolrHome();
+    private static final String SOURCE_HOME = MONTYSOLR_HOME
+            + "/src/test-files";
+    public static String TEST_HOME = SOURCE_HOME + "/solr";
+    public static String WEBAPP_HOME = new File(SOLR_HOME, "src/webapp/web")
+            .getAbsolutePath();
+    public static String EXAMPLE_HOME = new File(SOLR_HOME, "example/solr")
+            .getAbsolutePath();
+    public static String EXAMPLE_MULTICORE_HOME = new File(SOLR_HOME,
+            "example/multicore").getAbsolutePath();
+    public static String EXAMPLE_SCHEMA = EXAMPLE_HOME + "/collection1/conf/schema.xml";
+    public static String EXAMPLE_CONFIG = EXAMPLE_HOME + "/collection1/conf/solrconfig.xml";
 
 }

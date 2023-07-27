@@ -18,5 +18,5 @@ package monty.solr;
  */
 
 public class MontySolr {
-  public static String VERSION = "v60.x"; 
+    public static String VERSION = "v60.x";
 }

@@ -16,25 +16,25 @@
  */
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeMap;
-
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.standard.builders.MultiPhraseQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
 import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.builders.MultiPhraseQueryNodeBuilder;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.TermQuery;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Builds a {@link MultiPhraseQuery} object from a {@link MultiPhraseQueryNode}
  * object.
- * 
+ * <p>
  * Modified {@link MultiPhraseQueryNodeBuilder} - when we encounter a token
  * with position increment=0 we assume that it should be placed into the same
  * position as the previous token (i.e. it is a synonym). Make sure that
@@ -42,59 +42,58 @@ import org.apache.lucene.search.TermQuery;
  */
 public class AqpMultiPhraseQueryNodeBuilder implements StandardQueryBuilder {
 
-  public AqpMultiPhraseQueryNodeBuilder() {
-    // empty constructor
-  }
-
-  @Override
-  public MultiPhraseQuery build(QueryNode queryNode) throws QueryNodeException {
-    MultiPhraseQueryNode phraseNode = (MultiPhraseQueryNode) queryNode;
-
-    MultiPhraseQuery.Builder phraseQueryBuilder = new MultiPhraseQuery.Builder();
-
-    List<QueryNode> children = phraseNode.getChildren();
-
-    if (children != null) {
-      TreeMap<Integer, List<Term>> positionTermMap = new TreeMap<>();
-      Integer lastPos = null;
-
-      for (QueryNode child : children) {
-        FieldQueryNode termNode = (FieldQueryNode) child;
-        TermQuery termQuery = (TermQuery) termNode
-            .getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
-        
-        int pos = termNode.getPositionIncrement();
-        if (pos == 0 && lastPos != null) {
-          pos = lastPos;
-        }
-        else {
-          lastPos = pos;
-        }
-        
-        List<Term> termList = positionTermMap.get(pos);
-
-        if (termList == null) {
-          termList = new LinkedList<>();
-          positionTermMap.put(pos, termList);
-
-        }
-
-        termList.add(termQuery.getTerm());
-
-      }
-
-      for (int positionIncrement : positionTermMap.keySet()) {
-        List<Term> termList = positionTermMap.get(positionIncrement);
-
-        phraseQueryBuilder.add(termList.toArray(new Term[termList.size()]),
-            positionIncrement);
-
-      }
-
+    public AqpMultiPhraseQueryNodeBuilder() {
+        // empty constructor
     }
 
-    return phraseQueryBuilder.build();
+    @Override
+    public MultiPhraseQuery build(QueryNode queryNode) throws QueryNodeException {
+        MultiPhraseQueryNode phraseNode = (MultiPhraseQueryNode) queryNode;
 
-  }
+        MultiPhraseQuery.Builder phraseQueryBuilder = new MultiPhraseQuery.Builder();
+
+        List<QueryNode> children = phraseNode.getChildren();
+
+        if (children != null) {
+            TreeMap<Integer, List<Term>> positionTermMap = new TreeMap<>();
+            Integer lastPos = null;
+
+            for (QueryNode child : children) {
+                FieldQueryNode termNode = (FieldQueryNode) child;
+                TermQuery termQuery = (TermQuery) termNode
+                        .getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+
+                int pos = termNode.getPositionIncrement();
+                if (pos == 0 && lastPos != null) {
+                    pos = lastPos;
+                } else {
+                    lastPos = pos;
+                }
+
+                List<Term> termList = positionTermMap.get(pos);
+
+                if (termList == null) {
+                    termList = new LinkedList<>();
+                    positionTermMap.put(pos, termList);
+
+                }
+
+                termList.add(termQuery.getTerm());
+
+            }
+
+            for (int positionIncrement : positionTermMap.keySet()) {
+                List<Term> termList = positionTermMap.get(positionIncrement);
+
+                phraseQueryBuilder.add(termList.toArray(new Term[termList.size()]),
+                        positionIncrement);
+
+            }
+
+        }
+
+        return phraseQueryBuilder.build();
+
+    }
 
 }

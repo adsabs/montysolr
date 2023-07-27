@@ -17,36 +17,35 @@ package org.apache.solr.analysis;
  * limitations under the License.
  */
 
-import java.util.Map;
-
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
 import org.apache.lucene.analysis.util.MultiTermAwareComponent;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
-import org.apache.lucene.analysis.TokenStream;
 
-/** 
- * A wrapper for the {@link ASCIIFoldingFilter}. It retains the original token and returns the 
+import java.util.Map;
+
+/**
+ * A wrapper for the {@link ASCIIFoldingFilter}. It retains the original token and returns the
  * ASCII folded variant.
- * 
+ * <p>
  * It is little bit crazy, because we have to wrap the ASCII filter with two other filters
  * in order to get to the original value.
- *
  */
 public class ASCIIDuplicatingFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
-  public ASCIIDuplicatingFilterFactory(Map<String,String> args) {
-    super(args);
-    if (!args.isEmpty()) {
-      throw new IllegalArgumentException("Unknown parameter(s): " + args);
+    public ASCIIDuplicatingFilterFactory(Map<String, String> args) {
+        super(args);
+        if (!args.isEmpty()) {
+            throw new IllegalArgumentException("Unknown parameter(s): " + args);
+        }
     }
-  }
 
-  public OnChangeDuplicatingFilter create(TokenStream input) {
-    return new OnChangeDuplicatingFilter(new ASCIIFoldingFilter(new DuplicatingFilter(input)));
-  }
+    public OnChangeDuplicatingFilter create(TokenStream input) {
+        return new OnChangeDuplicatingFilter(new ASCIIFoldingFilter(new DuplicatingFilter(input)));
+    }
 
-  public AbstractAnalysisFactory getMultiTermComponent() {
-	return this;
-  }
+    public AbstractAnalysisFactory getMultiTermComponent() {
+        return this;
+    }
 }
 

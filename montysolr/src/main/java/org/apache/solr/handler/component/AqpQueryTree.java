@@ -1,7 +1,5 @@
 package org.apache.solr.handler.component;
 
-import java.io.IOException;
-
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
@@ -11,11 +9,9 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.search.AqpAdsabsQParser;
-import org.apache.solr.search.QParser;
-import org.apache.solr.search.QParserPlugin;
-import org.apache.solr.search.QueryParsing;
-import org.apache.solr.search.SyntaxError;
+import org.apache.solr.search.*;
+
+import java.io.IOException;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -38,69 +34,67 @@ import org.apache.solr.search.SyntaxError;
  * Returns the JSON representation of the query syntax tree
  * useful for parsing query (providing feedback to the user;
  * used by UI Bumblebee)
- * 
  */
 public class AqpQueryTree extends SearchComponent {
-  
-  public static final String COMPONENT_NAME = "qtree";
-  
-  @Override
-  public void prepare(ResponseBuilder rb) throws IOException {
-    SolrQueryRequest req = rb.req;
-    SolrParams params = req.getParams();
-    if (!params.getBool(COMPONENT_NAME, true)) {
-      return;
-    }
-    SolrQueryResponse rsp = rb.rsp;
-    
-    
-    String defType = params.get(QueryParsing.DEFTYPE,QParserPlugin.DEFAULT_QTYPE);
-    
-    // get it from the response builder to give a different component a chance
-    // to set it.
-    String queryString = rb.getQueryString();
-    if (queryString == null) {
-      // this is the normal way it's set.
-      queryString = params.get( CommonParams.Q );
-    }
-    
-    QParser parser;
-    try {
-      parser = QParser.getParser(queryString, defType, req);
-      
-      if (parser instanceof AqpAdsabsQParser) {
-        AqpQueryParser aqpParser = ((AqpAdsabsQParser) parser).getParser();
-        SyntaxParser syntaxParser = aqpParser.getSyntaxParser();
-        QueryNode queryTree = syntaxParser.parse(queryString, null);
-        if (queryTree instanceof AqpANTLRNode) {
-          if (params.get(CommonParams.WT, null) == "xml") {
-            //System.err.println(((AqpANTLRNode) queryTree).toJson());
-            rsp.add("qtree", ((AqpANTLRNode) queryTree).toString());
-          }
-          else {
-            //System.err.println(((AqpANTLRNode) queryTree).toString());
-            rsp.add("qtree", ((AqpANTLRNode) queryTree).toJson());
-          }
+
+    public static final String COMPONENT_NAME = "qtree";
+
+    @Override
+    public void prepare(ResponseBuilder rb) throws IOException {
+        SolrQueryRequest req = rb.req;
+        SolrParams params = req.getParams();
+        if (!params.getBool(COMPONENT_NAME, true)) {
+            return;
         }
-      }
-      
-    } catch (QueryNodeParseException e) {
-      rsp.add("qtreeError", e.getMessage());
-    } catch (SyntaxError e) {
-	    rsp.add("qtreeError", e.getMessage());
+        SolrQueryResponse rsp = rb.rsp;
+
+
+        String defType = params.get(QueryParsing.DEFTYPE, QParserPlugin.DEFAULT_QTYPE);
+
+        // get it from the response builder to give a different component a chance
+        // to set it.
+        String queryString = rb.getQueryString();
+        if (queryString == null) {
+            // this is the normal way it's set.
+            queryString = params.get(CommonParams.Q);
+        }
+
+        QParser parser;
+        try {
+            parser = QParser.getParser(queryString, defType, req);
+
+            if (parser instanceof AqpAdsabsQParser) {
+                AqpQueryParser aqpParser = ((AqpAdsabsQParser) parser).getParser();
+                SyntaxParser syntaxParser = aqpParser.getSyntaxParser();
+                QueryNode queryTree = syntaxParser.parse(queryString, null);
+                if (queryTree instanceof AqpANTLRNode) {
+                    if (params.get(CommonParams.WT, null) == "xml") {
+                        //System.err.println(((AqpANTLRNode) queryTree).toJson());
+                        rsp.add("qtree", queryTree.toString());
+                    } else {
+                        //System.err.println(((AqpANTLRNode) queryTree).toString());
+                        rsp.add("qtree", ((AqpANTLRNode) queryTree).toJson());
+                    }
+                }
+            }
+
+        } catch (QueryNodeParseException e) {
+            rsp.add("qtreeError", e.getMessage());
+        } catch (SyntaxError e) {
+            rsp.add("qtreeError", e.getMessage());
+        }
+
+
     }
-    
-    
-  }
-  
-  @Override
-  public void process(ResponseBuilder rb) throws IOException {
-    // do nothing
-  }
-  
-  @Override
-  public String getDescription() {
-    return null;
-  }
-  
+
+    @Override
+    public void process(ResponseBuilder rb) throws IOException {
+        // do nothing
+    }
+
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
 }

@@ -7,82 +7,82 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
 public class AqpRequestParamsImpl extends AttributeImpl
-	implements AqpRequestParams {
-	
-	private static final long serialVersionUID = -1243402092650568132L;
-	
-	private SolrQueryRequest req;
-	private SolrQueryResponse rsp;
-	private SolrParams localParams;
-	private SolrParams params;
-	private String query;
-	
-	public SolrQueryRequest getRequest() {
-		return req;
-	}
+        implements AqpRequestParams {
 
-	public void setRequest(SolrQueryRequest req) {
-		this.req = req;
-	}
+    private static final long serialVersionUID = -1243402092650568132L;
 
-	public SolrQueryResponse getResponse() {
-		return rsp;
-	}
+    private SolrQueryRequest req;
+    private SolrQueryResponse rsp;
+    private SolrParams localParams;
+    private SolrParams params;
+    private String query;
 
-	public void setResponse(SolrQueryResponse rsp) {
-		this.rsp = rsp;
-	}
+    public SolrQueryRequest getRequest() {
+        return req;
+    }
 
-	@Override
-	public void clear() {
-		req = null;
-		rsp = null;
-		params = null;
-		localParams = null;
-	}
+    public void setRequest(SolrQueryRequest req) {
+        this.req = req;
+    }
 
-	@Override
-	public void copyTo(AttributeImpl target) {
-		AqpRequestParams t = (AqpRequestParams) target;
-		t.setLocalParams(localParams);
-		t.setParams(params);
-		t.setQueryString(query);
-		t.setRequest(req);
-		t.setResponse(rsp);
-	}
+    public SolrQueryResponse getResponse() {
+        return rsp;
+    }
 
-	public void setLocalParams(SolrParams localParams) {
-		this.localParams = localParams;
-	}
+    public void setResponse(SolrQueryResponse rsp) {
+        this.rsp = rsp;
+    }
 
-	public void setParams(SolrParams params) {
-		this.params = params;
-	}
+    @Override
+    public void clear() {
+        req = null;
+        rsp = null;
+        params = null;
+        localParams = null;
+    }
 
-	public SolrParams getLocalParams() {
-		return localParams;
-	}
+    @Override
+    public void copyTo(AttributeImpl target) {
+        AqpRequestParams t = (AqpRequestParams) target;
+        t.setLocalParams(localParams);
+        t.setParams(params);
+        t.setQueryString(query);
+        t.setRequest(req);
+        t.setResponse(rsp);
+    }
 
-	public SolrParams getParams() {
-		return params;
-	}
+    public void setLocalParams(SolrParams localParams) {
+        this.localParams = localParams;
+    }
 
-	public String getQueryString() {
-		return query;
-	}
+    public void setParams(SolrParams params) {
+        this.params = params;
+    }
 
-	public void setQueryString(String query) {
-		this.query = query;
-	}
+    public SolrParams getLocalParams() {
+        return localParams;
+    }
 
-  @Override
-  public void reflectWith(AttributeReflector reflector) {
-    reflector.reflect(AqpRequestParams.class, "req", req);
-    reflector.reflect(AqpRequestParams.class, "rsp", rsp);
-    reflector.reflect(AqpRequestParams.class, "localParams", localParams);
-    reflector.reflect(AqpRequestParams.class, "params", params);
-    reflector.reflect(AqpRequestParams.class, "query", query);
-    
-  }
-	
+    public SolrParams getParams() {
+        return params;
+    }
+
+    public String getQueryString() {
+        return query;
+    }
+
+    public void setQueryString(String query) {
+        this.query = query;
+    }
+
+    @Override
+    public void reflectWith(AttributeReflector reflector) {
+        reflector.reflect(AqpRequestParams.class, "req", req);
+        reflector.reflect(AqpRequestParams.class, "rsp", rsp);
+        reflector.reflect(AqpRequestParams.class, "localParams", localParams);
+        reflector.reflect(AqpRequestParams.class, "params", params);
+        reflector.reflect(AqpRequestParams.class, "query", query);
+
+    }
+
 }

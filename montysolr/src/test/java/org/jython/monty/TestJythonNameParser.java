@@ -1,11 +1,11 @@
 package org.jython.monty;
 
-import java.util.Map;
-
 import org.apache.lucene.util.LuceneTestCase;
 import org.jython.JythonObjectFactory;
 import org.jython.monty.interfaces.JythonNameParser;
 import org.python.core.PySystemState;
+
+import java.util.Map;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -25,39 +25,39 @@ import org.python.core.PySystemState;
  */
 
 public class TestJythonNameParser extends LuceneTestCase {
-  
-  
-  public void tearDown() throws Exception {
-    System.clearProperty("python.cachedir.skip");
-    System.clearProperty("python.console.encoding");
-    super.tearDown();
-  }
-  
-  public void test() {
-    //PythonInterpreter interp = new PythonInterpreter();
-    //interp.exec("import sys; print sys.path");
-    //interp.exec("sys.path.append('/var/lib/montysolr/perpetuum/python/lib/python2.7/site-packages')");
-    
-    PySystemState state = new PySystemState();
-    JythonObjectFactory factory = new JythonObjectFactory(state, JythonNameParser.class, "jython_name_parser", "HumanParser");
-    
-    JythonNameParser instance = (JythonNameParser) factory.createObject();
-    
-    Map<String,String> res = instance.parse_human_name("Jimmi Hendrix");
-    assertEquals(res.get("First"), "Jimmi");
-    assertEquals(res.get("Last"), "Hendrix");
-    
-    for (int i=0; i<100; i++) {
-      res = instance.parse_human_name("Jimmi Hendrix");
-      if (i % 100 == 0) {
-        //System.out.println(i);
-      }
+
+
+    public void tearDown() throws Exception {
+        System.clearProperty("python.cachedir.skip");
+        System.clearProperty("python.console.encoding");
+        super.tearDown();
     }
 
-    res = instance.parse_human_name("Stephen M'   Donald");
-    assertEquals(res.get("First"), "Stephen");
-    assertEquals(res.get("Last"), "M'Donald");
-    
-  }
-  
+    public void test() {
+        //PythonInterpreter interp = new PythonInterpreter();
+        //interp.exec("import sys; print sys.path");
+        //interp.exec("sys.path.append('/var/lib/montysolr/perpetuum/python/lib/python2.7/site-packages')");
+
+        PySystemState state = new PySystemState();
+        JythonObjectFactory factory = new JythonObjectFactory(state, JythonNameParser.class, "jython_name_parser", "HumanParser");
+
+        JythonNameParser instance = (JythonNameParser) factory.createObject();
+
+        Map<String, String> res = instance.parse_human_name("Jimmi Hendrix");
+        assertEquals(res.get("First"), "Jimmi");
+        assertEquals(res.get("Last"), "Hendrix");
+
+        for (int i = 0; i < 100; i++) {
+            res = instance.parse_human_name("Jimmi Hendrix");
+            if (i % 100 == 0) {
+                //System.out.println(i);
+            }
+        }
+
+        res = instance.parse_human_name("Stephen M'   Donald");
+        assertEquals(res.get("First"), "Stephen");
+        assertEquals(res.get("Last"), "M'Donald");
+
+    }
+
 }

@@ -10,22 +10,21 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
  * Looks at the QueryNode(s) and translates the field name if we have a mapping
  * for it. It is used to change the field names on-the-fly. It does the same
  * thing as AqpFieldMapperProcessor
- * 
+ *
  * @see QueryConfigHandler
- * 
  */
 public class AqpAdsabsFieldMapperProcessorPostAnalysis extends AqpFieldMapperProcessor {
 
 
-	public AqpAdsabsFieldMapperProcessorPostAnalysis() {
-	  super();
-	  // empty constructor
-	}
-	
-	@Override
-  public QueryNode process(QueryNode queryTree) throws QueryNodeException {
-	  mapKey = AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS;
-    return super.process(queryTree);
-  }
-	
+    public AqpAdsabsFieldMapperProcessorPostAnalysis() {
+        super();
+        // empty constructor
+    }
+
+    @Override
+    public QueryNode process(QueryNode queryTree) throws QueryNodeException {
+        mapKey = AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS;
+        return super.process(queryTree);
+    }
+
 }

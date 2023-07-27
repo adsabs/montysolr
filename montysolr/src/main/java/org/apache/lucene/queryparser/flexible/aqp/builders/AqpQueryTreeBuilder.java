@@ -7,9 +7,9 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,88 +28,88 @@ import org.apache.lucene.search.Query;
 /**
  * This query tree builder only defines the necessary methods for
  * debugging. 
- * 
+ *
  * @see QueryTreeBuilder
  * @see StandardQueryNodeProcessorPipeline
  */
 public class AqpQueryTreeBuilder extends QueryTreeBuilder implements
-    StandardQueryBuilder {
-  
-  public final static String SYNONYMS = "Treat_as_synonyms";
-  
-  private boolean debug = false;
-  private int counter = 0;
-  
-  public AqpQueryTreeBuilder(boolean debug) {
-    this.setDebug(debug);
-    init();
-  }
+        StandardQueryBuilder {
 
-  public AqpQueryTreeBuilder() {
-    init();
-  }
+    public final static String SYNONYMS = "Treat_as_synonyms";
 
-  public void setDebug(boolean val) {
-  	if (val != debug) {
-  		debug = val;
-  		init();
-  	}
-  	debug = val;
-  }
-  
-  public boolean isInDebugMode() {
-  	return debug;
-  }
-  
-  public void init() {
-  	throw new IllegalAccessError("AqpQueryTreeBuilder must be subclassed and has the init() method");
-  }
+    private boolean debug = false;
+    private int counter = 0;
 
-  @Override
-  public Query build(QueryNode queryNode) throws QueryNodeException {
-    this.counter = 0;
-    return (Query) super.build(queryNode);
-  }
-
-
-  public void setBuilder(Class<? extends QueryNode> queryNodeClass,
-      QueryBuilder builder) {
-    if (this.debug) {
-      super.setBuilder(queryNodeClass, new DebuggingNodeBuilder(queryNodeClass,
-          builder));
-    } else {
-      super.setBuilder(queryNodeClass, builder);
-    }
-  }
-
-  class DebuggingNodeBuilder implements QueryBuilder {
-    private Class<? extends QueryNode> clazz = null;
-    private QueryBuilder realBuilder = null;
-
-    DebuggingNodeBuilder(Class<? extends QueryNode> queryNodeClass,
-        QueryBuilder builder) {
-      clazz = queryNodeClass;
-      realBuilder = builder;
+    public AqpQueryTreeBuilder(boolean debug) {
+        this.setDebug(debug);
+        init();
     }
 
-    public Object build(QueryNode queryNode) throws QueryNodeException {
-      System.out.println("--------------------------------------------");
-      System.out.println("step     " + counter++ + ".");
-      System.out.println("builder: " + realBuilder.getClass().getName());
-      System.out.println("node:    " + clazz.getName());
-      System.out.println(queryNode.toString());
-      System.out.println("   -->");
-      Object result = realBuilder.build(queryNode);
-      if (result != null) {
-        System.out.println(((Query) result).toString() + "  <"
-            + result.getClass().getName() + ">");
-      } else {
-        System.out.println("null");
-      }
-      System.out.println("--------------------------------------------");
-      return result;
+    public AqpQueryTreeBuilder() {
+        init();
     }
 
-  };
+    public void setDebug(boolean val) {
+        if (val != debug) {
+            debug = val;
+            init();
+        }
+        debug = val;
+    }
+
+    public boolean isInDebugMode() {
+        return debug;
+    }
+
+    public void init() {
+        throw new IllegalAccessError("AqpQueryTreeBuilder must be subclassed and has the init() method");
+    }
+
+    @Override
+    public Query build(QueryNode queryNode) throws QueryNodeException {
+        this.counter = 0;
+        return (Query) super.build(queryNode);
+    }
+
+
+    public void setBuilder(Class<? extends QueryNode> queryNodeClass,
+                           QueryBuilder builder) {
+        if (this.debug) {
+            super.setBuilder(queryNodeClass, new DebuggingNodeBuilder(queryNodeClass,
+                    builder));
+        } else {
+            super.setBuilder(queryNodeClass, builder);
+        }
+    }
+
+    class DebuggingNodeBuilder implements QueryBuilder {
+        private Class<? extends QueryNode> clazz = null;
+        private QueryBuilder realBuilder = null;
+
+        DebuggingNodeBuilder(Class<? extends QueryNode> queryNodeClass,
+                             QueryBuilder builder) {
+            clazz = queryNodeClass;
+            realBuilder = builder;
+        }
+
+        public Object build(QueryNode queryNode) throws QueryNodeException {
+            System.out.println("--------------------------------------------");
+            System.out.println("step     " + counter++ + ".");
+            System.out.println("builder: " + realBuilder.getClass().getName());
+            System.out.println("node:    " + clazz.getName());
+            System.out.println(queryNode.toString());
+            System.out.println("   -->");
+            Object result = realBuilder.build(queryNode);
+            if (result != null) {
+                System.out.println(result + "  <"
+                        + result.getClass().getName() + ">");
+            } else {
+                System.out.println("null");
+            }
+            System.out.println("--------------------------------------------");
+            return result;
+        }
+
+    }
 
 }

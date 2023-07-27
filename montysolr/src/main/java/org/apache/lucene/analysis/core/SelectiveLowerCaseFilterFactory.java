@@ -17,38 +17,36 @@ package org.apache.lucene.analysis.core;
  * limitations under the License.
  */
 
-import java.util.Map;
-
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
 import org.apache.lucene.analysis.util.MultiTermAwareComponent;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
 
+import java.util.Map;
+
 /**
- * Factory for {@link LowerCaseFilter}. 
+ * Factory for {@link LowerCaseFilter}.
  * <pre class="prettyprint" >
  * &lt;fieldType name="text_lwrcase" class="solr.TextField" positionIncrementGap="100"&gt;
  *   &lt;analyzer&gt;
  *     &lt;tokenizer class="solr.WhitespaceTokenizerFactory"/&gt;
  *     &lt;filter class="solr.LowerCaseFilterFactory"/&gt;
  *   &lt;/analyzer&gt;
- * &lt;/fieldType&gt;</pre> 
- *
+ * &lt;/fieldType&gt;</pre>
  */
 public class SelectiveLowerCaseFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
-  public SelectiveLowerCaseFilterFactory(Map<String,String> args) {
-    super(args);
-    if (!args.isEmpty()) {
-      throw new IllegalArgumentException("Unknown parameters: " + args);
+    public SelectiveLowerCaseFilterFactory(Map<String, String> args) {
+        super(args);
+        if (!args.isEmpty()) {
+            throw new IllegalArgumentException("Unknown parameters: " + args);
+        }
     }
-  }
 
-  public SelectiveLowerCaseFilter create(TokenStream input) {
-    return new SelectiveLowerCaseFilter(luceneMatchVersion,input);
-  }
-  
-  public AbstractAnalysisFactory getMultiTermComponent() {
-    return this;
-  }
+    public SelectiveLowerCaseFilter create(TokenStream input) {
+        return new SelectiveLowerCaseFilter(luceneMatchVersion, input);
+    }
+
+    public AbstractAnalysisFactory getMultiTermComponent() {
+        return this;
+    }
 }

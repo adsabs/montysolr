@@ -8,14 +8,15 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.util.Attribute;
 
 public interface AqpFunctionQueryBuilderConfig extends Attribute {
-	
-	
-	public void addProvider(AqpFunctionQueryBuilderProvider provider);
-	public void addProvider(int index, AqpFunctionQueryBuilderProvider provider);
-	
-	public void setBuilder(String funcName, AqpFunctionQueryBuilder builder);
-	
-	public AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config)
-		throws QueryNodeException;
-	
+
+
+    void addProvider(AqpFunctionQueryBuilderProvider provider);
+
+    void addProvider(int index, AqpFunctionQueryBuilderProvider provider);
+
+    void setBuilder(String funcName, AqpFunctionQueryBuilder builder);
+
+    AqpFunctionQueryBuilder getBuilder(String funcName, QueryNode node, QueryConfigHandler config)
+            throws QueryNodeException;
+
 }

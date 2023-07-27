@@ -17,11 +17,7 @@
 
 package org.apache.solr.handler.component;
 
-import static org.apache.solr.core.RequestParams.USEPARAM;
-
-import java.lang.invoke.MethodHandles;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.codahale.metrics.Timer;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.NamedList;
@@ -31,97 +27,97 @@ import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.SyntaxError;
 import org.apache.solr.util.SolrPluginUtils;
-import com.codahale.metrics.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.apache.solr.core.RequestParams.USEPARAM;
+
 /**
- *
  * Since SOLR 4.8 got this [booooo]terrific[/booooo] idea
- * of disallowing content streams for search handlers, 
+ * of disallowing content streams for search handlers,
  * we have to have this new handler which essentially
  * tricks {@link SearchHandler} into obedience
- *
  */
-public class BigQuerySearchHandler extends SearchHandler
-{
+public class BigQuerySearchHandler extends SearchHandler {
 
- //Statistics
- private final AtomicLong numRequests = new AtomicLong();
- private final AtomicLong numServerErrors = new AtomicLong();
- private final AtomicLong numClientErrors = new AtomicLong();
- private final AtomicLong numTimeouts = new AtomicLong();
- private final Timer requestTimes = new Timer();
- private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
- 
- 
-  
-  @Override
-  public void handleRequest(SolrQueryRequest req, SolrQueryResponse rsp) {
-    PluginInfo pluginInfo = this.getPluginInfo();
-    numRequests.incrementAndGet();
-    Timer.Context timer = requestTimes.time();
-    try {
-      if(pluginInfo != null && pluginInfo.attributes.containsKey(USEPARAM)) req.getContext().put(USEPARAM,pluginInfo.attributes.get(USEPARAM));
-      
-      Iterable<ContentStream> csms = req.getContentStreams();
-      if (csms != null) {
-        IgnoreFirstIteratorArrayList<ContentStream> il = new IgnoreFirstIteratorArrayList<ContentStream>();
-        for (ContentStream cs: csms) {
-          il.add(cs);
-          log.debug("processing content stream:" + cs.getContentType() + " " + cs.getSize());
-        }
-        ((SolrQueryRequestBase) req).setContentStreams(il);
-      }
-      
-      SolrPluginUtils.setDefaults(this, req, defaults, appends, invariants);
-      
-      req.getContext().remove(USEPARAM);
-      rsp.setHttpCaching(httpCaching);
-      handleRequestBody( req, rsp );
-      // count timeouts
-      NamedList header = rsp.getResponseHeader();
-      if(header != null) {
-        Object partialResults = header.get(SolrQueryResponse.RESPONSE_HEADER_PARTIAL_RESULTS_KEY);
-        boolean timedOut = partialResults == null ? false : (Boolean)partialResults;
-        if( timedOut ) {
-          numTimeouts.incrementAndGet();
-          rsp.setHttpCaching(false);
-        }
-      }
-    } catch (Exception e) {
-      boolean incrementErrors = true;
-      boolean isServerError = true;
-      if (e instanceof SolrException) {
-        SolrException se = (SolrException)e;
-        if (se.code() == SolrException.ErrorCode.CONFLICT.code) {
-          incrementErrors = false;
-        } else if (se.code() >= 400 && se.code() < 500) {
-          isServerError = false;
-        }
-      } else {
-        if (e instanceof SyntaxError) {
-          isServerError = false;
-          e = new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
-        }
-      }
+    //Statistics
+    private final AtomicLong numRequests = new AtomicLong();
+    private final AtomicLong numServerErrors = new AtomicLong();
+    private final AtomicLong numClientErrors = new AtomicLong();
+    private final AtomicLong numTimeouts = new AtomicLong();
+    private final Timer requestTimes = new Timer();
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-      rsp.setException(e);
 
-      if (incrementErrors) {
-        SolrException.log(log, e);
+    @Override
+    public void handleRequest(SolrQueryRequest req, SolrQueryResponse rsp) {
+        PluginInfo pluginInfo = this.getPluginInfo();
+        numRequests.incrementAndGet();
+        Timer.Context timer = requestTimes.time();
+        try {
+            if (pluginInfo != null && pluginInfo.attributes.containsKey(USEPARAM))
+                req.getContext().put(USEPARAM, pluginInfo.attributes.get(USEPARAM));
 
-        if (isServerError) {
-          numServerErrors.incrementAndGet();
-        } else {
-          numClientErrors.incrementAndGet();
+            Iterable<ContentStream> csms = req.getContentStreams();
+            if (csms != null) {
+                IgnoreFirstIteratorArrayList<ContentStream> il = new IgnoreFirstIteratorArrayList<ContentStream>();
+                for (ContentStream cs : csms) {
+                    il.add(cs);
+                    log.debug("processing content stream:" + cs.getContentType() + " " + cs.getSize());
+                }
+                ((SolrQueryRequestBase) req).setContentStreams(il);
+            }
+
+            SolrPluginUtils.setDefaults(this, req, defaults, appends, invariants);
+
+            req.getContext().remove(USEPARAM);
+            rsp.setHttpCaching(httpCaching);
+            handleRequestBody(req, rsp);
+            // count timeouts
+            NamedList header = rsp.getResponseHeader();
+            if (header != null) {
+                Object partialResults = header.get(SolrQueryResponse.RESPONSE_HEADER_PARTIAL_RESULTS_KEY);
+                boolean timedOut = partialResults != null && (Boolean) partialResults;
+                if (timedOut) {
+                    numTimeouts.incrementAndGet();
+                    rsp.setHttpCaching(false);
+                }
+            }
+        } catch (Exception e) {
+            boolean incrementErrors = true;
+            boolean isServerError = true;
+            if (e instanceof SolrException) {
+                SolrException se = (SolrException) e;
+                if (se.code() == SolrException.ErrorCode.CONFLICT.code) {
+                    incrementErrors = false;
+                } else if (se.code() >= 400 && se.code() < 500) {
+                    isServerError = false;
+                }
+            } else {
+                if (e instanceof SyntaxError) {
+                    isServerError = false;
+                    e = new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
+                }
+            }
+
+            rsp.setException(e);
+
+            if (incrementErrors) {
+                SolrException.log(log, e);
+
+                if (isServerError) {
+                    numServerErrors.incrementAndGet();
+                } else {
+                    numClientErrors.incrementAndGet();
+                }
+            }
+        } finally {
+            timer.stop();
         }
-      }
     }
-    finally {
-      timer.stop();
-    }
-  }
 }
 
 

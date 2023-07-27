@@ -1,35 +1,33 @@
 package org.apache.solr.analysis.author;
 
-import java.io.IOException;
-
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
+import java.io.IOException;
+
 public final class AuthorDetectAndIgnoreFilter extends TokenFilter {
 
-	private Integer maxlen;
-	private final CharTermAttribute termAtt;
-	
-	protected AuthorDetectAndIgnoreFilter(TokenStream input, Integer maxlen) {
-	  super(input);
-	  this.maxlen = maxlen;
-	  termAtt = addAttribute(CharTermAttribute.class);
-  }
+    private final Integer maxlen;
+    private final CharTermAttribute termAtt;
 
-	@Override
-  public boolean incrementToken() throws IOException {
-		if (!input.incrementToken()) {
-      return false;
+    protected AuthorDetectAndIgnoreFilter(TokenStream input, Integer maxlen) {
+        super(input);
+        this.maxlen = maxlen;
+        termAtt = addAttribute(CharTermAttribute.class);
     }
-	  
-		if (maxlen != null && maxlen != -1) {
-			String[] parts = termAtt.toString().split(" ");
-			if (parts.length > maxlen) {
-				return false;
-			}
-		}
-	  return true;
-  }
+
+    @Override
+    public boolean incrementToken() throws IOException {
+        if (!input.incrementToken()) {
+            return false;
+        }
+
+        if (maxlen != null && maxlen != -1) {
+            String[] parts = termAtt.toString().split(" ");
+            return parts.length <= maxlen;
+        }
+        return true;
+    }
 
 }

@@ -8,15 +8,15 @@ import java.util.Map;
  */
 
 public interface JythonNameParser {
-  /*
-   * Receives an author name; parses it using python name 
-   * parser and returns a dictionary with these elements:
-   * 
-   *    - first
-   *    - middle
-   *    - last
-   *    - suffix
-   *    - title 
-   */
-  public Map<String, String> parse_human_name(String authorName);
+    /*
+     * Receives an author name; parses it using python name
+     * parser and returns a dictionary with these elements:
+     *
+     *    - first
+     *    - middle
+     *    - last
+     *    - suffix
+     *    - title
+     */
+    Map<String, String> parse_human_name(String authorName);
 }

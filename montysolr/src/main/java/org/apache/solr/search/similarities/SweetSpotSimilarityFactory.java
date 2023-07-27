@@ -5,17 +5,16 @@
 
 package org.apache.solr.search.similarities;
 
+import org.apache.lucene.misc.SweetSpotSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
+import org.apache.solr.core.SolrResourceLoader;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaAware;
 import org.apache.solr.schema.SimilarityFactory;
-import org.apache.lucene.misc.SweetSpotSimilarity;
-import org.apache.solr.core.SolrResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jluker
  */
 //public class CustomSimilarityFactory extends SimilarityFactory {
@@ -40,8 +39,8 @@ public class SweetSpotSimilarityFactory extends SimilarityFactory implements Sch
         return sim;
     }
 
-	public void inform(IndexSchema schema) {
-		// do nothing
-	}
+    public void inform(IndexSchema schema) {
+        // do nothing
+    }
 
 }

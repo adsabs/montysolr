@@ -17,16 +17,17 @@
 
 package org.apache.lucene.analysis.pattern;
 
-import java.util.Map;
-
 import org.apache.lucene.analysis.util.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.Operations;
 import org.apache.lucene.util.automaton.RegExp;
 
-/** TODO:rca - remove after ugprade to 6.5
- * 
+import java.util.Map;
+
+/**
+ * TODO:rca - remove after ugprade to 6.5
+ * <p>
  * Factory for {@link SimplePatternSplitTokenizer}, for producing tokens by splitting according to the provided regexp.
  *
  * <p>This tokenizer uses Lucene {@link RegExp} pattern matching to construct distinct tokens
@@ -49,29 +50,30 @@ import org.apache.lucene.util.automaton.RegExp;
  *   &lt;analyzer&gt;
  *     &lt;tokenizer class="solr.SimplePatternSplitTokenizerFactory" pattern="[ \t\r\n]+"/&gt;
  *   &lt;/analyzer&gt;
- * &lt;/fieldType&gt;</pre> 
- * 
- * @lucene.experimental
+ * &lt;/fieldType&gt;</pre>
  *
+ * @lucene.experimental
  * @see SimplePatternSplitTokenizer
  */
 public class SimplePatternSplitTokenizerFactory extends TokenizerFactory {
-  public static final String PATTERN = "pattern";
-  private final Automaton dfa;
-  private final int maxDeterminizedStates;
- 
-  /** Creates a new SimpleSplitPatternTokenizerFactory */
-  public SimplePatternSplitTokenizerFactory(Map<String,String> args) {
-    super(args);
-    maxDeterminizedStates = getInt(args, "maxDeterminizedStates", Operations.DEFAULT_MAX_DETERMINIZED_STATES);
-    dfa = Operations.determinize(new RegExp(require(args, PATTERN)).toAutomaton(), maxDeterminizedStates);
-    if (args.isEmpty() == false) {
-      throw new IllegalArgumentException("Unknown parameters: " + args);
+    public static final String PATTERN = "pattern";
+    private final Automaton dfa;
+    private final int maxDeterminizedStates;
+
+    /**
+     * Creates a new SimpleSplitPatternTokenizerFactory
+     */
+    public SimplePatternSplitTokenizerFactory(Map<String, String> args) {
+        super(args);
+        maxDeterminizedStates = getInt(args, "maxDeterminizedStates", Operations.DEFAULT_MAX_DETERMINIZED_STATES);
+        dfa = Operations.determinize(new RegExp(require(args, PATTERN)).toAutomaton(), maxDeterminizedStates);
+        if (!args.isEmpty()) {
+            throw new IllegalArgumentException("Unknown parameters: " + args);
+        }
     }
-  }
-  
-  @Override
-  public SimplePatternSplitTokenizer create(final AttributeFactory factory) {
-    return new SimplePatternSplitTokenizer(factory, dfa);
-  }
+
+    @Override
+    public SimplePatternSplitTokenizer create(final AttributeFactory factory) {
+        return new SimplePatternSplitTokenizer(factory, dfa);
+    }
 }

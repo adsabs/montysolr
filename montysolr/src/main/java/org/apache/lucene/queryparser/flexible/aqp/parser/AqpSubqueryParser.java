@@ -7,10 +7,10 @@ import org.apache.solr.search.SyntaxError;
 
 public class AqpSubqueryParser {
 
-  
-	public Query parse(FunctionQParser fp) throws SyntaxError {
-		throw new NotImplementedException();
-	}
-	
+
+    public Query parse(FunctionQParser fp) throws SyntaxError {
+        throw new NotImplementedException();
+    }
+
 
 }

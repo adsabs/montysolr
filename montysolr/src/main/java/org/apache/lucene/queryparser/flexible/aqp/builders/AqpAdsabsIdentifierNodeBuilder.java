@@ -9,18 +9,18 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 
 public class AqpAdsabsIdentifierNodeBuilder implements StandardQueryBuilder {
-	
-	public AqpAdsabsIdentifierNodeBuilder() {
-		// empty constructor
-	}
 
-	public Query build(QueryNode queryNode) throws QueryNodeException {
-	    FieldQueryNode fieldNode = (FieldQueryNode) queryNode;
-	    
-        
-	    return new TermQuery(new Term(fieldNode.getFieldAsString(), 
-	    		fieldNode.getTextAsString().toLowerCase()));
+    public AqpAdsabsIdentifierNodeBuilder() {
+        // empty constructor
+    }
 
-	  }
+    public Query build(QueryNode queryNode) throws QueryNodeException {
+        FieldQueryNode fieldNode = (FieldQueryNode) queryNode;
+
+
+        return new TermQuery(new Term(fieldNode.getFieldAsString(),
+                fieldNode.getTextAsString().toLowerCase()));
+
+    }
 
 }

@@ -17,95 +17,96 @@
 package org.apache.lucene.analysis.synonym;
 
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.util.CharsRef;
+import org.apache.lucene.util.CharsRefBuilder;
+
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.text.ParseException;
 import java.util.Arrays;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.util.CharsRef;
-import org.apache.lucene.util.CharsRefBuilder;
-
 /**
  * Parser for wordnet prolog format
  * <p>
  * See http://wordnet.princeton.edu/man/prologdb.5WN.html for a description of the format.
+ *
  * @lucene.experimental
  */
 // TODO: allow you to specify syntactic categories (e.g. just nouns, etc)
 public class NewWordnetSynonymParser extends NewSynonymFilterFactory.SynonymParser {
-  private final boolean expand;
-  
-  public NewWordnetSynonymParser(boolean dedup, boolean expand, Analyzer analyzer) {
-    super(dedup, analyzer);
-    this.expand = expand;
-  }
+    private final boolean expand;
 
-  @Override
-  public void parse(Reader in) throws IOException, ParseException {
-    LineNumberReader br = new LineNumberReader(in);
-    try {
-      String line = null;
-      String lastSynSetID = "";
-      CharsRef synset[] = new CharsRef[8];
-      int synsetSize = 0;
-      
-      while ((line = br.readLine()) != null) {
-        String synSetID = line.substring(2, 11);
+    public NewWordnetSynonymParser(boolean dedup, boolean expand, Analyzer analyzer) {
+        super(dedup, analyzer);
+        this.expand = expand;
+    }
 
-        if (!synSetID.equals(lastSynSetID)) {
-          addInternal(synset, synsetSize);
-          synsetSize = 0;
+    @Override
+    public void parse(Reader in) throws IOException, ParseException {
+        LineNumberReader br = new LineNumberReader(in);
+        try {
+            String line = null;
+            String lastSynSetID = "";
+            CharsRef[] synset = new CharsRef[8];
+            int synsetSize = 0;
+
+            while ((line = br.readLine()) != null) {
+                String synSetID = line.substring(2, 11);
+
+                if (!synSetID.equals(lastSynSetID)) {
+                    addInternal(synset, synsetSize);
+                    synsetSize = 0;
+                }
+
+                if (synset.length <= synsetSize + 1) {
+                    synset = Arrays.copyOf(synset, synset.length * 2);
+                }
+
+                synset[synsetSize] = parseSynonym(line, new CharsRefBuilder());
+                synsetSize++;
+                lastSynSetID = synSetID;
+            }
+
+            // final synset in the file
+            addInternal(synset, synsetSize);
+        } catch (IllegalArgumentException e) {
+            ParseException ex = new ParseException("Invalid synonym rule at line " + br.getLineNumber(), 0);
+            ex.initCause(e);
+            throw ex;
+        } finally {
+            br.close();
+        }
+    }
+
+    private CharsRef parseSynonym(String line, CharsRefBuilder reuse) throws IOException {
+        if (reuse == null) {
+            reuse = new CharsRefBuilder();
         }
 
-        if (synset.length <= synsetSize+1) {
-          synset = Arrays.copyOf(synset, synset.length * 2);
+        int start = line.indexOf('\'') + 1;
+        int end = line.lastIndexOf('\'');
+
+        String text = line.substring(start, end).replace("''", "'");
+        return analyze(text, reuse);
+    }
+
+    private void addInternal(CharsRef[] synset, int size) {
+        if (size <= 1) {
+            return; // nothing to do
         }
-        
-        synset[synsetSize] = parseSynonym(line, new CharsRefBuilder());
-        synsetSize++;
-        lastSynSetID = synSetID;
-      }
-      
-      // final synset in the file
-      addInternal(synset, synsetSize);
-    } catch (IllegalArgumentException e) {
-      ParseException ex = new ParseException("Invalid synonym rule at line " + br.getLineNumber(), 0);
-      ex.initCause(e);
-      throw ex;
-    } finally {
-      br.close();
-    }
-  }
- 
-  private CharsRef parseSynonym(String line, CharsRefBuilder reuse) throws IOException {
-    if (reuse == null) {
-      reuse = new CharsRefBuilder();
-    }
-    
-    int start = line.indexOf('\'')+1;
-    int end = line.lastIndexOf('\'');
-    
-    String text = line.substring(start, end).replace("''", "'");
-    return analyze(text, reuse);
-  }
-  
-  private void addInternal(CharsRef synset[], int size) {
-    if (size <= 1) {
-      return; // nothing to do
-    }
-    
-    if (expand) {
-      for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-          add(synset[i], synset[j], false);
+
+        if (expand) {
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    add(synset[i], synset[j], false);
+                }
+            }
+        } else {
+            for (int i = 0; i < size; i++) {
+                add(synset[i], synset[0], false);
+            }
         }
-      }
-    } else {
-      for (int i = 0; i < size; i++) {
-        add(synset[i], synset[0], false);
-      }
     }
-  }
 }
