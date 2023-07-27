@@ -1,11 +1,10 @@
 package org.apache.solr.handler.batch;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import monty.solr.util.MontySolrSetup;
 
+import monty.solr.util.SolrTestSetup;
 import org.apache.solr.SolrTestCaseJ4;
 import org.junit.BeforeClass;
 
@@ -15,13 +14,13 @@ public class BatchProviderTest extends SolrTestCaseJ4 {
 	public static void beforeClass() throws Exception {
 		
 		System.setProperty("solr.allow.unsafe.resourceloading", "true");
-		schemaString = MontySolrSetup.getMontySolrHome()
-		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-batch-provider.xml";
+		schemaString = "solr/collection1/conf/schema-batch-provider.xml";
 		
-		configString = MontySolrSetup.getMontySolrHome()
-		+ "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-batch-provider.xml";
+		configString = "solr/collection1/conf/solrconfig-batch-provider.xml";
+
+		//System.out.println(BatchProviderTest.class.getResource(configString).toString());
 		
-		initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+		SolrTestSetup.initCore(configString, schemaString);
 	}
 	
 	
