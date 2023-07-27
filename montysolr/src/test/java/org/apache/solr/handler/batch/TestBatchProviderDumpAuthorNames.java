@@ -3,7 +3,7 @@ package org.apache.solr.handler.batch;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.solr.request.SolrQueryRequest;
 
-import java.io.File;
+import java.nio.file.Files;
 
 public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
 
@@ -40,7 +40,8 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
 
 
         BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-        String tmpDir = new File("./temp").getAbsolutePath();
+        String tmpDir = Files.createTempDirectory(BatchProviderDumpAuthorNames.class.getSimpleName())
+                .toAbsolutePath().toString();
         BatchProviderI provider = new BatchProviderDumpAuthorNames();
 
         SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "sourceField", "author", "analyzerField", "author_collector");
