@@ -21,7 +21,7 @@ dependencies {
 	implementation("org.apache.lucene:lucene-queryparser:7.7.3")
 
 	implementation("com.anyascii:anyascii:0.3.2")
-	implementation("org.python:jython:2.7.3")
+	implementation("org.python:jython-standalone:2.7.3")
 
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.antlr:stringtemplate:3.2.1")
@@ -33,6 +33,10 @@ java {
 	toolchain {
 		languageVersion.set(JavaLanguageVersion.of(8))
 	}
+}
+
+tasks.withType<Test>().all {
+	jvmArgs("-Djava.security.egd=file:/dev/./urandom")
 }
 
 sourceSets {
