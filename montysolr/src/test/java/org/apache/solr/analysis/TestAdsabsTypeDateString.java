@@ -275,7 +275,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
          */
 
         for (int i = 1900; i < 2025; i++) {
-            assertQ(Integer.toString(i),
+            assertQ(req("q", Integer.toString(i)),
                     "//*[@numFound='1']"
             );
         }
