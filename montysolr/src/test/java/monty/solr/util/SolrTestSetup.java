@@ -17,6 +17,7 @@ public class SolrTestSetup extends SolrTestCaseJ4 {
         SolrTestCaseJ4.initCore();
 
         // Create a resource loader + config that use our test class' resource loader
+        System.setProperty("solr.allow.unsafe.resourceloading", "true");
         Path solrPath = Files.createTempDirectory("montysolr");
         SolrResourceLoader loader = new SolrResourceLoader(solrPath,
                 SolrTestSetup.class.getClassLoader());

@@ -11,13 +11,9 @@ public class BatchProviderTest extends SolrTestCaseJ4 {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
         schemaString = "solr/collection1/conf/schema-batch-provider.xml";
 
         configString = "solr/collection1/conf/solrconfig-batch-provider.xml";
-
-        //System.out.println(BatchProviderTest.class.getResource(configString).toString());
 
         SolrTestSetup.initCore(configString, schemaString);
     }
