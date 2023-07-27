@@ -19,7 +19,7 @@ package org.adsabs;
 
 
 import monty.solr.util.MontySolrQueryTestCase;
-import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
@@ -54,18 +54,11 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(), MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf");
+        schemaString = "deploy/adsabs/server/solr/collection1/conf/schema.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
+        configString = "deploy/adsabs/server/solr/collection1/conf/solrconfig.xml";
 
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-                + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
 
