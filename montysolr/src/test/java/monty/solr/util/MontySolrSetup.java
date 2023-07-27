@@ -154,7 +154,7 @@ public class MontySolrSetup {
 	public static String getMontySolrHome() {
 		File base = new File(System.getProperty("user.dir"));
 		// File base = getFile("solr/conf").getAbsoluteFile();
-		while (!new File(base, "contrib/montysolr.md").exists()) {
+		while (!new File(base, "montysolr/montysolr.md").exists()) {
 			base = base.getParentFile();
 		}
 		return base.getAbsolutePath().replace('\\', '/');
