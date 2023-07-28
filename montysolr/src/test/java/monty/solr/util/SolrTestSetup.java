@@ -59,7 +59,7 @@ public class SolrTestSetup extends SolrTestCaseJ4 {
         SolrTestCaseJ4.testSolrHome = solrPath;
     }
 
-    private static URL getRepoUrl() throws URISyntaxException, MalformedURLException {
+    public static URL getRepoUrl() throws URISyntaxException, MalformedURLException {
         Class<SolrTestSetup> clazz = SolrTestSetup.class;
         ProtectionDomain protectionDomain = clazz.getProtectionDomain();
         CodeSource codeSource = protectionDomain.getCodeSource();
@@ -72,7 +72,7 @@ public class SolrTestSetup extends SolrTestCaseJ4 {
         return filePath.toUri().toURL();
     }
 
-    private static URL getRepoUrl(Path subpath) throws URISyntaxException, MalformedURLException {
+    public static URL getRepoUrl(Path subpath) throws URISyntaxException, MalformedURLException {
         return Paths.get(getRepoUrl().toURI()).resolve(subpath).toUri().toURL();
     }
 }
