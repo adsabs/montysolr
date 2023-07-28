@@ -18,6 +18,7 @@ package org.apache.solr.search;
 
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.util.RefCounted;
 import org.junit.BeforeClass;
@@ -37,22 +38,15 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        schemaString = "solr/collection1/conf/schema-citations-transformer.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" +
-                "schema-citations-transformer.xml";
+        configString = "solr/collection1/conf/citation-cache-solrconfig.xml";
 
-        configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/" +
-                "citation-cache-solrconfig.xml";
-
-        tmpdir = Files.createTempDirectory("citation-cache", PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx")));
-
-        initCore(configString, schemaString, tmpdir.getFileName().toString());
-
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
     private CitationLRUCache cache;
-    private static Path tmpdir;
+    private Path tmpdir;
 
 
     public void createCache() throws Exception {
@@ -111,8 +105,8 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
 
     @Override
     public void setUp() throws Exception {
-
         super.setUp();
+        tmpdir = createTempDir();
         createCache();
     }
 

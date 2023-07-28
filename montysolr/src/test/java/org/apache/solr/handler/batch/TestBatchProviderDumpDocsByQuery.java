@@ -12,7 +12,7 @@ public class TestBatchProviderDumpDocsByQuery extends BatchProviderTest {
         createIndex();
 
         BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-        String tmpDir = new File("./temp").getAbsolutePath();
+        String tmpDir = createTempDir().toAbsolutePath().toString();
         SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "q", "id:1");
 
         BatchProviderDumpDocsByQuery provider = new BatchProviderDumpDocsByQuery();

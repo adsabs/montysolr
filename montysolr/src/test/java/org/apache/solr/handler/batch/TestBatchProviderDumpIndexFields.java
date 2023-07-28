@@ -24,7 +24,7 @@ public class TestBatchProviderDumpIndexFields extends BatchProviderTest {
 
 
         BatchHandlerRequestQueue queue = new BatchHandlerRequestQueue();
-        String tmpDir = new File("./temp").getAbsolutePath();
+        String tmpDir = createTempDir().toAbsolutePath().toString();
         SolrQueryRequest req = req("jobid", "00000", "#workdir", tmpDir, "q", "title:wall OR title:peace",
                 "fields", "id,title,floatf");
 
