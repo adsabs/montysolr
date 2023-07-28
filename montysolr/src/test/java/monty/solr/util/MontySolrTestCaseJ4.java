@@ -12,7 +12,6 @@ import org.apache.solr.common.util.XML;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.BaseTestHarness;
 import org.apache.solr.util.TestHarness;
 import org.slf4j.Logger;
@@ -50,49 +49,8 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
         super.tearDown();
     }
 
-    /**
-     * Call initCore in @BeforeClass to instantiate a solr core in your test
-     * class. deleteCore will be called for you via SolrTestCaseJ4 @AfterClass
-     */
-    public static void initCore(String config, String schema) throws Exception {
-        initCore(config, schema, TEST_HOME);
-    }
-
-    /**
-     * Call initCore in @BeforeClass to instantiate a solr core in your test
-     * class. deleteCore will be called for you via SolrTestCaseJ4 @AfterClass
-     */
-    public static void initCore(String config, String schema, String solrHome)
-            throws Exception {
-        startTrackingSearchers();
-        configString = config;
-        schemaString = schema;
-        if (solrHome != null) {
-            System.setProperty("solr.solr.home", solrHome);
-        }
-        initCore();
-    }
-
     static long numOpens;
     static long numCloses;
-
-    protected static void startTrackingSearchers() {
-        numOpens = SolrIndexSearcher.numOpens.get();
-        numCloses = SolrIndexSearcher.numCloses.get();
-    }
-
-    protected static void endTrackingSearchers() {
-        long endNumOpens = SolrIndexSearcher.numOpens.get();
-        long endNumCloses = SolrIndexSearcher.numCloses.get();
-
-        if (endNumOpens - numOpens != endNumCloses - numCloses) {
-            String msg = "ERROR: SolrIndexSearcher opens="
-                    + (endNumOpens - numOpens) + " closes="
-                    + (endNumCloses - numCloses);
-            log.error(msg);
-            // fail(msg);
-        }
-    }
 
     /**
      * Causes an exception matching the regex pattern to not be logged.
@@ -189,32 +147,6 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 
     private static String factoryProp;
 
-    public static void initCore() throws Exception {
-        log.info("####initCore");
-
-        ignoreException("ignore_exception");
-        factoryProp = System.getProperty("solr.directoryFactory");
-        if (factoryProp == null) {
-            System.setProperty("solr.directoryFactory",
-                    "solr.RAMDirectoryFactory");
-        }
-
-        if (dataDir == null) {
-            createTempDir();
-        }
-
-        // other methods like starting a jetty instance need these too
-        System.setProperty("solr.test.sys.prop1", "propone");
-        System.setProperty("solr.test.sys.prop2", "proptwo");
-
-        String configFile = getSolrConfigFile();
-        if (configFile != null) {
-            createCore();
-
-        }
-        log.info("####initCore end");
-    }
-
     public static void createCore() {
         solrConfig = TestHarness.createConfig(getSolrHome(), getSolrConfigFile());
         h = new TestHarness(dataDir.getAbsolutePath(),
@@ -240,43 +172,6 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
      */
     public void preTearDown() {
         log.info("####PRETEARDOWN " + getTestName());
-    }
-
-    /**
-     * Shuts down the test harness, and makes the best attempt possible to
-     * delete dataDir, unless the system property "solr.test.leavedatadir" is
-     * set.
-     */
-    public static void deleteCore() throws Exception {
-        log.info("###deleteCore");
-        if (h != null) {
-            h.close();
-        }
-        if (dataDir != null) {
-            String skip = System.getProperty("solr.test.leavedatadir");
-            if (null != skip && 0 != skip.trim().length()) {
-                System.err
-                        .println("NOTE: per solr.test.leavedatadir, dataDir will not be removed: "
-                                + dataDir.getAbsolutePath());
-            } else {
-                if (!recurseDelete(dataDir)) {
-                    System.err.println("!!!! WARNING: best effort to remove "
-                            + dataDir.getAbsolutePath() + " FAILED !!!!!");
-                }
-            }
-        }
-
-        if (factoryProp == null) {
-            System.clearProperty("solr.directoryFactory");
-        }
-
-        dataDir = null;
-        solrConfig = null;
-        h = null;
-        lrf = null;
-        configString = schemaString = null;
-
-        endTrackingSearchers();
     }
 
     /**
@@ -627,19 +522,6 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
         }
     }
 
-    public static boolean recurseDelete(File f) {
-        if (f.isDirectory()) {
-            for (File sub : f.listFiles()) {
-                if (!recurseDelete(sub)) {
-                    System.err.println("!!!! WARNING: best effort to remove "
-                            + sub.getAbsolutePath() + " FAILED !!!!!");
-                    return false;
-                }
-            }
-        }
-        return f.delete();
-    }
-
     public void clearIndex() {
         assertU(delQ("*:*"));
     }
@@ -678,17 +560,5 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
      */
 
     public static String MONTYSOLR_HOME = MontySolrSetup.getMontySolrHome();
-    private static final String SOLR_HOME = MontySolrSetup.getSolrHome();
-    private static final String SOURCE_HOME = MONTYSOLR_HOME
-            + "/src/test-files";
-    public static String TEST_HOME = SOURCE_HOME + "/solr";
-    public static String WEBAPP_HOME = new File(SOLR_HOME, "src/webapp/web")
-            .getAbsolutePath();
-    public static String EXAMPLE_HOME = new File(SOLR_HOME, "example/solr")
-            .getAbsolutePath();
-    public static String EXAMPLE_MULTICORE_HOME = new File(SOLR_HOME,
-            "example/multicore").getAbsolutePath();
-    public static String EXAMPLE_SCHEMA = EXAMPLE_HOME + "/collection1/conf/schema.xml";
-    public static String EXAMPLE_CONFIG = EXAMPLE_HOME + "/collection1/conf/solrconfig.xml";
 
 }

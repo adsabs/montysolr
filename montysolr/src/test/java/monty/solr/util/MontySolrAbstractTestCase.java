@@ -56,14 +56,6 @@ public abstract class MontySolrAbstractTestCase extends SolrTestCaseJ4 {
 
     }
 
-    // normally we set this to point to default solr/example config
-    // but BlackBox tests should override the method and return only
-    // the solr home
-    public String getSolrHome() {
-        System.clearProperty("solr.solr.home"); // always force recomputing the solr.home
-        return MontySolrSetup.getSolrHome() + "/example/solr";
-    }
-
     /**
      * @see MontySolrTestCaseJ4#getFile
      */
@@ -71,39 +63,6 @@ public abstract class MontySolrAbstractTestCase extends SolrTestCaseJ4 {
         return MontySolrTestCaseJ4.getFile(name);
     }
 
-
-    /**
-     * A trick to add resources to a classpath so that we can run
-     * tests inside the development dir, but not necessarily install
-     * and compile the whole solr distribution.
-     * <p>
-     * We cannot guarantee which resource will be loaded first if
-     * it is present in both locations. So a warning is emitted.
-     * Also, we are adding the default Solr example/solr/conf
-     * <p>
-     * This method, if run by a test, should be called from inside
-     * getSchemaFile() because at that stage the instance already
-     * contains a config
-     */
-    public static void makeResourcesVisible(ClassLoader loader, String... paths) {
-        try {
-            URLClassLoader innerLoader = (URLClassLoader) loader;
-            Class<?> classLoader = URLClassLoader.class;
-            Class[] params = new Class[]{URL.class};
-            Method method = classLoader.getDeclaredMethod("addURL", params);
-            method.setAccessible(true);
-
-            for (String p : paths) {
-                File f = new File(p);
-                f = f.isDirectory() ? f : f.getParentFile();
-                method.invoke(innerLoader, f.toURI().toURL());
-                System.err.println("MontyDevel warning - adding resource path: " + f);
-                System.err.println("If you encounter strange errors, then first check for duplicate files!!!");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public EmbeddedSolrServer getEmbeddedServer() {
         return new EmbeddedSolrServer(h.getCoreContainer(), h.getCore().getName());
