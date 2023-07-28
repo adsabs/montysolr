@@ -20,6 +20,7 @@ package org.apache.solr.analysis;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.SynonymQuery;
@@ -28,6 +29,9 @@ import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 
 /**
@@ -38,20 +42,11 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(), MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1");
-
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-
-
         schemaString = getSchemaFile();
 
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
+        configString = "solrconfig.xml";
 
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-                + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
     public static String getSchemaFile() {
@@ -61,8 +56,13 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
          * our own synonym files
          */
 
-        String configFile = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
+        String configFile;
+        try {
+            configFile = SolrTestSetup.getRepoUrl(
+                    Paths.get("deploy/adsabs/server/solr/collection1/conf/schema.xml")).getFile();
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex.getMessage(), ex);
+        }
 
         File newConfig;
         try {

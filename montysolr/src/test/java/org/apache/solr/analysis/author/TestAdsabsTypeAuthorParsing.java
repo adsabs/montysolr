@@ -20,6 +20,7 @@ package org.apache.solr.analysis.author;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -36,6 +37,9 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,19 +81,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(), MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1");
-
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
         schemaString = getSchemaFile();
 
+        configString = "solrconfig.xml";
 
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-                + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
     public static String getSchemaFile() {
@@ -98,8 +94,14 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
          * Make a copy of the schema.xml, and create our own synonym translation rules
          */
 
-        String schemaConfig = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
+        String schemaConfig = null;
+        try {
+            schemaConfig = SolrTestSetup
+                    .getRepoUrl(Paths.get("deploy/adsabs/server/solr/collection1/conf/schema.xml"))
+                    .getFile();
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
 
         File newConfig;
         try {

@@ -2,6 +2,7 @@ package org.apache.lucene.search;
 
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.LeafReaderContext;
@@ -28,20 +29,11 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(), MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf");
+        schemaString = "solr/collection1/conf/schema-citations-transformer.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
-                + "schema-citations-transformer.xml";
+        configString = "solr/collection1/conf/citation-cache-solrconfig.xml";
 
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
-                + "citation-cache-solrconfig.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-                + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
 

@@ -18,6 +18,7 @@ package org.apache.solr.search;
 
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -31,19 +32,11 @@ public class TestAqpLuceneQParserPlugin extends MontySolrAbstractTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        schemaString = "solr/collection1/conf/schema-minimal.xml";
 
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(), MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1/conf");
+        configString = "solr/collection1/conf/solrconfig-extended-lucene-qparser.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
-                + "schema-minimal.xml";
-
-        configString = MontySolrSetup.getMontySolrHome() + "/contrib/adsabs/src/test-files/solr/collection1/conf/"
-                + "solrconfig-extended-lucene-qparser.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-                + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
 

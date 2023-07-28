@@ -20,11 +20,15 @@ package org.apache.solr.analysis;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.search.*;
 import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 /**
  * Tests that the fulltext is parsed properly, the ads_text type
@@ -103,24 +107,25 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
-                MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1");
-
         System.setProperty("solr.directoryFactory", "solr.StandardDirectoryFactory");
         System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = getSchemaFile();
 
+        schemaString = getSchemaFile();
 
         configString = getConfigFile();
 
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
     public static String getConfigFile() {
-        String configFile = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
+        String configFile = null;
+        try {
+            configFile = SolrTestSetup
+                    .getRepoUrl(Paths.get("deploy/adsabs/server/solr/collection1/conf/solrconfig.xml"))
+                    .getFile();
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
 
         File newConfig;
         try {
@@ -145,8 +150,14 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
          * and create our own synonym files
          */
 
-        String configFile = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
+        String configFile = null;
+        try {
+            configFile = SolrTestSetup
+                    .getRepoUrl(Paths.get("deploy/adsabs/server/solr/collection1/conf/schema.xml"))
+                    .getFile();
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
 
         File newConfig;
         try {

@@ -19,6 +19,7 @@ package org.apache.solr.handler.batch;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.common.SolrException;
@@ -48,19 +49,11 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        schemaString = "schema.xml";
 
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(), MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1");
+        configString = "solrconfig.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
-
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-                + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
 
@@ -84,11 +77,12 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 
 
         //if (true) {
+        String workDir = createTempDir() + "/batch-handler";
         handler = new BatchHandler();
         NamedList<Object> defaults = new NamedList<Object>();
         defaults.add("allowed", ".*");
         defaults.add("asynchronous", true);
-        defaults.add("workdir", new File("./temp").getAbsolutePath() + "/batch-handler");
+        defaults.add("workdir", workDir);
 
         NamedList<Object> providers = new NamedList<Object>();
 	    /*
@@ -130,7 +124,7 @@ public class TestBatchRequestHandler extends MontySolrQueryTestCase {
 
         assertEquals("{!aqp} lang:(german OR english) AND *:*", thisParams.get("q"));
         assertEquals(true, thisParams.getBool("asynchronous"));
-        assertEquals(new File("./temp").getAbsolutePath() + "/batch-handler", thisParams.get("workdir"));
+        assertEquals(workDir, thisParams.get("workdir"));
         assertEquals("bibcode,title,author", thisParams.get("fields"));
         assertEquals(jobid, thisParams.get("jobid"));
         assertEquals("foo\nzooo\nščř", thisParams.get("#data"));

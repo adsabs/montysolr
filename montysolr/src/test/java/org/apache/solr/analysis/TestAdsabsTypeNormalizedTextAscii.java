@@ -20,6 +20,7 @@ package org.apache.solr.analysis;
 
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
@@ -35,21 +36,11 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        schemaString = "schema.xml";
 
-        makeResourcesVisible(Thread.currentThread().getContextClassLoader(),
-                MontySolrSetup.getMontySolrHome() + "/contrib/examples/adsabs/server/solr/collection1/conf",
-                MontySolrSetup.getSolrHome() + "/example/solr/collection1");
+        configString = "solrconfig.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/schema.xml";
-
-
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/examples/adsabs/server/solr/collection1/conf/solrconfig.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome()
-                + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
 

@@ -1,29 +1,20 @@
 package org.apache.solr.response.transform;
 
 import monty.solr.util.MontySolrAbstractTestCase;
-import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.junit.BeforeClass;
 
 public class TestFieldTransformer extends MontySolrAbstractTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        schemaString = "solr/collection1/conf/schema-field-transformer.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-field-transformer.xml";
+        configString = "solr/collection1/conf/solrconfig-field-transformer.xml";
 
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-field-transformer.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
-
-    @Override
-    public String getSolrHome() {
-        return MontySolrSetup.getMontySolrHome();
-    }
 
     @Override
     public void setUp() throws Exception {

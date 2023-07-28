@@ -1,6 +1,7 @@
 package org.apache.solr.handler;
 
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
@@ -13,15 +14,11 @@ public class TestReplicationEventListener extends SolrTestCaseJ4 {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        schemaString = "solr/collection1/conf/schema-minimal.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-minimal.xml";
+        configString = "solr/collection1/conf/solrconfig-replication.xml";
 
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-replication.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
 

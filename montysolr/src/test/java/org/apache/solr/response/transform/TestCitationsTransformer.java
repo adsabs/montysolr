@@ -1,6 +1,7 @@
 package org.apache.solr.response.transform;
 
 import monty.solr.util.MontySolrSetup;
+import monty.solr.util.SolrTestSetup;
 import org.apache.solr.SolrTestCaseJ4;
 import org.junit.BeforeClass;
 
@@ -8,15 +9,11 @@ public class TestCitationsTransformer extends SolrTestCaseJ4 {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        schemaString = "solr/collection1/conf/schema-citations-transformer.xml";
 
-        System.setProperty("solr.allow.unsafe.resourceloading", "true");
-        schemaString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/schema-citations-transformer.xml";
+        configString = "solr/collection1/conf/solrconfig-citations-transformer.xml";
 
-        configString = MontySolrSetup.getMontySolrHome()
-                + "/contrib/adsabs/src/test-files/solr/collection1/conf/solrconfig-citations-transformer.xml";
-
-        initCore(configString, schemaString, MontySolrSetup.getSolrHome() + "/example/solr");
+        SolrTestSetup.initCore(configString, schemaString);
     }
 
 
