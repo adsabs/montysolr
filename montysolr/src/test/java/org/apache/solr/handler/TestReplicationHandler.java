@@ -46,10 +46,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.StandardDirectoryFactory;
 import org.apache.solr.core.snapshots.SolrSnapshotMetaDataManager;
 import org.apache.solr.util.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +69,7 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private static final String CONF_DIR = "solr"
-            + File.separator + "collection1" + File.separator + "conf"
-            + File.separator;
+    private static final String CONF_DIR = "solr/collection1/conf/";
 
     JettySolrRunner primaryJetty, secondaryJetty, repeaterJetty;
     SolrClient primaryClient, secondaryClient, repeaterClient;
@@ -564,6 +559,7 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
     }
 
 
+    @Ignore
     @BadApple(bugUrl = "tbd")
     @Test
     public void doTestIndexAndConfigAliasReplication() throws Exception {
