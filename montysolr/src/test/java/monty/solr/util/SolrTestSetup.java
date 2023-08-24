@@ -35,7 +35,6 @@ public class SolrTestSetup extends SolrTestCaseJ4 {
 
         SolrResourceLoader loader = new SolrResourceLoader(solrPath,
                 extendedLoader);
-        SolrConfig solrConfig = SolrConfig.readFromResourceLoader(loader, config);
 
         // Perform the rest of createCore
         SolrTestCaseJ4.h = new TestHarness(
