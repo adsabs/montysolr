@@ -26,7 +26,6 @@ import org.junit.BeforeClass;
 
 /**
  * Test for the date_string type
- *
  */
 public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 
@@ -268,7 +267,13 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
          */
 
         for (int i = 1900; i < 2025; i++) {
+            // Test unfielded year queries
             assertQ(req("q", Integer.toString(i)),
+                    "//*[@numFound='1']"
+            );
+
+            // Test fielded year queries
+            assertQ(req("q", "year:" + i),
                     "//*[@numFound='1']"
             );
         }
