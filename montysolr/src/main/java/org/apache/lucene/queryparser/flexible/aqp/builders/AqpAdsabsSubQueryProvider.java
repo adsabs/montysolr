@@ -390,8 +390,8 @@ public class AqpAdsabsSubQueryProvider implements
                     }
 
                     if (s.size() > 1) {
-                        throw new SyntaxError("`pos` queries cannot handle boolean queries that span multiple fields; " + 
-                            "this includes virtual fields. Try using a non-virtual field instead.");
+                        throw new SyntaxError("`pos` queries cannot handle boolean queries that span multiple fields, " + 
+                            "including virtual field queries. Try using a non-virtual field instead.");
                     }
 
                     return (String) s.toArray()[0];
