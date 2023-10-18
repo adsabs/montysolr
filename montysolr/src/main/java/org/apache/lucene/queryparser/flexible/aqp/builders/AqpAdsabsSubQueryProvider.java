@@ -388,9 +388,12 @@ public class AqpAdsabsSubQueryProvider implements
                     for (BooleanClause c : ((BooleanQuery) query).clauses()) {
                         s.add(getField(c.getQuery()));
                     }
+
                     if (s.size() > 1) {
-                        throw new SyntaxError("Illegal state: combining multiple fields is not allowed");
+                        throw new SyntaxError("`pos` queries cannot handle boolean queries that span multiple fields, " + 
+                            "including virtual field queries. Try using a non-virtual field instead.");
                     }
+
                     return (String) s.toArray()[0];
                 } else {
                     // last resort
