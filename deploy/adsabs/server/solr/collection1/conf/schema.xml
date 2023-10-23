@@ -1387,6 +1387,11 @@
 			stored="true" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
 
+		<field name="has"
+			type="normalized_text_ascii_notokenization" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+
 		<field name="database"
 			type="normalized_text_ascii_notokenization" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"
