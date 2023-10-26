@@ -664,15 +664,6 @@
 				<filter
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 
-
-
-				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
-					an acronym but do not change its type, if it was a SYNONYM, it is important 
-					information for query parsing -->
-				<filter class="solr.AcronymTokenFilterFactory"
-					emitBoth="false" prefix="acr::" setType="ACRONYM" />
-
-
 				<!-- remove stop words - first the case sensitively -->
 				<filter
 					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
