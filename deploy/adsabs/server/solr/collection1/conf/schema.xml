@@ -1567,11 +1567,11 @@
 	    * simbad_object_facet_hier
 	      The hierarchical facets consisting of object_type/object_id as above
 	     -->
-		<field name="simbid" type="int" indexed="true" stored="true"
+		<field name="simbid" type="int" indexed="true" stored="false"
 			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
 		<field name="simbtype" type="normalized_text_ascii"
-			indexed="true" stored="true" multiValued="true" omitNorms="true" />
+			indexed="true" stored="false" multiValued="true" omitNorms="true" />
 
 		<field name="simbad_object_facet_hier" type="string"
 			indexed="true" stored="true" multiValued="true" omitNorms="true"
@@ -1776,11 +1776,11 @@
         -->
 
 		<field name="nedid" type="normalized_string" indexed="true"
-			stored="true" required="false" multiValued="true" omitNorms="true"
+			stored="false" required="false" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
 
 		<field name="nedtype" type="normalized_string" indexed="true"
-			stored="true" multiValued="true" omitNorms="true"
+			stored="false" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
 
 		<field name="ned_object_facet_hier" type="normalized_string"
