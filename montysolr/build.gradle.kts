@@ -23,6 +23,8 @@ dependencies {
 	implementation("com.anyascii:anyascii:0.3.2")
 	implementation("org.python:jython-standalone:2.7.3")
 
+	implementation("org.apache.logging.log4j:log4j-layout-template-json:2.21.1")
+
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.antlr:stringtemplate:3.2.1")
 	testImplementation("org.apache.solr:solr-test-framework:7.7.3")
