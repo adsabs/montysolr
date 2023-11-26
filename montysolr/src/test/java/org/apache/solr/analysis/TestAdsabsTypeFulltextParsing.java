@@ -1189,7 +1189,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
 
         assertQueryEquals(req("q", "=title:\"NGC 1\"", "defType", "aqp"),
-                "title:\"acr::ngc 1\"",
+                "title:\"ngc 1\"",
                 PhraseQuery.class);
         assertQ(req("q", "=title" + ":NGC 1"),
                 "//*[@numFound='4']",
