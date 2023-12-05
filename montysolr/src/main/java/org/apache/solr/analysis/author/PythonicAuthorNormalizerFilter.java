@@ -73,6 +73,10 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
             if (parsedName != null) {
                 if (parsedName.containsKey("Last")) {
+                    if (parsedName.getOrDefault("First", "").endsWith(".")) {
+                        parsedName.computeIfPresent("First", (k, v) -> v.substring(0, v.length()-1) + "*");
+                    }
+
                     newIndividual = (parsedName.get("Last") + ","
                             + (parsedName.containsKey("First") ? " " + parsedName.get("First") : "")
                             + (parsedName.containsKey("Middle") ? " " + parsedName.get("Middle") : "")
