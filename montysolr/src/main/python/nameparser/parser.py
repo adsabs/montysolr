@@ -255,7 +255,9 @@ class HumanName(object):
         for piece in ps:
             if piece[:-1].find('.') >= 0:
                 p = [_f for _f in piece.split('.') if _f]
-                pieces += [x+'.' for x in p]
+                pieces += [x+'.' for x in p[:-1]]
+                if pieces:
+                    pieces += [p[-1] + ('.' if piece[-1] == '.' else '')]
             else:
                 pieces += [piece]
         

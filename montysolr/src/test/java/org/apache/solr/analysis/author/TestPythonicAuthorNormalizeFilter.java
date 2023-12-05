@@ -22,8 +22,8 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
         compare("Ibanez y Gracia, Maria Luisa, II., ed.", "Ibanez y Gracia, Maria Luisa, II., ed.", "Ibanez y Gracia, Maria Luisa");
         compare("Epstein, Brian, The Fifth Beatle", "Epstein, Brian, The Fifth Beatle", "Epstein, Brian");
         compare("Michael Edward Peskin", "Michael Edward Peskin,", "Peskin, Michael Edward");
-        compare("M.E. Peskin", "M.E. Peskin,", "Peskin, M. E.");
-        compare("M.E.Peskin", "M.E.Peskin,", "Peskin., M. E."); // to me this seems a bug of the python parser (?)
+        compare("M.E. Peskin", "M.E. Peskin,", "Peskin, M* E.");
+        compare("M.E.Peskin", "M.E.Peskin,", "Peskin, M* E."); // to me this seems a bug of the python parser (?)
         compare("Ronaldo", "Ronaldo,");
         compare("Cantina Octavia Jones-Smith", "Cantina Octavia Jones-Smith,", "Jones-Smith, Cantina Octavia");
         compare("Jean-Luc Picard", "Jean-Luc Picard,", "Picard, Jean-Luc");
@@ -56,6 +56,7 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
         compare("goodman", "goodman,");
         compare("alissa goodman", "alissa goodman,", "goodman, alissa");
 
+        compare("skorov, yu.", "skorov, yu.", "skorov, yu*");
     }
 
     public void compare(String input, String... expected) throws Exception {
