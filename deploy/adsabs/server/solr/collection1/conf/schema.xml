@@ -1574,6 +1574,32 @@
 			omitTermFreqAndPositions="true" docValues="true" />
 
 		<!--
+		@api.doc
+		* gpn
+		  An array of strings containing fully qualified planetary feature names.
+		* gpn_id
+		  An array of integers that uniquely identify each planetary feature.
+		* gpn_facet_hier_2level
+		  A 2 level hierarchical facet for searching planetary features by group.
+		* gpn_facet_hier_3level
+		  A 3 level hierarchical facet for searching planetary features by group.
+		 -->
+
+		<field name="gpn" type="ads_text" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true" />
+
+		<field name="gpn_id" type="int" indexed="true" stored="true"
+			   multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+		<field name="gpn_facet_hier_2level" type="string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="gpn_facet_hier_3level" type="string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<!--
 	    @api.doc
 	    * citation_count
 	      The number of citations associated with this record
