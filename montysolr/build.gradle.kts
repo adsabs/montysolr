@@ -1,6 +1,7 @@
 plugins {
 	java
 	antlr
+    kotlin("jvm") version "1.9.22"
 }
 
 repositories {
@@ -23,10 +24,16 @@ dependencies {
 	implementation("com.anyascii:anyascii:0.3.2")
 	implementation("org.python:jython-standalone:2.7.3")
 
+	implementation("me.lemire.integercompression:JavaFastPFOR:0.1.12")
+	implementation("it.unimi.dsi:fastutil-core:8.5.12")
+
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.antlr:stringtemplate:3.2.1")
 	testImplementation("org.apache.solr:solr-test-framework:7.7.3")
 	testImplementation("org.apache.lucene:lucene-test-framework:7.7.3")
+
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0-RC2")
+    testImplementation(kotlin("stdlib-jdk8"))
 }
 
 java {
