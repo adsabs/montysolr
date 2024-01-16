@@ -17,6 +17,7 @@
 
 package org.apache.solr.search;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.*;
 import org.apache.lucene.util.Bits;
@@ -799,77 +800,6 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         }
     }
 
-    /**
-     * Efficient resizable auto-expanding list holding <code>int</code> elements;
-     * implemented with arrays.
-     */
-    private static final class ArrayIntList {
-
-        private int[] elements;
-        private int size = 0;
-
-        public ArrayIntList(int initialCapacity) {
-            elements = new int[initialCapacity];
-        }
-
-        public void add(int elem) {
-            if (size == elements.length)
-                ensureCapacity(size + 1);
-            elements[size++] = elem;
-        }
-
-        public int[] getElements() {
-            int[] out = new int[size];
-            System.arraycopy(elements, 0, out, 0, size);
-            return out;
-        }
-
-        public int get(int index) {
-            if (index >= size)
-                throwIndex(index);
-            return elements[index];
-        }
-
-        public int size() {
-            return size;
-        }
-
-        private void ensureCapacity(int minCapacity) {
-            int newCapacity = Math.max(minCapacity, (elements.length * 3) / 2 + 1);
-            int[] newElements = new int[newCapacity];
-            System.arraycopy(elements, 0, newElements, 0, size);
-            elements = newElements;
-        }
-
-        private void throwIndex(int index) {
-            throw new IndexOutOfBoundsException("index: " + index + ", size: " + size);
-        }
-
-        public String toString() {
-            return Arrays.toString(elements);
-        }
-
-        /**
-         * returns the first few positions (without offsets); debug only
-         */
-        @SuppressWarnings("unused")
-        public String toString(int stride) {
-            int s = size() / stride;
-            int len = Math.min(10, s); // avoid printing huge lists
-            StringBuilder buf = new StringBuilder(4 * len);
-            buf.append("[");
-            for (int i = 0; i < len; i++) {
-                buf.append(get(i * stride));
-                if (i < len - 1)
-                    buf.append(", ");
-            }
-            if (len != s)
-                buf.append(", ..."); // and some more...
-            buf.append("]");
-            return buf.toString();
-        }
-    }
-
     /*
      * The main datastructure holding information about the lucene documents.
      *
@@ -885,15 +815,15 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     public class RelationshipLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
         private static final long serialVersionUID = -356203002886265188L;
         int slimit;
-        List<ArrayIntList> references;
-        List<ArrayIntList> citations;
+        List<IntArrayList> references;
+        List<IntArrayList> citations;
 
         public RelationshipLinkedHashMap(int initialSize, float ratio, boolean accessOrder, int limit,
                                          Float sizeInPercent) {
             super(initialSize, ratio, accessOrder);
             slimit = limit;
-            references = new ArrayList<ArrayIntList>(0); // just to prevent NPE - normally, is
-            citations = new ArrayList<ArrayIntList>(0); // initialized in initializeCitationCache
+            references = new ArrayList<>(0); // just to prevent NPE - normally, is
+            citations = new ArrayList<>(0); // initialized in initializeCitationCache
         }
 
         @SuppressWarnings("rawtypes")
@@ -910,9 +840,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         public int[] getReferences(int docid) {
             if (docid < references.size() && references.get(docid) != null) {
-                ArrayIntList c = references.get(docid);
+                IntArrayList c = references.get(docid);
                 if (c != null)
-                    return c.getElements();
+                    return c.toIntArray();
             }
             return null;
         }
@@ -927,16 +857,16 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         public int[] getCitations(int docid) {
             if (docid < citations.size() && citations.get(docid) != null) {
-                ArrayIntList c = citations.get(docid);
+                IntArrayList c = citations.get(docid);
                 if (c != null)
-                    return c.getElements();
+                    return c.toIntArray();
             }
             return null;
         }
 
         public void initializeCitationCache(int maxDocSize) {
-            references = new ArrayList<ArrayIntList>(maxDocSize);
-            citations = new ArrayList<ArrayIntList>(maxDocSize);
+            references = new ArrayList<>(maxDocSize);
+            citations = new ArrayList<>(maxDocSize);
 
             // i was hoping thi sis not necessary, but set(index, value)
             // throws errors otherwise
@@ -974,12 +904,12 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
             _add(citations, sourceDocid, targetDocid);
         }
 
-        private void _add(List<ArrayIntList> target, int sourceDocid, int targetDocid) {
+        private void _add(List<IntArrayList> target, int sourceDocid, int targetDocid) {
 
             // System.out.println("_add(" + sourceDocid + "," + targetDocid+")");
 
             if (target.get(sourceDocid) == null) {
-                ArrayIntList pointer = new ArrayIntList(1);
+                IntArrayList pointer = new IntArrayList(1);
                 pointer.add(targetDocid);
                 target.set(sourceDocid, pointer);
             } else {
@@ -989,7 +919,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         public void inferCitationsFromReferences() {
             int i = -1;
-            for (ArrayIntList refs : references) {
+            for (IntArrayList refs : references) {
                 i += 1;
                 if (refs == null) {
                     continue;
@@ -1004,7 +934,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         public void inferReferencesFromCitations() {
             int i = -1;
-            for (ArrayIntList refs : citations) {
+            for (IntArrayList refs : citations) {
                 i += 1;
                 if (refs == null) {
                     continue;
@@ -1030,11 +960,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                     throw new NoSuchElementException();
                 int[][] out = new int[2][];
 
-                ArrayIntList v1 = references.get(cursor);
-                ArrayIntList v2 = citations.get(cursor);
+                IntArrayList v1 = references.get(cursor);
+                IntArrayList v2 = citations.get(cursor);
 
-                out[0] = v1 != null ? v1.getElements() : new int[0];
-                out[1] = v2 != null ? v2.getElements() : new int[0];
+                out[0] = v1 != null ? v1.toIntArray() : new int[0];
+                out[1] = v2 != null ? v2.toIntArray() : new int[0];
 
                 cursor = i + 1;
                 return out;
