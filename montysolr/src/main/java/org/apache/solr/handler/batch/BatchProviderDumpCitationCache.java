@@ -7,6 +7,8 @@ import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationCache;
+import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.RefCounted;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -50,39 +52,52 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
 
 
         if (!returnDocids) {
-            SortedDocValues uniqueValueCache = req.getSearcher().getSlowAtomicReader().getSortedDocValues(uniqueField);
-            int paperid = 0;
-            while (it.hasNext()) {
-                int[][] data = it.next();
-                int[] references = data[0];
-                //TODO:rca - have a feeling this has become too convoluted
-                // and there must be a better way to un-invert; especially
-                // with docvalues
-                if (references != null && references.length > 0) {
-                    if (uniqueValueCache.advanceExact(paperid)) {
-                        ret = uniqueValueCache.binaryValue();
-                        out.write(ret.utf8ToString());
-                        out.write("\t");
-                        first = true;
-                        for (int luceneDocId : references) {
-                            if (luceneDocId == -1)
-                                continue;
+            RefCounted<SolrIndexSearcher> searcherRef = req.getCore().getRealtimeSearcher();
+            try {
+                SortedDocValues uniqueValueCache = searcherRef.get()
+                        .getSlowAtomicReader().getSortedDocValues(uniqueField);
 
-                            uniqueValueCache.advanceExact(luceneDocId);
+                int paperid = 0;
+                while (it.hasNext()) {
+                    int[][] data = it.next();
+                    int[] references = data[0];
+                    //TODO:rca - have a feeling this has become too convoluted
+                    // and there must be a better way to un-invert; especially
+                    // with docvalues
+                    if (references != null && references.length > 0) {
+                        if (uniqueValueCache.advanceExact(paperid)) {
                             ret = uniqueValueCache.binaryValue();
+                            out.write(ret.utf8ToString());
+                            out.write("\t");
+                            first = true;
 
-                            if (ret.length > 0) {
-                                if (!first) {
-                                    out.write("\t");
+                            // It's not possible to reset the SortedDocValues iterator, so create a new one and
+                            // seek to the appropriate point for each referenced document.
+                            SortedDocValues referenceValueCache = searcherRef.get()
+                                    .getSlowAtomicReader().getSortedDocValues(uniqueField);
+                            for (int luceneDocId : references) {
+                                if (luceneDocId == -1)
+                                    continue;
+
+                                if (referenceValueCache.advanceExact(luceneDocId)) {
+                                    ret = referenceValueCache.binaryValue();
+
+                                    if (ret.length > 0) {
+                                        if (!first) {
+                                            out.write("\t");
+                                        }
+                                        out.write(ret.utf8ToString());
+                                        first = false;
+                                    }
                                 }
-                                out.write(ret.utf8ToString());
-                                first = false;
                             }
+                            out.write("\n");
                         }
-                        out.write("\n");
                     }
+                    paperid++;
                 }
-                paperid++;
+            } finally {
+                searcherRef.decref();
             }
         } else {
             int paperid = 0;

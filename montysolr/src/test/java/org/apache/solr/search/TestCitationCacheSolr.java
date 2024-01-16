@@ -16,21 +16,23 @@
  */
 package org.apache.solr.search;
 
+import it.unimi.dsi.fastutil.ints.*;
 import monty.solr.util.MontySolrAbstractTestCase;
-import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
 import org.apache.solr.request.SolrQueryRequest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Random;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
+
+    private Random random;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -114,6 +116,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
     public void setUp() throws Exception {
         super.setUp();
         createIndex();
+        random = new Random(0L);
     }
 
     @Override
@@ -615,17 +618,17 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 
             if (cacheName.contains("from-references")) {
                 int[][][] expected = new int[][][]{
-                        new int[][]{new int[]{3, 4, 2}, new int[0]},
+                        new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 10, 11}},
                         new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}},
                         new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11}},
-                        new int[][]{new int[]{3, 4, 2}, new int[0]},
+                        new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[0], new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
-                        new int[][]{new int[]{4, 2, 2}, new int[0]},
+                        new int[][]{new int[]{2, 2, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                 };
 
@@ -634,9 +637,9 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
                 int[][][] expected = new int[][][]{
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
-                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2}},
-                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 11, 2}},
-                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2}},
+                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11}},
+                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}},
+                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11}},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
@@ -656,6 +659,91 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 
     }
 
+    @Test
+    public void testRelationshipMap() throws Exception {
+        CitationLRUCache.RelationshipLinkedHashMap<Object, Integer> map =
+                new CitationLRUCache.RelationshipLinkedHashMap<>(11, 0.75f, false, 1000);
+        map.initializeCitationCache(10);
+
+        for (int i = 0; i < 10; i++) {
+            map.put("a"+i, i);
+        }
+
+        assertEquals(10, map.size());
+
+        // Test citation map construction & recall
+        Int2ObjectMap<IntSet> citationMap = new Int2ObjectOpenHashMap<>();
+
+        for (int i = 0; i < 10; i++) {
+            int citations = random.nextInt(9);
+            IntSet set = new IntOpenHashSet();
+
+            for (int j = 0; j < citations; j++) {
+                int citedDoc = random.nextInt(10);
+                while (set.contains(citedDoc) || citedDoc == i) {
+                    citedDoc = random.nextInt(10);
+                }
+                set.add(citedDoc);
+
+                map.addCitation(i, citedDoc);
+            }
+
+            citationMap.put(i, set);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            int[] citations = map.getCitations(i);
+            if (citations == null)
+                citations = new int[0];
+
+            int[] expected = citationMap.get(i).toIntArray();
+
+            Arrays.sort(citations != null ? citations : new int[0]);
+            Arrays.sort(expected != null ? expected : new int[0]);
+
+            assertArrayEquals(expected, citations);
+        }
+
+        // Test reference inference from citations
+        Int2ObjectMap<IntSet> referenceMap = new Int2ObjectOpenHashMap<>();
+
+        for (int i = 0; i < 10; i++) {
+            for (int j : citationMap.getOrDefault(i, new IntOpenHashSet())) {
+                int finalI = i;
+                referenceMap.compute(j, (k, v) -> {
+                    if (v == null) {
+                        v = new IntOpenHashSet();
+                    }
+                    v.add(finalI);
+                    return v;
+                });
+            }
+        }
+
+        map.inferReferencesFromCitations();
+
+        for (int i = 0; i < 10; i++) {
+            int[] references = map.getReferences(i);
+            if (references == null)
+                references = new int[0];
+
+            int[] expected = referenceMap.get(i).toIntArray();
+
+            Arrays.sort(references);
+            Arrays.sort(expected != null ? expected : new int[0]);
+
+            assertArrayEquals(expected, references);
+        }
+
+        // Test iterator
+        Iterator<int[][]> it = map.getRelationshipsIterator();
+        for (int i = 0; i < 10; i++) {
+            int[][] data = it.next();
+            assertEquals(referenceMap.getOrDefault(i, new IntArraySet()).size(), data[0].length);
+            assertEquals(citationMap.getOrDefault(i, new IntArraySet()).size(), data[1].length);
+        }
+    }
+
     private int[][][] getCache(CitationLRUCache cache) {
         int[][][] results = new int[cache.getCitationsIteratorSize()][2][];
         Iterator<int[][]> it = cache.getCitationGraph();
@@ -663,6 +751,9 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
         int j = 0;
         while (it.hasNext()) {
             int[][] data = it.next();
+            Arrays.sort(data[0]);
+            Arrays.sort(data[1]);
+
             results[j] = data;
             j += 1;
         }

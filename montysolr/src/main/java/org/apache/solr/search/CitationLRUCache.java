@@ -17,6 +17,9 @@
 
 package org.apache.solr.search;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.lucene.index.*;
 import org.apache.lucene.util.Bits;
@@ -26,9 +29,9 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
-import org.apache.solr.schema.*;
-import org.apache.solr.uninverting.UninvertingReader;
-import org.apache.solr.uninverting.UninvertingReader.Type;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.SchemaField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +125,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
             citationFields = ((String) args.get("citationFields")).split(",");
         }
 
-        Float sizeInPercent = null;
+        float sizeInPercent = 1.0f;
 
         String str = (String) args.get("size");
         if (str != null && str.endsWith("%")) {
@@ -136,7 +139,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         final int initialSize = Math.min(str == null ? 1024 : Integer.parseInt(str), limit);
         description = generateDescription(limit, initialSize);
 
-        relationships = new RelationshipLinkedHashMap<K, V>(initialSize, 0.75f, true, limit, sizeInPercent);
+        relationships = new RelationshipLinkedHashMap<K, V>(initialSize, 0.75f, true, limit);
 
         if (persistence == null) {
             // must be the first time a cache of this type is being created
@@ -220,11 +223,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     }
 
     public void insertCitation(int sourceDocid, int targetDocid) {
-        ((CitationLRUCache<K, V>.RelationshipLinkedHashMap<K, V>) relationships).addCitation(sourceDocid, targetDocid);
+        ((CitationLRUCache.RelationshipLinkedHashMap<K, V>) relationships).addCitation(sourceDocid, targetDocid);
     }
 
     public void insertReference(int sourceDocid, int targetDocid) {
-        ((CitationLRUCache<K, V>.RelationshipLinkedHashMap<K, V>) relationships).addReference(sourceDocid, targetDocid);
+        ((CitationLRUCache.RelationshipLinkedHashMap<K, V>) relationships).addReference(sourceDocid, targetDocid);
     }
 
     public int[] getCitations(K key) {
@@ -349,6 +352,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                         log.error("Failed loading persisted cache " + name(), e);
                     }
                 } else {
+                    //noinspection AutoBoxing
                     log.info("Will not load the cache {} current index generation differs; dump:{} != index:{}",
                             name(), CitationCacheReaderWriter.getCacheGeneration(getCacheStorageDir(searcher)), CitationCacheReaderWriter.getIndexGeneration(searcher));
                 }
@@ -428,7 +432,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 if (treatIdentifiersAsText && value instanceof Integer) {
                     value = Integer.toString((Integer) value);
                 }
-                put((K) value, (V) (Integer) (docbase + docid));
+                put((K) value, (V) Integer.valueOf(docbase + docid));
             }
         });
 
@@ -472,37 +476,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         // collect ids of documents that need to be reloaded/regenerated during this
         // warmup run
-        // System.out.println("searcher: " + searcher.toString());
-        // System.out.println("maxDoc: " + searcher.getIndexReader().maxDoc());
         FixedBitSet toRefresh = new FixedBitSet(searcher.getIndexReader().maxDoc());
-
-        // System.out.println("version=" + searcher.getIndexReader().getVersion());
-        // try {
-        // System.out.println("commit=" + searcher.getIndexReader().getIndexCommit());
-        // } catch (IOException e2) {
-        // TODO Auto-generated catch block
-        // e2.printStackTrace();
-        // }
-
-        // for (IndexReaderContext c : searcher.getTopReaderContext().children()) {
-        // //System.out.println("context=" + c.reader().getCombinedCoreAndDeletesKey());
-        // }
-
-        // for (IndexReaderContext l : searcher.getIndexReader().leaves()) {
-        // //System.out.println(l);
-        // }
-
         Bits liveDocs = searcher.getSlowAtomicReader().getLiveDocs();
-        // System.out.println(liveDocs == null ? "liveDocs=" + null : "liveDocs=" +
-        // liveDocs.length());
-        // System.out.println("numDeletes=" +
-        // searcher.getAtomicReader().numDeletedDocs());
 
         if (liveDocs == null) { // everything is new, this could be fresh index or merged/optimized index too
 
-            // searcher.getAtomicReader().getContext().children().size()
-
-            // other.map.clear(); // force regeneration
             toRefresh.set(0, toRefresh.length());
 
             // Build the mapping from indexed values into lucene ids
@@ -512,21 +490,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 @SuppressWarnings("unchecked")
                 @Override
                 public void set(int docbase, int docid, Object value) {
-                    put((K) value, (V) (Integer) (docbase + docid));
+                    put((K) value, (V) Integer.valueOf(docbase + docid));
                 }
             });
 
-        } else if (liveDocs != null) {
-
-            Integer luceneId;
-            for (V v : other.relationships.values()) {
-                luceneId = ((Integer) v);
-                if (luceneId <= liveDocs.length() && !liveDocs.get(luceneId)) { // doc was either deleted or updated
-                    // System.out.println("Found deleted: " + luceneId);
-                    // retrieve all citations/references for this luceneId and mark these docs to be
-                    // refreshed
-                }
-            }
+        } else {
 
             for (int i = 0; i < toRefresh.length(); i++) {
                 if (liveDocs.get(i)) {
@@ -584,7 +552,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
     private List<String> getFields(SolrIndexSearcher searcher, String[] listOfFields) {
 
-        List<String> out = new ArrayList<String>();
+        List<String> out = new ArrayList<>();
 
         IndexSchema schema = searcher.getCore().getLatestSchema();
         if (schema.getUniqueKeyField() == null) {
@@ -675,32 +643,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                     continue;
                 }
 
-                SchemaField fSchema = schema.getField(field);
                 DocValuesType fType = fi.getDocValuesType();
-                Map<String, Type> mapping = new HashMap<String, Type>();
-                final LeafReader unReader;
+                final LeafReader unReader = lr;
 
-                if (fType.equals(DocValuesType.NONE)) {
-                    Class<? extends DocValuesType> c = fType.getClass();
-                    if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-                        if (fSchema.multiValued()) {
-                            mapping.put(field, Type.SORTED);
-                        } else {
-                            mapping.put(field, Type.BINARY);
-                        }
-                    } else if (c.isAssignableFrom(TrieIntField.class)) {
-                        if (fSchema.multiValued()) {
-                            mapping.put(field, Type.SORTED_SET_INTEGER);
-                        } else {
-                            mapping.put(field, Type.INTEGER_POINT);
-                        }
-                    } else {
-                        continue;
-                    }
-                    unReader = UninvertingReader.wrap(lr, mapping::get);
-                } else {
-                    unReader = lr;
-                }
 
                 switch (fType) {
                     case NUMERIC:
@@ -735,12 +680,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                     case SORTED_SET:
                         transformer = new Transformer() {
                             final SortedSetDocValues dv = unReader.getSortedSetDocValues(field);
-                            final int errs = 0;
 
                             @Override
                             public void process(int docBase, int docId) throws IOException {
-                                if (errs > 5)
-                                    return;
                                 if (dv.advanceExact(docId)) {
                                     for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
                                         final BytesRef value = dv.lookupOrd(ord);
@@ -800,7 +742,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         return "$URL: http://svn.apache.org/repos/asf/lucene/dev/branches/lucene_solr_4_0/solr/core/src/java/org/apache/solr/search/LRUCache.java $";
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked", "AutoBoxing"})
     public NamedList getStatistics() {
         NamedList lst = new SimpleOrderedMap();
         synchronized (relationships) {
@@ -861,77 +803,6 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         }
     }
 
-    /**
-     * Efficient resizable auto-expanding list holding <code>int</code> elements;
-     * implemented with arrays.
-     */
-    private static final class ArrayIntList {
-
-        private int[] elements;
-        private int size = 0;
-
-        public ArrayIntList(int initialCapacity) {
-            elements = new int[initialCapacity];
-        }
-
-        public void add(int elem) {
-            if (size == elements.length)
-                ensureCapacity(size + 1);
-            elements[size++] = elem;
-        }
-
-        public int[] getElements() {
-            int[] out = new int[size];
-            System.arraycopy(elements, 0, out, 0, size);
-            return out;
-        }
-
-        public int get(int index) {
-            if (index >= size)
-                throwIndex(index);
-            return elements[index];
-        }
-
-        public int size() {
-            return size;
-        }
-
-        private void ensureCapacity(int minCapacity) {
-            int newCapacity = Math.max(minCapacity, (elements.length * 3) / 2 + 1);
-            int[] newElements = new int[newCapacity];
-            System.arraycopy(elements, 0, newElements, 0, size);
-            elements = newElements;
-        }
-
-        private void throwIndex(int index) {
-            throw new IndexOutOfBoundsException("index: " + index + ", size: " + size);
-        }
-
-        public String toString() {
-            return Arrays.toString(elements);
-        }
-
-        /**
-         * returns the first few positions (without offsets); debug only
-         */
-        @SuppressWarnings("unused")
-        public String toString(int stride) {
-            int s = size() / stride;
-            int len = Math.min(10, s); // avoid printing huge lists
-            StringBuilder buf = new StringBuilder(4 * len);
-            buf.append("[");
-            for (int i = 0; i < len; i++) {
-                buf.append(get(i * stride));
-                if (i < len - 1)
-                    buf.append(", ");
-            }
-            if (len != s)
-                buf.append(", ..."); // and some more...
-            buf.append("]");
-            return buf.toString();
-        }
-    }
-
     /*
      * The main datastructure holding information about the lucene documents.
      *
@@ -944,18 +815,18 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
      * maxdoc size, so that no evictions happen
      */
     @SuppressWarnings("hiding")
-    public class RelationshipLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
+    public static class RelationshipLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
         private static final long serialVersionUID = -356203002886265188L;
         int slimit;
-        List<ArrayIntList> references;
-        List<ArrayIntList> citations;
+        int maxDocSize;
+        Int2ObjectMap<IntArrayList> references;
+        Int2ObjectMap<IntArrayList> citations;
 
-        public RelationshipLinkedHashMap(int initialSize, float ratio, boolean accessOrder, int limit,
-                                         Float sizeInPercent) {
+        public RelationshipLinkedHashMap(int initialSize, float ratio, boolean accessOrder, int limit) {
             super(initialSize, ratio, accessOrder);
             slimit = limit;
-            references = new ArrayList<ArrayIntList>(0); // just to prevent NPE - normally, is
-            citations = new ArrayList<ArrayIntList>(0); // initialized in initializeCitationCache
+            references = new Int2ObjectOpenHashMap<>(0); // just to prevent NPE - normally, is
+            citations = new Int2ObjectOpenHashMap<>(0); // initialized in initializeCitationCache
         }
 
         @SuppressWarnings("rawtypes")
@@ -971,10 +842,10 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         }
 
         public int[] getReferences(int docid) {
-            if (docid < references.size() && references.get(docid) != null) {
-                ArrayIntList c = references.get(docid);
+            if (references.containsKey(docid)) {
+                IntArrayList c = references.get(docid);
                 if (c != null)
-                    return c.getElements();
+                    return c.toIntArray();
             }
             return null;
         }
@@ -984,29 +855,26 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         }
 
         public int relationshipsDataSize() {
-            return citations.size();
+            return maxDocSize;
         }
 
         public int[] getCitations(int docid) {
-            if (docid < citations.size() && citations.get(docid) != null) {
-                ArrayIntList c = citations.get(docid);
+            if (citations.containsKey(docid)) {
+                IntArrayList c = citations.get(docid);
                 if (c != null)
-                    return c.getElements();
+                    return c.toIntArray();
             }
             return null;
         }
 
         public void initializeCitationCache(int maxDocSize) {
-            references = new ArrayList<ArrayIntList>(maxDocSize);
-            citations = new ArrayList<ArrayIntList>(maxDocSize);
+            references = new Int2ObjectOpenHashMap<>(maxDocSize);
+            citations = new Int2ObjectOpenHashMap<>(maxDocSize);
 
-            // i was hoping thi sis not necessary, but set(index, value)
-            // throws errors otherwise
-            for (int i = 0; i < maxDocSize; i++) {
-                references.add(null);
-                citations.add(null);
-            }
+            references.defaultReturnValue(null);
+            citations.defaultReturnValue(null);
 
+            this.maxDocSize = maxDocSize;
         }
 
         public void addReference(int sourceDocid, Object value) {
@@ -1020,6 +888,10 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         public void addReference(int sourceDocid, Integer targetDocid) {
             _add(references, sourceDocid, targetDocid);
+        }
+
+        public void addReference(int sourceDocId, int targetDocId) {
+            _add(references, sourceDocId, targetDocId);
         }
 
         public void addCitation(int sourceDocid, Object value) {
@@ -1036,45 +908,51 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
             _add(citations, sourceDocid, targetDocid);
         }
 
-        private void _add(List<ArrayIntList> target, int sourceDocid, int targetDocid) {
+        public void addCitation(int sourceDocId, int targetDocId) {
+            _add(citations, sourceDocId, targetDocId);
+        }
+
+        private void _add(Int2ObjectMap<IntArrayList> target, int sourceDocid, int targetDocid) {
 
             // System.out.println("_add(" + sourceDocid + "," + targetDocid+")");
 
             if (target.get(sourceDocid) == null) {
-                ArrayIntList pointer = new ArrayIntList(1);
+                IntArrayList pointer = new IntArrayList(1);
                 pointer.add(targetDocid);
-                target.set(sourceDocid, pointer);
+                target.put(sourceDocid, pointer);
             } else {
                 target.get(sourceDocid).add(targetDocid);
             }
         }
 
         public void inferCitationsFromReferences() {
-            int i = -1;
-            for (ArrayIntList refs : references) {
-                i += 1;
+            for (Int2ObjectMap.Entry<IntArrayList> entry : references.int2ObjectEntrySet()) {
+                int i = entry.getIntKey();
+                IntArrayList refs = entry.getValue();
                 if (refs == null) {
                     continue;
                 }
+
                 for (int j = 0; j < refs.size(); j++) {
-                    if (refs.get(j) == -1)
+                    if (refs.getInt(j) == -1)
                         continue;
-                    addCitation(refs.get(j), i);
+                    addCitation(refs.getInt(j), i);
                 }
             }
         }
 
         public void inferReferencesFromCitations() {
-            int i = -1;
-            for (ArrayIntList refs : citations) {
-                i += 1;
+            for (Int2ObjectMap.Entry<IntArrayList> entry : citations.int2ObjectEntrySet()) {
+                int i = entry.getIntKey();
+                IntArrayList refs = entry.getValue();
                 if (refs == null) {
                     continue;
                 }
+
                 for (int j = 0; j < refs.size(); j++) {
-                    if (refs.get(j) == -1)
+                    if (refs.getInt(j) == -1)
                         continue;
-                    addReference(refs.get(j), i);
+                    addReference(refs.getInt(j), i);
                 }
             }
         }
@@ -1083,20 +961,20 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
             int cursor = 0; // index of next element to return
 
             public boolean hasNext() {
-                return cursor != citations.size();
+                return cursor < maxDocSize;
             }
 
             public int[][] next() {
                 int i = cursor;
-                if (i >= citations.size())
+                if (i >= maxDocSize)
                     throw new NoSuchElementException();
                 int[][] out = new int[2][];
 
-                ArrayIntList v1 = references.get(cursor);
-                ArrayIntList v2 = citations.get(cursor);
+                IntArrayList v1 = references.get(cursor);
+                IntArrayList v2 = citations.get(cursor);
 
-                out[0] = v1 != null ? v1.getElements() : new int[0];
-                out[1] = v2 != null ? v2.getElements() : new int[0];
+                out[0] = v1 != null ? v1.toIntArray() : new int[0];
+                out[1] = v2 != null ? v2.toIntArray() : new int[0];
 
                 cursor = i + 1;
                 return out;
@@ -1111,7 +989,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
     @Override
     public void initializeCitationCache(int maxDocs) {
-        relationships = new RelationshipLinkedHashMap<K, V>(maxDocs, 0.75f, true, 1024, 100f);
+        relationships = new RelationshipLinkedHashMap<K, V>(maxDocs, 0.75f, true, 1024);
         ((RelationshipLinkedHashMap) relationships).initializeCitationCache(maxDocs);
         if (stats == null)
             stats = new CumulativeStats();
