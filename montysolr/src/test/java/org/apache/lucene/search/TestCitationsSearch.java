@@ -150,8 +150,9 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
             int docid = es.getKey();
             int[] docids = es.getValue();
             for (int reference : docids) {
-                List<Integer> a = Arrays.stream(citations.get(reference)).boxed().collect(Collectors.toList());
-                List<Integer> b = Arrays.stream(citationsWrapper.getLuceneDocIds(reference)).boxed().collect(Collectors.toList());
+                List<Integer> a = Arrays.stream(citations.get(reference)).boxed().sorted().collect(Collectors.toList());
+                List<Integer> b = Arrays.stream(citationsWrapper.getLuceneDocIds(reference)).boxed().sorted().collect(Collectors.toList());
+
                 assertTrue(a.contains(docid));
                 assertTrue(b.contains(docid));
                 assertEquals(a, b);
@@ -162,10 +163,9 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
             int docid = es.getKey();
             int[] docids = es.getValue();
             for (int reference : docids) {
-                List<Integer> a = Arrays.stream(references.get(reference)).boxed().collect(Collectors.toList());
-                List<Integer> b = Arrays.stream(referencesWrapper.getLuceneDocIds(reference)).boxed().collect(Collectors.toList());
-                Collections.sort(a);
-                Collections.sort(b);
+                List<Integer> a = Arrays.stream(references.get(reference)).boxed().sorted().collect(Collectors.toList());
+                List<Integer> b = Arrays.stream(referencesWrapper.getLuceneDocIds(reference)).boxed().sorted().collect(Collectors.toList());
+
                 assertTrue(a.contains(docid));
                 assertTrue(b.contains(docid));
                 assertEquals(docid + " produced diff cache results", a, b);
