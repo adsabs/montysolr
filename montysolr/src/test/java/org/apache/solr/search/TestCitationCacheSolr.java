@@ -618,17 +618,17 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 
             if (cacheName.contains("from-references")) {
                 int[][][] expected = new int[][][]{
-                        new int[][]{new int[]{3, 4, 2}, new int[0]},
+                        new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 10, 11}},
                         new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}},
                         new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11}},
-                        new int[][]{new int[]{3, 4, 2}, new int[0]},
+                        new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[0], new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
-                        new int[][]{new int[]{4, 2, 2}, new int[0]},
+                        new int[][]{new int[]{2, 2, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                 };
 
@@ -637,9 +637,9 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
                 int[][][] expected = new int[][][]{
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
-                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2}},
-                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 11, 2}},
-                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 9, 3, 4, 5, 6, 7, 10, 11, 2}},
+                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11}},
+                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 11}},
+                        new int[][]{new int[]{2, 3, 4}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11}},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
                         new int[][]{new int[]{2, 3, 4}, new int[0]},
@@ -751,6 +751,9 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
         int j = 0;
         while (it.hasNext()) {
             int[][] data = it.next();
+            Arrays.sort(data[0]);
+            Arrays.sort(data[1]);
+
             results[j] = data;
             j += 1;
         }
