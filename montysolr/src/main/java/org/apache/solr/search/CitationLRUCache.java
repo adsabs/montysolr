@@ -472,37 +472,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         // collect ids of documents that need to be reloaded/regenerated during this
         // warmup run
-        // System.out.println("searcher: " + searcher.toString());
-        // System.out.println("maxDoc: " + searcher.getIndexReader().maxDoc());
         FixedBitSet toRefresh = new FixedBitSet(searcher.getIndexReader().maxDoc());
-
-        // System.out.println("version=" + searcher.getIndexReader().getVersion());
-        // try {
-        // System.out.println("commit=" + searcher.getIndexReader().getIndexCommit());
-        // } catch (IOException e2) {
-        // TODO Auto-generated catch block
-        // e2.printStackTrace();
-        // }
-
-        // for (IndexReaderContext c : searcher.getTopReaderContext().children()) {
-        // //System.out.println("context=" + c.reader().getCombinedCoreAndDeletesKey());
-        // }
-
-        // for (IndexReaderContext l : searcher.getIndexReader().leaves()) {
-        // //System.out.println(l);
-        // }
-
         Bits liveDocs = searcher.getSlowAtomicReader().getLiveDocs();
-        // System.out.println(liveDocs == null ? "liveDocs=" + null : "liveDocs=" +
-        // liveDocs.length());
-        // System.out.println("numDeletes=" +
-        // searcher.getAtomicReader().numDeletedDocs());
 
         if (liveDocs == null) { // everything is new, this could be fresh index or merged/optimized index too
 
-            // searcher.getAtomicReader().getContext().children().size()
-
-            // other.map.clear(); // force regeneration
             toRefresh.set(0, toRefresh.length());
 
             // Build the mapping from indexed values into lucene ids
@@ -516,17 +490,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 }
             });
 
-        } else if (liveDocs != null) {
-
-            Integer luceneId;
-            for (V v : other.relationships.values()) {
-                luceneId = ((Integer) v);
-                if (luceneId <= liveDocs.length() && !liveDocs.get(luceneId)) { // doc was either deleted or updated
-                    // System.out.println("Found deleted: " + luceneId);
-                    // retrieve all citations/references for this luceneId and mark these docs to be
-                    // refreshed
-                }
-            }
+        } else {
 
             for (int i = 0; i < toRefresh.length(); i++) {
                 if (liveDocs.get(i)) {
