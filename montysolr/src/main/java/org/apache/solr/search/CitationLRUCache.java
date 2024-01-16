@@ -639,32 +639,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                     continue;
                 }
 
-                SchemaField fSchema = schema.getField(field);
                 DocValuesType fType = fi.getDocValuesType();
-                Map<String, Type> mapping = new HashMap<String, Type>();
-                final LeafReader unReader;
+                final LeafReader unReader = lr;
 
-                if (fType.equals(DocValuesType.NONE)) {
-                    Class<? extends DocValuesType> c = fType.getClass();
-                    if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-                        if (fSchema.multiValued()) {
-                            mapping.put(field, Type.SORTED);
-                        } else {
-                            mapping.put(field, Type.BINARY);
-                        }
-                    } else if (c.isAssignableFrom(TrieIntField.class)) {
-                        if (fSchema.multiValued()) {
-                            mapping.put(field, Type.SORTED_SET_INTEGER);
-                        } else {
-                            mapping.put(field, Type.INTEGER_POINT);
-                        }
-                    } else {
-                        continue;
-                    }
-                    unReader = UninvertingReader.wrap(lr, mapping::get);
-                } else {
-                    unReader = lr;
-                }
 
                 switch (fType) {
                     case NUMERIC:
@@ -699,12 +676,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                     case SORTED_SET:
                         transformer = new Transformer() {
                             final SortedSetDocValues dv = unReader.getSortedSetDocValues(field);
-                            final int errs = 0;
 
                             @Override
                             public void process(int docBase, int docId) throws IOException {
-                                if (errs > 5)
-                                    return;
                                 if (dv.advanceExact(docId)) {
                                     for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
                                         final BytesRef value = dv.lookupOrd(ord);
