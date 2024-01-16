@@ -662,7 +662,7 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
     @Test
     public void testRelationshipMap() throws Exception {
         CitationLRUCache.RelationshipLinkedHashMap<Object, Integer> map =
-                new CitationLRUCache.RelationshipLinkedHashMap<>(11, 0.75f, false, 1000, 0.75f);
+                new CitationLRUCache.RelationshipLinkedHashMap<>(11, 0.75f, false, 1000);
         map.initializeCitationCache(10);
 
         for (int i = 0; i < 10; i++) {
