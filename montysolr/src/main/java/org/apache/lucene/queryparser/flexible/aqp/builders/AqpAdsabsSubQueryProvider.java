@@ -20,6 +20,7 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
+import org.apache.lucene.search.spans.SpanExactPositionQuery;
 import org.apache.lucene.search.spans.SpanPositionRangeQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.util.FixedBitSet;
@@ -323,18 +324,17 @@ public class AqpAdsabsSubQueryProvider implements
                     throw new NestedParseException("Wrong number of arguments");
                 }
 
-                assert start > 0;
-                assert start <= end;
+                assert (start > 0 && start <= end) || (start < 0 && start == end);
 
                 SpanConverter converter = new SpanConverter();
                 converter.setWrapNonConvertible(true);
 
                 // a field can have a different positionIncrementGap
                 int positionIncrementGap = 1;
+                String queryField = getField(query);
                 if (fp.getReq() != null) {
                     IndexSchema schema = fp.getReq().getSchema();
-                    String f = getField(query);
-                    SchemaField field = schema.getFieldOrNull(f);
+                    SchemaField field = schema.getFieldOrNull(queryField);
                     if (field != null) {
                         FieldType fType = field.getType();
                         //if (!fType.isMultiValued()) {
@@ -367,7 +367,12 @@ public class AqpAdsabsSubQueryProvider implements
                     throw ex;
                 }
 
-                query = new SpanPositionRangeQuery(spanQuery, (start - 1) * positionIncrementGap, end * positionIncrementGap); //lucene counts from zeroes
+                if (start < 0) {
+                    query = new SpanExactPositionQuery(spanQuery, queryField, start);
+                } else {
+                    query = new SpanPositionRangeQuery(spanQuery, (start - 1) * positionIncrementGap, end * positionIncrementGap); //lucene counts from zeroes
+                }
+
                 if (wrapConstant)
                     query = new ConstantScoreQuery(query);
                 if (boostFactor != 1.0f)
