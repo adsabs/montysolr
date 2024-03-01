@@ -390,11 +390,32 @@ public class AqpAdsabsSubQueryProvider implements
                     }
 
                     if (s.size() > 1) {
-                        throw new SyntaxError("`pos` queries cannot handle boolean queries that span multiple fields, " + 
-                            "including virtual field queries. Try using a non-virtual field instead.");
+                        throw new SyntaxError("`pos` queries cannot handle boolean queries that span multiple fields, " +
+                                "including virtual field queries. Try using a non-virtual field instead.");
                     }
 
                     return (String) s.toArray()[0];
+                } else if (query instanceof BoostQuery) {
+                    return getField(((BoostQuery) query).getQuery());
+                } else if (query instanceof ConstantScoreQuery) {
+                    return getField(((ConstantScoreQuery) query).getQuery());
+                } else if (query instanceof MultiTermQuery) {
+                    return ((MultiTermQuery) query).getField();
+                } else if (query instanceof DisjunctionMaxQuery) {
+                    String field = null;
+
+                    for (Query q : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                        String f = getField(q);
+
+                        if (field == null) {
+                            field = f;
+                        } else if (!field.equals(f)) {
+                            throw new SyntaxError("`pos` queries cannot handle disjunction queries that span multiple fields, " +
+                                    "including virtual field queries. Try using a non-virtual field instead.");
+                        }
+                    }
+
+                    return field;
                 } else {
                     // last resort
                     return query.toString().split(":")[0];
