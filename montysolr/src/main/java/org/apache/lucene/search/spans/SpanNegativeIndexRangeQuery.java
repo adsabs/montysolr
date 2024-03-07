@@ -49,9 +49,9 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
         assert spans.startPosition() != spans.endPosition()
                 : "start equals end: " + spans.startPosition();
 
+        int count = currentDocument.getFields(fieldName).length;
         int docStartPosition = startPosition;
         if (startPosition < 0) {
-            int count = currentDocument.getFields(fieldName).length;
             docStartPosition = count + startPosition;
 
             if (docStartPosition < 0) {
@@ -60,7 +60,6 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
         }
         int docEndPosition = endPosition;
         if (endPosition < 0) {
-            int count = currentDocument.getFields(fieldName).length;
             docEndPosition = count + endPosition;
 
             if (docEndPosition < 0) {
