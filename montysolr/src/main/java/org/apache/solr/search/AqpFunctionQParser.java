@@ -144,7 +144,11 @@ public class AqpFunctionQParser extends FunctionQParser {
 
 
     public int parseInt() {
-        return Integer.valueOf(consumeAsString());
+        String val = consumeAsString();
+        if (val.charAt(0) == '"' && val.charAt(val.length() - 1) == '"') {
+            val = val.substring(1, val.length() - 1);
+        }
+        return Integer.valueOf(val);
     }
 
     public Float parseFloat() throws SyntaxError {
