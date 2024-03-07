@@ -3,13 +3,12 @@ package org.apache.lucene.search.spans;
 import org.apache.lucene.document.Document;
 
 /**
- * Matches spans near the beginning of a field.
- *
- * <p>This class is a simple extension of {@link SpanPositionRangeQuery} in that it assumes the
- * start to be zero and only checks the end boundary.
+ * Matches spans that are within a range of positions in the document. This query type supports negative indices.
  */
 public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
 
+    // Field name is required to check the total number of entries the document has for that field
+    // This information is not included in the Spans object; it needs to come from the Document
     protected String fieldName;
     protected int startPosition;
     protected int endPosition;
