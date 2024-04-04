@@ -54,5 +54,13 @@ public class TestNegativePositionQueries extends MontySolrQueryTestCase {
         assertQ(req("q", "pos(author:\"Author, B\", \"-5\", \"-1\")"),
                 "//*[@numFound='0']"
         );
+
+        assertQ(req("q", "pos(author:\"Author, B\", -3, -1)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(author:\"Author, B\", -5, -1)"),
+                "//*[@numFound='0']"
+        );
     }
 }
