@@ -33,17 +33,6 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
         this.endPosition = endPosition;
     }
 
-    /**
-     * Constructs a query to perform exact position matches.
-     *
-     * @param match Potential span match iterator
-     * @param fieldName Field to search
-     * @param startPosition The exact position the term can be in. Can be positive or negative, but never 0
-     */
-    public SpanNegativeIndexRangeQuery(SpanQuery match, String fieldName, int startPosition) {
-        this(match, fieldName, startPosition, 0);
-    }
-
     @Override
     protected FilterSpans.AcceptStatus acceptPosition(Spans spans, Document currentDocument) {
         assert spans.startPosition() != spans.endPosition()
@@ -61,10 +50,6 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
         int docEndPosition = endPosition;
         if (endPosition < 0) {
             docEndPosition = count + endPosition;
-
-            if (docEndPosition < 0) {
-                return FilterSpans.AcceptStatus.NO_MORE_IN_CURRENT_DOC;
-            }
         }
 
         if (endPosition != startPosition) {
