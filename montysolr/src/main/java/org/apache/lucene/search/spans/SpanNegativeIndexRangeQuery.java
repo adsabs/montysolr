@@ -40,13 +40,23 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
         if (startPosition < 0) {
             docStartPosition = count + startPosition;
 
+            // If the start index is still negative, clip it to the beginning of the field
+            // This is similar to Python, where if a = [1,2,3], then a[-10:] == [1,2,3] but a[:-10] == []
             if (docStartPosition < 0) {
-                return FilterSpans.AcceptStatus.NO_MORE_IN_CURRENT_DOC;
+                docStartPosition = 0;
             }
         }
         int docEndPosition = endPosition;
         if (endPosition < 0) {
-            docEndPosition = count + endPosition;
+            docEndPosition = count + endPosition + 1;
+
+            // If the end position is still negative, there can be no matches in the document
+            // Consider what the user is asking for: "Give me all matches that are _not_ in the last N positions"
+            // If the user is asking for everything except the last 10 positions, and the field only has 5 positions,
+            // then there can be no matches.
+            if (docEndPosition < 0) {
+                return FilterSpans.AcceptStatus.NO_MORE_IN_CURRENT_DOC;
+            }
         }
 
         if (endPosition != startPosition) {
