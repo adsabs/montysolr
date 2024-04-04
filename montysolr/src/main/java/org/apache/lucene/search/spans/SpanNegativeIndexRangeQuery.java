@@ -35,9 +35,6 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
 
     @Override
     protected FilterSpans.AcceptStatus acceptPosition(Spans spans, Document currentDocument) {
-        assert spans.startPosition() != spans.endPosition()
-                : "start equals end: " + spans.startPosition();
-
         int count = currentDocument.getFields(fieldName).length;
         int docStartPosition = startPosition;
         if (startPosition < 0) {
