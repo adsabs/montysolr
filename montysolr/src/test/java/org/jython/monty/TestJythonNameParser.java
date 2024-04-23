@@ -70,4 +70,14 @@ public class TestJythonNameParser extends LuceneTestCase {
         Map<String, String> parsedName = instance.parse_human_name(name);
     }
 
+    public void testParentheticalName() {
+        PySystemState state = new PySystemState();
+        JythonObjectFactory factory = new JythonObjectFactory(state, JythonNameParser.class, "jython_name_parser", "HumanParser");
+
+        JythonNameParser instance = (JythonNameParser) factory.createObject();
+
+        String name = "(Helling,+Ch)";
+        Map<String, String> parsedName = instance.parse_human_name(name);
+    }
+
 }
