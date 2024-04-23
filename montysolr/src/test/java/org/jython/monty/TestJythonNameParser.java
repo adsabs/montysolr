@@ -60,4 +60,14 @@ public class TestJythonNameParser extends LuceneTestCase {
 
     }
 
+    public void testUnicodeName() {
+        PySystemState state = new PySystemState();
+        JythonObjectFactory factory = new JythonObjectFactory(state, JythonNameParser.class, "jython_name_parser", "HumanParser");
+
+        JythonNameParser instance = (JythonNameParser) factory.createObject();
+
+        String name = "^\uD835\uDDE6\uD835\uDDFD\uD835\uDDF2\uD835\uDDFF\uD835\uDDF4\uD835\uDDF2\uD835\uDDF9, D";
+        Map<String, String> parsedName = instance.parse_human_name(name);
+    }
+
 }
