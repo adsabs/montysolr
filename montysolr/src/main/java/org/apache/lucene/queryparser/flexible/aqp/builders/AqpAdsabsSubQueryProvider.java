@@ -323,7 +323,7 @@ public class AqpAdsabsSubQueryProvider implements
                     throw new NestedParseException("Wrong number of arguments");
                 }
 
-                assert start > 0;
+                assert start >= 0;
                 assert start <= end;
 
                 SpanConverter converter = new SpanConverter();
