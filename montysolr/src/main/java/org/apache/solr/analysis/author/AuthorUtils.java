@@ -3,6 +3,7 @@ package org.apache.solr.analysis.author;
 import com.anyascii.AnyAscii;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,10 @@ public class AuthorUtils {
     // [^,\\-\\w\\s\\{N}\\p{L}\\p{M}*+]
 
 
+    // Keeps all:
+    // \p{N} - numbers in any script
+    // \p{L} - letters in any script
+    // \p{M} - diacritics
     static Pattern n1 = Pattern.compile("[^,\\-\\s\\p{N}\\p{L}\\p{M}]");
     static Pattern n1b = Pattern.compile("[^,\\-\\s\\'\\p{N}\\p{L}\\p{M}]");
 
@@ -47,14 +52,20 @@ public class AuthorUtils {
      * @return Normalized string
      */
     public static String normalizeAuthor(String a, boolean keepApostrophe) {
+        // Convert code points to a canonical form prior to regex to prevent removal of
+        // bytes that contribute to individual code points.
+        // If we didn't do this, some names could turn into unknown characters.
+        a = Normalizer.normalize(a, Normalizer.Form.NFKC);
         boolean hasWildcards = a.indexOf('*') > -1 || a.indexOf('?') > -1; // \*\? should never be encountered here
         if (!keepApostrophe)
             a = n4.matcher(a).replaceAll("-");
         a = n0.matcher(a).replaceAll(" ");
+
         if (keepApostrophe)
             a = n1b.matcher(a).replaceAll("");
         else
             a = n1.matcher(a).replaceAll("");
+
         a = n3.matcher(a).replaceAll(", ");
         a = n2.matcher(a.trim()).replaceAll(" ");
 

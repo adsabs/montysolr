@@ -1,0 +1,3 @@
+[submodule "jython"]
+	path = jython
+	url = ssh://git@github.com/adsabs/jython

@@ -71,7 +71,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
             Map<String, String> parsedName = jythonParser.parse_human_name(individual);
 
-            if (parsedName != null) {
+            if (parsedName != null && !parsedName.isEmpty()) {
                 if (parsedName.containsKey("Last")) {
                     newIndividual = (parsedName.get("Last") + ","
                             + (parsedName.containsKey("First") ? " " + parsedName.get("First") : "")
