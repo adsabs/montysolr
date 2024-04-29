@@ -58,7 +58,3 @@ gradle-app.setting
 
 contrib/
 jarfiles/
-
-### 10k Test Suite ###
-# The 10k test suite contains user queries and can't be released yet.
-montysolr/src/test/resources/successful_queries.csv
