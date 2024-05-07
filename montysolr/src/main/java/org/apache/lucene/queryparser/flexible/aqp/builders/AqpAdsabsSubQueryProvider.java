@@ -368,7 +368,7 @@ public class AqpAdsabsSubQueryProvider implements
                 }
 
                 if (start < 0 || end < 0) {
-                    query = new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end);
+                    query = new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end, positionIncrementGap);
                 } else {
                     query = new SpanPositionRangeQuery(spanQuery, (start - 1) * positionIncrementGap, end * positionIncrementGap); //lucene counts from zeroes
                 }

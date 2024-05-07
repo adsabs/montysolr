@@ -12,6 +12,7 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
     protected String fieldName;
     protected int startPosition;
     protected int endPosition;
+    private final int positionIncrementGap;
 
     /**
      * <p>Constructs a query to perform range matches, where the range position may be negative.
@@ -25,12 +26,14 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
      * @param startPosition The start position of the range. Can be positive or negative, but never 0
      * @param endPosition The end position of the range. Can be positive or negative, but never 0
      */
-    public SpanNegativeIndexRangeQuery(SpanQuery match, String fieldName, int startPosition, int endPosition) {
+    public SpanNegativeIndexRangeQuery(SpanQuery match, String fieldName, int startPosition, int endPosition,
+                                       int positionIncrementGap) {
         super(match);
 
         this.fieldName = fieldName;
         this.startPosition = startPosition;
         this.endPosition = endPosition;
+        this.positionIncrementGap = positionIncrementGap;
     }
 
     @Override
@@ -59,23 +62,37 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
             }
         }
 
+        int spanStart = spans.startPosition();
+        int spanEnd = spans.endPosition();
+        if (positionIncrementGap > 1) {
+            // positionIncrementGap produces sequences of positions like f(n) = n*(positionIncrementGap + 2)
+            // e.g. 0, 102, 204, 306
+            // The end of each position is its start position +1
+            // It is NOT the next start position
+            // e.g. (start, end): (0, 1), (102, 103), (204, 205), (306, 307)
+            spanStart = spans.startPosition() / (positionIncrementGap + 2);
+            spanEnd = (spans.endPosition() - 1) / (positionIncrementGap + 2);
+            if (spanStart == spanEnd && spans.startPosition() != spans.endPosition())
+                spanEnd += 1;
+        }
+
         if (endPosition != startPosition) {
             // Too late; beyond the end position
-            if (spans.startPosition() > docEndPosition)
+            if (spanStart > docEndPosition)
                 return FilterSpans.AcceptStatus.NO_MORE_IN_CURRENT_DOC;
 
-            if (spans.endPosition() > docEndPosition)
+            if (spanEnd > docEndPosition)
                 return FilterSpans.AcceptStatus.NO;
 
             // Too early; before the start position
-            if (spans.endPosition() < docStartPosition)
+            if (spanEnd < docStartPosition)
                 return FilterSpans.AcceptStatus.NO;
 
-            if (spans.startPosition() < docStartPosition)
+            if (spanStart < docStartPosition)
                 return FilterSpans.AcceptStatus.NO;
         } else {
             // We are doing an exact position search
-            if (spans.startPosition() != docStartPosition)
+            if (spanStart != docStartPosition)
                 return FilterSpans.AcceptStatus.NO_MORE_IN_CURRENT_DOC;
         }
 

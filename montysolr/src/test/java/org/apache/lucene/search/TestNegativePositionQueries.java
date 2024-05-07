@@ -19,7 +19,10 @@ public class TestNegativePositionQueries extends MontySolrQueryTestCase {
         assertU(adoc(AdsConfig.F.ID, "1", AdsConfig.F.BIBCODE, "xxxxxxxxxxxxx",
                 AdsConfig.F.AUTHOR, "Author, A",
                 AdsConfig.F.AUTHOR, "Author, B",
-                AdsConfig.F.AUTHOR, "Author, C"
+                AdsConfig.F.AUTHOR, "Author, C",
+                "aff", "aff1",
+                "aff", "aff2",
+                "aff", "aff3"
         ));
 
         assertU(commit("waitSearcher", "true"));
@@ -33,6 +36,21 @@ public class TestNegativePositionQueries extends MontySolrQueryTestCase {
 
         assertQ(req("q", "pos(author:\"Author, A\", 1)"),
                 "//*[@numFound='1']"
+        );
+    }
+
+    @Test
+    public void testAffiliationSearch() {
+        assertQ(req("q", "pos(aff:\"aff2\", -2)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(aff:\"aff2\", 0, -1)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(aff:\"aff3\", 0, -2)"),
+                "//*[@numFound='0']"
         );
     }
 
