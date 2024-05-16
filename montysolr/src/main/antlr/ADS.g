@@ -504,7 +504,7 @@ DATE_TOKEN
 
 NUMBER  
   : 
-  INT+ ('.' INT+)?
+  ('+'|'-')? INT+ ('.' INT+)?
   ;
 
 fragment M_NUMBER:  
