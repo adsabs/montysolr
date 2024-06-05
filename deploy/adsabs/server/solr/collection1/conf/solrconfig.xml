@@ -154,6 +154,7 @@
     You can disable the cache/and cache-warming/ by setting the values
     to zero
      -->
+    <!--
     <cache name="citations-cache"
               class="solr.CitationLRUCache"
               size="${solr.citationCache.size:512}"
@@ -166,6 +167,7 @@
               dumpCache="${montysolr.enable.write:true}"
               loadDumpedCache="${montysolr.load.citation_cache:true}"
               />
+	    -->
               
     <enableLazyFieldLoading>true</enableLazyFieldLoading>
 
@@ -805,17 +807,21 @@
   <requestHandler name="/perf" class="perf.CreatePerformanceQueriesHandler">
   </requestHandler>
   
+  <!--
   <transformer name="citations" class="org.apache.solr.response.transform.CitationsTransformerFactory" >
     <str name="cache-name">citations-cache</str>
     <str name="resolution-field">bibcode</str>
   </transformer>
+	  -->
 
   <transformer name="fields" class="org.apache.solr.response.transform.FieldTransformerFactory" >
   </transformer>  
   
   <queryParser name="bitset" class="solr.search.BitSetQParserPlugin">
     <lst name="defaults">
+	    <!--
       <str name="cache-mapping">bibcode:citations-cache</str>
+	    -->
       <str name="allowed-fields">bibcode,recid</str>
     </lst>
   </queryParser>
