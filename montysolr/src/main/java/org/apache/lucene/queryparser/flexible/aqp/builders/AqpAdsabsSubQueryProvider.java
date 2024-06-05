@@ -634,9 +634,15 @@ public class AqpAdsabsSubQueryProvider implements
             public Query parse(FunctionQParser fp) throws SyntaxError {
                 Query innerQuery = fp.parseNestedQuery();
 
+                CitationCache<Object, Integer> citationCache = (CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache");
+                if (citationCache == null) {
+                    // TODO: Perform citation query without the cache???
+                    return innerQuery;
+                }
+
                 @SuppressWarnings("unchecked")
                 SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
-                        (CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
+                        citationCache);
 
                 return new SecondOrderQuery(innerQuery,
                         new SecondOrderCollectorCitedBy(citationsWrapper), false);
@@ -1083,7 +1089,7 @@ public class AqpAdsabsSubQueryProvider implements
 
                 final SolrQueryRequest req = fp.getReq();
                 @SuppressWarnings("rawtypes") final CitationCache cache = (CitationCache) req.getSearcher().getCache("citations-cache");
-                if (!cache.isWarmingOrWarmed()) {
+                if (cache != null && !cache.isWarmingOrWarmed()) {
                     if (cache.size() > 0) {
                         return new MatchNoDocsQuery(); // we only allow it once (solr warms caches after first searcher was opened)
                     }
