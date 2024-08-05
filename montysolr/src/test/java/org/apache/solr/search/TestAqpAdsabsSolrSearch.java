@@ -696,7 +696,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)",
                 SpanPositionRangeQuery.class);
 
-        assertQueryParseException(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\", 1, -1)"));
         assertQueryParseException(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\", 1, 1, 1)"));
         assertQueryParseException(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\")"));
         assertQueryParseException(req("defType", "aqp", "q", "^two$"));

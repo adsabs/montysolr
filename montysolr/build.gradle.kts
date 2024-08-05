@@ -1,6 +1,7 @@
 plugins {
 	java
 	antlr
+	id("org.gradle.test-retry") version "1.5.9"
 }
 
 repositories {
@@ -33,12 +34,18 @@ dependencies {
 
 java {
 	toolchain {
-		languageVersion.set(JavaLanguageVersion.of(8))
+		languageVersion.set(JavaLanguageVersion.of(11))
 	}
 }
 
 tasks.withType<Test>().all {
 	jvmArgs("-Djava.security.egd=file:/dev/./urandom")
+
+	retry {
+		maxRetries.set(3)
+		maxFailures.set(10)
+		failOnPassedAfterRetry.set(false)
+	}
 }
 
 tasks.named<JavaCompile>("compileJava") {

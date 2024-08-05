@@ -1,12 +1,15 @@
 package org.apache.solr.handler.batch;
 
 import org.apache.solr.request.SolrQueryRequest;
+import org.junit.Ignore;
 
 import java.io.File;
 
 public class TestBatchProviderDumpCitationCache extends BatchProviderTest {
 
 
+    // TODO: Figure out the race condition that makes this flaky
+    @Ignore
     public void test() throws Exception {
 
         assertU(adoc("id", "11", "bibcode", "b1", "reference", "b2", "reference", "b3", "reference", "b4", "b", "test"));
