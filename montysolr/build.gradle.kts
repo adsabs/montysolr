@@ -22,12 +22,14 @@ dependencies {
 	implementation("org.apache.lucene:lucene-queryparser:7.7.3")
 
 	implementation("com.anyascii:anyascii:0.3.2")
-	implementation("org.python:jython-standalone:2.7.3")
+	//implementation("org.python:jython-standalone:2.7.3")
+	implementation(project(":jython"))
 
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.antlr:stringtemplate:3.2.1")
 	testImplementation("org.apache.solr:solr-test-framework:7.7.3")
 	testImplementation("org.apache.lucene:lucene-test-framework:7.7.3")
+	testImplementation("com.univocity:univocity-parsers:2.9.1")
 }
 
 java {
@@ -44,6 +46,10 @@ tasks.withType<Test>().all {
 		maxFailures.set(10)
 		failOnPassedAfterRetry.set(false)
 	}
+}
+
+tasks.named<JavaCompile>("compileJava") {
+	dependsOn(":jython:mergeExposed")
 }
 
 sourceSets {

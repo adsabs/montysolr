@@ -368,8 +368,10 @@ class HumanName(object):
         
         log.debug(u"full_name: {0}".format(self._full_name))
         log.debug(u"parts: {0}".format(parts))
-        
-        if len(parts) == 1:
+
+        if len(parts) == 0:
+            self.unparsable = True
+        elif len(parts) == 1:
             
             # no commas, title first middle middle middle last suffix
             

@@ -1,3 +1,4 @@
+.DS_Store
 *.class
 *.pyc
 *.log
@@ -57,3 +58,6 @@ gradle-app.setting
 
 ### MacOS ###
 .DS_Store
+
+contrib/
+jarfiles/

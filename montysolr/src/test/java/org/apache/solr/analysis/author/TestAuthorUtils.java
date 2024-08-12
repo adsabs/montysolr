@@ -21,7 +21,7 @@ public class TestAuthorUtils extends TestCase {
         // unicode character vs unicode+accent
         // U+0061 (a) + U+0300
         // U+00E0 (à)
-        assertEquals("G\u0061\u0300mez, Hector Q", AuthorUtils.normalizeAuthor("G\u0061\u0300mez, Hector Q."));
+        assertEquals("G\u00E0mez, Hector Q", AuthorUtils.normalizeAuthor("G\u0061\u0300mez, Hector Q."));
         assertEquals("G\u00E0mez, Hector Q", AuthorUtils.normalizeAuthor("G\u00E0mez, Hector Q."));
 
         assertEquals("hey, joe", AuthorUtils.normalizeAuthor("hey,_joe"));
