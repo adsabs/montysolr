@@ -1,9 +1,12 @@
 package monty.solr.util;
 
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.solr.SolrTestCaseJ4;
+import org.apache.solr.client.solrj.impl.SolrZkClientTimeout;
 import org.apache.solr.common.params.CommonParams;
-import org.apache.solr.core.SolrConfig;
-import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.core.*;
+import org.apache.solr.metrics.reporters.SolrJmxReporter;
+import org.apache.solr.update.UpdateShardHandlerConfig;
 import org.apache.solr.util.TestHarness;
 
 import java.net.MalformedURLException;
@@ -15,6 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SolrTestSetup extends SolrTestCaseJ4 {
 
@@ -38,7 +43,7 @@ public class SolrTestSetup extends SolrTestCaseJ4 {
 
         // Perform the rest of createCore
         SolrTestCaseJ4.h = new TestHarness(
-                TestHarness.buildTestNodeConfig(loader),
+                buildTestNodeConfig(solrPath, loader),
                 new TestHarness.TestCoresLocator(SolrTestCaseJ4.DEFAULT_TEST_CORENAME,
                         solrPath.toString(), config, schema)
         );
@@ -56,6 +61,24 @@ public class SolrTestSetup extends SolrTestCaseJ4 {
         SolrTestCaseJ4.configString = config;
         SolrTestCaseJ4.schemaString = schema;
         SolrTestCaseJ4.testSolrHome = solrPath;
+
+        IndexSearcher.setMaxClauseCount(2048);
+    }
+
+    public static NodeConfig buildTestNodeConfig(Path solrHome, SolrResourceLoader loader) {
+        CloudConfig cloudConfig = null == System.getProperty("zkHost") ? null : (new CloudConfig.CloudConfigBuilder(System.getProperty("host"), Integer.getInteger("hostPort", 8983), System.getProperty("hostContext", ""))).setZkClientTimeout(SolrZkClientTimeout.DEFAULT_ZK_CLIENT_TIMEOUT).setZkHost(System.getProperty("zkHost")).build();
+        Map<String, Object> attributes = new HashMap();
+        attributes.put("name", "default");
+        attributes.put("class", SolrJmxReporter.class.getName());
+        PluginInfo defaultPlugin = new PluginInfo("reporter", attributes);
+        MetricsConfig metricsConfig = (new MetricsConfig.MetricsConfigBuilder()).setMetricReporterPlugins(new PluginInfo[]{defaultPlugin}).build();
+        return (new NodeConfig.NodeConfigBuilder("testNode", solrHome))
+                .setUseSchemaCache(Boolean.getBoolean("shareSchema"))
+                .setCloudConfig(cloudConfig)
+                .setUpdateShardHandlerConfig(UpdateShardHandlerConfig.TEST_DEFAULT)
+                .setMetricsConfig(metricsConfig)
+                .setSolrResourceLoader(loader)
+                .build();
     }
 
     public static URL getRepoUrl() throws URISyntaxException, MalformedURLException {

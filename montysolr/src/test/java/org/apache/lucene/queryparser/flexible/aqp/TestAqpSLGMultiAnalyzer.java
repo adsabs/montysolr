@@ -25,6 +25,7 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.tests.analysis.MockTokenizer;
 
 import java.io.IOException;
 

@@ -38,9 +38,9 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
                 if (q instanceof BoostQuery && ((BoostQuery) q).getBoost() != 1.0)
                     return q;
 
-                if (q.toString().equals("")) return null;
+                if (q.toString().isEmpty()) return null;
                 if (q instanceof DisjunctionMaxQuery && ((DisjunctionMaxQuery) q).getDisjuncts().size() == 1) {
-                    return ((DisjunctionMaxQuery) q).getDisjuncts().get(0);
+                    return ((DisjunctionMaxQuery) q).getDisjuncts().stream().findFirst().get();
                 }
                 return q;
             }

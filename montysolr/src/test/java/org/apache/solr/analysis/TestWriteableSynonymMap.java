@@ -1,7 +1,7 @@
 package org.apache.solr.analysis;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.tests.util.LuceneTestCase;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

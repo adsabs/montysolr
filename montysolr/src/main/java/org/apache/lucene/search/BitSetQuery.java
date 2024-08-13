@@ -18,11 +18,11 @@ public class BitSetQuery extends Query {
     }
 
     @Override
-    public Weight createWeight(IndexSearcher searcher, boolean needsScores, float boost) throws IOException {
+    public Weight createWeight(IndexSearcher searcher, ScoreMode needsScores, float boost) throws IOException {
         return new ConstantScoreWeight(this, boost) {
             @Override
             public Scorer scorer(LeafReaderContext context) throws IOException {
-                return new ConstantScoreScorer(this, score(),
+                return new ConstantScoreScorer(this, score(), needsScores,
                         new BasedBitSetIterator(docs, docs.approximateCardinality(),
                                 context.docBase, context.reader().maxDoc()));
             }
@@ -37,6 +37,11 @@ public class BitSetQuery extends Query {
     @Override
     public String toString(String field) {
         return "BitSetQuery(" + docs.approximateCardinality() + ")";
+    }
+
+    @Override
+    public void visit(QueryVisitor visitor) {
+        visitor.visitLeaf(this);
     }
 
     @Override

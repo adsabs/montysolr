@@ -47,8 +47,8 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
 
     @Override
-    public boolean needsScores() {
-        return true;
+    public ScoreMode scoreMode() {
+        return ScoreMode.COMPLETE;
     }
 
 

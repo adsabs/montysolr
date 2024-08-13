@@ -20,7 +20,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.StopFilterFactory;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.TokenFilterFactory;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
@@ -30,7 +30,7 @@ import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery.Builder;
-import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.queries.spans.SpanQuery;
 import org.apache.lucene.util.Version;
 import org.apache.solr.analysis.TokenizerChain;
 import org.apache.solr.common.params.CommonParams;
@@ -1717,7 +1717,8 @@ public class AqpExtendedDismaxQParser extends QParser {
                                            SolrParams params, SolrQueryRequest req) {
             solrParams = SolrParams.wrapDefaults(localParams, params);
             minShouldMatch = DisMaxQParser.parseMinShouldMatch(req.getSchema(), solrParams); // req.getSearcher() here causes searcher refcount imbalance
-            final boolean forbidSubQueryByDefault = req.getCore().getSolrConfig().luceneMatchVersion.onOrAfter(Version.LUCENE_7_2_0);
+            final boolean forbidSubQueryByDefault = req.getCore().getSolrConfig().luceneMatchVersion.onOrAfter(
+                    Version.fromBits(7, 2, 0));
             userFields = new UserFields(U.parseFieldBoosts(solrParams.getParams(DMP.UF)), forbidSubQueryByDefault);
             try {
                 queryFields = DisMaxQParser.parseQueryFields(req.getSchema(), solrParams);  // req.getSearcher() here causes searcher refcount imbalance
@@ -1751,7 +1752,8 @@ public class AqpExtendedDismaxQParser extends QParser {
 
             // lowercaseOperators defaults to true for luceneMatchVersion < 7.0 and to false for >= 7.0
             lowercaseOperators = solrParams.getBool(DMP.LOWERCASE_OPS,
-                    !req.getCore().getSolrConfig().luceneMatchVersion.onOrAfter(Version.LUCENE_7_0_0));
+                    !req.getCore().getSolrConfig().luceneMatchVersion.onOrAfter(
+                            Version.fromBits(7, 0, 0)));
 
             /* * * Boosting Query * * */
             boostParams = solrParams.getParams(DisMaxParams.BQ);
@@ -1760,7 +1762,9 @@ public class AqpExtendedDismaxQParser extends QParser {
 
             multBoosts = solrParams.getParams(DMP.MULT_BOOST);
 
-            splitOnWhitespace = solrParams.getBool(QueryParsing.SPLIT_ON_WHITESPACE, SolrQueryParser.DEFAULT_SPLIT_ON_WHITESPACE);
+            splitOnWhitespace = solrParams.getBool(
+                    QueryParsing.SPLIT_ON_WHITESPACE,
+                    SolrQueryParser.DEFAULT_SPLIT_ON_WHITESPACE);
         }
 
         /**

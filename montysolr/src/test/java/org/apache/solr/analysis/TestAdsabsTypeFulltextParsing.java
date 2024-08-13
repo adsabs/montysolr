@@ -848,7 +848,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
         // query followed by something
         assertQueryEquals(req("q", "title:\"hubble space telescope goes home\"", "defType", "aqp"),
-                "(title:\"hubble (space syn::universe) telescope goes home\"~3 | title:\"(syn::hubble space telescope syn::hst acr::hst) ? ? goes home\"~3)",
+                "(title:\"(syn::hubble space telescope syn::hst acr::hst) ? ? goes home\"~3 | title:\"hubble (space syn::universe) telescope goes home\"~3)",
                 DisjunctionMaxQuery.class);
         assertQ(req("q", "title:\"hubble space telescope goes home\""),
                 "//*[@numFound='1']",

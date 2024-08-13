@@ -17,7 +17,7 @@
 
 package org.apache.solr.search;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.lucene.index.*;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
@@ -26,9 +26,11 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.metrics.SolrMetricsContext;
 import org.apache.solr.schema.*;
 import org.apache.solr.uninverting.UninvertingReader;
 import org.apache.solr.uninverting.UninvertingReader.Type;
+import org.apache.solr.util.IOFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,6 +190,16 @@ public class CitationLRUCacheDocValues<K, V> extends SolrCacheBase implements Ci
             }
             return val;
         }
+    }
+
+    @Override
+    public V remove(K k) {
+        return null;
+    }
+
+    @Override
+    public V computeIfAbsent(K k, IOFunction<? super K, ? extends V> ioFunction) throws IOException {
+        return null;
     }
 
     /*
@@ -468,7 +480,7 @@ public class CitationLRUCacheDocValues<K, V> extends SolrCacheBase implements Ci
                     if (isModified(liveDocs, keys[i], vals[i])) {
                         toRefresh.set((Integer) keys[i]);
                     } else {
-                        continueRegen = regenerator.regenerateItem(searcher, this, old, keys[i], vals[i]);
+                        continueRegen = regenerator.regenerateItem(searcher, this, old, (K)keys[i], (V)vals[i]);
                     }
                     if (!continueRegen) break;
                 } catch (Throwable e) {
@@ -527,9 +539,39 @@ public class CitationLRUCacheDocValues<K, V> extends SolrCacheBase implements Ci
         return false;
     }
 
+    @Override
+    public void initializeMetrics(SolrMetricsContext solrMetricsContext, String s) {
+
+    }
+
+    @Override
+    public SolrMetricsContext getSolrMetricsContext() {
+        return null;
+    }
+
     public void close() {
         relationships.setSearcher(null);
         relationships.clear();
+    }
+
+    @Override
+    public int getMaxSize() {
+        return 0;
+    }
+
+    @Override
+    public void setMaxSize(int i) {
+
+    }
+
+    @Override
+    public int getMaxRamMB() {
+        return 0;
+    }
+
+    @Override
+    public void setMaxRamMB(int i) {
+
     }
 
 
@@ -663,10 +705,8 @@ public class CitationLRUCacheDocValues<K, V> extends SolrCacheBase implements Ci
                             @Override
                             public void process(int docBase, int docId) throws IOException {
                                 if (dv.advanceExact(docId)) {
-                                    BytesRef v = dv.binaryValue();
-                                    if (v.length == 0)
-                                        return;
-                                    setter.set(docBase, docId, v.utf8ToString().toLowerCase());
+                                    int v = dv.ordValue();
+                                    setter.set(docBase, docId, Integer.toString(v));
                                 }
                             }
                         };

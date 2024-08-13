@@ -42,12 +42,10 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
         return 8959545 ^ cache.hashCode();
     }
 
-
     @Override
-    public boolean needsScores() {
-        return true;
+    public ScoreMode scoreMode() {
+        return ScoreMode.COMPLETE;
     }
-
 
     @Override
     public SecondOrderCollector copy() {

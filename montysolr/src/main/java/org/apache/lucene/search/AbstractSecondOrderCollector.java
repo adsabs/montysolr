@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class AbstractSecondOrderCollector implements Collector, LeafCollector, SecondOrderCollector {
 
 
-    protected Scorer scorer;
+    protected Scorable scorer;
     protected int docBase;
     protected List<CollectorDoc> hits;
     protected volatile boolean organized = false;
@@ -39,7 +39,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     @Override
-    public void setScorer(Scorer scorer) throws IOException {
+    public void setScorer(Scorable scorer) throws IOException {
         this.scorer = scorer;
     }
 

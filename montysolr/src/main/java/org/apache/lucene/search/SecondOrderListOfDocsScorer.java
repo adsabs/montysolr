@@ -73,4 +73,9 @@ public class SecondOrderListOfDocsScorer extends Scorer {
         };
     }
 
+    @Override
+    public float getMaxScore(int upTo) throws IOException {
+        return Float.POSITIVE_INFINITY;
+    }
+
 }

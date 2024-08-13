@@ -19,9 +19,10 @@ package org.apache.lucene.analysis.core;
 
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.ResourceLoader;
-import org.apache.lucene.analysis.util.ResourceLoaderAware;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.util.ResourceLoader;
+import org.apache.lucene.util.ResourceLoaderAware;
+import org.apache.lucene.analysis.TokenFilterFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class AqpStopFilterFactory extends TokenFilterFactory implements Resource
             if (null != format) {
                 throw new IllegalArgumentException("'format' can not be specified w/o an explicit 'words' file: " + format);
             }
-            stopWords = new CharArraySet(StopAnalyzer.ENGLISH_STOP_WORDS_SET, ignoreCase);
+            stopWords = new CharArraySet(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET, ignoreCase);
         }
     }
 

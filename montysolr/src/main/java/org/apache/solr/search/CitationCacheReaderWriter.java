@@ -251,6 +251,11 @@ public class CitationCacheReaderWriter {
             is.read(b, offset, len);
         }
 
+        @Override
+        public void skipBytes(long numBytes) throws IOException {
+            is.skip(numBytes);
+        }
+
         public void close() throws IOException {
             is.close();
         }

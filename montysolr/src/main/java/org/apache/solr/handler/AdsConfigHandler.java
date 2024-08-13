@@ -4,6 +4,7 @@ import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.security.AuthorizationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,4 +83,8 @@ public class AdsConfigHandler extends RequestHandlerBase {
         return sb.toString();
     }
 
+    @Override
+    public Name getPermissionName(AuthorizationContext request) {
+        return Name.CORE_EDIT_PERM;
+    }
 }

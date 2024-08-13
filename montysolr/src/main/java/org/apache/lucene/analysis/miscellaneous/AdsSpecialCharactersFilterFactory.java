@@ -18,9 +18,8 @@ package org.apache.lucene.analysis.miscellaneous;
  */
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
-import org.apache.lucene.analysis.util.MultiTermAwareComponent;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.AbstractAnalysisFactory;
+import org.apache.lucene.analysis.TokenFilterFactory;
 
 import java.util.Map;
 
@@ -34,7 +33,7 @@ import java.util.Map;
  *   &lt;/analyzer&gt;
  * &lt;/fieldType&gt;</pre>
  */
-public class AdsSpecialCharactersFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
+public class AdsSpecialCharactersFilterFactory extends TokenFilterFactory {
     public AdsSpecialCharactersFilterFactory(Map<String, String> args) {
         super(args);
         if (!args.isEmpty()) {
@@ -44,11 +43,6 @@ public class AdsSpecialCharactersFilterFactory extends TokenFilterFactory implem
 
     public AdsSpecialCharactersFilter create(TokenStream input) {
         return new AdsSpecialCharactersFilter(input);
-    }
-
-    @Override
-    public AbstractAnalysisFactory getMultiTermComponent() {
-        return this;
     }
 }
 

@@ -4,8 +4,10 @@
 <config>
   <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
   <dataDir>${solr.data.dir:}</dataDir>
-  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
-
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.ByteBuffersDirectoryFactory}"/>
+  <indexConfig>
+    <lockType>${montysolr.locktype:single}</lockType>
+  </indexConfig>
   <requestHandler name="standard" class="solr.BigQuerySearchHandler"></requestHandler>
   
 

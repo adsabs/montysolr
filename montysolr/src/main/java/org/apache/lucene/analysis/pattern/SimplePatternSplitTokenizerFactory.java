@@ -17,12 +17,14 @@
 
 package org.apache.lucene.analysis.pattern;
 
-import org.apache.lucene.analysis.util.TokenizerFactory;
+import com.google.j2objc.annotations.UsedByReflection;
+import org.apache.lucene.analysis.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.Operations;
 import org.apache.lucene.util.automaton.RegExp;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -56,16 +58,21 @@ import java.util.Map;
  * @see SimplePatternSplitTokenizer
  */
 public class SimplePatternSplitTokenizerFactory extends TokenizerFactory {
+    public static final String NAME = "simplePatternSplit";
     public static final String PATTERN = "pattern";
     private final Automaton dfa;
     private final int maxDeterminizedStates;
+
+    public SimplePatternSplitTokenizerFactory() {
+        this(Collections.emptyMap());
+    }
 
     /**
      * Creates a new SimpleSplitPatternTokenizerFactory
      */
     public SimplePatternSplitTokenizerFactory(Map<String, String> args) {
         super(args);
-        maxDeterminizedStates = getInt(args, "maxDeterminizedStates", Operations.DEFAULT_MAX_DETERMINIZED_STATES);
+        maxDeterminizedStates = getInt(args, "maxDeterminizedStates", Operations.DEFAULT_DETERMINIZE_WORK_LIMIT);
         dfa = Operations.determinize(new RegExp(require(args, PATTERN)).toAutomaton(), maxDeterminizedStates);
         if (!args.isEmpty()) {
             throw new IllegalArgumentException("Unknown parameters: " + args);

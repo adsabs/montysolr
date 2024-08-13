@@ -76,10 +76,9 @@ public class SecondOrderCollectorCitingTheMostCited extends AbstractSecondOrderC
         return false;
     }
 
-
     @Override
-    public boolean needsScores() {
-        return true;
+    public ScoreMode scoreMode() {
+        return ScoreMode.COMPLETE;
     }
 
     @Override

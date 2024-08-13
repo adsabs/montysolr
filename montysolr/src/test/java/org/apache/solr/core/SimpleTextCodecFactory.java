@@ -17,7 +17,7 @@
 package org.apache.solr.core;
 
 import org.apache.lucene.codecs.Codec;
-import org.apache.lucene.codecs.lucene50.Lucene50StoredFieldsFormat.Mode;
+import org.apache.lucene.backward_codecs.lucene50.Lucene50StoredFieldsFormat.Mode;
 import org.apache.lucene.codecs.simpletext.SimpleTextCodec;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;

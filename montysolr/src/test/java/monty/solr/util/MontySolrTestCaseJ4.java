@@ -1,6 +1,6 @@
 package monty.solr.util;
 
-import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.tests.util.LuceneTestCase;
 import org.apache.solr.JSONTestUtil;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -51,20 +51,6 @@ public abstract class MontySolrTestCaseJ4 extends LuceneTestCase {
 
     static long numOpens;
     static long numCloses;
-
-    /**
-     * Causes an exception matching the regex pattern to not be logged.
-     */
-    public static void ignoreException(String pattern) {
-        if (SolrException.ignorePatterns == null)
-            SolrException.ignorePatterns = new HashSet<String>();
-        SolrException.ignorePatterns.add(pattern);
-    }
-
-    public static void resetExceptionIgnores() {
-        SolrException.ignorePatterns = null;
-        ignoreException("ignore_exception"); // always ignore "ignore_exception"
-    }
 
     protected static String getClassName() {
         StackTraceElement[] stack = new RuntimeException("WhoAmI")

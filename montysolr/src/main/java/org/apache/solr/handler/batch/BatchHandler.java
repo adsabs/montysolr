@@ -31,6 +31,7 @@ import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.RawResponseWriter;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.security.AuthorizationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -466,6 +467,11 @@ public class BatchHandler extends RequestHandlerBase {
             }
         }
         return f.delete();
+    }
+
+    @Override
+    public Name getPermissionName(AuthorizationContext request) {
+        return Name.CORE_EDIT_PERM;
     }
 
     public class BatchProviderLazyLoader extends BatchProvider {

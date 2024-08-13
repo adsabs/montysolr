@@ -12,7 +12,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.Base64;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
@@ -29,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
@@ -459,11 +459,11 @@ public class BitSetQParserPlugin extends QParserPlugin {
 
 
     protected String encodeBase64(byte[] data) throws Exception {
-        return Base64.byteArrayToBase64(data, 0, data.length);
+        return new String(Base64.getEncoder().encode(data), StandardCharsets.ISO_8859_1);
     }
 
     protected byte[] decodeBase64(String data) throws Exception {
-        return Base64.base64ToByteArray(data);
+        return Base64.getDecoder().decode(data);
     }
 
     protected byte[] doGZip(byte[] data) throws IOException {

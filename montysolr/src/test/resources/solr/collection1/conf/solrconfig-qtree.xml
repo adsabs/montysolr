@@ -16,7 +16,10 @@
 <config>
 	<luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
 	<dataDir>${solr.data.dir:}</dataDir>
-	<directoryFactory name="DirectoryFactory"	class="${solr.directoryFactory:solr.RAMDirectoryFactory}" />
+	<directoryFactory name="DirectoryFactory"	class="${solr.directoryFactory:solr.ByteBuffersDirectoryFactory}" />
+	<indexConfig>
+		<lockType>${montysolr.locktype:single}</lockType>
+	</indexConfig>
 	<searchComponent name="qtree"	class="org.apache.solr.handler.component.AqpQueryTree" />
 	<schemaFactory class="ClassicIndexSchemaFactory"/>
 	<requestHandler name="/qtree" class="solr.StandardRequestHandler">

@@ -9,6 +9,7 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -192,9 +193,8 @@ public class BatchProviderDumpAnalyzedFields extends BatchProvider {
             }
 
             @Override
-            public boolean needsScores() {
-                // TODO Auto-generated method stub
-                return false;
+            public ScoreMode scoreMode() {
+                return ScoreMode.COMPLETE_NO_SCORES;
             }
         });
         //System.out.println("written + " + jobFile);

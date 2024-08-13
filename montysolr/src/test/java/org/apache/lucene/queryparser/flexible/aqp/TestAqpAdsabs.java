@@ -285,10 +285,10 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         q = assertQueryEquals("te?t", null, "te?t", WildcardQuery.class);
 
         q = assertQueryEquals("test*", null, "test*", WildcardQuery.class);
-        assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
+        assertEquals(MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
 
         q = assertQueryEquals("test?", null, "test?", WildcardQuery.class);
-        assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
+        assertEquals(MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE, ((MultiTermQuery) q).getRewriteMethod());
 
         assertQueryEquals("te*t", null, "te*t", WildcardQuery.class);
         assertQueryEqualsAllowLeadingWildcard("*te*t", null, "*te*t");

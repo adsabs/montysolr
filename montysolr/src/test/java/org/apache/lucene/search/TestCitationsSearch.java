@@ -54,7 +54,7 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
     }
 
     public HashMap<Integer, int[]> createRandomDocs(int start, int numDocs) throws IOException {
-        Random randomSeed = new Random();
+        Random randomSeed = new Random(42);
 
         int[] randData = new int[numDocs / 10];
         for (int i = 0; i < randData.length; i++) {
@@ -300,8 +300,8 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
             private LeafReaderContext context;
 
             @Override
-            public boolean needsScores() {
-                return false;
+            public ScoreMode scoreMode() {
+                return ScoreMode.COMPLETE_NO_SCORES;
             }
 
             @Override

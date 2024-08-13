@@ -18,15 +18,14 @@ package org.apache.solr.handler;
 
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.apache.lucene.util.LuceneTestCase.Slow;
-import org.apache.lucene.util.TestUtil;
+import org.apache.lucene.tests.util.TestUtil;
 import org.apache.solr.BaseDistributedSearchTestCase;
 import org.apache.solr.MontySolrTestCaseJ4;
 import org.apache.solr.SolrTestCaseJ4.SuppressSSL;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.embedded.JettyConfig;
-import org.apache.solr.client.solrj.embedded.JettySolrRunner;
+import org.apache.solr.embedded.JettyConfig;
+import org.apache.solr.embedded.JettySolrRunner;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -63,7 +62,6 @@ import java.util.*;
  * Test for Citation cache; reusing TestReplicationHandler
  */
 
-@Slow
 @SuppressSSL     // Currently unknown why SSL does not work with this test
 public class TestReplicationHandler extends MontySolrTestCaseJ4 {
 
@@ -83,7 +81,7 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
 
     @BeforeClass
     public static void beforeClass() {
-
+        System.setProperty("solr.disable.allowUrls", "true");
     }
 
     @Before
@@ -141,7 +139,7 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
         try {
             // setup the client...
             final String baseUrl = buildUrl(port) + "/" + DEFAULT_TEST_CORENAME;
-            HttpSolrClient client = getHttpSolrClient(baseUrl, 15000, 60000);
+            HttpSolrClient client = getHttpSolrClient(baseUrl);
             return client;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -269,26 +267,26 @@ public class TestReplicationHandler extends MontySolrTestCaseJ4 {
         {
             NamedList<Object> details = getDetails(primaryClient);
 
-            assertEquals("primary isMaster?",
-                    "true", details.get("isMaster"));
-            assertEquals("primary isSlave?",
-                    "false", details.get("isSlave"));
+            assertEquals("primary isLeader?",
+                    "true", details.get("isLeader"));
+            assertEquals("primary isFollower?",
+                    "false", details.get("isFollower"));
             assertNotNull("primary has primary section",
-                    details.get("master"));
+                    details.get("leader"));
         }
 
         // check details on the secondary a couple of times before & after fetching
         for (int i = 0; i < 3; i++) {
             NamedList<Object> details = getDetails(secondaryClient);
 
-            assertEquals("secondary isMaster?",
-                    "false", details.get("isMaster"));
-            assertEquals("secondary isSlave?",
-                    "true", details.get("isSlave"));
+            assertEquals("secondary isLeader?",
+                    "false", details.get("isLeader"));
+            assertEquals("secondary isFollower?",
+                    "true", details.get("isFollower"));
             assertNotNull("secondary has secondary section",
-                    details.get("slave"));
+                    details.get("follower"));
             // SOLR-2677: assert not false negatives
-            Object timesFailed = ((NamedList) details.get("slave")).get(IndexFetcher.TIMES_FAILED);
+            Object timesFailed = ((NamedList) details.get("follower")).get(IndexFetcher.TIMES_FAILED);
             // SOLR-7134: we can have a fail because some mock index files have no checksum, will
             // always be downloaded, and may not be able to be moved into the existing index
             assertTrue("secondary has fetch error count: " + timesFailed, timesFailed == null || timesFailed.equals("1"));

@@ -4,6 +4,8 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.SolrTestSetup;
+import org.apache.lucene.search.IndexSearcher;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

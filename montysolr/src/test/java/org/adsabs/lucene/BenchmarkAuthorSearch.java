@@ -6,22 +6,23 @@ import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.RandomIndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.payloads.SpanPayloadCheckQuery;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery.Builder;
-import org.apache.lucene.search.spans.SpanMultiTermQueryWrapper;
-import org.apache.lucene.search.spans.SpanNearQuery;
-import org.apache.lucene.search.spans.SpanQuery;
-import org.apache.lucene.search.spans.SpanTermQuery;
+import org.apache.lucene.queries.spans.SpanMultiTermQueryWrapper;
+import org.apache.lucene.queries.spans.SpanNearQuery;
+import org.apache.lucene.queries.spans.SpanQuery;
+import org.apache.lucene.queries.spans.SpanTermQuery;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.tests.analysis.MockTokenizer;
+import org.apache.lucene.tests.index.RandomIndexWriter;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.LuceneTestCase;
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
-import org.apache.lucene.util.TestRuleLimitSysouts;
-import org.apache.lucene.util.TestUtil;
+import org.apache.lucene.tests.util.LuceneTestCase;
+import org.apache.lucene.tests.util.LuceneTestCase.SuppressCodecs;
+import org.apache.lucene.tests.util.TestRuleLimitSysouts;
+import org.apache.lucene.tests.util.TestUtil;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -365,7 +366,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase {
         int total = 0;
         int rounds = 0;
         for (TestCase t : testCases) {
-            total += searcher.search(builder.getQuery(t), 1).totalHits;
+            total += (int) searcher.search(builder.getQuery(t), 1).totalHits.value;
             rounds++;
             if (rounds % 50 == 0 && (System.currentTimeMillis() - start) > maxTime) {
                 appendToTimer("Stopping execution, # queries finished: " + rounds);
@@ -407,7 +408,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase {
     private void verifySearch(int[] randomIds) throws IOException {
         for (int i = 0; i < randomIds.length; i++) {
             TopDocs docs = searcher.search(new TermQuery(new Term("id", Integer.toString(randomIds[i]))), 1);
-            if (docs.totalHits == 1) {
+            if (docs.totalHits.value == 1) {
                 Document doc = reader.document(docs.scoreDocs[0].doc);
                 String original = doc.getField("original").stringValue();
                 String[] parts = original.split("\\,? ");
@@ -415,7 +416,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase {
                 if (queries == null)
                     continue;
                 TermQuery oq = new TermQuery(new Term("original", original));
-                long ho = searcher.search(oq, 1).totalHits;
+                long ho = searcher.search(oq, 1).totalHits.value;
                 for (Query q : queries) {
                     if (q == null) continue;
                     Builder bq = new BooleanQuery.Builder();
@@ -426,7 +427,7 @@ public class BenchmarkAuthorSearch extends LuceneTestCase {
                         Query query = bq.build();
                         //System.out.println(query.toString());
                         //System.out.println("q: " + searcher.search(q, 10).totalHits);
-                        long no = searcher.search(query, 1).totalHits;
+                        long no = searcher.search(query, 1).totalHits.value;
                         if (no != 1) {
                             System.out.println("Results differ: " + oq + " <<>> " + q + "   [" + ho + " : " + no + "]");
                             if (store) {

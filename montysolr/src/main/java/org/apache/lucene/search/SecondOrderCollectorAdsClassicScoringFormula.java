@@ -52,12 +52,6 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 
 
     @Override
-    public void setScorer(Scorer scorer) throws IOException {
-        this.scorer = scorer;
-
-    }
-
-    @Override
     public void collect(int doc) throws IOException {
         float s = scorer.score();
 
@@ -117,13 +111,13 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
     }
 
     @Override
-    public boolean needsScores() {
-        return true;
-    }
-
-    @Override
     public SecondOrderCollector copy() {
         return new SecondOrderCollectorAdsClassicScoringFormula(cache, boostCache, lucenePart);
     }
 
+    @Override
+    public ScoreMode scoreMode() {
+        // TODO: Figure out whether this is correct
+        return ScoreMode.COMPLETE;
+    }
 }
