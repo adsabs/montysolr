@@ -32,13 +32,13 @@ Go ahead to http://github.com/adsabs/releases and download/unzip the version of 
 choice. Then run ./bin/solr
 
 If you want to build Montysolr from sources, rest assured it is easy.
-You will need Java JDK (version 8 and higher), and 'ant' (v1.8 and newer) 
+You will need Java JDK (version 11 and higher)
 
 ```bash
 
  $ git clone https://github.com/adsabs/montysolr
  $ cd montysolr
- $ ant build-all
+ $ ./gradlew build
 ```
 
 

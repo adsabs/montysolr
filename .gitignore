@@ -1,4 +1,3 @@
-.DS_Store
 *.class
 *.pyc
 *.log
@@ -55,6 +54,9 @@ gradle-app.setting
 
 ### Jython ###
 **/.jython_cache/
+
+### MacOS ###
+.DS_Store
 
 contrib/
 jarfiles/
