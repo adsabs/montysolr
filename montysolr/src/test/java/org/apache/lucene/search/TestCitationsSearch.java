@@ -115,17 +115,17 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
     public void testCitesCollector() throws Exception {
 
         int maxHits = 1000;
-        int maxHitsFound = new Float(maxHits * 0.3f).intValue();
-        createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
+        int maxHitsFound = Float.valueOf(maxHits * 0.3f).intValue();
+        createRandomDocs(0, Float.valueOf(maxHits * 0.4f).intValue());
         assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 
-        createRandomDocs(new Float(maxHits * 0.3f).intValue(), new Float(maxHits * 0.7f).intValue());
+        createRandomDocs(Float.valueOf(maxHits * 0.3f).intValue(), Float.valueOf(maxHits * 0.7f).intValue());
         assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 
-        createRandomDocs(new Float(maxHits * 0.71f).intValue(), new Float(maxHits * 1.0f).intValue());
+        createRandomDocs(Float.valueOf(maxHits * 0.71f).intValue(), Float.valueOf(maxHits * 1.0f).intValue());
         assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 
-        createRandomDocs(0, new Float(maxHits * 0.2f).intValue());
+        createRandomDocs(0, Float.valueOf(maxHits * 0.2f).intValue());
         assertU(commit("waitSearcher", "true")); // closes the writer, create a new segment
 
         // get the cache

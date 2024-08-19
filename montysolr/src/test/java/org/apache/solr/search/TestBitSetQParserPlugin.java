@@ -89,7 +89,7 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
         assertArrayEquals(byteData, bqp.decodeBase64(base64string));
         assertEquals(data, bqp.fromByteArray(bqp.decodeBase64(base64string)));
 
-        assertEquals(gzipBase64string, "H4sIAAAAAAAAAGNhaAAA7vLwFQMAAAA=");
+        // Don't test exact equality, as gzip compression may vary based on the platform's choice of algorithm
         assertArrayEquals(byteData, bqp.unGZip(gzipData));
         assertArrayEquals(byteData, bqp.unGZip(bqp.decodeBase64(gzipBase64string)));
         assertEquals(data, bqp.fromByteArray(bqp.unGZip(bqp.decodeBase64(gzipBase64string))));

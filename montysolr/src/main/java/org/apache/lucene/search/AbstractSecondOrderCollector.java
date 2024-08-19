@@ -270,7 +270,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsMinValue() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -299,7 +299,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsMaxValue() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -328,7 +328,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsAbsCount() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -358,7 +358,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsArithmMean() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -396,7 +396,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsGeomMean() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)

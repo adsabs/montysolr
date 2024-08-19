@@ -114,14 +114,14 @@ public class TestCollector extends LuceneTestCase {
 
         int maxHits = 10000;
 
-        int[][] data = createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
+        int[][] data = createRandomDocs(0, Float.valueOf(maxHits * 0.4f).intValue());
         reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
-        createRandomDocs(new Float(maxHits * 0.4f).intValue(), new Float(
+        createRandomDocs(Float.valueOf(maxHits * 0.4f).intValue(), Float.valueOf(
                 maxHits * 0.7f).intValue());
 
         writer.commit();
         reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
-        createRandomDocs(new Float(maxHits * 0.7f).intValue(), new Float(
+        createRandomDocs(Float.valueOf(maxHits * 0.7f).intValue(), Float.valueOf(
                 maxHits * 1.0f).intValue());
 
         writer.commit();
