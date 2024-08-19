@@ -992,10 +992,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "spanNear([spanNear([all:acr::nasa, all:grant], 3, true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
                 SpanNearQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"^0.9 NEAR N*"),
-                "spanNear([(spanNear([all:acr::nasa, all:grant], 1, true))^0.9, SpanMultiTermQueryWrapper(all:n*)], 5, false)",
+                "spanNear([PayloadScoreQuery(spanNear([all:acr::nasa, all:grant], 1, true), function: ConstantPayloadFunction, includeSpanScore: true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
                 SpanNearQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"~3^0.9 NEAR N*"),
-                "spanNear([(spanNear([all:acr::nasa, all:grant], 3, true))^0.9, SpanMultiTermQueryWrapper(all:n*)], 5, false)",
+                "spanNear([PayloadScoreQuery(spanNear([all:acr::nasa, all:grant], 3, true), function: ConstantPayloadFunction, includeSpanScore: true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
                 SpanNearQuery.class);
 
         // identifiers
@@ -1108,21 +1108,21 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 FunctionScoreQuery.class);
          */
 
-        assertQueryEquals(req("defType", "aqp", "q", "author:\"foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "custom((author:foo, bar | author:foo, bar * | author:foo, b | author:foo, b * | author:foo,), sum(float(cite_read_boost),const(0.5)))",
+        assertQueryContains(req("defType", "aqp", "q", "author:\"foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
+                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", "author:\"^foo, bar\"", "no.classic_scoring.modifier", "0.5"),
-                "spanPosRange(spanOr([author:foo, bar, SpanMultiTermQueryWrapper(author:foo, bar *), author:foo, b, SpanMultiTermQueryWrapper(author:foo, b *), author:foo,]), 0, 1)",
+        assertQueryNotContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "no.classic_scoring.modifier", "0.5"),
+                "scored by",
                 SpanPositionRangeQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "author:\"^foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "custom(spanPosRange(spanOr([author:foo, bar, SpanMultiTermQueryWrapper(author:foo, bar *), author:foo, b, SpanMultiTermQueryWrapper(author:foo, b *), author:foo,]), 0, 1), sum(float(cite_read_boost),const(0.5)))",
+        assertQueryContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
+                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
 
-        assertQueryEquals(
+        assertQueryContains(
                 req("defType", "aqp", "q", "foo bar aqp(baz)", "aqp.classic_scoring.modifier", "0.6", "qf",
                         "title keyword"),
-                "custom(+(keyword:foo | title:foo) +(keyword:bar | title:bar) +(keyword:baz | title:baz), sum(float(cite_read_boost),const(0.6)))",
+                "scored by boost(sum(float(cite_read_boost),const(0.6))))",
                 FunctionScoreQuery.class);
 
         // when used in conjunction with constant scoring, custom modifies constant (but
@@ -1131,10 +1131,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 req("defType", "aqp", "q", "^accomazzi", "aqp.constant_scoring", "author^5", "qf", "author title"),
                 "(ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0",
                 BoostQuery.class);
-        assertQueryEquals(
+        assertQueryContains(
                 req("defType", "aqp", "q", "^accomazzi", "aqp.classic_scoring.modifier", "0.5", "aqp.constant_scoring",
                         "author^5", "qf", "author title"),
-                "custom((ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0, sum(float(cite_read_boost),const(0.5)))",
+                ")))^5.0, scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
 
     }

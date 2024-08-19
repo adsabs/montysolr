@@ -18,6 +18,8 @@ public class TestReplicationEventListener extends SolrTestCaseJ4 {
 
         configString = "solr/collection1/conf/solrconfig-replication.xml";
 
+        System.setProperty("solr.disable.allowUrls", "true");
+
         SolrTestSetup.initCore(configString, schemaString);
     }
 

@@ -252,11 +252,14 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (values != null) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
+
+            if (values != null && values.length == 0)
+                return null;
             return values;
         }
     }
@@ -268,18 +271,21 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     public int[] getCitations(int docid) {
         synchronized (relationships) {
             RelationshipLinkedHashMap<K, V> relMap = (RelationshipLinkedHashMap<K, V>) relationships;
-            int[] val = relMap.getCitations(docid);
+            int[] values = relMap.getCitations(docid);
 
             if (getState() == State.LIVE) {
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (val.length > 0) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
-            return val;
+
+            if (values != null && values.length == 0)
+                return null;
+            return values;
         }
     }
 
@@ -296,11 +302,15 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (values != null) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
+
+            // For compatibility with pre-existing citation cache code
+            if (values != null && values.length == 0)
+                return null;
             return values;
         }
     }
@@ -312,18 +322,21 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     public int[] getReferences(int docid) {
         synchronized (relationships) {
             RelationshipLinkedHashMap<K, V> relMap = (RelationshipLinkedHashMap<K, V>) relationships;
-            int[] val = relMap.getReferences(docid);
+            int[] values = relMap.getReferences(docid);
 
             if (getState() == State.LIVE) {
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (val != null) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
-            return val;
+
+            if (values != null && values.length == 0)
+                return null;
+            return values;
         }
     }
 
@@ -1018,7 +1031,8 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 if (c != null)
                     return c.getElements();
             }
-            return null;
+
+            return new int[0];
         }
 
         public Iterator<int[][]> getRelationshipsIterator() {

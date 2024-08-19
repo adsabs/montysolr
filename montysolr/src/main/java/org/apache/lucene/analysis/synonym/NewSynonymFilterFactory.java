@@ -150,6 +150,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
 
         protected Analyzer getAnalyzer(ResourceLoader loader) throws IOException {
             final boolean ignoreCase = getBoolean(args, "ignoreCase", false);
+            args.put("ignoreCase", ignoreCase ? "true" : "false");
 
             String tf = args.get("tokenizerFactory");
 

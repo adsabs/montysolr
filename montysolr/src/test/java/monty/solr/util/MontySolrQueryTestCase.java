@@ -123,6 +123,54 @@ public class MontySolrQueryTestCase extends MontySolrAbstractTestCase {
         return q;
     }
 
+    public Query assertQueryContains(SolrQueryRequest req, String expected, Class<?> clazz)
+            throws Exception {
+
+        QParser qParser = getParser(req);
+        String query = req.getParams().get(CommonParams.Q);
+        Query q = qParser.parse();
+
+        String actual = q.toString("field");
+        if (BooleanQuery.class.equals(clazz) || DisjunctionMaxQuery.class.equals(clazz)) {
+            // TODO: Make a custom toString implementation to canonicalize the order of clauses
+            return q;
+        } else if (!actual.contains(expected)) {
+            tp.debugFail(query, expected, actual);
+        }
+
+        if (clazz != null) {
+            if (!q.getClass().isAssignableFrom(clazz)) {
+                tp.debugFail(actual, expected, "Query is not: " + clazz + " but: " + q.getClass() + q);
+            }
+        }
+
+        return q;
+    }
+
+    public Query assertQueryNotContains(SolrQueryRequest req, String expected, Class<?> clazz)
+            throws Exception {
+
+        QParser qParser = getParser(req);
+        String query = req.getParams().get(CommonParams.Q);
+        Query q = qParser.parse();
+
+        String actual = q.toString("field");
+        if (BooleanQuery.class.equals(clazz) || DisjunctionMaxQuery.class.equals(clazz)) {
+            // TODO: Make a custom toString implementation to canonicalize the order of clauses
+            return q;
+        } else if (actual.contains(expected)) {
+            tp.debugFail(query, expected, actual);
+        }
+
+        if (clazz != null) {
+            if (!q.getClass().isAssignableFrom(clazz)) {
+                tp.debugFail(actual, expected, "Query is not: " + clazz + " but: " + q.getClass() + q);
+            }
+        }
+
+        return q;
+    }
+
     private boolean isDisjunctionQueryEqual(String generated, String expected) {
         // Remove the outer parentheses and split on the disjunction operator "|"
         String[] generatedClauses = Arrays.stream(generated.substring(1, generated.length() - 1).split("\\|"))

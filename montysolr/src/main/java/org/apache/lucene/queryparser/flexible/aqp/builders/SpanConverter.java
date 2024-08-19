@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.queries.spans.*;
+import org.apache.lucene.queries.payloads.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -82,9 +83,15 @@ public class SpanConverter {
     }
 
     private SpanQuery wrapBoost(SpanQuery q, float boost) {
-        // TODO: Possibly re-add boosting
-        // Problem: boosting using FunctionScoreQuery produces a Query object, not a SpanQuery object
-        return q;
+        if (Math.abs(boost - 1.0f) < 1e-6f) {
+            return q;
+        }
+
+        // Score boosting was rewritten in Lucene 8, so we have to use PayloadScoreQueries to recreate
+        // the old, constant score boosting behavior
+        // With `includeSpanScore = true`, the score of the SpanQuery is multiplied by the payload score
+        return new PayloadScoreQuery(q, new ConstantPayloadFunction(boost),
+                PayloadDecoder.FLOAT_DECODER, true);
     }
 
     public SpanQuery wrapNonConvertible(SpanConverterContainer container) {
@@ -228,6 +235,44 @@ public class SpanConverter {
 
     }
 
+
+    public static class ConstantPayloadFunction extends PayloadFunction {
+
+        private float boost = 1.0f;
+
+        public ConstantPayloadFunction(float boost) {
+            this.boost = boost;
+        }
+
+        @Override
+        public float currentScore(int i, String s, int i1, int i2, int i3, float v, float v1) {
+            return boost;
+        }
+
+        @Override
+        public float docScore(int i, String s, int i1, float v) {
+            return boost;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ConstantPayloadFunction) {
+                return ((ConstantPayloadFunction) o).boost == boost;
+            }
+
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "ConstantPayloadFunction(" + boost + ")";
+        }
+    }
 
     public static class EmptySpanQuery extends SpanQuery {
 
