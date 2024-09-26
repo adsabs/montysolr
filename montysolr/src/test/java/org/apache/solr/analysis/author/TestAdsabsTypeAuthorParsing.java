@@ -382,6 +382,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                 "//doc/int[@name='recid'][.='222']"
         );
 
+        assertQueryEquals(req("q", "author:\"^Herrera-Camus\""),
+                "spanPosRange(spanOr([author:herrera camus,, SpanMultiTermQueryWrapper(author:herrera camus,*)]), 0, 1)",
+                SpanPositionRangeQuery.class);
+
         assertQueryEquals(req("q", "author:\"^acco*\""), "spanPosRange(SpanMultiTermQueryWrapper(author:acco*), 0, 1)", SpanPositionRangeQuery.class);
         assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
         assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
