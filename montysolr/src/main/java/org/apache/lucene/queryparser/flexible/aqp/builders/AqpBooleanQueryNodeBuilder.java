@@ -4,14 +4,20 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.*;
 import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
+import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.search.*;
 import org.python.core.__builtin__;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AqpBooleanQueryNodeBuilder implements StandardQueryBuilder {
 
@@ -73,6 +79,86 @@ public class AqpBooleanQueryNodeBuilder implements StandardQueryBuilder {
             }
 
         }
+
+        if (queryNode.getChildren() != null && canCoalesceSingleField(queryNode, null)
+                && queryNode.getChildren().size() > 2) {
+            return booleanFieldQueryToRegex(queryNode);
+        }
+
         return booleanBuilder.build(queryNode);
+    }
+
+    /**
+     * Checks whether a given boolean query can be coalesced into a single regular expression query to reduce
+     * total number of boolean clauses and improve query performance. Nodes will be checked recursively to
+     * verify that the entire subtree applies to the same field.
+     *
+     * @param queryNode Boolean query node or child node
+     * @param fieldName The field all nodes should match, or null if called on the root of the subtree
+     * @return Whether the root node and all of its descendents can be converted into a single regex query
+     */
+    public boolean canCoalesceSingleField(QueryNode queryNode, @Nullable CharSequence fieldName) {
+        if (!(queryNode instanceof BooleanQueryNode || queryNode instanceof FieldQueryNode)
+            || queryNode instanceof AndQueryNode) {
+            return false;
+        }
+
+        if (queryNode.getChildren() == null) {
+            return true;
+        }
+
+        if (queryNode.getChildren().stream()
+                .allMatch(subQuery -> subQuery instanceof FieldableNode)) {
+            List<CharSequence> distinctFields = queryNode.getChildren().stream()
+                    .map(subQuery -> ((FieldableNode)subQuery).getField())
+                    .distinct().toList();
+
+            if (distinctFields.size() != 1) {
+                return false;
+            }
+
+            if (fieldName != null && !distinctFields.get(0).equals(fieldName)) {
+                return false;
+            } else {
+                fieldName = distinctFields.get(0);
+            }
+
+            for (QueryNode child : queryNode.getChildren()) {
+                if (!canCoalesceSingleField(child, fieldName)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public Query booleanFieldQueryToRegex(QueryNode queryNode) {
+        String regex = collectRegex(queryNode);
+        return new RegexpQuery(new Term(getRegexField(queryNode), regex));
+    }
+
+    public String getRegexField(QueryNode queryNode) {
+        if (queryNode instanceof FieldQueryNode) {
+            return ((FieldQueryNode) queryNode).getFieldAsString();
+        }
+
+        return queryNode.getChildren().stream().map(this::getRegexField).findFirst().get();
+    }
+
+    public String collectRegex(QueryNode queryNode) {
+        if (queryNode instanceof WildcardQueryNode) {
+            String wildcardText = ((WildcardQueryNode) queryNode).getTextAsString();
+            wildcardText = wildcardText.replace(".", "\\.");
+            wildcardText = wildcardText.replace("*", ".*");
+            wildcardText = wildcardText.replace("?", ".");
+            return wildcardText;
+        } else if (queryNode instanceof FieldQueryNode) {
+            return ((FieldQueryNode) queryNode).getTextAsString();
+        }
+
+        return queryNode.getChildren().stream().map(this::collectRegex).collect(Collectors.joining("|"));
     }
 }
