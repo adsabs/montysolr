@@ -7,6 +7,7 @@ import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.*;
 import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
+import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.search.*;
@@ -98,7 +99,8 @@ public class AqpBooleanQueryNodeBuilder implements StandardQueryBuilder {
      * @return Whether the root node and all of its descendents can be converted into a single regex query
      */
     public boolean canCoalesceSingleField(QueryNode queryNode, @Nullable CharSequence fieldName) {
-        if (!(queryNode instanceof BooleanQueryNode || queryNode instanceof FieldQueryNode)
+        if (!(queryNode instanceof BooleanQueryNode || queryNode instanceof FieldQueryNode
+                || queryNode instanceof MultiPhraseQueryNode)
             || queryNode instanceof AndQueryNode) {
             return false;
         }
