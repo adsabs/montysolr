@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
@@ -29,6 +30,10 @@ public class AqpBooleanQueryNodeBuilder implements StandardQueryBuilder {
     }
 
     public Query build(QueryNode queryNode) throws QueryNodeException {
+        if (queryNode.getChildren() != null && canCoalesceSingleField(queryNode, null)) {
+            return booleanFieldQueryToRegex(queryNode);
+        }
+
         if (queryNode instanceof AqpOrQueryNode) {
             Object s = queryNode.getTag(AqpQueryTreeBuilder.SYNONYMS);
             if (s != null && (Boolean) s) {
@@ -81,11 +86,6 @@ public class AqpBooleanQueryNodeBuilder implements StandardQueryBuilder {
 
         }
 
-        if (queryNode.getChildren() != null && canCoalesceSingleField(queryNode, null)
-                && queryNode.getChildren().size() > 2) {
-            return booleanFieldQueryToRegex(queryNode);
-        }
-
         return booleanBuilder.build(queryNode);
     }
 
@@ -101,7 +101,7 @@ public class AqpBooleanQueryNodeBuilder implements StandardQueryBuilder {
     public boolean canCoalesceSingleField(QueryNode queryNode, @Nullable CharSequence fieldName) {
         if (!(queryNode instanceof BooleanQueryNode || queryNode instanceof FieldQueryNode
                 || queryNode instanceof MultiPhraseQueryNode)
-            || queryNode instanceof AndQueryNode) {
+            || queryNode instanceof AndQueryNode || queryNode instanceof AqpAndQueryNode) {
             return false;
         }
 
