@@ -4,11 +4,11 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuild
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 
@@ -19,6 +19,10 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 
     @Override
     public boolean nodeIsWanted(AqpANTLRNode node) {
+        if (node.getTokenLabel().equals("FIELD") && node.getChildren() != null &&
+                node.getChildren().stream().anyMatch((q) -> q.containsTag("pos_query"))) {
+            return true;
+        }
         return node.getTokenLabel().equals("QPOSITION");
     }
 
@@ -49,6 +53,20 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
      *                           <value>
      */
     public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
+        if (node.getTokenLabel().equals("FIELD")) {
+            for (QueryNode child : node.getChildren()) {
+                if (child instanceof AqpANTLRNode && ((AqpANTLRNode) child).getTokenName().equals("TERM_NORMAL")) {
+                    AqpANTLRNode antlrNode = (AqpANTLRNode) child;
+                    if (antlrNode.getTokenName().equals("TERM_NORMAL") && antlrNode.getTokenInput().equals("author")) {
+                        antlrNode.setTokenInput("first_author");
+                        antlrNode.setTokenLabel("first_author");
+                    }
+                }
+            }
+
+            return node;
+        }
+
         AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
         String input = subChild.getTokenInput();
 
@@ -127,8 +145,10 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
         values.add(new OriginalInput(String.valueOf(start), -1, -1));
         values.add(new OriginalInput(String.valueOf(end), -1, -1));
 
-
-        return new AqpFunctionQueryNode("pos", builder, values);
+        QueryNode newNode = new FieldQueryNode("first_author", input, subChild.getInputTokenStart(), subChild.getInputTokenEnd());
+        newNode.setTag("pos_query", Boolean.TRUE);
+        return newNode;
+        //return new AqpFunctionQueryNode("pos", builder, values);
 
     }
 

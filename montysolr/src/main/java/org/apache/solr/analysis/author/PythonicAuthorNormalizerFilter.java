@@ -8,6 +8,7 @@ import org.jython.JythonObjectFactory;
 import org.jython.monty.interfaces.JythonNameParser;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
         String original = termAtt.toString();
         original = multiSpace.matcher(original).replaceAll(" ");
+        original = Normalizer.normalize(original, Normalizer.Form.NFKC);
 
         String newIndividual = null;
 
