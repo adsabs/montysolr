@@ -1539,7 +1539,7 @@
 	        qq={!aqp}black hole
 	        fq={!query v=$qq}
 	     -->
-		<field name="cite_read_boost" type="tfloat" indexed="true"
+		<field name="doctype_boost" type="tfloat" indexed="true"
 			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
 		<!--
