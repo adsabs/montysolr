@@ -1087,6 +1087,9 @@
 		<field name="bibcode" type="identifier_string" indexed="true"
 			multiValued="false" stored="true" required="true" omitNorms="true"
 			omitTermFreqAndPositions="true"/>
+		<field name="scix_id" type="identifier_string" indexed="true"
+			   multiValued="false" stored="true" required="true" omitNorms="true"
+			   omitTermFreqAndPositions="true"/>
 
 
 		<!--
@@ -1598,6 +1601,7 @@
 		  A 3 level hierarchical facet for searching planetary features by group.
 		 -->
 
+		<!-- Deprecated field names -->
 		<field name="gpn" type="ads_text" indexed="true"
 			   stored="true" multiValued="true" omitNorms="true" />
 
@@ -1609,6 +1613,21 @@
 			   omitTermFreqAndPositions="true" docValues="true" />
 
 		<field name="gpn_facet_hier_3level" type="string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<!-- New field names -->
+		<field name="planetary_feature" type="ads_text" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true" />
+
+		<field name="planetary_feature_id" type="int" indexed="true" stored="true"
+			   multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+		<field name="planetary_feature_facet_hier_2level" type="string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="planetary_feature_facet_hier_3level" type="string" indexed="true"
 			   stored="true" multiValued="true" omitNorms="true"
 			   omitTermFreqAndPositions="true" docValues="true" />
 
