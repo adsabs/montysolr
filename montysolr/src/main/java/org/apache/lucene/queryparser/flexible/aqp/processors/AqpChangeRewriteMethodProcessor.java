@@ -52,7 +52,7 @@ public class AqpChangeRewriteMethodProcessor extends
 
     protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
 
-        if (first && getConfigVal("aqp.classic_scoring.modifier", "") != "") {
+        if (first && getConfigVal("aqp.classic_scoring.modifier", "").strip() != "") {
             // TODO: i don't want to make the source field be changed with URL params
             // but i'd like it to be configurable
 

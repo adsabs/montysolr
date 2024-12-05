@@ -1531,6 +1531,19 @@
 
 		<!--
 	    @api.doc
+	    * doctype_boost
+	      Float values containing normalized (float) boost factors. These
+	      can be used with functional queries to modify ranking of results.
+	      Example:
+	        q={!func}product(product(0.5,$scaledQ),product(0.5,field('doctype_boost')))
+	        qq={!aqp}black hole
+	        fq={!query v=$qq}
+	     -->
+		<field name="doctype_boost" type="tfloat" indexed="true"
+			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+		<!--
+	    @api.doc
 	    * cite_read_boost
 	      Float values containing normalized (float) boost factors. These
 	      can be used with functional queries to modify ranking of results.
