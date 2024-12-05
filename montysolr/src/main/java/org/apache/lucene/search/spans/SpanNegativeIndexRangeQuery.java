@@ -1,6 +1,11 @@
 package org.apache.lucene.search.spans;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.queries.spans.FilterSpans;
+import org.apache.lucene.queries.spans.SpanQuery;
+import org.apache.lucene.queries.spans.Spans;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.QueryVisitor;
 
 /**
  * Matches spans that are within a range of positions in the document. This query type supports negative indices.
@@ -123,5 +128,12 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
         buffer.append(endPosition);
         buffer.append(")");
         return buffer.toString();
+    }
+
+    @Override
+    public void visit(QueryVisitor visitor) {
+        if (visitor.acceptField(this.fieldName)) {
+            this.match.visit(visitor.getSubVisitor(BooleanClause.Occur.MUST, this));
+        }
     }
 }

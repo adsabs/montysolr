@@ -19,7 +19,7 @@ package org.apache.solr.handler.component;
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.lucene.tests.util.LuceneTestCase.SuppressCodecs;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

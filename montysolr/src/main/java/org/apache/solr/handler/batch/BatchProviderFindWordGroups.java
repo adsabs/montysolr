@@ -215,8 +215,8 @@ public class BatchProviderFindWordGroups extends BatchProvider {
                 }
 
                 @Override
-                public boolean needsScores() {
-                    return false;
+                public ScoreMode scoreMode() {
+                    return ScoreMode.COMPLETE_NO_SCORES;
                 }
             });
 

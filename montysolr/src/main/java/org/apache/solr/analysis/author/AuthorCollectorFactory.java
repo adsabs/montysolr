@@ -1,7 +1,7 @@
 package org.apache.solr.analysis.author;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.TokenFilterFactory;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.StrUtils;
 

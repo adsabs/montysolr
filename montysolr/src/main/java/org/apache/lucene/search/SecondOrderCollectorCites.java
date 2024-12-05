@@ -85,12 +85,10 @@ public class SecondOrderCollectorCites extends AbstractSecondOrderCollector {
         return 9645127 ^ fieldsToLoad.hashCode() ^ cache.hashCode();
     }
 
-
     @Override
-    public boolean needsScores() {
-        return true;
+    public ScoreMode scoreMode() {
+        return ScoreMode.COMPLETE;
     }
-
 
     @Override
     public SecondOrderCollector copy() {

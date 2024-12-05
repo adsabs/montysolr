@@ -370,7 +370,7 @@ public class AqpChangeRewriteMethodProcessor extends
 
     private void setRewriteMethod(QueryNode node, String method) throws QueryNodeException {
         if ("constant".equals(method)) {
-            node.setTag(MultiTermRewriteMethodProcessor.TAG_ID, MultiTermQuery.CONSTANT_SCORE_REWRITE);
+            node.setTag(MultiTermRewriteMethodProcessor.TAG_ID, MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE);
         } else if ("constant_boolean".equals(method)) {
             node.setTag(MultiTermRewriteMethodProcessor.TAG_ID, MultiTermQuery.CONSTANT_SCORE_BOOLEAN_REWRITE);
         } else if ("boolean".equals(method)) {

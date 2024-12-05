@@ -5,8 +5,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.synonym.NewSolrSynonymParser;
 import org.apache.lucene.analysis.synonym.NewSynonymFilterFactory;
 import org.apache.lucene.analysis.synonym.NewSynonymFilterFactory.SynonymParser;
-import org.apache.lucene.analysis.util.ResourceLoader;
-import org.apache.lucene.analysis.util.ResourceLoaderAware;
+import org.apache.lucene.util.ResourceLoader;
+import org.apache.lucene.util.ResourceLoaderAware;
 import org.apache.lucene.util.CharsRef;
 import org.apache.solr.analysis.PersistingMapTokenFilterFactory;
 import org.apache.solr.common.util.StrUtils;
@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.HashSet;

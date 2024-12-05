@@ -7,6 +7,8 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.security.AuthorizationContext;
+import org.apache.solr.security.PermissionNameProvider;
 import org.apache.solr.util.RefCounted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,6 +153,11 @@ public class ReplicationCoordinatorHandler extends RequestHandlerBase {
     public String getDescription() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Name getPermissionName(AuthorizationContext authorizationContext) {
+        return Name.READ_PERM;
     }
 }
 

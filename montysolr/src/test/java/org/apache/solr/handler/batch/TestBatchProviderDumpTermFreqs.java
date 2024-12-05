@@ -1,6 +1,6 @@
 package org.apache.solr.handler.batch;
 
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.lucene.tests.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.request.SolrQueryRequest;
 
 import java.io.File;

@@ -1,6 +1,6 @@
 package org.apache.solr.analysis;
 
-import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.lucene.tests.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.TokenStream;
 
 import java.io.StringReader;

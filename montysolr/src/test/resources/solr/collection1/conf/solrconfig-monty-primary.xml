@@ -19,7 +19,7 @@
 
 <config>
   <luceneMatchVersion>${tests.luceneMatchVersion:LATEST}</luceneMatchVersion>  
-  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.SimpleFSDirectoryFactory}"/>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.NIOFSDirectoryFactory}"/>
   <schemaFactory class="ClassicIndexSchemaFactory"/>
   <dataDir>${solr.data.dir:}</dataDir>
 

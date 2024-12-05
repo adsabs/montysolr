@@ -17,7 +17,7 @@
 
 package org.apache.solr.search;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.lucene.index.*;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
@@ -26,9 +26,11 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.metrics.SolrMetricsContext;
 import org.apache.solr.schema.*;
 import org.apache.solr.uninverting.UninvertingReader;
 import org.apache.solr.uninverting.UninvertingReader.Type;
+import org.apache.solr.util.IOFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,6 +203,16 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         }
     }
 
+    @Override
+    public V remove(K k) {
+        return null;
+    }
+
+    @Override
+    public V computeIfAbsent(K k, IOFunction<? super K, ? extends V> ioFunction) throws IOException {
+        return null;
+    }
+
     /*
      * This method should be used only for very specific purposes of dumping the
      * citation cache (or accessing all elements of the cache). Access to the map is
@@ -240,11 +252,14 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (values != null) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
+
+            if (values != null && values.length == 0)
+                return null;
             return values;
         }
     }
@@ -256,18 +271,21 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     public int[] getCitations(int docid) {
         synchronized (relationships) {
             RelationshipLinkedHashMap<K, V> relMap = (RelationshipLinkedHashMap<K, V>) relationships;
-            int[] val = relMap.getCitations(docid);
+            int[] values = relMap.getCitations(docid);
 
             if (getState() == State.LIVE) {
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (val != null) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
-            return val;
+
+            if (values != null && values.length == 0)
+                return null;
+            return values;
         }
     }
 
@@ -284,11 +302,15 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (values != null) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
+
+            // For compatibility with pre-existing citation cache code
+            if (values != null && values.length == 0)
+                return null;
             return values;
         }
     }
@@ -300,18 +322,21 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     public int[] getReferences(int docid) {
         synchronized (relationships) {
             RelationshipLinkedHashMap<K, V> relMap = (RelationshipLinkedHashMap<K, V>) relationships;
-            int[] val = relMap.getReferences(docid);
+            int[] values = relMap.getReferences(docid);
 
             if (getState() == State.LIVE) {
                 // only increment lookups and hits if we are live.
                 lookups++;
                 stats.lookups.incrementAndGet();
-                if (val != null) {
+                if (values != null && values.length > 0) {
                     hits++;
                     stats.hits.incrementAndGet();
                 }
             }
-            return val;
+
+            if (values != null && values.length == 0)
+                return null;
+            return values;
         }
     }
 
@@ -571,7 +596,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                     if (isModified(liveDocs, keys[i], vals[i])) {
                         toRefresh.set((Integer) keys[i]);
                     } else {
-                        continueRegen = regenerator.regenerateItem(searcher, this, old, keys[i], vals[i]);
+                        continueRegen = regenerator.regenerateItem(searcher, this, old, (K)keys[i], (V)vals[i]);
                     }
                     if (!continueRegen)
                         break;
@@ -629,7 +654,37 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         return false;
     }
 
+    @Override
+    public void initializeMetrics(SolrMetricsContext solrMetricsContext, String s) {
+
+    }
+
+    @Override
+    public SolrMetricsContext getSolrMetricsContext() {
+        return null;
+    }
+
     public void close() {
+    }
+
+    @Override
+    public int getMaxSize() {
+        return 0;
+    }
+
+    @Override
+    public void setMaxSize(int i) {
+
+    }
+
+    @Override
+    public int getMaxRamMB() {
+        return 0;
+    }
+
+    @Override
+    public void setMaxRamMB(int i) {
+
     }
 
     /*
@@ -760,10 +815,10 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                             @Override
                             public void process(int docBase, int docId) throws IOException {
                                 if (dv.advanceExact(docId)) {
-                                    BytesRef v = dv.binaryValue();
-                                    if (v.length == 0)
-                                        return;
-                                    setter.set(docBase, docId, v.utf8ToString().toLowerCase());
+                                    // TODO: Is this the correct value here?
+                                    int v = dv.ordValue();
+                                    final BytesRef value = dv.lookupOrd(v);
+                                    setter.set(docBase, docId, value.utf8ToString().toLowerCase());
                                 }
                             }
                         };
@@ -976,7 +1031,8 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 if (c != null)
                     return c.getElements();
             }
-            return null;
+
+            return new int[0];
         }
 
         public Iterator<int[][]> getRelationshipsIterator() {
@@ -993,7 +1049,8 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 if (c != null)
                     return c.getElements();
             }
-            return null;
+
+            return new int[0];
         }
 
         public void initializeCitationCache(int maxDocSize) {

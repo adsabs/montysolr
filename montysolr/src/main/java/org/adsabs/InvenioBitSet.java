@@ -1,10 +1,12 @@
 package org.adsabs;
 
-import org.apache.solr.common.util.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.BitSet;
 import java.util.zip.DataFormatException;
 import java.util.zip.DeflaterOutputStream;
@@ -114,7 +116,8 @@ public class InvenioBitSet extends BitSet {
      */
     public String toBase64() throws IOException {
         byte[] data = this.fastDump();
-        return Base64.byteArrayToBase64(data, 0, data.length);
+        return new String(Base64.getEncoder().encode(ByteBuffer.wrap(data, 0, data.length)).array(),
+                StandardCharsets.ISO_8859_1);
     }
 
 }

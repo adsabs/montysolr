@@ -110,7 +110,7 @@ public class AqpFunctionQParser extends FunctionQParser {
             Number num = p.getNumber();
 
             if (num instanceof Long) {
-                return new LongConstValueSource(num.longValue());
+                return new ValueSourceParser.LongConstValueSource(num.longValue());
             } else if (num instanceof Double) {
                 return new DoubleConstValueSource(num.doubleValue());
             } else {

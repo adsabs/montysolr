@@ -8,6 +8,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.SimpleCollector;
 import org.apache.solr.analysis.WriteableExplicitSynonymMap;
 import org.apache.solr.analysis.WriteableSynonymMap;
@@ -134,8 +135,8 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
             }
 
             @Override
-            public boolean needsScores() {
-                return false;
+            public ScoreMode scoreMode() {
+                return ScoreMode.COMPLETE_NO_SCORES;
             }
         });
 

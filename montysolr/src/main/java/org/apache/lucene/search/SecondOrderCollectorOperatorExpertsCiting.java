@@ -115,15 +115,13 @@ public class SecondOrderCollectorOperatorExpertsCiting extends AbstractSecondOrd
 
 
     @Override
-    public boolean needsScores() {
-        return true;
-    }
-
-
-    @Override
     public SecondOrderCollector copy() {
         return new SecondOrderCollectorOperatorExpertsCiting(cache, boostCache);
     }
 
 
+    @Override
+    public ScoreMode scoreMode() {
+        return ScoreMode.COMPLETE;
+    }
 }

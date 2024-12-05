@@ -1,8 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 
-import org.apache.lucene.queries.CustomScoreQuery;
-import org.apache.lucene.queries.function.FunctionQuery;
+import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.queries.function.valuesource.ConstValueSource;
 import org.apache.lucene.queries.function.valuesource.FloatFieldSource;
@@ -17,7 +16,7 @@ import org.apache.lucene.search.Query;
 /**
  * @author rchyla
  * <p>
- * Will produce a CustomScoreQuery which combines scores computed by
+ * Will produce a FunctionScoreQuery which combines scores computed by
  * lucene with the value indexed in an index, using formula:
  * <p>
  * score = lucene_score * ( classic_factor + modifier )
@@ -43,8 +42,7 @@ public class AqpScoringQueryNodeBuilder implements StandardQueryBuilder {
         });
 
 
-        FunctionQuery functionQuery = new FunctionQuery(vs);
-        return new CustomScoreQuery(q, functionQuery);
+        return FunctionScoreQuery.boostByValue(q, vs.asDoubleValuesSource());
     }
 
 }

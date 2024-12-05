@@ -21,6 +21,7 @@ import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
@@ -47,8 +48,10 @@ import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.BooleanQuery2ModifierNodeProcessor;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanQuery.Builder;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.tests.analysis.MockAnalyzer;
+import org.apache.lucene.tests.analysis.MockTokenizer;
 import org.apache.lucene.util.automaton.Automata;
 import org.apache.lucene.util.automaton.CharacterRunAutomaton;
 
@@ -188,17 +191,17 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
         Query q = qp.parse("foo*bar", "field");
         assertTrue(q instanceof WildcardQuery);
-        assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
+        assertEquals(MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE,
                 ((MultiTermQuery) q).getRewriteMethod());
 
         q = qp.parse("foo*", "field");
         assertTrue(q instanceof PrefixQuery);
-        assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
+        assertEquals(MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE,
                 ((MultiTermQuery) q).getRewriteMethod());
 
         q = qp.parse("[a TO z]", "field");
         assertTrue(q instanceof TermRangeQuery);
-        assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
+        assertEquals(MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE,
                 ((MultiTermQuery) q).getRewriteMethod());
     }
 
@@ -486,7 +489,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     public void testRange() throws Exception {
         assertQueryEquals("[ a TO z]", null, "[a TO z]");
-        assertEquals(MultiTermQuery.CONSTANT_SCORE_REWRITE,
+        assertEquals(MultiTermQuery.CONSTANT_SCORE_BLENDED_REWRITE,
                 ((TermRangeQuery) getQuery("[ a TO z]", null)).getRewriteMethod());
 
         AqpQueryParser qp = getParser();
@@ -789,7 +792,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
         assertNotNull(q);
 
         AqpQueryParser qp2 = getParser();
-        qp2.setAnalyzer(new StandardAnalyzer());
+        qp2.setAnalyzer(new StandardAnalyzer(EnglishAnalyzer.getDefaultStopSet()));
 
         q = qp2.parse("the^3", "field");
         // "the" is a stop word so the result is an empty query:
@@ -867,7 +870,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
     public void testLocalDateFormat() throws IOException, QueryNodeException,
             ParseException {
-        Directory ramDir = new RAMDirectory();
+        Directory ramDir = new ByteBuffersDirectory();
         IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(new WhitespaceAnalyzer()));
         addDateDoc("a", 2005, 12, 2, 10, 15, 33, iw);
         addDateDoc("b", 2005, 12, 4, 22, 15, 00, iw);
@@ -1011,7 +1014,7 @@ public class TestAqpSLGStandardTest extends AqpTestAbstractCase {
 
         Query q = QPTestParser.init(new CannedAnalyzer()).parse("\"a\"", "field");
         assertTrue(q instanceof MultiPhraseQuery);
-        assertEquals(1, s.search(q, 10).totalHits);
+        assertEquals(1, s.search(q, 10).totalHits.value);
         r.close();
         w.close();
         dir.close();

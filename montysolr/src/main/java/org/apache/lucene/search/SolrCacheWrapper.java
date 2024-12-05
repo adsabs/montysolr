@@ -1,6 +1,6 @@
 package org.apache.lucene.search;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.solr.search.CitationCache;
 
 import java.lang.ref.SoftReference;

@@ -2,18 +2,9 @@
 
 <config>
 
-  <luceneMatchVersion>6.0</luceneMatchVersion>
+  <luceneMatchVersion>9.0</luceneMatchVersion>
 
   <lib dir="../lib" />
-
-  <lib dir="../../../dist/" regex="apache-solr-cell-\d.*\.jar" />
-  <lib dir="../../../contrib/extraction/lib" regex=".*\.jar" />
-
-  <lib dir="../../../dist/" regex="apache-solr-clustering-\d.*\.jar" />
-  <lib dir="../../../contrib/clustering/lib/" regex=".*\.jar" />
-
-  <lib dir="../../../dist/" regex="apache-solr-langid-\d.*\.jar" />
-  <lib dir="../../../contrib/langid/lib/" regex=".*\.jar" />
 
   <lib dir="../../../dist/" regex="apache-solr-velocity-\d.*\.jar" />
   <lib dir="../../../contrib/velocity/lib" regex=".*\.jar" />
@@ -45,7 +36,7 @@
          make sure that only one writer is modifying it; and other 
          instances are using 'single' lockType -->
          
-    <lockType>${montysolr.locktype:native}</lockType>
+    <lockType>${montysolr.locktype:single}</lockType>
 
 
     <deletionPolicy class="solr.SolrDeletionPolicy">
@@ -124,20 +115,20 @@
     
     <slowQueryThresholdMillis>1000</slowQueryThresholdMillis>
 
-    <filterCache class="solr.FastLRUCache"
+    <filterCache class="solr.CaffeineCache"
                  size="${solr.filterCache.size:512}"
                  initialSize="${solr.filterCache.initialSize:512}"
                  autowarmCount="${solr.filterCache.autowarmCount:128}"
                  />
 
-    <queryResultCache class="solr.LRUCache"
+    <queryResultCache class="solr.CaffeineCache"
                      size="${solr.queryResultCache.size:512}"
                      initialSize="${solr.queryResultCache.initialSize:512}"
                      autowarmCount="${solr.queryResultCache.autowarmCount:128}"
                      maxRamMB="${solr.queryResultCache.maxRamMB:128}"
                      />
    
-    <documentCache class="solr.LRUCache"
+    <documentCache class="solr.CaffeineCache"
                    size="${solr.documentCache.size:512}"
                    initialSize="${solr.documentCache.initialSize:512}"
                    autowarmCount="${solr.documentCache.autowarmCount:128}"
@@ -679,7 +670,7 @@
 
   <queryResponseWriter name="json" class="solr.JSONResponseWriter" />
     
-  <queryResponseWriter name="xslt" class="solr.XSLTResponseWriter">
+  <queryResponseWriter name="xslt" class="solr.scripting.xslt.XSLTResponseWriter">
     <int name="xsltCacheLifetimeSeconds">5</int>
   </queryResponseWriter>
 

@@ -9,7 +9,7 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
-import org.apache.lucene.util.LuceneTestCase.SuppressCodecs;
+import org.apache.lucene.tests.util.LuceneTestCase.SuppressCodecs;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.*;
 import org.apache.solr.uninverting.UninvertingReader;
@@ -310,11 +310,11 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
             searcher.search(new SecondOrderQuery(q, collector),
                     new SimpleCollector() {
 
-                        private Scorer scorer;
+                        private Scorable scorer;
                         private LeafReader reader;
 
                         @Override
-                        public void setScorer(Scorer scorer) throws IOException {
+                        public void setScorer(Scorable scorer) throws IOException {
                             this.scorer = scorer;
                         }
 
@@ -335,8 +335,8 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
                         }
 
                         @Override
-                        public boolean needsScores() {
-                            return false;
+                        public ScoreMode scoreMode() {
+                            return ScoreMode.COMPLETE_NO_SCORES;
                         }
                     });
 
@@ -385,6 +385,11 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
 
             searcher.search(new SecondOrderQuery(new MatchAllDocsQuery(), new AbstractSecondOrderCollector() {
                         @Override
+                        public ScoreMode scoreMode() {
+                            return ScoreMode.COMPLETE_NO_SCORES;
+                        }
+
+                        @Override
                         public void doSetNextReader(LeafReaderContext context) throws IOException {
                             setFinalValueType(testFinalType);
                         }
@@ -401,11 +406,6 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
                         }
 
                         @Override
-                        public boolean needsScores() {
-                            return false;
-                        }
-
-                        @Override
                         public SecondOrderCollector copy() {
                             return this;
                         }
@@ -414,18 +414,18 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
                     new SimpleCollector() { // this one collects results
 
                         private int docBase;
-                        private Scorer scorer;
+                        private Scorable scorer;
                         private LeafReader reader;
-
-                        @Override
-                        public void setScorer(Scorer scorer) throws IOException {
-                            this.scorer = scorer;
-                        }
 
                         @Override
                         public void doSetNextReader(LeafReaderContext context) throws IOException {
                             docBase = context.docBase;
                             reader = context.reader();
+                        }
+
+                        @Override
+                        public void setScorer(Scorable scorer) throws IOException {
+                            this.scorer = scorer;
                         }
 
                         @Override
@@ -437,10 +437,9 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
                         }
 
                         @Override
-                        public boolean needsScores() {
-                            return false;
+                        public ScoreMode scoreMode() {
+                            return ScoreMode.COMPLETE_NO_SCORES;
                         }
-
                     });
 
             Collections.sort(results, new Comparator() {

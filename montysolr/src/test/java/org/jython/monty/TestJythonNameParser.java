@@ -1,6 +1,6 @@
 package org.jython.monty;
 
-import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.tests.util.LuceneTestCase;
 import org.jython.JythonObjectFactory;
 import org.jython.monty.interfaces.JythonNameParser;
 import org.python.core.PySystemState;

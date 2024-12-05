@@ -2,13 +2,14 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermContext;
+import org.apache.lucene.index.TermStates;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.BooleanClause.Occur;
-import org.apache.lucene.search.spans.*;
+import org.apache.lucene.queries.spans.*;
+import org.apache.lucene.queries.payloads.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -62,16 +63,16 @@ public class SpanConverter {
 
     private SpanQuery convertDisjunctionQuery(SpanConverterContainer container) throws QueryNodeException {
         DisjunctionMaxQuery q = (DisjunctionMaxQuery) container.query;
-        List<Query> clauses = q.getDisjuncts();
+        Collection<Query> clauses = q.getDisjuncts();
         if (clauses.size() == 0) {
             container.query = new MatchNoDocsQuery();
             return getSpanQuery(container);
         } else if (clauses.size() == 1) {
-            container.query = clauses.get(0);
+            container.query = clauses.stream().findFirst().get();
             return getSpanQuery(container);
         } else {
             // we assume it is OR query case
-            List<Query> disjuncts = q.getDisjuncts();
+            Collection<Query> disjuncts = q.getDisjuncts();
             BooleanQuery.Builder bQuery = new BooleanQuery.Builder();
             for (Query qa : disjuncts) {
                 bQuery.add(qa, Occur.SHOULD);
@@ -82,9 +83,15 @@ public class SpanConverter {
     }
 
     private SpanQuery wrapBoost(SpanQuery q, float boost) {
-        if (boost != 1.0f)
-            return new SpanBoostQuery(q, boost);
-        return q;
+        if (Math.abs(boost - 1.0f) < 1e-6f) {
+            return q;
+        }
+
+        // Score boosting was rewritten in Lucene 8, so we have to use PayloadScoreQueries to recreate
+        // the old, constant score boosting behavior
+        // With `includeSpanScore = true`, the score of the SpanQuery is multiplied by the payload score
+        return new PayloadScoreQuery(q, new ConstantPayloadFunction(boost),
+                PayloadDecoder.FLOAT_DECODER, true);
     }
 
     public SpanQuery wrapNonConvertible(SpanConverterContainer container) {
@@ -229,6 +236,44 @@ public class SpanConverter {
     }
 
 
+    public static class ConstantPayloadFunction extends PayloadFunction {
+
+        private float boost = 1.0f;
+
+        public ConstantPayloadFunction(float boost) {
+            this.boost = boost;
+        }
+
+        @Override
+        public float currentScore(int i, String s, int i1, int i2, int i3, float v, float v1) {
+            return boost;
+        }
+
+        @Override
+        public float docScore(int i, String s, int i1, float v) {
+            return boost;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ConstantPayloadFunction) {
+                return ((ConstantPayloadFunction) o).boost == boost;
+            }
+
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "ConstantPayloadFunction(" + boost + ")";
+        }
+    }
+
     public static class EmptySpanQuery extends SpanQuery {
 
         private final Query wrappedQ;
@@ -315,8 +360,13 @@ public class SpanConverter {
         }
 
         @Override
-        public SpanWeight createWeight(IndexSearcher searcher, boolean needsScores, float boost) throws IOException {
+        public SpanWeight createWeight(IndexSearcher searcher, ScoreMode needsScores, float boost) throws IOException {
             return new EmptySpanWeight(this, searcher, null, boost);
+        }
+
+        @Override
+        public void visit(QueryVisitor visitor) {
+
         }
 
 
@@ -336,16 +386,11 @@ public class SpanConverter {
     public static class EmptySpanWeight extends SpanWeight {
 
 
-        public EmptySpanWeight(SpanQuery query, IndexSearcher searcher, Map<Term, TermContext> termContexts, float boost)
+        public EmptySpanWeight(SpanQuery query, IndexSearcher searcher, Map<Term, TermStates> TermStatess, float boost)
                 throws IOException {
-            super(query, searcher, termContexts, boost);
+            super(query, searcher, TermStatess, boost);
         }
 
-
-        @Override
-        public void extractTerms(Set<Term> terms) {
-
-        }
 
         @Override
         public Explanation explain(LeafReaderContext context, int doc) throws IOException {
@@ -359,7 +404,7 @@ public class SpanConverter {
         }
 
         @Override
-        public void extractTermContexts(Map<Term, TermContext> contexts) {
+        public void extractTermStates(Map<Term, TermStates> contexts) {
             // TODO Auto-generated method stub
 
         }

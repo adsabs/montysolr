@@ -55,7 +55,7 @@ public class SecondOrderQuery extends Query {
      * return the Weight object, which carries with itself the results of the
      * first-order query
      */
-    public Weight createWeight(final IndexSearcher searcher, boolean needsScores, float boost) throws IOException {
+    public Weight createWeight(final IndexSearcher searcher, ScoreMode needsScores, float boost) throws IOException {
 
         Weight firstOrderWeight = firstOrderQuery.createWeight(searcher, needsScores, boost);
 
@@ -92,6 +92,11 @@ public class SecondOrderQuery extends Query {
         } else {
             return this;
         }
+    }
+
+    @Override
+    public void visit(QueryVisitor visitor) {
+        firstOrderQuery.visit(visitor);
     }
 
     public Query getQuery() {

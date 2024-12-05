@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class AbstractSecondOrderCollector implements Collector, LeafCollector, SecondOrderCollector {
 
 
-    protected Scorer scorer;
+    protected Scorable scorer;
     protected int docBase;
     protected List<CollectorDoc> hits;
     protected volatile boolean organized = false;
@@ -39,7 +39,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     @Override
-    public void setScorer(Scorer scorer) throws IOException {
+    public void setScorer(Scorable scorer) throws IOException {
         this.scorer = scorer;
     }
 
@@ -270,7 +270,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsMinValue() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -299,7 +299,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsMaxValue() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -328,7 +328,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsAbsCount() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -358,7 +358,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsArithmMean() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)
@@ -396,7 +396,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
     protected void compactHitsGeomMean() {
-        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(new Float(
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
 
         if (hits.size() < 1)

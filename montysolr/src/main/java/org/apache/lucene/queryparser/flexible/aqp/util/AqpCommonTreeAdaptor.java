@@ -38,7 +38,8 @@ public class AqpCommonTreeAdaptor extends CommonTreeAdaptor {
         }
         for (int ttype = Token.MIN_TOKEN_TYPE; ttype < tokenNames.length; ttype++) {
             String name = tokenNames[ttype];
-            m.put(new Integer(ttype), name);
+            //noinspection AutoBoxing
+            m.put(ttype, name);
         }
         return m;
     }

@@ -22,7 +22,7 @@
 <config>
   <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
   <dataDir>${solr.data.dir:}</dataDir>
-  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.SimpleFSDirectoryFactory}"/>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.NIOFSDirectoryFactory}"/>
   <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
   <schemaFactory class="ClassicIndexSchemaFactory"/>
   <query>

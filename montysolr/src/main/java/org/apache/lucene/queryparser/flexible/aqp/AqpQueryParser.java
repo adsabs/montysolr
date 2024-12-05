@@ -42,6 +42,7 @@ import org.apache.lucene.queryparser.flexible.standard.processors.StandardQueryN
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.MultiTermQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.util.automaton.LevenshteinAutomata;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -488,7 +489,7 @@ public class AqpQueryParser extends QueryParserHelper {
                 ConfigurationKeys.FUZZY_CONFIG);
 
         if (fuzzyConfig == null) {
-            return FuzzyQuery.defaultMinSimilarity;
+            return LevenshteinAutomata.MAXIMUM_SUPPORTED_DISTANCE;
         } else {
             return fuzzyConfig.getMinSimilarity();
         }

@@ -9,10 +9,14 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermContext;
+import org.apache.lucene.index.TermStates;
+import org.apache.lucene.queries.spans.FilterSpans;
+import org.apache.lucene.queries.spans.SpanQuery;
+import org.apache.lucene.queries.spans.SpanWeight;
+import org.apache.lucene.queries.spans.Spans;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.spans.FilterSpans.AcceptStatus;
+import org.apache.lucene.search.ScoreMode;
 
 
 /**
@@ -48,36 +52,31 @@ public abstract class SpanPositionAndDocumentQuery extends SpanQuery implements 
      * @see Spans#nextDoc()
      *
      */
-    protected abstract AcceptStatus acceptPosition(Spans spans, Document currentDocument) throws IOException;
+    protected abstract FilterSpans.AcceptStatus acceptPosition(Spans spans, Document currentDocument) throws IOException;
 
     @Override
-    public SpanWeight createWeight(IndexSearcher searcher, boolean needsScores, float boost) throws IOException {
-        SpanWeight matchWeight = match.createWeight(searcher, false, boost);
-        return new SpanPositionCheckWeight(matchWeight, searcher, needsScores ? getTermContexts(matchWeight) : null, boost);
+    public SpanWeight createWeight(IndexSearcher searcher, ScoreMode scoreMode, float boost) throws IOException {
+        SpanWeight matchWeight = match.createWeight(searcher, scoreMode, boost);
+        return new SpanPositionCheckWeight(matchWeight, searcher, scoreMode.needsScores() ? getTermStates(matchWeight) : null, boost);
     }
 
     public class SpanPositionCheckWeight extends SpanWeight {
 
         final SpanWeight matchWeight;
 
-        public SpanPositionCheckWeight(SpanWeight matchWeight, IndexSearcher searcher, Map<Term, TermContext> terms, float boost) throws IOException {
+        public SpanPositionCheckWeight(SpanWeight matchWeight, IndexSearcher searcher, Map<Term, TermStates> terms, float boost) throws IOException {
             super(SpanPositionAndDocumentQuery.this, searcher, terms, boost);
             this.matchWeight = matchWeight;
         }
 
         @Override
-        public void extractTerms(Set<Term> terms) {
-            matchWeight.extractTerms(terms);
+        public void extractTermStates(Map<Term, TermStates> terms) {
+            matchWeight.extractTermStates(terms);
         }
 
         @Override
         public boolean isCacheable(LeafReaderContext ctx) {
             return matchWeight.isCacheable(ctx);
-        }
-
-        @Override
-        public void extractTermContexts(Map<Term, TermContext> contexts) {
-            matchWeight.extractTermContexts(contexts);
         }
 
         @Override

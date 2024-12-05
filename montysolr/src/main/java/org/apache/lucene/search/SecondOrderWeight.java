@@ -32,11 +32,6 @@ public class SecondOrderWeight extends Weight {
     }
 
     @Override
-    public void extractTerms(Set<Term> terms) {
-        innerWeight.extractTerms(terms);
-    }
-
-    @Override
     public Explanation explain(LeafReaderContext context, int doc) throws IOException {
         Explanation innerExplanation = innerWeight.explain(context, doc);
         return Explanation.match(innerExplanation.getValue(), "nested, result of", innerExplanation);

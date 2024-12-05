@@ -11,6 +11,7 @@ import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.*;
+import org.apache.solr.security.AuthorizationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import perf.CreateQueries.TermFreq;
@@ -236,6 +237,11 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
         this.req = null;
     }
 
+    @Override
+    public Name getPermissionName(AuthorizationContext request) {
+        return Name.READ_PERM;
+    }
+
 
     public static class FormattedQuery {
         private final String query;
@@ -275,7 +281,7 @@ public class CreatePerformanceQueriesHandler extends RequestHandlerBase {
         public void resolveFound(SolrIndexSearcher searcher, QParser parser) throws SyntaxError, IOException {
             parser.setString(query);
             TopDocs hits = searcher.search(parser.parse(), 1);
-            totalHits = hits.totalHits;
+            totalHits = hits.totalHits.value;
         }
     }
 

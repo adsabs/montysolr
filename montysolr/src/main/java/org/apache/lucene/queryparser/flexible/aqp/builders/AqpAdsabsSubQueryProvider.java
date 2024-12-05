@@ -21,8 +21,8 @@ import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.join.JoinUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanNegativeIndexRangeQuery;
-import org.apache.lucene.search.spans.SpanPositionRangeQuery;
-import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.queries.spans.SpanPositionRangeQuery;
+import org.apache.lucene.queries.spans.SpanQuery;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -37,11 +37,14 @@ import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.*;
+import org.apache.lucene.search.join.JoinUtil;
+import org.apache.lucene.search.join.ScoreMode;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.uninverting.UninvertingReader;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -92,13 +95,6 @@ public class AqpAdsabsSubQueryProvider implements
         /**
          * comment XXX
          */
-        parsers.put(OldLuceneQParserPlugin.NAME, new AqpSubqueryParser() {
-            public Query parse(FunctionQParser fp) throws SyntaxError {
-                QParser q = fp.subQuery(fp.getString(), OldLuceneQParserPlugin.NAME);
-                return q.getQuery();
-
-            }
-        });
         parsers.put(FunctionQParserPlugin.NAME, new AqpSubqueryParser() {
             public Query parse(FunctionQParser fp) throws SyntaxError {
                 QParser q = fp.subQuery(fp.getString(), FunctionQParserPlugin.NAME);
@@ -214,14 +210,15 @@ public class AqpAdsabsSubQueryProvider implements
 
                 try {
                     searcher.search(discoverMostReadQ, new SimpleCollector() {
+                        @Override
+                        public org.apache.lucene.search.ScoreMode scoreMode() {
+                            // TODO: determine whether this is the correct behavior
+                            return org.apache.lucene.search.ScoreMode.COMPLETE_NO_SCORES;
+                        }
+
                         private Document d;
                         private LeafReader reader;
                         private boolean firstPassed = false;
-
-                        @Override
-                        public void setScorer(Scorer scorer) throws IOException {
-                            //pass
-                        }
 
                         @Override
                         public void collect(int doc) throws IOException {
@@ -238,11 +235,6 @@ public class AqpAdsabsSubQueryProvider implements
                         public void doSetNextReader(LeafReaderContext context)
                                 throws IOException {
                             this.reader = context.reader();
-                        }
-
-                        @Override
-                        public boolean needsScores() {
-                            return true;
                         }
                     });
                 } catch (IOException e) {
@@ -961,7 +953,7 @@ public class AqpAdsabsSubQueryProvider implements
             }
 
             protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-                List<Query> parts = query.getDisjuncts();
+                List<Query> parts = new ArrayList<>(query.getDisjuncts());
                 for (int i = 0; i < parts.size(); i++) {
                     Query oldQ = parts.get(i);
                     String field = null;
@@ -1016,7 +1008,7 @@ public class AqpAdsabsSubQueryProvider implements
             }
 
             protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-                List<Query> parts = query.getDisjuncts();
+                List<Query> parts = new ArrayList<>(query.getDisjuncts());
                 for (int i = 0; i < parts.size(); i++) {
                     Query oldQ = parts.get(i);
                     String field = null;
@@ -1267,7 +1259,7 @@ public class AqpAdsabsSubQueryProvider implements
 
                     try {
                         topDocs = searcher.search(innerQuery, docToSearch);
-                        if (topDocs.totalHits == 0)
+                        if (topDocs.totalHits.value == 0)
                             return new MatchNoDocsQuery();
 
                         for (ScoreDoc d : topDocs.scoreDocs) {
@@ -1282,7 +1274,7 @@ public class AqpAdsabsSubQueryProvider implements
                         }
 
                         // set some better defaults when it is a rare doc
-                        if (topDocs.totalHits < 2) {
+                        if (topDocs.totalHits.value < 2) {
                             minTermFrequency = 0;
                             minDocFrequency = 1;
                         }

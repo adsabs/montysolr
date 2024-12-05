@@ -1,6 +1,6 @@
 package org.apache.lucene.analysis.core;
 
-import org.apache.lucene.analysis.BaseTokenStreamTestCase;
+import org.apache.lucene.tests.analysis.BaseTokenStreamTestCase;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.solr.analysis.AcronymTokenFilterFactory;

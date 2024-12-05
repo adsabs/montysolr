@@ -1,6 +1,6 @@
 package org.adsabs;
 
-import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.tests.util.LuceneTestCase;
 import org.apache.lucene.util.SmallFloat;
 import org.junit.Test;
 

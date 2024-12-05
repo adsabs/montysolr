@@ -19,9 +19,8 @@ package org.apache.solr.analysis;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
-import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
-import org.apache.lucene.analysis.util.MultiTermAwareComponent;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
+import org.apache.lucene.analysis.AbstractAnalysisFactory;
+import org.apache.lucene.analysis.TokenFilterFactory;
 
 import java.util.Map;
 
@@ -32,7 +31,7 @@ import java.util.Map;
  * It is little bit crazy, because we have to wrap the ASCII filter with two other filters
  * in order to get to the original value.
  */
-public class ASCIIDuplicatingFilterFactory extends TokenFilterFactory implements MultiTermAwareComponent {
+public class ASCIIDuplicatingFilterFactory extends TokenFilterFactory {
     public ASCIIDuplicatingFilterFactory(Map<String, String> args) {
         super(args);
         if (!args.isEmpty()) {

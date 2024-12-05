@@ -23,7 +23,10 @@
   <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
   <dataDir>${solr.data.dir:}</dataDir>
   <schemaFactory class="ClassicIndexSchemaFactory"/>
-  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.RAMDirectoryFactory}"/>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.ByteBuffersDirectoryFactory}"/>
+  <indexConfig>
+    <lockType>${montysolr.locktype:single}</lockType>
+  </indexConfig>
   <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
   
   <!-- checks the system and prints information from both Java and Python side -->

@@ -4,6 +4,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.Builder;
 import org.apache.solr.client.solrj.request.QueryRequest;
+import org.apache.solr.common.ConfigNode;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.CloseHook;
@@ -193,12 +194,14 @@ public class ReplicationEventListener implements SolrEventListener {
     }
 
     private String findMasterUrl(SolrConfig config) {
-
-        Node a = config.getNode("//config/requestHandler[@name='/replication']/lst[@name='slave']/str[@name='masterUrl']", false);
-        if (a == null)
+        ConfigNode masterUrlNode =
+                config.get("requestHandler", (ConfigNode node) -> node.attr("name").equals("/replication"))
+                        .get("lst", (ConfigNode node) -> node.attr("name").equals("slave"))
+                        .get("str", (ConfigNode node) -> node.attr("name").equals("masterUrl"));
+        if (masterUrlNode.equals(ConfigNode.EMPTY))
             return null;
 
-        String url = a.getTextContent();
+        String url = masterUrlNode.txt();
         return url.trim();
 
     }

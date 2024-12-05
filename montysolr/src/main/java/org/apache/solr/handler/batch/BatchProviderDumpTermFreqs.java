@@ -1,9 +1,6 @@
 package org.apache.solr.handler.batch;
 
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.index.*;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -70,7 +67,7 @@ public class BatchProviderDumpTermFreqs extends BatchProvider {
 
             out.write("\n\n# " + f + "\n");
 
-            Terms te = MultiFields.getTerms(ir, f);
+            Terms te = MultiTerms.getTerms(ir, f);
             if (te == null) {
                 out.write("# term stats is not available for this field");
                 continue;

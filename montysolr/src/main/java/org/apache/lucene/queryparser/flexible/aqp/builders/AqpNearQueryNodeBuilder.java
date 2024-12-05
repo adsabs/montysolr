@@ -7,9 +7,10 @@ import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.spans.SpanNearQuery;
-import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.queries.spans.SpanNearQuery;
+import org.apache.lucene.queries.spans.SpanQuery;
 
 import java.util.List;
 
@@ -76,7 +77,12 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
             for (QueryNode child : children) {
                 Object obj = child.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
                 if (obj != null) {
-                    SpanQuery result = converter.getSpanQuery(new SpanConverterContainer((Query) obj, nearNode.getSlop(), nearNode.getInOrder()));
+                    float boost = 1.0f;
+                    if (obj instanceof BoostQuery) {
+                        boost = ((BoostQuery) obj).getBoost();
+                    }
+
+                    SpanQuery result = converter.getSpanQuery(new SpanConverterContainer((Query) obj, nearNode.getSlop(), nearNode.getInOrder(), boost));
                     clauses[i++] = result;
 
                     //TODO: v6 - boost is gone, have to move it converter

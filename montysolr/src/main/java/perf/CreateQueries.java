@@ -380,7 +380,7 @@ public class CreateQueries {
 
     public static TermFreq[] getTopTermsByDocFreq(IndexReader r, String field, int topN, boolean doShingles) throws IOException {
         final MostFrequentTerms pq = new MostFrequentTerms(topN);
-        Terms terms = MultiFields.getTerms(r, field);
+        Terms terms = MultiTerms.getTerms(r, field);
         if (terms != null) {
             TermsEnum termsEnum = terms.iterator();
             while (termsEnum.next() != null) {

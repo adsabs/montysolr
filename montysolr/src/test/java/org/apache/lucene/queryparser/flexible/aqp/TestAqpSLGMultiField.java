@@ -18,7 +18,8 @@ package org.apache.lucene.queryparser.flexible.aqp;
  */
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.MockAnalyzer;
+import org.apache.lucene.store.ByteBuffersDirectory;
+import org.apache.lucene.tests.analysis.MockAnalyzer;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -35,7 +36,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
+import org.apache.solr.core.DirectoryFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -328,7 +329,7 @@ public class TestAqpSLGMultiField extends AqpTestAbstractCase {
 
     public void testStopWordSearching() throws Exception {
         Analyzer analyzer = new StandardAnalyzer();
-        Directory ramDir = new RAMDirectory();
+        Directory ramDir = new ByteBuffersDirectory();
         IndexWriter iw = new IndexWriter(ramDir, newIndexWriterConfig(analyzer));
         Document doc = new Document();
         doc.add(newField("body", "blah the footest blah", TextField.TYPE_NOT_STORED));

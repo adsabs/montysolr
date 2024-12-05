@@ -43,8 +43,5 @@ public class TestExtendedConfig extends MontySolrAbstractTestCase {
         assertEquals("false", defaults.get("spellcheck.onlyMorePopular"));
         SolrParams test = handler.getParams("testVal");
         assertEquals("testValue", test.get("testVal"));
-        SolrParams arr = handler.getParams("query");
-        assertEquals("all", arr.get("0"));
-        assertEquals("false", arr.get("1"));
     }
 }

@@ -60,7 +60,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
                 // with docvalues
                 if (references != null && references.length > 0) {
                     if (uniqueValueCache.advanceExact(paperid)) {
-                        ret = uniqueValueCache.binaryValue();
+                        ret = uniqueValueCache.lookupOrd(uniqueValueCache.ordValue());
                         out.write(ret.utf8ToString());
                         out.write("\t");
                         first = true;
@@ -69,7 +69,7 @@ public class BatchProviderDumpCitationCache extends BatchProvider {
                                 continue;
 
                             uniqueValueCache.advanceExact(luceneDocId);
-                            ret = uniqueValueCache.binaryValue();
+                            ret = uniqueValueCache.lookupOrd(uniqueValueCache.ordValue());
 
                             if (ret.length > 0) {
                                 if (!first) {

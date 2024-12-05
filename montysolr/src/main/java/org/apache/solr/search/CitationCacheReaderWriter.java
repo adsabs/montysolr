@@ -60,8 +60,8 @@ public class CitationCacheReaderWriter {
                     cs.writeInt(c);
             }
 
-            rs.writeByte((byte) '\n');
-            cs.writeByte((byte) '\n');
+            rs.writeInt(-1);
+            cs.writeInt(-1);
             i += 1;
         }
 
@@ -135,23 +135,20 @@ public class CitationCacheReaderWriter {
         di.close();
 
         int j = 0;
-        int p0;
-        int p1;
-        p0 = p1 = 0;
+        int citedInt;
+        int referencedInt;
+        citedInt = referencedInt = -1;
         while (j <= m.maxDocs) {
-            while ((p0 = ci.peek()) != '\n') {
-                if (p0 == -1)
-                    break;
-                cache.insertCitation(j, ci.readInt());
+            while ((citedInt = ci.readInt()) != -1) {
+                assert citedInt < m.maxDocs + 1;
+                cache.insertCitation(j, citedInt);
             }
 
-            while ((p1 = ri.peek()) != '\n') {
-                if (p1 == -1)
-                    break;
-                cache.insertReference(j, ri.readInt());
+            while ((referencedInt = ri.readInt()) != -1) {
+                assert referencedInt < m.maxDocs + 1;
+                cache.insertReference(j, referencedInt);
             }
-            ci.readByte();
-            ri.readByte();
+
             j += 1;
         }
         ci.close();
@@ -249,6 +246,11 @@ public class CitationCacheReaderWriter {
         @Override
         public void readBytes(byte[] b, int offset, int len) throws IOException {
             is.read(b, offset, len);
+        }
+
+        @Override
+        public void skipBytes(long numBytes) throws IOException {
+            is.skip(numBytes);
         }
 
         public void close() throws IOException {

@@ -17,11 +17,11 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
         this.topN = topN;
         this.sortOrder = sortOrder;
         this.detail = detail;
-        this.topCollector = TopFieldCollector.create(sortOrder, topN, false, true, true, true);
+        this.topCollector = TopFieldCollector.create(sortOrder, topN, Integer.MAX_VALUE);
     }
 
     public SecondOrderCollectorTopN(int topN) {
-        topCollector = TopScoreDocCollector.create(topN);
+        topCollector = TopScoreDocCollector.create(topN, Integer.MAX_VALUE);
         this.topN = topN;
     }
 
@@ -55,11 +55,6 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
     }
 
     @Override
-    public boolean needsScores() {
-        return this.topCollector.needsScores();
-    }
-
-    @Override
     public void collect(int doc) throws IOException {
         throw new UnsupportedOperationException("Must not be called");
 
@@ -69,6 +64,11 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
     public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
         LeafCollector c = topCollector.getLeafCollector(context);
         return c;
+    }
+
+    @Override
+    public ScoreMode scoreMode() {
+        return this.topCollector.scoreMode();
     }
 
     public SecondOrderCollector copy() {

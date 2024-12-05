@@ -22,10 +22,10 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
-import org.apache.lucene.analysis.util.ResourceLoader;
-import org.apache.lucene.analysis.util.ResourceLoaderAware;
-import org.apache.lucene.analysis.util.TokenFilterFactory;
-import org.apache.lucene.analysis.util.TokenizerFactory;
+import org.apache.lucene.util.ResourceLoader;
+import org.apache.lucene.util.ResourceLoaderAware;
+import org.apache.lucene.analysis.TokenFilterFactory;
+import org.apache.lucene.analysis.TokenizerFactory;
 import org.apache.lucene.util.AttributeFactory;
 import org.apache.lucene.util.CharsRef;
 
@@ -150,6 +150,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
 
         protected Analyzer getAnalyzer(ResourceLoader loader) throws IOException {
             final boolean ignoreCase = getBoolean(args, "ignoreCase", false);
+            args.put("ignoreCase", ignoreCase ? "true" : "false");
 
             String tf = args.get("tokenizerFactory");
 

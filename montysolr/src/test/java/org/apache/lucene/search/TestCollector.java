@@ -8,10 +8,10 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.MockIndexWriter;
+import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
-import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.tests.util.LuceneTestCase;
 
 import java.io.IOException;
 import java.util.Random;
@@ -36,7 +36,7 @@ public class TestCollector extends LuceneTestCase {
         // File(TEMP_DIR,"index-citations"));
         // directory = NIOFSDirectory.open(new
         // File(TEMP_DIR,"index-citations"));
-        directory = new RAMDirectory();
+        directory = new ByteBuffersDirectory();
         reOpenWriter(OpenMode.CREATE);
         writer.deleteAll();
         writer.commit();
@@ -114,14 +114,14 @@ public class TestCollector extends LuceneTestCase {
 
         int maxHits = 10000;
 
-        int[][] data = createRandomDocs(0, new Float(maxHits * 0.4f).intValue());
+        int[][] data = createRandomDocs(0, Float.valueOf(maxHits * 0.4f).intValue());
         reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
-        createRandomDocs(new Float(maxHits * 0.4f).intValue(), new Float(
+        createRandomDocs(Float.valueOf(maxHits * 0.4f).intValue(), Float.valueOf(
                 maxHits * 0.7f).intValue());
 
         writer.commit();
         reOpenWriter(OpenMode.APPEND); // close the writer, create a new segment
-        createRandomDocs(new Float(maxHits * 0.7f).intValue(), new Float(
+        createRandomDocs(Float.valueOf(maxHits * 0.7f).intValue(), Float.valueOf(
                 maxHits * 1.0f).intValue());
 
         writer.commit();
@@ -143,16 +143,8 @@ public class TestCollector extends LuceneTestCase {
             int visited = 0;
 
             @Override
-            public void setScorer(Scorer scorer) throws IOException {
-                this.scorer = scorer;
-            }
-
-            @Override
             public void collect(int doc) throws IOException {
                 visited++;
-                float score = scorer.score();
-                Document d = reader.document(doc);
-                // d.getValues("text_reference");
             }
 
             @Override
@@ -163,11 +155,9 @@ public class TestCollector extends LuceneTestCase {
             }
 
             @Override
-            public boolean needsScores() {
-                return false;
+            public ScoreMode scoreMode() {
+                return ScoreMode.COMPLETE_NO_SCORES;
             }
-
-
         });
 
     }
