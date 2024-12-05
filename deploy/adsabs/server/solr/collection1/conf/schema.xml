@@ -1087,6 +1087,9 @@
 		<field name="bibcode" type="identifier_string" indexed="true"
 			multiValued="false" stored="true" required="true" omitNorms="true"
 			omitTermFreqAndPositions="true"/>
+		<field name="scix_id" type="identifier_string" indexed="true"
+			   multiValued="false" stored="true" required="true" omitNorms="true"
+			   omitTermFreqAndPositions="true"/>
 
 
 		<!--
