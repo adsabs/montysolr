@@ -64,7 +64,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
         for (String individual : original.split(";")) {
 
             // skip processing wildcards
-            if (individual.indexOf('*') > -1 || individual.indexOf('?') > -1) {
+            if (individual.contains("*") || individual.contains("?")) {
                 buffer.add(individual);
                 continue;
             }
@@ -103,7 +103,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
                 } else { // some modifications happened
 
                     // add original
-                    if (individual.indexOf(",") == -1) {
+                    if (!individual.contains(",")) {
                         buffer.add(individual + ",");
                     } else {
                         buffer.add(individual);
