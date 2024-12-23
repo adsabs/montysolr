@@ -1289,10 +1289,6 @@
                docValues="true"/>
         <field name="aff_id" type="affiliation_tokens" indexed="true" stored="true"
                multiValued="true" omitNorms="true"/>
-        
-        <!-- for Unified Astronomy Thesaurus -->
-        <field name="uat" type="uat_tokens" indexed="true" stored="true"
-               multiValued="true" omitNorms="true"/>
 
 
 		<field name="email" type="normalized_text_ascii" indexed="true"
@@ -1588,6 +1584,27 @@
 		<field name="simbad_object_facet_hier" type="string"
 			indexed="true" stored="true" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" docValues="true" />
+
+		<!--
+		@api.doc
+		* uat
+		  Unified Astronomy Thesaurus feature names.
+		* uat_id
+		  An array of integers that uniquely identify UAT features.
+		* uat_facet_hier
+		  A hierarchical facet for searching UAT features by group.
+		 -->
+        <!-- for Unified Astronomy Thesaurus -->
+        <field name="uat" type="uat_tokens" indexed="true" stored="true"
+               multiValued="true" omitNorms="true"/>
+
+		<field name="uat_id" type="int" indexed="true" stored="true"
+			   multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+		<field name="uat_facet_hier" type="string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
 
 		<!--
 		@api.doc
