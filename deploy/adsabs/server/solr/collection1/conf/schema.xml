@@ -146,7 +146,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
@@ -211,7 +211,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
@@ -278,7 +278,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
@@ -371,7 +371,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
