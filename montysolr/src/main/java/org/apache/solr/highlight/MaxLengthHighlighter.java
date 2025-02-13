@@ -48,13 +48,10 @@ public class MaxLengthHighlighter extends UnifiedSolrHighlighter {
                 String[] highlights = snippets.get(key);
                 if (highlights == null) continue;
 
-                int count = 0;
                 for (int index = 0; index < highlights.length; index++) {
                     if (highlights[index] != null) {
-                        if (count > maxLength) {
+                        if (highlights[index].length() > maxLength) {
                             highlights[index] = null;
-                        } else {
-                            count += highlights[index].length();
                         }
                     }
                 }
