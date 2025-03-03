@@ -721,7 +721,7 @@
        <str name="aqp.dateFields">entry_date,date</str>
        <str name="aqp.timestampFields">indexstamp,update_timestamp,entry_date,metadata_ctime,metadata_mtime,fulltext_ctime,fulltext_mtime,nonbib_ctime,nonbib_mtime,metrics_ctime,metrics_mtime,orcid_ctime,orcid_mtime</str>
        <str name="aqp.floatFields">cite_read_boost,citation_count_norm</str>
-       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count,page_count,data_count</str>
+       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,uat_id,read_count,author_count,page_count,data_count</str>
        <str name="aqp.authorFields">author,first_author,book_author,editor</str>
        <str name="aqp.humanized.dates">pubdate:date,entdate:entry_date:timestamp</str>
        <str name="aqp.force.fuzzy.phrases">author,first_author,book_author,editor</str>
@@ -754,7 +754,7 @@
        <str name="aqp.dateFields">entry_date,date</str>
        <str name="aqp.timestampFields">indexstamp,update_timestamp,entry_date,metadata_ctime,metadata_mtime,fulltext_ctime,fulltext_mtime,nonbib_ctime,nonbib_mtime,metrics_ctime,metrics_mtime,orcid_ctime,orcid_mtime</str>
        <str name="aqp.floatFields">cite_read_boost,citation_count_norm</str>
-       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count,page_count,data_count</str>
+       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,uat_id,read_count,author_count,page_count,data_count</str>
        <str name="aqp.authorFields">author,first_author,book_author,editor</str>
        <str name="aqp.humanized.dates">pubdate:date,entdate:entry_date:timestamp</str>
        <str name="aqp.force.fuzzy.phrases">author,first_author,book_author,editor</str>
@@ -833,7 +833,7 @@
        <str name="aqp.dateFields">entry_date,date</str>
        <str name="aqp.timestampFields">indexstamp,update_timestamp,entry_date,metadata_ctime,metadata_mtime,fulltext_ctime,fulltext_mtime,nonbib_ctime,nonbib_mtime,metrics_ctime,metrics_mtime,orcid_ctime,orcid_mtime</str>
        <str name="aqp.floatFields">cite_read_boost,citation_count_norm</str>
-       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,read_count,author_count,page_count,data_count</str>
+       <str name="aqp.intFields">recid,pubdate_sort,citation_count,classic_factor,simbid,uat_id,read_count,author_count,page_count,data_count</str>
        <str name="aqp.authorFields">author,first_author,book_author,editor</str>
        <str name="aqp.humanized.dates">pubdate:date,entdate:entry_date:timestamp</str>
        <str name="aqp.force.fuzzy.phrases">author,first_author,book_author,editor</str>
