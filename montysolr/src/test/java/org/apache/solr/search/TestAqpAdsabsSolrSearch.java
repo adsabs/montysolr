@@ -319,6 +319,29 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testFirstAuthorRemapping() throws Exception {
+        // Simple case
+        assertQueryEquals(
+                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
+                        "=author:\"^foo\""),
+                "FunctionScoreQuery(first_author:foo, scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                FunctionScoreQuery.class);
+
+        // Complex case
+        assertQueryEquals(
+                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
+                        "=author:(^accomazzi kurtz)"),
+                "FunctionScoreQuery(first_author:foo, scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                FunctionScoreQuery.class);
+
+        assertQueryEquals(
+                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
+                        "=author:((^accomazzi AND kurtz) OR (^accomazzi AND lockhart))"),
+                "FunctionScoreQuery(first_author:foo, scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                FunctionScoreQuery.class);
+        // first_
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",

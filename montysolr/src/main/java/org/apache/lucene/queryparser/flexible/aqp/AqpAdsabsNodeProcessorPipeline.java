@@ -27,6 +27,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         // function queries are handled first, because they will be parsed
         // again (during resolution)
         add(new AqpAdsabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
+        add(new AqpFirstAuthorMappingProcessor()); // remap first author queries to the first_author field
         add(new AqpAdsabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
         add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
 

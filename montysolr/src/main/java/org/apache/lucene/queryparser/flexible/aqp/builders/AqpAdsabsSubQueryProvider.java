@@ -349,6 +349,10 @@ public class AqpAdsabsSubQueryProvider implements
                     wrapConstant = true;
                 }
 
+                // If we're dealing with an author query, rewrite to first_author
+                if (start == 1 && end == 1 && queryField != null && queryField.equals("author")) {
+                    return query;
+                }
 
                 SpanQuery spanQuery;
                 try {
