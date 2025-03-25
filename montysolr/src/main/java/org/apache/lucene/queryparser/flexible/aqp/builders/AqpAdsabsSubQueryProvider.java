@@ -349,11 +349,6 @@ public class AqpAdsabsSubQueryProvider implements
                     wrapConstant = true;
                 }
 
-                // If we're dealing with an author query, rewrite to first_author
-                if (start == 1 && end == 1 && queryField != null && queryField.equals("author")) {
-                    return query;
-                }
-
                 SpanQuery spanQuery;
                 try {
                     spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
@@ -1357,7 +1352,7 @@ public class AqpAdsabsSubQueryProvider implements
 		swimDeep(children.get(0), span);
 		swimDeep(children.get(children.size()-1), span);
 	}
-	
+
 
 	private void swimDeep(QueryNode node, Integer[] span) {
 
