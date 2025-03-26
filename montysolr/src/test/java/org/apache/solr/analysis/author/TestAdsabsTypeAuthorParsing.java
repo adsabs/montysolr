@@ -58,14 +58,14 @@ import java.util.regex.Pattern;
  *
  * IMPORTANT: this unittest was reviewed on 11-12-2012 by Alberto
  * and he found 1 (in words "ONE") problem, everything else was
- * fine. The problem is easily fixable, right now the 
+ * fine. The problem is easily fixable, right now the
  * "synonym-upgrade" considers only names with initials for
- * expansion. Ie. 
+ * expansion. Ie.
  *
  *  "jones, c" =&gt; jones, christine; forman, c; forman, christine
  *
  *  But Alberto wants that any short form produces the same effect,
- *  ie. 
+ *  ie.
  *
  *  "jones," =&gt; jones, christine; forman, c; forman, christine
  *  "jones, c" =&gt; jones, christine; forman, c; forman, christine
@@ -383,10 +383,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         );
 
         assertQueryEquals(req("q", "author:\"^Herrera-Camus\""),
-                "spanPosRange(spanOr([author:herrera camus,, SpanMultiTermQueryWrapper(author:herrera camus,*)]), 0, 1)",
-                SpanPositionRangeQuery.class);
+                "herrera camus, | herrera camus,*",
+                BooleanQuery.class);
 
-        assertQueryEquals(req("q", "author:\"^acco*\""), "spanPosRange(SpanMultiTermQueryWrapper(author:acco*), 0, 1)", SpanPositionRangeQuery.class);
+        assertQueryEquals(req("q", "author:\"^acco*\""), "acco | acco*", BooleanQuery.class);
         assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
         assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
 
@@ -883,15 +883,15 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
 
 
-    
-    
-    
+
+
+
     /*
      * ============================================================
      * Here comes the bloodiest part of the author parsing unittest
      * ============================================================
-     * 
-     * 
+     *
+     *
 		 Each test case has two branches, one representing the full utf-8 form (with ascii chars),
 		 the other the ascii downgraded form. No matter which, the query must be expanded in both
 		 cases equally for each testcase
@@ -912,7 +912,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 	       <surname>, <2name> <1name>
 	       <surname>, <2> <1name>
 	       <surname>, <2> <1>
-	       
+
 	       <surname>, <1n*>
 	       <surname>, <1*>
 	       <surname>, <2n*>
@@ -2853,12 +2853,12 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                         "| author:muller, b | author:muller, b *",
                 DisjunctionMaxQuery.class);
 
-    
-    
+
+
     /*
-     * 
-    TODO: 
-    
+     *
+    TODO:
+
     assertQ(req("q", "author:\"Albert, R\""), "//*[@numFound='1']");
     assertQ(req("q", "author:\"Albert, Reeka\""), "//*[@numFound='1']");
     assertQ(req("q", "author:\"Barabási, A\""), "//*[@numFound='1']");
@@ -2935,7 +2935,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     }
 
   /* XXX:rca - it was not used, to remove?
-   * 
+   *
    *
   public void assertQ(String message, SolrQueryRequest req, String... tests) {
     try {
