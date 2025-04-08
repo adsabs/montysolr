@@ -23,6 +23,7 @@ dependencies {
 	implementation("org.apache.lucene:lucene-join:9.10.0")
 	implementation("org.apache.lucene:lucene-misc:9.10.0")
 	implementation("org.apache.lucene:lucene-suggest:9.10.0")
+	implementation("org.apache.lucene:lucene-highlighter:9.10.0")
 	implementation("org.apache.commons:commons-lang3:3.14.0")
 
 	implementation("com.google.guava:guava:33.2.1-jre")
