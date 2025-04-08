@@ -558,7 +558,7 @@
 
 
   <searchComponent class="solr.HighlightComponent" name="highlight">
-    <highlighting>
+    <highlighting class="org.apache.solr.highlight.MaxLengthHighlighter">
       <!-- Configure the standard fragmenter -->
       <!-- This could most likely be commented out in the "default" case -->
       <fragmenter name="gap" 
