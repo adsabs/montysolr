@@ -283,14 +283,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         assertU(adoc("id", "25", "bibcode", "b25", "title", "datetest",
                 "pubdate", "1977-01-01", "date", "1977-01-01T00:30:00Z"));
 
-        assertU(adoc("id", "50", "bibcode", "b50", "author", "Bond, E J"));
-        assertU(adoc("id", "51", "bibcode", "b51", "author", "Bond, Edwin James"));
-        assertU(adoc("id", "52", "bibcode", "b52", "author", "Bond, E James"));
-        assertU(adoc("id", "53", "bibcode", "b53", "author", "Bond, Edwin J"));
-        assertU(adoc("id", "54", "bibcode", "b54", "author", "Bond, EJames"));
-        assertU(adoc("id", "55", "bibcode", "b55", "author", "Bond, E"));
-        assertU(adoc("id", "56", "bibcode", "b56", "author", "Bond, J"));
-        assertU(adoc("id", "57", "bibcode", "b57", "author", "Bond,"));
+        assertU(adoc("id", "50", "bibcode", "b50", "author", "Bond, E J", "first_author", "Bond, E J"));
+        assertU(adoc("id", "51", "bibcode", "b51", "author", "Bond, Edwin James", "first_author", "Bond, Edwin James"));
+        assertU(adoc("id", "52", "bibcode", "b52", "author", "Bond, E James", "first_author", "Bond, E James"));
+        assertU(adoc("id", "53", "bibcode", "b53", "author", "Bond, Edwin J", "first_author", "Bond, Edwin J"));
+        assertU(adoc("id", "54", "bibcode", "b54", "author", "Bond, EJames", "first_author", "Bond, EJames"));
+        assertU(adoc("id", "55", "bibcode", "b55", "author", "Bond, E", "first_author", "Bond, E"));
+        assertU(adoc("id", "56", "bibcode", "b56", "author", "Bond, J", "first_author", "Bond, J"));
+        assertU(adoc("id", "57", "bibcode", "b57", "author", "Bond,", "first_author", "Bond,"));
 
         assertU(adoc("id", "60", "bibcode", "b60", "abstract", "all no-sky survey"));
 
@@ -402,7 +402,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='0']");
 
         // failing now, will need to mess with grammar first
-//		assertQ(req("q", "doi:(\"doi:ŽŠČŘĎŤŇ:123456789\" OR \"ŽŠČŘĎŤŇ:123456789\")"), 
+//		assertQ(req("q", "doi:(\"doi:ŽŠČŘĎŤŇ:123456789\" OR \"ŽŠČŘĎŤŇ:123456789\")"),
 //		    "//*[@numFound='1']");
 
 
