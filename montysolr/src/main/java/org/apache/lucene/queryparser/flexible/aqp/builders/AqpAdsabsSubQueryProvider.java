@@ -303,7 +303,7 @@ public class AqpAdsabsSubQueryProvider implements
          */
         parsers.put("pos", new AqpSubqueryParserFull() {
             @Override
-            public Query parse(FunctionQParser fp) throws SyntaxError {
+            public Query parse(FunctionQParser fp, QueryConfigHandler configHandler) throws SyntaxError {
                 Query query = fp.parseNestedQuery();
                 int start = fp.parseInt();
                 int end = start;
