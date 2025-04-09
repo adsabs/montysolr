@@ -1347,7 +1347,7 @@ public class AqpAdsabsSubQueryProvider implements
 
         // TODO: builder is reusing parser object; that may be bad if two threads
         // are accessing it. Not happening now, but ...
-        return new AqpSubQueryTreeBuilder(provider, parser);
+        return new AqpSubQueryTreeBuilder(provider, parser, config);
 
     }
 
