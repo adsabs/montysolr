@@ -5,6 +5,7 @@ import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
+import org.apache.lucene.queries.spans.FieldMaskingSpanQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.*;
 import org.apache.lucene.queries.spans.SpanNearQuery;
@@ -395,7 +396,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(
                 req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
                         "=author:\"^foo\""),
-                "FunctionScoreQuery(ConstantScore(spanPosRange(author:foo,, 0, 1)), scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                "FunctionScoreQuery(mask(author:foo,) as first_author, scored by boost(sum(float(cite_read_boost),const(0.6))))",
                 FunctionScoreQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
@@ -449,9 +450,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         // https://github.com/romanchyla/montysolr/issues/101
         assertQueryEquals(req("defType", "aqp", "q", "=author:\"foo, bar\""), "author:foo, bar", TermQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"foo, bar\", 1)"),
-                "spanPosRange(author:foo, bar, 0, 1)", SpanPositionRangeQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"^foo, bar\""), "spanPosRange(author:foo, bar, 0, 1)",
-                SpanPositionRangeQuery.class);
+                "mask(author:foo, bar) as first_author", FieldMaskingSpanQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "=author:\"^foo, bar\""), "mask(author:foo, bar) as first_author",
+                FieldMaskingSpanQuery.class);
 
         // constant() score
         assertQueryEquals(req("defType", "aqp", "q", "constant(title:foo)"), "ConstantScore(title:foo)",
@@ -598,11 +599,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // nested functions should parse well: citations(author:"^kurtz")
         assertQueryEquals(req("defType", "aqp", "q", "citations(author:\"^kurtz\")"),
-                "SecondOrderQuery(spanPosRange(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)]), 0, 1), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "SecondOrderQuery(mask(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)])) as first_author, collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "citations(citations(author:\"^kurtz\"))"),
-                "SecondOrderQuery(SecondOrderQuery(spanPosRange(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)]), 0, 1), collector=SecondOrderCollectorCitedBy(cache:citations-cache)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "SecondOrderQuery(SecondOrderQuery(mask(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)])) as first_author, collector=SecondOrderCollectorCitedBy(cache:citations-cache)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
         // #30 - first_author and author:"^fooo" give diff results
@@ -716,7 +717,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         // notice the use of modifier '=' (if it is lowercased, it means _nosyn analyzer
         // was used)
         assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"Accomazzi, A\", 1)"),
-                "spanPosRange(author:accomazzi, a, 0, 1)", SpanPositionRangeQuery.class);
+                "mask(author:accomazzi, a) as first_author", FieldMaskingSpanQuery.class);
 //        assertQueryEquals(req("defType", "aqp", "q", "pos(+author:\"Accomazzi, A\", 1, 1)"),
 //                "spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)",
 //                SpanPositionRangeQuery.class);
@@ -1137,7 +1138,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertQueryNotContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "no.classic_scoring.modifier", "0.5"),
                 "scored by",
-                SpanPositionRangeQuery.class);
+                FieldMaskingSpanQuery.class);
         assertQueryContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
                 "scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
@@ -1152,12 +1153,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         // it won't replace it)
         assertQueryEquals(
                 req("defType", "aqp", "q", "^accomazzi", "aqp.constant_scoring", "author^5", "qf", "author title"),
-                "(ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0",
-                BoostQuery.class);
+                "mask(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)])) as first_author",
+                FieldMaskingSpanQuery.class);
         assertQueryContains(
                 req("defType", "aqp", "q", "^accomazzi", "aqp.classic_scoring.modifier", "0.5", "aqp.constant_scoring",
                         "author^5", "qf", "author title"),
-                ")))^5.0, scored by boost(sum(float(cite_read_boost),const(0.5))))",
+                "FunctionScoreQuery(mask(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)])) as first_author, scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
 
     }
