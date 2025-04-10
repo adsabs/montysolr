@@ -725,6 +725,7 @@
        <str name="aqp.authorFields">author,first_author,book_author,editor</str>
        <str name="aqp.humanized.dates">pubdate:date,entdate:entry_date:timestamp</str>
        <str name="aqp.force.fuzzy.phrases">author,first_author,book_author,editor</str>
+       <str name="aqp.firstPositionRemapping.author">first_author</str>
     </lst>
   </queryParser>
   

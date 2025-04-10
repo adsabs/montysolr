@@ -185,6 +185,15 @@ public class AqpAdsabsQParser extends QParser {
             }
         }
 
+        for (String paramName : namedParams.keySet()) {
+            if (!paramName.startsWith("aqp.firstPositionRemapping.")) {
+                continue;
+            }
+
+            String fieldName = paramName.substring("aqp.firstPositionRemapping.".length());
+            config.get(ConfigurationKeys.FIRST_POSITION_REMAPPING).put(fieldName, namedParams.get(paramName));
+        }
+
         if (params.getBool("debugQuery", false)) {
             try {
                 qParser.setDebug(true);
