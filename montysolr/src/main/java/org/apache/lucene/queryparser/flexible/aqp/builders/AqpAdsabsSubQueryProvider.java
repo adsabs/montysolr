@@ -8,9 +8,11 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
+import org.apache.lucene.queries.spans.FieldMaskingSpanQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -361,6 +363,16 @@ public class AqpAdsabsSubQueryProvider implements
                     SyntaxError ex = new SyntaxError(e.getMessage(), e);
                     ex.setStackTrace(e.getStackTrace());
                     throw ex;
+                }
+
+                if (configHandler != null && start == 1 && end == 1) {
+                    String replacementField = configHandler
+                            .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FIRST_POSITION_REMAPPING)
+                            .getOrDefault(queryField, "");
+
+                    if (!replacementField.isEmpty()) {
+                        return new FieldMaskingSpanQuery(spanQuery, replacementField);
+                    }
                 }
 
                 if (start < 0 || end < 0) {
