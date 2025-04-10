@@ -331,13 +331,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(
                 req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
                         "=author:(^accomazzi kurtz)"),
-                "FunctionScoreQuery(first_author:foo, scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                "FunctionScoreQuery(+mask(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)])) as first_author +ConstantScore(author:kurtz,), scored by boost(sum(float(cite_read_boost),const(0.6))))",
                 FunctionScoreQuery.class);
 
         assertQueryEquals(
                 req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
                         "=author:((^accomazzi AND kurtz) OR (^accomazzi AND lockhart))"),
-                "FunctionScoreQuery(first_author:foo, scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                "FunctionScoreQuery((+mask(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)])) as first_author +ConstantScore(author:kurtz,)) (+mask(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)])) as first_author +ConstantScore(author:lockhart,)), scored by boost(sum(float(cite_read_boost),const(0.6))))",
                 FunctionScoreQuery.class);
         // first_
     }
