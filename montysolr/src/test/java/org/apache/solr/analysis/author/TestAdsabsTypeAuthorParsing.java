@@ -24,6 +24,7 @@ import monty.solr.util.SolrTestSetup;
 import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.queries.spans.FieldMaskingSpanQuery;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.Query;
@@ -383,10 +384,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         );
 
         assertQueryEquals(req("q", "author:\"^Herrera-Camus\""),
-                "spanPosRange(spanOr([author:herrera camus,, SpanMultiTermQueryWrapper(author:herrera camus,*)]), 0, 1)",
-                SpanPositionRangeQuery.class);
+                "mask(spanOr([author:herrera camus,, SpanMultiTermQueryWrapper(author:herrera camus,*)])) as first_author",
+                FieldMaskingSpanQuery.class);
 
-        assertQueryEquals(req("q", "author:\"^acco*\""), "spanPosRange(SpanMultiTermQueryWrapper(author:acco*), 0, 1)", SpanPositionRangeQuery.class);
+        assertQueryEquals(req("q", "author:\"^acco*\""), "mask(SpanMultiTermQueryWrapper(author:acco*)) as first_author", FieldMaskingSpanQuery.class);
         assertQueryEquals(req("q", "author:acco*"), "author:acco*", WildcardQuery.class);
         assertQueryEquals(req("q", "author:Adamč*"), "author:adamč*", WildcardQuery.class);
 
