@@ -25,6 +25,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationMapDBCache extends MontySolrAbstractTestCase {
@@ -41,7 +42,7 @@ public class TestCitationMapDBCache extends MontySolrAbstractTestCase {
     private CitationMapDBCache cache;
     private Path tmpdir;
 
-    public void createCache() throws Exception {
+    public void createCache() {
         /*
             0 refs: [3, 4, 2] cits: []
             1 refs: [2, 3, 4] cits: []
@@ -57,12 +58,12 @@ public class TestCitationMapDBCache extends MontySolrAbstractTestCase {
         */
 
         cache = new CitationMapDBCache<>();
-        HashMap<String, String> m = new HashMap<String, String>();
+        HashMap<String, String> m = new HashMap<>();
         m.put("identifierFields", "bibcode");
         m.put("referenceFields", "reference");
         m.put("citationFields", "citation");
         m.put("dbPath", tmpdir.toString() + "/mapdb-test");
-        
+
         // Initialize the cache
         cache.init(m, null, null);
         cache.initializeCitationCache(10 + 1);
@@ -108,54 +109,56 @@ public class TestCitationMapDBCache extends MontySolrAbstractTestCase {
         if (cache != null) {
             cache.close();
         }
-        
-        for (File f : tmpdir.toFile().listFiles()) {
-            f.delete();
+
+        for (File f : Objects.requireNonNull(tmpdir.toFile().listFiles())) {
+            if (!f.delete()) {
+                System.err.println("Failed to delete file: " + f.getAbsolutePath());
+            }
         }
 
         super.tearDown();
     }
 
     @Test
-    public void testBasicOperations() throws Exception {
+    public void testBasicOperations() {
         // Test ID mapping function
         assertEquals(0, cache.get("b0"));
         assertEquals(1, cache.get("b1"));
         assertEquals(2, cache.get("b2"));
-        
+
         // Test references
         compare("References", new int[]{2, 3, 4}, cache.getReferences(1));
         compare("References", new int[]{2, 3, 4}, cache.getReferences(2));
         compare("References", new int[]{2, 3, 4}, cache.getReferences(3));
-        
+
         // Test citations
         compare("Citations", null, cache.getCitations(0));
         compare("Citations", null, cache.getCitations(1));
         compare("Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10}, cache.getCitations(2));
         compare("Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10}, cache.getCitations(3));
-        
+
         // Test with string keys
         compare("References", new int[]{2, 3, 4}, cache.getReferences("b1"));
         compare("Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10}, cache.getCitations("b2"));
     }
-    
+
     @Test
-    public void testCacheModifications() throws Exception {
+    public void testCacheModifications() {
         // Test initial state
         assertEquals(2, cache.get("b2"));
         compare("Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10}, cache.getCitations(2));
-        
+
         // Remove an item
         cache.remove("b2");
         assertNull(cache.get("b2"));
-        
+
         // Add it back
         cache.put("b2", 2);
         assertEquals(2, cache.get("b2"));
-        
+
         // Test that citations and references need to be rebuilt
         assertNull(cache.getCitations(2));
-        
+
         // Reinsert citations
         for (int i = 0; i < 8; i++) {
             cache.insertCitation(2, i);
@@ -163,33 +166,33 @@ public class TestCitationMapDBCache extends MontySolrAbstractTestCase {
         cache.insertCitation(2, 8);
         cache.insertCitation(2, 9);
         cache.insertCitation(2, 10);
-        
+
         compare("Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, cache.getCitations(2));
     }
-    
+
     @Test
-    public void testCachePersistence() throws Exception {
+    public void testCachePersistence() {
         // Close the existing cache to avoid file lock conflicts
         cache.close();
         cache = null;
-        
+
         // Create a new cache that will load the data from the MapDB files
         CitationMapDBCache<String, Integer> cache2 = new CitationMapDBCache<>();
-        HashMap<String, String> m = new HashMap<String, String>();
+        HashMap<String, String> m = new HashMap<>();
         m.put("identifierFields", "bibcode");
         m.put("referenceFields", "reference");
         m.put("citationFields", "citation");
         m.put("dbPath", tmpdir.toString() + "/mapdb-test");
-        
+
         try {
             // Initialize the cache (should load from existing MapDB files)
             cache2.init(m, null, null);
-            
+
             // Test that the data was loaded
             assertEquals(0, (int)cache2.get("b0"));
             assertEquals(1, (int)cache2.get("b1"));
             assertEquals(2, (int)cache2.get("b2"));
-            
+
             compare("References", new int[]{2, 3, 4}, cache2.getReferences(1));
             compare("Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10}, cache2.getCitations(2));
         } finally {
@@ -207,7 +210,7 @@ public class TestCitationMapDBCache extends MontySolrAbstractTestCase {
         // Print debug info
         System.out.println("EXPECTED: " + (exp == null ? "null" : Arrays.toString(exp)));
         System.out.println("ACTUAL  : " + (res == null ? "null" : Arrays.toString(res)));
-        
+
         assertArrayEquals(msg, exp, res);
     }
 }
