@@ -27,6 +27,7 @@ dependencies {
 
 	implementation("com.google.guava:guava:33.2.1-jre")
 	implementation("com.anyascii:anyascii:0.3.2")
+	implementation("org.mapdb:mapdb:3.0.10")
 	//implementation("org.python:jython-standalone:2.7.3")
 	implementation(project(":jython"))
 
