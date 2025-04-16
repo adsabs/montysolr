@@ -99,13 +99,13 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
     // Configuration options
     private boolean incremental = false;
 
-    
-    @SuppressWarnings({"unchecked", "rawtypes"})
+
+    @SuppressWarnings({"unchecked"})
     public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
         super.init(args, regenerator);
 
         identifierFields = ((String) args.get("identifierFields")).split(",");
-        assert (identifierFields != null && identifierFields.length > 0);
+        assert identifierFields.length > 0;
 
         incremental = "true".equals(args.get("incremental"));
         "true".equals(args.get("reuseCache"));
@@ -119,17 +119,13 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         citationFields = new ArrayList<>();
         referenceFields = new ArrayList<>();
 
-        if (args.containsKey("referenceFields") && ((String) args.get("referenceFields")).trim().length() > 0) {
+        if (args.containsKey("referenceFields") && !((String) args.get("referenceFields")).trim().isEmpty()) {
             String[] refs = ((String) args.get("referenceFields")).split(",");
-            for (String ref : refs) {
-                referenceFields.add(ref);
-            }
+            referenceFields.addAll(Arrays.asList(refs));
         }
-        if (args.containsKey("citationFields") && ((String) args.get("citationFields")).trim().length() > 0) {
+        if (args.containsKey("citationFields") && !((String) args.get("citationFields")).trim().isEmpty()) {
             String[] cites = ((String) args.get("citationFields")).split(",");
-            for (String cite : cites) {
-                citationFields.add(cite);
-            }
+            citationFields.addAll(Arrays.asList(cites));
         }
 
         String str = (String) args.get("size");
@@ -216,10 +212,6 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
 
     public int size() {
         return identifierToDocIdMap.size();
-    }
-
-    public boolean treatsIdentifiersAsText() {
-        return treatIdentifiersAsText;
     }
 
     public V put(K key, V value) {
@@ -328,10 +320,6 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         }
     }
 
-    public int getCitationsIteratorSize() {
-        return citationCache.size();
-    }
-
     public int[] getCitations(K key) {
         V val = get(key);
         if (val == null) {
@@ -423,7 +411,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         // Note: We need to check both caches separately as a document might have citations but no references
         boolean hasCitations = citationCache.containsKey(docId);
         boolean hasReferences = referenceCache.containsKey(docId);
-        
+
         // Process if either cache is missing data
         if (hasCitations && hasReferences) {
             return;
@@ -432,7 +420,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         // Get the LeafReader context for this document
         List<LeafReaderContext> leaves = searcher.getLeafContexts();
         LeafReaderContext leafContext = null;
-        int docBase = 0;
+        int docBase;
         int localDocId = docId;
 
         for (LeafReaderContext ctx : leaves) {
@@ -626,11 +614,11 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
      */
     public void setSearcher(SolrIndexSearcher searcher) {
         this.searcher = searcher;
-        
+
         // Process and load alternate identifiers map automatically
         loadAlternateIdentifiers(searcher);
     }
-    
+
     /**
      * Load alternate identifiers using DocValues to properly map them
      * to primary identifiers in identifierToDocIdMap
@@ -638,7 +626,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
     @SuppressWarnings("unchecked")
     private void loadAlternateIdentifiers(SolrIndexSearcher searcher) {
         if (searcher == null) return;
-        
+
         try {
             List<LeafReaderContext> leaves = searcher.getLeafContexts();
             try {
@@ -646,31 +634,31 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                 // No alternate_bibcode field defined, nothing to do
                 return;
             }
-            
+
             // Map to store alternate to primary identifier mappings
             Map<K, V> alternateMap = new HashMap<>();
-            
+
             // Process all leaf readers
             for (LeafReaderContext ctx : leaves) {
                 LeafReader reader = ctx.reader();
                 int maxDoc = reader.maxDoc();
                 int docBase = ctx.docBase;
-                
+
                 // Get alternate_bibcode DocValues if available
                 SortedSetDocValues alternateDV = reader.getSortedSetDocValues("alternate_bibcode");
                 if (alternateDV == null) continue;
-                
+
                 // For each document
                 for (int i = 0; i < maxDoc; i++) {
                     // Skip deleted docs
                     if (reader.getLiveDocs() != null && !reader.getLiveDocs().get(i)) {
                         continue;
                     }
-                    
+
                     // Find the document's primary identifier
                     String primaryIdentifier = null;
                     int luceneDocId = docBase + i;
-                    
+
                     // Use reverse lookup to find primary identifier for this doc
                     for (Entry<K, V> entry : identifierToDocIdMap.entrySet()) {
                         if (entry.getValue().equals(luceneDocId)) {
@@ -678,18 +666,18 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                             break;
                         }
                     }
-                    
+
                     if (primaryIdentifier == null) {
                         continue;
                     }
-                    
+
                     // Get all alternate identifiers for this document
                     if (alternateDV.advanceExact(i)) {
                         long ord;
                         while ((ord = alternateDV.nextOrd()) != -1) {
                             BytesRef bytesRef = alternateDV.lookupOrd(ord);
                             String alternateId = bytesRef.utf8ToString();
-                            
+
                             // Add alternate->primary mapping
                             K altKey = safeStrToKey(alternateId);
                             alternateMap.put(altKey, (V)(Integer)luceneDocId);
@@ -697,32 +685,30 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                     }
                 }
             }
-            
+
             // Now add all alternate identifiers to the main map
-            for (Entry<K, V> entry : alternateMap.entrySet()) {
-                identifierToDocIdMap.put(entry.getKey(), entry.getValue());
-            }
-            
+            identifierToDocIdMap.putAll(alternateMap);
+
             db.commit(); // Commit the changes to make them durable
-            
+
         } catch (Exception e) {
             log.error("Error loading alternate identifiers", e);
         }
     }
-    
-    
+
+
     public void warm(SolrIndexSearcher searcher, SolrCache<K, V> old) {
         long warmingStartTime = System.nanoTime();
         if (isAutowarmingOn()) {
             isWarming = true;
             try {
-                log.info("Building cache (" + name() + "): " + searcher);
+                log.info("Building cache ({}): {}", name(), searcher);
                 if (this.incremental) {
                     warmIncrementally(searcher, old);
                 } else {
                     warmRebuildEverything(searcher, old);
                 }
-                log.info("Warming cache " + name() + " done (# entries:" + size() + "): " + searcher);
+                log.info("Warming cache {} done (# entries:{}): {}", name(), size(), searcher);
             } catch (IOException e) {
                 throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to generate initial IDMapping", e);
             }
@@ -777,13 +763,13 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                     put((K) value, (V) (Integer) (docbase + docid));
                 }
             });
-        } else if (liveDocs != null) {
+        } else {
             // Handle deleted or updated documents
             for (Entry<K, V> entry : other.identifierToDocIdMap.entrySet()) {
                 Integer luceneId = (Integer) entry.getValue();
-                if (luceneId <= liveDocs.length() && !liveDocs.get(luceneId)) {
-                    // Doc was either deleted or updated - mark for refresh
-                }
+                if (luceneId <= liveDocs.length()) {
+                    liveDocs.get(luceneId);
+                }// Doc was either deleted or updated - mark for refresh
             }
 
             for (int i = 0; i < toRefresh.length(); i++) {
@@ -826,14 +812,14 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                         break;
                     }
                 } catch (Throwable e) {
-                    log.error("Error during auto-warming of key:" + entry.getKey(), e);
+                    log.error("Error during auto-warming of key:{}", entry.getKey(), e);
                 }
             }
         }
     }
 
     private List<String> getFields(SolrIndexSearcher searcher, String[] listOfFields) {
-        List<String> out = new ArrayList<String>();
+        List<String> out = new ArrayList<>();
 
         IndexSchema schema = searcher.getCore().getLatestSchema();
         if (schema.getUniqueKeyField() == null) {
@@ -850,7 +836,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                 treatIdentifiersAsText = true;
             }
 
-            if (!fieldInfo.stored() && "NONE".equals(type.getDocValuesFormat().toString())) {
+            if (!fieldInfo.stored() && "NONE".equals(type.getDocValuesFormat())) {
                 throw new SolrException(ErrorCode.FORBIDDEN,
                     "The field " + f + " cannot be used to build citation cache!");
             }
@@ -868,7 +854,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
     }
 
     /*
-     * Checks whether the cache needs to be rebuilt for this document, eg. if the
+     * Checks whether the cache needs to be rebuilt for this document, e.g. if the
      * key points to a deleted document or if one of the values point at a deleted
      * document
      */
@@ -911,7 +897,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
     public String getDescription() {
         return description;
     }
-    
+
     /**
      * Helper method to safely cast a String to key type K
      * @param str String to convert to key type
@@ -924,7 +910,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         if (treatIdentifiersAsText) {
             return (K)str;
         }
-        
+
         // Otherwise, try our best to determine the type
         // This is necessary for test handling of alternate bibcodes
         try {
@@ -939,7 +925,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
             // Fall back to generic cast
             log.debug("Error determining key type", e);
         }
-        
+
         return (K)str;
     }
 
@@ -1007,7 +993,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
     /**
      * Reads values from the DocValue and/or FieldCache and calls the setter
      */
-    private class KVSetter {
+    private static class KVSetter {
         public void set(int docbase, int docid, Object value) {
             throw new NotImplementedException();
         }
@@ -1033,7 +1019,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                 FieldInfo fi = fInfo.fieldInfo(field);
 
                 if (fi == null) {
-                    log.error("Field " + field + " has no schema entry; skipping it!");
+                    log.error("Field {} has no schema entry; skipping it!", field);
                     continue;
                 }
 
@@ -1041,7 +1027,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
 
                 if (fType.equals(DocValuesType.NONE)) {
                     // Skip fields without DocValues for DocValues implementation
-                    log.warn("Field " + field + " has no DocValues; skipping it!");
+                    log.warn("Field {} has no DocValues; skipping it!", field);
                     continue;
                 }
 
@@ -1114,7 +1100,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                         break;
 
                     default:
-                        log.warn("Unsupported DocValues type: " + fType + " for field: " + field);
+                        log.warn("Unsupported DocValues type: {} for field: {}", fType, field);
                 }
             }
         }
