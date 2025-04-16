@@ -40,7 +40,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
 
     private CitationMapDBCacheDocValues cache;
     private Path tmpdir;
-    
+
     public void createIndex() throws Exception {
         /*
             0 refs: [3, 4, 2] cits: []
@@ -112,7 +112,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
         m.put("referenceFields", "reference");
         m.put("citationFields", "citation");
         m.put("dbPath", tmpdir.toString() + "/mapdb-docvalues-test");
-        
+
         // Initialize the cache
         cache.init(m, null, null);
         cache.initializeCitationCache(10 + 1);
@@ -121,24 +121,24 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
         for (int i = 0; i < 11; i++) {
             cache.put("b" + i, i);
         }
-        
+
         // Manually map alternate bibcodes that were previously handled by the implementation
         cache.put("x2", 2);  // x2 -> b2
-        cache.put("x22", 2); // x22 -> b2 
+        cache.put("x22", 2); // x22 -> b2
         cache.put("x8", 8);  // x8 -> b8
 
         // Set up the test searcher to use DocValues
         SolrQueryRequest r = req("test");
         SolrIndexSearcher searcher = r.getSearcher();
         cache.setSearcher(searcher);
-        
+
         // Pre-process critical documents for testing
         // This replaces the functionality that was in loadCriticalCitationNodes()
         preloadDocumentsForTesting(searcher);
-        
+
         r.close();
     }
-    
+
     /**
      * Pre-process critical document relationships for testing
      * This replaces the implementation-specific loadCriticalCitationNodes method
@@ -153,32 +153,31 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
             cache.getCitations(docId);
             cache.getReferences(docId);
         }
-        
+
         // Ensure citation from doc 3 to doc 0 is present
         // (This was previously handled as a special case in the implementation)
         int[] citations = cache.getCitations(0);
-        if (citations == null || !containsValue(citations, 3)) {
+        if (!containsValue(citations, 3)) {
             cache.insertCitation(3, 0);
         }
-        
+
         // Ensure bidirectional consistency by adding the corresponding reference
         int[] refs = cache.getReferences(3);
-        if (refs == null || !containsValue(refs, 0)) {
+        if (!containsValue(refs, 0)) {
             cache.insertReference(3, 0);
         }
-        
+
         // Ensure bidirectional consistency for all existing relationships
         ensureBidirectionalConsistency();
     }
-    
+
     /**
      * Ensure all citation/reference relationships are properly bidirectional
      * This replicates the functionality of the removed ensureBidirectionalCitations method
      * but places responsibility in the test rather than the implementation
      */
     private void ensureBidirectionalConsistency() throws Exception {
-        SolrQueryRequest r = req("test");
-        try {
+        try (SolrQueryRequest r = req("test")) {
             // Process key documents to establish relationships from both sides
             for (int docId = 0; docId <= 5; docId++) {
                 int[] citations = cache.getCitations(docId);
@@ -186,25 +185,23 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
                     for (int citingDoc : citations) {
                         // Make sure references are complete
                         int[] refs = cache.getReferences(citingDoc);
-                        if (refs == null || !containsValue(refs, docId)) {
+                        if (!containsValue(refs, docId)) {
                             cache.insertReference(citingDoc, docId);
                         }
                     }
                 }
-                
+
                 int[] references = cache.getReferences(docId);
                 if (references != null) {
                     for (int refDoc : references) {
                         // Make sure citations are complete
                         int[] cites = cache.getCitations(refDoc);
-                        if (cites == null || !containsValue(cites, docId)) {
+                        if (!containsValue(cites, docId)) {
                             cache.insertCitation(docId, refDoc);
                         }
                     }
                 }
             }
-        } finally {
-            r.close();
         }
     }
 
@@ -221,11 +218,11 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
         if (cache != null) {
             cache.close();
         }
-        
+
         for (File f : tmpdir.toFile().listFiles()) {
             f.delete();
         }
-        
+
         super.tearDown();
     }
 
@@ -236,61 +233,53 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
         assertEquals(0, (int)cache.get("b0"));
         assertEquals(1, (int)cache.get("b1"));
         assertEquals(2, (int)cache.get("b2"));
-        
+
         // Request data to trigger docvalues reading
-        SolrQueryRequest r = req("test");
-        try {
+        try (SolrQueryRequest r = req("test")) {
             // Get citations and references using DocValues
             int[] citations2 = cache.getCitations(2);
             int[] references1 = cache.getReferences(1);
-            
+
             // Verify results - specific results depend on the DocValues implementation
             assertNotNull(citations2);
             assertNotNull(references1);
-            
-        } finally {
-            r.close();
         }
     }
-    
+
     @Test
     public void testCacheModifications() throws Exception {
         // Test initial state
         assertEquals(2, (int)cache.get("b2"));
-        
+
         // Remove an item
         cache.remove("b2");
         assertNull(cache.get("b2"));
-        
+
         // Add it back
         cache.put("b2", 2);
         assertEquals(2, (int)cache.get("b2"));
-        
+
         // Test with a searcher
-        SolrQueryRequest r = req("test");
-        try {
+        try (SolrQueryRequest r = req("test")) {
             cache.setSearcher(r.getSearcher());
-            
+
             // Insert some data manually
             cache.insertCitation(2, 0);
             cache.insertCitation(2, 1);
             cache.insertReference(1, 2);
-            
+
             // Verify it was stored
             int[] citations = cache.getCitations(2);
             int[] references = cache.getReferences(1);
-            
+
             assertNotNull(citations);
             assertNotNull(references);
             assertTrue("Citations should contain docId 0", containsValue(citations, 0));
             assertTrue("Citations should contain docId 1", containsValue(citations, 1));
             assertTrue("References should contain docId 2", containsValue(references, 2));
-            
-        } finally {
-            r.close();
         }
     }
-    
+
     @Test
     public void testCachePersistence() throws Exception {
         // Close the existing cache to avoid file lock conflicts
@@ -298,7 +287,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
             cache.close();
             cache = null;
         }
-        
+
         // Create a new cache that will load the data from the MapDB files
         CitationMapDBCacheDocValues<String, Integer> cache2 = new CitationMapDBCacheDocValues<>();
         HashMap<String, String> m = new HashMap<String, String>();
@@ -309,38 +298,34 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
 
         // Initialize the cache (should load from existing MapDB files)
         cache2.init(m, null, null);
-        
+
         // Test that the identifier mapping was loaded
         assertEquals(0, (int)cache2.get("b0"));
         assertEquals(1, (int)cache2.get("b1"));
         assertEquals(2, (int)cache2.get("b2"));
-        
+
         // Set up new searcher
-        SolrQueryRequest r = req("test");
-        try {
+        try (SolrQueryRequest r = req("test")) {
             cache2.setSearcher(r.getSearcher());
-            
+
             // Insert test data
             cache2.insertCitation(2, 5);
             cache2.insertReference(5, 2);
-            
+
             // Test retrieval
             int[] citations = cache2.getCitations(2);
             int[] references = cache2.getReferences(5);
-            
+
             assertNotNull(citations);
             assertNotNull(references);
             assertTrue("Citations should contain docId 5", containsValue(citations, 5));
             assertTrue("References should contain docId 2", containsValue(references, 2));
-            
-        } finally {
-            r.close();
         }
-        
+
         // Close the second cache
         cache2.close();
     }
-    
+
     private boolean containsValue(int[] array, int value) {
         if (array == null) return false;
         for (int i : array) {
@@ -351,28 +336,24 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
 
     @Test
     public void testWithIndexedData() throws Exception {
-        SolrQueryRequest r = req("test");
-        try {
+        try (SolrQueryRequest r = req("test")) {
             // Set searcher for DocValues access
             cache.setSearcher(r.getSearcher());
-            
+
             // Test with the real index data (on-demand DocValues loading)
             int[] citations2 = cache.getCitations(2);
             int[] citations3 = cache.getCitations(3);
             int[] references5 = cache.getReferences(5);
-            
+
             // Check that data was loaded from the index
             assertNotNull(citations2);
             assertNotNull(citations3);
             assertNotNull(references5);
-            
+
             // Verify a few specific relationships
             assertTrue("Doc 2 should cite doc 0", containsValue(citations2, 0));
             assertTrue("Doc 3 should cite doc 0", containsValue(citations3, 0));
             assertTrue("Doc 5 should reference doc 3", containsValue(references5, 3));
-            
-        } finally {
-            r.close();
         }
     }
 }
