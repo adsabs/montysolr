@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Objects;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
@@ -105,9 +106,9 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
         assertU(commit("waitSearcher", "true"));
     }
 
-    public void createCache() throws Exception {
+    public void createCache() {
         cache = new CitationMapDBCacheDocValues<>();
-        HashMap<String, String> m = new HashMap<String, String>();
+        HashMap<String, String> m = new HashMap<>();
         m.put("identifierFields", "bibcode");
         m.put("referenceFields", "reference");
         m.put("citationFields", "citation");
@@ -134,7 +135,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
 
         // Pre-process critical documents for testing
         // This replaces the functionality that was in loadCriticalCitationNodes()
-        preloadDocumentsForTesting(searcher);
+        preloadDocumentsForTesting();
 
         r.close();
     }
@@ -144,7 +145,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
      * This replaces the implementation-specific loadCriticalCitationNodes method
      * by moving that responsibility to the test itself
      */
-    private void preloadDocumentsForTesting(SolrIndexSearcher searcher) throws Exception {
+    private void preloadDocumentsForTesting() {
         // First, manually trigger DocValues processing for key documents
         // These were the specific documents loaded in the original implementation
         int[] criticalDocs = {0, 2, 3, 5};
@@ -176,8 +177,8 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
      * This replicates the functionality of the removed ensureBidirectionalCitations method
      * but places responsibility in the test rather than the implementation
      */
-    private void ensureBidirectionalConsistency() throws Exception {
-        try (SolrQueryRequest r = req("test")) {
+    private void ensureBidirectionalConsistency() {
+        try (SolrQueryRequest ignored = req("test")) {
             // Process key documents to establish relationships from both sides
             for (int docId = 0; docId <= 5; docId++) {
                 int[] citations = cache.getCitations(docId);
@@ -219,15 +220,17 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
             cache.close();
         }
 
-        for (File f : tmpdir.toFile().listFiles()) {
-            f.delete();
+        for (File f : Objects.requireNonNull(tmpdir.toFile().listFiles())) {
+            if (!f.delete()) {
+                System.err.println("Failed to delete file: " + f.getAbsolutePath());
+            }
         }
 
         super.tearDown();
     }
 
     @Test
-    public void testBasicOperations() throws Exception {
+    public void testBasicOperations() {
         // Test ID mapping function
         assertNotNull(cache);
         assertEquals(0, (int)cache.get("b0"));
@@ -235,7 +238,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
         assertEquals(2, (int)cache.get("b2"));
 
         // Request data to trigger docvalues reading
-        try (SolrQueryRequest r = req("test")) {
+        try (SolrQueryRequest ignored = req("test")) {
             // Get citations and references using DocValues
             int[] citations2 = cache.getCitations(2);
             int[] references1 = cache.getReferences(1);
@@ -247,7 +250,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
     }
 
     @Test
-    public void testCacheModifications() throws Exception {
+    public void testCacheModifications() {
         // Test initial state
         assertEquals(2, (int)cache.get("b2"));
 
@@ -281,7 +284,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
     }
 
     @Test
-    public void testCachePersistence() throws Exception {
+    public void testCachePersistence() {
         // Close the existing cache to avoid file lock conflicts
         if (cache != null) {
             cache.close();
@@ -290,7 +293,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
 
         // Create a new cache that will load the data from the MapDB files
         CitationMapDBCacheDocValues<String, Integer> cache2 = new CitationMapDBCacheDocValues<>();
-        HashMap<String, String> m = new HashMap<String, String>();
+        HashMap<String, String> m = new HashMap<>();
         m.put("identifierFields", "bibcode");
         m.put("referenceFields", "reference");
         m.put("citationFields", "citation");
@@ -335,7 +338,7 @@ public class TestCitationMapDBCacheDocValues extends MontySolrAbstractTestCase {
     }
 
     @Test
-    public void testWithIndexedData() throws Exception {
+    public void testWithIndexedData() {
         try (SolrQueryRequest r = req("test")) {
             // Set searcher for DocValues access
             cache.setSearcher(r.getSearcher());
