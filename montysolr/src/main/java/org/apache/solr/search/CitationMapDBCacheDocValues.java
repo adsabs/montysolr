@@ -1023,10 +1023,10 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         Bits liveDocs;
         LeafReader lr;
 
-        for (LeafReaderContext leave : leaves) {
-            int docBase = leave.docBase;
-            liveDocs = leave.reader().getLiveDocs();
-            lr = leave.reader();
+        for (LeafReaderContext leaf : leaves) {
+            int docBase = leaf.docBase;
+            liveDocs = leaf.reader().getLiveDocs();
+            lr = leaf.reader();
             FieldInfos fInfo = lr.getFieldInfos();
 
             for (final String field : fields) {
