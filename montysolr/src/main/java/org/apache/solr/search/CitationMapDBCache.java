@@ -205,6 +205,17 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                 .keySerializer(Serializer.INTEGER)
                 .valueSerializer(Serializer.INT_ARRAY)
                 .createOrOpen();
+
+            // Check if we loaded an existing database with citation/reference pairs
+            // but empty caches (which can happen during persistence)
+            boolean hasData = !identifierToDocIdMap.isEmpty();
+            boolean hasPairs = !citations.isEmpty() || !references.isEmpty();
+            boolean needsRebuild = hasPairs && (citationCache.isEmpty() || referenceCache.isEmpty());
+
+            if (hasData && needsRebuild) {
+                log.info("Found existing citation/reference pairs but empty caches. Rebuilding caches...");
+                rebuildCaches();
+            }
         } catch (Exception e) {
             log.error("Failed to initialize MapDB for citation cache", e);
             throw new SolrException(ErrorCode.SERVER_ERROR, "Failed to initialize MapDB for citation cache", e);
@@ -346,35 +357,23 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     }
 
     /**
-     * Simple class for storing integer pairs for citations and references
-     */
-    private static class IntIntPair implements java.io.Serializable {
-        @Serial
-        private static final long serialVersionUID = 1L;
-        private final int source;
-        private final int target;
+         * Simple class for storing integer pairs for citations and references
+         */
+        private record IntIntPair(int source, int target) implements java.io.Serializable {
+            @Serial
+            private static final long serialVersionUID = 1L;
 
-        public IntIntPair(int source, int target) {
-            this.source = source;
-            this.target = target;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            IntIntPair that = (IntIntPair) o;
-            return source == that.source && target == that.target;
-        }
-
-        @Override
-        public int hashCode() {
-            return 31 * source + target;
-        }
     }
 
     public void insertCitation(int sourceDocid, int targetDocid) {
+        log.info("Inserting citation from {} to {}", sourceDocid, targetDocid);
         IntIntPair pair = new IntIntPair(sourceDocid, targetDocid);
+
+        // First check if the pair already exists to avoid duplicates
+        if (citations.contains(pair)) {
+            return; // Already exists, nothing to add
+        }
+
         citations.add(pair);
 
         // Update citation cache
@@ -384,13 +383,19 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             newCitations = new int[1];
             newCitations[0] = sourceDocid;
         } else {
-            // Check if citation already exists (avoid duplicates)
+            // Double-check if citation already exists (avoid duplicates)
+            boolean found = false;
             for (int citationDocid : existingCitations) {
                 if (citationDocid == sourceDocid) {
-                    return; // Already exists, nothing to add
+                    found = true;
+                    break;
                 }
             }
-            
+
+            if (found) {
+                return; // Already exists, nothing to add
+            }
+
             // Add the citation
             newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
             newCitations[existingCitations.length] = sourceDocid;
@@ -402,6 +407,12 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
     public void insertReference(int sourceDocid, int targetDocid) {
         IntIntPair pair = new IntIntPair(sourceDocid, targetDocid);
+
+        // First check if the pair already exists to avoid duplicates
+        if (references.contains(pair)) {
+            return; // Already exists, nothing to add
+        }
+
         references.add(pair);
 
         // Update reference cache
@@ -411,11 +422,17 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             newReferences = new int[1];
             newReferences[0] = targetDocid;
         } else {
-            // Check if reference already exists
+            // Double-check if reference already exists
+            boolean found = false;
             for (int referenceDocid : existingReferences) {
                 if (referenceDocid == targetDocid) {
-                    return; // Already exists, nothing to add
+                    found = true;
+                    break;
                 }
+            }
+
+            if (found) {
+                return; // Already exists, nothing to add
             }
 
             // Add the new reference
@@ -528,8 +545,14 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
      */
     private void inferCitationsFromReferences() {
         log.info("Inferring citations from references");
-        for (IntIntPair ref : references) {
-            insertCitation(ref.target, ref.source);
+        // Create a temporary collection to avoid concurrent modification
+        List<IntIntPair> referencesToProcess = new ArrayList<>(references);
+
+        // Process references to create citations (reverse the relationship)
+        for (IntIntPair ref : referencesToProcess) {
+            // For example, if document 0 references document 1
+            // then document 1 is cited by document 0
+            insertCitation(ref.source, ref.target);
         }
         db.commit();
     }
@@ -539,20 +562,97 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
      */
     private void inferReferencesFromCitations() {
         log.info("Inferring references from citations");
-        for (IntIntPair cite : citations) {
-            insertReference(cite.target, cite.source);
+        // Create a temporary collection to avoid concurrent modification
+        List<IntIntPair> citationsToProcess = new ArrayList<>(citations);
+
+        // Process citations to create references (reverse the relationship)
+        for (IntIntPair cite : citationsToProcess) {
+            // For example, if document 0 cites document 1
+            // then document 0 references document 1
+            insertReference(cite.source, cite.target);
         }
         db.commit();
     }
 
-    public void clear() {
-        identifierToDocIdMap.clear();
-        citations.clear();
-        references.clear();
+    /**
+     * Rebuild citation and reference caches from stored pairs
+     */
+    private void rebuildCaches() {
+        log.info("Rebuilding citation and reference caches from stored pairs");
+
+        // Clear existing caches but not the pairs
         citationCache.clear();
         referenceCache.clear();
+
+        // Rebuild reference cache from reference pairs
+        for (IntIntPair ref : references) {
+            int[] existingReferences = referenceCache.get(ref.source);
+            int[] newReferences;
+            if (existingReferences == null) {
+                newReferences = new int[1];
+                newReferences[0] = ref.target;
+            } else {
+                // Check if reference already exists
+                boolean found = false;
+                for (int referenceDocid : existingReferences) {
+                    if (referenceDocid == ref.target) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    // Add the new reference
+                    newReferences = Arrays.copyOf(existingReferences, existingReferences.length + 1);
+                    newReferences[existingReferences.length] = ref.target;
+                } else {
+                    continue; // Already exists, nothing to add
+                }
+            }
+            referenceCache.put(ref.source, newReferences);
+        }
+
+        // Rebuild citation cache from citation pairs
+        for (IntIntPair cite : citations) {
+            int[] existingCitations = citationCache.get(cite.target);
+            int[] newCitations;
+            if (existingCitations == null) {
+                newCitations = new int[1];
+                newCitations[0] = cite.source;
+            } else {
+                // Check if citation already exists
+                boolean found = false;
+                for (int citationDocid : existingCitations) {
+                    if (citationDocid == cite.source) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    // Add the citation
+                    newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
+                    newCitations[existingCitations.length] = cite.source;
+                } else {
+                    continue; // Already exists, nothing to add
+                }
+            }
+            citationCache.put(cite.target, newCitations);
+        }
+
         db.commit();
+        log.info("Cache rebuild complete. Citations cache size: {}, References cache size: {}",
+                 citationCache.size(), referenceCache.size());
     }
+
+public void clear() {
+    log.info("Clearing cache state");
+    identifierToDocIdMap.clear();
+    citations.clear();
+    references.clear();
+    citationCache.clear();
+    referenceCache.clear();
+    db.commit();
+    log.info("Cache state cleared and committed");
+}
 
     private boolean isWarming = false;
 
@@ -581,7 +681,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                     }
                 } else {
                     log.info("Will not load the cache {} current index generation differs; dump:{} != index:{}",
-                            name(), CitationCacheReaderWriter.getCacheGeneration(getCacheStorageDir(searcher)), CitationCacheReaderWriter.getIndexGeneration(searcher));
+                            name(), CitationCacheReaderWriter.getCacheGeneration(Objects.requireNonNull(getCacheStorageDir(searcher))), CitationCacheReaderWriter.getIndexGeneration(searcher));
                 }
             }
 
@@ -823,7 +923,21 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
     @Override
     public void initializeCitationCache(int maxDocs) {
-        // Create or clear existing caches
+        // For a fresh cache, clear existing data
+        // For a reopened cache, we want to keep the existing data
+        if (identifierToDocIdMap.isEmpty() &&
+            citations.isEmpty() &&
+            references.isEmpty() &&
+            citationCache.isEmpty() &&
+            referenceCache.isEmpty()) {
+            log.info("Initializing empty citation cache");
+        } else {
+            log.info("Reusing existing citation cache data: {} identifiers, {} citation pairs, {} reference pairs",
+                    identifierToDocIdMap.size(), citations.size(), references.size());
+            return;
+        }
+
+        // Only clear if we're not loading from existing data
         clear();
     }
 
