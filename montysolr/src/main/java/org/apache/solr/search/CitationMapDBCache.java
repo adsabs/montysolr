@@ -28,7 +28,6 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.metrics.SolrMetricsContext;
 import org.apache.solr.schema.*;
-import org.apache.solr.uninverting.UninvertingReader;
 import org.apache.solr.uninverting.UninvertingReader.Type;
 import org.apache.solr.util.IOFunction;
 import org.slf4j.Logger;
@@ -267,11 +266,6 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             int docId = (Integer) val;
             citationCache.remove(docId);
             referenceCache.remove(docId);
-
-            // Update test state when the specific document ID is removed
-            if (docId == 2) {
-                testState = TestState.AFTER_REMOVE;
-            }
         }
 
         db.commit();
@@ -383,20 +377,21 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         IntIntPair pair = new IntIntPair(sourceDocid, targetDocid);
         citations.add(pair);
 
-        // For test: when we start reinserting citations for doc 2 after it was removed,
-        // mark as AFTER_REINSERT immediately to handle all subsequent getCitation calls correctly
-        if (targetDocid == 2 && testState == TestState.AFTER_REMOVE) {
-            testState = TestState.AFTER_REINSERT;
-        }
-
-        // Update citation cache - allow duplicates to match test expectations
+        // Update citation cache
         int[] existingCitations = citationCache.get(targetDocid);
         int[] newCitations;
         if (existingCitations == null) {
             newCitations = new int[1];
             newCitations[0] = sourceDocid;
         } else {
-            // Add the citation (allowing duplicates)
+            // Check if citation already exists (avoid duplicates)
+            for (int citationDocid : existingCitations) {
+                if (citationDocid == sourceDocid) {
+                    return; // Already exists, nothing to add
+                }
+            }
+            
+            // Add the citation
             newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
             newCitations[existingCitations.length] = sourceDocid;
         }
@@ -446,35 +441,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
      * This is a helper method allowing you to retrieve what we have directly using
      * lucene docid
      */
-    // Special field to track test execution context
-    private enum TestState { INITIAL, AFTER_REMOVE, AFTER_REINSERT }
-    private TestState testState = TestState.INITIAL;
-
     public int[] getCitations(int docid) {
-        // Handle specific test cases with hardcoded expected values
-        if (docid == 0 || docid == 1) {
-            // Test expects null for documents 0 and 1
-            return null;
-        } else if (docid == 2) {
-            // This is the docid being tested in both test methods
-
-            // Special case for testCacheModifications
-            if (testState == TestState.AFTER_REMOVE) {
-                // After removal in testCacheModifications, return null
-                return null;
-            } else if (testState == TestState.AFTER_REINSERT) {
-                // After reinsertion in testCacheModifications, return expected value without duplicate
-                return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-            } else {
-                // Initial state for testBasicOperations - includes the duplicate 8
-                return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10};
-            }
-        } else if (docid == 3) {
-            return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 9, 10};
-        } else if (docid == 4) {
-            return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        }
-
         int[] citations = citationCache.get(docid);
 
         if (getState() == State.LIVE) {
@@ -510,11 +477,6 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
      * lucene docid
      */
     public int[] getReferences(int docid) {
-        // Special case handling for test expectations
-        if (docid >= 0 && docid <= 10) {
-            return new int[]{2, 3, 4}; // Return the expected references for all test doc IDs
-        }
-
         int[] references = referenceCache.get(docid);
 
         if (getState() == State.LIVE) {
@@ -1019,7 +981,9 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                         @Override
                         public void process(int docBase, int docId) throws IOException {
                             if (dv.advanceExact(docId)) {
-                                for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
+                                int count = dv.docValueCount();
+                                for (int i = 0; i < count; i++) {
+                                    long ord = dv.nextOrd();
                                     final BytesRef value = dv.lookupOrd(ord);
                                     setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply tokenization, doc values ignore it
                                 }
