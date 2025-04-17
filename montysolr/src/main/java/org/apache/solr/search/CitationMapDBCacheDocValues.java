@@ -60,10 +60,10 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
      * LRUCache at the same time. Make sure everything is thread safe.
      */
     private static class CumulativeStats {
-        AtomicLong lookups = new AtomicLong();
-        AtomicLong hits = new AtomicLong();
-        AtomicLong inserts = new AtomicLong();
-        AtomicLong evictions = new AtomicLong();
+        final AtomicLong lookups = new AtomicLong();
+        final AtomicLong hits = new AtomicLong();
+        final AtomicLong inserts = new AtomicLong();
+        final AtomicLong evictions = new AtomicLong();
     }
 
     private CumulativeStats stats;
@@ -108,7 +108,6 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         assert identifierFields.length > 0;
 
         incremental = "true".equals(args.get("incremental"));
-        "true".equals(args.get("reuseCache"));
 
         // Get path for MapDB files
         dbPath = (String) args.get("dbPath");
@@ -154,7 +153,9 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         try {
             File dbFile = new File(dbPath);
             if (!dbFile.getParentFile().exists()) {
-                dbFile.getParentFile().mkdirs();
+                if(!dbFile.getParentFile().mkdirs()){
+                    log.warn("Directory {} not created", dbFile);
+                }
             }
 
             // Close existing DB if it's open
@@ -629,11 +630,6 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
 
         try {
             List<LeafReaderContext> leaves = searcher.getLeafContexts();
-            try {
-            } catch (Exception e) {
-                // No alternate_bibcode field defined, nothing to do
-                return;
-            }
 
             // Map to store alternate to primary identifier mappings
             Map<K, V> alternateMap = new HashMap<>();
@@ -706,7 +702,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
                 if (this.incremental) {
                     warmIncrementally(searcher, old);
                 } else {
-                    warmRebuildEverything(searcher, old);
+                    warmRebuildEverything(searcher);
                 }
                 log.info("Warming cache {} done (# entries:{}): {}", name(), size(), searcher);
             } catch (IOException e) {
@@ -717,7 +713,7 @@ public class CitationMapDBCacheDocValues<K, V> extends SolrCacheBase implements 
         warmupTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - warmingStartTime, TimeUnit.NANOSECONDS);
     }
 
-    private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K, V> old) throws IOException {
+    private void warmRebuildEverything(SolrIndexSearcher searcher) throws IOException {
         setSearcher(searcher);
         List<String> fields = getFields(searcher, this.identifierFields);
 

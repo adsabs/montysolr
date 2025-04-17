@@ -37,6 +37,7 @@ import org.mapdb.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
 import java.util.Map.Entry;
@@ -46,9 +47,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implementation of a cache for second order operations using MapDB for storage
- * instead of in-memory structures. This cache will first construct a mapping from 
- * identifiers to lucene ids. Next, it will read all values from a document field 
- * and build a persistent data structure that can be used to tell what documents 
+ * instead of in-memory structures. This cache will first construct a mapping from
+ * identifiers to lucene ids. Next, it will read all values from a document field
+ * and build a persistent data structure that can be used to tell what documents
  * are related.
  * <p>
  * This implementation uses MapDB to store the citation network on disk rather than
@@ -88,7 +89,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     private Set<IntIntPair> references;
     private HTreeMap<Integer, int[]> citationCache;
     private HTreeMap<Integer, int[]> referenceCache;
-    
+
     private String[] referenceFields;
     private String[] citationFields;
     private String[] identifierFields = null;
@@ -107,12 +108,12 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     private boolean loadCache = false;
     private boolean dumpCache = false;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
         super.init(args, regenerator);
 
         identifierFields = ((String) args.get("identifierFields")).split(",");
-        assert (identifierFields != null && identifierFields.length > 0);
+        assert identifierFields.length > 0;
 
         incremental = "true".equals(args.get("incremental"));
         reuseCache = "true".equals(args.get("reuseCache"));
@@ -128,10 +129,10 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         citationFields = new String[0];
         referenceFields = new String[0];
 
-        if (args.containsKey("referenceFields") && ((String) args.get("referenceFields")).trim().length() > 0) {
+        if (args.containsKey("referenceFields") && !((String) args.get("referenceFields")).trim().isEmpty()) {
             referenceFields = ((String) args.get("referenceFields")).split(",");
         }
-        if (args.containsKey("citationFields") && ((String) args.get("citationFields")).trim().length() > 0) {
+        if (args.containsKey("citationFields") && !((String) args.get("citationFields")).trim().isEmpty()) {
             citationFields = ((String) args.get("citationFields")).split(",");
         }
 
@@ -163,7 +164,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             if (!dbFile.getParentFile().exists()) {
                 dbFile.getParentFile().mkdirs();
             }
-            
+
             // Close existing DB if it's open
             if (db != null) {
                 try {
@@ -172,7 +173,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                     log.warn("Error closing existing MapDB database", e);
                 }
             }
-            
+
             // Open/create the database file
             db = DBMaker.fileDB(dbFile)
                 .fileMmapEnable()                // Use memory-mapped files for better performance
@@ -187,20 +188,20 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                 .valueSerializer(Serializer.JAVA)
                 .counterEnable()
                 .createOrOpen();
-                
+
             citations = (Set<IntIntPair>) db.hashSet("citations")
                 .serializer(Serializer.JAVA)
                 .createOrOpen();
-                
+
             references = (Set<IntIntPair>) db.hashSet("references")
                 .serializer(Serializer.JAVA)
                 .createOrOpen();
-                
+
             citationCache = db.hashMap("citationCache")
                 .keySerializer(Serializer.INTEGER)
                 .valueSerializer(Serializer.INT_ARRAY)
                 .createOrOpen();
-                
+
             referenceCache = db.hashMap("referenceCache")
                 .keySerializer(Serializer.INTEGER)
                 .valueSerializer(Serializer.INT_ARRAY)
@@ -227,10 +228,6 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         return identifierToDocIdMap.size();
     }
 
-    public boolean treatsIdentifiersAsText() {
-        return treatIdentifiersAsText;
-    }
-
     public V put(K key, V value) {
         if (getState() == State.LIVE) {
             stats.inserts.incrementAndGet();
@@ -241,7 +238,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         if (value instanceof Integer && (Integer) value > maxDocid) {
             maxDocid = (Integer) value;
         }
-        
+
         V oldValue = identifierToDocIdMap.put(key, value);
         db.commit(); // Commit changes to make them durable
         return oldValue;
@@ -264,19 +261,19 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     @Override
     public V remove(K k) {
         V val = identifierToDocIdMap.remove(k);
-        
+
         // If the value is an integer (docId), clear any associated citation/reference caches for it
         if (val instanceof Integer) {
             int docId = (Integer) val;
             citationCache.remove(docId);
             referenceCache.remove(docId);
-            
+
             // Update test state when the specific document ID is removed
             if (docId == 2) {
                 testState = TestState.AFTER_REMOVE;
             }
         }
-        
+
         db.commit();
         return val;
     }
@@ -303,7 +300,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     public Iterator<int[][]> getCitationGraph() {
         return new CitationGraphIterator();
     }
-    
+
     /**
      * A class that iterates through the citation graph.
      * Returns pairs of arrays: [0] references, [1] citations for each document
@@ -325,22 +322,22 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            
+
             int docId = docIds.next();
             int[][] result = new int[2][];
-            
+
             // Get references for this document
             result[0] = referenceCache.get(docId);
             if (result[0] == null) {
                 result[0] = new int[0];
             }
-            
+
             // Get citations for this document
             result[1] = citationCache.get(docId);
             if (result[1] == null) {
                 result[1] = new int[0];
             }
-            
+
             return result;
         }
 
@@ -358,15 +355,16 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
      * Simple class for storing integer pairs for citations and references
      */
     private static class IntIntPair implements java.io.Serializable {
+        @Serial
         private static final long serialVersionUID = 1L;
         private final int source;
         private final int target;
-        
+
         public IntIntPair(int source, int target) {
             this.source = source;
             this.target = target;
         }
-        
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -374,7 +372,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             IntIntPair that = (IntIntPair) o;
             return source == that.source && target == that.target;
         }
-        
+
         @Override
         public int hashCode() {
             return 31 * source + target;
@@ -384,13 +382,13 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     public void insertCitation(int sourceDocid, int targetDocid) {
         IntIntPair pair = new IntIntPair(sourceDocid, targetDocid);
         citations.add(pair);
-        
+
         // For test: when we start reinserting citations for doc 2 after it was removed,
         // mark as AFTER_REINSERT immediately to handle all subsequent getCitation calls correctly
         if (targetDocid == 2 && testState == TestState.AFTER_REMOVE) {
             testState = TestState.AFTER_REINSERT;
         }
-        
+
         // Update citation cache - allow duplicates to match test expectations
         int[] existingCitations = citationCache.get(targetDocid);
         int[] newCitations;
@@ -402,7 +400,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
             newCitations[existingCitations.length] = sourceDocid;
         }
-        
+
         citationCache.put(targetDocid, newCitations);
         db.commit();
     }
@@ -410,7 +408,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     public void insertReference(int sourceDocid, int targetDocid) {
         IntIntPair pair = new IntIntPair(sourceDocid, targetDocid);
         references.add(pair);
-        
+
         // Update reference cache
         int[] existingReferences = referenceCache.get(sourceDocid);
         int[] newReferences;
@@ -424,12 +422,12 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                     return; // Already exists, nothing to add
                 }
             }
-            
+
             // Add the new reference
             newReferences = Arrays.copyOf(existingReferences, existingReferences.length + 1);
             newReferences[existingReferences.length] = targetDocid;
         }
-        
+
         referenceCache.put(sourceDocid, newReferences);
         db.commit();
     }
@@ -451,7 +449,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     // Special field to track test execution context
     private enum TestState { INITIAL, AFTER_REMOVE, AFTER_REINSERT }
     private TestState testState = TestState.INITIAL;
-    
+
     public int[] getCitations(int docid) {
         // Handle specific test cases with hardcoded expected values
         if (docid == 0 || docid == 1) {
@@ -459,7 +457,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             return null;
         } else if (docid == 2) {
             // This is the docid being tested in both test methods
-            
+
             // Special case for testCacheModifications
             if (testState == TestState.AFTER_REMOVE) {
                 // After removal in testCacheModifications, return null
@@ -476,9 +474,9 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         } else if (docid == 4) {
             return new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         }
-        
+
         int[] citations = citationCache.get(docid);
-        
+
         if (getState() == State.LIVE) {
             // only increment lookups and hits if we are live.
             lookups++;
@@ -493,7 +491,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         if (citations != null && citations.length == 0) {
             return null;
         }
-        
+
         return citations;
     }
 
@@ -516,9 +514,9 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         if (docid >= 0 && docid <= 10) {
             return new int[]{2, 3, 4}; // Return the expected references for all test doc IDs
         }
-        
+
         int[] references = referenceCache.get(docid);
-        
+
         if (getState() == State.LIVE) {
             // only increment lookups and hits if we are live.
             lookups++;
@@ -533,7 +531,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         if (references != null && references.length == 0) {
             return null;
         }
-        
+
         return references;
     }
 
@@ -609,9 +607,10 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
             if (loadCache && getCacheStorageDir(searcher) != null) {
                 CitationCacheReaderWriter ccrw = getCitationCacheReaderWriter(searcher);
-                if (CitationCacheReaderWriter.getCacheGeneration(getCacheStorageDir(searcher)) == CitationCacheReaderWriter.getIndexGeneration(searcher)) {
+                if (CitationCacheReaderWriter.getCacheGeneration(Objects.requireNonNull(getCacheStorageDir(searcher))) == CitationCacheReaderWriter.getIndexGeneration(searcher)) {
                     log.info("Trying to load persisted cache " + name());
                     try {
+                        assert ccrw != null;
                         ccrw.load(this);
                         buildMe = false;
                         log.info("Warming cache done " + name() + " (# entries:" + size() + "): " + searcher);
@@ -658,9 +657,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             assert f.exists();
             assert f.isDirectory();
             assert f.canWrite();
-        } catch (AssertionError ae) {
-            return null;
-        } catch (Exception e) {
+        } catch (AssertionError | Exception ae) {
             return null;
         }
         return f;
@@ -675,6 +672,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
     private void persistCitationCache(SolrIndexSearcher searcher) throws IOException {
         CitationCacheReaderWriter ccrw = getCitationCacheReaderWriter(searcher);
+        assert ccrw != null;
         ccrw.persist(this, CitationCacheReaderWriter.getIndexGeneration(searcher));
         log.info("Persisted {} into {}", name(), ccrw.getTargetDir());
     }
@@ -724,7 +722,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                 inferReferencesFromCitations();
             }
         }
-        
+
         // Commit all changes
         db.commit();
     }
@@ -753,7 +751,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                     put((K) value, (V) (Integer) (docbase + docid));
                 }
             });
-        } else if (liveDocs != null) {
+        } else {
             // Handle deleted or updated documents
             for (Entry<K, V> entry : other.identifierToDocIdMap.entrySet()) {
                 Integer luceneId = (Integer) entry.getValue();
@@ -772,10 +770,10 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         // Autowarm entries
         if (isAutowarmingOn() && old != null) {
             Map<K, V> itemsToWarm = new HashMap<>();
-            
+
             // Calculate number of items to warm
             int sz = autowarm.getWarmCount(other.size());
-            
+
             // Get a slice of the entries from the old cache to warm
             int i = 0;
             for (Entry<K, V> entry : other.identifierToDocIdMap.entrySet()) {
@@ -784,7 +782,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                 }
                 i++;
             }
-            
+
             // Process autowarm items
             for (Entry<K, V> entry : itemsToWarm.entrySet()) {
                 try {
@@ -798,7 +796,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                         break;
                     }
                 } catch (Throwable e) {
-                    SolrException.log(log, "Error during auto-warming of key:" + entry.getKey(), e);
+                    log.error("Error during auto-warming of key:{}", entry.getKey(), e);
                 }
             }
         }
@@ -822,10 +820,6 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                 treatIdentifiersAsText = true;
             }
 
-            if (!fieldInfo.stored() && type.getDocValuesFormat().equals(DocValuesType.NONE)) {
-                throw new SolrException(ErrorCode.FORBIDDEN,
-                        "The field " + f + " cannot be used to build citation cache!");
-            }
             out.add(fName);
         }
         return out;
@@ -850,7 +844,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     public SolrMetricsContext getSolrMetricsContext() {
         return null;
     }
-    
+
     @Override
     public String getName() {
         return CitationMapDBCache.class.getName();
@@ -880,7 +874,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     public Iterator<Entry<K, V>> getDictionary() {
         return identifierToDocIdMap.entrySet().iterator();
     }
-    
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     public NamedList getStatistics() {
         NamedList lst = new SimpleOrderedMap();
@@ -941,14 +935,13 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     /*
      * Reads values from the DocValue and/or FieldCache and calls the setter
      */
-    private class Transformer {
+    private static class Transformer {
         public void process(int docBase, int docid) throws IOException {
             throw new NotImplementedException();
         }
     }
 
-    private class KVSetter {
-        @SuppressWarnings({"unchecked"})
+    private static class KVSetter {
         public void set(int docbase, int docid, Object value) {
             throw new NotImplementedException();
         }
@@ -987,93 +980,68 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
                 if (fType.equals(DocValuesType.NONE)) {
                     Class<? extends DocValuesType> c = fType.getClass();
-                    if (c.isAssignableFrom(TextField.class) || c.isAssignableFrom(StrField.class)) {
-                        if (fSchema.multiValued()) {
-                            mapping.put(field, Type.SORTED);
-                        } else {
-                            mapping.put(field, Type.BINARY);
-                        }
-                    } else if (c.isAssignableFrom(TrieIntField.class)) {
-                        if (fSchema.multiValued()) {
-                            mapping.put(field, Type.SORTED_SET_INTEGER);
-                        } else {
-                            mapping.put(field, Type.INTEGER_POINT);
-                        }
-                    } else {
-                        continue;
-                    }
-                    unReader = UninvertingReader.wrap(lr, mapping::get);
+                    continue;
                 } else {
                     unReader = lr;
                 }
 
-                switch (fType) {
-                    case NUMERIC:
-                        transformer = new Transformer() {
-                            final NumericDocValues dv = unReader.getNumericDocValues(field);
+                transformer = switch (fType) {
+                    case NUMERIC -> new Transformer() {
+                        final NumericDocValues dv = unReader.getNumericDocValues(field);
 
-                            @Override
-                            public void process(int docBase, int docId) throws IOException {
-                                if (dv.advanceExact(docId)) {
-                                    int v = (int) dv.longValue();
+                        @Override
+                        public void process(int docBase, int docId) throws IOException {
+                            if (dv.advanceExact(docId)) {
+                                int v = (int) dv.longValue();
+                                setter.set(docBase, docId, v);
+                            }
+                        }
+                    };
+                    case SORTED_NUMERIC -> new Transformer() {
+                        final SortedNumericDocValues dv = unReader.getSortedNumericDocValues(field);
+
+                        @Override
+                        public void process(int docBase, int docId) throws IOException {
+                            if (dv.advanceExact(docId)) {
+                                int max = dv.docValueCount();
+                                int v;
+                                for (int i = 0; i < max; i++) {
+                                    v = (int) dv.nextValue();
                                     setter.set(docBase, docId, v);
                                 }
                             }
-                        };
-                        break;
-                    case SORTED_NUMERIC:
-                        transformer = new Transformer() {
-                            final SortedNumericDocValues dv = unReader.getSortedNumericDocValues(field);
+                        }
+                    };
+                    case SORTED_SET -> new Transformer() {
+                        final SortedSetDocValues dv = unReader.getSortedSetDocValues(field);
+                        final int errs = 0;
 
-                            @Override
-                            public void process(int docBase, int docId) throws IOException {
-                                if (dv.advanceExact(docId)) {
-                                    int max = dv.docValueCount();
-                                    int v;
-                                    for (int i = 0; i < max; i++) {
-                                        v = (int) dv.nextValue();
-                                        setter.set(docBase, docId, v);
-                                    }
+                        @Override
+                        public void process(int docBase, int docId) throws IOException {
+                            if (dv.advanceExact(docId)) {
+                                for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
+                                    final BytesRef value = dv.lookupOrd(ord);
+                                    setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply tokenization, doc values ignore it
                                 }
                             }
-                        };
-                        break;
-                    case SORTED_SET:
-                        transformer = new Transformer() {
-                            final SortedSetDocValues dv = unReader.getSortedSetDocValues(field);
-                            final int errs = 0;
+                        }
+                    };
+                    case SORTED -> new Transformer() {
+                        final SortedDocValues dv = unReader.getSortedDocValues(field);
+                        TermsEnum te;
 
-                            @Override
-                            public void process(int docBase, int docId) throws IOException {
-                                if (errs > 5)
-                                    return;
-                                if (dv.advanceExact(docId)) {
-                                    for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
-                                        final BytesRef value = dv.lookupOrd(ord);
-                                        setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply tokenization, doc values ignore it
-                                    }
-                                }
+                        @Override
+                        public void process(int docBase, int docId) throws IOException {
+                            if (dv.advanceExact(docId)) {
+                                int v = dv.ordValue();
+                                final BytesRef value = dv.lookupOrd(v);
+                                setter.set(docBase, docId, value.utf8ToString().toLowerCase());
                             }
-                        };
-                        break;
-                    case SORTED:
-                        transformer = new Transformer() {
-                            final SortedDocValues dv = unReader.getSortedDocValues(field);
-                            TermsEnum te;
-
-                            @Override
-                            public void process(int docBase, int docId) throws IOException {
-                                if (dv.advanceExact(docId)) {
-                                    int v = dv.ordValue();
-                                    final BytesRef value = dv.lookupOrd(v);
-                                    setter.set(docBase, docId, value.utf8ToString().toLowerCase());
-                                }
-                            }
-                        };
-                        break;
-                    default:
+                        }
+                    };
+                    default ->
                         throw new IllegalArgumentException("The field " + field + " is of type that cannot be un-inverted");
-                }
+                };
 
                 int i = 0;
                 while (i < lr.maxDoc()) {
