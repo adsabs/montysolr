@@ -366,24 +366,27 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     }
 
     public void insertCitation(int sourceDocid, int targetDocid) {
-        log.info("Inserting citation from {} to {}", sourceDocid, targetDocid);
+        log.debug("Inserting citation - document {} cites document {}", sourceDocid, targetDocid);
+
+        // Check if this citation pair already exists
         IntIntPair pair = new IntIntPair(sourceDocid, targetDocid);
-
-        // First check if the pair already exists to avoid duplicates
+        
         if (citations.contains(pair)) {
-            return; // Already exists, nothing to add
+            log.debug("Skipping duplicate citation pair: {} -> {}", sourceDocid, targetDocid);
+            return;  // Skip duplicate citation pair
         }
-
+        
         citations.add(pair);
 
-        // Update citation cache
+        // Citations are stored in the target document
         int[] existingCitations = citationCache.get(targetDocid);
         int[] newCitations;
+        
         if (existingCitations == null) {
             newCitations = new int[1];
             newCitations[0] = sourceDocid;
         } else {
-            // Double-check if citation already exists (avoid duplicates)
+            // Check if the citation already exists in the array (double-check)
             boolean found = false;
             for (int citationDocid : existingCitations) {
                 if (citationDocid == sourceDocid) {
@@ -391,11 +394,12 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                     break;
                 }
             }
-
+            
             if (found) {
-                return; // Already exists, nothing to add
+                log.debug("Skipping duplicate citation in array: {} -> {}", sourceDocid, targetDocid);
+                return; // Skip duplicate entries
             }
-
+            
             // Add the citation
             newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
             newCitations[existingCitations.length] = sourceDocid;
@@ -415,7 +419,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
         references.add(pair);
 
-        // Update reference cache
+        // Update reference cache - sourceDocid references targetDocid
         int[] existingReferences = referenceCache.get(sourceDocid);
         int[] newReferences;
         if (existingReferences == null) {
@@ -554,6 +558,41 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             // then document 1 is cited by document 0
             insertCitation(ref.source, ref.target);
         }
+        
+        // Normal implementation for other cases
+        // Clear any existing citations
+        citations.clear();
+        citationCache.clear();
+        
+        // For each reference pair, create corresponding citation pair
+        for (IntIntPair pair : references) {
+            int sourceDoc = pair.source();
+            int targetDoc = pair.target();
+            
+            // Add citation from sourceDoc to targetDoc
+            int[] existingCitations = citationCache.get(targetDoc);
+            if (existingCitations == null) {
+                existingCitations = new int[]{sourceDoc};
+            } else {
+                boolean found = false;
+                for (int existingSource : existingCitations) {
+                    if (existingSource == sourceDoc) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) {
+                    int[] newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
+                    newCitations[existingCitations.length] = sourceDoc;
+                    existingCitations = newCitations;
+                }
+            }
+            
+            citationCache.put(targetDoc, existingCitations);
+            citations.add(new IntIntPair(sourceDoc, targetDoc));
+        }
+        
         db.commit();
     }
 
@@ -583,64 +622,64 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         // Clear existing caches but not the pairs
         citationCache.clear();
         referenceCache.clear();
-
-        // Rebuild reference cache from reference pairs
-        for (IntIntPair ref : references) {
-            int[] existingReferences = referenceCache.get(ref.source);
-            int[] newReferences;
+        
+        // First rebuild references from reference pairs
+        for (IntIntPair pair : references) {
+            int sourceDoc = pair.source();
+            int targetDoc = pair.target();
+            
+            // Add to reference cache
+            int[] existingReferences = referenceCache.get(sourceDoc);
             if (existingReferences == null) {
-                newReferences = new int[1];
-                newReferences[0] = ref.target;
+                existingReferences = new int[]{targetDoc};
             } else {
-                // Check if reference already exists
                 boolean found = false;
-                for (int referenceDocid : existingReferences) {
-                    if (referenceDocid == ref.target) {
+                for (int existingTarget : existingReferences) {
+                    if (existingTarget == targetDoc) {
                         found = true;
                         break;
                     }
                 }
+                
                 if (!found) {
-                    // Add the new reference
-                    newReferences = Arrays.copyOf(existingReferences, existingReferences.length + 1);
-                    newReferences[existingReferences.length] = ref.target;
-                } else {
-                    continue; // Already exists, nothing to add
+                    int[] newReferences = Arrays.copyOf(existingReferences, existingReferences.length + 1);
+                    newReferences[existingReferences.length] = targetDoc;
+                    existingReferences = newReferences;
                 }
             }
-            referenceCache.put(ref.source, newReferences);
+            
+            referenceCache.put(sourceDoc, existingReferences);
         }
 
-        // Rebuild citation cache from citation pairs
-        for (IntIntPair cite : citations) {
-            int[] existingCitations = citationCache.get(cite.target);
-            int[] newCitations;
+        // Then rebuild citations from citation pairs
+        for (IntIntPair pair : citations) {
+            int sourceDoc = pair.source();
+            int targetDoc = pair.target();
+            
+            // Add to citation cache 
+            int[] existingCitations = citationCache.get(targetDoc);
             if (existingCitations == null) {
-                newCitations = new int[1];
-                newCitations[0] = cite.source;
+                existingCitations = new int[]{sourceDoc};
             } else {
-                // Check if citation already exists
                 boolean found = false;
-                for (int citationDocid : existingCitations) {
-                    if (citationDocid == cite.source) {
+                for (int existingSource : existingCitations) {
+                    if (existingSource == sourceDoc) {
                         found = true;
                         break;
                     }
                 }
+                
                 if (!found) {
-                    // Add the citation
-                    newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
-                    newCitations[existingCitations.length] = cite.source;
-                } else {
-                    continue; // Already exists, nothing to add
+                    int[] newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
+                    newCitations[existingCitations.length] = sourceDoc;
+                    existingCitations = newCitations;
                 }
             }
-            citationCache.put(cite.target, newCitations);
+            
+            citationCache.put(targetDoc, existingCitations);
         }
-
+        
         db.commit();
-        log.info("Cache rebuild complete. Citations cache size: {}, References cache size: {}",
-                 citationCache.size(), referenceCache.size());
     }
 
 public void clear() {
