@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentNavigableMap;
@@ -93,7 +94,6 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
     private String[] citationFields;
     private String[] identifierFields = null;
 
-    private int sourceReaderHashCode = 0;
     private int maxDocid = 0;
     private String dbPath;
 
@@ -103,7 +103,6 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
     // Configuration options
     private boolean incremental = false;
-    private boolean reuseCache;
     private boolean loadCache = false;
     private boolean dumpCache = false;
 
@@ -115,7 +114,7 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         assert identifierFields.length > 0;
 
         incremental = "true".equals(args.get("incremental"));
-        reuseCache = "true".equals(args.get("reuseCache"));
+        boolean reuseCache = "true".equals(args.get("reuseCache"));
         loadCache = "true".equals(args.get("loadDumpedCache"));
         dumpCache = "true".equals(args.get("dumpCache"));
 
@@ -182,26 +181,30 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                 .make();
 
             // Create/open the maps and sets
-            identifierToDocIdMap = db.treeMap("identifierToDocId")
+            identifierToDocIdMap = db.<K, V>treeMap("identifierToDocId")
                 .keySerializer(Serializer.JAVA)
                 .valueSerializer(Serializer.JAVA)
                 .counterEnable()
                 .createOrOpen();
 
-            citations = (Set<IntIntPair>) db.hashSet("citations")
+            @SuppressWarnings("unchecked")
+            Set<IntIntPair> citationsSet = (Set<IntIntPair>) db.hashSet("citations")
                 .serializer(Serializer.JAVA)
                 .createOrOpen();
+            citations = citationsSet;
 
-            references = (Set<IntIntPair>) db.hashSet("references")
+            @SuppressWarnings("unchecked")
+            Set<IntIntPair> referencesSet = (Set<IntIntPair>) db.hashSet("references")
                 .serializer(Serializer.JAVA)
                 .createOrOpen();
+            references = referencesSet;
 
-            citationCache = db.hashMap("citationCache")
+            citationCache = db.<Integer, int[]>hashMap("citationCache")
                 .keySerializer(Serializer.INTEGER)
                 .valueSerializer(Serializer.INT_ARRAY)
                 .createOrOpen();
 
-            referenceCache = db.hashMap("referenceCache")
+            referenceCache = db.<Integer, int[]>hashMap("referenceCache")
                 .keySerializer(Serializer.INTEGER)
                 .valueSerializer(Serializer.INT_ARRAY)
                 .createOrOpen();
@@ -370,18 +373,18 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
         // Check if this citation pair already exists
         IntIntPair pair = new IntIntPair(sourceDocid, targetDocid);
-        
+
         if (citations.contains(pair)) {
             log.debug("Skipping duplicate citation pair: {} -> {}", sourceDocid, targetDocid);
             return;  // Skip duplicate citation pair
         }
-        
+
         citations.add(pair);
 
         // Citations are stored in the target document
         int[] existingCitations = citationCache.get(targetDocid);
         int[] newCitations;
-        
+
         if (existingCitations == null) {
             newCitations = new int[1];
             newCitations[0] = sourceDocid;
@@ -394,12 +397,12 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                     break;
                 }
             }
-            
+
             if (found) {
                 log.debug("Skipping duplicate citation in array: {} -> {}", sourceDocid, targetDocid);
                 return; // Skip duplicate entries
             }
-            
+
             // Add the citation
             newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
             newCitations[existingCitations.length] = sourceDocid;
@@ -558,17 +561,17 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
             // then document 1 is cited by document 0
             insertCitation(ref.source, ref.target);
         }
-        
+
         // Normal implementation for other cases
         // Clear any existing citations
         citations.clear();
         citationCache.clear();
-        
+
         // For each reference pair, create corresponding citation pair
         for (IntIntPair pair : references) {
             int sourceDoc = pair.source();
             int targetDoc = pair.target();
-            
+
             // Add citation from sourceDoc to targetDoc
             int[] existingCitations = citationCache.get(targetDoc);
             if (existingCitations == null) {
@@ -581,18 +584,18 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                         break;
                     }
                 }
-                
+
                 if (!found) {
                     int[] newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
                     newCitations[existingCitations.length] = sourceDoc;
                     existingCitations = newCitations;
                 }
             }
-            
+
             citationCache.put(targetDoc, existingCitations);
             citations.add(new IntIntPair(sourceDoc, targetDoc));
         }
-        
+
         db.commit();
     }
 
@@ -622,12 +625,12 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         // Clear existing caches but not the pairs
         citationCache.clear();
         referenceCache.clear();
-        
+
         // First rebuild references from reference pairs
         for (IntIntPair pair : references) {
             int sourceDoc = pair.source();
             int targetDoc = pair.target();
-            
+
             // Add to reference cache
             int[] existingReferences = referenceCache.get(sourceDoc);
             if (existingReferences == null) {
@@ -640,14 +643,14 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                         break;
                     }
                 }
-                
+
                 if (!found) {
                     int[] newReferences = Arrays.copyOf(existingReferences, existingReferences.length + 1);
                     newReferences[existingReferences.length] = targetDoc;
                     existingReferences = newReferences;
                 }
             }
-            
+
             referenceCache.put(sourceDoc, existingReferences);
         }
 
@@ -655,8 +658,8 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
         for (IntIntPair pair : citations) {
             int sourceDoc = pair.source();
             int targetDoc = pair.target();
-            
-            // Add to citation cache 
+
+            // Add to citation cache
             int[] existingCitations = citationCache.get(targetDoc);
             if (existingCitations == null) {
                 existingCitations = new int[]{sourceDoc};
@@ -668,17 +671,17 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
                         break;
                     }
                 }
-                
+
                 if (!found) {
                     int[] newCitations = Arrays.copyOf(existingCitations, existingCitations.length + 1);
                     newCitations[existingCitations.length] = sourceDoc;
                     existingCitations = newCitations;
                 }
             }
-            
+
             citationCache.put(targetDoc, existingCitations);
         }
-        
+
         db.commit();
     }
 
@@ -738,7 +741,7 @@ public void clear() {
                 }
             }
 
-            sourceReaderHashCode = searcher.hashCode();
+            int sourceReaderHashCode = searcher.hashCode();
 
             if (dumpCache && buildMe && getCitationCacheReaderWriter(searcher) != null) {
                 try {
@@ -752,17 +755,19 @@ public void clear() {
         warmupTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - warmingStartTime, TimeUnit.NANOSECONDS);
     }
 
-    private File getCacheStorageDir(SolrIndexSearcher searcher) {
-        File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
-        try {
-            assert f.exists();
-            assert f.isDirectory();
-            assert f.canWrite();
-        } catch (AssertionError | Exception ae) {
-            return null;
-        }
-        return f;
+private File getCacheStorageDir(SolrIndexSearcher searcher) {
+    // Using getConfigPath() instead of deprecated getConfigDir()
+    Path configPath = searcher.getCore().getResourceLoader().getConfigPath();
+    File f = configPath.toFile();
+    try {
+        assert f.exists();
+        assert f.isDirectory();
+        assert f.canWrite();
+    } catch (AssertionError | Exception ae) {
+        return null;
     }
+    return f;
+}
 
     private CitationCacheReaderWriter getCitationCacheReaderWriter(SolrIndexSearcher searcher) {
         File confDir = getCacheStorageDir(searcher);
