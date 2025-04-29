@@ -4,10 +4,6 @@
 
   <luceneMatchVersion>9.0</luceneMatchVersion>
 
-  <lib dir="../lib" />
-
-  <lib dir="../../../dist/" regex="apache-solr-velocity-\d.*\.jar" />
-  <lib dir="../../../contrib/velocity/lib" regex=".*\.jar" />
 
   
   <dataDir>${solr.data.dir:}</dataDir>

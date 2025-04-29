@@ -62,9 +62,9 @@ SOLR_LOGS_DIR=${MONTYSOLR_SHARED_DIR:-./server}/logs
 SOLR_PORT=${MONTYSOLR_JETTY_PORT:-9983}
 
 
+# -Dsolr.data.dir=${MONTYSOLR_INDEX_DIR:-./server/solr/collection1/data} \
 # Set the thread stack size
 SOLR_OPTS="${SOLR_OPTS} -Xss256k \
--Dsolr.data.dir=${MONTYSOLR_INDEX_DIR:-./server/solr/collection1/data} \
 -Dpython.path=${MONTYSOLR_PYTHON_PATH:-./server/resources} \
 -Dmontysolr.reuseCache=${MONTYSOLR_REUSE_CACHE:-false} \
 -Dmontysolr.batch.workdir=${MONTYSOLR_INDEX_DIR:-./server/solr/collection1/data/}/batch-handler \
