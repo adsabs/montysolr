@@ -111,7 +111,7 @@
        Query section - these settings control query time things like caches
        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
   <query>
-    <maxBooleanClauses>1024</maxBooleanClauses>
+    <maxBooleanClauses>${solr.max.booleanClauses:1024}</maxBooleanClauses>
     
     <slowQueryThresholdMillis>1000</slowQueryThresholdMillis>
 
