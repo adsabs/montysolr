@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+
+
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
+  <directoryFactory name="DirectoryFactory" class="solr.ByteBuffersDirectoryFactory"/>
+  <indexConfig>
+    <lockType>${montysolr.locktype:single}</lockType>
+  </indexConfig>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+
+  <query>
+    <cache name="citations-cache-from-references"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              referenceFields="reference"
+              reuseCache="false"
+              />
+
+    <cache name="citations-cache-from-citations"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              citationFields="citation"
+              reuseCache="true"
+              />
+
+    <cache name="citations-cache-from-both"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              citationFields="citation"
+              referenceFields="reference"
+              />
+
+    <cache name="citations-cache-from-dump"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="bibcode,alternate_bibcode"
+              citationFields="citation"
+              referenceFields="reference"
+              loadDumpedCache="true"
+              />
+
+  </query>
+
+  <requestHandler name="/select" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <str name="indent">true</str>
+      <str name="df">text</str>
+    </lst>
+  </requestHandler>
+
+
+</config>
