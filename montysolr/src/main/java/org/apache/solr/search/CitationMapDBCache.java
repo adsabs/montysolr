@@ -123,7 +123,9 @@ public class CitationMapDBCache<K, V> extends SolrCacheBase implements CitationC
 
         dbPath = (String) args.get("dbPath");
         if (dbPath == null) {
-            dbPath = System.getProperty("java.io.tmpdir") + "/solr-citation-cache-" + name();
+            // Make the database path unique for each cache instance to prevent file locking conflicts
+            String uniqueId = System.currentTimeMillis() + "-" + System.identityHashCode(this);
+            dbPath = System.getProperty("java.io.tmpdir") + "/solr-citation-cache-" + name() + "-" + uniqueId;
         }
 
         citationFields = new String[0];
@@ -864,6 +866,12 @@ private void persistCache(long indexGeneration) {
 }
 
     private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K, V> old) throws IOException {
+        // Only allow cache rebuild on leader node in SolrCloud
+        if (!isLeader) {
+            log.info("Skipping cache rebuild on non-leader node in SolrCloud");
+            return;
+        }
+        
         List<String> fields = getFields(searcher, this.identifierFields);
 
         // Clear existing data

@@ -22,5 +22,5 @@ public class TestCitationsSearchCloudMapDBMultiShard extends AbstractCitationsSe
     protected String getConfigDir() { return CONFIG_DIR; }
 
     @Override
-    protected boolean skipCacheTests() { return true; }
+    protected boolean skipCacheTests() { return false; }
 }
