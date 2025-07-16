@@ -1674,6 +1674,10 @@
 		<field name="read_count" type="int" indexed="true" stored="true"
 			omitNorms="true" omitTermFreqAndPositions="true" docValues="true" />
 
+		<field name="reference_count" type="int" indexed="true"
+			   stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			   docValues="true" />
+
 		<!-- technical metadata; values are a JSON string that is stored and used 
 			for search result display -->
 		<field name="links_data" type="string" indexed="false"
