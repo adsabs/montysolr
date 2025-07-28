@@ -2,6 +2,7 @@ package org.apache.solr.search;
 
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.apache.lucene.util.BitSet;
@@ -361,12 +362,24 @@ public class BitSetQParserPlugin extends QParserPlugin {
             while (fi.hasNext()) {
                 SolrInputField field = fi.next();
                 Function<Object, Integer> docIdResolver = null;
+
                 SolrCacheWrapper<CitationCache<Object, Integer>> cache = getCache(field.getName());
                 if (cache == null) {
-                    throw new SolrException(ErrorCode.BAD_REQUEST, "Uff, uff, I have no idea how to map this field (" + field.getName() + ") values into docids! Call 911");
+                    SchemaField schemaField = req.getSchema().getField(field.getName());
+                    FieldType fieldType = schemaField.getType();
+
+                    docIdResolver = obj -> {
+                      Term queryTerm = new Term(schemaField.getName(), fieldType.readableToIndexed(obj.toString()));
+                        try {
+                            return req.getSearcher().getFirstMatch(queryTerm);
+                        } catch (IOException e) {
+                            return -1;
+                        }
+                    };
                 } else {
                     docIdResolver = obj -> cache.getLuceneDocId(0, obj);
                 }
+
                 translators.put(field.getName(), docIdResolver);
             }
 
