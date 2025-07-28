@@ -36,7 +36,7 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        schemaString = "solr/collection1/conf/schema-minimal.xml";
+        schemaString = "solr/collection1/conf/schema-bitset.xml";
 
         configString = "solr/collection1/conf/bitset-solrconfig.xml";
 
@@ -45,18 +45,18 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
 
 
     public void createIndex() {
-        assertU(adoc("id", "1", "recid", "1", "text", "who"));
-        assertU(adoc("id", "2", "recid", "2", "text", "is stopword"));
-        assertU(adoc("id", "3", "recid", "3", "text", "able"));
-        assertU(adoc("id", "4", "recid", "4", "text", "to stopword"));
-        assertU(adoc("id", "5", "recid", "5", "text", "exchange"));
+        assertU(adoc("id", "1", "recid", "1", "strid", "a", "text", "who"));
+        assertU(adoc("id", "2", "recid", "2", "strid", "b", "text", "is stopword"));
+        assertU(adoc("id", "3", "recid", "3", "strid", "c", "text", "able"));
+        assertU(adoc("id", "4", "recid", "4", "strid", "d", "text", "to stopword"));
+        assertU(adoc("id", "5", "recid", "5", "strid", "e", "text", "exchange"));
         assertU(commit("waitSearcher", "true"));
 
-        assertU(adoc("id", "16", "recid", "16", "text", "liberty"));
-        assertU(adoc("id", "17", "recid", "17", "text", "for stopword"));
-        assertU(adoc("id", "18", "recid", "18", "text", "safety"));
-        assertU(adoc("id", "19", "recid", "19", "text", "deserves"));
-        assertU(adoc("id", "20", "recid", "20", "text", "neither"));
+        assertU(adoc("id", "16", "recid", "16", "strid", "f", "text", "liberty"));
+        assertU(adoc("id", "17", "recid", "17", "strid", "g", "text", "for stopword"));
+        assertU(adoc("id", "18", "recid", "18", "strid", "h", "text", "safety"));
+        assertU(adoc("id", "19", "recid", "19", "strid", "i", "text", "deserves"));
+        assertU(adoc("id", "20", "recid", "20", "strid", "j", "text", "neither"));
         assertU(commit("waitSearcher", "true"));
     }
 
@@ -64,6 +64,22 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
     public void setUp() throws Exception {
         super.setUp();
         createIndex();
+    }
+
+    public void testStringIDs() throws Exception {
+        SolrQueryRequestBase req = (SolrQueryRequestBase) req("q", "text:*",
+                "fq", "{!bitset compression=none}");
+        List<ContentStream> streams = new ArrayList<ContentStream>(1);
+        ContentStreamBase cs = new ContentStreamBase.StringStream("strid\na\nb");
+        cs.setContentType("big-query/csv");
+        streams.add(cs);
+        req.setContentStreams(streams);
+
+        assertQ(req
+                , "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='5']",
+                "//doc/str[@name='id'][.='16']"
+        );
     }
 
     @Test
