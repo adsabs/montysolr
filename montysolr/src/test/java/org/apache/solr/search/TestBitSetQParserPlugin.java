@@ -17,7 +17,6 @@
 package org.apache.solr.search;
 
 import monty.solr.util.MontySolrAbstractTestCase;
-import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.FixedBitSet;
@@ -28,7 +27,6 @@ import org.apache.solr.request.SolrQueryRequestBase;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +54,7 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
         assertU(adoc("id", "17", "recid", "17", "strid", "g", "text", "for stopword"));
         assertU(adoc("id", "18", "recid", "18", "strid", "h", "text", "safety"));
         assertU(adoc("id", "19", "recid", "19", "strid", "i", "text", "deserves"));
-        assertU(adoc("id", "20", "recid", "20", "strid", "j", "text", "neither"));
+        assertU(adoc("id", "20", "recid", "20", "strid", "j", "strid", "z", "text", "neither"));
         assertU(commit("waitSearcher", "true"));
     }
 
@@ -66,19 +64,67 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
         createIndex();
     }
 
-    public void testStringIDs() throws Exception {
+    @Test
+    public void testStringID() throws Exception {
         SolrQueryRequestBase req = (SolrQueryRequestBase) req("q", "text:*",
                 "fq", "{!bitset compression=none}");
         List<ContentStream> streams = new ArrayList<ContentStream>(1);
-        ContentStreamBase cs = new ContentStreamBase.StringStream("strid\na\nb");
+        ContentStreamBase cs = new ContentStreamBase.StringStream("strid\na");
+        cs.setContentType("big-query/csv");
+        streams.add(cs);
+        req.setContentStreams(streams);
+
+        assertQ(req
+                , "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1']"
+        );
+    }
+
+    @Test
+    public void testMultivaluedStringIDs() throws Exception {
+        SolrQueryRequestBase req = (SolrQueryRequestBase) req("q", "text:*",
+                "fq", "{!bitset compression=none}");
+        List<ContentStream> streams = new ArrayList<ContentStream>(1);
+        ContentStreamBase cs = new ContentStreamBase.StringStream("strid\na\nz\nj");
         cs.setContentType("big-query/csv");
         streams.add(cs);
         req.setContentStreams(streams);
 
         assertQ(req
                 , "//*[@numFound='2']",
-                "//doc/str[@name='id'][.='5']",
-                "//doc/str[@name='id'][.='16']"
+                "//doc/str[@name='id'][.='1']",
+                "//doc/str[@name='id'][.='20']"
+        );
+    }
+
+    @Test
+    public void testDuplicateStringIDs() throws Exception {
+        SolrQueryRequestBase req = (SolrQueryRequestBase) req("q", "text:*",
+                "fq", "{!bitset compression=none}");
+        List<ContentStream> streams = new ArrayList<ContentStream>(1);
+        ContentStreamBase cs = new ContentStreamBase.StringStream("strid\na\na");
+        cs.setContentType("big-query/csv");
+        streams.add(cs);
+        req.setContentStreams(streams);
+
+        assertQ(req
+                , "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1']"
+        );
+    }
+
+    @Test
+    public void testMissingStringIDs() throws Exception {
+        SolrQueryRequestBase req = (SolrQueryRequestBase) req("q", "text:*",
+                "fq", "{!bitset compression=none}");
+        List<ContentStream> streams = new ArrayList<ContentStream>(1);
+        ContentStreamBase cs = new ContentStreamBase.StringStream("strid\nabba\naaa\n1212");
+        cs.setContentType("big-query/csv");
+        streams.add(cs);
+        req.setContentStreams(streams);
+
+        assertQ(req
+                , "//*[@numFound='0']"
         );
     }
 

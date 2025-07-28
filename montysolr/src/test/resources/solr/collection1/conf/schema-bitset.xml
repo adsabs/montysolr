@@ -16,7 +16,7 @@
     <fields>
         <field name="id" type="string" indexed="true" stored="true"/>
         <field name="recid" type="int" indexed="true" stored="true"/>
-        <field name="strid" type="identifier_string" indexed="true" stored="true"/>
+        <field name="strid" type="identifier_string" multiValued="true" indexed="true" stored="true"/>
         <dynamicField name="*" type="text_ws" indexed="true" stored="true"/>
     </fields>
     <uniqueKey>id</uniqueKey>
