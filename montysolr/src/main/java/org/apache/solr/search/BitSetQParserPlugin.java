@@ -369,7 +369,7 @@ public class BitSetQParserPlugin extends QParserPlugin {
                     FieldType fieldType = schemaField.getType();
 
                     docIdResolver = obj -> {
-                      Term queryTerm = new Term(schemaField.getName(), fieldType.readableToIndexed(obj.toString()));
+                        Term queryTerm = new Term(schemaField.getName(), fieldType.readableToIndexed(obj.toString()));
                         try {
                             return req.getSearcher().getFirstMatch(queryTerm);
                         } catch (IOException e) {
