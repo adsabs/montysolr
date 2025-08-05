@@ -1435,6 +1435,24 @@
 		<field name="facility" type="normalized_text_ascii"
 			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
+		<!--
+			Software Mentions - https://docs.google.com/document/d/1076zfpgK28ZP6u_gS5JcV50SHPJ-iiDOnNQzIwPx6zI
+		-->
+		<field name="mention" type="identifier_string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="mention_count" type="int" indexed="true"
+			   stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			   docValues="true" />
+
+		<field name="credit" type="identifier_string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="credit_count" type="int" indexed="true"
+			   stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			   docValues="true" />
 
 
 		<!--
