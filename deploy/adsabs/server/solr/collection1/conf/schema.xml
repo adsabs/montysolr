@@ -146,7 +146,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
@@ -211,7 +211,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
@@ -278,7 +278,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
@@ -371,7 +371,7 @@
 					p k *" "adamcuk, piotr k *" "adamcuk, p kolja *" "adamcuk," -->
 				<filter
 					class="solr.analysis.author.AuthorCreateQueryVariationsFilterFactory"
-					acronymVariations="1" plainSurname="true"
+					acronymVariations="1" plainSurname="false"
 					addShortenedMultiName="true" addWildcards="false"
 					lookAtPayloadForOrigAuthor="false" />
 				<!-- deal with multiple occurences of the same (can happen because of 
@@ -1435,6 +1435,24 @@
 		<field name="facility" type="normalized_text_ascii"
 			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
+		<!--
+			Software Mentions - https://docs.google.com/document/d/1076zfpgK28ZP6u_gS5JcV50SHPJ-iiDOnNQzIwPx6zI
+		-->
+		<field name="mention" type="identifier_string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="mention_count" type="int" indexed="true"
+			   stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			   docValues="true" />
+
+		<field name="credit" type="identifier_string" indexed="true"
+			   stored="true" multiValued="true" omitNorms="true"
+			   omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="credit_count" type="int" indexed="true"
+			   stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			   docValues="true" />
 
 
 		<!--
@@ -1673,6 +1691,10 @@
 
 		<field name="read_count" type="int" indexed="true" stored="true"
 			omitNorms="true" omitTermFreqAndPositions="true" docValues="true" />
+
+		<field name="reference_count" type="int" indexed="true"
+			   stored="true" omitNorms="true" omitTermFreqAndPositions="true"
+			   docValues="true" />
 
 		<!-- technical metadata; values are a JSON string that is stored and used 
 			for search result display -->
