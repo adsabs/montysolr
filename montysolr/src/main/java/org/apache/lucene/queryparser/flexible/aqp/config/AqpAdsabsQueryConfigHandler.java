@@ -56,6 +56,11 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 
         final public static ConfigurationKey<Map<String, Map<String, Float>>> VIRTUAL_FIELDS = ConfigurationKey.newInstance();
 
+        /**
+         * Field names that should be remapped if they're used in a first position query
+         */
+        final public static ConfigurationKey<Map<String, String>> FIRST_POSITION_REMAPPING = ConfigurationKey
+                .newInstance();
     }
 
     public AqpAdsabsQueryConfigHandler() {
@@ -101,5 +106,7 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
         set(StandardQueryConfigHandler.ConfigurationKeys.MULTI_FIELDS, new CharSequence[0]);
 
         set(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS, new HashMap<String, Map<String, Float>>());
+
+        set(ConfigurationKeys.FIRST_POSITION_REMAPPING, new HashMap<>());
     }
 }

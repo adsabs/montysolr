@@ -4,6 +4,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
+import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.search.Query;
@@ -15,10 +16,13 @@ public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
 
     private final AqpSubqueryParser aqpValueSourceParser;
     private final AqpFunctionQParser functionQueryParser;
+    private final QueryConfigHandler queryConfigHandler;
 
-    public AqpSubQueryTreeBuilder(AqpSubqueryParser provider, AqpFunctionQParser parser) {
+    public AqpSubQueryTreeBuilder(AqpSubqueryParser provider, AqpFunctionQParser parser,
+                                  QueryConfigHandler config) {
         aqpValueSourceParser = provider;
         functionQueryParser = parser;
+        queryConfigHandler = config;
     }
 
     public Query build(QueryNode node) throws QueryNodeException {
@@ -27,7 +31,7 @@ public class AqpSubQueryTreeBuilder extends QueryTreeBuilder
             if (((AqpFunctionQueryNode) node).getOriginalInput() != null) {
                 functionQueryParser.setString(((AqpFunctionQueryNode) node).getOriginalInput().value);
             }
-            return aqpValueSourceParser.parse(functionQueryParser);
+            return aqpValueSourceParser.parse(functionQueryParser, queryConfigHandler);
         } catch (SyntaxError e) {
             QueryNodeException ex = new QueryNodeException(new MessageImpl(e.getMessage()));
             ex.setStackTrace(e.getStackTrace());
