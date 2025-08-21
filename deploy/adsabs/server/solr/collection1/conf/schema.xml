@@ -1559,6 +1559,33 @@
 		<field name="doctype_boost" type="tfloat" indexed="true"
 			stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
+        <field name="refereed_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="recency_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="boost_factor" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="astronomy_final_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="physics_final_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="earth_science_final_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="planetary_science_final_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="heliophysics_final_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
+        <field name="general_final_boost" type="tfloat" indexed="true"
+               stored="true" omitNorms="true" omitTermFreqAndPositions="true" />
+
 		<!--
 	    @api.doc
 	    * cite_read_boost
