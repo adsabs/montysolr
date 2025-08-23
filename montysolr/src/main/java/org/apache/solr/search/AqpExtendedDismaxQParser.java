@@ -69,7 +69,7 @@ public class AqpExtendedDismaxQParser extends QParser {
     /**
      * shorten the class references for utilities
      */
-    private interface DMP extends DisMaxParams {
+    public interface DMP extends DisMaxParams {
         /**
          * User fields. The fields that can be used by the end user to create field-specific queries.
          */
@@ -187,7 +187,7 @@ public class AqpExtendedDismaxQParser extends QParser {
         Query topQuery = QueryUtils.build(query, this);
         List<ValueSource> boosts = getMultiplicativeBoosts();
         if (boosts.size() > 1) {
-            ValueSource prod = new ProductFloatFunction(boosts.toArray(new ValueSource[boosts.size()]));
+            ValueSource prod = new ProductFloatFunction(boosts.toArray(new ValueSource[0]));
             topQuery = FunctionScoreQuery.boostByValue(topQuery, prod.asDoubleValuesSource());
         } else if (boosts.size() == 1) {
             topQuery = FunctionScoreQuery.boostByValue(topQuery, boosts.get(0).asDoubleValuesSource());
