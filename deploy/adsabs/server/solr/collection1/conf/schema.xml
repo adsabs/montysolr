@@ -1174,6 +1174,9 @@
 		<field name="pub_raw" type="normalized_text_ascii"
 			indexed="true" stored="true" omitNorms="true" />
 
+        <field name="pub_abbrev" type="normalized_string"
+               indexed="true" stored="true" omitNorms="true" />
+
 		<field name="page" type="normalized_string" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
