@@ -5,7 +5,12 @@
         <fieldType name="int" class="solr.TrieIntField"
                    precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
         <fieldType name="identifier_string"
-                   class="solr.SortableTextField"/>
+                   class="solr.SortableTextField">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
         <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="1">
             <analyzer>
                 <tokenizer class="solr.StandardTokenizerFactory"/>

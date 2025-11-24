@@ -81,6 +81,22 @@ public class TestBitSetQParserPlugin extends MontySolrAbstractTestCase {
     }
 
     @Test
+    public void testAnalyzers() throws Exception {
+        SolrQueryRequestBase req = (SolrQueryRequestBase) req("q", "text:*",
+                "fq", "{!bitset compression=none}");
+        List<ContentStream> streams = new ArrayList<ContentStream>(1);
+        ContentStreamBase cs = new ContentStreamBase.StringStream("strid\nA");
+        cs.setContentType("big-query/csv");
+        streams.add(cs);
+        req.setContentStreams(streams);
+
+        assertQ(req
+                , "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1']"
+        );
+    }
+
+    @Test
     public void testMultivaluedStringIDs() throws Exception {
         SolrQueryRequestBase req = (SolrQueryRequestBase) req("q", "text:*",
                 "fq", "{!bitset compression=none}");
