@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="minimal" version="1.1">
+    <types>
+        <fieldType name="string" class="solr.StrField"/>
+        <fieldType name="int" class="solr.TrieIntField"
+                   precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+        <fieldType name="identifier_string"
+                   class="solr.SortableTextField">
+            <analyzer>
+                <tokenizer class="solr.KeywordTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+        <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="1">
+            <analyzer>
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            </analyzer>
+        </fieldType>
+    </types>
+    <fields>
+        <field name="id" type="string" indexed="true" stored="true"/>
+        <field name="recid" type="int" indexed="true" stored="true"/>
+        <field name="strid" type="identifier_string" multiValued="true" indexed="true" stored="true"/>
+        <dynamicField name="*" type="text_ws" indexed="true" stored="true"/>
+    </fields>
+    <uniqueKey>id</uniqueKey>
+</schema>

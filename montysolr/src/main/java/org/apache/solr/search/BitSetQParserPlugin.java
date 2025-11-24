@@ -2,6 +2,7 @@ package org.apache.solr.search;
 
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.NumericDocValues;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.apache.lucene.util.BitSet;
@@ -30,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -355,25 +357,50 @@ public class BitSetQParserPlugin extends QParserPlugin {
             // for csv, we can assume that every doc has the same fields (?)
             Iterator<SolrInputField> fi = d.iterator();
 
-            HashMap<String, SolrCacheWrapper<CitationCache<Object, Integer>>> translators = new HashMap<String, SolrCacheWrapper<CitationCache<Object, Integer>>>();
+            HashMap<String, Function<Object, Integer>> translators = new HashMap<>();
 
             while (fi.hasNext()) {
                 SolrInputField field = fi.next();
+                Function<Object, Integer> docIdResolver = null;
+
                 SolrCacheWrapper<CitationCache<Object, Integer>> cache = getCache(field.getName());
                 if (cache == null) {
-                    throw new SolrException(ErrorCode.BAD_REQUEST, "Uff, uff, I have no idea how to map this field (" + field.getName() + ") values into docids! Call 911");
+                    SchemaField schemaField = req.getSchema().getField(field.getName());
+                    FieldType fieldType = schemaField.getType();
+
+                    docIdResolver = obj -> {
+                        String strValue = fieldType.readableToIndexed(obj.toString());
+
+                        // Attempt to process the value as we would during query time
+                        Query fieldQuery = fieldType.getFieldQuery(null, schemaField, strValue);
+                        Term queryTerm = new Term(schemaField.getName(), strValue);
+                        if (fieldQuery instanceof TermQuery termQuery) {
+                            queryTerm = termQuery.getTerm();
+                        }
+
+                        try {
+                            return req.getSearcher().getFirstMatch(queryTerm);
+                        } catch (IOException e) {
+                            return -1;
+                        }
+                    };
+                } else {
+                    docIdResolver = obj -> cache.getLuceneDocId(0, obj);
                 }
-                translators.put(field.getName(), cache);
+
+                translators.put(field.getName(), docIdResolver);
             }
 
             for (SolrInputDocument doc : docs) {
-                for (SolrInputField f : doc.values()) {
-                    SolrCacheWrapper<CitationCache<Object, Integer>> c = translators.get(f.getName());
-                    for (Object o : f.getValues()) {
-                        int v = c.getLuceneDocId(0, o);
-                        if (v == -1)
+                for (SolrInputField queryField : doc.values()) {
+                    Function<Object, Integer> docIdMapper = translators.get(queryField.getName());
+
+                    for (Object queryFieldValue : queryField.getValues()) {
+                        int luceneId = docIdMapper.apply(queryFieldValue);
+                        if (luceneId == -1)
                             continue;
-                        bs.set(v);
+
+                        bs.set(luceneId);
                     }
                 }
             }
