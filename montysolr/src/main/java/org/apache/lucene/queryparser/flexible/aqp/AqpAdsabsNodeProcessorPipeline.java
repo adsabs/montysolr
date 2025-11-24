@@ -77,6 +77,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         add(new AqpAdsabsQTRUNCATEDProcessor());
         add(new AqpQANYTHINGProcessor());
         add(new AqpQIDENTIFIERProcessor());
+        add(new AqpScixIDProcessor());
         add(new AqpFIELDProcessor()); // sets the field name (if user specified one, or there is a default)
 
 
