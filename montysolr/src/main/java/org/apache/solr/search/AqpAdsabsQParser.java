@@ -1,5 +1,10 @@
 package org.apache.solr.search;
 
+import org.apache.lucene.queries.function.FunctionQuery;
+import org.apache.lucene.queries.function.FunctionScoreQuery;
+import org.apache.lucene.queries.function.ValueSource;
+import org.apache.lucene.queries.function.valuesource.ProductFloatFunction;
+import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
@@ -15,13 +20,16 @@ import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.PointsConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.search.*;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.util.DateMathParser;
+import org.apache.solr.util.SolrPluginUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +56,10 @@ public class AqpAdsabsQParser extends QParser {
 
     private final AqpQueryParser qParser;
 
+    private String[] boostParams;
+    private String[] boostFuncs;
+    private String[] multBoosts;
+
     public AqpAdsabsQParser(AqpQueryParser parser, String qstr, SolrParams localParams,
                             SolrParams params, SolrQueryRequest req, SolrParserConfigParams defaultConfig)
             throws QueryNodeParseException {
@@ -71,6 +83,8 @@ public class AqpAdsabsQParser extends QParser {
 
 
         Map<String, String> namedParams = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
+        SolrParams solrParams = SolrParams.wrapDefaults(localParams,
+                SolrParams.wrapDefaults(params, new NamedList<>(namedParams).toSolrParams()));
 
         // get the parameters from the parser configuration (and pass them on)
         for (Entry<String, String> par : defaultConfig.params.entrySet()) {
@@ -235,6 +249,12 @@ public class AqpAdsabsQParser extends QParser {
                     params.getBool("aqp.allow.leading_wildcard", false));
         }
 
+        // Boost factors
+        boostParams = solrParams.getParams(DisMaxParams.BQ);
+
+        boostFuncs = solrParams.getParams(DisMaxParams.BF);
+
+        multBoosts = solrParams.getParams(AqpExtendedDismaxQParser.DMP.MULT_BOOST);
     }
 
     public class NumberDateFormat extends NumberFormat {
@@ -338,7 +358,31 @@ public class AqpAdsabsQParser extends QParser {
             //  return qParser.parse(getString() + config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE), null);
             //}
 
-            return qParser.parse(getString(), null);
+            Query userQuery = qParser.parse(getString(), null);
+            Query topQuery = userQuery;
+
+            if (boostParams != null || boostFuncs != null) {
+                BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                builder.add(userQuery, BooleanClause.Occur.MUST);
+
+                for (Query q : getBoostQueries()) {
+                    builder.add(q, BooleanClause.Occur.SHOULD);
+                }
+
+                topQuery = builder.build();
+            }
+
+            if (multBoosts != null) {
+                List<ValueSource> boosts = getMultiplicativeBoosts();
+                DoubleValuesSource multiplicativeBoostSource =
+                        boosts.size() > 1
+                                ? new ProductFloatFunction(boosts.toArray(new ValueSource[0])).asDoubleValuesSource()
+                                : boosts.get(0).asDoubleValuesSource();
+
+                topQuery = FunctionScoreQuery.boostByValue(topQuery, multiplicativeBoostSource);
+            }
+
+            return topQuery;
         } catch (QueryNodeException e) {
             throw new SyntaxError(e);
         } catch (SolrException e1) {
@@ -348,5 +392,45 @@ public class AqpAdsabsQParser extends QParser {
 
     public AqpQueryParser getParser() {
         return qParser;
+    }
+
+    /**
+     * Parses all multiplicative boosts
+     */
+    protected List<ValueSource> getMultiplicativeBoosts() throws SyntaxError {
+        List<ValueSource> boosts = new ArrayList<>();
+
+        for (String boostStr : multBoosts) {
+            if (boostStr == null || boostStr.isBlank()) continue;
+
+            Query boost = subQuery(boostStr, FunctionQParserPlugin.NAME).getQuery();
+
+            ValueSource vs;
+            if (boost instanceof FunctionQuery) {
+                vs = ((FunctionQuery) boost).getValueSource();
+            } else {
+                vs = new QueryValueSource(boost, 1.0f);
+            }
+
+            boosts.add(vs);
+        }
+
+        return boosts;
+    }
+
+    /**
+     * Parses all additive boost fields
+     */
+    protected List<Query> getBoostQueries() throws SyntaxError {
+        List<Query> boostQueries = new LinkedList<>();
+
+        for (String boostParam : boostParams) {
+            if (boostParam == null || boostParam.trim().isBlank()) continue;
+
+            Query q = subQuery(boostParam, null).getQuery();
+            boostQueries.add(q);
+        }
+
+        return boostQueries;
     }
 }
