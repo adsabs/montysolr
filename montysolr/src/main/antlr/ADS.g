@@ -321,7 +321,8 @@ identifier
   //IDENTIFIER  
   ('doi:' -> QNORMAL["doi"]
   |'arxiv:' -> QNORMAL["arxiv"]
-  |'arXiv:'  -> QNORMAL["arxiv"])
+  |'arXiv:'  -> QNORMAL["arxiv"]
+  |'scix:' -> QNORMAL["scix"])
   (TERM_NORMAL -> $identifier TERM_NORMAL
   | PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
   | PHRASE -> $identifier ^(QPHRASE PHRASE)
