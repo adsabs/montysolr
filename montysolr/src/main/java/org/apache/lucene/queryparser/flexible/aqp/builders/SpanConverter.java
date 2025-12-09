@@ -50,14 +50,14 @@ public class SpanConverter {
         } else if (q instanceof SynonymQuery) {
             return wrapBoost(convertSynonymToSpan(container), boost);
         } else if (q instanceof FunctionScoreQuery functionScoreQuery) {
-            Query subQuery = functionScoreQuery.getWrappedQuery();
-            if (subQuery instanceof ConstantScoreQuery constantScoreQuery) {
-                subQuery = constantScoreQuery.getQuery();
-            }
-
-            if (subQuery instanceof SpanQuery) {
-                return wrapBoost((SpanQuery) subQuery, boost);
-            }
+            container.query = functionScoreQuery.getWrappedQuery();
+            return getSpanQuery(container);
+        } else if (q instanceof BoostQuery boostQuery) {
+            container.query = boostQuery.getQuery();
+            return getSpanQuery(container);
+        } else if (q instanceof ConstantScoreQuery constantScoreQuery) {
+            container.query = constantScoreQuery.getQuery();
+            return getSpanQuery(container);
         }
 
         SpanQuery wrapped = wrapNonConvertible(container);
