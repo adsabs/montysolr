@@ -3,6 +3,7 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermStates;
+import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
@@ -48,23 +49,31 @@ public class SpanConverter {
             return new EmptySpanQuery(container.query);
         } else if (q instanceof SynonymQuery) {
             return wrapBoost(convertSynonymToSpan(container), boost);
-        } else {
-
-            SpanQuery wrapped = wrapNonConvertible(container);
-            if (wrapped != null)
-                return wrapped;
-
-            throw new QueryNodeException(new MessageImpl(
-                    QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
-                    "(yet) Unsupported clause inside span query: "
-                            + q.getClass().getName()));
+        } else if (q instanceof FunctionScoreQuery functionScoreQuery) {
+            container.query = functionScoreQuery.getWrappedQuery();
+            return getSpanQuery(container);
+        } else if (q instanceof BoostQuery boostQuery) {
+            container.query = boostQuery.getQuery();
+            return getSpanQuery(container);
+        } else if (q instanceof ConstantScoreQuery constantScoreQuery) {
+            container.query = constantScoreQuery.getQuery();
+            return getSpanQuery(container);
         }
+
+        SpanQuery wrapped = wrapNonConvertible(container);
+        if (wrapped != null)
+            return wrapped;
+
+        throw new QueryNodeException(new MessageImpl(
+                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
+                "(yet) Unsupported clause inside span query: "
+                        + q.getClass().getName()));
     }
 
     private SpanQuery convertDisjunctionQuery(SpanConverterContainer container) throws QueryNodeException {
         DisjunctionMaxQuery q = (DisjunctionMaxQuery) container.query;
         Collection<Query> clauses = q.getDisjuncts();
-        if (clauses.size() == 0) {
+        if (clauses.isEmpty()) {
             container.query = new MatchNoDocsQuery();
             return getSpanQuery(container);
         } else if (clauses.size() == 1) {
@@ -83,7 +92,7 @@ public class SpanConverter {
     }
 
     private SpanQuery wrapBoost(SpanQuery q, float boost) {
-        if (Math.abs(boost - 1.0f) < 1e-6f) {
+        if (Float.compare(boost, 1f) == 0) {
             return q;
         }
 
