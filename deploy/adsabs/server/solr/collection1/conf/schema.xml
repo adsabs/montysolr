@@ -807,7 +807,7 @@
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.PatternReplaceFilterFactory"
-					pattern="(\-|_)" replacement="" replace="all" />
+					pattern="(\-\.|_)" replacement="" replace="all" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
 			</analyzer>
@@ -816,7 +816,7 @@
 				<filter class="solr.ASCIIFoldingFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.PatternReplaceFilterFactory"
-					pattern="(\-|_)" replacement="" replace="all" />
+					pattern="(\-\.|_)" replacement="" replace="all" />
 			</analyzer>
 		</fieldType>
 
@@ -1174,6 +1174,9 @@
 
 		<field name="pub_raw" type="normalized_text_ascii"
 			indexed="true" stored="true" omitNorms="true" />
+
+        <field name="pub_abbrev" type="normalized_string"
+               indexed="true" stored="true" omitNorms="true" />
 
 		<field name="page" type="normalized_string" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"
