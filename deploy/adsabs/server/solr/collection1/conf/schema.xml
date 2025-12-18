@@ -59,9 +59,10 @@
 					pattern="[|]" />
 				<filter
 					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" preserveOriginal="true" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.TrimFilterFactory" />
-				
+
 			</analyzer>
 
 			<!-- If you update the normalization components (ie. add new steps; especially 
