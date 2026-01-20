@@ -8,9 +8,11 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
+import org.apache.lucene.queries.spans.FieldMaskingSpanQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -303,7 +305,7 @@ public class AqpAdsabsSubQueryProvider implements
          */
         parsers.put("pos", new AqpSubqueryParserFull() {
             @Override
-            public Query parse(FunctionQParser fp) throws SyntaxError {
+            public Query parse(FunctionQParser fp, QueryConfigHandler configHandler) throws SyntaxError {
                 Query query = fp.parseNestedQuery();
                 int start = fp.parseInt();
                 int end = start;
@@ -349,7 +351,6 @@ public class AqpAdsabsSubQueryProvider implements
                     wrapConstant = true;
                 }
 
-
                 SpanQuery spanQuery;
                 try {
                     spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
@@ -357,6 +358,16 @@ public class AqpAdsabsSubQueryProvider implements
                     SyntaxError ex = new SyntaxError(e.getMessage(), e);
                     ex.setStackTrace(e.getStackTrace());
                     throw ex;
+                }
+
+                if (configHandler != null && start == 1 && end == 1) {
+                    String replacementField = configHandler
+                            .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FIRST_POSITION_REMAPPING)
+                            .getOrDefault(queryField, "");
+
+                    if (!replacementField.isEmpty()) {
+                        return new FieldMaskingSpanQuery(spanQuery, replacementField);
+                    }
                 }
 
                 if (start < 0 || end < 0) {
@@ -1343,7 +1354,7 @@ public class AqpAdsabsSubQueryProvider implements
 
         // TODO: builder is reusing parser object; that may be bad if two threads
         // are accessing it. Not happening now, but ...
-        return new AqpSubQueryTreeBuilder(provider, parser);
+        return new AqpSubQueryTreeBuilder(provider, parser, config);
 
     }
 
