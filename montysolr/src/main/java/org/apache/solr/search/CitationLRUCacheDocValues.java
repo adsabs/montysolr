@@ -689,7 +689,9 @@ public class CitationLRUCacheDocValues<K, V> extends SolrCacheBase implements Ci
                                 if (errs > 5)
                                     return;
                                 if (dv.advanceExact(docId)) {
-                                    for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
+                                    int count = dv.docValueCount();
+                                    for (int i = 0; i < count; i++) {
+                                        long ord = dv.nextOrd();
                                         final BytesRef value = dv.lookupOrd(ord);
                                         setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply tokenization, doc values ignore it
                                     }
