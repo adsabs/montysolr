@@ -303,7 +303,7 @@ public class AqpAdsabsSubQueryProvider implements
          */
         parsers.put("pos", new AqpSubqueryParserFull() {
             @Override
-            public Query parse(FunctionQParser fp) throws SyntaxError {
+            public Query parse(FunctionQParser fp, QueryConfigHandler configHandler) throws SyntaxError {
                 Query query = fp.parseNestedQuery();
                 int start = fp.parseInt();
                 int end = start;
@@ -348,7 +348,6 @@ public class AqpAdsabsSubQueryProvider implements
                     query = ((ConstantScoreQuery) query).getQuery();
                     wrapConstant = true;
                 }
-
 
                 SpanQuery spanQuery;
                 try {
@@ -1343,7 +1342,7 @@ public class AqpAdsabsSubQueryProvider implements
 
         // TODO: builder is reusing parser object; that may be bad if two threads
         // are accessing it. Not happening now, but ...
-        return new AqpSubQueryTreeBuilder(provider, parser);
+        return new AqpSubQueryTreeBuilder(provider, parser, config);
 
     }
 
@@ -1353,7 +1352,7 @@ public class AqpAdsabsSubQueryProvider implements
 		swimDeep(children.get(0), span);
 		swimDeep(children.get(children.size()-1), span);
 	}
-	
+
 
 	private void swimDeep(QueryNode node, Integer[] span) {
 

@@ -25,7 +25,7 @@ public class SpanConverter {
         float boost = container.boost;
 
         if (q instanceof SpanQuery) {
-            return wrapBoost((SpanQuery) q, boost);
+            return wrapBoost(maskField((SpanQuery) q), boost);
         } else if (q instanceof TermQuery) {
             return wrapBoost(new SpanTermQuery(((TermQuery) q).getTerm()), boost);
         } else if (q instanceof ConstantScoreQuery) {
@@ -68,6 +68,14 @@ public class SpanConverter {
                 QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
                 "(yet) Unsupported clause inside span query: "
                         + q.getClass().getName()));
+    }
+
+    private SpanQuery maskField(SpanQuery q) {
+        if (Objects.equals(q.getField(), "author")) {
+            return new FieldMaskingSpanQuery(q, "first_author");
+        } else {
+            return q;
+        }
     }
 
     private SpanQuery convertDisjunctionQuery(SpanConverterContainer container) throws QueryNodeException {
