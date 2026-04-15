@@ -27,7 +27,9 @@ import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.schema.SchemaField;
 import org.apache.solr.util.DateMathParser;
 import org.apache.solr.util.SolrPluginUtils;
 import org.slf4j.Logger;
@@ -241,6 +243,14 @@ public class AqpAdsabsQParser extends QParser {
                 ncm.put(f, new PointsConfig(new MaxNumberFormat(Integer.MAX_VALUE), Integer.class));
             }
         }
+
+        req.getSchema().getFields().forEach((fieldName, schemaField) -> {
+            switch (schemaField.getType().getNumberType()) {
+                case FLOAT, DOUBLE -> ncm.put(fieldName, new PointsConfig(new MaxNumberFormat(Float.MAX_VALUE), Float.class));
+                case INTEGER, LONG -> ncm.put(fieldName, new PointsConfig(new MaxNumberFormat(Integer.MAX_VALUE), Integer.class));
+                case null, default -> {}
+            }
+        });
 
         config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS).putAll(defaultConfig.virtualFields);
 
