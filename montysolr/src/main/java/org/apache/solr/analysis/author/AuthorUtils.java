@@ -2,6 +2,7 @@ package org.apache.solr.analysis.author;
 
 import com.anyascii.AnyAscii;
 import org.apache.commons.lang3.StringUtils;
+import org.jython.monty.HumanParser;
 
 import java.text.Normalizer;
 import java.util.*;
@@ -10,7 +11,7 @@ import java.util.regex.Pattern;
 public class AuthorUtils {
 
     static final Trie trie = buildTrie();
-    static final NameParser nameParser = new NameParser();
+    static final HumanParser nameParser = new HumanParser();
 
     public static final String AUTHOR_QUERY_VARIANT = "AUTHOR_QUERY_VARIANT";
     public static final String AUTHOR_INPUT = "AUTHOR_INPUT";
@@ -93,9 +94,9 @@ public class AuthorUtils {
 
     public static Map<String, String> parseAuthor(String a, boolean normalize) {
         if (normalize) {
-            return nameParser.parseName(AuthorUtils.normalizeAuthor(a));
+            return nameParser.parse_human_name(AuthorUtils.normalizeAuthor(a));
         } else {
-            return nameParser.parseName(a);
+            return nameParser.parse_human_name(a);
         }
     }
 
