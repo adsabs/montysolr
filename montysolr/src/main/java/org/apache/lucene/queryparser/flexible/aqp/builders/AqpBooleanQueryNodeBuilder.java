@@ -1,6 +1,5 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
@@ -8,7 +7,6 @@ import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.standard.builders.BooleanQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.standard.builders.StandardQueryBuilder;
 import org.apache.lucene.search.*;
-import org.python.core.__builtin__;
 
 import java.util.ArrayList;
 import java.util.List;
