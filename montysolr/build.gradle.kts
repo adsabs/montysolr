@@ -28,8 +28,6 @@ dependencies {
 
 	implementation("com.google.guava:guava:33.2.1-jre")
 	implementation("com.anyascii:anyascii:0.3.2")
-	//implementation("org.python:jython-standalone:2.7.3")
-	implementation(project(":jython"))
 
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.antlr:stringtemplate:3.2.1")
@@ -58,9 +56,6 @@ tasks.withType<Test>().all {
 	}
 }
 
-tasks.named<JavaCompile>("compileJava") {
-	dependsOn(":jython:mergeExposed")
-}
 
 sourceSets {
 	main {
