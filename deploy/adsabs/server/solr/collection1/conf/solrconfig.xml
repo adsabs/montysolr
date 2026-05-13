@@ -298,6 +298,8 @@
        
   </requestDispatcher>
 
+  <searchComponent name="requestMemoryStart" class="org.adsabs.solr.metrics.memory.RequestMemoryStartComponent"/>
+  <searchComponent name="requestMemoryEnd" class="org.adsabs.solr.metrics.memory.RequestMemoryEndComponent"/>
   <requestHandler name="/select" class="solr.SearchHandler">
      <lst name="defaults">
        <str name="wt">json</str>
@@ -344,8 +346,12 @@
        <str name="aqp.allow.leading_wildcard">false</str>
        <str name="aqp.maxAbsolutePhraseLength">500</str>
      </lst>
+     <arr name="first-components">
+         <str>requestMemoryStart</str>
+     </arr>
      <arr name="last-components">
       <str>wordcloud</str>
+      <str>requestMemoryEnd</str>
      </arr>
     </requestHandler>
 
