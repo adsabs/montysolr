@@ -52,7 +52,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 
     public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight) throws IOException {
         // this is pretty arbitrary, but 2nd order queries may return many hits...
-        ((ArrayList<CollectorDoc>) hits).ensureCapacity((int) (searcher.getIndexReader().maxDoc() * ensureCapacityRatio));
+        //((ArrayList<CollectorDoc>) hits).ensureCapacity((int) (searcher.getIndexReader().maxDoc() * ensureCapacityRatio));
         return true;
     }
 
