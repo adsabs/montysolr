@@ -4,7 +4,7 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
-import org.jython.JythonObjectFactory;
+import org.jython.monty.HumanParser;
 import org.jython.monty.interfaces.JythonNameParser;
 
 import java.io.IOException;
@@ -42,8 +42,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
     public PythonicAuthorNormalizerFilter(TokenStream input) {
         super(input);
-        JythonObjectFactory factory = new JythonObjectFactory(JythonNameParser.class, "jython_name_parser", "HumanParser");
-        this.jythonParser = (JythonNameParser) factory.createObject();
+        this.jythonParser = new HumanParser();
     }
 
     @Override
