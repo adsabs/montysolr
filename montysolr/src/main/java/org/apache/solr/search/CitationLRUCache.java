@@ -409,7 +409,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     }
 
     private File getCacheStorageDir(SolrIndexSearcher searcher) {
-        File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
+        File f = searcher.getCore().getResourceLoader().getConfigPath().toFile();
         try {
             assert f.exists();
             assert f.isDirectory();
@@ -419,6 +419,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         } catch (Exception e) {
             return null;
         }
+
         return f;
     }
 
@@ -797,7 +798,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                                 if (errs > 5)
                                     return;
                                 if (dv.advanceExact(docId)) {
-                                    for (long ord = dv.nextOrd(); ord != SortedSetDocValues.NO_MORE_ORDS; ord = dv.nextOrd()) {
+                                    int count = dv.docValueCount();
+                                    for (int i = 0; i < count; i++) {
+                                        long ord = dv.nextOrd();
                                         final BytesRef value = dv.lookupOrd(ord);
                                         setter.set(docBase, docId, value.utf8ToString().toLowerCase()); // XXX: even if we apply
                                         // tokenization, doc

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="minimal" version="1.6">
+  <types>
+    <fieldType name="string" class="solr.StrField" />
+    <fieldType name="int" class="solr.TrieIntField"
+      precisionStep="0" omitNorms="true" positionIncrementGap="0" />
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="true"
+      precisionStep="0" positionIncrementGap="0" />
+    <fieldType name="float" class="solr.FloatPointField"
+            omitNorms="true" positionIncrementGap="0"
+            docValues="true"/>
+    <fieldType name="long" class="${solr.tests.LongFieldType}"
+            docValues="${solr.tests.numeric.dv}" precisionStep="0"
+            positionIncrementGap="0" uninvertible="true"/>
+  </types>
+  <fields>
+      <field name="_version_" type="long" indexed="true" stored="true"/>
+      <field name="id" type="int" indexed="true" stored="true"
+      required="true" />
+    <field name="bibcode" type="string" indexed="true" stored="true"
+      required="false" />
+    <field name="alternate_bibcode" type="string" indexed="true" stored="true"
+      required="false" multiValued="true"/>
+    <field name="reference" type="string" indexed="true" stored="true"
+      multiValued="true"/>
+    <field name="ireference" type="int" indexed="true" stored="true"
+      multiValued="true"/>
+    <field name="citation" type="string" indexed="true" stored="true"
+      multiValued="true"/>
+    <field name="year" type="string" indexed="true" stored="true"
+      required="false" />
+
+    <field name="date" type="date" indexed="true" stored="true"
+      multiValued="false" />
+    <field name="indexstamp" type="date" indexed="true" stored="true"
+      default="NOW" multiValued="false" />
+
+    <dynamicField name="x*" type="string" indexed="true"
+      stored="true" multiValued="true" />
+    <dynamicField name="boost*" type="float" indexed="true"
+      stored="true" multiValued="false" docValues="true"/>
+  </fields>
+  <uniqueKey>id</uniqueKey>
+</schema>
