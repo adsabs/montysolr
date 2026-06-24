@@ -319,6 +319,29 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testFirstAuthorRemapping() throws Exception {
+        // Simple case
+        assertQueryEquals(
+                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
+                        "=author:\"^foo\""),
+                "FunctionScoreQuery(first_author:foo, scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                FunctionScoreQuery.class);
+
+        // Complex case
+        assertQueryEquals(
+                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
+                        "=author:(^accomazzi kurtz)"),
+                "FunctionScoreQuery(+ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)) +ConstantScore(author:kurtz,), scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                FunctionScoreQuery.class);
+
+        assertQueryEquals(
+                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
+                        "=author:((^accomazzi AND kurtz) OR (^accomazzi AND lockhart))"),
+                "FunctionScoreQuery((+ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)) +ConstantScore(author:kurtz,)) (+ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)) +ConstantScore(author:lockhart,)), scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                FunctionScoreQuery.class);
+        // first_
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",
@@ -372,7 +395,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(
                 req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
                         "=author:\"^foo\""),
-                "FunctionScoreQuery(ConstantScore(spanPosRange(author:foo,, 0, 1)), scored by boost(sum(float(cite_read_boost),const(0.6))))",
+                "FunctionScoreQuery(first_author:foo, scored by boost(sum(float(cite_read_boost),const(0.6))))",
                 FunctionScoreQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
@@ -427,8 +450,8 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "=author:\"foo, bar\""), "author:foo, bar", TermQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"foo, bar\", 1)"),
                 "spanPosRange(author:foo, bar, 0, 1)", SpanPositionRangeQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"^foo, bar\""), "spanPosRange(author:foo, bar, 0, 1)",
-                SpanPositionRangeQuery.class);
+        assertQueryEquals(req("defType", "aqp", "q", "=author:\"^foo, bar\""), "first_author:foo, bar",
+                TermQuery.class);
 
         // constant() score
         assertQueryEquals(req("defType", "aqp", "q", "constant(title:foo)"), "ConstantScore(title:foo)",
@@ -575,11 +598,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         // nested functions should parse well: citations(author:"^kurtz")
         assertQueryEquals(req("defType", "aqp", "q", "citations(author:\"^kurtz\")"),
-                "SecondOrderQuery(spanPosRange(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)]), 0, 1), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "SecondOrderQuery(first_author:kurtz, first_author:kurtz,*, collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "citations(citations(author:\"^kurtz\"))"),
-                "SecondOrderQuery(SecondOrderQuery(spanPosRange(spanOr([author:kurtz,, SpanMultiTermQueryWrapper(author:kurtz,*)]), 0, 1), collector=SecondOrderCollectorCitedBy(cache:citations-cache)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
+                "SecondOrderQuery(SecondOrderQuery(first_author:kurtz, first_author:kurtz,*, collector=SecondOrderCollectorCitedBy(cache:citations-cache)), collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
         // #30 - first_author and author:"^fooo" give diff results
@@ -942,13 +965,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "+title:xxx +(-title:foo title:bar)", BooleanQuery.class);
 
         // TO FINISH, it will cause build failure
-//		assertQueryEquals(req("defType", "aqp", "q", "title:xxx -title:(foo bar)"), 
+//		assertQueryEquals(req("defType", "aqp", "q", "title:xxx -title:(foo bar)"),
 //        "+title:xxx -title:foo -title:bar",
 //        BooleanQuery.class);
-//		assertQueryEquals(req("defType", "aqp", "q", "title:xxx +title:(foo bar)"), 
+//		assertQueryEquals(req("defType", "aqp", "q", "title:xxx +title:(foo bar)"),
 //        "+title:xxx +title:foo +title:bar",
 //        BooleanQuery.class);
-//		assertQueryEquals(req("defType", "aqp", "q", "title:xxx +title:(-foo bar)"), 
+//		assertQueryEquals(req("defType", "aqp", "q", "title:xxx +title:(-foo bar)"),
 //        "+title:xxx -title:foo +title:bar",
 //        BooleanQuery.class);
 
@@ -1114,7 +1137,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertQueryNotContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "no.classic_scoring.modifier", "0.5"),
                 "scored by",
-                SpanPositionRangeQuery.class);
+                DisjunctionMaxQuery.class);
         assertQueryContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
                 "scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
