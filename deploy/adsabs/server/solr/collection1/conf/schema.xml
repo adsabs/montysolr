@@ -634,6 +634,206 @@
 			</analyzer>
 		</fieldType>
 
+		<fieldType name="ads_text_gap" class="solr.TextField" positionIncrementGap="100">
+			<analyzer type="index">
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
+
+				<!-- AA: rewrite these common astronomy compound names so that the WDFF
+					will index both the short and long versions of them -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b"
+							replacement="$1-$3 M$3" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b"
+							replacement="$1-$3 A$3" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:(N)(-|\s+)([0-9]+[A-Z]*))\b"
+							replacement="NGC-$3 N$3" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:([34]CR?|ADS|H[DHR]|IC|[MW]|MKN|NGC|PKS|PSR[BJ]?|SAO|UGC|UT)(-|\s+)([0-9]+[A-Z]*))\b"
+							replacement="$1-$3" />
+
+				<!-- tokenize on empty space (if it is not a hyphen connecting other
+					words) -->
+				<tokenizer class="solr.PatternTokenizerFactory"
+						   pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
+
+				<!-- rca: i am not sure i understand, why isn't it: (\s*\-+\s*)+ and
+					the WDFF should be able to handle these cases anyway -->
+				<filter class="solr.PatternReplaceFilterFactory"
+						pattern="-?\s+-?" replacement="-" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+						pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2" />
+
+				<filter class="solr.LengthTokenFilterFactory" min="1" max="50" />
+
+				<!-- translate math symbols and others into their ascii representation -->
+				<filter
+						class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+
+				<!-- split all-sky into [all, sky, allsky] -->
+				<filter
+						class="solr.WordDelimiterGraphFilterFactory"
+						generateWordParts="1" generateNumberParts="1" catenateWords="0"
+						catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
+						splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+
+				<!-- lowercase everything besides ACRONYMS -->
+				<filter
+						class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
+
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="index:1"/> -->
+
+				<!-- find synonyms, first multi-tokens -->
+				<filter
+						class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+						synonyms="ads_text_multi.synonyms" ignoreCase="false" expand="true"
+						tokenizerFactory="solr.KeywordTokenizerFactory"
+						builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
+						inclOrig="true" />
+
+				<!-- now find simple synonyms (it may catch tokens that are part of the
+					multi-token synonym) -->
+				<filter
+						class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+						synonyms="ads_text_simple.synonyms" ignoreCase="false"
+						expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
+						builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
+						inclOrig="true" />
+
+
+				<!-- remove stop words - first the case sensitively -->
+				<filter
+						class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+						ignoreCase="false" words="ads_text.kill_sens" />
+				<!-- remove stop words - then case insensitively -->
+				<filter
+						class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+						ignoreCase="true" words="ads_text.kill" />
+
+				<!-- if the original or synonym contains UPPERCASE variant, mark it as
+					an acronym but keep the type information (if it is a synonym, it will remain
+					SYNONYM) which is important for the query parsing -->
+				<filter class="solr.AcronymTokenFilterFactory"
+						emitBoth="true" prefix="acr::" setType="ACRONYM" />
+
+				<!-- add a prefix to all synonyms -->
+				<filter class="solr.analysis.ResetFilterFactory"
+						incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" range="1,2147483647" />
+
+
+				<!-- we emit ASCIIField version of the token (at the same position):
+					this is rather crazy/expensive behaviour given that ads_text is used on fulltext,
+					can we get rid off it? -->
+				<filter class="solr.ASCIIDuplicatingFilterFactory" />
+
+				<!-- final normalization -->
+				<filter class="solr.TrimFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+
+			</analyzer>
+			<analyzer type="query">
+				<charFilter class="solr.HTMLStripCharFilterFactory" />
+				<!-- AA: as above, but we only have one canonical replacement for the
+					expression -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b"
+							replacement="$1-$3" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:(ABELL)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:(NGC|N)(-|\s+)([0-9]+[A-Z]*))\b" replacement="$1-$3" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+							pattern="\b(?i:([34]CR?|ADS|H[DHR]|IC|[MW]|MKN|NGC|PKS|PSR[BJ]?|SAO|UGC|UT)(-|\s+)([0-9]+[A-Z]*))\b"
+							replacement="$1-$3" />
+
+
+				<!-- tokenize on empty space (if it is not a hyphen connecting other
+					words) -->
+				<tokenizer class="solr.PatternTokenizerFactory"
+						   pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
+
+				<!-- translate math symbols and others into their ascii representation -->
+				<filter
+						class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+
+
+				<filter
+						class="solr.WordDelimiterGraphFilterFactory"
+						generateWordParts="1" generateNumberParts="1" catenateWords="1"
+						catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
+						splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query:split"/> -->
+
+				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond =>
+					mond Hubble Space Telescope => hubble space telescope -->
+				<filter
+						class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
+
+				<!-- search synonyms, first multi-tokens; includeOrig=true affects only
+					simple synonyms; for multi-tokens orig.parts are always returned. MOND =
+					MOND, modified newtonian dynamics hubble space telescope => HST [SYNONYM],
+					hubble space telescope [SYNONYM], hubble space telescope [original] Warning:
+					be sure you understand how inclOrig influences different types of synonym
+					rules ie. synonym1,synonym2 => synonym vs. synonym1,synonym2 -->
+				<filter
+						class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+						synonyms="ads_text_multi.synonyms" ignoreCase="false" expand="true"
+						tokenizerFactory="solr.KeywordTokenizerFactory"
+						builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
+						inclOrig="true" />
+
+
+				<!-- MOND => [] mond => mond, lunar [SYNONYM] hubble space telescope
+					=> HST [SYNONYM], hubble space telescope [SYNONYM], hubble, space, telescope
+					[original], spazio [SYNONYM] -->
+				<filter
+						class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
+						synonyms="ads_text_simple.synonyms" ignoreCase="false"
+						expand="true" tokenizerFactory="solr.KeywordTokenizerFactory"
+						builderFactory="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory$BestEffortIgnoreCaseSelectively"
+						inclOrig="true" />
+
+				<!-- remove stop words - first the case sensitively -->
+				<filter
+						class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+						ignoreCase="false" words="ads_text.kill_sens" />
+				<!-- remove stop words - then case insensitively -->
+				<filter
+						class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
+						ignoreCase="true" words="ads_text.kill" />
+
+				<!-- if the original or synonym contains UPPERCASE variant, mark it as
+					an acronym but do not change its type, if it was a SYNONYM, it is important
+					information for query parsing -->
+				<filter class="solr.AcronymTokenFilterFactory"
+						emitBoth="false" allowTypes="SYNONYM" prefix="acr::"
+						setType="ACRONYM" />
+
+				<!-- add a prefix to all synonyms -->
+				<filter class="solr.analysis.ResetFilterFactory"
+						incomingType="SYNONYM" addPrefix="syn::" posIncrement="0" />
+
+				<!-- only pass SYNONYM and ACRONYM tokens <filter class="solr.analysis.author.AuthorCollectorFactory"
+					tokenTypes="word" emitTokens="false" /> -->
+
+
+
+
+				<!-- we emit ASCIIField version of the token (at the same position) -->
+				<filter class="solr.ASCIIDuplicatingFilterFactory" />
+
+				<!-- final normalization -->
+				<filter class="solr.TrimFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+
+				<filter
+						class="org.apache.lucene.analysis.miscellaneous.RemoveDuplicatesTokenFilterFactory" />
+				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="searcher"/> -->
+			</analyzer>
+		</fieldType>
+
 
 		<!-- ads_text_nosyn to enable exact searches; only used for querying; test: 
 			TestAdsabsTypeFullText -->
@@ -1355,7 +1555,7 @@
 	      @since 61.1.0.1
 	      
 	     -->
-		<field name="keyword" type="ads_text" indexed="true"
+		<field name="keyword" type="ads_text_gap" indexed="true"
 			stored="true" multiValued="true" omitNorms="true" />
 
 		<field name="keyword_nosyn" type="ads_text_nosyn"
