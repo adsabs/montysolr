@@ -1689,10 +1689,6 @@
 		<field name="planetary_feature_id" type="int" indexed="true" stored="true"
 			   multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
 
-		<field name="planetary_feature_facet_hier_2level" type="string" indexed="true"
-			   stored="true" multiValued="true" omitNorms="true"
-			   omitTermFreqAndPositions="true" docValues="true" />
-
 		<field name="planetary_feature_facet_hier_3level" type="string" indexed="true"
 			   stored="true" multiValued="true" omitNorms="true"
 			   omitTermFreqAndPositions="true" docValues="true" />
