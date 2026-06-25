@@ -434,7 +434,7 @@
 		<!-- Be careful, this chain is very 'delicate'! always run unittest: TestAdsabsTypeFulltext -->
 		<!-- the tokenizing part needs more work, probably using synonyms to match 
 			patterns? -->
-		<fieldType name="ads_text" class="solr.TextField">
+		<fieldType name="ads_text" class="solr.TextField" positionIncrementGap="100">
 			<analyzer type="index">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
 
@@ -1172,7 +1172,7 @@
 		<field name="pub" type="normalized_string" indexed="true"
 			stored="true" omitNorms="true" />
 
-		<field name="pub_raw" type="normalized_text_ascii"
+		<field name="pub_raw" type="ads_text"
 			indexed="true" stored="true" omitNorms="true" />
 
         <field name="pub_abbrev" type="normalized_string"
@@ -1640,8 +1640,6 @@
 		  Unified Astronomy Thesaurus feature names.
 		* uat_id
 		  An array of integers that uniquely identify UAT features.
-		* uat_facet_hier
-		  A hierarchical facet for searching UAT features by group.
 		 -->
         <!-- for Unified Astronomy Thesaurus -->
         <field name="uat" type="uat_tokens" indexed="true" stored="true"
@@ -1649,10 +1647,6 @@
 
 		<field name="uat_id" type="int" indexed="true" stored="true"
 			   multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
-
-		<field name="uat_facet_hier" type="string" indexed="true"
-			   stored="true" multiValued="true" omitNorms="true"
-			   omitTermFreqAndPositions="true" docValues="true" />
 
 
 		<!--
@@ -1688,10 +1682,6 @@
 
 		<field name="planetary_feature_id" type="int" indexed="true" stored="true"
 			   multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
-
-		<field name="planetary_feature_facet_hier_2level" type="string" indexed="true"
-			   stored="true" multiValued="true" omitNorms="true"
-			   omitTermFreqAndPositions="true" docValues="true" />
 
 		<field name="planetary_feature_facet_hier_3level" type="string" indexed="true"
 			   stored="true" multiValued="true" omitNorms="true"
