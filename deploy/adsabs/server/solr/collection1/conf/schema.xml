@@ -434,7 +434,7 @@
 		<!-- Be careful, this chain is very 'delicate'! always run unittest: TestAdsabsTypeFulltext -->
 		<!-- the tokenizing part needs more work, probably using synonyms to match 
 			patterns? -->
-		<fieldType name="ads_text" class="solr.TextField">
+		<fieldType name="ads_text" class="solr.TextField" positionIncrementGap="100">
 			<analyzer type="index">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
 
