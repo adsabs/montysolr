@@ -18,8 +18,7 @@ import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
-import org.apache.lucene.search.join.JoinUtil;
-import org.apache.lucene.search.join.ScoreMode;
+import org.apache.lucene.search.join.MontyNormalizingJoinUtil;
 import org.apache.lucene.search.spans.SpanNegativeIndexRangeQuery;
 import org.apache.lucene.queries.spans.SpanPositionRangeQuery;
 import org.apache.lucene.queries.spans.SpanQuery;
@@ -37,8 +36,6 @@ import org.apache.solr.schema.FieldType;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.*;
-import org.apache.lucene.search.join.JoinUtil;
-import org.apache.lucene.search.join.ScoreMode;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.uninverting.UninvertingReader;
 
@@ -698,8 +695,9 @@ public class AqpAdsabsSubQueryProvider implements
                 SolrQueryRequest req = fp.getReq();
                 try {
                     // XXX: not sure if i can use several fields: citationSearchIdField
-                    return JoinUtil.createJoinQuery("bibcode", false, "reference", innerQuery,
-                            req.getSearcher(), ScoreMode.Avg);
+                    Analyzer toAnalyzer = req.getSchema().getFieldType("reference").getIndexAnalyzer();
+                    return MontyNormalizingJoinUtil.createJoinQuery("bibcode", "reference", toAnalyzer,
+                            innerQuery, req.getSearcher());
                 } catch (IOException e) {
                     throw new SyntaxError(e.getMessage());
                 }
@@ -725,8 +723,9 @@ public class AqpAdsabsSubQueryProvider implements
                 Query innerQuery = fp.parseNestedQuery();
                 SolrQueryRequest req = fp.getReq();
                 try {
-                    return JoinUtil.createJoinQuery("bibcode", false, "citation", innerQuery,
-                            req.getSearcher(), ScoreMode.Avg);
+                    Analyzer toAnalyzer = req.getSchema().getFieldType("citation").getIndexAnalyzer();
+                    return MontyNormalizingJoinUtil.createJoinQuery("bibcode", "citation", toAnalyzer,
+                            innerQuery, req.getSearcher());
                 } catch (IOException e) {
                     throw new SyntaxError(e.getMessage());
                 }

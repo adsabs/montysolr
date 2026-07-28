@@ -67,20 +67,46 @@ public class TestJoinReferences extends MontySolrQueryTestCase {
         DirectSolrConnection direct = getDirectServer();
         EmbeddedSolrServer embedded = getEmbeddedServer();
 
-        // check authors are correctly indexed/searched
-        assertU(adoc("id", "0", "bibcode", "b1",
-                "citation", "b2"));
-        assertU(adoc("id", "3", "bibcode", "c1",
-                "citation", "b2", "citation", "b3"));
-        assertU(adoc("id", "1", "bibcode", "b2",
-                "citation", "b3"));
-        assertU(adoc("id", "2", "bibcode", "b3",
-                "citation", "b4"));
+        // bibcode is deliberately mixed-case here: its DocValues (used by joincitations/
+        // joinreferences) hold the raw value, while citation/reference postings hold the
+        // value normalized by the identifier_string analyzer (lower-cased, dashes/underscores
+        // stripped). citation/reference field content is otherwise unchanged from before, so
+        // the citations()/references() RAM-cache-based oracles below stay valid.
+        assertU(adoc("id", "0", "bibcode", "B1",
+                "citation", "b2", "reference", "b2"));
+        assertU(adoc("id", "3", "bibcode", "C1",
+                "citation", "b2", "citation", "b3", "reference", "b2", "reference", "b3"));
+        assertU(adoc("id", "1", "bibcode", "B2",
+                "citation", "b3", "reference", "b3"));
+        assertU(adoc("id", "2", "bibcode", "B3",
+                "citation", "b4", "reference", "b4"));
+
+        // Isolated pair covering the dash-stripping normalization step (PatternReplaceFilter),
+        // kept separate from the docs above so it doesn't disturb the RAM-cache oracle counts.
+        assertU(adoc("id", "4", "bibcode", "D-1",
+                "citation", "e1", "reference", "e1"));
+        assertU(adoc("id", "5", "bibcode", "e1",
+                "citation", "d-1", "reference", "d-1"));
 
         assertU(commit("waitSearcher", "true"));
 
         assertQ(req("q", "bibcode:b1"), "//*[@numFound='1']");
+
+        // RAM-cache-based oracles, unaffected by the DocValues/postings normalization mismatch
         assertQ(req("q", "citations(bibcode:b2)"), "//*[@numFound='1']");
-        assertQ(req("q", "joinreferences(bibcode:b2)"), "//*[@numFound='0']");
+        assertQ(req("q", "references(bibcode:b2)"), "//*[@numFound='2']");
+
+        // case-folding: bibcode "B2" must normalize to "b2" to match citation/reference postings
+        assertQ(req("q", "joinreferences(bibcode:b2)"), "//*[@numFound='2']");
+        assertQ(req("q", "joincitations(bibcode:b2)"), "//*[@numFound='2']");
+
+        // dash-stripping: bibcode "D-1"/"e1" must normalize (strip '-') to match "d1"/"e1"
+        assertQ(req("q", "joinreferences(bibcode:d-1)"), "//*[@numFound='1']");
+        assertQ(req("q", "joincitations(bibcode:d-1)"), "//*[@numFound='1']");
+
+        // collected terms present but no match on the "to" side
+        assertQ(req("q", "joinreferences(bibcode:b1)"), "//*[@numFound='0']");
+        // "from" query matches nothing at all -> MatchNoDocsQuery short-circuit
+        assertQ(req("q", "joinreferences(bibcode:doesnotexist)"), "//*[@numFound='0']");
     }
 }
