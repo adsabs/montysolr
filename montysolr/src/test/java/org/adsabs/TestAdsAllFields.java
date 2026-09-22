@@ -1395,31 +1395,28 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         );
 
         assertQ(req("q", "author:\"bond, edwin james\""),
-                "//*[@numFound='6']",
+                "//*[@numFound='5']",
                 "//doc/int[@name='recid'][.='50']",
                 "//doc/int[@name='recid'][.='51']",
                 "//doc/int[@name='recid'][.='52']",
                 "//doc/int[@name='recid'][.='53']",
-                "//doc/int[@name='recid'][.='55']",
-                "//doc/int[@name='recid'][.='57']"
+                "//doc/int[@name='recid'][.='55']"
         );
         assertQ(req("q", "author:\"^bond, edwin james\""),
-                "//*[@numFound='6']",
+                "//*[@numFound='5']",
                 "//doc/int[@name='recid'][.='50']",
                 "//doc/int[@name='recid'][.='51']",
                 "//doc/int[@name='recid'][.='52']",
                 "//doc/int[@name='recid'][.='53']",
-                "//doc/int[@name='recid'][.='55']",
-                "//doc/int[@name='recid'][.='57']"
+                "//doc/int[@name='recid'][.='55']"
         );
         assertQ(req("q", "pos(author:\"bond, edwin james\", 1, 2)"),
-                "//*[@numFound='6']",
+                "//*[@numFound='5']",
                 "//doc/int[@name='recid'][.='50']",
                 "//doc/int[@name='recid'][.='51']",
                 "//doc/int[@name='recid'][.='52']",
                 "//doc/int[@name='recid'][.='53']",
-                "//doc/int[@name='recid'][.='55']",
-                "//doc/int[@name='recid'][.='57']"
+                "//doc/int[@name='recid'][.='55']"
         );
 
 

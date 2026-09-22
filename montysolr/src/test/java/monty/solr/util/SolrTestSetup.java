@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
@@ -82,13 +83,43 @@ public class SolrTestSetup extends SolrTestCaseJ4 {
     }
 
     public static URL getRepoUrl() throws URISyntaxException, MalformedURLException {
+        String configuredRoot = System.getProperty("montysolr.repo.root");
+        if (configuredRoot != null && !configuredRoot.trim().isEmpty()) {
+            Path repoRoot;
+            try {
+                repoRoot = Paths.get(configuredRoot.trim());
+            } catch (InvalidPathException ex) {
+                throw new IllegalStateException(
+                        "Invalid montysolr.repo.root '" + configuredRoot
+                                + "': expected a directory containing .gitignore",
+                        ex);
+            }
+            if (!Files.isDirectory(repoRoot)
+                    || !Files.exists(repoRoot.resolve(".gitignore"))) {
+                throw new IllegalStateException(
+                        "Invalid montysolr.repo.root '" + configuredRoot
+                                + "': expected a directory containing .gitignore");
+            }
+            return repoRoot.toUri().toURL();
+        }
+
         Class<SolrTestSetup> clazz = SolrTestSetup.class;
         ProtectionDomain protectionDomain = clazz.getProtectionDomain();
-        CodeSource codeSource = protectionDomain.getCodeSource();
+        CodeSource codeSource = protectionDomain == null ? null : protectionDomain.getCodeSource();
+        if (codeSource == null || codeSource.getLocation() == null) {
+            throw new IllegalStateException(
+                    "Unable to locate repository root containing .gitignore from the test classpath");
+        }
 
         Path filePath = Paths.get(codeSource.getLocation().toURI());
-        while (!filePath.resolve(".gitignore").toFile().exists()) {
-            filePath = filePath.getParent();
+        while (!Files.exists(filePath.resolve(".gitignore"))) {
+            Path parent = filePath.getParent();
+            if (parent == null) {
+                throw new IllegalStateException(
+                        "Unable to locate repository root containing .gitignore from classpath location "
+                                + filePath);
+            }
+            filePath = parent;
         }
 
         return filePath.toUri().toURL();

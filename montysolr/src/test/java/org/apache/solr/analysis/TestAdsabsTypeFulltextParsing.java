@@ -263,7 +263,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         assertU(adoc("id", "156", "bibcode", "xxxxxxxxxx156", "title", "N 1"));
         assertU(adoc("id", "157", "bibcode", "xxxxxxxxxx157", "title", "NGC1"));
 
-        assertU(adoc("id", "318", "bibcode", "xxxxxxxxxx318", "title", "creation of a thesaurus", "pub", "creation of a thesaurus"));
+        assertU(adoc("id", "318", "bibcode", "xxxxxxxxxx318", "title", "creation of a thesaurus", "pub_raw", "creation of a thesaurus"));
         assertU(adoc("id", "382", "bibcode", "xxxxxxxxxx382", "title", "xhtml <tags> should be <SUB>fooxx</SUB> <xremoved>"));
 
         // greek letter should not be a problem, #604
@@ -527,14 +527,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
 
         // ticket #318
-        assertQueryEquals(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "all title^1.4 pub"),
-                "+(all:creation | pub:creation | (title:creation)^1.4) +pub:of +pub:a +(all:thesaurus | pub:thesaurus | (title:thesaurus)^1.4)",
-                BooleanQuery.class);
-        assertQ(req("q", "pub:of AND pub:a"),
+        // pub is a normalized_string for exact publication matching.  The full-text
+        // behavior exercised here belongs to pub_raw, whose current type is ads_text.
+        assertQ(req("q", "pub_raw:creation AND pub_raw:thesaurus"),
                 "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='318']"
         );
-        assertQ(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "title^1.4 all pub"),
+        // Stop words are removed by the ads_text index analyzer, but they do not
+        // prevent the surrounding terms from matching.
+        assertQ(req("q", "pub_raw:of AND pub_raw:a"), "//*[@numFound='0']");
+        assertQ(req("q", "creation of a thesaurus", "defType", "aqp", "qf", "pub_raw"),
                 "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='318']"
         );

@@ -21,7 +21,6 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.adsabs.solr.AdsConfig.F;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.TermQuery;
@@ -46,24 +45,27 @@ public class TestAdsabsTypeNormalizedTextAscii extends MontySolrQueryTestCase {
 
     public void test() throws Exception {
 
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Bílá kobyla skočila přes čtyřista"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "třicet-tři stříbrných střech"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "A ještě TřistaTřicetTři stříbrných stovek"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri, R"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri,R"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "Cutri,.R"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "one-jets")); //6.
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "jets-two"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "three-jets-four"));
-        assertU(addDocs(F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS, "five jets"));
+        // pub is now a normalized_string for exact publication matching.  Keep this
+        // test focused on keyword_norm, which still uses the normalized ASCII chain.
+        String[] normalizedTextAsciiFields = {"keyword_norm"};
+        assertU(addDocs(normalizedTextAsciiFields, "Bílá kobyla skočila přes čtyřista"));
+        assertU(addDocs(normalizedTextAsciiFields, "třicet-tři stříbrných střech"));
+        assertU(addDocs(normalizedTextAsciiFields, "A ještě TřistaTřicetTři stříbrných stovek"));
+        assertU(addDocs(normalizedTextAsciiFields, "Cutri, R"));
+        assertU(addDocs(normalizedTextAsciiFields, "Cutri,R"));
+        assertU(addDocs(normalizedTextAsciiFields, "Cutri,.R"));
+        assertU(addDocs(normalizedTextAsciiFields, "one-jets")); //6.
+        assertU(addDocs(normalizedTextAsciiFields, "jets-two"));
+        assertU(addDocs(normalizedTextAsciiFields, "three-jets-four"));
+        assertU(addDocs(normalizedTextAsciiFields, "five jets"));
 
         assertU(commit("waitSearcher", "true"));
 
         assertQ(req("q", "*:*"), "//*[@numFound='10']");
 
-        //dumpDoc(null, F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS);
+        //dumpDoc(null, normalizedTextAsciiFields);
 
-        for (String f : F.TYPE_NORMALIZED_TEXT_ASCII_FIELDS) {
+        for (String f : normalizedTextAsciiFields) {
 
             // ascii normalization
             assertQueryEquals(req("q", f + ":Bílá", "qt", "aqp"), f + ":bila", TermQuery.class);
