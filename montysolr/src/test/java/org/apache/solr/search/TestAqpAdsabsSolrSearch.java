@@ -711,6 +711,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("q", "title:(profile NEAR2 rotation)"), "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
 
         assertQEx("INVALID_SYNTAX", req("q", "author:\"^\"de marco year:2015"), 400);
+        // The second title is a decoy; the suffix must remain a year filter.
+        assertU(adoc("id", "1041", "bibcode", "b1041", "author", "Montez, R.", "year", "2017", "title", "hello"));
+        assertU(adoc("id", "1042", "bibcode", "b1042", "author", "Montez, R.", "year", "2018", "title", "2017"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "q", "^montez, r. year:2017"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1041']",
+                "//doc[not(str[@name='id']='1042')]");
+        assertQ(req("defType", "aqp", "q", "^montez, r. title:hello"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1041']",
+                "//doc[not(str[@name='id']='1042')]");
+
 
         assertQ(req("q", "similar(foo bar baz title bitle, input abstract title, 100, 100, 1, 1)"),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='2']");
