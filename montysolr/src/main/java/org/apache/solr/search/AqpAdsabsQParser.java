@@ -116,6 +116,10 @@ public class AqpAdsabsQParser extends QParser {
                 }
             }
         }
+        String queryFields = solrParams.get("qf");
+        if (queryFields != null) {
+            namedParams.put("aqp.unfielded.queryFields", queryFields);
+        }
 
 
         qParser.setAnalyzer(schema.getQueryAnalyzer());
