@@ -5,6 +5,7 @@ import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.search.*;
 
 import java.util.Map.Entry;
@@ -270,7 +271,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("+field:");
 
         assertQueryNodeException("=");
-        assertQueryNodeException("one ^\"author phrase\"");
 
         // this parses well, shall we consider it mistake?
         //assertQueryNodeException("one ^\"author phrase\"$");
@@ -279,6 +279,34 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("(doi:tricky:01235)");
 
     }
+
+    public void testLeadingCaretPhraseBoundary() throws Exception {
+        assertQueryEquals("^\"Henneken,E\" ADS", null, "+\"henneken e\" +ads", BooleanQuery.class);
+        AqpANTLRNode tree = (AqpANTLRNode) new AqpSyntaxParserLoadableImpl()
+                .initializeGrammar("ADS")
+                .parse("one ^\"author phrase\"", null);
+        assertEquals(2, tree.getChildren().size());
+        assertNotNull(((AqpANTLRNode) tree.getChildren().get(1)).findChild("QPHRASE"));
+        assertQueryNodeException("^2\"Henneken,E\" ADS");
+        assertQueryNodeException("one ^\"author phrase\"$");
+    }
+
+
+    public void testOrdinaryPhraseDollarSyntax() throws Exception {
+        AqpANTLRNode tree = (AqpANTLRNode) new AqpSyntaxParserLoadableImpl()
+                .initializeGrammar("ADS")
+                .parse("one \"author phrase\"$", null);
+        assertEquals("OPERATOR", tree.getTokenName());
+        assertEquals(3, tree.getChildren().size());
+        AqpANTLRNode phrase = ((AqpANTLRNode) tree.getChildren().get(1)).findChild("QPHRASE");
+        assertNotNull(phrase);
+        assertEquals("\"author phrase\"",
+                ((AqpANTLRNode) phrase.getChildren().get(0)).getTokenInput());
+        AqpANTLRNode dollar = ((AqpANTLRNode) tree.getChildren().get(2)).findChild("QNORMAL");
+        assertNotNull(dollar);
+        assertEquals("$", ((AqpANTLRNode) dollar.getChildren().get(0)).getTokenInput());
+    }
+
 
     public void testWildCards() throws Exception {
         Query q = null;
@@ -367,6 +395,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");
         assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"", PhraseQuery.class);
+
 
         assertQueryEquals("title:\"X x\" AND text:go title:\"x y\" AND A", null, "+title:\"x x\" +text:go +title:\"x y\" +a");
         assertQueryEquals("title:\"X x\" OR text:go title:\"x y\" OR A", null, "+(title:\"x x\" text:go) +(title:\"x y\" a)");
