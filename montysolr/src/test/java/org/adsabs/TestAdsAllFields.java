@@ -477,6 +477,45 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         assertQ(req("q", "pos(author:\"Einstein, A\", 1, 2)"),
                 "//*[@numFound='0']"
         );
+        // Curly punctuation inside an existing ASCII-quoted author literal is
+        // content, not a second delimiter. The ASCII control proves the
+        // positional parser itself is functional; curly-content matching is
+        // left to the configured author analyzer.
+        assertU(adoc("id", "204", "bibcode", "ascii-author",
+                "author", "Smith, Plain"));
+        assertU(adoc("id", "205", "bibcode", "nested-curly-author",
+                "author", "Smith, Cur\u201Dly"));
+        assertU(commit());
+        try {
+            assertQ(req("q", "pos(author:\"Smith, Plain\", 1)"),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='204']");
+            assertQ(req("q", "pos(author:\"Smith, Cur\u201Dly\", 1)"),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='205']");
+        } finally {
+            assertU(delI("204"));
+            assertU(delI("205"));
+            assertU(commit());
+        }
+        assertQ(req("q", "pos(author:\u201DAnders, John Michael\u201D, 2)"),
+                "//doc/int[@name='recid'][.='100']",
+                "//*[@numFound='1']");
+        // Malformed positional argument order is a client error, not an HTTP 500.
+        assertQEx("pos() should reject a field argument in the distance slot",
+                req("q", "pos(1,author:\"Anders, John Michael\")"), 400);
+        assertQ(req("q", "author:\u201DAnders, John Michael\u201D AND recid:100"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']");
+        assertQ(req("q", "author:\u201DAnders, John Michael\u201D^2"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']");
+        assertQ(req("q", "title:\u201Cquoteescapedleft\\\u201Dquoteescapedright\u201D"),
+                "//*[@numFound='0']");
+        assertQueryContains(req("q", "title:/foo:\u201Dbar/"), "\u201D", null);
+        var regexAfterClause = assertQueryEquals(
+                req("q", "title:foo OR /foo:\u201Dbar/"), null, BooleanQuery.class);
+        assertTrue(regexAfterClause.toString("field").contains("\u201D"));
 
 
         /*
