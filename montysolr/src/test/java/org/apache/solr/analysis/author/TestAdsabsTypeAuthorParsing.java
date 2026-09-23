@@ -1248,6 +1248,34 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         return new junit.framework.JUnit4TestAdapter(TestAdsabsTypeAuthorParsing.class);
     }
 
+    public void testSingleSurnameWildcard() throws Exception {
+        assertU(adoc(F.ID, "9811", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Asteron, A"));
+        assertU(adoc(F.ID, "9812", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Bsteron, B"));
+        assertU(adoc(F.ID, "9813", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Accomazzi, Alberto"));
+        assertU(adoc(F.ID, "9814", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Planck, Max"));
+        assertU(commit());
+
+        try {
+            assertQ(req("q", "author:a*", "fq", "id:(9811 OR 9812)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9811']",
+                    "not(//doc/str[@name='id'][.='9812'])"
+            );
+            assertQ(req("q", "author:\"acco*\"", "fq", "id:9813"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9813']");
+            assertQ(req("q", "author:\"Planck*\"", "fq", "id:9814"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9814']");
+        } finally {
+            assertU(delI("9811"));
+            assertU(delI("9812"));
+            assertU(delI("9813"));
+            assertU(delI("9814"));
+            assertU(commit());
+        }
+    }
+
 
 
 }
