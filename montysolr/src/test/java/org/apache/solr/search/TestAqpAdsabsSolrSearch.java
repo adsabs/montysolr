@@ -1143,4 +1143,17 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabsSolrSearch.class);
     }
 
+    public void testWildcardAgainstReaderStringField() throws Exception {
+        assertU(adoc("id", "1761", "bibcode", "1761", "reader", "X02f794aca"));
+        assertU(adoc("id", "1762", "bibcode", "1762", "reader", "X02f795aca"));
+        assertU(commit());
+
+        assertQ(req("defType", "aqp", "q", "reader:X02f794ac*"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1761']",
+                "not(//doc/str[@name='id'][.='1762'])"
+        );
+    }
+
+
 }

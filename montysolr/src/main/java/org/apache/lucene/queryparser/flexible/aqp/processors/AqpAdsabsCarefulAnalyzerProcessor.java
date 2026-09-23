@@ -17,6 +17,8 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.StrField;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -66,6 +68,9 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         if (node instanceof WildcardQueryNode) {
             field = ((WildcardQueryNode) node).getFieldAsString();
             value = ((WildcardQueryNode) node).getTextAsString();
+            if (isStrField(field)) {
+                return node;
+            }
 
             int asteriskPosition = -1;
             int qmarkPosition = -1;
@@ -168,6 +173,14 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         }
 
         return node;
+    }
+
+    private boolean isStrField(String fieldName) {
+        SolrQueryRequest req = this.getQueryConfigHandler()
+                .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+                .getRequest();
+        SchemaField schemaField = req.getSchema().getFieldOrNull(fieldName);
+        return schemaField != null && schemaField.getType() instanceof StrField;
     }
 
 
