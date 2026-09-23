@@ -114,6 +114,13 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
             // we must detect pubdate:YYYY(-MM-DD) queries, and turn them into range
             // query if necessary
             // ie. rewrite (pub)date fieldquery into termrange query
+
+            // Explicit year ranges may have a one-to-three-digit endpoint. Keep this
+            // field-specific so identifiers such as title:09-2012 remain terms.
+            if (field.equals("year") && isShortYearRange(fieldNode.getTextAsString())
+                    && !(node.getParent() instanceof TermRangeQueryNode)) {
+                node = rewriteShortYearRange(fieldNode);
+            }
             if (humanizedDateFields.containsKey(field)) {
                 node = rewriteDateRange(node, fieldNode, humanizedDateFields, field);
             }
@@ -144,6 +151,46 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
             }
         }
         return true;
+    }
+
+    private boolean isShortYearRange(String value) {
+        int separator = value.indexOf('-');
+        if (separator <= 0 || separator != value.lastIndexOf('-')) {
+            return false;
+        }
+
+        int lowerLength = separator;
+        int upperLength = value.length() - separator - 1;
+        if (!((lowerLength <= 3 && upperLength == 4)
+                || (lowerLength == 4 && upperLength >= 1 && upperLength <= 3))) {
+            return false;
+        }
+
+        for (int i = 0; i < value.length(); i++) {
+            if (i == separator) {
+                continue;
+            }
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private QueryNode rewriteShortYearRange(FieldQueryNode fieldNode) {
+        String value = fieldNode.getTextAsString();
+        int separator = value.indexOf('-');
+        String lower = canonicalYear(value.substring(0, separator));
+        String upper = canonicalYear(value.substring(separator + 1));
+        int start = fieldNode.getBegin();
+        FieldQueryNode lowerBound = new FieldQueryNode(fieldNode.getFieldAsString(), lower,
+                start, start + separator);
+        FieldQueryNode upperBound = new FieldQueryNode(fieldNode.getFieldAsString(), upper,
+                start + separator + 1, fieldNode.getEnd());
+        return new TermRangeQueryNode(lowerBound, upperBound, true, true);
+    }
+    private String canonicalYear(String value) {
+        return value.length() == 4 ? value : "0000".substring(value.length()) + value;
     }
 
     private QueryNode rewriteDateRange(QueryNode node, FieldQueryNode fieldNode, Map<String, TargetField> hFields,
