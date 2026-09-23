@@ -1068,6 +1068,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "trending(author:muller)"),
                 "(like:bibcode1 bibcode2 bibcode2 bibcode4 bibcode5 bibcode2)^2.0", BoostQuery.class);
 
+
         // pos() operator
 //        assertQueryEquals(req("defType", "aqp", "q", "pos(author:\"Accomazzi, A\", 1, 100)"),
 //                "spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 100)",
@@ -1309,6 +1310,38 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
 
 
+    public void testCoreadsDoesNotTruncateReaderTerms() throws Exception {
+        List<String> seed = new ArrayList<String>();
+        List<String> seedReaders = new ArrayList<String>();
+        seed.add("id");
+        seed.add("10000");
+        seed.add("author");
+        seed.add("coreadsseed");
+        for (int i = 0; i < 1025; i++) {
+            String reader = String.format("coreads-reader-%04d", i);
+            seedReaders.add(reader);
+            seed.add("reader");
+            seed.add(reader);
+        }
+        assertU(addDocs(seed.toArray(new String[0])));
+
+        assertU(addDocs("id", "10001", "reader", seedReaders.get(0),
+                "reader", seedReaders.get(1)));
+        for (int i = 2; i < 1025; i++) {
+            assertU(addDocs("id", Integer.toString(10002 + i), "reader",
+                    String.format("coreads-reader-%04d", i)));
+        }
+        assertU(addDocs("id", "12000", "reader", "coreads-reader-unshared"));
+        assertU(commit());
+
+        // More than Lucene's default Boolean clause limit is represented as
+        // postings, not BooleanQuery clauses.  The seed has 1025 overlaps,
+        // the double candidate has two, and each single candidate has one.
+        assertQ(req("defType", "aqp", "q", "coreads(author:coreadsseed)"),
+                "//*[@numFound='1025']",
+                "//doc[1]/str[@name='id'][.='10000']",
+                "//doc[2]/str[@name='id'][.='10001']");
+    }
     public void testSearch() throws Exception {
 
         // search for all docs with a field
