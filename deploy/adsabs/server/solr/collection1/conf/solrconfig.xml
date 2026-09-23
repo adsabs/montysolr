@@ -723,6 +723,8 @@
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        
        <str name="aqp.defaultOperator">AND</str>
+       <!-- Treat the vertical bar in affiliation values as literal text, not regex syntax. -->
+       <str name="aqp.regex.disallowed.fields">aff</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
@@ -756,6 +758,8 @@
        <str name="aqp.unfieldedSearchField">unfielded_search</str>
        <str name="aqp.defaultField">unfielded_search</str>
        <str name="aqp.defaultOperator">AND</str>
+       <!-- Treat the vertical bar in affiliation values as literal text, not regex syntax. -->
+       <str name="aqp.regex.disallowed.fields">aff</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
        <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
