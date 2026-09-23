@@ -970,12 +970,12 @@ public class AqpAdsabsSubQueryProvider implements
                     }
                     if (field != null) {
                         parts.set(i, reAnalyze(field, getParser().getString(),
-                                oldQ.getClass().isInstance(BoostQuery.class) ? ((BoostQuery) oldQ).getBoost() : null));
+                                oldQ instanceof BoostQuery ? ((BoostQuery) oldQ).getBoost() : null));
                     } else {
                         parts.set(i, swimDeep(oldQ));
                     }
                 }
-                return query;
+                return new DisjunctionMaxQuery(parts, query.getTieBreakerMultiplier());
             }
 
             private String toBeAnalyzedAgain(TermQuery q) {
@@ -990,7 +990,7 @@ public class AqpAdsabsSubQueryProvider implements
             private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {
                 QParser fParser = getParser();
                 //System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
-                QParser aqp = fParser.subQuery(field + ":" + fParser.getString(), "aqp");
+                QParser aqp = fParser.subQuery(field + ":" + getOriginalInput(), "aqp");
                 Query q = aqp.getQuery();
                 if (boost != null && boost != 1.0f) {
                     q = new BoostQuery(q, boost);
@@ -1001,41 +1001,56 @@ public class AqpAdsabsSubQueryProvider implements
         parsers.put("edismax_always_aqp", new AqpSubqueryParserFull() { // will use edismax to create top query, but the rest is done by aqp
             public Query parse(FunctionQParser fp) throws SyntaxError {
                 final String original = fp.getString();
+                final boolean exactSearch = original.startsWith("{!adismax")
+                        && original.contains("aqp.exact.search=true");
+                final int localParamsEnd = original.indexOf('}');
+                final String queryText = localParamsEnd >= 0
+                        ? original.substring(localParamsEnd + 1)
+                        : original;
                 QParser eqp = fp.subQuery("xxx", "adismax");
-                fp.setString(original);
                 Query q = eqp.getQuery();
-                return simplify(reParse(q, fp, (Class<?>) null));
+                fp.setString(queryText);
+                return simplify(reParse(q, fp, Boolean.valueOf(exactSearch), TermQuery.class));
             }
 
             protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-                List<Query> parts = new ArrayList<>(query.getDisjuncts());
-                for (int i = 0; i < parts.size(); i++) {
-                    Query oldQ = parts.get(i);
+                List<Query> parts = new ArrayList<>(query.getDisjuncts().size());
+                for (Query oldQ : query.getDisjuncts()) {
+                    Query candidate = oldQ;
+                    Float boost = null;
+                    if (candidate instanceof BoostQuery) {
+                        boost = ((BoostQuery) candidate).getBoost();
+                        candidate = ((BoostQuery) candidate).getQuery();
+                    }
                     String field = null;
-                    if (oldQ instanceof TermQuery) {
-                        field = ((TermQuery) oldQ).getTerm().field();
-                    } else if (oldQ instanceof BooleanQuery) {
-                        List<BooleanClause> clauses = ((BooleanQuery) oldQ).clauses();
+                    if (candidate instanceof TermQuery) {
+                        field = ((TermQuery) candidate).getTerm().field();
+                    } else if (candidate instanceof BooleanQuery) {
+                        List<BooleanClause> clauses = ((BooleanQuery) candidate).clauses();
                         if (clauses.size() > 0) {
                             Query firstQuery = clauses.get(0).getQuery();
+                            if (firstQuery instanceof BoostQuery) {
+                                firstQuery = ((BoostQuery) firstQuery).getQuery();
+                            }
                             if (firstQuery instanceof TermQuery) {
                                 field = ((TermQuery) firstQuery).getTerm().field();
                             }
                         }
                     }
                     if (field != null) {
-                        parts.set(i, reAnalyze(field, getParser().getString(),
-                                oldQ.getClass().isInstance(BoostQuery.class) ? ((BoostQuery) oldQ).getBoost() : null));
+                        parts.add(reAnalyze(field, getParser().getString(), boost));
                     } else {
-                        parts.set(i, swimDeep(oldQ));
+                        parts.add(swimDeep(oldQ));
                     }
                 }
-                return query;
+                return new DisjunctionMaxQuery(parts, query.getTieBreakerMultiplier());
             }
 
             private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {
                 QParser fParser = getParser();
-                QParser aqp = fParser.subQuery(field + ":" + fParser.getString(), "aqp");
+                boolean exactSearch = Boolean.TRUE.equals(getReParseContext());
+                String exactPrefix = exactSearch ? "=" : "";
+                QParser aqp = fParser.subQuery(exactPrefix + field + ":" + getOriginalInput(), "aqp");
                 Query q = aqp.getQuery();
                 if (boost != null && boost != 1.0f) {
                     q = new BoostQuery(q, boost);

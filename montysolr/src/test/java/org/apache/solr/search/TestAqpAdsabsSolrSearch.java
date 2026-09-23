@@ -639,6 +639,26 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][not(.='222010')]");
     }
 
+    public void testIssue182UnfieldedFuzzySearch() throws Exception {
+        assertU(adoc("id", "900", "bibcode", "b900", "abstract", "galaxy"));
+        assertU(adoc("id", "901", "bibcode", "b901", "abstract", "galaxyx"));
+        assertU(adoc("id", "902", "bibcode", "b902", "abstract", "nebula"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "abstract:galaxy~0.8 NOT abstract:galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+        assertQ(req("defType", "aqp", "q", "=abstract:galaxy~0.8 NOT =abstract:galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+        assertQ(req("defType", "aqp", "q", "galaxy~0.8 NOT galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+        assertQ(req("defType", "aqp", "q", "=galaxy~0.8 NOT =galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",
