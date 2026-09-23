@@ -156,6 +156,7 @@
               reuseCache="${montysolr.reuseCache:true}"
               dumpCache="${montysolr.enable.write:true}"
               loadDumpedCache="${montysolr.load.citation_cache:true}"
+              incremental="${montysolr.citationCache.incremental:true}"
               />
               
     <enableLazyFieldLoading>true</enableLazyFieldLoading>

@@ -91,16 +91,16 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     // we'll treat all values (mappings) as text values
     private boolean treatIdentifiersAsText = false;
 
-    // TODO: i'm planning to add the ability to build the cache
-    // incrementally (ie per index segment), but it may
-    // not be necessary as we are going to denormalize
-    // citation data outside solr and prepare everything there...
     private boolean incremental = false;
     private boolean reuseCache;
     private boolean loadCache = false;
     private boolean dumpCache = false;
 
     private int maxDocid;
+    private int sourceMaxDoc;
+    private List<Object> sourceLeafReaderKeys = Collections.emptyList();
+    private boolean hasUnresolvedRelationships;
+    private boolean loadedFromDisk;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Object init(Map args, Object persistence, CacheRegenerator regenerator) {
@@ -368,6 +368,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                     log.info("Trying to load persisted cache " + name());
                     try {
                         ccrw.load(this);
+                        loadedFromDisk = true;
                         buildMe = false;
                         log.info("Warming cache done " + name() + " (# entries:" + relationships.size() + "): " + searcher);
                     } catch (IOException e) {
@@ -393,7 +394,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 }
             }
 
-            sourceReaderHashCode = searcher.hashCode();
+            rememberSourceReader(searcher);
 
             if (dumpCache && buildMe && getCitationCacheReaderWriter(searcher) != null) {
                 try {
@@ -407,6 +408,18 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
         warmupTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - warmingStartTime, TimeUnit.NANOSECONDS);
     }
+    private void rememberSourceReader(SolrIndexSearcher searcher) {
+        sourceReaderHashCode = searcher.hashCode();
+        sourceMaxDoc = searcher.maxDoc();
+        List<LeafReaderContext> leaves = searcher.getIndexReader().leaves();
+        List<Object> keys = new ArrayList<>(leaves.size());
+        for (LeafReaderContext leaf : leaves) {
+            IndexReader.CacheHelper helper = leaf.reader().getReaderCacheHelper();
+            keys.add(helper == null ? null : helper.getKey());
+        }
+        sourceLeafReaderKeys = keys;
+    }
+
 
     private File getCacheStorageDir(SolrIndexSearcher searcher) {
         try {
@@ -436,6 +449,8 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
 
     private void warmRebuildEverything(SolrIndexSearcher searcher, SolrCache<K, V> old) throws IOException {
+        hasUnresolvedRelationships = false;
+
 
         List<String> fields = getFields(searcher, this.identifierFields);
 
@@ -463,6 +478,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 @Override
                 public void set(int docbase, int docid, Object value) {
                     synchronized (relMap) {
+                        if (!relMap.containsKey(value)) {
+                            hasUnresolvedRelationships = true;
+                        }
                         relMap.addReference(docbase + docid, value);
                     }
                 }
@@ -472,6 +490,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 @Override
                 public void set(int docbase, int docid, Object value) {
                     synchronized (relMap) {
+                        if (!relMap.containsKey(value)) {
+                            hasUnresolvedRelationships = true;
+                        }
                         relMap.addCitation(docbase + docid, value);
                     }
                 }
@@ -487,119 +508,155 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     }
 
     private void warmIncrementally(SolrIndexSearcher searcher, SolrCache<K, V> old) throws IOException {
-        if (regenerator == null)
+        if (!canReuseIncrementally(searcher, old)) {
+            warmRebuildEverything(searcher, old);
             return;
-
-        List<String> fields = getFields(searcher, this.identifierFields);
-        CitationLRUCache<K, V> other = (CitationLRUCache<K, V>) old;
-
-        // collect ids of documents that need to be reloaded/regenerated during this
-        // warmup run
-        // System.out.println("searcher: " + searcher.toString());
-        // System.out.println("maxDoc: " + searcher.getIndexReader().maxDoc());
-        FixedBitSet toRefresh = new FixedBitSet(searcher.getIndexReader().maxDoc());
-
-        // System.out.println("version=" + searcher.getIndexReader().getVersion());
-        // try {
-        // System.out.println("commit=" + searcher.getIndexReader().getIndexCommit());
-        // } catch (IOException e2) {
-        // TODO Auto-generated catch block
-        // e2.printStackTrace();
-        // }
-
-        // for (IndexReaderContext c : searcher.getTopReaderContext().children()) {
-        // //System.out.println("context=" + c.reader().getCombinedCoreAndDeletesKey());
-        // }
-
-        // for (IndexReaderContext l : searcher.getIndexReader().leaves()) {
-        // //System.out.println(l);
-        // }
-
-        Bits liveDocs = searcher.getSlowAtomicReader().getLiveDocs();
-        // System.out.println(liveDocs == null ? "liveDocs=" + null : "liveDocs=" +
-        // liveDocs.length());
-        // System.out.println("numDeletes=" +
-        // searcher.getAtomicReader().numDeletedDocs());
-
-        if (liveDocs == null) { // everything is new, this could be fresh index or merged/optimized index too
-
-            // searcher.getAtomicReader().getContext().children().size()
-
-            // other.map.clear(); // force regeneration
-            toRefresh.set(0, toRefresh.length());
-
-            // Build the mapping from indexed values into lucene ids
-            // this must always be available, so we build it no matter what...
-            // XXX: make it update only the necessary IDs (not the whole index)
-            unInvertedTheDamnThing(searcher, fields, new KVSetter() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public void set(int docbase, int docid, Object value) {
-                    put((K) value, (V) (Integer) (docbase + docid));
-                }
-            });
-
-        } else if (liveDocs != null) {
-
-            Integer luceneId;
-            for (V v : other.relationships.values()) {
-                luceneId = ((Integer) v);
-                if (luceneId <= liveDocs.length() && !liveDocs.get(luceneId)) { // doc was either deleted or updated
-                    // System.out.println("Found deleted: " + luceneId);
-                    // retrieve all citations/references for this luceneId and mark these docs to be
-                    // refreshed
-                }
-            }
-
-            for (int i = 0; i < toRefresh.length(); i++) {
-                if (liveDocs.get(i)) {
-                    toRefresh.set(i);
-                }
-            }
         }
 
-        // warm entries
-        if (isAutowarmingOn()) {
-            Object[] keys, vals = null;
+        CitationLRUCache<K, V> other = (CitationLRUCache<K, V>) old;
+        int firstNewDoc = other.sourceMaxDoc;
+        List<String> identifierFields = getFields(searcher, this.identifierFields);
+        Map<K, V> newIdentifiers = new LinkedHashMap<>(16, 0.75f, true);
+        boolean[] duplicateIdentifiers = new boolean[1];
+        unInvertedTheDamnThing(searcher, identifierFields, firstNewDoc, new KVSetter() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public void set(int docbase, int docid, Object value) {
+                if (treatIdentifiersAsText && value instanceof Integer) {
+                    value = Integer.toString((Integer) value);
+                }
+                K key = (K) value;
+                V newDocId = (V) (Integer) (docbase + docid);
+                synchronized (other.relationships) {
+                    if (other.relationships.containsKey(key)) {
+                        duplicateIdentifiers[0] = true;
+                    }
+                }
+                V previousDocId = newIdentifiers.put(key, newDocId);
+                if (previousDocId != null && !previousDocId.equals(newDocId)) {
+                    duplicateIdentifiers[0] = true;
+                }
+            }
+        });
+        if (duplicateIdentifiers[0]) {
+            warmRebuildEverything(searcher, old);
+            return;
+        }
 
-            // Don't do the autowarming in the synchronized block, just pull out the keys
-            // and values.
-            synchronized (other.relationships) {
+        copyCacheData(other, searcher.maxDoc());
+        for (Map.Entry<K, V> entry : newIdentifiers.entrySet()) {
+            put(entry.getKey(), entry.getValue());
+        }
 
-                int sz = autowarm.getWarmCount(other.relationships.size());
+        if (this.referenceFields.length == 0 && this.citationFields.length == 0) {
+            return;
+        }
 
-                keys = new Object[sz];
-                vals = new Object[sz];
+        final RelationshipLinkedHashMap<K, V> relMap =
+                (RelationshipLinkedHashMap<K, V>) relationships;
+        if (this.referenceFields.length > 0) {
+            unInvertedTheDamnThing(searcher, getFields(searcher, this.referenceFields), firstNewDoc,
+                    new KVSetter() {
+                        @Override
+                        public void set(int docbase, int docid, Object value) {
+                            int source = docbase + docid;
+                            synchronized (relMap) {
+                                if (!relMap.containsKey(value)) {
+                                    hasUnresolvedRelationships = true;
+                                }
+                                relMap.addReference(source, value);
+                                if (citationFields.length == 0) {
+                                    Integer target = (Integer) relMap.get(value);
+                                    if (target != null) {
+                                        relMap.addCitation(target, source);
+                                    }
+                                }
+                            }
+                        }
+                    });
+        }
+        if (this.citationFields.length > 0) {
+            unInvertedTheDamnThing(searcher, getFields(searcher, this.citationFields), firstNewDoc,
+                    new KVSetter() {
+                        @Override
+                        public void set(int docbase, int docid, Object value) {
+                            int source = docbase + docid;
+                            synchronized (relMap) {
+                                if (!relMap.containsKey(value)) {
+                                    hasUnresolvedRelationships = true;
+                                }
+                                relMap.addCitation(source, value);
+                                if (referenceFields.length == 0) {
+                                    Integer target = (Integer) relMap.get(value);
+                                    if (target != null) {
+                                        relMap.addReference(target, source);
+                                    }
+                                }
+                            }
+                        }
+                    });
+        }
+    }
 
-                Iterator<Map.Entry<K, V>> iter = other.relationships.entrySet().iterator();
+    private boolean canReuseIncrementally(SolrIndexSearcher searcher, SolrCache<K, V> old) {
+        if (!(old instanceof CitationLRUCache)) {
+            return false;
+        }
+        CitationLRUCache<?, ?> other = (CitationLRUCache<?, ?>) old;
+        if (other.loadedFromDisk || other.hasUnresolvedRelationships || other.sourceLeafReaderKeys.isEmpty()
+                || other.sourceMaxDoc > searcher.maxDoc()) {
+            return false;
+        }
+        if (searcher.getSlowAtomicReader().getLiveDocs() != null) {
+            return false;
+        }
 
-                // iteration goes from oldest (least recently used) to most recently used,
-                // so we need to skip over the oldest entries.
-                int skip = other.relationships.size() - sz;
-                for (int i = 0; i < skip; i++)
-                    iter.next();
+        List<LeafReaderContext> leaves = searcher.getIndexReader().leaves();
+        if (leaves.size() < other.sourceLeafReaderKeys.size()) {
+            return false;
+        }
+        for (int i = 0; i < other.sourceLeafReaderKeys.size(); i++) {
+            Object oldKey = other.sourceLeafReaderKeys.get(i);
+            IndexReader.CacheHelper helper = leaves.get(i).reader().getReaderCacheHelper();
+            if (oldKey == null || helper == null || helper.getKey() != oldKey) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-                for (int i = 0; i < sz; i++) {
-                    Map.Entry<K, V> entry = iter.next();
-                    keys[i] = entry.getKey();
-                    vals[i] = entry.getValue();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void copyCacheData(CitationLRUCache<K, V> other, int maxDocs) {
+        RelationshipLinkedHashMap<K, V> target =
+                (RelationshipLinkedHashMap<K, V>) relationships;
+        RelationshipLinkedHashMap<K, V> source =
+                (RelationshipLinkedHashMap<K, V>) other.relationships;
+
+        synchronized (source) {
+            for (Map.Entry<K, V> entry : source.entrySet()) {
+                relationships.put(entry.getKey(), entry.getValue());
+                if (entry.getValue() instanceof Integer) {
+                    maxDocid = Math.max(maxDocid, (Integer) entry.getValue());
                 }
             }
 
-            // autowarm from the oldest to the newest entries so that the ordering will be
-            // correct in the new cache.
-            for (int i = 0; i < keys.length; i++) {
-                try {
-                    boolean continueRegen = true;
-                    if (isModified(liveDocs, keys[i], vals[i])) {
-                        toRefresh.set((Integer) keys[i]);
-                    } else {
-                        continueRegen = regenerator.regenerateItem(searcher, this, old, (K)keys[i], (V)vals[i]);
+            if (referenceFields.length == 0 && citationFields.length == 0) {
+                return;
+            }
+            target.initializeCitationCache(maxDocs);
+            int copied = Math.min(maxDocs, source.references.size());
+            for (int sourceDoc = 0; sourceDoc < copied; sourceDoc++) {
+                ArrayIntList refs = source.references.get(sourceDoc);
+                if (refs != null) {
+                    for (int i = 0; i < refs.size(); i++) {
+                        target.addReference(sourceDoc, refs.get(i));
                     }
-                    if (!continueRegen)
-                        break;
-                } catch (Throwable e) {
-                    SolrException.log(log, "Error during auto-warming of key:" + keys[i], e);
+                }
+                ArrayIntList cits = source.citations.get(sourceDoc);
+                if (cits != null) {
+                    for (int i = 0; i < cits.size(); i++) {
+                        target.addCitation(sourceDoc, cits.get(i));
+                    }
                 }
             }
         }
@@ -626,7 +683,7 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
                 }
             }
 
-            if (!fieldInfo.stored() && type.getDocValuesFormat().equals(DocValuesType.NONE)) {
+            if (!fieldInfo.stored() && !fieldInfo.hasDocValues()) {
                 throw new SolrException(ErrorCode.FORBIDDEN,
                         "The field " + f + " cannot be used to build citation cache!");
             }
@@ -711,6 +768,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
      */
     private void unInvertedTheDamnThing(SolrIndexSearcher searcher, List<String> fields, final KVSetter setter)
             throws IOException {
+        unInvertedTheDamnThing(searcher, fields, 0, setter);
+    }
+
+    private void unInvertedTheDamnThing(SolrIndexSearcher searcher, List<String> fields,
+                                        int firstDoc, final KVSetter setter) throws IOException {
 
         IndexSchema schema = searcher.getCore().getLatestSchema();
         List<LeafReaderContext> leaves = searcher.getIndexReader().getContext().leaves();
@@ -720,6 +782,9 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         Transformer transformer;
         for (LeafReaderContext leave : leaves) {
             int docBase = leave.docBase;
+            if (docBase + leave.reader().maxDoc() <= firstDoc) {
+                continue;
+            }
             liveDocs = leave.reader().getLiveDocs();
             lr = leave.reader();
             FieldInfos fInfo = lr.getFieldInfos();
@@ -831,6 +896,10 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
 
                 int i = 0;
                 while (i < lr.maxDoc()) {
+                    if (docBase + i < firstDoc) {
+                        i++;
+                        continue;
+                    }
                     if (liveDocs != null && !(i < liveDocs.length() && liveDocs.get(i))) {
                         i++;
                         continue;

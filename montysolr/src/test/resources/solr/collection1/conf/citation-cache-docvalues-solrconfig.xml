@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<config>
+  <luceneMatchVersion>${tests.luceneMatchVersion:LUCENE_CURRENT}</luceneMatchVersion>
+  <dataDir>${solr.data.dir:}</dataDir>
+  <schemaFactory class="solr.ClassicIndexSchemaFactory"/>
+  <directoryFactory name="DirectoryFactory" class="solr.ByteBuffersDirectoryFactory"/>
+  <indexConfig>
+    <lockType>${montysolr.locktype:single}</lockType>
+  </indexConfig>
+  <requestHandler name="standard" class="solr.StandardRequestHandler"></requestHandler>
+  <query>
+    <cache name="citations-cache-from-id-docvalues"
+              class="solr.CitationLRUCache"
+              size="1024"
+              initialSize="1024"
+              autowarmCount="1024"
+              regenerator="solr.CitationLRUCache$SimpleRegenerator"
+              identifierFields="cache_id"
+              incremental="true"
+              />
+  </query>
+</config>
