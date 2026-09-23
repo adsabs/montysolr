@@ -298,4 +298,33 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 
     }
 
+    public void testBareYearRangeBoundary() throws Exception {
+        String[] ids = {"9301", "9302", "9303", "9304", "9305", "9306", "9307", "9308"};
+        String idsFilter = "{!terms f=id}9301,9302,9303,9304,9305,9306,9307,9308";
+        try {
+            assertU(addDocs("id", "9303", "date", "1976-01-01T00:30:00Z", "title", "foo"));
+            assertU(addDocs("id", "9304", "date", "1976-01-02T00:30:00Z"));
+            assertU(addDocs("id", "9305", "date", "1976-02-01T00:30:00Z"));
+            assertU(addDocs("id", "9306", "date", "1976-01-02T00:30:00Z"));
+            assertU(addDocs("id", "9307", "date", "1976-12-30T00:30:00Z"));
+            assertU(addDocs("id", "9308", "date", "1977-01-01T00:30:00Z"));
+            assertU(addDocs("id", "9301", "date", "2000-12-31T23:59:59.999Z"));
+            assertU(addDocs("id", "9302", "date", "2001-01-01T00:00:00Z"));
+            assertU(commit());
+
+            assertQ(req("q", "1000-2000", "fl", "id,date", "fq", idsFilter),
+                    "//*[@numFound='7']",
+                    "//doc/str[@name='id'][.='9301']"
+            );
+            assertQ(req("q", "2001-2001", "fl", "id,date", "fq", idsFilter),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9302']"
+            );
+        } finally {
+            for (String id : ids) {
+                assertU(delI(id));
+            }
+            assertU(commit());
+        }
+    }
 }
