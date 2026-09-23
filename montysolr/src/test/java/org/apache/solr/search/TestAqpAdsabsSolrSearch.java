@@ -676,6 +676,36 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("defType", "aqp", "q", "=galaxy~0.8 NOT =galaxy"),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
                 "not(//doc/str[@name='id'][.='902'])");
+
+    }
+
+    public void testIssue183QuotedBracketLiteral() throws Exception {
+        try {
+            assertU(adoc("id", "920", "bibcode", "b920", "title", "B[e]"));
+            assertU(adoc("id", "921", "bibcode", "b921", "title", "B(e)"));
+            assertU(adoc("id", "922", "bibcode", "b922", "title", "B[e]-stars"));
+            assertU(commit("waitSearcher", "true"));
+
+            assertQ(req("q", "\"B[e]\""),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='920']",
+                    "not(//doc/str[@name='id'][.='921'])");
+            assertQ(req("q", "title:\"B[e]\""),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='920']",
+                    "not(//doc/str[@name='id'][.='921'])");
+            assertQ(req("q", "title:\"B[e],\""),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='920']",
+                    "not(//doc/str[@name='id'][.='921'])");
+            assertQ(req("q", "\"B(e)\""),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='921']",
+                    "not(//doc/str[@name='id'][.='920'])");
+            assertQ(req("q", "title:stars"),
+                    "//doc/str[@name='id'][.='922']");
+        } finally {
+            assertU(delI("920"));
+            assertU(delI("921"));
+            assertU(delI("922"));
+            assertU(commit());
+        }
     }
 
     public void testSpecialCases() throws Exception {
