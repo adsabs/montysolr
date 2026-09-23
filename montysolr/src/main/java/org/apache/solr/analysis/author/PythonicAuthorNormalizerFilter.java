@@ -4,6 +4,8 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
+import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
+import org.apache.lucene.util.BytesRef;
 import org.jython.monty.HumanParser;
 import org.jython.monty.interfaces.JythonNameParser;
 
@@ -36,6 +38,8 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+    private final PayloadAttribute payloadAtt = addAttribute(PayloadAttribute.class);
+    private final List<String> originalNames = new ArrayList<String>();
     private final List<String> buffer = new ArrayList<String>();
     private final Pattern multiSpace = Pattern.compile("\\s\\s+");
     private final JythonNameParser jythonParser;
@@ -48,8 +52,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
     @Override
     public boolean incrementToken() throws IOException {
         if (buffer.size() > 0) {
-            termAtt.setEmpty().append(buffer.remove(0));
-            typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
+            emitBuffered();
             return true;
         }
 
@@ -61,10 +64,14 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
         String newIndividual = null;
 
         for (String individual : original.split(";")) {
+            String sourceName = individual.trim();
+            if (!sourceName.contains(",")) {
+                sourceName += ",";
+            }
 
             // skip processing wildcards
             if (individual.contains("*") || individual.contains("?")) {
-                buffer.add(individual);
+                addBuffered(individual, sourceName);
                 continue;
             }
 
@@ -98,24 +105,23 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
                         || ignNewSpaceIndividual.equals(ignSpaceIndividual)
                         || ignNewSpaceIndividual.equals(ignSpaceIndividual + ",")
                 ) {
-                    buffer.add(newIndividual);  // no modifications, just add original
+                    addBuffered(newIndividual, sourceName);
                 } else { // some modifications happened
 
                     // add original
                     if (!individual.contains(",")) {
-                        buffer.add(individual + ",");
+                        addBuffered(individual + ",", sourceName);
                     } else {
-                        buffer.add(individual);
+                        addBuffered(individual, sourceName);
                     }
 
                     if (newIndividual != null) {
-                        buffer.add(newIndividual); // add modified version
+                        addBuffered(newIndividual, sourceName); // add modified version
                     }
-
                 }
 
             } else {
-                buffer.add(individual);
+                addBuffered(individual, sourceName);
             }
         }
 
@@ -123,15 +129,24 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
             return false;
         }
 
-        termAtt.setEmpty().append(buffer.remove(0));
-        typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
-
+        emitBuffered();
         return true;
     }
 
+    private void addBuffered(String name, String originalName) {
+        buffer.add(name);
+        originalNames.add(originalName);
+    }
+
+    private void emitBuffered() {
+        termAtt.setEmpty().append(buffer.remove(0));
+        payloadAtt.setPayload(new BytesRef(originalNames.remove(0)));
+        typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
+    }
     @Override
     public void reset() throws IOException {
         super.reset();
         buffer.clear();
+        originalNames.clear();
     }
 }
