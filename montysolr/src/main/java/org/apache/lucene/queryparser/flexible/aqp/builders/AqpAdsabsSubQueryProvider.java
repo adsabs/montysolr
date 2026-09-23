@@ -80,17 +80,31 @@ public class AqpAdsabsSubQueryProvider implements
     }
 
     /**
-     * MoreLikeThisQuery hard-caps analyzed input at 5,000 tokens. Trending
-     * reader lists can be much larger, so keep the existing max-query-term
-     * limit while allowing all collected reader values to be considered.
+     * MoreLikeThisQuery normally puts all input in one field and caps analyzed
+     * input at 5,000 tokens. Similarity preserves source-field associations,
+     * while trending reads the full collected reader list.
      */
     private static class AdsMoreLikeThisQuery extends MoreLikeThisQuery {
         private final String fieldName;
+        private final Map<String, Collection<Object>> fieldValues;
 
         AdsMoreLikeThisQuery(String likeText, String[] moreLikeFields,
                              Analyzer analyzer, String fieldName) {
             super(likeText, moreLikeFields, analyzer, fieldName);
             this.fieldName = fieldName;
+            this.fieldValues = null;
+        }
+
+        AdsMoreLikeThisQuery(String likeText, String[] moreLikeFields,
+                             Analyzer analyzer, String fieldName,
+                             Map<String, Collection<Object>> fieldValues) {
+            super(likeText, moreLikeFields, analyzer, fieldName);
+            this.fieldName = fieldName;
+            Map<String, Collection<Object>> copied = new HashMap<>();
+            for (Map.Entry<String, Collection<Object>> entry : fieldValues.entrySet()) {
+                copied.put(entry.getKey(), List.copyOf(entry.getValue()));
+            }
+            this.fieldValues = Map.copyOf(copied);
         }
 
         @Override
@@ -104,10 +118,13 @@ public class AqpAdsabsSubQueryProvider implements
             }
             mlt.setMaxQueryTerms(getMaxQueryTerms());
             mlt.setStopWords(getStopWords());
-            mlt.setMaxNumTokensParsed(Integer.MAX_VALUE);
-
-            BooleanQuery terms = (BooleanQuery) mlt.like(
-                    fieldName, new StringReader(getLikeText()));
+            BooleanQuery terms;
+            if (fieldValues == null) {
+                mlt.setMaxNumTokensParsed(Integer.MAX_VALUE);
+                terms = (BooleanQuery) mlt.like(fieldName, new StringReader(getLikeText()));
+            } else {
+                terms = (BooleanQuery) mlt.like(fieldValues);
+            }
             BooleanQuery.Builder query = new BooleanQuery.Builder();
             for (BooleanClause clause : terms) {
                 query.add(clause);
@@ -115,6 +132,18 @@ public class AqpAdsabsSubQueryProvider implements
             query.setMinimumNumberShouldMatch(
                     (int) (terms.clauses().size() * getPercentTermsToMatch()));
             return query.build();
+        }
+        @Override
+        public boolean equals(Object other) {
+            return other instanceof AdsMoreLikeThisQuery
+                    && super.equals(other)
+                    && fieldName.equals(((AdsMoreLikeThisQuery) other).fieldName)
+                    && Objects.equals(fieldValues, ((AdsMoreLikeThisQuery) other).fieldValues);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * super.hashCode() + Objects.hash(fieldName, fieldValues);
         }
     }
 
@@ -1240,6 +1269,7 @@ public class AqpAdsabsSubQueryProvider implements
                 final StringBuilder text = new StringBuilder();
                 SolrQueryRequest req = fp.getReq();
                 FixedBitSet toIgnore = null;
+                Map<String, Collection<Object>> fieldValues = new HashMap<>();
                 String[] fieldsToLoad = toLoad.split(" ");
 
                 if (toLoad.indexOf("input") > -1) {
@@ -1274,9 +1304,10 @@ public class AqpAdsabsSubQueryProvider implements
                             toIgnore.set(d.doc);
                             Document vals = searcher.doc(d.doc, docFields);
                             for (String f : docFields) {
+                                Collection<Object> values = fieldValues.computeIfAbsent(
+                                        f, ignored -> new ArrayList<>());
                                 for (String x : vals.getValues(f)) {
-                                    text.append(x);
-                                    text.append(" ");
+                                    values.add(x);
                                 }
                             }
                         }
@@ -1295,8 +1326,10 @@ public class AqpAdsabsSubQueryProvider implements
 
 
                 Analyzer analyzer = req.getSchema().getIndexAnalyzer();
-                MoreLikeThisQuery mlt = new MoreLikeThisQuery(text.toString(), fieldsToLoad,
-                        analyzer, fieldsToLoad[0]);
+                MoreLikeThisQuery mlt = toLoad.indexOf("input") > -1
+                        ? new MoreLikeThisQuery(text.toString(), fieldsToLoad, analyzer, fieldsToLoad[0])
+                        : new AdsMoreLikeThisQuery("", fieldsToLoad, analyzer,
+                        fieldsToLoad[0], fieldValues);
 
                 mlt.setMinTermFrequency(minTermFrequency);
                 mlt.setMinDocFreq(minDocFrequency);
