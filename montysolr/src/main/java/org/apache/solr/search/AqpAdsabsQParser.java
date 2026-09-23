@@ -54,6 +54,8 @@ public class AqpAdsabsQParser extends QParser {
     public static TimeZone UTC = TimeZone.getTimeZone("UTC");
     public static final Logger log = LoggerFactory
             .getLogger(AqpAdsabsQParser.class);
+    public static final String VIRTUAL_FIELDS_CONTEXT_KEY =
+            AqpAdsabsQParser.class.getName() + ".virtualFields";
 
 
     private final AqpQueryParser qParser;
@@ -253,6 +255,8 @@ public class AqpAdsabsQParser extends QParser {
         });
 
         config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS).putAll(defaultConfig.virtualFields);
+        req.getContext().put(VIRTUAL_FIELDS_CONTEXT_KEY,
+                config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.VIRTUAL_FIELDS));
 
         if (params.get("aqp.allow.leading_wildcard", null) != null) {
             config.set(StandardQueryConfigHandler.ConfigurationKeys.ALLOW_LEADING_WILDCARD,
