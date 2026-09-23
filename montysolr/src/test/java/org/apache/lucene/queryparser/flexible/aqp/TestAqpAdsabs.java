@@ -178,6 +178,15 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
     }
 
+    public void testForbiddenLineNotation() throws Exception {
+        assertEquals(getQuery("C\\[II\\]", null).toString("field"),
+                getQuery("C[II]", null).toString("field"));
+        assertEquals(getQuery("\\[OII\\]", null).toString("field"),
+                getQuery("[OII]", null).toString("field"));
+        assertEquals(getQuery("CII\\]", null).toString("field"),
+                getQuery("CII]", null).toString("field"));
+    }
+
 
     public void testModifiers() throws Exception {
 
