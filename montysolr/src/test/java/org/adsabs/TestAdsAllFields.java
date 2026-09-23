@@ -994,6 +994,31 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "//*[@numFound='1']",
                 "//doc/int[@name='recid'][.='100']"
         );
+        try {
+            /*
+             * An open-ended humanized timestamp range must remain open. A finite
+             * +/-1000-year substitute would incorrectly exclude this future record.
+             */
+            assertU(adoc("id", "998", "bibcode", "ancient-date",
+                    "entry_date", "0001-01-01T00:00:00.000Z"));
+            assertU(adoc("id", "999", "bibcode", "future-date",
+                    "entry_date", "2025-01-01T00:00:00.000Z"));
+            assertU(commit());
+            assertQ(req("q", "id:999 AND entdate:[1000 TO *]", "debugQuery", "true"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='999']");
+            assertQ(req("q", "id:998 AND entdate:[* TO 2012]", "debugQuery", "true"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='998']");
+            assertQ(req("q", "id:998 AND entdate:[1000 TO 2012]"),
+                    "//*[@numFound='0']");
+            assertQ(req("q", "id:999 AND entdate:[1000 TO 2004]"),
+                    "//*[@numFound='0']");
+        } finally {
+            assertU(delI("998"));
+            assertU(delI("999"));
+            assertU(commit());
+        }
 
 
         /*

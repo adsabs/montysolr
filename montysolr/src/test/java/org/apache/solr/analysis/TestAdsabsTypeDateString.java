@@ -107,17 +107,6 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         assertQueryEquals(req("q", "pubdate:[2012]", "defType", "aqp"),
                 "date:[1325376000000 TO 1325462399000]",
                 null);
-        // 1012-01-01T00:00:01 - 2012-12-31T23:59:59
-        // NOTE: the date parsing is tricky (calendars were changed in 1582)
-        // so it actually produces 1011-12-26; but I think we can ignore it
-        assertQueryEquals(req("q", "pubdate:[* TO 2012]", "defType", "aqp"),
-                "date:[-30231619199000 TO 1356998399000]",
-                null);
-
-        // 2012-01-01T00:00:00 - 3011-12-31T23:59:59
-        assertQueryEquals(req("q", "pubdate:[2012 TO *]", "defType", "aqp"),
-                "date:[1325376000000 TO 32882284799000]",
-                null);
 
         // 2012-01-01T00:00:00 - 2013-12-31T23:59:59
         assertQueryEquals(req("q", "pubdate:[2012 TO 2013]", "defType", "aqp"),
