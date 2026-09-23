@@ -21,6 +21,7 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsScoringQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
@@ -48,27 +49,97 @@ import java.util.*;
 public class AqpChangeRewriteMethodProcessor extends
         AqpQueryNodeProcessorImpl {
     boolean first = true;
+    public static final String TOPN_SCORE_APPLIED = "aqp.topn.score.applied";
+    public static final String TOPN_SCORE_MODIFIER = "aqp.topn.score.modifier";
     private Set<String> types = null;
     private Set<String> fields = null;
     private Set<String> ignoredFields = null;
+    private boolean isTopNOnly(QueryNode node) {
+        if (node instanceof AqpFunctionQueryNode) {
+            AqpFunctionQueryNode function = (AqpFunctionQueryNode) node;
+            return "topn".equalsIgnoreCase(function.getName());
+        }
+        List<QueryNode> children = node.getChildren();
+        if (children == null || children.isEmpty()) {
+            return false;
+        }
+        for (QueryNode child : children) {
+            if (!isTopNOnly(child)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private boolean containsTopN(QueryNode node) {
+        if (node instanceof AqpFunctionQueryNode) {
+            AqpFunctionQueryNode function = (AqpFunctionQueryNode) node;
+            if ("topn".equalsIgnoreCase(function.getName())) {
+                return true;
+            }
+        }
+        List<QueryNode> children = node.getChildren();
+        if (children != null) {
+            for (QueryNode child : children) {
+                if (containsTopN(child)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private QueryNode scoreNonTopN(QueryNode node, float modifier) {
+        if (isTopNOnly(node)) {
+            return node;
+        }
+        if (!containsTopN(node)) {
+            return new AqpAdsabsScoringQueryNode(node, "cite_read_boost", modifier);
+        }
+        List<QueryNode> children = node.getChildren();
+        if (children == null || children.isEmpty()) {
+            return node;
+        }
+        List<QueryNode> rewritten = new ArrayList<>(children.size());
+        for (QueryNode child : children) {
+            rewritten.add(scoreNonTopN(child, modifier));
+        }
+        node.set(rewritten);
+        return node;
+    }
+
 
     protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
 
         if (first && getConfigVal("aqp.classic_scoring.modifier", "").strip() != "") {
-            // TODO: i don't want to make the source field be changed with URL params
-            // but i'd like it to be configurable
-
             SolrQueryRequest req = this.getQueryConfigHandler()
                     .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
                     .getRequest();
+            if (!Boolean.TRUE.equals(req.getContext().get(TOPN_SCORE_APPLIED))) {
+                float modifier = Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier"));
+                // Preserve the configured modifier in request context for
+                // lazy nested parsers, including opaque function arguments
+                // whose topn() nodes are not visible in this AST.
+                req.getContext().put(TOPN_SCORE_MODIFIER, modifier);
+                if (containsTopN(node)) {
+                    ModifiableSolrParams params = new ModifiableSolrParams(req.getParams());
+                    params.remove("aqp.classic_scoring.modifier");
+                    req.setParams(params);
 
-            ModifiableSolrParams params = new ModifiableSolrParams(req.getParams());
-            params.remove("aqp.classic_scoring.modifier");
-            req.setParams(params);
+                    node = scoreNonTopN(node, modifier);
+                    first = false;
+                    return node;
+                }
+
+                // TODO: i don't want to make the source field be changed with URL params
+                // but i'd like it to be configurable
+
+                ModifiableSolrParams params = new ModifiableSolrParams(req.getParams());
+                params.remove("aqp.classic_scoring.modifier");
+                req.setParams(params);
 
 
-            node = new AqpAdsabsScoringQueryNode(node, "cite_read_boost",
-                    Float.parseFloat(getConfigVal("aqp.classic_scoring.modifier")));
+                node = new AqpAdsabsScoringQueryNode(node, "cite_read_boost", modifier);
+            }
         }
         first = false;
         return node;

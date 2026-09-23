@@ -9,11 +9,13 @@ import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
+import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpChangeRewriteMethodProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -60,6 +62,9 @@ public class AqpAdsabsSubQueryProvider implements
         AqpFunctionQueryBuilderProvider {
 
 
+    private static final String TOPN_SCORE_APPLIED = AqpChangeRewriteMethodProcessor.TOPN_SCORE_APPLIED;
+    private static final String TOPN_SCORE_MODIFIER = AqpChangeRewriteMethodProcessor.TOPN_SCORE_MODIFIER;
+    private static final String TOPN_OWNED_SCORING = "aqp.topn.owned.scoring";
     public static Map<String, AqpSubqueryParser> parsers = new HashMap<String, AqpSubqueryParser>();
 
     //TODO: make configurable
@@ -77,6 +82,116 @@ public class AqpAdsabsSubQueryProvider implements
             throw new SyntaxError("Naughty, naughty server error", e);
         }
         return cacheWrapper;
+    }
+    private static boolean containsOwnedScoring(Query query, Set<Query> ownedScoring) {
+        if (ownedScoring.contains(query)) {
+            return true;
+        }
+        if (query instanceof FunctionScoreQuery) {
+            return containsOwnedScoring(((FunctionScoreQuery) query).getWrappedQuery(), ownedScoring);
+        }
+        if (query instanceof BoostQuery) {
+            return containsOwnedScoring(((BoostQuery) query).getQuery(), ownedScoring);
+        }
+        if (query instanceof DisjunctionMaxQuery) {
+            for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                if (containsOwnedScoring(disjunct, ownedScoring)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (query instanceof BooleanQuery) {
+            for (BooleanClause clause : ((BooleanQuery) query).clauses()) {
+                if (containsOwnedScoring(clause.getQuery(), ownedScoring)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean fullyOwnedScoring(Query query, Set<Query> ownedScoring) {
+        if (ownedScoring.contains(query)) {
+            return true;
+        }
+        if (query instanceof FunctionScoreQuery || query instanceof BoostQuery) {
+            Query child = query instanceof FunctionScoreQuery
+                    ? ((FunctionScoreQuery) query).getWrappedQuery()
+                    : ((BoostQuery) query).getQuery();
+            return fullyOwnedScoring(child, ownedScoring);
+        }
+        if (query instanceof DisjunctionMaxQuery) {
+            Collection<Query> disjuncts = ((DisjunctionMaxQuery) query).getDisjuncts();
+            return !disjuncts.isEmpty() && disjuncts.stream()
+                    .allMatch(disjunct -> fullyOwnedScoring(disjunct, ownedScoring));
+        }
+        if (query instanceof BooleanQuery) {
+            List<BooleanClause> clauses = ((BooleanQuery) query).clauses();
+            return !clauses.isEmpty() && clauses.stream()
+                    .allMatch(clause -> fullyOwnedScoring(clause.getQuery(), ownedScoring));
+        }
+        return false;
+    }
+    private static Query ensureCustomScoring(Query query, float modifier, Set<Query> ownedScoring) {
+        if (fullyOwnedScoring(query, ownedScoring)) {
+            return query;
+        }
+        if (query instanceof FunctionScoreQuery) {
+            FunctionScoreQuery functionScore = (FunctionScoreQuery) query;
+            if (!containsOwnedScoring(query, ownedScoring)) {
+                Query scored = AqpScoringQueryNodeBuilder.wrapQuery(query, "cite_read_boost", modifier);
+                ownedScoring.add(scored);
+                return scored;
+            }
+            Query scoredChild = ensureCustomScoring(functionScore.getWrappedQuery(), modifier, ownedScoring);
+            return new FunctionScoreQuery(scoredChild, functionScore.getSource());
+        }
+        if (query instanceof BoostQuery) {
+            BoostQuery boostQuery = (BoostQuery) query;
+            Query scoredChild = ensureCustomScoring(boostQuery.getQuery(), modifier, ownedScoring);
+            return new BoostQuery(scoredChild, boostQuery.getBoost());
+        }
+        if (query instanceof DisjunctionMaxQuery) {
+            DisjunctionMaxQuery disjunction = (DisjunctionMaxQuery) query;
+            if (!containsOwnedScoring(query, ownedScoring)) {
+                Query scored = AqpScoringQueryNodeBuilder.wrapQuery(query, "cite_read_boost", modifier);
+                ownedScoring.add(scored);
+                return scored;
+            }
+            List<Query> rebuiltDisjuncts = new ArrayList<>();
+            for (Query disjunct : disjunction.getDisjuncts()) {
+                rebuiltDisjuncts.add(ensureCustomScoring(disjunct, modifier, ownedScoring));
+            }
+            return new DisjunctionMaxQuery(rebuiltDisjuncts, disjunction.getTieBreakerMultiplier());
+        }
+        if (query instanceof BooleanQuery) {
+            BooleanQuery booleanQuery = (BooleanQuery) query;
+            if (!containsOwnedScoring(query, ownedScoring)) {
+                Query scored = AqpScoringQueryNodeBuilder.wrapQuery(query, "cite_read_boost", modifier);
+                ownedScoring.add(scored);
+                return scored;
+            }
+            BooleanQuery.Builder rebuilt = new BooleanQuery.Builder();
+            for (BooleanClause clause : booleanQuery.clauses()) {
+                rebuilt.add(ensureCustomScoring(clause.getQuery(), modifier, ownedScoring), clause.getOccur());
+            }
+            rebuilt.setMinimumNumberShouldMatch(booleanQuery.getMinimumNumberShouldMatch());
+            return rebuilt.build();
+        }
+        Query scored = AqpScoringQueryNodeBuilder.wrapQuery(query, "cite_read_boost", modifier);
+        ownedScoring.add(scored);
+        return scored;
+    }
+    @SuppressWarnings("unchecked")
+    private static Set<Query> getOwnedScoring(Map<Object, Object> requestContext) {
+        Object existing = requestContext.get(TOPN_OWNED_SCORING);
+        if (existing instanceof Set<?>) {
+            return (Set<Query>) existing;
+        }
+        Set<Query> created = Collections.newSetFromMap(new IdentityHashMap<>());
+        requestContext.put(TOPN_OWNED_SCORING, created);
+        return created;
     }
 
     /**
@@ -568,8 +683,29 @@ public class AqpAdsabsSubQueryProvider implements
                     throw new SyntaxError("Hmmm, the first argument of your operator must be a positive number.");
                 }
 
-                QParser eqp = fp.subQuery(fp.parseId(), "aqp");
-                Query innerQuery = eqp.getQuery();
+                SolrQueryRequest req = fp.getReq();
+                SolrParams requestParams = req.getParams();
+                String modifierValue = requestParams.get("aqp.classic_scoring.modifier");
+                if (modifierValue == null) {
+                    Object contextModifier = req.getContext().get(TOPN_SCORE_MODIFIER);
+                    modifierValue = contextModifier == null ? null : contextModifier.toString();
+                }
+                float scoreModifier = modifierValue == null ? 0.5f : Float.parseFloat(modifierValue);
+                Map<Object, Object> requestContext = req.getContext();
+                Set<Query> ownedScoring = getOwnedScoring(requestContext);
+                Object previousScoreState = requestContext.put(TOPN_SCORE_APPLIED, Boolean.TRUE);
+                QParser eqp;
+                Query innerQuery;
+                try {
+                    eqp = fp.subQuery(fp.parseId(), "aqp");
+                    innerQuery = eqp.getQuery();
+                } finally {
+                    if (previousScoreState == null) {
+                        requestContext.remove(TOPN_SCORE_APPLIED);
+                    } else {
+                        requestContext.put(TOPN_SCORE_APPLIED, previousScoreState);
+                    }
+                }
 
                 if (innerQuery == null) {
                     throw new SyntaxError("This query is empty: " + eqp.getString());
@@ -588,6 +724,19 @@ public class AqpAdsabsSubQueryProvider implements
 
                 SortSpec sortSpec = SortSpecParsing.parseSortSpec(sortOrRank, fp.getReq());
 
+                /*
+                 * A top-level AQP query can be rescored with cite_read_boost.  The
+                 * topn collector must rank on that same score whenever the requested
+                 * sort includes score; otherwise it truncates by the inner Lucene score
+                 * and only applies cite_read_boost after the wrong documents have
+                 * been selected.
+                 */
+                boolean scoreSort = sortSpec.getSort() == null || sortSpec.includesScore();
+                boolean innerScoreApplied = fullyOwnedScoring(innerQuery, ownedScoring);
+                if (scoreSort && !innerScoreApplied) {
+                    innerQuery = ensureCustomScoring(innerQuery, scoreModifier, ownedScoring);
+                    innerScoreApplied = true;
+                }
                 Query q;
                 if (sortSpec.getSort() == null) {
                     q = new SecondOrderQuery(innerQuery,
@@ -607,7 +756,17 @@ public class AqpAdsabsSubQueryProvider implements
                             new SecondOrderCollectorTopN(sortOrRank, topN, sortOrder));
                 }
 
-                return AqpScoringQueryNodeBuilder.wrapQuery(q, "cite_read_boost", 0.5f);
+                // Field-only sorts select documents without custom scores; apply the
+                // configured score to the selected results afterward.
+                boolean outputScoreApplied = innerScoreApplied
+                        && (sortSpec.getSort() == null || sortSpec.includesScore());
+                if (!outputScoreApplied) {
+                    Query scored = AqpScoringQueryNodeBuilder.wrapQuery(q, "cite_read_boost", scoreModifier);
+                    ownedScoring.add(scored);
+                    return scored;
+                }
+                ownedScoring.add(q);
+                return q;
             }
         });
 
