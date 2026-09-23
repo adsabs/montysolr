@@ -323,9 +323,22 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         assertU(adoc("id", "1052", "bibcode", "xxxxxxxxxx1052", "title", "NuStar"));
         assertU(adoc("id", "1053", "bibcode", "xxxxxxxxxx1053", "title", "nuclear spectroscopic telescope array"));
         assertU(adoc("id", "1054", "bibcode", "xxxxxxxxxx1054", "title", "nuclear spectroscopic telescope"));
+        assertU(adoc("id", "607", "bibcode", "xxxxxxxxxx607",
+                "title", "useful science"));
+        assertU(adoc("id", "608", "bibcode", "xxxxxxxxxx608",
+                "title", "science"));
+        assertU(adoc("id", "609", "bibcode", "xxxxxxxxxx609",
+                "title", "the science"));
+        assertU(adoc("id", "610", "bibcode", "xxxxxxxxxx610",
+                "title", "science"));
+        assertU(adoc("id", "611", "bibcode", "xxxxxxxxxx611",
+                "title", "alternate control",
+                "alternate_title", "useful science"));
+        assertU(adoc("id", "612", "bibcode", "xxxxxxxxxx612",
+                "title", "alternate control",
+                "alternate_title", "science"));
         assertU(commit());
     }
-
 
     public void testIssue171PhraseAlternativesRemainSearchable() throws Exception {
         assertU(adoc("id", "1710", "bibcode", "xxxxxxxxxx1710",
@@ -798,7 +811,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
         // simple case: synonyms deactivated
         assertQueryEquals(req("q", "=title:\"Hubble Space Telescope\"", "defType", "aqp"),
-                "title:\"hubble space telescope\"",
+                "title_nosyn:\"hubble space telescope\"",
                 PhraseQuery.class);
         assertQ(req("q", "=title:\"Hubble Space Telescope\""),
                 "//*[@numFound='2']",
@@ -806,8 +819,23 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
         //setDebug(true);
         assertQueryEquals(req("q", "=\"Hubble Space Telescope\"", "defType", "aqp", "qf", "body title"),
-                "(body:\"hubble space telescope\" | title:\"hubble space telescope\")",
+                "(body:\"hubble space telescope\" | title_nosyn:\"hubble space telescope\")",
                 DisjunctionMaxQuery.class);
+        assertQueryEquals(req("q", "=title:\"useful science\"", "defType", "aqp"),
+                "title_nosyn:\"useful science\"",
+                PhraseQuery.class);
+        assertQ(req("q", "=title:\"useful science\"", "defType", "aqp"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='607']",
+                "//doc/str[@name='id'][.='611']"
+        );
+        assertQueryEquals(req("q", "=title:\"the science\"", "defType", "aqp"),
+                "title_nosyn:\"the science\"",
+                PhraseQuery.class);
+        assertQ(req("q", "=title:\"the science\"", "defType", "aqp"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='609']"
+        );
     }
 
 
@@ -1150,15 +1178,15 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
 
         assertQueryEquals(req("q", "=title:\"NGC 1\"", "defType", "aqp"),
-                "title:\"ngc 1\"",
+                "title_nosyn:\"ngc 1\"",
                 PhraseQuery.class);
         assertQ(req("q", "=title" + ":NGC 1"),
-                "//*[@numFound='4']",
+                "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='153']",
                 "//doc/str[@name='id'][.='154']",
-                "//doc/str[@name='id'][.='155']",
-                "//doc/str[@name='id'][.='156']",
-                "//doc/str[@name='id'][.!='157']"
+                "not(//doc/str[@name='id'][.='155'])",
+                "not(//doc/str[@name='id'][.='156'])",
+                "not(//doc/str[@name='id'][.='157'])"
         );
 
 

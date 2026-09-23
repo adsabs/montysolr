@@ -1148,6 +1148,10 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertAuthorResults("\"Muller, Z\"", "0");
         assertAuthorResults("Bill", "0");
 
+        assertQ(req("q", "=all:\"William\"", "defType", "aqp"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='100']",
+                "//doc/str[@name='id'][.='101']");
         // A default-field term must remain a required clause, rather than
         // disappearing into the fielded author expression.
         assertQ(req("q", "author:\"Muller, William\" William", "df", "all"),

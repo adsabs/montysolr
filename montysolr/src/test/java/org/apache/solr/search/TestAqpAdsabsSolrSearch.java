@@ -347,6 +347,29 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
 
+    public void testExactPhraseDoesNotCrossTitleValues() throws Exception {
+        assertU(adoc("id", "6901", "bibcode", "b6901",
+                "title", "the", "title", "science"));
+        assertU(adoc("id", "6902", "bibcode", "b6902", "title", "the science"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "=title:the", "fq", "id:6901"),
+                "//*[@numFound='1']");
+        assertQ(req("defType", "aqp", "q", "=title:science", "fq", "id:6901"),
+                "//*[@numFound='1']");
+        assertQ(req("defType", "aqp", "q", "=title:\"the science\"",
+                        "fq", "id:(6901 OR 6902)"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='6902']");
+    }
+
+    public void testExactBodyPhraseSearchesOrdinaryBody() throws Exception {
+        assertU(adoc("id", "6903", "bibcode", "b6903", "body", "the science of stars"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "=body:\"science of stars\"", "fq", "id:6903"),
+                "//*[@numFound='1']");
+    }
+
     public void testPunctuationIdentifierQueries() throws Exception {
         assertU(adoc("id", "1101", "bibcode", "b1101", "ack", "mentions 10.17909/T9XG63"));
         assertU(adoc("id", "1102", "bibcode", "b1102", "ack", "mentions 10 words later 17909"));
@@ -609,11 +632,11 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                         + "Synonym(keyword:bremsstrahlung keyword:bremßtrahlung keyword:syn::brehmen)",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=full:bremßtrahlung"),
-                "Synonym(ack:bremsstrahlung ack:bremßtrahlung) "
-                        + "(Synonym(abstract:bremsstrahlung abstract:bremßtrahlung))^2.0 "
-                        + "(Synonym(title:bremsstrahlung title:bremßtrahlung))^2.0 "
+                "Synonym(ack_nosyn:bremsstrahlung ack_nosyn:bremßtrahlung) "
+                        + "(Synonym(abstract_nosyn:bremsstrahlung abstract_nosyn:bremßtrahlung))^2.0 "
+                        + "(Synonym(title_nosyn:bremsstrahlung title_nosyn:bremßtrahlung))^2.0 "
                         + "Synonym(body:bremsstrahlung body:bremßtrahlung) "
-                        + "Synonym(keyword:bremsstrahlung keyword:bremßtrahlung)",
+                        + "Synonym(keyword_nosyn:bremsstrahlung keyword_nosyn:bremßtrahlung)",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "body:bremßtrahlung"),
                 "Synonym(body:bremsstrahlung body:bremßtrahlung body:syn::brehmen)", SynonymQuery.class);
@@ -625,15 +648,15 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de))",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
-                "abstract:\"dark energy\" title:\"dark energy\" keyword:\"dark energy\"", BooleanQuery.class);
+                "abstract_nosyn:\"dark energy\" title_nosyn:\"dark energy\" keyword_nosyn:\"dark energy\"", BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "=abs:(\"dark energy\")"),
-                "abstract:\"dark energy\" title:\"dark energy\" keyword:\"dark energy\"", BooleanQuery.class);
+                "abstract_nosyn:\"dark energy\" title_nosyn:\"dark energy\" keyword_nosyn:\"dark energy\"", BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "abs:(weak)"),
                 "Synonym(abstract:syn::lightweak abstract:weak) Synonym(title:syn::lightweak title:weak) Synonym(keyword:syn::lightweak keyword:weak)",
                 BooleanQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=abs:(weak)"), "abstract:weak title:weak keyword:weak",
+        assertQueryEquals(req("defType", "aqp", "q", "=abs:(weak)"), "abstract_nosyn:weak title_nosyn:weak keyword_nosyn:weak",
                 BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "abs:(=weak weak)"),
                 "+(abstract:weak title:weak keyword:weak) +(Synonym(abstract:syn::lightweak abstract:weak) Synonym(title:syn::lightweak title:weak) Synonym(keyword:syn::lightweak keyword:weak))",
