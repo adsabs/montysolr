@@ -1318,9 +1318,14 @@ public class AqpAdsabsSubQueryProvider implements
 
     }
 
+    private static Query parseNestedFunctionQuery(FunctionQParser fp) throws SyntaxError {
+        String nestedQuery = "{!aqp aqp.caret_in_function=true}" + fp.getString();
+        QParser aqp = fp.subQuery(nestedQuery, "aqp");
+        return aqp.parse();
+    }
+
     private static Query parseCoreads(FunctionQParser fp) throws SyntaxError {
-        QParser aqp = fp.subQuery(fp.getString(), "aqp");
-        Query innerQuery = aqp.parse();
+        Query innerQuery = parseNestedFunctionQuery(fp);
         SolrQueryRequest req = fp.getReq();
         SolrIndexSearcher searcher = req.getSearcher();
         final Set<String> readers = new HashSet<String>();
@@ -1356,8 +1361,7 @@ public class AqpAdsabsSubQueryProvider implements
     }
 
     private static Query parseReaderOverlap(FunctionQParser fp, int maxQueryTerms) throws SyntaxError {
-        QParser aqp = fp.subQuery(fp.getString(), "aqp");
-        Query innerQuery = aqp.parse();
+        Query innerQuery = parseNestedFunctionQuery(fp);
 
         SolrQueryRequest req = fp.getReq();
         SolrIndexSearcher searcher = req.getSearcher();
