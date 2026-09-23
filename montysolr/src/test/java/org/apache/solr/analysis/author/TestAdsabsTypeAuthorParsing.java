@@ -281,6 +281,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertU(adoc(F.ID, "301", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, Jewell"));
         assertU(adoc(F.ID, "302", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, J"));
 
+        assertU(adoc(F.ID, "310", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen-Dalsgaard, J"));
+        assertU(adoc(F.ID, "311", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen Dalsgaard, J"));
+        assertU(adoc(F.ID, "312", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen-Dalsgaard, Jane"));
+        assertU(adoc(F.ID, "313", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen, J"));
+
         assertU(adoc(F.ID, "400", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae-Sik"));
         assertU(adoc(F.ID, "401", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae- Sik"));
         assertU(adoc(F.ID, "402", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D. -S."));
@@ -386,6 +391,25 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertAuthorResults("V\\ Maestro", "1", "709");
         assertAuthorResults("Boyajian\\,\\ T", "1", "710");
         assertAuthorResults("T\\ Boyajian", "1", "710");
+        // Exercise the historical bare unfielded leading-position syntax itself;
+        // the quoted whole-query form is the documented workaround/control.
+        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
+                        "q", "^Christensen-Dalsgaard, J"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='310']",
+                "//doc/str[@name='id'][.='311']",
+                "//doc/str[@name='id'][.='312']",
+                "not(//doc/str[@name='id'][.='313'])");
+        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
+                        "q", "\"^Christensen-Dalsgaard, J\""),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='310']",
+                "//doc/str[@name='id'][.='311']",
+                "//doc/str[@name='id'][.='312']",
+                "not(//doc/str[@name='id'][.='313'])");
+        assertAuthorResults("\"Christensen-Dalsgaard, J\"", "3", "310", "311", "312");
+        assertAuthorResults("\"^Christensen-Dalsgaard, J\"", "3", "310", "311", "312");
+        assertAuthorResults("\"Christensen Dalsgaard, J\"", "3", "310", "311", "312");
         assertAuthorResults("first", "0");
         assertAuthorResults("goodman", "0");
 
