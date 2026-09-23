@@ -46,10 +46,13 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
         if (explicitSlop && defaultValue == 0) {
             return query;
         }
+        boolean preserveGraphPositions =
+                phraseSlopNode.getTag(AqpPostAnalysisProcessor.EXACT_GRAPH_PATH) != null
+                        || phraseSlopNode.getChild().getTag(AqpPostAnalysisProcessor.EXACT_GRAPH_PATH) != null;
 
         if (query instanceof PhraseQuery) {
             boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
-            if (explicitPositions) {
+            if (explicitPositions || preserveGraphPositions) {
                 PhraseQuery phrase = (PhraseQuery) query;
                 if (phrase.getSlop() == defaultValue) return phrase;
                 Builder builder = new PhraseQuery.Builder().setSlop(defaultValue);
@@ -60,6 +63,7 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
                 }
                 return builder.build();
             }
+
             if (defaultValue == 0) {
                 int[] pos = ((PhraseQuery) query).getPositions();
                 defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
@@ -75,9 +79,8 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
             query = builder.build();
 
         } else {
-
             boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
-            if (explicitPositions) {
+            if (explicitPositions || preserveGraphPositions) {
                 MultiPhraseQuery phrase = (MultiPhraseQuery) query;
                 if (phrase.getSlop() == defaultValue) return phrase;
                 return new MultiPhraseQuery.Builder(phrase).setSlop(defaultValue).build();

@@ -426,6 +426,72 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         assertTrue("Expected synonym disjunction, got " + phraseQuery.getClass()
                 + ": " + phraseQuery, phraseQuery instanceof DisjunctionMaxQuery);
     }
+    public void testExactHyphenatedPhrase() throws Exception {
+        assertU(adoc("id", "90044", "bibcode", "issue44-exact",
+                "title", "dust-dust plasma"));
+        assertU(adoc("id", "90045", "bibcode", "issue44-exact-case",
+                "title", "Dust-dust plasma"));
+        assertU(adoc("id", "90046", "bibcode", "issue44-separate",
+                "title", "dust-dust and dust-plasma interaction"));
+        assertU(adoc("id", "90047", "bibcode", "issue44-stopword",
+                "title", "dust, and dust on the plasma"));
+        assertU(adoc("id", "90048", "bibcode", "issue44-reported-negative",
+                "title", "dynamicscale of dust. Dust plasma"));
+        assertU(adoc("id", "90049", "bibcode", "issue44-alternate",
+                "alternate_title", "dust-dust plasma"));
+        assertU(adoc("id", "90050", "bibcode", "issue44-stop-gap",
+                "title", "dust and plasma"));
+        assertU(adoc("id", "90051", "bibcode", "issue44-adjacent",
+                "title", "dust plasma"));
+        assertU(adoc("id", "90052", "bibcode", "issue44-two-stop-gap",
+                "title", "dust and the plasma"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "=title:\"dust-dust plasma\"", "fl", "id"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='90044']",
+                "//doc/str[@name='id'][.='90045']",
+                "//doc/str[@name='id'][.='90049']",
+                "not(//doc/str[@name='id'][.='90046'])",
+                "not(//doc/str[@name='id'][.='90047'])",
+                "not(//doc/str[@name='id'][.='90048'])");
+        assertQ(req("defType", "aqp", "q", "=alternate_title:\"dust-dust plasma\"", "fl", "id"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='90049']");
+        assertQ(req("defType", "aqp", "q", "=title:\"dust and plasma\"", "fl", "id",
+                        "fq", "{!terms f=id}90050,90051"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='90050']",
+                "not(//doc/str[@name='id'][.='90051'])");
+        assertQ(req("defType", "aqp", "q", "=title:\"dust and the plasma\"", "fl", "id",
+                        "fq", "{!terms f=id}90050,90051,90052"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='90052']");
+        // Stopwords remain literal in exact fields, so a missing "and" is not covered by one slop.
+        assertQ(req("defType", "aqp", "q", "=title:\"dust and plasma\"~1", "fl", "id",
+                        "fq", "{!terms f=id}90050,90051,90052"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='90050']",
+                "//doc/str[@name='id'][.='90052']",
+                "not(//doc/str[@name='id'][.='90051'])");
+        assertQ(req("defType", "aqp", "q", "=title:\"dustdust plasma\"", "fl", "id"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='90044']",
+                "//doc/str[@name='id'][.='90045']",
+                "//doc/str[@name='id'][.='90049']",
+                "not(//doc/str[@name='id'][.='90046'])",
+                "not(//doc/str[@name='id'][.='90047'])",
+                "not(//doc/str[@name='id'][.='90048'])");
+        assertQ(req("defType", "aqp", "q", "=title:\"NAG5-ABCD\"", "fl", "id"),
+                "//*[@numFound='4']",
+                "//doc/str[@name='id'][.='147']",
+                "//doc/str[@name='id'][.='148']",
+                "//doc/str[@name='id'][.='150']",
+                "//doc/str[@name='id'][.='151']",
+                "not(//doc/str[@name='id'][.='149'])",
+                "not(//doc/str[@name='id'][.='152'])");
+    }
+
 
     public void testPhraseWithoutLiteralKeepsOneTokenPerPosition() throws Exception {
         // Listing the original token's type in keep_one leaves the stacked position without a literal token.
@@ -810,28 +876,17 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
 
         // simple case: synonyms deactivated
-        assertQueryEquals(req("q", "=title:\"Hubble Space Telescope\"", "defType", "aqp"),
-                "title_nosyn:\"hubble space telescope\"",
-                PhraseQuery.class);
+
         assertQ(req("q", "=title:\"Hubble Space Telescope\""),
                 "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='4']"
         );
         //setDebug(true);
-        assertQueryEquals(req("q", "=\"Hubble Space Telescope\"", "defType", "aqp", "qf", "body title"),
-                "(body:\"hubble space telescope\" | title_nosyn:\"hubble space telescope\")",
-                DisjunctionMaxQuery.class);
-        assertQueryEquals(req("q", "=title:\"useful science\"", "defType", "aqp"),
-                "title_nosyn:\"useful science\"",
-                PhraseQuery.class);
         assertQ(req("q", "=title:\"useful science\"", "defType", "aqp"),
                 "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='607']",
                 "//doc/str[@name='id'][.='611']"
         );
-        assertQueryEquals(req("q", "=title:\"the science\"", "defType", "aqp"),
-                "title_nosyn:\"the science\"",
-                PhraseQuery.class);
         assertQ(req("q", "=title:\"the science\"", "defType", "aqp"),
                 "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='609']"
@@ -1177,16 +1232,18 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='157']"
         );
 
-        assertQueryEquals(req("q", "=title:\"NGC 1\"", "defType", "aqp"),
-                "title_nosyn:\"ngc 1\"",
-                PhraseQuery.class);
-        assertQ(req("q", "=title" + ":NGC 1"),
+        // Exact search retains the actual token sequence, not the NGC/N aliases.
+        assertQ(req("q", "=title:\"NGC 1\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='153']"
+        );
+        assertQ(req("q", "=title:NGC-1"),
                 "//*[@numFound='2']",
-                "//doc/str[@name='id'][.='153']",
                 "//doc/str[@name='id'][.='154']",
+                "//doc/str[@name='id'][.='157']",
+                "not(//doc/str[@name='id'][.='153'])",
                 "not(//doc/str[@name='id'][.='155'])",
-                "not(//doc/str[@name='id'][.='156'])",
-                "not(//doc/str[@name='id'][.='157'])"
+                "not(//doc/str[@name='id'][.='156'])"
         );
 
 

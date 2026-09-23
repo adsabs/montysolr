@@ -67,6 +67,8 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
     public static final String RAW_POSITIONAL_GAPS = "raw_positional_gaps";
     private static final String RAW_LEADING_GAP = "raw_leading_gap";
 
+    public static final String EXACT_GRAPH_PATH = "exact_graph_path";
+
     @Override
     protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
         if (node instanceof SlopQueryNode) {
@@ -129,6 +131,9 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             }
 
             if (node instanceof TokenizedPhraseQueryNode) {
+                if (isExactAnalyzerField(node)) {
+                    node.setTag(EXACT_GRAPH_PATH, true);
+                }
                 if (!hasRawPositionalPath(node)) {
                     return node;
                 }
@@ -142,7 +147,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                                 return near;
                             }
                         },
-                        getPhraseSlop(node), true);
+                        getPhraseSlop(node), true, isExactAnalyzerField(node));
 
             } else if (node instanceof GroupQueryNode) {
                 if (node.getChildren().size() > 0 && node.getChildren().get(0) instanceof BooleanQueryNode
@@ -169,8 +174,8 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 }
 
             } else if (node instanceof MultiPhraseQueryNode) {
+                boolean exactGraph = isExactAnalyzerField(node);
                 queryStructure = extractQueries(node);
-
                 if (node.getParent() instanceof FuzzyQueryNode) { // "some span query"~3
 
                     final FuzzyQueryNode parent = (FuzzyQueryNode) node.getParent();
@@ -185,7 +190,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                     );
                 } else {
 
-                    return buildNewQueryNode(queryStructure,      // default: create boolean ((+a +b) OR (+a +(b|c)))
+                    return buildNewQueryNode(queryStructure,
                             new QueryBuilder() {
                                 @Override
                                 public QueryNode buildQuery(List<QueryNode> clauses) {
@@ -209,7 +214,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                                     }
                                 }
                             },
-                            getPhraseSlop(node), true
+                            getPhraseSlop(node), true, exactGraph
                     );
                 }
             }
@@ -266,20 +271,28 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
      */
     protected QueryNode buildNewQueryNode(List<List<List<QueryNode>>> queries,
                                           QueryBuilder queryBuilder) {
-        return buildNewQueryNode(queries, queryBuilder, 0, false);
+        return buildNewQueryNode(queries, queryBuilder, 0, false, false);
     }
+
+
 
     private QueryNode buildNewQueryNode(List<List<List<QueryNode>>> queries,
                                         QueryBuilder queryBuilder,
-                                        Integer explicitPhraseSlop,
-                                        boolean factorPositionalPaths) {
+                                        Integer phraseSlop,
+                                        boolean factorPositionalPaths,
+                                        boolean exactGraph) {
         if (factorPositionalPaths && containsRawPositionalPath(queries)) {
-            if (explicitPhraseSlop != null && explicitPhraseSlop > 0) {
-                return buildExplicitSlopQuery(queries);
+            QueryNode result;
+            if (phraseSlop != null && phraseSlop > 0) {
+                result = buildExplicitSlopQuery(queries);
+            } else {
+                result = buildFactoredQuery(queries, queryBuilder);
             }
-            return buildFactoredQuery(queries, queryBuilder);
+            if (exactGraph) {
+                markExactGraph(result);
+            }
+            return result;
         }
-
         List<QueryNode> mainQueryClauses = new ArrayList<QueryNode>();
 
         // last bit of info we add
@@ -326,7 +339,21 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 mainQueryClauses.add(clauses.get(0));
             }
         }
-        return queryBuilder.buildTopQuery(mainQueryClauses);
+        QueryNode result = queryBuilder.buildTopQuery(mainQueryClauses);
+        if (exactGraph) {
+            markExactGraph(result);
+        }
+        return result;
+    }
+
+    private void markExactGraph(QueryNode node) {
+        node.setTag(EXACT_GRAPH_PATH, true);
+        List<QueryNode> children = node.getChildren();
+        if (children != null) {
+            for (QueryNode child : children) {
+                markExactGraph(child);
+            }
+        }
     }
 
     private boolean containsRawPositionalPath(
@@ -568,7 +595,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
      * such queries (and we shouldn't!)
      */
     protected List<List<List<QueryNode>>> extractQueries(QueryNode node) throws QueryNodeException {
-
         List<List<List<QueryNode>>> queries;
         List<QueryNode> children = node.getChildren();
 
@@ -1070,6 +1096,22 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                     edge.getKey(), next, paths);
         }
     }
+    private boolean isExactAnalyzerField(QueryNode node) {
+        if (node.getTag("aqp.exact") != null) {
+            return true;
+        }
+        List<QueryNode> children = node.getChildren();
+        if (children == null) {
+            return false;
+        }
+        for (QueryNode child : children) {
+            if (child instanceof FieldQueryNode
+                    && ((FieldQueryNode) child).getFieldAsString().endsWith("_nosyn")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
@@ -1239,7 +1281,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             // retrieve only the queries made of query elements that cover the longest distance
             for (int i = 0; i < measured.length; i++) {
                 if (measured[i] != max) {
-                    //System.out.println("ignoring:" + measured[i] + " " + paths.get(i).toString());
+                    //System.out.println("ignoring:" + paths.get(i).toString());
                     continue;
                 }
 

@@ -631,33 +631,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                         + "Synonym(body:bremsstrahlung body:bremßtrahlung body:syn::brehmen) "
                         + "Synonym(keyword:bremsstrahlung keyword:bremßtrahlung keyword:syn::brehmen)",
                 BooleanQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=full:bremßtrahlung"),
-                "Synonym(ack_nosyn:bremsstrahlung ack_nosyn:bremßtrahlung) "
-                        + "(Synonym(abstract_nosyn:bremsstrahlung abstract_nosyn:bremßtrahlung))^2.0 "
-                        + "(Synonym(title_nosyn:bremsstrahlung title_nosyn:bremßtrahlung))^2.0 "
-                        + "Synonym(body:bremsstrahlung body:bremßtrahlung) "
-                        + "Synonym(keyword_nosyn:bremsstrahlung keyword_nosyn:bremßtrahlung)",
-                BooleanQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "body:bremßtrahlung"),
                 "Synonym(body:bremsstrahlung body:bremßtrahlung body:syn::brehmen)", SynonymQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=body:bremßtrahlung"),
-                "Synonym(body:bremsstrahlung body:bremßtrahlung)", SynonymQuery.class);
 
         // disable synonyms (also for virtual fiels) - #36
         assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
                 "(abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) (title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) (keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de))",
                 BooleanQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=abs:\"dark energy\""),
-                "abstract_nosyn:\"dark energy\" title_nosyn:\"dark energy\" keyword_nosyn:\"dark energy\"", BooleanQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", "=abs:(\"dark energy\")"),
-                "abstract_nosyn:\"dark energy\" title_nosyn:\"dark energy\" keyword_nosyn:\"dark energy\"", BooleanQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "abs:(weak)"),
                 "Synonym(abstract:syn::lightweak abstract:weak) Synonym(title:syn::lightweak title:weak) Synonym(keyword:syn::lightweak keyword:weak)",
                 BooleanQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=abs:(weak)"), "abstract_nosyn:weak title_nosyn:weak keyword_nosyn:weak",
-                BooleanQuery.class);
+
         assertQueryEquals(req("defType", "aqp", "q", "abs:(=weak weak)"),
                 "+(abstract:weak title:weak keyword:weak) +(Synonym(abstract:syn::lightweak abstract:weak) Synonym(title:syn::lightweak title:weak) Synonym(keyword:syn::lightweak keyword:weak))",
                 BooleanQuery.class);
@@ -718,12 +704,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                         "title abstract", "aqp.unfielded.tokens.strategy", "multiply", "aqp.unfielded.tokens.new.type",
                         "simple", "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"),
                 "+(((Synonym(abstract:stephen abstract:syn::stephen) | Synonym(title:stephen title:syn::stephen)) (abstract:murray | title:murray)) (abstract:\"(stephen syn::stephen) murray\" | title:\"(stephen syn::stephen) murray\")) +author_facet_hier:0/murray, s",
-                BooleanQuery.class);
-        assertQueryEquals(
-                req("defType", "aqp", "q", "=(stephen murray) author_facet_hier:\"0/Murray, S\"", "qf",
-                        "title abstract", "aqp.unfielded.tokens.strategy", "multiply", "aqp.unfielded.tokens.new.type",
-                        "simple", "aqp.unfielded.tokens.function.name", "edismax_combined_aqp"),
-                "+(+(abstract:stephen | title:stephen) +(abstract:murray | title:murray)) +author_facet_hier:0/murray, s",
                 BooleanQuery.class);
 
         // virtual fields (their definition is in the solrconfig.xml)

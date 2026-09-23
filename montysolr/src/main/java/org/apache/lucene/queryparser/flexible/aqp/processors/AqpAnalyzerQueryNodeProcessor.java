@@ -146,6 +146,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             int queryStart = Math.max(fieldNode.getBegin(), 0); // could be -1
             String text = fieldNode.getTextAsString();
             String field = fieldNode.getFieldAsString();
+            boolean preservePositionIncrements =
+                    this.positionIncrementsEnabled || (field != null && field.endsWith("_nosyn"));
 
             TokenStream source = null;
             CachingTokenFilter buffer = null;
@@ -328,7 +330,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
                             if (positionIncrement > 0 && multiTerms.size() > 0) {
                                 for (FieldQueryNode termNode : multiTerms) {
-                                    if (this.positionIncrementsEnabled) {
+                                    if (preservePositionIncrements) {
                                         termNode.setPositionIncrement(position);
                                     } else {
                                         termNode.setPositionIncrement(termGroupCount);
@@ -361,7 +363,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                         }
                         for (FieldQueryNode termNode : multiTerms) {
 
-                            if (this.positionIncrementsEnabled) {
+                            if (preservePositionIncrements) {
                                 termNode.setPositionIncrement(position);
 
                             } else {
@@ -430,7 +432,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                         newFieldNode.setTag(SOURCE_QUERY_TEXT, text);
                         newFieldNode.setTag(SOURCE_QUERY_START, queryStart);
 
-                        if (this.positionIncrementsEnabled) {
+                        if (preservePositionIncrements) {
                             position += positionIncrement;
                             newFieldNode.setPositionIncrement(position);
 
