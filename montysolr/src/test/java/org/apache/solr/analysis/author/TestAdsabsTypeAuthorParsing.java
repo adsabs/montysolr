@@ -140,6 +140,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                             "Gonzalez Alfonso, E=>González Alfonso, E",
                             "Chyelkovae,=>Chýlková,",
                             "stoklasova,=>stoklasová,",
+                            "wang, i=>wang, y",
                             "orlitova,=>orlitová,"
                     }
             ));
@@ -307,7 +308,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                 F.AUTHOR, "Baz, Baz|\\u8349")); // 草
 
         assertU(adoc(F.ID, "601", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wyrzykowski, Ł"));
+        assertU(adoc(F.ID, "900", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wang, I"));
+        assertU(adoc(F.ID, "901", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wang, Y"));
+        assertU(adoc(F.ID, "902", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wang, I A"));
+        assertU(adoc(F.ID, "903", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wång, I"));
 
+        assertU(adoc(F.ID, "23300", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, Adam", "first_author", "Moss, Adam"));
+        assertU(adoc(F.ID, "23301", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, Adam", "first_author", "moss, adam"));
+        assertU(adoc(F.ID, "23302", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, Adamson", "first_author", "Moss, Adamson"));
+        assertU(adoc(F.ID, "23303", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Mōss, Adam", "first_author", "Mōss, Adam"));
+        assertU(adoc(F.ID, "23304", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, A", "first_author", "Moss, A"));
         assertU(commit());
 
         //dumpDoc(null, "id", "author");
@@ -332,10 +347,38 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     public void xtestX() throws Exception {
         assertAuthorResults("\"adamczuk, molja k\"", "21");
+    }
 
+    public void testExactAuthorDoesNotExpandGeneratedTransliteration() throws Exception {
+        assertAuthorResults("=\"Wang, I\"", "1", "900");
+        assertAuthorResults("=\"wang, i\"", "1", "900");
+        assertAuthorResults("=\"Wang, I A\"", "1", "902");
+        assertAuthorResults("=\"Wång, I\"", "1", "903");
+        assertAuthorResults("=\"Foo, Bar\"", "1", "600");
+    }
+
+    public void testExactFirstAuthorNormalizesCase() throws Exception {
+        author_field = "first_author";
+        try {
+            assertAuthorResults("=\"Moss, Adam\"", "2", "23300", "23301");
+            assertAuthorResults("=\"moss, adam\"", "2", "23300", "23301");
+            assertAuthorResults("=\"Mōss, Adam\"", "1", "23303");
+            assertAuthorResults("=\"Moss, A\"", "1", "23304");
+            assertQ(req("defType", "aqp", "q",
+                            "pos(=first_author:\"Moss, Adam\", 1)"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='23300']",
+                    "//doc/str[@name='id'][.='23301']");
+        } finally {
+            author_field = "author";
+        }
+    }
+    public void testExactAuthorPreservesPipeValues() throws Exception {
+        assertAuthorResults("=\"Foo, Bar\"", "1", "600");
     }
 
     public void testAuthorParsingUseCases() throws Exception {
+
         assertU(adoc(F.ID, "700", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Krivodubski, V"));
         assertU(adoc(F.ID, "701", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Krivodubski,"));
         assertU(adoc(F.ID, "702", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Herrera-Camus, Ana"));
@@ -1191,8 +1234,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         for (int i = 0; i < recids.length; i++) {
             checks[i + 1] = "//doc/str[@name='id'][.='" + recids[i] + "']";
         }
+        String fieldQuery = query.startsWith("=")
+                ? "=" + author_field + ":" + query.substring(1)
+                : author_field + ":" + query;
         assertQ(req("defType", "aqp", "fl", "id," + author_field, "rows", "100",
-                        "q", author_field + ":" + query),
+                        "q", fieldQuery),
                 checks);
     }
 
