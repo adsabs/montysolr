@@ -35,6 +35,7 @@ import java.util.Map;
  */
 public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl implements
         QueryNodeProcessor {
+    public static final String EXPLICIT_SLOP = "aqp.explicit.slop";
 
     @Override
     protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
@@ -74,7 +75,9 @@ public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl impleme
                                         + " is automatically converted to: " + fuzzy.intValue()));
                     }
                 }
-                return new SlopQueryNode(child, fuzzy.intValue());
+                SlopQueryNode slopNode = new SlopQueryNode(child, fuzzy.intValue());
+                slopNode.setTag(EXPLICIT_SLOP, true);
+                return slopNode;
             } else if (child instanceof FieldQueryNode) {
 
                 FieldQueryNode fn = (FieldQueryNode) child;

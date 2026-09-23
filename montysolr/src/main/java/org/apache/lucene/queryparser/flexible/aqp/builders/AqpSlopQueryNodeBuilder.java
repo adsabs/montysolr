@@ -2,6 +2,7 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
@@ -36,7 +37,11 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
                 QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
 
         int defaultValue = phraseSlopNode.getValue();
-
+        boolean explicitSlop = Boolean.TRUE.equals(
+                phraseSlopNode.getTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP));
+        if (explicitSlop && defaultValue == 0) {
+            return query;
+        }
 
         if (query instanceof PhraseQuery) {
 
@@ -45,7 +50,7 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
                 defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
             }
 
-            if (defaultValue <= 1) return query;
+            if (explicitSlop ? defaultValue == 0 : defaultValue <= 1) return query;
 
             Builder builder = new PhraseQuery.Builder();
             builder.setSlop(defaultValue);
@@ -59,14 +64,16 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
             int maxBranchSize = 0;
             int gap = 0;
             // examine terms that made the multi-phrase query
-            for (QueryNode child : queryNode.getChildren().get(0).getChildren()) {
-                if (child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE) != null) {
-                    gap = (Integer) child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
-                    if (gap > defaultValue)
-                        defaultValue = gap;
-                }
-                if (child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE) != null) {
-                    maxBranchSize = (Integer) child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE);
+            if (!explicitSlop) {
+                for (QueryNode child : queryNode.getChildren().get(0).getChildren()) {
+                    if (child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE) != null) {
+                        gap = (Integer) child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
+                        if (gap > defaultValue)
+                            defaultValue = gap;
+                    }
+                    if (child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE) != null) {
+                        maxBranchSize = (Integer) child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE);
+                    }
                 }
             }
 
@@ -75,12 +82,12 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
             }
 
             // fallback
-            if (defaultValue == 0) {
+            if (!explicitSlop && defaultValue == 0) {
                 int[] pos = ((MultiPhraseQuery) query).getPositions();
                 defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
             }
 
-            if (defaultValue <= 1) return query;
+            if (explicitSlop ? defaultValue == 0 : defaultValue <= 1) return query;
 
             MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder((MultiPhraseQuery) query);
             builder.setSlop(defaultValue);
