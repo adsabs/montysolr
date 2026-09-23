@@ -192,7 +192,11 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
             }
         }
 
-        if (shortenMultiname && parts.length > 2) {
+        // PythonicAuthorNormalizerFilter marks natural-order names with a
+        // trailing comma. Do not drop terms from those names: shortening a
+        // three-part phrase such as "Kepler 1362 b" would emit "b, Kepler".
+        if (shortenMultiname && parts.length > 2
+                && origAuthorName.contains(",") && !origAuthorName.endsWith(",")) {
             variationStack.push(parts[0] + " " + parts[1]);
             if (parts[1].length() > 1) {
                 variationStack.push(parts[0] + " " + parts[1].charAt(0));

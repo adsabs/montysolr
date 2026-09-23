@@ -11,6 +11,8 @@ import org.apache.lucene.queries.spans.SpanNearQuery;
 import org.apache.lucene.queries.spans.SpanPositionRangeQuery;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.FixedBitSet;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
@@ -21,6 +23,7 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -317,6 +320,52 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "((+(author:accomazzi, author:accomazzi,*) +(((author:alberto, author:alberto,*))^2.3 | title:alberto))) (author:accomazzi, alberto | author:accomazzi, alberto * | author:accomazzi, a | author:accomazzi, a * | author:accomazzi,)",
                 BooleanQuery.class);
 
+    }
+    /**
+     * An unfielded phrase is broadcast to the author field, but the author
+     * expansion must retain all phrase terms rather than adding a
+     * surname-only wildcard or a shortened multi-part variant.
+     */
+    public void testUnfieldedAuthorPhraseDoesNotMatchSurnameOnly() throws Exception {
+        assertU(adoc("id", "1740", "bibcode", "b1740", "author", "B, Kepler 1362"));
+        assertU(adoc("id", "1741", "bibcode", "b1741", "author", "B, Other"));
+        assertU(adoc("id", "1742", "bibcode", "b1742", "author", "B, Kepler"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "\"Kepler 1362 b\"", "qf", "author",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1740']");
+    }
+
+    public void testMixedSemicolonAuthorOrderKeepsPerNameVariations() throws Exception {
+        List<String> naturalFirst = authorQueryTokens("Kepler 1362 b; Smith, John Paul");
+        assertTrue(naturalFirst.toString(), naturalFirst.contains("smith, john"));
+        assertTrue(naturalFirst.toString(), naturalFirst.contains("smith, j"));
+        assertFalse(naturalFirst.toString(), naturalFirst.contains("b, kepler"));
+
+        List<String> naturalLast = authorQueryTokens("Smith, John Paul; Kepler 1362 b");
+        assertTrue(naturalLast.toString(), naturalLast.contains("smith, john"));
+        assertTrue(naturalLast.toString(), naturalLast.contains("smith, j"));
+        assertFalse(naturalLast.toString(), naturalLast.contains("b, kepler"));
+        assertTrue(naturalLast.toString(), naturalLast.contains("b, kepler 1362"));
+    }
+
+    private List<String> authorQueryTokens(String input) throws IOException {
+        TokenStream stream = h.getCore().getLatestSchema().getQueryAnalyzer()
+                .tokenStream("author", new StringReader(input));
+        List<String> terms = new ArrayList<String>();
+        try {
+            stream.reset();
+            CharTermAttribute term = stream.getAttribute(CharTermAttribute.class);
+            while (stream.incrementToken()) {
+                terms.add(term.toString());
+            }
+            stream.end();
+        } finally {
+            stream.close();
+        }
+        return terms;
     }
 
     public void testSpecialCases() throws Exception {
