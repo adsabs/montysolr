@@ -23,6 +23,7 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.apache.lucene.search.spans.SpanNegativeIndexRangeQuery;
 import org.apache.lucene.queries.spans.SpanPositionRangeQuery;
 import org.apache.lucene.queries.spans.SpanQuery;
+import org.apache.lucene.index.memory.MemoryIndex;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
@@ -422,6 +423,98 @@ public class AqpAdsabsSubQueryProvider implements
             }
         });
 
+        /* @api.doc
+         *
+         * same(author:..., aff:...)
+         *
+         * Match an author and affiliation only when both terms occur in the
+         * same aligned multivalued slot. Unlike ordinary AND, this relation
+         * preserves the author/affiliation pairing established by ingestion.
+         * Physical fields are required because matching reads their stored
+         * values directly.
+         */
+        parsers.put("same", new AqpSubqueryParserFull() {
+            @Override
+            public Query parse(FunctionQParser fp) throws SyntaxError {
+                Query authorQuery = fp.parseNestedQuery();
+                Query affiliationQuery = fp.parseNestedQuery();
+                if (fp.hasMoreArguments()) {
+                    throw new NestedParseException("same() expects exactly two field queries");
+                }
+
+                String authorField = getSingleField(authorQuery);
+                String affiliationField = getSingleField(affiliationQuery);
+                if (!"author".equals(authorField) || !"aff".equals(affiliationField)) {
+                    throw new SyntaxError("same() requires physical author and aff fields");
+                }
+
+                SchemaField authorSchema = fp.getReq().getSchema().getField(authorField);
+                SchemaField affiliationSchema = fp.getReq().getSchema().getField(affiliationField);
+                return new AlignedFieldQuery(
+                        authorQuery,
+                        affiliationQuery,
+                        authorField,
+                        affiliationField,
+                        authorSchema.getType().getIndexAnalyzer(),
+                        affiliationSchema.getType().getIndexAnalyzer());
+            }
+
+            private String getSingleField(Query query) throws SyntaxError {
+                if (query instanceof TermQuery) {
+                    return ((TermQuery) query).getTerm().field();
+                } else if (query instanceof PhraseQuery) {
+                    return getSingleField(null, ((PhraseQuery) query).getTerms());
+                } else if (query instanceof MultiPhraseQuery) {
+                    String field = null;
+                    for (Term[] terms : ((MultiPhraseQuery) query).getTermArrays()) {
+                        field = getSingleField(field, terms);
+                    }
+                    return field;
+                } else if (query instanceof SynonymQuery) {
+                    return getSingleField(null, ((SynonymQuery) query).getTerms());
+                } else if (query instanceof MultiTermQuery) {
+                    return ((MultiTermQuery) query).getField();
+                } else if (query instanceof BoostQuery) {
+                    return getSingleField(((BoostQuery) query).getQuery());
+                } else if (query instanceof ConstantScoreQuery) {
+                    return getSingleField(((ConstantScoreQuery) query).getQuery());
+                } else if (query instanceof BooleanQuery) {
+                    String field = null;
+                    for (BooleanClause clause : ((BooleanQuery) query).clauses()) {
+                        field = getSingleField(field, getSingleField(clause.getQuery()));
+                    }
+                    return field;
+                } else if (query instanceof DisjunctionMaxQuery) {
+                    String field = null;
+                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                        field = getSingleField(field, getSingleField(disjunct));
+                    }
+                    return field;
+                }
+                throw new SyntaxError("same() requires simple field queries");
+            }
+
+            private String getSingleField(String field, Term[] terms) throws SyntaxError {
+                for (Term term : terms) {
+                    field = getSingleField(field, term.field());
+                }
+                return field;
+            }
+
+            private String getSingleField(String field, Iterable<Term> terms) throws SyntaxError {
+                for (Term term : terms) {
+                    field = getSingleField(field, term.field());
+                }
+                return field;
+            }
+
+            private String getSingleField(String field, String candidateField) throws SyntaxError {
+                if (field != null && !field.equals(candidateField)) {
+                    throw new SyntaxError("same() does not support virtual or multi-field queries");
+                }
+                return candidateField;
+            }
+        });
         /* @api.doc
          *
          * def classic_relevance(query, ratio=0.5):
@@ -1308,6 +1401,168 @@ public class AqpAdsabsSubQueryProvider implements
             }
         });
 
+    }
+
+    /**
+     * A reader-aware relation query. The stored array values are evaluated
+     * independently through the active index analyzers, then joined by raw
+     * array ordinal. This preserves placeholders and does not assume that
+     * token positions or token counts identify an array slot.
+     */
+    private static final class AlignedFieldQuery extends Query {
+        private final Query authorQuery;
+        private final Query affiliationQuery;
+        private final String authorField;
+        private final String affiliationField;
+        private final Analyzer authorAnalyzer;
+        private final Analyzer affiliationAnalyzer;
+
+        private AlignedFieldQuery(Query authorQuery,
+                                  Query affiliationQuery,
+                                  String authorField,
+                                  String affiliationField,
+                                  Analyzer authorAnalyzer,
+                                  Analyzer affiliationAnalyzer) {
+            this.authorQuery = authorQuery;
+            this.affiliationQuery = affiliationQuery;
+            this.authorField = authorField;
+            this.affiliationField = affiliationField;
+            this.authorAnalyzer = authorAnalyzer;
+            this.affiliationAnalyzer = affiliationAnalyzer;
+        }
+
+        @Override
+        public Weight createWeight(IndexSearcher searcher,
+                                    org.apache.lucene.search.ScoreMode scoreMode,
+                                    float boost) throws IOException {
+            FixedBitSet matches = new FixedBitSet(searcher.getIndexReader().maxDoc());
+            Query authorCandidate = positiveCandidate(authorQuery);
+            Query affiliationCandidate = positiveCandidate(affiliationQuery);
+            BooleanQuery.Builder candidateBuilder = new BooleanQuery.Builder();
+            candidateBuilder.add(authorCandidate, BooleanClause.Occur.SHOULD);
+            candidateBuilder.add(affiliationCandidate, BooleanClause.Occur.SHOULD);
+            FixedBitSet candidates = new FixedBitSet(searcher.getIndexReader().maxDoc());
+            searcher.search(candidateBuilder.build(), new SimpleCollector() {
+                private int docBase;
+
+                @Override
+                public org.apache.lucene.search.ScoreMode scoreMode() {
+                    return org.apache.lucene.search.ScoreMode.COMPLETE_NO_SCORES;
+                }
+
+                @Override
+                protected void doSetNextReader(LeafReaderContext context) {
+                    docBase = context.docBase;
+                }
+
+                @Override
+                public void collect(int doc) {
+                    candidates.set(docBase + doc);
+                }
+            });
+
+            Set<String> fields = new HashSet<>();
+            fields.add(authorField);
+            fields.add(affiliationField);
+            MemoryIndex authorIndex = new MemoryIndex();
+            MemoryIndex affiliationIndex = new MemoryIndex();
+            for (LeafReaderContext context : searcher.getIndexReader().leaves()) {
+                LeafReader reader = context.reader();
+                int leafEnd = context.docBase + reader.maxDoc();
+                int globalDoc = candidates.nextSetBit(context.docBase);
+                while (globalDoc >= context.docBase && globalDoc < leafEnd) {
+                    int docId = globalDoc - context.docBase;
+                    Document document = reader.document(docId, fields);
+                    String[] authors = document.getValues(authorField);
+                    String[] affiliations = document.getValues(affiliationField);
+                    int pairedValues = Math.min(authors.length, affiliations.length);
+                    for (int ordinal = 0; ordinal < pairedValues; ordinal++) {
+                        if (matches(authorIndex, authorQuery, authorField, authors[ordinal], authorAnalyzer)
+                                && matches(affiliationIndex, affiliationQuery, affiliationField,
+                                affiliations[ordinal], affiliationAnalyzer)) {
+                            matches.set(globalDoc);
+                            break;
+                        }
+                    }
+                    if (globalDoc + 1 >= candidates.length()) {
+                        break;
+                    }
+                    globalDoc = candidates.nextSetBit(globalDoc + 1);
+                }
+            }
+            return new BitSetQuery(matches).createWeight(searcher, scoreMode, boost);
+        }
+
+        private Query positiveCandidate(Query query) {
+            if (query instanceof BooleanQuery) {
+                BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                int positiveClauses = 0;
+                for (BooleanClause clause : ((BooleanQuery) query).clauses()) {
+                    if (clause.getOccur() != BooleanClause.Occur.MUST_NOT) {
+                        builder.add(positiveCandidate(clause.getQuery()), BooleanClause.Occur.SHOULD);
+                        positiveClauses++;
+                    }
+                }
+                return positiveClauses == 0 ? new MatchAllDocsQuery() : builder.build();
+            } else if (query instanceof DisjunctionMaxQuery) {
+                List<Query> disjuncts = new ArrayList<>();
+                for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                    disjuncts.add(positiveCandidate(disjunct));
+                }
+                return new DisjunctionMaxQuery(disjuncts, 0.0f);
+            } else if (query instanceof BoostQuery) {
+                BoostQuery boostQuery = (BoostQuery) query;
+                return new BoostQuery(positiveCandidate(boostQuery.getQuery()), boostQuery.getBoost());
+            } else if (query instanceof ConstantScoreQuery) {
+                return new ConstantScoreQuery(positiveCandidate(((ConstantScoreQuery) query).getQuery()));
+            }
+            return query;
+        }
+
+        private boolean matches(MemoryIndex memoryIndex,
+                                Query query,
+                                String field,
+                                String value,
+                                Analyzer analyzer) throws IOException {
+            memoryIndex.reset();
+            memoryIndex.addField(field, value, analyzer);
+            return memoryIndex.createSearcher().count(query) > 0;
+        }
+
+        @Override
+        public String toString(String field) {
+            return "same(" + authorQuery + ", " + affiliationQuery + ")";
+        }
+
+        @Override
+        public void visit(QueryVisitor visitor) {
+            visitor.visitLeaf(this);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof AlignedFieldQuery)) {
+                return false;
+            }
+            AlignedFieldQuery that = (AlignedFieldQuery) other;
+            return authorField.equals(that.authorField)
+                    && affiliationField.equals(that.affiliationField)
+                    && authorQuery.equals(that.authorQuery)
+                    && affiliationQuery.equals(that.affiliationQuery);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = classHash();
+            result = 31 * result + authorQuery.hashCode();
+            result = 31 * result + affiliationQuery.hashCode();
+            result = 31 * result + authorField.hashCode();
+            result = 31 * result + affiliationField.hashCode();
+            return result;
+        }
     }
 
     /**
