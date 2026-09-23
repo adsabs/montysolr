@@ -3,6 +3,7 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsIdentifierNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 
@@ -20,14 +21,27 @@ public class AqpScixIDProcessor extends QueryNodeProcessorImpl {
 
     @Override
     protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
-        if (node instanceof AqpAdsabsIdentifierNode identifierNode) {
-            if (identifierNode.getFieldAsString().equals("scix")) {
-                return new AqpAdsabsIdentifierNode(
-                        identifierNode.getField(),
-                        identifierNode.getFieldAsString() + ":" + identifierNode.getTextAsString(),
-                        identifierNode.getBegin(),
-                        identifierNode.getEnd());
+        if (node instanceof FieldQueryNode identifierNode) {
+            String field = identifierNode.getFieldAsString();
+            String text = identifierNode.getTextAsString();
+            if ("scix".equals(field)) {
+                if (!text.regionMatches(true, 0, "scix:", 0, 5)) {
+                    text = "scix:" + text;
+                }
+            } else if (!("identifier".equals(field) && text.regionMatches(true, 0, "scix:", 0, 5))) {
+                return node;
             }
+
+            // Preserve an identifier field when it is already present. The
+            // unqualified namespace has no schema field named "scix", so it
+            // must target the dedicated scix_id field; AqpFIELDProcessor later
+            // reapplies an explicit outer field to nested identifier nodes.
+            String targetField = "identifier".equals(field) ? "identifier" : "scix_id";
+            return new AqpAdsabsIdentifierNode(
+                    targetField,
+                    text,
+                    identifierNode.getBegin(),
+                    identifierNode.getEnd());
         }
 
         return node;

@@ -1014,6 +1014,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testScixIdentifierColon() throws Exception {
+        assertU(adoc("id", "219001", "bibcode", "2020ApJ...900..219A",
+                "identifier", "scix:ABC-123", "scix_id", "scix:ABC-999"));
+        assertU(adoc("id", "219002", "bibcode", "2020ApJ...900..220A",
+                "identifier", "scix:ABC-999", "scix_id", "scix:ABC-123"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "q", "identifier:scix:ABC-123"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='219001']");
+        assertQ(req("defType", "aqp", "q", "scix:ABC-123"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='219002']");
+
+    }
+
     public void testSubquery() throws Exception {
         // fixedbitset has to be one bit larger; also we need to round up num of bits
         int size = ((100 + 8) / 8) * 8;
