@@ -256,6 +256,29 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
     }
 
+    public void testUnaryExclusions() throws Exception {
+        assertRootExclusion(getQuery("-bibstem:(AAS)", null));
+        assertRootExclusion(getQuery("NOT bibstem:(\"AAS\")", null));
+        assertRootExclusion(getQuery("-m:(a b NEAR c d AND e)", null));
+    }
+
+    private void assertRootExclusion(Query query) {
+        assertTrue(query instanceof BooleanQuery);
+        boolean hasMatchAll = false;
+        boolean hasProhibited = false;
+        for (BooleanClause clause : ((BooleanQuery) query).clauses()) {
+            if (clause.getOccur() == BooleanClause.Occur.MUST
+                    && clause.getQuery() instanceof MatchAllDocsQuery) {
+                hasMatchAll = true;
+            }
+            if (clause.getOccur() == BooleanClause.Occur.MUST_NOT) {
+                hasProhibited = true;
+            }
+        }
+        assertTrue(hasMatchAll);
+        assertTrue(hasProhibited);
+    }
+
     public void testExceptions() throws Exception {
         assertQueryNodeException("this (+(((+(that))))");
         assertQueryNodeException("this (++(((+(that)))))");
@@ -411,7 +434,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("field:(one OR two OR three)", null, "one two three");
         assertQueryEquals("fieldx:(one +two -three)", null, "+fieldx:one +fieldx:two -fieldx:three");
         assertQueryEquals("+field:(-one +two three)", null, "-one +two +three");
-        assertQueryEquals("-field:(-one +two three)", null, "-one +two +three");
         assertQueryEquals("+field:(-one +two three) x:four", null, "+(-one +two +three) +x:four");
 
 
@@ -432,7 +454,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("field: (one)", null, "one");
         assertQueryEquals("field:( one )", null, "one");
         assertQueryEquals("+value", null, "value");
-        assertQueryEquals("-value", null, "value"); //? should we allow - at the beginning?
 
 
         assertQueryEquals("m:(a b c)", null, "+m:a +m:b +m:c");
@@ -464,11 +485,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("m:(a b c OR d NOT e)", null, "+m:a +m:b +(m:c (+m:d -m:e))");
         assertQueryEquals("m:(a b NEAR c)", null, "+m:a +spanNear([m:b, m:c], 5, false)");
         assertQueryEquals("m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, false) +(+m:d +m:e)");
-        assertQueryEquals("-m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, false) +(+m:d +m:e)"); //? should we allow - at the beginning?
 
         assertQueryEquals("m:(a b NEAR2 c)", null, "+m:a +spanNear([m:b, m:c], 2, false)");
         assertQueryEquals("m:(a b NEAR3 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 3, false) +(+m:d +m:e)");
-        assertQueryEquals("-m:(a b NEAR4 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 4, false) +(+m:d +m:e)");
         assertQueryNodeException("m:(a b NEAR7 c)"); // by default, only range 1-5 is allowed (in configuration)
 
 
