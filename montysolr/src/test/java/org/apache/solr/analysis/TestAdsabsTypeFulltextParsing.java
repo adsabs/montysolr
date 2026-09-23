@@ -1343,27 +1343,22 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='600']",
                 "//doc/str[@name='id'][.='601']");
 
-        // change to NGC tokenizer in the schema; we want to index both
-        // variants, but during search time only query for the concat version
+        // NGC forms are normalized to the canonical form; standalone N forms
+        // must remain distinct so an NGC query cannot match them.
 
         assertQ(req("q", "title" + ":NGC"),
-                "//*[@numFound='4']",
+                "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='153']", //NGC 1
-                "//doc/str[@name='id'][.='154']", //NGC-1
-                "//doc/str[@name='id'][.='155']", //N-1
-                "//doc/str[@name='id'][.='156']"  //N 1
-                //"//doc/str[@name='id'][.='157']" //NGC1
+                "//doc/str[@name='id'][.='154']" //NGC-1
         );
 
         assertQueryEquals(req("q", "title:\"NGC 1\"", "defType", "aqp"),
                 "(title:acr::ngc1 | title:\"acr::ngc 1\")",
                 DisjunctionMaxQuery.class);
         assertQ(req("q", "title" + ":NGC 1", "indent", "true"),
-                "//*[@numFound='5']",
+                "//*[@numFound='3']",
                 "//doc/str[@name='id'][.='153']",
                 "//doc/str[@name='id'][.='154']",
-                "//doc/str[@name='id'][.='155']",
-                "//doc/str[@name='id'][.='156']",
                 "//doc/str[@name='id'][.='157']"
         );
 
@@ -1372,11 +1367,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "(title:acr::ngc1 | title:\"acr::ngc 1\")",
                 DisjunctionMaxQuery.class);
         assertQ(req("q", "title" + ":NGC-1"),
-                "//*[@numFound='5']",
+                "//*[@numFound='3']",
                 "//doc/str[@name='id'][.='153']",
                 "//doc/str[@name='id'][.='154']",
-                "//doc/str[@name='id'][.='155']",
-                "//doc/str[@name='id'][.='156']",
                 "//doc/str[@name='id'][.='157']" //NGC1
         );
 
@@ -1392,8 +1385,6 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.!='157']"
         );
 
-        // this finds 0 because during indexing, we'd turn the two
-        // tokens into 'n1' - and this search
         assertQueryEquals(req("q", "title:\"N 1\"", "defType", "aqp"),
                 "(title:n1 | title:\"n 1\")",
                 DisjunctionMaxQuery.class);
@@ -1410,24 +1401,28 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "title:acr::ngc1",
                 TermQuery.class);
         assertQ(req("q", "title" + ":NGC1"),
-                "//*[@numFound='5']",
+                "//*[@numFound='3']",
                 "//doc/str[@name='id'][.='153']",
                 "//doc/str[@name='id'][.='154']",
-                "//doc/str[@name='id'][.='155']",
-                "//doc/str[@name='id'][.='156']",
                 "//doc/str[@name='id'][.='157']"
         );
 
-        assertQueryEquals(req("q", "=title:\"NGC 1\"", "defType", "aqp"),
-                "title:\"ngc 1\"",
-                PhraseQuery.class);
+        // Exact search retains the actual token sequence, not the NGC/N aliases.
         assertQ(req("q", "=title" + ":NGC 1"),
-                "//*[@numFound='4']",
+                "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='153']",
                 "//doc/str[@name='id'][.='154']",
-                "//doc/str[@name='id'][.='155']",
-                "//doc/str[@name='id'][.='156']",
-                "//doc/str[@name='id'][.!='157']"
+                "not(//doc/str[@name='id'][.='157'])",
+                "not(//doc/str[@name='id'][.='155'])",
+                "not(//doc/str[@name='id'][.='156'])"
+        );
+        assertQ(req("q", "=title:NGC-1"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='153']",
+                "//doc/str[@name='id'][.='154']",
+                "not(//doc/str[@name='id'][.='157'])",
+                "not(//doc/str[@name='id'][.='155'])",
+                "not(//doc/str[@name='id'][.='156'])"
         );
 
 
