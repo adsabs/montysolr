@@ -1063,10 +1063,42 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertU(addDocs("author", "muller", "reader", "bibcode1", "reader", "bibcode2"));
         assertU(addDocs("author", "muller", "reader", "bibcode2", "reader", "bibcode4"));
         assertU(addDocs("author", "muller", "reader", "bibcode5", "reader", "bibcode2"));
+        assertU(addDocs("id", "1461", "bibcode", "b1461", "author", "other, a", "first_author", "chyla, a",
+                "reader", "caret-reader"));
+        assertU(addDocs("id", "1462", "bibcode", "b1462", "author", "other, b", "first_author", "chyla, b",
+                "reader", "caret-reader"));
+        assertU(addDocs("id", "1463", "bibcode", "b1463", "author", "other, target", "first_author", "other, target",
+                "reader", "caret-reader"));
+        assertU(addDocs("id", "1464", "bibcode", "b1464", "author", "other, negative", "first_author", "other, negative",
+                "reader", "other-reader"));
+        assertU(addDocs("id", "1465", "bibcode", "b1465",
+                "author", "other, target", "author", "chyla, b",
+                "first_author", "other, target", "reader", "caret-reader"));
         assertU(commit());
+        assertQ(req("defType", "aqp", "q", "author:chyla", "fl", "id"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1465']");
 
         assertQueryEquals(req("defType", "aqp", "q", "trending(author:muller)"),
                 "(like:bibcode1 bibcode2 bibcode2 bibcode4 bibcode5 bibcode2)^2.0", BoostQuery.class);
+        assertQ(req("defType", "aqp", "q", "trending(^chyla)", "fl", "id"),
+                "//*[@numFound='4']",
+                "//doc/str[@name='id'][.='1461']",
+                "//doc/str[@name='id'][.='1462']",
+                "//doc/str[@name='id'][.='1463']",
+                "//doc/str[@name='id'][.='1465']",
+                "not(//doc/str[@name='id'][.='1464'])");
+        assertQ(req("defType", "aqp", "q", "trending((^chyla))", "fl", "id"),
+                "//*[@numFound='4']",
+                "//doc/str[@name='id'][.='1461']",
+                "//doc/str[@name='id'][.='1462']",
+                "//doc/str[@name='id'][.='1463']",
+                "//doc/str[@name='id'][.='1465']",
+                "not(//doc/str[@name='id'][.='1464'])");
+        assertQ(req("defType", "aqp", "q", "trending(author:(^chyla))", "fl", "id"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "coreads(author:(^chyla))", "fl", "id"),
+                "//*[@numFound='0']");
 
 
         // pos() operator
