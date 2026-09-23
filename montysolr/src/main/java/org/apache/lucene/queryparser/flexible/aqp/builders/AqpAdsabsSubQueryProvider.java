@@ -221,7 +221,7 @@ public class AqpAdsabsSubQueryProvider implements
          *
          *     - setMinTermFrequency(0)
          *		 - setMinDocFreq(2)
-         *		 - setMaxQueryTerms(200)
+         *     - setMaxQueryTerms(200)
          *     - setBoost(2.0f)
          *     - setPercentTermsToMatch(0.0f)
          *
@@ -230,81 +230,26 @@ public class AqpAdsabsSubQueryProvider implements
          * 		"""
          *    return "trending(%s)" % query
          */
-        // coreads(Q) - what people read: MoreLikeThese(topn(200,classic_relevance(Q)))
         parsers.put("trending", new AqpSubqueryParserFull() {
             public Query parse(FunctionQParser fp) throws SyntaxError {
-                QParser aqp = fp.subQuery(fp.getString(), "aqp");
-                Query innerQuery = aqp.parse();
+                return parseReaderOverlap(fp, 200);
+            }
+        });
 
-                SolrQueryRequest req = fp.getReq();
-                SolrIndexSearcher searcher = req.getSearcher();
-
-                final String fieldName = "reader";
-
-                // A seed without readers cannot contribute to trending results.
-                // Restrict the top-N seed selection before ranking so score ties
-                // among otherwise unrelated documents do not exhaust the seed
-                // window with empty reader fields.
-                Query seedQuery = new BooleanQuery.Builder()
-                        .add(innerQuery, BooleanClause.Occur.MUST)
-                        .add(new WildcardQuery(new Term(fieldName, "*")), BooleanClause.Occur.FILTER)
-                        .build();
-                SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(seedQuery,
-                        new SecondOrderCollectorTopN(200));
-                discoverMostReadQ.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
-
-                final StringBuilder readers = new StringBuilder();
-                final HashSet<String> fieldsToLoad = new HashSet<String>();
-                fieldsToLoad.add(fieldName);
-                try {
-                    searcher.search(discoverMostReadQ, new SimpleCollector() {
-                        @Override
-                        public org.apache.lucene.search.ScoreMode scoreMode() {
-                            // TODO: determine whether this is the correct behavior
-                            return org.apache.lucene.search.ScoreMode.COMPLETE_NO_SCORES;
-                        }
-
-                        private Document d;
-                        private LeafReader reader;
-                        private boolean firstPassed = false;
-
-                        @Override
-                        public void collect(int doc) throws IOException {
-                            d = reader.document(doc, fieldsToLoad);
-                            for (String val : d.getValues(fieldName)) {
-                                if (firstPassed)
-                                    readers.append(" ");
-                                readers.append(val);
-                                firstPassed = true;
-                            }
-                        }
-
-                        @Override
-                        public void doSetNextReader(LeafReaderContext context)
-                                throws IOException {
-                            this.reader = context.reader();
-                        }
-                    });
-                } catch (IOException e) {
-                    throw new SyntaxError(e.getMessage(), e);
-                }
-
-                AdsMoreLikeThisQuery mlt = new AdsMoreLikeThisQuery(readers.toString(), new String[]{fieldName},
-                        new WhitespaceAnalyzer(), fieldName);
-
-                // configurable params
-                mlt.setMinTermFrequency(0);
-                mlt.setMinDocFreq(2);
-                mlt.setMaxQueryTerms(200);
-                mlt.setPercentTermsToMatch(0.0f);
-
-                //try {
-                //  Query q = mlt.rewrite(req.getSearcher().getIndexReader());
-                //  System.out.println(q);
-                //} catch (IOException e) {
-                //}
-
-                return new BoostQuery(mlt, 2.0f);
+        /* @api.doc
+         *
+         * def coreads(query):
+         * 		"""
+         *    Finds papers read by the same readers as the query results.
+         *    Unlike trending(), all eligible reader terms are retained so
+         *    the score reflects the complete reader overlap.
+         *
+         * 		"""
+         *    return "coreads(%s)" % query
+         */
+        parsers.put("coreads", new AqpSubqueryParserFull() {
+            public Query parse(FunctionQParser fp) throws SyntaxError {
+                return parseCoreads(fp);
             }
         });
 
@@ -1371,6 +1316,107 @@ public class AqpAdsabsSubQueryProvider implements
             }
         });
 
+    }
+
+    private static Query parseCoreads(FunctionQParser fp) throws SyntaxError {
+        QParser aqp = fp.subQuery(fp.getString(), "aqp");
+        Query innerQuery = aqp.parse();
+        SolrQueryRequest req = fp.getReq();
+        SolrIndexSearcher searcher = req.getSearcher();
+        final Set<String> readers = new HashSet<String>();
+        final String fieldName = "reader";
+        final HashSet<String> fieldsToLoad = new HashSet<String>();
+        fieldsToLoad.add(fieldName);
+
+        try {
+            searcher.search(innerQuery, new SimpleCollector() {
+                private LeafReader reader;
+
+                @Override
+                public org.apache.lucene.search.ScoreMode scoreMode() {
+                    return org.apache.lucene.search.ScoreMode.COMPLETE_NO_SCORES;
+                }
+
+                @Override
+                public void collect(int doc) throws IOException {
+                    Document document = reader.document(doc, fieldsToLoad);
+                    Collections.addAll(readers, document.getValues(fieldName));
+                }
+
+                @Override
+                public void doSetNextReader(LeafReaderContext context) throws IOException {
+                    reader = context.reader();
+                }
+            });
+        } catch (IOException e) {
+            throw new SyntaxError(e.getMessage(), e);
+        }
+
+        return new BoostQuery(new CoreadsQuery(fieldName, readers), 2.0f);
+    }
+
+    private static Query parseReaderOverlap(FunctionQParser fp, int maxQueryTerms) throws SyntaxError {
+        QParser aqp = fp.subQuery(fp.getString(), "aqp");
+        Query innerQuery = aqp.parse();
+
+        SolrQueryRequest req = fp.getReq();
+        SolrIndexSearcher searcher = req.getSearcher();
+        final String fieldName = "reader";
+
+        Query seedQuery = new BooleanQuery.Builder()
+                .add(innerQuery, BooleanClause.Occur.MUST)
+                .add(new WildcardQuery(new Term(fieldName, "*")), BooleanClause.Occur.FILTER)
+                .build();
+
+        SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(seedQuery,
+                new SecondOrderCollectorTopN(200));
+        discoverMostReadQ.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
+
+        final StringBuilder readers = new StringBuilder();
+        final HashSet<String> fieldsToLoad = new HashSet<String>();
+        fieldsToLoad.add(fieldName);
+
+        try {
+            searcher.search(discoverMostReadQ, new SimpleCollector() {
+                @Override
+                public org.apache.lucene.search.ScoreMode scoreMode() {
+                    return org.apache.lucene.search.ScoreMode.COMPLETE_NO_SCORES;
+                }
+
+                private Document d;
+                private LeafReader reader;
+                private boolean firstPassed = false;
+
+                @Override
+                public void collect(int doc) throws IOException {
+                    d = reader.document(doc, fieldsToLoad);
+                    for (String val : d.getValues(fieldName)) {
+                        if (firstPassed)
+                            readers.append(" ");
+                        readers.append(val);
+                        firstPassed = true;
+                    }
+                }
+
+                @Override
+                public void doSetNextReader(LeafReaderContext context)
+                        throws IOException {
+                    this.reader = context.reader();
+                }
+            });
+        } catch (IOException e) {
+            throw new SyntaxError(e.getMessage(), e);
+        }
+
+        AdsMoreLikeThisQuery mlt = new AdsMoreLikeThisQuery(readers.toString(), new String[]{fieldName},
+                new WhitespaceAnalyzer(), fieldName);
+
+        mlt.setMinTermFrequency(0);
+        mlt.setMinDocFreq(2);
+        mlt.setMaxQueryTerms(maxQueryTerms);
+        mlt.setPercentTermsToMatch(0.0f);
+
+        return new BoostQuery(mlt, 2.0f);
     }
 
     /**
