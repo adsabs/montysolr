@@ -21,7 +21,6 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.SynonymQuery;
 import org.apache.lucene.search.TermQuery;
@@ -155,11 +154,6 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
                 "institution:foo bar",
                 TermQuery.class
         );
-        // it is not visible here, but tokens are: foo bar, baz
-        assertQueryEquals(req("q", "institution:\"Foo Bar/Baz\""),
-                "institution:\"foo bar baz\"",
-                PhraseQuery.class
-        );
 
         // test matches
         assertQ(req("q", "institution:\"foo bar\""),
@@ -244,72 +238,88 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
         // one person however can have multiple affiliations; and they can be searched via proximity
         assertQ(req("q", "institution:\"Phys\" NEAR5 institution:\"Ast\""), "//*[@numFound='1']");
 
-        // SI/CfA is also known through identifiers/canonical names - NOTE: the input synonyms
-        // MUST CONTAIN correct entry, i.e. "SI/CfA" - for some reason we used to have "SI CfA"
-        assertQ(req("q", "institution:\"A01400\""), "//*[@numFound='2']");
-        assertQ(req("q", "institution:\"RID61814\""), "//*[@numFound='2']");
-        assertQ(req("q", "institution:\"Harvard Smithsonian Center for Astrophysics\""), "//*[@numFound='2']");
-        assertQ(req("q", "institution:\"03c3r2d17\""), "//*[@numFound='2']");
-        assertQ(req("q", "institution:\"Q1133697\""), "//*[@numFound='2']");
-        assertQ(req("q", "institution:\"grid.455754.2\""), "//*[@numFound='2']");
-
-
+        // institution uses only normalization; identifiers remain aff_id synonyms.
+        assertQ(req("q", "institution:\"A01400\""), "//*[@numFound='0']");
         // what is the meaning of the pipe? (|) -- it forces our parser to treat the query
         // as a regex; to not do that we have to set aqp.regex.disallowed.fields
         //assertQ(req("q", "institution:\"Center for Astrophysics | Harvard and Smithsonian\"",
         //    "aqp.regex.disallowed.fields", "institution"), "//*[@numFound='2']");
-
         assertQ(req("q", "institution:\"Center for Astrophysics Harvard and Smithsonian\"",
-                "aqp.regex.disallowed.fields", "institution"), "//*[@numFound='2']");
+                "aqp.regex.disallowed.fields", "institution"), "//*[@numFound='0']");
 
-        // and we also want to find the records via parent/child relationship BUT using
-        // synonyms; so assume that parent (SI) is also known under synonym 'AX' and
-        // CfA is known under synonym 'AB'; the search "AX/AB" should then find the same
-        // thing as "SI/CfA" -- HOWEVER, note, this feature requires synonym mapping
-        // either of the explicit form:
-        // AX => SI
-        // or more forgiving (and more wasteful):
-        // AX;SI
-        // IMHO this feature is confusing; will bloat the synonym file and users
-        // are going to be confused by it. I'd just say: use canonical forms of
-        // the synonym. And, and... be aware that if the synonym file contains a cycle
-        // i.e. 'parent/child' entry sharing synonyms with 'child' entry; then the
-        // two will be merged and considered as one:
-        //
-        // SI/CfA;A01400
-        // CfA;A014000
-        //
-        // becomes:
-        // SI/CfA;A01400;CfA
-        assertQ(req("q", "institution:\"AX/AB\""), "//*[@numFound='2']");
+        assertQ(req("q", "institution:\"AX/AB\""), "//*[@numFound='0']");
 
-        //this tests behaviour with ADS's extended configuration for multi-token synonym handling
-        //first what happens what we are doing by default; then with the configuration to disable
-        //such treatment for specific fields
-        assertQueryEquals(req("q", "institution:\"SI/CfA\"",
-                        "aqp.multiphrase.keep_one", "SYNONYM"
-                ),
-                "institution:\"si cfa\"~6",
-                MultiPhraseQuery.class
-        );
-
-        assertQueryEquals(req("q", "institution:\"SI/CfA\"",
-                        "aqp.multiphrase.keep_one", "SYNONYM",
-                        "aqp.multiphrase.keep_one.ignore.fields", "aff_id,aff_raw,institution"),
-                "institution:\"(ax si a01397 smithsonian institution rid8264 01pp8nd67 0000000087163312 q131626 grid.1214.6) (a01400 cfa si/cfa harvard u/cfa center for astrophysics harvard and smithsonian harvard smithsonian center for astrophysics rid61814 03c3r2d17 q1133697 grid.455754.2)\"",
-                MultiPhraseQuery.class
-        );
         // and check we still retrieve the same docs
         assertQ(req("q", "institution:\"SI/CfA\"",
                         "aqp.multiphrase.keep_one", "SYNONYM",
                         "aqp.multiphrase.keep_one.ignore.fields", "aff_id,aff_raw,institution"),
                 "//*[@numFound='2']");
 
+
+
+
+
+
     }
+
 
 
     // Uniquely for Junit 3
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAdsabsTypeAffiliationTokens.class);
+    }
+
+    public void testInstitutionHierarchyLookup() throws Exception {
+        assertU(delQ("*:*"));
+        assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
+        try {
+            assertU(addDocs("institution", "foo bar", "institution", "bar baz/hey"));
+            assertU(addDocs("institution", "Kavli Institute/Dept of Physics"));
+            assertU(addDocs("institution", "U Catania/Dep Phy Ast; -",
+                    "institution", "U Catania/Dep Phy Ast; -; -; INFN/Catania",
+                    "institution", "U Catania/Dep Phy Ast; -"
+            ));
+            assertU(addDocs(
+                    "institution", "SI/CfA; Harvard U/CfA",
+                    "institution", "Harvard U/Phys; Brown U/Ast",
+                    "aff", "SI/CfA")
+            );
+            assertU(addDocs(
+                    "institution", "Harvard U/Law; -",
+                    "institution", "SI/CfA; Harvard U/CfA",
+                    "aff", "SI/CfA")
+            );
+            assertU(addDocs("institution", "Université de Montréal/Phys Dépt"));
+            assertU(addDocs("institution", "IMCCE/Observatoire de Paris"));
+            assertU(adoc("id", "1261", "bibcode", "b1261", "institution", "Harvard U/Math"));
+            assertU(adoc("id", "1262", "bibcode", "b1262", "institution", "Other U/CfA"));
+            assertU(commit());
+
+
+            assertQ(req("q", "institution:\"Universite de Montreal\""),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='5']");
+            assertQ(req("q", "institution:\"Phys Dept\""),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='5']");
+            assertQ(req("q", "institution:\"IMCCE\""),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='6']");
+            // Full hierarchy lookup is exact: siblings sharing only Parent or Child
+            // must not satisfy the query.
+            assertQ(req("q", "institution:\"Harvard U/CfA\""),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='3']",
+                    "//doc/str[@name='id'][.='4']",
+                    "not(//doc/str[@name='id'][.='1261' or .='1262'])"
+            );
+            assertQ(req("q", "institution:observatoire"), "//*[@numFound='0']");
+            // Full, parent, and child alternatives share one position; a phrase
+            // must not treat the hierarchy components as successive terms.
+            assertQ(req("q", "institution:\"IMCCE Observatoire\""), "//*[@numFound='0']");
+        } finally {
+            assertU(delQ("*:*"));
+            assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
+        }
     }
 }
