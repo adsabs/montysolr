@@ -645,10 +645,17 @@
 				<filter class="solr.LengthTokenFilterFactory" min="1" max="50" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2" />
+				<filter class="solr.AcronymTokenFilterFactory"
+					emitBoth="true" prefix="acr::" setType="ACRONYM" />
+				<filter class="solr.KeywordMarkerFilterFactory"
+					pattern="^acr::.+$" />
 				<filter class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="0" generateNumberParts="0" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
+					ignoreKeywords="1" />
 				<filter
 					class="org.apache.lucene.analysis.core.SelectiveLowerCaseFilterFactory" />
 				<filter class="solr.ASCIIDuplicatingFilterFactory" />
@@ -669,15 +676,15 @@
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
-				<!-- Exact queries retain the compound delimiter boundary.  The
-					indexed ads_text_nosyn companion contains the matching catenated
-					term; emitting only that term here keeps whitespace-separated
-					prose from taking a decomposed graph alternative.  Ordinary
-					ads_text queries continue to use the full graph analyzer above. -->
+				<!-- Exact queries retain compound boundaries, and preserve the
+					acr:: prefix so exclusions match the token emitted by ads_text. -->
+				<filter class="solr.KeywordMarkerFilterFactory"
+					pattern="^acr::.+$" />
 				<filter class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="0" generateNumberParts="0" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
+					ignoreKeywords="1" />
 
 
 				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 

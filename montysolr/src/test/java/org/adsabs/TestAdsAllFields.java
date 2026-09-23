@@ -1730,6 +1730,27 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                         + "(institution:astro 3d)^2.0 aff_id:astro 3d "
                         + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\")",
                 BooleanQuery.class);
+
+        // Exact full-field search suppresses expansion, not the literal word
+        // also indexed for a source acronym. "airblast" is a deployed synonym.
+        assertU(adoc("id", "1841", "bibcode", "b1841", "title", "blast"));
+        assertU(adoc("id", "1842", "bibcode", "b1842", "title", "BLAST"));
+        assertU(adoc("id", "1843", "bibcode", "b1843", "title", "airblast"));
+        assertU(adoc("id", "1844", "bibcode", "b1844", "title", "BLAST,"));
+        assertU(adoc("id", "1845", "bibcode", "b1845", "title", "(BLAST)"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("q", "full:blast"), "//*[@numFound='5']",
+                "//doc/str[@name='id'][.='1841']", "//doc/str[@name='id'][.='1842']",
+                "//doc/str[@name='id'][.='1843']", "//doc/str[@name='id'][.='1844']",
+                "//doc/str[@name='id'][.='1845']");
+        assertQ(req("q", "=full:BLAST"), "//*[@numFound='4']",
+                "//doc/str[@name='id'][.='1841']", "//doc/str[@name='id'][.='1842']",
+                "//doc/str[@name='id'][.='1844']", "//doc/str[@name='id'][.='1845']");
+        assertQ(req("q", "=full:blast"), "//*[@numFound='4']",
+                "//doc/str[@name='id'][.='1841']", "//doc/str[@name='id'][.='1842']",
+                "//doc/str[@name='id'][.='1844']", "//doc/str[@name='id'][.='1845']");
+        assertQ(req("q", "full:blast NOT =full:acr\\:\\:blast"), "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1841']", "//doc/str[@name='id'][.='1843']");
     }
     public void testGlobalExplicitSynonymPhraseSlop() throws Exception {
         try {
