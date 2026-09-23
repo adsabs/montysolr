@@ -1645,6 +1645,30 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
         /*
+         * trending_overlap must expose distinct reader intersection counts,
+         * not MoreLikeThis similarity or ADS classic rescoring.
+         */
+        assertU(adoc("id", "310", "bibcode", "2020Iss31....1A",
+                "author", "muller", "reader", "reader-alpha",
+                "reader", "reader-alpha", "reader", "reader-beta"));
+        assertU(adoc("id", "311", "bibcode", "2020Iss31....2B",
+                "author", "muller", "reader", ""));
+        assertU(adoc("id", "312", "bibcode", "2020Iss31....3C",
+                "reader", "reader-beta", "reader", "reader-beta"));
+        assertU(adoc("id", "313", "bibcode", "2020Iss31....4D",
+                "reader", "reader-gamma"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp",
+                        "q", "trending_overlap(author:muller)",
+                        "aqp.classic_scoring.modifier", "0.5",
+                        "fl", "id,score"),
+                "//*[@numFound='2']",
+                "//doc[1]/str[@name='id'][.='310']",
+                "//doc[1]/float[@name='score'][.='2.0']",
+                "//doc[2]/str[@name='id'][.='312']",
+                "//doc[2]/float[@name='score'][.='1.0']");
+
+        /*
          * these are the cases that depend on the default parameters specified in the
          * solrcofig.xml; here we just test what came up as bugs
          */

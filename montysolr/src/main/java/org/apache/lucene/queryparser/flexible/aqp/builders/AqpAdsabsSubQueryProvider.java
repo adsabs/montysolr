@@ -263,6 +263,68 @@ public class AqpAdsabsSubQueryProvider implements
 
         /* @api.doc
          *
+         * def trending_overlap(query):
+         *     """
+         *     Collects the readers of the initial top-200 papers and scores
+         *     every candidate by the number of distinct readers shared with
+         *     that set.  This is intentionally a separate metric from
+         *     trending(), whose score remains MoreLikeThis relevance.
+         *     """
+         */
+        parsers.put("trending_overlap", new AqpSubqueryParserFull() {
+            public Query parse(FunctionQParser fp) throws SyntaxError {
+                QParser aqp = fp.subQuery(fp.getString(), "aqp");
+                Query innerQuery = aqp.parse();
+
+                SolrQueryRequest req = fp.getReq();
+                SolrIndexSearcher searcher = req.getSearcher();
+
+                SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(innerQuery,
+                        new SecondOrderCollectorTopN(200));
+                discoverMostReadQ.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
+
+                final Set<String> readers = new HashSet<String>();
+                final String fieldName = "reader";
+                final Set<String> fieldsToLoad = Collections.singleton(fieldName);
+
+                try {
+                    searcher.search(discoverMostReadQ, new SimpleCollector() {
+                        private LeafReader reader;
+
+                        @Override
+                        public org.apache.lucene.search.ScoreMode scoreMode() {
+                            return org.apache.lucene.search.ScoreMode.COMPLETE_NO_SCORES;
+                        }
+
+                        @Override
+                        public void collect(int doc) throws IOException {
+                            Document d = reader.document(doc, fieldsToLoad);
+                            for (String value : d.getValues(fieldName)) {
+                                // Empty stored values are not reader identities.
+                                if (value != null && !value.isEmpty()) {
+                                    readers.add(value);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void doSetNextReader(LeafReaderContext context) {
+                            reader = context.reader();
+                        }
+                    });
+                } catch (IOException e) {
+                    throw new SyntaxError(e.getMessage(), e);
+                }
+
+                // ReaderOverlapQuery applies raw set intersection scoring.  Do
+                // not wrap this metric in MoreLikeThis or a similarity boost.
+                return new ReaderOverlapQuery(fieldName, readers);
+            }
+        });
+
+
+        /* @api.doc
+         *
          * def pos(query, start, end=None):
          * 		"""
          *    Positional search; returns only documents that
