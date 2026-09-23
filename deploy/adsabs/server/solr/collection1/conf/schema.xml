@@ -1244,6 +1244,10 @@
 		<field name="author" type="author" indexed="true" stored="true"
 			multiValued="true" omitNorms="true" useDocValuesAsStored="false" />
 
+		<field name="author_native" type="string" indexed="true"
+			stored="true" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" />
+
 		<field name="author_norm"
 			type="normalized_text_ascii_notokenization" indexed="true"
 			stored="true" multiValued="true" omitNorms="true" />

@@ -138,6 +138,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 ", \"author_facet_hier\": [\"0/T Hooft, V\", \"1/T Hooft, V/T Hooft, Van X\", \"0/Anders, J M\", \"1/Anders, J M/Anders, John Michael\", \"0/Einstein, A\"]" +
                 // in the future, this can contain normalized author names
                 ", \"author_norm\": [\"t' Hooft, van X\", \"Anders, John Michael\", \"Einstein, A\"]" +
+                ", \"author_native\": [\"张伟\", \"Γεώργιος Παπαδόπουλος\"]" +
 
                 ", \"bibcode\": \"2014JNuM..455...10B\"" +
                 ", \"bibgroup\": [\"Cfa\"]" +
@@ -302,6 +303,15 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         );
         assertQ(req("q", "id:100"),
                 "//*[@numFound='1']"
+        );
+        assertQ(req("q", "author_native:\"张伟\"", "fl", "id,author_native"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='100']",
+                "//doc/arr[@name='author_native']/str[.='张伟']"
+        );
+        assertQ(req("q", "author_native:\"Γεώργιος Παπαδόπουλος\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='100']"
         );
 
 
