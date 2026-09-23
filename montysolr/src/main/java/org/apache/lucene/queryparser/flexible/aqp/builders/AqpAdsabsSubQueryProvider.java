@@ -198,16 +198,23 @@ public class AqpAdsabsSubQueryProvider implements
                 SolrQueryRequest req = fp.getReq();
                 SolrIndexSearcher searcher = req.getSearcher();
 
-                // find the 200 most interesting papers and collect their readers
-                SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(innerQuery,
+                final String fieldName = "reader";
+
+                // A seed without readers cannot contribute to trending results.
+                // Restrict the top-N seed selection before ranking so score ties
+                // among otherwise unrelated documents do not exhaust the seed
+                // window with empty reader fields.
+                Query seedQuery = new BooleanQuery.Builder()
+                        .add(innerQuery, BooleanClause.Occur.MUST)
+                        .add(new WildcardQuery(new Term(fieldName, "*")), BooleanClause.Occur.FILTER)
+                        .build();
+                SecondOrderQuery discoverMostReadQ = new SecondOrderQuery(seedQuery,
                         new SecondOrderCollectorTopN(200));
                 discoverMostReadQ.getcollector().setFinalValueType(FinalValueType.ABS_COUNT);
 
                 final StringBuilder readers = new StringBuilder();
                 final HashSet<String> fieldsToLoad = new HashSet<String>();
-                final String fieldName = "reader";
                 fieldsToLoad.add(fieldName);
-
                 try {
                     searcher.search(discoverMostReadQ, new SimpleCollector() {
                         @Override
