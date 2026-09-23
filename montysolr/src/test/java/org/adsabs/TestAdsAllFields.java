@@ -28,6 +28,8 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.ContentStreamBase.StringStream;
+import org.apache.solr.common.util.Utils;
+import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.IntPointField;
@@ -37,6 +39,7 @@ import org.junit.BeforeClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -59,6 +62,18 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         configString = "deploy/adsabs/server/solr/collection1/conf/solrconfig.xml";
 
         SolrTestSetup.initCore(configString, schemaString);
+    }
+
+    private float scoreFor(String query, String id) throws Exception {
+        try (SolrQueryRequest request = req("q", query, "fq", "id:" + id,
+                "fl", "id,score", "rows", "1", "wt", "json")) {
+            Map<?, ?> result = (Map<?, ?>) Utils.fromJSONString(h.query(request));
+            Map<?, ?> response = (Map<?, ?>) result.get("response");
+            assertEquals(1L, ((Number) response.get("numFound")).longValue());
+            Map<?, ?> document = (Map<?, ?>) ((List<?>) response.get("docs")).get(0);
+            assertEquals(id, document.get("id"));
+            return ((Number) document.get("score")).floatValue();
+        }
     }
 
 
@@ -541,6 +556,107 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "//*[@numFound='1']",
                 "//doc/int[@name='recid'][.='100']"
         );
+        // A virtual field expands to both aff_id and institution.  Positional
+        // matching must be applied independently to each physical field.
+        assertQ(req("q", "pos(inst:\"foo\", 4)"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']"
+        );
+        assertQ(req("q", "pos(inst:\"A1036\", 2)"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']"
+        );
+        // Exercise the negative index against exact affiliation keywords rather
+        // than the display value Harvard U/Dep Ast, whose analyzer shape is not
+        // a plain searchable phrase.
+        assertU(adoc("id", "19201", "bibcode", "b19201",
+                "institution", "slot0",
+                "institution", "target",
+                "institution", "slot2",
+                "institution", "slot3"));
+        assertU(adoc("id", "19202", "bibcode", "b19202",
+                "institution", "target",
+                "institution", "slot1",
+                "institution", "slot2",
+                "institution", "slot3"));
+        assertU(commit());
+        try {
+            assertQ(req("q", "pos(inst:target,-3)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='19201']",
+                    "not(//doc/str[@name='id'][.='19202'])");
+        } finally {
+            assertU(delI("19201"));
+            assertU(delI("19202"));
+            assertU(commit());
+        }
+        assertU(adoc("id", "19204", "bibcode", "b19204", "aff_id", "scorebranch"));
+        assertU(adoc("id", "19205", "bibcode", "b19205", "institution", "scorebranch"));
+        assertU(commit());
+        try {
+            // Compare each virtual branch with its physical-field consumer: the
+            // configured aff_id^2 branch doubles its same-field score, while the
+            // institution branch retains its physical score.
+            assertQ(req("q", "pos(inst:scorebranch,1)", "fl", "id"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='19204']",
+                    "//doc/str[@name='id'][.='19205']");
+            float physicalAffiliation = scoreFor("pos(aff_id:scorebranch,1)", "19204");
+            float virtualAffiliation = scoreFor("pos(inst:scorebranch,1)", "19204");
+            float physicalInstitution = scoreFor("pos(institution:scorebranch,1)", "19205");
+            float virtualInstitution = scoreFor("pos(inst:scorebranch,1)", "19205");
+            assertTrue(virtualAffiliation > physicalAffiliation);
+            assertEquals(2.0f, virtualAffiliation / physicalAffiliation, 0.00001f);
+            assertEquals(1.0f, virtualInstitution / physicalInstitution, 0.00001f);
+        } finally {
+            assertU(delI("19204"));
+            assertU(delI("19205"));
+            assertU(commit());
+        }
+        assertU(adoc("id", "19206", "bibcode", "b19206", "institution", "aff_id:foo"));
+        assertU(commit());
+        try {
+            assertQ(req("q", "pos(inst:\"aff_id:foo\",1)", "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='19206']");
+        } finally {
+            assertU(delI("19206"));
+            assertU(commit());
+        }
+        assertQ(req("q", "pos(inst:(foo AND \"bar baz\"), 4)"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']"
+        );
+        assertQ(req("q", "pos(inst:(foo AND missing), 4)"),
+                "//*[@numFound='0']"
+        );
+        assertQ(req("q", "pos(inst:(foo NOT \"bar baz\"), 4)"),
+                "//*[@numFound='0']"
+        );
+        // The deployed HST synonym must survive virtual-field positional projection
+        // even when only the expanded phrase is present in the fixture.
+        assertU(adoc("id", "19203", "bibcode", "b19203", "title", "Hubble Space Telescope"));
+        assertU(commit());
+        try {
+            assertQ(req("q", "pos(abs:HST,1)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='19203']");
+            assertQ(req("q", "pos(inst:(foo^2 OR baz),4)"),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='100']");
+            assertQ(req("q", "pos(inst:foo^2,4)"),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='100']");
+        } finally {
+            assertU(delI("19203"));
+            assertU(commit());
+        }
+        assertQueryParseException(req("q", "pos((inst:foo AND title:foo), 1)"));
+        assertQ(req("q", "pos(constant(inst:foo),4)"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']");
+        assertQueryParseException(req("q", "pos(constant(inst:foo AND title:foo), 1)"));
+        assertQueryParseException(req("q", "pos(orcid_pub:foo OR orcid_user:foo OR orcid_other:foo, 1)"));
 
 
         assertQ(req("q", "affil:\"Kavli\""),

@@ -86,7 +86,9 @@ public class AqpQFUNCProcessor extends AqpQProcessor {
             }
             stop = funcTail.getInputTokenEnd() - 1;
             values.add(new OriginalInput(inputStream.substring(start, stop), start, stop));
-            return new AqpFunctionQueryNode(funcName, builder, originalInput, values);
+            AqpFunctionQueryNode functionNode = new AqpFunctionQueryNode(funcName, builder, originalInput, values);
+            functionNode.setSourceNode(node);
+            return functionNode;
         } else { // the old semantics when we try hard to discover elements of the function
             return new AqpFunctionQueryNode(funcName, builder, (AqpANTLRNode) children.get(1));
         }
