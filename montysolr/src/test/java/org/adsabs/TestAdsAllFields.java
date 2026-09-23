@@ -32,6 +32,7 @@ import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.schema.IntPointField;
 import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.StrField;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.BeforeClass;
 
@@ -88,6 +89,13 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 && !field.multiValued());
         field.checkSortability();
         assertTrue(field.getType().getClass().isAssignableFrom(IntPointField.class));
+
+        for (String objectField : new String[]{
+                "nedid", "nedtype", "ned_object_facet_hier"}) {
+            field = schema.getField(objectField);
+            assertTrue(field.indexed() && field.stored() && field.multiValued());
+            assertTrue(field.getType().getClass().equals(StrField.class));
+        }
 
         // check field ID is copied to field RECID
 //		List<CopyField> copyFields = schema.getCopyFieldsList("id");
@@ -204,7 +212,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 ", \"links_data\": [\"{whatever: here there MAST}\"," +
                 "\"{\\\"foo\\\": [\\\"bar\\\", \\\"baz\\\"], \\\"one\\\": {\\\"two\\\": \\\"three\\\"}}\"]" +
 
-                ", \"nedid\": [\"X+1-5 =6\", \"foo bar\"]" +
+                ", \"nedid\": [\"X+1-5 =6\", \"FoO Bar\"]" +
                 ", \"nedtype\": [\"Other\", \"type2\"]" +
                 ", \"ned_object_facet_hier\": [ \"0/Other\", \"1/Other/X+1-5 =6\", \"0/type2\", \"1/type2/foo bar\"]" +
 
@@ -1426,14 +1434,29 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
          * ned_object_facet_hier
          */
 
-        assertQ(req("q", "nedid:\"FoO bar\""),
+        assertQ(req("q", "nedid:\"FoO Bar\""),
                 "//doc[1]/int[@name='recid'][.='100']"
+        );
+        assertQ(req("q", "nedid:\"foo bar\""),
+                "//*[@numFound='0']"
         );
         assertQ(req("q", "nedtype:Other"),
                 "//doc[1]/int[@name='recid'][.='100']"
         );
-        assertQ(req("q", "ned_object_facet_hier:\"0/OTHER       \""),
+        assertQ(req("q", "nedtype:other"),
+                "//*[@numFound='0']"
+        );
+        assertQ(req("q", "ned_object_facet_hier:\"0/Other\""),
                 "//doc[1]/int[@name='recid'][.='100']"
+        );
+        assertQ(req("q", "ned_object_facet_hier:\"0/OTHER\""),
+                "//*[@numFound='0']"
+        );
+        assertQ(req("q", "recid:100",
+                        "fl", "nedid,nedtype,ned_object_facet_hier"),
+                "//doc/arr[@name='nedid']/str[.='FoO Bar']",
+                "//doc/arr[@name='nedtype']/str[.='Other']",
+                "//doc/arr[@name='ned_object_facet_hier']/str[.='0/Other']"
         );
 
         /*
