@@ -111,6 +111,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
     public void testUnfieldedSearch() throws Exception {
+        assertU(adoc("id", "2101", "bibcode", "2101test", "title", "netpune atmospheres"));
+        assertU(adoc("id", "2102", "bibcode", "2102test", "title", "netpune exoplanet atmospheres"));
+        assertU(adoc("id", "2103", "bibcode", "2103test", "title", "netpune atmospheres", "abstract", "exoplanet"));
+        assertU(commit("waitSearcher", "true"));
+
+        // A virtual full-field exclusion must remain prohibited after the
+        // virtual field is expanded into its concrete fields.
+        assertQ(req("defType", "aqp", "q", "netpune -full:exoplanet atmospheres", "qf", "title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
+        assertQ(req("defType", "aqp", "q", "netpune atmospheres -full:exoplanet", "qf", "title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
+        assertQ(req("defType", "aqp", "q", "netpune -full:\"exoplanet\" atmospheres", "qf", "title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
 
         assertQueryEquals(
                 req("defType", "aqp", "q", "foo NEAR2 bar", "qf", "bibcode^5 title^10",
