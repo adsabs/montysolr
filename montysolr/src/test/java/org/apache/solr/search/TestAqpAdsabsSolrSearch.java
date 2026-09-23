@@ -587,6 +587,110 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         }
     }
 
+    public void testUnfieldedAuthorAndKeyword() throws Exception {
+        assertU(adoc("id", "222001", "bibcode", "2020ApJ...901..221A", "author", "Jarmak, Stephanie",
+                "abstract", "JWST starshade alignment"));
+        assertU(adoc("id", "222002", "bibcode", "2020ApJ...901..222A", "author", "Kelbert, Anna",
+                "abstract", "modem electromagnetic geophysical studies"));
+        assertU(adoc("id", "222003", "bibcode", "2020ApJ...901..223A", "author", "Colwell, Josh",
+                "abstract", "Saturn rings and related research"));
+        assertU(adoc("id", "222004", "bibcode", "2020ApJ...901..224A", "author", "Other, Author",
+                "abstract", "Erin Leonard Europa Clipper mission"));
+        assertU(adoc("id", "222005", "bibcode", "2020ApJ...901..225A", "author", "Becker, Tracy",
+                "abstract", "Saturn rings and moon-induced effects"));
+        assertU(adoc("id", "222006", "bibcode", "2020ApJ...901..226A", "author", "Control, Author",
+                "abstract", "DarkMatter BlackHole merger"));
+        assertU(adoc("id", "222007", "bibcode", "2020ApJ...901..227A", "author", "Control, Author",
+                "title", "Dark Matter Black Hole merger", "abstract", "unrelated observational study"));
+        assertU(adoc("id", "222099", "bibcode", "2020ApJ...901..299A", "author", "JWST, A.",
+                "abstract", "unrelated topic"));
+        assertU(adoc("id", "222008", "bibcode", "2020ApJ...901..228A", "author", "Smith, John A",
+                "abstract", "galaxy spectra"));
+        assertU(adoc("id", "222009", "bibcode", "2020ApJ...901..229A", "author", "Doe, Jane",
+                "abstract", "stellar outflows driven by solar wind"));
+        assertU(adoc("id", "222010", "bibcode", "2020ApJ...901..230A", "author", "Doe, Jane",
+                "abstract", "stellar outflows"));
+        assertU(adoc("id", "222011", "bibcode", "2020ApJ...901..231A", "author", "Jarmak, Stephanie",
+                "author", "Colwell, Josh", "abstract", "hyperion rings"));
+        assertU(adoc("id", "222012", "bibcode", "2020ApJ...901..232A", "author", "Jarmak, Stephanie",
+                "abstract", "alpha bravo charlie delta echo foxtrot"));
+        assertU(adoc("id", "222013", "bibcode", "2020ApJ...901..233A", "author", "Other, Author",
+                "abstract", "Europa Clipper Erin probe Leonard"));
+        assertU(adoc("id", "222014", "bibcode", "2020ApJ...901..234A", "author", "Li, Na",
+                "abstract", "unrelated puzzle"));
+        assertU(adoc("id", "222015", "bibcode", "2020ApJ...901..235A", "author", "Other, Author",
+                "abstract", "Li Na anticorrelation in globular cluster stars"));
+
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']",
+                "//doc[not(str[@name='id'][.='222099'])]");
+        assertQ(req("defType", "aqp", "q", "stephanie jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Anna Kelbert modem"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222002']");
+        assertQ(req("defType", "aqp", "q", "Josh Colwell Saturn"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222003']");
+        assertQ(req("defType", "aqp", "q", "Erin Leonard Europa"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222004']",
+                "//doc[not(str[@name='id'][.='222099'])]");
+        assertQ(req("defType", "aqp", "q", "Tracy Becker Saturn"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222005']");
+        assertQ(req("defType", "aqp", "q", "DarkMatter BlackHole merger"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222006']");
+        assertQ(req("defType", "aqp", "q", "Dark Matter Black Hole merger"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222007']");
+
+        assertQ(req("defType", "aqp", "q", "John Smith galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222008']");
+        assertQ(req("defType", "aqp", "q", "Jane Doe stellar wind"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222009']",
+                "//doc/str[@name='id'][not(.='222010')]");
+
+        assertQ(req("defType", "aqp", "q", "JWST Stephanie Jarmak"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Saturn Josh Colwell"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222003']");
+        assertQ(req("defType", "aqp", "q", "starshade Stephanie Jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Jarmak Stephanie JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak Josh Colwell hyperion"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222011']");
+        assertQ(req("defType", "aqp", "q", "Jarmak Stephanie Jarmak hyperion"),
+                "//*[@numFound='0']");
+
+        assertQ(req("defType", "aqp", "q", "alpha bravo charlie delta echo foxtrot Stephanie Jarmak"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "alpha bravo charlie delta echo foxtrot Stephanie Jarmak",
+                        "aqp.unfielded.author.maxWordIndex", "6"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "alpha bravo charlie delta echo foxtrot Stephanie Jarmak",
+                        "aqp.unfielded.author.maxWordIndex", "7"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222012']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak alpha bravo charlie delta echo zulu"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak JWST",
+                        "aqp.unfielded.author.maxWordIndex", "0"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak JWST",
+                        "aqp.unfielded.author.maxWordIndex", "abc"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+
+        assertQ(req("defType", "aqp", "q", "Europa Erin Leonard"),
+                "//*[@numFound='2']", "//doc/str[@name='id'][.='222004']",
+                "//doc/str[@name='id'][.='222013']");
+
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak Josh Colwell"),
+                "//*[@numFound='0']");
+
+        assertQ(req("defType", "aqp", "q", "Li Na anticorrelation globular"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222015']");
+        assertQ(req("defType", "aqp", "q", "globular cluster Li Na anticorrelation"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222015']");
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",
