@@ -5,6 +5,7 @@ import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.queries.function.valuesource.ProductFloatFunction;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpNearQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
@@ -14,6 +15,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -21,6 +23,7 @@ import org.apache.lucene.queryparser.flexible.standard.config.PointsConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.search.*;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
@@ -207,6 +210,15 @@ public class AqpAdsabsQParser extends QParser {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        if (qParser.getQueryBuilder() instanceof AqpAdsabsQueryTreeBuilder treeBuilder) {
+            treeBuilder.setBuilder(AqpNearQueryNode.class,
+                    new AqpNearQueryNodeBuilder(field -> {
+                        SchemaField schemaField = schema.getFieldOrNull(field);
+                        return schemaField != null
+                                && schemaField.indexOptions().compareTo(
+                                IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) >= 0;
+                    }));
         }
 
 

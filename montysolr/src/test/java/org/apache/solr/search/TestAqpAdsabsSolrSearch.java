@@ -112,15 +112,42 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     public void testUnfieldedSearch() throws Exception {
 
-        // NEAR on unfielded search -- will generate error when results have mixed
-        // fields
-        assertQueryParseException(
-                req("defType", "aqp", "q", "foo NEAR2 bar", "qf", "bibcode^5 title^10", "aqp.unfielded.tokens.strategy",
-                        "disjuncts", "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"));
+        assertQueryEquals(
+                req("defType", "aqp", "q", "foo NEAR2 bar", "qf", "bibcode^5 title^10",
+                        "aqp.unfielded.tokens.strategy", "disjuncts", "aqp.unfielded.tokens.new.type",
+                        "simple", "aqp.constant_scoring", "bibcode^6"),
+                "", BooleanQuery.class);
 
-        assertQueryParseException(req("defType", "aqp", "q", "foo NEAR2 bar NEAR2 title:baz", "qf",
-                "bibcode^5 title^10", "aqp.unfielded.tokens.strategy", "disjuncts", "aqp.unfielded.tokens.new.type",
-                "simple", "aqp.constant_scoring", "bibcode^6"));
+        assertQueryEquals(req("defType", "aqp", "q", "foo NEAR2 bar NEAR2 title:baz", "qf",
+                "bibcode^5 title^10", "aqp.unfielded.tokens.strategy", "disjuncts",
+                "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "", BooleanQuery.class);
+
+        assertQueryEquals(req("defType", "aqp", "q", "foo NEAR2 (bar NEAR2 baz)", "qf",
+                "bibcode^5 title^10", "aqp.unfielded.tokens.strategy", "disjuncts",
+                "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "", BooleanQuery.class);
+
+        assertQueryParseException(req("defType", "aqp", "q", "bibcode:foo NEAR2 title:bar"));
+        assertU(adoc("id", "7801", "bibcode", "2000TEST...7801F", "title", "Frew bridge J"));
+        assertU(adoc("id", "7802", "bibcode", "frew", "title", "J"));
+        assertU(adoc("id", "7803", "bibcode", "group-positive", "title", "alpha bridge beta gamma"));
+        assertU(adoc("id", "7804", "bibcode", "beta", "title", "alpha gamma"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "df", "unfielded_search", "q", "frew NEAR2 j",
+                        "qf", "bibcode^5 title^10",
+                        "aqp.unfielded.tokens.strategy", "disjuncts",
+                        "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7801']");
+        assertQ(req("defType", "aqp", "df", "unfielded_search", "q", "frew NEAR2 j",
+                        "qf", "bibcode^5 title^10", "debugQuery", "true",
+                        "aqp.unfielded.tokens.strategy", "disjuncts",
+                        "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7801']");
+        assertQ(req("defType", "aqp", "q", "title:(alpha AND beta) NEAR2 gamma",
+                        "qf", "title", "aqp.unfielded.tokens.strategy", "disjuncts",
+                        "aqp.unfielded.tokens.new.type", "simple"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7803']");
 
         // when we generate the phrase search, ignore acronyms
         assertQueryEquals(req("defType", "aqp", "q", "FOO BAR BAZ", "aqp.unfielded.tokens.strategy", "disjuncts",
