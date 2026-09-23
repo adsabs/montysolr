@@ -64,18 +64,14 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
             LeafReader reader)
             throws IOException {
 
-        Map<String, UninvertingReader.Type> mapping = new HashMap<String, UninvertingReader.Type>();
-        mapping.put(fieldName, type);
-        LeafReader uninvertingReader = UninvertingReader.wrap(reader, mapping::get);
-        NumericDocValues values = uninvertingReader.getNumericDocValues(fieldName);
-
-        // this to get cache indexed by docid (total)
-        //NumericDocValues values = getNumericValues(reader, fieldName);
-        if (values == null)
-            values = DocValues.emptyNumeric();
-
         final String fName = fieldName;
+        final Type valueType = type;
+        final LeafReader valueReader = reader;
+        NumericDocValues values = loadNumericValues(fName, valueType, valueReader);
+
         LuceneCacheWrapper<NumericDocValues> newCache = new LuceneCacheWrapper<NumericDocValues>(new SoftReference<NumericDocValues>(values)) {
+            private int lastDocId = -1;
+
             @Override
             public String internalToString() {
                 return "float[] " + fName;
@@ -85,6 +81,14 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
             public float getFloat(int docid) {
                 NumericDocValues ref = this.cache.get();
                 try {
+                    // Lucene 7 NumericDocValues only supports forward traversal. Explanations
+                    // can request documents in an arbitrary order, so recreate the iterator
+                    // before a backwards lookup.
+                    if (docid < lastDocId) {
+                        ref = loadNumericValues(fName, valueType, valueReader);
+                        this.cache = new SoftReference<NumericDocValues>(ref);
+                    }
+                    lastDocId = docid;
                     if (ref.advanceExact(docid)) {
                         return Float.intBitsToFloat((int) ref.longValue());
                     }
@@ -98,6 +102,15 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
 
         return newCache;
 
+    }
+
+    private static NumericDocValues loadNumericValues(String fieldName, Type type, LeafReader reader)
+            throws IOException {
+        Map<String, UninvertingReader.Type> mapping = new HashMap<String, UninvertingReader.Type>();
+        mapping.put(fieldName, type);
+        LeafReader uninvertingReader = UninvertingReader.wrap(reader, mapping::get);
+        NumericDocValues values = uninvertingReader.getNumericDocValues(fieldName);
+        return values == null ? DocValues.emptyNumeric() : values;
     }
 
     /**

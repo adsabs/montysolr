@@ -102,6 +102,15 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
         assertU(commit());
     }
 
+    public void testFloatCacheSupportsBackwardLookups() throws Exception {
+        LuceneCacheWrapper<NumericDocValues> boost = LuceneCacheWrapper.getFloatCache(
+                "boost_2", UninvertingReader.Type.FLOAT_POINT, tempReq.getSearcher().getSlowAtomicReader());
+
+        // Explanations may ask for a lower doc ID after scoring a higher one.
+        assertEquals(0.5f, boost.getFloat(11), 0.0f);
+        assertEquals(0.8f, boost.getFloat(5), 0.0f);
+    }
+
     public void testADSOperators() throws Exception {
 
 
