@@ -95,8 +95,8 @@ public class AqpAdsabsSubQueryProvider implements
             this.fieldValues = null;
         }
 
-        AdsMoreLikeThisQuery(String likeText, String[] moreLikeFields,
-                             Analyzer analyzer, String fieldName,
+        AdsMoreLikeThisQuery(String likeText, String[] moreLikeFields, Analyzer analyzer,
+                             String fieldName,
                              Map<String, Collection<Object>> fieldValues) {
             super(likeText, moreLikeFields, analyzer, fieldName);
             this.fieldName = fieldName;
@@ -1266,18 +1266,19 @@ public class AqpAdsabsSubQueryProvider implements
                 if (fp.hasMoreArguments())
                     percentToMatch = fp.parseFloat();
 
-                final StringBuilder text = new StringBuilder();
                 SolrQueryRequest req = fp.getReq();
                 FixedBitSet toIgnore = null;
                 Map<String, Collection<Object>> fieldValues = new HashMap<>();
                 String[] fieldsToLoad = toLoad.split(" ");
 
                 if (toLoad.indexOf("input") > -1) {
-                    text.append(input);
                     if (toLoad.length() > 5) {
                         fieldsToLoad = toLoad.substring(toLoad.indexOf("input") + 6).split(" ");
                     } else {
                         fieldsToLoad = new String[]{"abstract"};
+                    }
+                    for (String field : fieldsToLoad) {
+                        fieldValues.put(field, Collections.singletonList(input));
                     }
                 } else {
 
@@ -1326,10 +1327,8 @@ public class AqpAdsabsSubQueryProvider implements
 
 
                 Analyzer analyzer = req.getSchema().getIndexAnalyzer();
-                MoreLikeThisQuery mlt = toLoad.indexOf("input") > -1
-                        ? new MoreLikeThisQuery(text.toString(), fieldsToLoad, analyzer, fieldsToLoad[0])
-                        : new AdsMoreLikeThisQuery("", fieldsToLoad, analyzer,
-                        fieldsToLoad[0], fieldValues);
+                AdsMoreLikeThisQuery mlt = new AdsMoreLikeThisQuery(input, fieldsToLoad,
+                        analyzer, fieldsToLoad[0], fieldValues);
 
                 mlt.setMinTermFrequency(minTermFrequency);
                 mlt.setMinDocFreq(minDocFrequency);
