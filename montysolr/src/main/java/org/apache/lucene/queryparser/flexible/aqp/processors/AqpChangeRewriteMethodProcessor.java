@@ -182,43 +182,29 @@ public class AqpChangeRewriteMethodProcessor extends
         // will inspect multiphrase children, discover those that fall on the same
         // position and will only keep one of them (so that we avoid double scoring)
 
-
         List<QueryNode> children = node.getChildren();
         if (children != null) {
             TreeMap<Integer, List<QueryNode>> positionTermMap = new TreeMap<>();
-
-            // first group nodes into positions
             for (QueryNode child : children) {
                 FieldQueryNode termNode = (FieldQueryNode) child;
-
-                List<QueryNode> termList = positionTermMap.get(termNode
-                        .getPositionIncrement());
-
+                List<QueryNode> termList = positionTermMap.get(termNode.getPositionIncrement());
                 if (termList == null) {
                     termList = new LinkedList<>();
                     positionTermMap.put(termNode.getPositionIncrement(), termList);
                 }
-
                 termList.add(termNode);
             }
 
-
-            List newList = new LinkedList<QueryNode>();
-            for (int positionIncrement : positionTermMap.keySet()) {
-
-                List<QueryNode> termList = positionTermMap.get(positionIncrement);
+            List<QueryNode> newList = new LinkedList<>();
+            for (List<QueryNode> termList : positionTermMap.values()) {
                 if (termList.size() > 1) {
-                    pickSynonyms(termList, newList, getTypes());
+                    pickSynonyms(termList, newList, typesToKeep);
                 } else {
                     newList.add(termList.get(0));
                 }
             }
-
-            // it's guaranteed to be a simple phrase
             node.set(newList);
-
         }
-
         return node;
     }
 
@@ -347,8 +333,6 @@ public class AqpChangeRewriteMethodProcessor extends
             } else if (strategy.equals("cantDecide") && closestLenTerm != null) {
                 newList.add(closestLenTerm);
             }
-
-
             if (newList.size() == oldSize) { // we didn't find any type that would satisfy the condition
                 QueryNode picked = termList.get(0);
                 // pick the longest if you can
@@ -361,6 +345,28 @@ public class AqpChangeRewriteMethodProcessor extends
                     }
                 }
                 newList.add(picked);
+            }
+
+            FieldQueryNode selected = (FieldQueryNode) newList.get(newList.size() - 1);
+            int selectedBegin = selected.getBegin();
+            int selectedEnd = selected.getEnd();
+            int equivalentWidth = 0;
+            if (selectedBegin >= 0 && selectedEnd >= selectedBegin) {
+                for (QueryNode candidate : termList) {
+                    FieldQueryNode fieldCandidate = (FieldQueryNode) candidate;
+                    if (fieldCandidate.getBegin() == selectedBegin
+                            && fieldCandidate.getEnd() == selectedEnd) {
+                        Integer width = (Integer) fieldCandidate.getTag(
+                                AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
+                        if (width != null && width > equivalentWidth) {
+                            equivalentWidth = width;
+                        }
+                    }
+                }
+            }
+            if (equivalentWidth > 1) {
+                selected.setTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE,
+                        equivalentWidth);
             }
 
         } finally {

@@ -180,7 +180,9 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                             "radio, radios, nonradio, radioed, radiobereich, adio, miniradio, radido => radio\n" +
                             "pulsars, pulsar, psr, pulser, psrs, pulsare, pulsares, pulars, pulsary, puslsar, interpulsars, pusar, nonpulsar, psro, rontgenpulsare, pulsarlike, pulsarpsr => pulsars\n" +
                             "millisecond, milliseconds, submillisecond, millisec, milliseconde, millesecond, millisekunden, milliseond, millisecnd => millisecond\n" +
-                            "fermi, fermilab => fermi\n",
+                            "fermi, fermilab => fermi\n" +
+                            "galactic=>galaxies\n" +
+                            "central,centre=>central\n",
                     "space => universe\n"
             });
 
@@ -201,6 +203,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                     "ADS,anti\0de\0sitter\0space,antidesitter\0spacetime,antidesitter\0space\n" +
                     "ADS,astrophysics\0data\0system\n" +
                     "VLBA,very\0long\0baseline\0array\n" +
+                    "galactic\0centre,galaxies\0central,milky\0way\0galaxy\0nucleus\n" +
+                    "galactic\0center,galaxies\0central,milky\0way\0galaxy\0nucleus\n" +
+                    "central\0molecular\0zone,galactic\0centre\n" +
+                    "star\0formation,stars\0formation\n" +
                     "space,universe"
 
                     // and this is how it would be if it was one line
@@ -295,6 +301,55 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "title", "Massachusets Institute of Technology and antidesitter space-time"));
 
         assertU(commit());
+    }
+
+
+    public void testIssue171PhraseAlternativesRemainSearchable() throws Exception {
+        assertU(adoc("id", "1710", "bibcode", "xxxxxxxxxx1710",
+                "abstract", "A study of the galactic centre and star formation"));
+        assertU(adoc("id", "1711", "bibcode", "xxxxxxxxxx1711",
+                "abstract", "A study of the galactic center and star formation"));
+        assertU(adoc("id", "1712", "bibcode", "xxxxxxxxxx1712",
+                "abstract", "A study of the central molecular zone and star formation"));
+        assertU(adoc("id", "1713", "bibcode", "xxxxxxxxxx1713",
+                "abstract", "A study of the galactic distant object central and star formation"));
+        assertU(commit());
+
+        assertQ(req("q", "abstract:((\"galactic centre\" OR \"galactic center\" OR \"central molecular zone\") AND (\"star formation\"))"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='1710']",
+                "//doc/str[@name='id'][.='1711']",
+                "//doc/str[@name='id'][.='1712']",
+                "not(//doc/str[@name='id'][.='1713'])");
+        assertQ(req("q", "abstract:((\"galactic    centre\" OR \"galactic   center\" OR \"central   molecular  zone\") AND (\"star    formation\"))"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='1710']",
+                "//doc/str[@name='id'][.='1711']",
+                "//doc/str[@name='id'][.='1712']",
+                "not(//doc/str[@name='id'][.='1713'])");
+    }
+
+    public void testRepeatedWhitespaceDoesNotWidenPhrase() throws Exception {
+        try {
+            assertU(adoc("id", "17140", "bibcode", "b17140",
+                    "abstract", "galactic centre and star formation"));
+            assertU(adoc("id", "17141", "bibcode", "b17141",
+                    "abstract", "galactic centre gapone gaptwo gapthree gapfour gapfive and star formation"));
+            assertU(commit());
+
+            assertQ(req("q", "abstract:\"galactic centre and star formation\"",
+                            "fq", "{!terms f=id}17140,17141"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='17140']",
+                    "not(//doc/str[@name='id'][.='17141'])");
+            assertQ(req("q", "abstract:\"galactic        centre and star formation\"",
+                            "fq", "{!terms f=id}17140,17141"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='17140']",
+                    "not(//doc/str[@name='id'][.='17141'])");
+        } finally {
+            assertU(delI("17140"));
+            assertU(delI("17141"));
+            assertU(commit());
+        }
     }
 
 
@@ -816,11 +871,13 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 DisjunctionMaxQuery.class);
 
         assertQ(req("q", "title:\"hubble space telescope\""),
-                "//*[@numFound='6']",
+                "//*[@numFound='5']",
                 "//doc/str[@name='id'][.='4']",
                 "//doc/str[@name='id'][.='5']",
                 "//doc/str[@name='id'][.='600']",
-                "//doc/str[@name='id'][.='601']"
+                "//doc/str[@name='id'][.='601']",
+                "//doc/str[@name='id'][.='603']",
+                "not(//doc/str[@name='id'][.='18'])"
         );
 
 
@@ -830,19 +887,17 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "(title:\"mirrors hubble (space syn::universe) telescope\"~3 | title:\"mirrors (syn::hubble space telescope syn::hst acr::hst)\"~3)",
                 DisjunctionMaxQuery.class);
 
-        // TODO:rca - this finds too much because of the higher slope; a potential solution
-        // is to compare the max branch size and if we discover that it has covered the full
-        // length then no slope is needed for this multiphrase; see AqpSlopQueryNodeBuilder
-        // for possible implementation; when accepted then the numFound=2 is correct here
         assertQ(req("q", "title:\"mirrors hubble space telescope\"", "defType", "aqp"),
-                "//*[@numFound='3']",
+                "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='4']",
-                "//doc/str[@name='id'][.='5']"
+                "//doc/str[@name='id'][.='5']",
+                "not(//doc/str[@name='id'][.='18'])"
         );
         assertQ(req("q", "title:\"mirrors of the hubble space telescope\""),
-                "//*[@numFound='3']",
+                "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='4']",
-                "//doc/str[@name='id'][.='5']"
+                "//doc/str[@name='id'][.='5']",
+                "not(//doc/str[@name='id'][.='18'])"
         );
         assertQ(req("q", "title:\"mirrors of the hubble space scope\""),
                 "//*[@numFound='0']"

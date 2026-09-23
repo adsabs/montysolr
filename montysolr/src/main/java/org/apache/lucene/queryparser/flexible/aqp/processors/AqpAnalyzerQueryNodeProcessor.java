@@ -142,9 +142,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                 if (buffer.hasAttribute(TypeAttribute.class)) {
                     typeAtt = buffer.getAttribute(TypeAttribute.class);
                 }
-
                 CharTermAttribute termAtt = buffer.getAttribute(CharTermAttribute.class);
-                int maxMultiTokenSynonymSize = 0;
 
                 while (buffer.incrementToken()) {
                     numTokens++;
@@ -152,22 +150,9 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                             .getPositionIncrement() : 1;
                     if (positionIncrement != 0) {
                         positionCount += positionIncrement;
-
                     } else {
                         severalTokensAtSamePosition = true;
-
-                        if (buffer.hasAttribute(CharTermAttribute.class)) {
-                            int x = 0;
-                            for (int i = 0; i < termAtt.length(); i++) {
-                                if (termAtt.charAt(i) == ' ')
-                                    x += 1;
-                            }
-
-                            if (x > maxMultiTokenSynonymSize)
-                                maxMultiTokenSynonymSize = x;
-                        }
                     }
-
                 }
 
 
@@ -242,8 +227,10 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                                     offsetEnd);
                             if (typeAtt != null)
                                 fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-                            if (maxMultiTokenSynonymSize > 0)
-                                fq.setTag(MAX_MULTI_TOKEN_SIZE, maxMultiTokenSynonymSize + 1);
+                            int multiTokenSize = getMultiTokenSize(term, offsetStart, offsetEnd,
+                                    queryStart, text);
+                            if (multiTokenSize > 1)
+                                fq.setTag(MAX_MULTI_TOKEN_SIZE, multiTokenSize);
                             children.add(fq);
 
                         }
@@ -305,8 +292,10 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                             FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
                                     offsetEnd);
                             fq.setTag(TYPE_ATTRIBUTE, tokenType);
-                            if (maxMultiTokenSynonymSize > 0)
-                                fq.setTag(MAX_MULTI_TOKEN_SIZE, maxMultiTokenSynonymSize + 1);
+                            int multiTokenSize = getMultiTokenSize(term, offsetStart, offsetEnd,
+                                    queryStart, text);
+                            if (multiTokenSize > 1)
+                                fq.setTag(MAX_MULTI_TOKEN_SIZE, multiTokenSize);
                             multiTerms.add(fq);
 
                         }
@@ -361,8 +350,10 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                                 offsetStart, offsetEnd);
                         if (typeAtt != null)
                             newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-                        if (maxMultiTokenSynonymSize > 0)
-                            newFieldNode.setTag(MAX_MULTI_TOKEN_SIZE, maxMultiTokenSynonymSize + 1);
+                        int multiTokenSize = getMultiTokenSize(term, offsetStart, offsetEnd,
+                                queryStart, text);
+                        if (multiTokenSize > 1)
+                            newFieldNode.setTag(MAX_MULTI_TOKEN_SIZE, multiTokenSize);
 
                         if (this.positionIncrementsEnabled) {
                             position += positionIncrement;
@@ -402,6 +393,37 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
         return node;
 
+    }
+
+    private int getMultiTokenSize(String term, int offsetStart, int offsetEnd,
+            int sourceStart, String sourceText) {
+        if (term == null) {
+            return 0;
+        }
+        int outputTokenCount = 1;
+        for (int i = 0; i < term.length(); i++) {
+            if (term.charAt(i) == ' ') {
+                outputTokenCount++;
+            }
+        }
+
+        int sourceTokenCount = 0;
+        if (sourceText != null && offsetStart >= sourceStart && offsetEnd > offsetStart) {
+            int start = offsetStart - sourceStart;
+            int end = offsetEnd - sourceStart;
+            if (start >= 0 && end <= sourceText.length()) {
+                boolean inToken = false;
+                for (int i = start; i < end; i++) {
+                    if (Character.isWhitespace(sourceText.charAt(i))) {
+                        inToken = false;
+                    } else if (!inToken) {
+                        sourceTokenCount++;
+                        inToken = true;
+                    }
+                }
+            }
+        }
+        return Math.max(outputTokenCount, sourceTokenCount);
     }
 
     @Override
