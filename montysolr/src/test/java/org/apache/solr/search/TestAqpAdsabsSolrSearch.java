@@ -15,7 +15,6 @@ import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequestBase;
-import org.apache.solr.util.RefCounted;
 import org.junit.BeforeClass;
 
 import java.io.File;
@@ -759,13 +758,24 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='2']");
 
         // similar()
-        assertQueryEquals(req("defType", "aqp", "q", "similar(foo bar baz, input)"), "like:foo bar baz",
-                MoreLikeThisQuery.class);
         // default docfreq=2, termfreq=2
         assertQ(req("q", "similar(foo bar baz, input abstract, 100, 100, 2, 2)"), "//*[@numFound='0']");
         // change defaults
         assertQ(req("q", "similar(foo bar baz, input abstract, 100, 100, 1, 1)"), "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='2']");
+        // Multi-field similarity must retain the field associated with each term.
+        // The title-only target would not match if all source text were assigned
+        // to the first field (abstract).
+        assertU(adoc("id", "1621", "bibcode", "sim162source",
+                "abstract", "sim162abstractterm", "title", "sim162titleterm"));
+        assertU(adoc("id", "1622", "bibcode", "sim162target",
+                "title", "sim162titleterm"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("q", "similar(id:1621, abstract title, 100, 100, 1, 1)"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='1622']");
+        assertQ(req("q", "similar(\"sim162abstractterm sim162titleterm\", input abstract title, 100, 100, 1, 1)"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1621']", "//doc/str[@name='id'][.='1622']");
 
 
         // topn() with score sorting
@@ -790,7 +800,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertU(commit("waitSearcher", "true"));
         assertQ(req("defType", "aqp", "q", "similar(bibcode:sim121source)"),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='1211']");
-
 
         // make sure the cache key of the query is different
         Query aq = assertQueryEquals(req("defType", "aqp", "q", "author:\"Accomazzi, A\" abs:\"ADS\" year:2000-2015"),
