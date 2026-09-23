@@ -158,9 +158,21 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                     "//doc/str[@name='id'][.='7011']",
                     "//doc/str[@name='id'][.='7012']"
             );
+            assertU(adoc("id", "7014", "bibcode", "grouped-date-lower", "date", "1995-01-01T00:00:00Z"));
+            assertU(adoc("id", "7015", "bibcode", "grouped-date-upper", "date", "1996-12-31T23:59:59Z"));
+            assertU(adoc("id", "7016", "bibcode", "grouped-date-outside", "date", "1997-01-01T00:00:00Z"));
+            assertU(commit("waitSearcher", "true"));
+            assertQueryEquals(req("defType", "aqp", "q", "date:(1995-1996)"),
+                    "date:[788918400000 TO 852076799999]", null);
+            assertQ(req("defType", "aqp", "q", "date:(1995-1996)",
+                            "fq", "{!terms f=id}7014,7015,7016"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='7014']",
+                    "//doc/str[@name='id'][.='7015']"
+            );
         } finally {
             for (String id : new String[]{"7000", "7001", "7002", "7003", "7004", "7005", "7006", "7007",
-                    "7008", "7009", "7010", "7011", "7012", "7013"}) {
+                    "7008", "7009", "7010", "7011", "7012", "7013", "7014", "7015", "7016"}) {
                 assertU(delI(id));
             }
             assertU(commit("waitSearcher", "true"));
