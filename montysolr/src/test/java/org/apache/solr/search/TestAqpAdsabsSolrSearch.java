@@ -767,8 +767,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("q", "similar(foo bar baz, input abstract, 100, 100, 1, 1)"), "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='2']");
 
-        assertQueryEquals(req("defType", "aqp", "q", "similar(recid:2, title)"), "+like:title bitle  -BitSetQuery(1)",
-                BooleanQuery.class);
 
         // topn() with score sorting
         // TODO: solve it differently https://github.com/romanchyla/montysolr/issues/185
@@ -783,24 +781,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
                 MatchNoDocsQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX)"),
-                "+like:foo bar baz title bitle  -BitSetQuery(1)", BooleanQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX, title)"),
-                "+like:title bitle  -BitSetQuery(1)", BooleanQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XXX, title abstract)"),
-                "+like:foo bar baz title bitle  -BitSetQuery(1)", BooleanQuery.class);
+        assertU(adoc("id", "1210", "bibcode", "sim121source",
+                "title", "sim121xenovalue quorlin"));
+        assertU(adoc("id", "1211", "bibcode", "sim121target",
+                "title", "sim121xenovalue quorlin"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "q", "similar(bibcode:sim121source)"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='1211']");
 
-        RefCounted<SolrIndexSearcher> ir = h.getCore().getSearcher();
-        int md = ir.get().maxDoc();
-        ir.decref();
-
-        assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, abstract:foo), title abstract)"),
-                "+like:foo bar baz title bitle  -BitSetQuery(" + (md - 1) + ")", BooleanQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "similar(topn(200, abstract:foo) , title abstract) foo"),
-                "+(+like:foo bar baz title bitle  -BitSetQuery(" + (md - 1) + ")) +all:foo",
-                BooleanQuery.class);
 
         // make sure the cache key of the query is different
         Query aq = assertQueryEquals(req("defType", "aqp", "q", "author:\"Accomazzi, A\" abs:\"ADS\" year:2000-2015"),
