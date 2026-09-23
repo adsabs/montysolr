@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -145,6 +146,25 @@ public class TestCitationCacheReaderWriter extends MontySolrAbstractTestCase {
         rw.load(cache2);
         //System.out.println(formatCache(cache2));
         assertEquals(formatCache(cache), formatCache(cache2));
+    }
+
+
+    @Test
+    public void testCloseReleasesCitationData() throws Exception {
+        assertEquals(11, cache.size());
+        assertEquals(11, cache.getCitationsIteratorSize());
+        assertEquals(3, cache.getReferences(0).length);
+
+        Field relationshipsField = CitationLRUCache.class.getDeclaredField("relationships");
+        relationshipsField.setAccessible(true);
+        Object oldRelationships = relationshipsField.get(cache);
+
+        cache.close();
+
+        assertNotSame(oldRelationships, relationshipsField.get(cache));
+        assertEquals(0, cache.size());
+        assertEquals(0, cache.getCitationsIteratorSize());
+        assertNull(cache.getReferences(0));
     }
 
     @Test
