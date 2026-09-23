@@ -1,22 +1,17 @@
-Pre-requisites:
-  
-  * Java SDK (v1.7 and newer)
-  * ant (at least 1.8)
-  * python (on path, v2.5 and newer)
+Prerequisites:
+
+  * Java JDK (version 21)
 
 
-Build everything:
+Build everything with Gradle:
 
-    $ git clone git@github.com:romanchyla/montysolr.git montysolr
+    $ git clone https://github.com/adsabs/montysolr.git montysolr
     $ cd montysolr
-    $ ant build-all
+    $ ./gradlew build
+    Windows: gradlew.bat build
 
-If it finished successfuly, you can run the provided example distribution
-
-  $ cd ./build/contrib/examples/adsabs
-  $ ./run.sh
-
-You need to chdir for this example to work properly.  
+The Ant build files are legacy and import upstream sources that are not part of
+this repository. Do not run `ant build-all`; use the Gradle wrapper above.
 
 
 == FAQ ==
