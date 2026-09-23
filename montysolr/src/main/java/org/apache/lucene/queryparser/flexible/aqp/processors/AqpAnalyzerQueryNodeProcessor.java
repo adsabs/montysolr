@@ -592,7 +592,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         int sourceWordRuns = countWordRuns(sourceValue);
         if (outputWordRuns == 1) {
             return sourceWordRuns > 1
-                    || (positionLength > 1 && !output.equals(sourceValue));
+                    || (positionLength > 1 && !output.equalsIgnoreCase(sourceValue));
         }
         // A synthetic multi-word term has span width one even when its
         // source and normalized spelling occupy the same number of words.
