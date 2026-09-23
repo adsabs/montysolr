@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Custom WordDelimiterGraphFilter character types for signed chemical formulas.
-# Marker signs stay part of their adjacent component; the separator marker
-# creates a split while catenateAll emits the complete signed formula.
+# Custom WordDelimiterGraphFilter character types for signed chemical formulas
+# and astronomical J-coordinate names. Formula markers retain adjacent signed
+# components and split separators; J-coordinate markers restore their signs.
 \ue000 => ALPHANUM
 \ue001 => ALPHANUM
 \ue002 => SUBWORD_DELIM
+\ue004 => ALPHANUM
+\ue005 => ALPHANUM

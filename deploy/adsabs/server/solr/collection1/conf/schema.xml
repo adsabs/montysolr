@@ -358,6 +358,14 @@
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
 				<!-- Preserve balanced punctuation literals without retaining every
 				     ordinary token as an extra original term. -->
+				<!-- Preserve J-coordinate signs as part of astronomical object names
+				     while still allowing ordinary plus/minus punctuation to split. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?i:J)\d{4,6})\+(\d{2,6})\b"
+					replacement="$1$2" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?i:J)\d{4,6})-(\d{2,6})\b"
+					replacement="$1$2" />
 
 				<!-- Mark signs in chemical formula components before WDFF. The
 					uppercase element grammar avoids changing ordinary word+/- tokens.
@@ -424,6 +432,10 @@
 					pattern="" replacement="-" replace="all" />
 				<filter class="solr.PatternReplaceFilterFactory"
 					pattern="" replacement="" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="+" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="-" replace="all" />
 
 				<!-- lowercase everything besides ACRONYMS -->
 				<filter
@@ -481,6 +493,14 @@
 			</analyzer>
 			<analyzer type="query">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
+				<!-- Mark signed J-coordinate names before WordDelimiterGraph splits
+				     punctuation; the marker type restores the original signs below. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?i:J)\d{4,6})\+(\d{2,6})\b"
+					replacement="$1$2" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?i:J)\d{4,6})-(\d{2,6})\b"
+					replacement="$1$2" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
 					replacement="$1" />
@@ -511,6 +531,7 @@
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b(?i:((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+))-(?=[A-Za-z0-9α\-]*[])"
 					replacement="$1" />
+
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b"
 					replacement="$1-$3" />
@@ -551,6 +572,10 @@
 					pattern="" replacement="-" replace="all" />
 				<filter class="solr.PatternReplaceFilterFactory"
 					pattern="" replacement="" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="+" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="-" replace="all" />
 
 				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query:split"/> -->
 
@@ -629,6 +654,12 @@
 		<fieldType name="ads_text_nosyn" class="solr.TextField">
 			<analyzer type="query">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?i:J)\d{4,6})\+(\d{2,6})\b"
+					replacement="$1$2" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?i:J)\d{4,6})-(\d{2,6})\b"
+					replacement="$1$2" />
 				<!-- Exact phrases preserve signed formula components as terms. -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
@@ -691,6 +722,10 @@
 					pattern="" replacement="+" replace="all" />
 				<filter class="solr.PatternReplaceFilterFactory"
 					pattern="" replacement="-" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="+" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="-" replace="all" />
 
 
 				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 
