@@ -587,6 +587,58 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         }
     }
 
+    public void testUnfieldedAuthorAndKeyword() throws Exception {
+        assertU(adoc("id", "222001", "bibcode", "2020ApJ...901..221A", "author", "Jarmak, Stephanie",
+                "abstract", "JWST starshade alignment"));
+        assertU(adoc("id", "222002", "bibcode", "2020ApJ...901..222A", "author", "Kelbert, Anna",
+                "abstract", "modem electromagnetic geophysical studies"));
+        assertU(adoc("id", "222003", "bibcode", "2020ApJ...901..223A", "author", "Colwell, Josh",
+                "abstract", "Saturn rings and related research"));
+        assertU(adoc("id", "222004", "bibcode", "2020ApJ...901..224A", "author", "Other, Author",
+                "abstract", "Erin Leonard Europa Clipper mission"));
+        assertU(adoc("id", "222005", "bibcode", "2020ApJ...901..225A", "author", "Becker, Tracy",
+                "abstract", "Saturn rings and moon-induced effects"));
+        assertU(adoc("id", "222006", "bibcode", "2020ApJ...901..226A", "author", "Control, Author",
+                "abstract", "DarkMatter BlackHole merger"));
+        assertU(adoc("id", "222007", "bibcode", "2020ApJ...901..227A", "author", "Control, Author",
+                "title", "Dark Matter Black Hole merger", "abstract", "unrelated observational study"));
+        assertU(adoc("id", "222099", "bibcode", "2020ApJ...901..299A", "author", "JWST, A.",
+                "abstract", "unrelated topic"));
+        assertU(adoc("id", "222008", "bibcode", "2020ApJ...901..228A", "author", "Smith, John A",
+                "abstract", "galaxy spectra"));
+        assertU(adoc("id", "222009", "bibcode", "2020ApJ...901..229A", "author", "Doe, Jane",
+                "abstract", "stellar outflows driven by solar wind"));
+        assertU(adoc("id", "222010", "bibcode", "2020ApJ...901..230A", "author", "Doe, Jane",
+                "abstract", "stellar outflows"));
+
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']",
+                "//doc[not(str[@name='id'][.='222099'])]");
+        assertQ(req("defType", "aqp", "q", "stephanie jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Anna Kelbert modem"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222002']");
+        assertQ(req("defType", "aqp", "q", "Josh Colwell Saturn"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222003']");
+        assertQ(req("defType", "aqp", "q", "Erin Leonard Europa"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222004']",
+                "//doc[not(str[@name='id'][.='222099'])]");
+        assertQ(req("defType", "aqp", "q", "Tracy Becker Saturn"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222005']");
+        assertQ(req("defType", "aqp", "q", "DarkMatter BlackHole merger"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222006']");
+        assertQ(req("defType", "aqp", "q", "Dark Matter Black Hole merger"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222007']");
+
+        assertQ(req("defType", "aqp", "q", "John Smith galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222008']");
+        assertQ(req("defType", "aqp", "q", "Jane Doe stellar wind"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222009']",
+                "//doc/str[@name='id'][not(.='222010')]");
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",

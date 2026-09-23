@@ -7,9 +7,12 @@ import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuild
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpWhiteSpacedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -22,6 +25,17 @@ import java.io.IOException;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.index.MultiTerms;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.QueryBuilder;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
+import org.apache.solr.request.SolrQueryRequest;
+
+import java.io.StringReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +114,13 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
 
             String funcName = "edismax_combined_aqp"; //"edismax_always_aqp"; //"edismax_combined_aqp";
             String subQuery = ((FieldQueryNode) node).getTextAsString();
+            if (node instanceof AqpWhiteSpacedQueryNode
+                    && !(node.getParent() instanceof SlopQueryNode)) {
+                AuthorQueryParts parts = identifyLikelyAuthorQuery(subQuery, config);
+                if (parts != null) {
+                    return buildAuthorQuery((AqpWhiteSpacedQueryNode) node, parts);
+                }
+            }
 
             if (node instanceof AqpNonAnalyzedQueryNode) {
                 funcName = "edismax_nonanalyzed";
@@ -156,6 +177,169 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
         return node;
     }
 
+    private QueryNode buildAuthorQuery(AqpWhiteSpacedQueryNode node,
+                                       AuthorQueryParts parts) {
+        List<QueryNode> nameAlternatives = new ArrayList<QueryNode>();
+        if (parts.indexedAuthor) {
+            nameAlternatives.add(new QuotedFieldQueryNode("author", parts.authorName,
+                    node.getBegin(), node.getEnd()));
+        }
+        nameAlternatives.add(new QuotedFieldQueryNode("abs", parts.fullName,
+                node.getBegin(), node.getEnd()));
+
+        List<QueryNode> clauses = new ArrayList<QueryNode>();
+        clauses.add(new AqpOrQueryNode(nameAlternatives));
+        for (String keyword : parts.nonAuthor.split("\\s+")) {
+            if (!keyword.isEmpty()) {
+                clauses.add(new FieldQueryNode("abs", keyword, node.getBegin(), node.getEnd()));
+            }
+        }
+        return new AqpAndQueryNode(clauses);
+    }
+
+    private static AuthorQueryParts identifyLikelyAuthorQuery(String input, QueryConfigHandler config) {
+        String value = input.trim();
+        if (value.length() >= 2 && value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
+            value = value.substring(1, value.length() - 1).trim();
+        }
+
+        String[] parts = value.split("\\s+");
+        if (parts.length < 3 || !isNameToken(parts[0]) || !isNameToken(parts[1])) {
+            return null;
+        }
+        String authorName = parts[1] + ", " + parts[0];
+        AuthorEvidence evidence = lookupAuthorEvidence(authorName, config);
+        boolean indexedAuthor = evidence.indexed;
+        if (!indexedAuthor && (!evidence.available
+                || !isCapitalizedName(parts[0]) || !isCapitalizedName(parts[1])
+                || !hasAbstractPhraseEvidence(parts[0] + " " + parts[1], config))) {
+            return null;
+        }
+
+        StringBuilder nonAuthor = new StringBuilder();
+        for (int i = 2; i < parts.length; i++) {
+            if (nonAuthor.length() > 0) {
+                nonAuthor.append(' ');
+            }
+            nonAuthor.append(parts[i]);
+        }
+
+        return new AuthorQueryParts(parts[0] + " " + parts[1], authorName,
+                nonAuthor.toString(), indexedAuthor);
+    }
+
+    private static final class AuthorQueryParts {
+        final String fullName;
+        final String authorName;
+        final String nonAuthor;
+        final boolean indexedAuthor;
+
+        AuthorQueryParts(String fullName, String authorName, String nonAuthor, boolean indexedAuthor) {
+            this.fullName = fullName;
+            this.authorName = authorName;
+            this.nonAuthor = nonAuthor;
+            this.indexedAuthor = indexedAuthor;
+        }
+    }
+
+    private static final class AuthorEvidence {
+        final boolean indexed;
+        final boolean available;
+
+        AuthorEvidence(boolean indexed, boolean available) {
+            this.indexed = indexed;
+            this.available = available;
+        }
+    }
+
+    private static AuthorEvidence lookupAuthorEvidence(String authorName, QueryConfigHandler config) {
+        AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+        if (reqAttr == null || reqAttr.getRequest() == null) {
+            return new AuthorEvidence(false, false);
+        }
+
+        SolrQueryRequest req = reqAttr.getRequest();
+        Analyzer analyzer = req.getSchema().getFieldType("author").getIndexAnalyzer();
+        String normalizedTerm = null;
+        try (TokenStream tokens = analyzer.tokenStream("author", new StringReader(authorName))) {
+            CharTermAttribute term = tokens.addAttribute(CharTermAttribute.class);
+            tokens.reset();
+            if (tokens.incrementToken()) {
+                normalizedTerm = term.toString();
+            }
+            tokens.end();
+        } catch (IOException e) {
+            return new AuthorEvidence(false, false);
+        }
+        if (normalizedTerm == null) {
+            return new AuthorEvidence(false, true);
+        }
+
+        try {
+            Terms terms = MultiTerms.getTerms(req.getSearcher().getIndexReader(), "author");
+            if (terms == null) {
+                return new AuthorEvidence(false, true);
+            }
+            BytesRef prefix = new BytesRef(normalizedTerm);
+            TermsEnum iterator = terms.iterator();
+            iterator.seekCeil(prefix);
+            BytesRef candidate = iterator.term();
+            boolean indexed = candidate != null && candidate.length >= prefix.length;
+            for (int i = 0; indexed && i < prefix.length; i++) {
+                indexed = candidate.bytes[candidate.offset + i] == prefix.bytes[prefix.offset + i];
+            }
+            if (indexed && candidate.length > prefix.length) {
+                indexed = candidate.bytes[candidate.offset + prefix.length] == ' ';
+            }
+            return new AuthorEvidence(indexed, true);
+        } catch (IOException e) {
+            return new AuthorEvidence(false, false);
+        }
+    }
+
+    private static boolean hasAbstractPhraseEvidence(String fullName, QueryConfigHandler config) {
+        AqpRequestParams reqAttr = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+        if (reqAttr == null || reqAttr.getRequest() == null) {
+            return false;
+        }
+
+        SolrQueryRequest req = reqAttr.getRequest();
+        Analyzer analyzer = req.getSchema().getFieldType("abstract").getIndexAnalyzer();
+        Query phrase = new QueryBuilder(analyzer).createPhraseQuery("abstract", fullName);
+        if (phrase == null) {
+            return false;
+        }
+        try {
+            return req.getSearcher().search(phrase, 1).totalHits.value > 0;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private static boolean isNameToken(String value) {
+        if (value.length() < 2) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (!Character.isLetter(c) && c != '-' && c != '\'') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isCapitalizedName(String value) {
+        if (!Character.isUpperCase(value.charAt(0))) {
+            return false;
+        }
+        for (int i = 1; i < value.length(); i++) {
+            if (Character.isUpperCase(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     private boolean hasExactAncestor(QueryNode node) {
         QueryNode parent = node.getParent();

@@ -103,6 +103,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         add(new MultiFieldQueryNodeProcessor());
         add(new AqpNullDefaultFieldProcessor());
 
+        if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY)) {
+            add(new AqpUnfieldedSearchProcessor());
+        }
         // expands virtual fields into real fields, that can be analyzed
         // normal ways (it also adds boosts, if necessary)
         add(new AqpVirtualFieldsQueryNodeProcessor());
@@ -137,10 +140,9 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         // this block applies only when query parser is ran inside SOLR
         if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY)) {
 
-            // take the 'unfielded search' values and wrap them into edismax('xxxxx') call
-            // it will be executed/built in the 'build' phase (after processors finished)
+            // Process fielded exact queries after virtual fields expand so their
+            // exact-field markers reach every generated field alternative.
             add(new AqpUnfieldedSearchProcessor());
-
             // this takes the unfielded search (multi-token group)
             add(new AqpWhiteSpacedQueryNodeProcessor());
 
