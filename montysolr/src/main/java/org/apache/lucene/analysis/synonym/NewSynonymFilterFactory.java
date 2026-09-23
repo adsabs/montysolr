@@ -358,14 +358,10 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
 
 
     /*
-     * This is a custom configuration for multi-token query-time synonym expansion.
-     *
-     * Multi-tokens are searched lowercase and original parts are returned
-     *
-     * Single tokens are searched as they are written in the synonym file
-     *
-     * The parser also returns source tokens for the multi-token group, for
-     * single-token the behaviour is governed by settings of includeOrig
+     * Multi-token inputs are matched case-insensitively unless their first
+     * token is an uppercase acronym. Acronym-leading phrases retain their
+     * source case so the query analyzer can preserve acronym sensitivity while
+     * still matching ordinary mixed-case phrases.
      *
      */
     public static class BestEffortIgnoreCaseSelectively extends SynonymBuilderFactory {
@@ -388,7 +384,13 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
                 @Override
                 public void add(CharsRef input, CharsRef output, boolean includeOrig) { //is always false :(
                     int count = countWords(input);
-                    super.add(count > 1 ? lowercase(input) : input, replaceNulls(output), count > 1 || inclOrig);
+                    boolean acronymPhrase = count > 1 && startsWithUppercaseAcronym(input);
+                    boolean addOriginal = count > 1 || inclOrig;
+                    super.add(acronymPhrase ? input : (count > 1 ? lowercase(input) : input),
+                            replaceNulls(output), addOriginal);
+                    if (acronymPhrase) {
+                        super.add(lowercase(input), replaceNulls(output), addOriginal);
+                    }
                 }
 
                 private CharsRef lowercase(CharsRef chars) {
@@ -398,6 +400,25 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
                         chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not be always correct (?)
                     }
                     return chars;
+                }
+
+                private boolean startsWithUppercaseAcronym(CharsRef chars) {
+                    int letters = 0;
+                    int uppercase = 0;
+                    int limit = chars.offset + chars.length;
+                    for (int i = chars.offset; i < limit; i++) {
+                        char ch = chars.chars[i];
+                        if (ch == SynonymMap.WORD_SEPARATOR) {
+                            break;
+                        }
+                        if (Character.isLetter(ch)) {
+                            letters++;
+                            if (Character.isUpperCase(ch)) {
+                                uppercase++;
+                            }
+                        }
+                    }
+                    return letters >= 2 && letters == uppercase;
                 }
             };
 

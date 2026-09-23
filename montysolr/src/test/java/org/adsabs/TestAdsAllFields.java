@@ -296,10 +296,86 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
 
 
         assertU(commit("waitSearcher", "true"));
+        assertU(adoc("id", "9801", "bibcode", "2014NED...980...01A", "title", "NED"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("q", "title:NED"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9801']");
+        assertQ(req("q", "title:\"NASA ipac extragalactic database\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9801']");
+        assertQ(req("q", "title:\"NED database\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9801']");
+        assertQ(req("q", "title:\"NED data base\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9801']");
+        assertQ(req("q", "title:\"NASA IPAC extragalactic datbase\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9801']");
+        assertQ(req("q", "title:\"nasa extra galactic data base\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9801']");
 
-        assertQ(req("q", "*:*"),
-                "//*[@numFound>='19']"
-        );
+        assertU(adoc("id", "9802", "bibcode", "2014NED...980...02A",
+                "title", "prefix NED suffix"));
+        assertU(adoc("id", "9804", "bibcode", "2014NED...980...04A",
+                "title", "national aeronautics and space administration ipac extragalactic database"));
+        assertU(adoc("id", "9805", "bibcode", "2014NED...980...05A",
+                "title", "prefix NED gap suffix"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("q", "title:\"NASA ipac extragalactic database\"",
+                        "fq", "{!terms f=id}9801,9804"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='9801']",
+                "//doc/str[@name='id'][.='9804']");
+        assertQ(req("q", "title:\"prefix NASA ipac extragalactic database suffix\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9802']",
+                "not(//doc/str[@name='id'][.='9805'])");
+        assertQ(req("q", "title:\"prefix NASA ipac extragalactic database suffix\"~1"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='9802']",
+                "//doc/str[@name='id'][.='9805']");
+        assertU(adoc("id", "9806", "bibcode", "2014NED...980...06A",
+                "title", "administration space aeronautics national"));
+        assertU(commit("waitSearcher", "true"));
+        try {
+            assertQ(req("q", "title:\"NASA\""),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9804']",
+                    "not(//doc/str[@name='id'][.='9806'])");
+        } finally {
+            assertU(delI("9806"));
+            assertU(commit("waitSearcher", "true"));
+        }
+        assertQ(req("q", "title:\"prefix  NASA ipac extragalactic database suffix\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9802']",
+                "not(//doc/str[@name='id'][.='9805'])");
+        assertQ(req("q", "title:\"prefix NASA  ipac extragalactic   database suffix\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='9802']",
+                "not(//doc/str[@name='id'][.='9805'])");
+        assertU(adoc("id", "9807", "bibcode", "2014NED...980...07A",
+                "title", "prefix national aeronautics and space administration ipac extragalactic database suffix"));
+        assertU(commit("waitSearcher", "true"));
+        try {
+            assertQ(req("q", "title:\"prefix NASA  ipac extragalactic   database suffix\"",
+                            "fq", "{!terms f=id}9805,9807"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9807']",
+                    "not(//doc/str[@name='id'][.='9805'])");
+        } finally {
+            assertU(delI("9807"));
+            assertU(commit("waitSearcher", "true"));
+        }
+        assertU(delI("9801"));
+        assertU(delI("9802"));
+        assertU(delI("9804"));
+        assertU(delI("9805"));
+        // MLT below uses corpus statistics, including unmerged deleted postings.
+        assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
         assertQ(req("q", "id:100"),
                 "//*[@numFound='1']"
         );
@@ -1654,5 +1730,111 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                         + "(institution:astro 3d)^2.0 aff_id:astro 3d "
                         + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\")",
                 BooleanQuery.class);
+    }
+    public void testGlobalExplicitSynonymPhraseSlop() throws Exception {
+        try {
+            assertU(adoc("id", "9896", "bibcode", "span9896", "title",
+                    "prefix NASA ipac gap extragalactic database suffix"));
+            assertU(adoc("id", "9897", "bibcode", "span9897", "title",
+                    "prefix gap NASA ipac gap extragalactic database suffix"));
+            assertU(adoc("id", "9898", "bibcode", "span9898", "title",
+                    "quartz granite NED"));
+            assertU(commit("waitSearcher", "true"));
+
+            String nasaDocs = "{!terms f=id}9896,9897";
+            assertQ(req("defType", "aqp", "q", "title:\"prefix NED suffix\"",
+                            "fq", nasaDocs),
+                    "//*[@numFound='0']");
+            assertQ(req("defType", "aqp", "q", "title:\"prefix NED suffix\"~1",
+                            "fq", nasaDocs),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9896']");
+
+            assertQ(req("defType", "aqp", "q", "title:\"granite quartz NED\"~1",
+                            "fq", "{!terms f=id}9898"),
+                    "//*[@numFound='0']");
+            assertQ(req("defType", "aqp", "q", "title:\"granite quartz NED\"~2",
+                            "fq", "{!terms f=id}9898"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9898']");
+        } finally {
+            for (String id : new String[]{"9896", "9897", "9898"}) {
+                assertU(delI(id));
+            }
+            assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
+        }
+    }
+
+    public void testRawPositionalPunctuationGaps() throws Exception {
+        String[] ids = {"9961", "9962", "9963", "9964"};
+        try {
+            assertU(adoc("id", "9961", "bibcode", "span9961", "title",
+                    "prefix NED < 7 suffix"));
+            assertU(adoc("id", "9962", "bibcode", "span9962", "title",
+                    "prefix NASA ipac extragalactic database < 7 suffix"));
+            assertU(adoc("id", "9963", "bibcode", "span9963", "title",
+                    "prefix NASA ipac extragalactic database 7 suffix"));
+            assertU(adoc("id", "9964", "bibcode", "span9964", "title",
+                    "prefix NASA ipac extragalactic database unknown < 7 suffix"));
+            assertU(commit("waitSearcher", "true"));
+
+            assertQ(req("defType", "aqp",
+                            "q", "title:\"prefix NED < 7 suffix\"~0",
+                            "fq", "{!terms f=id}9961,9962,9963,9964"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='9961']",
+                    "//doc/str[@name='id'][.='9962']",
+                    "not(//doc/str[@name='id'][.='9963'])",
+                    "not(//doc/str[@name='id'][.='9964'])");
+        } finally {
+            for (String id : ids) {
+                assertU(delI(id));
+            }
+            assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
+        }
+    }
+
+    public void testIndependentOmittedWordsAndGlobalSlop() throws Exception {
+        String[] ids = {"9861", "9862", "9863", "9864", "9865", "9866", "9867",
+                "9851", "9852", "9853", "9854", "9841", "9842", "9843", "9844"};
+        String[] titles = {
+                "granite BY AM quartz NED", "granite BY quartz NED",
+                "granite AM quartz NED", "granite quartz NED",
+                "granite unknown quartz NED", "granite BY AM gap quartz NED",
+                "granite AM BY quartz NED",
+                "BY AM granite NED", "BY granite NED", "AM granite NED", "granite NED",
+                "granite NED BY AM", "granite NED BY", "granite NED AM", "granite NED"
+        };
+        try {
+            for (int i = 0; i < ids.length; i++) {
+                assertU(adoc("id", ids[i], "bibcode", "omitted" + ids[i], "title", titles[i]));
+            }
+            assertU(commit("waitSearcher", "true"));
+            assertQ(req("q", "title:\"granite by am quartz NED\"",
+                            "fq", "{!terms f=id}9861,9862,9863,9864,9865,9866,9867"),
+                    "//*[@numFound='4']",
+                    "//doc/str[@name='id'][.='9861']", "//doc/str[@name='id'][.='9862']",
+                    "//doc/str[@name='id'][.='9863']", "//doc/str[@name='id'][.='9864']");
+            assertQ(req("q", "title:\"granite by am quartz NED\"~1",
+                            "fq", "{!terms f=id}9866"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='9866']");
+            assertQ(req("q", "title:\"by am granite NED\"",
+                            "fq", "{!terms f=id}9851,9852,9853,9854"),
+                    "//*[@numFound='4']",
+                    "//doc/str[@name='id'][.='9851']", "//doc/str[@name='id'][.='9852']",
+                    "//doc/str[@name='id'][.='9853']", "//doc/str[@name='id'][.='9854']");
+            assertQ(req("q", "title:\"granite NED by am\"",
+                            "fq", "{!terms f=id}9841,9842,9843,9844"),
+                    "//*[@numFound='4']",
+                    "//doc/str[@name='id'][.='9841']", "//doc/str[@name='id'][.='9842']",
+                    "//doc/str[@name='id'][.='9843']", "//doc/str[@name='id'][.='9844']");
+            assertQ(req("q", "title:\"granite by of quartz NED\"",
+                            "fq", "{!terms f=id}9861,9862,9863,9864,9865,9866,9867"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='9862']", "//doc/str[@name='id'][.='9864']");
+        } finally {
+            for (String id : ids) assertU(delI(id));
+            assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
+        }
     }
 }

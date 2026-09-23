@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryBuilder;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
@@ -95,6 +96,32 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
                             QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
                             "One of the clauses inside AqpNearQueryNode is null"));
                 }
+            }
+
+            int[] rawGaps = (int[]) nearNode.getTag(
+                    AqpPostAnalysisProcessor.RAW_POSITIONAL_GAPS);
+            if (rawGaps != null) {
+                if (rawGaps.length != clauses.length || rawGaps.length == 0
+                        || rawGaps[0] != 0) {
+                    throw new QueryNodeException(new MessageImpl(
+                            QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+                            "Invalid fixed-gap positions for AqpNearQueryNode"));
+                }
+                SpanNearQuery.Builder builder = new SpanNearQuery.Builder(
+                        clauses[0].getField(), nearNode.getInOrder());
+                for (i = 0; i < clauses.length; i++) {
+                    if (rawGaps[i] < 0) {
+                        throw new QueryNodeException(new MessageImpl(
+                                QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
+                                "Negative fixed gap in AqpNearQueryNode"));
+                    }
+                    if (rawGaps[i] > 0) {
+                        builder.addGap(rawGaps[i]);
+                    }
+                    builder.addClause(clauses[i]);
+                }
+                builder.setSlop(nearNode.getSlop());
+                return builder.build();
             }
 
             return new SpanNearQuery(clauses, nearNode.getSlop(),

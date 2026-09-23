@@ -16,6 +16,10 @@ import java.io.IOException;
 import java.util.*;
 
 public class SpanConverter {
+    private static final int MAX_POSITIONED_SLOP_FOR_EXACT_ALTERNATIVES = 64;
+    private static final int MAX_POSITIONED_SLOP_ALTERNATIVES = 64;
+    private static final int MAX_POSITIONED_SLOP_SEARCH_STEPS = 4096;
+
 
     boolean wrapNonConvertible = false;
 
@@ -34,6 +38,8 @@ public class SpanConverter {
             return wrapBoost(new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q), boost);
         } else if (q instanceof PrefixQuery) {
             return wrapBoost(new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q), boost);
+        } else if (q instanceof MultiPhraseQuery) {
+            return wrapBoost(convertMultiPhraseToSpan(container), boost);
         } else if (q instanceof PhraseQuery) {
             return wrapBoost(convertPhraseToSpan(container), boost);
         } else if (q instanceof BooleanQuery) {
@@ -118,15 +124,177 @@ public class SpanConverter {
         wrapNonConvertible = v;
     }
 
+    private SpanQuery convertMultiPhraseToSpan(SpanConverterContainer container) {
+        MultiPhraseQuery q = (MultiPhraseQuery) container.query;
+        Term[][] termArrays = q.getTermArrays();
+        if (termArrays.length == 0) {
+            return new EmptySpanQuery(q);
+        }
+        SpanQuery[] clauses = convertTermArrays(termArrays);
+        if (clauses == null) {
+            return new EmptySpanQuery(q);
+        }
+        return convertPositionedClauses(q, clauses, q.getPositions(), q.getSlop());
+    }
+
     private SpanQuery convertPhraseToSpan(SpanConverterContainer container) {
         PhraseQuery q = (PhraseQuery) container.query;
-
-        SpanQuery[] clauses = new SpanQuery[q.getTerms().length];
-        int i = 0;
-        for (Term term : q.getTerms()) {
-            clauses[i++] = new SpanTermQuery(term);
+        Term[] terms = q.getTerms();
+        if (terms.length == 0) {
+            return new EmptySpanQuery(q);
         }
-        return new SpanNearQuery(clauses, q.getSlop() > 0 ? q.getSlop() : 1, true);
+        return convertPositionedClauses(q, convertTerms(terms),
+                q.getPositions(), q.getSlop());
+    }
+
+    private SpanQuery[] convertTerms(Term[] terms) {
+        SpanQuery[] clauses = new SpanQuery[terms.length];
+        for (int i = 0; i < terms.length; i++) {
+            clauses[i] = new SpanTermQuery(terms[i]);
+        }
+        return clauses;
+    }
+
+    private SpanQuery[] convertTermArrays(Term[][] termArrays) {
+        SpanQuery[] clauses = new SpanQuery[termArrays.length];
+        for (int i = 0; i < termArrays.length; i++) {
+            Term[] terms = termArrays[i];
+            if (terms.length == 0) {
+                return null;
+            }
+            if (terms.length == 1) {
+                clauses[i] = new SpanTermQuery(terms[0]);
+            } else {
+                clauses[i] = new SpanOrQuery(convertTerms(terms));
+            }
+        }
+        return clauses;
+    }
+
+    private SpanQuery convertPositionedClauses(Query source, SpanQuery[] clauses,
+                                                int[] positions, int querySlop) {
+        if (clauses.length == 1) {
+            return clauses[0];
+        }
+        if (clauses.length == 0) {
+            return new EmptySpanQuery(source);
+        }
+
+        boolean hasPositionHoles = false;
+        for (int i = 1; i < positions.length; i++) {
+            hasPositionHoles |= positions[i] - positions[i - 1] > 1;
+        }
+        // SpanNear slop counts unmatched positions, not the phrase-wide move cost across holes.
+        if (querySlop > 0 && hasPositionHoles) {
+            if (querySlop > MAX_POSITIONED_SLOP_FOR_EXACT_ALTERNATIVES) {
+                return convertPositionedClausesLinearly(clauses, positions, querySlop);
+            }
+            List<SpanQuery> alternatives = new ArrayList<>();
+            int[] candidatePositions = new int[positions.length];
+            long[] positionOffsets = new long[positions.length];
+            int[] remainingSearchSteps = {MAX_POSITIONED_SLOP_SEARCH_STEPS};
+            candidatePositions[0] = 0;
+            for (long center = -((long) querySlop); center <= querySlop; center++) {
+                int remainingSlop = querySlop - (int) Math.abs(center);
+                if (!addPositionedSlopAlternatives(clauses, positions, candidatePositions,
+                        positionOffsets, 1, center, remainingSlop, alternatives,
+                        remainingSearchSteps)) {
+                    return convertPositionedClausesLinearly(clauses, positions, querySlop);
+                }
+            }
+            if (alternatives.isEmpty()) {
+                return new EmptySpanQuery(source);
+            }
+            if (alternatives.size() == 1) {
+                return alternatives.get(0);
+            }
+            return new SpanOrQuery(alternatives.toArray(new SpanQuery[0]));
+        }
+        return convertPositionedClausesLinearly(clauses, positions, querySlop);
+    }
+
+    private SpanQuery convertPositionedClausesLinearly(SpanQuery[] clauses, int[] positions,
+                                                         int querySlop) {
+        SpanNearQuery.Builder builder = new SpanNearQuery.Builder(
+                clauses[0].getField(), true);
+        builder.addClause(clauses[0]);
+        for (int i = 1; i < clauses.length; i++) {
+            int gap = positions[i] - positions[i - 1] - 1;
+            if (gap > 0) {
+                builder.addGap(gap);
+            }
+            builder.addClause(clauses[i]);
+        }
+        builder.setSlop(querySlop);
+        return builder.build();
+    }
+
+    private boolean addPositionedSlopAlternatives(SpanQuery[] clauses, int[] positions,
+                                                   int[] candidatePositions, long[] positionOffsets,
+                                                   int clauseIndex, long center, int remainingSlop,
+                                                   List<SpanQuery> alternatives,
+                                                   int[] remainingSearchSteps) {
+        if (--remainingSearchSteps[0] < 0) {
+            return false;
+        }
+        if (clauseIndex == clauses.length) {
+            if (!isLowerMedian(positionOffsets, center)) {
+                return true;
+            }
+            if (alternatives.size() >= MAX_POSITIONED_SLOP_ALTERNATIVES) {
+                return false;
+            }
+            SpanNearQuery.Builder builder = new SpanNearQuery.Builder(
+                    clauses[0].getField(), true);
+            builder.addClause(clauses[0]);
+            for (int i = 1; i < clauses.length; i++) {
+                int gap = candidatePositions[i] - candidatePositions[i - 1] - 1;
+                if (gap > 0) {
+                    builder.addGap(gap);
+                }
+                builder.addClause(clauses[i]);
+            }
+            alternatives.add(builder.setSlop(0).build());
+            return true;
+        }
+
+        long queryPosition = (long) positions[clauseIndex] - positions[0];
+        for (long offset = center - remainingSlop;
+             offset <= center + remainingSlop; offset++) {
+            long candidatePosition = queryPosition + offset;
+            if (candidatePosition <= candidatePositions[clauseIndex - 1]
+                    || candidatePosition > Integer.MAX_VALUE) {
+                continue;
+            }
+            int editCost = (int) Math.abs(offset - center);
+            if (editCost > remainingSlop) {
+                continue;
+            }
+            candidatePositions[clauseIndex] = (int) candidatePosition;
+            positionOffsets[clauseIndex] = offset;
+            if (!addPositionedSlopAlternatives(clauses, positions, candidatePositions,
+                    positionOffsets, clauseIndex + 1, center, remainingSlop - editCost,
+                    alternatives, remainingSearchSteps)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private boolean isLowerMedian(long[] positionOffsets, long center) {
+        int rank = (positionOffsets.length - 1) / 2;
+        int below = 0;
+        int atOrBelow = 0;
+        for (long offset : positionOffsets) {
+            if (offset < center) {
+                below++;
+            }
+            if (offset <= center) {
+                atOrBelow++;
+            }
+        }
+        return below <= rank && atOrBelow > rank;
     }
 
     /*
