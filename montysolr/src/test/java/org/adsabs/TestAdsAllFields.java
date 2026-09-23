@@ -1431,6 +1431,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "//doc[1]/int[@name='recid'][.='101']",
                 "//doc[2]/int[@name='recid'][.='103']"
         );
+        assertQ(req("q", "trending(bibcode:2014JNuM..455...10C) -bibcode:2014JNuM..455...10C"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='103']");
 
 
         // test we can search for all docs that have certain field
@@ -1761,6 +1764,28 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "//*[@numFound='2']",
                 "//doc/int[@name='recid'][.='500']",
                 "//doc/int[@name='recid'][.='501']");
+        // MoreLikeThisQuery's default token budget must not discard a shared
+        // reader that occurs after 5,000 seed-reader terms.
+        String[] longReaderSeed = new String[10006];
+        longReaderSeed[0] = "id";
+        longReaderSeed[1] = "600";
+        longReaderSeed[2] = "bibcode";
+        longReaderSeed[3] = "long-reader-seed";
+        int longReaderPosition = 4;
+        for (int i = 0; i < 5000; i++) {
+            longReaderSeed[longReaderPosition++] = "reader";
+            longReaderSeed[longReaderPosition++] = "long-reader-unique-" + i;
+        }
+        longReaderSeed[longReaderPosition++] = "reader";
+        longReaderSeed[longReaderPosition] = "long-reader-shared";
+        assertU(adoc(longReaderSeed));
+        assertU(adoc("id", "601", "bibcode", "long-reader-peer",
+                "reader", "long-reader-shared"));
+        assertU(commit());
+        assertQ(req("q", "trending(bibcode:long-reader-seed) -bibcode:long-reader-seed",
+                        "fl", "recid"),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='601']");
     }
     public void testGlobalExplicitSynonymPhraseSlop() throws Exception {
         try {

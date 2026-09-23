@@ -7,6 +7,7 @@ import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.mlt.MoreLikeThis;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -43,6 +44,7 @@ import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.uninverting.UninvertingReader;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,6 +77,45 @@ public class AqpAdsabsSubQueryProvider implements
             throw new SyntaxError("Naughty, naughty server error", e);
         }
         return cacheWrapper;
+    }
+
+    /**
+     * MoreLikeThisQuery hard-caps analyzed input at 5,000 tokens. Trending
+     * reader lists can be much larger, so keep the existing max-query-term
+     * limit while allowing all collected reader values to be considered.
+     */
+    private static class AdsMoreLikeThisQuery extends MoreLikeThisQuery {
+        private final String fieldName;
+
+        AdsMoreLikeThisQuery(String likeText, String[] moreLikeFields,
+                             Analyzer analyzer, String fieldName) {
+            super(likeText, moreLikeFields, analyzer, fieldName);
+            this.fieldName = fieldName;
+        }
+
+        @Override
+        public Query rewrite(IndexSearcher searcher) throws IOException {
+            MoreLikeThis mlt = new MoreLikeThis(searcher.getIndexReader());
+            mlt.setFieldNames(getMoreLikeFields());
+            mlt.setAnalyzer(getAnalyzer());
+            mlt.setMinTermFreq(getMinTermFrequency());
+            if (getMinDocFreq() >= 0) {
+                mlt.setMinDocFreq(getMinDocFreq());
+            }
+            mlt.setMaxQueryTerms(getMaxQueryTerms());
+            mlt.setStopWords(getStopWords());
+            mlt.setMaxNumTokensParsed(Integer.MAX_VALUE);
+
+            BooleanQuery terms = (BooleanQuery) mlt.like(
+                    fieldName, new StringReader(getLikeText()));
+            BooleanQuery.Builder query = new BooleanQuery.Builder();
+            for (BooleanClause clause : terms) {
+                query.add(clause);
+            }
+            query.setMinimumNumberShouldMatch(
+                    (int) (terms.clauses().size() * getPercentTermsToMatch()));
+            return query.build();
+        }
     }
 
     static {
@@ -248,7 +289,7 @@ public class AqpAdsabsSubQueryProvider implements
                     throw new SyntaxError(e.getMessage(), e);
                 }
 
-                MoreLikeThisQuery mlt = new MoreLikeThisQuery(readers.toString(), new String[]{fieldName},
+                AdsMoreLikeThisQuery mlt = new AdsMoreLikeThisQuery(readers.toString(), new String[]{fieldName},
                         new WhitespaceAnalyzer(), fieldName);
 
                 // configurable params
