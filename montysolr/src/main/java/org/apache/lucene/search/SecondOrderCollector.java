@@ -6,7 +6,7 @@ import java.util.List;
 public interface SecondOrderCollector {
 
     enum FinalValueType {
-        ARITHM_MEAN, GEOM_MEAN, ABS_COUNT, MAX_VALUE, MIN_VALUE,
+        ARITHM_MEAN, GEOM_MEAN, ABS_COUNT, ABS_COUNT_TEXT_WEIGHT, MAX_VALUE, MIN_VALUE,
         GEOM_MEAN_NORM, ARITHM_MEAN_NORM, ABS_COUNT_NORM,
         AGRESTI_COULL
     }

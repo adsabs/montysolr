@@ -34,12 +34,12 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
         ));
         assertU(adoc("id", "1", "bibcode", "b",
                 "reference", "X",
-                "citation", "A", "citation", "D"
+                "citation", "A", "citation", "D", "citation", "G"
         ));
         assertU(commit("waitSearcher", "true"));
         assertU(adoc("id", "2", "bibcode", "c",
                 "reference", "E", "reference", "F",
-                "citation", "A"
+                "citation", "A", "citation", "E"
         ));
         assertU(adoc("id", "3", "bibcode", "d",
                 "reference", "B",
@@ -47,16 +47,28 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
         ));
         assertU(commit("waitSearcher", "true"));
         assertU(adoc("id", "4", "bibcode", "e",
-                "citation", "C"
+                "citation", "C", "reference", "C"
         ));
         assertU(adoc("id", "5", "bibcode", "f",
                 "citation", "C"
         ));
+        assertU(adoc("id", "6", "bibcode", "g",
+                "reference", "b"));
+        assertU(adoc("id", "7", "bibcode", "p",
+                "citation", "x", "citation", "y"));
+        assertU(adoc("id", "8", "bibcode", "q",
+                "citation", "z"));
+        assertU(adoc("id", "9", "bibcode", "x",
+                "reference", "p"));
+        assertU(adoc("id", "10", "bibcode", "y",
+                "reference", "p"));
+        assertU(adoc("id", "11", "bibcode", "z",
+                "reference", "q"));
         assertU(commit("waitSearcher", "true"));
 
 
         assertQ(req("q", "*:*"),
-                "//*[@numFound='6']"
+                "//*[@numFound='12']"
         );
 
         assertQ(req("q", "bibcode:A", "fl", "bibcode"),
@@ -68,11 +80,26 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
                 "//*[@numFound='0']"
         );
 
+        assertQ(req("q", "citations(author:\"Torkelsson, U.\")"),
+                "//*[@numFound='0']");
+        assertQ(req("q", "citations(Torkelsson, U.)"),
+                "//*[@numFound='0']");
+
         assertQ(req("q", "citations(bibcode:b)", "fl", "bibcode"),
-                "//*[@numFound='2']",
+                "//*[@numFound='3']",
                 "//result/doc/str[@name='bibcode']='a'",
-                "//result/doc/str[@name='bibcode']='d'"
+                "//result/doc/str[@name='bibcode']='d'",
+                "//result/doc/str[@name='bibcode']='g'"
         );
+        // Root normalization must preserve the relative citation counts.
+        assertQ(req("q", "citations((bibcode:b OR bibcode:c))", "fl", "bibcode,score",
+                        "sort", "score desc,bibcode asc"),
+                "//*[@numFound='4']",
+                "//result/doc[1]/str[@name='bibcode']='a'",
+                "//result/doc[1]/float[@name='score'] = 2 * //result/doc[2]/float[@name='score']",
+                "//result/doc[2]/str[@name='bibcode']='d'",
+                "//result/doc[3]/str[@name='bibcode']='e'",
+                "//result/doc[4]/str[@name='bibcode']='g'");
 
 //		ModifiableSolrParams p = params("sort","id asc");
 //		assertJQ(req(p, "q","{!join from=bibcode to=reference}bibcode:b", "fl","id", "debugQuery", "true")
@@ -80,9 +107,10 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
 //    );
 
         assertQ(req("q", "joincitations(bibcode:B)", "fl", "bibcode"),
-                "//*[@numFound='2']",
+                "//*[@numFound='3']",
                 "//result/doc/str[@name='bibcode']='a'",
-                "//result/doc/str[@name='bibcode']='d'"
+                "//result/doc/str[@name='bibcode']='d'",
+                "//result/doc/str[@name='bibcode']='g'"
         );
 
 
@@ -92,6 +120,24 @@ public class TestSolrCitationQuery extends MontySolrQueryTestCase {
                 "//result/doc/str[@name='bibcode']='c'",
                 "//result/doc/str[@name='bibcode']='d'"
         );
+        assertQ(req("q", "references((bibcode:a OR bibcode:g))", "fl", "bibcode,score",
+                        "sort", "score desc"),
+                "//*[@numFound='3']",
+                "//result/doc[1]/str[@name='bibcode']='b'",
+                "//result/doc[1]/float[@name='score'] = 2 * //result/doc[2]/float[@name='score']",
+                "//result/doc[2]/str[@name='bibcode']='c'",
+                "//result/doc[3]/str[@name='bibcode']='d'");
+        assertQ(req("q", "references((bibcode:x OR bibcode:y OR bibcode:z^10),1.0)",
+                        "fl", "bibcode,score", "sort", "score desc,bibcode asc"),
+                "//*[@numFound='2']",
+                "//result/doc[1]/str[@name='bibcode']='q'",
+                "//result/doc[1]/float[@name='score'] > //result/doc[2]/float[@name='score']",
+                "//result/doc[2]/str[@name='bibcode']='p'");
+        assertQ(req("q", "citations((bibcode:p OR bibcode:q^10),1.0)",
+                        "fl", "bibcode,score", "sort", "score desc,bibcode asc"),
+                "//*[@numFound='3']",
+                "//result/doc[1]/str[@name='bibcode']='z'",
+                "//result/doc[1]/float[@name='score'] > //result/doc[2]/float[@name='score']");
         assertQ(req("q", "joinreferences(bibcode:A)", "fl", "bibcode"),
                 "//*[@numFound='3']",
                 "//result/doc/str[@name='bibcode']='b'",
