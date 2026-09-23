@@ -575,6 +575,12 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
         }
 
         public boolean isBareNode(boolean isFirstInGroup) {
+            // A standalone '*' is a match-all query, not a wildcard term to concatenate
+            // with neighboring unfielded tokens. Keeping it separate lets the normal
+            // QTRUNCATED processor turn it into MatchAllDocsQueryNode.
+            if ("QTRUNCATED".equals(qType) && "*".equals(input)) {
+                return false;
+            }
             // we allow only the following:
             // /MODIFIER/TMODIFIER/FIELD/QNORMAL
             // and all elements must be either empty
