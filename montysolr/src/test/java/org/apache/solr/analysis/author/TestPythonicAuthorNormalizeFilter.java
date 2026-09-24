@@ -1,6 +1,7 @@
 package org.apache.solr.analysis.author;
 
 import monty.solr.util.MontySolrAbstractLuceneTestCase;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.KeywordTokenizer;
@@ -56,6 +57,45 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
         compare("goodman", "goodman,");
         compare("alissa goodman", "alissa goodman,", "goodman, alissa");
 
+    }
+
+    public void testAnalyzerReuseAfterRejectedLongAuthor() throws Exception {
+        Analyzer analyzer = new Analyzer() {
+            @Override
+            protected TokenStreamComponents createComponents(String fieldName) {
+                KeywordTokenizer tokenizer = new KeywordTokenizer();
+                TokenStream normalized = new PythonicAuthorNormalizerFilter(tokenizer);
+                return new TokenStreamComponents(tokenizer,
+                        new AuthorDetectAndIgnoreFilter(normalized, 6));
+            }
+        };
+
+        try {
+            assertEquals(0, collect(analyzer,
+                    "purpose of this review is to bridge the gap between").size());
+
+            ArrayList<String> actual = collect(analyzer, "Boser, S");
+            assertEquals(1, actual.size());
+            assertEquals("Boser, S", actual.get(0));
+        } finally {
+            analyzer.close();
+        }
+    }
+
+    private ArrayList<String> collect(Analyzer analyzer, String input) throws Exception {
+        TokenStream stream = analyzer.tokenStream("author", new StringReader(input));
+        ArrayList<String> tokens = new ArrayList<String>();
+        try {
+            stream.reset();
+            CharTermAttribute term = stream.getAttribute(CharTermAttribute.class);
+            while (stream.incrementToken()) {
+                tokens.add(term.toString());
+            }
+            stream.end();
+            return tokens;
+        } finally {
+            stream.close();
+        }
     }
 
     public void compare(String input, String... expected) throws Exception {

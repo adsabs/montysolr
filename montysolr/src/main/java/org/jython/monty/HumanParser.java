@@ -91,7 +91,7 @@ public class HumanParser implements JythonNameParser {
         fullName = RE_SPACES.matcher(fullName.strip()).replaceAll(" ");
 
         // Split by commas
-        String[] parts = fullName.split(",");
+        String[] parts = fullName.split(",", -1);
         for (int i = 0; i < parts.length; i++) {
             parts[i] = parts[i].strip();
         }
