@@ -62,6 +62,25 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
     }
 
 
+
+    public void testHighlightingInsideReferencesOperator() throws Exception {
+        try {
+            assertU(adoc("id", "105", "bibcode", "b105", "title", "exoplanet source"));
+            assertU(adoc("id", "106", "bibcode", "b106", "title", "exoplanet target",
+                    "citation", "b105"));
+            assertU(commit("waitSearcher", "true"));
+            assertQ(req("defType", "aqp", "q", "references(title:exoplanet)",
+                            "hl", "true", "hl.fl", "title", "fl", "id,recid,title"),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='106']",
+                    "//lst[@name='106']/arr[@name='title']/str[contains(.,'em>exoplanet')]");
+        } finally {
+            assertU(delI("105"));
+            assertU(delI("106"));
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
     public void test() throws Exception {
 
         DirectSolrConnection direct = getDirectServer();

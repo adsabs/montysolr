@@ -400,6 +400,55 @@ public class AqpAdsabsQParser extends QParser {
         }
     }
 
+    @Override
+    public Query getHighlightQuery() throws SyntaxError {
+        return unwrapHighlightQuery(getQuery());
+    }
+
+    static Query unwrapHighlightQuery(Query query) {
+        if (query instanceof SecondOrderQuery secondOrder) {
+            return unwrapHighlightQuery(secondOrder.getQuery());
+        }
+        if (query instanceof FunctionScoreQuery functionScore) {
+            Query wrapped = unwrapHighlightQuery(functionScore.getWrappedQuery());
+            return wrapped == functionScore.getWrappedQuery()
+                    ? query
+                    : new FunctionScoreQuery(wrapped, functionScore.getSource());
+        }
+        if (query instanceof BoostQuery boost) {
+            Query wrapped = unwrapHighlightQuery(boost.getQuery());
+            return wrapped == boost.getQuery() ? query : new BoostQuery(wrapped, boost.getBoost());
+        }
+        if (query instanceof ConstantScoreQuery constantScore) {
+            Query wrapped = unwrapHighlightQuery(constantScore.getQuery());
+            return wrapped == constantScore.getQuery() ? query : new ConstantScoreQuery(wrapped);
+        }
+        if (query instanceof DisjunctionMaxQuery disjunction) {
+            List<Query> disjuncts = new ArrayList<>();
+            boolean changed = false;
+            for (Query disjunct : disjunction) {
+                Query unwrapped = unwrapHighlightQuery(disjunct);
+                disjuncts.add(unwrapped);
+                changed |= unwrapped != disjunct;
+            }
+            return changed
+                    ? new DisjunctionMaxQuery(disjuncts, disjunction.getTieBreakerMultiplier())
+                    : query;
+        }
+        if (query instanceof BooleanQuery booleanQuery) {
+            BooleanQuery.Builder builder = new BooleanQuery.Builder();
+            builder.setMinimumNumberShouldMatch(booleanQuery.getMinimumNumberShouldMatch());
+            boolean changed = false;
+            for (BooleanClause clause : booleanQuery) {
+                Query unwrapped = unwrapHighlightQuery(clause.getQuery());
+                builder.add(unwrapped, clause.getOccur());
+                changed |= unwrapped != clause.getQuery();
+            }
+            return changed ? builder.build() : query;
+        }
+        return query;
+    }
+
     public AqpQueryParser getParser() {
         return qParser;
     }
