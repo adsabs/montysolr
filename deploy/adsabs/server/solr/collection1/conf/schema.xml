@@ -902,6 +902,30 @@
 				<filter class="solr.TrimFilterFactory" />
 			</analyzer>
 		</fieldType>
+        <!-- institution abbreviations are hierarchical Parent/Child keywords.
+             Unlike aff_id, these values are not synonym-expanded. Pattern capture
+             keeps the full hierarchy and both components at one position. -->
+        <fieldType name="institution_tokens" class="solr.TextField"
+                   positionIncrementGap="100">
+            <analyzer type="index">
+                <charFilter class="solr.HTMLStripCharFilterFactory" />
+                <tokenizer class="solr.PatternTokenizerFactory"
+                           pattern="[\;]" group="-1" />
+                <filter class="org.apache.lucene.analysis.pattern.PatternCaptureGroupFilterFactory"
+                        pattern="([^/]+)/([^/]+)" preserve_original="true" />
+                <filter class="solr.ASCIIFoldingFilterFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.TrimFilterFactory" />
+            </analyzer>
+            <analyzer type="query">
+                <charFilter class="solr.HTMLStripCharFilterFactory" />
+                <tokenizer class="solr.PatternTokenizerFactory"
+                           pattern="[\;]" group="-1" />
+                <filter class="solr.ASCIIFoldingFilterFactory" />
+                <filter class="solr.LowerCaseFilterFactory" />
+                <filter class="solr.TrimFilterFactory" />
+            </analyzer>
+        </fieldType>
 
 
         <!-- test: this is a copy of affiliation_token
@@ -1282,7 +1306,7 @@
         <field name="aff_abbrev" type="affiliation_text" indexed="true" stored="true"
               multiValued="true" omitNorms="true"/>
         <!-- contents of institution is the same as aff_abbrev -->
-        <field name="institution" type="affiliation_tokens" indexed="true" stored="true"
+        <field name="institution" type="institution_tokens" indexed="true" stored="true"
                multiValued="true" omitNorms="true"/>
         <field name="aff_canonical" type="affiliation_text" indexed="true" stored="true"
                multiValued="true" omitNorms="true"/>
