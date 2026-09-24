@@ -1405,8 +1405,11 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='400']",
                 "//doc/str[@name='id'][.='401']",
                 "//doc/str[@name='id'][.='402']",
-                "//doc/str[@name='id'][.='403']"
+                "//doc/str[@name='id'][.='403']",
+                "//lst[@name='debug']/str[@name='aqp_debug'][contains(.,'final result:')]"
         );
+        assertQ(req("defType", "adismax", "q", "title:\"γ ray Sources\"", "debugQuery", "true"),
+                "//lst[@name='debug']/str[@name='aqp_debug'][contains(.,'final result:')]");
         assertQ(req("q", "title:\"$\\gamma$ ray Sources\"",
                         "indent", "true",
                         "debugQuery", "true"),

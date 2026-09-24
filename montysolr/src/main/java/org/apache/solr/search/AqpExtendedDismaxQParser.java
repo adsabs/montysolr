@@ -98,6 +98,7 @@ public class AqpExtendedDismaxQParser extends QParser {
     private Query altUserQuery;
     private List<Query> boostQueries;
     private boolean parsed = false;
+    private final StringBuilder aqpDebugOutput = new StringBuilder();
 
 
     public AqpExtendedDismaxQParser(String qstr, SolrParams localParams, SolrParams params, SolrQueryRequest req) {
@@ -110,6 +111,7 @@ public class AqpExtendedDismaxQParser extends QParser {
     public Query parse() throws SyntaxError {
 
         parsed = true;
+        aqpDebugOutput.setLength(0);
 
         /* the main query we will execute.  we disable the coord because
          * this query is an artificial construct
@@ -603,6 +605,10 @@ public class AqpExtendedDismaxQParser extends QParser {
     @Override
     public void addDebugInfo(NamedList<Object> debugInfo) {
         super.addDebugInfo(debugInfo);
+        String parserDebug = aqpDebugOutput.toString();
+        if (!parserDebug.isEmpty()) {
+            debugInfo.add("aqp_debug", parserDebug);
+        }
         debugInfo.add("altquerystring", altUserQuery);
         if (null != boostQueries) {
             debugInfo.add("boost_queries", config.boostParams);
@@ -1350,6 +1356,15 @@ public class AqpExtendedDismaxQParser extends QParser {
                     localReq = new LocalSolrQueryRequest(req.getCore(), nl);
                     QParser aqpParser = getParser(qs, "aqp", localReq);
                     query = aqpParser.parse();
+                    if (aqpParser instanceof AqpAdsabsQParser adsabsParser) {
+                        String parserDebug = adsabsParser.getParser().getDebugOutput();
+                        if (!parserDebug.isEmpty()) {
+                            if (aqpDebugOutput.length() > 0) {
+                                aqpDebugOutput.append('\n');
+                            }
+                            aqpDebugOutput.append(parserDebug);
+                        }
+                    }
 
                     if (query instanceof MatchNoDocsQuery)
                         return null;
