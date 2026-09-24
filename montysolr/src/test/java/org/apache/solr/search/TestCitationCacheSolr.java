@@ -113,6 +113,8 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        clearIndex();
+        assertU(commit("waitSearcher", "true"));
         createIndex();
     }
 
@@ -655,6 +657,98 @@ public class TestCitationCacheSolr extends MontySolrAbstractTestCase {
 
 
     }
+
+    @Test
+    public void testIncrementalAppendPreservesExistingGraph() throws Exception {
+        SolrQueryRequest initialRequest = req("test");
+        try {
+            CitationLRUCache preIncrementalCache = (CitationLRUCache) initialRequest.getSearcher()
+                    .getCache("citations-cache-from-references");
+            assertEquals(2, preIncrementalCache.get("b2"));
+
+            assertU(adoc("id", "11", "bibcode", "b11",
+                    "reference", "b2", "reference", "b3", "reference", "b12"));
+            assertU(commit("waitSearcher", "true"));
+
+            SolrQueryRequest afterIncrementalRequest = req("test");
+            try {
+                CitationLRUCache oldSearcherCache = (CitationLRUCache) afterIncrementalRequest.getSearcher()
+                        .getCache("citations-cache-from-references");
+                assertEquals(11, oldSearcherCache.get("b11"));
+                compare("References before target arrives", new int[]{2, 3}, oldSearcherCache.getReferences("b11"));
+
+                assertEquals(null, preIncrementalCache.get("b11"));
+                compare("Pre-incremental searcher remains unchanged", new int[]{2, 3, 4},
+                        preIncrementalCache.getReferences("b2"));
+                compare("Pre-incremental citations remain unchanged",
+                        new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10},
+                        preIncrementalCache.getCitations("b2"));
+            } finally {
+                afterIncrementalRequest.close();
+            }
+        } finally {
+            initialRequest.close();
+        }
+
+        SolrQueryRequest oldSearcherRequest = req("test");
+        try {
+            CitationLRUCache oldSearcherCache = (CitationLRUCache) oldSearcherRequest.getSearcher()
+                    .getCache("citations-cache-from-references");
+            assertEquals(11, oldSearcherCache.get("b11"));
+            compare("References before target arrives", new int[]{2, 3}, oldSearcherCache.getReferences("b11"));
+
+            assertU(adoc("id", "12", "bibcode", "b12"));
+            assertU(commit("waitSearcher", "true"));
+
+            assertEquals(null, oldSearcherCache.get("b12"));
+            compare("Old searcher remains unchanged", new int[]{2, 3},
+                    oldSearcherCache.getReferences("b11"));
+        } finally {
+            oldSearcherRequest.close();
+        }
+
+        SolrQueryRequest currentRequest = req("test");
+        try {
+            CitationLRUCache cache = (CitationLRUCache) currentRequest.getSearcher()
+                    .getCache("citations-cache-from-references");
+            assertEquals(12, cache.get("b12"));
+            compare("References after target arrives", new int[]{2, 3, 12}, cache.getReferences("b11"));
+            compare("Citations for newly resolved target", new int[]{11}, cache.getCitations("b12"));
+            compare("Citations", new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 10, 11},
+                    cache.getCitations("b2"));
+        } finally {
+            currentRequest.close();
+        }
+    }
+
+    @Test
+    public void testIncrementalAppendWithDuplicateIdentifierRebuildsGraph() throws Exception {
+        SolrQueryRequest initialRequest = req("test");
+        try {
+            CitationLRUCache preIncrementalCache = (CitationLRUCache) initialRequest.getSearcher()
+                    .getCache("citations-cache-from-references");
+            compare("Initial references", new int[]{2, 3, 4}, preIncrementalCache.getReferences("b1"));
+
+            assertU(adoc("id", "11", "bibcode", "b2", "reference", "b3"));
+            assertU(commit("waitSearcher", "true"));
+
+            SolrQueryRequest updatedRequest = req("test");
+            try {
+                CitationLRUCache updatedCache = (CitationLRUCache) updatedRequest.getSearcher()
+                        .getCache("citations-cache-from-references");
+                assertEquals(11, updatedCache.get("b2"));
+                compare("References resolve to the appended identifier", new int[]{11, 3, 4},
+                        updatedCache.getReferences("b1"));
+                compare("Previous searcher remains unchanged", new int[]{2, 3, 4},
+                        preIncrementalCache.getReferences("b1"));
+            } finally {
+                updatedRequest.close();
+            }
+        } finally {
+            initialRequest.close();
+        }
+    }
+
 
     private int[][][] getCache(CitationLRUCache cache) {
         int[][][] results = new int[cache.getCitationsIteratorSize()][2][];

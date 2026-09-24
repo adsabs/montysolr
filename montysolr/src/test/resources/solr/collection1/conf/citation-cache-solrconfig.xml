@@ -21,6 +21,7 @@
               identifierFields="bibcode,alternate_bibcode"
               referenceFields="reference"
               reuseCache="false"
+              incremental="true"
               />
               
     <cache name="citations-cache-from-citations"
@@ -32,6 +33,7 @@
               identifierFields="bibcode,alternate_bibcode"
               citationFields="citation"
               reuseCache="true"
+              incremental="true"
               />
               
     <cache name="citations-cache-from-both"
@@ -43,6 +45,7 @@
               identifierFields="bibcode,alternate_bibcode"
               citationFields="citation"
               referenceFields="reference"
+              incremental="true"
               />
               
     <cache name="citations-cache-from-dump"
