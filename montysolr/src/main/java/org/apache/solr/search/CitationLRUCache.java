@@ -409,17 +409,15 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     }
 
     private File getCacheStorageDir(SolrIndexSearcher searcher) {
-        File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
         try {
+            File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
             assert f.exists();
             assert f.isDirectory();
             assert f.canWrite();
-        } catch (AssertionError ae) {
-            return null;
-        } catch (Exception e) {
+            return f;
+        } catch (AssertionError | Exception e) {
             return null;
         }
-        return f;
     }
 
     private CitationCacheReaderWriter getCitationCacheReaderWriter(SolrIndexSearcher searcher) {
