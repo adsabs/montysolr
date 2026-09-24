@@ -9,8 +9,7 @@ import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery.Builder;
-import org.apache.lucene.util.BytesRefBuilder;
-import org.apache.solr.legacy.LegacyNumericUtils;
+import org.apache.lucene.document.IntPoint;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.CitationCache;
 import org.apache.solr.search.SolrIndexSearcher;
@@ -81,6 +80,8 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
         for (int k = 0; k < randi.length; k++) {
             thisDoc.clear();
             thisDoc.add("id");
+            thisDoc.add(String.valueOf(k + start));
+            thisDoc.add("numeric_id");
             thisDoc.add(String.valueOf(k + start));
             thisDoc.add("bibcode");
             thisDoc.add("b" + (k + start));
@@ -186,11 +187,8 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
         ScoreDoc[] hits;
         for (Integer i = 0; i < maxHits; i++) {
 
-            // int field types must be searched with bytes value (not strings)
-            BytesRefBuilder br = new BytesRefBuilder();
-            LegacyNumericUtils.intToPrefixCoded(i, 0, br);
-
-            ScoreDoc[] doc = searcher.search(new TermQuery(new Term("id", br.get().utf8ToString())), 1000).scoreDocs;
+            Query idQuery = IntPoint.newExactQuery("numeric_id", i);
+            ScoreDoc[] doc = searcher.search(idQuery, 1000).scoreDocs;
 
             if (doc.length == 0) // that's ok, some docs are missing
                 continue;
@@ -202,17 +200,17 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
             // references(id:X)
             if (debug)
                 System.out.println(i + " cites : " + join(references.get(docid)) + " -> " + join(referencesWrapper.getLuceneDocIds(docid)));
-            hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+            hits = searcher.search(new SecondOrderQuery(idQuery,
                     new SecondOrderCollectorCites(referencesWrapper, new String[]{"reference"})), maxHitsFound).scoreDocs;
             hitsEquals(docid, references, hits);
-            hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+            hits = searcher.search(new SecondOrderQuery(idQuery,
                     new SecondOrderCollectorCitesRAM(referencesWrapper), false), maxHitsFound).scoreDocs;
             hitsEquals(docid, references, hits);
 
             // citations(id:X)
             if (debug)
                 System.out.println(i + " cited-by : " + join(citations.get(docid)) + " -> " + join(citationsWrapper.getLuceneDocIds(docid)));
-            hits = searcher.search(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+            hits = searcher.search(new SecondOrderQuery(idQuery,
                     new SecondOrderCollectorCitedBy(citationsWrapper), false), maxHitsFound).scoreDocs;
             hitsEquals(docid, citations, hits);
 
@@ -228,7 +226,7 @@ public class TestCitationsSearch extends MontySolrAbstractTestCase {
             Query expected = builder.build();
 
             builder = new BooleanQuery.Builder();
-            builder.add(new BooleanClause(new SecondOrderQuery(new TermQuery(new Term("id", br.get().utf8ToString())),
+            builder.add(new BooleanClause(new SecondOrderQuery(idQuery,
                     new SecondOrderCollectorCitedBy(citationsWrapper), false), Occur.MUST));
             builder.add(new BooleanClause(new TermQuery(new Term("year", "1995")), Occur.MUST));
             Query seeked = builder.build();

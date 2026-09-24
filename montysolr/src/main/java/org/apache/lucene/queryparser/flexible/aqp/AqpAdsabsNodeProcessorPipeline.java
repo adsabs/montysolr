@@ -128,10 +128,6 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         // but you don't want to define these fields as separate indexes
         add(new AqpFieldMapperProcessor());
 
-        // was the old-time behaviour, before the AqpDEFOPMarkPlainNodes() was
-        // modifying the AST; now this is obsolete, we solve it elsewhere
-        // find synonyms if we have 'plain word token group', this processor
-        // add(new AqpMultiWordProcessor());
 
 
         // this block applies only when query parser is ran inside SOLR
