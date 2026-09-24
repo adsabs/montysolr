@@ -1139,6 +1139,27 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testExactMarkerAfterField() throws Exception {
+        assertU(adoc("id", "3601", "bibcode", "issue36-positive",
+                "abstract", "dark energy", "title", "dark energy"));
+        assertU(adoc("id", "3602", "bibcode", "issue36-negative",
+                "abstract", "dark matter energy", "title", "dark matter energy"));
+        assertU(commit("waitSearcher", "true"));
+
+        String[] exactDarkEnergyQueries = {
+                "=abs:\"dark energy\"",
+                "=abs:(\"dark energy\")",
+                "abs:=\"dark energy\"",
+                "abs:(=\"dark energy\")"
+        };
+        for (String query : exactDarkEnergyQueries) {
+            assertQ(req("defType", "aqp", "q", query, "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='3601']",
+                    "not(//doc/str[@name='id'][.='3602'])");
+        }
+    }
+
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabsSolrSearch.class);
     }
