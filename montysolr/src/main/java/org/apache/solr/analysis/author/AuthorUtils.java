@@ -270,7 +270,7 @@ public class AuthorUtils {
 
     static Set<String> transliterateRussianName(String name) {
         // always search lowercase
-        name = name.toLowerCase();
+        name = name.toLowerCase(Locale.ROOT);
         HashSet<String> out = new HashSet<String>();
         out.add(name);
 
