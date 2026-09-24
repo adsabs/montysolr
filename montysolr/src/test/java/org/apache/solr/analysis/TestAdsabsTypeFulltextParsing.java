@@ -113,6 +113,41 @@ import java.util.List;
 
 public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
+    public void testWhitespaceHyphenDoesNotCatenate() throws Exception {
+        assertU(adoc("id", "700", "bibcode", "xxxxxxxxxx700", "title", "ORBIT - A"));
+        assertU(adoc("id", "701", "bibcode", "xxxxxxxxxx701", "title", "a-b"));
+        assertU(commit("waitSearcher", "true"));
+        assertU(adoc("id", "702", "bibcode", "xxxxxxxxxx702", "title", "GAW-ZEE"));
+        assertU(adoc("id", "703", "bibcode", "xxxxxxxxxx703", "title", "GAW - ZEE"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("q", "=title:\"GAW - ZEE\"", "defType", "aqp", "df", "title"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='703']");
+
+        assertQ(req("q", "=title:\"GAW - ZEE\" AND title:GAW", "defType", "aqp", "df", "title"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='703']");
+        assertQ(req("q", "title:\"GAW - ZEE\"", "defType", "aqp", "df", "title"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='703']");
+
+
+        assertQ(req("q", "title:ORBITA", "defType", "aqp", "df", "title"),
+                "//*[@numFound='0']");
+        assertQ(req("q", "title:\"ORBIT A\"", "defType", "aqp", "df", "title"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']");
+        assertQ(req("q", "title:a", "defType", "aqp", "df", "title"),
+                "//*[@numFound='0']");
+        assertQ(req("q", "title:b", "defType", "aqp", "df", "title"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='701']");
+        assertQ(req("q", "title:ab", "defType", "aqp", "df", "title"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='701']");
+    }
+
 
     @BeforeClass
     public static void beforeClass() throws Exception {
