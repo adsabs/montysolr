@@ -9,6 +9,7 @@ import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
@@ -317,26 +318,8 @@ public class AqpAdsabsSubQueryProvider implements
                 }
 
                 assert end != 0;
-
                 SpanConverter converter = new SpanConverter();
                 converter.setWrapNonConvertible(true);
-
-                // a field can have a different positionIncrementGap
-                int positionIncrementGap = 1;
-                String queryField = getField(query);
-                if (fp.getReq() != null) {
-                    IndexSchema schema = fp.getReq().getSchema();
-                    SchemaField field = schema.getFieldOrNull(queryField);
-                    if (field != null) {
-                        FieldType fType = field.getType();
-                        //if (!fType.isMultiValued()) {
-                        //	throw new SyntaxError("The positional search doesn't make sense for: " + query);
-                        //}
-                        positionIncrementGap = fType.getIndexAnalyzer().getPositionIncrementGap(field.getName());
-                        if (positionIncrementGap == 0)
-                            positionIncrementGap = 1;
-                    }
-                }
 
                 boolean wrapConstant = false;
                 float boostFactor = 1.0f;
@@ -349,7 +332,174 @@ public class AqpAdsabsSubQueryProvider implements
                     wrapConstant = true;
                 }
 
+                Set<String> virtualFields = getVirtualFields(fp);
+                query = buildPositionQuery(fp, converter, query, start, end, virtualFields);
 
+                if (wrapConstant)
+                    query = new ConstantScoreQuery(query);
+                if (boostFactor != 1.0f)
+                    query = new BoostQuery(query, boostFactor);
+                return query;
+            }
+
+            private Query buildPositionQuery(FunctionQParser fp, SpanConverter converter, Query query,
+                                             int start, int end, Set<String> virtualFields)
+                    throws SyntaxError {
+                Set<String> queryFields = getFields(query);
+                if (queryFields.size() <= 1) {
+                    String queryField = getField(query);
+                    return createPositionQuery(converter, query, queryField, start, end,
+                            getPositionIncrementGap(fp, queryField));
+                }
+                if (virtualFields.isEmpty() || !virtualFields.containsAll(queryFields)) {
+                    throw new SyntaxError("`pos` queries cannot handle explicit multi-field queries; " +
+                            "only configured virtual-field compositions may be expanded.");
+                }
+
+                if (query instanceof BooleanQuery) {
+                    BooleanQuery booleanQuery = (BooleanQuery) query;
+                    if (isVirtualOr(booleanQuery, virtualFields)) {
+                        return partitionBooleanQuery(fp, converter, booleanQuery, start, end);
+                    }
+                    BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                    builder.setMinimumNumberShouldMatch(booleanQuery.getMinimumNumberShouldMatch());
+                    for (BooleanClause clause : booleanQuery.clauses()) {
+                        builder.add(buildPositionQuery(fp, converter, clause.getQuery(), start, end, virtualFields),
+                                clause.getOccur());
+                    }
+                    return builder.build();
+                }
+
+                if (query instanceof DisjunctionMaxQuery) {
+                    List<Query> disjuncts = new ArrayList<>();
+                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                        disjuncts.add(buildPositionQuery(fp, converter, disjunct, start, end, virtualFields));
+                    }
+                    return new DisjunctionMaxQuery(disjuncts,
+                            ((DisjunctionMaxQuery) query).getTieBreakerMultiplier());
+                }
+
+                if (query instanceof BoostQuery) {
+                    return new BoostQuery(buildPositionQuery(fp, converter,
+                            ((BoostQuery) query).getQuery(), start, end, virtualFields),
+                            ((BoostQuery) query).getBoost());
+                }
+                if (query instanceof ConstantScoreQuery) {
+                    return new ConstantScoreQuery(buildPositionQuery(fp, converter,
+                            ((ConstantScoreQuery) query).getQuery(), start, end, virtualFields));
+                }
+                throw new SyntaxError("`pos` cannot expand this multi-field virtual query shape.");
+            }
+
+            private boolean isVirtualOr(Query query, Set<String> virtualFields) {
+                if (query instanceof BooleanQuery) {
+                    BooleanQuery booleanQuery = (BooleanQuery) query;
+                    for (BooleanClause clause : booleanQuery.clauses()) {
+                        if (clause.getOccur() != BooleanClause.Occur.SHOULD
+                                || getFields(clause.getQuery()).size() != 1) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                if (query instanceof DisjunctionMaxQuery) {
+                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                        if (getFields(disjunct).size() != 1) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            private Query partitionBooleanQuery(FunctionQParser fp, SpanConverter converter,
+                                                BooleanQuery query, int start, int end)
+                    throws SyntaxError {
+                BooleanQuery.Builder positioned = new BooleanQuery.Builder();
+                positioned.setMinimumNumberShouldMatch(query.getMinimumNumberShouldMatch());
+                for (String queryField : getFields(query)) {
+                    Query fieldQuery = restrictToField(query, queryField);
+                    if (fieldQuery != null) {
+                        positioned.add(createPositionQuery(converter, fieldQuery, queryField, start, end,
+                                getPositionIncrementGap(fp, queryField)), BooleanClause.Occur.SHOULD);
+                    }
+                }
+                return positioned.build();
+            }
+
+            private Set<String> getVirtualFields(FunctionQParser fp) {
+                Set<String> fields = new LinkedHashSet<>();
+                if (!(fp instanceof AqpFunctionQParser)) {
+                    return fields;
+                }
+                QueryNode node = ((AqpFunctionQParser) fp).getQueryNode();
+                if (!(node instanceof AqpFunctionQueryNode)
+                        || ((AqpFunctionQueryNode) node).getFuncValues().isEmpty()
+                        || fp.getReq() == null) {
+                    return fields;
+                }
+                String original = ((AqpFunctionQueryNode) node).getFuncValues().get(0).value.trim();
+                while (original.startsWith("(")) {
+                    original = original.substring(1).trim();
+                }
+                if (original.startsWith("=")) {
+                    original = original.substring(1).trim();
+                }
+                int separator = original.indexOf(':');
+                if (separator <= 0) {
+                    return fields;
+                }
+                String virtualField = original.substring(0, separator).trim();
+                Object configured = fp.getReq().getContext().get(AqpAdsabsQParser.VIRTUAL_FIELDS_CONTEXT_KEY);
+                if (!(configured instanceof Map)) {
+                    return fields;
+                }
+                Object physical = ((Map<?, ?>) configured).get(virtualField);
+                if (physical instanceof Map) {
+                    for (Object field : ((Map<?, ?>) physical).keySet()) {
+                        if (field instanceof String) {
+                            String physicalField = (String) field;
+                            if (!virtualField.equals(physicalField)
+                                    && hasFieldPrefix(original, physicalField)) {
+                                return fields;
+                            }
+                            fields.add(physicalField);
+                        }
+                    }
+                }
+                return fields;
+            }
+
+            private boolean hasFieldPrefix(String input, String field) {
+                String marker = field + ":";
+                boolean quoted = false;
+                boolean escaped = false;
+                for (int offset = 0; offset < input.length(); offset++) {
+                    char character = input.charAt(offset);
+                    if (escaped) {
+                        escaped = false;
+                        continue;
+                    }
+                    if (character == '\\') {
+                        escaped = true;
+                        continue;
+                    }
+                    if (character == '"') {
+                        quoted = !quoted;
+                        continue;
+                    }
+                    if (!quoted && input.startsWith(marker, offset)
+                            && (offset == 0 || !Character.isLetterOrDigit(input.charAt(offset - 1)))) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            private Query createPositionQuery(SpanConverter converter, Query query, String queryField,
+                                              int start, int end, int positionIncrementGap)
+                    throws SyntaxError {
                 SpanQuery spanQuery;
                 try {
                     spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
@@ -360,65 +510,117 @@ public class AqpAdsabsSubQueryProvider implements
                 }
 
                 if (start < 0 || end < 0) {
-                    query = new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end, positionIncrementGap);
-                } else {
-                    query = new SpanPositionRangeQuery(spanQuery, (start - 1) * positionIncrementGap, end * positionIncrementGap); //lucene counts from zeroes
+                    return new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end, positionIncrementGap);
                 }
+                return new SpanPositionRangeQuery(spanQuery,
+                        (start - 1) * positionIncrementGap, end * positionIncrementGap);
+            }
 
-                if (wrapConstant)
-                    query = new ConstantScoreQuery(query);
-                if (boostFactor != 1.0f)
-                    query = new BoostQuery(query, boostFactor);
-                return query;
+            private int getPositionIncrementGap(FunctionQParser fp, String fieldName) {
+                int positionIncrementGap = 1;
+                if (fp.getReq() != null) {
+                    IndexSchema schema = fp.getReq().getSchema();
+                    SchemaField field = schema.getFieldOrNull(fieldName);
+                    if (field != null) {
+                        FieldType fType = field.getType();
+                        positionIncrementGap = fType.getIndexAnalyzer().getPositionIncrementGap(field.getName());
+                        if (positionIncrementGap == 0)
+                            positionIncrementGap = 1;
+                    }
+                }
+                return positionIncrementGap;
+            }
+
+            private Set<String> getFields(Query query) {
+                Set<String> fields = new LinkedHashSet<>();
+                if (query instanceof TermQuery) {
+                    fields.add(((TermQuery) query).getTerm().field());
+                } else if (query instanceof PhraseQuery) {
+                    for (Term t : ((PhraseQuery) query).getTerms()) {
+                        fields.add(t.field());
+                    }
+                } else if (query instanceof MultiPhraseQuery) {
+                    for (Term[] terms : ((MultiPhraseQuery) query).getTermArrays()) {
+                        for (Term t : terms) {
+                            fields.add(t.field());
+                        }
+                    }
+                } else if (query instanceof SynonymQuery) {
+                    for (Term t : ((SynonymQuery) query).getTerms()) {
+                        fields.add(t.field());
+                    }
+                } else if (query instanceof BooleanQuery) {
+                    for (BooleanClause c : ((BooleanQuery) query).clauses()) {
+                        fields.addAll(getFields(c.getQuery()));
+                    }
+                } else if (query instanceof BoostQuery) {
+                    fields.addAll(getFields(((BoostQuery) query).getQuery()));
+                } else if (query instanceof ConstantScoreQuery) {
+                    fields.addAll(getFields(((ConstantScoreQuery) query).getQuery()));
+                } else if (query instanceof MultiTermQuery) {
+                    fields.add(((MultiTermQuery) query).getField());
+                } else if (query instanceof DisjunctionMaxQuery) {
+                    for (Query q : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                        fields.addAll(getFields(q));
+                    }
+                } else {
+                    fields.add(query.toString().split(":")[0]);
+                }
+                return fields;
+            }
+
+            private Query restrictToField(Query query, String field) {
+                if (query instanceof TermQuery) {
+                    return field.equals(((TermQuery) query).getTerm().field()) ? query : null;
+                } else if (query instanceof PhraseQuery || query instanceof MultiPhraseQuery
+                        || query instanceof SynonymQuery) {
+                    return getFields(query).contains(field) ? query : null;
+                } else if (query instanceof BoostQuery) {
+                    Query child = restrictToField(((BoostQuery) query).getQuery(), field);
+                    return child == null ? null : new BoostQuery(child, ((BoostQuery) query).getBoost());
+                } else if (query instanceof ConstantScoreQuery) {
+                    Query child = restrictToField(((ConstantScoreQuery) query).getQuery(), field);
+                    return child == null ? null : new ConstantScoreQuery(child);
+                } else if (query instanceof MultiTermQuery) {
+                    return field.equals(((MultiTermQuery) query).getField()) ? query : null;
+                } else if (query instanceof BooleanQuery) {
+                    BooleanQuery original = (BooleanQuery) query;
+                    BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                    builder.setMinimumNumberShouldMatch(original.getMinimumNumberShouldMatch());
+                    for (BooleanClause clause : original.clauses()) {
+                        Query child = restrictToField(clause.getQuery(), field);
+                        if (child != null) {
+                            builder.add(child, clause.getOccur());
+                        }
+                    }
+                    BooleanQuery result = builder.build();
+                    return result.clauses().isEmpty() ? null : result;
+                } else if (query instanceof DisjunctionMaxQuery) {
+                    List<Query> disjuncts = new ArrayList<>();
+                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                        Query child = restrictToField(disjunct, field);
+                        if (child != null) {
+                            disjuncts.add(child);
+                        }
+                    }
+                    if (disjuncts.isEmpty()) {
+                        return null;
+                    }
+                    if (disjuncts.size() == 1) {
+                        return disjuncts.get(0);
+                    }
+                    return new DisjunctionMaxQuery(disjuncts, ((DisjunctionMaxQuery) query).getTieBreakerMultiplier());
+                }
+                return null;
             }
 
             private String getField(Query query) throws SyntaxError {
-
-                if (query instanceof TermQuery) {
-                    return ((TermQuery) query).getTerm().field();
-                } else if (query instanceof SynonymQuery) {
-                    for (Term t : ((SynonymQuery) query).getTerms()) {
-                        return t.field();
-                    }
-                } else if (query instanceof BooleanQuery) {
-                    HashSet<String> s = new HashSet<String>();
-                    for (BooleanClause c : ((BooleanQuery) query).clauses()) {
-                        s.add(getField(c.getQuery()));
-                    }
-
-                    if (s.size() > 1) {
-                        throw new SyntaxError("`pos` queries cannot handle boolean queries that span multiple fields, " +
-                                "including virtual field queries. Try using a non-virtual field instead.");
-                    }
-
-                    return (String) s.toArray()[0];
-                } else if (query instanceof BoostQuery) {
-                    return getField(((BoostQuery) query).getQuery());
-                } else if (query instanceof ConstantScoreQuery) {
-                    return getField(((ConstantScoreQuery) query).getQuery());
-                } else if (query instanceof MultiTermQuery) {
-                    return ((MultiTermQuery) query).getField();
-                } else if (query instanceof DisjunctionMaxQuery) {
-                    String field = null;
-
-                    for (Query q : ((DisjunctionMaxQuery) query).getDisjuncts()) {
-                        String f = getField(q);
-
-                        if (field == null) {
-                            field = f;
-                        } else if (!field.equals(f)) {
-                            throw new SyntaxError("`pos` queries cannot handle disjunction queries that span multiple fields, " +
-                                    "including virtual field queries. Try using a non-virtual field instead.");
-                        }
-                    }
-
-                    return field;
-                } else {
-                    // last resort
-                    return query.toString().split(":")[0];
+                Set<String> fields = getFields(query);
+                if (fields.size() > 1) {
+                    throw new SyntaxError("`pos` queries cannot handle boolean queries that span multiple fields, " +
+                            "including virtual field queries. Try using a non-virtual field instead.");
                 }
-
-                return null;
+                return fields.isEmpty() ? null : fields.iterator().next();
             }
         });
 

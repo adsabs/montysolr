@@ -643,34 +643,101 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 );
 
 
-        /*
-         * orcid, added 30/12/14; they must correspond to the author array
-         * - updated 13/11/15 - orcid field is now a virtual one; and we have
-         *   orcid_pub,_user,_other
-         */
-        assertQ(req("q", "orcid_pub:1111-2222-3333-4444"),
-                "//doc/int[@name='recid'][.='100']",
-                "//*[@numFound='1']"
-        );
-        assertQ(req("q", "orcid_pub:1111*"),
-                "//doc/int[@name='recid'][.='100']",
-                "//*[@numFound='1']"
-        );
-        assert h.query(req("q", "recid:100", "indent", "false", "fl", "orcid_pub"))
-                .contains("<arr name=\"orcid_pub\">" +
-                        "<str>1111-2222-3333-4444</str>" +
-                        "<str>-</str>" +
-                        "<str>0000-0002-4110-3511</str></arr>"
-                );
-        // this is only present in orcid_other
-        assertQ(req("q", "orcid:1111-2222-3333-5555"),
-                "//doc/int[@name='recid'][.='100']",
-                "//*[@numFound='1']"
-        );
-        assertQ(req("q", "orcid_other:1111-2222-3333-5555"),
-                "//doc/int[@name='recid'][.='100']",
-                "//*[@numFound='1']"
-        );
+        // Isolated documents make each underlying virtual-field branch
+        // observable and provide controls for negative positional indices.
+        assertU(adoc("id", "200", "bibcode", "orcid-pub-first",
+                "orcid_pub", "pub-first"));
+        assertU(adoc("id", "201", "bibcode", "orcid-user-first",
+                "orcid_user", "user-first"));
+        assertU(adoc("id", "202", "bibcode", "orcid-other-first",
+                "orcid_other", "other-first"));
+        assertU(adoc("id", "203", "bibcode", "orcid-pub-last",
+                "orcid_pub", "pub-before", "orcid_pub", "pub-last"));
+        assertU(adoc("id", "205", "bibcode", "inst-quoted-prefix",
+                "institution", "institution:foo"));
+        assertU(commit());
+        assertU(adoc("id", "204", "bibcode", "orcid-hst-synonym",
+                "title", "Hubble Space Telescope"));
+        assertU(commit());
+        try {
+            /*
+             * orcid, added 30/12/14; they must correspond to the author array
+             * - updated 13/11/15 - orcid field is now a virtual one; and we have
+             *   orcid_pub,_user,_other
+             */
+            assertQ(req("q", "orcid_pub:1111-2222-3333-4444"),
+                    "//doc/int[@name='recid'][.='100']",
+                    "//*[@numFound='1']"
+            );
+            assertQ(req("q", "orcid_pub:1111*"),
+                    "//doc/int[@name='recid'][.='100']",
+                    "//*[@numFound='1']"
+            );
+            assert h.query(req("q", "recid:100", "indent", "false", "fl", "orcid_pub"))
+                    .contains("<arr name=\"orcid_pub\">" +
+                            "<str>1111-2222-3333-4444</str>" +
+                            "<str>-</str>" +
+                            "<str>0000-0002-4110-3511</str></arr>"
+                    );
+            // this is only present in orcid_other
+            assertQ(req("q", "orcid:1111-2222-3333-5555"),
+                    "//doc/int[@name='recid'][.='100']",
+                    "//*[@numFound='1']"
+            );
+            assertQ(req("q", "orcid_other:1111-2222-3333-5555"),
+                    "//doc/int[@name='recid'][.='100']",
+                    "//*[@numFound='1']"
+            );
+            assertQ(req("q", "orcid:\"^1111-2222-3333-4444\""),
+                    "//doc/int[@name='recid'][.='100']",
+                    "//*[@numFound='1']");
+            assertQ(req("q", "orcid:\"^0000-0002-4110-3511\""),
+                    "//*[@numFound='0']");
+            assertQ(req("q", "orcid:\"^pub-first\""),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='200']");
+            assertQ(req("q", "orcid:\"^user-first\""),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='201']");
+            assertQ(req("q", "orcid:\"^other-first\""),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='202']");
+            // Exact matching bypasses ORCID punctuation normalization, so query the indexed token.
+            assertQ(req("q", "pos(=orcid:\"pubfirst\",1)"),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='200']");
+            assertQ(req("q", "pos(orcid:\"pub-last\",-1)"),
+                    "//*[@numFound='1']",
+                    "//doc/int[@name='recid'][.='203']");
+            assertQ(req("q", "pos(orcid:\"pub-before\",-1)"),
+                    "//*[@numFound='0']");
+            assertQ(req("q", "pos(orcid:(pub-first AND user-first),1)"),
+                    "//*[@numFound='0']");
+            assertQ(req("q", "pos(orcid:(pub-first^2 OR user-first),1)",
+                            "rows", "2", "sort", "score desc"),
+                    "//*[@numFound='2']",
+                    "//result/doc[1]/int[@name='recid'][.='200']",
+                    "//result/doc[2]/int[@name='recid'][.='201']");
+            assertQ(req("q", "pos(abs:HST,1)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='204']");
+            assertQ(req("q", "pos(inst:\"institution:foo\",1)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='205']");
+            assertQEx("Explicit mixed-field positional queries remain invalid",
+                    req("q", "pos(title:foo OR abstract:bar,1)"), 400);
+            assertQEx("Explicit mixed ORCID-field positional queries remain invalid",
+                    req("q", "pos(orcid_pub:pub-first OR orcid_user:user-first OR orcid_other:other-first,1)"),
+                    400);
+        } finally {
+            assertU(delI("200"));
+            assertU(delI("204"));
+            assertU(delI("201"));
+            assertU(delI("202"));
+            assertU(delI("203"));
+            assertU(delI("205"));
+            assertU(commit());
+        }
 
 
 
