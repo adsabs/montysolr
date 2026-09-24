@@ -135,8 +135,32 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                     "//*[@numFound='1']",
                     "//doc/str[@name='id'][.='7006']"
             );
+            assertU(adoc("id", "7008", "bibcode", "grouped-year-lower", "year", "1900"));
+            assertU(adoc("id", "7009", "bibcode", "grouped-year-upper", "year", "1950"));
+            assertU(adoc("id", "7010", "bibcode", "grouped-year-outside", "year", "1951"));
+            assertU(adoc("id", "7011", "bibcode", "grouped-title-lower", "title", "1900"));
+            assertU(adoc("id", "7012", "bibcode", "grouped-title-upper", "title", "1950"));
+            assertU(adoc("id", "7013", "bibcode", "grouped-title-outside", "title", "1951"));
+            assertU(commit("waitSearcher", "true"));
+            assertQueryEquals(req("defType", "aqp", "q", "year:(1900-1950)"),
+                    "year:[1900 TO 1950]", TermRangeQuery.class);
+            assertQ(req("defType", "aqp", "q", "year:(1900-1950)",
+                            "fq", "{!terms f=id}7008,7009,7010"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='7008']",
+                    "//doc/str[@name='id'][.='7009']"
+            );
+            assertQueryEquals(req("defType", "aqp", "q", "title:(1900-1950)"),
+                    "title:[1900 TO 1950]", TermRangeQuery.class);
+            assertQ(req("defType", "aqp", "q", "title:(1900-1950)",
+                            "fq", "{!terms f=id}7011,7012,7013"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='7011']",
+                    "//doc/str[@name='id'][.='7012']"
+            );
         } finally {
-            for (String id : new String[]{"7000", "7001", "7002", "7003", "7004", "7005", "7006", "7007"}) {
+            for (String id : new String[]{"7000", "7001", "7002", "7003", "7004", "7005", "7006", "7007",
+                    "7008", "7009", "7010", "7011", "7012", "7013"}) {
                 assertU(delI(id));
             }
             assertU(commit("waitSearcher", "true"));
