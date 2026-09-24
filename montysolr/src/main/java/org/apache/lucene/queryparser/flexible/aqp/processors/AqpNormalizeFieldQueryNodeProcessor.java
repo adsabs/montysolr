@@ -11,6 +11,8 @@ import org.apache.lucene.queryparser.flexible.core.nodes.RangeQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
+import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.StrField;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.request.SolrQueryRequest;
 
@@ -32,6 +34,10 @@ public class AqpNormalizeFieldQueryNodeProcessor extends
                 || node instanceof RegexpQueryNode) {
 
 
+            String fieldName = ((FieldQueryNode) node).getFieldAsString();
+            if (isStrField(fieldName)) {
+                return node;
+            }
             FieldQueryNode txtNode = (FieldQueryNode) node;
             CharSequence text = txtNode.getText();
 
@@ -62,6 +68,17 @@ public class AqpNormalizeFieldQueryNodeProcessor extends
     protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
             throws QueryNodeException {
         return children;
+    }
+
+    private boolean isStrField(String fieldName) {
+        SolrQueryRequest req = this.getQueryConfigHandler()
+                .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+                .getRequest();
+        if (req == null) {
+            return false;
+        }
+        SchemaField schemaField = req.getSchema().getFieldOrNull(fieldName);
+        return schemaField != null && schemaField.getType() instanceof StrField;
     }
 
     private boolean hasAnalyzer(String fieldName) {
