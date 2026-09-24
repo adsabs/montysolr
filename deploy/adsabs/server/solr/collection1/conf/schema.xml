@@ -1889,15 +1889,15 @@
           @since v63.1.0.5
         -->
 
-		<field name="nedid" type="normalized_string" indexed="true"
+		<field name="nedid" type="string" indexed="true"
 			stored="true" required="false" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
 
-		<field name="nedtype" type="normalized_string" indexed="true"
+		<field name="nedtype" type="string" indexed="true"
 			stored="true" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" />
 
-		<field name="ned_object_facet_hier" type="normalized_string"
+		<field name="ned_object_facet_hier" type="string"
 			indexed="true" stored="true" multiValued="true" omitNorms="true"
 			omitTermFreqAndPositions="true" docValues="true" />
 
