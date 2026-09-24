@@ -451,6 +451,7 @@ public class AqpAdsabsSubQueryProvider implements
                 }
                 return fields;
             }
+
             private String findVirtualFieldInOriginalInput(AqpFunctionQueryNode functionNode,
                                                            Set<?> configuredFields) {
                 if (functionNode.getFuncValues().isEmpty()) {
@@ -592,6 +593,36 @@ public class AqpAdsabsSubQueryProvider implements
             private Query createPositionQuery(SpanConverter converter, Query query, String queryField,
                                               int start, int end, int positionIncrementGap)
                     throws SyntaxError {
+                boolean positionalConjunction = query instanceof BooleanQuery
+                        && ((BooleanQuery) query).clauses().size() > 1
+                        && ((BooleanQuery) query).clauses().stream()
+                        .allMatch(clause -> clause.getOccur() == BooleanClause.Occur.MUST);
+
+                if (positionalConjunction) {
+                    BooleanQuery.Builder positionalQuery = new BooleanQuery.Builder();
+                    for (BooleanClause clause : ((BooleanQuery) query).clauses()) {
+                        SpanQuery clauseSpan;
+                        try {
+                            clauseSpan = converter.getSpanQuery(
+                                    new SpanConverterContainer(clause.getQuery(), 1, true));
+                        } catch (QueryNodeException e) {
+                            SyntaxError ex = new SyntaxError(e.getMessage(), e);
+                            ex.setStackTrace(e.getStackTrace());
+                            throw ex;
+                        }
+                        Query clauseQuery;
+                        if (start < 0 || end < 0) {
+                            clauseQuery = new SpanNegativeIndexRangeQuery(
+                                    clauseSpan, queryField, start, end, positionIncrementGap);
+                        } else {
+                            clauseQuery = new SpanPositionRangeQuery(clauseSpan,
+                                    (start - 1) * positionIncrementGap, end * positionIncrementGap);
+                        }
+                        positionalQuery.add(clauseQuery, BooleanClause.Occur.MUST);
+                    }
+                    return positionalQuery.build();
+                }
+
                 SpanQuery spanQuery;
                 try {
                     spanQuery = converter.getSpanQuery(new SpanConverterContainer(query, 1, true));
