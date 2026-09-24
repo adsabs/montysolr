@@ -89,11 +89,16 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 && !field.multiValued());
         field.checkSortability();
         assertTrue(field.getType().getClass().isAssignableFrom(IntPointField.class));
+        for (String objectField : new String[]{
+                "simbid", "simbtype", "simbad_object_facet_hier",
+                "nedid", "nedtype", "ned_object_facet_hier"}) {
+            assertFalse(schema.getField(objectField).stored());
+        }
 
         for (String objectField : new String[]{
                 "nedid", "nedtype", "ned_object_facet_hier"}) {
             field = schema.getField(objectField);
-            assertTrue(field.indexed() && field.stored() && field.multiValued());
+            assertTrue(field.indexed() && !field.stored() && field.multiValued());
             assertTrue(field.getType().getClass().equals(StrField.class));
         }
 
@@ -1453,10 +1458,24 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "//*[@numFound='0']"
         );
         assertQ(req("q", "recid:100",
-                        "fl", "nedid,nedtype,ned_object_facet_hier"),
-                "//doc/arr[@name='nedid']/str[.='FoO Bar']",
-                "//doc/arr[@name='nedtype']/str[.='Other']",
-                "//doc/arr[@name='ned_object_facet_hier']/str[.='0/Other']"
+                        "fl", "*",
+                        "indent", "false"),
+                "count(//doc/*[@name='simbid'])=0",
+                "count(//doc/*[@name='simbtype'])=0",
+                "count(//doc/*[@name='simbad_object_facet_hier'])=0",
+                "count(//doc/*[@name='nedid'])=0",
+                "count(//doc/*[@name='nedtype'])=0",
+                "count(//doc/*[@name='ned_object_facet_hier'])=0"
+        );
+        assertQ(req("q", "*:*", "rows", "0", "facet", "true",
+                        "facet.field", "simbad_object_facet_hier", "facet.limit", "-1"),
+                "//lst[@name='facet_fields']/lst[@name='simbad_object_facet_hier']/int[@name='0/HII Region'][.='1']",
+                "//lst[@name='facet_fields']/lst[@name='simbad_object_facet_hier']/int[@name='1/HII Region/9000000'][.='1']"
+        );
+        assertQ(req("q", "*:*", "rows", "0", "facet", "true",
+                        "facet.field", "ned_object_facet_hier", "facet.limit", "-1"),
+                "//lst[@name='facet_fields']/lst[@name='ned_object_facet_hier']/int[@name='0/Other'][.='1']",
+                "//lst[@name='facet_fields']/lst[@name='ned_object_facet_hier']/int[@name='1/Other/X+1-5 =6'][.='1']"
         );
 
         /*

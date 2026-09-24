@@ -1624,15 +1624,18 @@
 	    * simbad_object_facet_hier
 	      The hierarchical facets consisting of object_type/object_id as above
 	     -->
-		<field name="simbid" type="int" indexed="true" stored="true"
-			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true" />
+		<field name="simbid" type="int" indexed="true" stored="false"
+			multiValued="true" omitNorms="true" omitTermFreqAndPositions="true"
+			useDocValuesAsStored="false" />
 
 		<field name="simbtype" type="normalized_text_ascii"
-			indexed="true" stored="true" multiValued="true" omitNorms="true" />
+			indexed="true" stored="false" multiValued="true" omitNorms="true"
+			useDocValuesAsStored="false" />
 
 		<field name="simbad_object_facet_hier" type="string"
-			indexed="true" stored="true" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="true" docValues="true" />
+			indexed="true" stored="false" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true"
+			useDocValuesAsStored="false" />
 
 		<!--
 		@api.doc
@@ -1890,16 +1893,17 @@
         -->
 
 		<field name="nedid" type="string" indexed="true"
-			stored="true" required="false" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="true" />
+			stored="false" required="false" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" useDocValuesAsStored="false" />
 
 		<field name="nedtype" type="string" indexed="true"
-			stored="true" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="true" />
+			stored="false" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" useDocValuesAsStored="false" />
 
 		<field name="ned_object_facet_hier" type="string"
-			indexed="true" stored="true" multiValued="true" omitNorms="true"
-			omitTermFreqAndPositions="true" docValues="true" />
+			indexed="true" stored="false" multiValued="true" omitNorms="true"
+			omitTermFreqAndPositions="true" docValues="true"
+			useDocValuesAsStored="false" />
 
 
 		<!--
