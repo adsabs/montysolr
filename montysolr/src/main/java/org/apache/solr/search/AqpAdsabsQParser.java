@@ -360,6 +360,76 @@ public class AqpAdsabsQParser extends QParser {
         }
 
     }
+    private static String normalizeTypographicQuoteDelimiters(String query) {
+        StringBuilder normalized = null;
+        boolean inAsciiQuote = false;
+        boolean inTypographicQuote = false;
+        boolean escaped = false;
+        for (int i = 0; i < query.length(); i++) {
+            char c = query.charAt(i);
+            if (escaped) {
+                escaped = false;
+                continue;
+            }
+            if (c == '\\') {
+                escaped = true;
+                continue;
+            }
+            if (!inAsciiQuote && !inTypographicQuote && c == '/'
+                    && isRegexLiteralStart(query, i)) {
+                int end = findRegexLiteralEnd(query, i);
+                if (end > i) {
+                    i = end;
+                    continue;
+                }
+            }
+            if (c == '"') {
+                inAsciiQuote = !inAsciiQuote;
+            }
+            if (inAsciiQuote
+                    || (c != '\u201C' && c != '\u201D' && c != '\u201E')) {
+                continue;
+            }
+            boolean delimiter = inTypographicQuote
+                    || isOpeningQuoteDelimiter(query, i);
+            if (delimiter) {
+                if (normalized == null) {
+                    normalized = new StringBuilder(query);
+                }
+                normalized.setCharAt(i, '"');
+                inTypographicQuote = !inTypographicQuote;
+            }
+        }
+        return normalized == null ? query : normalized.toString();
+    }
+
+    private static boolean isRegexLiteralStart(String query, int index) {
+        int before = index - 1;
+        return before < 0 || Character.isWhitespace(query.charAt(before))
+                || ":,(+-!~=^".indexOf(query.charAt(before)) >= 0;
+    }
+
+    private static int findRegexLiteralEnd(String query, int start) {
+        for (int i = start + 1; i < query.length(); i++) {
+            char c = query.charAt(i);
+            if (c == '\\') {
+                i++;
+            } else if (c == '/') {
+                return i > start + 1 ? i : -1;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean isOpeningQuoteDelimiter(String query, int index) {
+        int before = index - 1;
+        while (before >= 0 && Character.isWhitespace(query.charAt(before))) {
+            before--;
+        }
+        return before >= 0
+                && (query.charAt(before) == ':' || query.charAt(before) == ','
+                || query.charAt(before) == '(');
+    }
 
     public Query parse() throws SyntaxError {
         try {
@@ -368,7 +438,8 @@ public class AqpAdsabsQParser extends QParser {
             //  return qParser.parse(getString() + config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DUMMY_VALUE), null);
             //}
 
-            Query userQuery = qParser.parse(getString(), null);
+            String queryString = normalizeTypographicQuoteDelimiters(getString());
+            Query userQuery = qParser.parse(queryString, null);
             Query topQuery = userQuery;
 
             if (boostParams != null || boostFuncs != null) {

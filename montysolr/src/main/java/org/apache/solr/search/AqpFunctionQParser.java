@@ -143,12 +143,19 @@ public class AqpFunctionQParser extends FunctionQParser {
     }
 
 
-    public int parseInt() {
+    public int parseInt() throws SyntaxError {
         String val = consumeAsString();
+        if (val.isEmpty()) {
+            throw new SyntaxError("Expected integer argument instead of an empty value");
+        }
         if (val.charAt(0) == '"' && val.charAt(val.length() - 1) == '"') {
             val = val.substring(1, val.length() - 1);
         }
-        return Integer.valueOf(val);
+        try {
+            return Integer.valueOf(val);
+        } catch (NumberFormatException e) {
+            throw new SyntaxError("Expected integer argument instead of: " + val, e);
+        }
     }
 
     public Float parseFloat() throws SyntaxError {
