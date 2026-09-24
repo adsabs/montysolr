@@ -159,7 +159,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         }
 
         add(new PointQueryNodeProcessor());
-        add(new PointRangeQueryNodeProcessor());
+        add(new AqpPointRangeQueryNodeProcessor());
         add(new TermRangeQueryNodeProcessor());
         add(new AqpAdsabsRegexNodeProcessor()); // wraps regex QN w/ NonAnalyzedQueryNode
 
