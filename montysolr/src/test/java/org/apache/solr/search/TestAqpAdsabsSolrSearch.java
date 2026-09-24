@@ -1091,6 +1091,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testLongUppercaseTitlePhrase() throws Exception {
+        assertU(adoc("id", "223001", "bibcode", "2020ApJ...902..231A", "title",
+                "INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in the JULES-INFERNO global fire model"));
+        assertU(adoc("id", "223002", "bibcode", "2020ApJ...902..232A", "title",
+                "INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in quasar JULES-INFERNO global fire model"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q",
+                        "title:\"INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in the JULES-INFERNO global fire model\""),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='223001']",
+                "//doc[not(str[@name='id'][.='223002'])]");
+        assertQ(req("defType", "aqp", "q",
+                        "title:\"INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in the jules-inferno global fire model\""),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='223001']");
+    }
+
     public void testCustomScoring() throws Exception {
 
         assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
