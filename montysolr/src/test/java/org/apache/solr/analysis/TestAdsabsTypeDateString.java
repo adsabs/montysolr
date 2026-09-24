@@ -42,6 +42,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
     public void test() throws Exception {
 
 
+
         assertU(addDocs("date", "2012-10-01T00:00:00Z"));
         assertU(addDocs("date", "2012-10-01T00:30:00Z"));
         assertU(addDocs("date", "2012-10-01T00:31:00Z"));
@@ -63,6 +64,7 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
 
         assertU(commit());
         assertQ(req("q", "*:*"), "//*[@numFound='16']");
+
 
         for (int i = 1900; i < 2025; i++) {
             assertU(addDocs("year", Integer.toString(i)));
@@ -300,6 +302,40 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         );
 
     }
+    public void testDateComponentWidthQueries() throws Exception {
+        String[] ids = {"9401", "9402", "9403", "9404", "9405", "9406", "9407"};
+        String idsFilter = "{!terms f=id}9401,9402,9403,9404,9405,9406,9407";
+        try {
+            // Keep dates at the boundaries where zero padding changes the parsed
+            // precision, and where a one-digit day must match its two-digit form.
+            assertU(addDocs("id", "9401", "date", "2014-01-01T00:00:00Z"));
+            assertU(addDocs("id", "9402", "date", "2014-01-01T00:30:00Z"));
+            assertU(addDocs("id", "9403", "date", "2014-05-31T23:59:59Z"));
+            assertU(addDocs("id", "9404", "date", "2014-06-01T00:00:00Z"));
+            assertU(addDocs("id", "9405", "date", "2016-01-01T00:00:00Z"));
+            assertU(addDocs("id", "9406", "date", "2016-01-01T00:30:00Z"));
+            assertU(addDocs("id", "9407", "date", "2016-01-31T00:30:00Z"));
+            assertU(commit());
+
+            assertQ(req("q", "pubdate:[2014-00 TO 2014-06]", "fq", idsFilter),
+                    "//*[@numFound='4']");
+            assertQ(req("q", "pubdate:[2014-00-00 TO 2014-06-00]", "fq", idsFilter),
+                    "//*[@numFound='4']");
+            assertQ(req("q", "pubdate:[2014-00-0 TO 2014-06-0]", "fq", idsFilter),
+                    "//*[@numFound='4']");
+
+            assertQ(req("q", "pubdate:[2016-01-01 TO 2016-01-31]", "fq", idsFilter),
+                    "//*[@numFound='2']");
+            assertQ(req("q", "pubdate:[2016-01-1 TO 2016-01-31]", "fq", idsFilter),
+                    "//*[@numFound='2']");
+        } finally {
+            for (String id : ids) {
+                assertU(delI(id));
+            }
+            assertU(commit());
+        }
+    }
+
 
     public void testBareYearRangeBoundary() throws Exception {
         String[] ids = {"9301", "9302", "9303", "9304", "9305", "9306", "9307", "9308"};
