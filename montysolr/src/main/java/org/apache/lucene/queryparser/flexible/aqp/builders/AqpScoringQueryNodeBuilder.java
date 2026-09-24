@@ -31,6 +31,12 @@ public class AqpScoringQueryNodeBuilder implements StandardQueryBuilder {
         Query query = (Query) queryNode.getChildren().get(0).getTag(
                 QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
 
+        // trending_overlap exposes a count, not a relevance score.  Preserve
+        // that metric when the ADS root-level classic rescoring pass runs.
+        if (query instanceof org.apache.lucene.search.ReaderOverlapQuery) {
+            return query;
+        }
+
         return wrapQuery(query, q.getSource(), q.getModifier());
 
     }
