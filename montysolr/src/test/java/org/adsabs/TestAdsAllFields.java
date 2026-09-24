@@ -191,6 +191,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 ", \"grant_facet_hier\": [\"0/NASA\", \"1/NASA/123456-78\"]" +
                 // pipeline is now filling this field (we do no more copyfield)
                 ", \"identifier\": [\"arxiv:1234.5678\", \"ARXIV:hep-ph/1234\", \"2014JNuM..455...1a1\", \"2014JNuM..455...1a2\", \"2014JNuM..455...10B\"]" +
+                ", \"arxiv_class\": [\"astro-ph.SR\"]" +
                 ", \"ids_data\": [\"{whatever: here there MAST}\"]" +
                 ", \"issue\": \"24i\"" +
 
@@ -254,6 +255,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "}" +
                 "}}";
         updateJ(json, null);
+        assertU(adoc("id", "1141", "bibcode", "b1141",
+                "title", "arxiv sibling", "arxiv_class", "astro-ph.GA"));
 
 
         assertU(adoc("id", "101", "bibcode", "2014JNuM..455...10C",
@@ -811,6 +814,19 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         assertQ(req("q", "identifier:2014JNuM..455...10B"),
                 "//*[@numFound='1']",
                 "//doc/int[@name='recid'][.='100']");
+        assertQ(req("q", "arxiv_class:\"astro-ph\""),
+                "//*[@numFound='2']",
+                "//doc/int[@name='recid'][.='100']",
+                "//doc/int[@name='recid'][.='1141']");
+        assertQ(req("q", "arxiv_class:\"astro-ph.SR\""),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']",
+                "not(//doc/int[@name='recid'][.='1141'])");
+        assertQ(req("q", "arxiv_class:\"astro-ph.GA\""),
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='1141']",
+                "not(//doc/int[@name='recid'][.='100'])");
+
 
 
         /*

@@ -820,6 +820,25 @@
 			</analyzer>
 		</fieldType>
 
+		<fieldType name="arxiv_class"
+			class="solr.TextField">
+			<analyzer type="index">
+				<tokenizer class="solr.PathHierarchyTokenizerFactory"
+					delimiter="." />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|\.|_)" replacement="" replace="all" />
+			</analyzer>
+			<analyzer type="query">
+				<tokenizer class="solr.KeywordTokenizerFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="(\-|\.|_)" replacement="" replace="all" />
+			</analyzer>
+		</fieldType>
+
 		<!--copy of the chain above but without duplicates removal; this should 
 			be used for situations where papers has multiple values per field; but we 
 			want to keep them in order and not loss any. Example is author, which has 
@@ -1371,7 +1390,7 @@
 		<field name="keyword_facet" type="string" indexed="true"
 			stored="true" multiValued="true" omitNorms="true" />
 
-		<field name="arxiv_class" type="normalized_text_ascii"
+		<field name="arxiv_class" type="arxiv_class"
 			indexed="true" stored="true" multiValued="true" omitNorms="true" />
 
 
