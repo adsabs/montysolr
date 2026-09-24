@@ -11,19 +11,27 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
     private final SolrCacheWrapper cache;
 
-
     public SecondOrderCollectorCitedBy(SolrCacheWrapper cache) {
+        this(cache, 0.0f);
+    }
+
+    public SecondOrderCollectorCitedBy(SolrCacheWrapper cache, float textWeightRatio) {
         super();
         assert cache != null;
         this.cache = cache;
+        setTextWeightRatio(textWeightRatio);
     }
 
 
     @Override
     public void collect(int doc) throws IOException {
         int[] v = cache.getLuceneDocIds(doc + docBase);
-        if (v == null) return;
+        if (v == null && textWeightRatio == 0.0f) return;
         float s = scorer.score();
+        if (textWeightRatio > 0.0f) {
+            recordInputScore(s);
+        }
+        if (v == null) return;
         for (int citingDoc : v) {
             hits.add(new CollectorDoc(citingDoc, s, v.length));
         }
@@ -39,7 +47,8 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
      * Returns a hash code value for this object.
      */
     public int hashCode() {
-        return 8959545 ^ cache.hashCode();
+        return 8959545 ^ cache.hashCode()
+                ^ (textWeightRatio == 0.0f ? 0 : Float.hashCode(textWeightRatio));
     }
 
     @Override
@@ -49,7 +58,8 @@ public class SecondOrderCollectorCitedBy extends AbstractSecondOrderCollector {
 
     @Override
     public SecondOrderCollector copy() {
-        return new SecondOrderCollectorCitedBy(cache);
+        SecondOrderCollectorCitedBy copy = new SecondOrderCollectorCitedBy(cache, textWeightRatio);
+        copy.setFinalValueType(compactingType);
+        return copy;
     }
-
 }

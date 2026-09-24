@@ -11,6 +11,8 @@ import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -75,6 +77,62 @@ public class AqpAdsabsSubQueryProvider implements
             throw new SyntaxError("Naughty, naughty server error", e);
         }
         return cacheWrapper;
+    }
+
+    private static class CitationArguments {
+        final Query innerQuery;
+        final float textWeightRatio;
+
+        CitationArguments(Query innerQuery, float textWeightRatio) {
+            this.innerQuery = innerQuery;
+            this.textWeightRatio = textWeightRatio;
+        }
+    }
+
+    private static CitationArguments parseCitationArguments(FunctionQParser fp) throws SyntaxError {
+        Query innerQuery;
+        float ratio = 0.0f;
+        String queryText = null;
+        if (fp instanceof AqpFunctionQParser) {
+            AqpFunctionQParser aqpFp = (AqpFunctionQParser) fp;
+            QueryNode queryNode = aqpFp.getQueryNode();
+            if (queryNode instanceof AqpFunctionQueryNode) {
+                List<OriginalInput> functionValues =
+                        ((AqpFunctionQueryNode) queryNode).getFuncValues();
+                if (!functionValues.isEmpty()) {
+                    int queryArgumentCount = functionValues.size();
+                    if (queryArgumentCount > 1) {
+                        try {
+                            ratio = Float.parseFloat(
+                                    functionValues.get(queryArgumentCount - 1).value.trim());
+                            queryArgumentCount--;
+                        } catch (NumberFormatException ignored) {
+                            ratio = 0.0f;
+                        }
+                    }
+                    StringBuilder queryBuilder = new StringBuilder();
+                    for (int i = 0; i < queryArgumentCount; i++) {
+                        if (i > 0) {
+                            queryBuilder.append(", ");
+                        }
+                        queryBuilder.append(functionValues.get(i).value);
+                    }
+                    queryText = queryBuilder.toString();
+                }
+            }
+        }
+        if (queryText != null) {
+            innerQuery = fp.subQuery(queryText, null).getQuery();
+        } else {
+            innerQuery = fp.parseNestedQuery();
+            if (fp.hasMoreArguments()) {
+                ratio = fp.parseFloat();
+            }
+        }
+        if (!Float.isFinite(ratio) || ratio < 0.0f || ratio > 1.0f) {
+            throw new SyntaxError("The ratio must be in the range 0.0-1.0");
+        }
+        return new CitationArguments(innerQuery, ratio);
     }
 
     static {
@@ -591,9 +649,12 @@ public class AqpAdsabsSubQueryProvider implements
 
         /* @api.doc
          *
-         * def citations(query):
+         * def citations(query, textWeightRatio=0):
          * 		"""
-         *    Finds set of papers that have **P** in their reference list
+         *    Finds set of papers that have **P** in their reference list.
+         *    Each selected paper contributes one point to every citing paper by default.
+         *    A ratio from 0.0 to 1.0 weights each link by the normalized score of its
+         *    source query result; 0.0 uses citation frequency only.
          *
          *    'P' is the set of papers that will be selected by the query
          *
@@ -624,23 +685,33 @@ public class AqpAdsabsSubQueryProvider implements
          */
         parsers.put("citations", new AqpSubqueryParserFull() {
             public Query parse(FunctionQParser fp) throws SyntaxError {
-                Query innerQuery = fp.parseNestedQuery();
+                CitationArguments arguments = parseCitationArguments(fp);
+                Query innerQuery = arguments.innerQuery;
+                float textWeightRatio = arguments.textWeightRatio;
 
                 @SuppressWarnings("unchecked")
                 SolrCacheWrapper<CitationCache<Object, Integer>> citationsWrapper = new SolrCacheWrapper.CitationsCache(
                         (CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 
-                return new SecondOrderQuery(innerQuery,
-                        new SecondOrderCollectorCitedBy(citationsWrapper), false);
+                SecondOrderCollectorCitedBy collector =
+                        new SecondOrderCollectorCitedBy(citationsWrapper, textWeightRatio);
+
+                collector.setFinalValueType(textWeightRatio == 0.0f
+                        ? FinalValueType.ABS_COUNT
+                        : FinalValueType.ABS_COUNT_TEXT_WEIGHT);
+                return new SecondOrderQuery(innerQuery, collector, false);
             }
         });
 
 
         /* @api.doc
          *
-         * def references(query):
+         * def references(query, textWeightRatio=0):
          * 		"""
-         *    Finds set of papers that **are** in the references list of **P**
+         *    Finds set of papers that **are** in the references list of **P**.
+         *    Each selected paper contributes one point to every referenced paper by default.
+         *    A ratio from 0.0 to 1.0 weights each link by the normalized score of its
+         *    source query result; 0.0 uses citation frequency only.
          *
          *    'P' is the set of papers that will be selected by the query
          *
@@ -667,15 +738,21 @@ public class AqpAdsabsSubQueryProvider implements
          */
         parsers.put("references", new AqpSubqueryParserFull() {
             public Query parse(FunctionQParser fp) throws SyntaxError {
-                Query innerQuery = fp.parseNestedQuery();
+                CitationArguments arguments = parseCitationArguments(fp);
+                Query innerQuery = arguments.innerQuery;
+                float textWeightRatio = arguments.textWeightRatio;
 
                 @SuppressWarnings("unchecked")
                 SolrCacheWrapper<CitationCache<Object, Integer>> referencesWrapper = new SolrCacheWrapper.ReferencesCache(
                         (CitationCache<Object, Integer>) fp.getReq().getSearcher().getCache("citations-cache"));
 
+                SecondOrderCollectorCitesRAM collector =
+                        new SecondOrderCollectorCitesRAM(referencesWrapper, textWeightRatio);
 
-                return new SecondOrderQuery(innerQuery,
-                        new SecondOrderCollectorCitesRAM(referencesWrapper), false);
+                collector.setFinalValueType(textWeightRatio == 0.0f
+                        ? FinalValueType.ABS_COUNT
+                        : FinalValueType.ABS_COUNT_TEXT_WEIGHT);
+                return new SecondOrderQuery(innerQuery, collector, false);
             }
         });
 

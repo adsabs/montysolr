@@ -11,29 +11,40 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
     private final SolrCacheWrapper cache;
 
     public SecondOrderCollectorCitesRAM(SolrCacheWrapper cache) {
+        this(cache, 0.0f);
+    }
+
+    public SecondOrderCollectorCitesRAM(SolrCacheWrapper cache, float textWeightRatio) {
         super();
         assert cache != null;
         this.cache = cache;
+        setTextWeightRatio(textWeightRatio);
     }
 
 
     @Override
     public void collect(int doc) throws IOException {
         int[] citations = cache.getLuceneDocIds(doc + docBase);
-        if (citations == null) {
+        if (citations == null && textWeightRatio == 0.0f) {
             return;
         }
         float s = scorer.score();
+        if (textWeightRatio > 0.0f) {
+            recordInputScore(s);
+        }
+        if (citations == null) {
+            return;
+        }
         for (int docid : citations) {
-            if (docid == -1)
+            if (docid == -1) {
                 continue;
+            }
             hits.add(new CollectorDoc(docid, s, citations.length));
         }
 
     }
 
 
-    @Override
     public String toString() {
         return this.getClass().getSimpleName() + "(cache:" + cache.toString() + ")";
     }
@@ -42,7 +53,8 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
      * Returns a hash code value for this object.
      */
     public int hashCode() {
-        return 2938572 ^ cache.hashCode();
+        return 2938572 ^ cache.hashCode()
+                ^ (textWeightRatio == 0.0f ? 0 : Float.hashCode(textWeightRatio));
     }
 
 
@@ -54,6 +66,8 @@ public class SecondOrderCollectorCitesRAM extends AbstractSecondOrderCollector {
 
     @Override
     public SecondOrderCollector copy() {
-        return new SecondOrderCollectorCitesRAM(cache);
+        SecondOrderCollectorCitesRAM copy = new SecondOrderCollectorCitesRAM(cache, textWeightRatio);
+        copy.setFinalValueType(compactingType);
+        return copy;
     }
 }

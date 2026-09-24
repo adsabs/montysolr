@@ -24,6 +24,8 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     protected FinalValueType compactingType = FinalValueType.MAX_VALUE;
     protected LeafReaderContext context;
     private float maxScore = 0.0f;
+    protected float textWeightRatio = 0.0f;
+    private float maxInputScore = 0.0f;
 
     public AbstractSecondOrderCollector() {
         lock = new ReentrantLock();
@@ -190,6 +192,16 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
         compactingType = type;
     }
 
+    public void setTextWeightRatio(float ratio) {
+        textWeightRatio = ratio;
+    }
+
+    protected void recordInputScore(float score) {
+        if (score > maxInputScore) {
+            maxInputScore = score;
+        }
+    }
+
     protected void compactHits() {
         switch (compactingType) {
             case GEOM_MEAN_NORM:
@@ -212,6 +224,9 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
             case ABS_COUNT_NORM:
                 compactHitsAbsCount();
                 normalizeScores();
+                break;
+            case ABS_COUNT_TEXT_WEIGHT:
+                compactHitsAbsCountTextWeight();
                 break;
             case MAX_VALUE:
                 compactHitsMaxValue();
@@ -355,6 +370,39 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
         hits = newHits;
     }
 
+    protected void compactHitsAbsCountTextWeight() {
+        ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
+                (hits.size() * 0.75f)).intValue());
+
+        if (hits.size() < 1)
+            return;
+
+        CollectorDoc currDoc = hits.get(0);
+        int seenTimes = 0;
+        float score = 0.0f;
+
+        for (CollectorDoc d : hits) {
+            float normalizedScore = maxInputScore > 0.0f ? d.score / maxInputScore : 0.0f;
+            float contribution = (1.0f - textWeightRatio) + (textWeightRatio * normalizedScore);
+            if (d.doc == currDoc.doc) {
+                score += contribution;
+                seenTimes += 1;
+                continue;
+            }
+            currDoc.score = score;
+            currDoc.shardIndex = seenTimes;
+            newHits.add(currDoc);
+            currDoc = d;
+            score = contribution;
+            seenTimes = 1;
+        }
+
+        currDoc.score = score;
+        currDoc.shardIndex = seenTimes;
+        newHits.add(currDoc);
+        hits = newHits;
+    }
+
     protected void compactHitsArithmMean() {
         ArrayList<CollectorDoc> newHits = new ArrayList<CollectorDoc>(Float.valueOf(
                 (hits.size() * 0.75f)).intValue());
@@ -458,6 +506,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     public void reset() {
         hits.clear();
         organized = false;
+        maxInputScore = 0.0f;
     }
 
     protected String fieldsToStr(String[] fields) {
