@@ -331,6 +331,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("q",
                         "title:\"A Change of Rotation Profile in the Envelope in the HH 111 Protostellar System: A Transition to a Disk\""),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
+        // A lone dollar is analyzed away, but it must produce a safe no-match
+        // rather than the obsolete trailing-author-position error.
+        assertQ(req("defType", "aqp", "q", "$"), "//*[@numFound='0']");
 
         // check NEAR ignores order
         assertQ(req("q", "title:(rotation NEAR2 profile)"), "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
