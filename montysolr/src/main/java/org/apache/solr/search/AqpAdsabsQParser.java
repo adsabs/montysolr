@@ -404,6 +404,15 @@ public class AqpAdsabsQParser extends QParser {
         return qParser;
     }
 
+    @Override
+    public void addDebugInfo(NamedList<Object> debugInfo) {
+        super.addDebugInfo(debugInfo);
+        String parserDebug = qParser.getDebugOutput();
+        if (!parserDebug.isEmpty()) {
+            debugInfo.add("aqp_debug", parserDebug);
+        }
+    }
+
     /**
      * Parses all multiplicative boosts
      */
