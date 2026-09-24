@@ -57,9 +57,23 @@ public class AqpAdsabsAuthorPreProcessor extends AqpQueryNodeProcessorImpl {
             if (fieldMap.containsKey(fqn.getFieldAsString())) {
                 String field = fqn.getFieldAsString();
                 String[] nameParts = fqn.getTextAsString().split(" ");
+                if (node instanceof QuotedFieldQueryNode) {
+                    String value = fqn.getTextAsString();
+                    if (value.length() > 1
+                            && value.indexOf(' ') < 0
+                            && value.indexOf(',') < 0
+                            && value.indexOf('?') < 0
+                            && value.indexOf('^') < 0
+                            && value.indexOf('*') == value.length() - 1) {
+                        return new WildcardQueryNode(fqn.getField(), value,
+                                fqn.getBegin(), fqn.getEnd());
+                    }
+                }
                 if (node instanceof WildcardQueryNode) {
-                    if (nameParts[nameParts.length - 1].replace("*", "").length() > 1) return node;
-                    // make "kurtz, m*" a simple case
+                    if (nameParts.length == 1
+                            || nameParts[nameParts.length - 1].replace("*", "").length() > 1) {
+                        return node;
+                    }
                     nameParts[nameParts.length - 1] = nameParts[nameParts.length - 1].replace("*", "");
                     StringBuffer newName = new StringBuffer();
                     newName.append(nameParts[0]);
