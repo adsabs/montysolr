@@ -273,6 +273,9 @@ public class TestAdsabsTypeDateString extends MontySolrQueryTestCase {
         assertQ(req("q", "year:\"1900-1950\""),
                 "//*[@numFound='51']"
         );
+        assertQ(req("q", "1900-1950"),
+                "//*[@numFound='51']"
+        );
 
         assertQ(req("q", "year:[* TO 1950]"),
                 "//*[@numFound='51']"
