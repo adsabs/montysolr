@@ -70,13 +70,13 @@ public class SpanNegativeIndexRangeQuery extends SpanPositionAndDocumentQuery {
         int spanStart = spans.startPosition();
         int spanEnd = spans.endPosition();
         if (positionIncrementGap > 1) {
-            // positionIncrementGap produces sequences of positions like f(n) = n*(positionIncrementGap + 2)
-            // e.g. 0, 102, 204, 306
-            // The end of each position is its start position +1
-            // It is NOT the next start position
-            // e.g. (start, end): (0, 1), (102, 103), (204, 205), (306, 307)
-            spanStart = spans.startPosition() / (positionIncrementGap + 2);
-            spanEnd = (spans.endPosition() - 1) / (positionIncrementGap + 2);
+            // Lucene advances each successive multi-valued field value by the
+            // configured gap plus the value's first position increment.
+            // For a gap of 100, native starts are 0, 101, 202, ... (not 0,
+            // 102, 204). Normalize against that actual index position scale.
+            int valueStride = positionIncrementGap + 1;
+            spanStart = spans.startPosition() / valueStride;
+            spanEnd = (spans.endPosition() - 1) / valueStride;
             if (spanStart == spanEnd && spans.startPosition() != spans.endPosition())
                 spanEnd += 1;
         }

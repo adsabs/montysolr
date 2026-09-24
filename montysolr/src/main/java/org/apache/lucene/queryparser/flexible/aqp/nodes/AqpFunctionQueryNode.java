@@ -44,6 +44,7 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
     private String name = null;
     private OriginalInput originalInput = null;
     private final List<OriginalInput> funcValues;
+    private transient AqpANTLRNode sourceNode = null;
     private final Set<String> nodesToCount = new HashSet<String>(Arrays.asList("QRANGEIN", "QRANGEEX", "QFUNC"));
 
     public AqpFunctionQueryNode(String name, AqpFunctionQueryBuilder builder, List<OriginalInput> values) throws ParseException {
@@ -148,5 +149,13 @@ public class AqpFunctionQueryNode extends QueryNodeImpl implements QueryNode {
 
     public OriginalInput getOriginalInput() {
         return originalInput;
+    }
+
+    public AqpANTLRNode getSourceNode() {
+        return sourceNode;
+    }
+
+    public void setSourceNode(AqpANTLRNode sourceNode) {
+        this.sourceNode = sourceNode;
     }
 }

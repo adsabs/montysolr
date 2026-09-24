@@ -9,14 +9,16 @@ import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 import org.apache.lucene.search.*;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 import org.apache.lucene.search.join.JoinUtil;
@@ -318,6 +320,7 @@ public class AqpAdsabsSubQueryProvider implements
                 }
 
                 assert end != 0;
+
                 SpanConverter converter = new SpanConverter();
                 converter.setWrapNonConvertible(true);
 
@@ -331,7 +334,6 @@ public class AqpAdsabsSubQueryProvider implements
                     query = ((ConstantScoreQuery) query).getQuery();
                     wrapConstant = true;
                 }
-
                 Set<String> virtualFields = getVirtualFields(fp);
                 query = buildPositionQuery(fp, converter, query, start, end, virtualFields);
 
@@ -345,40 +347,11 @@ public class AqpAdsabsSubQueryProvider implements
             private Query buildPositionQuery(FunctionQParser fp, SpanConverter converter, Query query,
                                              int start, int end, Set<String> virtualFields)
                     throws SyntaxError {
-                Set<String> queryFields = getFields(query);
-                if (queryFields.size() <= 1) {
+                if (virtualFields.isEmpty()) {
                     String queryField = getField(query);
                     return createPositionQuery(converter, query, queryField, start, end,
                             getPositionIncrementGap(fp, queryField));
                 }
-                if (virtualFields.isEmpty() || !virtualFields.containsAll(queryFields)) {
-                    throw new SyntaxError("`pos` queries cannot handle explicit multi-field queries; " +
-                            "only configured virtual-field compositions may be expanded.");
-                }
-
-                if (query instanceof BooleanQuery) {
-                    BooleanQuery booleanQuery = (BooleanQuery) query;
-                    if (isVirtualOr(booleanQuery, virtualFields)) {
-                        return partitionBooleanQuery(fp, converter, booleanQuery, start, end);
-                    }
-                    BooleanQuery.Builder builder = new BooleanQuery.Builder();
-                    builder.setMinimumNumberShouldMatch(booleanQuery.getMinimumNumberShouldMatch());
-                    for (BooleanClause clause : booleanQuery.clauses()) {
-                        builder.add(buildPositionQuery(fp, converter, clause.getQuery(), start, end, virtualFields),
-                                clause.getOccur());
-                    }
-                    return builder.build();
-                }
-
-                if (query instanceof DisjunctionMaxQuery) {
-                    List<Query> disjuncts = new ArrayList<>();
-                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
-                        disjuncts.add(buildPositionQuery(fp, converter, disjunct, start, end, virtualFields));
-                    }
-                    return new DisjunctionMaxQuery(disjuncts,
-                            ((DisjunctionMaxQuery) query).getTieBreakerMultiplier());
-                }
-
                 if (query instanceof BoostQuery) {
                     return new BoostQuery(buildPositionQuery(fp, converter,
                             ((BoostQuery) query).getQuery(), start, end, virtualFields),
@@ -388,81 +361,89 @@ public class AqpAdsabsSubQueryProvider implements
                     return new ConstantScoreQuery(buildPositionQuery(fp, converter,
                             ((ConstantScoreQuery) query).getQuery(), start, end, virtualFields));
                 }
+
+                Set<String> queryFields = getFields(query);
+                if (query instanceof BooleanQuery) {
+                    if (queryFields.size() > 1
+                            && (virtualFields.isEmpty() || !virtualFields.containsAll(queryFields))) {
+                        throw new SyntaxError("`pos` queries cannot handle explicit multi-field queries; " +
+                                "only configured virtual-field compositions may be expanded.");
+                    }
+                    BooleanQuery original = (BooleanQuery) query;
+                    BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                    builder.setMinimumNumberShouldMatch(original.getMinimumNumberShouldMatch());
+                    for (BooleanClause clause : original.clauses()) {
+                        builder.add(buildPositionQuery(fp, converter, clause.getQuery(), start, end, virtualFields),
+                                clause.getOccur());
+                    }
+                    return builder.build();
+                }
+
+                if (query instanceof DisjunctionMaxQuery) {
+                    if (queryFields.size() > 1
+                            && (virtualFields.isEmpty() || !virtualFields.containsAll(queryFields))) {
+                        throw new SyntaxError("`pos` queries cannot handle explicit multi-field queries; " +
+                                "only configured virtual-field compositions may be expanded.");
+                    }
+                    List<Query> disjuncts = new ArrayList<>();
+                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
+                        disjuncts.add(buildPositionQuery(fp, converter, disjunct, start, end, virtualFields));
+                    }
+                    return new DisjunctionMaxQuery(disjuncts,
+                            ((DisjunctionMaxQuery) query).getTieBreakerMultiplier());
+                }
+
+                if (queryFields.size() <= 1) {
+                    String queryField = getField(query);
+                    return createPositionQuery(converter, query, queryField, start, end,
+                            getPositionIncrementGap(fp, queryField));
+                }
+                if (virtualFields.isEmpty() || !virtualFields.containsAll(queryFields)) {
+                    throw new SyntaxError("`pos` queries cannot handle explicit multi-field queries; " +
+                            "only configured virtual-field compositions may be expanded.");
+                }
                 throw new SyntaxError("`pos` cannot expand this multi-field virtual query shape.");
             }
 
-            private boolean isVirtualOr(Query query, Set<String> virtualFields) {
-                if (query instanceof BooleanQuery) {
-                    BooleanQuery booleanQuery = (BooleanQuery) query;
-                    for (BooleanClause clause : booleanQuery.clauses()) {
-                        if (clause.getOccur() != BooleanClause.Occur.SHOULD
-                                || getFields(clause.getQuery()).size() != 1) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                if (query instanceof DisjunctionMaxQuery) {
-                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
-                        if (getFields(disjunct).size() != 1) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            }
 
-            private Query partitionBooleanQuery(FunctionQParser fp, SpanConverter converter,
-                                                BooleanQuery query, int start, int end)
-                    throws SyntaxError {
-                BooleanQuery.Builder positioned = new BooleanQuery.Builder();
-                positioned.setMinimumNumberShouldMatch(query.getMinimumNumberShouldMatch());
-                for (String queryField : getFields(query)) {
-                    Query fieldQuery = restrictToField(query, queryField);
-                    if (fieldQuery != null) {
-                        positioned.add(createPositionQuery(converter, fieldQuery, queryField, start, end,
-                                getPositionIncrementGap(fp, queryField)), BooleanClause.Occur.SHOULD);
-                    }
-                }
-                return positioned.build();
-            }
-
-            private Set<String> getVirtualFields(FunctionQParser fp) {
+            private Set<String> getVirtualFields(FunctionQParser fp) throws SyntaxError {
                 Set<String> fields = new LinkedHashSet<>();
                 if (!(fp instanceof AqpFunctionQParser)) {
                     return fields;
                 }
                 QueryNode node = ((AqpFunctionQParser) fp).getQueryNode();
                 if (!(node instanceof AqpFunctionQueryNode)
-                        || ((AqpFunctionQueryNode) node).getFuncValues().isEmpty()
                         || fp.getReq() == null) {
                     return fields;
                 }
-                String original = ((AqpFunctionQueryNode) node).getFuncValues().get(0).value.trim();
-                while (original.startsWith("(")) {
-                    original = original.substring(1).trim();
-                }
-                if (original.startsWith("=")) {
-                    original = original.substring(1).trim();
-                }
-                int separator = original.indexOf(':');
-                if (separator <= 0) {
+                AqpFunctionQueryNode functionNode = (AqpFunctionQueryNode) node;
+                AqpANTLRNode sourceNode = functionNode.getSourceNode();
+                if (sourceNode == null && !"pos".equals(functionNode.getName())) {
                     return fields;
                 }
-                String virtualField = original.substring(0, separator).trim();
                 Object configured = fp.getReq().getContext().get(AqpAdsabsQParser.VIRTUAL_FIELDS_CONTEXT_KEY);
                 if (!(configured instanceof Map)) {
                     return fields;
                 }
-                Object physical = ((Map<?, ?>) configured).get(virtualField);
+                Map<?, ?> configuredFields = (Map<?, ?>) configured;
+                QueryNode argumentNode = sourceNode == null ? null : firstFunctionArgument(sourceNode);
+                String virtualField = sourceNode == null
+                        ? findVirtualFieldInOriginalInput(functionNode, configuredFields.keySet())
+                        : findVirtualField(argumentNode, configuredFields.keySet());
+                if (virtualField == null) {
+                    return fields;
+                }
+                Set<String> origins = new LinkedHashSet<>();
+                if (argumentNode != null) {
+                    collectFieldOrigins(argumentNode, origins);
+                }
+                Object physical = configuredFields.get(virtualField);
                 if (physical instanceof Map) {
                     for (Object field : ((Map<?, ?>) physical).keySet()) {
                         if (field instanceof String) {
                             String physicalField = (String) field;
-                            if (!virtualField.equals(physicalField)
-                                    && hasFieldPrefix(original, physicalField)) {
-                                return fields;
+                            if (!virtualField.equals(physicalField) && origins.contains(physicalField)) {
+                                return new LinkedHashSet<>();
                             }
                             fields.add(physicalField);
                         }
@@ -470,32 +451,143 @@ public class AqpAdsabsSubQueryProvider implements
                 }
                 return fields;
             }
+            private String findVirtualFieldInOriginalInput(AqpFunctionQueryNode functionNode,
+                                                           Set<?> configuredFields) {
+                if (functionNode.getFuncValues().isEmpty()) {
+                    return null;
+                }
+                String original = functionNode.getFuncValues().get(0).value;
+                if (original == null) {
+                    return null;
+                }
+                original = original.trim();
+                if (original.startsWith("=")) {
+                    original = original.substring(1).trim();
+                }
+                while (original.startsWith("(")) {
+                    original = original.substring(1).trim();
+                }
+                int separator = original.indexOf(':');
+                if (separator <= 0) {
+                    return null;
+                }
+                String field = original.substring(0, separator).trim();
+                return configuredFields.contains(field) ? field : null;
+            }
 
-            private boolean hasFieldPrefix(String input, String field) {
-                String marker = field + ":";
-                boolean quoted = false;
-                boolean escaped = false;
-                for (int offset = 0; offset < input.length(); offset++) {
-                    char character = input.charAt(offset);
-                    if (escaped) {
-                        escaped = false;
-                        continue;
-                    }
-                    if (character == '\\') {
-                        escaped = true;
-                        continue;
-                    }
-                    if (character == '"') {
-                        quoted = !quoted;
-                        continue;
-                    }
-                    if (!quoted && input.startsWith(marker, offset)
-                            && (offset == 0 || !Character.isLetterOrDigit(input.charAt(offset - 1)))) {
-                        return true;
+
+            private QueryNode firstFunctionArgument(AqpANTLRNode functionNode) {
+                List<QueryNode> functionChildren = functionNode.getChildren();
+                if (functionChildren == null || functionChildren.size() < 2) {
+                    return null;
+                }
+                List<QueryNode> arguments = functionChildren.get(1).getChildren();
+                if (arguments == null || arguments.isEmpty()) {
+                    return null;
+                }
+                for (QueryNode argument : arguments) {
+                    if (!(argument instanceof AqpANTLRNode)
+                            || !"QDELIMITER".equals(((AqpANTLRNode) argument).getTokenName())) {
+                        return argument;
                     }
                 }
-                return false;
+                return null;
             }
+
+            private String sourceFieldName(AqpANTLRNode field) throws SyntaxError {
+                List<QueryNode> children = field.getChildren();
+                if (children == null || children.size() < 2
+                        || !(children.get(0) instanceof AqpANTLRNode)) {
+                    return null;
+                }
+                String name = ((AqpANTLRNode) children.get(0)).getTokenInput();
+                if (name == null) {
+                    return null;
+                }
+                try {
+                    return EscapeQuerySyntaxImpl.discardEscapeChar(name).toString();
+                } catch (QueryNodeException error) {
+                    throw new SyntaxError("Invalid positional field name", error);
+                }
+            }
+
+            private String findVirtualField(QueryNode node, Set<?> configuredFields) throws SyntaxError {
+                if (node instanceof AqpFunctionQueryNode) {
+                    AqpFunctionQueryNode function = (AqpFunctionQueryNode) node;
+                    if (!"constant".equals(function.getName()) && !"boost".equals(function.getName())) {
+                        return null;
+                    }
+                    AqpANTLRNode source = function.getSourceNode();
+                    return source == null ? null
+                            : findVirtualField(firstFunctionArgument(source), configuredFields);
+                }
+                if (!(node instanceof AqpANTLRNode)) {
+                    return null;
+                }
+                AqpANTLRNode ast = (AqpANTLRNode) node;
+                if ("QFUNC".equals(ast.getTokenName())) {
+                    List<QueryNode> children = ast.getChildren();
+                    if (children == null || children.isEmpty()
+                            || !(children.get(0) instanceof AqpANTLRNode)) {
+                        return null;
+                    }
+                    String function = ((AqpANTLRNode) children.get(0)).getTokenInput();
+                    if (function != null && function.endsWith("(")) {
+                        function = function.substring(0, function.length() - 1);
+                    }
+                    if (!"constant".equals(function) && !"boost".equals(function)) {
+                        return null;
+                    }
+                    return findVirtualField(firstFunctionArgument(ast), configuredFields);
+                }
+                if ("FIELD".equals(ast.getTokenName())) {
+                    String field = sourceFieldName(ast);
+                    if (field != null) {
+                        return configuredFields.contains(field) ? field : null;
+                    }
+                }
+                List<QueryNode> children = ast.getChildren();
+                if (children == null || children.isEmpty()) {
+                    return null;
+                }
+                if ("MODIFIER".equals(ast.getTokenName()) || "TMODIFIER".equals(ast.getTokenName())) {
+                    for (QueryNode child : children) {
+                        String field = findVirtualField(child, configuredFields);
+                        if (field != null) {
+                            return field;
+                        }
+                    }
+                    return null;
+                }
+                return findVirtualField(children.get(0), configuredFields);
+            }
+
+            private void collectFieldOrigins(QueryNode node, Set<String> origins) throws SyntaxError {
+                if (node instanceof AqpFunctionQueryNode) {
+                    AqpANTLRNode source = ((AqpFunctionQueryNode) node).getSourceNode();
+                    if (source != null) {
+                        collectFieldOrigins(firstFunctionArgument(source), origins);
+                    }
+                    return;
+                }
+                if (!(node instanceof AqpANTLRNode)) {
+                    return;
+                }
+                AqpANTLRNode ast = (AqpANTLRNode) node;
+                if ("FIELD".equals(ast.getTokenName())) {
+                    String field = sourceFieldName(ast);
+                    if (field != null) {
+                        origins.add(field);
+                    }
+                }
+                List<QueryNode> children = ast.getChildren();
+                if (children != null) {
+                    for (QueryNode child : children) {
+                        collectFieldOrigins(child, origins);
+                    }
+                }
+            }
+
 
             private Query createPositionQuery(SpanConverter converter, Query query, String queryField,
                                               int start, int end, int positionIncrementGap)
@@ -569,50 +661,6 @@ public class AqpAdsabsSubQueryProvider implements
                 return fields;
             }
 
-            private Query restrictToField(Query query, String field) {
-                if (query instanceof TermQuery) {
-                    return field.equals(((TermQuery) query).getTerm().field()) ? query : null;
-                } else if (query instanceof PhraseQuery || query instanceof MultiPhraseQuery
-                        || query instanceof SynonymQuery) {
-                    return getFields(query).contains(field) ? query : null;
-                } else if (query instanceof BoostQuery) {
-                    Query child = restrictToField(((BoostQuery) query).getQuery(), field);
-                    return child == null ? null : new BoostQuery(child, ((BoostQuery) query).getBoost());
-                } else if (query instanceof ConstantScoreQuery) {
-                    Query child = restrictToField(((ConstantScoreQuery) query).getQuery(), field);
-                    return child == null ? null : new ConstantScoreQuery(child);
-                } else if (query instanceof MultiTermQuery) {
-                    return field.equals(((MultiTermQuery) query).getField()) ? query : null;
-                } else if (query instanceof BooleanQuery) {
-                    BooleanQuery original = (BooleanQuery) query;
-                    BooleanQuery.Builder builder = new BooleanQuery.Builder();
-                    builder.setMinimumNumberShouldMatch(original.getMinimumNumberShouldMatch());
-                    for (BooleanClause clause : original.clauses()) {
-                        Query child = restrictToField(clause.getQuery(), field);
-                        if (child != null) {
-                            builder.add(child, clause.getOccur());
-                        }
-                    }
-                    BooleanQuery result = builder.build();
-                    return result.clauses().isEmpty() ? null : result;
-                } else if (query instanceof DisjunctionMaxQuery) {
-                    List<Query> disjuncts = new ArrayList<>();
-                    for (Query disjunct : ((DisjunctionMaxQuery) query).getDisjuncts()) {
-                        Query child = restrictToField(disjunct, field);
-                        if (child != null) {
-                            disjuncts.add(child);
-                        }
-                    }
-                    if (disjuncts.isEmpty()) {
-                        return null;
-                    }
-                    if (disjuncts.size() == 1) {
-                        return disjuncts.get(0);
-                    }
-                    return new DisjunctionMaxQuery(disjuncts, ((DisjunctionMaxQuery) query).getTieBreakerMultiplier());
-                }
-                return null;
-            }
 
             private String getField(Query query) throws SyntaxError {
                 Set<String> fields = getFields(query);
