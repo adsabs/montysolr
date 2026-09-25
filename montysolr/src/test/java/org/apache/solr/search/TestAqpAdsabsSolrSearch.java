@@ -124,6 +124,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
         assertQ(req("defType", "aqp", "q", "netpune -full:\"exoplanet\" atmospheres", "qf", "title"),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
+        assertU(adoc("id", "3401", "bibcode", "issue34-ack",
+                "ack", "issue34acktoken"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "q", "issue34acktoken", "fl", "id"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='3401']");
 
         assertQueryEquals(
                 req("defType", "aqp", "q", "foo NEAR2 bar", "qf", "bibcode^5 title^10",
