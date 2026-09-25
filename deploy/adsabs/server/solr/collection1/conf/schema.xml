@@ -78,12 +78,6 @@
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter
 					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<!-- detect cases when we should bail-out and not attempt author search -->
-				<filter
-					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-					maxlen="6" />
-				<!-- downgrade; if necessary and discover synonyms that will be used 
-					to seed the next stages -->
 				<filter
 					class="solr.analysis.author.AuthorTransliterationFactory"
 					inputType="AUTHOR_INPUT" />
@@ -175,10 +169,6 @@
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter
 					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<!-- detect cases when we should bail-out and not attempt author search -->
-				<filter
-					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-					maxlen="6" />
 				<!-- discover synonyms that will be used to seed the next stages -->
 				<filter
 					class="org.apache.lucene.analysis.synonym.NewSynonymFilterFactory"
@@ -237,10 +227,6 @@
 					and "adamczuk, k" becomes "adamczuk, k" -->
 				<filter
 					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
-				<!-- detect cases when we should bail-out and not attempt author search -->
-				<filter
-					class="solr.analysis.author.AuthorDetectAndIgnoreFilterFactory"
-					maxlen="6" />
 				<!-- discover synonyms that will be used to seed the next stages -->
 				<filter
 					class="solr.analysis.author.AuthorTransliterationFactory"
@@ -311,6 +297,7 @@
 				<tokenizer class="solr.KeywordTokenizerFactory" />
 				<filter
 					class="solr.analysis.author.AuthorNormalizeFilterFactory" />
+
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 		</fieldType>

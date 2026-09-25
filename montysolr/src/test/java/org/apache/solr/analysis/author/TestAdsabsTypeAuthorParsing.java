@@ -490,6 +490,49 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertAuthorResults("\"Lee, H*\"", "4", "200", "201", "202", "203");
     }
 
+    /**
+     * Natural-order author phrases must not be broadened to surname-only
+     * wildcards, and long collaboration names must remain searchable.
+     */
+    public void testNaturalOrderAuthorPhraseRetainsAllTerms() throws Exception {
+        assertU(adoc(F.ID, "19400", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gaia Collaboration"));
+        assertU(adoc(F.ID, "19401", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Collaboration, Other"));
+        assertU(adoc(F.ID, "19402", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Anna Kelbert"));
+        assertU(adoc(F.ID, "19403", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Kelbert, Mark"));
+        assertU(adoc(F.ID, "19404", F.BIBCODE, "2023Natur.614..649J", F.AUTHOR,
+                "JWST Transiting Exoplanet Community Early Release Science Team"));
+        assertU(adoc(F.ID, "19405", F.BIBCODE, "2023Natur.614..649K", F.AUTHOR,
+                "JWST Transiting Exoplanet Community Early Release Science Team Collaboration"));
+        assertU(adoc(F.ID, "19406", F.BIBCODE, "2023Natur.614..649M", F.AUTHOR, "Collaboration, JWST"));
+        assertU(adoc(F.ID, "19407", F.BIBCODE, "2023Natur.614..649N", F.AUTHOR,
+                "Team, JWST Transiting Exoplanet Community Early Release"));
+        assertU(adoc(F.ID, "19408", F.BIBCODE, "2023Natur.614..649P", F.AUTHOR,
+                "Team, JWST Transiting Exoplanet Community Early"));
+        assertU(commit());
+
+        assertAuthorResults("\"Gaia Collaboration\"", "1", "19400");
+        assertAuthorResults("\"Anna Kelbert\"", "1", "19402");
+        assertAuthorResults("\"JWST Transiting Exoplanet Community Early Release Science Team\"", "1", "19404");
+        assertAuthorResults("\"JWST Transiting Exoplanet Community Early Release Science Team Collaboration\"", "1", "19405");
+        assertQ(req("defType", "aqp", "q", "author:\"JWST Transiting Exoplanet Community Early Release Science Team*\"",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='19404']",
+                "//doc/str[@name='id'][.='19405']",
+                "not(//doc/str[@name='id'][.='19401'])",
+                "not(//doc/str[@name='id'][.='19406'])");
+        assertQ(req("defType", "aqp", "qf", "author^2",
+                        "q", "\"Team, JWST Transiting Exoplanet Community Early Release\"",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "qf", "author^2 title",
+                        "q", "\"Team,  JWST Transiting Exoplanet Community Early\"",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='19407']",
+                "//doc/str[@name='id'][.='19408']");
+    }
+
     public void testAuthorParsingMainLogic() throws Exception {
         /**
          * For ADS there are these rules:

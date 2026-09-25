@@ -16,6 +16,7 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.solr.analysis.author.AuthorCreateQueryVariationsFilter;
 import org.apache.solr.analysis.author.AuthorNormalizeFilter;
 import org.apache.solr.analysis.author.AuthorUtils;
 import org.apache.solr.analysis.author.PythonicAuthorNormalizerFilter;
@@ -137,7 +138,13 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
             FieldQueryNode fqn = ((FieldQueryNode) node);
             if (fields.containsKey(fqn.getFieldAsString())) {
 
-                // 'name upgrade'
+                // Keep the full analyzed author literal, but do not add optional
+                // synonym/prefix/regex clauses for names beyond the existing
+                // six-part author-variation budget. Long collaborations and
+                // citation-style author strings must not exhaust Boolean clauses.
+                if (origNameInfo.noOfParts > AuthorCreateQueryVariationsFilter.MAX_NAME_PARTS) {
+                    return;
+                }
                 if (level[0] == 1 && !isLongForm(origNameInfo.origName)) {
                     try {
                         String[] synonyms = getSynonyms(origNameInfo.origName);

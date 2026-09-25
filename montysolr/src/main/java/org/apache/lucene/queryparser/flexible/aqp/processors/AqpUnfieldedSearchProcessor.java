@@ -24,6 +24,7 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import java.io.IOException;
 import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.MatchNoDocsQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.index.MultiTerms;
@@ -36,9 +37,11 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.solr.request.SolrQueryRequest;
 
 import java.io.StringReader;
+import org.apache.solr.analysis.author.AuthorCreateQueryVariationsFilter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This processor wraps fields with the 'null' value into edismax
@@ -167,12 +170,22 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
                         "Unknown function \"" + funcName + "\""));
             }
 
+            // Keep long unfielded phrases out of author fields to stay within the
+            // synonym-expansion clause budget.
+            String nonAuthorQf = unfieldedPhraseQfWithoutAuthors(node);
+            if (nonAuthorQf != null) {
+                if (nonAuthorQf.isEmpty()) {
+                    return new MatchNoDocsQueryNode();
+                }
+                local.add("qf='" + escapeLocalParam(nonAuthorQf) + "'");
+            }
+
             // let adismax know that we want exact search
             if (node.getTag("aqp.exact") != null ||
                     (node.getParent() instanceof AqpAdsabsSynonymQueryNode && !((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated())) {
-                local.add("aqp.exact.search=true ");
+                local.add("aqp.exact.search=true");
             } else if (getConfigVal("aqp.maxPhraseLength", null) != null) {
-                subQuery = "{!adismax aqp.maxPhraseLength=" + getConfigVal("aqp.maxPhraseLength") + "}" + subQuery;
+                local.add("aqp.maxPhraseLength=" + getConfigVal("aqp.maxPhraseLength"));
             }
 
             List<OriginalInput> fValues = new ArrayList<OriginalInput>();
@@ -404,6 +417,56 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
         } catch (IOException e) {
             throw new RuntimeException("Unable to analyze unfielded query fragment", e);
         }
+    }
+    private String unfieldedPhraseQfWithoutAuthors(QueryNode node) {
+        if (!(node instanceof QuotedFieldQueryNode)) {
+            return null;
+        }
+        String phrase = ((FieldQueryNode) node).getTextAsString();
+        if (countPhraseParts(phrase) <= AuthorCreateQueryVariationsFilter.MAX_NAME_PARTS) {
+            return null;
+        }
+
+        String qf = getConfigVal("aqp.unfielded.queryFields", null);
+        if (qf == null || qf.trim().isEmpty()) {
+            return null;
+        }
+
+        Map<String, int[]> authorFields =
+                getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.AUTHOR_FIELDS);
+        StringBuilder filtered = new StringBuilder();
+        for (String fieldBoost : qf.trim().split("\\s+")) {
+            int boost = fieldBoost.indexOf('^');
+            String field = boost < 0 ? fieldBoost : fieldBoost.substring(0, boost);
+            if (isAuthorField(field, authorFields)) {
+                continue;
+            }
+            if (filtered.length() > 0) {
+                filtered.append(' ');
+            }
+            filtered.append(fieldBoost);
+        }
+        return filtered.toString();
+    }
+
+    private static int countPhraseParts(String phrase) {
+        // Count nonempty words so whitespace formatting does not change the cutoff.
+        String trimmed = phrase.trim();
+        return trimmed.isEmpty() ? 0 : trimmed.split("\\s+").length;
+    }
+
+    private static boolean isAuthorField(String field, Map<String, int[]> configuredAuthorFields) {
+        if (configuredAuthorFields != null && configuredAuthorFields.containsKey(field)) {
+            return true;
+        }
+        return field.equals("author") || field.startsWith("author_")
+                || field.equals("first_author") || field.startsWith("first_author_")
+                || field.equals("book_author") || field.startsWith("book_author_")
+                || field.equals("editor") || field.startsWith("editor_");
+    }
+
+    private static String escapeLocalParam(String value) {
+        return value.replace("\\", "\\\\").replace("'", "\\'");
     }
 
     @Override
