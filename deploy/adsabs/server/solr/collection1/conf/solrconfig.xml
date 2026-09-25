@@ -724,7 +724,7 @@
        
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
-       <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
+       <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title_nosyn;alternate_title_nosyn alternate_title_nosyn;abstract_nosyn abstract_nosyn;all_nosyn all;full_nosyn full_nosyn;body_nosyn body;ack_nosyn ack_nosyn;keyword_nosyn keyword_nosyn</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
        <str name="aqp.timestampFormat">yyyy-MM-dd'T'HH:mm:ss.SSS</str>
@@ -757,7 +757,7 @@
        <str name="aqp.defaultField">unfielded_search</str>
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
-       <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
+       <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title_nosyn;alternate_title_nosyn alternate_title_nosyn;abstract_nosyn abstract_nosyn;all_nosyn all;full_nosyn full_nosyn;body_nosyn body;ack_nosyn ack_nosyn;keyword_nosyn keyword_nosyn</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
        <str name="aqp.timestampFormat">yyyy-MM-dd'T'HH:mm:ss.SSS</str>
@@ -836,7 +836,7 @@
        <str name="aqp.defaultField">unfielded_search</str>
        <str name="aqp.defaultOperator">AND</str>
        <str name="aqp.fieldMap">arxiv identifier;collection database</str>
-       <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title;alternate_title_nosyn alternate_title;abstract_nosyn abstract;all_nosyn all;full_nosyn full;body_nosyn body;ack_nosyn ack;keyword_nosyn keyword</str>
+       <str name="aqp.fieldMapPostAnalysis">entdate entry_date;pubdate date;author_nosyn author_notrans author_nosyn_notrans author;title_nosyn title_nosyn;alternate_title_nosyn alternate_title_nosyn;abstract_nosyn abstract_nosyn;all_nosyn all;full_nosyn full_nosyn;body_nosyn body;ack_nosyn ack_nosyn;keyword_nosyn keyword_nosyn</str>
        <str name="aqp.unfieldedSearch">author^1.5 title^1.4 abstract^1.3</str>
        <str name="aqp.dateFormat">yyyy-MM-dd'T'HH:mm:ss</str>
        <str name="aqp.timestampFormat">yyyy-MM-dd'T'HH:mm:ss.SSS</str>
