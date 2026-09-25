@@ -353,6 +353,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='1104']");
     }
 
+    public void testNearStopWordInTitle() throws Exception {
+        String title = "Shear viscosity measurements in the binary mixture butyl "
+                + "cellosolve-water near its upper and lower critical consolute points";
+        assertU(adoc("id", "216", "bibcode", "issue216-positive", "title", title));
+        assertU(adoc("id", "217", "bibcode", "issue216-negative", "title",
+                "Shear viscosity measurements in the binary mixture butyl "
+                        + "cellosolve-water near its upper and lower critical consolute temperature"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("q", "title:(Shear viscosity measurements in the binary mixture "
+                        + "butyl cellosolve-water near its upper and lower critical consolute points)"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='216']");
+
+        assertQ(req("q", "title:(its NEAR its)"), "//*[@numFound='0']");
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",
