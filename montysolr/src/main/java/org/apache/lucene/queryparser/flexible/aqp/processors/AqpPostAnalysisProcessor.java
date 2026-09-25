@@ -66,6 +66,8 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
     public static final String RAW_POSITIONAL_PATH = "raw_positional_path";
     public static final String RAW_POSITIONAL_GAPS = "raw_positional_gaps";
     private static final String RAW_LEADING_GAP = "raw_leading_gap";
+    /** Marks phrases from exact analysis whose term positions must survive a slop rewrite. */
+    public static final String EXACT_GRAPH_PATH = "exact_graph_path";
 
     @Override
     protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {

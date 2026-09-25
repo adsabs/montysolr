@@ -654,10 +654,15 @@
 					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
 
-				<filter class="solr.WordDelimiterFilterFactory"
+				<!-- Exact queries keep a hyphenated compound as one catenated term, at
+					the positions the ordinary index gives it, so "dust-dust plasma"
+					does not match the same words separated by whitespace. -->
+				<filter class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+				<filter
+					class="org.apache.lucene.analysis.miscellaneous.CompoundTermOnlyFilterFactory" />
 
 
 				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 

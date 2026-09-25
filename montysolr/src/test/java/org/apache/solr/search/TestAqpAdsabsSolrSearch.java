@@ -347,6 +347,27 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
 
+    public void testExactHyphenatedPhraseMatchesCompoundOnly() throws Exception {
+        assertU(adoc("id", "4401", "bibcode", "b4401", "title", "dust-dust plasma"));
+        assertU(adoc("id", "4402", "bibcode", "b4402", "title", "dust dust plasma"));
+        assertU(adoc("id", "4403", "bibcode", "b4403", "title", "dust-dust and dust-plasma interaction"));
+        assertU(adoc("id", "4404", "bibcode", "b4404", "title", "the dust, and the dust-plasma"));
+        assertU(adoc("id", "4405", "bibcode", "b4405", "title", "Dust-dust plasma waves"));
+        assertU(adoc("id", "4406", "bibcode", "b4406", "title", "on the dust and dust on the plasma"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "=title:\"dust-dust plasma\"", "fq", "id:[4401 TO 4406]"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='4401']",
+                "//doc/str[@name='id'][.='4405']");
+        // Slop counts from the compound's indexed positions, so one extra word may intervene.
+        assertQ(req("defType", "aqp", "q", "=title:\"dust-dust plasma\"~1", "fq", "id:[4401 TO 4406]"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='4401']",
+                "//doc/str[@name='id'][.='4403']",
+                "//doc/str[@name='id'][.='4405']");
+    }
+
     public void testPunctuationIdentifierQueries() throws Exception {
         assertU(adoc("id", "1101", "bibcode", "b1101", "ack", "mentions 10.17909/T9XG63"));
         assertU(adoc("id", "1102", "bibcode", "b1102", "ack", "mentions 10 words later 17909"));
