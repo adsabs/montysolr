@@ -328,6 +328,7 @@ identifier
   | PHRASE -> $identifier ^(QPHRASE PHRASE)
   | NUMBER  -> $identifier NUMBER
   | STAR -> $identifier ^(QANYTHING STAR)
+  | LPAREN multiClause RPAREN -> $identifier ^(CLAUSE multiClause)
   )
   ;
   
