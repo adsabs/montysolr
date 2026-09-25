@@ -319,6 +319,40 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+
+    public void testPunctuationIdentifierQueries() throws Exception {
+        assertU(adoc("id", "1101", "bibcode", "b1101", "ack", "mentions 10.17909/T9XG63"));
+        assertU(adoc("id", "1102", "bibcode", "b1102", "ack", "mentions 10 words later 17909"));
+        assertU(adoc("id", "1103", "bibcode", "b1103", "ack", "contains grant7-code"));
+        assertU(adoc("id", "1104", "bibcode", "b1104", "ack", "contains grant7 unrelatedmarker code"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("q", "ack:10.17909"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "ack:\"10.17909\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "full:10.17909"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "full:\"10.17909\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "ack:grant7-code"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1103']",
+                "not(//doc/str[@name='id'][.='1104'])");
+        assertQ(req("q", "full:(grant7 code)"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1103']",
+                "//doc/str[@name='id'][.='1104']");
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",

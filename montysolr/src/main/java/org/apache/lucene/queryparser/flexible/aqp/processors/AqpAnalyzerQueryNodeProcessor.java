@@ -214,6 +214,9 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                     offsetAtt = null;
                 }
 
+                boolean punctuationIdentifier = isPunctuationIdentifier(text);
+                boolean forcePhrase = node instanceof QuotedFieldQueryNode
+                        || punctuationIdentifier;
                 if (numTokens == 0) {
                     return new NoTokenFoundQueryNode();
 
@@ -241,9 +244,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                     fieldNode.setTag(SOURCE_QUERY_START, queryStart);
                     return fieldNode;
 
-                } else if (severalTokensAtSamePosition
-                        || !(node instanceof QuotedFieldQueryNode)) {
-                    if (positionCount == 1 || !(node instanceof QuotedFieldQueryNode)) {
+                } else if (severalTokensAtSamePosition || !forcePhrase) {
+                    if (positionCount == 1 || !forcePhrase) {
                         // no phrase query:
                         LinkedList<QueryNode> children = new LinkedList<QueryNode>();
 
@@ -708,6 +710,32 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         return Character.isLetterOrDigit(ch);
     }
 
+
+    /**
+     * Keep identifier-like values containing punctuation together.  The
+     * full-text analyzer emits both the catenated identifier and its
+     * punctuation-delimited parts.  Treating an unquoted value such as
+     * {@code 10.17909} as a normal Boolean query would make the parts match
+     * independently, even though the input contains no whitespace.
+     */
+    private static boolean isPunctuationIdentifier(String text) {
+        boolean hasDigit = false;
+        boolean hasPunctuation = false;
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (Character.isWhitespace(c)) {
+                return false;
+            }
+            if (Character.isDigit(c)) {
+                hasDigit = true;
+            } else if (!Character.isLetter(c)) {
+                hasPunctuation = true;
+            }
+        }
+
+        return hasDigit && hasPunctuation;
+    }
 
     @Override
     protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {

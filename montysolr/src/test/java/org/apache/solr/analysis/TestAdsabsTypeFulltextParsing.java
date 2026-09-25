@@ -569,18 +569,12 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         //    DisjunctionMaxQuery.class);
 
         // UPPER-CASE vs lower-case
-        assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp", "df", "title", "fl", "id,title"),
-                "(title:acr::nag5abcd | (+title:acr::nag5 +title:acr::abcd))",
-                DisjunctionMaxQuery.class);
         assertQ(req("q", "NAG5-ABCD", "df", "title"),
                 "//*[@numFound='3']",
                 "//doc/str[@name='id'][.='147']",
                 "//doc/str[@name='id'][.='148']",
                 "//doc/str[@name='id'][.='149']"
         );
-        assertQueryEquals(req("q", "nag5-abcd", "defType", "aqp", "df", "title"),
-                "(title:nag5abcd | (+title:nag5 +title:abcd))",
-                DisjunctionMaxQuery.class);
         assertQ(req("q", "nag5-abcd", "df", "title"),
                 "//*[@numFound='6']",
                 "//doc/str[@name='id'][.='147']",
@@ -1168,11 +1162,6 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         );
 
 
-        // #147 - parsing of WDDF tokens
-        // analyzer operation. eg. XXX-YYYY => (XXX AND YYY) OR XXXYYY
-        assertQueryEquals(req("q", "NAG5-ABCD", "defType", "aqp"),
-                "(all:acr::nag5abcd | (+all:acr::nag5 +all:acr::abcd))",
-                DisjunctionMaxQuery.class);
 
 
         // the ascii folding filter emits both unicode and the ascii version
