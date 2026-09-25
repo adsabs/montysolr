@@ -5,6 +5,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
@@ -27,8 +28,9 @@ public class AqpAdsabsRegexNodeProcessor extends AqpQueryNodeProcessorImpl imple
     @Override
     protected QueryNode preProcessNode(QueryNode node)
             throws QueryNodeException {
-        if (node instanceof FieldQueryNode && !(node instanceof AqpNonAnalyzedQueryNode) &&
-                !(node.getParent() instanceof TermRangeQueryNode)) {
+        if (node instanceof FieldQueryNode && !(node instanceof QuotedFieldQueryNode)
+                && !(node instanceof AqpNonAnalyzedQueryNode)
+                && !(node.getParent() instanceof TermRangeQueryNode)) {
             FieldQueryNode n = (FieldQueryNode) node;
             String input = n.getTextAsString();
 

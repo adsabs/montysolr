@@ -356,6 +356,8 @@
 		<fieldType name="ads_text" class="solr.TextField" positionIncrementGap="100">
 			<analyzer type="index">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
+				<!-- Preserve balanced punctuation literals without retaining every
+				     ordinary token as an extra original term. -->
 
 				<!-- AA: rewrite these common astronomy compound names so that the WDFF 
 					will index both the short and long versions of them -->
@@ -382,20 +384,24 @@
 				<filter class="solr.PatternReplaceFilterFactory"
 					pattern="-?\s+-?" replacement="-" replace="all" />
 				<filter class="solr.PatternReplaceFilterFactory"
-					pattern="^(\p{Punct}*)(.*?)(\p{Punct}*)$" replacement="$2" />
+					pattern="^([\p{Punct}&amp;&amp;[^\[\]\(\)]]*)(.*?)([\p{Punct}&amp;&amp;[^\[\]\(\)]]*)$" replacement="$2" />
 
                 <filter class="solr.LengthTokenFilterFactory" min="1" max="50" />
                 
 				<!-- translate math symbols and others into their ascii representation -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
+				<filter class="solr.KeywordMarkerFilterFactory"
+					pattern="^[\p{L}\p{N}]+(\[[^\[\]]+\]|\([^()]+\))$" />
+
 
 				<!-- split all-sky into [all, sky, allsky] -->
 				<filter
 					class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
+					ignoreKeywords="1" />
 
 				<!-- lowercase everything besides ACRONYMS -->
 				<filter
@@ -471,17 +477,24 @@
 					words) -->
 				<tokenizer class="solr.PatternTokenizerFactory"
 					pattern="(?&lt;![-\s])\s+(?!-)" group="-1" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="^([\p{Punct}&amp;&amp;[^\[\]\(\)]]*)(.*?)([\p{Punct}&amp;&amp;[^\[\]\(\)]]*)$" replacement="$2" />
+
 
 				<!-- translate math symbols and others into their ascii representation -->
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.AdsSpecialCharactersFilterFactory" />
 
 
+				<filter class="solr.KeywordMarkerFilterFactory"
+					pattern="^[\p{L}\p{N}]*(\[[^\[\]]+\]|\([^()]+\))$" />
+
 				<filter
 					class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
+					ignoreKeywords="1" />
 
 				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query:split"/> -->
 
@@ -576,10 +589,13 @@
 				<!-- Exact queries keep a hyphenated compound as one catenated term, at
 					the positions the ordinary index gives it, so "dust-dust plasma"
 					does not match the same words separated by whitespace. -->
+				<filter class="solr.KeywordMarkerFilterFactory"
+					pattern="^[\p{L}\p{N}]*(\[[^\[\]]+\]|\([^()]+\))$" />
 				<filter class="solr.WordDelimiterGraphFilterFactory"
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
-					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0" />
+					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
+					ignoreKeywords="1" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.CompoundTermOnlyFilterFactory" />
 
