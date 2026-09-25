@@ -21,6 +21,7 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.junit.BeforeClass;
 
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
  * Tests that the fulltext is parsed properly, the ads_text type
@@ -182,9 +184,22 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                             "millisecond, milliseconds, submillisecond, millisec, milliseconde, millesecond, millisekunden, milliseond, millisecnd => millisecond\n" +
                             "fermi, fermilab => fermi\n" +
                             "galactic=>galaxies\n" +
-                            "central,centre=>central\n",
+                            "central,centre=>central\n" +
+                            "special=>especially\n" +
+                            "relativistic=>relativity\n" +
+                            "theory=>theoretical\n" +
+                            "locally=>local\n" +
+                            "anisotropic=>anisotropy\n" +
+                            "spacetime=>time\n",
                     "space => universe\n"
             });
+            File indexSimpleTokenSynonymsFile = duplicateFile(simpleTokenSynonymsFile);
+            replaceInFile(indexSimpleTokenSynonymsFile, "special=>especially\n", "");
+            replaceInFile(indexSimpleTokenSynonymsFile, "relativistic=>relativity\n", "");
+            replaceInFile(indexSimpleTokenSynonymsFile, "theory=>theoretical\n", "");
+            replaceInFile(indexSimpleTokenSynonymsFile, "locally=>local\n", "");
+            replaceInFile(indexSimpleTokenSynonymsFile, "anisotropic=>anisotropy\n", "");
+            replaceInFile(indexSimpleTokenSynonymsFile, "spacetime=>time\n", "");
 
             File multiTokenSynonymsFile = createTempFile("dynamics\0hubble,dyhu\n" +
                     "hubble\0space\0telescope,HST\n" +
@@ -213,8 +228,12 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                     //"ADS,aitken\0double\0stars,astrophysics\0data\0system,anti\0de\0sitter\0space,antidesitter\0spacetime\n"
             );
 
+            replaceInFile(newConfig,
+                    Pattern.compile("(?s)(<!-- MOND => \\[\\] mond.*?synonyms=\")ads_text_simple\\.synonyms"),
+                    "$1ISSUE170_QUERY_SYNONYMS");
             replaceInFile(newConfig, "synonyms=\"ads_text_multi.synonyms\"", "synonyms=\"" + multiTokenSynonymsFile.getAbsolutePath() + "\"");
-            replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + simpleTokenSynonymsFile.getAbsolutePath() + "\"");
+            replaceInFile(newConfig, "synonyms=\"ads_text_simple.synonyms\"", "synonyms=\"" + indexSimpleTokenSynonymsFile.getAbsolutePath() + "\"");
+            replaceInFile(newConfig, "synonyms=\"ISSUE170_QUERY_SYNONYMS\"", "synonyms=\"" + simpleTokenSynonymsFile.getAbsolutePath() + "\"");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -349,6 +368,55 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
             assertU(delI("17140"));
             assertU(delI("17141"));
             assertU(commit());
+        }
+    }
+
+    public void testIssue170PhraseRetainsLiteralPath() throws Exception {
+        assertU(adoc("id", "1700", "bibcode", "xxxxxxxxxx1700",
+                "title", "A special-relativistic theory of the locally anisotropic spacetime"));
+        assertU(adoc("id", "1701", "bibcode", "xxxxxxxxxx1701",
+                "title", "A special-relativistic filler theory of the locally anisotropic spacetime"));
+        assertU(adoc("id", "1702", "bibcode", "xxxxxxxxxx1702",
+                "title", "special filler theory"));
+        assertU(adoc("id", "1703", "bibcode", "xxxxxxxxxx1703",
+                "title", "special filler one theory"));
+        assertU(adoc("id", "1704", "bibcode", "xxxxxxxxxx1704",
+                "title", "special theory zzanchor"));
+        assertU(adoc("id", "1705", "bibcode", "xxxxxxxxxx1705",
+                "title", "special theory zzdifferent"));
+        assertU(commit());
+
+        assertQ(req("q", "title:\"special theory zzanchor\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1704']",
+                "not(//doc/str[@name='id'][.='1705'])");
+
+        assertQ(req("q", "title:\"A special-relativistic theory of the locally anisotropic spacetime\""),
+                "//doc/str[@name='id'][.='1700']",
+                "not(//doc/str[@name='id'][.='1705'])");
+        assertQ(req("q", "title:\"A special-relativistic theory of the locally anisotropic spacetime\"~0"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1700']");
+        assertQ(req("q", "title:\"special theory\"~1",
+                "fq", "id:(1700 OR 1701 OR 1702 OR 1703)"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1700']",
+                "//doc/str[@name='id'][.='1702']",
+                "not(//doc/str[@name='id'][.='1701'])",
+                "not(//doc/str[@name='id'][.='1703'])");
+        Object phraseQuery = getParser(req("q", "title:\"special theory\"~1",
+                "aqp.multiphrase.keep_one", "SYNONYM")).parse();
+        assertTrue("Expected synonym disjunction, got " + phraseQuery.getClass()
+                + ": " + phraseQuery, phraseQuery instanceof DisjunctionMaxQuery);
+    }
+
+    public void testPhraseWithoutLiteralKeepsOneTokenPerPosition() throws Exception {
+        // Listing the original token's type in keep_one leaves the stacked position without a literal token.
+        Query phraseQuery = getParser(req("q", "title:\"deep space\"",
+                "aqp.multiphrase.keep_one", "SYNONYM,word")).parse();
+        assertTrue("Expected one phrase, got " + phraseQuery, phraseQuery instanceof MultiPhraseQuery);
+        for (Term[] position : ((MultiPhraseQuery) phraseQuery).getTermArrays()) {
+            assertEquals(phraseQuery.toString(), 1, position.length);
         }
     }
 
