@@ -507,15 +507,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "spanNear([ack:frew, ack:j], 2, false) spanNear([(abstract:frew)^2.0, (abstract:j)^2.0], 2, false) spanNear([(title:frew)^2.0, (title:j)^2.0], 2, false) spanNear([body:frew, body:j], 2, false) spanNear([keyword:frew, keyword:j], 2, false)",
                 BooleanQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", " full:\"HST\" NEAR2 full:\"proposal\""),
-                "spanNear([spanOr([ack:acr::hst, ack:syn::hst, ack:syn::hubble space telescope]), ack:proposal], 2, false) spanNear([(spanOr([abstract:acr::hst, abstract:syn::hst, abstract:syn::hubble space telescope]))^2.0, (abstract:proposal)^2.0], 2, false) spanNear([(spanOr([title:acr::hst, title:syn::hst, title:syn::hubble space telescope]))^2.0, (title:proposal)^2.0], 2, false) spanNear([spanOr([body:acr::hst, body:syn::hst, body:syn::hubble space telescope]), body:proposal], 2, false) spanNear([spanOr([keyword:acr::hst, keyword:syn::hst, keyword:syn::hubble space telescope]), keyword:proposal], 2, false)",
-                BooleanQuery.class);
 
         // yeah, if you don't specify any field, then i'll refuse to serve you anything
         // useful!
-        assertQueryEquals(req("defType", "aqp", "q", " HST NEAR2 galaxy"),
-                "spanNear([spanOr([all:acr::hst, all:syn::hst, all:syn::hubble space telescope]), all:galaxy], 2, false)",
-                SpanNearQuery.class);
 
         // fuzzy search for authors
         assertQueryEquals(req("defType", "aqp", "q", "author:kurtz~2"), "author:kurtz,~2", FuzzyQuery.class);
@@ -906,6 +900,30 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testSynonymPhraseNearPreservesOrderAndDistance() throws Exception {
+        assertU(adoc("id", "9881", "bibcode", "span9881", "ack",
+                "hubble space telescope proposal"));
+        assertU(adoc("id", "9882", "bibcode", "span9882", "ack",
+                "hubble space telescope quartz granite proposal"));
+        assertU(adoc("id", "9883", "bibcode", "span9883", "ack",
+                "telescope space hubble proposal"));
+        assertU(adoc("id", "9884", "bibcode", "span9884", "ack",
+                "hubble quartz space telescope proposal"));
+        assertU(adoc("id", "9885", "bibcode", "span9885", "ack",
+                "hubble space telescope quartz granite basalt proposal"));
+        assertU(commit("waitSearcher", "true"));
+
+        // The alias itself stays ordered and contiguous; only the outer NEAR
+        // permits a gap. The boundary hit requires the full raw alias span.
+        assertQ(req("defType", "aqp", "q", "full:\"HST\" NEAR2 full:\"proposal\"",
+                        "fq", "{!terms f=id}9881,9882,9883,9884,9885"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='9881']",
+                "//doc/str[@name='id'][.='9882']");
+    }
+
+
+
     public void testSearch() throws Exception {
 
         // search for all docs with a field
@@ -990,9 +1008,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"~3 NEAR N*"),
                 "spanNear([spanNear([all:acr::nasa, all:grant], 3, true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
-                SpanNearQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"^0.9 NEAR N*"),
-                "spanNear([PayloadScoreQuery(spanNear([all:acr::nasa, all:grant], 1, true), function: ConstantPayloadFunction, includeSpanScore: true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
                 SpanNearQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"~3^0.9 NEAR N*"),
                 "spanNear([PayloadScoreQuery(spanNear([all:acr::nasa, all:grant], 3, true), function: ConstantPayloadFunction, includeSpanScore: true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",

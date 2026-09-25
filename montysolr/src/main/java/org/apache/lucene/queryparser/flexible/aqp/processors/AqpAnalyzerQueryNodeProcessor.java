@@ -23,8 +23,11 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.*;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
@@ -36,10 +39,13 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Map;
 /**
  * This is an improved version of the {@link AnalyzerQueryNodeProcessor} it is
  * better because it keeps track of the position offset which is absolutely
@@ -73,22 +79,44 @@ import java.util.List;
 public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
     public static String TYPE_ATTRIBUTE = "token_type_attribute";
-    public static String MAX_MULTI_TOKEN_SIZE = "max_multi_token";
-
+    public static String SOURCE_TEXT = "source_text";
+    public static String SOURCE_QUERY_TEXT = "source_query_text";
+    public static String SOURCE_QUERY_START = "source_query_start";
+    public static String MAX_MULTI_TOKEN_SIZE = "max_multi_token_size";
+    public static String RAW_MULTI_TOKEN_ALIAS = "raw_multi_token_alias";
+    public static String OMITTED_SOURCE_TOKEN = "omitted_source_token";
+    public static final String OMITTED_SOURCE_RANGES = "omitted_source_ranges";
+    public static final String SOURCE_INDEX_START = "source_index_start";
+    public static final String SOURCE_INDEX_END = "source_index_end";
+    public static final String RAW_INDEX_POSITION_DELTA = "raw_index_position_delta";
     private Analyzer analyzer;
+    private final Map<String, List<IndexTokenPosition>> indexPositionCache =
+            new HashMap<>();
 
     private boolean positionIncrementsEnabled;
 
-    public AqpAnalyzerQueryNodeProcessor() {
-        // empty constructor
+    private static final class IndexTokenPosition {
+        private final int start;
+        private final int end;
+        private final int position;
+        private final int positionEnd;
+
+        private IndexTokenPosition(int start, int end, int position, int positionEnd) {
+            this.start = start;
+            this.end = end;
+            this.position = position;
+            this.positionEnd = positionEnd;
+        }
     }
+
 
     @Override
     public QueryNode process(QueryNode queryTree) throws QueryNodeException {
-        Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
+        indexPositionCache.clear();
+        Analyzer configuredAnalyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
 
-        if (analyzer != null) {
-            this.analyzer = analyzer;
+        if (configuredAnalyzer != null) {
+            this.analyzer = configuredAnalyzer;
             this.positionIncrementsEnabled = false;
             Boolean positionIncrementsEnabled = getQueryConfigHandler().get(
                     ConfigurationKeys.ENABLE_POSITION_INCREMENTS);
@@ -100,11 +128,9 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             if (this.analyzer != null) {
                 return super.process(queryTree);
             }
-
         }
 
         return queryTree;
-
     }
 
     @Override
@@ -138,6 +164,11 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                     posIncrAtt = buffer.getAttribute(PositionIncrementAttribute.class);
                 }
 
+                PositionLengthAttribute posLengthAtt = null;
+                if (buffer.hasAttribute(PositionLengthAttribute.class)) {
+                    posLengthAtt = buffer.getAttribute(PositionLengthAttribute.class);
+                }
+
                 TypeAttribute typeAtt = null;
                 if (buffer.hasAttribute(TypeAttribute.class)) {
                     typeAtt = buffer.getAttribute(TypeAttribute.class);
@@ -162,6 +193,12 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                 // close original stream - all tokens buffered
                 source.close();
                 source = null;
+                // Index and query analyzers may share reusable components.
+                // Capture source positions only after closing the query stream.
+                List<IndexTokenPosition> indexPositions =
+                        node instanceof QuotedFieldQueryNode && numTokens > 1
+                                ? getIndexTokenPositions(field, text)
+                                : Collections.emptyList();
 
                 if (!buffer.hasAttribute(CharTermAttribute.class)) {
                     return new NoTokenFoundQueryNode();
@@ -197,8 +234,11 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                         fieldNode.setBegin(queryStart + offsetAtt.startOffset());
                         fieldNode.setEnd(queryStart + offsetAtt.endOffset());
                     }
+                    setSourceIndexBounds(fieldNode, indexPositions, fieldNode.getBegin() - queryStart, fieldNode.getEnd() - queryStart);
                     if (typeAtt != null)
                         fieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
+                    fieldNode.setTag(SOURCE_QUERY_TEXT, text);
+                    fieldNode.setTag(SOURCE_QUERY_START, queryStart);
                     return fieldNode;
 
                 } else if (severalTokensAtSamePosition
@@ -209,6 +249,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
                         for (int i = 0; i < numTokens; i++) {
                             String term = null;
+                            int positionLength = 1;
                             offsetStart = offsetEnd = -1;
                             try {
                                 boolean hasNext = buffer.incrementToken();
@@ -218,21 +259,33 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                                     offsetStart = queryStart + offsetAtt.startOffset();
                                     offsetEnd = queryStart + offsetAtt.endOffset();
                                 }
+                                if (posLengthAtt != null) {
+                                    positionLength = posLengthAtt.getPositionLength();
+                                }
 
                             } catch (IOException e) {
                                 // safe to ignore, because we know the number of tokens
                             }
-
                             FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
                                     offsetEnd);
+                            setSourceIndexBounds(fq, indexPositions, offsetStart - queryStart, offsetEnd - queryStart);
+                            int multiTokenSize = getMultiTokenSize(term, positionLength,
+                                    offsetStart, offsetEnd, queryStart, text);
                             if (typeAtt != null)
                                 fq.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-                            int multiTokenSize = getMultiTokenSize(term, offsetStart, offsetEnd,
-                                    queryStart, text);
                             if (multiTokenSize > 1)
                                 fq.setTag(MAX_MULTI_TOKEN_SIZE, multiTokenSize);
+                            if (isRawMultiTokenAlias(term, positionLength, offsetStart,
+                                    offsetEnd, queryStart, text,
+                                    typeAtt == null ? null : typeAtt.type()))
+                                fq.setTag(RAW_MULTI_TOKEN_ALIAS, true);
+                            String sourceValue = getSourceText(offsetStart, offsetEnd,
+                                    queryStart, text);
+                            if (sourceValue != null)
+                                fq.setTag(SOURCE_TEXT, sourceValue);
+                            fq.setTag(SOURCE_QUERY_TEXT, text);
+                            fq.setTag(SOURCE_QUERY_START, queryStart);
                             children.add(fq);
-
                         }
                         return new GroupQueryNode(new BooleanQueryNode(children));
                     } else {
@@ -248,6 +301,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                             String term = null;
                             offsetStart = offsetEnd = -1;
                             int positionIncrement = 1;
+                            int positionLength = 1;
                             String tokenType = null;
                             try {
                                 boolean hasNext = buffer.incrementToken();
@@ -260,46 +314,49 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                                     offsetStart = queryStart + offsetAtt.startOffset();
                                     offsetEnd = queryStart + offsetAtt.endOffset();
                                 }
-                                if (typeAtt != null)
+                                if (posLengthAtt != null) {
+                                    positionLength = posLengthAtt.getPositionLength();
+                                }
+                                if (typeAtt != null) {
                                     tokenType = typeAtt.type();
+                                }
                             } catch (IOException e) {
                                 // safe to ignore, because we know the number of tokens
                             }
 
                             if (positionIncrement > 0 && multiTerms.size() > 0) {
-
                                 for (FieldQueryNode termNode : multiTerms) {
-
                                     if (this.positionIncrementsEnabled) {
                                         termNode.setPositionIncrement(position);
                                     } else {
                                         termNode.setPositionIncrement(termGroupCount);
                                     }
-
                                     mpq.add(termNode);
-
                                 }
-
-                                // Only increment once for each "group" of
-                                // terms that were in the same position:
                                 termGroupCount++;
-
                                 multiTerms.clear();
-
                             }
-
                             position += positionIncrement;
                             FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
                                     offsetEnd);
+                            setSourceIndexBounds(fq, indexPositions, offsetStart - queryStart, offsetEnd - queryStart);
+                            int multiTokenSize = getMultiTokenSize(term, positionLength,
+                                    offsetStart, offsetEnd, queryStart, text);
                             fq.setTag(TYPE_ATTRIBUTE, tokenType);
-                            int multiTokenSize = getMultiTokenSize(term, offsetStart, offsetEnd,
-                                    queryStart, text);
                             if (multiTokenSize > 1)
                                 fq.setTag(MAX_MULTI_TOKEN_SIZE, multiTokenSize);
+                            if (isRawMultiTokenAlias(term, positionLength, offsetStart,
+                                    offsetEnd, queryStart, text, tokenType))
+                                fq.setTag(RAW_MULTI_TOKEN_ALIAS, true);
+                            String sourceValue = getSourceText(offsetStart, offsetEnd,
+                                    queryStart, text);
+                            if (sourceValue != null)
+                                fq.setTag(SOURCE_TEXT, sourceValue);
+                            fq.setTag(SOURCE_QUERY_TEXT, text);
+                            fq.setTag(SOURCE_QUERY_START, queryStart);
                             multiTerms.add(fq);
 
                         }
-
                         for (FieldQueryNode termNode : multiTerms) {
 
                             if (this.positionIncrementsEnabled) {
@@ -313,6 +370,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
 
                         }
 
+                        appendOmittedSourceNodes(mpq, node, field, text, queryStart);
                         return mpq;
 
                     }
@@ -326,6 +384,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                     for (int i = 0; i < numTokens; i++) {
                         String term = null;
                         int positionIncrement = 1;
+                        int positionLength = 1;
                         offsetStart = offsetEnd = -1;
 
                         try {
@@ -337,6 +396,10 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                                 positionIncrement = posIncrAtt.getPositionIncrement();
                             }
 
+                            if (posLengthAtt != null) {
+                                positionLength = posLengthAtt.getPositionLength();
+                            }
+
                             if (offsetAtt != null) {
                                 offsetStart = queryStart + offsetAtt.startOffset();
                                 offsetEnd = queryStart + offsetAtt.endOffset();
@@ -345,15 +408,25 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                         } catch (IOException e) {
                             // safe to ignore, because we know the number of tokens
                         }
-
                         FieldQueryNode newFieldNode = new FieldQueryNode(field, term,
                                 offsetStart, offsetEnd);
+                        setSourceIndexBounds(newFieldNode, indexPositions, offsetStart - queryStart, offsetEnd - queryStart);
+                        int multiTokenSize = getMultiTokenSize(term, positionLength,
+                                offsetStart, offsetEnd, queryStart, text);
                         if (typeAtt != null)
                             newFieldNode.setTag(TYPE_ATTRIBUTE, typeAtt.type());
-                        int multiTokenSize = getMultiTokenSize(term, offsetStart, offsetEnd,
-                                queryStart, text);
                         if (multiTokenSize > 1)
                             newFieldNode.setTag(MAX_MULTI_TOKEN_SIZE, multiTokenSize);
+                        if (isRawMultiTokenAlias(term, positionLength, offsetStart,
+                                offsetEnd, queryStart, text,
+                                typeAtt == null ? null : typeAtt.type()))
+                            newFieldNode.setTag(RAW_MULTI_TOKEN_ALIAS, true);
+                        String sourceValue = getSourceText(offsetStart, offsetEnd,
+                                queryStart, text);
+                        if (sourceValue != null)
+                            newFieldNode.setTag(SOURCE_TEXT, sourceValue);
+                        newFieldNode.setTag(SOURCE_QUERY_TEXT, text);
+                        newFieldNode.setTag(SOURCE_QUERY_START, queryStart);
 
                         if (this.positionIncrementsEnabled) {
                             position += positionIncrement;
@@ -366,6 +439,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                         pq.add(newFieldNode);
 
                     }
+                    appendOmittedSourceNodes(pq, node, field, text, queryStart);
 
                     return pq;
 
@@ -394,43 +468,250 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         return node;
 
     }
+    private List<IndexTokenPosition> getIndexTokenPositions(String field,
+            String text) throws IOException {
+        String key = field + "\u0000" + text;
+        List<IndexTokenPosition> cached = indexPositionCache.get(key);
+        if (cached != null) {
+            return cached;
+        }
 
-    private int getMultiTokenSize(String term, int offsetStart, int offsetEnd,
-            int sourceStart, String sourceText) {
+        List<IndexTokenPosition> positions = new ArrayList<>();
+        Analyzer indexAnalyzer = getSourceAnalyzer();
+        if (indexAnalyzer == null) {
+            indexPositionCache.put(key, positions);
+            return positions;
+        }
+        try (TokenStream stream = indexAnalyzer.tokenStream(field,
+                new StringReader(text))) {
+            TypeAttribute type = stream.addAttribute(TypeAttribute.class);
+            PositionIncrementAttribute increment =
+                    stream.addAttribute(PositionIncrementAttribute.class);
+            PositionLengthAttribute length =
+                    stream.addAttribute(PositionLengthAttribute.class);
+            OffsetAttribute offset = stream.addAttribute(OffsetAttribute.class);
+            int position = -1;
+            stream.reset();
+            while (stream.incrementToken()) {
+                position += increment.getPositionIncrement();
+                if (!"SYNONYM".equals(type.type()) && !"ACRONYM".equals(type.type())) {
+                    positions.add(new IndexTokenPosition(
+                            offset.startOffset(), offset.endOffset(), position,
+                            position + length.getPositionLength()));
+                }
+            }
+            stream.end();
+        }
+        indexPositionCache.put(key, positions);
+        return positions;
+    }
+
+    private void setSourceIndexBounds(FieldQueryNode node,
+            List<IndexTokenPosition> positions, int start, int end) {
+        int first = Integer.MAX_VALUE;
+        int last = Integer.MIN_VALUE;
+        for (IndexTokenPosition candidate : positions) {
+            if (candidate.start < end && candidate.end > start) {
+                first = Math.min(first, candidate.position);
+                last = Math.max(last, candidate.positionEnd);
+            }
+        }
+        if (first != Integer.MAX_VALUE) {
+            node.setTag(SOURCE_INDEX_START, first);
+            node.setTag(SOURCE_INDEX_END, last);
+        }
+    }
+
+
+    private int getMultiTokenSize(String term, int positionLength, int offsetStart,
+            int offsetEnd, int queryStart, String sourceText) {
         if (term == null) {
             return 0;
         }
-        int outputTokenCount = 1;
-        for (int i = 0; i < term.length(); i++) {
-            if (term.charAt(i) == ' ') {
-                outputTokenCount++;
+        int separator = term.indexOf("::");
+        String output = separator >= 0 ? term.substring(separator + 2) : term;
+        int outputWordRuns = countWordRuns(output);
+        if (outputWordRuns <= 1) {
+            return positionLength;
+        }
+        int sourceWordRuns = 0;
+        if (offsetStart >= queryStart && offsetEnd >= offsetStart) {
+            int sourceStart = Math.min(offsetStart - queryStart, sourceText.length());
+            int sourceEnd = Math.min(offsetEnd - queryStart, sourceText.length());
+            if (sourceEnd >= sourceStart) {
+                sourceWordRuns = countWordRuns(sourceText.substring(sourceStart, sourceEnd));
             }
         }
+        if (sourceWordRuns >= outputWordRuns) {
+            return positionLength;
+        }
+        return Math.max(positionLength, outputWordRuns);
+    }
 
-        int sourceTokenCount = 0;
-        if (sourceText != null && offsetStart >= sourceStart && offsetEnd > offsetStart) {
-            int start = offsetStart - sourceStart;
-            int end = offsetEnd - sourceStart;
-            if (start >= 0 && end <= sourceText.length()) {
-                boolean inToken = false;
-                for (int i = start; i < end; i++) {
-                    if (Character.isWhitespace(sourceText.charAt(i))) {
-                        inToken = false;
-                    } else if (!inToken) {
-                        sourceTokenCount++;
-                        inToken = true;
+    private int countWordRuns(CharSequence text) {
+        int runs = 0;
+        boolean inWord = false;
+        for (int i = 0; i < text.length(); i++) {
+            if (Character.isWhitespace(text.charAt(i))) {
+                inWord = false;
+            } else if (!inWord) {
+                runs++;
+                inWord = true;
+            }
+        }
+        return runs;
+    }
+    private boolean isRawMultiTokenAlias(String term, int positionLength,
+            int offsetStart, int offsetEnd, int queryStart, String sourceText,
+            String tokenType) {
+        if (term == null || offsetStart < queryStart || offsetEnd < offsetStart) {
+            return false;
+        }
+        // Acronym tokens retain their case-sensitive namespace. Their sibling
+        // synonym tokens supply any genuine expanded phrase alternatives.
+        if ("ACRONYM".equals(tokenType) || term.startsWith("acr::")) {
+            return false;
+        }
+        int separator = term.indexOf("::");
+        String output = separator >= 0 ? term.substring(separator + 2) : term;
+        int outputWordRuns = countWordRuns(output);
+        int sourceStart = Math.min(offsetStart - queryStart, sourceText.length());
+        int sourceEnd = Math.min(offsetEnd - queryStart, sourceText.length());
+        if (sourceEnd < sourceStart) {
+            return false;
+        }
+        String sourceValue = sourceText.substring(sourceStart, sourceEnd);
+        int sourceWordRuns = countWordRuns(sourceValue);
+        if (outputWordRuns == 1) {
+            return sourceWordRuns > 1
+                    || (positionLength > 1 && !output.equals(sourceValue));
+        }
+        // A synthetic multi-word term has span width one even when its
+        // source and normalized spelling occupy the same number of words.
+        // Keep an index-normalized raw path for that equal-width case too.
+        return sourceWordRuns > 0 && sourceWordRuns <= outputWordRuns;
+    }
+    private String getSourceText(int offsetStart, int offsetEnd, int queryStart,
+            String sourceText) {
+        if (offsetStart < queryStart || offsetEnd < offsetStart) {
+            return null;
+        }
+        int sourceStart = Math.min(offsetStart - queryStart, sourceText.length());
+        int sourceEnd = Math.min(offsetEnd - queryStart, sourceText.length());
+        return sourceEnd >= sourceStart ? sourceText.substring(sourceStart, sourceEnd) : null;
+    }
+
+    private void appendOmittedSourceNodes(QueryNode phrase, QueryNode sourceNode,
+            String field, String text, int queryStart) throws QueryNodeException {
+        if (!(sourceNode instanceof QuotedFieldQueryNode)) {
+            return;
+        }
+
+        List<QueryNode> existing = phrase.getChildren();
+        List<int[]> omittedRanges = new ArrayList<>();
+        int wordPosition = 0;
+        int index = 0;
+        while (index < text.length()) {
+            while (index < text.length() && !isSourceWordChar(text.charAt(index))) {
+                index++;
+            }
+            if (index >= text.length()) {
+                break;
+            }
+            int start = index;
+            while (index < text.length() && isSourceWordChar(text.charAt(index))) {
+                index++;
+            }
+            int end = index;
+            int absoluteStart = queryStart + start;
+            int absoluteEnd = queryStart + end;
+            boolean covered = false;
+            for (QueryNode child : existing) {
+                if (!(child instanceof FieldQueryNode)) {
+                    continue;
+                }
+                FieldQueryNode fieldNode = (FieldQueryNode) child;
+                if (fieldNode.getBegin() <= absoluteStart
+                        && fieldNode.getEnd() >= absoluteEnd) {
+                    covered = true;
+                    break;
+                }
+            }
+            if (!covered) {
+                omittedRanges.add(new int[]{absoluteStart, absoluteEnd});
+                String sourceWord = text.substring(start, end);
+                for (String term : sourceTerms(field, sourceWord)) {
+                    FieldQueryNode omitted = new FieldQueryNode(field, term,
+                            absoluteStart, absoluteEnd);
+                    omitted.setPositionIncrement(wordPosition);
+                    omitted.setTag(OMITTED_SOURCE_TOKEN, true);
+                    omitted.setTag(AqpPostAnalysisProcessor.RAW_POSITIONAL_PATH, true);
+                    omitted.setTag(SOURCE_TEXT, sourceWord);
+                    omitted.setTag(SOURCE_QUERY_TEXT, text);
+                    omitted.setTag(SOURCE_QUERY_START, queryStart);
+                    if (phrase instanceof MultiPhraseQueryNode) {
+                        ((MultiPhraseQueryNode) phrase).add(omitted);
+                    } else {
+                        ((TokenizedPhraseQueryNode) phrase).add(omitted);
                     }
                 }
             }
+            wordPosition++;
         }
-        return Math.max(outputTokenCount, sourceTokenCount);
+        if (!omittedRanges.isEmpty()) {
+            for (QueryNode child : phrase.getChildren()) {
+                child.setTag(OMITTED_SOURCE_RANGES, omittedRanges);
+            }
+        }
     }
+
+    private List<String> sourceTerms(String field, String sourceWord) throws QueryNodeException {
+        List<String> terms = analyzeSourceWord(field, sourceWord);
+        if (terms.isEmpty()) {
+            terms = analyzeSourceWord(field, sourceWord.toUpperCase(Locale.ROOT));
+        }
+        return terms;
+    }
+
+    private List<String> analyzeSourceWord(String field, String sourceWord) throws QueryNodeException {
+        List<String> terms = new ArrayList<>();
+        Analyzer sourceAnalyzer = getSourceAnalyzer();
+        try (TokenStream stream = sourceAnalyzer.tokenStream(
+                field, new StringReader(sourceWord))) {
+            CharTermAttribute term = stream.addAttribute(CharTermAttribute.class);
+            stream.reset();
+            while (stream.incrementToken()) {
+                terms.add(term.toString());
+            }
+            stream.end();
+        } catch (IOException e) {
+            throw new QueryNodeException(e);
+        }
+        return terms;
+    }
+
+    private Analyzer getSourceAnalyzer() {
+        QueryConfigHandler config = getQueryConfigHandler();
+        if (config != null) {
+            AqpRequestParams request = config.get(
+                    AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+            if (request != null && request.getRequest() != null
+                    && request.getRequest().getSchema() != null
+                    && request.getRequest().getSchema().getIndexAnalyzer() != null) {
+                return request.getRequest().getSchema().getIndexAnalyzer();
+            }
+        }
+        return analyzer;
+    }
+
+    private boolean isSourceWordChar(char ch) {
+        return Character.isLetterOrDigit(ch);
+    }
+
 
     @Override
     protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
-
         return node;
-
     }
 
     @Override

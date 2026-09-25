@@ -13,6 +13,7 @@ import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PhraseQuery.Builder;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.queries.spans.SpanQuery;
 
 /**
  * This builder basically reads the {@link Query} object set on the
@@ -36,6 +37,9 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
         Query query = (Query) phraseSlopNode.getChild().getTag(
                 QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
 
+        if (query instanceof SpanQuery) {
+            return query;
+        }
         int defaultValue = phraseSlopNode.getValue();
         boolean explicitSlop = Boolean.TRUE.equals(
                 phraseSlopNode.getTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP));
@@ -44,7 +48,18 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
         }
 
         if (query instanceof PhraseQuery) {
-
+            boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
+            if (explicitPositions) {
+                PhraseQuery phrase = (PhraseQuery) query;
+                if (phrase.getSlop() == defaultValue) return phrase;
+                Builder builder = new PhraseQuery.Builder().setSlop(defaultValue);
+                Term[] terms = phrase.getTerms();
+                int[] positions = phrase.getPositions();
+                for (int i = 0; i < terms.length; i++) {
+                    builder.add(terms[i], positions[i]);
+                }
+                return builder.build();
+            }
             if (defaultValue == 0) {
                 int[] pos = ((PhraseQuery) query).getPositions();
                 defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
@@ -61,6 +76,12 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
 
         } else {
 
+            boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
+            if (explicitPositions) {
+                MultiPhraseQuery phrase = (MultiPhraseQuery) query;
+                if (phrase.getSlop() == defaultValue) return phrase;
+                return new MultiPhraseQuery.Builder(phrase).setSlop(defaultValue).build();
+            }
             int maxBranchSize = 0;
             int gap = 0;
             // examine terms that made the multi-phrase query
@@ -97,6 +118,20 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
 
         return query;
 
+    }
+    private boolean hasRawPositions(QueryNode node) {
+        if (Boolean.TRUE.equals(node.getTag(
+                AqpPostAnalysisProcessor.RAW_POSITIONAL_PATH))) {
+            return true;
+        }
+        if (node.getChildren() != null) {
+            for (QueryNode child : node.getChildren()) {
+                if (hasRawPositions(child)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
