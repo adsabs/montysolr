@@ -14,6 +14,7 @@ import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.common.util.Utils;
 import org.apache.solr.request.SolrQueryRequestBase;
 import org.junit.BeforeClass;
 
@@ -23,8 +24,9 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-
+import java.util.Map;
 /**
  * This unittest is for queries that require solr core
  *
@@ -43,7 +45,19 @@ import java.util.List;
  * Let's do it pragmatically (not as code puritans)
  * @see TestAqpAdsabs for the other tests
  */
+
 public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
+    @SuppressWarnings("unchecked")
+    private static Map<String, Float> responseScores(String response) {
+        Map<String, Object> parsed = (Map<String, Object>) Utils.fromJSONString(response);
+        Map<String, Object> responseBody = (Map<String, Object>) parsed.get("response");
+        List<Map<String, Object>> docs = (List<Map<String, Object>>) responseBody.get("docs");
+        Map<String, Float> scores = new LinkedHashMap<>();
+        for (Map<String, Object> doc : docs) {
+            scores.put(String.valueOf(doc.get("id")), ((Number) doc.get("score")).floatValue());
+        }
+        return scores;
+    }
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -778,14 +792,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='1621']", "//doc/str[@name='id'][.='1622']");
 
 
-        // topn() with score sorting
-        // TODO: solve it differently https://github.com/romanchyla/montysolr/issues/185
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, score desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, \"score desc,bibcode asc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2, info=score desc,bibcode asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
+
 
 
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
@@ -800,6 +807,127 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertU(commit("waitSearcher", "true"));
         assertQ(req("defType", "aqp", "q", "similar(bibcode:sim121source)"),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='1211']");
+        assertU(adoc("id", "1850", "bibcode", "s185source",
+                "abstract", "rankingfixture alpha beta gamma", "cite_read_boost", "0.0"));
+        assertU(adoc("id", "1851", "bibcode", "s185low",
+                "abstract", "rankingfixture alpha beta gamma", "cite_read_boost", "0.1"));
+        assertU(adoc("id", "1852", "bibcode", "s185high",
+                "abstract", "rankingfixture alpha beta", "cite_read_boost", "0.9",
+                "date", "2015-01-01T00:00:00Z"));
+        assertU(adoc("id", "1853", "bibcode", "s185tie",
+                "abstract", "rankingfixture alpha beta", "cite_read_boost", "0.9",
+                "date", "2015-01-01T00:00:00Z"));
+        assertU(adoc("id", "1860", "bibcode", "s186source",
+                "abstract", "targetsource citation seed",
+                "citation", "s186low", "citation", "s186high",
+                "cite_read_boost", "0.0"));
+        assertU(adoc("id", "1861", "bibcode", "s186low",
+                "cite_read_boost", "0.1"));
+        assertU(adoc("id", "1862", "bibcode", "s186high",
+                "cite_read_boost", "0.9"));
+        assertU(adoc("id", "1870", "bibcode", "s187source",
+                "abstract", "scoretiebreak orbit sample", "cite_read_boost", "0.0"));
+        assertU(adoc("id", "1871", "bibcode", "s187low",
+                "abstract", "scoretiebreak orbit sample", "cite_read_boost", "0.1",
+                "date", "2015-01-01T00:00:00Z"));
+        assertU(adoc("id", "1872", "bibcode", "s187high",
+                "abstract", "scoretiebreak orbit sample", "cite_read_boost", "0.9",
+                "date", "2015-01-01T00:00:00Z"));
+        assertU(commit("waitSearcher", "true"));
+        String similar185 = "similar(bibcode:s185source, abstract, 100, 200, 1, 1)";
+        String similar187 = "similar(bibcode:s187source, abstract, 100, 200, 1, 1)";
+        assertQ(req("defType", "aqp", "q", similar185,
+                        "aqp.classic_scoring.modifier", "0.6",
+                        "sort", "score desc,bibcode desc", "rows", "2",
+                        "fl", "id,bibcode,score,cite_read_boost"),
+                "//*[@numFound='3']",
+                "//result/doc[1]/str[@name='id'][.='1853']",
+                "//result/doc[2]/str[@name='id'][.='1852']",
+                "//result/doc[1]/float[@name='cite_read_boost'][.='0.9']",
+                "//result/doc[2]/float[@name='cite_read_boost'][.='0.9']",
+                "//result/doc[1]/float[@name='score'][not(.='NaN')]",
+                "//result/doc[2]/float[@name='score'][not(.='NaN')]");
+        assertQ(req("defType", "aqp", "q",
+                        "topn(2, " + similar185 + ", \"score desc,bibcode desc\")",
+                        "aqp.classic_scoring.modifier", "0.6",
+                        "sort", "score desc,bibcode desc", "rows", "2",
+                        "fl", "id,bibcode,score,cite_read_boost"),
+                "//*[@numFound='2']",
+                "//result/doc[1]/str[@name='id'][.='1853']",
+                "//result/doc[2]/str[@name='id'][.='1852']",
+                "//result/doc[1]/float[@name='cite_read_boost'][.='0.9']",
+                "//result/doc[2]/float[@name='cite_read_boost'][.='0.9']",
+                "//result/doc[1]/float[@name='score'][not(.='NaN')]",
+                "//result/doc[2]/float[@name='score'][not(.='NaN')]");
+        assertQ(req("defType", "aqp", "q",
+                        "topn(1, " + similar187 + ", \"date desc,score desc\")",
+                        "aqp.classic_scoring.modifier", "0.6",
+                        "sort", "date desc,score desc", "rows", "1",
+                        "fl", "id,bibcode,score,cite_read_boost"),
+                "//*[@numFound='1']",
+                "//result/doc[1]/str[@name='id'][.='1872']",
+                "//result/doc[1]/float[@name='cite_read_boost'][.='0.9']");
+        String directScoreResponse = h.query(req("defType", "aqp", "q", similar185,
+                "aqp.classic_scoring.modifier", "0.6",
+                "sort", "score desc,bibcode desc", "rows", "2",
+                "fl", "id,bibcode,score,cite_read_boost", "wt", "json"));
+        String topnScoreResponse = h.query(req("defType", "aqp", "q",
+                "topn(2, " + similar185 + ", \"score desc,bibcode desc\")",
+                "aqp.classic_scoring.modifier", "0.6",
+                "sort", "score desc,bibcode desc", "rows", "2",
+                "fl", "id,bibcode,score,cite_read_boost", "wt", "json"));
+        String nestedTopnScoreResponse = h.query(req("defType", "aqp", "q",
+                "topn(2, topn(3, " + similar185 + ", \"score desc,bibcode desc\"), \"score desc,bibcode desc\")",
+                "aqp.classic_scoring.modifier", "0.6",
+                "sort", "score desc,bibcode desc", "rows", "2",
+                "fl", "id,bibcode,score,cite_read_boost", "wt", "json"));
+        Map<String, Float> directScores = responseScores(directScoreResponse);
+        Map<String, Float> topnScores = responseScores(topnScoreResponse);
+        Map<String, Float> nestedTopnScores = responseScores(nestedTopnScoreResponse);
+        assertEquals(2, directScores.size());
+        List<String> directIds = new ArrayList<>(directScores.keySet());
+        assertEquals(directIds, new ArrayList<>(topnScores.keySet()));
+        assertEquals(directIds, new ArrayList<>(nestedTopnScores.keySet()));
+        for (Map.Entry<String, Float> direct : directScores.entrySet()) {
+            assertEquals(direct.getValue(), topnScores.get(direct.getKey()), 1.0e-5f);
+            assertEquals(direct.getValue(), nestedTopnScores.get(direct.getKey()), 1.0e-5f);
+        }
+        assertQ(req("defType", "aqp", "q",
+                        "topn(1, topn(2, " + similar185 + ", \"score desc,bibcode desc\"), \"bibcode desc\")",
+                        "aqp.classic_scoring.modifier", "0.6",
+                        "sort", "bibcode desc", "rows", "1",
+                        "fl", "id,bibcode,score,cite_read_boost"),
+                "//*[@numFound='1']",
+                "//result/doc[1]/str[@name='id'][.='1853']",
+                "//result/doc[1]/float[@name='cite_read_boost'][.='0.9']");
+        String citedTargets = "citations(topn(1, bibcode:s186source, \"score desc,bibcode desc\"))";
+        assertQ(req("defType", "aqp", "q", citedTargets,
+                        "aqp.classic_scoring.modifier", "0.6",
+                        "sort", "score desc,bibcode desc", "rows", "2",
+                        "fl", "id,bibcode,score,cite_read_boost"),
+                "//*[@numFound='2']",
+                "//result/doc[1]/str[@name='id'][.='1862']",
+                "//result/doc[1]/float[@name='cite_read_boost'][.='0.9']");
+        assertQ(req("defType", "aqp", "q",
+                        "topn(1, " + citedTargets + ", \"score desc,bibcode desc\")",
+                        "aqp.classic_scoring.modifier", "0.6",
+                        "sort", "score desc,bibcode desc", "rows", "1",
+                        "fl", "id,bibcode,score,cite_read_boost"),
+                "//*[@numFound='1']",
+                "//result/doc[1]/str[@name='id'][.='1862']",
+                "//result/doc[1]/float[@name='cite_read_boost'][.='0.9']");
+        Map<String, Float> citedDirectScores = responseScores(h.query(req("defType", "aqp", "q",
+                citedTargets, "aqp.classic_scoring.modifier", "0.6",
+                "sort", "score desc,bibcode desc", "rows", "2",
+                "fl", "id,bibcode,score,cite_read_boost", "wt", "json")));
+        Map<String, Float> citedTopnScores = responseScores(h.query(req("defType", "aqp", "q",
+                "topn(1, " + citedTargets + ", \"score desc,bibcode desc\")",
+                "aqp.classic_scoring.modifier", "0.6",
+                "sort", "score desc,bibcode desc", "rows", "1",
+                "fl", "id,bibcode,score,cite_read_boost", "wt", "json")));
+        assertEquals("1862", new ArrayList<>(citedDirectScores.keySet()).get(0));
+        assertEquals(List.of("1862"), new ArrayList<>(citedTopnScores.keySet()));
+        assertEquals(citedDirectScores.get("1862"), citedTopnScores.get("1862"), 1.0e-5f);
 
         // make sure the cache key of the query is different
         Query aq = assertQueryEquals(req("defType", "aqp", "q", "author:\"Accomazzi, A\" abs:\"ADS\" year:2000-2015"),
@@ -1040,14 +1168,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
-        // # 389
-        // make sure the functional parsing is handling things well
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo OR topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo AND topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(+title:foo +FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "topn(200, title:foo, date desc)"),
                 "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
@@ -1152,19 +1272,10 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 FunctionScoreQuery.class);
 
         // topN - added Aug2013
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*)"),
-                "FunctionScoreQuery(SecondOrderQuery(*:*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, (foo bar))"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:foo +all:bar, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
 //        assertQueryEquals(req("defType", "aqp", "q", "topn(5, edismax(dog OR cat))", "qf", "title^1 abstract^0.5"),
 //                "FunctionScoreQuery(SecondOrderQuery(((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat), collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
 //                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:accomazzi)"),
-                "FunctionScoreQuery(SecondOrderQuery(author:accomazzi, author:accomazzi,*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         /*
          * It is different if Aqp handles the boolean operations or if edismax() does
