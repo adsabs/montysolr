@@ -112,7 +112,7 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
                 local.add("aqp.preserve.unfielded.stopwords=true");
             }
 
-            String funcName = "edismax_combined_aqp"; //"edismax_always_aqp"; //"edismax_combined_aqp";
+            String funcName = "edismax_combined_aqp";
             String subQuery = ((FieldQueryNode) node).getTextAsString();
             if (node instanceof AqpWhiteSpacedQueryNode
                     && !(node.getParent() instanceof SlopQueryNode)) {
@@ -122,6 +122,14 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
                 }
             }
 
+            if (node instanceof FuzzyQueryNode) {
+                subQuery += "~" + ((FuzzyQueryNode) node).getSimilarity();
+                // The edismax-only pass treats a floating fuzzy similarity as
+                // an ordinary unfielded term. Re-run fuzzy nodes through AQP
+                // after edismax selects the target fields, preserving the
+                // fuzzy modifier and the analyzer's edit-distance semantics.
+                funcName = "edismax_always_aqp";
+            }
             if (node instanceof AqpNonAnalyzedQueryNode) {
                 funcName = "edismax_nonanalyzed";
             } else {
