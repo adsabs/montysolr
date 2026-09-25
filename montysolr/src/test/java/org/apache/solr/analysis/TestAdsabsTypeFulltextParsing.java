@@ -203,6 +203,7 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
 
             File multiTokenSynonymsFile = createTempFile("dynamics\0hubble,dyhu\n" +
                     "hubble\0space\0telescope,HST\n" +
+                    "NuSTAR,nuclear\0spectroscopic\0telescope\0array\n" +
                     "Massachusets\0Institute\0of\0Technology, MIT\n" +
                     "Hubble\0Space\0Microscope, HSM\n" +
                     "ABC,Astrophysics\0Business\0Center\n" +
@@ -318,7 +319,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "title", "MIT and anti de sitter space-time"));
         assertU(adoc("id", "606", "bibcode", "xxxxxxxxxx604",
                 "title", "Massachusets Institute of Technology and antidesitter space-time"));
-
+        assertU(adoc("id", "1051", "bibcode", "xxxxxxxxxx1051", "title", "NuSTAR"));
+        assertU(adoc("id", "1052", "bibcode", "xxxxxxxxxx1052", "title", "NuStar"));
+        assertU(adoc("id", "1053", "bibcode", "xxxxxxxxxx1053", "title", "nuclear spectroscopic telescope array"));
+        assertU(adoc("id", "1054", "bibcode", "xxxxxxxxxx1054", "title", "nuclear spectroscopic telescope"));
         assertU(commit());
     }
 
@@ -428,6 +432,18 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='602']"
         );
+        assertQ(req("q", "title:NuSTAR"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='1051']",
+                "//doc/str[@name='id'][.='1052']",
+                "//doc/str[@name='id'][.='1053']",
+                "//doc[not(str[@name='id']='1054')]");
+        assertQ(req("q", "title:NuStar"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='1051']",
+                "//doc/str[@name='id'][.='1052']",
+                "//doc/str[@name='id'][.='1053']",
+                "//doc[not(str[@name='id']='1054')]");
 
         // now add some docfreq
         assertU(adoc("id", "1000", "bibcode", "xxxxxxxxxx1000",

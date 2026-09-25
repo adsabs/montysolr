@@ -386,11 +386,27 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
                     int count = countWords(input);
                     boolean acronymPhrase = count > 1 && startsWithUppercaseAcronym(input);
                     boolean addOriginal = count > 1 || inclOrig;
+                    CharsRef synonymOutput = replaceNulls(output);
                     super.add(acronymPhrase ? input : (count > 1 ? lowercase(input) : input),
-                            replaceNulls(output), addOriginal);
+                            synonymOutput, addOriginal);
                     if (acronymPhrase) {
-                        super.add(lowercase(input), replaceNulls(output), addOriginal);
+                        super.add(lowercase(input), synonymOutput, addOriginal);
                     }
+                    String source = input.toString();
+                    if (count == 1
+                            && org.apache.lucene.analysis.core.AcronymTokenFilter.termIsAcronym(source)
+                            && hasLowercase(source)) {
+                        super.add(lowercase(input), synonymOutput, addOriginal);
+                    }
+                }
+
+                private boolean hasLowercase(String value) {
+                    for (int i = 0; i < value.length(); i++) {
+                        if (Character.isLowerCase(value.charAt(i))) {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
 
                 private CharsRef lowercase(CharsRef chars) {
