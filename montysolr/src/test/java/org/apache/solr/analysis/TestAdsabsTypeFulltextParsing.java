@@ -21,16 +21,23 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests that the fulltext is parsed properly, the ads_text type
@@ -323,6 +330,32 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         assertU(adoc("id", "1052", "bibcode", "xxxxxxxxxx1052", "title", "NuStar"));
         assertU(adoc("id", "1053", "bibcode", "xxxxxxxxxx1053", "title", "nuclear spectroscopic telescope array"));
         assertU(adoc("id", "1054", "bibcode", "xxxxxxxxxx1054", "title", "nuclear spectroscopic telescope"));
+        assertU(adoc("id", "700", "bibcode", "xxxxxxxxxx700",
+                "title", "H2O+ CNO-SI+ PSI+O3-"));
+        assertU(adoc("id", "701", "bibcode", "xxxxxxxxxx701",
+                "title", "H2O CNO-SI PSI O3"));
+        assertU(adoc("id", "702", "bibcode", "xxxxxxxxxx702",
+                "title", "H<SUB>2</SUB>O+"));
+        assertU(adoc("id", "703", "bibcode", "xxxxxxxxxx703",
+                "title", "CO<SUB>2</SUB><SUP>+</SUP>"));
+        assertU(adoc("id", "704", "bibcode", "xxxxxxxxxx704",
+                "title", "CO<SUB>2</SUB>"));
+        assertU(adoc("id", "705", "bibcode", "xxxxxxxxxx705",
+                "title", "H&alpha;+"));
+        assertU(adoc("id", "706", "bibcode", "xxxxxxxxxx706",
+                "title", "H<SUB>&alpha;</SUB>+"));
+        assertU(adoc("id", "707", "bibcode", "xxxxxxxxxx707",
+                "title", "H&alpha;"));
+        assertU(adoc("id", "708", "bibcode", "xxxxxxxxxx708",
+                "title", "H<SUB>&alpha;</SUB>"));
+        assertU(adoc("id", "709", "bibcode", "xxxxxxxxxx709",
+                "title", "H2O+CO2"));
+        assertU(adoc("id", "710", "bibcode", "xxxxxxxxxx710",
+                "title", "foo+123"));
+        assertU(adoc("id", "716", "bibcode", "xxxxxxxxxx716",
+                "title", "well-known+"));
+        assertU(adoc("id", "717", "bibcode", "xxxxxxxxxx717",
+                "title", "TB+ TM+"));
         assertU(commit());
     }
 
@@ -729,6 +762,196 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='19']"
         );
 
+    }
+
+    private static List<String> analyzedTokens(Analyzer analyzer, String value) throws IOException {
+        TokenStream stream = analyzer.tokenStream("title", new StringReader(value));
+        CharTermAttribute term = stream.addAttribute(CharTermAttribute.class);
+        PositionIncrementAttribute increment = stream.addAttribute(PositionIncrementAttribute.class);
+        List<String> tokens = new ArrayList<>();
+        int position = 0;
+        stream.reset();
+        while (stream.incrementToken()) {
+            position += increment.getPositionIncrement();
+            tokens.add(position + ":" + term.toString());
+        }
+        stream.end();
+        stream.close();
+        return tokens;
+    }
+
+    private static boolean hasTokenAt(List<String> tokens, int position, String expected) {
+        String prefix = position + ":";
+        for (String token : tokens) {
+            if (token.startsWith(prefix) && token.substring(prefix.length()).equalsIgnoreCase(expected)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasToken(List<String> tokens, String expected) {
+        for (String token : tokens) {
+            int separator = token.indexOf(':');
+            if (separator >= 0 && token.substring(separator + 1).equalsIgnoreCase(expected)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void testSignedChemicalFormulaAnalyzerGraphs() throws Exception {
+        Analyzer indexAnalyzer = h.getCore().getLatestSchema().getField("title").getType().getIndexAnalyzer();
+        Analyzer queryAnalyzer = h.getCore().getLatestSchema().getField("title").getType().getQueryAnalyzer();
+
+        List<String> indexedCno = analyzedTokens(indexAnalyzer, "CNO-SI+");
+        assertTrue(indexedCno.toString(), hasTokenAt(indexedCno, 1, "CNO-SI+"));
+        assertTrue(indexedCno.toString(), hasTokenAt(indexedCno, 1, "acr::cno-"));
+        assertTrue(indexedCno.toString(), hasTokenAt(indexedCno, 2, "SI+"));
+
+        List<String> indexedPsi = analyzedTokens(indexAnalyzer, "PSI+O3-");
+        assertTrue(indexedPsi.toString(), hasTokenAt(indexedPsi, 1, "PSI+O3-"));
+        assertTrue(indexedPsi.toString(), hasTokenAt(indexedPsi, 1, "acr::psi+"));
+        assertTrue(indexedPsi.toString(), hasTokenAt(indexedPsi, 2, "O3-"));
+
+        List<String> queriedCno = analyzedTokens(queryAnalyzer, "CNO-SI+");
+        assertTrue(queriedCno.toString(), hasTokenAt(queriedCno, 1, "CNO-SI+"));
+        assertTrue(queriedCno.toString(), hasTokenAt(queriedCno, 1, "acr::cno-"));
+        assertTrue(queriedCno.toString(), hasTokenAt(queriedCno, 2, "SI+"));
+
+        List<String> queriedPsi = analyzedTokens(queryAnalyzer, "PSI+O3-");
+        assertTrue(queriedPsi.toString(), hasTokenAt(queriedPsi, 1, "PSI+O3-"));
+        assertTrue(queriedPsi.toString(), hasTokenAt(queriedPsi, 1, "acr::psi+"));
+        assertTrue(queriedPsi.toString(), hasTokenAt(queriedPsi, 2, "O3-"));
+
+        List<String> ordinaryIndexed = analyzedTokens(indexAnalyzer, "zzword+ zzword-");
+        List<String> ordinaryQueried = analyzedTokens(queryAnalyzer, "zzword+ zzword-");
+        assertTrue(ordinaryIndexed.toString(), hasToken(ordinaryIndexed, "zzword"));
+        assertFalse(ordinaryIndexed.toString(), hasToken(ordinaryIndexed, "zzword+"));
+        assertFalse(ordinaryIndexed.toString(), hasToken(ordinaryIndexed, "zzword-"));
+        assertTrue(ordinaryQueried.toString(), hasToken(ordinaryQueried, "zzword"));
+        assertFalse(ordinaryQueried.toString(), hasToken(ordinaryQueried, "zzword+"));
+        assertFalse(ordinaryQueried.toString(), hasToken(ordinaryQueried, "zzword-"));
+        Analyzer exactIndexAnalyzer = h.getCore().getLatestSchema()
+                .getField("title_nosyn").getType().getIndexAnalyzer();
+        Analyzer exactQueryAnalyzer = h.getCore().getLatestSchema()
+                .getField("title_nosyn").getType().getQueryAnalyzer();
+        List<String> exactIndexedCno = analyzedTokens(exactIndexAnalyzer, "CNO-SI+");
+        List<String> exactQueriedCno = analyzedTokens(exactQueryAnalyzer, "CNO-SI+");
+        assertTrue(exactIndexedCno.toString(), hasTokenAt(exactIndexedCno, 1, "CNO-"));
+        assertTrue(exactIndexedCno.toString(), hasTokenAt(exactIndexedCno, 2, "SI+"));
+        assertTrue(exactQueriedCno.toString(), hasTokenAt(exactQueriedCno, 1, "CNO-"));
+        assertTrue(exactQueriedCno.toString(), hasTokenAt(exactQueriedCno, 2, "SI+"));
+        assertFalse(exactIndexedCno.toString(), hasToken(exactIndexedCno, "CNO-SI"));
+
+        List<String> exactIndexedPsi = analyzedTokens(exactIndexAnalyzer, "PSI+O3-");
+        List<String> exactQueriedPsi = analyzedTokens(exactQueryAnalyzer, "PSI+O3-");
+        assertTrue(exactIndexedPsi.toString(), hasTokenAt(exactIndexedPsi, 1, "PSI+"));
+        assertTrue(exactIndexedPsi.toString(), hasTokenAt(exactIndexedPsi, 2, "O3-"));
+        assertTrue(exactQueriedPsi.toString(), hasTokenAt(exactQueriedPsi, 1, "PSI+"));
+        assertTrue(exactQueriedPsi.toString(), hasTokenAt(exactQueriedPsi, 2, "O3-"));
+    }
+
+    public void testSignedChemicalFormulae() throws Exception {
+        assertQ(req("q", "title:\"H2O+\""),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='700']",
+                "//doc/str[@name='id'][.='702']",
+                "//doc/str[@name='id'][.='709']"
+        );
+        assertQ(req("q", "title:\"CNO-SI+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']"
+        );
+        assertQ(req("q", "title:\"PSI+O3-\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']"
+        );
+        assertQ(req("q", "title:\"PSI+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']"
+        );
+        assertQ(req("q", "title:\"O3-\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']"
+        );
+        assertQ(req("q", "title:\"CNO-\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']"
+        );
+        assertQ(req("q", "title:\"SI+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']"
+        );
+        assertQ(req("q", "title:\"si+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']",
+                "not(//doc/str[@name='id'][.='701'])");
+        assertQ(req("q", "title:\"cno-si+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']",
+                "not(//doc/str[@name='id'][.='701'])");
+        assertQ(req("q", "title:\"CO2+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='703']"
+        );
+        assertQ(req("q", "title:\"co2+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='703']",
+                "not(//doc/str[@name='id'][.='704'])");
+        assertQ(req("defType", "aqp", "q", "=title:\"co2+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='703']",
+                "not(//doc/str[@name='id'][.='704'])");
+        assertQ(req("defType", "aqp", "q", "=title:\"si+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']",
+                "not(//doc/str[@name='id'][.='701'])");
+        assertQ(req("defType", "aqp", "q", "=title:\"cno-si+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='700']",
+                "not(//doc/str[@name='id'][.='701'])");
+        assertQ(req("defType", "aqp", "q", "=title:\"H2O+\""),
+                "//doc/str[@name='id'][.='709']");
+        assertQ(req("q", "title:\"foo+123\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='710']");
+        assertQ(req("defType", "aqp", "q", "=title:\"foo+123\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='710']");
+        assertQ(req("q", "title:\"well-known+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='716']");
+        assertQ(req("defType", "aqp", "q", "=title:\"well-known+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='716']");
+        assertQ(req("q", "title:\"tb+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='717']");
+        assertQ(req("defType", "aqp", "q", "=title:\"tb+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='717']");
+        assertQ(req("q", "title:\"tm+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='717']");
+        assertQ(req("defType", "aqp", "q", "=title:\"tm+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='717']");
+        assertQ(req("q", "title:\"CO2\""),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='704']",
+                "//doc/str[@name='id'][.='709']"
+        );
+        assertQ(req("q", "title:\"Hα+\""),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='705']",
+                "//doc/str[@name='id'][.='706']"
+        );
+        assertQ(req("q", "title:\"Hα\""),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='707']",
+                "//doc/str[@name='id'][.='708']"
+        );
     }
 
     public void unfieldedSearch() throws Exception {

@@ -359,6 +359,22 @@
 				<!-- Preserve balanced punctuation literals without retaining every
 				     ordinary token as an extra original term. -->
 
+				<!-- Mark signs in chemical formula components before WDFF. The
+					uppercase element grammar avoids changing ordinary word+/- tokens.
+					WDFF then emits signed components and catenateAll emits the
+					complete signed formula. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)-(?=[^\p{Alnum}]|$)"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)(?=[A-Za-z0-9α])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)-(?=[A-Za-z0-9α\-]*[])"
+					replacement="$1" />
 				<!-- AA: rewrite these common astronomy compound names so that the WDFF 
 					will index both the short and long versions of them -->
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
@@ -401,7 +417,13 @@
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
-					ignoreKeywords="1" />
+					ignoreKeywords="1" types="wdchemtypes.txt" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="+" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="-" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="" replace="all" />
 
 				<!-- lowercase everything besides ACRONYMS -->
 				<filter
@@ -459,8 +481,36 @@
 			</analyzer>
 			<analyzer type="query">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
-				<!-- AA: as above, but we only have one canonical replacement for the 
-					expression -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)-(?=[^\p{Alnum}]|$)"
+					replacement="$1" />
+				<!-- Require a pre-sign chemical marker; single elements are handled below. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:(?=[A-Za-z0-9α]*(?:\d|alpha|α))((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*))\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:(?=[A-Za-z0-9α]*(?:\d|alpha|α))((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*))-(?=[^\p{Alnum}]|$)"
+					replacement="$1" />
+				<!-- A hyphenated formula's separator is also evidence before the charge sign. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+(?:-(?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+)+))\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+(?:-(?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+)+))-(?=[^\p{Alnum}]|$)"
+					replacement="$1" />
+				<!-- A single element symbol can form a complete signed formula. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)))\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+))(?=[A-Za-z0-9α])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+))-(?=[A-Za-z0-9α\-]*[])"
+					replacement="$1" />
 				<charFilter class="solr.PatternReplaceCharFilterFactory"
 					pattern="\b(?i:(MESSIER)(-|\s+)([0-9]+[A-Z]*))\b"
 					replacement="$1-$3" />
@@ -494,7 +544,13 @@
 					generateWordParts="1" generateNumberParts="1" catenateWords="1"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
-					ignoreKeywords="1" />
+					ignoreKeywords="1" types="wdchemtypes.txt" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="+" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="-" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="" replace="all" />
 
 				<!-- <filter class="org.apache.solr.analysis.DiagnoseFilterFactory" msg="query:split"/> -->
 
@@ -573,6 +629,39 @@
 		<fieldType name="ads_text_nosyn" class="solr.TextField">
 			<analyzer type="query">
 				<charFilter class="solr.HTMLStripCharFilterFactory" />
+				<!-- Exact phrases preserve signed formula components as terms. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*)-(?=[^\p{Alnum}]|$)"
+					replacement="$1" />
+				<!-- Require a pre-sign chemical marker; single elements are handled below. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:(?=[A-Za-z0-9α]*(?:\d|alpha|α))((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*))\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:(?=[A-Za-z0-9α]*(?:\d|alpha|α))((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+(?:-(?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+)*))-(?=[^\p{Alnum}]|$)"
+					replacement="$1" />
+				<!-- A hyphenated formula's separator is also evidence before the charge sign. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+(?:-(?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+)+))\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+(?:-(?:(?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)\d*)+)+))-(?=[^\p{Alnum}]|$)"
+					replacement="$1" />
+				<!-- A single element symbol can form a complete signed formula. -->
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:Ac|Ag|Al|Am|Ar|As|At|Au|B|Ba|Be|Bh|Bi|Bk|Br|C|Ca|Cd|Ce|Cf|Cl|Cm|Cn|Co|Cr|Cs|Cu|Db|Ds|Dy|Er|Es|Eu|F|Fe|Fl|Fm|Fr|Ga|Gd|Ge|H|He|Hf|Hg|Ho|Hs|I|In|Ir|K|Kr|La|Li|Lr|Lu|Lv|Mc|Md|Mg|Mn|Mo|Mt|N|Na|Nb|Nd|Ne|Nh|Ni|No|Np|O|Og|Os|P|Pa|Pb|Pd|Pm|Po|Pr|Pt|Pu|Ra|Rb|Re|Rf|Rg|Rh|Rn|Ru|S|Sb|Sc|Se|Sg|Si|Sm|Sn|Sr|Ta|Tb|Tc|Te|Th|Ti|Tl|Tm|Ts|U|V|W|Xe|Y|Yb|Zn|Zr)))\+(?=[A-Za-z0-9α]|\s|$|[.,;:!?])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+))(?=[A-Za-z0-9α])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="\b(?i:((?:[A-Z][a-z]?\d*|alpha\d*|α\d*)+))-(?=[A-Za-z0-9α\-]*[])"
+					replacement="$1" />
+				<charFilter class="solr.PatternReplaceCharFilterFactory"
+					pattern="" replacement=" " />
 
 				<!-- tokenize on empty space (if it is not a hyphen connecting other 
 					words) -->
@@ -595,9 +684,13 @@
 					generateWordParts="1" generateNumberParts="1" catenateWords="0"
 					catenateNumbers="0" catenateAll="1" splitOnCaseChange="0"
 					splitOnNumerics="0" stemEnglishPossessive="1" preserveOriginal="0"
-					ignoreKeywords="1" />
+					ignoreKeywords="1" types="wdchemtypes.txt" />
 				<filter
 					class="org.apache.lucene.analysis.miscellaneous.CompoundTermOnlyFilterFactory" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="+" replace="all" />
+				<filter class="solr.PatternReplaceFilterFactory"
+					pattern="" replacement="-" replace="all" />
 
 
 				<!-- lowercase words, but keep ACRONYMS case ie. MOND => MOND Mond => 
