@@ -35,6 +35,31 @@ public class AqpAdsabsAnalyzerProcessor extends AqpAnalyzerQueryNodeProcessor {
     private boolean enteredCleanZone = false;
     private int counter = 0;
 
+    @Override
+    protected boolean isPositionIncrementsEnabled(QueryNode node) {
+        if (super.isPositionIncrementsEnabled(node)) {
+            return true;
+        }
+        if (!(node instanceof FieldQueryNode)) {
+            return false;
+        }
+        FieldQueryNode fieldNode = (FieldQueryNode) node;
+        return (node.getTag("aqp.exact") != null
+                && fieldNode.getFieldAsString().endsWith("_nosyn"))
+                || containsWhitespaceHyphen(fieldNode.getTextAsString());
+    }
+
+    private static boolean containsWhitespaceHyphen(String value) {
+        for (int i = 1; i < value.length() - 1; i++) {
+            if (value.charAt(i) == '-'
+                    && Character.isWhitespace(value.charAt(i - 1))
+                    && Character.isWhitespace(value.charAt(i + 1))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     protected QueryNode preProcessNode(QueryNode node) throws QueryNodeException {
