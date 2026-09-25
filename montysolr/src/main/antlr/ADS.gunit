@@ -239,7 +239,9 @@ mainQ:
 "one 2009-2012"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QDATE 2009-2012)))))"
 "notdate 09-12"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL notdate)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 09-12)))))"
 "notdate 09-2012"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL notdate)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 09-2012)))))"
-"one ^\"author phrase\""		FAIL
+"one ^\"author phrase\""		->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"author phrase\")))))"
+"one \"author phrase\"$"        -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"author phrase\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL $)))))"
+"^\"Henneken,E\" ADS"		->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"Henneken,E\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL ADS)))))"
 "one ^\"author phrase\"$"		FAIL
 "one \"^author phrase\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"^author phrase\")))))"
 "one \"^author phrase$\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"^author phrase$\")))))"
