@@ -51,6 +51,7 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
  * @see AqpBooleanQueryNode
  */
 public class AqpMODIFIERProcessor extends AqpQProcessor {
+    static final String EXPLICIT_MODIFIER_TAG = "aqp.explicit.modifier";
 
     public boolean nodeIsWanted(AqpANTLRNode node) {
         return node.getTokenLabel().equals("MODIFIER");
@@ -75,18 +76,19 @@ public class AqpMODIFIERProcessor extends AqpQProcessor {
 
         QueryNode childNode = getValueNode(node);
 
+        ModifierQueryNode.Modifier modifierValue;
         if (modifier.equals("PLUS")) {
-            return new ModifierQueryNode(childNode,
-                    ModifierQueryNode.Modifier.MOD_REQ);
+            modifierValue = ModifierQueryNode.Modifier.MOD_REQ;
         } else if (modifier.equals("MINUS")) {
-            return new ModifierQueryNode(childNode,
-                    ModifierQueryNode.Modifier.MOD_NOT);
+            modifierValue = ModifierQueryNode.Modifier.MOD_NOT;
         } else {
             throw new QueryNodeException(new MessageImpl(
                     QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
                     "Unknown modifier: " + modifier + "\n" + node));
         }
-
+        ModifierQueryNode explicitModifier = new ModifierQueryNode(childNode, modifierValue);
+        explicitModifier.setTag(EXPLICIT_MODIFIER_TAG, true);
+        return explicitModifier;
     }
 
 }

@@ -2,6 +2,8 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpDisjunctionQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpWhiteSpacedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -12,6 +14,7 @@ import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,10 +46,35 @@ public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl impleme
             QueryNode child = ((AqpFuzzyModifierNode) node).getChild();
             Float fuzzy = ((AqpFuzzyModifierNode) node).getFuzzyValue();
 
+            if (child instanceof AqpDisjunctionQueryNode) {
+                AqpDisjunctionQueryNode disjunction = (AqpDisjunctionQueryNode) child;
+                List<QueryNode> sloppedChildren = new ArrayList<>(disjunction.getChildren().size());
+                for (QueryNode disjunct : disjunction.getChildren()) {
+                    if (!(disjunct instanceof AqpWhiteSpacedQueryNode)) {
+                        throw new QueryNodeException(new MessageImpl(
+                                QueryParserMessages.INVALID_SYNTAX, node
+                                        + "\nUse of ~ is not allowed here"));
+                    }
+                    String value = ((AqpWhiteSpacedQueryNode) disjunct).getTextAsString();
+                    if (value.startsWith("\"") && value.endsWith("\"")) {
+                        sloppedChildren.add(new SlopQueryNode(disjunct, fuzzy.intValue()));
+                    } else {
+                        sloppedChildren.add(disjunct);
+                    }
+                }
+                return new AqpDisjunctionQueryNode(sloppedChildren, disjunction.getTieBreaker());
+            }
+
             QueryConfigHandler config = getQueryConfigHandler();
 
+            boolean quotedWhitespaceNode = false;
+            if (child instanceof AqpWhiteSpacedQueryNode) {
+                String value = ((AqpWhiteSpacedQueryNode) child).getTextAsString();
+                quotedWhitespaceNode = value.startsWith("\"") && value.endsWith("\"");
+            }
             if (child instanceof QuotedFieldQueryNode
-                    || child instanceof WildcardQueryNode) {
+                    || child instanceof WildcardQueryNode
+                    || quotedWhitespaceNode) {
 
                 if (child instanceof QuotedFieldQueryNode && hasConfigMap()) {
                     Map<String, String> c = getConfigMap();
