@@ -326,7 +326,14 @@ public class SpanConverter {
 
             i++;
         }
-
+        if (spanClauses.length == 1) {
+            if (o.equals(Occur.MUST) || o.equals(Occur.SHOULD)) {
+                return spanClauses[0];
+            }
+            throw new QueryNodeException(new MessageImpl(
+                    QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
+                    "A prohibited singleton cannot form a proximity span"));
+        }
         try {
             if (o.equals(Occur.MUST)) {
                 return new SpanNearQuery(spanClauses, container.slop,
