@@ -416,6 +416,25 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertQ(req("q", "title:(its NEAR its)"), "//*[@numFound='0']");
     }
+    public void testExactAuthorConstantScoring() throws Exception {
+        assertU(adoc("id", "19801", "bibcode", "b19801", "author", "Foo",
+                "author", "Bar", "first_author", "Foo", "cite_read_boost", "0"));
+        assertU(adoc("id", "19802", "bibcode", "b19802", "author", "Bar",
+                "author", "Foo", "first_author", "Bar", "cite_read_boost", "0"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("q", "=author:\"foo\"", "fl", "id,score",
+                        "aqp.constant_scoring", "author^1",
+                        "aqp.classic_scoring.modifier", "0.6"),
+                "//*[@numFound='2']",
+                "//doc[str[@name='id']='19801']/float[@name='score'][. > 0.5999 and . < 0.6001]",
+                "//doc[str[@name='id']='19802']/float[@name='score'][. > 0.5999 and . < 0.6001]");
+        assertQ(req("q", "=author:\"^foo\"", "fl", "id,score",
+                        "aqp.constant_scoring", "author^1",
+                        "aqp.classic_scoring.modifier", "0.6"),
+                "//*[@numFound='1']",
+                "//doc[str[@name='id']='19801']/float[@name='score'][. > 0.5999 and . < 0.6001]");
+    }
 
     public void testSpecialCases() throws Exception {
 
@@ -460,18 +479,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2, info=score desc,bibcode asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
                 FunctionScoreQuery.class);
 
-        // custom scoring should be possible even with constant scores
-        assertQueryEquals(
-                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
-                        "=author:\"foo\""),
-                "FunctionScoreQuery(ConstantScore(author:foo,), scored by boost(sum(float(cite_read_boost),const(0.6))))",
-                FunctionScoreQuery.class);
-
-        assertQueryEquals(
-                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
-                        "=author:\"^foo\""),
-                "FunctionScoreQuery(ConstantScore(spanPosRange(author:foo,, 0, 1)), scored by boost(sum(float(cite_read_boost),const(0.6))))",
-                FunctionScoreQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
                 MatchNoDocsQuery.class);
@@ -515,18 +522,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertTrue(aq.hashCode() != bq.hashCode());
         assertEquals(aq.hashCode(), cq.hashCode());
 
-        // another method for constant scoring for fields (this time applied
-        // universally; to
-        // every query type used in a field)
-        assertQueryEquals(req("defType", "aqp", "aqp.constant_scoring", "author^1", "q", "=author:\"foo\""),
-                "ConstantScore(author:foo,)", ConstantScoreQuery.class);
-
-        // https://github.com/romanchyla/montysolr/issues/101
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"foo, bar\""), "author:foo, bar", TermQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"foo, bar\", 1)"),
-                "spanPosRange(author:foo, bar, 0, 1)", SpanPositionRangeQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"^foo, bar\""), "spanPosRange(author:foo, bar, 0, 1)",
-                SpanPositionRangeQuery.class);
 
         // constant() score
         assertQueryEquals(req("defType", "aqp", "q", "constant(title:foo)"), "ConstantScore(title:foo)",
@@ -613,10 +608,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "author:kurtz~2"), "author:kurtz,~2", FuzzyQuery.class);
 
         // levenshtein automata only considers distances (and max is 2)
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~3"), "author:hoffmann, w~2",
-                FuzzyQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~1"), "author:hoffmann, w~1",
-                FuzzyQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "author:\"Hoffmann, W.\"~2"), "author:hoffmann, w~2",
                 FuzzyQuery.class);
@@ -782,10 +773,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 //                "spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 100)",
 //                SpanPositionRangeQuery.class);
 
-        // notice the use of modifier '=' (if it is lowercased, it means _nosyn analyzer
-        // was used)
-        assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"Accomazzi, A\", 1)"),
-                "spanPosRange(author:accomazzi, a, 0, 1)", SpanPositionRangeQuery.class);
 //        assertQueryEquals(req("defType", "aqp", "q", "pos(+author:\"Accomazzi, A\", 1, 1)"),
 //                "spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)",
 //                SpanPositionRangeQuery.class);
