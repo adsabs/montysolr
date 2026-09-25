@@ -666,7 +666,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertU(adoc("id", "2", "bibcode", "XXX", "abstract", "foo bar baz", "title", "title bitle"));
 
+        assertU(adoc("id", "62", "bibcode", "b62", "title", "MOND"));
+        assertU(adoc("id", "63", "bibcode", "b63", "title", "Newtonian gravity"));
         assertU(commit("waitSearcher", "true"));
+        // A standalone wildcard must remain a match-all clause when combined
+        // with an unfielded term; otherwise the parser builds the pathological
+        // wildcard pattern "* foo".
+        assertQ(req("q", "* foo"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='2']",
+                "not(//doc/str[@name='id'][.='61'])");
+        assertQ(req("q", "* -MOND"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='61']",
+                "//doc/str[@name='id'][.='2']",
+                "//doc/str[@name='id'][.='63']",
+                "not(//doc/str[@name='id'][.='62'])");
 
         assertQ(req("q",
                         "title:\"A Change of Rotation Profile in the Envelope in the HH 111 Protostellar System: A Transition to a Disk\""),
