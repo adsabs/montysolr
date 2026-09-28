@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.nodes.DeletedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -120,6 +121,9 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
             for (String suffix : new String[]{"_fuzzy", ""}) {
                 if (hasAnalyzer(field + suffix)) {
                     tokens = analyze(field + suffix, value);
+                    if (tokens.length == 0) {
+                        return new DeletedQueryNode();
+                    }
 
                     if (tokens.length > 1)
                         return node; // break, let the analyzer decide the fate
