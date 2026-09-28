@@ -171,8 +171,22 @@ tokens {
     }
     return -1;
   }
-}
 
+  private boolean isCaretPhraseDollar() {
+    int offset = -1;
+    if (input.LA(offset) != '"') {
+      return false;
+    }
+    offset--;
+    while (input.LA(offset) != CharStream.EOF) {
+      if (input.LA(offset) == '"' && input.LA(offset - 1) != '\\') {
+        return input.LA(offset - 1) == '^';
+      }
+      offset--;
+    }
+    return false;
+  }
+}
 
 mainQ : 
   clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
@@ -257,6 +271,7 @@ value
   | coordinate -> ^(QCOORDINATE coordinate)
   | normal -> ^(QNORMAL normal) 
   | truncated -> ^(QTRUNCATED truncated)  
+  | CARAT_PHRASE quoted -> ^(QPHRASE quoted)
   | quoted -> ^(QPHRASE quoted)
   | quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
   | DATE_RANGE -> ^(QDATE DATE_RANGE)
@@ -512,7 +527,9 @@ QMARK  : '?'+ ;
 
 //RCURLY  : '}' ;
 
+CARAT_PHRASE : {input.LA(2) == '"'}? '^';
 CARAT : '^' NUMBER?;
+
 
 TILDE : '~' NUMBER?;
 
@@ -523,11 +540,14 @@ DQUOTE  : '\"';
 COMMA : ',';
 
 SEMICOLON:  ';';
+DOLLAR_AFTER_QUOTE
+  : {isCaretPhraseDollar()}? '$'
+  ;
 
 
 fragment AS_CHAR
   :
-  ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
+  ~('0' .. '9' | ' ' | '\"' | COMMA | PLUS | MINUS | '$')
   ;
   
   
