@@ -434,6 +434,157 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                         "aqp.classic_scoring.modifier", "0.6"),
                 "//*[@numFound='1']",
                 "//doc[str[@name='id']='19801']/float[@name='score'][. > 0.5999 and . < 0.6001]");
+
+    }
+
+    public void testPastedSearchWithAndAndStopwords() throws Exception {
+        assertU(adoc("id", "1171", "bibcode", "2014AJ....147..133P",
+                "title", "Magnetite Authigenesis and the Warming of Early Mars"));
+        assertU(adoc("id", "1172", "bibcode", "2014AJ....147..134P",
+                "title", "Completely Different Article"));
+        assertU(adoc("id", "1173", "bibcode", "2014AJ....147..135P",
+                "identifier", "the", "title", "Unrelated Identifier Control"));
+        assertU(adoc("id", "1174", "bibcode", "2014AJ....147..136P",
+                "identifier", "the", "title", "the Magnetite"));
+        assertU(adoc("id", "1175", "bibcode", "2014AJ....147..137P",
+                "title", "Magnetite Negative Exact Control"));
+        assertU(commit("waitSearcher", "true"));
+
+        String[] queries = {
+                "Magnetite Authigenesis and the Warming of Early Mars",
+                "Magnetite Authigenesis Warming of Early Mars",
+                "\"Magnetite Authigenesis\" and \"the Warming of Early Mars\"",
+                "\"Magnetite Authigenesis\" and the Warming of Early Mars",
+                "\"Magnetite Authigenesis\" and Warming of Early Mars",
+                "(Magnetite Authigenesis Warming Early Mars)^2",
+                "(Magnetite Authigenesis Warming Early Mars)~5"
+        };
+        for (String query : queries) {
+            assertQ(req("defType", "aqp", "q", query),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='1171']",
+                    "//doc/str[@name='id'][not(.='1172')]",
+                    "//doc/str[@name='id'][not(.='1173')]");
+        }
+
+        assertQ(req("defType", "aqp", "q", "=the AND Magnetite"),
+                "//*[@numFound='1']",
+                "not(//doc/str[@name='id'][.='1171'])",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1175')]");
+        assertQ(req("defType", "aqp", "q", "=(the Magnetite)"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1171')]",
+                "//doc/str[@name='id'][not(.='1175')]");
+
+        assertQ(req("defType", "aqp", "q", "identifier:the"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1173']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1171')]",
+                "//doc/str[@name='id'][not(.='1172')]");
+        assertQ(req("defType", "aqp", "q", "Magnetite -the"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1171']",
+                "//doc/str[@name='id'][.='1175']",
+                "//doc/str[@name='id'][not(.='1173')]",
+                "//doc/str[@name='id'][not(.='1174')]");
+        assertQ(req("defType", "aqp", "q", "Magnetite +the"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1171')]",
+                "//doc/str[@name='id'][not(.='1173')]",
+                "//doc/str[@name='id'][not(.='1175')]");
+
+        // Reversed terms prevent the companion phrase branch from hiding a
+        // required stopword in the normal unquoted whitespace branch.
+        assertU(adoc("id", "1176", "bibcode", "b1176", "title", "glacial quartz"));
+        assertU(adoc("id", "1177", "bibcode", "b1177", "title", "quartz unrelated"));
+        assertU(commit("waitSearcher", "true"));
+        try {
+            assertQ(req("defType", "aqp", "q", "quartz the glacial"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='1176']",
+                    "not(//doc/str[@name='id'][.='1177'])");
+            assertQ(req("defType", "aqp", "q", "\"quartz the glacial\""),
+                    "//*[@numFound='0']");
+        } finally {
+            assertU(delI("1176"));
+            assertU(delI("1177"));
+            assertU(commit("waitSearcher", "true"));
+        }
+        assertQ(req("defType", "aqp", "q",
+                        "The case for a minute-long merger-driven gamma-ray burst from fast-cooling synchrotron emission"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "Magnetite AND the~0.8"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1175')]");
+        assertQ(req("defType", "aqp", "q", "Magnetite AND the*"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1175')]");
+    }
+
+    public void testGroupedUnfieldedSlopRequiresAllTerms() throws Exception {
+        assertU(adoc("id", "1179", "bibcode", "b1179", "title",
+                "Magnetite noise noise Authigenesis noise noise Warming noise Early noise"));
+        assertU(adoc("id", "1178", "bibcode", "b1178", "title",
+                "Magnetite Authigenesis Warming Early Mars noise noise noise noise noise noise noise"));
+        assertU(commit("waitSearcher", "true"));
+
+        try {
+            assertQ(req("defType", "aqp", "q", "(Magnetite Authigenesis Warming Early Mars)~5",
+                            "qf", "title", "aqp.unfielded.tokens.strategy", "disjuncts",
+                            "fl", "id,score"),
+                    "//*[@numFound='1']",
+                    "//result/doc[1]/str[@name='id'][.='1178']",
+                    "not(//result/doc/str[@name='id'][.='1179'])");
+        } finally {
+            assertU(delI("1178"));
+            assertU(delI("1179"));
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
+    public void testJoinedUnfieldedGroupSlopIsRejected() throws Exception {
+        assertQueryParseException(req("defType", "aqp", "q", "(foo bar)~5",
+                "qf", "title", "aqp.unfielded.tokens.strategy", "join",
+                "aqp.unfielded.tokens.new.type", "simple"));
+    }
+
+    public void testDirectAdismaxPreservesSignedStopwords() throws Exception {
+        assertU(adoc("id", "11760", "bibcode", "b11760", "title", "Magnetite",
+                "identifier", "the"));
+        assertU(adoc("id", "11761", "bibcode", "b11761", "title", "Magnetite",
+                "identifier", "other"));
+        assertU(commit("waitSearcher", "true"));
+
+        try {
+            assertQ(req("defType", "aqp", "q", "adismax(Magnetite -the)",
+                            "qf", "title identifier",
+                            "fq", "id:(11760 OR 11761)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='11761']",
+                    "not(//doc/str[@name='id'][.='11760'])");
+            assertQ(req("defType", "aqp", "q", "adismax(Magnetite +the)",
+                            "qf", "title identifier", "fq", "id:(11760 OR 11761)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='11760']",
+                    "not(//doc/str[@name='id'][.='11761'])");
+            assertQ(req("defType", "aqp",
+                            "q", "adismax(-the* AND Magnetite AND the)",
+                            "qf", "title identifier",
+                            "fq", "id:(11760 OR 11761)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='11761']",
+                    "not(//doc/str[@name='id'][.='11760'])");
+        } finally {
+            assertU(delI("11760"));
+            assertU(delI("11761"));
+            assertU(commit("waitSearcher", "true"));
+        }
     }
 
     public void testSpecialCases() throws Exception {
