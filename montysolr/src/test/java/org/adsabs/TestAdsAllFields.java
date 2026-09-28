@@ -1730,6 +1730,18 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                         + "(institution:astro 3d)^2.0 aff_id:astro 3d "
                         + "(aff_canonical:\"acr::astro (3d 3d)\" | aff_canonical:\"acr::astro 3 d\")",
                 BooleanQuery.class);
+
+        assertU(adoc("id", "1845", "bibcode", "b1845", "title", "(BLAST)"));
+        assertU(adoc("id", "1846", "bibcode", "b1846", "title", "B[e]"));
+        assertU(adoc("id", "1847", "bibcode", "b1847", "title", "B(e)"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("q", "full:blast", "fq", "id:1845"), "//*[@numFound='1']");
+        assertQ(req("q", "full:\"B[e]\""), "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1846']",
+                "not(//doc/str[@name='id'][.='1847'])");
+        assertQ(req("q", "full:\"B(e)\""), "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1847']",
+                "not(//doc/str[@name='id'][.='1846'])");
     }
     public void testGlobalExplicitSynonymPhraseSlop() throws Exception {
         try {
