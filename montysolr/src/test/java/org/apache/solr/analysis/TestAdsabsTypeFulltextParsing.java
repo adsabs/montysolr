@@ -351,6 +351,16 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         assertU(adoc("id", "709", "bibcode", "xxxxxxxxxx709",
                 "title", "H2O+CO2"));
         assertU(adoc("id", "710", "bibcode", "xxxxxxxxxx710",
+                "title", "J1234+5678"));
+        assertU(adoc("id", "711", "bibcode", "xxxxxxxxxx711",
+                "title", "J1234-5678"));
+        assertU(adoc("id", "712", "bibcode", "xxxxxxxxxx712",
+                "title", "J1234 5678"));
+        assertU(adoc("id", "713", "bibcode", "xxxxxxxxxx713",
+                "title", "He+"));
+        assertU(adoc("id", "714", "bibcode", "xxxxxxxxxx714",
+                "title", "He"));
+        assertU(adoc("id", "715", "bibcode", "xxxxxxxxxx715",
                 "title", "foo+123"));
         assertU(adoc("id", "716", "bibcode", "xxxxxxxxxx716",
                 "title", "well-known+"));
@@ -915,10 +925,10 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='709']");
         assertQ(req("q", "title:\"foo+123\""),
                 "//*[@numFound='1']",
-                "//doc/str[@name='id'][.='710']");
+                "//doc/str[@name='id'][.='715']");
         assertQ(req("defType", "aqp", "q", "=title:\"foo+123\""),
                 "//*[@numFound='1']",
-                "//doc/str[@name='id'][.='710']");
+                "//doc/str[@name='id'][.='715']");
         assertQ(req("q", "title:\"well-known+\""),
                 "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='716']");
@@ -951,6 +961,42 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
                 "//*[@numFound='2']",
                 "//doc/str[@name='id'][.='707']",
                 "//doc/str[@name='id'][.='708']"
+        );
+    }
+
+    public void testSignedAstronomicalObjectNames() throws Exception {
+        // A coordinate written with a space is a meaningful negative control.
+        assertQ(req("q", "title:\"J1234+5678\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='710']",
+                "not(//doc/str[@name='id'][.='712'])"
+        );
+        assertQ(req("q", "title:\"j1234+5678\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='710']",
+                "not(//doc/str[@name='id'][.='712'])"
+        );
+        assertQ(req("q", "title:\"J1234-5678\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='711']"
+        );
+        assertQ(req("q", "title:\"j1234-5678\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='711']"
+        );
+        assertQ(req("defType", "aqp", "q", "=title:\"j1234+5678\""),
+                "//doc/str[@name='id'][.='710']");
+        assertQ(req("q", "title:\"J1234 5678\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='712']"
+        );
+    }
+
+    public void testSignedChemicalFormulaNames() throws Exception {
+        assertQ(req("q", "title:\"He+\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='713']",
+                "not(//doc/str[@name='id'][.='714'])"
         );
     }
 
