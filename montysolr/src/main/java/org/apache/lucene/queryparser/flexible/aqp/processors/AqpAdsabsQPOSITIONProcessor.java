@@ -3,9 +3,11 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
@@ -49,10 +51,13 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
      *                           <value>
      */
     public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
+
         AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
         String input = subChild.getTokenInput();
 
-        input = input.trim();
+        AqpANTLRNode explicitFieldScope = findExplicitFieldScope(node);
+        boolean explicitField = explicitFieldScope != null;
+        boolean insideFunction = isInsideFunction(node);
 
         if (input.equals("^~") || input.equals("^") || input.equals("")) {
             throw new QueryNodeException(new MessageImpl(
@@ -82,6 +87,14 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
         if (input.charAt(0) != '"') {
             input = "\"" + input + "\"";
         }
+        if (start == 1 && (insideFunction || isMarkedFunctionCaret()) && !explicitField) {
+            String fieldInput = input.length() > 1 && input.charAt(0) == '"'
+                    && input.charAt(input.length() - 1) == '"'
+                    ? input.substring(1, input.length() - 1)
+                    : input;
+            return new FieldQueryNode("first_author", fieldInput,
+                    subChild.getInputTokenStart(), subChild.getInputTokenEnd());
+        }
 
         // finally, generate warning
         AqpFeedback feedback = getFeedbackAttr();
@@ -108,7 +121,7 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
         }
 
 
-        String fieldName = getFieldName(node, "author");
+        String fieldName = getFieldName(explicitFieldScope, "author");
         List<OriginalInput> values = new ArrayList<OriginalInput>();
 
         // was it old syntax =author:"^...." ?
@@ -127,27 +140,64 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
         values.add(new OriginalInput(String.valueOf(start), -1, -1));
         values.add(new OriginalInput(String.valueOf(end), -1, -1));
 
-
         return new AqpFunctionQueryNode("pos", builder, values);
-
     }
 
-    // tries to discover the field (if present, otherwise returns the default)
-    private String getFieldName(AqpANTLRNode node, String defaultField) {
-        String fieldName = defaultField;
+    private AqpANTLRNode findExplicitFieldScope(AqpANTLRNode node) {
+        QueryNode parent = node.getParent();
+        while (parent instanceof AqpANTLRNode) {
+            AqpANTLRNode antlrParent = (AqpANTLRNode) parent;
+            if ("FIELD".equals(antlrParent.getTokenLabel())
+                    && antlrParent.getChildren().size() == 2) {
+                return antlrParent;
+            }
+            if ("QFUNC".equals(antlrParent.getTokenLabel())
+                    || "QFUNC".equals(antlrParent.getTokenName())
+                    || "FUNC_NAME".equals(antlrParent.getTokenName())) {
+                return null;
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
 
-        if (node.getParent().getChildren().size() != 2) {
-            return fieldName;
+    private boolean isInsideFunction(AqpANTLRNode node) {
+        QueryNode parent = node.getParent();
+        while (parent instanceof AqpANTLRNode) {
+            AqpANTLRNode antlrParent = (AqpANTLRNode) parent;
+            if ("QFUNC".equals(antlrParent.getTokenLabel())
+                    || "QFUNC".equals(antlrParent.getTokenName())
+                    || "FUNC_NAME".equals(antlrParent.getTokenName())) {
+                return true;
+            }
+            parent = parent.getParent();
+        }
+        return false;
+    }
+
+    private boolean isMarkedFunctionCaret() {
+        AqpRequestParams requestParams = getQueryConfigHandler().get(
+                AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
+        return requestParams != null
+                && requestParams.getLocalParams() != null
+                && requestParams.getLocalParams().getBool("aqp.caret_in_function", false);
+    }
+
+
+    // tries to discover the field (if present, otherwise returns the default)
+    private String getFieldName(AqpANTLRNode fieldScope, String defaultField) {
+        if (fieldScope == null || fieldScope.getChildren().isEmpty()) {
+            return defaultField;
         }
 
-        QueryNode possibleField = node.getParent().getChildren().get(0);
+        QueryNode possibleField = fieldScope.getChildren().get(0);
         if (possibleField instanceof AqpANTLRNode) {
-            String testValue = ((AqpANTLRNode) possibleField).getTokenInput();
-            if (testValue != null) {
-                fieldName = testValue;
+            String fieldName = ((AqpANTLRNode) possibleField).getTokenInput();
+            if (fieldName != null) {
+                return fieldName;
             }
         }
-        return fieldName;
+        return defaultField;
     }
 
     protected AqpANTLRNode getChain(AqpANTLRNode finalNode) {

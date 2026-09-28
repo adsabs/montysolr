@@ -679,7 +679,7 @@ DOLLAR_AFTER_QUOTE
 
 fragment AS_CHAR
   :
-  ~('0' .. '9' | ' ' | '\"' | COMMA | PLUS | MINUS | '$')
+  ~('0' .. '9' | ' ' | '"' | COMMA | PLUS | MINUS | '$' | LPAREN | RPAREN)
   ;
   
   
