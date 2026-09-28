@@ -1742,6 +1742,25 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         assertQ(req("q", "full:\"B(e)\""), "//*[@numFound='1']",
                 "//doc/str[@name='id'][.='1847']",
                 "not(//doc/str[@name='id'][.='1846'])");
+        // A score tie must not let reader-less seeds consume trending's top-N window.
+        for (int i = 0; i < 200; i++) {
+            assertU(adoc("id", Integer.toString(300 + i),
+                    "bibcode", "trending-empty-" + i,
+                    "title", "star"));
+        }
+        assertU(adoc("id", "500",
+                "bibcode", "trending-reader-1",
+                "title", "star",
+                "reader", "trending-shared-reader"));
+        assertU(adoc("id", "501",
+                "bibcode", "trending-reader-2",
+                "title", "star",
+                "reader", "trending-shared-reader"));
+        assertU(commit());
+        assertQ(req("q", "trending(title:star)", "fl", "recid"),
+                "//*[@numFound='2']",
+                "//doc/int[@name='recid'][.='500']",
+                "//doc/int[@name='recid'][.='501']");
     }
     public void testGlobalExplicitSynonymPhraseSlop() throws Exception {
         try {
