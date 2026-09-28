@@ -186,6 +186,137 @@ tokens {
     }
     return false;
   }
+
+  private static final String ELEMENT_SYMBOLS =
+      "|H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al|Si|P|S|Cl|Ar|K|Ca|Sc|Ti|V|Cr|Mn|Fe|Co|Ni|Cu|Zn|"
+      + "Ga|Ge|As|Se|Br|Kr|Rb|Sr|Y|Zr|Nb|Mo|Tc|Ru|Rh|Pd|Ag|Cd|In|Sn|Sb|Te|I|Xe|Cs|Ba|"
+      + "La|Ce|Pr|Nd|Pm|Sm|Eu|Gd|Tb|Dy|Ho|Er|Tm|Yb|Lu|Hf|Ta|W|Re|Os|Ir|Pt|Au|Hg|Tl|"
+      + "Pb|Bi|Po|At|Rn|Fr|Ra|Ac|Th|Pa|U|Np|Pu|Am|Cm|Bk|Cf|Es|Fm|Md|No|Lr|Rf|Db|Sg|"
+      + "Bh|Hs|Mt|Ds|Rg|Cn|Nh|Fl|Mc|Lv|Ts|Og|";
+
+  private boolean isForbiddenLine() {
+    StringBuilder value = new StringBuilder();
+    int i = 1;
+    int c = input.LA(i);
+    if (c == '[') {
+      value.append((char) c);
+      c = input.LA(++i);
+      if (!Character.isUpperCase((char) c)) return false;
+      value.append((char) c);
+      c = input.LA(++i);
+      if (Character.isLowerCase((char) c)) {
+        value.append((char) c);
+        c = input.LA(++i);
+      }
+    } else {
+      if (!Character.isUpperCase((char) c)) return false;
+      value.append((char) c);
+      c = input.LA(++i);
+      if (Character.isLowerCase((char) c)) {
+        value.append((char) c);
+        c = input.LA(++i);
+      }
+    }
+    while (c == ' ' || c == '\t') {
+      value.append((char) c);
+      c = input.LA(++i);
+    }
+    if (c == '[') {
+      value.append((char) c);
+      c = input.LA(++i);
+      while (c == ' ' || c == '\t') {
+        value.append((char) c);
+        c = input.LA(++i);
+      }
+    }
+    int romanStart = value.length();
+    while ("IVXLCDMivxlcdm".indexOf(c) >= 0) {
+      value.append((char) c);
+      c = input.LA(++i);
+    }
+    if (value.length() == romanStart) return false;
+    while (c == ' ' || c == '\t') {
+      value.append((char) c);
+      c = input.LA(++i);
+    }
+    if (c != ']') return false;
+    value.append(']');
+    return isForbiddenLine(value.toString());
+  }
+  private boolean isForbiddenLine(String value) {
+    int close = value.lastIndexOf(']');
+    if (close <= 0) return false;
+    int open = value.indexOf('[');
+    int elementStart = open == 0 ? 1 : 0;
+    while (elementStart < close && isLineSpace(value.charAt(elementStart))) elementStart++;
+    int elementEnd = elementStart + 1;
+    if (elementEnd < close && Character.isLowerCase(value.charAt(elementEnd))) elementEnd++;
+    if (!isElementSymbol(value, elementStart, elementEnd)) return false;
+    int romanStart = elementEnd;
+    if (open >= elementEnd) {
+      while (romanStart < open && isLineSpace(value.charAt(romanStart))) romanStart++;
+      if (romanStart != open) return false;
+      romanStart = open + 1;
+    }
+    while (romanStart < close && isLineSpace(value.charAt(romanStart))) romanStart++;
+    int romanEnd = close;
+    while (romanEnd > romanStart && isLineSpace(value.charAt(romanEnd - 1))) romanEnd--;
+    return isCanonicalRoman(value, romanStart, romanEnd);
+  }
+
+  private boolean isElementSymbol(String value, int start, int end) {
+    return ELEMENT_SYMBOLS.contains("|" + value.substring(start, end) + "|");
+  }
+
+  private boolean isCanonicalRoman(String value, int start, int end) {
+    if (start >= end) return false;
+    boolean lower = Character.isLowerCase(value.charAt(start));
+    for (int i = start; i < end; i++) {
+      char c = value.charAt(i);
+      if (!"IVXLCDMivxlcdm".contains(String.valueOf(c))
+          || Character.isLowerCase(c) != lower) return false;
+    }
+    int i = consumeRun(value, start, end, 'M', 3);
+    if (i < end && upper(value.charAt(i)) == 'C'
+        && i + 1 < end && (upper(value.charAt(i + 1)) == 'M' || upper(value.charAt(i + 1)) == 'D')) {
+      i += 2;
+    } else if (i < end && upper(value.charAt(i)) == 'D') {
+      i = consumeRun(value, i + 1, end, 'C', 3);
+    } else {
+      i = consumeRun(value, i, end, 'C', 3);
+    }
+    if (i < end && upper(value.charAt(i)) == 'X'
+        && i + 1 < end && (upper(value.charAt(i + 1)) == 'C' || upper(value.charAt(i + 1)) == 'L')) {
+      i += 2;
+    } else if (i < end && upper(value.charAt(i)) == 'L') {
+      i = consumeRun(value, i + 1, end, 'X', 3);
+    } else {
+      i = consumeRun(value, i, end, 'X', 3);
+    }
+    if (i < end && upper(value.charAt(i)) == 'I'
+        && i + 1 < end && (upper(value.charAt(i + 1)) == 'X' || upper(value.charAt(i + 1)) == 'V')) {
+      i += 2;
+    } else if (i < end && upper(value.charAt(i)) == 'V') {
+      i = consumeRun(value, i + 1, end, 'I', 3);
+    } else {
+      i = consumeRun(value, i, end, 'I', 3);
+    }
+    return i == end;
+  }
+
+  private int consumeRun(String value, int start, int end, char symbol, int max) {
+    int i = start;
+    while (i < end && upper(value.charAt(i)) == symbol && i - start < max) i++;
+    return i;
+  }
+
+  private char upper(char value) {
+    return Character.toUpperCase(value);
+  }
+
+  private boolean isLineSpace(char value) {
+    return value == ' ' || value == '\t';
+  }
 }
 
 mainQ : 
@@ -264,7 +395,8 @@ range_term_ex
 */
 value  
   :
-  REGEX -> ^(QREGEX REGEX) 
+  REGEX -> ^(QREGEX REGEX)
+  | f=FORBIDDEN_LINE -> ^(QNORMAL $f)
   |range_term_in -> ^(QRANGEIN range_term_in)
 //  | range_term_ex -> ^(QRANGEEX range_term_ex) 
   | identifier -> ^(QIDENTIFIER identifier)
@@ -676,6 +808,31 @@ fragment S_NUMBER:
 HOUR
   : 
   INT INT COLON INT INT COLON NUMBER (PLUS|MINUS) INT INT COLON INT INT COLON NUMBER
+  ;
+
+fragment ROMAN_NUMERAL
+  :
+  ('I' | 'V' | 'X' | 'L' | 'C' | 'D' | 'M'
+   | 'i' | 'v' | 'x' | 'l' | 'c' | 'd' | 'm')+
+  ;
+
+fragment ELEMENT_SYMBOL
+  :
+  ('A'..'Z') ('a'..'z')?
+  ;
+
+fragment BRACKET_ELEMENT_SYMBOL
+  :
+  ('A'..'Z') ('a'..'z')?
+  ;
+
+FORBIDDEN_LINE
+  :
+  {isForbiddenLine()}?=>
+  ( ELEMENT_SYMBOL (' ' | '\t')* LBRACK (' ' | '\t')* ROMAN_NUMERAL (' ' | '\t')* RBRACK
+  | LBRACK BRACKET_ELEMENT_SYMBOL (' ' | '\t')* ROMAN_NUMERAL (' ' | '\t')* RBRACK
+  | ELEMENT_SYMBOL (' ' | '\t')* ROMAN_NUMERAL (' ' | '\t')* RBRACK
+  )
   ;
 
 TERM_NORMAL
