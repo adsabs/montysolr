@@ -586,7 +586,8 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
             // and all elements must be either empty
             // or have values that can be ignored
 
-            if (modifier == "" || (isFirstInGroup && ignoreModifiers.contains(modifier))) {
+            if (modifier == "" || (isFirstInGroup && ignoreModifiers.contains(modifier)
+                    && !modifier.equals("MINUS"))) {
                 if (tModifier == "" || (isFirstInGroup && ignoreTModifiers.contains(tModifier))) {
                     if (field == "" || (isFirstInGroup && !isFieldIgnored(field))) {
                         return catchQTypes.contains(qType);
