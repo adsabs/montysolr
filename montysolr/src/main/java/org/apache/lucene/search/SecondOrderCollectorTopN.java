@@ -37,7 +37,7 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
             if (!organized) {
                 ((ArrayList) hits).ensureCapacity(topCollector.totalHits);
                 for (ScoreDoc d : topCollector.topDocs().scoreDocs) {
-                    hits.add(new CollectorDoc(d.doc, d.score));
+                    hits.add(new CollectorDoc(d.doc, scoreOf(d)));
                 }
 
             }
@@ -47,6 +47,28 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 
         return super.getSubReaderResults(rangeStart, rangeEnd);
 
+    }
+
+    private float scoreOf(ScoreDoc scoreDoc) {
+        if (!Float.isNaN(scoreDoc.score)) {
+            return scoreDoc.score;
+        }
+        if (scoreDoc instanceof FieldDoc && sortOrder != null) {
+            Object[] sortValues = ((FieldDoc) scoreDoc).fields;
+            SortField[] sortFields = sortOrder.getSort();
+            if (sortValues != null) {
+                for (int i = 0; i < sortFields.length && i < sortValues.length; i++) {
+                    if (sortFields[i].getType() == SortField.Type.SCORE
+                            && sortValues[i] instanceof Number) {
+                        float score = ((Number) sortValues[i]).floatValue();
+                        if (!Float.isNaN(score)) {
+                            return score;
+                        }
+                    }
+                }
+            }
+        }
+        return scoreDoc.score;
     }
 
     @Override
