@@ -40,6 +40,139 @@ tokens {
 @lexer::header {
    package org.apache.lucene.queryparser.flexible.aqp.parser;
 }
+@lexer::members {
+  private final java.util.ArrayDeque<Token> pendingTokens =
+      new java.util.ArrayDeque<Token>();
+
+  /**
+   * AUTHOR_SEARCH is permissive for comma-separated names. If it consumed an
+   * explicit field suffix, split that suffix into normal lexer tokens without
+   * rewinding the CharStream, so ANTLR's line and column state remains intact.
+   */
+  @Override
+  public Token nextToken() {
+    if (!pendingTokens.isEmpty()) {
+      return pendingTokens.removeFirst();
+    }
+
+    Token token = super.nextToken();
+    if (token.getType() != AUTHOR_SEARCH) {
+      return token;
+    }
+
+    String text = token.getText();
+    int boundary = fieldBoundary(text);
+    if (boundary < 0) {
+      return token;
+    }
+
+    int fieldEnd = boundary;
+    while (fieldEnd < text.length() && text.charAt(fieldEnd) != ':') {
+      fieldEnd++;
+    }
+    if (fieldEnd >= text.length()) {
+      return token;
+    }
+
+    org.antlr.runtime.CommonToken authorToken =
+        (org.antlr.runtime.CommonToken) token;
+    int start = authorToken.getStartIndex();
+    int line = authorToken.getLine();
+    int column = authorToken.getCharPositionInLine();
+    authorToken.setText(text.substring(0, boundary));
+    authorToken.setStopIndex(start + boundary - 1);
+
+    org.antlr.runtime.CommonToken fieldToken =
+        new org.antlr.runtime.CommonToken(authorToken.getInputStream(), TERM_NORMAL,
+            Token.DEFAULT_CHANNEL, start + boundary, start + fieldEnd - 1);
+    fieldToken.setStartIndex(start + boundary);
+    fieldToken.setStopIndex(start + fieldEnd - 1);
+    fieldToken.setLine(line);
+    fieldToken.setCharPositionInLine(column + boundary);
+
+    org.antlr.runtime.CommonToken colonToken =
+        new org.antlr.runtime.CommonToken(authorToken.getInputStream(), COLON,
+            Token.DEFAULT_CHANNEL, start + fieldEnd, start + fieldEnd);
+    colonToken.setStartIndex(start + fieldEnd);
+    colonToken.setStopIndex(start + fieldEnd);
+    colonToken.setLine(line);
+    colonToken.setCharPositionInLine(column + fieldEnd);
+
+    pendingTokens.add(fieldToken);
+    pendingTokens.add(colonToken);
+    queueFieldValue(authorToken, text, fieldEnd + 1);
+
+    return authorToken;
+  }
+
+  private void queueFieldValue(
+      org.antlr.runtime.CommonToken authorToken, String text, int valueStart) {
+    if (valueStart >= text.length()) {
+      return;
+    }
+
+    org.antlr.runtime.ANTLRStringStream valueStream =
+        new org.antlr.runtime.ANTLRStringStream(text.substring(valueStart));
+    ADSLexer valueLexer = new ADSLexer(valueStream);
+    int inputStart = authorToken.getStartIndex() + valueStart;
+    org.antlr.runtime.CommonToken valueToken;
+    while ((valueToken =
+        (org.antlr.runtime.CommonToken) valueLexer.nextToken()).getType()
+        != Token.EOF) {
+      org.antlr.runtime.CommonToken queuedToken =
+          new org.antlr.runtime.CommonToken(authorToken.getInputStream(),
+              valueToken.getType(), valueToken.getChannel(),
+              inputStart + valueToken.getStartIndex(),
+              inputStart + valueToken.getStopIndex());
+      queuedToken.setLine(authorToken.getLine() + valueToken.getLine() - 1);
+      int tokenColumn = valueToken.getCharPositionInLine();
+      if (valueToken.getLine() == 1) {
+        tokenColumn += authorToken.getCharPositionInLine() + valueStart;
+      }
+      queuedToken.setCharPositionInLine(tokenColumn);
+      pendingTokens.add(queuedToken);
+    }
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    if (pendingTokens != null) {
+      pendingTokens.clear();
+    }
+  }
+
+  private int fieldBoundary(String text) {
+    boolean afterComma = false;
+    for (int i = 1; i < text.length(); i++) {
+      if (text.charAt(i) == ',') {
+        afterComma = true;
+        continue;
+      }
+      if (!afterComma || text.charAt(i) != ' ') {
+        continue;
+      }
+      int field = i;
+      while (field < text.length() && text.charAt(field) == ' ') {
+        field++;
+      }
+      if (field >= text.length() || !Character.isLetter(text.charAt(field))) {
+        continue;
+      }
+      int colon = field + 1;
+      while (colon < text.length()
+          && (Character.isLetterOrDigit(text.charAt(colon))
+              || text.charAt(colon) == '_' || text.charAt(colon) == '-')) {
+        colon++;
+      }
+      if (colon < text.length() && text.charAt(colon) == ':') {
+        return field;
+      }
+    }
+    return -1;
+  }
+}
+
 
 mainQ : 
   clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
