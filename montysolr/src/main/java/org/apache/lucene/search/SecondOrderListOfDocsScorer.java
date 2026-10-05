@@ -11,14 +11,16 @@ public class SecondOrderListOfDocsScorer extends Scorer {
     private int doc = -1;
     private float score;
     private int docBase = 0;
+    private final float scoreBoost;
 
-    public SecondOrderListOfDocsScorer(Weight weight, List<CollectorDoc> hits, int docBase) throws IOException {
+    public SecondOrderListOfDocsScorer(Weight weight, List<CollectorDoc> hits, int docBase, float scoreBoost) throws IOException {
         super(weight);
         if (hits.size() > 0) {
             this.hits = hits;
             iterator = hits.iterator();
         }
         this.docBase = docBase;
+        this.scoreBoost = scoreBoost;
     }
 
 
@@ -51,7 +53,8 @@ public class SecondOrderListOfDocsScorer extends Scorer {
             public int nextDoc() throws IOException {
                 if (iterator != null && iterator.hasNext()) {
                     ScoreDoc hit = iterator.next();
-                    score = hit.score;
+                    float boostedScore = hit.score * scoreBoost;
+                    score = boostedScore >= 0f ? boostedScore : 0f;
                     return doc = hit.doc - docBase;
                 } else {
                     return doc = NO_MORE_DOCS;

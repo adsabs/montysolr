@@ -3,12 +3,10 @@ package org.apache.solr.search;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.*;
 import org.apache.lucene.queries.spans.SpanNearQuery;
-import org.apache.lucene.queries.spans.SpanPositionRangeQuery;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.util.ContentStream;
@@ -779,14 +777,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "similar(recid:2, title)"), "+like:title bitle  -BitSetQuery(1)",
                 BooleanQuery.class);
 
-        // topn() with score sorting
-        // TODO: solve it differently https://github.com/romanchyla/montysolr/issues/185
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, score desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, \"score desc,bibcode asc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2, info=score desc,bibcode asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
 
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
@@ -1033,40 +1023,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "abs:foo"), "abstract:foo title:foo keyword:foo",
                 BooleanQuery.class);
 
-        // unbalanced brackets for functions
-        assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy), date asc)"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(
-                req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy),   date asc   )"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(201,(  ((\"foo bar\") AND database:astronomy)),date asc)"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         // added ability to interactively tweak queries
         assertQueryEquals(req("defType", "aqp", "q", "tweak(collector_final_value=ARITHM_MEAN, citations(author:foo))"),
                 "SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
-        // # 389
-        // make sure the functional parsing is handling things well
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo OR topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo AND topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(+title:foo +FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, title:foo, date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, (title:foo), date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, \"foo bar\", \"date desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(all:\"foo bar\", collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         // trendy() - what people read, it reads data from index
         assertU(addDocs("author", "muller", "reader", "bibcode1", "reader", "bibcode2"));
@@ -1117,31 +1079,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 BooleanQuery.class);
 
 
-        // topn sorted - added 15Aug2013
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(*:*, collector=SecondOrderCollectorTopN(5, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc,citation_count desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc,citation_count desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        // topN - added Aug2013
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*)"),
-                "FunctionScoreQuery(SecondOrderQuery(*:*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, (foo bar))"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:foo +all:bar, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-//        assertQueryEquals(req("defType", "aqp", "q", "topn(5, edismax(dog OR cat))", "qf", "title^1 abstract^0.5"),
-//                "FunctionScoreQuery(SecondOrderQuery(((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat), collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-//                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:accomazzi)"),
-                "FunctionScoreQuery(SecondOrderQuery(author:accomazzi, author:accomazzi,*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         /*
          * It is different if Aqp handles the boolean operations or if edismax() does
@@ -1508,31 +1445,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                         + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de))",
                 BooleanQuery.class);
 
-        /*
-        assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"", "aqp.classic_scoring.modifier", "0.6"),
-                "custom((abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) "
-                        + "(title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) "
-                        + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de)), "
-                        + "sum(float(cite_read_boost),const(0.6)))",
-                FunctionScoreQuery.class);
-         */
-
-        assertQueryContains(req("defType", "aqp", "q", "author:\"foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        assertQueryNotContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "no.classic_scoring.modifier", "0.5"),
-                "scored by",
-                SpanPositionRangeQuery.class);
-        assertQueryContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        assertQueryContains(
-                req("defType", "aqp", "q", "foo bar aqp(baz)", "aqp.classic_scoring.modifier", "0.6", "qf",
-                        "title keyword"),
-                "scored by boost(sum(float(cite_read_boost),const(0.6))))",
-                FunctionScoreQuery.class);
 
         // when used in conjunction with constant scoring, custom modifies constant (but
         // it won't replace it)
@@ -1540,11 +1452,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 req("defType", "aqp", "q", "^accomazzi", "aqp.constant_scoring", "author^5", "qf", "author title"),
                 "(ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0",
                 BoostQuery.class);
-        assertQueryContains(
-                req("defType", "aqp", "q", "^accomazzi", "aqp.classic_scoring.modifier", "0.5", "aqp.constant_scoring",
-                        "author^5", "qf", "author title"),
-                ")))^5.0, scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
     }
 

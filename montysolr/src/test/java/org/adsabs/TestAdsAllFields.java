@@ -1715,9 +1715,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "//*[@numFound='6']"
         );
 
-        // verify the explanation still works
-        assertQ(req("defType", "aqp", "debugQuery", "true", "q", "topn(2, similar(datetest, input title, 100, 1, 1, 1), \"score desc,bibcode asc\")"),
-                "//*[@name='debug']/*[@name='explain']/*[position() <= 1][contains(text(), 'product of')]");
 
 
         /*

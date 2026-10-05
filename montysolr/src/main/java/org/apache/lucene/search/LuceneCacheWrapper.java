@@ -54,7 +54,7 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
         throw new NotImplementedException();
     }
 
-    public float getFloat(int docid) {
+    public float getFloat(int docid) throws IOException {
         throw new NotImplementedException();
     }
 
@@ -82,15 +82,18 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
             }
 
             @Override
-            public float getFloat(int docid) {
+            public synchronized float getFloat(int docid) throws IOException {
                 NumericDocValues ref = this.cache.get();
-                try {
-                    if (ref.advanceExact(docid)) {
-                        return Float.intBitsToFloat((int) ref.longValue());
+                // Reopen the forward-only iterator before accessing a lower doc id.
+                if (ref == null || docid < ref.docID()) {
+                    ref = uninvertingReader.getNumericDocValues(fName);
+                    if (ref == null) {
+                        ref = DocValues.emptyNumeric();
                     }
-                } catch (IOException e) {
-                    // TODO:rca - propagate instead?
-                    e.printStackTrace();
+                    this.cache = new SoftReference<>(ref);
+                }
+                if (ref.advanceExact(docid)) {
+                    return Float.intBitsToFloat((int) ref.longValue());
                 }
                 return 0.0f;
             }
