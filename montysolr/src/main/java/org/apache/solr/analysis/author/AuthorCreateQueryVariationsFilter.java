@@ -38,7 +38,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
 
     private final boolean lookAtPayloadForOrigAuthor;
-    private final int maxNumberOfNames = 6; // safety precaution, we are pretty efficient but one should be careful...
+    public static final int MAX_NAME_PARTS = 6;
     private final boolean plainSurname;
     private final int createVariations;
     private final boolean addWildcards;
@@ -118,8 +118,8 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
 
             if (authorParts.length > 1) {
 
-                String[] nameParts = authorParts[1].split(" ", maxNumberOfNames - 1);
-                String[] origNameParts = origAuthorParts[1].split(" ", maxNumberOfNames - 1);
+                String[] nameParts = authorParts[1].split(" ", MAX_NAME_PARTS - 1);
+                String[] origNameParts = origAuthorParts[1].split(" ", MAX_NAME_PARTS - 1);
 
                 parts = new String[nameParts.length + 1];
                 parts[0] = authorParts[0] + ",";
@@ -132,8 +132,8 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
                 origParts = origAuthorParts;
             }
         } else {
-            parts = authorName.split(" ", maxNumberOfNames);
-            origParts = origAuthorName.split(" ", maxNumberOfNames);
+            parts = authorName.split(" ", MAX_NAME_PARTS);
+            origParts = origAuthorName.split(" ", MAX_NAME_PARTS);
         }
 
         // this is an important indicator that influences how the wildcard variant
@@ -192,7 +192,11 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
             }
         }
 
-        if (shortenMultiname && parts.length > 2) {
+        // PythonicAuthorNormalizerFilter marks natural-order names with a
+        // trailing comma. Do not drop terms from those names: shortening a
+        // three-part phrase such as "Kepler 1362 b" would emit "b, Kepler".
+        if (shortenMultiname && parts.length > 2
+                && origAuthorName.contains(",") && !origAuthorName.endsWith(",")) {
             variationStack.push(parts[0] + " " + parts[1]);
             if (parts[1].length() > 1) {
                 variationStack.push(parts[0] + " " + parts[1].charAt(0));
