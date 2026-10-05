@@ -585,7 +585,7 @@ public class AqpAdsabsSubQueryProvider implements
                             new SecondOrderCollectorTopN(sortOrRank, topN, sortOrder));
                 }
 
-                return AqpScoringQueryNodeBuilder.wrapQuery(q, "cite_read_boost", 0.5f);
+                return q;
             }
         });
 
