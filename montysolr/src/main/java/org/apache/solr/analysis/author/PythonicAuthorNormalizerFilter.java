@@ -128,4 +128,10 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
 
         return true;
     }
+
+    @Override
+    public void reset() throws IOException {
+        super.reset();
+        buffer.clear();
+    }
 }

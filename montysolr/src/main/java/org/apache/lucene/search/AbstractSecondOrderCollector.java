@@ -55,7 +55,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
     }
 
 
-    public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
+    public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) throws IOException {
 
         if (hits.size() == 0)
             return null;
@@ -188,6 +188,11 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
 
     public void setFinalValueType(FinalValueType type) {
         compactingType = type;
+    }
+
+    @Override
+    public FinalValueType getFinalValueType() {
+        return compactingType;
     }
 
     protected void compactHits() {

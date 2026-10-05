@@ -32,9 +32,11 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
             if (modifierNode.getChildren() != null) {
                 String modifier = ((AqpANTLRNode) modifierNode.getChildren().get(0))
                         .getTokenName();
-                node = new ModifierQueryNode(node,
+                ModifierQueryNode explicitModifier = new ModifierQueryNode(node,
                         modifier.equals("PLUS") ? ModifierQueryNode.Modifier.MOD_REQ
                                 : ModifierQueryNode.Modifier.MOD_NOT);
+                explicitModifier.setTag(AqpMODIFIERProcessor.EXPLICIT_MODIFIER_TAG, true);
+                node = explicitModifier;
             }
             return node;
         }
