@@ -1,3 +1,8 @@
+Unreleased
+----------
+- Add two-letter, single-component given-name prefix matching (for example, `Yu` can match both `Yu` and `Yuri`); exact-author queries preserve precision.
+- Avoid overlapping author prefixes for complete rewrites; retain the narrower prefix when configured term limits could drop existing matches, including mapped analysis fields.
+
 MontySolr 0.1, 2011-05-19
 -------------------------
 - Initial release

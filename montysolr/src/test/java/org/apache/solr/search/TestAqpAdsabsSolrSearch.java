@@ -454,6 +454,108 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testTwoLetterAuthorAbbreviationPrefix() throws Exception {
+        assertU(adoc("id", "34501", "bibcode", "2016TEST....34501S",
+                "author", "Testname, Yuri", "year", "2016"));
+        assertU(adoc("id", "34502", "bibcode", "2016TEST....34502S",
+                "author", "Testname, Yu. V.", "year", "2016"));
+        assertU(adoc("id", "34503", "bibcode", "2016TEST....34503S",
+                "author", "Testname, Yevgeny", "year", "2016"));
+        assertU(adoc("id", "34504", "bibcode", "2016TEST....34504S",
+                "author", "Elsewhere, Yuri", "year", "2016"));
+        assertU(adoc("id", "34505", "bibcode", "2016TEST....34505S",
+                "author", "Other, Author", "author", "Testname, Yuri", "year", "2016"));
+        assertU(adoc("id", "34506", "bibcode", "2016TEST....34506S",
+                "author", "Testname, Yuri L.", "year", "2016"));
+        assertU(adoc("id", "34507", "bibcode", "2016TEST....34507S",
+                "author", "Testname, Yu", "year", "2016"));
+        assertU(adoc("id", "34508", "bibcode", "2016TEST....34508S",
+                "author", "Testname, Yuliana", "year", "2016"));
+        assertU(commit("waitSearcher", "true"));
+
+        for (String abbreviation : new String[]{"author:\"^testname, yu.\" year:2016",
+                "author:\"^testname, yu\" year:2016"}) {
+            assertQ(req("defType", "aqp", "q", abbreviation),
+                    "//*[@numFound='5']",
+                    "//doc/str[@name='id'][.='34501']",
+                    "//doc/str[@name='id'][.='34502']",
+                    "//doc/str[@name='id'][.='34506']",
+                    "//doc/str[@name='id'][.='34507']",
+                    "//doc/str[@name='id'][.='34508']",
+                    "not(//doc/str[@name='id'][.='34503'])",
+                    "not(//doc/str[@name='id'][.='34504'])",
+                    "not(//doc/str[@name='id'][.='34505'])");
+        }
+
+        assertQ(req("defType", "aqp", "q", "author:\"testname, yu\" year:2016"),
+                "//*[@numFound='6']",
+                "//doc/str[@name='id'][.='34505']",
+                "//doc/str[@name='id'][.='34507']",
+                "//doc/str[@name='id'][.='34508']");
+        assertQ(req("defType", "aqp", "q", "author:\"^testname, y\" year:2016"),
+                "//doc/str[@name='id'][.='34501']");
+        assertQ(req("defType", "aqp", "q", "author:\"^testname, yuri\" year:2016"),
+                "//doc/str[@name='id'][.='34501']",
+                "not(//doc/str[@name='id'][.='34503'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+        assertQ(req("defType", "aqp", "q", "author:\"^testname, yuri l\" year:2016"),
+                "//doc/str[@name='id'][.='34501']",
+                "//doc/str[@name='id'][.='34506']",
+                "not(//doc/str[@name='id'][.='34503'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+        assertQ(req("defType", "aqp", "q", "=author:\"^testname, yuri\" year:2016"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='34501']",
+                "not(//doc/str[@name='id'][.='34506'])");
+        assertQ(req("defType", "aqp", "q", "=author:\"^testname, yu\" year:2016"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='34507']",
+                "not(//doc/str[@name='id'][.='34501'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+        assertQ(req("defType", "aqp", "q", "=author:\"^testname, yu.\" year:2016"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='34507']",
+                "not(//doc/str[@name='id'][.='34501'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+    }
+
+    public void testTwoLetterAuthorPrefixRetainsBoundedRewriteMatches() throws Exception {
+        int previousLimit = IndexSearcher.getMaxClauseCount();
+        try {
+            // Isolate the configured term selection from the separate nested clause limit.
+            IndexSearcher.setMaxClauseCount(4096);
+            assertU(adoc("id", "3451000", "bibcode", "2016TEST..3451000S",
+                    "author", "Boundedprefix, Yu", "year", "2016"));
+            for (int i = 0; i < 1024; i++) {
+                String suffix = "" + (char) ('a' + i / (26 * 26))
+                        + (char) ('a' + (i / 26) % 26) + (char) ('a' + i % 26);
+                assertU(adoc("id", Integer.toString(3451001 + i),
+                        "bibcode", "2016TEST..3451001S" + suffix,
+                        "author", "Boundedprefix, Yu " + suffix, "year", "2016"));
+            }
+            assertU(commit("waitSearcher", "true"));
+
+            // The literal takes one of the broad prefix's 1024 slots. The separate
+            // space prefix must retain its last selected name rather than lose that paper.
+            assertQ(req("q", "author:\"^boundedprefix, yu\" year:2016",
+                            "aqp.qprefix.scoring.author", "topterms", "rows", "0"),
+                    "//*[@numFound='1025']");
+            assertQ(req("q", "author:\"^boundedprefix, yu\" year:2016",
+                            "aqp.qprefix.scoring.author", "topterms",
+                            "fq", "id:3452024", "rows", "1", "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/*[@name='id'][.='3452024']");
+            assertQ(req("q", "author_notrans:\"^boundedprefix, yu\" year:2016",
+                            "aqp.authorFields", "author_notrans",
+                            "aqp.qprefix.scoring.author", "topterms",
+                            "fq", "id:3452024", "rows", "1", "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/*[@name='id'][.='3452024']");
+        } finally {
+            IndexSearcher.setMaxClauseCount(previousLimit);
+        }
+    }
+
     public void testPastedSearchWithAndAndStopwords() throws Exception {
         assertU(adoc("id", "1171", "bibcode", "2014AJ....147..133P",
                 "title", "Magnetite Authigenesis and the Warming of Early Mars"));
