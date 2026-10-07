@@ -18,6 +18,22 @@ So what is here:
   - multi-synonym parsing and expansion
   - support for Jython
   - and of course: the whole configuration of the ADS search engine
+
+ADS QUERY SYNTAX
+================
+
+When a title copied in all capitals is parsed as a sequence of acronyms, search
+the title phrase with the `=` modifier to disable synonym and acronym expansion:
+
+```text
+title:(="ON THE ACCURACY ASSESSMENT OF CELESTIAL REFERENCE FRAME REALIZATIONS")
+```
+
+Here `=` controls query expansion; it does not require the complete title field
+to equal the phrase. The quoted phrase is still analyzed for title search. Use
+this form only when searching a known title spelling; queries without `=` and
+queries in other fields keep their normal synonym and acronym behavior.
+
   
   
 In the past MontySolr combined Java with extensions written in C++/Python but now 

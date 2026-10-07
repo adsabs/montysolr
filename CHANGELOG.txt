@@ -1,3 +1,7 @@
+MontySolr, unreleased
+----------------------
+- Documented the `=` modifier for searching all-capital copied title phrases.
+
 MontySolr 0.1, 2011-05-19
 -------------------------
 - Initial release

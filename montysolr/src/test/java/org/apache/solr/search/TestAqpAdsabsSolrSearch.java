@@ -385,6 +385,51 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "//doc/str[@name='id'][.='4405']");
     }
 
+    public void testUppercasePastedTitleExactSearch() throws Exception {
+        String title = "On the accuracy assessment of celestial reference frame realizations";
+        String uppercaseTitle = title.toUpperCase(java.util.Locale.ROOT);
+        assertU(adoc("id", "35301", "bibcode", "2008JGeod..82..325M", "title", title));
+        assertU(adoc("id", "35302", "bibcode", "issue35302",
+                "title", "Preface: " + title + " revisited", "abstract", uppercaseTitle));
+        assertU(adoc("id", "35303", "bibcode", "issue35303",
+                "title", "SALT survey of the VLT", "abstract", "VLT observations"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "title:\"" + title + "\"", "fl", "id"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='35301']",
+                "//doc/str[@name='id'][.='35302']");
+        assertQ(req("defType", "aqp", "q", "title:\"" + uppercaseTitle + "\"", "fl", "id"),
+                "//*[@numFound='0']");
+
+        // '=' disables synonym and acronym expansion; the analyzed phrase is
+        // still a phrase search, not a whole-field equality check.
+        String exactTitle = "title:(=\"" + uppercaseTitle + "\")";
+        assertQ(req("defType", "aqp", "q", exactTitle, "fl", "id"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='35301']",
+                "//doc/str[@name='id'][.='35302']");
+        assertQ(req("defType", "aqp", "q", exactTitle + "^2", "fl", "id"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='35301']",
+                "//doc/str[@name='id'][.='35302']");
+        assertQ(req("defType", "aqp", "q", "abstract:(=\"" + uppercaseTitle + "\")", "fl", "id"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='35302']",
+                "not(//doc/str[@name='id'][.='35301'])");
+
+        // Title queries containing real acronyms, and acronym queries in other
+        // text fields, keep the normal acronym-aware analysis.
+        assertQ(req("defType", "aqp", "q", "title:\"SALT survey of the VLT\"", "fl", "id"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35303']");
+        assertQ(req("defType", "aqp", "q", "title:SALT", "fl", "id"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35303']");
+        assertQ(req("defType", "aqp", "q", "title:VLT", "fl", "id"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35303']");
+        assertQ(req("defType", "aqp", "q", "abstract:VLT", "fl", "id"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35303']");
+    }
+
     public void testPunctuationIdentifierQueries() throws Exception {
         assertU(adoc("id", "1101", "bibcode", "b1101", "ack", "mentions 10.17909/T9XG63"));
         assertU(adoc("id", "1102", "bibcode", "b1102", "ack", "mentions 10 words later 17909"));
