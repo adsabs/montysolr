@@ -6,8 +6,13 @@ import monty.solr.util.SolrTestSetup;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.*;
+import org.apache.lucene.index.MultiTerms;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.queries.spans.SpanNearQuery;
 import org.apache.lucene.util.BitSet;
+import org.apache.lucene.util.BytesRef;
+import org.apache.lucene.util.automaton.ByteRunAutomaton;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
@@ -23,6 +28,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * This unittest is for queries that require solr core
@@ -433,6 +439,95 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertQ(req("q", "title:(its NEAR its)"), "//*[@numFound='0']");
     }
+    public void testFirstAuthorInitialWithMoreThanLuceneClauseLimit() throws Exception {
+        final int matchingAuthors = 1025;
+        for (int i = 0; i < matchingAuthors; i++) {
+            String id = Integer.toString(344000 + i);
+            String bibcode = "344broad" + i;
+            assertU(adoc("id", id, "bibcode", bibcode, "author", "Li, S" + i,
+                    "year", "2020"));
+        }
+        assertU(adoc("id", "345100", "bibcode", "344later",
+                "author", "Other, O|Li, Slater", "year", "2020"));
+        assertU(adoc("id", "345101", "bibcode", "344otherYear",
+                "author", "Li, Sother", "year", "2019"));
+        assertU(commit("waitSearcher", "true"));
+
+        final int productionClauseLimit = 1024;
+        final int originalClauseLimit = IndexSearcher.getMaxClauseCount();
+        try {
+            IndexSearcher.setMaxClauseCount(productionClauseLimit);
+
+            Query query;
+            SolrQueryRequestBase queryRequest =
+                    (SolrQueryRequestBase) req("defType", "aqp", "q",
+                            "author:\"^Li, S\" year:2020");
+            try {
+                query = getParser(queryRequest).parse();
+            } finally {
+                queryRequest.close();
+            }
+
+            List<ByteRunAutomaton> authorExpansions = new ArrayList<>();
+            query.visit(new QueryVisitor() {
+                @Override
+                public QueryVisitor getSubVisitor(BooleanClause.Occur occur, Query parent) {
+                    return this;
+                }
+
+                @Override
+                public void consumeTermsMatching(Query source, String field,
+                                                 Supplier<ByteRunAutomaton> automaton) {
+                    if ("author".equals(field)) {
+                        authorExpansions.add(automaton.get());
+                    }
+                }
+            });
+            assertFalse("Expected a positional author multi-term query",
+                    authorExpansions.isEmpty());
+
+            RefCounted<SolrIndexSearcher> searcher = h.getCore().getSearcher();
+            try {
+                Terms terms = MultiTerms.getTerms(searcher.get().getIndexReader(), "author");
+                assertNotNull("Expected indexed author terms", terms);
+                int[] expansionCounts = new int[authorExpansions.size()];
+                TermsEnum termsEnum = terms.iterator();
+                for (BytesRef term = termsEnum.next(); term != null; term = termsEnum.next()) {
+                    for (int i = 0; i < authorExpansions.size(); i++) {
+                        ByteRunAutomaton automaton = authorExpansions.get(i);
+                        if (automaton.run(term.bytes, term.offset, term.length)) {
+                            expansionCounts[i]++;
+                        }
+                    }
+                }
+                int largestExpansion = 0;
+                for (int count : expansionCounts) {
+                    largestExpansion = Math.max(largestExpansion, count);
+                }
+                assertTrue("Expected an actual author dictionary expansion above the production "
+                                + "limit; largest was " + largestExpansion,
+                        largestExpansion > productionClauseLimit);
+            } finally {
+                searcher.decref();
+            }
+
+            assertQ(req("defType", "aqp", "q", "author:\"^Li, S\" year:2020",
+                            "fl", "id", "rows", "1100"),
+                    "//*[@numFound='1025']",
+                    "//doc/str[@name='id'][.='344000']",
+                    "//doc/str[@name='id'][.='345024']",
+                    "not(//doc/str[@name='id'][.='345100'])",
+                    "not(//doc/str[@name='id'][.='345101'])");
+            assertQ(req("defType", "aqp", "q", "author:\"Li, S\" year:2020",
+                            "fl", "id", "rows", "1100"),
+                    "//*[@numFound='1026']",
+                    "//doc/str[@name='id'][.='345100']",
+                    "not(//doc/str[@name='id'][.='345101'])");
+        } finally {
+            IndexSearcher.setMaxClauseCount(originalClauseLimit);
+        }
+    }
+
     public void testExactAuthorConstantScoring() throws Exception {
         assertU(adoc("id", "19801", "bibcode", "b19801", "author", "Foo",
                 "author", "Bar", "first_author", "Foo", "cite_read_boost", "0"));

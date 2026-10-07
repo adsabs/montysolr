@@ -34,18 +34,18 @@ public class SpanConverter {
             return wrapBoost(new SpanTermQuery(((TermQuery) q).getTerm()), boost);
         } else if (q instanceof ConstantScoreQuery) {
             return getSpanQuery(new SpanConverterContainer(((ConstantScoreQuery) q).getQuery(), 1, true, 0.0f));
-        } else if (q instanceof WildcardQuery) {
-            return wrapBoost(new SpanMultiTermQueryWrapper<WildcardQuery>((WildcardQuery) q), boost);
-        } else if (q instanceof PrefixQuery) {
-            return wrapBoost(new SpanMultiTermQueryWrapper<PrefixQuery>((PrefixQuery) q), boost);
+        } else if (q instanceof WildcardQuery wildcardQuery) {
+            return wrapBoost(wrapMultiTermQuery(wildcardQuery), boost);
+        } else if (q instanceof PrefixQuery prefixQuery) {
+            return wrapBoost(wrapMultiTermQuery(prefixQuery), boost);
         } else if (q instanceof MultiPhraseQuery) {
             return wrapBoost(convertMultiPhraseToSpan(container), boost);
         } else if (q instanceof PhraseQuery) {
             return wrapBoost(convertPhraseToSpan(container), boost);
         } else if (q instanceof BooleanQuery) {
             return wrapBoost(convertBooleanToSpan(container), boost);
-        } else if (q instanceof RegexpQuery) {
-            return wrapBoost(new SpanMultiTermQueryWrapper<RegexpQuery>((RegexpQuery) q), boost);
+        } else if (q instanceof RegexpQuery regexpQuery) {
+            return wrapBoost(wrapMultiTermQuery(regexpQuery), boost);
         } else if (q instanceof DisjunctionMaxQuery) {
             return wrapBoost(convertDisjunctionQuery(container), boost);
         } else if (q instanceof BoostQuery) {
@@ -376,6 +376,74 @@ public class SpanConverter {
         }
 
         return new SpanOrQuery(spanClauses);
+    }
+
+    /**
+     * Count a positional multi-term pattern as the single user clause it represents.
+     *
+     * <p>IndexSearcher applies its nested-clause limit to QueryVisitor leaves after rewriting. The
+     * normal SpanMultiTermQueryWrapper rewrite exposes each matching dictionary term as a separate
+     * leaf, even though all those terms are alternatives in one positional clause. Keep the
+     * pattern intact for that check, then use the same scoring span rewrite at weight creation
+     * (or the configured top-terms span rewrite). The query is not expanded during clause
+     * visiting, so weight creation does not repeat a prior term/state collection. The retained
+     * working-set shape is the same as existing legal SpanOr expansions (one per-term
+     * weight/postings stream), not a second term-set copy. The rewrite preserves every selected
+     * positional, payload, and scoring behavior; memory remains proportional to matching terms
+     * because each term needs its own span/postings stream.
+     */
+    private SpanQuery wrapMultiTermQuery(MultiTermQuery query) {
+        return new DeferredSpanMultiTermQuery(query);
+    }
+
+    private static final class DeferredSpanMultiTermQuery extends SpanQuery {
+        private final MultiTermQuery query;
+        private final SpanMultiTermQueryWrapper.SpanRewriteMethod spanRewrite;
+
+        private DeferredSpanMultiTermQuery(MultiTermQuery query) {
+            this.query = query;
+            MultiTermQuery.RewriteMethod rewrite = query.getRewriteMethod();
+            this.spanRewrite =
+                    rewrite instanceof TopTermsRewrite<?> topTermsRewrite
+                            ? new SpanMultiTermQueryWrapper.TopTermsSpanBooleanQueryRewrite(
+                                    topTermsRewrite.getSize())
+                            : SpanMultiTermQueryWrapper.SCORING_SPAN_QUERY_REWRITE;
+        }
+
+        @Override
+        public String getField() {
+            return query.getField();
+        }
+
+        @Override
+        public SpanWeight createWeight(IndexSearcher searcher, ScoreMode scoreMode,
+                                       float boost) throws IOException {
+            SpanQuery expanded = spanRewrite.rewrite(searcher.getIndexReader(), query);
+            return expanded.createWeight(searcher, scoreMode, boost);
+        }
+
+        @Override
+        public void visit(QueryVisitor visitor) {
+            if (visitor.acceptField(getField())) {
+                query.visit(visitor.getSubVisitor(Occur.MUST, this));
+            }
+        }
+
+        @Override
+        public String toString(String field) {
+            return "SpanMultiTermQueryWrapper(" + query.toString(field) + ")";
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return sameClassAs(other)
+                    && query.equals(((DeferredSpanMultiTermQuery) other).query);
+        }
+
+        @Override
+        public int hashCode() {
+            return classHash() ^ query.hashCode();
+        }
     }
 
     class Leaf {
