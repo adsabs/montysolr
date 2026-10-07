@@ -166,18 +166,25 @@ final public class AqpQueryParserUtil {
      * escaped are escaped by a preceding <code>\</code>.
      */
     public static String escape(String s) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = null;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             // These characters are part of the query syntax and must be escaped
             if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':'
-                    || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~'
-                    || c == '*' || c == '?' || c == '|' || c == '&') {
+                    || c == '^' || c == '[' || c == ']' || c == '\"' || c == '\u201C' || c == '\u201D'
+                    || c == '{' || c == '}' || c == '~' || c == '*'
+                    || c == '?' || c == '|' || c == '&') {
+                if (sb == null) {
+                    sb = new StringBuilder(s.length());
+                    sb.append(s, 0, i);
+                }
                 sb.append('\\');
             }
-            sb.append(c);
+            if (sb != null) {
+                sb.append(c);
+            }
         }
-        return sb.toString();
+        return sb == null ? s : sb.toString();
     }
 
 }

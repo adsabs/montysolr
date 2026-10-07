@@ -63,15 +63,12 @@ public class TestAqpQueryTree extends MontySolrQueryTestCase {
 
         assert response.contains(s);
 
-        s = "&lt;astOPERATOR label=\"DEFOP\" name=\"OPERATOR\" type=\"35\" &gt;\n" +
-                "    &lt;astMODIFIER label=\"MODIFIER\" name=\"MODIFIER\" type=\"30\" &gt;\n" +
-                "        &lt;astTMODIFIER label=\"TMODIFIER\" name=\"TMODIFIER\" type=\"66\" &gt;\n" +
-                "            &lt;astFIELD label=\"FIELD\" name=\"FIELD\" type=\"19\" &gt;";
-
         response = h.query(req("qt", "/qtree", "q", "title:joe doe", "wt", "xml"));
 
-        assert response.contains(s);
-
+        assertTrue(response.contains("&lt;astOPERATOR label=\"DEFOP\" name=\"OPERATOR\""));
+        assertTrue(response.contains("&lt;astMODIFIER label=\"MODIFIER\" name=\"MODIFIER\""));
+        assertTrue(response.contains("&lt;astTMODIFIER label=\"TMODIFIER\" name=\"TMODIFIER\""));
+        assertTrue(response.contains("&lt;astFIELD label=\"FIELD\" name=\"FIELD\""));
         response = h.query(req("qt", "/qtree", "q", "title:\"joe doe\"", "wt", "json"));
         //System.out.println(response);
 

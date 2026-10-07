@@ -144,11 +144,33 @@ public class AqpFunctionQParser extends FunctionQParser {
 
 
     public int parseInt() {
-        String val = consumeAsString();
-        if (val.charAt(0) == '"' && val.charAt(val.length() - 1) == '"') {
-            val = val.substring(1, val.length() - 1);
-        }
+        String val = dequoteDoubleQuoted(consumeAsString());
         return Integer.valueOf(val);
+    }
+
+    /** Removes supported delimiters from a raw quoted function argument. */
+    public static String dequote(String value) {
+        return dequote(value, true);
+    }
+
+    /** Removes supported double-quote delimiters without accepting single quotes. */
+    public static String dequoteDoubleQuoted(String value) {
+        return dequote(value, false);
+    }
+
+    private static String dequote(String value, boolean allowSingleQuotes) {
+        if (value == null || value.length() < 2) {
+            return value;
+        }
+
+        char opening = value.charAt(0);
+        char closing = value.charAt(value.length() - 1);
+        if ((opening == '"' && closing == '"')
+                || (opening == '\u201C' && (closing == '\u201D' || closing == '"'))
+                || (allowSingleQuotes && opening == '\'' && closing == '\'')) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 
     public Float parseFloat() throws SyntaxError {
