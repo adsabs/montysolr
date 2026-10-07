@@ -1,3 +1,10 @@
+Unreleased
+----------
+- Clarify that `=` suppresses synonyms and expanded-name alternatives but is
+  not a literal source-spelling mode. Document AQP field-regex queries for
+  `acr::`-tagged terms, noting uppercase synonym outputs may also be tagged and
+  that indexed compound forms remain. No runtime or index behavior changed.
+
 MontySolr 0.1, 2011-05-19
 -------------------------
 - Initial release

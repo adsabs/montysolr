@@ -25,6 +25,37 @@ that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014
   
 
 
+SEARCH CASE AND EXACTNESS
+=========================
+
+The ADS query modifier `=` suppresses synonym and expanded-name alternatives;
+it does not request a literal search of the source text. For example,
+`=full:SALT` avoids adding the “South African Large Telescope” expansion, but
+can still match an ordinary lowercase use of “salt.”
+
+The ADS text analyzer lowercases indexed term text and tokenizes punctuation,
+but does not erase every distinction. It tags analyzer-classified acronym
+terms and retains compound-token paths alongside their component terms.
+Ordinary queries can still merge hyphenated and concatenated spellings, so
+these paths do not provide literal punctuation matching. Case can affect query
+classification; `=` does not turn off analysis or provide a literal-case mode.
+
+With the ADS AQP parser, a field regular-expression query is matched against
+indexed terms directly, without analyzing the regex as body text. For example,
+`body:/acr::salt/` targets the indexed body term `acr::salt` (and does not scan
+stored body text). The `acr::` prefix is an analyzer-added tag that marks a
+token classified as an acronym. This can be useful for targeting tagged terms
+in the current index, but it is an analyzer detail rather than a stable
+acronym-metadata API or a guarantee that the source contained an acronym:
+uppercase synonym outputs may receive the same tag. Such a query can therefore
+match an expansion derived from lowercase source text, and its result is
+limited to the field named in the query.
+
+Neither `=` nor an `acr::` term query guarantees the original letter case or
+punctuation in the source. A strict source-spelling search requires searchable
+data that preserves that spelling; the existing ADS text terms do not provide
+that guarantee.
+
 INSTALLATION
 ============
 

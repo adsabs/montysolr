@@ -323,7 +323,32 @@ public class TestAdsabsTypeFulltextParsing extends MontySolrQueryTestCase {
         assertU(adoc("id", "1052", "bibcode", "xxxxxxxxxx1052", "title", "NuStar"));
         assertU(adoc("id", "1053", "bibcode", "xxxxxxxxxx1053", "title", "nuclear spectroscopic telescope array"));
         assertU(adoc("id", "1054", "bibcode", "xxxxxxxxxx1054", "title", "nuclear spectroscopic telescope"));
+        assertU(adoc("id", "1055", "bibcode", "xxxxxxxxxx1055", "title", "SALT"));
+        assertU(adoc("id", "1056", "bibcode", "xxxxxxxxxx1056", "title", "salt"));
         assertU(commit());
+    }
+
+    public void testAcronymTagRegexTargetsIndexedTermsNotSourceSpelling() throws Exception {
+        // '=' still searches normalized text terms: the ordinary lower-case term
+        // is present for both source spellings.
+        assertQ(req("q", "=title:SALT"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1055']",
+                "//doc/str[@name='id'][.='1056']");
+
+        // AQP field regexes match indexed terms directly. The analyzer-added tag
+        // is lowercased and is also applied to uppercase synonym output: the
+        // lowercase "black hole" source in 501 therefore has acr::bh too.
+        assertQ(req("q", "title:/acr::salt/"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1055']",
+                "not(//doc/str[@name='id'][.='1056'])");
+        assertQ(req("q", "title:/acr::SALT/"), "//*[@numFound='0']");
+        assertQ(req("q", "title:/acr::bh/"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='500']",
+                "//doc/str[@name='id'][.='501']");
+
     }
 
 
