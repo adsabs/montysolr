@@ -1265,6 +1265,20 @@
 	    * keyword_facet
 	      This is the normalized version of a controlled keyword (if paper contains it).
 	      Very often this value may be missing.
+	    * arxiv_class
+	      Search arXiv category IDs, not category display names. Use the current
+	      IDs from the arXiv category taxonomy:
+	      https://arxiv.org/category_taxonomy
+	      For example, hep-ex is the ID for "High Energy Physics - Experiment".
+	      Category IDs that match depend on which records are present in the
+	      collection; the arxiv_class field is populated from datafield 650,
+	      subfield a. Check an ID against the collection with an AQP query:
+	        defType=aqp
+	        q=arxiv_class:hep-ex
+	        fq={!type=aqp v=$fq_database}
+	        fq_database=(database:astronomy OR database:physics)
+	      The ADS/SciX web-interface help is maintained outside this repository.
+
 	      
 	    * comment
 	    

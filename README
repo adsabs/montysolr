@@ -25,6 +25,25 @@ that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014
   
 
 
+ARXIV CATEGORY SEARCH
+=====================
+
+The `arxiv_class` field searches arXiv category IDs, not category display names.
+Use IDs from the official [arXiv category taxonomy](https://arxiv.org/category_taxonomy).
+For example, `hep-ex` is the ID for "High Energy Physics - Experiment".
+
+To search records in the astronomy or physics databases with AQP, use:
+
+```text
+defType=aqp
+q=arxiv_class:hep-ex
+fq={!type=aqp v=$fq_database}
+fq_database=(database:astronomy OR database:physics)
+```
+
+Which category IDs match depends on the records present in the collection.
+
+
 INSTALLATION
 ============
 
