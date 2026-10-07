@@ -43,3 +43,30 @@ You will need Java JDK (version 11 and higher)
 
 
 
+HIGHLIGHTING LONG FIELDS
+========================
+
+Solr's Unified Highlighter analyzes at most 51,200 characters per field by
+default. A document can therefore match a query while a matching occurrence
+later in a long field has no snippet. To inspect a known match beyond that
+prefix, send a finite `hl.maxAnalyzedChars` override on that request:
+
+```bash
+curl --get "$SOLR_SELECT" \
+  --data-urlencode 'q=full:(=WSRT)' \
+  --data-urlencode 'fq=bibcode:2026arXiv260928030L' \
+  --data-urlencode 'rows=1' --data-urlencode 'fl=id,bibcode' \
+  --data-urlencode 'wt=json' --data-urlencode 'hl=true' \
+  --data-urlencode 'hl.fl=title,abstract,body,ack' \
+  --data-urlencode 'hl.snippets=4' \
+  --data-urlencode 'hl.requireFieldMatch=true' \
+  --data-urlencode 'hl.maxAnalyzedChars=200000'
+```
+
+Set `SOLR_SELECT` to the collection's `/select` URL, and replace `q` and `fq`
+with the intended search and filters. The override changes snippet analysis,
+not the search or filters, and `hl.requireFieldMatch=true` continues to limit
+snippets to matching fields. The analysis limit applies to each requested
+field; increasing it can add work for every returned document and highlighted
+field. Use a finite limit only where longer-field snippets are needed; the
+example value is not a measured performance threshold or a new server default.

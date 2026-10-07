@@ -1,3 +1,8 @@
+Unreleased
+----------
+- Documented the per-request `hl.maxAnalyzedChars` override for highlighting
+  matches beyond Solr's default 51,200-character analysis limit.
+
 MontySolr 0.1, 2011-05-19
 -------------------------
 - Initial release
