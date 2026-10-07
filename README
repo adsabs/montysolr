@@ -43,3 +43,15 @@ You will need Java JDK (version 11 and higher)
 
 
 
+
+SEARCHING PUBLICATIONS
+======================
+
+Use `pub` when searching by a publication's name, and `bibstem` when searching by its short journal code. For example, these queries search the *Bulletin of the American Astronomical Society* in 2019, volume 51:
+
+```text
+pub:"Bulletin of the American Astronomical Society" year:2019 volume:51
+bibstem:BAAS year:2019 volume:51
+```
+
+To find a short code for another publication, search by its name with `pub` and inspect `bibstem` on a matching record; for Solr results, include `bibstem` in the requested fields (for example, `fl=bibcode,pub,bibstem`). A `bibstem` identifies a publication and may also include a volume-specific form. These examples filter by publication, year, and volume; they do not select only the Astro2020 science white papers.
