@@ -157,6 +157,7 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                  *
                  */
                 ", \"bibstem\": [\"JNuM\", \"JNuM..455\"]" +
+                ", \"bibstem_facet\": [\"JNuM\"]" +
                 ", \"body\": \"Some fulltext hashimoto added\"" +
                 ", \"book_author\": [\"book, author\", \"book, fauthor\"]" +
                 ", \"caption\": [\"caption1 captionFoo\", \"caption2\"]" +
@@ -419,6 +420,9 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
          * bibstem
          */
         assertQ(req("q", "bibstem:JNUM"), "//*[@numFound='1']");
+        assertQ(req("q", "bibstem:jnum"), "//*[@numFound='1']");
+        assertQ(req("q", "bibstem_facet:JNuM"), "//*[@numFound='1']");
+        assertQ(req("q", "bibstem_facet:jnum"), "//*[@numFound='0']");
         assertQ(req("q", "bibstem:jnum"), "//*[@numFound='1']");
 
         assertQ(req("q", "bibstem:jnum..455"), "//*[@numFound='1']");

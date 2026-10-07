@@ -1,3 +1,7 @@
+Unreleased
+----------
+- Documented how to obtain case-preserved `bibstem_facet` query terms from a Solr facet response and use `bibstem` for case-insensitive short journal-code searches.
+
 MontySolr 0.1, 2011-05-19
 -------------------------
 - Initial release

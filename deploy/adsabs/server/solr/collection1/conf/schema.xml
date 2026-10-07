@@ -1040,7 +1040,9 @@
             bibstem:Sci.....6
         * bibstem_facet
           Technical field, used for faceting by publication. It contains only
-          bibstems without volumes (eg. Sci)
+          bibstems without volumes (eg. Sci). Query capitalization must match
+          the facet label (eg. bibstem_facet:ApJ). For case-insensitive journal
+          code searches, use bibstem instead (eg. bibstem:apj).
          -->
 
 		<field name="doi" type="identifier_string" indexed="true"

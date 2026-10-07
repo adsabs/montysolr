@@ -25,6 +25,29 @@ that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014
   
 
 
+PUBLICATION FACET QUERIES
+=========================
+
+Publication-filter queries on `bibstem_facet` are case-sensitive. To discover
+the facet terms returned for your collection, request this field from Solr:
+
+```bash
+curl --get "$SOLR_SELECT" \
+  --data-urlencode 'q=*:*' \
+  --data-urlencode 'defType=aqp' \
+  --data-urlencode 'rows=0' \
+  --data-urlencode 'facet=true' \
+  --data-urlencode 'facet.field=bibstem_facet' \
+  --data-urlencode 'wt=json'
+```
+
+Use a value from `facet_counts.facet_fields.bibstem_facet` in the response
+(subject to the facet limit) as the `bibstem_facet` query term. For example,
+if the response contains `ApJ`, query `bibstem_facet:ApJ`, not
+`bibstem_facet:apj`; use `bibstem:apj` for a case-insensitive short journal-code
+search instead.
+
+
 INSTALLATION
 ============
 
