@@ -1,5 +1,8 @@
 package org.apache.solr.search;
 
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonToken;
+import org.antlr.runtime.Token;
 import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.queries.function.valuesource.ConstValueSource;
@@ -7,17 +10,21 @@ import org.apache.lucene.queries.function.valuesource.DoubleConstValueSource;
 import org.apache.lucene.queries.function.valuesource.LiteralValueSource;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
+import org.apache.lucene.queryparser.flexible.aqp.parser.ADSLexer;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.Query;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.StrUtils;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.SchemaField;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -42,11 +49,104 @@ public class AqpFunctionQParser extends FunctionQParser {
             // if not passed, try and get the defaultType from local params
             defaultType = localParams.get(QueryParsing.DEFTYPE);
         }
+        if (q != null) {
+            q = q.strip();
+        }
         QParser nestedParser = getParser(q, defaultType, true, getReq());
+        // Resolve the parser first: local parameters can override the requested type.
+        if (!(nestedParser instanceof AqpAdsabsQParser)) {
+            String input = nestedParser.getString();
+            String normalized = normalizeSubquery(input, recurseCount, getReq().getParams());
+            if (normalized != input) {
+                nestedParser.setString(normalized);
+                if (nestedParser.getLocalParams() != null) {
+                    ModifiableSolrParams local = new ModifiableSolrParams(nestedParser.getLocalParams());
+                    local.set(QueryParsing.V, normalized);
+                    nestedParser.setLocalParams(local);
+                }
+            }
+        }
         nestedParser.flags = this.flags;  // TODO: this would be better passed in to the constructor... change to a ParserContext object?
         nestedParser.recurseCount = recurseCount;
         recurseCount--;
         return nestedParser;
+    }
+
+    private static String normalizeSubquery(String value, int depth, SolrParams params) throws SyntaxError {
+        if (value == null) {
+            return null;
+        }
+        int firstQuote = 0;
+        while (firstQuote < value.length()
+                && !AqpQueryParserUtil.isTypographicDoubleQuote(value.charAt(firstQuote))) {
+            firstQuote++;
+        }
+        if (firstQuote == value.length() && !value.contains("{!")) {
+            return value;
+        }
+        if (depth >= 100) {
+            throw new SyntaxError("Infinite recursion detected in nested query values");
+        }
+
+        ADSLexer lexer = new ADSLexer(new ANTLRStringStream(value));
+        StringBuilder normalized = null;
+        int copiedUntil = 0;
+        for (Token token = lexer.nextToken(); token.getType() != Token.EOF; token = lexer.nextToken()) {
+            if (token.getType() == ADSLexer.CURLY_QUOTE
+                    || token.getType() == ADSLexer.UNTERMINATED_CURLY_PHRASE) {
+                throw new SyntaxError("Empty or unterminated typographic quoted phrase");
+            }
+            CommonToken input = (CommonToken) token;
+            boolean phrase = token.getType() == ADSLexer.PHRASE
+                    || token.getType() == ADSLexer.PHRASE_ANYTHING;
+            String header = null;
+            if (phrase) {
+                if (!AqpQueryParserUtil.isTypographicDoubleQuote(value.charAt(input.getStartIndex()))) {
+                    continue;
+                }
+            } else if (token.getType() == ADSLexer.LOCAL_PARAMS) {
+                SolrParams local = QueryParsing.getLocalParams(token.getText(), params);
+                String query = local.get(QueryParsing.V);
+                String converted = normalizeSubquery(query, depth + 1, params);
+                if (query == converted) {
+                    continue;
+                }
+                StringBuilder options = new StringBuilder("{!");
+                for (Iterator<String> names = local.getParameterNamesIterator(); names.hasNext();) {
+                    String name = names.next();
+                    if (name.equals(QueryParsing.V)) {
+                        appendLocalParam(options, name, converted);
+                    } else {
+                        for (String option : local.getParams(name)) {
+                            appendLocalParam(options, name, option);
+                        }
+                    }
+                }
+                header = options.append('}').toString();
+            } else {
+                continue;
+            }
+            if (normalized == null) {
+                normalized = new StringBuilder(value.length());
+            }
+            normalized.append(value, copiedUntil, input.getStartIndex());
+            if (phrase) {
+                normalized.append('"').append(value, input.getStartIndex() + 1, input.getStopIndex()).append('"');
+            } else {
+                normalized.append(header);
+            }
+            copiedUntil = input.getStopIndex() + 1;
+        }
+        return normalized == null ? value : normalized.append(value, copiedUntil, value.length()).toString();
+    }
+
+    private static void appendLocalParam(StringBuilder output, String name, String value) {
+        if (value == null) {
+            return;
+        }
+        output.append(' ').append(name).append("='");
+        StrUtils.appendEscapedTextToBuilder(output, value, '\'');
+        output.append('\'');
     }
 
     private int currChild = -1;
@@ -144,9 +244,13 @@ public class AqpFunctionQParser extends FunctionQParser {
     }
 
 
-    public int parseInt() {
+    public int parseInt() throws SyntaxError {
         String val = AqpQueryParserUtil.dequoteDoubleQuoted(consumeAsString());
-        return Integer.valueOf(val);
+        try {
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e) {
+            throw new SyntaxError("Expected integer argument instead of: " + val, e);
+        }
     }
 
     public Float parseFloat() throws SyntaxError {

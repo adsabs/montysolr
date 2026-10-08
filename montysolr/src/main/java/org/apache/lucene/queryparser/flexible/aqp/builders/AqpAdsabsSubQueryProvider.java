@@ -533,12 +533,7 @@ public class AqpAdsabsSubQueryProvider implements
          */
         parsers.put("topn", new AqpSubqueryParserFull() {
             public Query parse(FunctionQParser fp) throws SyntaxError {
-                int topN = -1;
-                try {
-                    topN = fp.parseInt();
-                } catch (NumberFormatException e) {
-                    throw new SyntaxError("The function signature is topn(int, query, [sort order]). Error: " + e.getMessage());
-                }
+                int topN = fp.parseInt();
 
                 if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
                     throw new SyntaxError("Hmmm, the first argument of your operator must be a positive number.");
@@ -986,7 +981,7 @@ public class AqpAdsabsSubQueryProvider implements
             private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {
                 QParser fParser = getParser();
                 //System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
-                QParser aqp = fParser.subQuery(field + ":" + getOriginalInput(), "aqp");
+                QParser aqp = fParser.subQuery(field + ":(" + getOriginalInput() + ")", "aqp");
                 Query q = aqp.getQuery();
                 if (boost != null && boost != 1.0f) {
                     q = new BoostQuery(q, boost);
@@ -1046,7 +1041,7 @@ public class AqpAdsabsSubQueryProvider implements
                 QParser fParser = getParser();
                 boolean exactSearch = Boolean.TRUE.equals(getReParseContext());
                 String exactPrefix = exactSearch ? "=" : "";
-                QParser aqp = fParser.subQuery(exactPrefix + field + ":" + getOriginalInput(), "aqp");
+                QParser aqp = fParser.subQuery(exactPrefix + field + ":(" + getOriginalInput() + ")", "aqp");
                 Query q = aqp.getQuery();
                 if (boost != null && boost != 1.0f) {
                     q = new BoostQuery(q, boost);
@@ -1125,7 +1120,7 @@ public class AqpAdsabsSubQueryProvider implements
 
                 SolrQueryRequest req = fp.getReq();
                 String input = fp.getString();
-                String filterName = input.substring(1, input.length() - 1).trim();
+                String filterName = input.trim();
 
 
                 // pick the content stream (actually a filter)

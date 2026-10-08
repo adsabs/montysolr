@@ -179,11 +179,17 @@ final public class AqpQueryParserUtil {
         char opening = value.charAt(0);
         char closing = value.charAt(value.length() - 1);
         if ((opening == '"' && closing == '"')
-                || (opening == '\u201C' && (closing == '\u201D' || closing == '"'))
+                || (isTypographicDoubleQuote(opening)
+                    && (isTypographicDoubleQuote(closing) || closing == '"'))
                 || (allowSingleQuotes && opening == '\'' && closing == '\'')) {
             return value.substring(1, value.length() - 1);
         }
         return value;
+    }
+
+    /** Recognizes opening, closing, and low typographic double quotes. */
+    public static boolean isTypographicDoubleQuote(char c) {
+        return c == '\u201C' || c == '\u201D' || c == '\u201E';
     }
 
     /**
@@ -196,7 +202,7 @@ final public class AqpQueryParserUtil {
             char c = s.charAt(i);
             // These characters are part of the query syntax and must be escaped
             if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':'
-                    || c == '^' || c == '[' || c == ']' || c == '\"' || c == '\u201C' || c == '\u201D'
+                    || c == '^' || c == '[' || c == ']' || c == '\"' || isTypographicDoubleQuote(c)
                     || c == '{' || c == '}' || c == '~' || c == '*'
                     || c == '?' || c == '|' || c == '&') {
                 if (sb == null) {

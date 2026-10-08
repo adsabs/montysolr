@@ -226,6 +226,18 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
         String mixedQuery = "full: “Simons Foundation” full:“00001470\"";
         assertEquals(qp.parse(asciiQuery, "field"), qp.parse(mixedQuery, "field"));
 
+        for (char opening : new char[]{'“', '”', '„'}) {
+            for (char closing : new char[]{'“', '”', '„', '"'}) {
+                assertEquals(qp.parse(asciiQuery, "field"),
+                        qp.parse("full:" + opening + "Simons Foundation" + closing
+                                + " full:" + opening + "00001470" + closing, "field"));
+                assertEquals(qp.parse("title:\"science*\"", "field"),
+                        qp.parse("title:" + opening + "science*" + closing, "field"));
+            }
+            assertQueryNodeException("title:" + opening + "unterminated");
+            assertQueryNodeException("title:" + opening + "foo\\" + opening);
+        }
+
         PhraseQuery preserved = (PhraseQuery) qp.parse(
                 "title:\"researcher's “curly” phrase\"", "field");
         assertEquals("researcher's", preserved.getTerms()[0].text());

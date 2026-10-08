@@ -91,6 +91,17 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertEquals(ascii, mixed);
         assertEquals(ascii, curly);
 
+        for (char opening : new char[]{'“', '”', '„'}) {
+            for (char closing : new char[]{'“', '”', '„', '"'}) {
+                assertEquals(ascii, qp.parse("full:" + opening + "Simons Foundation" + closing
+                        + " full:" + opening + "00001470" + closing, ""));
+                assertEquals(qp.parse("title:\"science*\"", ""),
+                        qp.parse("title:" + opening + "science*" + closing, ""));
+            }
+            assertQueryNodeException("title:" + opening + "unterminated");
+            assertQueryNodeException("title:" + opening + "foo\\" + opening);
+        }
+
         AqpQueryParser whitespaceParser = getParser(new WhitespaceAnalyzer());
         PhraseQuery preserved = (PhraseQuery) whitespaceParser.parse(
                 "title:\"researcher's “curly” phrase\"", "");
@@ -117,16 +128,16 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
                 qp.parse("[“this” TO “that”]", ""));
         assertQueryEquals("author:/foo“bar”/", null, "author:/foo“bar”/",
                 RegexpQuery.class);
-        String curlyLiteral = "foo“bar”";
+        String curlyLiteral = "foo“bar”„baz";
         String utilityEscaped = AqpQueryParserUtil.escape(curlyLiteral);
-        assertEquals("foo\\“bar\\”", utilityEscaped);
+        assertEquals("foo\\“bar\\”\\„baz", utilityEscaped);
         TermQuery utilityRoundTrip = (TermQuery) whitespaceParser.parse(utilityEscaped, "title");
         assertEquals(curlyLiteral, utilityRoundTrip.getTerm().text());
 
         ADSEscapeQuerySyntaxImpl escaper = new ADSEscapeQuerySyntaxImpl();
         CharSequence adsEscaped = escaper.escape(
                 curlyLiteral, java.util.Locale.ROOT, EscapeQuerySyntax.Type.NORMAL);
-        assertEquals("foo\\“bar\\”", adsEscaped.toString());
+        assertEquals("foo\\“bar\\”\\„baz", adsEscaped.toString());
         TermQuery adsRoundTrip = (TermQuery) whitespaceParser.parse(adsEscaped.toString(), "title");
         assertEquals(curlyLiteral, adsRoundTrip.getTerm().text());
         assertEquals(curlyLiteral, escaper.escape(
@@ -139,7 +150,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
                 whitespaceParser.parse("title:“foo\\\\”", ""));
 
         assertQueryNodeException("title:“”");
-        assertQueryNodeException("title:” “");
         assertQueryNodeException("title:\u201D\u201C");
         assertQueryNodeException("title:\"foo”");
         assertQueryNodeException("title:“foo\\”");
