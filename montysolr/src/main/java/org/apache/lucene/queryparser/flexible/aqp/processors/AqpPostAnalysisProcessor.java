@@ -172,7 +172,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
 
             } else if (node instanceof MultiPhraseQueryNode) {
                 queryStructure = extractQueries(node);
-
                 if (node.getParent() instanceof FuzzyQueryNode) { // "some span query"~3
 
                     final FuzzyQueryNode parent = (FuzzyQueryNode) node.getParent();
@@ -579,8 +578,8 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         Integer maxAllowedDepth = Integer.valueOf(getConfigVal("aqp.maxPathLength", "100"));
 
         for (QueryNode child : children) {
-            //System.out.println("addToken(): " + child);
-            maxDepth = graph.consume(child);
+            // A sibling alternative does not make a path deeper.
+            maxDepth = Math.max(maxDepth, graph.consume(child));
             if (maxDepth > maxAllowedDepth)
                 throw new QueryNodeException(new MessageImpl("Query exceed maxAllowedDepth of " + maxAllowedDepth + " tokens for query redistribution"));
         }
@@ -1174,13 +1173,14 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         private int consume(QueryNode qnode, int depth) {
             FieldQueryNode node = ((FieldQueryNode) qnode);
             boolean descended = false;
+            int maxDepth = depth;
             for (NodeOfQuery child : children) {
                 if (child.startPos == node.getBegin() && child.endPos == node.getEnd()) {
                     child.addPayload(node);
-                    return depth;
+                    return maxDepth;
                 }
                 if (child.startPos < node.getBegin() && child.endPos < node.getEnd()) {
-                    depth = child.consume(qnode, depth + 1);
+                    maxDepth = Math.max(maxDepth, child.consume(qnode, depth + 1));
                     descended = true;
                 }
             }
@@ -1197,7 +1197,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 }
                 children.add(inserted);
             }
-            return depth;
+            return maxDepth;
         }
 
         public void addPayload(QueryNode node) {
@@ -1205,6 +1205,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 //System.out.println("Adding payload: " + node);
                 payload.add(node);
         }
+
 
 
         public void drillDown(QueryPath path) {
