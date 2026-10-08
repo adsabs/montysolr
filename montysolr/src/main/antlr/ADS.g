@@ -42,7 +42,9 @@ tokens {
 }
 
 mainQ : 
-  clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
+  NOT clauseNear EOF
+    -> ^(OPERATOR["DEFOP"] ^(MODIFIER MINUS["-"] clauseNear))
+  | clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
   ;
    
   
@@ -55,7 +57,8 @@ clauseAnd
   ;
 
 clauseNot
-  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
+  :
+  (first=clauseNear  -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
 clauseNear

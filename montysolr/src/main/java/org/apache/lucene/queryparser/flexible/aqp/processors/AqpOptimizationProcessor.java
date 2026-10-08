@@ -1,8 +1,10 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpBooleanQueryNode;
+import org.apache.lucene.queryparser.flexible.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.BooleanQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldableNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.ModifierQueryNode;
@@ -31,9 +33,15 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
             if (node instanceof BooleanQueryNode) {
                 QueryNode c = node.getChildren().get(0);
                 if (c instanceof ModifierQueryNode
-                        && ((ModifierQueryNode) c).getModifier() != Modifier.MOD_NOT) {
+                        && ((ModifierQueryNode) c).getModifier() == Modifier.MOD_NOT) {
+                    return addMatchAllAnchor(c);
+                }
+                if (c instanceof ModifierQueryNode) {
                     return ((ModifierQueryNode) c).getChild();
                 }
+            } else if (node instanceof ModifierQueryNode
+                    && ((ModifierQueryNode) node).getModifier() == Modifier.MOD_NOT) {
+                return addMatchAllAnchor(node);
             }
         } else if (node instanceof AqpBooleanQueryNode &&
                 (node.getTag(AqpQueryTreeBuilder.SYNONYMS) == null ||
@@ -87,6 +95,13 @@ public class AqpOptimizationProcessor extends QueryNodeProcessorImpl implements
         }
 
         return node;
+    }
+
+    private QueryNode addMatchAllAnchor(QueryNode prohibitedClause) {
+        List<QueryNode> clauses = new ArrayList<QueryNode>(2);
+        clauses.add(new MatchAllDocsQueryNode());
+        clauses.add(prohibitedClause);
+        return new AqpAndQueryNode(clauses);
     }
 
     private QueryNode getClauseIgnoreModifiers(QueryNode node) {
