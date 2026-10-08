@@ -399,6 +399,11 @@ fragment AS_CHAR
   :
   ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
   ;
+
+fragment AUTHOR_CHAR
+  :
+  AS_CHAR | '-'
+  ;
   
   
 fragment ESC_CHAR:  '\\' .; 
@@ -416,7 +421,7 @@ NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
   
 AUTHOR_SEARCH
   :
-  '^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
+  '^' AUTHOR_CHAR+ (',' (' ' | AUTHOR_CHAR)+)* '$'?
   ;
 
 
