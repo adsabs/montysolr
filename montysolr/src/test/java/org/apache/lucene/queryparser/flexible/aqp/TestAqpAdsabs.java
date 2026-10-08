@@ -278,6 +278,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("this =and that");
         assertQueryNodeException("(doi:tricky:01235)");
 
+        assertQueryNodeException("two$");
+        assertQueryNodeException("\"two phrase$\"");
+        assertQueryEquals("$", null, "MatchNoDocsQuery(\"\")", MatchNoDocsQuery.class);
     }
 
     public void testWildCards() throws Exception {

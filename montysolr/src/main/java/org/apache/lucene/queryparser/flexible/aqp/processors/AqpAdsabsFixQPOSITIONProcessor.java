@@ -19,13 +19,16 @@ public class AqpAdsabsFixQPOSITIONProcessor extends AqpQProcessor {
         // TODO: emit warnings
 
         if (node.getTokenLabel().equals("QNORMAL")) {
-            if (input.endsWith("$")) {
+            // A lone dollar is not the obsolete trailing-dollar marker used
+            // by the author-position syntax.
+            if (input.endsWith("$") && input.length() > 1) {
                 node.setTokenName("QPOSITION");
                 node.setTokenLabel("QPOSITION");
             }
         } else {
             String testInput = input.substring(1, input.length() - 1);
-            if (testInput.startsWith("^") || testInput.endsWith("$")) {
+            if (testInput.startsWith("^") ||
+                    (testInput.endsWith("$") && testInput.length() > 1)) {
                 node.setTokenName("QPOSITION");
                 node.setTokenLabel("QPOSITION");
                 subChild.setTokenInput(testInput);
