@@ -52,13 +52,13 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
         } else if (node instanceof FieldQueryNode) {
 
             if (node.getTag("aqp.exact") != null) {
-                // this node had a modifier (= or #)
-                // which only modifies the analysis, but doesn't turn it off
+                FieldQueryNode fieldNode = (FieldQueryNode) node;
+                String fieldName = fieldNode.getFieldAsString();
+                String field = fieldName + "_nosyn";
 
-                String field = ((FieldQueryNode) node).getFieldAsString() + "_nosyn";
                 if (hasAnalyzer(field)) {
-                    ((FieldQueryNode) node).setField(field); // change the field to use a different analyzer...
-                    return node;
+                    fieldNode.setField(field);
+                    return fieldNode;
                 }
             }
             // catch all, avoid analysis
@@ -91,6 +91,7 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
                 .getRequest();
         return req != null && req.getSchema().hasExplicitField(fieldName);
     }
+
 
     @Override
     protected List<QueryNode> setChildrenOrder(List<QueryNode> children)

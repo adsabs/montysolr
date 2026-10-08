@@ -80,7 +80,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 
 
     @Override
-    public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
+    public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) throws IOException {
 
         if (hits.size() == 0)
             return null;
@@ -100,7 +100,7 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
 
     }
 
-    private float getClassicBoostFactor(int doc) {
+    private float getClassicBoostFactor(int doc) throws IOException {
         return boostCache.getFloat(doc);
     }
 

@@ -34,7 +34,7 @@ public interface SecondOrderCollector {
      *
      * @return list of collectors
      */
-    List<CollectorDoc> getSubReaderResults(int docBase, int docBaseEnd);
+    List<CollectorDoc> getSubReaderResults(int docBase, int docBaseEnd) throws IOException;
 
 
     /**
@@ -60,6 +60,13 @@ public interface SecondOrderCollector {
      * score (as an average of votes, maximum, minimum, etc...)
      */
     void setFinalValueType(FinalValueType type);
+    FinalValueType getFinalValueType();
+
+    ScoreMode scoreMode();
+    /** A retained seed Weight may need scores even when collection itself does not. */
+    default ScoreMode initializationScoreMode() {
+        return scoreMode();
+    }
 
 
     SecondOrderCollector copy();

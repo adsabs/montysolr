@@ -3,12 +3,10 @@ package org.apache.solr.search;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.*;
 import org.apache.lucene.queries.spans.SpanNearQuery;
-import org.apache.lucene.queries.spans.SpanPositionRangeQuery;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.FixedBitSet;
 import org.apache.solr.common.util.ContentStream;
@@ -111,16 +109,62 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
     public void testUnfieldedSearch() throws Exception {
+        assertU(adoc("id", "2101", "bibcode", "2101test", "title", "netpune atmospheres"));
+        assertU(adoc("id", "2102", "bibcode", "2102test", "title", "netpune exoplanet atmospheres"));
+        assertU(adoc("id", "2103", "bibcode", "2103test", "title", "netpune atmospheres", "abstract", "exoplanet"));
+        assertU(commit("waitSearcher", "true"));
 
-        // NEAR on unfielded search -- will generate error when results have mixed
-        // fields
-        assertQueryParseException(
-                req("defType", "aqp", "q", "foo NEAR2 bar", "qf", "bibcode^5 title^10", "aqp.unfielded.tokens.strategy",
-                        "disjuncts", "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"));
+        // A virtual full-field exclusion must remain prohibited after the
+        // virtual field is expanded into its concrete fields.
+        assertQ(req("defType", "aqp", "q", "netpune -full:exoplanet atmospheres", "qf", "title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
+        assertQ(req("defType", "aqp", "q", "netpune atmospheres -full:exoplanet", "qf", "title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
+        assertQ(req("defType", "aqp", "q", "netpune -full:\"exoplanet\" atmospheres", "qf", "title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='2101']");
+        assertU(adoc("id", "3401", "bibcode", "issue34-ack",
+                "ack", "issue34acktoken"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "q", "issue34acktoken", "fl", "id"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='3401']");
 
-        assertQueryParseException(req("defType", "aqp", "q", "foo NEAR2 bar NEAR2 title:baz", "qf",
-                "bibcode^5 title^10", "aqp.unfielded.tokens.strategy", "disjuncts", "aqp.unfielded.tokens.new.type",
-                "simple", "aqp.constant_scoring", "bibcode^6"));
+        assertQueryEquals(
+                req("defType", "aqp", "q", "foo NEAR2 bar", "qf", "bibcode^5 title^10",
+                        "aqp.unfielded.tokens.strategy", "disjuncts", "aqp.unfielded.tokens.new.type",
+                        "simple", "aqp.constant_scoring", "bibcode^6"),
+                "", BooleanQuery.class);
+
+        assertQueryEquals(req("defType", "aqp", "q", "foo NEAR2 bar NEAR2 title:baz", "qf",
+                "bibcode^5 title^10", "aqp.unfielded.tokens.strategy", "disjuncts",
+                "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "", BooleanQuery.class);
+
+        assertQueryEquals(req("defType", "aqp", "q", "foo NEAR2 (bar NEAR2 baz)", "qf",
+                "bibcode^5 title^10", "aqp.unfielded.tokens.strategy", "disjuncts",
+                "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "", BooleanQuery.class);
+
+        assertQueryParseException(req("defType", "aqp", "q", "bibcode:foo NEAR2 title:bar"));
+        assertU(adoc("id", "7801", "bibcode", "2000TEST...7801F", "title", "Frew bridge J"));
+        assertU(adoc("id", "7802", "bibcode", "frew", "title", "J"));
+        assertU(adoc("id", "7803", "bibcode", "group-positive", "title", "alpha bridge beta gamma"));
+        assertU(adoc("id", "7804", "bibcode", "beta", "title", "alpha gamma"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "df", "unfielded_search", "q", "frew NEAR2 j",
+                        "qf", "bibcode^5 title^10",
+                        "aqp.unfielded.tokens.strategy", "disjuncts",
+                        "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7801']");
+        assertQ(req("defType", "aqp", "df", "unfielded_search", "q", "frew NEAR2 j",
+                        "qf", "bibcode^5 title^10", "debugQuery", "true",
+                        "aqp.unfielded.tokens.strategy", "disjuncts",
+                        "aqp.unfielded.tokens.new.type", "simple", "aqp.constant_scoring", "bibcode^6"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7801']");
+        assertQ(req("defType", "aqp", "q", "title:(alpha AND beta) NEAR2 gamma",
+                        "qf", "title", "aqp.unfielded.tokens.strategy", "disjuncts",
+                        "aqp.unfielded.tokens.new.type", "simple"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7803']");
 
         // when we generate the phrase search, ignore acronyms
         assertQueryEquals(req("defType", "aqp", "q", "FOO BAR BAZ", "aqp.unfielded.tokens.strategy", "disjuncts",
@@ -319,6 +363,371 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+
+    public void testExactHyphenatedPhraseMatchesCompoundOnly() throws Exception {
+        assertU(adoc("id", "4401", "bibcode", "b4401", "title", "dust-dust plasma"));
+        assertU(adoc("id", "4402", "bibcode", "b4402", "title", "dust dust plasma"));
+        assertU(adoc("id", "4403", "bibcode", "b4403", "title", "dust-dust and dust-plasma interaction"));
+        assertU(adoc("id", "4404", "bibcode", "b4404", "title", "the dust, and the dust-plasma"));
+        assertU(adoc("id", "4405", "bibcode", "b4405", "title", "Dust-dust plasma waves"));
+        assertU(adoc("id", "4406", "bibcode", "b4406", "title", "on the dust and dust on the plasma"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "=title:\"dust-dust plasma\"", "fq", "id:[4401 TO 4406]"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='4401']",
+                "//doc/str[@name='id'][.='4405']");
+        // Slop counts from the compound's indexed positions, so one extra word may intervene.
+        assertQ(req("defType", "aqp", "q", "=title:\"dust-dust plasma\"~1", "fq", "id:[4401 TO 4406]"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='4401']",
+                "//doc/str[@name='id'][.='4403']",
+                "//doc/str[@name='id'][.='4405']");
+    }
+
+    public void testPunctuationIdentifierQueries() throws Exception {
+        assertU(adoc("id", "1101", "bibcode", "b1101", "ack", "mentions 10.17909/T9XG63"));
+        assertU(adoc("id", "1102", "bibcode", "b1102", "ack", "mentions 10 words later 17909"));
+        assertU(adoc("id", "1103", "bibcode", "b1103", "ack", "contains grant7-code"));
+        assertU(adoc("id", "1104", "bibcode", "b1104", "ack", "contains grant7 unrelatedmarker code"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("q", "ack:10.17909"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "ack:\"10.17909\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "full:10.17909"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "full:\"10.17909\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1101']",
+                "not(//doc/str[@name='id'][.='1102'])");
+        assertQ(req("q", "ack:grant7-code"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1103']",
+                "not(//doc/str[@name='id'][.='1104'])");
+        assertQ(req("q", "full:(grant7 code)"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1103']",
+                "//doc/str[@name='id'][.='1104']");
+    }
+
+    public void testNearStopWordInTitle() throws Exception {
+        String title = "Shear viscosity measurements in the binary mixture butyl "
+                + "cellosolve-water near its upper and lower critical consolute points";
+        assertU(adoc("id", "216", "bibcode", "issue216-positive", "title", title));
+        assertU(adoc("id", "217", "bibcode", "issue216-negative", "title",
+                "Shear viscosity measurements in the binary mixture butyl "
+                        + "cellosolve-water near its upper and lower critical consolute temperature"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("q", "title:(Shear viscosity measurements in the binary mixture "
+                        + "butyl cellosolve-water near its upper and lower critical consolute points)"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='216']");
+
+        assertQ(req("q", "title:(its NEAR its)"), "//*[@numFound='0']");
+    }
+    public void testExactAuthorConstantScoring() throws Exception {
+        assertU(adoc("id", "19801", "bibcode", "b19801", "author", "Foo",
+                "author", "Bar", "first_author", "Foo", "cite_read_boost", "0"));
+        assertU(adoc("id", "19802", "bibcode", "b19802", "author", "Bar",
+                "author", "Foo", "first_author", "Bar", "cite_read_boost", "0"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("q", "=author:\"foo\"", "fl", "id,score",
+                        "aqp.constant_scoring", "author^1",
+                        "aqp.classic_scoring.modifier", "0.6"),
+                "//*[@numFound='2']",
+                "//doc[str[@name='id']='19801']/float[@name='score'][. > 0.5999 and . < 0.6001]",
+                "//doc[str[@name='id']='19802']/float[@name='score'][. > 0.5999 and . < 0.6001]");
+        assertQ(req("q", "=author:\"^foo\"", "fl", "id,score",
+                        "aqp.constant_scoring", "author^1",
+                        "aqp.classic_scoring.modifier", "0.6"),
+                "//*[@numFound='1']",
+                "//doc[str[@name='id']='19801']/float[@name='score'][. > 0.5999 and . < 0.6001]");
+
+    }
+
+    public void testPastedSearchWithAndAndStopwords() throws Exception {
+        assertU(adoc("id", "1171", "bibcode", "2014AJ....147..133P",
+                "title", "Magnetite Authigenesis and the Warming of Early Mars"));
+        assertU(adoc("id", "1172", "bibcode", "2014AJ....147..134P",
+                "title", "Completely Different Article"));
+        assertU(adoc("id", "1173", "bibcode", "2014AJ....147..135P",
+                "identifier", "the", "title", "Unrelated Identifier Control"));
+        assertU(adoc("id", "1174", "bibcode", "2014AJ....147..136P",
+                "identifier", "the", "title", "the Magnetite"));
+        assertU(adoc("id", "1175", "bibcode", "2014AJ....147..137P",
+                "title", "Magnetite Negative Exact Control"));
+        assertU(commit("waitSearcher", "true"));
+
+        String[] queries = {
+                "Magnetite Authigenesis and the Warming of Early Mars",
+                "Magnetite Authigenesis Warming of Early Mars",
+                "\"Magnetite Authigenesis\" and \"the Warming of Early Mars\"",
+                "\"Magnetite Authigenesis\" and the Warming of Early Mars",
+                "\"Magnetite Authigenesis\" and Warming of Early Mars",
+                "(Magnetite Authigenesis Warming Early Mars)^2",
+                "(Magnetite Authigenesis Warming Early Mars)~5"
+        };
+        for (String query : queries) {
+            assertQ(req("defType", "aqp", "q", query),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='1171']",
+                    "//doc/str[@name='id'][not(.='1172')]",
+                    "//doc/str[@name='id'][not(.='1173')]");
+        }
+
+        assertQ(req("defType", "aqp", "q", "=the AND Magnetite"),
+                "//*[@numFound='1']",
+                "not(//doc/str[@name='id'][.='1171'])",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1175')]");
+        assertQ(req("defType", "aqp", "q", "=(the Magnetite)"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1171')]",
+                "//doc/str[@name='id'][not(.='1175')]");
+
+        assertQ(req("defType", "aqp", "q", "identifier:the"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1173']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1171')]",
+                "//doc/str[@name='id'][not(.='1172')]");
+        assertQ(req("defType", "aqp", "q", "Magnetite -the"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='1171']",
+                "//doc/str[@name='id'][.='1175']",
+                "//doc/str[@name='id'][not(.='1173')]",
+                "//doc/str[@name='id'][not(.='1174')]");
+        assertQ(req("defType", "aqp", "q", "Magnetite +the"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1171')]",
+                "//doc/str[@name='id'][not(.='1173')]",
+                "//doc/str[@name='id'][not(.='1175')]");
+
+        // Reversed terms prevent the companion phrase branch from hiding a
+        // required stopword in the normal unquoted whitespace branch.
+        assertU(adoc("id", "1176", "bibcode", "b1176", "title", "glacial quartz"));
+        assertU(adoc("id", "1177", "bibcode", "b1177", "title", "quartz unrelated"));
+        assertU(commit("waitSearcher", "true"));
+        try {
+            assertQ(req("defType", "aqp", "q", "quartz the glacial"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='1176']",
+                    "not(//doc/str[@name='id'][.='1177'])");
+            assertQ(req("defType", "aqp", "q", "\"quartz the glacial\""),
+                    "//*[@numFound='0']");
+        } finally {
+            assertU(delI("1176"));
+            assertU(delI("1177"));
+            assertU(commit("waitSearcher", "true"));
+        }
+        assertQ(req("defType", "aqp", "q",
+                        "The case for a minute-long merger-driven gamma-ray burst from fast-cooling synchrotron emission"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "Magnetite AND the~0.8"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1175')]");
+        assertQ(req("defType", "aqp", "q", "Magnetite AND the*"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1174']",
+                "//doc/str[@name='id'][not(.='1175')]");
+    }
+
+    public void testGroupedUnfieldedSlopRequiresAllTerms() throws Exception {
+        assertU(adoc("id", "1179", "bibcode", "b1179", "title",
+                "Magnetite noise noise Authigenesis noise noise Warming noise Early noise"));
+        assertU(adoc("id", "1178", "bibcode", "b1178", "title",
+                "Magnetite Authigenesis Warming Early Mars noise noise noise noise noise noise noise"));
+        assertU(commit("waitSearcher", "true"));
+
+        try {
+            assertQ(req("defType", "aqp", "q", "(Magnetite Authigenesis Warming Early Mars)~5",
+                            "qf", "title", "aqp.unfielded.tokens.strategy", "disjuncts",
+                            "fl", "id,score"),
+                    "//*[@numFound='1']",
+                    "//result/doc[1]/str[@name='id'][.='1178']",
+                    "not(//result/doc/str[@name='id'][.='1179'])");
+        } finally {
+            assertU(delI("1178"));
+            assertU(delI("1179"));
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
+    public void testJoinedUnfieldedGroupSlopIsRejected() throws Exception {
+        assertQueryParseException(req("defType", "aqp", "q", "(foo bar)~5",
+                "qf", "title", "aqp.unfielded.tokens.strategy", "join",
+                "aqp.unfielded.tokens.new.type", "simple"));
+    }
+
+    public void testDirectAdismaxPreservesSignedStopwords() throws Exception {
+        assertU(adoc("id", "11760", "bibcode", "b11760", "title", "Magnetite",
+                "identifier", "the"));
+        assertU(adoc("id", "11761", "bibcode", "b11761", "title", "Magnetite",
+                "identifier", "other"));
+        assertU(commit("waitSearcher", "true"));
+
+        try {
+            assertQ(req("defType", "aqp", "q", "adismax(Magnetite -the)",
+                            "qf", "title identifier",
+                            "fq", "id:(11760 OR 11761)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='11761']",
+                    "not(//doc/str[@name='id'][.='11760'])");
+            assertQ(req("defType", "aqp", "q", "adismax(Magnetite +the)",
+                            "qf", "title identifier", "fq", "id:(11760 OR 11761)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='11760']",
+                    "not(//doc/str[@name='id'][.='11761'])");
+            assertQ(req("defType", "aqp",
+                            "q", "adismax(-the* AND Magnetite AND the)",
+                            "qf", "title identifier",
+                            "fq", "id:(11760 OR 11761)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='11761']",
+                    "not(//doc/str[@name='id'][.='11760'])");
+        } finally {
+            assertU(delI("11760"));
+            assertU(delI("11761"));
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
+    public void testUnfieldedAuthorAndKeyword() throws Exception {
+        assertU(adoc("id", "222001", "bibcode", "2020ApJ...901..221A", "author", "Jarmak, Stephanie",
+                "abstract", "JWST starshade alignment"));
+        assertU(adoc("id", "222002", "bibcode", "2020ApJ...901..222A", "author", "Kelbert, Anna",
+                "abstract", "modem electromagnetic geophysical studies"));
+        assertU(adoc("id", "222003", "bibcode", "2020ApJ...901..223A", "author", "Colwell, Josh",
+                "abstract", "Saturn rings and related research"));
+        assertU(adoc("id", "222004", "bibcode", "2020ApJ...901..224A", "author", "Other, Author",
+                "abstract", "Erin Leonard Europa Clipper mission"));
+        assertU(adoc("id", "222005", "bibcode", "2020ApJ...901..225A", "author", "Becker, Tracy",
+                "abstract", "Saturn rings and moon-induced effects"));
+        assertU(adoc("id", "222006", "bibcode", "2020ApJ...901..226A", "author", "Control, Author",
+                "abstract", "DarkMatter BlackHole merger"));
+        assertU(adoc("id", "222007", "bibcode", "2020ApJ...901..227A", "author", "Control, Author",
+                "title", "Dark Matter Black Hole merger", "abstract", "unrelated observational study"));
+        assertU(adoc("id", "222099", "bibcode", "2020ApJ...901..299A", "author", "JWST, A.",
+                "abstract", "unrelated topic"));
+        assertU(adoc("id", "222008", "bibcode", "2020ApJ...901..228A", "author", "Smith, John A",
+                "abstract", "galaxy spectra"));
+        assertU(adoc("id", "222009", "bibcode", "2020ApJ...901..229A", "author", "Doe, Jane",
+                "abstract", "stellar outflows driven by solar wind"));
+        assertU(adoc("id", "222010", "bibcode", "2020ApJ...901..230A", "author", "Doe, Jane",
+                "abstract", "stellar outflows"));
+        assertU(adoc("id", "222011", "bibcode", "2020ApJ...901..231A", "author", "Jarmak, Stephanie",
+                "author", "Colwell, Josh", "abstract", "hyperion rings"));
+        assertU(adoc("id", "222012", "bibcode", "2020ApJ...901..232A", "author", "Jarmak, Stephanie",
+                "abstract", "alpha bravo charlie delta echo foxtrot"));
+        assertU(adoc("id", "222013", "bibcode", "2020ApJ...901..233A", "author", "Other, Author",
+                "abstract", "Europa Clipper Erin probe Leonard"));
+        assertU(adoc("id", "222014", "bibcode", "2020ApJ...901..234A", "author", "Li, Na",
+                "abstract", "unrelated puzzle"));
+        assertU(adoc("id", "222015", "bibcode", "2020ApJ...901..235A", "author", "Other, Author",
+                "abstract", "Li Na anticorrelation in globular cluster stars"));
+
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']",
+                "//doc[not(str[@name='id'][.='222099'])]");
+        assertQ(req("defType", "aqp", "q", "stephanie jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Anna Kelbert modem"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222002']");
+        assertQ(req("defType", "aqp", "q", "Josh Colwell Saturn"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222003']");
+        assertQ(req("defType", "aqp", "q", "Erin Leonard Europa"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222004']",
+                "//doc[not(str[@name='id'][.='222099'])]");
+        assertQ(req("defType", "aqp", "q", "Tracy Becker Saturn"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222005']");
+        assertQ(req("defType", "aqp", "q", "DarkMatter BlackHole merger"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222006']");
+        assertQ(req("defType", "aqp", "q", "Dark Matter Black Hole merger"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222007']");
+
+        assertQ(req("defType", "aqp", "q", "John Smith galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222008']");
+        assertQ(req("defType", "aqp", "q", "Jane Doe stellar wind"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222009']",
+                "//doc/str[@name='id'][not(.='222010')]");
+
+        assertQ(req("defType", "aqp", "q", "JWST Stephanie Jarmak"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Saturn Josh Colwell"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222003']");
+        assertQ(req("defType", "aqp", "q", "starshade Stephanie Jarmak JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Jarmak Stephanie JWST"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak Josh Colwell hyperion"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222011']");
+        assertQ(req("defType", "aqp", "q", "Jarmak Stephanie Jarmak hyperion"),
+                "//*[@numFound='0']");
+
+        assertQ(req("defType", "aqp", "q", "alpha bravo charlie delta echo foxtrot Stephanie Jarmak"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "alpha bravo charlie delta echo foxtrot Stephanie Jarmak",
+                        "aqp.unfielded.author.maxWordIndex", "6"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "alpha bravo charlie delta echo foxtrot Stephanie Jarmak",
+                        "aqp.unfielded.author.maxWordIndex", "7"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222012']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak alpha bravo charlie delta echo zulu"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak JWST",
+                        "aqp.unfielded.author.maxWordIndex", "0"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak JWST",
+                        "aqp.unfielded.author.maxWordIndex", "abc"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222001']");
+
+        assertQ(req("defType", "aqp", "q", "Europa Erin Leonard"),
+                "//*[@numFound='2']", "//doc/str[@name='id'][.='222004']",
+                "//doc/str[@name='id'][.='222013']");
+
+        assertQ(req("defType", "aqp", "q", "Stephanie Jarmak Josh Colwell"),
+                "//*[@numFound='0']");
+
+        assertQ(req("defType", "aqp", "q", "Li Na anticorrelation globular"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222015']");
+        assertQ(req("defType", "aqp", "q", "globular cluster Li Na anticorrelation"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='222015']");
+    }
+
+    public void testIssue182UnfieldedFuzzySearch() throws Exception {
+        assertU(adoc("id", "900", "bibcode", "b900", "abstract", "galaxy"));
+        assertU(adoc("id", "901", "bibcode", "b901", "abstract", "galaxyx"));
+        assertU(adoc("id", "902", "bibcode", "b902", "abstract", "nebula"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "abstract:galaxy~0.8 NOT abstract:galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+        assertQ(req("defType", "aqp", "q", "=abstract:galaxy~0.8 NOT =abstract:galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+        assertQ(req("defType", "aqp", "q", "galaxy~0.8 NOT galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+        assertQ(req("defType", "aqp", "q", "=galaxy~0.8 NOT =galaxy"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='901']",
+                "not(//doc/str[@name='id'][.='902'])");
+    }
+
     public void testSpecialCases() throws Exception {
 
         assertU(adoc("id", "61", "bibcode", "b61", "title",
@@ -326,11 +735,29 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertU(adoc("id", "2", "bibcode", "XXX", "abstract", "foo bar baz", "title", "title bitle"));
 
+        assertU(adoc("id", "62", "bibcode", "b62", "title", "MOND"));
+        assertU(adoc("id", "63", "bibcode", "b63", "title", "Newtonian gravity"));
         assertU(commit("waitSearcher", "true"));
+        // A standalone wildcard must remain a match-all clause when combined
+        // with an unfielded term; otherwise the parser builds the pathological
+        // wildcard pattern "* foo".
+        assertQ(req("q", "* foo"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='2']",
+                "not(//doc/str[@name='id'][.='61'])");
+        assertQ(req("q", "* -MOND"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='61']",
+                "//doc/str[@name='id'][.='2']",
+                "//doc/str[@name='id'][.='63']",
+                "not(//doc/str[@name='id'][.='62'])");
 
         assertQ(req("q",
                         "title:\"A Change of Rotation Profile in the Envelope in the HH 111 Protostellar System: A Transition to a Disk\""),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
+        // A lone dollar is analyzed away, but it must produce a safe no-match
+        // rather than the obsolete trailing-author-position error.
+        assertQ(req("defType", "aqp", "q", "$"), "//*[@numFound='0']");
 
         // check NEAR ignores order
         assertQ(req("q", "title:(rotation NEAR2 profile)"), "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
@@ -353,27 +780,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "similar(recid:2, title)"), "+like:title bitle  -BitSetQuery(1)",
                 BooleanQuery.class);
 
-        // topn() with score sorting
-        // TODO: solve it differently https://github.com/romanchyla/montysolr/issues/185
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, score desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, \"score desc,bibcode asc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2, info=score desc,bibcode asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
-        // custom scoring should be possible even with constant scores
-        assertQueryEquals(
-                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
-                        "=author:\"foo\""),
-                "FunctionScoreQuery(ConstantScore(author:foo,), scored by boost(sum(float(cite_read_boost),const(0.6))))",
-                FunctionScoreQuery.class);
-
-        assertQueryEquals(
-                req("defType", "aqp", "aqp.constant_scoring", "author^1", "aqp.classic_scoring.modifier", "0.6", "q",
-                        "=author:\"^foo\""),
-                "FunctionScoreQuery(ConstantScore(spanPosRange(author:foo,, 0, 1)), scored by boost(sum(float(cite_read_boost),const(0.6))))",
-                FunctionScoreQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
                 MatchNoDocsQuery.class);
@@ -417,18 +824,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertTrue(aq.hashCode() != bq.hashCode());
         assertEquals(aq.hashCode(), cq.hashCode());
 
-        // another method for constant scoring for fields (this time applied
-        // universally; to
-        // every query type used in a field)
-        assertQueryEquals(req("defType", "aqp", "aqp.constant_scoring", "author^1", "q", "=author:\"foo\""),
-                "ConstantScore(author:foo,)", ConstantScoreQuery.class);
-
-        // https://github.com/romanchyla/montysolr/issues/101
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"foo, bar\""), "author:foo, bar", TermQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"foo, bar\", 1)"),
-                "spanPosRange(author:foo, bar, 0, 1)", SpanPositionRangeQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"^foo, bar\""), "spanPosRange(author:foo, bar, 0, 1)",
-                SpanPositionRangeQuery.class);
 
         // constant() score
         assertQueryEquals(req("defType", "aqp", "q", "constant(title:foo)"), "ConstantScore(title:foo)",
@@ -507,24 +902,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "spanNear([ack:frew, ack:j], 2, false) spanNear([(abstract:frew)^2.0, (abstract:j)^2.0], 2, false) spanNear([(title:frew)^2.0, (title:j)^2.0], 2, false) spanNear([body:frew, body:j], 2, false) spanNear([keyword:frew, keyword:j], 2, false)",
                 BooleanQuery.class);
 
-        assertQueryEquals(req("defType", "aqp", "q", " full:\"HST\" NEAR2 full:\"proposal\""),
-                "spanNear([spanOr([ack:acr::hst, ack:syn::hst, ack:syn::hubble space telescope]), ack:proposal], 2, false) spanNear([(spanOr([abstract:acr::hst, abstract:syn::hst, abstract:syn::hubble space telescope]))^2.0, (abstract:proposal)^2.0], 2, false) spanNear([(spanOr([title:acr::hst, title:syn::hst, title:syn::hubble space telescope]))^2.0, (title:proposal)^2.0], 2, false) spanNear([spanOr([body:acr::hst, body:syn::hst, body:syn::hubble space telescope]), body:proposal], 2, false) spanNear([spanOr([keyword:acr::hst, keyword:syn::hst, keyword:syn::hubble space telescope]), keyword:proposal], 2, false)",
-                BooleanQuery.class);
 
         // yeah, if you don't specify any field, then i'll refuse to serve you anything
         // useful!
-        assertQueryEquals(req("defType", "aqp", "q", " HST NEAR2 galaxy"),
-                "spanNear([spanOr([all:acr::hst, all:syn::hst, all:syn::hubble space telescope]), all:galaxy], 2, false)",
-                SpanNearQuery.class);
 
         // fuzzy search for authors
         assertQueryEquals(req("defType", "aqp", "q", "author:kurtz~2"), "author:kurtz,~2", FuzzyQuery.class);
 
         // levenshtein automata only considers distances (and max is 2)
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~3"), "author:hoffmann, w~2",
-                FuzzyQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "=author:\"Hoffmann, W.\"~1"), "author:hoffmann, w~1",
-                FuzzyQuery.class);
 
         assertQueryEquals(req("defType", "aqp", "q", "author:\"Hoffmann, W.\"~2"), "author:hoffmann, w~2",
                 FuzzyQuery.class);
@@ -641,40 +1026,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "abs:foo"), "abstract:foo title:foo keyword:foo",
                 BooleanQuery.class);
 
-        // unbalanced brackets for functions
-        assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy), date asc)"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(
-                req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy),   date asc   )"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(201,(  ((\"foo bar\") AND database:astronomy)),date asc)"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         // added ability to interactively tweak queries
         assertQueryEquals(req("defType", "aqp", "q", "tweak(collector_final_value=ARITHM_MEAN, citations(author:foo))"),
                 "SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
-        // # 389
-        // make sure the functional parsing is handling things well
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo OR topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo AND topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(+title:foo +FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, title:foo, date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, (title:foo), date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, \"foo bar\", \"date desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(all:\"foo bar\", collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         // trendy() - what people read, it reads data from index
         assertU(addDocs("author", "muller", "reader", "bibcode1", "reader", "bibcode2"));
@@ -690,10 +1047,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 //                "spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 100)",
 //                SpanPositionRangeQuery.class);
 
-        // notice the use of modifier '=' (if it is lowercased, it means _nosyn analyzer
-        // was used)
-        assertQueryEquals(req("defType", "aqp", "q", "pos(=author:\"Accomazzi, A\", 1)"),
-                "spanPosRange(author:accomazzi, a, 0, 1)", SpanPositionRangeQuery.class);
 //        assertQueryEquals(req("defType", "aqp", "q", "pos(+author:\"Accomazzi, A\", 1, 1)"),
 //                "spanPosRange(spanOr([author:accomazzi, a, SpanMultiTermQueryWrapper(author:accomazzi, a*), author:accomazzi,]), 0, 1)",
 //                SpanPositionRangeQuery.class);
@@ -729,31 +1082,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 BooleanQuery.class);
 
 
-        // topn sorted - added 15Aug2013
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(*:*, collector=SecondOrderCollectorTopN(5, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc,citation_count desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc,citation_count desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        // topN - added Aug2013
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*)"),
-                "FunctionScoreQuery(SecondOrderQuery(*:*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, (foo bar))"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:foo +all:bar, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-//        assertQueryEquals(req("defType", "aqp", "q", "topn(5, edismax(dog OR cat))", "qf", "title^1 abstract^0.5"),
-//                "FunctionScoreQuery(SecondOrderQuery(((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat), collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-//                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:accomazzi)"),
-                "FunctionScoreQuery(SecondOrderQuery(author:accomazzi, author:accomazzi,*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         /*
          * It is different if Aqp handles the boolean operations or if edismax() does
@@ -906,6 +1234,30 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testSynonymPhraseNearPreservesOrderAndDistance() throws Exception {
+        assertU(adoc("id", "9881", "bibcode", "span9881", "ack",
+                "hubble space telescope proposal"));
+        assertU(adoc("id", "9882", "bibcode", "span9882", "ack",
+                "hubble space telescope quartz granite proposal"));
+        assertU(adoc("id", "9883", "bibcode", "span9883", "ack",
+                "telescope space hubble proposal"));
+        assertU(adoc("id", "9884", "bibcode", "span9884", "ack",
+                "hubble quartz space telescope proposal"));
+        assertU(adoc("id", "9885", "bibcode", "span9885", "ack",
+                "hubble space telescope quartz granite basalt proposal"));
+        assertU(commit("waitSearcher", "true"));
+
+        // The alias itself stays ordered and contiguous; only the outer NEAR
+        // permits a gap. The boundary hit requires the full raw alias span.
+        assertQ(req("defType", "aqp", "q", "full:\"HST\" NEAR2 full:\"proposal\"",
+                        "fq", "{!terms f=id}9881,9882,9883,9884,9885"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='9881']",
+                "//doc/str[@name='id'][.='9882']");
+    }
+
+
+
     public void testSearch() throws Exception {
 
         // search for all docs with a field
@@ -990,9 +1342,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"~3 NEAR N*"),
                 "spanNear([spanNear([all:acr::nasa, all:grant], 3, true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
-                SpanNearQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"^0.9 NEAR N*"),
-                "spanNear([PayloadScoreQuery(spanNear([all:acr::nasa, all:grant], 1, true), function: ConstantPayloadFunction, includeSpanScore: true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
                 SpanNearQuery.class);
         assertQueryEquals(req("defType", "aqp", "q", "\"NASA grant\"~3^0.9 NEAR N*"),
                 "spanNear([PayloadScoreQuery(spanNear([all:acr::nasa, all:grant], 3, true), function: ConstantPayloadFunction, includeSpanScore: true), SpanMultiTermQueryWrapper(all:n*)], 5, false)",
@@ -1099,31 +1448,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                         + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de))",
                 BooleanQuery.class);
 
-        /*
-        assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"", "aqp.classic_scoring.modifier", "0.6"),
-                "custom((abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) "
-                        + "(title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) "
-                        + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de)), "
-                        + "sum(float(cite_read_boost),const(0.6)))",
-                FunctionScoreQuery.class);
-         */
-
-        assertQueryContains(req("defType", "aqp", "q", "author:\"foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        assertQueryNotContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "no.classic_scoring.modifier", "0.5"),
-                "scored by",
-                SpanPositionRangeQuery.class);
-        assertQueryContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        assertQueryContains(
-                req("defType", "aqp", "q", "foo bar aqp(baz)", "aqp.classic_scoring.modifier", "0.6", "qf",
-                        "title keyword"),
-                "scored by boost(sum(float(cite_read_boost),const(0.6))))",
-                FunctionScoreQuery.class);
 
         // when used in conjunction with constant scoring, custom modifies constant (but
         // it won't replace it)
@@ -1131,11 +1455,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 req("defType", "aqp", "q", "^accomazzi", "aqp.constant_scoring", "author^5", "qf", "author title"),
                 "(ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0",
                 BoostQuery.class);
-        assertQueryContains(
-                req("defType", "aqp", "q", "^accomazzi", "aqp.classic_scoring.modifier", "0.5", "aqp.constant_scoring",
-                        "author^5", "qf", "author title"),
-                ")))^5.0, scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
     }
 

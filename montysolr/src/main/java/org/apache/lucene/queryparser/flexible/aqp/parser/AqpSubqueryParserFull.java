@@ -13,10 +13,18 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
 
     private QParser parser = null;
     private Class<?>[] qtypes = null;
+    private String originalInput = null;
+    private Object reParseContext = null;
     private final ReentrantLock parsingLock = new ReentrantLock();
 
     public QParser getParser() {
         return parser;
+    }
+    protected String getOriginalInput() {
+        return originalInput;
+    }
+    protected Object getReParseContext() {
+        return reParseContext;
     }
 
     public Class[] getQtypes() {
@@ -49,15 +57,23 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     }
 
     public Query reParse(Query query, QParser qp, Class<?>... types) throws SyntaxError {
+        return reParse(query, qp, null, types);
+    }
+
+    protected Query reParse(Query query, QParser qp, Object context, Class<?>... types)
+            throws SyntaxError {
         parsingLock.lock();
         try {
             parser = qp;
             qtypes = types;
-            swimDeep(query);
-            return query;
+            originalInput = qp.getString();
+            reParseContext = context;
+            return swimDeep(query);
         } finally {
             parser = null;
             qtypes = null;
+            originalInput = null;
+            reParseContext = null;
             parsingLock.unlock();
         }
     }
@@ -80,28 +96,31 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     }
 
     protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-        ArrayList<Query> parts = (ArrayList<Query>) query.getDisjuncts();
-        for (int i = 0; i < parts.size(); i++) {
-            Query oldQ = parts.get(i);
-            parts.set(i, swimDeep(oldQ));
+        List<Query> parts = new ArrayList<>(query.getDisjuncts().size());
+        for (Query oldQ : query.getDisjuncts()) {
+            parts.add(swimDeep(oldQ));
         }
-        return query;
-
+        return new DisjunctionMaxQuery(parts, query.getTieBreakerMultiplier());
     }
 
     protected Query swimDeep(BooleanQuery query) throws SyntaxError {
-        List<BooleanClause> clauses = query.clauses();
-        for (int i = 0; i < clauses.size(); i++) {
-            BooleanClause c = clauses.get(i);
-            Query qq = swimDeep(c.getQuery());
-            clauses.set(i, new BooleanClause(qq, c.getOccur()));
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
+        for (BooleanClause c : query.clauses()) {
+            builder.add(swimDeep(c.getQuery()), c.getOccur());
         }
-        return query;
+        builder.setMinimumNumberShouldMatch(query.getMinimumNumberShouldMatch());
+        return builder.build();
+    }
+
+    protected Query swimDeep(BoostQuery query) throws SyntaxError {
+        return new BoostQuery(swimDeep(query.getQuery()), query.getBoost());
     }
 
     protected Query swimDeep(Query query) throws SyntaxError {
         if (query instanceof BooleanQuery) {
             return swimDeep((BooleanQuery) query);
+        } else if (query instanceof BoostQuery) {
+            return swimDeep((BoostQuery) query);
         } else if (query instanceof DisjunctionMaxQuery) {
             return swimDeep((DisjunctionMaxQuery) query);
         } else if (query instanceof TermQuery) {
