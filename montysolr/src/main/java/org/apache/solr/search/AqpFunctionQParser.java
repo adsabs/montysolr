@@ -9,6 +9,7 @@ import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.Query;
@@ -144,33 +145,8 @@ public class AqpFunctionQParser extends FunctionQParser {
 
 
     public int parseInt() {
-        String val = dequoteDoubleQuoted(consumeAsString());
+        String val = AqpQueryParserUtil.dequoteDoubleQuoted(consumeAsString());
         return Integer.valueOf(val);
-    }
-
-    /** Removes supported delimiters from a raw quoted function argument. */
-    public static String dequote(String value) {
-        return dequote(value, true);
-    }
-
-    /** Removes supported double-quote delimiters without accepting single quotes. */
-    public static String dequoteDoubleQuoted(String value) {
-        return dequote(value, false);
-    }
-
-    private static String dequote(String value, boolean allowSingleQuotes) {
-        if (value == null || value.length() < 2) {
-            return value;
-        }
-
-        char opening = value.charAt(0);
-        char closing = value.charAt(value.length() - 1);
-        if ((opening == '"' && closing == '"')
-                || (opening == '\u201C' && (closing == '\u201D' || closing == '"'))
-                || (allowSingleQuotes && opening == '\'' && closing == '\'')) {
-            return value.substring(1, value.length() - 1);
-        }
-        return value;
     }
 
     public Float parseFloat() throws SyntaxError {

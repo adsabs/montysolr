@@ -403,13 +403,16 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         String lowercaseTopnSort = "topn(1,full:Simons,\"date desc\")";
         String curlyTopnSort = "topn(1,full:Simons,“DATE DESC”)";
         String curlyAsciiTopnSort = "topn(1,full:Simons,“DATE DESC\")";
+        String singleQuotedTopnSort = "topn(1,full:Simons,'DATE DESC')";
         for (String topnSortQuery : new String[]{
-                asciiTopnSort, lowercaseTopnSort, curlyTopnSort, curlyAsciiTopnSort}) {
+                asciiTopnSort, lowercaseTopnSort, curlyTopnSort, curlyAsciiTopnSort, singleQuotedTopnSort}) {
             assertQ(req("defType", "aqp", "q", topnSortQuery, "fl", "id"),
                     "//*[@numFound='1']",
                     "//doc/str[@name='id'][.='35202']",
                     "not(//doc/str[@name='id'][.='35201'])");
         }
+
+        assertQueryParseException(req("defType", "aqp", "q", "topn('1',full:Simons)"));
 
         assertQueryParseException(req("defType", "aqp", "q", "full:“”"));
         assertQueryParseException(req("defType", "aqp", "q", "full:\u201D\u201C"));

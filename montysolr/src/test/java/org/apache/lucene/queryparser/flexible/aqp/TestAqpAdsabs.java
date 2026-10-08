@@ -99,12 +99,19 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         PhraseQuery escaped = (PhraseQuery) whitespaceParser.parse(
                 "title:\"escaped \\\" quote\"", "");
         assertEquals("\"", escaped.getTerms()[1].text());
+        assertEquals(escaped, whitespaceParser.parse("title:“escaped \\\" quote\"", ""));
 
         PhraseQuery escapedSmartClose = (PhraseQuery) whitespaceParser.parse(
                 "title:“escaped \\” quote”", "");
         assertEquals("”", escapedSmartClose.getTerms()[1].text());
         assertEquals(qp.parse("title:\"science*\"", ""),
                 qp.parse("title:“science*”", ""));
+        assertEquals(qp.parse("title:\"science*\"", ""),
+                qp.parse("title:“science*\"", ""));
+        assertEquals(qp.parse("title:\"science?\"", ""),
+                qp.parse("title:“science?”", ""));
+        assertEquals(qp.parse("title:\"science?\"", ""),
+                qp.parse("title:“science?\"", ""));
 
         assertEquals(qp.parse("[\"this\" TO \"that\"]", ""),
                 qp.parse("[“this” TO “that”]", ""));

@@ -548,14 +548,12 @@ TERM_TRUNCATED:
 PHRASE  
   : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
-  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'|'?'|'*'))+ RQUOTE
-  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'|'?'|'*'))+ DQUOTE
+  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'|'?'|'*'))+ (RQUOTE | DQUOTE)
   ;
 
 PHRASE_ANYTHING : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
-  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'))+ RQUOTE
-  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'))+ DQUOTE
+  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'))+ (RQUOTE | DQUOTE)
   ;
 
 LOCAL_PARAMS  : 

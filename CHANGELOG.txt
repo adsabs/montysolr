@@ -3,6 +3,7 @@ Unreleased
 - Query phrase syntax accepts curly opening double quotes closed by curly or ASCII double quotes; curly marks inside ASCII-delimited phrases remain literal.
 - Empty and unterminated curly phrases, including a final delimiter escaped by a backslash, produce syntax errors.
 - Term escaping protects both curly quote delimiters, and quoted integer and topn sort arguments accept supported curly/ASCII delimiter pairs while preserving case-insensitive topn sort-field normalization.
+- Share function argument unquoting in the parser utility and factor repeated curly phrase closing alternatives without changing quote or escaping behavior.
 
 MontySolr 0.1, 2011-05-19
 -------------------------
