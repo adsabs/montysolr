@@ -1,7 +1,3 @@
-Unreleased
-----------
-- Count positional multi-term author patterns as one nested clause while preserving the configured span rewrite and its full default expansion.
-
 MontySolr 0.1, 2011-05-19
 -------------------------
 - Initial release
