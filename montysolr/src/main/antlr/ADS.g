@@ -42,7 +42,9 @@ tokens {
 }
 
 mainQ : 
-  clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
+  NOT clauseNear EOF
+    -> ^(OPERATOR["DEFOP"] ^(MODIFIER MINUS["-"] clauseNear))
+  | clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
   ;
    
   
@@ -55,7 +57,8 @@ clauseAnd
   ;
 
 clauseNot
-  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
+  :
+  (first=clauseNear  -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
 clauseNear
@@ -398,6 +401,11 @@ fragment AS_CHAR
   :
   ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
   ;
+
+fragment AUTHOR_CHAR
+  :
+  AS_CHAR | '-'
+  ;
   
   
 fragment ESC_CHAR:  '\\' .; 
@@ -415,7 +423,7 @@ NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
   
 AUTHOR_SEARCH
   :
-  '^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
+  '^' AUTHOR_CHAR+ (',' (' ' | AUTHOR_CHAR)+)* '$'?
   ;
 
 

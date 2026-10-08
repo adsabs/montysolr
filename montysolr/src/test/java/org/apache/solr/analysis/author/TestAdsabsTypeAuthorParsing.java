@@ -140,6 +140,7 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                             "Gonzalez Alfonso, E=>González Alfonso, E",
                             "Chyelkovae,=>Chýlková,",
                             "stoklasova,=>stoklasová,",
+                            "wang, i=>wang, y",
                             "orlitova,=>orlitová,"
                     }
             ));
@@ -281,6 +282,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertU(adoc(F.ID, "301", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, Jewell"));
         assertU(adoc(F.ID, "302", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, J"));
 
+        assertU(adoc(F.ID, "310", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen-Dalsgaard, J"));
+        assertU(adoc(F.ID, "311", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen Dalsgaard, J"));
+        assertU(adoc(F.ID, "312", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen-Dalsgaard, Jane"));
+        assertU(adoc(F.ID, "313", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen, J"));
+
         assertU(adoc(F.ID, "400", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae-Sik"));
         assertU(adoc(F.ID, "401", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae- Sik"));
         assertU(adoc(F.ID, "402", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D. -S."));
@@ -307,7 +313,21 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
                 F.AUTHOR, "Baz, Baz|\\u8349")); // 草
 
         assertU(adoc(F.ID, "601", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wyrzykowski, Ł"));
+        assertU(adoc(F.ID, "900", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wang, I"));
+        assertU(adoc(F.ID, "901", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wang, Y"));
+        assertU(adoc(F.ID, "902", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wang, I A"));
+        assertU(adoc(F.ID, "903", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Wång, I"));
 
+        assertU(adoc(F.ID, "23300", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, Adam", "first_author", "Moss, Adam"));
+        assertU(adoc(F.ID, "23301", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, Adam", "first_author", "moss, adam"));
+        assertU(adoc(F.ID, "23302", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, Adamson", "first_author", "Moss, Adamson"));
+        assertU(adoc(F.ID, "23303", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Mōss, Adam", "first_author", "Mōss, Adam"));
+        assertU(adoc(F.ID, "23304", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Moss, A", "first_author", "Moss, A"));
         assertU(commit());
 
         //dumpDoc(null, "id", "author");
@@ -332,10 +352,38 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
 
     public void xtestX() throws Exception {
         assertAuthorResults("\"adamczuk, molja k\"", "21");
+    }
 
+    public void testExactAuthorDoesNotExpandGeneratedTransliteration() throws Exception {
+        assertAuthorResults("=\"Wang, I\"", "1", "900");
+        assertAuthorResults("=\"wang, i\"", "1", "900");
+        assertAuthorResults("=\"Wang, I A\"", "1", "902");
+        assertAuthorResults("=\"Wång, I\"", "1", "903");
+        assertAuthorResults("=\"Foo, Bar\"", "1", "600");
+    }
+
+    public void testExactFirstAuthorNormalizesCase() throws Exception {
+        author_field = "first_author";
+        try {
+            assertAuthorResults("=\"Moss, Adam\"", "2", "23300", "23301");
+            assertAuthorResults("=\"moss, adam\"", "2", "23300", "23301");
+            assertAuthorResults("=\"Mōss, Adam\"", "1", "23303");
+            assertAuthorResults("=\"Moss, A\"", "1", "23304");
+            assertQ(req("defType", "aqp", "q",
+                            "pos(=first_author:\"Moss, Adam\", 1)"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='23300']",
+                    "//doc/str[@name='id'][.='23301']");
+        } finally {
+            author_field = "author";
+        }
+    }
+    public void testExactAuthorPreservesPipeValues() throws Exception {
+        assertAuthorResults("=\"Foo, Bar\"", "1", "600");
     }
 
     public void testAuthorParsingUseCases() throws Exception {
+
         assertU(adoc(F.ID, "700", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Krivodubski, V"));
         assertU(adoc(F.ID, "701", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Krivodubski,"));
         assertU(adoc(F.ID, "702", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Herrera-Camus, Ana"));
@@ -386,6 +434,25 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertAuthorResults("V\\ Maestro", "1", "709");
         assertAuthorResults("Boyajian\\,\\ T", "1", "710");
         assertAuthorResults("T\\ Boyajian", "1", "710");
+        // Exercise the historical bare unfielded leading-position syntax itself;
+        // the quoted whole-query form is the documented workaround/control.
+        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
+                        "q", "^Christensen-Dalsgaard, J"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='310']",
+                "//doc/str[@name='id'][.='311']",
+                "//doc/str[@name='id'][.='312']",
+                "not(//doc/str[@name='id'][.='313'])");
+        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
+                        "q", "\"^Christensen-Dalsgaard, J\""),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='310']",
+                "//doc/str[@name='id'][.='311']",
+                "//doc/str[@name='id'][.='312']",
+                "not(//doc/str[@name='id'][.='313'])");
+        assertAuthorResults("\"Christensen-Dalsgaard, J\"", "3", "310", "311", "312");
+        assertAuthorResults("\"^Christensen-Dalsgaard, J\"", "3", "310", "311", "312");
+        assertAuthorResults("\"Christensen Dalsgaard, J\"", "3", "310", "311", "312");
         assertAuthorResults("first", "0");
         assertAuthorResults("goodman", "0");
 
@@ -445,6 +512,49 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertAuthorResults("\"Lee, Harwin-*\"", "0");
         assertAuthorResults("\"Lee, Harwin*\"", "2", "202", "203");
         assertAuthorResults("\"Lee, H*\"", "4", "200", "201", "202", "203");
+    }
+
+    /**
+     * Natural-order author phrases must not be broadened to surname-only
+     * wildcards, and long collaboration names must remain searchable.
+     */
+    public void testNaturalOrderAuthorPhraseRetainsAllTerms() throws Exception {
+        assertU(adoc(F.ID, "19400", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gaia Collaboration"));
+        assertU(adoc(F.ID, "19401", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Collaboration, Other"));
+        assertU(adoc(F.ID, "19402", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Anna Kelbert"));
+        assertU(adoc(F.ID, "19403", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Kelbert, Mark"));
+        assertU(adoc(F.ID, "19404", F.BIBCODE, "2023Natur.614..649J", F.AUTHOR,
+                "JWST Transiting Exoplanet Community Early Release Science Team"));
+        assertU(adoc(F.ID, "19405", F.BIBCODE, "2023Natur.614..649K", F.AUTHOR,
+                "JWST Transiting Exoplanet Community Early Release Science Team Collaboration"));
+        assertU(adoc(F.ID, "19406", F.BIBCODE, "2023Natur.614..649M", F.AUTHOR, "Collaboration, JWST"));
+        assertU(adoc(F.ID, "19407", F.BIBCODE, "2023Natur.614..649N", F.AUTHOR,
+                "Team, JWST Transiting Exoplanet Community Early Release"));
+        assertU(adoc(F.ID, "19408", F.BIBCODE, "2023Natur.614..649P", F.AUTHOR,
+                "Team, JWST Transiting Exoplanet Community Early"));
+        assertU(commit());
+
+        assertAuthorResults("\"Gaia Collaboration\"", "1", "19400");
+        assertAuthorResults("\"Anna Kelbert\"", "1", "19402");
+        assertAuthorResults("\"JWST Transiting Exoplanet Community Early Release Science Team\"", "1", "19404");
+        assertAuthorResults("\"JWST Transiting Exoplanet Community Early Release Science Team Collaboration\"", "1", "19405");
+        assertQ(req("defType", "aqp", "q", "author:\"JWST Transiting Exoplanet Community Early Release Science Team*\"",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='19404']",
+                "//doc/str[@name='id'][.='19405']",
+                "not(//doc/str[@name='id'][.='19401'])",
+                "not(//doc/str[@name='id'][.='19406'])");
+        assertQ(req("defType", "aqp", "qf", "author^2",
+                        "q", "\"Team, JWST Transiting Exoplanet Community Early Release\"",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "qf", "author^2 title",
+                        "q", "\"Team,  JWST Transiting Exoplanet Community Early\"",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='2']",
+                "//doc/str[@name='id'][.='19407']",
+                "//doc/str[@name='id'][.='19408']");
     }
 
     public void testAuthorParsingMainLogic() throws Exception {
@@ -1191,8 +1301,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         for (int i = 0; i < recids.length; i++) {
             checks[i + 1] = "//doc/str[@name='id'][.='" + recids[i] + "']";
         }
+        String fieldQuery = query.startsWith("=")
+                ? "=" + author_field + ":" + query.substring(1)
+                : author_field + ":" + query;
         assertQ(req("defType", "aqp", "fl", "id," + author_field, "rows", "100",
-                        "q", author_field + ":" + query),
+                        "q", fieldQuery),
                 checks);
     }
 

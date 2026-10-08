@@ -48,6 +48,7 @@ public class AqpWhiteSpacedQueryNodeProcessor extends AqpQueryNodeProcessorImpl 
 
             String funcName = getConfigVal("aqp.unfielded.tokens.function.name", "edismax_combined_aqp");
             String subQuery = ((FieldQueryNode) node).getTextAsString();
+            boolean quotedPhrase = subQuery.startsWith("\"") && subQuery.endsWith("\"");
             String field = ((FieldQueryNode) node).getFieldAsString();
             if (field.equals(config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD))) {
                 field = null;
@@ -58,8 +59,12 @@ public class AqpWhiteSpacedQueryNodeProcessor extends AqpQueryNodeProcessorImpl 
             }
 
             if (node.getParent() instanceof SlopQueryNode) {
-                subQuery = "(" + subQuery + ")";
-                subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
+                if (quotedPhrase) {
+                    subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
+                } else {
+                    subQuery = "(" + subQuery + ")";
+                    subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
+                }
                 if (node.getParent().getParent() instanceof BoostQueryNode) {
                     subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
                 }

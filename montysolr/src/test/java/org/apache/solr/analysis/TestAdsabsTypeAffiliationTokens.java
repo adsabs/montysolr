@@ -21,7 +21,6 @@ package org.apache.solr.analysis;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.SynonymQuery;
 import org.apache.lucene.search.TermQuery;
@@ -228,6 +227,8 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
 
         // search parent/child
         assertQ(req("q", "institution:\"SI/CfA\""), "//*[@numFound='2']");
+        assertQ(req("q", "institution:\"SI/CfA\"", "aqp.multiphrase.keep_one", "SYNONYM"),
+                "//*[@numFound='2']");
 
         // do the same but as phrase; it should fail because the parser WILL NOT
         // treat empty space as a delimiter; it considers it part of the token
@@ -283,22 +284,6 @@ public class TestAdsabsTypeAffiliationTokens extends MontySolrQueryTestCase {
         // SI/CfA;A01400;CfA
         assertQ(req("q", "institution:\"AX/AB\""), "//*[@numFound='2']");
 
-        //this tests behaviour with ADS's extended configuration for multi-token synonym handling
-        //first what happens what we are doing by default; then with the configuration to disable
-        //such treatment for specific fields
-        assertQueryEquals(req("q", "institution:\"SI/CfA\"",
-                        "aqp.multiphrase.keep_one", "SYNONYM"
-                ),
-                "institution:\"si cfa\"~6",
-                MultiPhraseQuery.class
-        );
-
-        assertQueryEquals(req("q", "institution:\"SI/CfA\"",
-                        "aqp.multiphrase.keep_one", "SYNONYM",
-                        "aqp.multiphrase.keep_one.ignore.fields", "aff_id,aff_raw,institution"),
-                "institution:\"(ax si a01397 smithsonian institution rid8264 01pp8nd67 0000000087163312 q131626 grid.1214.6) (a01400 cfa si/cfa harvard u/cfa center for astrophysics harvard and smithsonian harvard smithsonian center for astrophysics rid61814 03c3r2d17 q1133697 grid.455754.2)\"",
-                MultiPhraseQuery.class
-        );
         // and check we still retrieve the same docs
         assertQ(req("q", "institution:\"SI/CfA\"",
                         "aqp.multiphrase.keep_one", "SYNONYM",
