@@ -5,6 +5,7 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 
 /**
@@ -218,4 +219,32 @@ public class TestAqpSLGSimple extends AqpTestAbstractCase {
 
 
     }
+
+    public void testCurlyQuotedPhrases() throws Exception {
+        AqpQueryParser qp = getParser(new WhitespaceAnalyzer());
+        String asciiQuery = "full:\"Simons Foundation\" full:\"00001470\"";
+        String mixedQuery = "full: “Simons Foundation” full:“00001470\"";
+        assertEquals(qp.parse(asciiQuery, "field"), qp.parse(mixedQuery, "field"));
+
+        PhraseQuery preserved = (PhraseQuery) qp.parse(
+                "title:\"researcher's “curly” phrase\"", "field");
+        assertEquals("researcher's", preserved.getTerms()[0].text());
+        assertEquals("“curly”", preserved.getTerms()[1].text());
+
+        PhraseQuery escaped = (PhraseQuery) qp.parse(
+                "title:\"escaped \\\" quote\"", "field");
+        assertEquals("\"", escaped.getTerms()[1].text());
+
+        assertEquals(qp.parse("title:\"foo\\\\\"", "field"),
+                qp.parse("title:“foo\\\\”", "field"));
+
+        assertQueryNodeException("title:“”");
+        assertQueryNodeException("title:\u201D\u201C");
+        assertQueryNodeException("title:\"foo”");
+        assertQueryNodeException("title:“foo\\”");
+        assertQueryNodeException("title:“unterminated\\");
+        assertQueryNodeException("title:“unterminated");
+        assertQueryNodeException("title:\"unterminated");
+    }
+
 }

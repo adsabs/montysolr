@@ -13,6 +13,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -555,11 +556,7 @@ public class AqpAdsabsSubQueryProvider implements
                     sortOrRank = fp.parseId();
                 }
 
-                sortOrRank = sortOrRank.toLowerCase();
-
-                if (sortOrRank.contains("\"") || sortOrRank.contains("'")) {
-                    sortOrRank = sortOrRank.substring(1, sortOrRank.length() - 1);
-                }
+                sortOrRank = AqpQueryParserUtil.dequote(sortOrRank).toLowerCase(Locale.ROOT);
 
                 SortSpec sortSpec = SortSpecParsing.parseSortSpec(sortOrRank, fp.getReq());
 

@@ -9,6 +9,7 @@ import org.apache.lucene.queries.function.valuesource.QueryValueSource;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.search.Query;
@@ -144,10 +145,7 @@ public class AqpFunctionQParser extends FunctionQParser {
 
 
     public int parseInt() {
-        String val = consumeAsString();
-        if (val.charAt(0) == '"' && val.charAt(val.length() - 1) == '"') {
-            val = val.substring(1, val.length() - 1);
-        }
+        String val = AqpQueryParserUtil.dequoteDoubleQuoted(consumeAsString());
         return Integer.valueOf(val);
     }
 

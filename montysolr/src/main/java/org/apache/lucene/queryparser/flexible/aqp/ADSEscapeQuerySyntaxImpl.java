@@ -35,7 +35,7 @@ public class ADSEscapeQuerySyntaxImpl implements EscapeQuerySyntax {
 
     private static final String[] escapableTermExtraFirstChars = {"+", "-", "@"};
 
-    private static final String[] escapableTermChars = {"\"", "<", ">", "=",
+    private static final String[] escapableTermChars = {"\"", "\u201C", "\u201D", "<", ">", "=",
             "(", ")", "^", "[", "{", ":", "]", "}", "~", "/", ","};
 
     // TODO: check what to do with these "*", "?", "\\"

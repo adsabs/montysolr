@@ -364,6 +364,64 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     }
 
 
+    public void testMixedCurlyAndStraightQuotes() throws Exception {
+        assertU(adoc("id", "35201", "bibcode", "b35201",
+                "ack", "Simons Foundation acknowledged funding 00001470",
+                "date", "2017-01-01T00:00:00Z"));
+        assertU(adoc("id", "35202", "bibcode", "b35202",
+                "ack", "Simons Foundation acknowledged funding 00000000",
+                "date", "2018-01-01T00:00:00Z"));
+        assertU(commit("waitSearcher", "true"));
+
+        String asciiQuery = "full:\"Simons Foundation\" full:\"00001470\"";
+        String mixedQuery = "full: “Simons Foundation” full:“00001470\"";
+        Query ascii = assertQueryEquals(req("defType", "aqp", "q", asciiQuery),
+                "", BooleanQuery.class);
+        Query mixed = assertQueryEquals(req("defType", "aqp", "q", mixedQuery),
+                "", BooleanQuery.class);
+        assertEquals(ascii, mixed);
+
+        assertQ(req("defType", "aqp", "q", mixedQuery, "fl", "id"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='35201']",
+                "not(//doc/str[@name='id'][.='35202'])");
+        Query asciiEscapedClose = getParser(req("defType", "aqp", "q",
+                "full:\"foo\\\\\"")).parse();
+        Query curlyEscapedClose = getParser(req("defType", "aqp", "q",
+                "full:“foo\\\\”")).parse();
+        assertEquals(asciiEscapedClose, curlyEscapedClose);
+
+        String asciiTopn = "topn(\"1\",full:Simons)";
+        String curlyTopn = "topn(“1”,full:Simons)";
+        String curlyAsciiTopn = "topn(“1\",full:Simons)";
+        for (String topnQuery : new String[]{asciiTopn, curlyTopn, curlyAsciiTopn}) {
+            assertQ(req("defType", "aqp", "q", topnQuery, "fl", "id"),
+                    "//*[@numFound='1']");
+        }
+
+        String asciiTopnSort = "topn(1,full:Simons,\"DATE DESC\")";
+        String lowercaseTopnSort = "topn(1,full:Simons,\"date desc\")";
+        String curlyTopnSort = "topn(1,full:Simons,“DATE DESC”)";
+        String curlyAsciiTopnSort = "topn(1,full:Simons,“DATE DESC\")";
+        String singleQuotedTopnSort = "topn(1,full:Simons,'DATE DESC')";
+        for (String topnSortQuery : new String[]{
+                asciiTopnSort, lowercaseTopnSort, curlyTopnSort, curlyAsciiTopnSort, singleQuotedTopnSort}) {
+            assertQ(req("defType", "aqp", "q", topnSortQuery, "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='35202']",
+                    "not(//doc/str[@name='id'][.='35201'])");
+        }
+
+        assertQueryParseException(req("defType", "aqp", "q", "topn('1',full:Simons)"));
+
+        assertQueryParseException(req("defType", "aqp", "q", "full:“”"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:\u201D\u201C"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:\"foo”"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:“foo\\”"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:“unterminated\\"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:“unterminated"));
+    }
+
     public void testExactHyphenatedPhraseMatchesCompoundOnly() throws Exception {
         assertU(adoc("id", "4401", "bibcode", "b4401", "title", "dust-dust plasma"));
         assertU(adoc("id", "4402", "bibcode", "b4402", "title", "dust dust plasma"));

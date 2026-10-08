@@ -385,6 +385,13 @@ TILDE : '~' NUMBER?;
 
 DQUOTE  : '\"';
 
+// An opening curly double quote closes with a curly or ASCII double quote.
+// Curly quotes inside an ASCII-delimited phrase remain literal content.
+// Each delimiter occupies one UTF-16 unit, so source offsets need no adjustment.
+LQUOTE  : '\u201C';
+
+RQUOTE  : '\u201D';
+
 //SQUOTE  : '\'';
 
 COMMA : ',';
@@ -482,7 +489,7 @@ fragment INT: '0' .. '9';
 fragment TERM_START_CHAR
   :
   (~(' ' | '\t' | '\n' | '\r' | '\u3000'
-        | '\"' 
+        | '\"' | '\u201C' | '\u201D'
         | '(' | ')' | '[' | ']' | '{' | '}'
         | '+' | '-' | '!' | ':' | '~' | '^' 
         | '?' | '*' | '\\'|',' | '=' | '#'
@@ -541,10 +548,12 @@ TERM_TRUNCATED:
 PHRASE  
   : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
+  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'|'?'|'*'))+ (RQUOTE | DQUOTE)
   ;
 
 PHRASE_ANYTHING : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+  | LQUOTE (ESC_CHAR|~('\u201D'|'\"'|'\\'))+ (RQUOTE | DQUOTE)
   ;
 
 LOCAL_PARAMS  : 
@@ -553,3 +562,6 @@ LOCAL_PARAMS  :
 REGEX : 
   '/' (ESC_CHAR|~('/'|'\\'))+ '/'
   ; 
+UNTERMINATED_CURLY_PHRASE
+  : LQUOTE (ESC_CHAR | ~('\u201D'|'\"'|'\\'))* '\\'? EOF
+  ;

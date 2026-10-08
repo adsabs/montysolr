@@ -5,6 +5,8 @@ import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
+import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.search.*;
 
 import java.util.Map.Entry;
@@ -79,6 +81,72 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
     public void testAcronyms() throws Exception {
         assertQueryEquals("\"dark matter\" -LHC", null, "+\"dark matter\" -lhc");
+    }
+
+    public void testCurlyDoubleQuotes() throws Exception {
+        AqpQueryParser qp = getParser();
+        Query ascii = qp.parse("full:\"Simons Foundation\" full:\"00001470\"", "");
+        Query mixed = qp.parse("full: “Simons Foundation” full:“00001470\"", "");
+        Query curly = qp.parse("full:“Simons Foundation” full:“00001470”", "");
+        assertEquals(ascii, mixed);
+        assertEquals(ascii, curly);
+
+        AqpQueryParser whitespaceParser = getParser(new WhitespaceAnalyzer());
+        PhraseQuery preserved = (PhraseQuery) whitespaceParser.parse(
+                "title:\"researcher's “curly” phrase\"", "");
+        assertEquals("researcher's", preserved.getTerms()[0].text());
+        assertEquals("“curly”", preserved.getTerms()[1].text());
+        PhraseQuery escaped = (PhraseQuery) whitespaceParser.parse(
+                "title:\"escaped \\\" quote\"", "");
+        assertEquals("\"", escaped.getTerms()[1].text());
+        assertEquals(escaped, whitespaceParser.parse("title:“escaped \\\" quote\"", ""));
+
+        PhraseQuery escapedSmartClose = (PhraseQuery) whitespaceParser.parse(
+                "title:“escaped \\” quote”", "");
+        assertEquals("”", escapedSmartClose.getTerms()[1].text());
+        assertEquals(qp.parse("title:\"science*\"", ""),
+                qp.parse("title:“science*”", ""));
+        assertEquals(qp.parse("title:\"science*\"", ""),
+                qp.parse("title:“science*\"", ""));
+        assertEquals(qp.parse("title:\"science?\"", ""),
+                qp.parse("title:“science?”", ""));
+        assertEquals(qp.parse("title:\"science?\"", ""),
+                qp.parse("title:“science?\"", ""));
+
+        assertEquals(qp.parse("[\"this\" TO \"that\"]", ""),
+                qp.parse("[“this” TO “that”]", ""));
+        assertQueryEquals("author:/foo“bar”/", null, "author:/foo“bar”/",
+                RegexpQuery.class);
+        String curlyLiteral = "foo“bar”";
+        String utilityEscaped = AqpQueryParserUtil.escape(curlyLiteral);
+        assertEquals("foo\\“bar\\”", utilityEscaped);
+        TermQuery utilityRoundTrip = (TermQuery) whitespaceParser.parse(utilityEscaped, "title");
+        assertEquals(curlyLiteral, utilityRoundTrip.getTerm().text());
+
+        ADSEscapeQuerySyntaxImpl escaper = new ADSEscapeQuerySyntaxImpl();
+        CharSequence adsEscaped = escaper.escape(
+                curlyLiteral, java.util.Locale.ROOT, EscapeQuerySyntax.Type.NORMAL);
+        assertEquals("foo\\“bar\\”", adsEscaped.toString());
+        TermQuery adsRoundTrip = (TermQuery) whitespaceParser.parse(adsEscaped.toString(), "title");
+        assertEquals(curlyLiteral, adsRoundTrip.getTerm().text());
+        assertEquals(curlyLiteral, escaper.escape(
+                curlyLiteral, java.util.Locale.ROOT, EscapeQuerySyntax.Type.STRING).toString());
+
+        String asciiLiteral = new String("plain ASCII");
+        assertSame(asciiLiteral, AqpQueryParserUtil.escape(asciiLiteral));
+
+        assertEquals(whitespaceParser.parse("title:\"foo\\\\\"", ""),
+                whitespaceParser.parse("title:“foo\\\\”", ""));
+
+        assertQueryNodeException("title:“”");
+        assertQueryNodeException("title:” “");
+        assertQueryNodeException("title:\u201D\u201C");
+        assertQueryNodeException("title:\"foo”");
+        assertQueryNodeException("title:“foo\\”");
+        assertQueryNodeException("title:“unterminated\\");
+        assertQueryNodeException("title:“unterminated");
+
+        assertQueryNodeException("full:“unterminated");
     }
 
 

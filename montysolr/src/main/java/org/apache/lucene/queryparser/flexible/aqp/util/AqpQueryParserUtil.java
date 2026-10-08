@@ -161,23 +161,55 @@ final public class AqpQueryParserUtil {
         return bQuery.build();
     }
 
+    /** Removes supported delimiters from a raw quoted function argument. */
+    public static String dequote(String value) {
+        return dequote(value, true);
+    }
+
+    /** Removes supported double-quote delimiters without accepting single quotes. */
+    public static String dequoteDoubleQuoted(String value) {
+        return dequote(value, false);
+    }
+
+    private static String dequote(String value, boolean allowSingleQuotes) {
+        if (value == null || value.length() < 2) {
+            return value;
+        }
+
+        char opening = value.charAt(0);
+        char closing = value.charAt(value.length() - 1);
+        if ((opening == '"' && closing == '"')
+                || (opening == '\u201C' && (closing == '\u201D' || closing == '"'))
+                || (allowSingleQuotes && opening == '\'' && closing == '\'')) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
+
     /**
      * Returns a String where those characters that TextParser expects to be
      * escaped are escaped by a preceding <code>\</code>.
      */
     public static String escape(String s) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = null;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             // These characters are part of the query syntax and must be escaped
             if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':'
-                    || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~'
-                    || c == '*' || c == '?' || c == '|' || c == '&') {
+                    || c == '^' || c == '[' || c == ']' || c == '\"' || c == '\u201C' || c == '\u201D'
+                    || c == '{' || c == '}' || c == '~' || c == '*'
+                    || c == '?' || c == '|' || c == '&') {
+                if (sb == null) {
+                    sb = new StringBuilder(s.length());
+                    sb.append(s, 0, i);
+                }
                 sb.append('\\');
             }
-            sb.append(c);
+            if (sb != null) {
+                sb.append(c);
+            }
         }
-        return sb.toString();
+        return sb == null ? s : sb.toString();
     }
 
 }
