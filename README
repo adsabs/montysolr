@@ -25,16 +25,6 @@ that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014
   
 
 
-AUTHOR GIVEN-NAME ABBREVIATIONS
-===============================
-
-A quoted two-letter, single-component given-name query such as
-`author:"^surname, yu."` also matches longer given names with the same prefix,
-such as `Yuri`, and a genuine two-letter name such as `Yu`. This is intentional
-ambiguity; longer and multicomponent query names keep their existing behavior.
-For an exact match to `Yu` without `Yuri`, use exact-author syntax:
-`=author:"^surname, yu"`.
-
 INSTALLATION
 ============
 
