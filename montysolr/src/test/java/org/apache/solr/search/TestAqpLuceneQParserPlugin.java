@@ -19,7 +19,13 @@ package org.apache.solr.search;
 import monty.solr.util.MontySolrAbstractTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SecondOrderCollectorTopN;
+import org.apache.lucene.search.SecondOrderQuery;
+import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.request.SolrQueryRequest;
@@ -103,6 +109,25 @@ public class TestAqpLuceneQParserPlugin extends MontySolrAbstractTestCase {
                 "//doc/str[@name='id'][.='21']"
         );
 
+    }
+
+    @Test
+    public void testHighlightQueryPreservesMinimumShouldMatch() {
+        Query nestedQuery = new SecondOrderQuery(
+                new TermQuery(new Term("title", "exoplanet")),
+                new SecondOrderCollectorTopN(1));
+        BooleanQuery.Builder query = new BooleanQuery.Builder();
+        query.setMinimumNumberShouldMatch(2);
+        query.add(nestedQuery, BooleanClause.Occur.SHOULD);
+        query.add(new TermQuery(new Term("title", "source")), BooleanClause.Occur.SHOULD);
+
+        Query highlightQuery = AqpAdsabsQParser.unwrapHighlightQuery(query.build());
+
+        assertTrue(highlightQuery instanceof BooleanQuery);
+        BooleanQuery booleanHighlightQuery = (BooleanQuery) highlightQuery;
+        assertEquals(2, booleanHighlightQuery.getMinimumNumberShouldMatch());
+        assertEquals(new TermQuery(new Term("title", "exoplanet")),
+                booleanHighlightQuery.clauses().get(0).getQuery());
     }
 
 }
