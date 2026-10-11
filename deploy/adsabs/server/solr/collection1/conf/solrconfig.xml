@@ -300,6 +300,8 @@
 
   <searchComponent name="requestMemoryStart" class="org.adsabs.solr.metrics.memory.RequestMemoryStartComponent"/>
   <searchComponent name="requestMemoryEnd" class="org.adsabs.solr.metrics.memory.RequestMemoryEndComponent"/>
+  <!-- when parseOnly=true, returns the fully expanded query (debug.parsedquery) without searching -->
+  <searchComponent name="expandedQuery" class="org.apache.solr.handler.component.AqpExpandedQueryComponent"/>
   <requestHandler name="/select" class="solr.SearchHandler">
      <lst name="defaults">
        <str name="wt">json</str>
@@ -348,6 +350,7 @@
      </lst>
      <arr name="first-components">
          <str>requestMemoryStart</str>
+         <str>expandedQuery</str>
      </arr>
      <arr name="last-components">
       <str>wordcloud</str>
