@@ -65,14 +65,14 @@ public class TestCitationsTransformer extends SolrTestCaseJ4 {
 
         assertQ(req("q", "bibcode:b3"),
                 "//*[@numFound='1']",
-                "//doc/int[@name='id'][.='3']"
+                "//doc/str[@name='id'][.='3']"
         );
 
         assertQ(req("q", "bibcode:b3",
                         "fl", "id,[citations]",
                         "indent", "true"),
                 "//*[@numFound='1']",
-                "//doc/int[@name='id'][.='3']",
+                "//doc/str[@name='id'][.='3']",
                 "//doc/lst[@name='[citations]']/int[@name='num_citations'][.='10']",
                 "//doc/lst[@name='[citations]']/int[@name='num_references'][.='3']"
         );
@@ -81,7 +81,7 @@ public class TestCitationsTransformer extends SolrTestCaseJ4 {
                         "fl", "id,[citations values=citations,references]",
                         "indent", "true"),
                 "//*[@numFound='1']",
-                "//doc/int[@name='id'][.='3']",
+                "//doc/str[@name='id'][.='3']",
                 "//doc/lst[@name='[citations]']/int[@name='num_citations'][.='10']",
                 "//doc/lst[@name='[citations]']/int[@name='num_references'][.='3']",
                 "//doc/lst[@name='[citations]']/arr[@name='references']/str[1][.='2']",
@@ -95,7 +95,7 @@ public class TestCitationsTransformer extends SolrTestCaseJ4 {
                         "fl", "id,[citations values=citations,references resolve=true]",
                         "indent", "true"),
                 "//*[@numFound='1']",
-                "//doc/int[@name='id'][.='3']",
+                "//doc/str[@name='id'][.='3']",
                 "//doc/lst[@name='[citations]']/int[@name='num_citations'][.='10']",
                 "//doc/lst[@name='[citations]']/int[@name='num_references'][.='3']",
                 "//doc/lst[@name='[citations]']/arr[@name='references']/str[1][.='b2']",
@@ -109,7 +109,7 @@ public class TestCitationsTransformer extends SolrTestCaseJ4 {
                         "fl", "id,[citations values=citations,references resolve=true]",
                         "indent", "true"),
                 "//*[@numFound='1']",
-                "//doc/int[@name='id'][.='11']",
+                "//doc/str[@name='id'][.='11']",
                 "//doc/lst[@name='[citations]']/int[@name='num_citations'][.='0']",
                 "//doc/lst[@name='[citations]']/int[@name='num_references'][.='0']"
         );
