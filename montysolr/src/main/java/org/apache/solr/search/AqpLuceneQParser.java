@@ -16,6 +16,7 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.schema.IndexSchema;
+import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,5 +119,13 @@ public class AqpLuceneQParser extends QParser {
 
     public AqpQueryParser getParser() {
         return qParser;
+    }
+    @Override
+    public void addDebugInfo(NamedList<Object> debugInfo) {
+        super.addDebugInfo(debugInfo);
+        String parserDebug = qParser.getDebugOutput();
+        if (!parserDebug.isEmpty()) {
+            debugInfo.add("aqp_debug", parserDebug);
+        }
     }
 }

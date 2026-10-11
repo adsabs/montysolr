@@ -39,6 +39,7 @@ public class AqpQueryTreeBuilder extends QueryTreeBuilder implements
 
     private boolean debug = false;
     private int counter = 0;
+    private StringBuilder debugOutput = new StringBuilder();
 
     public AqpQueryTreeBuilder(boolean debug) {
         this.setDebug(debug);
@@ -47,6 +48,15 @@ public class AqpQueryTreeBuilder extends QueryTreeBuilder implements
 
     public AqpQueryTreeBuilder() {
         init();
+    }
+
+    public void setDebugOutput(StringBuilder debugOutput) {
+        this.debugOutput = debugOutput;
+    }
+
+    private void debug(String message) {
+        System.out.println(message);
+        debugOutput.append(message).append('\n');
     }
 
     public void setDebug(boolean val) {
@@ -93,20 +103,20 @@ public class AqpQueryTreeBuilder extends QueryTreeBuilder implements
         }
 
         public Object build(QueryNode queryNode) throws QueryNodeException {
-            System.out.println("--------------------------------------------");
-            System.out.println("step     " + counter++ + ".");
-            System.out.println("builder: " + realBuilder.getClass().getName());
-            System.out.println("node:    " + clazz.getName());
-            System.out.println(queryNode.toString());
-            System.out.println("   -->");
+            debug("--------------------------------------------");
+            debug("step     " + counter++ + ".");
+            debug("builder: " + realBuilder.getClass().getName());
+            debug("node:    " + clazz.getName());
+            debug(queryNode.toString());
+            debug("   -->");
             Object result = realBuilder.build(queryNode);
             if (result != null) {
-                System.out.println(result + "  <"
+                debug(result + "  <"
                         + result.getClass().getName() + ">");
             } else {
-                System.out.println("null");
+                debug("null");
             }
-            System.out.println("--------------------------------------------");
+            debug("--------------------------------------------");
             return result;
         }
 
