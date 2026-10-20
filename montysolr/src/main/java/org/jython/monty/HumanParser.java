@@ -331,7 +331,7 @@ public class HumanParser implements JythonNameParser {
         if (value == null || value.isEmpty()) {
             return "";
         }
-        return value.toLowerCase().replace(".", "");
+        return value.toLowerCase(Locale.ROOT).replace(".", "");
     }
 
     private boolean isAnInitial(String value) {
@@ -339,7 +339,7 @@ public class HumanParser implements JythonNameParser {
     }
 
     private boolean isTitle(String piece) {
-        return titles.contains(lc(piece)) || puncTitles.contains(piece.toLowerCase());
+        return titles.contains(lc(piece)) || puncTitles.contains(piece.toLowerCase(Locale.ROOT));
     }
 
     private boolean isConjunction(String piece) {

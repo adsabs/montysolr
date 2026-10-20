@@ -2,7 +2,7 @@ package org.jython.monty;
 
 import org.apache.lucene.tests.util.LuceneTestCase;
 import org.jython.monty.interfaces.JythonNameParser;
-
+import java.util.Locale;
 import java.util.Map;
 
 /*
@@ -340,6 +340,21 @@ public class TestJythonNameParser extends LuceneTestCase {
         Map<String, String> result = parser.parse_human_name("van Gogh, Vincent");
         assertEquals("van Gogh", result.get("Last"));
         assertEquals("Vincent", result.get("First"));
+    }
+
+    public void testParsingIsLocaleIndependent() {
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.ROOT);
+            Map<String, String> expected = parser.parse_human_name("John Smith IV");
+
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            Map<String, String> actual = parser.parse_human_name("John Smith IV");
+
+            assertEquals(expected, actual);
+        } finally {
+            Locale.setDefault(previous);
+        }
     }
 
     // Original tests preserved
