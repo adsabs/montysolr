@@ -1,9 +1,16 @@
 package org.apache.solr.handler.batch;
 
 import org.adsabs.solr.AdsConfig.F;
+import org.apache.lucene.analysis.core.KeywordTokenizer;
+import org.apache.lucene.analysis.synonym.NewSynonymFilterFactory;
 import org.apache.solr.request.SolrQueryRequest;
 
+import java.io.StringReader;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.lucene.tests.analysis.BaseTokenStreamTestCase.assertTokenStreamContents;
 
 public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
 
@@ -67,11 +74,20 @@ public class TestBatchProviderDumpAuthorNames extends BatchProviderTest {
                 "!a=>á,",
                 "gonzalez alfonso,=>gonzález alfonso,",
                 "gonzalez alfonso, e=>gonzález alfonso, e",
-                "savye, e=>sav e, e",
-                "silchenko,=>sil chenko,", // this is cleaned up "sil'chenko"
-                "!sil'chenko,=>sil chenko,",
                 "wyrzykowski, l=>wyrzykowski, ł",
                 "peissker, l=>peißker, l");
+
+        // Consume the harvested rules: Russian transliteration must target the
+        // same compact spelling that the author index now stores.
+        Map<String, String> args = new HashMap<>();
+        args.put("synonyms", tmpDir + "/00000");
+        args.put("format", "semicolon");
+        args.put("tokenizerFactory", "solr.KeywordTokenizerFactory");
+        NewSynonymFilterFactory synonyms = new NewSynonymFilterFactory(args);
+        synonyms.inform(h.getCore().getResourceLoader());
+        KeywordTokenizer tokenizer = new KeywordTokenizer();
+        tokenizer.setReader(new StringReader("savye, e"));
+        assertTokenStreamContents(synonyms.create(tokenizer), new String[]{"save, e"});
     }
 
     public static String[] formatSynonyms(String[] strings) {
