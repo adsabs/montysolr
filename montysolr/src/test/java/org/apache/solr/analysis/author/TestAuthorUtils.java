@@ -14,7 +14,6 @@ public class TestAuthorUtils extends TestCase {
         assertEquals("Huchra, J", AuthorUtils.normalizeAuthor("Huchra,    J."));
         assertEquals("Gomez, Hector Q", AuthorUtils.normalizeAuthor(" Gomez,   Hector Q  "));
         assertEquals("Gómez, Hector Q", AuthorUtils.normalizeAuthor("Gómez, Hector Q"));
-        assertEquals("Foo Eye, Bar", AuthorUtils.normalizeAuthor("Foo'Eye, Bar"));
         assertEquals("Radio, F M", AuthorUtils.normalizeAuthor("Radio, F.M."));
         assertEquals("NA49 COLLABORATION,", AuthorUtils.normalizeAuthor("NA49 COLLABORATION"));
         assertEquals("29, 000 STARDUST HOME DUSTERS", AuthorUtils.normalizeAuthor("29, 000 STARDUST HOME DUSTERS"));
@@ -27,9 +26,6 @@ public class TestAuthorUtils extends TestCase {
         assertEquals("hey, joe", AuthorUtils.normalizeAuthor("hey,_joe"));
         assertEquals("hey, joe", AuthorUtils.normalizeAuthor("hey, joe$#@^&*!!!"));
 
-        assertEquals("o sullivan, mike", AuthorUtils.normalizeAuthor("o'sullivan, mike"));
-        assertEquals("o sullivan, mike", AuthorUtils.normalizeAuthor("o' sullivan, mike"));
-        assertEquals("mc donald, co", AuthorUtils.normalizeAuthor("mc'donald, co(.)"));
         assertEquals("GómezFoo, He ctor 29Q", AuthorUtils.normalizeAuthor("%$Gómez_Foo, He-ctor;  29Q."));
         assertEquals("Gómez, Hector Q", AuthorUtils.normalizeAuthor("  Gómez,\n Hector    Q "));
 
@@ -44,6 +40,24 @@ public class TestAuthorUtils extends TestCase {
         // this character gets removed ⻉
         assertEquals("\u8349,", AuthorUtils.normalizeAuthor("\u8349")); // 草
 
+    }
+
+    public void testApostrophesAreSearchFoldsNotWordBoundaries() {
+        for (String mark : new String[]{"'", "’", "‘", "ʼ", "ʻ", "＇"}) {
+            assertEquals("AHearn, M", AuthorUtils.normalizeAuthor("A" + mark + "Hearn, M"));
+            assertEquals("ONeill, Siobhan", AuthorUtils.normalizeAuthor("O" + mark + " Neill, Siobhan"));
+            assertEquals("t Hooft, Gerard", AuthorUtils.normalizeAuthor(mark + "t Hooft, Gerard"));
+            assertEquals("Ii, Keala", AuthorUtils.normalizeAuthor(mark + "I" + mark + "i, Ke" + mark + "ala"));
+            assertEquals("A'Hearn, M", AuthorUtils.normalizeAuthor("A" + mark + "Hearn, M", true));
+        }
+        assertEquals("DallOglio, Antonella", AuthorUtils.normalizeAuthor("Dall'Oglio, Antonella"));
+        assertEquals("Xian, Ping", AuthorUtils.normalizeAuthor("Xi'an, P'ing"));
+        assertEquals("A Hearn, M", AuthorUtils.normalizeAuthor("A Hearn, M"));
+        assertEquals("A Hearn, M", AuthorUtils.normalizeAuthor("A-Hearn, M"));
+        assertEquals("s Gravesande, Willem", AuthorUtils.normalizeAuthor("'s-Gravesande, Willem"));
+        assertEquals("q\u0301a, M", AuthorUtils.normalizeAuthor("q\u0301' a, M"));
+        check("o’neill, s", "oneill, s");
+        check("f’edorov", "fedorov,", "fiedorov,", "fyedorov,");
     }
 
     public void testParseAuthor() throws Exception {

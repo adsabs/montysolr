@@ -34,8 +34,6 @@ public class TestIssue20CurrentAuthorCuration extends MontySolrQueryTestCase {
 
         assertU(adoc(F.ID, "820", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pustilnik, S"));
         assertU(adoc(F.ID, "821", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Pustil'nik, S"));
-        assertU(adoc(F.ID, "822", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "O'Brian, S"));
-        assertU(adoc(F.ID, "823", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Obrian, S"));
         assertU(commit());
 
         assertQ(req("defType", "aqp", "debugQuery", "true", "fl", "id,author", "rows", "100",
@@ -84,12 +82,6 @@ public class TestIssue20CurrentAuthorCuration extends MontySolrQueryTestCase {
         assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
                         "q", "author:\"Pustil'nik, S\""),
                 ids("820", "821"));
-        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
-                        "q", "author:\"O'Brian, S\""),
-                ids("822"));
-        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
-                        "q", "author:\"Obrian, S\""),
-                ids("823"));
 
     }
 

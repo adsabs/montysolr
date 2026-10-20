@@ -38,8 +38,9 @@ public class AuthorUtils {
     static Pattern n2 = Pattern.compile("\\s+");
     // to normalize non escaped commas
     static Pattern n3 = Pattern.compile("(?<!\\\\),\\s*");
-    // deal with word delimiters
-    static Pattern n4 = Pattern.compile("(?<=\\p{L})\\'\\s*");
+    // An internal apostrophe is not a word boundary (O'Neill, Dall'Oglio).
+    // Include combining marks for letters without a precomposed Unicode form.
+    static Pattern n4 = Pattern.compile("(?<=[\\p{L}\\p{M}])'\\s*");
 
     public static String normalizeAuthor(String a) {
         return normalizeAuthor(a, false);
@@ -49,7 +50,7 @@ public class AuthorUtils {
      * Method used by the tokenizer chain to normalize author names.
      *
      * @param a              - author name
-     * @param keepApostrophe - bool, preserve apostrophe
+     * @param keepApostrophe - preserve apostrophes in canonical ASCII form for transliteration
      * @return Normalized string
      */
     public static String normalizeAuthor(String a, boolean keepApostrophe) {
@@ -57,9 +58,15 @@ public class AuthorUtils {
         // bytes that contribute to individual code points.
         // If we didn't do this, some names could turn into unknown characters.
         a = Normalizer.normalize(a, Normalizer.Form.NFKC);
+        // Fold typographic apostrophes and Polynesian/modifier-letter spellings
+        // for search only; the stored author name is not changed. NFKC already
+        // folds the fullwidth apostrophe. Do this before the letter allow-list:
+        // U+02BB/U+02BC are letters, not punctuation.
+        a = a.replace('\u2018', '\'').replace('\u2019', '\'')
+                .replace('\u02bb', '\'').replace('\u02bc', '\'');
         boolean hasWildcards = a.indexOf('*') > -1 || a.indexOf('?') > -1; // \*\? should never be encountered here
         if (!keepApostrophe)
-            a = n4.matcher(a).replaceAll("-");
+            a = n4.matcher(a).replaceAll("");
         a = n0.matcher(a).replaceAll(" ");
 
         if (keepApostrophe)
@@ -131,8 +138,7 @@ public class AuthorUtils {
         synonyms.addAll(transRus);
         synonyms.addAll(translitRussianApostrophes(synonyms.iterator()));
 
-        // apostrophes are now preserved in the index
-        // so we need to generate translits for those
+        // Collector mode retains apostrophes; also harvest the unmarked spelling.
         if (a.contains("'"))
             synonyms.add(a.replace("'", ""));
 
