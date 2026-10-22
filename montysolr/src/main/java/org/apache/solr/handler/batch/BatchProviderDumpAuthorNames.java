@@ -56,16 +56,16 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 
         final Analyzer analyzer = core.getLatestSchema().getQueryAnalyzer();
 
-        SchemaField tField = core.getLatestSchema().getFieldOrNull(analyzerField);
+        SchemaField analyzerSchemaField = core.getLatestSchema().getFieldOrNull(analyzerField);
 
-        if (tField == null) {
+        if (analyzerSchemaField == null) {
             data.setMsg("We cannot find analyzer for: " + analyzerField);
             queue.registerFailedBatch(this, data);
             return;
         }
 
         final String targetAnalyzer = analyzerField;
-        SolrIndexSearcher se = req.getSearcher();
+        SolrIndexSearcher searcher = req.getSearcher();
 
         final HashSet<String> fieldsToLoad = new HashSet<String>();
         fieldsToLoad.add(sourceField);
@@ -74,7 +74,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
         final WriteableSynonymMap synMap = createSynonymMap();
         synMap.setOutput(jobFile.getAbsolutePath());
 
-        se.search(new MatchAllDocsQuery(), new SimpleCollector() {
+        searcher.search(new MatchAllDocsQuery(), new SimpleCollector() {
             private LeafReader reader;
             private final int i = 0;
             private final Set<String> tokenBuffer = new LinkedHashSet<String>();
@@ -88,36 +88,33 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
 
             @Override
             public void collect(int i) {
-                Document d;
+                Document document;
                 try {
-                    d = reader.document(i, fieldsToLoad);
+                    document = reader.document(i, fieldsToLoad);
 
-                    for (String f : fieldsToLoad) {
-                        String[] vals = d.getValues(f);
+                    for (String fieldName : fieldsToLoad) {
+                        String[] authorNames = document.getValues(fieldName);
 
-                        for (String s : vals) {
-                            //System.out.println(s);
-                            //System.out.println(AuthorUtils.normalizeAuthor(s));
-                            s = s.toLowerCase(Locale.ROOT);
+                        for (String authorName : authorNames) {
+                            authorName = authorName.toLowerCase(Locale.ROOT);
 
-                            TokenStream ts = analyzer.tokenStream(targetAnalyzer, new StringReader(s));
-                            ts.reset();
-                            authorInput = s;
-                            while (ts.incrementToken()) {
-                                termAtt = ts.getAttribute(CharTermAttribute.class);
-                                typeAtt = ts.getAttribute(TypeAttribute.class);
+                            TokenStream tokenStream = analyzer.tokenStream(targetAnalyzer, new StringReader(authorName));
+                            tokenStream.reset();
+                            authorInput = authorName;
+                            while (tokenStream.incrementToken()) {
+                                termAtt = tokenStream.getAttribute(CharTermAttribute.class);
+                                typeAtt = tokenStream.getAttribute(TypeAttribute.class);
 
                                 if (typeAtt.type().equals(AuthorUtils.AUTHOR_INPUT)) {
                                     addTokensToSynMap();
                                     authorInput = termAtt.toString();
-                                    //System.out.println("authorInput " + authorInput);
                                 } else {
                                     tokenBuffer.add(termAtt.toString().toLowerCase(Locale.ROOT));
                                 }
                             }
 
                             addTokensToSynMap();
-                            ts.close();
+                            tokenStream.close();
                         }
                     }
                 } catch (IOException e) {

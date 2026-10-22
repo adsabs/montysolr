@@ -31,13 +31,10 @@ import java.util.List;
 public class AqpWhiteSpacedQueryNodeProcessor extends AqpQueryNodeProcessorImpl implements
         QueryNodeProcessor {
 
-
     @Override
     protected QueryNode postProcessNode(QueryNode node)
             throws QueryNodeException {
-
         if (node instanceof AqpWhiteSpacedQueryNode) {
-
             QueryConfigHandler config = getQueryConfigHandler();
 
             if (!config.has(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)) {
@@ -46,8 +43,9 @@ public class AqpWhiteSpacedQueryNodeProcessor extends AqpQueryNodeProcessorImpl 
                         "Missing FunctionQueryBuilder provider"));
             }
 
-            String funcName = getConfigVal("aqp.unfielded.tokens.function.name", "edismax_combined_aqp");
+            String functionName = getConfigVal("aqp.unfielded.tokens.function.name", "edismax_combined_aqp");
             String subQuery = ((FieldQueryNode) node).getTextAsString();
+            // Detect quotes before adding a field prefix.
             boolean quotedPhrase = subQuery.startsWith("\"") && subQuery.endsWith("\"");
             String field = ((FieldQueryNode) node).getFieldAsString();
             if (field.equals(config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD))) {
@@ -65,6 +63,7 @@ public class AqpWhiteSpacedQueryNodeProcessor extends AqpQueryNodeProcessorImpl 
                     subQuery = "(" + subQuery + ")";
                     subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
                 }
+
                 if (node.getParent().getParent() instanceof BoostQueryNode) {
                     subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
                 }
@@ -76,18 +75,18 @@ public class AqpWhiteSpacedQueryNodeProcessor extends AqpQueryNodeProcessorImpl 
             node.setTag("subQuery", subQuery);
 
             AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
-                    .getBuilder(funcName, node, config);
+                    .getBuilder(functionName, node, config);
 
             if (builder == null) {
                 throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
-                        "Unknown function: \"" + funcName + "\""));
+                        "Unknown function: \"" + functionName + "\""));
             }
 
-
-            List<OriginalInput> fValues = new ArrayList<OriginalInput>();
-            fValues.add(new OriginalInput(subQuery, ((AqpWhiteSpacedQueryNode) node).getBegin(), ((AqpWhiteSpacedQueryNode) node).getEnd()));
-            return new AqpFunctionQueryNode(funcName, builder, fValues);
+            List<OriginalInput> arguments = new ArrayList<OriginalInput>();
+            arguments.add(new OriginalInput(subQuery, ((AqpWhiteSpacedQueryNode) node).getBegin(), ((AqpWhiteSpacedQueryNode) node).getEnd()));
+            return new AqpFunctionQueryNode(functionName, builder, arguments);
         }
+
         return node;
     }
 

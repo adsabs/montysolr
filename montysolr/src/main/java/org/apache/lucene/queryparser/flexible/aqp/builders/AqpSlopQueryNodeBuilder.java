@@ -1,6 +1,7 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.spans.SpanQuery;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
@@ -13,7 +14,6 @@ import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PhraseQuery.Builder;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.queries.spans.SpanQuery;
 
 /**
  * This builder basically reads the {@link Query} object set on the
@@ -21,9 +21,9 @@ import org.apache.lucene.queries.spans.SpanQuery;
  * {@link QueryTreeBuilder#QUERY_TREE_BUILDER_TAGID} and applies the slop value
  * defined in the {@link SlopQueryNode}.
  * <p>
- * IFF the default value is zero, we'll check positions of the
- * terms and adjust the slope, eg. positions 0,1,5 will get slope of
- * 3 because there are three empty tokens inbetween (2,3,4)
+ * For implicit slop on phrases without preserved raw or graph positions, a
+ * zero value falls back to the position holes. Positions 0,1,5 contribute
+ * three empty positions (2,3,4). Explicit zero slop leaves the query unchanged.
  */
 public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
 
@@ -40,22 +40,27 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
         if (query instanceof SpanQuery) {
             return query;
         }
-        int defaultValue = phraseSlopNode.getValue();
+
+        int effectiveSlop = phraseSlopNode.getValue();
         boolean explicitSlop = Boolean.TRUE.equals(
                 phraseSlopNode.getTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP));
-        if (explicitSlop && defaultValue == 0) {
+        if (explicitSlop && effectiveSlop == 0) {
             return query;
         }
+
         boolean preserveGraphPositions =
                 phraseSlopNode.getTag(AqpPostAnalysisProcessor.EXACT_GRAPH_PATH) != null
                         || phraseSlopNode.getChild().getTag(AqpPostAnalysisProcessor.EXACT_GRAPH_PATH) != null;
 
         if (query instanceof PhraseQuery) {
-            boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
-            if (explicitPositions || preserveGraphPositions) {
+            boolean rawPositions = hasRawPositions(phraseSlopNode.getChild());
+            if (rawPositions || preserveGraphPositions) {
                 PhraseQuery phrase = (PhraseQuery) query;
-                if (phrase.getSlop() == defaultValue) return phrase;
-                Builder builder = new PhraseQuery.Builder().setSlop(defaultValue);
+                if (phrase.getSlop() == effectiveSlop) {
+                    return phrase;
+                }
+
+                Builder builder = new PhraseQuery.Builder().setSlop(effectiveSlop);
                 Term[] terms = phrase.getTerms();
                 int[] positions = phrase.getPositions();
                 for (int i = 0; i < terms.length; i++) {
@@ -63,37 +68,44 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
                 }
                 return builder.build();
             }
-            if (defaultValue == 0) {
-                int[] pos = ((PhraseQuery) query).getPositions();
-                defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
+
+            if (effectiveSlop == 0) {
+                int[] positions = ((PhraseQuery) query).getPositions();
+                effectiveSlop = (positions[positions.length - 1] - positions[0]) - (positions.length - 1);
             }
 
-            if (explicitSlop ? defaultValue == 0 : defaultValue <= 1) return query;
+            if (explicitSlop ? effectiveSlop == 0 : effectiveSlop <= 1) {
+                return query;
+            }
 
             Builder builder = new PhraseQuery.Builder();
-            builder.setSlop(defaultValue);
-            for (Term t : ((PhraseQuery) query).getTerms()) {
-                builder.add(t);
+            builder.setSlop(effectiveSlop);
+            for (Term term : ((PhraseQuery) query).getTerms()) {
+                builder.add(term);
             }
             query = builder.build();
-
         } else {
-
-            boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
-            if (explicitPositions || preserveGraphPositions) {
+            boolean rawPositions = hasRawPositions(phraseSlopNode.getChild());
+            if (rawPositions || preserveGraphPositions) {
                 MultiPhraseQuery phrase = (MultiPhraseQuery) query;
-                if (phrase.getSlop() == defaultValue) return phrase;
-                return new MultiPhraseQuery.Builder(phrase).setSlop(defaultValue).build();
+                if (phrase.getSlop() == effectiveSlop) {
+                    return phrase;
+                }
+
+                return new MultiPhraseQuery.Builder(phrase).setSlop(effectiveSlop).build();
             }
+
             int maxBranchSize = 0;
             int gap = 0;
-            // examine terms that made the multi-phrase query
+
+            // Examine terms that made the multi-phrase query.
             if (!explicitSlop) {
                 for (QueryNode child : queryNode.getChildren().get(0).getChildren()) {
                     if (child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE) != null) {
                         gap = (Integer) child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
-                        if (gap > defaultValue)
-                            defaultValue = gap;
+                        if (gap > effectiveSlop) {
+                            effectiveSlop = gap;
+                        }
                     }
                     if (child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE) != null) {
                         maxBranchSize = (Integer) child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE);
@@ -105,23 +117,24 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
                 // return query; // do nothing
             }
 
-            // fallback
-            if (!explicitSlop && defaultValue == 0) {
-                int[] pos = ((MultiPhraseQuery) query).getPositions();
-                defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
+            // Fall back to position holes when no implicit slop was inferred.
+            if (!explicitSlop && effectiveSlop == 0) {
+                int[] positions = ((MultiPhraseQuery) query).getPositions();
+                effectiveSlop = (positions[positions.length - 1] - positions[0]) - (positions.length - 1);
             }
 
-            if (explicitSlop ? defaultValue == 0 : defaultValue <= 1) return query;
+            if (explicitSlop ? effectiveSlop == 0 : effectiveSlop <= 1) {
+                return query;
+            }
 
             MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder((MultiPhraseQuery) query);
-            builder.setSlop(defaultValue);
-
+            builder.setSlop(effectiveSlop);
             query = builder.build();
         }
 
         return query;
-
     }
+
     private boolean hasRawPositions(QueryNode node) {
         if (Boolean.TRUE.equals(node.getTag(
                 AqpPostAnalysisProcessor.RAW_POSITIONAL_PATH))) {

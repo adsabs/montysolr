@@ -74,6 +74,17 @@ public class AqpAdsabsSubQueryProvider implements
         return cacheWrapper;
     }
 
+    private static Query createNormalizedBibcodeJoin(Query innerQuery, SolrQueryRequest req,
+                                                    String targetField) throws SyntaxError {
+        try {
+            Analyzer targetIndexAnalyzer = req.getSchema().getFieldType(targetField).getIndexAnalyzer();
+            return MontyNormalizingJoinUtil.createJoinQuery("bibcode", targetField, targetIndexAnalyzer,
+                    innerQuery, req.getSearcher());
+        } catch (IOException e) {
+            throw new SyntaxError(e.getMessage());
+        }
+    }
+
     static {
 
         /* @api.doc
@@ -680,7 +691,7 @@ public class AqpAdsabsSubQueryProvider implements
          *
          * def joincitations(query):
          * 		"""
-         *    Equivalent of citations() but implemented using lucene block-join
+         *    Equivalent of citations() but implemented using a normalized Lucene term join
          *
          *
          *    @experimental
@@ -693,14 +704,7 @@ public class AqpAdsabsSubQueryProvider implements
             public Query parse(FunctionQParser fp) throws SyntaxError {
                 Query innerQuery = fp.parseNestedQuery();
                 SolrQueryRequest req = fp.getReq();
-                try {
-                    // XXX: not sure if i can use several fields: citationSearchIdField
-                    Analyzer toAnalyzer = req.getSchema().getFieldType("reference").getIndexAnalyzer();
-                    return MontyNormalizingJoinUtil.createJoinQuery("bibcode", "reference", toAnalyzer,
-                            innerQuery, req.getSearcher());
-                } catch (IOException e) {
-                    throw new SyntaxError(e.getMessage());
-                }
+                return createNormalizedBibcodeJoin(innerQuery, req, "reference");
             }
         });
 
@@ -708,7 +712,7 @@ public class AqpAdsabsSubQueryProvider implements
          *
          * def joinreferences(query):
          * 		"""
-         *    Equivalent of references() but implemented using lucene block-join
+         *    Equivalent of references() but implemented using a normalized Lucene term join
          *
          *
          *    @experimental
@@ -722,13 +726,7 @@ public class AqpAdsabsSubQueryProvider implements
             public Query parse(FunctionQParser fp) throws SyntaxError {
                 Query innerQuery = fp.parseNestedQuery();
                 SolrQueryRequest req = fp.getReq();
-                try {
-                    Analyzer toAnalyzer = req.getSchema().getFieldType("citation").getIndexAnalyzer();
-                    return MontyNormalizingJoinUtil.createJoinQuery("bibcode", "citation", toAnalyzer,
-                            innerQuery, req.getSearcher());
-                } catch (IOException e) {
-                    throw new SyntaxError(e.getMessage());
-                }
+                return createNormalizedBibcodeJoin(innerQuery, req, "citation");
             }
         });
 
@@ -1006,21 +1004,23 @@ public class AqpAdsabsSubQueryProvider implements
                 final String queryText = localParamsEnd >= 0
                         ? original.substring(localParamsEnd + 1)
                         : original;
-                QParser eqp = fp.subQuery("xxx", "adismax");
-                Query q = eqp.getQuery();
+
+                QParser dismaxParser = fp.subQuery("xxx", "adismax");
+                Query fieldRoutingQuery = dismaxParser.getQuery();
                 fp.setString(queryText);
-                return simplify(reParse(q, fp, Boolean.valueOf(exactSearch), TermQuery.class));
+                return simplify(reParse(fieldRoutingQuery, fp, Boolean.valueOf(exactSearch), TermQuery.class));
             }
 
             protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-                List<Query> parts = new ArrayList<>(query.getDisjuncts().size());
-                for (Query oldQ : query.getDisjuncts()) {
-                    Query candidate = oldQ;
+                List<Query> reparsedDisjuncts = new ArrayList<>(query.getDisjuncts().size());
+                for (Query disjunct : query.getDisjuncts()) {
+                    Query candidate = disjunct;
                     Float boost = null;
                     if (candidate instanceof BoostQuery) {
                         boost = ((BoostQuery) candidate).getBoost();
                         candidate = ((BoostQuery) candidate).getQuery();
                     }
+
                     String field = null;
                     if (candidate instanceof TermQuery) {
                         field = ((TermQuery) candidate).getTerm().field();
@@ -1036,13 +1036,14 @@ public class AqpAdsabsSubQueryProvider implements
                             }
                         }
                     }
+
                     if (field != null) {
-                        parts.add(reAnalyze(field, getParser().getString(), boost));
+                        reparsedDisjuncts.add(reAnalyze(field, getParser().getString(), boost));
                     } else {
-                        parts.add(swimDeep(oldQ));
+                        reparsedDisjuncts.add(swimDeep(disjunct));
                     }
                 }
-                return new DisjunctionMaxQuery(parts, query.getTieBreakerMultiplier());
+                return new DisjunctionMaxQuery(reparsedDisjuncts, query.getTieBreakerMultiplier());
             }
 
             private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {

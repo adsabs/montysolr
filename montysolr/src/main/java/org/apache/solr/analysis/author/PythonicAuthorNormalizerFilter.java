@@ -3,8 +3,8 @@ package org.apache.solr.analysis.author;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.util.BytesRef;
 import org.jython.monty.HumanParser;
 import org.jython.monty.interfaces.JythonNameParser;
@@ -38,19 +38,20 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
     private final PayloadAttribute payloadAtt = addAttribute(PayloadAttribute.class);
-    private final List<String> originalNames = new ArrayList<String>();
-    private final List<String> buffer = new ArrayList<String>();
+    // Each buffered name has a source-name payload at the same index.
+    private final List<String> bufferedSourceNames = new ArrayList<String>();
+    private final List<String> bufferedNames = new ArrayList<String>();
     private final Pattern multiSpace = Pattern.compile("\\s\\s+");
-    private final JythonNameParser jythonParser;
+    private final JythonNameParser nameParser;
 
     public PythonicAuthorNormalizerFilter(TokenStream input) {
         super(input);
-        this.jythonParser = new HumanParser();
+        this.nameParser = new HumanParser();
     }
 
     @Override
     public boolean incrementToken() throws IOException {
-        if (buffer.size() > 0) {
+        if (bufferedNames.size() > 0) {
             emitBuffered();
             return true;
         }
@@ -74,7 +75,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
                 continue;
             }
 
-            Map<String, String> parsedName = jythonParser.parse_human_name(individual);
+            Map<String, String> parsedName = nameParser.parse_human_name(individual);
 
             if (parsedName != null && !parsedName.isEmpty()) {
                 if (parsedName.containsKey("Last")) {
@@ -124,7 +125,7 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
             }
         }
 
-        if (buffer.size() == 0) {
+        if (bufferedNames.size() == 0) {
             return false;
         }
 
@@ -133,19 +134,20 @@ public final class PythonicAuthorNormalizerFilter extends TokenFilter {
     }
 
     private void addBuffered(String name, String originalName) {
-        buffer.add(name);
-        originalNames.add(originalName);
+        bufferedNames.add(name);
+        bufferedSourceNames.add(originalName);
     }
 
     private void emitBuffered() {
-        termAtt.setEmpty().append(buffer.remove(0));
-        payloadAtt.setPayload(new BytesRef(originalNames.remove(0)));
+        termAtt.setEmpty().append(bufferedNames.remove(0));
+        payloadAtt.setPayload(new BytesRef(bufferedSourceNames.remove(0)));
         typeAtt.setType(AuthorUtils.AUTHOR_INPUT);
     }
+
     @Override
     public void reset() throws IOException {
         super.reset();
-        buffer.clear();
-        originalNames.clear();
+        bufferedNames.clear();
+        bufferedSourceNames.clear();
     }
 }
