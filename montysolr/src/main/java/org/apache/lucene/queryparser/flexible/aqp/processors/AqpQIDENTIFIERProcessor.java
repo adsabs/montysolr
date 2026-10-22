@@ -10,19 +10,16 @@ import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.GroupQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.MatchAllDocsQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 
 /**
- * Converts QIDENTIFIER node into @{link {@link QuotedFieldQueryNode}.
- * The field value is the @{link DefaultFieldAttribute}
- * specified in the configuration.
- *
+ * Converts identifier syntax into identifier or wildcard nodes, reusing existing
+ * field nodes when available. Grouped identifier values receive the identifier
+ * field recursively.
  * <p>
- * <p>
- * If the user specified a field, it will be set by the @{link AqpFIELDProcessor}
- * Therefore the {@link AqpQPHRASEProcessor} should run before it.
+ * Uses the configured default identifier field unless the syntax supplies one.
+ * {@link AqpQPHRASEProcessor} runs first to convert quoted identifier values.
  *
  * @see QueryConfigHandler
  */
@@ -33,14 +30,12 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
     }
 
     public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
-        //String field = getDefaultFieldName();
-
         String field = getQueryConfigHandler().get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.DEFAULT_IDENTIFIER_FIELD);
         String input = null;
         int start = 0;
         int end = 0;
 
-        QueryNode sc = null;
+        QueryNode valueNode = null;
         if (node.getChildren().size() == 2
                 && node.getChildren().get(1) instanceof GroupQueryNode) {
             String identifierField = ((AqpANTLRNode) node.getChildren().get(0)).getTokenLabel();
@@ -50,58 +45,31 @@ public class AqpQIDENTIFIERProcessor extends AqpQProcessor {
         }
 
         if (node.getChildren().size() == 1) {
-            sc = node.getChildren().get(0);
-            if (sc instanceof AqpANTLRNode) {
-                input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
-                start = ((AqpANTLRNode) sc).getTokenStart();
-                end = ((AqpANTLRNode) sc).getTokenEnd();
-            } else if (sc instanceof MatchAllDocsQueryNode) {
-                // XXX: we are missing the info about the token position, which may hurt us later
-                return new PrefixWildcardQueryNode(field, "*", -1, -1);
-            } else {
-                input = ((FieldQueryNode) sc).getTextAsString();
-                start = ((FieldQueryNode) sc).getBegin();
-                end = ((FieldQueryNode) sc).getEnd();
-            }
+            valueNode = node.getChildren().get(0);
         } else {
             field = ((AqpANTLRNode) node.getChildren().get(0)).getTokenLabel();
-            sc = node.getChildren().get(1);
-            if (sc instanceof AqpANTLRNode) {
-                input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) sc).getTokenInput()).toString();
-                start = ((AqpANTLRNode) sc).getTokenStart();
-                end = ((AqpANTLRNode) sc).getTokenEnd();
-            } else if (sc instanceof MatchAllDocsQueryNode) {
-                // XXX: we are missing the info about the token position, which may hurt us later
-                return new PrefixWildcardQueryNode(field, "*", -1, -1);
-            } else {
-                input = ((FieldQueryNode) sc).getTextAsString();
-                start = ((FieldQueryNode) sc).getBegin();
-                end = ((FieldQueryNode) sc).getEnd();
-            }
+            valueNode = node.getChildren().get(1);
         }
-		
-		
-		
-		/*
-		if (input.contains(":")) {
-			String[] vals = input.split("\\:", 2);
-			String f = vals[0].toLowerCase();
-			if (f.equals("doi")) {
-				field = "doi";
-			}
-			else if (f.equals("identifier")) {
-				field = "identifier";
-			}
-			
-		}
-		*/
 
-        if (sc instanceof FieldQueryNode) {
-            ((FieldQueryNode) sc).setField(field);
-            ((FieldQueryNode) sc).setText(input);
-            ((FieldQueryNode) sc).setBegin(start);
-            ((FieldQueryNode) sc).setEnd(end);
-            return sc;
+        if (valueNode instanceof AqpANTLRNode) {
+            input = EscapeQuerySyntaxImpl.discardEscapeChar(((AqpANTLRNode) valueNode).getTokenInput()).toString();
+            start = ((AqpANTLRNode) valueNode).getTokenStart();
+            end = ((AqpANTLRNode) valueNode).getTokenEnd();
+        } else if (valueNode instanceof MatchAllDocsQueryNode) {
+            // Token positions are unavailable after match-all conversion.
+            return new PrefixWildcardQueryNode(field, "*", -1, -1);
+        } else {
+            input = ((FieldQueryNode) valueNode).getTextAsString();
+            start = ((FieldQueryNode) valueNode).getBegin();
+            end = ((FieldQueryNode) valueNode).getEnd();
+        }
+
+        if (valueNode instanceof FieldQueryNode) {
+            ((FieldQueryNode) valueNode).setField(field);
+            ((FieldQueryNode) valueNode).setText(input);
+            ((FieldQueryNode) valueNode).setBegin(start);
+            ((FieldQueryNode) valueNode).setEnd(end);
+            return valueNode;
         } else {
             if (input.equals("*")) {
                 return new PrefixWildcardQueryNode(field, input, start, end);

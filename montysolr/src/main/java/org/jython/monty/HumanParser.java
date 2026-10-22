@@ -3,9 +3,7 @@ package org.jython.monty;
 import org.jython.monty.interfaces.JythonNameParser;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Pure Java implementation of name parser that replaces the Jython-based implementation.
@@ -90,7 +88,7 @@ public class HumanParser implements JythonNameParser {
         // Collapse multiple spaces
         fullName = RE_SPACES.matcher(fullName.strip()).replaceAll(" ");
 
-        // Split by commas
+        // Retain trailing empty parts so "Surname," stays in surname-first form.
         String[] parts = fullName.split(",", -1);
         for (int i = 0; i < parts.length; i++) {
             parts[i] = parts[i].strip();
@@ -146,7 +144,7 @@ public class HumanParser implements JythonNameParser {
             }
         } else {
             // Check if second part is a suffix
-            if (parts.length > 1 && isSuffix(lc(parts[1].strip()))) {
+            if (parts.length > 1 && isSuffix(normalizeLookupToken(parts[1].strip()))) {
                 // Suffix comma format: title first middle last, suffix [, suffix]
                 List<String> pieces = parsePieces(Arrays.asList(parts[0]), 0);
 
@@ -296,7 +294,7 @@ public class HumanParser implements JythonNameParser {
                 // Check if previous piece is also a conjunction
                 if (idx > 0 && isConjunction(pieces.get(idx - 1))) {
                     String newPiece = pieces.get(idx) + " " + pieces.get(idx + 1);
-                    conjunctions.add(lc(newPiece));
+                    conjunctions.add(normalizeLookupToken(newPiece));
                     pieces.set(idx, newPiece);
                     pieces.remove(idx + 1);
                     continue;
@@ -306,7 +304,7 @@ public class HumanParser implements JythonNameParser {
                 if (idx > 0) {
                     String newPiece = pieces.get(idx - 1) + " " + pieces.get(idx) + " " + pieces.get(idx + 1);
                     if (isTitle(pieces.get(idx - 1))) {
-                        titles.add(lc(newPiece));
+                        titles.add(normalizeLookupToken(newPiece));
                     }
                     pieces.set(idx - 1, newPiece);
                     pieces.remove(idx);
@@ -327,7 +325,7 @@ public class HumanParser implements JythonNameParser {
         return pieces;
     }
 
-    private String lc(String value) {
+    private String normalizeLookupToken(String value) {
         if (value == null || value.isEmpty()) {
             return "";
         }
@@ -339,29 +337,29 @@ public class HumanParser implements JythonNameParser {
     }
 
     private boolean isTitle(String piece) {
-        return titles.contains(lc(piece)) || puncTitles.contains(piece.toLowerCase(Locale.ROOT));
+        return titles.contains(normalizeLookupToken(piece)) || puncTitles.contains(piece.toLowerCase(Locale.ROOT));
     }
 
     private boolean isConjunction(String piece) {
-        return conjunctions.contains(lc(piece)) && !isAnInitial(piece);
+        return conjunctions.contains(normalizeLookupToken(piece)) && !isAnInitial(piece);
     }
 
     private boolean isPrefix(String piece) {
-        return prefixes.contains(lc(piece)) && !isAnInitial(piece);
+        return prefixes.contains(normalizeLookupToken(piece)) && !isAnInitial(piece);
     }
 
     private boolean isSuffix(String piece) {
-        return suffixes.contains(lc(piece)) && !isAnInitial(piece);
+        return suffixes.contains(normalizeLookupToken(piece)) && !isAnInitial(piece);
     }
 
     private boolean isRootname(String piece) {
-        return !suffixesPrefixesTitles.contains(lc(piece)) && !isAnInitial(piece);
+        return !suffixesPrefixesTitles.contains(normalizeLookupToken(piece)) && !isAnInitial(piece);
     }
 
     private boolean pieceContainsConjunction(String piece) {
         String[] words = piece.split("\\s+");
         for (String word : words) {
-            if (conjunctions.contains(lc(word))) {
+            if (conjunctions.contains(normalizeLookupToken(word))) {
                 return true;
             }
         }

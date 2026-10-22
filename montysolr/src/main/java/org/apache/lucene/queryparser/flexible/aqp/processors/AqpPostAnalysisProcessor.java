@@ -1,5 +1,12 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
+import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -12,26 +19,19 @@ import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigH
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
-import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
-import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
-import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
-import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.*;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
+import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.standard.nodes.MultiPhraseQueryNode;
 import org.apache.solr.common.params.SolrParams;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -66,6 +66,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
     public static final String RAW_POSITIONAL_PATH = "raw_positional_path";
     public static final String RAW_POSITIONAL_GAPS = "raw_positional_gaps";
     private static final String RAW_LEADING_GAP = "raw_leading_gap";
+
     /** Marks phrases from exact analysis whose term positions must survive a slop rewrite. */
     public static final String EXACT_GRAPH_PATH = "exact_graph_path";
 
@@ -76,19 +77,19 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             QueryNode child = slop.getChild();
             if (child instanceof AqpNearQueryNode
                     && Boolean.TRUE.equals(child.getTag(RAW_POSITIONAL_PATH))) {
-                addSlop((AqpNearQueryNode) child, slop.getValue());
+                applySlopIfUnset((AqpNearQueryNode) child, slop.getValue());
                 return child;
             }
             if (child instanceof AqpOrQueryNode) {
                 List<QueryNode> branches = child.getChildren();
-                boolean normalized = false;
+                boolean hasRawBranch = false;
                 for (QueryNode branch : branches) {
                     if (Boolean.TRUE.equals(branch.getTag(RAW_POSITIONAL_PATH))) {
-                        normalized = true;
+                        hasRawBranch = true;
                         break;
                     }
                 }
-                if (normalized) {
+                if (hasRawBranch) {
                     // Standard phrase-slop cleanup discards wrappers around disjunctions.
                     // Factored positional branches carry the explicit slop on their
                     // outer Near node; nested Near nodes retain only exact adjacency.
@@ -96,7 +97,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                         QueryNode branch = branches.get(i);
                         if (branch instanceof AqpNearQueryNode
                                 && Boolean.TRUE.equals(branch.getTag(RAW_POSITIONAL_PATH))) {
-                            addSlop((AqpNearQueryNode) branch, slop.getValue());
+                            applySlopIfUnset((AqpNearQueryNode) branch, slop.getValue());
                         } else if (branch instanceof TokenizedPhraseQueryNode
                                 || branch instanceof MultiPhraseQueryNode) {
                             branch.setTag(RAW_POSITIONAL_PATH, true);
@@ -111,7 +112,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         return node;
     }
 
-    private void addSlop(AqpNearQueryNode node, int value) {
+    private void applySlopIfUnset(AqpNearQueryNode node, int value) {
         Integer current = node.getSlop();
         if (current == null || current == 0) {
             node.setSlop(value);
@@ -204,7 +205,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                                         return pq;
                                     } else {
                                         TokenizedPhraseQueryNode pq = new TokenizedPhraseQueryNode();
-                                        //MultiPhraseQueryNode pq = new MultiPhraseQueryNode();
                                         pq.add(clauses);
                                         return pq;
                                     }
@@ -235,7 +235,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         return config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST);
     }
 
-
     private Integer getDefaultProximityValue() throws QueryNodeException {
         QueryConfigHandler queryConfig = getQueryConfigHandler();
         if (queryConfig == null
@@ -257,7 +256,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 StandardQueryConfigHandler.ConfigurationKeys.PHRASE_SLOP);
         return configured == null ? 0 : configured;
     }
-
 
     /*
      * Build a simple Query node from
@@ -283,11 +281,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
 
         List<QueryNode> mainQueryClauses = new ArrayList<QueryNode>();
 
-        // last bit of info we add
-        // is the number of tokens each branch contains
-        // that can be used later for deciding whether they
-        // need a slope
-
+        // Slop builders use the longest branch's token count for every alternative.
         int maxSize = 0;
         // find the length of the longest query (in tokens)
         for (List<List<QueryNode>> oneQuery : queries) {
@@ -513,22 +507,22 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         if (!(node instanceof AqpOrQueryNode)) {
             return node;
         }
-        List<QueryNode> fields = new ArrayList<>();
-        List<QueryNode> alternatives = new ArrayList<>();
+        List<QueryNode> termAlternatives = new ArrayList<>();
+        List<QueryNode> compoundAlternatives = new ArrayList<>();
         for (QueryNode child : node.getChildren()) {
             if (child instanceof FieldQueryNode) {
-                fields.add(child);
+                termAlternatives.add(child);
             } else {
-                alternatives.add(child);
+                compoundAlternatives.add(child);
             }
         }
-        if (fields.size() <= 1 || alternatives.isEmpty()) {
+        if (termAlternatives.size() <= 1 || compoundAlternatives.isEmpty()) {
             return node;
         }
-        AqpOrQueryNode compact = new AqpOrQueryNode(fields);
-        compact.setTag(AqpQueryTreeBuilder.SYNONYMS, true);
-        alternatives.add(0, compact);
-        node.set(alternatives);
+        AqpOrQueryNode termDisjunction = new AqpOrQueryNode(termAlternatives);
+        termDisjunction.setTag(AqpQueryTreeBuilder.SYNONYMS, true);
+        compoundAlternatives.add(0, termDisjunction);
+        node.set(compoundAlternatives);
         return node;
     }
 
@@ -559,8 +553,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         }
     }
 
-
-
     /*
      * this method knows to handle FieldQueryNodes, it is especially useful
      * for 	MultiPhraseQueryNode
@@ -584,8 +576,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 throw new QueryNodeException(new MessageImpl("Query exceed maxAllowedDepth of " + maxAllowedDepth + " tokens for query redistribution"));
         }
 
-        //System.out.println(graph.toString());
-
         try {
             queries = graph.traverseGraphFindAllQueries();
             Integer phraseSlop = getPhraseSlop(node);
@@ -608,76 +598,87 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         List<List<List<QueryNode>>> expandedQueries = new ArrayList<>();
         for (List<List<QueryNode>> query : queries) {
             if (localRawAliases) {
-                boolean queryHasRaw = false;
-                List<List<QueryNode>> factoredPath = new ArrayList<>(query.size());
-                List<QueryNode> previous = null;
-                for (List<QueryNode> element : query) {
-                    List<QueryNode> choices = cloneElement(deduplicateElement(element));
-                    List<List<List<QueryNode>>> rawSequences =
-                            distinctRawSequences(element, choices);
-                    for (List<List<QueryNode>> rawSequence : rawSequences) {
-                        choices.add(buildRawAliasNode(rawSequence));
-                    }
-                    queryHasRaw |= !rawSequences.isEmpty();
-                    for (QueryNode candidate : element) {
-                        queryHasRaw |= hasRawPositionalPath(candidate);
-                    }
-                    setIncomingGap(choices, sourceGap(previous, element));
-                    previous = element;
-                    factoredPath.add(choices);
-                }
-                if (queryHasRaw) {
-                    expandedQueries.add(clonePathWithPositions(factoredPath));
-                } else {
-                    expandedQueries.add(factoredPath);
-                }
-                continue;
-            }
-
-            List<List<List<QueryNode>>> variants = new ArrayList<>();
-            variants.add(new ArrayList<>());
-            boolean queryHasRaw = false;
-            List<QueryNode> previous = null;
-            for (List<QueryNode> element : query) {
-                List<QueryNode> retained = cloneElement(deduplicateElement(element));
-                List<List<List<QueryNode>>> rawSequences =
-                        distinctRawSequences(element, retained);
-                queryHasRaw |= !rawSequences.isEmpty();
-                int gap = sourceGap(previous, element);
-                setIncomingGap(retained, gap);
-                for (List<List<QueryNode>> rawSequence : rawSequences) {
-                    setIncomingGap(rawSequence.get(0), gap);
-                }
-                previous = element;
-
-                List<List<List<QueryNode>>> next = new ArrayList<>();
-                for (List<List<QueryNode>> variant : variants) {
-                    if (!retained.isEmpty()) {
-                        List<List<QueryNode>> retainedVariant = new ArrayList<>(variant);
-                        retainedVariant.add(retained);
-                        next.add(retainedVariant);
-                    }
-                    for (List<List<QueryNode>> rawSequence : rawSequences) {
-                        List<List<QueryNode>> rawVariant = new ArrayList<>(variant);
-                        rawVariant.addAll(rawSequence);
-                        next.add(rawVariant);
-                    }
-                }
-                variants = next;
-            }
-            if (queryHasRaw) {
-                Set<String> seenVariants = new LinkedHashSet<>();
-                for (List<List<QueryNode>> variant : variants) {
-                    List<List<QueryNode>> positioned = clonePathWithPositions(variant);
-                    if (seenVariants.add(pathSignature(positioned))) {
-                        expandedQueries.add(positioned);
-                    }
-                }
+                expandedQueries.add(buildLocalRawAliasPath(query));
             } else {
-                expandedQueries.add(variants.get(0));
+                appendExpandedRawAliasPaths(query, expandedQueries);
             }
         }
         return expandedQueries;
+    }
+
+    // Local aliases stay at one graph element; their internal phrase order is exact.
+    private List<List<QueryNode>> buildLocalRawAliasPath(List<List<QueryNode>> query)
+            throws CloneNotSupportedException, IOException {
+        boolean queryHasRaw = false;
+        List<List<QueryNode>> factoredPath = new ArrayList<>(query.size());
+        List<QueryNode> previous = null;
+        for (List<QueryNode> element : query) {
+            List<QueryNode> choices = cloneElement(deduplicateElement(element));
+            List<List<List<QueryNode>>> rawSequences =
+                    distinctRawSequences(element, choices);
+            for (List<List<QueryNode>> rawSequence : rawSequences) {
+                choices.add(buildRawAliasNode(rawSequence));
+            }
+            queryHasRaw |= !rawSequences.isEmpty();
+            for (QueryNode candidate : element) {
+                queryHasRaw |= hasRawPositionalPath(candidate);
+            }
+            setIncomingGap(choices, sourceGap(previous, element));
+            previous = element;
+            factoredPath.add(choices);
+        }
+        if (queryHasRaw) {
+            return clonePathWithPositions(factoredPath);
+        }
+        return factoredPath;
+    }
+
+    // Positive phrase slop needs flat paths so it can span the alias boundaries.
+    private void appendExpandedRawAliasPaths(List<List<QueryNode>> query,
+            List<List<List<QueryNode>>> expandedQueries)
+            throws CloneNotSupportedException, IOException {
+        List<List<List<QueryNode>>> variants = new ArrayList<>();
+        variants.add(new ArrayList<>());
+        boolean queryHasRaw = false;
+        List<QueryNode> previous = null;
+        for (List<QueryNode> element : query) {
+            List<QueryNode> retained = cloneElement(deduplicateElement(element));
+            List<List<List<QueryNode>>> rawSequences =
+                    distinctRawSequences(element, retained);
+            queryHasRaw |= !rawSequences.isEmpty();
+            int gap = sourceGap(previous, element);
+            setIncomingGap(retained, gap);
+            for (List<List<QueryNode>> rawSequence : rawSequences) {
+                setIncomingGap(rawSequence.get(0), gap);
+            }
+            previous = element;
+
+            List<List<List<QueryNode>>> nextVariants = new ArrayList<>();
+            for (List<List<QueryNode>> variant : variants) {
+                if (!retained.isEmpty()) {
+                    List<List<QueryNode>> retainedVariant = new ArrayList<>(variant);
+                    retainedVariant.add(retained);
+                    nextVariants.add(retainedVariant);
+                }
+                for (List<List<QueryNode>> rawSequence : rawSequences) {
+                    List<List<QueryNode>> rawVariant = new ArrayList<>(variant);
+                    rawVariant.addAll(rawSequence);
+                    nextVariants.add(rawVariant);
+                }
+            }
+            variants = nextVariants;
+        }
+        if (queryHasRaw) {
+            Set<String> seenVariants = new LinkedHashSet<>();
+            for (List<List<QueryNode>> variant : variants) {
+                List<List<QueryNode>> positioned = clonePathWithPositions(variant);
+                if (seenVariants.add(pathSignature(positioned))) {
+                    expandedQueries.add(positioned);
+                }
+            }
+        } else {
+            expandedQueries.add(variants.get(0));
+        }
     }
 
     private List<List<List<QueryNode>>> distinctRawSequences(
@@ -704,7 +705,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         }
         rawSequences.addAll(reanalyzedRawAliases(element));
 
-        Set<String> retainedTerms = termSet(retained);
+        Set<String> retainedSignatures = nodeSignatureSet(retained);
         Set<String> seenRawSequences = new HashSet<>();
         List<List<List<QueryNode>>> distinctRawSequences = new ArrayList<>();
         for (List<List<QueryNode>> rawSequence : rawSequences) {
@@ -716,7 +717,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             }
             if (rawSequence.size() == 1
                     && rawPositionDelta(rawSequence.get(0)) == 1
-                    && retainedTerms.containsAll(termSet(rawSequence.get(0)))) {
+                    && retainedSignatures.containsAll(nodeSignatureSet(rawSequence.get(0)))) {
                 continue;
             }
             markRawPath(rawSequence);
@@ -748,12 +749,12 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         return retained;
     }
 
-    private Set<String> termSet(List<QueryNode> element) {
-        Set<String> terms = new HashSet<>();
+    private Set<String> nodeSignatureSet(List<QueryNode> element) {
+        Set<String> signatures = new HashSet<>();
         for (QueryNode node : element) {
-            terms.add(nodeSignature(node));
+            signatures.add(nodeSignature(node));
         }
-        return terms;
+        return signatures;
     }
 
     private String nodeSignature(QueryNode node) {
@@ -860,6 +861,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         exact.setTag(RAW_POSITIONAL_PATH, true);
         return exact;
     }
+
     private List<QueryNode> cloneElement(List<QueryNode> element)
             throws CloneNotSupportedException {
         List<QueryNode> copy = new ArrayList<>(element.size());
@@ -899,6 +901,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         }
         return copy;
     }
+
     private List<List<List<QueryNode>>> reanalyzedRawAliases(List<QueryNode> element)
             throws IOException {
         List<List<List<QueryNode>>> sequences = new ArrayList<>();
@@ -1030,6 +1033,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 firstPosition, new ArrayList<>(), paths);
         return paths;
     }
+
     private void collectRawAliasPaths(FieldQueryNode alias,
             List<RawAliasToken> tokens, int position, int finalPosition,
             int previousEnd, List<List<QueryNode>> prefix,
@@ -1078,12 +1082,10 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         return children;
     }
 
-
     class NodeOfQuery {
         protected int startPos;
         private List<QueryNode> payload = new ArrayList<QueryNode>();
         private final List<NodeOfQuery> children;
-        private final int nodeRetrieved = 0;
         protected int endPos = -1;
         private boolean terminalAlternative;
 
@@ -1202,11 +1204,8 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
 
         public void addPayload(QueryNode node) {
             if (!payload.contains(node))
-                //System.out.println("Adding payload: " + node);
                 payload.add(node);
         }
-
-
 
         public void drillDown(QueryPath path) {
             if (children.isEmpty() || terminalAlternative) {
@@ -1242,7 +1241,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             // retrieve only the queries made of query elements that cover the longest distance
             for (int i = 0; i < measured.length; i++) {
                 if (measured[i] != max) {
-                    //System.out.println("ignoring:" + measured[i] + " " + paths.get(i).toString());
                     continue;
                 }
 
@@ -1264,7 +1262,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             Integer keyStart = path.get(pos);
             Integer keyEnd = path.get(pos + 1);
 
-
             for (NodeOfQuery child : children) {
                 if (child.startPos == keyStart && child.endPos == keyEnd) {
                     child.insertItself(oneQuery);
@@ -1276,7 +1273,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
         }
 
         private void insertItself(List<List<QueryNode>> oneQuery) throws CloneNotSupportedException {
-            //if (nodeRetrieved > 0) {
             ArrayList<QueryNode> copyOfNodes = new ArrayList<QueryNode>(payload.size());
             for (QueryNode n : payload) {
                 QueryNode nClone = n.cloneTree();
@@ -1286,25 +1282,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
                 copyOfNodes.add(nClone);
             }
             oneQuery.add(copyOfNodes);
-            //}
-            //else {
-            //	oneQuery.add(payload);
-            //}
-        }
-
-        private int[] measurePaths(List<List<Integer>> paths) {
-            int[] measuredPaths = new int[paths.size()];
-            int j = 0;
-            for (List<Integer> path : paths) {
-                assert path.size() % 2 == 0;
-                int length = 0;
-                for (int i = 0; i < path.size(); i = i + 2) {
-                    length += path.get(i + 1) - path.get(i);
-                }
-                length += (path.size() / 2) - 1; // number of edges (assuming it equals 1 space, hm...)
-                measuredPaths[j++] = length;
-            }
-            return measuredPaths;
         }
 
         private boolean isWhitespaceGap(List<Integer> path, int gapIndex) {
@@ -1331,6 +1308,7 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             }
             return true;
         }
+
         private boolean isOmittedSourceGap(List<Integer> path, int gapIndex) {
             QueryNode sourceNode = findSourceNode();
             if (sourceNode == null) {
@@ -1423,7 +1401,6 @@ public class AqpPostAnalysisProcessor extends AqpQueryNodeProcessorImpl {
             return measuredPaths;
         }
     }
-
 
     class QueryPath {
         private final ArrayList<Integer> data;

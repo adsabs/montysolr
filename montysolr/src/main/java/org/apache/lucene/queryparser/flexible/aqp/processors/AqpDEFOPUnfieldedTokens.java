@@ -87,8 +87,8 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
     public static String PLAIN_TOKEN_CONCATENATED = "PLAIN_TOKEN_CONCATENATED";
 
     /*
-     * Nodes will be considered 'bare' even if they have any of these modifiers
-     * e.g. +foo will be effectively treated as if it was 'foo'
+     * Modifiers allowed when inspecting enclosing groups. A leading MINUS
+     * still prevents individual tokens from joining a bare-token group.
      */
     private final List<String> ignoreModifiers;
 
@@ -180,7 +180,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
                     newGroup.add(ninfo);
                 } else {
                     if (newGroup.size() > 1) {
-                        decideInsertChild(newChildren, newGroup);
+                        appendTokenGroup(newChildren, newGroup);
                         newGroup.clear();
                         if (ninfo.isBareNode(true)) {
                             newGroup.add(ninfo);
@@ -202,7 +202,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
             }
 
             if (newGroup.size() > 1) {
-                decideInsertChild(newChildren, newGroup);
+                appendTokenGroup(newChildren, newGroup);
             } else if (newGroup.size() == 1) {
                 newChildren.add(newGroup.get(0).getOriginalNode());
             }
@@ -216,8 +216,8 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
         return node;
     }
 
-    private void decideInsertChild(List<QueryNode> newChildren,
-                                   List<NodeInfo> newGroup) throws CloneNotSupportedException, QueryNodeException {
+    private void appendTokenGroup(List<QueryNode> newChildren,
+                                  List<NodeInfo> newGroup) throws CloneNotSupportedException, QueryNodeException {
 
         if (operationMode == null) {
             operationMode = getStrategy();
@@ -334,7 +334,7 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
     }
 
 
-    private QueryNode createReplacementNode(List<NodeInfo> newGroup, String tt) throws CloneNotSupportedException, QueryNodeException {
+    private QueryNode createReplacementNode(List<NodeInfo> newGroup, String tokenType) throws CloneNotSupportedException, QueryNodeException {
         String newValue = getConcatenatedValue(newGroup);
 
         if (newValue != newValue.toLowerCase() && newValue == newValue.toUpperCase() && newGroup.size() > getMaxAllowedAcronym()) {
@@ -353,10 +353,10 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
             }
         }
 
-        if (tt == null)
-            tt = getNewTokenType();
+        if (tokenType == null)
+            tokenType = getNewTokenType();
 
-        if (tt.equals("simple")) {
+        if (tokenType.equals("simple")) {
             return new AqpWhiteSpacedQueryNode(
                     field != "" ? newGroup.get(0).getField() : null, newValue, -1, -1);
         }
@@ -377,11 +377,11 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
             ((AqpANTLRNode) terminalParent).setTokenName("QTRUNCATED");
             ((AqpANTLRNode) terminalParent).setTokenLabel("QTRUNCATED");
         } else {
-            if (tt.contains("QPHRASE")) {
+            if (tokenType.contains("QPHRASE")) {
                 ((AqpANTLRNode) terminalNode).setTokenInput("\"" + newValue + "\"");
             }
-            ((AqpANTLRNode) terminalParent).setTokenName(tt);
-            ((AqpANTLRNode) terminalParent).setTokenLabel(tt);
+            ((AqpANTLRNode) terminalParent).setTokenName(tokenType);
+            ((AqpANTLRNode) terminalParent).setTokenLabel(tokenType);
         }
 
         return firstNode;
@@ -575,16 +575,15 @@ public class AqpDEFOPUnfieldedTokens extends AqpQProcessor {
         }
 
         public boolean isBareNode(boolean isFirstInGroup) {
-            // A standalone '*' is a match-all query, not a wildcard term to concatenate
-            // with neighboring unfielded tokens. Keeping it separate lets the normal
-            // QTRUNCATED processor turn it into MatchAllDocsQueryNode.
+            // Keep '*' separate so QTRUNCATED processing can distinguish
+            // unfielded match-all from a fielded wildcard query.
             if ("QTRUNCATED".equals(qType) && "*".equals(input)) {
                 return false;
             }
-            // we allow only the following:
-            // /MODIFIER/TMODIFIER/FIELD/QNORMAL
-            // and all elements must be either empty
-            // or have values that can be ignored
+
+            // Accept the MODIFIER/TMODIFIER/FIELD/query-type structure only
+            // when its values are empty or ignorable. MINUS always separates
+            // token groups so exclusions do not absorb neighboring terms.
 
             if (modifier == "" || (isFirstInGroup && ignoreModifiers.contains(modifier)
                     && !modifier.equals("MINUS"))) {

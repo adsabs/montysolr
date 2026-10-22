@@ -17,7 +17,7 @@ public class SecondOrderQuery extends Query {
     private static final long serialVersionUID = -5670377581753190942L;
     Query firstOrderQuery;
     private final SecondOrderCollector secondOrderCollector;
-    private boolean alreadyExecuted;
+    private boolean collectionComplete;
     private boolean needsScoring;
 
     /**
@@ -33,7 +33,7 @@ public class SecondOrderQuery extends Query {
     public SecondOrderQuery(Query query, SecondOrderCollector collector, boolean needsScoring) {
         this.firstOrderQuery = query;
         this.secondOrderCollector = collector;
-        this.alreadyExecuted = false;
+        this.collectionComplete = false;
 
         if (collector == null) {
             throw new IllegalStateException("Collector must not be null");
@@ -46,38 +46,23 @@ public class SecondOrderQuery extends Query {
 
 
     /**
-     * Returns a Weight that applies the filter to the enclosed query's Weight.
-     * This is accomplished by overriding the Scorer returned by the Weight.
-     * <p>
-     * The Weight is prepared before the search begins, but since we are inside
-     * the second order query, we start searching, collect results and then
-     * return the Weight object, which carries with itself the results of the
-     * first-order query
+     * Collects first-order results before returning the Weight that exposes
+     * second-order hits. The collector determines the seed Weight's score mode;
+     * the outer boost is applied only when scoring collected hits.
      */
     public Weight createWeight(final IndexSearcher searcher, ScoreMode needsScores, float boost) throws IOException {
 
+        // Build the seed Weight on every call, even when collection is already complete.
         Weight firstOrderWeight = firstOrderQuery.createWeight(
                 searcher, secondOrderCollector.initializationScoreMode(), 1f);
 
-        //System.out.println("preparing: " + this.secondOrderCollector);
-
         // conduct search only if initialization of necessary caches went well
-        if (!alreadyExecuted && secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
-            //System.out.println("Executing: " + firstOrderQuery.toString());
+        if (!collectionComplete && secondOrderCollector.searcherInitialization(searcher, firstOrderWeight)) {
             searcher.search(firstOrderQuery, (Collector) secondOrderCollector);
 
-            //System.out.println("  searching: " + this.secondOrderCollector);
-
-            // TODO: can we avoid being called (initialized) in a loop?
-            // this looks like a bad design (on my side) if it happens
-            // it happens when 2nd order operators are nested
-            alreadyExecuted = true;
-
+            collectionComplete = true;
         }
 
-        //System.out.println("done:" + this.secondOrderCollector);
-
-        // no logging, we are basic lucene class
         return new SecondOrderWeight(this, firstOrderWeight, secondOrderCollector, boost);
     }
 
@@ -89,6 +74,7 @@ public class SecondOrderQuery extends Query {
     public Query rewrite(IndexSearcher searcher) throws IOException {
         Query rewritten = firstOrderQuery.rewrite(searcher);
         if (rewritten != firstOrderQuery) {
+            // Rewriting starts with a fresh collector but retains its aggregation policy.
             SecondOrderCollector collectorCopy = secondOrderCollector.copy();
             collectorCopy.setFinalValueType(secondOrderCollector.getFinalValueType());
             return new SecondOrderQuery(rewritten, collectorCopy);

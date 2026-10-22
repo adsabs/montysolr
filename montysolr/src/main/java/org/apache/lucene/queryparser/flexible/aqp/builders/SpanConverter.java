@@ -20,7 +20,6 @@ public class SpanConverter {
     private static final int MAX_POSITIONED_SLOP_ALTERNATIVES = 64;
     private static final int MAX_POSITIONED_SLOP_SEARCH_STEPS = 4096;
 
-
     boolean wrapNonConvertible = false;
 
     public SpanQuery getSpanQuery(SpanConverterContainer container)
@@ -125,26 +124,28 @@ public class SpanConverter {
     }
 
     private SpanQuery convertMultiPhraseToSpan(SpanConverterContainer container) {
-        MultiPhraseQuery q = (MultiPhraseQuery) container.query;
-        Term[][] termArrays = q.getTermArrays();
+        MultiPhraseQuery phraseQuery = (MultiPhraseQuery) container.query;
+        Term[][] termArrays = phraseQuery.getTermArrays();
         if (termArrays.length == 0) {
-            return new EmptySpanQuery(q);
+            return new EmptySpanQuery(phraseQuery);
         }
+
         SpanQuery[] clauses = convertTermArrays(termArrays);
         if (clauses == null) {
-            return new EmptySpanQuery(q);
+            return new EmptySpanQuery(phraseQuery);
         }
-        return convertPositionedClauses(q, clauses, q.getPositions(), q.getSlop());
+        return convertPositionedClauses(phraseQuery, clauses,
+                phraseQuery.getPositions(), phraseQuery.getSlop());
     }
 
     private SpanQuery convertPhraseToSpan(SpanConverterContainer container) {
-        PhraseQuery q = (PhraseQuery) container.query;
-        Term[] terms = q.getTerms();
+        PhraseQuery phraseQuery = (PhraseQuery) container.query;
+        Term[] terms = phraseQuery.getTerms();
         if (terms.length == 0) {
-            return new EmptySpanQuery(q);
+            return new EmptySpanQuery(phraseQuery);
         }
-        return convertPositionedClauses(q, convertTerms(terms),
-                q.getPositions(), q.getSlop());
+        return convertPositionedClauses(phraseQuery, convertTerms(terms),
+                phraseQuery.getPositions(), phraseQuery.getSlop());
     }
 
     private SpanQuery[] convertTerms(Term[] terms) {
@@ -172,7 +173,7 @@ public class SpanConverter {
     }
 
     private SpanQuery convertPositionedClauses(Query source, SpanQuery[] clauses,
-                                                int[] positions, int querySlop) {
+                                               int[] positions, int querySlop) {
         if (clauses.length == 1) {
             return clauses[0];
         }
@@ -184,11 +185,13 @@ public class SpanConverter {
         for (int i = 1; i < positions.length; i++) {
             hasPositionHoles |= positions[i] - positions[i - 1] > 1;
         }
+
         // SpanNear slop counts unmatched positions, not the phrase-wide move cost across holes.
         if (querySlop > 0 && hasPositionHoles) {
             if (querySlop > MAX_POSITIONED_SLOP_FOR_EXACT_ALTERNATIVES) {
-                return convertPositionedClausesLinearly(clauses, positions, querySlop);
+                return buildPositionedSpanNear(clauses, positions, querySlop);
             }
+
             List<SpanQuery> alternatives = new ArrayList<>();
             int[] candidatePositions = new int[positions.length];
             long[] positionOffsets = new long[positions.length];
@@ -199,9 +202,10 @@ public class SpanConverter {
                 if (!addPositionedSlopAlternatives(clauses, positions, candidatePositions,
                         positionOffsets, 1, center, remainingSlop, alternatives,
                         remainingSearchSteps)) {
-                    return convertPositionedClausesLinearly(clauses, positions, querySlop);
+                    return buildPositionedSpanNear(clauses, positions, querySlop);
                 }
             }
+
             if (alternatives.isEmpty()) {
                 return new EmptySpanQuery(source);
             }
@@ -210,11 +214,11 @@ public class SpanConverter {
             }
             return new SpanOrQuery(alternatives.toArray(new SpanQuery[0]));
         }
-        return convertPositionedClausesLinearly(clauses, positions, querySlop);
+        return buildPositionedSpanNear(clauses, positions, querySlop);
     }
 
-    private SpanQuery convertPositionedClausesLinearly(SpanQuery[] clauses, int[] positions,
-                                                         int querySlop) {
+    private SpanQuery buildPositionedSpanNear(SpanQuery[] clauses, int[] positions,
+                                             int querySlop) {
         SpanNearQuery.Builder builder = new SpanNearQuery.Builder(
                 clauses[0].getField(), true);
         builder.addClause(clauses[0]);
@@ -230,10 +234,10 @@ public class SpanConverter {
     }
 
     private boolean addPositionedSlopAlternatives(SpanQuery[] clauses, int[] positions,
-                                                   int[] candidatePositions, long[] positionOffsets,
-                                                   int clauseIndex, long center, int remainingSlop,
-                                                   List<SpanQuery> alternatives,
-                                                   int[] remainingSearchSteps) {
+                                                 int[] candidatePositions, long[] positionOffsets,
+                                                 int clauseIndex, long center, int remainingSlop,
+                                                 List<SpanQuery> alternatives,
+                                                 int[] remainingSearchSteps) {
         if (--remainingSearchSteps[0] < 0) {
             return false;
         }
@@ -244,17 +248,7 @@ public class SpanConverter {
             if (alternatives.size() >= MAX_POSITIONED_SLOP_ALTERNATIVES) {
                 return false;
             }
-            SpanNearQuery.Builder builder = new SpanNearQuery.Builder(
-                    clauses[0].getField(), true);
-            builder.addClause(clauses[0]);
-            for (int i = 1; i < clauses.length; i++) {
-                int gap = candidatePositions[i] - candidatePositions[i - 1] - 1;
-                if (gap > 0) {
-                    builder.addGap(gap);
-                }
-                builder.addClause(clauses[i]);
-            }
-            alternatives.add(builder.setSlop(0).build());
+            alternatives.add(buildPositionedSpanNear(clauses, candidatePositions, 0));
             return true;
         }
 
@@ -281,7 +275,6 @@ public class SpanConverter {
         return true;
     }
 
-
     private boolean isLowerMedian(long[] positionOffsets, long center) {
         int rank = (positionOffsets.length - 1) / 2;
         int below = 0;
@@ -298,9 +291,8 @@ public class SpanConverter {
     }
 
     /*
-     * Silly convertor for now it can handle only boolean queries of the same type
-     * (ie not mixed cases). To do that, I have to build a graph (tree) and maybe
-     * of only pairs (?)
+     * All clauses in a BooleanQuery must have the same occurrence. Nested
+     * BooleanQuery operands are converted recursively under the same rule.
      */
     protected SpanQuery convertBooleanToSpan(SpanConverterContainer container)
             throws QueryNodeException {
@@ -308,7 +300,6 @@ public class SpanConverter {
 
         List<BooleanClause> clauses = q.clauses();
         SpanQuery[] spanClauses = new SpanQuery[clauses.size()];
-        String field = null;
         Occur o = null;
         int i = 0;
         for (BooleanClause c : clauses) {
@@ -326,6 +317,7 @@ public class SpanConverter {
 
             i++;
         }
+
         if (spanClauses.length == 1) {
             if (o.equals(Occur.MUST) || o.equals(Occur.SHOULD)) {
                 return spanClauses[0];
@@ -334,6 +326,7 @@ public class SpanConverter {
                     QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
                     "A prohibited singleton cannot form a proximity span"));
         }
+
         try {
             if (o.equals(Occur.MUST)) {
                 return new SpanNearQuery(spanClauses, container.slop,
@@ -350,7 +343,6 @@ public class SpanConverter {
                     QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),
                     "Proximity searches must be executed against the same field; please specify the field explicitly"));
         }
-
 
         throw new QueryNodeException(new MessageImpl(
                 QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR, q.toString(),

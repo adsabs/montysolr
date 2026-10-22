@@ -97,25 +97,7 @@ public class AqpChangeRewriteMethodProcessor extends
                 && node.getChildren() != null
                 && node.getChildren().size() == 1
                 && node.getChildren().get(0) instanceof AqpOrQueryNode) {
-            AqpOrQueryNode alternatives = (AqpOrQueryNode) node.getChildren().get(0);
-            List<QueryNode> branches = alternatives.getChildren();
-            List<QueryNode> sloppedBranches = new LinkedList<>();
-            int slop = ((SlopQueryNode) node).getValue();
-            boolean explicitSlop = Boolean.TRUE.equals(
-                    node.getTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP));
-            for (QueryNode branch : branches) {
-                SlopQueryNode branchSlop = new SlopQueryNode(branch, slop);
-                if (explicitSlop) {
-                    branchSlop.setTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP, true);
-                }
-                sloppedBranches.add(branchSlop);
-            }
-            AqpOrQueryNode sloppedAlternatives = new AqpOrQueryNode(sloppedBranches);
-            Object synonymsTag = alternatives.getTag(AqpQueryTreeBuilder.SYNONYMS);
-            if (synonymsTag != null) {
-                sloppedAlternatives.setTag(AqpQueryTreeBuilder.SYNONYMS, synonymsTag);
-            }
-            return sloppedAlternatives;
+            return distributeSlopAcrossAlternatives(node);
         } else if (node instanceof MultiPhraseQueryNode) {
             if (getConfigVal("aqp.multiphrase.keep_one", null) != null) {
 
@@ -206,6 +188,30 @@ public class AqpChangeRewriteMethodProcessor extends
         return isSynonymDisjunction(node) ? compactPhraseAlternatives(node) : node;
     }
 
+    private QueryNode distributeSlopAcrossAlternatives(QueryNode node) {
+        AqpOrQueryNode alternatives = (AqpOrQueryNode) node.getChildren().get(0);
+        List<QueryNode> branches = alternatives.getChildren();
+        List<QueryNode> sloppedBranches = new LinkedList<>();
+        int slop = ((SlopQueryNode) node).getValue();
+        boolean explicitSlop = Boolean.TRUE.equals(
+                node.getTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP));
+
+        for (QueryNode branch : branches) {
+            SlopQueryNode branchSlop = new SlopQueryNode(branch, slop);
+            if (explicitSlop) {
+                branchSlop.setTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP, true);
+            }
+            sloppedBranches.add(branchSlop);
+        }
+
+        AqpOrQueryNode sloppedAlternatives = new AqpOrQueryNode(sloppedBranches);
+        Object synonymsTag = alternatives.getTag(AqpQueryTreeBuilder.SYNONYMS);
+        if (synonymsTag != null) {
+            sloppedAlternatives.setTag(AqpQueryTreeBuilder.SYNONYMS, synonymsTag);
+        }
+        return sloppedAlternatives;
+    }
+
     private boolean isSynonymDisjunction(QueryNode node) {
         return node instanceof AqpOrQueryNode
                 && Boolean.TRUE.equals(node.getTag(AqpQueryTreeBuilder.SYNONYMS));
@@ -231,6 +237,7 @@ public class AqpChangeRewriteMethodProcessor extends
         if (phrases.size() < 2) {
             return node;
         }
+
         Set<QueryNode> covered = Collections.newSetFromMap(new IdentityHashMap<>());
         for (QueryNode candidate : phrases) {
             for (QueryNode covering : phrases) {
@@ -241,29 +248,33 @@ public class AqpChangeRewriteMethodProcessor extends
                 }
             }
         }
+
         return covered.isEmpty() ? node : removeCoveredPhrases(node, covered);
     }
 
     private boolean coversExactPhrase(QueryNode covering, QueryNode candidate) {
-        List<QueryNode> left = ((SlopQueryNode) covering).getChild().getChildren();
-        List<QueryNode> right = ((SlopQueryNode) candidate).getChild().getChildren();
-        int l = 0;
-        int r = 0;
-        while (l < left.size() && r < right.size()) {
-            int position = ((FieldQueryNode) left.get(l)).getPositionIncrement();
-            if (((FieldQueryNode) right.get(r)).getPositionIncrement() != position) {
+        List<QueryNode> coveringTerms = ((SlopQueryNode) covering).getChild().getChildren();
+        List<QueryNode> candidateTerms = ((SlopQueryNode) candidate).getChild().getChildren();
+        int coveringIndex = 0;
+        int candidateIndex = 0;
+
+        while (coveringIndex < coveringTerms.size() && candidateIndex < candidateTerms.size()) {
+            int position = ((FieldQueryNode) coveringTerms.get(coveringIndex)).getPositionIncrement();
+            if (((FieldQueryNode) candidateTerms.get(candidateIndex)).getPositionIncrement() != position) {
                 return false;
             }
-            int end = l + 1;
-            while (end < left.size()
-                    && ((FieldQueryNode) left.get(end)).getPositionIncrement() == position) {
-                end++;
+
+            int coveringPositionEnd = coveringIndex + 1;
+            while (coveringPositionEnd < coveringTerms.size()
+                    && ((FieldQueryNode) coveringTerms.get(coveringPositionEnd)).getPositionIncrement() == position) {
+                coveringPositionEnd++;
             }
+
             do {
-                FieldQueryNode term = (FieldQueryNode) right.get(r++);
+                FieldQueryNode term = (FieldQueryNode) candidateTerms.get(candidateIndex++);
                 boolean found = false;
-                for (int i = l; i < end; i++) {
-                    FieldQueryNode option = (FieldQueryNode) left.get(i);
+                for (int i = coveringIndex; i < coveringPositionEnd; i++) {
+                    FieldQueryNode option = (FieldQueryNode) coveringTerms.get(i);
                     if (option.getFieldAsString().equals(term.getFieldAsString())
                             && option.getTextAsString().equals(term.getTextAsString())) {
                         found = true;
@@ -273,11 +284,12 @@ public class AqpChangeRewriteMethodProcessor extends
                 if (!found) {
                     return false;
                 }
-            } while (r < right.size()
-                    && ((FieldQueryNode) right.get(r)).getPositionIncrement() == position);
-            l = end;
+            } while (candidateIndex < candidateTerms.size()
+                    && ((FieldQueryNode) candidateTerms.get(candidateIndex)).getPositionIncrement() == position);
+            coveringIndex = coveringPositionEnd;
         }
-        return l == left.size() && r == right.size();
+
+        return coveringIndex == coveringTerms.size() && candidateIndex == candidateTerms.size();
     }
 
     private QueryNode removeCoveredPhrases(QueryNode node, Set<QueryNode> covered) {
@@ -315,7 +327,6 @@ public class AqpChangeRewriteMethodProcessor extends
         }
         return fields;
     }
-
 
     private QueryNode simplifyMultiphrase(QueryNode node, Set<String> typesToKeep) throws IOException {
         List<QueryNode> children = node.getChildren();
@@ -373,11 +384,12 @@ public class AqpChangeRewriteMethodProcessor extends
     }
 
     /**
-     * Returns the user's original token at every position, or null when some stacked position holds only
-     * synonyms, because a phrase that skips a position would search for different text.
+     * Returns a literal candidate at every position, accepting singleton terms as-is and otherwise
+     * choosing the first type not selected by {@code typesToKeep}. Returns null if a stacked position
+     * has no such candidate; skipping that position would search for different text.
      */
     private List<QueryNode> findLiteralPath(TreeMap<Integer, List<QueryNode>> positionTermMap,
-                                            Set<String> typesToKeep) {
+                                           Set<String> typesToKeep) {
         List<QueryNode> literalPath = new LinkedList<>();
         for (List<QueryNode> termList : positionTermMap.values()) {
             QueryNode literal = termList.size() == 1 ? termList.get(0) : null;
@@ -532,6 +544,7 @@ public class AqpChangeRewriteMethodProcessor extends
             } else if (strategy.equals("cantDecide") && closestLenTerm != null) {
                 newList.add(closestLenTerm);
             }
+
             if (newList.size() == oldSize) { // we didn't find any type that would satisfy the condition
                 QueryNode picked = termList.get(0);
                 // pick the longest if you can

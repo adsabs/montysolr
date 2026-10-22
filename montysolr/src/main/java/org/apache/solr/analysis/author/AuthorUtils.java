@@ -18,7 +18,7 @@ public class AuthorUtils {
     public static final String AUTHOR_TRANSLITERATED = "AUTHOR_TRANSLITERATED";
     public static final String AUTHOR_CURATED_SYN = "AUTHOR_CURATED_SYN";
 
-    // to remove commas from behind initials B. => B
+    // Remove periods after initials: B. => B
     static Pattern n0 = Pattern.compile("(?<=\\b\\p{L})\\.(?=\\s*\\b)");
     // these are the characters we allow for author names
     // we keep any unicode character with its punctuation, digits,
@@ -49,7 +49,7 @@ public class AuthorUtils {
     /**
      * Method used by the tokenizer chain to normalize author names.
      *
-     * @param a              - author name
+     * @param a             - author name
      * @param keepApostrophe - preserve apostrophes in canonical ASCII form for transliteration
      * @return Normalized string
      */
@@ -58,12 +58,14 @@ public class AuthorUtils {
         // bytes that contribute to individual code points.
         // If we didn't do this, some names could turn into unknown characters.
         a = Normalizer.normalize(a, Normalizer.Form.NFKC);
+
         // Fold typographic apostrophes and Polynesian/modifier-letter spellings
         // for search only; the stored author name is not changed. NFKC already
         // folds the fullwidth apostrophe. Do this before the letter allow-list:
         // U+02BB/U+02BC are letters, not punctuation.
         a = a.replace('\u2018', '\'').replace('\u2019', '\'')
                 .replace('\u02bb', '\'').replace('\u02bc', '\'');
+
         boolean hasWildcards = a.indexOf('*') > -1 || a.indexOf('?') > -1; // \*\? should never be encountered here
         if (!keepApostrophe)
             a = n4.matcher(a).replaceAll("");
@@ -93,7 +95,7 @@ public class AuthorUtils {
      * Utility method to split string (author name) into constituting parts
      *
      * @param a - author name
-     * @return map with 'last', 'first', 'middle' keys
+     * @return map with 'Last', 'First', 'Middle', 'Suffix', and 'Title' keys when present
      */
     public static Map<String, String> parseAuthor(String a) {
         return parseAuthor(a, true);

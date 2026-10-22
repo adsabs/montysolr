@@ -60,8 +60,7 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
         if (hits.size() == 0)
             return null;
 
-        int i = -1;
-        //TODO: prevent locking, test for !orgnized
+        // Organize shared collected hits once before selecting a subreader's range.
         lock.lock();
         try {
             if (!organized) {
@@ -72,17 +71,15 @@ public abstract class AbstractSecondOrderCollector implements Collector, LeafCol
             lock.unlock();
         }
 
-        i = findClosestIndex(rangeStart, rangeEnd, 0, hits.size() - 1);
-        if (i == -1 || i + 1 > hits.size())
+        int hitIndex = findClosestIndex(rangeStart, rangeEnd, 0, hits.size() - 1);
+        if (hitIndex == -1 || hitIndex + 1 > hits.size())
             return null;
 
-
         ArrayList<CollectorDoc> results = new ArrayList<CollectorDoc>();
-        for (; i < hits.size() && hits.get(i).doc < rangeEnd; i++) {
-            results.add(hits.get(i));
+        for (; hitIndex < hits.size() && hits.get(hitIndex).doc < rangeEnd; hitIndex++) {
+            results.add(hits.get(hitIndex));
         }
         return results;
-
     }
 
     private int findClosestIndex(int rangeStart, int rangeEnd, int low, int high) {

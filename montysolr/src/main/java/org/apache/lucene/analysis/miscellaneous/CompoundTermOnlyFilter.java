@@ -18,8 +18,9 @@ import java.io.IOException;
 public final class CompoundTermOnlyFilter extends FilteringTokenFilter {
     private final PositionIncrementAttribute posIncAtt = addAttribute(PositionIncrementAttribute.class);
     private final PositionLengthAttribute posLenAtt = addAttribute(PositionLengthAttribute.class);
+
     private int position = -1;
-    private int coveredUntil = -1;
+    private int compoundEndPosition = -1;
 
     public CompoundTermOnlyFilter(TokenStream in) {
         super(in);
@@ -28,18 +29,19 @@ public final class CompoundTermOnlyFilter extends FilteringTokenFilter {
     @Override
     protected boolean accept() {
         position += posIncAtt.getPositionIncrement();
-        int length = posLenAtt.getPositionLength();
-        if (length > 1) {
-            coveredUntil = Math.max(coveredUntil, position + length);
+        int positionLength = posLenAtt.getPositionLength();
+        if (positionLength > 1) {
+            compoundEndPosition = Math.max(compoundEndPosition, position + positionLength);
             return true;
         }
-        return position >= coveredUntil;
+
+        return position >= compoundEndPosition;
     }
 
     @Override
     public void reset() throws IOException {
         super.reset();
         position = -1;
-        coveredUntil = -1;
+        compoundEndPosition = -1;
     }
 }
