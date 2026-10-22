@@ -16,8 +16,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /*
- * This filter will call Python library: http://code.google.com/p/python-nameparser/
- * to parse the input string, eg.
+ * This filter uses the Java HumanParser to parse the input string, eg.
  *
  * Doe, Lt. Gen. John A. Kenneth IV
  *

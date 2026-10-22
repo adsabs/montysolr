@@ -6,4 +6,4 @@
  */
 
 rootProject.name = "montysolr"
-include("jython", "montysolr", "deploy")
+include("montysolr", "deploy")

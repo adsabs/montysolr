@@ -5,3 +5,25 @@ MontySolr 0.1, 2011-05-19
 MontySolr 1.0, 2016-10-12
 -------------------------
 - Upgrade to SOLR 6.x
+
+Unreleased
+----------
+- Align legacy author wildcard and editor assertions with the Java parser's
+  distinction between leading apostrophes and internal elisions; retain exact
+  matching-record checks without changing production normalization behavior.
+- Retire the Ant/Ivy build and distribution assembler, obsolete build/IDE
+  metadata, and Python deployment, reporting and debugging tools.
+- Stop packaging the retired Python/Jython parser, demonstration code and scripts;
+  remove orphan integration fixtures/importer configuration and checked-in
+  generated token maps. Gradle continues to generate the parsers and token maps.
+- Remove the public org.jython.monty.interfaces.JythonSimpleClass demonstration
+  interface and org.apache.lucene.queryparser.flexible.aqp.nodes.PythonQueryNode
+  transport node. Consumers of these retired bridge APIs must remove their use;
+  this removal is not binary-compatible with those consumers.
+- Retire the dormant Ant deployment-test harness, including its pivot and
+  assembled-deployment assertions. It was not part of the Gradle test suites;
+  no equivalent replacement coverage or distribution assembler is provided.
+- Retain Java author parsing under its legacy JythonNameParser and
+  PythonicAuthorNormalizerFilter names, current Java regression suites, the ADS
+  deployment overlay, and standalone Java grammar and JMeter tools. Document the
+  Java 21/Gradle wrapper build and staged deployment jars in README.

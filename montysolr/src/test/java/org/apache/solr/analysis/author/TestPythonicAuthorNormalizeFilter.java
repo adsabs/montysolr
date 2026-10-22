@@ -24,7 +24,7 @@ public class TestPythonicAuthorNormalizeFilter extends MontySolrAbstractLuceneTe
         compare("Epstein, Brian, The Fifth Beatle", "Epstein, Brian, The Fifth Beatle", "Epstein, Brian");
         compare("Michael Edward Peskin", "Michael Edward Peskin,", "Peskin, Michael Edward");
         compare("M.E. Peskin", "M.E. Peskin,", "Peskin, M. E.");
-        compare("M.E.Peskin", "M.E.Peskin,", "Peskin., M. E."); // to me this seems a bug of the python parser (?)
+        compare("M.E.Peskin", "M.E.Peskin,", "Peskin., M. E."); // Retain the parser's trailing-period behavior.
         compare("Ronaldo", "Ronaldo,");
         compare("Cantina Octavia Jones-Smith", "Cantina Octavia Jones-Smith,", "Jones-Smith, Cantina Octavia");
         compare("Jean-Luc Picard", "Jean-Luc Picard,", "Picard, Jean-Luc");

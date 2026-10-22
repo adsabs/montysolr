@@ -39,7 +39,7 @@
           </elementProp>
           <elementProp name="queryFile" elementType="Argument">
             <stringProp name="Argument.name">queryFile</stringProp>
-            <stringProp name="Argument.value">${__P(queryFile,/dvt/workspace/montysolr/contrib/examples/adsabs/jmeter/field.queries)}</stringProp>
+            <stringProp name="Argument.value">${__P(queryFile,field.queries)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>

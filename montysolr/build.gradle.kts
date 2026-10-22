@@ -56,12 +56,3 @@ tasks.withType<Test>().all {
 	}
 }
 
-
-sourceSets {
-	main {
-		resources {
-			setSrcDirs(listOf("src/main/python"))
-		}
-	}
-}
-

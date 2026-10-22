@@ -32,13 +32,6 @@ public class TestJythonNameParser extends LuceneTestCase {
         parser = new HumanParser();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        System.clearProperty("python.cachedir.skip");
-        System.clearProperty("python.console.encoding");
-        super.tearDown();
-    }
-
     // Basic name parsing tests
 
     public void testSimpleFirstLast() {
