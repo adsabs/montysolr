@@ -539,9 +539,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                         "<str>Anders, John Michael</str>" +
                         "<str>Einstein, A</str></arr>");
 
+        // Leading apostrophes retain a word boundary; internal elisions join letters.
+        assertQ(req("q", "author:\"'t Hoof*\""),
+                "//*[@numFound='2']",
+                "//doc/int[@name='recid'][.='2']",
+                "//doc/int[@name='recid'][.='7']");
         assertQ(req("q", "author:\"t' Hoof*\""),
-                "//*[@numFound='3']"
-        );
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']");
 
         /*
          * book_author
@@ -674,6 +679,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
          * editor
          */
         assertQ(req("q", "editor:\"'t hooft, v x\""),
+                "//*[@numFound='0']");
+        assertQ(req("q", "editor:\"t' hooft, v x\""),
                 "//*[@numFound='1']",
                 "//doc/int[@name='recid'][.='100']");
 

@@ -16,30 +16,86 @@ So what is here:
   - author name disambiguation
   - extensive tokenization rules
   - multi-synonym parsing and expansion
-  - support for Jython
+  - Java author-name parsing
   - and of course: the whole configuration of the ADS search engine
   
   
-In the past MontySolr combined Java with extensions written in C++/Python but now 
-that Jython support for JNI arrived, MontySolr switched to pure Java (April 2014)
+Author parsing runs in Java. The legacy JythonNameParser and
+PythonicAuthorNormalizerFilter names remain in the Java API and configuration;
+they do not require a Python or Jython runtime.
   
 
 
-INSTALLATION
-============
+BUILDING FROM SOURCE
+====================
 
-Go ahead to http://github.com/adsabs/releases and download/unzip the version of your
-choice. Then run ./bin/solr
-
-If you want to build Montysolr from sources, rest assured it is easy.
-You will need Java JDK (version 11 and higher)
+Install JDK 21 and use the checked-in Gradle wrapper (no separate Gradle
+installation is required). The build targets Solr 9.6.1 and Lucene 9.10.0.
+Run these commands from the repository root:
 
 ```bash
-
- $ git clone https://github.com/adsabs/montysolr
- $ cd montysolr
- $ ./gradlew build
+git clone https://github.com/adsabs/montysolr
+cd montysolr
+./gradlew clean build
 ```
 
+The build generates the ANTLR parsers, compiles the Java extensions, runs the
+current Java tests, and stages deployment dependencies. Its main outputs are:
+
+  - montysolr/build/libs/montysolr.jar: the Java extension jar
+  - deploy/build/libs/: the extension jar and its runtime dependency jars
+  - montysolr/build/reports/tests/test/index.html: the Java test report
+
+Useful individual tasks:
+
+```bash
+./gradlew :montysolr:test
+./gradlew :montysolr:generateGrammarSource
+./gradlew :deploy:copyDependenciesToLib
+```
+
+Generated parser sources and token maps live under
+montysolr/build/generated-src/antlr/main; edit the grammar sources rather than
+generated output. For IDE development, import the root project as a Gradle
+project, select the wrapper and JDK 21, and let Gradle configure the source sets
+and dependencies instead of using checked-in Eclipse or PyDev metadata.
 
 
+DEPLOYMENT
+==========
+
+deploy/adsabs is the retained ADS configuration overlay, not a standalone Solr
+installation. It supplies the collection configuration and dictionaries, startup
+profiles, logging and Jetty configuration, and standalone JMeter assets.
+
+Provision a compatible Solr installation separately, then integrate the overlay
+with that installation. Make the extension and required runtime jars staged in
+deploy/build/libs available on Solr's library path, accounting for dependencies
+already supplied by Solr. Review the collection's library paths and the startup
+profile's index, batch, log and port settings for your environment before
+starting Solr with that installation's launcher.
+
+Install the overlay's conf/core.properties in the core directory itself
+(collection1/core.properties), not under collection1/conf; leaving it under conf
+can cause duplicate core discovery. The deployed configuration also requires
+Solr's scripting module for XSLT support. Provide and enable that module in the
+Solr installation separately: it is a test-only dependency here and is not
+included in the staged runtime jars.
+
+Gradle stages jars only: it does not assemble a complete Solr distribution,
+install the overlay, or start a configured server. The source checkout cannot be
+started as a Solr distribution directly.
+
+
+RETIRED TOOLING
+===============
+
+The Ant/Ivy build and distribution assembler, Python/Jython implementation and
+packaged scripts, and Python deployment, reporting and debugging tools have
+been retired. Java author parsing, the current Gradle Java test suites, and the
+standalone Java grammar and JMeter tools remain supported.
+
+The dormant Ant deployment-test harness was also retired. It was outside the
+Gradle test source sets and contained assembled-deployment and pivot assertions;
+the current Gradle tests are not claimed to replace that coverage. Deployment
+assembly and the removed operational tools have no replacement in this build.

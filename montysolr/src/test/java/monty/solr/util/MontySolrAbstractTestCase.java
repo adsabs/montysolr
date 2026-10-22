@@ -5,7 +5,6 @@ import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.servlet.DirectSolrConnection;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,11 +20,6 @@ import java.util.regex.Pattern;
 
 
 public abstract class MontySolrAbstractTestCase extends SolrTestCaseJ4 {
-
-    @BeforeClass
-    public static void beforeClassMontySolrTestCase() throws Exception {
-        envInit();
-    }
 
     @AfterClass
     public static void afterClassMontySolrTestCase() throws Exception {
@@ -45,15 +39,6 @@ public abstract class MontySolrAbstractTestCase extends SolrTestCaseJ4 {
         for (File f : tempFiles) {
             Files.delete(f.toPath());
         }
-    }
-
-    /**
-     * This must be called first, so that we make sure the Python
-     * interpreter is loaded
-     */
-    public static void envInit() throws Exception {
-        //System.setProperty("storeAll", "true");
-
     }
 
     /**
