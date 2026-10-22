@@ -134,6 +134,25 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
     }
 
 
+    public void testPipeAndAmpersandAreAffiliationSeparators() throws Exception {
+        assertU(addDocs("aff", "Center for Astrophysics | Harvard & Smithsonian"));
+        assertU(commit());
+
+        assertQ(req("q", "aff:\"Center for Astrophysics | Harvard & Smithsonian\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='0']"
+        );
+        assertQ(req("q", "aff:\"Center for Astrophysics Harvard & Smithsonian\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='0']"
+        );
+        assertQ(req("q", "aff:\"Center for Astrophysics Harvard Smithsonian\""),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='0']"
+        );
+    }
+
+
     // Uniquely for Junit 3
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAdsabsTypeAffiliationText.class);
