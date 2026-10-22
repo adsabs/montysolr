@@ -19,6 +19,7 @@ dependencies {
 	implementation("org.antlr:antlr-runtime:3.5.2")
 	implementation("org.apache.solr:solr-core:9.6.1")
 	implementation("org.apache.lucene:lucene-core:9.10.0")
+	implementation("org.apache.lucene:lucene-memory:9.10.0")
 	implementation("org.apache.lucene:lucene-queryparser:9.10.0")
 	implementation("org.apache.lucene:lucene-join:9.10.0")
 	implementation("org.apache.lucene:lucene-misc:9.10.0")
