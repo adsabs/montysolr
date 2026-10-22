@@ -61,22 +61,6 @@ project, select the wrapper and JDK 21, and let Gradle configure the source sets
 and dependencies instead of using checked-in Eclipse or PyDev metadata.
 
 
-CODE ORGANIZATION
-=================
-
-Request parameters and schema-dependent wiring belong in org.apache.solr.search.
-Within org.apache.lucene.queryparser.flexible.aqp, processors transform query
-nodes and carry analysis metadata; builders convert those nodes into Lucene
-queries. Keep positional graph handling separate from field alignment and
-request policy, and preserve processor order when changing these components.
-
-org.apache.lucene.search owns second-order collection, per-leaf weights and
-scoring. Its join package normalizes raw DocValues for term-based joins.
-Author normalization and token variations live in org.apache.solr.analysis.author;
-org.jython.monty.HumanParser supplies Java name parsing. Batch author harvesting
-uses the same analysis chain rather than a separate normalization implementation.
-
-
 DEPLOYMENT
 ==========
 
