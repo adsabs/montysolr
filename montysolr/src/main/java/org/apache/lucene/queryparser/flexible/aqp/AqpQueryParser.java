@@ -124,6 +124,7 @@ public class AqpQueryParser extends QueryParserHelper {
 
     private boolean debugMode = false;
     private String syntaxName = null;
+    private final StringBuilder debugOutput = new StringBuilder();
 
     public AqpQueryParser(QueryConfigHandler config, AqpSyntaxParser parser,
                           QueryNodeProcessorPipeline processor, QueryTreeBuilder builder) {
@@ -161,8 +162,9 @@ public class AqpQueryParser extends QueryParserHelper {
             QueryConfigHandler configHandler = this.getQueryConfigHandler();
 
             if (debug) {
+                debugOutput.setLength(0);
                 newPipeline = new AqpDebuggingQueryNodeProcessorPipeline(
-                        this.getQueryConfigHandler(), processor.getClass());
+                        this.getQueryConfigHandler(), processor.getClass(), debugOutput);
             } else {
                 // can't use the simple form because parser pipelines may be using config to adjust themselves
                 // newPipeline = clazz.newInstance();
@@ -184,7 +186,9 @@ public class AqpQueryParser extends QueryParserHelper {
 
             QueryBuilder newBuilder = builder.getClass().newInstance();
             if (newBuilder instanceof AqpQueryTreeBuilder) {
-                ((AqpQueryTreeBuilder) newBuilder).setDebug(debug);
+                AqpQueryTreeBuilder aqpBuilder = (AqpQueryTreeBuilder) newBuilder;
+                aqpBuilder.setDebugOutput(debugOutput);
+                aqpBuilder.setDebug(debug);
                 this.setQueryBuilder(newBuilder);
             }
 
@@ -194,6 +198,10 @@ public class AqpQueryParser extends QueryParserHelper {
 
     public boolean getDebug() {
         return debugMode;
+    }
+
+    public String getDebugOutput() {
+        return debugOutput.toString();
     }
 
     /**
