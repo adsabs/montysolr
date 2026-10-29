@@ -10,13 +10,9 @@ grammar ExtendedLuceneGrammar;
 //   add custom logic on top of the 'rigid' query syntax. Besides...the grammar
 //   is not that 'rigid' - you can modify the grammar and easily recompile.
 //   
-//   # run this commad inside antlrqueryparser
-//   
-//      $ ant generate-antlr -Dgrammar=MyNewGrammar
-//   
-//   # or if you want to test things, do:
-//   
-//      $ ant try-view -Dgrammar=MyNewGrammar -Dquery="foo AND bar"
+//   # run this command from the repository root to regenerate the parsers:
+//
+//      $ ./gradlew :montysolr:generateGrammarSource
 //   
 //   
 //   Implementation note: I have tried hard to avoid putting language specific details

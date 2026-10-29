@@ -63,12 +63,16 @@ public class TestAqpQueryTree extends MontySolrQueryTestCase {
 
         assert response.contains(s);
 
+        s = "&lt;astOPERATOR label=\"DEFOP\" name=\"OPERATOR\" &gt;\n" +
+                "    &lt;astMODIFIER label=\"MODIFIER\" name=\"MODIFIER\" &gt;\n" +
+                "        &lt;astTMODIFIER label=\"TMODIFIER\" name=\"TMODIFIER\" &gt;\n" +
+                "            &lt;astFIELD label=\"FIELD\" name=\"FIELD\" &gt;";
+
         response = h.query(req("qt", "/qtree", "q", "title:joe doe", "wt", "xml"));
 
-        assertTrue(response.contains("&lt;astOPERATOR label=\"DEFOP\" name=\"OPERATOR\""));
-        assertTrue(response.contains("&lt;astMODIFIER label=\"MODIFIER\" name=\"MODIFIER\""));
-        assertTrue(response.contains("&lt;astTMODIFIER label=\"TMODIFIER\" name=\"TMODIFIER\""));
-        assertTrue(response.contains("&lt;astFIELD label=\"FIELD\" name=\"FIELD\""));
+        // ANTLR generates the token type numbers from ADS.g, so any grammar
+        // change renumbers them; compare the tree without them.
+        assert response.replaceAll(" type=\"\\d+\"", "").contains(s);
         response = h.query(req("qt", "/qtree", "q", "title:\"joe doe\"", "wt", "json"));
         //System.out.println(response);
 

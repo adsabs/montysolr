@@ -98,7 +98,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
                         for (String s : vals) {
                             //System.out.println(s);
                             //System.out.println(AuthorUtils.normalizeAuthor(s));
-                            s = s.toLowerCase();
+                            s = s.toLowerCase(Locale.ROOT);
 
                             TokenStream ts = analyzer.tokenStream(targetAnalyzer, new StringReader(s));
                             ts.reset();
@@ -112,7 +112,7 @@ public class BatchProviderDumpAuthorNames extends BatchProvider {
                                     authorInput = termAtt.toString();
                                     //System.out.println("authorInput " + authorInput);
                                 } else {
-                                    tokenBuffer.add(termAtt.toString().toLowerCase());
+                                    tokenBuffer.add(termAtt.toString().toLowerCase(Locale.ROOT));
                                 }
                             }
 
