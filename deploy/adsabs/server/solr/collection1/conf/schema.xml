@@ -1011,10 +1011,10 @@
 			omitTermFreqAndPositions="true" />
 		<field name="bibcode" type="identifier_string" indexed="true"
 			multiValued="false" stored="true" required="true" omitNorms="true"
-			omitTermFreqAndPositions="true"/>
+			omitTermFreqAndPositions="true" docValues="true"/>
 		<field name="scix_id" type="identifier_string" indexed="true"
 			   multiValued="false" stored="true" omitNorms="true"
-			   omitTermFreqAndPositions="true"/>
+			   omitTermFreqAndPositions="true" docValues="true"/>
 
 
 		<!--
