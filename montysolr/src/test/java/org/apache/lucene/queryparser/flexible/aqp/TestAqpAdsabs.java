@@ -395,6 +395,25 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("one ^\"author phrase\"$");
     }
 
+    public void testCaretTypographicQuoteBoundaries() throws Exception {
+        Query expected = getQuery("\"Henneken,E\" ADS", null);
+        Query ordinaryDollar = getQuery("\"author phrase\"$", null);
+        char[] quotes = {'"', '\u201C', '\u201D', '\u201E'};
+        for (char opening : quotes) {
+            for (char closing : quotes) {
+                if (opening == '"' && closing != '"') {
+                    continue;
+                }
+                String phrase = opening + "Henneken,E" + closing;
+                assertEquals(expected, getQuery("^" + phrase + " ADS", null));
+                assertQueryNodeException("^" + phrase + "$");
+                assertEquals(ordinaryDollar,
+                        getQuery(opening + "author phrase" + closing + "$", null));
+            }
+        }
+        assertQueryNodeException("^\"author \u201Cphrase\u201D\"$");
+    }
+
 
     public void testOrdinaryPhraseDollarSyntax() throws Exception {
         AqpANTLRNode tree = (AqpANTLRNode) new AqpSyntaxParserLoadableImpl()
