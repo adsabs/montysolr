@@ -662,7 +662,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         return null;
     }
 
+    @Override
     public void close() {
+        synchronized (relationships) {
+            relationships = new RelationshipLinkedHashMap<K, V>(0, 0.75f, true, 0, null);
+        }
     }
 
     @Override
@@ -1021,6 +1025,13 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
              * context of a higher level synchronized block. evictions++;
              * stats.evictions.incrementAndGet(); return true; } return false;
              */
+        }
+
+        @Override
+        public void clear() {
+            super.clear();
+            references.clear();
+            citations.clear();
         }
 
         public int[] getReferences(int docid) {
