@@ -409,17 +409,15 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     }
 
     private File getCacheStorageDir(SolrIndexSearcher searcher) {
-        File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
         try {
-            assert f.exists();
-            assert f.isDirectory();
-            assert f.canWrite();
-        } catch (AssertionError ae) {
-            return null;
+            File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
+            if (!f.exists() || !f.isDirectory() || !f.canWrite()) {
+                return null;
+            }
+            return f;
         } catch (Exception e) {
             return null;
         }
-        return f;
     }
 
     private CitationCacheReaderWriter getCitationCacheReaderWriter(SolrIndexSearcher searcher) {
@@ -664,7 +662,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         return null;
     }
 
+    @Override
     public void close() {
+        synchronized (relationships) {
+            relationships = new RelationshipLinkedHashMap<K, V>(0, 0.75f, true, 0, null);
+        }
     }
 
     @Override
@@ -1023,6 +1025,13 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
              * context of a higher level synchronized block. evictions++;
              * stats.evictions.incrementAndGet(); return true; } return false;
              */
+        }
+
+        @Override
+        public void clear() {
+            super.clear();
+            references.clear();
+            citations.clear();
         }
 
         public int[] getReferences(int docid) {
