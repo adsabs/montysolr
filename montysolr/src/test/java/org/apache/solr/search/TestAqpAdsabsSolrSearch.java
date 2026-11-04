@@ -111,6 +111,40 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         super.tearDown();
     }
 
+    public void testDateYearRangeQueries() throws Exception {
+        try {
+            assertU(adoc("id", "7000", "bibcode", "year-lower-bound", "year", "0001"));
+            assertU(adoc("id", "7001", "bibcode", "year-in-range", "year", "1976"));
+            assertU(adoc("id", "7002", "bibcode", "year-upper-bound", "year", "2018"));
+            assertU(adoc("id", "7003", "bibcode", "year-out-of-range", "year", "2019"));
+            assertU(adoc("id", "7004", "bibcode", "volume-literal", "volume", "09-2012"));
+            assertU(adoc("id", "7005", "bibcode", "volume-range-sentinel", "volume", "1500"));
+            assertU(adoc("id", "7006", "bibcode", "doi-literal", "doi", "doi:09-2012"));
+            assertU(adoc("id", "7007", "bibcode", "doi-sentinel", "doi", "doi:1500"));
+            assertU(commit("waitSearcher", "true"));
+            assertQ(req("defType", "aqp", "q", "year:1-2018"),
+                    "//*[@numFound='3']",
+                    "//doc/str[@name='id'][.='7000']",
+                    "//doc/str[@name='id'][.='7001']",
+                    "//doc/str[@name='id'][.='7002']"
+            );
+            assertQ(req("defType", "aqp", "q", "volume:09-2012"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='7004']"
+            );
+            assertQ(req("defType", "aqp", "q", "doi:09-2012"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='7006']"
+            );
+        } finally {
+            for (String id : new String[]{"7000", "7001", "7002", "7003", "7004", "7005", "7006", "7007"}) {
+                assertU(delI(id));
+            }
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
+
     public void testUnfieldedSearch() throws Exception {
         assertU(adoc("id", "2101", "bibcode", "2101test", "title", "netpune atmospheres"));
         assertU(adoc("id", "2102", "bibcode", "2102test", "title", "netpune exoplanet atmospheres"));

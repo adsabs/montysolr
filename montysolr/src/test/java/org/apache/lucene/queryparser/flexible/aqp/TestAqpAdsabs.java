@@ -101,6 +101,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("one x:doi:word/word doi:word/123", wsa, "+one +x:word/word +doi:word/123");
         assertQueryEquals("doi:hey/156-8569", wsa, "doi:hey/156-8569");
+        assertQueryEquals("doi:09-2012", wsa, "doi:09-2012");
         q = assertQueryEquals("doi:10.1000/182", wsa, "doi:10.1000/182");
 
         // pretend we are sending bibcode (this should be handled as a normal token)
@@ -118,8 +119,12 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("2011-2012", null, "date:[2011 TO 2012]");
         assertQueryEquals("xf:2011-2012", null, "xf:[2011 TO 2012]");
+        assertQueryEquals("year:1-2018", null, "year:[0001 TO 2018]");
+
+        assertTrue(getQuery("year:[1-2018 TO 2020]", null) instanceof TermRangeQuery);
         assertQueryEquals("one 2009-2012", null, "+one +date:[2009 TO 2012]");
         assertQueryEquals("notdate 09-12", wsa, "+notdate +09-12");
+        assertQueryEquals("title:09-2012", wsa, "title:09-2012");
         assertQueryEquals("notdate 09-2012", wsa, "+notdate +09-2012");
 
 
