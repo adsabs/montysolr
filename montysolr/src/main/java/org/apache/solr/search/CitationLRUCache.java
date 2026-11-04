@@ -411,11 +411,11 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
     private File getCacheStorageDir(SolrIndexSearcher searcher) {
         try {
             File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
-            assert f.exists();
-            assert f.isDirectory();
-            assert f.canWrite();
+            if (!f.exists() || !f.isDirectory() || !f.canWrite()) {
+                return null;
+            }
             return f;
-        } catch (AssertionError | Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
