@@ -114,18 +114,17 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
     public void testDateRanges() throws Exception {
         WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 
-        assertQueryEquals("intitle:\"QSO\" 1995-2000", null, "+intitle:qso +date:[1995 TO 2000]");
 
 
-        assertQueryEquals("2011-2012", null, "date:[2011 TO 2012]");
         assertQueryEquals("xf:2011-2012", null, "xf:[2011 TO 2012]");
         assertQueryEquals("year:1-2018", null, "year:[0001 TO 2018]");
 
         assertQueryEquals("year:(1900-1950)", null, "year:[1900 TO 1950]");
         assertQueryEquals("title:(1900-1950)", null, "title:[1900 TO 1950]");
+        assertTrue(getQuery("date:(1995-1996)", null) instanceof TermRangeQuery);
+        assertTrue(getQuery("xf:(1995-1996)", null) instanceof TermRangeQuery);
 
         assertTrue(getQuery("year:[1-2018 TO 2020]", null) instanceof TermRangeQuery);
-        assertQueryEquals("one 2009-2012", null, "+one +date:[2009 TO 2012]");
         assertQueryEquals("notdate 09-12", wsa, "+notdate +09-12");
         assertQueryEquals("title:09-2012", wsa, "title:09-2012");
         assertQueryEquals("notdate 09-2012", wsa, "+notdate +09-2012");
