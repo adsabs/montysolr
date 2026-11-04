@@ -391,6 +391,11 @@ TILDE : '~' NUMBER?;
 
 DQUOTE  : '\"';
 
+// Typographic double quotes can open or close a phrase, including low quotes.
+// A typographic opening quote also accepts an ASCII closing quote.
+// Quotes inside an ASCII-delimited phrase remain literal content.
+CURLY_QUOTE : '\u201C' | '\u201D' | '\u201E';
+
 //SQUOTE  : '\'';
 
 COMMA : ',';
@@ -493,7 +498,7 @@ fragment INT: '0' .. '9';
 fragment TERM_START_CHAR
   :
   (~(' ' | '\t' | '\n' | '\r' | '\u3000'
-        | '\"' 
+        | '\"' | '\u201C' | '\u201D' | '\u201E'
         | '(' | ')' | '[' | ']' | '{' | '}'
         | '+' | '-' | '!' | ':' | '~' | '^' 
         | '?' | '*' | '\\'|',' | '=' | '#'
@@ -552,10 +557,12 @@ TERM_TRUNCATED:
 PHRASE  
   : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'|'?'|'*'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 PHRASE_ANYTHING : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 LOCAL_PARAMS  : 
@@ -564,3 +571,6 @@ LOCAL_PARAMS  :
 REGEX : 
   '/' (ESC_CHAR|~('/'|'\\'))+ '/'
   ; 
+UNTERMINATED_CURLY_PHRASE
+  : CURLY_QUOTE (ESC_CHAR | ~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))* '\\'? EOF
+  ;
