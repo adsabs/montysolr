@@ -6,6 +6,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpConstantQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -96,12 +97,23 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
             Map<String, TargetField> humanizedDateFields = getFields();
 
             FieldQueryNode fieldNode = (FieldQueryNode) node;
-            String field = ((FieldQueryNode) node).getFieldAsString();
+            String field = fieldNode.getFieldAsString();
+
+            // A quoted four-digit year range is still a range, not one
+            // normalized year token (year's analyzer removes the dash).
+            if (fieldNode instanceof QuotedFieldQueryNode && field.equals("year")
+                    && isYearRange(fieldNode.getTextAsString())
+                    && !(node.getParent() instanceof TermRangeQueryNode)) {
+                String value = fieldNode.getTextAsString();
+                int begin = fieldNode.getBegin();
+                FieldQueryNode lowerBound = new FieldQueryNode(field, value.substring(0, 4), begin, begin + 4);
+                FieldQueryNode upperBound = new FieldQueryNode(field, value.substring(5), begin + 5, begin + 9);
+                return new TermRangeQueryNode(lowerBound, upperBound, true, true);
+            }
 
             // we must detect pubdate:YYYY(-MM-DD) queries, and turn them into range
             // query if necessary
             // ie. rewrite (pub)date fieldquery into termrange query
-
             if (humanizedDateFields.containsKey(field)) {
                 node = rewriteDateRange(node, fieldNode, humanizedDateFields, field);
             }
@@ -114,9 +126,24 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
                     node = new BoostQueryNode(node, boost);
                 }
             }
-
         }
         return node;
+    }
+
+    private boolean isYearRange(String value) {
+        if (value == null || value.length() != 9 || value.charAt(4) != '-') {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            if (i == 4) {
+                continue;
+            }
+            char c = value.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 
     private QueryNode rewriteDateRange(QueryNode node, FieldQueryNode fieldNode, Map<String, TargetField> hFields,
