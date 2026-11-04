@@ -121,6 +121,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("xf:2011-2012", null, "xf:[2011 TO 2012]");
         assertQueryEquals("year:1-2018", null, "year:[0001 TO 2018]");
 
+        assertQueryEquals("year:(1900-1950)", null, "year:[1900 TO 1950]");
+        assertQueryEquals("title:(1900-1950)", null, "title:[1900 TO 1950]");
+
         assertTrue(getQuery("year:[1-2018 TO 2020]", null) instanceof TermRangeQuery);
         assertQueryEquals("one 2009-2012", null, "+one +date:[2009 TO 2012]");
         assertQueryEquals("notdate 09-12", wsa, "+notdate +09-12");
