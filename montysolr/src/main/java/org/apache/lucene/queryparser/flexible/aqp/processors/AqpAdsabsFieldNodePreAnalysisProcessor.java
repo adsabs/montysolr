@@ -6,6 +6,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpConstantQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
+import org.apache.lucene.queryparser.flexible.core.nodes.QuotedFieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.BoostQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
@@ -96,12 +97,30 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
             Map<String, TargetField> humanizedDateFields = getFields();
 
             FieldQueryNode fieldNode = (FieldQueryNode) node;
-            String field = ((FieldQueryNode) node).getFieldAsString();
+            String field = fieldNode.getFieldAsString();
+
+            // A quoted four-digit year range is still a range, not one
+            // normalized year token (year's analyzer removes the dash).
+            if (fieldNode instanceof QuotedFieldQueryNode && field.equals("year")
+                    && isYearRange(fieldNode.getTextAsString())
+                    && !(node.getParent() instanceof TermRangeQueryNode)) {
+                String value = fieldNode.getTextAsString();
+                int begin = fieldNode.getBegin();
+                FieldQueryNode lowerBound = new FieldQueryNode(field, value.substring(0, 4), begin, begin + 4);
+                FieldQueryNode upperBound = new FieldQueryNode(field, value.substring(5), begin + 5, begin + 9);
+                return new TermRangeQueryNode(lowerBound, upperBound, true, true);
+            }
 
             // we must detect pubdate:YYYY(-MM-DD) queries, and turn them into range
             // query if necessary
             // ie. rewrite (pub)date fieldquery into termrange query
 
+            // Explicit year ranges may have a one-to-three-digit endpoint. Keep this
+            // field-specific so identifiers such as title:09-2012 remain terms.
+            if (field.equals("year") && isShortYearRange(fieldNode.getTextAsString())
+                    && !(node.getParent() instanceof TermRangeQueryNode)) {
+                node = rewriteShortYearRange(fieldNode);
+            }
             if (humanizedDateFields.containsKey(field)) {
                 node = rewriteDateRange(node, fieldNode, humanizedDateFields, field);
             }
@@ -114,9 +133,64 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
                     node = new BoostQueryNode(node, boost);
                 }
             }
-
         }
         return node;
+    }
+
+    private boolean isYearRange(String value) {
+        if (value == null || value.length() != 9 || value.charAt(4) != '-') {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            if (i == 4) {
+                continue;
+            }
+            char c = value.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isShortYearRange(String value) {
+        int separator = value.indexOf('-');
+        if (separator <= 0 || separator != value.lastIndexOf('-')) {
+            return false;
+        }
+
+        int lowerLength = separator;
+        int upperLength = value.length() - separator - 1;
+        if (!((lowerLength <= 3 && upperLength == 4)
+                || (lowerLength == 4 && upperLength >= 1 && upperLength <= 3))) {
+            return false;
+        }
+
+        for (int i = 0; i < value.length(); i++) {
+            if (i == separator) {
+                continue;
+            }
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private QueryNode rewriteShortYearRange(FieldQueryNode fieldNode) {
+        String value = fieldNode.getTextAsString();
+        int separator = value.indexOf('-');
+        String lower = canonicalYear(value.substring(0, separator));
+        String upper = canonicalYear(value.substring(separator + 1));
+        int start = fieldNode.getBegin();
+        FieldQueryNode lowerBound = new FieldQueryNode(fieldNode.getFieldAsString(), lower,
+                start, start + separator);
+        FieldQueryNode upperBound = new FieldQueryNode(fieldNode.getFieldAsString(), upper,
+                start + separator + 1, fieldNode.getEnd());
+        return new TermRangeQueryNode(lowerBound, upperBound, true, true);
+    }
+    private String canonicalYear(String value) {
+        return value.length() == 4 ? value : "0000".substring(value.length()) + value;
     }
 
     private QueryNode rewriteDateRange(QueryNode node, FieldQueryNode fieldNode, Map<String, TargetField> hFields,
@@ -127,6 +201,18 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
         boolean dateGuessed = false;
 
         if (value.equals("*") && node.getParent() instanceof TermRangeQueryNode) {
+            /*
+             * An explicitly typed '*' is an unbounded endpoint.  The parser
+             * also creates a synthetic '*' endpoint for shorthand such as
+             * [2012]; that endpoint must continue to inherit the other bound
+             * so the shorthand retains its day/month/year semantics.
+             */
+            if (fieldNode.getBegin() > 0) {
+                fieldNode.setField(targetDateField.fieldname);
+                fieldNode.setValue("");
+                return new AqpNonAnalyzedQueryNode(fieldNode);
+            }
+
             QueryNode theOtherNode = null;
             for (QueryNode ch : node.getParent().getChildren()) {
                 if (ch != fieldNode) {
@@ -135,11 +221,11 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
                 }
             }
             if (theOtherNode != null) {
-                String theOtherValue = ((FieldQueryNode) theOtherNode).getTextAsString();
-                value = theOtherValue;
+                value = ((FieldQueryNode) theOtherNode).getTextAsString();
                 dateGuessed = true;
             }
         }
+
 
         Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
         TokenStream source = null;

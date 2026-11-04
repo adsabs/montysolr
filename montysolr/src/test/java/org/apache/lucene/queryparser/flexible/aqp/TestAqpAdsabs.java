@@ -7,6 +7,7 @@ import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.search.*;
 
 import java.util.Map.Entry;
@@ -179,6 +180,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("one x:doi:word/word doi:word/123", wsa, "+one +x:word/word +doi:word/123");
         assertQueryEquals("doi:hey/156-8569", wsa, "doi:hey/156-8569");
+        assertQueryEquals("doi:09-2012", wsa, "doi:09-2012");
         q = assertQueryEquals("doi:10.1000/182", wsa, "doi:10.1000/182");
 
         // pretend we are sending bibcode (this should be handled as a normal token)
@@ -191,13 +193,19 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
     public void testDateRanges() throws Exception {
         WhitespaceAnalyzer wsa = new WhitespaceAnalyzer();
 
-        assertQueryEquals("intitle:\"QSO\" 1995-2000", null, "+intitle:qso +date:[1995 TO 2000]");
 
 
-        assertQueryEquals("2011-2012", null, "date:[2011 TO 2012]");
         assertQueryEquals("xf:2011-2012", null, "xf:[2011 TO 2012]");
-        assertQueryEquals("one 2009-2012", null, "+one +date:[2009 TO 2012]");
+        assertQueryEquals("year:1-2018", null, "year:[0001 TO 2018]");
+
+        assertQueryEquals("year:(1900-1950)", null, "year:[1900 TO 1950]");
+        assertQueryEquals("title:(1900-1950)", null, "title:[1900 TO 1950]");
+        assertTrue(getQuery("date:(1995-1996)", null) instanceof TermRangeQuery);
+        assertTrue(getQuery("xf:(1995-1996)", null) instanceof TermRangeQuery);
+
+        assertTrue(getQuery("year:[1-2018 TO 2020]", null) instanceof TermRangeQuery);
         assertQueryEquals("notdate 09-12", wsa, "+notdate +09-12");
+        assertQueryEquals("title:09-2012", wsa, "title:09-2012");
         assertQueryEquals("notdate 09-2012", wsa, "+notdate +09-2012");
 
 
@@ -253,6 +261,15 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("year:[2000 TO *]", null, "year:[2000 TO 2222]");
 
+    }
+
+    public void testForbiddenLineNotation() throws Exception {
+        assertEquals(getQuery("C\\[II\\]", null).toString("field"),
+                getQuery("C[II]", null).toString("field"));
+        assertEquals(getQuery("\\[OII\\]", null).toString("field"),
+                getQuery("[OII]", null).toString("field"));
+        assertEquals(getQuery("CII\\]", null).toString("field"),
+                getQuery("CII]", null).toString("field"));
     }
 
 
@@ -371,7 +388,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("+field:");
 
         assertQueryNodeException("=");
-        assertQueryNodeException("one ^\"author phrase\"");
 
         // this parses well, shall we consider it mistake?
         //assertQueryNodeException("one ^\"author phrase\"$");
@@ -383,6 +399,34 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("\"two phrase$\"");
         assertQueryEquals("$", null, "MatchNoDocsQuery(\"\")", MatchNoDocsQuery.class);
     }
+
+    public void testLeadingCaretPhraseBoundary() throws Exception {
+        assertQueryEquals("^\"Henneken,E\" ADS", null, "+\"henneken e\" +ads", BooleanQuery.class);
+        AqpANTLRNode tree = (AqpANTLRNode) new AqpSyntaxParserLoadableImpl()
+                .initializeGrammar("ADS")
+                .parse("one ^\"author phrase\"", null);
+        assertEquals(2, tree.getChildren().size());
+        assertNotNull(((AqpANTLRNode) tree.getChildren().get(1)).findChild("QPHRASE"));
+        assertQueryNodeException("^2\"Henneken,E\" ADS");
+        assertQueryNodeException("one ^\"author phrase\"$");
+    }
+
+
+    public void testOrdinaryPhraseDollarSyntax() throws Exception {
+        AqpANTLRNode tree = (AqpANTLRNode) new AqpSyntaxParserLoadableImpl()
+                .initializeGrammar("ADS")
+                .parse("one \"author phrase\"$", null);
+        assertEquals("OPERATOR", tree.getTokenName());
+        assertEquals(3, tree.getChildren().size());
+        AqpANTLRNode phrase = ((AqpANTLRNode) tree.getChildren().get(1)).findChild("QPHRASE");
+        assertNotNull(phrase);
+        assertEquals("\"author phrase\"",
+                ((AqpANTLRNode) phrase.getChildren().get(0)).getTokenInput());
+        AqpANTLRNode dollar = ((AqpANTLRNode) tree.getChildren().get(2)).findChild("QNORMAL");
+        assertNotNull(dollar);
+        assertEquals("$", ((AqpANTLRNode) dollar.getChildren().get(0)).getTokenInput());
+    }
+
 
     public void testWildCards() throws Exception {
         Query q = null;
@@ -471,6 +515,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");
         assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"", PhraseQuery.class);
+
 
         assertQueryEquals("title:\"X x\" AND text:go title:\"x y\" AND A", null, "+title:\"x x\" +text:go +title:\"x y\" +a");
         assertQueryEquals("title:\"X x\" OR text:go title:\"x y\" OR A", null, "+(title:\"x x\" text:go) +(title:\"x y\" a)");

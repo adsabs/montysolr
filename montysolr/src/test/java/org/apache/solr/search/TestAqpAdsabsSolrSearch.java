@@ -124,6 +124,76 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         super.tearDown();
     }
 
+    public void testDateYearRangeQueries() throws Exception {
+        try {
+            assertU(adoc("id", "7000", "bibcode", "year-lower-bound", "year", "0001"));
+            assertU(adoc("id", "7001", "bibcode", "year-in-range", "year", "1976"));
+            assertU(adoc("id", "7002", "bibcode", "year-upper-bound", "year", "2018"));
+            assertU(adoc("id", "7003", "bibcode", "year-out-of-range", "year", "2019"));
+            assertU(adoc("id", "7004", "bibcode", "volume-literal", "volume", "09-2012"));
+            assertU(adoc("id", "7005", "bibcode", "volume-range-sentinel", "volume", "1500"));
+            assertU(adoc("id", "7006", "bibcode", "doi-literal", "doi", "doi:09-2012"));
+            assertU(adoc("id", "7007", "bibcode", "doi-sentinel", "doi", "doi:1500"));
+            assertU(commit("waitSearcher", "true"));
+            assertQ(req("defType", "aqp", "q", "year:1-2018"),
+                    "//*[@numFound='3']",
+                    "//doc/str[@name='id'][.='7000']",
+                    "//doc/str[@name='id'][.='7001']",
+                    "//doc/str[@name='id'][.='7002']"
+            );
+            assertQ(req("defType", "aqp", "q", "volume:09-2012"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='7004']"
+            );
+            assertQ(req("defType", "aqp", "q", "doi:09-2012"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='7006']"
+            );
+            assertU(adoc("id", "7008", "bibcode", "grouped-year-lower", "year", "1900"));
+            assertU(adoc("id", "7009", "bibcode", "grouped-year-upper", "year", "1950"));
+            assertU(adoc("id", "7010", "bibcode", "grouped-year-outside", "year", "1951"));
+            assertU(adoc("id", "7011", "bibcode", "grouped-title-lower", "title", "1900"));
+            assertU(adoc("id", "7012", "bibcode", "grouped-title-upper", "title", "1950"));
+            assertU(adoc("id", "7013", "bibcode", "grouped-title-outside", "title", "1951"));
+            assertU(commit("waitSearcher", "true"));
+            assertQueryEquals(req("defType", "aqp", "q", "year:(1900-1950)"),
+                    "year:[1900 TO 1950]", TermRangeQuery.class);
+            assertQ(req("defType", "aqp", "q", "year:(1900-1950)",
+                            "fq", "{!terms f=id}7008,7009,7010"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='7008']",
+                    "//doc/str[@name='id'][.='7009']"
+            );
+            assertQueryEquals(req("defType", "aqp", "q", "title:(1900-1950)"),
+                    "title:[1900 TO 1950]", TermRangeQuery.class);
+            assertQ(req("defType", "aqp", "q", "title:(1900-1950)",
+                            "fq", "{!terms f=id}7011,7012,7013"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='7011']",
+                    "//doc/str[@name='id'][.='7012']"
+            );
+            assertU(adoc("id", "7014", "bibcode", "grouped-date-lower", "date", "1995-01-01T00:00:00Z"));
+            assertU(adoc("id", "7015", "bibcode", "grouped-date-upper", "date", "1996-12-31T23:59:59Z"));
+            assertU(adoc("id", "7016", "bibcode", "grouped-date-outside", "date", "1997-01-01T00:00:00Z"));
+            assertU(commit("waitSearcher", "true"));
+            assertQueryEquals(req("defType", "aqp", "q", "date:(1995-1996)"),
+                    "date:[788918400000 TO 852076799999]", null);
+            assertQ(req("defType", "aqp", "q", "date:(1995-1996)",
+                            "fq", "{!terms f=id}7014,7015,7016"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='7014']",
+                    "//doc/str[@name='id'][.='7015']"
+            );
+        } finally {
+            for (String id : new String[]{"7000", "7001", "7002", "7003", "7004", "7005", "7006", "7007",
+                    "7008", "7009", "7010", "7011", "7012", "7013", "7014", "7015", "7016"}) {
+                assertU(delI(id));
+            }
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
+
     public void testUnfieldedSearch() throws Exception {
         assertU(adoc("id", "2101", "bibcode", "2101test", "title", "netpune atmospheres"));
         assertU(adoc("id", "2102", "bibcode", "2102test", "title", "netpune exoplanet atmospheres"));
@@ -1161,6 +1231,19 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("q", "title:(profile NEAR2 rotation)"), "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
 
         assertQEx("INVALID_SYNTAX", req("q", "author:\"^\"de marco year:2015"), 400);
+        // The second title is a decoy; the suffix must remain a year filter.
+        assertU(adoc("id", "1041", "bibcode", "b1041", "author", "Montez, R.", "year", "2017", "title", "hello"));
+        assertU(adoc("id", "1042", "bibcode", "b1042", "author", "Montez, R.", "year", "2018", "title", "2017"));
+        assertU(commit("waitSearcher", "true"));
+        assertQ(req("defType", "aqp", "q", "^montez, r. year:2017"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1041']",
+                "//doc[not(str[@name='id']='1042')]");
+        assertQ(req("defType", "aqp", "q", "^montez, r. title:hello"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1041']",
+                "//doc[not(str[@name='id']='1042')]");
+
 
         assertQ(req("q", "similar(foo bar baz title bitle, input abstract title, 100, 100, 1, 1)"),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='2']");
