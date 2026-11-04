@@ -348,7 +348,7 @@ public class AqpAdsabsSubQueryProvider implements
                     throws SyntaxError {
                 if (virtualFields.isEmpty()) {
                     String queryField = getField(query);
-                    return createPositionQuery(converter, query, queryField, start, end,
+                    return createPositionQuery(fp, converter, query, queryField, start, end,
                             getPositionIncrementGap(fp, queryField));
                 }
                 if (query instanceof BoostQuery) {
@@ -394,7 +394,7 @@ public class AqpAdsabsSubQueryProvider implements
 
                 if (queryFields.size() <= 1) {
                     String queryField = getField(query);
-                    return createPositionQuery(converter, query, queryField, start, end,
+                    return createPositionQuery(fp, converter, query, queryField, start, end,
                             getPositionIncrementGap(fp, queryField));
                 }
                 if (virtualFields.isEmpty() || !virtualFields.containsAll(queryFields)) {
@@ -589,7 +589,7 @@ public class AqpAdsabsSubQueryProvider implements
             }
 
 
-            private Query createPositionQuery(SpanConverter converter, Query query, String queryField,
+            private Query createPositionQuery(FunctionQParser fp, SpanConverter converter, Query query, String queryField,
                                               int start, int end, int positionIncrementGap)
                     throws SyntaxError {
                 boolean positionalConjunction = query instanceof BooleanQuery
@@ -612,7 +612,7 @@ public class AqpAdsabsSubQueryProvider implements
                         Query clauseQuery;
                         if (start < 0 || end < 0) {
                             clauseQuery = new SpanNegativeIndexRangeQuery(
-                                    clauseSpan, queryField, start, end, positionIncrementGap);
+                                    clauseSpan, queryField, start, end, fp.getReq().getSchema().getIndexAnalyzer());
                         } else {
                             clauseQuery = new SpanPositionRangeQuery(clauseSpan,
                                     (start - 1) * positionIncrementGap, end * positionIncrementGap);
@@ -632,7 +632,8 @@ public class AqpAdsabsSubQueryProvider implements
                 }
 
                 if (start < 0 || end < 0) {
-                    return new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end, positionIncrementGap);
+                    return new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end,
+                            fp.getReq().getSchema().getIndexAnalyzer());
                 }
                 return new SpanPositionRangeQuery(spanQuery,
                         (start - 1) * positionIncrementGap, end * positionIncrementGap);
@@ -715,8 +716,8 @@ public class AqpAdsabsSubQueryProvider implements
         parsers.put("same", new AqpSubqueryParserFull() {
             @Override
             public Query parse(FunctionQParser fp) throws SyntaxError {
-                Query authorQuery = fp.parseNestedQuery();
-                Query affiliationQuery = fp.parseNestedQuery();
+                Query authorQuery = parseMembershipQuery(fp);
+                Query affiliationQuery = parseMembershipQuery(fp);
                 if (fp.hasMoreArguments()) {
                     throw new NestedParseException("same() expects exactly two field queries");
                 }
@@ -737,9 +738,24 @@ public class AqpAdsabsSubQueryProvider implements
                         authorSchema.getType().getIndexAnalyzer(),
                         affiliationSchema.getType().getIndexAnalyzer());
             }
+            private Query parseMembershipQuery(FunctionQParser fp) throws SyntaxError {
+                String queryText = fp.parseId();
+                QParser subParser = fp.subQuery(queryText, "aqp");
+                if (subParser instanceof AqpAdsabsQParser aqpParser) {
+                    try {
+                        return aqpParser.getParser().parse(subParser.getString(), null);
+                    } catch (QueryNodeException e) {
+                        throw new SyntaxError(e);
+                    }
+                }
+                return subParser.getQuery();
+            }
+
 
             private String getSingleField(Query query) throws SyntaxError {
-                if (query instanceof TermQuery) {
+                if (query instanceof MatchAllDocsQuery) {
+                    return null;
+                } else if (query instanceof TermQuery) {
                     return ((TermQuery) query).getTerm().field();
                 } else if (query instanceof PhraseQuery) {
                     return getSingleField(null, ((PhraseQuery) query).getTerms());
@@ -788,6 +804,9 @@ public class AqpAdsabsSubQueryProvider implements
             }
 
             private String getSingleField(String field, String candidateField) throws SyntaxError {
+                if (candidateField == null) {
+                    return field;
+                }
                 if (field != null && !field.equals(candidateField)) {
                     throw new SyntaxError("same() does not support virtual or multi-field queries");
                 }
@@ -1697,6 +1716,8 @@ public class AqpAdsabsSubQueryProvider implements
      * token positions or token counts identify an array slot.
      */
     private static final class AlignedFieldQuery extends Query {
+        private static final long MAX_REUSED_INDEX_BYTES = 64 * 1024L;
+
         private final Query authorQuery;
         private final Query affiliationQuery;
         private final String authorField;
@@ -1726,8 +1747,8 @@ public class AqpAdsabsSubQueryProvider implements
             Query authorCandidate = positiveCandidate(authorQuery);
             Query affiliationCandidate = positiveCandidate(affiliationQuery);
             BooleanQuery.Builder candidateBuilder = new BooleanQuery.Builder();
-            candidateBuilder.add(authorCandidate, BooleanClause.Occur.SHOULD);
-            candidateBuilder.add(affiliationCandidate, BooleanClause.Occur.SHOULD);
+            candidateBuilder.add(authorCandidate, BooleanClause.Occur.MUST);
+            candidateBuilder.add(affiliationCandidate, BooleanClause.Occur.MUST);
             FixedBitSet candidates = new FixedBitSet(searcher.getIndexReader().maxDoc());
             searcher.search(candidateBuilder.build(), new SimpleCollector() {
                 private int docBase;
@@ -1751,8 +1772,11 @@ public class AqpAdsabsSubQueryProvider implements
             Set<String> fields = new HashSet<>();
             fields.add(authorField);
             fields.add(affiliationField);
-            MemoryIndex authorIndex = new MemoryIndex();
-            MemoryIndex affiliationIndex = new MemoryIndex();
+            // Keep bounded token buffers across slot resets rather than reallocating each pair.
+            MemoryIndex authorIndex = MemoryIndex.fromDocument(Collections.emptyList(), authorAnalyzer,
+                    false, false, MAX_REUSED_INDEX_BYTES);
+            MemoryIndex affiliationIndex = MemoryIndex.fromDocument(Collections.emptyList(), affiliationAnalyzer,
+                    false, false, MAX_REUSED_INDEX_BYTES);
             for (LeafReaderContext context : searcher.getIndexReader().leaves()) {
                 LeafReader reader = context.reader();
                 int leafEnd = context.docBase + reader.maxDoc();

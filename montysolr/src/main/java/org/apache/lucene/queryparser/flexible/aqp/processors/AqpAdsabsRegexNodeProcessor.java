@@ -6,6 +6,7 @@ import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.core.util.UnescapedCharSequence;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
@@ -30,6 +31,9 @@ public class AqpAdsabsRegexNodeProcessor extends AqpQueryNodeProcessorImpl imple
         if (node instanceof FieldQueryNode && !(node instanceof AqpNonAnalyzedQueryNode) &&
                 !(node.getParent() instanceof TermRangeQueryNode)) {
             FieldQueryNode n = (FieldQueryNode) node;
+            if (Boolean.TRUE.equals(n.getTag(AqpAdsabsQNORMALProcessor.LITERAL_LINE_TAG))) {
+                return node;
+            }
             String input = n.getTextAsString();
 
             String field = n.getFieldAsString();
@@ -41,7 +45,7 @@ public class AqpAdsabsRegexNodeProcessor extends AqpQueryNodeProcessorImpl imple
             }
 
             // try to detect if we have special regex characters inside the string
-            if (isRegex(input)) {
+            if (isRegex(n.getText())) {
                 if (!isRegex(input.replace(".?", "").replace(".*", ""))) { // detect simple wildcard cases
                     input = input.replace(".*", "*").replace(".?", "?");
                     if (input.endsWith("*") && !input.contains("?")) {
@@ -104,9 +108,14 @@ public class AqpAdsabsRegexNodeProcessor extends AqpQueryNodeProcessorImpl imple
 
     Pattern regexTest = Pattern.compile(regexMarker);
 
-    private boolean isRegex(String input) {
+    private boolean isRegex(CharSequence input) {
         Matcher matcher = regexTest.matcher(input);
-        return matcher.find();
+        while (matcher.find()) {
+            if (!UnescapedCharSequence.wasEscaped(input, matcher.start())) {
+                return true;
+            }
+        }
+        return false;
 
     }
 }

@@ -1975,6 +1975,31 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         }
     }
 
+    public void testForbiddenLineNamesRemainLiteral() throws Exception {
+        try {
+            assertU(adoc("id", "15901", "bibcode", "line-oxygen",
+                    "title", "[O III] emission"));
+            assertU(adoc("id", "15902", "bibcode", "line-carbon",
+                    "title", "C[II] emission"));
+            assertU(commit("waitSearcher", "true"));
+            String filter = "id:(15901 OR 15902)";
+            for (String query : new String[]{"title:[O III]", "title:\\[O\\ III\\]"}) {
+                assertQ(req("q", query, "fq", filter, "fl", "id"),
+                        "//*[@numFound='1']", "//doc/str[@name='id'][.='15901']");
+            }
+            for (String query : new String[]{"title:C[II]", "title:C\\[II\\]"}) {
+                assertQ(req("q", query, "fq", filter, "fl", "id"),
+                        "//*[@numFound='1']", "//doc/str[@name='id'][.='15902']");
+            }
+            assertQ(req("q", "title:/.*emission/", "fq", filter),
+                    "//*[@numFound='2']");
+        } finally {
+            assertU(delI("15901"));
+            assertU(delI("15902"));
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabsSolrSearch.class);
     }

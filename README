@@ -61,6 +61,34 @@ project, select the wrapper and JDK 21, and let Gradle configure the source sets
 and dependencies instead of using checked-in Eclipse or PyDev metadata.
 
 
+v96.7.0-beta QUERY COMPATIBILITY
+==============================
+
+This beta integrates typographic quote handling, first-author prefix searches
+above the query-clause limit, year/date range fixes, positional searches across
+configured field aliases, and highlighting inside related-paper operators.
+Bracketed emission-line names such as `title:[O III]` are treated as literal
+search terms; explicit `/.../` regular expressions remain available.
+
+`same(author:Smith, aff:MIT)` requires the author and affiliation to match the
+same entry in their stored arrays. Those arrays must already preserve ingestion
+order and placeholders; the query cannot repair misaligned source data. Broad
+author-prefix and `same()` queries still consume resources in proportion to
+their matching names or candidate documents.
+
+The integrated changes do not alter the schema, index analyzers, or synonym
+files relative to main at 1fcccee883177b5d39ae348c3ed6782ed531dbb8. Existing
+indexes written with that configuration can be reopened without reindexing.
+Negative positional searches reconstruct value boundaries with the current
+index analyzer, which must remain compatible with the one used to index those
+values. Review earlier migration requirements when upgrading from an older
+release.
+
+The optional citation-cache persistence now falls back to an in-memory graph
+when its directory is unavailable. Deployment dependencies include the JSON
+logging layout aligned with Solr 9.6.1's Log4j version.
+
+
 DEPLOYMENT
 ==========
 
