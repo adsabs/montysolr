@@ -41,6 +41,27 @@ public class TestNegativePositionQueries extends MontySolrQueryTestCase {
         assertU(adoc(AdsConfig.F.ID, "6", AdsConfig.F.BIBCODE, "ccccccccccccc",
                 "orcid_pub", "phrase value"
         ));
+        String[] longDocument = new String[4 + 4 * 102];
+        longDocument[0] = AdsConfig.F.ID;
+        longDocument[1] = "8";
+        longDocument[2] = AdsConfig.F.BIBCODE;
+        longDocument[3] = "ddddddddddddd";
+        for (int i = 0; i < 102; i++) {
+            longDocument[4 + 4 * i] = "aff";
+            longDocument[5 + 4 * i] = i == 101 ? "sentinel omega" : "alpha beta";
+            longDocument[6 + 4 * i] = "title";
+            longDocument[7 + 4 * i] = i == 101 ? "singlecontrol" : "filler";
+        }
+        assertU(adoc(longDocument));
+
+        assertU(adoc(AdsConfig.F.ID, "9", AdsConfig.F.BIBCODE, "eeeeeeeeeeeee",
+                "aff", "edge",
+                "aff", " ",
+                "aff", "emptyend",
+                "title", "alpha",
+                "title", "the",
+                "title", "omega"
+        ));
         assertU(commit("waitSearcher", "true"));
     }
 
@@ -67,6 +88,55 @@ public class TestNegativePositionQueries extends MontySolrQueryTestCase {
 
         assertQ(req("q", "pos(aff:\"aff3\", 0, -2)"),
                 "//*[@numFound='0']"
+        );
+    }
+
+    @Test
+    public void testLongMultiTokenValuesUseActualBoundaries() {
+        assertQ(req("q", "pos(aff:sentinel, -1)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(aff:\"sentinel omega\", -1)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(aff:alpha, -1)"),
+                "//*[@numFound='0']"
+        );
+
+        assertQ(req("q", "pos(aff:alpha, -2)"),
+                "//*[@numFound='1']"
+        );
+    }
+
+    @Test
+    public void testSingleTokenVirtualFieldKeepsLongGapBoundaries() {
+        assertQ(req("q", "pos(abs:singlecontrol, -1)"),
+                "//*[@numFound='1']"
+        );
+    }
+
+    @Test
+    public void testEmptyAndStopwordOnlyValuesCountAsBoundaries() {
+        assertQ(req("q", "pos(aff:emptyend, -1)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(aff:edge, -3)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(aff:edge, -3, -1)"),
+                "//*[@numFound='1']"
+        );
+
+        assertQ(req("q", "pos(aff:emptyend, -2)"),
+                "//*[@numFound='0']"
+        );
+
+        assertQ(req("q", "pos(title:omega, -1)"),
+                "//*[@numFound='1']"
         );
     }
 
