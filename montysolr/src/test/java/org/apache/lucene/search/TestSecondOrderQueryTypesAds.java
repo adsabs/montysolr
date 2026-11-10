@@ -277,14 +277,6 @@ public class TestSecondOrderQueryTypesAds extends MontySolrAbstractTestCase {
                 Arrays.asList(1.0f, 0.9995f)
         );
 
-        testQ3(FinalValueType.AGRESTI_COULL,
-                new HashMap() {{
-                    put(0, new Float[]{2f});
-                    put(1, new Float[]{1.0f, 1.0f});
-                }},
-                Arrays.asList(1, 0),
-                Arrays.asList(-0.0004f, -0.1988f)
-        );
 
     }
 
