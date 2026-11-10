@@ -46,13 +46,28 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
     }
 
     private CharSequence normalize(String string) {
-        boolean normalDate = true;
-        if (string.contains("00")) {
-            string = string.replace("-00", "");
-            normalDate = false;
+        int firstDash = string.indexOf('-');
+        int secondDash = firstDash < 0 ? -1 : string.indexOf('-', firstDash + 1);
+        int dayEnd = secondDash < 0 ? -1 : string.indexOf('T', secondDash + 1);
+        if (dayEnd < 0) {
+            dayEnd = string.length();
         }
-        if (string.length() < 10) {
-            normalDate = false;
+
+        int monthEnd = secondDash >= 0 ? secondDash : string.length();
+        boolean zeroMonth = firstDash >= 0 && allZeros(string, firstDash + 1, monthEnd);
+        boolean zeroDay = secondDash >= 0 && allZeros(string, secondDash + 1, dayEnd);
+        boolean normalDate = secondDash >= 0 && !zeroMonth && !zeroDay;
+
+        if (zeroMonth) {
+            if (secondDash < 0 || zeroDay) {
+                string = string.substring(0, firstDash);
+            } else {
+                // Preserve a nonzero day after a zero month so invalid values
+                // such as yyyy-00-32 are not silently turned into yyyy.
+                string = string.substring(0, firstDash) + string.substring(secondDash);
+            }
+        } else if (zeroDay) {
+            string = string.substring(0, secondDash);
         }
 
         // we allow symbolic date math logic; if parsed
@@ -87,5 +102,18 @@ public final class DateNormalizerTokenFilter extends TokenFilter {
         }
         return "0000-00-00T00:00:00Z"; // error parsing input data
     }
+
+    private boolean allZeros(String value, int start, int end) {
+        if (start >= end) {
+            return false;
+        }
+        for (int i = start; i < end; i++) {
+            if (value.charAt(i) != '0') {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
 }
