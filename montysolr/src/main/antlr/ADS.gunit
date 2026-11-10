@@ -142,6 +142,16 @@ atom:
 "[* TO this]" 	->	"(MODIFIER (TMODIFIER (FIELD (QRANGEIN (QANYTHING *) (QNORMAL this)))))"
 "[\"this\" TO \"that*\"]" 	->	"(MODIFIER (TMODIFIER (FIELD (QRANGEIN (QPHRASE \"this\") (QPHRASETRUNC \"that*\")))))"
 "[\"#$%^&\" TO \"&*()\"]" 	->	"(MODIFIER (TMODIFIER (FIELD (QRANGEIN (QPHRASE \"#$%^&\") (QPHRASETRUNC \"&*()\")))))"
+"C[II]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL C[II])))))"
+"FeII]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL FeII])))))"
+"[O III]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL [O III])))))"
+"[OII ]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL [OII ])))))"
+"CII ]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL CII ])))))"
+"[Civil]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QRANGEIN (QNORMAL Civil) (QANYTHING *))))))"
+"[OII]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL [OII])))))"
+"CII]" -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL CII])))))"
+"foo]"		FAIL
+"Civil]"		FAIL
 //	->	
 //	->	
 //	->	
@@ -239,7 +249,9 @@ mainQ:
 "one 2009-2012"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QDATE 2009-2012)))))"
 "notdate 09-12"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL notdate)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 09-12)))))"
 "notdate 09-2012"	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL notdate)))) (MODIFIER (TMODIFIER (FIELD (QNORMAL 09-2012)))))"
-"one ^\"author phrase\""		FAIL
+"one ^\"author phrase\""		->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"author phrase\")))))"
+"one \"author phrase\"$"        -> "(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"author phrase\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL $)))))"
+"^\"Henneken,E\" ADS"		->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QPHRASE \"Henneken,E\")))) (MODIFIER (TMODIFIER (FIELD (QNORMAL ADS)))))"
 "one ^\"author phrase\"$"		FAIL
 "one \"^author phrase\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"^author phrase\")))))"
 "one \"^author phrase$\""	->	"(DEFOP (MODIFIER (TMODIFIER (FIELD (QNORMAL one)))) (MODIFIER (TMODIFIER (FIELD (QPHRASE \"^author phrase$\")))))"
