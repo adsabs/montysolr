@@ -611,7 +611,8 @@ public class AqpAdsabsSubQueryProvider implements
                         Query clauseQuery;
                         if (start < 0 || end < 0) {
                             clauseQuery = new SpanNegativeIndexRangeQuery(
-                                    clauseSpan, queryField, start, end, positionIncrementGap);
+                                    clauseSpan, queryField, start, end,
+                                    fp.getReq().getSchema().getIndexAnalyzer());
                         } else {
                             clauseQuery = new SpanPositionRangeQuery(clauseSpan,
                                     (start - 1) * positionIncrementGap, end * positionIncrementGap);
