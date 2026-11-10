@@ -282,6 +282,11 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertU(adoc(F.ID, "301", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, Jewell"));
         assertU(adoc(F.ID, "302", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Gopal-Krishna, J"));
 
+        assertU(adoc(F.ID, "310", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen-Dalsgaard, J"));
+        assertU(adoc(F.ID, "311", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen Dalsgaard, J"));
+        assertU(adoc(F.ID, "312", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen-Dalsgaard, Jane"));
+        assertU(adoc(F.ID, "313", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Christensen, J"));
+
         assertU(adoc(F.ID, "400", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae-Sik"));
         assertU(adoc(F.ID, "401", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, Dae- Sik"));
         assertU(adoc(F.ID, "402", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Moon, D. -S."));
@@ -390,10 +395,57 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertU(adoc(F.ID, "708", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Kao,"));
         assertU(adoc(F.ID, "709", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Maestro, V"));
         assertU(adoc(F.ID, "710", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Boyajian, T"));
+        assertU(adoc(F.ID, "9799", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Kurtz, Michael"));
+        assertU(adoc(F.ID, "9801", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Accomazzi, Alberto",
+                F.AUTHOR, "Kurtz, Michael"));
+        assertU(adoc(F.ID, "9802", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Kurtz, Michael",
+                F.AUTHOR, "G,"));
+        assertU(adoc(F.ID, "9803", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Kurtz, Michael",
+                F.AUTHOR, "Eichhorn, John",
+                F.AUTHOR, "G,"));
+        assertU(adoc(F.ID, "9804", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Kurtz, Michael"));
+        assertU(adoc(F.ID, "9831", F.BIBCODE, "xxxxxxxxxxxxx",
+                F.AUTHOR, "Kurtz, Michael",
+                F.AUTHOR, "Eichhorn, John"));
         assertU(commit());
 
-        // A multipart author query must retain the normalized surname and initial,
-        // but must not broaden to the surname-only record.
+        // The default author operator is AND: only a paper containing both
+        // complete author values is a positive match.  Separate one-author and
+        // surname-only records are negative controls.
+        // Compare the original unquoted syntax with quoted-group and repeated
+        // author-field forms; all must return the same exact document.
+        try {
+            assertQ(req("defType", "aqp", "fl", "id," + author_field,
+                            "rows", "100", "q", author_field + ":(accomazzi,a kurtz,m)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9801']");
+            assertAuthorResults("(\"accomazzi,a\" \"kurtz,m\")", "1", "9801");
+            assertAuthorResults("\"accomazzi,a\" AND " + author_field + ":\"kurtz,m\"", "1", "9801");
+            assertQ(req("defType", "aqp", "fl", "id", "q",
+                            "id:9802 AND author:(kurtz; -eichhorn, g)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9802']");
+            assertQ(req("defType", "aqp", "fl", "id", "q",
+                            "id:9803 AND author:(kurtz; -eichhorn, g)"),
+                    "//*[@numFound='0']");
+            assertQ(req("defType", "aqp", "fl", "id", "q",
+                            "id:9804 AND author:(kurtz; -eichhorn, g)"),
+                    "//*[@numFound='0']");
+            assertQ(req("defType", "aqp", "fl", "id", "q",
+                            "id:9831 AND author:(kurtz; -eichhorn, -g)"),
+                    "//*[@numFound='0']");
+        } finally {
+            assertU(delI("9799"));
+            assertU(delI("9801"));
+            assertU(delI("9802"));
+            assertU(delI("9803"));
+            assertU(delI("9804"));
+            assertU(delI("9831"));
+            assertU(commit());
+        }
         assertAuthorResults("\"krivodubski, v\"", "1", "700");
         assertAuthorResults("\"krivodubskij, v\"", "1", "700");
 
@@ -429,6 +481,25 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
         assertAuthorResults("V\\ Maestro", "1", "709");
         assertAuthorResults("Boyajian\\,\\ T", "1", "710");
         assertAuthorResults("T\\ Boyajian", "1", "710");
+        // Exercise the historical bare unfielded leading-position syntax itself;
+        // the quoted whole-query form is the documented workaround/control.
+        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
+                        "q", "^Christensen-Dalsgaard, J"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='310']",
+                "//doc/str[@name='id'][.='311']",
+                "//doc/str[@name='id'][.='312']",
+                "not(//doc/str[@name='id'][.='313'])");
+        assertQ(req("defType", "aqp", "fl", "id,author", "rows", "100",
+                        "q", "\"^Christensen-Dalsgaard, J\""),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='310']",
+                "//doc/str[@name='id'][.='311']",
+                "//doc/str[@name='id'][.='312']",
+                "not(//doc/str[@name='id'][.='313'])");
+        assertAuthorResults("\"Christensen-Dalsgaard, J\"", "3", "310", "311", "312");
+        assertAuthorResults("\"^Christensen-Dalsgaard, J\"", "3", "310", "311", "312");
+        assertAuthorResults("\"Christensen Dalsgaard, J\"", "3", "310", "311", "312");
         assertAuthorResults("first", "0");
         assertAuthorResults("goodman", "0");
 
@@ -1288,6 +1359,34 @@ public class TestAdsabsTypeAuthorParsing extends MontySolrQueryTestCase {
     // Uniquely for Junit 3
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAdsabsTypeAuthorParsing.class);
+    }
+
+    public void testSingleSurnameWildcard() throws Exception {
+        assertU(adoc(F.ID, "9811", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Asteron, A"));
+        assertU(adoc(F.ID, "9812", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Bsteron, B"));
+        assertU(adoc(F.ID, "9813", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Accomazzi, Alberto"));
+        assertU(adoc(F.ID, "9814", F.BIBCODE, "xxxxxxxxxxxxx", F.AUTHOR, "Planck, Max"));
+        assertU(commit());
+
+        try {
+            assertQ(req("q", "author:a*", "fq", "id:(9811 OR 9812)"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9811']",
+                    "not(//doc/str[@name='id'][.='9812'])"
+            );
+            assertQ(req("q", "author:\"acco*\"", "fq", "id:9813"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9813']");
+            assertQ(req("q", "author:\"Planck*\"", "fq", "id:9814"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='9814']");
+        } finally {
+            assertU(delI("9811"));
+            assertU(delI("9812"));
+            assertU(delI("9813"));
+            assertU(delI("9814"));
+            assertU(commit());
+        }
     }
 
 
