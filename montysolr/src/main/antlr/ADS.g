@@ -530,6 +530,7 @@ match_all
 normal  
   :
   TERM_NORMAL
+  | SHORT_DATE_RANGE
   | NUMBER
   | TO
   ; 
@@ -617,6 +618,7 @@ identifier
   |'arXiv:'  -> QNORMAL["arxiv"]
   |'scix:' -> QNORMAL["scix"])
   (TERM_NORMAL -> $identifier TERM_NORMAL
+  | SHORT_DATE_RANGE -> $identifier SHORT_DATE_RANGE
   | PHRASE_ANYTHING  -> $identifier ^(QPHRASETRUNC PHRASE_ANYTHING)
   | PHRASE -> $identifier ^(QPHRASE PHRASE)
   | NUMBER  -> $identifier NUMBER
@@ -752,13 +754,16 @@ COORDINATE
   */
   
   
-  
-
-  
 DATE_RANGE
   : 
   '-' INT INT INT INT
   | INT INT INT INT '-' (INT INT INT INT)?
+  ;
+
+SHORT_DATE_RANGE
+  :
+  (INT INT? INT?) '-' INT INT INT INT
+  | INT INT INT INT '-' (INT INT? INT?)
   ;
   
 //IDENTIFIER
