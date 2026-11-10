@@ -347,7 +347,7 @@ public class AqpAdsabsSubQueryProvider implements
                     throws SyntaxError {
                 if (virtualFields.isEmpty()) {
                     String queryField = getField(query);
-                    return createPositionQuery(converter, query, queryField, start, end,
+                    return createPositionQuery(fp, converter, query, queryField, start, end,
                             getPositionIncrementGap(fp, queryField));
                 }
                 if (query instanceof BoostQuery) {
@@ -393,7 +393,7 @@ public class AqpAdsabsSubQueryProvider implements
 
                 if (queryFields.size() <= 1) {
                     String queryField = getField(query);
-                    return createPositionQuery(converter, query, queryField, start, end,
+                    return createPositionQuery(fp, converter, query, queryField, start, end,
                             getPositionIncrementGap(fp, queryField));
                 }
                 if (virtualFields.isEmpty() || !virtualFields.containsAll(queryFields)) {
@@ -587,7 +587,7 @@ public class AqpAdsabsSubQueryProvider implements
             }
 
 
-            private Query createPositionQuery(SpanConverter converter, Query query, String queryField,
+            private Query createPositionQuery(FunctionQParser fp, SpanConverter converter, Query query, String queryField,
                                               int start, int end, int positionIncrementGap)
                     throws SyntaxError {
                 SpanQuery spanQuery;
@@ -600,7 +600,8 @@ public class AqpAdsabsSubQueryProvider implements
                 }
 
                 if (start < 0 || end < 0) {
-                    return new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end, positionIncrementGap);
+                    return new SpanNegativeIndexRangeQuery(spanQuery, queryField, start, end,
+                            fp.getReq().getSchema().getIndexAnalyzer());
                 }
                 return new SpanPositionRangeQuery(spanQuery,
                         (start - 1) * positionIncrementGap, end * positionIncrementGap);
