@@ -42,7 +42,9 @@ tokens {
 }
 
 mainQ : 
-  clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
+  NOT clauseNear EOF
+    -> ^(OPERATOR["DEFOP"] ^(MODIFIER MINUS["-"] clauseNear))
+  | clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
   ;
    
   
@@ -55,7 +57,8 @@ clauseAnd
   ;
 
 clauseNot
-  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
+  :
+  (first=clauseNear  -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
 clauseNear
@@ -80,7 +83,9 @@ atom
   : 
   lmodifier? field multi_value rmodifier?
    -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field multi_value)))
-  | lmodifier? field? value rmodifier? 
+  | lmodifier? field '=' value rmodifier?
+   -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field ^(MODIFIER EQUAL["="] value))))
+  | lmodifier? field? value rmodifier?
   -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
   //| lmodifier? (STAR COLON)? STAR 
   //-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
@@ -330,6 +335,7 @@ identifier
   | PHRASE -> $identifier ^(QPHRASE PHRASE)
   | NUMBER  -> $identifier NUMBER
   | STAR -> $identifier ^(QANYTHING STAR)
+  | LPAREN multiClause RPAREN -> $identifier ^(CLAUSE multiClause)
   )
   ;
   
@@ -398,6 +404,11 @@ fragment AS_CHAR
   :
   ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
   ;
+
+fragment AUTHOR_CHAR
+  :
+  AS_CHAR | '-'
+  ;
   
   
 fragment ESC_CHAR:  '\\' .; 
@@ -415,7 +426,7 @@ NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
   
 AUTHOR_SEARCH
   :
-  '^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
+  '^' AUTHOR_CHAR+ (',' (' ' | AUTHOR_CHAR)+)* '$'?
   ;
 
 

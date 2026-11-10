@@ -11,6 +11,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+
 
 public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
 
@@ -44,6 +48,21 @@ public class TestAuthorTransliterationFilter extends BaseTokenStreamTestCase {
         checkIt("Mendigutıa", "Mendigutıa", "Mendigutia,");
         checkIt("krivodubski, v", "krivodubski, v", "krivodubskyi, v", "krivodubskiy, v", "krivodubskij, v", "krivodubskii, v");
 
+    }
+
+    public void testTransliterationIsLocaleIndependent() {
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.ROOT);
+            Set<String> expected = new HashSet<>(AuthorUtils.getAsciiTransliteratedVariants("KIEV, I"));
+
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            Set<String> actual = new HashSet<>(AuthorUtils.getAsciiTransliteratedVariants("KIEV, I"));
+
+            assertEquals(expected, actual);
+        } finally {
+            Locale.setDefault(previous);
+        }
     }
 
     private void checkIt(String input, String... expected) throws Exception {

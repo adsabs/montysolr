@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.core.nodes.DeletedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FieldQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.FuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -17,6 +18,8 @@ import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfi
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.StrField;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -66,6 +69,9 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         if (node instanceof WildcardQueryNode) {
             field = ((WildcardQueryNode) node).getFieldAsString();
             value = ((WildcardQueryNode) node).getTextAsString();
+            if (isStrField(field)) {
+                return node;
+            }
 
             int asteriskPosition = -1;
             int qmarkPosition = -1;
@@ -120,6 +126,9 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
             for (String suffix : new String[]{"_fuzzy", ""}) {
                 if (hasAnalyzer(field + suffix)) {
                     tokens = analyze(field + suffix, value);
+                    if (tokens.length == 0) {
+                        return new DeletedQueryNode();
+                    }
 
                     if (tokens.length > 1)
                         return node; // break, let the analyzer decide the fate
@@ -168,6 +177,14 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         }
 
         return node;
+    }
+
+    private boolean isStrField(String fieldName) {
+        SolrQueryRequest req = this.getQueryConfigHandler()
+                .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
+                .getRequest();
+        SchemaField schemaField = req.getSchema().getFieldOrNull(fieldName);
+        return schemaField != null && schemaField.getType() instanceof StrField;
     }
 
 
