@@ -639,6 +639,86 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
         assertQ(req("q", "title:(its NEAR its)"), "//*[@numFound='0']");
     }
+    public void testQuotedFirstAuthorKeepsFollowingClauses() throws Exception {
+        try {
+            assertU(adoc("id", "15001", "bibcode", "issue150-first",
+                    "author", "Henneken, E", "title", "ADS", "year", "2017"));
+            assertU(adoc("id", "15002", "bibcode", "issue150-later",
+                    "author", "Other, B", "author", "Henneken, E",
+                    "title", "ADS", "year", "2017"));
+            assertU(adoc("id", "15003", "bibcode", "issue150-text",
+                    "author", "Other, B", "title", "Henneken E ADS", "year", "2017"));
+            assertU(adoc("id", "15004", "bibcode", "issue150-missing-term",
+                    "author", "Henneken, E", "title", "unrelated", "year", "2017"));
+            assertU(adoc("id", "15005", "bibcode", "issue150-other-year",
+                    "author", "Henneken, E", "title", "ADS", "year", "2018"));
+            assertU(commit("waitSearcher", "true"));
+
+            char[] quotes = {'"', '\u201C', '\u201D', '\u201E'};
+            for (char opening : quotes) {
+                for (char closing : quotes) {
+                    if (opening == '"' && closing != '"') {
+                        continue;
+                    }
+                    assertQ(req("q", "^" + opening + "Henneken,E" + closing + " ADS year:2017"),
+                            "//*[@numFound='1']", "//doc/str[@name='id'][.='15001']");
+                }
+            }
+            for (String query : new String[] {
+                    "^\"Henneken\" ADS year:2017",
+                    "^\"Henneken, E*\" ADS year:2017",
+                    "author:^\"Henneken,E\" ADS year:2017",
+                    "^\"Henneken,E\" AND ADS AND year:2017",
+                    "^\"Henneken,E\" year:2017 (ADS OR title:missing)"}) {
+                assertQ(req("q", query),
+                        "//*[@numFound='1']", "//doc/str[@name='id'][.='15001']");
+            }
+            assertQ(req("q", "^\"Henneken,E\" ADS"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='15001']",
+                    "//doc/str[@name='id'][.='15005']");
+            assertQ(req("q", "^\"Henneken,E\" ADS year:2018"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='15005']");
+            for (String query : new String[] {
+                    "^2\"Henneken,E\" ADS", "^\"Henneken,E\"$ ADS",
+                    "^”Henneken,E”$ ADS", "^\"Henneken,E ADS", "^”Henneken,E ADS"}) {
+                assertQEx("Invalid quoted positional author syntax must be a client error",
+                        req("q", query), 400);
+            }
+        } finally {
+            for (String id : new String[] {"15001", "15002", "15003", "15004", "15005"}) {
+                assertU(delI(id));
+            }
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
+    public void testQuotedFirstAuthorPreservesNamePunctuation() throws Exception {
+        try {
+            assertU(adoc("id", "15011", "bibcode", "issue150-literal-curly",
+                    "author", "Quotecontent, Cur”ly", "title", "ADS"));
+            assertU(adoc("id", "15012", "bibcode", "issue150-literal-field",
+                    "author", "Quotefield, year:smith", "title", "ADS"));
+            assertU(adoc("id", "15013", "bibcode", "issue150-escaped-quote",
+                    "author", "Escapequote, Cur\"ly", "title", "ADS"));
+            assertU(commit("waitSearcher", "true"));
+
+            assertQ(req("q", "^\"Quotecontent, Cur”ly\" ADS"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='15011']");
+            assertQ(req("q", "^\"Quotefield, year:smith\" ADS"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='15012']");
+            assertQ(req("q", "^\"Escapequote, Cur\\\"ly\" ADS"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='15013']");
+            assertQEx("Literal quotes must not hide the unsupported last-author marker",
+                    req("q", "^\"Quotecontent, Cur”ly\"$ ADS"), 400);
+        } finally {
+            for (String id : new String[] {"15011", "15012", "15013"}) {
+                assertU(delI(id));
+            }
+            assertU(commit("waitSearcher", "true"));
+        }
+    }
+
     public void testFirstAuthorInitialWithMoreThanLuceneClauseLimit() throws Exception {
         final int matchingAuthors = 1025;
         for (int i = 0; i < matchingAuthors; i++) {

@@ -6,6 +6,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpCommonTree;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
@@ -49,8 +50,12 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
      *                           <value>
      */
     public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
-        AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
-        String input = subChild.getTokenInput();
+        AqpANTLRNode firstChild = (AqpANTLRNode) node.getChildren().get(0);
+        // Quoted caret syntax keeps the caret and the bounded name as separate tokens.
+        boolean quotedCaret = node.getChildren().size() == 2;
+        AqpANTLRNode nameNode = quotedCaret
+                ? (AqpANTLRNode) node.getChildren().get(1) : firstChild;
+        String input = nameNode.getTokenInput();
 
         input = input.trim();
 
@@ -60,7 +65,7 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
                     "^~ is very concise and therefore cool, but I am afraid you must tell me more. Try something like: word^0.5~"));
         }
 
-        Integer start = -1;
+        Integer start = quotedCaret ? 1 : -1;
         Integer end = 1;
 
         if (input.startsWith("^")) {
@@ -79,7 +84,7 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
 
         input = input.trim(); // it may contain trailing spaces, especially when: ^name, j, k   AND somethi...
 
-        if (input.charAt(0) != '"') {
+        if (input.charAt(0) != '"' && !AqpQueryParserUtil.isTypographicDoubleQuote(input.charAt(0))) {
             input = "\"" + input + "\"";
         }
 
@@ -123,7 +128,8 @@ public class AqpAdsabsQPOSITIONProcessor extends AqpQProcessorPost {
                 ((AqpANTLRNode) p.getChildren().get(0)).getTokenName().equals("EQUAL")) {
             prefix = "=";
         }
-        values.add(new OriginalInput(prefix + fieldName + ":" + input, subChild.getInputTokenStart(), subChild.getInputTokenEnd()));
+        values.add(new OriginalInput(prefix + fieldName + ":" + input,
+                firstChild.getInputTokenStart(), nameNode.getInputTokenEnd()));
         values.add(new OriginalInput(String.valueOf(start), -1, -1));
         values.add(new OriginalInput(String.valueOf(end), -1, -1));
 

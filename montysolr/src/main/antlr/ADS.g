@@ -39,10 +39,12 @@ tokens {
 }
 @lexer::header {
    package org.apache.lucene.queryparser.flexible.aqp.parser;
+   import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 }
 @lexer::members {
   private final java.util.ArrayDeque<Token> pendingTokens =
       new java.util.ArrayDeque<Token>();
+  private Token previousToken;
 
   /**
    * AUTHOR_SEARCH is permissive for comma-separated names. If it consumed an
@@ -52,10 +54,12 @@ tokens {
   @Override
   public Token nextToken() {
     if (!pendingTokens.isEmpty()) {
-      return pendingTokens.removeFirst();
+      previousToken = pendingTokens.removeFirst();
+      return previousToken;
     }
 
     Token token = super.nextToken();
+    previousToken = token;
     if (token.getType() != AUTHOR_SEARCH) {
       return token;
     }
@@ -137,6 +141,7 @@ tokens {
   @Override
   public void reset() {
     super.reset();
+    previousToken = null;
     if (pendingTokens != null) {
       pendingTokens.clear();
     }
@@ -171,8 +176,25 @@ tokens {
     }
     return -1;
   }
-}
 
+  private boolean isDoubleQuote(int character) {
+    return character == '"'
+        || AqpQueryParserUtil.isTypographicDoubleQuote((char) character);
+  }
+
+  private boolean isCaretPhraseDollar() {
+    if (!(previousToken instanceof org.antlr.runtime.CommonToken)
+        || (previousToken.getType() != PHRASE
+            && previousToken.getType() != PHRASE_ANYTHING)) {
+      return false;
+    }
+    org.antlr.runtime.CommonToken phrase =
+        (org.antlr.runtime.CommonToken) previousToken;
+    return phrase.getStartIndex() > 0
+        && phrase.getStopIndex() == input.index() - 1
+        && input.LA(phrase.getStartIndex() - input.index() - 1) == '^';
+  }
+}
 
 mainQ : 
   NOT clauseNear EOF
@@ -262,6 +284,8 @@ value
   | coordinate -> ^(QCOORDINATE coordinate)
   | normal -> ^(QNORMAL normal) 
   | truncated -> ^(QTRUNCATED truncated)  
+  | CARAT_PHRASE author=(PHRASE | PHRASE_ANYTHING)
+    -> ^(QPOSITION CARAT_PHRASE $author)
   | quoted -> ^(QPHRASE quoted)
   | quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
   | DATE_RANGE -> ^(QDATE DATE_RANGE)
@@ -518,7 +542,9 @@ QMARK  : '?'+ ;
 
 //RCURLY  : '}' ;
 
+CARAT_PHRASE : {isDoubleQuote(input.LA(2))}? '^';
 CARAT : '^' NUMBER?;
+
 
 TILDE : '~' NUMBER?;
 
@@ -534,11 +560,14 @@ CURLY_QUOTE : '\u201C' | '\u201D' | '\u201E';
 COMMA : ',';
 
 SEMICOLON:  ';';
+DOLLAR_AFTER_QUOTE
+  : {isCaretPhraseDollar()}? '$'
+  ;
 
 
 fragment AS_CHAR
   :
-  ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
+  ~('0' .. '9' | ' ' | '\"' | '\u201C' | '\u201D' | '\u201E' | COMMA | PLUS | MINUS | '$')
   ;
 
 fragment AUTHOR_CHAR

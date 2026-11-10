@@ -371,10 +371,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("+field:");
 
         assertQueryNodeException("=");
-        assertQueryNodeException("one ^\"author phrase\"");
-
-        // this parses well, shall we consider it mistake?
-        //assertQueryNodeException("one ^\"author phrase\"$");
 
         assertQueryNodeException("this =and that");
         assertQueryNodeException("(doi:tricky:01235)");
@@ -383,6 +379,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("\"two phrase$\"");
         assertQueryEquals("$", null, "MatchNoDocsQuery(\"\")", MatchNoDocsQuery.class);
     }
+
 
     public void testWildCards() throws Exception {
         Query q = null;
@@ -471,6 +468,7 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("intitle:\"yellow symbiotic\"", null, "intitle:\"yellow symbiotic\"");
         assertQueryEquals("\"galactic rotation\"", null, "\"galactic rotation\"", PhraseQuery.class);
+
 
         assertQueryEquals("title:\"X x\" AND text:go title:\"x y\" AND A", null, "+title:\"x x\" +text:go +title:\"x y\" +a");
         assertQueryEquals("title:\"X x\" OR text:go title:\"x y\" OR A", null, "+(title:\"x x\" text:go) +(title:\"x y\" a)");
