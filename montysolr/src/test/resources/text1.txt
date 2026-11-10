@@ -1,1 +1,0 @@
-Hi, this text will be processed by a PythonTextField, will it?
