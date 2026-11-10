@@ -11,6 +11,8 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.nodes.TermRangeQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.parser.EscapeQuerySyntaxImpl;
 
+import java.util.List;
+
 public class AqpQDATEProcessor extends AqpQProcessorPost {
 
     public boolean nodeIsWanted(AqpANTLRNode node) {
@@ -36,16 +38,16 @@ public class AqpQDATEProcessor extends AqpQProcessorPost {
 
 
         AqpANTLRNode subChild = (AqpANTLRNode) node.getChildren().get(0);
-
         String input = subChild.getTokenInput();
         int start_point = subChild.getTokenStart();
+
         String lower = null;
         String upper = null;
         int lower_start = 0;
         int lower_end = 0;
         int upper_start = 0;
         int upper_end = 0;
-
+        boolean upperExclusive = false;
 
         if (input.startsWith("-") || input.endsWith("-")) {
             AqpFeedback feedback = getFeedbackAttr();
@@ -82,6 +84,16 @@ public class AqpQDATEProcessor extends AqpQProcessorPost {
             upper = parts[1];
             upper_start = start_point + input.indexOf(upper);
             upper_end = upper_start + upper.length();
+
+        }
+        boolean expandYears = Boolean.TRUE.equals(queryConfig.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY))
+                && isDateRangeField(node, dateField);
+        if (expandYears) {
+            String expandedLower = expandLowerYear(lower);
+            lower = expandedLower;
+            String expandedUpper = expandUpperYear(upper);
+            upperExclusive = !expandedUpper.equals(upper);
+            upper = expandedUpper;
         }
 
         FieldQueryNode lowerBound = new FieldQueryNode(dateField,
@@ -91,9 +103,45 @@ public class AqpQDATEProcessor extends AqpQProcessorPost {
                 EscapeQuerySyntaxImpl.discardEscapeChar(upper),
                 upper_start, upper_end);
 
-        return new TermRangeQueryNode(lowerBound, upperBound, true, true);
-
-
+        return new TermRangeQueryNode(lowerBound, upperBound, true, !upperExclusive);
     }
 
+    private String expandLowerYear(String value) {
+        if (value.length() == 4 && isDigits(value, 0, 4)) {
+            return value + "-01-01T00:00:00Z";
+        }
+        return value;
+    }
+
+    private String expandUpperYear(String value) {
+        if (value.length() == 4 && isDigits(value, 0, 4)) {
+            return value + "-01-01T00:00:00Z+1YEAR";
+        }
+        return value;
+    }
+
+    private boolean isDigits(String value, int start, int end) {
+        for (int i = start; i < end; i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isDateRangeField(AqpANTLRNode node, String dateField) {
+        String explicitField = null;
+        QueryNode ancestor = node.getParent();
+        while (ancestor != null) {
+            if (ancestor instanceof AqpANTLRNode && ((AqpANTLRNode) ancestor).getTokenLabel().equals("FIELD")) {
+                AqpANTLRNode fieldNode = (AqpANTLRNode) ancestor;
+                List<QueryNode> children = fieldNode.getChildren();
+                if (children != null && children.size() > 1 && children.get(0) instanceof AqpANTLRNode fieldName) {
+                    explicitField = fieldName.getTokenInput();
+                }
+            }
+            ancestor = ancestor.getParent();
+        }
+        return explicitField == null || dateField.equals(explicitField);
+    }
 }
