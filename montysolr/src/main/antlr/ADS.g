@@ -39,6 +39,292 @@ tokens {
 }
 @lexer::header {
    package org.apache.lucene.queryparser.flexible.aqp.parser;
+   import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
+}
+@lexer::members {
+  private final java.util.ArrayDeque<Token> pendingTokens =
+      new java.util.ArrayDeque<Token>();
+  private Token previousToken;
+
+  /**
+   * AUTHOR_SEARCH is permissive for comma-separated names. If it consumed an
+   * explicit field suffix, split that suffix into normal lexer tokens without
+   * rewinding the CharStream, so ANTLR's line and column state remains intact.
+   */
+  @Override
+  public Token nextToken() {
+    if (!pendingTokens.isEmpty()) {
+      previousToken = pendingTokens.removeFirst();
+      return previousToken;
+    }
+
+    Token token = super.nextToken();
+    previousToken = token;
+    if (token.getType() != AUTHOR_SEARCH) {
+      return token;
+    }
+
+    String text = token.getText();
+    int boundary = fieldBoundary(text);
+    if (boundary < 0) {
+      return token;
+    }
+
+    int fieldEnd = boundary;
+    while (fieldEnd < text.length() && text.charAt(fieldEnd) != ':') {
+      fieldEnd++;
+    }
+    if (fieldEnd >= text.length()) {
+      return token;
+    }
+
+    org.antlr.runtime.CommonToken authorToken =
+        (org.antlr.runtime.CommonToken) token;
+    int start = authorToken.getStartIndex();
+    int line = authorToken.getLine();
+    int column = authorToken.getCharPositionInLine();
+    authorToken.setText(text.substring(0, boundary));
+    authorToken.setStopIndex(start + boundary - 1);
+
+    org.antlr.runtime.CommonToken fieldToken =
+        new org.antlr.runtime.CommonToken(authorToken.getInputStream(), TERM_NORMAL,
+            Token.DEFAULT_CHANNEL, start + boundary, start + fieldEnd - 1);
+    fieldToken.setStartIndex(start + boundary);
+    fieldToken.setStopIndex(start + fieldEnd - 1);
+    fieldToken.setLine(line);
+    fieldToken.setCharPositionInLine(column + boundary);
+
+    org.antlr.runtime.CommonToken colonToken =
+        new org.antlr.runtime.CommonToken(authorToken.getInputStream(), COLON,
+            Token.DEFAULT_CHANNEL, start + fieldEnd, start + fieldEnd);
+    colonToken.setStartIndex(start + fieldEnd);
+    colonToken.setStopIndex(start + fieldEnd);
+    colonToken.setLine(line);
+    colonToken.setCharPositionInLine(column + fieldEnd);
+
+    pendingTokens.add(fieldToken);
+    pendingTokens.add(colonToken);
+    queueFieldValue(authorToken, text, fieldEnd + 1);
+
+    return authorToken;
+  }
+
+  private void queueFieldValue(
+      org.antlr.runtime.CommonToken authorToken, String text, int valueStart) {
+    if (valueStart >= text.length()) {
+      return;
+    }
+
+    org.antlr.runtime.ANTLRStringStream valueStream =
+        new org.antlr.runtime.ANTLRStringStream(text.substring(valueStart));
+    ADSLexer valueLexer = new ADSLexer(valueStream);
+    int inputStart = authorToken.getStartIndex() + valueStart;
+    org.antlr.runtime.CommonToken valueToken;
+    while ((valueToken =
+        (org.antlr.runtime.CommonToken) valueLexer.nextToken()).getType()
+        != Token.EOF) {
+      org.antlr.runtime.CommonToken queuedToken =
+          new org.antlr.runtime.CommonToken(authorToken.getInputStream(),
+              valueToken.getType(), valueToken.getChannel(),
+              inputStart + valueToken.getStartIndex(),
+              inputStart + valueToken.getStopIndex());
+      queuedToken.setLine(authorToken.getLine() + valueToken.getLine() - 1);
+      int tokenColumn = valueToken.getCharPositionInLine();
+      if (valueToken.getLine() == 1) {
+        tokenColumn += authorToken.getCharPositionInLine() + valueStart;
+      }
+      queuedToken.setCharPositionInLine(tokenColumn);
+      pendingTokens.add(queuedToken);
+    }
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+    previousToken = null;
+    if (pendingTokens != null) {
+      pendingTokens.clear();
+    }
+  }
+
+  private int fieldBoundary(String text) {
+    boolean afterComma = false;
+    for (int i = 1; i < text.length(); i++) {
+      if (text.charAt(i) == ',') {
+        afterComma = true;
+        continue;
+      }
+      if (!afterComma || text.charAt(i) != ' ') {
+        continue;
+      }
+      int field = i;
+      while (field < text.length() && text.charAt(field) == ' ') {
+        field++;
+      }
+      if (field >= text.length() || !Character.isLetter(text.charAt(field))) {
+        continue;
+      }
+      int colon = field + 1;
+      while (colon < text.length()
+          && (Character.isLetterOrDigit(text.charAt(colon))
+              || text.charAt(colon) == '_' || text.charAt(colon) == '-')) {
+        colon++;
+      }
+      if (colon < text.length() && text.charAt(colon) == ':') {
+        return field;
+      }
+    }
+    return -1;
+  }
+
+  private boolean isDoubleQuote(int character) {
+    return character == '"'
+        || AqpQueryParserUtil.isTypographicDoubleQuote((char) character);
+  }
+
+  private boolean isCaretPhraseDollar() {
+    if (!(previousToken instanceof org.antlr.runtime.CommonToken)
+        || (previousToken.getType() != PHRASE
+            && previousToken.getType() != PHRASE_ANYTHING)) {
+      return false;
+    }
+    org.antlr.runtime.CommonToken phrase =
+        (org.antlr.runtime.CommonToken) previousToken;
+    return phrase.getStartIndex() > 0
+        && phrase.getStopIndex() == input.index() - 1
+        && input.LA(phrase.getStartIndex() - input.index() - 1) == '^';
+  }
+
+  private static final String ELEMENT_SYMBOLS =
+      "|H|He|Li|Be|B|C|N|O|F|Ne|Na|Mg|Al|Si|P|S|Cl|Ar|K|Ca|Sc|Ti|V|Cr|Mn|Fe|Co|Ni|Cu|Zn|"
+      + "Ga|Ge|As|Se|Br|Kr|Rb|Sr|Y|Zr|Nb|Mo|Tc|Ru|Rh|Pd|Ag|Cd|In|Sn|Sb|Te|I|Xe|Cs|Ba|"
+      + "La|Ce|Pr|Nd|Pm|Sm|Eu|Gd|Tb|Dy|Ho|Er|Tm|Yb|Lu|Hf|Ta|W|Re|Os|Ir|Pt|Au|Hg|Tl|"
+      + "Pb|Bi|Po|At|Rn|Fr|Ra|Ac|Th|Pa|U|Np|Pu|Am|Cm|Bk|Cf|Es|Fm|Md|No|Lr|Rf|Db|Sg|"
+      + "Bh|Hs|Mt|Ds|Rg|Cn|Nh|Fl|Mc|Lv|Ts|Og|";
+
+  private boolean isForbiddenLine() {
+    StringBuilder value = new StringBuilder();
+    int i = 1;
+    int c = input.LA(i);
+    if (c == '[') {
+      value.append((char) c);
+      c = input.LA(++i);
+      if (!Character.isUpperCase((char) c)) return false;
+      value.append((char) c);
+      c = input.LA(++i);
+      if (Character.isLowerCase((char) c)) {
+        value.append((char) c);
+        c = input.LA(++i);
+      }
+    } else {
+      if (!Character.isUpperCase((char) c)) return false;
+      value.append((char) c);
+      c = input.LA(++i);
+      if (Character.isLowerCase((char) c)) {
+        value.append((char) c);
+        c = input.LA(++i);
+      }
+    }
+    while (c == ' ' || c == '\t') {
+      value.append((char) c);
+      c = input.LA(++i);
+    }
+    if (c == '[') {
+      value.append((char) c);
+      c = input.LA(++i);
+      while (c == ' ' || c == '\t') {
+        value.append((char) c);
+        c = input.LA(++i);
+      }
+    }
+    int romanStart = value.length();
+    while ("IVXLCDMivxlcdm".indexOf(c) >= 0) {
+      value.append((char) c);
+      c = input.LA(++i);
+    }
+    if (value.length() == romanStart) return false;
+    while (c == ' ' || c == '\t') {
+      value.append((char) c);
+      c = input.LA(++i);
+    }
+    if (c != ']') return false;
+    value.append(']');
+    return isForbiddenLine(value.toString());
+  }
+  private boolean isForbiddenLine(String value) {
+    int close = value.lastIndexOf(']');
+    if (close <= 0) return false;
+    int open = value.indexOf('[');
+    int elementStart = open == 0 ? 1 : 0;
+    while (elementStart < close && isLineSpace(value.charAt(elementStart))) elementStart++;
+    int elementEnd = elementStart + 1;
+    if (elementEnd < close && Character.isLowerCase(value.charAt(elementEnd))) elementEnd++;
+    if (!isElementSymbol(value, elementStart, elementEnd)) return false;
+    int romanStart = elementEnd;
+    if (open >= elementEnd) {
+      while (romanStart < open && isLineSpace(value.charAt(romanStart))) romanStart++;
+      if (romanStart != open) return false;
+      romanStart = open + 1;
+    }
+    while (romanStart < close && isLineSpace(value.charAt(romanStart))) romanStart++;
+    int romanEnd = close;
+    while (romanEnd > romanStart && isLineSpace(value.charAt(romanEnd - 1))) romanEnd--;
+    return isCanonicalRoman(value, romanStart, romanEnd);
+  }
+
+  private boolean isElementSymbol(String value, int start, int end) {
+    return ELEMENT_SYMBOLS.contains("|" + value.substring(start, end) + "|");
+  }
+
+  private boolean isCanonicalRoman(String value, int start, int end) {
+    if (start >= end) return false;
+    boolean lower = Character.isLowerCase(value.charAt(start));
+    for (int i = start; i < end; i++) {
+      char c = value.charAt(i);
+      if (!"IVXLCDMivxlcdm".contains(String.valueOf(c))
+          || Character.isLowerCase(c) != lower) return false;
+    }
+    int i = consumeRun(value, start, end, 'M', 3);
+    if (i < end && upper(value.charAt(i)) == 'C'
+        && i + 1 < end && (upper(value.charAt(i + 1)) == 'M' || upper(value.charAt(i + 1)) == 'D')) {
+      i += 2;
+    } else if (i < end && upper(value.charAt(i)) == 'D') {
+      i = consumeRun(value, i + 1, end, 'C', 3);
+    } else {
+      i = consumeRun(value, i, end, 'C', 3);
+    }
+    if (i < end && upper(value.charAt(i)) == 'X'
+        && i + 1 < end && (upper(value.charAt(i + 1)) == 'C' || upper(value.charAt(i + 1)) == 'L')) {
+      i += 2;
+    } else if (i < end && upper(value.charAt(i)) == 'L') {
+      i = consumeRun(value, i + 1, end, 'X', 3);
+    } else {
+      i = consumeRun(value, i, end, 'X', 3);
+    }
+    if (i < end && upper(value.charAt(i)) == 'I'
+        && i + 1 < end && (upper(value.charAt(i + 1)) == 'X' || upper(value.charAt(i + 1)) == 'V')) {
+      i += 2;
+    } else if (i < end && upper(value.charAt(i)) == 'V') {
+      i = consumeRun(value, i + 1, end, 'I', 3);
+    } else {
+      i = consumeRun(value, i, end, 'I', 3);
+    }
+    return i == end;
+  }
+
+  private int consumeRun(String value, int start, int end, char symbol, int max) {
+    int i = start;
+    while (i < end && upper(value.charAt(i)) == symbol && i - start < max) i++;
+    return i;
+  }
+
+  private char upper(char value) {
+    return Character.toUpperCase(value);
+  }
+
+  private boolean isLineSpace(char value) {
+    return value == ' ' || value == '\t';
+  }
 }
 
 mainQ : 
@@ -122,13 +408,15 @@ range_term_ex
 */
 value  
   :
-  REGEX -> ^(QREGEX REGEX) 
+  REGEX -> ^(QREGEX REGEX)
+  | f=FORBIDDEN_LINE -> ^(QNORMAL $f)
   |range_term_in -> ^(QRANGEIN range_term_in)
 //  | range_term_ex -> ^(QRANGEEX range_term_ex) 
   | identifier -> ^(QIDENTIFIER identifier)
   | coordinate -> ^(QCOORDINATE coordinate)
   | normal -> ^(QNORMAL normal) 
   | truncated -> ^(QTRUNCATED truncated)  
+  | CARAT_PHRASE quoted -> ^(QPHRASE quoted)
   | quoted -> ^(QPHRASE quoted)
   | quoted_truncated -> ^(QPHRASETRUNC quoted_truncated)
   | DATE_RANGE -> ^(QDATE DATE_RANGE)
@@ -385,22 +673,32 @@ QMARK  : '?'+ ;
 
 //RCURLY  : '}' ;
 
+CARAT_PHRASE : {isDoubleQuote(input.LA(2))}? '^';
 CARAT : '^' NUMBER?;
+
 
 TILDE : '~' NUMBER?;
 
 DQUOTE  : '\"';
+
+// Typographic double quotes can open or close a phrase, including low quotes.
+// A typographic opening quote also accepts an ASCII closing quote.
+// Quotes inside an ASCII-delimited phrase remain literal content.
+CURLY_QUOTE : '\u201C' | '\u201D' | '\u201E';
 
 //SQUOTE  : '\'';
 
 COMMA : ',';
 
 SEMICOLON:  ';';
+DOLLAR_AFTER_QUOTE
+  : {isCaretPhraseDollar()}? '$'
+  ;
 
 
 fragment AS_CHAR
   :
-  ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
+  ~('0' .. '9' | ' ' | '\"' | '\u201C' | '\u201D' | '\u201E' | COMMA | PLUS | MINUS | '$')
   ;
 
 fragment AUTHOR_CHAR
@@ -493,7 +791,7 @@ fragment INT: '0' .. '9';
 fragment TERM_START_CHAR
   :
   (~(' ' | '\t' | '\n' | '\r' | '\u3000'
-        | '\"' 
+        | '\"' | '\u201C' | '\u201D' | '\u201E'
         | '(' | ')' | '[' | ']' | '{' | '}'
         | '+' | '-' | '!' | ':' | '~' | '^' 
         | '?' | '*' | '\\'|',' | '=' | '#'
@@ -536,6 +834,31 @@ HOUR
   INT INT COLON INT INT COLON NUMBER (PLUS|MINUS) INT INT COLON INT INT COLON NUMBER
   ;
 
+fragment ROMAN_NUMERAL
+  :
+  ('I' | 'V' | 'X' | 'L' | 'C' | 'D' | 'M'
+   | 'i' | 'v' | 'x' | 'l' | 'c' | 'd' | 'm')+
+  ;
+
+fragment ELEMENT_SYMBOL
+  :
+  ('A'..'Z') ('a'..'z')?
+  ;
+
+fragment BRACKET_ELEMENT_SYMBOL
+  :
+  ('A'..'Z') ('a'..'z')?
+  ;
+
+FORBIDDEN_LINE
+  :
+  {isForbiddenLine()}?=>
+  ( ELEMENT_SYMBOL (' ' | '\t')* LBRACK (' ' | '\t')* ROMAN_NUMERAL (' ' | '\t')* RBRACK
+  | LBRACK BRACKET_ELEMENT_SYMBOL (' ' | '\t')* ROMAN_NUMERAL (' ' | '\t')* RBRACK
+  | ELEMENT_SYMBOL (' ' | '\t')* ROMAN_NUMERAL (' ' | '\t')* RBRACK
+  )
+  ;
+
 TERM_NORMAL
   : 
   TERM_START_CHAR ( TERM_CHAR )*
@@ -552,10 +875,12 @@ TERM_TRUNCATED:
 PHRASE  
   : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'|'?'|'*'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 PHRASE_ANYTHING : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 LOCAL_PARAMS  : 
@@ -564,3 +889,6 @@ LOCAL_PARAMS  :
 REGEX : 
   '/' (ESC_CHAR|~('/'|'\\'))+ '/'
   ; 
+UNTERMINATED_CURLY_PHRASE
+  : CURLY_QUOTE (ESC_CHAR | ~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))* '\\'? EOF
+  ;
