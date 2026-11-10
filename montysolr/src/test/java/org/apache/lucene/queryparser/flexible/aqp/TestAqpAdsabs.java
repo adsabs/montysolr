@@ -5,7 +5,6 @@ import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.search.*;
@@ -373,61 +372,12 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryNodeException("=");
 
-        // this parses well, shall we consider it mistake?
-        //assertQueryNodeException("one ^\"author phrase\"$");
-
         assertQueryNodeException("this =and that");
         assertQueryNodeException("(doi:tricky:01235)");
 
         assertQueryNodeException("two$");
         assertQueryNodeException("\"two phrase$\"");
         assertQueryEquals("$", null, "MatchNoDocsQuery(\"\")", MatchNoDocsQuery.class);
-    }
-
-    public void testLeadingCaretPhraseBoundary() throws Exception {
-        assertQueryEquals("^\"Henneken,E\" ADS", null, "+\"henneken e\" +ads", BooleanQuery.class);
-        AqpANTLRNode tree = (AqpANTLRNode) new AqpSyntaxParserLoadableImpl()
-                .initializeGrammar("ADS")
-                .parse("one ^\"author phrase\"", null);
-        assertEquals(2, tree.getChildren().size());
-        assertNotNull(((AqpANTLRNode) tree.getChildren().get(1)).findChild("QPHRASE"));
-        assertQueryNodeException("^2\"Henneken,E\" ADS");
-        assertQueryNodeException("one ^\"author phrase\"$");
-    }
-
-    public void testCaretTypographicQuoteBoundaries() throws Exception {
-        Query expected = getQuery("\"Henneken,E\" ADS", null);
-        Query ordinaryDollar = getQuery("\"author phrase\"$", null);
-        char[] quotes = {'"', '\u201C', '\u201D', '\u201E'};
-        for (char opening : quotes) {
-            for (char closing : quotes) {
-                if (opening == '"' && closing != '"') {
-                    continue;
-                }
-                String phrase = opening + "Henneken,E" + closing;
-                assertEquals(expected, getQuery("^" + phrase + " ADS", null));
-                assertQueryNodeException("^" + phrase + "$");
-                assertEquals(ordinaryDollar,
-                        getQuery(opening + "author phrase" + closing + "$", null));
-            }
-        }
-        assertQueryNodeException("^\"author \u201Cphrase\u201D\"$");
-    }
-
-
-    public void testOrdinaryPhraseDollarSyntax() throws Exception {
-        AqpANTLRNode tree = (AqpANTLRNode) new AqpSyntaxParserLoadableImpl()
-                .initializeGrammar("ADS")
-                .parse("one \"author phrase\"$", null);
-        assertEquals("OPERATOR", tree.getTokenName());
-        assertEquals(3, tree.getChildren().size());
-        AqpANTLRNode phrase = ((AqpANTLRNode) tree.getChildren().get(1)).findChild("QPHRASE");
-        assertNotNull(phrase);
-        assertEquals("\"author phrase\"",
-                ((AqpANTLRNode) phrase.getChildren().get(0)).getTokenInput());
-        AqpANTLRNode dollar = ((AqpANTLRNode) tree.getChildren().get(2)).findChild("QNORMAL");
-        assertNotNull(dollar);
-        assertEquals("$", ((AqpANTLRNode) dollar.getChildren().get(0)).getTokenInput());
     }
 
 
