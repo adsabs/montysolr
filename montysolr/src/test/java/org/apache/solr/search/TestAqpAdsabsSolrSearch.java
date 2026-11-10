@@ -3,14 +3,14 @@ package org.apache.solr.search;
 import monty.solr.util.MontySolrQueryTestCase;
 import monty.solr.util.MontySolrSetup;
 import monty.solr.util.SolrTestSetup;
-import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.TestAqpAdsabs;
 import org.apache.lucene.search.*;
 import org.apache.lucene.queries.spans.SpanNearQuery;
-import org.apache.lucene.queries.spans.SpanPositionRangeQuery;
 import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.FixedBitSet;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
@@ -21,7 +21,10 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.io.StringReader;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +53,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
     public static void beforeClass() throws Exception {
         schemaString = getSchemaFile();
 
-        configString = "solrconfig.xml";
+        Path config = createTempDir("quote-parsers").resolve("solrconfig.xml");
+        Path original = Paths.get(SolrTestSetup.getRepoUrl(Paths.get(
+                "deploy/adsabs/server/solr/collection1/conf/solrconfig.xml")).toURI());
+        Files.writeString(config, Files.readString(original).replace("</config>",
+                "<queryParser name=\"native_lucene\" class=\"solr.LuceneQParserPlugin\"/>\n</config>"));
+        configString = config.toString();
 
         SolrTestSetup.initCore(configString, schemaString);
     }
@@ -364,7 +372,197 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 BooleanQuery.class);
 
     }
+    /**
+     * An unfielded phrase is broadcast to the author field, but the author
+     * expansion must retain all phrase terms rather than adding a
+     * surname-only wildcard or a shortened multi-part variant.
+     */
+    public void testUnfieldedAuthorPhraseDoesNotMatchSurnameOnly() throws Exception {
+        assertU(adoc("id", "1740", "bibcode", "b1740", "author", "B, Kepler 1362"));
+        assertU(adoc("id", "1741", "bibcode", "b1741", "author", "B, Other"));
+        assertU(adoc("id", "1742", "bibcode", "b1742", "author", "B, Kepler"));
+        assertU(commit("waitSearcher", "true"));
 
+        assertQ(req("defType", "aqp", "q", "\"Kepler 1362 b\"", "qf", "author",
+                        "fl", "id", "rows", "100"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1740']");
+    }
+
+    public void testMixedSemicolonAuthorOrderKeepsPerNameVariations() throws Exception {
+        List<String> naturalFirst = authorQueryTokens("Kepler 1362 b; Smith, John Paul");
+        assertTrue(naturalFirst.toString(), naturalFirst.contains("smith, john"));
+        assertTrue(naturalFirst.toString(), naturalFirst.contains("smith, j"));
+        assertFalse(naturalFirst.toString(), naturalFirst.contains("b, kepler"));
+
+        List<String> naturalLast = authorQueryTokens("Smith, John Paul; Kepler 1362 b");
+        assertTrue(naturalLast.toString(), naturalLast.contains("smith, john"));
+        assertTrue(naturalLast.toString(), naturalLast.contains("smith, j"));
+        assertFalse(naturalLast.toString(), naturalLast.contains("b, kepler"));
+        assertTrue(naturalLast.toString(), naturalLast.contains("b, kepler 1362"));
+    }
+
+    private List<String> authorQueryTokens(String input) throws IOException {
+        TokenStream stream = h.getCore().getLatestSchema().getQueryAnalyzer()
+                .tokenStream("author", new StringReader(input));
+        List<String> terms = new ArrayList<String>();
+        try {
+            stream.reset();
+            CharTermAttribute term = stream.getAttribute(CharTermAttribute.class);
+            while (stream.incrementToken()) {
+                terms.add(term.toString());
+            }
+            stream.end();
+        } finally {
+            stream.close();
+        }
+        return terms;
+    }
+
+
+    public void testMixedCurlyAndStraightQuotes() throws Exception {
+        assertU(adoc("id", "35201", "bibcode", "b35201",
+                "ack", "Simons Foundation acknowledged funding 00001470",
+                "date", "2017-01-01T00:00:00Z"));
+        assertU(adoc("id", "35202", "bibcode", "b35202",
+                "ack", "Simons Foundation acknowledged funding 00000000",
+                "date", "2018-01-01T00:00:00Z"));
+        assertU(commit("waitSearcher", "true"));
+
+        String asciiQuery = "full:\"Simons Foundation\" full:\"00001470\"";
+        String mixedQuery = "full: “Simons Foundation” full:“00001470\"";
+        Query ascii = assertQueryEquals(req("defType", "aqp", "q", asciiQuery),
+                "", BooleanQuery.class);
+        Query mixed = assertQueryEquals(req("defType", "aqp", "q", mixedQuery),
+                "", BooleanQuery.class);
+        assertEquals(ascii, mixed);
+
+        assertQ(req("defType", "aqp", "q", mixedQuery, "fl", "id"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='35201']",
+                "not(//doc/str[@name='id'][.='35202'])");
+        Query asciiEscapedClose = getParser(req("defType", "aqp", "q",
+                "full:\"foo\\\\\"")).parse();
+        Query curlyEscapedClose = getParser(req("defType", "aqp", "q",
+                "full:“foo\\\\”")).parse();
+        assertEquals(asciiEscapedClose, curlyEscapedClose);
+
+        String asciiTopn = "topn(\"1\",full:Simons)";
+        String curlyTopn = "topn(“1”,full:Simons)";
+        String curlyAsciiTopn = "topn(“1\",full:Simons)";
+        for (String topnQuery : new String[]{asciiTopn, curlyTopn, curlyAsciiTopn}) {
+            assertQ(req("defType", "aqp", "q", topnQuery, "fl", "id"),
+                    "//*[@numFound='1']");
+        }
+
+        String asciiTopnSort = "topn(1,full:Simons,\"DATE DESC\")";
+        String lowercaseTopnSort = "topn(1,full:Simons,\"date desc\")";
+        String curlyTopnSort = "topn(1,full:Simons,“DATE DESC”)";
+        String curlyAsciiTopnSort = "topn(1,full:Simons,“DATE DESC\")";
+        String singleQuotedTopnSort = "topn(1,full:Simons,'DATE DESC')";
+        for (String topnSortQuery : new String[]{
+                asciiTopnSort, lowercaseTopnSort, curlyTopnSort, curlyAsciiTopnSort, singleQuotedTopnSort}) {
+            assertQ(req("defType", "aqp", "q", topnSortQuery, "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='35202']",
+                    "not(//doc/str[@name='id'][.='35201'])");
+        }
+
+        assertQueryParseException(req("defType", "aqp", "q", "topn('1',full:Simons)"));
+
+        assertQueryParseException(req("defType", "aqp", "q", "full:“”"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:\u201D\u201C"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:\"foo”"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:“foo\\”"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:“unterminated\\"));
+        assertQueryParseException(req("defType", "aqp", "q", "full:“unterminated"));
+    }
+
+    public void testTypographicQuotesInAuthorFunctions() throws Exception {
+        assertU(adoc("id", "35203", "bibcode", "b35203",
+                "author", "Other, B", "author", "Example, A",
+                "date", "2017-01-01T00:00:00Z"));
+        assertU(adoc("id", "35204", "bibcode", "b35204",
+                "author", "Example, A", "author", "Other, B",
+                "date", "2018-01-01T00:00:00Z"));
+        assertU(adoc("id", "35205", "bibcode", "b35205",
+                "author", "Example, Cur”ly"));
+        assertU(commit("waitSearcher", "true"));
+
+        for (char opening : new char[]{'“', '”', '„'}) {
+            for (char closing : new char[]{'“', '”', '„', '"'}) {
+                String author = "author:" + opening + "Example, A" + closing;
+                assertQ(req("q", "pos(" + author + "," + opening + "2" + closing + ")"),
+                        "//*[@numFound='1']", "//doc/str[@name='id'][.='35203']");
+                assertQ(req("q", "topn(" + opening + "1" + closing + "," + author
+                                + "," + opening + "DATE DESC" + closing + ")"),
+                        "//*[@numFound='1']", "//doc/str[@name='id'][.='35204']");
+            }
+        }
+        assertQ(req("q", "author:”Example, A”^2 AND id:35203"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35203']");
+        assertQ(req("q", "author:\"Example, Cur”ly\""),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35205']");
+        assertQ(req("q", "pos(author:\"Example, Cur”ly\",1)"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35205']");
+        assertQueryContains(req("q", "title:/foo:”bar/"), "”", null);
+        assertQueryContains(req("q", "title:foo OR /foo:”bar/"), "”", null);
+
+        for (String query : new String[]{
+                "pos(1,author:\"Example, A\")",
+                "pos(author:\"Example, A\",\"\")",
+                "pos(author:\"Example, A\",2147483648)",
+                "topn(notanumber,author:\"Example, A\")"}) {
+            assertQEx("Invalid integer arguments must be client errors", req("q", query), 400);
+        }
+    }
+
+    public void testTypographicQuotesInDelegatedQueries() throws Exception {
+        assertU(adoc("id", "35206", "bibcode", "b35206", "title", "dark matter"));
+        assertU(adoc("id", "35207", "bibcode", "b35207", "title", "dark abundant matter"));
+        assertU(adoc("id", "35208", "bibcode", "b35208",
+                "title", "dark", "keyword", "matter"));
+        assertU(commit("waitSearcher", "true"));
+
+        Query ascii = getParser(req("q", "lucene(title:\"dark matter\")")).parse();
+        for (String query : new String[]{
+                "lucene(title:”dark matter”)",
+                "lucene(title:„dark matter“)",
+                "lucene((title:„dark matter“))"}) {
+            assertEquals(ascii, getParser(req("q", query)).parse());
+            assertQ(req("q", query),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='35206']");
+        }
+        // Unlike the configured lucene alias, edismax uses Solr's native parser.
+        for (String query : new String[]{
+                "edismax(title:„dark matter“)",
+                "edismax({!type=edismax v='title:„dark matter“'}*)",
+                "edismax( {!type=edismax v='title:„dark matter“'}* )",
+                "lucene({!type=native_lucene}({!type=native_lucene v='title:„dark matter“'}*))",
+                "lucene({!type=native_lucene}title:„dark matter“)",
+                "lucene({!type=native_lucene v='title:„dark matter“'}*)",
+                "lucene( {!type=native_lucene v='title:„dark matter“'}* )"}) {
+            String control = query.replace('„', '"').replace('“', '"');
+            assertEquals(getParser(req("q", control, "qf", "title", "df", "title")).parse(),
+                    getParser(req("q", query, "qf", "title", "df", "title")).parse());
+            assertQ(req("q", query, "qf", "title", "df", "title"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='35206']");
+        }
+        assertQ(req("q", "topn(1,{!type=edismax}title:„dark matter“)", "qf", "title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35206']");
+        assertQ(req("q", "edismax({!type=aqp}title:„dark matter“)"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='35206']");
+        assertEquals(getParser(req("q", "{!lucene}title:\"dark ” matter\"")).parse(),
+                getParser(req("q", "lucene(title:\"dark ” matter\")")).parse());
+        assertQueryContains(req("q", "lucene(title:/foo:”bar/)"), "”", null);
+        assertQ(req("q", "edismax_always_aqp(dark matter)", "qf", "title keyword", "q.op", "AND"),
+                "//*[@numFound='2']", "not(//doc/str[@name='id'][.='35208'])");
+        for (String query : new String[]{
+                "lucene({!type=native_lucene}({!type=native_lucene v='title:„unterminated'}*))",
+                "lucene({!type=native_lucene}({!type=native_lucene v='title:”“'}*))"}) {
+            assertQEx("Malformed delegated phrases must be client errors", req("q", query), 400);
+        }
+    }
 
     public void testExactHyphenatedPhraseMatchesCompoundOnly() throws Exception {
         assertU(adoc("id", "4401", "bibcode", "b4401", "title", "dust-dust plasma"));
@@ -454,6 +652,108 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 "//*[@numFound='1']",
                 "//doc[str[@name='id']='19801']/float[@name='score'][. > 0.5999 and . < 0.6001]");
 
+    }
+
+    public void testTwoLetterAuthorAbbreviationPrefix() throws Exception {
+        assertU(adoc("id", "34501", "bibcode", "2016TEST....34501S",
+                "author", "Testname, Yuri", "year", "2016"));
+        assertU(adoc("id", "34502", "bibcode", "2016TEST....34502S",
+                "author", "Testname, Yu. V.", "year", "2016"));
+        assertU(adoc("id", "34503", "bibcode", "2016TEST....34503S",
+                "author", "Testname, Yevgeny", "year", "2016"));
+        assertU(adoc("id", "34504", "bibcode", "2016TEST....34504S",
+                "author", "Elsewhere, Yuri", "year", "2016"));
+        assertU(adoc("id", "34505", "bibcode", "2016TEST....34505S",
+                "author", "Other, Author", "author", "Testname, Yuri", "year", "2016"));
+        assertU(adoc("id", "34506", "bibcode", "2016TEST....34506S",
+                "author", "Testname, Yuri L.", "year", "2016"));
+        assertU(adoc("id", "34507", "bibcode", "2016TEST....34507S",
+                "author", "Testname, Yu", "year", "2016"));
+        assertU(adoc("id", "34508", "bibcode", "2016TEST....34508S",
+                "author", "Testname, Yuliana", "year", "2016"));
+        assertU(commit("waitSearcher", "true"));
+
+        for (String abbreviation : new String[]{"author:\"^testname, yu.\" year:2016",
+                "author:\"^testname, yu\" year:2016"}) {
+            assertQ(req("defType", "aqp", "q", abbreviation),
+                    "//*[@numFound='5']",
+                    "//doc/str[@name='id'][.='34501']",
+                    "//doc/str[@name='id'][.='34502']",
+                    "//doc/str[@name='id'][.='34506']",
+                    "//doc/str[@name='id'][.='34507']",
+                    "//doc/str[@name='id'][.='34508']",
+                    "not(//doc/str[@name='id'][.='34503'])",
+                    "not(//doc/str[@name='id'][.='34504'])",
+                    "not(//doc/str[@name='id'][.='34505'])");
+        }
+
+        assertQ(req("defType", "aqp", "q", "author:\"testname, yu\" year:2016"),
+                "//*[@numFound='6']",
+                "//doc/str[@name='id'][.='34505']",
+                "//doc/str[@name='id'][.='34507']",
+                "//doc/str[@name='id'][.='34508']");
+        assertQ(req("defType", "aqp", "q", "author:\"^testname, y\" year:2016"),
+                "//doc/str[@name='id'][.='34501']");
+        assertQ(req("defType", "aqp", "q", "author:\"^testname, yuri\" year:2016"),
+                "//doc/str[@name='id'][.='34501']",
+                "not(//doc/str[@name='id'][.='34503'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+        assertQ(req("defType", "aqp", "q", "author:\"^testname, yuri l\" year:2016"),
+                "//doc/str[@name='id'][.='34501']",
+                "//doc/str[@name='id'][.='34506']",
+                "not(//doc/str[@name='id'][.='34503'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+        assertQ(req("defType", "aqp", "q", "=author:\"^testname, yuri\" year:2016"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='34501']",
+                "not(//doc/str[@name='id'][.='34506'])");
+        assertQ(req("defType", "aqp", "q", "=author:\"^testname, yu\" year:2016"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='34507']",
+                "not(//doc/str[@name='id'][.='34501'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+        assertQ(req("defType", "aqp", "q", "=author:\"^testname, yu.\" year:2016"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='34507']",
+                "not(//doc/str[@name='id'][.='34501'])",
+                "not(//doc/str[@name='id'][.='34508'])");
+    }
+
+    public void testTwoLetterAuthorPrefixRetainsBoundedRewriteMatches() throws Exception {
+        int previousLimit = IndexSearcher.getMaxClauseCount();
+        try {
+            // Isolate the configured term selection from the separate nested clause limit.
+            IndexSearcher.setMaxClauseCount(4096);
+            assertU(adoc("id", "3451000", "bibcode", "2016TEST..3451000S",
+                    "author", "Boundedprefix, Yu", "year", "2016"));
+            for (int i = 0; i < 1024; i++) {
+                String suffix = "" + (char) ('a' + i / (26 * 26))
+                        + (char) ('a' + (i / 26) % 26) + (char) ('a' + i % 26);
+                assertU(adoc("id", Integer.toString(3451001 + i),
+                        "bibcode", "2016TEST..3451001S" + suffix,
+                        "author", "Boundedprefix, Yu " + suffix, "year", "2016"));
+            }
+            assertU(commit("waitSearcher", "true"));
+
+            // The literal takes one of the broad prefix's 1024 slots. The separate
+            // space prefix must retain its last selected name rather than lose that paper.
+            assertQ(req("q", "author:\"^boundedprefix, yu\" year:2016",
+                            "aqp.qprefix.scoring.author", "topterms", "rows", "0"),
+                    "//*[@numFound='1025']");
+            assertQ(req("q", "author:\"^boundedprefix, yu\" year:2016",
+                            "aqp.qprefix.scoring.author", "topterms",
+                            "fq", "id:3452024", "rows", "1", "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/*[@name='id'][.='3452024']");
+            assertQ(req("q", "author_notrans:\"^boundedprefix, yu\" year:2016",
+                            "aqp.authorFields", "author_notrans",
+                            "aqp.qprefix.scoring.author", "topterms",
+                            "fq", "id:3452024", "rows", "1", "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/*[@name='id'][.='3452024']");
+        } finally {
+            IndexSearcher.setMaxClauseCount(previousLimit);
+        }
     }
 
     public void testPastedSearchWithAndAndStopwords() throws Exception {
@@ -757,6 +1057,9 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQ(req("q",
                         "title:\"A Change of Rotation Profile in the Envelope in the HH 111 Protostellar System: A Transition to a Disk\""),
                 "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
+        // A lone dollar is analyzed away, but it must produce a safe no-match
+        // rather than the obsolete trailing-author-position error.
+        assertQ(req("defType", "aqp", "q", "$"), "//*[@numFound='0']");
 
         // check NEAR ignores order
         assertQ(req("q", "title:(rotation NEAR2 profile)"), "//*[@numFound='1']", "//doc/str[@name='id'][.='61']");
@@ -792,14 +1095,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "similar(recid:2, title)"), "+like:title bitle  -BitSetQuery(1)",
                 BooleanQuery.class);
 
-        // topn() with score sorting
-        // TODO: solve it differently https://github.com/romanchyla/montysolr/issues/185
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, score desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(2, title:foo, \"score desc,bibcode asc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(2, info=score desc,bibcode asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
 
         assertQueryEquals(req("defType", "aqp", "q", "similar(bibcode:XX)"), "MatchNoDocsQuery(\"\")",
@@ -1046,40 +1341,12 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         assertQueryEquals(req("defType", "aqp", "q", "abs:foo"), "abstract:foo title:foo keyword:foo",
                 BooleanQuery.class);
 
-        // unbalanced brackets for functions
-        assertQueryEquals(req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy), date asc)"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(
-                req("defType", "aqp", "q", "topn(201, ((\"foo bar\") AND database:astronomy),   date asc   )"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(201,(  ((\"foo bar\") AND database:astronomy)),date asc)"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:\"foo bar\" +database:astronomy, collector=SecondOrderCollectorTopN(201, info=date asc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         // added ability to interactively tweak queries
         assertQueryEquals(req("defType", "aqp", "q", "tweak(collector_final_value=ARITHM_MEAN, citations(author:foo))"),
                 "SecondOrderQuery(author:foo, author:foo,*, collector=SecondOrderCollectorCitedBy(cache:citations-cache))",
                 SecondOrderQuery.class);
 
-        // # 389
-        // make sure the functional parsing is handling things well
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo OR topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, ((title:foo AND topn(10, title:bar OR title:baz))))"),
-                "FunctionScoreQuery(SecondOrderQuery(+title:foo +FunctionScoreQuery(SecondOrderQuery(title:bar title:baz, collector=SecondOrderCollectorTopN(10)), scored by boost(sum(float(cite_read_boost),const(0.5)))), collector=SecondOrderCollectorTopN(200)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, title:foo, date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, (title:foo), date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(title:foo, collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(200, \"foo bar\", \"date desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(all:\"foo bar\", collector=SecondOrderCollectorTopN(200, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         // trendy() - what people read, it reads data from index
         assertU(addDocs("author", "muller", "reader", "bibcode1", "reader", "bibcode2"));
@@ -1130,31 +1397,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 BooleanQuery.class);
 
 
-        // topn sorted - added 15Aug2013
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*, date desc)"),
-                "FunctionScoreQuery(SecondOrderQuery(*:*, collector=SecondOrderCollectorTopN(5, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:civano, \"date desc,citation_count desc\")"),
-                "FunctionScoreQuery(SecondOrderQuery(author:civano, author:civano,*, collector=SecondOrderCollectorTopN(5, info=date desc,citation_count desc)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        // topN - added Aug2013
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, *:*)"),
-                "FunctionScoreQuery(SecondOrderQuery(*:*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, (foo bar))"),
-                "FunctionScoreQuery(SecondOrderQuery(+all:foo +all:bar, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-//        assertQueryEquals(req("defType", "aqp", "q", "topn(5, edismax(dog OR cat))", "qf", "title^1 abstract^0.5"),
-//                "FunctionScoreQuery(SecondOrderQuery(((abstract:dog)^0.5 | title:dog) ((abstract:cat)^0.5 | title:cat), collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-//                FunctionScoreQuery.class);
-        assertQueryEquals(req("defType", "aqp", "q", "topn(5, author:accomazzi)"),
-                "FunctionScoreQuery(SecondOrderQuery(author:accomazzi, author:accomazzi,*, collector=SecondOrderCollectorTopN(5)), scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
         /*
          * It is different if Aqp handles the boolean operations or if edismax() does
@@ -1513,6 +1755,22 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
 
     }
 
+    public void testLongUppercaseTitlePhrase() throws Exception {
+        assertU(adoc("id", "223001", "bibcode", "2020ApJ...902..231A", "title",
+                "INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in the JULES-INFERNO global fire model"));
+        assertU(adoc("id", "223002", "bibcode", "2020ApJ...902..232A", "title",
+                "INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in quasar JULES-INFERNO global fire model"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q",
+                        "title:\"INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in the JULES-INFERNO global fire model\""),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='223001']",
+                "//doc[not(str[@name='id'][.='223002'])]");
+        assertQ(req("defType", "aqp", "q",
+                        "title:\"INFERNO-peat v1. 0.0 a representation of northern high-latitude peat fires in the jules-inferno global fire model\""),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='223001']");
+    }
+
     public void testCustomScoring() throws Exception {
 
         assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\""),
@@ -1521,31 +1779,6 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                         + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de))",
                 BooleanQuery.class);
 
-        /*
-        assertQueryEquals(req("defType", "aqp", "q", "abs:\"dark energy\"", "aqp.classic_scoring.modifier", "0.6"),
-                "custom((abstract:\"dark energy\" | Synonym(abstract:acr::de abstract:syn::dark energy abstract:syn::de)) "
-                        + "(title:\"dark energy\" | Synonym(title:acr::de title:syn::dark energy title:syn::de)) "
-                        + "(keyword:\"dark energy\" | Synonym(keyword:acr::de keyword:syn::dark energy keyword:syn::de)), "
-                        + "sum(float(cite_read_boost),const(0.6)))",
-                FunctionScoreQuery.class);
-         */
-
-        assertQueryContains(req("defType", "aqp", "q", "author:\"foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        assertQueryNotContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "no.classic_scoring.modifier", "0.5"),
-                "scored by",
-                SpanPositionRangeQuery.class);
-        assertQueryContains(req("defType", "aqp", "q", "author:\"^foo, bar\"", "aqp.classic_scoring.modifier", "0.5"),
-                "scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
-
-        assertQueryContains(
-                req("defType", "aqp", "q", "foo bar aqp(baz)", "aqp.classic_scoring.modifier", "0.6", "qf",
-                        "title keyword"),
-                "scored by boost(sum(float(cite_read_boost),const(0.6))))",
-                FunctionScoreQuery.class);
 
         // when used in conjunction with constant scoring, custom modifies constant (but
         // it won't replace it)
@@ -1553,16 +1786,45 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                 req("defType", "aqp", "q", "^accomazzi", "aqp.constant_scoring", "author^5", "qf", "author title"),
                 "(ConstantScore(spanPosRange(spanOr([author:accomazzi,, SpanMultiTermQueryWrapper(author:accomazzi,*)]), 0, 1)))^5.0",
                 BoostQuery.class);
-        assertQueryContains(
-                req("defType", "aqp", "q", "^accomazzi", "aqp.classic_scoring.modifier", "0.5", "aqp.constant_scoring",
-                        "author^5", "qf", "author title"),
-                ")))^5.0, scored by boost(sum(float(cite_read_boost),const(0.5))))",
-                FunctionScoreQuery.class);
 
+    }
+
+    public void testExactMarkerAfterField() throws Exception {
+        assertU(adoc("id", "3601", "bibcode", "issue36-positive",
+                "abstract", "dark energy", "title", "dark energy"));
+        assertU(adoc("id", "3602", "bibcode", "issue36-negative",
+                "abstract", "dark matter energy", "title", "dark matter energy"));
+        assertU(commit("waitSearcher", "true"));
+
+        String[] exactDarkEnergyQueries = {
+                "=abs:\"dark energy\"",
+                "=abs:(\"dark energy\")",
+                "abs:=\"dark energy\"",
+                "abs:(=\"dark energy\")"
+        };
+        for (String query : exactDarkEnergyQueries) {
+            assertQ(req("defType", "aqp", "q", query, "fl", "id"),
+                    "//*[@numFound='1']",
+                    "//doc/str[@name='id'][.='3601']",
+                    "not(//doc/str[@name='id'][.='3602'])");
+        }
     }
 
     public static junit.framework.Test suite() {
         return new junit.framework.JUnit4TestAdapter(TestAqpAdsabsSolrSearch.class);
     }
+
+    public void testWildcardAgainstReaderStringField() throws Exception {
+        assertU(adoc("id", "1761", "bibcode", "1761", "reader", "X02f794aca"));
+        assertU(adoc("id", "1762", "bibcode", "1762", "reader", "X02f795aca"));
+        assertU(commit());
+
+        assertQ(req("defType", "aqp", "q", "reader:X02f794ac*"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='1761']",
+                "not(//doc/str[@name='id'][.='1762'])"
+        );
+    }
+
 
 }
