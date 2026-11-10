@@ -1,6 +1,5 @@
 package org.apache.lucene.search;
 
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.SecondOrderCollector.FinalValueType;
 
@@ -57,7 +56,8 @@ public class SecondOrderQuery extends Query {
      */
     public Weight createWeight(final IndexSearcher searcher, ScoreMode needsScores, float boost) throws IOException {
 
-        Weight firstOrderWeight = firstOrderQuery.createWeight(searcher, needsScores, boost);
+        Weight firstOrderWeight = firstOrderQuery.createWeight(
+                searcher, secondOrderCollector.initializationScoreMode(), 1f);
 
         //System.out.println("preparing: " + this.secondOrderCollector);
 
@@ -78,20 +78,22 @@ public class SecondOrderQuery extends Query {
         //System.out.println("done:" + this.secondOrderCollector);
 
         // no logging, we are basic lucene class
-        return new SecondOrderWeight(firstOrderWeight, secondOrderCollector);
+        return new SecondOrderWeight(this, firstOrderWeight, secondOrderCollector, boost);
     }
 
 
     /**
      * Rewrites the wrapped query.
      */
-    public Query rewrite(IndexReader reader) throws IOException {
-        Query rewritten = firstOrderQuery.rewrite(reader);
+    @Override
+    public Query rewrite(IndexSearcher searcher) throws IOException {
+        Query rewritten = firstOrderQuery.rewrite(searcher);
         if (rewritten != firstOrderQuery) {
-            return new SecondOrderQuery(rewritten, this.secondOrderCollector.copy());
-        } else {
-            return this;
+            SecondOrderCollector collectorCopy = secondOrderCollector.copy();
+            collectorCopy.setFinalValueType(secondOrderCollector.getFinalValueType());
+            return new SecondOrderQuery(rewritten, collectorCopy);
         }
+        return this;
     }
 
     @Override

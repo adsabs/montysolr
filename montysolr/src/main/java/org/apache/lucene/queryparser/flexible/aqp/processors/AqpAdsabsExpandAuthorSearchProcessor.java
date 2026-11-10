@@ -7,15 +7,17 @@ import org.apache.lucene.analysis.core.KeywordTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.*;
-import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.PrefixWildcardQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
+import org.apache.lucene.search.TopTermsRewrite;
+import org.apache.solr.analysis.author.AuthorCreateQueryVariationsFilter;
 import org.apache.solr.analysis.author.AuthorNormalizeFilter;
 import org.apache.solr.analysis.author.AuthorUtils;
 import org.apache.solr.analysis.author.PythonicAuthorNormalizerFilter;
@@ -34,7 +36,7 @@ import java.util.Map;
  * @see AqpFieldMapperProcessor
  * @see QueryConfigHandler
  */
-public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl {
+public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorImpl {
 
     private Map<String, int[]> fields;
 
@@ -137,7 +139,13 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
             FieldQueryNode fqn = ((FieldQueryNode) node);
             if (fields.containsKey(fqn.getFieldAsString())) {
 
-                // 'name upgrade'
+                // Keep the full analyzed author literal, but do not add optional
+                // synonym/prefix/regex clauses for names beyond the existing
+                // six-part author-variation budget. Long collaborations and
+                // citation-style author strings must not exhaust Boolean clauses.
+                if (origNameInfo.noOfParts > AuthorCreateQueryVariationsFilter.MAX_NAME_PARTS) {
+                    return;
+                }
                 if (level[0] == 1 && !isLongForm(origNameInfo.origName)) {
                     try {
                         String[] synonyms = getSynonyms(origNameInfo.origName);
@@ -185,7 +193,16 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
                                 parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
                             }
                         } else {
-                            parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
+                            if (isTwoLetterGivenNameQuery(origNameInfo, nameParts)) {
+                                // The broader prefix covers the space prefix unless a term limit
+                                // can discard its matches. Avoid executing both for complete rewrites.
+                                if (hasBoundedPrefixRewrite(fqn.getFieldAsString())) {
+                                    parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
+                                }
+                                parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + "*", fqn.getBegin(), fqn.getEnd()));
+                            } else {
+                                parentChildren.add(new PrefixWildcardQueryNode(fqn.getField(), v + " *", fqn.getBegin(), fqn.getEnd()));
+                            }
                         }
                     }
 
@@ -221,6 +238,37 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends QueryNodeProcessorImpl
         }
 
         if (!node.isLeaf()) expandNodes(node, origNameInfo, level);
+    }
+
+    private boolean hasBoundedPrefixRewrite(String field) {
+        Map<String, String> fieldMap = getQueryConfigHandler().get(
+                AqpStandardQueryConfigHandler.ConfigurationKeys.FIELD_MAPPER_POST_ANALYSIS);
+        if (fieldMap != null && fieldMap.containsKey(field)) {
+            field = fieldMap.get(field);
+        }
+        String method = getConfigVal("aqp.qprefix.scoring." + field);
+        if (method != null && !method.isEmpty()) {
+            return "topterms".equals(method)
+                    || "topterms_blended".equals(method)
+                    || "topterms_boosted".equals(method);
+        }
+        return getQueryConfigHandler().get(ConfigurationKeys.MULTI_TERM_REWRITE_METHOD)
+                instanceof TopTermsRewrite<?>;
+    }
+
+    private boolean isTwoLetterGivenNameQuery(NameInfo origNameInfo, String[] nameParts) {
+        if (origNameInfo.parts.length != 2 || nameParts.length != 2) {
+            return false;
+        }
+
+        String originalGivenName = origNameInfo.parts[1];
+        String givenName = nameParts[1];
+        return originalGivenName.length() == 2
+                && Character.isLetter(originalGivenName.charAt(0))
+                && Character.isLetter(originalGivenName.charAt(1))
+                && givenName.length() == 2
+                && Character.isLetter(givenName.charAt(0))
+                && Character.isLetter(givenName.charAt(1));
     }
 
     private boolean regexIsPossible(String[] orig, String[] newName) {

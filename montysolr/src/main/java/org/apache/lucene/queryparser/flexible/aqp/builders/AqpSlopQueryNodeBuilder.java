@@ -2,6 +2,7 @@ package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpAnalyzerQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.aqp.processors.AqpFuzzyModifierProcessor;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
@@ -12,6 +13,7 @@ import org.apache.lucene.search.MultiPhraseQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.PhraseQuery.Builder;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.queries.spans.SpanQuery;
 
 /**
  * This builder basically reads the {@link Query} object set on the
@@ -35,17 +37,38 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
         Query query = (Query) phraseSlopNode.getChild().getTag(
                 QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
 
+        if (query instanceof SpanQuery) {
+            return query;
+        }
         int defaultValue = phraseSlopNode.getValue();
-
+        boolean explicitSlop = Boolean.TRUE.equals(
+                phraseSlopNode.getTag(AqpFuzzyModifierProcessor.EXPLICIT_SLOP));
+        if (explicitSlop && defaultValue == 0) {
+            return query;
+        }
+        boolean preserveGraphPositions =
+                phraseSlopNode.getTag(AqpPostAnalysisProcessor.EXACT_GRAPH_PATH) != null
+                        || phraseSlopNode.getChild().getTag(AqpPostAnalysisProcessor.EXACT_GRAPH_PATH) != null;
 
         if (query instanceof PhraseQuery) {
-
+            boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
+            if (explicitPositions || preserveGraphPositions) {
+                PhraseQuery phrase = (PhraseQuery) query;
+                if (phrase.getSlop() == defaultValue) return phrase;
+                Builder builder = new PhraseQuery.Builder().setSlop(defaultValue);
+                Term[] terms = phrase.getTerms();
+                int[] positions = phrase.getPositions();
+                for (int i = 0; i < terms.length; i++) {
+                    builder.add(terms[i], positions[i]);
+                }
+                return builder.build();
+            }
             if (defaultValue == 0) {
                 int[] pos = ((PhraseQuery) query).getPositions();
                 defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
             }
 
-            if (defaultValue <= 1) return query;
+            if (explicitSlop ? defaultValue == 0 : defaultValue <= 1) return query;
 
             Builder builder = new PhraseQuery.Builder();
             builder.setSlop(defaultValue);
@@ -56,17 +79,25 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
 
         } else {
 
+            boolean explicitPositions = hasRawPositions(phraseSlopNode.getChild());
+            if (explicitPositions || preserveGraphPositions) {
+                MultiPhraseQuery phrase = (MultiPhraseQuery) query;
+                if (phrase.getSlop() == defaultValue) return phrase;
+                return new MultiPhraseQuery.Builder(phrase).setSlop(defaultValue).build();
+            }
             int maxBranchSize = 0;
             int gap = 0;
             // examine terms that made the multi-phrase query
-            for (QueryNode child : queryNode.getChildren().get(0).getChildren()) {
-                if (child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE) != null) {
-                    gap = (Integer) child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
-                    if (gap > defaultValue)
-                        defaultValue = gap;
-                }
-                if (child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE) != null) {
-                    maxBranchSize = (Integer) child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE);
+            if (!explicitSlop) {
+                for (QueryNode child : queryNode.getChildren().get(0).getChildren()) {
+                    if (child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE) != null) {
+                        gap = (Integer) child.getTag(AqpAnalyzerQueryNodeProcessor.MAX_MULTI_TOKEN_SIZE);
+                        if (gap > defaultValue)
+                            defaultValue = gap;
+                    }
+                    if (child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE) != null) {
+                        maxBranchSize = (Integer) child.getTag(AqpPostAnalysisProcessor.QUERY_BRANCH_SIZE);
+                    }
                 }
             }
 
@@ -75,12 +106,12 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
             }
 
             // fallback
-            if (defaultValue == 0) {
+            if (!explicitSlop && defaultValue == 0) {
                 int[] pos = ((MultiPhraseQuery) query).getPositions();
                 defaultValue = (pos[pos.length - 1] - pos[0]) - (pos.length - 1);
             }
 
-            if (defaultValue <= 1) return query;
+            if (explicitSlop ? defaultValue == 0 : defaultValue <= 1) return query;
 
             MultiPhraseQuery.Builder builder = new MultiPhraseQuery.Builder((MultiPhraseQuery) query);
             builder.setSlop(defaultValue);
@@ -90,6 +121,20 @@ public class AqpSlopQueryNodeBuilder implements StandardQueryBuilder {
 
         return query;
 
+    }
+    private boolean hasRawPositions(QueryNode node) {
+        if (Boolean.TRUE.equals(node.getTag(
+                AqpPostAnalysisProcessor.RAW_POSITIONAL_PATH))) {
+            return true;
+        }
+        if (node.getChildren() != null) {
+            for (QueryNode child : node.getChildren()) {
+                if (hasRawPositions(child)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
