@@ -408,18 +408,17 @@ public class CitationLRUCache<K, V> extends SolrCacheBase implements CitationCac
         warmupTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - warmingStartTime, TimeUnit.NANOSECONDS);
     }
 
+    // Optional disk persistence must not prevent in-memory warming when assertions are disabled.
     private File getCacheStorageDir(SolrIndexSearcher searcher) {
-        File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
         try {
-            assert f.exists();
-            assert f.isDirectory();
-            assert f.canWrite();
-        } catch (AssertionError ae) {
-            return null;
+            File f = new File(searcher.getCore().getResourceLoader().getConfigDir());
+            if (!f.exists() || !f.isDirectory() || !f.canWrite()) {
+                return null;
+            }
+            return f;
         } catch (Exception e) {
             return null;
         }
-        return f;
     }
 
     private CitationCacheReaderWriter getCitationCacheReaderWriter(SolrIndexSearcher searcher) {
