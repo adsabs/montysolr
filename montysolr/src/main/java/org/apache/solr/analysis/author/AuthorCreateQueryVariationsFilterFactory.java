@@ -36,6 +36,10 @@ public class AuthorCreateQueryVariationsFilterFactory extends TokenFilterFactory
         if (args.containsKey("lookAtPayloadForOrigAuthor")) {
             lookAtPayloadForOrigAuthor = args.remove("lookAtPayloadForOrigAuthor").equals("true");
         }
+        // Shortened multi-name variants must use each emitted author's source name.
+        if (shortenMultiname) {
+            lookAtPayloadForOrigAuthor = true;
+        }
 
         if (args.containsKey("tokenType")) {
             tokenType = args.remove("tokenType");
