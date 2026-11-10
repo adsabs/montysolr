@@ -70,8 +70,6 @@ public class AqpTestAbstractCase extends LuceneTestCase {
     public void tearDown() throws Exception {
         BooleanQuery.setMaxClauseCount(originalMaxClauses);
         super.tearDown();
-        //System.clearProperty("python.cachedir.skip");
-        //System.clearProperty("python.console.encoding");
     }
 
     public static void fail(String message) {

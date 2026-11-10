@@ -39,10 +39,12 @@ tokens {
 }
 @lexer::header {
    package org.apache.lucene.queryparser.flexible.aqp.parser;
+   import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 }
 @lexer::members {
   private final java.util.ArrayDeque<Token> pendingTokens =
       new java.util.ArrayDeque<Token>();
+  private Token previousToken;
 
   /**
    * AUTHOR_SEARCH is permissive for comma-separated names. If it consumed an
@@ -52,10 +54,12 @@ tokens {
   @Override
   public Token nextToken() {
     if (!pendingTokens.isEmpty()) {
-      return pendingTokens.removeFirst();
+      previousToken = pendingTokens.removeFirst();
+      return previousToken;
     }
 
     Token token = super.nextToken();
+    previousToken = token;
     if (token.getType() != AUTHOR_SEARCH) {
       return token;
     }
@@ -137,6 +141,7 @@ tokens {
   @Override
   public void reset() {
     super.reset();
+    previousToken = null;
     if (pendingTokens != null) {
       pendingTokens.clear();
     }
@@ -172,19 +177,22 @@ tokens {
     return -1;
   }
 
+  private boolean isDoubleQuote(int character) {
+    return character == '"'
+        || AqpQueryParserUtil.isTypographicDoubleQuote((char) character);
+  }
+
   private boolean isCaretPhraseDollar() {
-    int offset = -1;
-    if (input.LA(offset) != '"') {
+    if (!(previousToken instanceof org.antlr.runtime.CommonToken)
+        || (previousToken.getType() != PHRASE
+            && previousToken.getType() != PHRASE_ANYTHING)) {
       return false;
     }
-    offset--;
-    while (input.LA(offset) != CharStream.EOF) {
-      if (input.LA(offset) == '"' && input.LA(offset - 1) != '\\') {
-        return input.LA(offset - 1) == '^';
-      }
-      offset--;
-    }
-    return false;
+    org.antlr.runtime.CommonToken phrase =
+        (org.antlr.runtime.CommonToken) previousToken;
+    return phrase.getStartIndex() > 0
+        && phrase.getStopIndex() == input.index() - 1
+        && input.LA(phrase.getStartIndex() - input.index() - 1) == '^';
   }
 
   private static final String ELEMENT_SYMBOLS =
@@ -320,7 +328,9 @@ tokens {
 }
 
 mainQ : 
-  clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
+  NOT clauseNear EOF
+    -> ^(OPERATOR["DEFOP"] ^(MODIFIER MINUS["-"] clauseNear))
+  | clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
   ;
    
   
@@ -333,7 +343,8 @@ clauseAnd
   ;
 
 clauseNot
-  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
+  :
+  (first=clauseNear  -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
 clauseNear
@@ -358,7 +369,9 @@ atom
   : 
   lmodifier? field multi_value rmodifier?
    -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field multi_value)))
-  | lmodifier? field? value rmodifier? 
+  | lmodifier? field '=' value rmodifier?
+   -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field ^(MODIFIER EQUAL["="] value))))
+  | lmodifier? field? value rmodifier?
   -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
   //| lmodifier? (STAR COLON)? STAR 
   //-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
@@ -608,6 +621,7 @@ identifier
   | PHRASE -> $identifier ^(QPHRASE PHRASE)
   | NUMBER  -> $identifier NUMBER
   | STAR -> $identifier ^(QANYTHING STAR)
+  | LPAREN multiClause RPAREN -> $identifier ^(CLAUSE multiClause)
   )
   ;
   
@@ -659,13 +673,18 @@ QMARK  : '?'+ ;
 
 //RCURLY  : '}' ;
 
-CARAT_PHRASE : {input.LA(2) == '"'}? '^';
+CARAT_PHRASE : {isDoubleQuote(input.LA(2))}? '^';
 CARAT : '^' NUMBER?;
 
 
 TILDE : '~' NUMBER?;
 
 DQUOTE  : '\"';
+
+// Typographic double quotes can open or close a phrase, including low quotes.
+// A typographic opening quote also accepts an ASCII closing quote.
+// Quotes inside an ASCII-delimited phrase remain literal content.
+CURLY_QUOTE : '\u201C' | '\u201D' | '\u201E';
 
 //SQUOTE  : '\'';
 
@@ -679,7 +698,12 @@ DOLLAR_AFTER_QUOTE
 
 fragment AS_CHAR
   :
-  ~('0' .. '9' | ' ' | '\"' | COMMA | PLUS | MINUS | '$')
+  ~('0' .. '9' | ' ' | '\"' | '\u201C' | '\u201D' | '\u201E' | COMMA | PLUS | MINUS | '$')
+  ;
+
+fragment AUTHOR_CHAR
+  :
+  AS_CHAR | '-'
   ;
   
   
@@ -698,7 +722,7 @@ NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
   
 AUTHOR_SEARCH
   :
-  '^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
+  '^' AUTHOR_CHAR+ (',' (' ' | AUTHOR_CHAR)+)* '$'?
   ;
 
 
@@ -767,7 +791,7 @@ fragment INT: '0' .. '9';
 fragment TERM_START_CHAR
   :
   (~(' ' | '\t' | '\n' | '\r' | '\u3000'
-        | '\"' 
+        | '\"' | '\u201C' | '\u201D' | '\u201E'
         | '(' | ')' | '[' | ']' | '{' | '}'
         | '+' | '-' | '!' | ':' | '~' | '^' 
         | '?' | '*' | '\\'|',' | '=' | '#'
@@ -851,10 +875,12 @@ TERM_TRUNCATED:
 PHRASE  
   : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'|'?'|'*'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 PHRASE_ANYTHING : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 LOCAL_PARAMS  : 
@@ -863,3 +889,6 @@ LOCAL_PARAMS  :
 REGEX : 
   '/' (ESC_CHAR|~('/'|'\\'))+ '/'
   ; 
+UNTERMINATED_CURLY_PHRASE
+  : CURLY_QUOTE (ESC_CHAR | ~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))* '\\'? EOF
+  ;
