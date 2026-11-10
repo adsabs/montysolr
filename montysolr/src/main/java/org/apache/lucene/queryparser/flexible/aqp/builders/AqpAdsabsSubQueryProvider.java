@@ -711,14 +711,16 @@ public class AqpAdsabsSubQueryProvider implements
          * Match an author and affiliation only when both terms occur in the
          * same aligned multivalued slot. Unlike ordinary AND, this relation
          * preserves the author/affiliation pairing established by ingestion.
-         * Physical fields are required because matching reads their stored
-         * values directly.
+         * Both physical fields must be stored with their aligned array values;
+         * same() reads those values directly and does not infer alignment from
+         * positions. Request-level boost, bq, and bf scoring is applied outside
+         * this membership relation and does not alter its matching semantics.
          */
         parsers.put("same", new AqpSubqueryParserFull() {
             @Override
             public Query parse(FunctionQParser fp) throws SyntaxError {
-                Query authorQuery = fp.parseNestedQuery();
-                Query affiliationQuery = fp.parseNestedQuery();
+                Query authorQuery = parseMembershipQuery(fp);
+                Query affiliationQuery = parseMembershipQuery(fp);
                 if (fp.hasMoreArguments()) {
                     throw new NestedParseException("same() expects exactly two field queries");
                 }
@@ -739,9 +741,24 @@ public class AqpAdsabsSubQueryProvider implements
                         authorSchema.getType().getIndexAnalyzer(),
                         affiliationSchema.getType().getIndexAnalyzer());
             }
+            private Query parseMembershipQuery(FunctionQParser fp) throws SyntaxError {
+                String queryText = fp.parseId();
+                QParser subParser = fp.subQuery(queryText, "aqp");
+                if (subParser instanceof AqpAdsabsQParser aqpParser) {
+                    try {
+                        return aqpParser.getParser().parse(subParser.getString(), null);
+                    } catch (QueryNodeException e) {
+                        throw new SyntaxError(e);
+                    }
+                }
+                return subParser.getQuery();
+            }
+
 
             private String getSingleField(Query query) throws SyntaxError {
-                if (query instanceof TermQuery) {
+                if (query instanceof MatchAllDocsQuery) {
+                    return null;
+                } else if (query instanceof TermQuery) {
                     return ((TermQuery) query).getTerm().field();
                 } else if (query instanceof PhraseQuery) {
                     return getSingleField(null, ((PhraseQuery) query).getTerms());
@@ -790,6 +807,9 @@ public class AqpAdsabsSubQueryProvider implements
             }
 
             private String getSingleField(String field, String candidateField) throws SyntaxError {
+                if (candidateField == null) {
+                    return field;
+                }
                 if (field != null && !field.equals(candidateField)) {
                     throw new SyntaxError("same() does not support virtual or multi-field queries");
                 }
@@ -1699,6 +1719,7 @@ public class AqpAdsabsSubQueryProvider implements
      * token positions or token counts identify an array slot.
      */
     private static final class AlignedFieldQuery extends Query {
+        private static final long MAX_REUSED_INDEX_BYTES = 64 * 1024L;
         private final Query authorQuery;
         private final Query affiliationQuery;
         private final String authorField;
@@ -1728,8 +1749,8 @@ public class AqpAdsabsSubQueryProvider implements
             Query authorCandidate = positiveCandidate(authorQuery);
             Query affiliationCandidate = positiveCandidate(affiliationQuery);
             BooleanQuery.Builder candidateBuilder = new BooleanQuery.Builder();
-            candidateBuilder.add(authorCandidate, BooleanClause.Occur.SHOULD);
-            candidateBuilder.add(affiliationCandidate, BooleanClause.Occur.SHOULD);
+            candidateBuilder.add(authorCandidate, BooleanClause.Occur.MUST);
+            candidateBuilder.add(affiliationCandidate, BooleanClause.Occur.MUST);
             FixedBitSet candidates = new FixedBitSet(searcher.getIndexReader().maxDoc());
             searcher.search(candidateBuilder.build(), new SimpleCollector() {
                 private int docBase;
@@ -1753,8 +1774,11 @@ public class AqpAdsabsSubQueryProvider implements
             Set<String> fields = new HashSet<>();
             fields.add(authorField);
             fields.add(affiliationField);
-            MemoryIndex authorIndex = new MemoryIndex();
-            MemoryIndex affiliationIndex = new MemoryIndex();
+            // Reuse bounded token buffers across stored slot values.
+            MemoryIndex authorIndex = MemoryIndex.fromDocument(Collections.emptyList(), authorAnalyzer,
+                    false, false, MAX_REUSED_INDEX_BYTES);
+            MemoryIndex affiliationIndex = MemoryIndex.fromDocument(Collections.emptyList(), affiliationAnalyzer,
+                    false, false, MAX_REUSED_INDEX_BYTES);
             for (LeafReaderContext context : searcher.getIndexReader().leaves()) {
                 LeafReader reader = context.reader();
                 int leafEnd = context.docBase + reader.maxDoc();
