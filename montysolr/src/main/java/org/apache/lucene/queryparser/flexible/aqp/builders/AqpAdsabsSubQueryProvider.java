@@ -13,6 +13,7 @@ import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHan
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpSubqueryParserFull;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
@@ -532,12 +533,7 @@ public class AqpAdsabsSubQueryProvider implements
          */
         parsers.put("topn", new AqpSubqueryParserFull() {
             public Query parse(FunctionQParser fp) throws SyntaxError {
-                int topN = -1;
-                try {
-                    topN = fp.parseInt();
-                } catch (NumberFormatException e) {
-                    throw new SyntaxError("The function signature is topn(int, query, [sort order]). Error: " + e.getMessage());
-                }
+                int topN = fp.parseInt();
 
                 if (topN < 1) {  //|| topN > 50000 - previously, i was limiting the fields
                     throw new SyntaxError("Hmmm, the first argument of your operator must be a positive number.");
@@ -555,11 +551,7 @@ public class AqpAdsabsSubQueryProvider implements
                     sortOrRank = fp.parseId();
                 }
 
-                sortOrRank = sortOrRank.toLowerCase();
-
-                if (sortOrRank.contains("\"") || sortOrRank.contains("'")) {
-                    sortOrRank = sortOrRank.substring(1, sortOrRank.length() - 1);
-                }
+                sortOrRank = AqpQueryParserUtil.dequote(sortOrRank).toLowerCase(Locale.ROOT);
 
                 SortSpec sortSpec = SortSpecParsing.parseSortSpec(sortOrRank, fp.getReq());
 
@@ -989,7 +981,7 @@ public class AqpAdsabsSubQueryProvider implements
             private Query reAnalyze(String field, String value, Float boost) throws SyntaxError {
                 QParser fParser = getParser();
                 //System.out.println(field+ ":"+fParser.getString() + "|value=" + value);
-                QParser aqp = fParser.subQuery(field + ":" + getOriginalInput(), "aqp");
+                QParser aqp = fParser.subQuery(field + ":(" + getOriginalInput() + ")", "aqp");
                 Query q = aqp.getQuery();
                 if (boost != null && boost != 1.0f) {
                     q = new BoostQuery(q, boost);
@@ -1049,7 +1041,7 @@ public class AqpAdsabsSubQueryProvider implements
                 QParser fParser = getParser();
                 boolean exactSearch = Boolean.TRUE.equals(getReParseContext());
                 String exactPrefix = exactSearch ? "=" : "";
-                QParser aqp = fParser.subQuery(exactPrefix + field + ":" + getOriginalInput(), "aqp");
+                QParser aqp = fParser.subQuery(exactPrefix + field + ":(" + getOriginalInput() + ")", "aqp");
                 Query q = aqp.getQuery();
                 if (boost != null && boost != 1.0f) {
                     q = new BoostQuery(q, boost);
@@ -1128,7 +1120,7 @@ public class AqpAdsabsSubQueryProvider implements
 
                 SolrQueryRequest req = fp.getReq();
                 String input = fp.getString();
-                String filterName = input.substring(1, input.length() - 1).trim();
+                String filterName = input.trim();
 
 
                 // pick the content stream (actually a filter)
