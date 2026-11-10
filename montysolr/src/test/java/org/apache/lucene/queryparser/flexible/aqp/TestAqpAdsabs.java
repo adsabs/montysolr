@@ -5,6 +5,8 @@ import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
+import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.search.*;
 
 import java.util.Map.Entry;
@@ -79,6 +81,82 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
     public void testAcronyms() throws Exception {
         assertQueryEquals("\"dark matter\" -LHC", null, "+\"dark matter\" -lhc");
+    }
+
+    public void testCurlyDoubleQuotes() throws Exception {
+        AqpQueryParser qp = getParser();
+        Query ascii = qp.parse("full:\"Simons Foundation\" full:\"00001470\"", "");
+        Query mixed = qp.parse("full: “Simons Foundation” full:“00001470\"", "");
+        Query curly = qp.parse("full:“Simons Foundation” full:“00001470”", "");
+        assertEquals(ascii, mixed);
+        assertEquals(ascii, curly);
+
+        for (char opening : new char[]{'“', '”', '„'}) {
+            for (char closing : new char[]{'“', '”', '„', '"'}) {
+                assertEquals(ascii, qp.parse("full:" + opening + "Simons Foundation" + closing
+                        + " full:" + opening + "00001470" + closing, ""));
+                assertEquals(qp.parse("title:\"science*\"", ""),
+                        qp.parse("title:" + opening + "science*" + closing, ""));
+            }
+            assertQueryNodeException("title:" + opening + "unterminated");
+            assertQueryNodeException("title:" + opening + "foo\\" + opening);
+        }
+
+        AqpQueryParser whitespaceParser = getParser(new WhitespaceAnalyzer());
+        PhraseQuery preserved = (PhraseQuery) whitespaceParser.parse(
+                "title:\"researcher's “curly” phrase\"", "");
+        assertEquals("researcher's", preserved.getTerms()[0].text());
+        assertEquals("“curly”", preserved.getTerms()[1].text());
+        PhraseQuery escaped = (PhraseQuery) whitespaceParser.parse(
+                "title:\"escaped \\\" quote\"", "");
+        assertEquals("\"", escaped.getTerms()[1].text());
+        assertEquals(escaped, whitespaceParser.parse("title:“escaped \\\" quote\"", ""));
+
+        PhraseQuery escapedSmartClose = (PhraseQuery) whitespaceParser.parse(
+                "title:“escaped \\” quote”", "");
+        assertEquals("”", escapedSmartClose.getTerms()[1].text());
+        assertEquals(qp.parse("title:\"science*\"", ""),
+                qp.parse("title:“science*”", ""));
+        assertEquals(qp.parse("title:\"science*\"", ""),
+                qp.parse("title:“science*\"", ""));
+        assertEquals(qp.parse("title:\"science?\"", ""),
+                qp.parse("title:“science?”", ""));
+        assertEquals(qp.parse("title:\"science?\"", ""),
+                qp.parse("title:“science?\"", ""));
+
+        assertEquals(qp.parse("[\"this\" TO \"that\"]", ""),
+                qp.parse("[“this” TO “that”]", ""));
+        assertQueryEquals("author:/foo“bar”/", null, "author:/foo“bar”/",
+                RegexpQuery.class);
+        String curlyLiteral = "foo“bar”„baz";
+        String utilityEscaped = AqpQueryParserUtil.escape(curlyLiteral);
+        assertEquals("foo\\“bar\\”\\„baz", utilityEscaped);
+        TermQuery utilityRoundTrip = (TermQuery) whitespaceParser.parse(utilityEscaped, "title");
+        assertEquals(curlyLiteral, utilityRoundTrip.getTerm().text());
+
+        ADSEscapeQuerySyntaxImpl escaper = new ADSEscapeQuerySyntaxImpl();
+        CharSequence adsEscaped = escaper.escape(
+                curlyLiteral, java.util.Locale.ROOT, EscapeQuerySyntax.Type.NORMAL);
+        assertEquals("foo\\“bar\\”\\„baz", adsEscaped.toString());
+        TermQuery adsRoundTrip = (TermQuery) whitespaceParser.parse(adsEscaped.toString(), "title");
+        assertEquals(curlyLiteral, adsRoundTrip.getTerm().text());
+        assertEquals(curlyLiteral, escaper.escape(
+                curlyLiteral, java.util.Locale.ROOT, EscapeQuerySyntax.Type.STRING).toString());
+
+        String asciiLiteral = new String("plain ASCII");
+        assertSame(asciiLiteral, AqpQueryParserUtil.escape(asciiLiteral));
+
+        assertEquals(whitespaceParser.parse("title:\"foo\\\\\"", ""),
+                whitespaceParser.parse("title:“foo\\\\”", ""));
+
+        assertQueryNodeException("title:“”");
+        assertQueryNodeException("title:\u201D\u201C");
+        assertQueryNodeException("title:\"foo”");
+        assertQueryNodeException("title:“foo\\”");
+        assertQueryNodeException("title:“unterminated\\");
+        assertQueryNodeException("title:“unterminated");
+
+        assertQueryNodeException("full:“unterminated");
     }
 
 
@@ -256,6 +334,29 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
     }
 
+    public void testUnaryExclusions() throws Exception {
+        assertRootExclusion(getQuery("-bibstem:(AAS)", null));
+        assertRootExclusion(getQuery("NOT bibstem:(\"AAS\")", null));
+        assertRootExclusion(getQuery("-m:(a b NEAR c d AND e)", null));
+    }
+
+    private void assertRootExclusion(Query query) {
+        assertTrue(query instanceof BooleanQuery);
+        boolean hasMatchAll = false;
+        boolean hasProhibited = false;
+        for (BooleanClause clause : ((BooleanQuery) query).clauses()) {
+            if (clause.getOccur() == BooleanClause.Occur.MUST
+                    && clause.getQuery() instanceof MatchAllDocsQuery) {
+                hasMatchAll = true;
+            }
+            if (clause.getOccur() == BooleanClause.Occur.MUST_NOT) {
+                hasProhibited = true;
+            }
+        }
+        assertTrue(hasMatchAll);
+        assertTrue(hasProhibited);
+    }
+
     public void testExceptions() throws Exception {
         assertQueryNodeException("this (+(((+(that))))");
         assertQueryNodeException("this (++(((+(that)))))");
@@ -278,6 +379,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryNodeException("this =and that");
         assertQueryNodeException("(doi:tricky:01235)");
 
+        assertQueryNodeException("two$");
+        assertQueryNodeException("\"two phrase$\"");
+        assertQueryEquals("$", null, "MatchNoDocsQuery(\"\")", MatchNoDocsQuery.class);
     }
 
     public void testWildCards() throws Exception {
@@ -411,7 +515,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("field:(one OR two OR three)", null, "one two three");
         assertQueryEquals("fieldx:(one +two -three)", null, "+fieldx:one +fieldx:two -fieldx:three");
         assertQueryEquals("+field:(-one +two three)", null, "-one +two +three");
-        assertQueryEquals("-field:(-one +two three)", null, "-one +two +three");
         assertQueryEquals("+field:(-one +two three) x:four", null, "+(-one +two +three) +x:four");
 
 
@@ -432,7 +535,6 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("field: (one)", null, "one");
         assertQueryEquals("field:( one )", null, "one");
         assertQueryEquals("+value", null, "value");
-        assertQueryEquals("-value", null, "value"); //? should we allow - at the beginning?
 
 
         assertQueryEquals("m:(a b c)", null, "+m:a +m:b +m:c");
@@ -464,11 +566,9 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("m:(a b c OR d NOT e)", null, "+m:a +m:b +(m:c (+m:d -m:e))");
         assertQueryEquals("m:(a b NEAR c)", null, "+m:a +spanNear([m:b, m:c], 5, false)");
         assertQueryEquals("m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, false) +(+m:d +m:e)");
-        assertQueryEquals("-m:(a b NEAR c d AND e)", null, "+m:a +spanNear([m:b, m:c], 5, false) +(+m:d +m:e)"); //? should we allow - at the beginning?
 
         assertQueryEquals("m:(a b NEAR2 c)", null, "+m:a +spanNear([m:b, m:c], 2, false)");
         assertQueryEquals("m:(a b NEAR3 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 3, false) +(+m:d +m:e)");
-        assertQueryEquals("-m:(a b NEAR4 c d AND e)", null, "+m:a +spanNear([m:b, m:c], 4, false) +(+m:d +m:e)");
         assertQueryNodeException("m:(a b NEAR7 c)"); // by default, only range 1-5 is allowed (in configuration)
 
 

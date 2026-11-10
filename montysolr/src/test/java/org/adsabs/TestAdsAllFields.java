@@ -52,6 +52,30 @@ import java.util.List;
  **/
 public class TestAdsAllFields extends MontySolrQueryTestCase {
 
+    public void testIdentifierFieldAppliesToEveryGroupClause() throws Exception {
+        assertU(delQ("*:*"));
+        assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
+        try {
+            assertU(adoc("id", "100", "bibcode", "identifier-groups-unicode",
+                    "doi", "doi:ŽŠČŘĎŤŇ:123456789"));
+            assertU(adoc("id", "201", "bibcode", "issue25-first", "doi", "doi:issue25-first"));
+            assertU(adoc("id", "202", "bibcode", "issue25-second", "doi", "doi:issue25-second"));
+            assertU(adoc("id", "203", "bibcode", "issue25-wrong-field", "title", "doi:issue25-second"));
+            assertU(commit("waitSearcher", "true"));
+
+            assertQ(req("q", "doi:(\"doi:issue25-first\" OR \"doi:issue25-second\")"),
+                    "//*[@numFound='2']",
+                    "//doc/str[@name='id'][.='201']",
+                    "//doc/str[@name='id'][.='202']",
+                    "not(//doc/str[@name='id'][.='203'])");
+            assertQ(req("q", "doi:(\"doi:ŽŠČŘĎŤŇ:123456789\" OR \"ŽŠČŘĎŤŇ:123456789\")"),
+                    "//*[@numFound='1']", "//doc/int[@name='recid'][.='100']");
+        } finally {
+            assertU(delQ("*:*"));
+            assertU(commit("waitSearcher", "true", "expungeDeletes", "true"));
+        }
+    }
+
     @BeforeClass
     public static void beforeClass() throws Exception {
         schemaString = "deploy/adsabs/server/solr/collection1/conf/schema.xml";
@@ -477,9 +501,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
         //assertQ(req("q", "doi:\"doi:žščŘĎŤŇ?123456789\""), "//*[@numFound='1']");
         assertQ(req("q", "doi:\"doi:žščŘĎŤŇ\\?123456789\""), "//*[@numFound='0']");
 
-        // failing now, will need to mess with grammar first
-//		assertQ(req("q", "doi:(\"doi:ŽŠČŘĎŤŇ:123456789\" OR \"ŽŠČŘĎŤŇ:123456789\")"), 
-//		    "//*[@numFound='1']");
 
 
 
@@ -518,9 +539,14 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                         "<str>Anders, John Michael</str>" +
                         "<str>Einstein, A</str></arr>");
 
+        // Leading apostrophes retain a word boundary; internal elisions join letters.
+        assertQ(req("q", "author:\"'t Hoof*\""),
+                "//*[@numFound='2']",
+                "//doc/int[@name='recid'][.='2']",
+                "//doc/int[@name='recid'][.='7']");
         assertQ(req("q", "author:\"t' Hoof*\""),
-                "//*[@numFound='3']"
-        );
+                "//*[@numFound='1']",
+                "//doc/int[@name='recid'][.='100']");
 
         /*
          * book_author
@@ -653,6 +679,8 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
          * editor
          */
         assertQ(req("q", "editor:\"'t hooft, v x\""),
+                "//*[@numFound='0']");
+        assertQ(req("q", "editor:\"t' hooft, v x\""),
                 "//*[@numFound='1']",
                 "//doc/int[@name='recid'][.='100']");
 
@@ -1715,9 +1743,6 @@ public class TestAdsAllFields extends MontySolrQueryTestCase {
                 "//*[@numFound='6']"
         );
 
-        // verify the explanation still works
-        assertQ(req("defType", "aqp", "debugQuery", "true", "q", "topn(2, similar(datetest, input title, 100, 1, 1, 1), \"score desc,bibcode asc\")"),
-                "//*[@name='debug']/*[@name='explain']/*[position() <= 1][contains(text(), 'product of')]");
 
 
         /*

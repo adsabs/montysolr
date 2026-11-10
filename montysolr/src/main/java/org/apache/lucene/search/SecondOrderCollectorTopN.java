@@ -1,9 +1,12 @@
 package org.apache.lucene.search;
 
 import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.ReaderUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
@@ -12,6 +15,8 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
     private final int topN;
     private String detail = null;
     private Sort sortOrder;
+    private IndexSearcher searcher;
+    private Weight firstOrderScoreWeight;
 
     public SecondOrderCollectorTopN(String detail, int topN, Sort sortOrder) {
         this.topN = topN;
@@ -26,8 +31,25 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
     }
 
 
+
     @Override
-    public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) {
+    public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight)
+            throws IOException {
+        if (sortOrder != null) {
+            this.searcher = searcher;
+            this.firstOrderScoreWeight = firstOrderWeight;
+        }
+        return super.searcherInitialization(searcher, firstOrderWeight);
+    }
+
+    @Override
+    public ScoreMode initializationScoreMode() {
+        // No-score weights can discard scoring wrappers needed to rescore selected hits.
+        return sortOrder == null ? scoreMode() : ScoreMode.COMPLETE;
+    }
+
+    @Override
+    public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) throws IOException {
 
         if (topCollector.totalHits == 0)
             return null;
@@ -35,8 +57,12 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
         lock.lock();
         try {
             if (!organized) {
-                ((ArrayList) hits).ensureCapacity(topCollector.totalHits);
-                for (ScoreDoc d : topCollector.topDocs().scoreDocs) {
+                ScoreDoc[] scoreDocs = topCollector.topDocs().scoreDocs;
+                ((ArrayList) hits).ensureCapacity(scoreDocs.length);
+                if (sortOrder != null) {
+                    populateScores(scoreDocs);
+                }
+                for (ScoreDoc d : scoreDocs) {
                     hits.add(new CollectorDoc(d.doc, d.score));
                 }
 
@@ -46,7 +72,30 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
         }
 
         return super.getSubReaderResults(rangeStart, rangeEnd);
+    }
 
+    private void populateScores(ScoreDoc[] scoreDocs) throws IOException {
+        Arrays.sort(scoreDocs, Comparator.comparingInt(scoreDoc -> scoreDoc.doc));
+        List<LeafReaderContext> contexts = searcher.getLeafContexts();
+        LeafReaderContext currentContext = null;
+        Scorer currentScorer = null;
+        for (ScoreDoc scoreDoc : scoreDocs) {
+            if (currentContext == null
+                    || scoreDoc.doc >= currentContext.docBase + currentContext.reader().maxDoc()) {
+                currentContext = contexts.get(ReaderUtil.subIndex(scoreDoc.doc, contexts));
+                ScorerSupplier scorerSupplier = firstOrderScoreWeight.scorerSupplier(currentContext);
+                if (scorerSupplier == null) {
+                    throw new IllegalStateException("Selected top-n document does not match the seed query");
+                }
+                currentScorer = scorerSupplier.get(1);
+            }
+            int leafDoc = scoreDoc.doc - currentContext.docBase;
+            int advanced = currentScorer.iterator().advance(leafDoc);
+            if (advanced != leafDoc) {
+                throw new IllegalStateException("Selected top-n document does not match the seed query");
+            }
+            scoreDoc.score = currentScorer.score();
+        }
     }
 
     @Override

@@ -175,7 +175,9 @@ tokens {
 
 
 mainQ : 
-  clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
+  NOT clauseNear EOF
+    -> ^(OPERATOR["DEFOP"] ^(MODIFIER MINUS["-"] clauseNear))
+  | clauseOr+ EOF -> ^(OPERATOR["DEFOP"] clauseOr+) // Default operator
   ;
    
   
@@ -188,7 +190,8 @@ clauseAnd
   ;
 
 clauseNot
-  : (first=clauseNear -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
+  :
+  (first=clauseNear  -> $first) (not others=clauseNear -> ^(OPERATOR["NOT"] clauseNear+ ))*
   ;
   
 clauseNear
@@ -213,7 +216,9 @@ atom
   : 
   lmodifier? field multi_value rmodifier?
    -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field multi_value)))
-  | lmodifier? field? value rmodifier? 
+  | lmodifier? field '=' value rmodifier?
+   -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field ^(MODIFIER EQUAL["="] value))))
+  | lmodifier? field? value rmodifier?
   -> ^(MODIFIER lmodifier? ^(TMODIFIER rmodifier? ^(FIELD field? value)))
   //| lmodifier? (STAR COLON)? STAR 
   //-> ^(MODIFIER lmodifier? ^(QANYTHING STAR["*"]))
@@ -461,6 +466,7 @@ identifier
   | PHRASE -> $identifier ^(QPHRASE PHRASE)
   | NUMBER  -> $identifier NUMBER
   | STAR -> $identifier ^(QANYTHING STAR)
+  | LPAREN multiClause RPAREN -> $identifier ^(CLAUSE multiClause)
   )
   ;
   
@@ -518,6 +524,11 @@ TILDE : '~' NUMBER?;
 
 DQUOTE  : '\"';
 
+// Typographic double quotes can open or close a phrase, including low quotes.
+// A typographic opening quote also accepts an ASCII closing quote.
+// Quotes inside an ASCII-delimited phrase remain literal content.
+CURLY_QUOTE : '\u201C' | '\u201D' | '\u201E';
+
 //SQUOTE  : '\'';
 
 COMMA : ',';
@@ -528,6 +539,11 @@ SEMICOLON:  ';';
 fragment AS_CHAR
   :
   ~('0' .. '9' | ' ' | COMMA | PLUS | MINUS | '$')
+  ;
+
+fragment AUTHOR_CHAR
+  :
+  AS_CHAR | '-'
   ;
   
   
@@ -546,7 +562,7 @@ NEAR  : ('n' | 'N') ('e' | 'E') ('a' | 'A') ('r' | 'R') ('0'..'9')*;
   
 AUTHOR_SEARCH
   :
-  '^' AS_CHAR+ (',' (' ' | AS_CHAR)+)* '$'?
+  '^' AUTHOR_CHAR+ (',' (' ' | AUTHOR_CHAR)+)* '$'?
   ;
 
 
@@ -615,7 +631,7 @@ fragment INT: '0' .. '9';
 fragment TERM_START_CHAR
   :
   (~(' ' | '\t' | '\n' | '\r' | '\u3000'
-        | '\"' 
+        | '\"' | '\u201C' | '\u201D' | '\u201E'
         | '(' | ')' | '[' | ']' | '{' | '}'
         | '+' | '-' | '!' | ':' | '~' | '^' 
         | '?' | '*' | '\\'|',' | '=' | '#'
@@ -674,10 +690,12 @@ TERM_TRUNCATED:
 PHRASE  
   : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'|'?'|'*'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'|'?'|'*'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 PHRASE_ANYTHING : 
   DQUOTE (ESC_CHAR|~('\"'|'\\'))+ DQUOTE
+  | CURLY_QUOTE (ESC_CHAR|~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))+ (CURLY_QUOTE | DQUOTE)
   ;
 
 LOCAL_PARAMS  : 
@@ -686,3 +704,6 @@ LOCAL_PARAMS  :
 REGEX : 
   '/' (ESC_CHAR|~('/'|'\\'))+ '/'
   ; 
+UNTERMINATED_CURLY_PHRASE
+  : CURLY_QUOTE (ESC_CHAR | ~('\u201C'|'\u201D'|'\u201E'|'\"'|'\\'))* '\\'? EOF
+  ;
