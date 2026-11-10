@@ -66,9 +66,10 @@ public class AqpQFUNCProcessor extends AqpQProcessor {
         if (((AqpANTLRNode) children.get(children.size() - 1)).getTokenName().equals("RPAREN")) {
             CharStream inputStream = AqpQProcessor.getInputStream(node);
             AqpANTLRNode funcTail = (AqpANTLRNode) children.get(children.size() - 1);
-            OriginalInput originalInput = new OriginalInput(inputStream.substring(funcHead.getInputTokenEnd(), funcTail.getInputTokenStart()),
-                    funcHead.getInputTokenStart(),
-                    funcHead.getInputTokenEnd());
+            int bodyStart = funcHead.getInputTokenEnd() + 1;
+            int bodyEnd = funcTail.getInputTokenStart() - 1;
+            OriginalInput originalInput = new OriginalInput(inputStream.substring(bodyStart, bodyEnd),
+                    bodyStart, bodyEnd);
 
             ArrayList<OriginalInput> values = new ArrayList<OriginalInput>();
             int start = funcHead.getInputTokenEnd() + 1;

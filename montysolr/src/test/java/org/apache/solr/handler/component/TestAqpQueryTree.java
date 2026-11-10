@@ -73,7 +73,6 @@ public class TestAqpQueryTree extends MontySolrQueryTestCase {
         // ANTLR generates the token type numbers from ADS.g, so any grammar
         // change renumbers them; compare the tree without them.
         assert response.replaceAll(" type=\"\\d+\"", "").contains(s);
-
         response = h.query(req("qt", "/qtree", "q", "title:\"joe doe\"", "wt", "json"));
         //System.out.println(response);
 
