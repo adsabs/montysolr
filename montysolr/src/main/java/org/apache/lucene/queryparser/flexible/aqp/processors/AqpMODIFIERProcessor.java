@@ -16,7 +16,7 @@ import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
  *
  * <p>
  * <p>
- * If BOOST node contains two children, we take the first and check its input,
+ * If MODIFIER node contains two children, we take the first and check its input,
  * eg.
  *
  * <pre>
@@ -86,6 +86,7 @@ public class AqpMODIFIERProcessor extends AqpQProcessor {
                     QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
                     "Unknown modifier: " + modifier + "\n" + node));
         }
+
         ModifierQueryNode explicitModifier = new ModifierQueryNode(childNode, modifierValue);
         explicitModifier.setTag(EXPLICIT_MODIFIER_TAG, true);
         return explicitModifier;

@@ -23,8 +23,6 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
         if (node instanceof AqpANTLRNode
                 && ((AqpANTLRNode) node).getTokenLabel().equals("ATOM")) {
 
-            AqpANTLRNode atomNode = (AqpANTLRNode) node;
-
             List<QueryNode> children = node.getChildren();
             QueryNode modifierNode = children.get(0); // MODIFIER
             node = children.get(1); // NUCLEUS
@@ -38,6 +36,7 @@ public class AqpATOMProcessor extends QueryNodeProcessorImpl implements
                 explicitModifier.setTag(AqpMODIFIERProcessor.EXPLICIT_MODIFIER_TAG, true);
                 node = explicitModifier;
             }
+
             return node;
         }
         return node;

@@ -1,10 +1,9 @@
 package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpFeedback;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpDisjunctionQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFuzzyModifierNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpWhiteSpacedQueryNode;
-import org.apache.lucene.queryparser.flexible.aqp.nodes.SlowFuzzyQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -19,22 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Rewrites the query node which is below the {@link AqpFuzzyModifierNode}
+ * Interprets {@link AqpFuzzyModifierNode} as phrase slop for quoted or wildcard nodes and as
+ * {@link FuzzyQueryNode} for other field nodes. Fields configured by
+ * {@code aqp.force.fuzzy.phrases} use fuzzy matching even when quoted.
  * <p>
- * The actions are: <p>
- * <p>
- * <p>
- * {@link FieldQueryNode} <p>
- * - query is turned into {@link FuzzyQueryNode} or {@link SlowFuzzyQueryNode} <p>
- * depending the configuration of {@link AqpStandardQueryConfigHandler}.ConfigurationKeys.ALLOW_SLOW_FUZZY
- * - invalid syntax is raised if not 0.0 &gt; fuzzy &lt; 1.0  <p>
- * <p>
- * {@link WildcardQueryNode}, {@link QuotedFieldQueryNode} <p>
- * - becomes {@link SlopQueryNode} <p>
- * <p>
- * <p>
- * {@link QuotedFieldQueryNode} <p>
- * - wrapped with {@link SlopQueryNode}
+ * For whitespace disjunctions, only quoted branches receive slop; unquoted branches remain
+ * unchanged. Direct phrase and wildcard slop nodes carry {@link #EXPLICIT_SLOP}.
  */
 public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl implements
         QueryNodeProcessor {
@@ -55,8 +44,7 @@ public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl impleme
                                 QueryParserMessages.INVALID_SYNTAX, node
                                         + "\nUse of ~ is not allowed here"));
                     }
-                    String value = ((AqpWhiteSpacedQueryNode) disjunct).getTextAsString();
-                    if (value.startsWith("\"") && value.endsWith("\"")) {
+                    if (isQuotedWhitespaceNode((AqpWhiteSpacedQueryNode) disjunct)) {
                         sloppedChildren.add(new SlopQueryNode(disjunct, fuzzy.intValue()));
                     } else {
                         sloppedChildren.add(disjunct);
@@ -69,23 +57,23 @@ public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl impleme
 
             boolean quotedWhitespaceNode = false;
             if (child instanceof AqpWhiteSpacedQueryNode) {
-                String value = ((AqpWhiteSpacedQueryNode) child).getTextAsString();
-                quotedWhitespaceNode = value.startsWith("\"") && value.endsWith("\"");
+                quotedWhitespaceNode = isQuotedWhitespaceNode((AqpWhiteSpacedQueryNode) child);
             }
+
             if (child instanceof QuotedFieldQueryNode
                     || child instanceof WildcardQueryNode
                     || quotedWhitespaceNode) {
 
                 if (child instanceof QuotedFieldQueryNode && hasConfigMap()) {
-                    Map<String, String> c = getConfigMap();
+                    Map<String, String> configMap = getConfigMap();
 
-                    if (c.containsKey("aqp.force.fuzzy.phrases")) {
-                        FieldQueryNode fn = (FieldQueryNode) child;
+                    if (configMap.containsKey("aqp.force.fuzzy.phrases")) {
+                        FieldQueryNode fieldNode = (FieldQueryNode) child;
 
                         // if this is a phrase, but we want to treat it as a fuzzy field
-                        for (String f : c.get("aqp.force.fuzzy.phrases").split(",")) {
-                            if (f.equals(fn.getFieldAsString())) {
-                                return makeFuzzyNode(config, fn, fuzzy);
+                        for (String field : configMap.get("aqp.force.fuzzy.phrases").split(",")) {
+                            if (field.equals(fieldNode.getFieldAsString())) {
+                                return makeFuzzyNode(fieldNode, fuzzy);
                             }
                         }
                     }
@@ -103,15 +91,14 @@ public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl impleme
                                         + " is automatically converted to: " + fuzzy.intValue()));
                     }
                 }
+
                 SlopQueryNode slopNode = new SlopQueryNode(child, fuzzy.intValue());
                 slopNode.setTag(EXPLICIT_SLOP, true);
                 return slopNode;
             } else if (child instanceof FieldQueryNode) {
 
-                FieldQueryNode fn = (FieldQueryNode) child;
-                return makeFuzzyNode(config, fn, fuzzy);
-
-
+                FieldQueryNode fieldNode = (FieldQueryNode) child;
+                return makeFuzzyNode(fieldNode, fuzzy);
             } else {
                 throw new QueryNodeException(new MessageImpl(
                         QueryParserMessages.INVALID_SYNTAX, node
@@ -133,9 +120,14 @@ public class AqpFuzzyModifierProcessor extends AqpQueryNodeProcessorImpl impleme
         return children;
     }
 
-    private QueryNode makeFuzzyNode(QueryConfigHandler config, FieldQueryNode fn, Float fuzzy) {
-        return new FuzzyQueryNode(fn.getFieldAsString(), fn.getTextAsString(),
-                fuzzy, fn.getBegin(), fn.getEnd());
+    private boolean isQuotedWhitespaceNode(AqpWhiteSpacedQueryNode node) {
+        String value = node.getTextAsString();
+        return value.startsWith("\"") && value.endsWith("\"");
+    }
+
+    private QueryNode makeFuzzyNode(FieldQueryNode fieldNode, Float fuzzy) {
+        return new FuzzyQueryNode(fieldNode.getFieldAsString(), fieldNode.getTextAsString(),
+                fuzzy, fieldNode.getBegin(), fieldNode.getEnd());
     }
 
 }

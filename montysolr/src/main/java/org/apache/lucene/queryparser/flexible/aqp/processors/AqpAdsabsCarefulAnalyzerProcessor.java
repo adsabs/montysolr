@@ -66,40 +66,42 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         String field = null;
         String value = null;
         String[] tokens;
+
         if (node instanceof WildcardQueryNode) {
             field = ((WildcardQueryNode) node).getFieldAsString();
             value = ((WildcardQueryNode) node).getTextAsString();
-            if (isStrField(field)) {
+            if (isStringField(field)) {
                 return node;
             }
 
             int asteriskPosition = -1;
-            int qmarkPosition = -1;
-            int origLen = value.length();
+            int questionMarkPosition = -1;
+            int originalLength = value.length();
 
             if (value.indexOf('*') > -1) {
                 asteriskPosition = value.indexOf('*');
             }
             if (value.indexOf('?') > -1) {
-                qmarkPosition = value.indexOf('?');
+                questionMarkPosition = value.indexOf('?');
             }
+
             // if wildcard in the middle, we can't deal with it. return
             if (asteriskPosition > 0 && asteriskPosition + 1 < value.length()
-                    || qmarkPosition > 0 && qmarkPosition + 1 < value.length()
-                    || asteriskPosition > -1 && qmarkPosition > -1)
+                    || questionMarkPosition > 0 && questionMarkPosition + 1 < value.length()
+                    || asteriskPosition > -1 && questionMarkPosition > -1)
                 return node;
 
             for (String suffix : new String[]{"_wildcard", ""}) {
-                if (hasAnalyzer(field + suffix)) {
+                if (hasExplicitAnalyzerField(field + suffix)) {
                     tokens = analyze(field + suffix, value);
 
                     if (tokens.length != 1)
                         return node; // break, let the analyzer decide the fate
 
                     String newToken = tokens[0];
-                    if (newToken.length() < origLen) {
-                        if (qmarkPosition > -1) {
-                            if (qmarkPosition == 0) {
+                    if (newToken.length() < originalLength) {
+                        if (questionMarkPosition > -1) {
+                            if (questionMarkPosition == 0) {
                                 newToken = '?' + tokens[0];
                             } else {
                                 newToken = tokens[0] + '?';
@@ -123,9 +125,11 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         } else if (node instanceof FuzzyQueryNode) {
             field = ((FuzzyQueryNode) node).getFieldAsString();
             value = ((FuzzyQueryNode) node).getTextAsString();
+
             for (String suffix : new String[]{"_fuzzy", ""}) {
-                if (hasAnalyzer(field + suffix)) {
+                if (hasExplicitAnalyzerField(field + suffix)) {
                     tokens = analyze(field + suffix, value);
+
                     if (tokens.length == 0) {
                         return new DeletedQueryNode();
                     }
@@ -133,12 +137,10 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
                     if (tokens.length > 1)
                         return node; // break, let the analyzer decide the fate
 
-
                     if (!tokens[0].equals(value)) {
 
                         QueryConfigHandler config = getQueryConfigHandler();
                         Map<String, String> args = config.get(AqpStandardQueryConfigHandler.ConfigurationKeys.NAMED_PARAMETER);
-
 
                         if (node.getClass().equals(SlowFuzzyQueryNode.class)
                                 && args != null && args.getOrDefault("aqp.allow.slow.fuzzy", "true") == "true") {
@@ -160,8 +162,9 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         } else if (node instanceof AqpAdsabsRegexQueryNode) {
             field = ((FieldQueryNode) node).getFieldAsString();
             value = ((FieldQueryNode) node).getText().toString();
+
             for (String suffix : new String[]{"_regex",}) {
-                if (hasAnalyzer(field + suffix)) {
+                if (hasExplicitAnalyzerField(field + suffix)) {
                     tokens = analyze(field + suffix, value);
 
                     if (tokens.length > 1)
@@ -179,20 +182,19 @@ public class AqpAdsabsCarefulAnalyzerProcessor extends QueryNodeProcessorImpl {
         return node;
     }
 
-    private boolean isStrField(String fieldName) {
-        SolrQueryRequest req = this.getQueryConfigHandler()
+    private boolean isStringField(String fieldName) {
+        SolrQueryRequest request = this.getQueryConfigHandler()
                 .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
                 .getRequest();
-        SchemaField schemaField = req.getSchema().getFieldOrNull(fieldName);
+        SchemaField schemaField = request.getSchema().getFieldOrNull(fieldName);
         return schemaField != null && schemaField.getType() instanceof StrField;
     }
 
-
-    private boolean hasAnalyzer(String fieldName) {
-        SolrQueryRequest req = this.getQueryConfigHandler()
+    private boolean hasExplicitAnalyzerField(String fieldName) {
+        SolrQueryRequest request = this.getQueryConfigHandler()
                 .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
                 .getRequest();
-        return req.getSchema().hasExplicitField(fieldName);
+        return request.getSchema().hasExplicitField(fieldName);
     }
 
     private String[] analyze(CharSequence field, String value) throws QueryNodeException {

@@ -1,6 +1,7 @@
 package org.apache.lucene.search.join;
 
 import java.io.IOException;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -54,31 +55,32 @@ public final class MontyNormalizingJoinUtil {
             IndexSearcher fromSearcher)
             throws IOException {
 
-        RawTermsAvgCollector collector = new RawTermsAvgCollector(fromField);
+        RawTermsAverageCollector collector = new RawTermsAverageCollector(fromField);
         fromSearcher.search(fromQuery, collector);
 
         BytesRefHash normalizedTerms = new BytesRefHash();
-        float[] normScoreSums = new float[0];
-        int[] normScoreCounts = new int[0];
+        float[] normalizedScores = new float[0];
+        int[] normalizedScoreCounts = new int[0];
 
         BytesRefHash rawTerms = collector.collectedTerms;
-        float[] rawAvgScores = collector.getAverageScoresPerTerm();
+        float[] rawAverageScores = collector.getAverageScoresPerTerm();
         BytesRef spare = new BytesRef();
-        for (int rawOrd = 0; rawOrd < rawTerms.size(); rawOrd++) {
-            BytesRef rawValue = rawTerms.get(rawOrd, spare);
-            BytesRef normValue = analyzeToSingleTerm(toAnalyzer, toField, rawValue.utf8ToString());
+        for (int rawTermOrd = 0; rawTermOrd < rawTerms.size(); rawTermOrd++) {
+            BytesRef rawValue = rawTerms.get(rawTermOrd, spare);
+            BytesRef normalizedValue = analyzeToSingleTerm(toAnalyzer, toField, rawValue.utf8ToString());
 
-            int normOrd = normalizedTerms.add(normValue);
-            if (normOrd < 0) {
-                normOrd = -normOrd - 1;
+            int normalizedTermOrd = normalizedTerms.add(normalizedValue);
+            if (normalizedTermOrd < 0) {
+                normalizedTermOrd = -normalizedTermOrd - 1;
             } else {
-                normScoreSums = ArrayUtil.grow(normScoreSums, normOrd + 1);
-                normScoreCounts = ArrayUtil.grow(normScoreCounts, normOrd + 1);
+                normalizedScores = ArrayUtil.grow(normalizedScores, normalizedTermOrd + 1);
+                normalizedScoreCounts = ArrayUtil.grow(normalizedScoreCounts, normalizedTermOrd + 1);
             }
 
-            int rawCount = collector.scoreCounts[rawOrd];
-            normScoreSums[normOrd] += rawAvgScores[rawOrd] * rawCount;
-            normScoreCounts[normOrd] += rawCount;
+            int rawCount = collector.scoreCounts[rawTermOrd];
+            // Preserve raw-average rounding before combining terms that normalize to the same value.
+            normalizedScores[normalizedTermOrd] += rawAverageScores[rawTermOrd] * rawCount;
+            normalizedScoreCounts[normalizedTermOrd] += rawCount;
         }
 
         if (normalizedTerms.size() == 0) {
@@ -86,13 +88,13 @@ public final class MontyNormalizingJoinUtil {
         }
 
         for (int i = 0; i < normalizedTerms.size(); i++) {
-            normScoreSums[i] /= normScoreCounts[i];
+            normalizedScores[i] /= normalizedScoreCounts[i];
         }
 
         return new MontyNormalizingTermsIncludingScoreQuery(
                 toField,
                 normalizedTerms,
-                normScoreSums,
+                normalizedScores,
                 fromField,
                 fromQuery,
                 fromSearcher.getTopReaderContext().id());
@@ -100,15 +102,16 @@ public final class MontyNormalizingJoinUtil {
 
     private static BytesRef analyzeToSingleTerm(Analyzer analyzer, String field, String value)
             throws IOException {
-        try (TokenStream ts = analyzer.tokenStream(field, value)) {
-            CharTermAttribute termAtt = ts.addAttribute(CharTermAttribute.class);
-            ts.reset();
-            if (!ts.incrementToken()) {
+        try (TokenStream tokenStream = analyzer.tokenStream(field, value)) {
+            CharTermAttribute termAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+            tokenStream.reset();
+            if (!tokenStream.incrementToken()) {
                 throw new IllegalStateException(
                         "Analyzer for field '" + field + "' produced zero tokens for value: " + value);
             }
-            BytesRef result = new BytesRef(termAtt.toString());
-            if (ts.incrementToken()) {
+
+            BytesRef result = new BytesRef(termAttribute.toString());
+            if (tokenStream.incrementToken()) {
                 throw new IllegalStateException(
                         "Analyzer for field '"
                                 + field
@@ -117,13 +120,14 @@ public final class MontyNormalizingJoinUtil {
                                 + " -- MontyNormalizingJoinUtil requires a single-token"
                                 + " (keyword-tokenizer-based) analyzer chain for join fields");
             }
-            ts.end();
+
+            tokenStream.end();
             return result;
         }
     }
 
     /** Collects raw (unanalyzed) single-valued term values and averages the query score per term. */
-    private static final class RawTermsAvgCollector extends SimpleCollector {
+    private static final class RawTermsAverageCollector extends SimpleCollector {
 
         private final String field;
         final BytesRefHash collectedTerms = new BytesRefHash();
@@ -133,16 +137,16 @@ public final class MontyNormalizingJoinUtil {
         private SortedDocValues docValues;
         private Scorable scorer;
 
-        RawTermsAvgCollector(String field) {
+        RawTermsAverageCollector(String field) {
             this.field = field;
         }
 
         float[] getAverageScoresPerTerm() {
-            float[] avg = new float[collectedTerms.size()];
-            for (int i = 0; i < avg.length; i++) {
-                avg[i] = scoreSums[i] / scoreCounts[i];
+            float[] averageScores = new float[collectedTerms.size()];
+            for (int i = 0; i < averageScores.length; i++) {
+                averageScores[i] = scoreSums[i] / scoreCounts[i];
             }
-            return avg;
+            return averageScores;
         }
 
         @Override
@@ -153,15 +157,17 @@ public final class MontyNormalizingJoinUtil {
             } else {
                 value = new BytesRef(BytesRef.EMPTY_BYTES);
             }
-            int ord = collectedTerms.add(value);
-            if (ord < 0) {
-                ord = -ord - 1;
+
+            int termOrd = collectedTerms.add(value);
+            if (termOrd < 0) {
+                termOrd = -termOrd - 1;
             } else {
-                scoreSums = ArrayUtil.grow(scoreSums, ord + 1);
-                scoreCounts = ArrayUtil.grow(scoreCounts, ord + 1);
+                scoreSums = ArrayUtil.grow(scoreSums, termOrd + 1);
+                scoreCounts = ArrayUtil.grow(scoreCounts, termOrd + 1);
             }
-            scoreSums[ord] += scorer.score();
-            scoreCounts[ord]++;
+
+            scoreSums[termOrd] += scorer.score();
+            scoreCounts[termOrd]++;
         }
 
         @Override

@@ -13,29 +13,31 @@ public class AqpAdsabsFixQPOSITIONProcessor extends AqpQProcessor {
 
     public QueryNode createQNode(AqpANTLRNode node) throws QueryNodeException {
 
-        AqpANTLRNode subChild = ((AqpANTLRNode) node.getChildren().get(0));
-        String input = subChild.getTokenInput();
+        AqpANTLRNode inputNode = ((AqpANTLRNode) node.getChildren().get(0));
+        String input = inputNode.getTokenInput();
 
         // TODO: emit warnings
 
         if (node.getTokenLabel().equals("QNORMAL")) {
-            // A lone dollar is not the obsolete trailing-dollar marker used
-            // by the author-position syntax.
-            if (input.endsWith("$") && input.length() > 1) {
+            if (hasTrailingPositionMarker(input)) {
                 node.setTokenName("QPOSITION");
                 node.setTokenLabel("QPOSITION");
             }
         } else {
-            String testInput = input.substring(1, input.length() - 1);
-            if (testInput.startsWith("^") ||
-                    (testInput.endsWith("$") && testInput.length() > 1)) {
+            String unquotedInput = input.substring(1, input.length() - 1);
+            if (unquotedInput.startsWith("^") || hasTrailingPositionMarker(unquotedInput)) {
                 node.setTokenName("QPOSITION");
                 node.setTokenLabel("QPOSITION");
-                subChild.setTokenInput(testInput);
+                inputNode.setTokenInput(unquotedInput);
             }
         }
 
         return node;
+    }
+
+    private boolean hasTrailingPositionMarker(String input) {
+        // A lone dollar is not the obsolete trailing-dollar author-position marker.
+        return input.endsWith("$") && input.length() > 1;
     }
 
 }

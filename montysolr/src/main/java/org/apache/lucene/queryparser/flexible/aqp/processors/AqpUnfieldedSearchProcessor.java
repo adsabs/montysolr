@@ -2,50 +2,47 @@ package org.apache.lucene.queryparser.flexible.aqp.processors;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.index.MultiTerms;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.queryparser.flexible.aqp.ADSEscapeQuerySyntaxImpl;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpFunctionQueryBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
+import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsRegexQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAdsabsSynonymQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpAndQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpFunctionQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNonAnalyzedQueryNode;
-import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpOrQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpWhiteSpacedQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpQProcessor.OriginalInput;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
-import org.apache.lucene.queryparser.flexible.core.nodes.DeletedQueryNode;
 import org.apache.lucene.queryparser.flexible.core.nodes.*;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-import java.io.IOException;
-import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
+import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
-import org.apache.lucene.queryparser.flexible.core.nodes.MatchNoDocsQueryNode;
+import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryNodeProcessor;
 import org.apache.lucene.queryparser.flexible.standard.processors.MultiFieldQueryNodeProcessor;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.index.MultiTerms;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.QueryBuilder;
-import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
+import org.apache.solr.analysis.author.AuthorCreateQueryVariationsFilter;
 import org.apache.solr.request.SolrQueryRequest;
 
+import java.io.IOException;
 import java.io.StringReader;
-import org.apache.solr.analysis.author.AuthorCreateQueryVariationsFilter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * This processor wraps fields with the 'null' value into edismax
- * search. This is the solution for the unfielded search
+ * Routes the configured unfielded search field through edismax, with
+ * stopword tagging, author detection, and bounded author phrase expansion.
  *
  * @see FieldableNode
  * @see MultiFieldQueryNodeProcessor
@@ -66,30 +63,35 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
         String unfieldedName = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.UNFIELDED_SEARCH_FIELD);
         Analyzer analyzer = config.get(StandardQueryConfigHandler.ConfigurationKeys.ANALYZER);
         if (analyzer != null) {
-            List<FieldQueryNode> unfieldedNodes = new ArrayList<>();
-            collectUnfieldedNodes(queryTree, unfieldedName, unfieldedNodes);
-            boolean hasMeaningfulToken = false;
-            for (FieldQueryNode node : unfieldedNodes) {
-                if (!hasExactAncestor(node)
-                        && emitsToken(analyzer, unfieldedName, node.getTextAsString())) {
-                    hasMeaningfulToken = true;
-                    break;
-                }
-            }
-            for (FieldQueryNode node : unfieldedNodes) {
-                if (!hasExactAncestor(node) && isPlainAnalyzedLiteral(node)
-                        && !emitsToken(analyzer, unfieldedName, node.getTextAsString())) {
-                    if (hasModifierAncestor(node)) {
-                        node.setTag(PRESERVE_STOPWORD_FRAGMENT, true);
-                    } else if (hasMeaningfulToken) {
-                        node.setTag(DROP_STOPWORD_FRAGMENT, true);
-                    }
-                }
-            }
+            tagStopwordFragments(queryTree, unfieldedName, analyzer);
         }
         return super.process(queryTree);
     }
 
+    private void tagStopwordFragments(QueryNode queryTree, String unfieldedName, Analyzer analyzer) {
+        List<FieldQueryNode> unfieldedNodes = new ArrayList<>();
+        collectUnfieldedNodes(queryTree, unfieldedName, unfieldedNodes);
+
+        boolean hasMeaningfulToken = false;
+        for (FieldQueryNode node : unfieldedNodes) {
+            if (!hasExactAncestor(node)
+                    && emitsToken(analyzer, unfieldedName, node.getTextAsString())) {
+                hasMeaningfulToken = true;
+                break;
+            }
+        }
+
+        for (FieldQueryNode node : unfieldedNodes) {
+            if (!hasExactAncestor(node) && isPlainAnalyzedLiteral(node)
+                    && !emitsToken(analyzer, unfieldedName, node.getTextAsString())) {
+                if (hasExplicitModifierAncestor(node)) {
+                    node.setTag(PRESERVE_STOPWORD_FRAGMENT, true);
+                } else if (hasMeaningfulToken) {
+                    node.setTag(DROP_STOPWORD_FRAGMENT, true);
+                }
+            }
+        }
+    }
 
     @Override
     protected QueryNode postProcessNode(QueryNode node)
@@ -112,12 +114,12 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
                         "Invalid configuration",
                         "Missing FunctionQueryBuilder provider"));
             }
-            List<String> local = new ArrayList<String>();
+            List<String> localParams = new ArrayList<String>();
             if (Boolean.TRUE.equals(node.getTag(PRESERVE_STOPWORD_FRAGMENT))) {
-                local.add("aqp.preserve.unfielded.stopwords=true");
+                localParams.add("aqp.preserve.unfielded.stopwords=true");
             }
 
-            String funcName = "edismax_combined_aqp";
+            String functionName = "edismax_combined_aqp";
             String subQuery = ((FieldQueryNode) node).getTextAsString();
             if (node instanceof AqpWhiteSpacedQueryNode
                     && !(node.getParent() instanceof SlopQueryNode)) {
@@ -133,43 +135,26 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
                 // an ordinary unfielded term. Re-run fuzzy nodes through AQP
                 // after edismax selects the target fields, preserving the
                 // fuzzy modifier and the analyzer's edit-distance semantics.
-                funcName = "edismax_always_aqp";
+                functionName = "edismax_always_aqp";
             }
             if (node instanceof AqpNonAnalyzedQueryNode) {
-                funcName = "edismax_nonanalyzed";
+                functionName = "edismax_nonanalyzed";
             } else {
-                //subQuery = (String) escaper.escape(subQuery, Locale.getDefault(), EscapeQuerySyntax.Type.NORMAL);
-
                 if (node instanceof QuotedFieldQueryNode) {
                     subQuery = "\"" + subQuery + "\"";
-                    //local.add("sow=false");
                 }
                 if (node.getParent() instanceof SlopQueryNode) {
                     subQuery = subQuery + "~" + ((SlopQueryNode) node.getParent()).getValue();
-                    //if (node.getParent().getParent() instanceof BoostQueryNode) {
-                    //	subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent().getParent()).getValue();
-                    //}
                 }
-	      /*else if (node.getParent() instanceof BoostQueryNode) {
-	      	//subQuery = subQuery + "^" + ((BoostQueryNode) node.getParent()).getValue();
-	      	if (node.getParent().getParent() != null) {
-	      	  QueryNode root = node.getParent().getParent();
-	      	  List<QueryNode> children = root.getChildren();
-	      	  children.clear();
-	      	  children.add(node);
-	      	  root.set(children);
-	      	}
-	      	
-	      }*/
             }
             node.setTag("subQuery", subQuery);
 
             AqpFunctionQueryBuilder builder = config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.FUNCTION_QUERY_BUILDER_CONFIG)
-                    .getBuilder(funcName, node, config);
+                    .getBuilder(functionName, node, config);
 
             if (builder == null) {
                 throw new QueryNodeException(new MessageImpl(QueryParserMessages.INVALID_SYNTAX,
-                        "Unknown function \"" + funcName + "\""));
+                        "Unknown function \"" + functionName + "\""));
             }
 
             // Keep long unfielded phrases out of author fields to stay within the
@@ -179,23 +164,23 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
                 if (nonAuthorQf.isEmpty()) {
                     return new MatchNoDocsQueryNode();
                 }
-                local.add("qf='" + escapeLocalParam(nonAuthorQf) + "'");
+                localParams.add("qf='" + escapeLocalParam(nonAuthorQf) + "'");
             }
 
             // let adismax know that we want exact search
             if (node.getTag("aqp.exact") != null ||
                     (node.getParent() instanceof AqpAdsabsSynonymQueryNode && !((AqpAdsabsSynonymQueryNode) node.getParent()).isActivated())) {
-                local.add("aqp.exact.search=true");
+                localParams.add("aqp.exact.search=true");
             } else if (getConfigVal("aqp.maxPhraseLength", null) != null) {
-                local.add("aqp.maxPhraseLength=" + getConfigVal("aqp.maxPhraseLength"));
+                localParams.add("aqp.maxPhraseLength=" + getConfigVal("aqp.maxPhraseLength"));
             }
 
-            List<OriginalInput> fValues = new ArrayList<OriginalInput>();
-            if (local.size() > 0) {
-                subQuery = "{!adismax " + String.join(" ", local).trim() + "}" + subQuery;
+            List<OriginalInput> functionArguments = new ArrayList<OriginalInput>();
+            if (localParams.size() > 0) {
+                subQuery = "{!adismax " + String.join(" ", localParams).trim() + "}" + subQuery;
             }
-            fValues.add(new OriginalInput(subQuery, -1, -1));
-            return new AqpFunctionQueryNode(funcName, builder, fValues);
+            functionArguments.add(new OriginalInput(subQuery, -1, -1));
+            return new AqpFunctionQueryNode(functionName, builder, functionArguments);
         }
         return node;
     }
@@ -461,7 +446,7 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
         return false;
     }
 
-    private boolean hasModifierAncestor(QueryNode node) {
+    private boolean hasExplicitModifierAncestor(QueryNode node) {
         QueryNode parent = node.getParent();
         while (parent != null) {
             if (parent instanceof ModifierQueryNode
@@ -505,6 +490,7 @@ public class AqpUnfieldedSearchProcessor extends AqpQueryNodeProcessorImpl imple
             throw new RuntimeException("Unable to analyze unfielded query fragment", e);
         }
     }
+
     private String unfieldedPhraseQfWithoutAuthors(QueryNode node) {
         if (!(node instanceof QuotedFieldQueryNode)) {
             return null;

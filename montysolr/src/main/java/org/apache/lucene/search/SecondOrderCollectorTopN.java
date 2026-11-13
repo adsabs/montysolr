@@ -30,8 +30,6 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
         this.topN = topN;
     }
 
-
-
     @Override
     public boolean searcherInitialization(IndexSearcher searcher, Weight firstOrderWeight)
             throws IOException {
@@ -50,7 +48,6 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
 
     @Override
     public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) throws IOException {
-
         if (topCollector.totalHits == 0)
             return null;
 
@@ -60,12 +57,11 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
                 ScoreDoc[] scoreDocs = topCollector.topDocs().scoreDocs;
                 ((ArrayList) hits).ensureCapacity(scoreDocs.length);
                 if (sortOrder != null) {
-                    populateScores(scoreDocs);
+                    populateSeedScores(scoreDocs);
                 }
-                for (ScoreDoc d : scoreDocs) {
-                    hits.add(new CollectorDoc(d.doc, d.score));
+                for (ScoreDoc scoreDoc : scoreDocs) {
+                    hits.add(new CollectorDoc(scoreDoc.doc, scoreDoc.score));
                 }
-
             }
         } finally {
             lock.unlock();
@@ -74,24 +70,27 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
         return super.getSubReaderResults(rangeStart, rangeEnd);
     }
 
-    private void populateScores(ScoreDoc[] scoreDocs) throws IOException {
+    private void populateSeedScores(ScoreDoc[] scoreDocs) throws IOException {
+        // Selected hits must be visited in doc-id order by the forward-only seed scorers.
         Arrays.sort(scoreDocs, Comparator.comparingInt(scoreDoc -> scoreDoc.doc));
-        List<LeafReaderContext> contexts = searcher.getLeafContexts();
-        LeafReaderContext currentContext = null;
+        List<LeafReaderContext> leaves = searcher.getLeafContexts();
+        LeafReaderContext currentLeaf = null;
         Scorer currentScorer = null;
+
         for (ScoreDoc scoreDoc : scoreDocs) {
-            if (currentContext == null
-                    || scoreDoc.doc >= currentContext.docBase + currentContext.reader().maxDoc()) {
-                currentContext = contexts.get(ReaderUtil.subIndex(scoreDoc.doc, contexts));
-                ScorerSupplier scorerSupplier = firstOrderScoreWeight.scorerSupplier(currentContext);
+            if (currentLeaf == null
+                    || scoreDoc.doc >= currentLeaf.docBase + currentLeaf.reader().maxDoc()) {
+                currentLeaf = leaves.get(ReaderUtil.subIndex(scoreDoc.doc, leaves));
+                ScorerSupplier scorerSupplier = firstOrderScoreWeight.scorerSupplier(currentLeaf);
                 if (scorerSupplier == null) {
                     throw new IllegalStateException("Selected top-n document does not match the seed query");
                 }
                 currentScorer = scorerSupplier.get(1);
             }
-            int leafDoc = scoreDoc.doc - currentContext.docBase;
-            int advanced = currentScorer.iterator().advance(leafDoc);
-            if (advanced != leafDoc) {
+
+            int leafDocId = scoreDoc.doc - currentLeaf.docBase;
+            int advancedDocId = currentScorer.iterator().advance(leafDocId);
+            if (advancedDocId != leafDocId) {
                 throw new IllegalStateException("Selected top-n document does not match the seed query");
             }
             scoreDoc.score = currentScorer.score();
@@ -106,13 +105,11 @@ public class SecondOrderCollectorTopN extends AbstractSecondOrderCollector {
     @Override
     public void collect(int doc) throws IOException {
         throw new UnsupportedOperationException("Must not be called");
-
     }
 
     @Override
     public LeafCollector getLeafCollector(LeafReaderContext context) throws IOException {
-        LeafCollector c = topCollector.getLeafCollector(context);
-        return c;
+        return topCollector.getLeafCollector(context);
     }
 
     @Override

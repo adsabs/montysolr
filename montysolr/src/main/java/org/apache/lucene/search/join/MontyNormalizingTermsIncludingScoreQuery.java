@@ -19,6 +19,7 @@ package org.apache.lucene.search.join;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
+
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
@@ -38,11 +39,11 @@ import org.apache.lucene.util.FixedBitSet;
 import org.apache.lucene.util.RamUsageEstimator;
 
 /**
- * Adapted from Lucene's package-private {@code org.apache.lucene.search.join.TermsIncludingScoreQuery}
- * (which this class cannot extend or reuse directly, being package-private). Unlike the original,
- * the terms and scores supplied here are expected to already be normalized (analyzed) and
- * deduplicated by the caller ({@link MontyNormalizingJoinUtil}) -- this class performs no
- * analysis itself, it only seeks the given terms against toField's term dictionary.
+ * Adapted from Lucene's {@code org.apache.lucene.search.join.TermsIncludingScoreQuery}.
+ * The terms and scores supplied here are normalized (analyzed) and deduplicated by the caller
+ * ({@link MontyNormalizingJoinUtil}), rather than collected directly by Lucene's join collectors.
+ * This class performs no analysis itself; it only seeks the given terms against toField's
+ * term dictionary.
  *
  * <p>Trimmed relative to the original: only the single-valued-per-document scorer is kept, since
  * montysolr's join call sites (bibcode -&gt; citation/reference) never join on a multivalued
@@ -56,7 +57,7 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
     private final String toField;
     private final BytesRefHash terms;
     private final float[] scores;
-    private final int[] ords;
+    private final int[] sortedTermOrds;
 
     // These fields are used for equals() and hashcode() only
     private final String fromField;
@@ -77,7 +78,7 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
         this.toField = toField;
         this.terms = terms;
         this.scores = scores;
-        this.ords = terms.sort();
+        this.sortedTermOrds = terms.sort();
 
         this.fromField = fromField;
         this.fromQuery = fromQuery;
@@ -87,8 +88,8 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
                 BASE_RAM_BYTES
                         + RamUsageEstimator.sizeOfObject(fromField)
                         + RamUsageEstimator.sizeOfObject(
-                        fromQuery, RamUsageEstimator.QUERY_DEFAULT_RAM_BYTES_USED)
-                        + RamUsageEstimator.sizeOfObject(ords)
+                                fromQuery, RamUsageEstimator.QUERY_DEFAULT_RAM_BYTES_USED)
+                        + RamUsageEstimator.sizeOfObject(sortedTermOrds)
                         + RamUsageEstimator.sizeOfObject(scores)
                         + RamUsageEstimator.sizeOfObject(terms)
                         + RamUsageEstimator.sizeOfObject(toField);
@@ -137,17 +138,17 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
 
             @Override
             public Explanation explain(LeafReaderContext context, int doc) throws IOException {
-                Terms terms = context.reader().terms(toField);
-                if (terms != null) {
-                    TermsEnum segmentTermsEnum = terms.iterator();
+                Terms segmentTerms = context.reader().terms(toField);
+                if (segmentTerms != null) {
+                    TermsEnum segmentTermsEnum = segmentTerms.iterator();
                     BytesRef spare = new BytesRef();
                     PostingsEnum postingsEnum = null;
                     for (int i = 0; i < MontyNormalizingTermsIncludingScoreQuery.this.terms.size(); i++) {
                         if (segmentTermsEnum.seekExact(
-                                MontyNormalizingTermsIncludingScoreQuery.this.terms.get(ords[i], spare))) {
+                                MontyNormalizingTermsIncludingScoreQuery.this.terms.get(sortedTermOrds[i], spare))) {
                             postingsEnum = segmentTermsEnum.postings(postingsEnum, PostingsEnum.NONE);
                             if (postingsEnum.advance(doc) == doc) {
-                                final float score = MontyNormalizingTermsIncludingScoreQuery.this.scores[ords[i]];
+                                final float score = MontyNormalizingTermsIncludingScoreQuery.this.scores[sortedTermOrds[i]];
                                 if (boost == 1.0f) {
                                     return Explanation.match(
                                             score, "Score based on join value " + segmentTermsEnum.term().utf8ToString());
@@ -168,15 +169,15 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
 
             @Override
             public Scorer scorer(LeafReaderContext context) throws IOException {
-                Terms terms = context.reader().terms(toField);
-                if (terms == null) {
+                Terms segmentTerms = context.reader().terms(toField);
+                if (segmentTerms == null) {
                     return null;
                 }
 
-                final long cost = context.reader().maxDoc() * terms.size();
+                final long cost = context.reader().maxDoc() * segmentTerms.size();
 
-                TermsEnum segmentTermsEnum = terms.iterator();
-                return new SVInOrderScorer(this, segmentTermsEnum, context.reader().maxDoc(), cost, boost);
+                TermsEnum segmentTermsEnum = segmentTerms.iterator();
+                return new SingleValueInOrderScorer(this, segmentTermsEnum, context.reader().maxDoc(), cost, boost);
             }
 
             @Override
@@ -186,18 +187,18 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
         };
     }
 
-    private class SVInOrderScorer extends Scorer {
+    private class SingleValueInOrderScorer extends Scorer {
 
         final DocIdSetIterator matchingDocsIterator;
-        final float[] scores;
+        final float[] documentScores;
         final long cost;
         final float boost;
 
-        SVInOrderScorer(Weight weight, TermsEnum termsEnum, int maxDoc, long cost, float boost)
+        SingleValueInOrderScorer(Weight weight, TermsEnum termsEnum, int maxDoc, long cost, float boost)
                 throws IOException {
             super(weight);
             FixedBitSet matchingDocs = new FixedBitSet(maxDoc);
-            this.scores = new float[maxDoc];
+            this.documentScores = new float[maxDoc];
             fillDocsAndScores(matchingDocs, termsEnum);
             this.matchingDocsIterator = new BitSetIterator(matchingDocs, cost);
             this.cost = cost;
@@ -209,16 +210,16 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
             BytesRef spare = new BytesRef();
             PostingsEnum postingsEnum = null;
             for (int i = 0; i < terms.size(); i++) {
-                if (termsEnum.seekExact(terms.get(ords[i], spare))) {
+                if (termsEnum.seekExact(terms.get(sortedTermOrds[i], spare))) {
                     postingsEnum = termsEnum.postings(postingsEnum, PostingsEnum.NONE);
-                    float score = MontyNormalizingTermsIncludingScoreQuery.this.scores[ords[i]];
+                    float score = MontyNormalizingTermsIncludingScoreQuery.this.scores[sortedTermOrds[i]];
                     for (int doc = postingsEnum.nextDoc();
                          doc != DocIdSetIterator.NO_MORE_DOCS;
                          doc = postingsEnum.nextDoc()) {
                         matchingDocs.set(doc);
                         // In the case the same doc is also related to another doc, a score might be
                         // overwritten. This can only happen in a many-to-many relation.
-                        scores[doc] = score;
+                        documentScores[doc] = score;
                     }
                 }
             }
@@ -226,7 +227,7 @@ final class MontyNormalizingTermsIncludingScoreQuery extends Query implements Ac
 
         @Override
         public float score() throws IOException {
-            return scores[docID()] * boost;
+            return documentScores[docID()] * boost;
         }
 
         @Override

@@ -103,9 +103,11 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         add(new MultiFieldQueryNodeProcessor());
         add(new AqpNullDefaultFieldProcessor());
 
+        // Wrap unfielded input before virtual-field expansion and analysis.
         if (config.get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_READY)) {
             add(new AqpUnfieldedSearchProcessor());
         }
+
         // expands virtual fields into real fields, that can be analyzed
         // normal ways (it also adds boosts, if necessary)
         add(new AqpVirtualFieldsQueryNodeProcessor());
@@ -143,6 +145,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
             // Process fielded exact queries after virtual fields expand so their
             // exact-field markers reach every generated field alternative.
             add(new AqpUnfieldedSearchProcessor());
+
             // this takes the unfielded search (multi-token group)
             add(new AqpWhiteSpacedQueryNodeProcessor());
 
@@ -228,9 +231,8 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         add(new MultiTermRewriteMethodProcessor());
 
 
-        // purely aestetical, final touches to the query
-        // we are rewriting the tree, for example:
-        // +(+this +that) +what' becomes '+this +that +what'
+        // Final structural simplification flattens compatible boolean groups
+        // and anchors lone prohibited clauses with a match-all query.
         add(new AqpGroupQueryOptimizerProcessor());
         add(new AqpOptimizationProcessor());
 

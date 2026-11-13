@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class AqpSubqueryParserFull extends AqpSubqueryParser {
 
     private QParser parser = null;
-    private Class<?>[] qtypes = null;
+    private Class<?>[] queryTypes = null;
     private String originalInput = null;
     private Object reParseContext = null;
     private final ReentrantLock parsingLock = new ReentrantLock();
@@ -20,15 +20,17 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     public QParser getParser() {
         return parser;
     }
+
     protected String getOriginalInput() {
         return originalInput;
     }
+
     protected Object getReParseContext() {
         return reParseContext;
     }
 
     public Class[] getQtypes() {
-        return qtypes;
+        return queryTypes;
     }
 
     /*
@@ -65,13 +67,14 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
         parsingLock.lock();
         try {
             parser = qp;
-            qtypes = types;
+            queryTypes = types;
+            // Traversal mutates the parser string; retain the input for field-specific reparsing.
             originalInput = qp.getString();
             reParseContext = context;
             return swimDeep(query);
         } finally {
             parser = null;
-            qtypes = null;
+            queryTypes = null;
             originalInput = null;
             reParseContext = null;
             parsingLock.unlock();
@@ -79,7 +82,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     }
 
     protected boolean isWanted(Query query) {
-        for (Class<?> type : qtypes) {
+        for (Class<?> type : queryTypes) {
             if (type.isInstance(query)) {
                 return true;
             }
@@ -88,7 +91,7 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     }
 
     protected Query swimDeep(TermQuery query) throws SyntaxError {
-        if (parser != null && qtypes != null && isWanted(query)) {
+        if (parser != null && queryTypes != null && isWanted(query)) {
             parser.setString(query.toString());
             return parser.parse();
         }
@@ -96,17 +99,17 @@ public class AqpSubqueryParserFull extends AqpSubqueryParser {
     }
 
     protected Query swimDeep(DisjunctionMaxQuery query) throws SyntaxError {
-        List<Query> parts = new ArrayList<>(query.getDisjuncts().size());
-        for (Query oldQ : query.getDisjuncts()) {
-            parts.add(swimDeep(oldQ));
+        List<Query> reparsedDisjuncts = new ArrayList<>(query.getDisjuncts().size());
+        for (Query disjunct : query.getDisjuncts()) {
+            reparsedDisjuncts.add(swimDeep(disjunct));
         }
-        return new DisjunctionMaxQuery(parts, query.getTieBreakerMultiplier());
+        return new DisjunctionMaxQuery(reparsedDisjuncts, query.getTieBreakerMultiplier());
     }
 
     protected Query swimDeep(BooleanQuery query) throws SyntaxError {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        for (BooleanClause c : query.clauses()) {
-            builder.add(swimDeep(c.getQuery()), c.getOccur());
+        for (BooleanClause clause : query.clauses()) {
+            builder.add(swimDeep(clause.getQuery()), clause.getOccur());
         }
         builder.setMinimumNumberShouldMatch(query.getMinimumNumberShouldMatch());
         return builder.build();

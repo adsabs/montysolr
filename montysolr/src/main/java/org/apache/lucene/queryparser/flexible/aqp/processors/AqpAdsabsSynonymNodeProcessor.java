@@ -13,10 +13,9 @@ import org.apache.solr.request.SolrQueryRequest;
 import java.util.List;
 
 /**
- * If the node is {@link AqpAdsabsSynonymQueryNode} we'll check
- * whether to analyze it. If yes, it will be passed to the normal
- * analyzer for that given field. If not, then it will be processed
- * by analyzers of our choice
+ * Expands active synonym wrappers through normal analysis. For inactive wrappers, exact-tagged
+ * fields use an explicitly configured {@code _nosyn} field when available; other fields bypass
+ * analysis.
  *
  * @author rchyla
  */
@@ -54,13 +53,14 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
             if (node.getTag("aqp.exact") != null) {
                 FieldQueryNode fieldNode = (FieldQueryNode) node;
                 String fieldName = fieldNode.getFieldAsString();
-                String field = fieldName + "_nosyn";
+                String noSynonymsField = fieldName + "_nosyn";
 
-                if (hasAnalyzer(field)) {
-                    fieldNode.setField(field);
+                if (hasExplicitField(noSynonymsField)) {
+                    fieldNode.setField(noSynonymsField);
                     return fieldNode;
                 }
             }
+
             // catch all, avoid analysis
             return new AqpNonAnalyzedQueryNode((FieldQueryNode) node);
         }
@@ -83,21 +83,17 @@ public class AqpAdsabsSynonymNodeProcessor extends QueryNodeProcessorImpl implem
         return synNode.getChild();
     }
 
-    // TODO: consider merging with AqpAdsabsCarefulAnalyzerProcessor
-    // where this code was copied from
-    private boolean hasAnalyzer(String fieldName) {
+    private boolean hasExplicitField(String fieldName) {
         SolrQueryRequest req = this.getQueryConfigHandler()
                 .get(AqpAdsabsQueryConfigHandler.ConfigurationKeys.SOLR_REQUEST)
                 .getRequest();
         return req != null && req.getSchema().hasExplicitField(fieldName);
     }
 
-
     @Override
     protected List<QueryNode> setChildrenOrder(List<QueryNode> children)
             throws QueryNodeException {
         return children;
     }
-
 
 }
