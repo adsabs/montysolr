@@ -50,8 +50,31 @@ public class TestAdsabsTypeAffiliationText extends MontySolrQueryTestCase {
                 "aff", "INAF - IASF Milano, via E. Bassini 15, I-20133 Milano, Italy"));
         assertU(addDocs("aff", "Instituto de Astrofísica de Andalucía (IAA-CSIC) foo:doo"));
         assertU(addDocs("aff", "foo1", "aff", "foo2", "aff", "-", "aff", "foo4"));
+        assertU(addDocs("aff", "Max-Plank Institute for Astronomy"));
+        assertU(addDocs("aff", "Unrelated Institution",
+                "aff", "Northern Institute for Astronomy"));
 
         assertU(commit());
+        assertQ(req("q", "pos(aff:(\"max\" \"astronomy\"), 1)"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='6']"
+        );
+        assertQ(req("q", "pos(aff:(\"northern\" \"astronomy\"), -1)"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='7']"
+        );
+        assertQ(req("q", "pos(aff:\"northern\", -1) AND pos(aff:\"astronomy\", -1)"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='7']"
+        );
+        assertQ(req("q", "pos(aff:(\"max\"^2 \"astronomy\"), 1)"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='6']"
+        );
+        assertQ(req("q", "pos(aff:\"max\", 1) AND pos(aff:\"astronomy\", 1)"),
+                "//*[@numFound='1']",
+                "//doc/str[@name='id'][.='6']"
+        );
 
         //dumpDoc(null, "aff");
         //System.err.println(h.query(req("q", "aff:foo1")));
