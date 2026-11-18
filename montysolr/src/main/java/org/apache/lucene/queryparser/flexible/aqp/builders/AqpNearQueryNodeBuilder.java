@@ -1,6 +1,8 @@
 package org.apache.lucene.queryparser.flexible.aqp.builders;
 
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.spans.SpanNearQuery;
+import org.apache.lucene.queries.spans.SpanQuery;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
 import org.apache.lucene.queryparser.flexible.aqp.processors.AqpPostAnalysisProcessor;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
@@ -9,9 +11,6 @@ import org.apache.lucene.queryparser.flexible.core.builders.QueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.core.messages.QueryParserMessages;
 import org.apache.lucene.queryparser.flexible.core.nodes.QueryNode;
 import org.apache.lucene.queryparser.flexible.messages.MessageImpl;
-
-import org.apache.lucene.queries.spans.SpanNearQuery;
-import org.apache.lucene.queries.spans.SpanQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BoostQuery;
@@ -26,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -59,30 +59,29 @@ import java.util.function.Supplier;
  * must rewrite them, effectively producing
  *
  * <pre>
- * SpanNear(SpanOr(dog | cat), SpanTerm(cat), 5)
+ * SpanNear(SpanOr(dog | canin), SpanTerm(cat), 5)
  * </pre>
  * <p>
- * <p>
- * This builder does not know (yet) how to handle cases of
- * mixed boolean operators, eg.
+ * Each BooleanQuery operand must use a single occurrence type at its own
+ * level; nested groups may use different occurrence types. Mixed clauses
+ * within one group are not supported, for example:
  *
  * <pre>
- * (dog AND (cat OR fat)) NEAR/5 batman
+ * (dog AND cat OR fat) NEAR/5 batman
  * </pre>
  *
  * @see AqpNearQueryNode
  */
 public class AqpNearQueryNodeBuilder implements QueryBuilder {
-    private final java.util.function.Predicate<String> fieldEligible;
+    private final Predicate<String> fieldEligible;
 
     public AqpNearQueryNodeBuilder() {
         this(field -> true);
     }
 
-    public AqpNearQueryNodeBuilder(java.util.function.Predicate<String> fieldEligible) {
+    public AqpNearQueryNodeBuilder(Predicate<String> fieldEligible) {
         this.fieldEligible = fieldEligible;
     }
-
 
     public Object build(QueryNode queryNode) throws QueryNodeException {
         AqpNearQueryNode nearNode = (AqpNearQueryNode) queryNode;
@@ -96,9 +95,9 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
             return new MatchNoDocsQuery();
         }
         if (children.size() == 1) {
-            Object obj = children.get(0).getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
-            if (obj instanceof Query) {
-                return obj;
+            Object builtQuery = children.get(0).getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+            if (builtQuery instanceof Query) {
+                return builtQuery;
             }
             throw new QueryNodeException(new MessageImpl(
                     QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
@@ -110,8 +109,8 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
         boolean allFieldsKnown = true;
 
         for (QueryNode child : children) {
-            Object obj = child.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
-            if (!(obj instanceof Query query)) {
+            Object builtQuery = child.getTag(QueryTreeBuilder.QUERY_TREE_BUILDER_TAGID);
+            if (!(builtQuery instanceof Query query)) {
                 throw new QueryNodeException(new MessageImpl(
                         QueryParserMessages.LUCENE_QUERY_CONVERSION_ERROR,
                         "One of the clauses inside AqpNearQueryNode is null"));
@@ -129,6 +128,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
                 commonFields.retainAll(fields);
             }
         }
+
         if (commonFields != null) {
             commonFields.removeIf(field -> !fieldEligible.test(field));
         }
@@ -151,9 +151,9 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
             // Unfielded operands are expanded into field disjunctions. Build
             // one proximity query per field and combine those queries at the
             // Boolean-query level: SpanOrQuery itself cannot mix fields.
-            List<SpanQuery> aligned = new ArrayList<>(commonFields.size());
+            List<SpanQuery> alignedQueries = new ArrayList<>(commonFields.size());
             for (String field : commonFields) {
-                List<Query> perField = new ArrayList<>(queries.size());
+                List<Query> fieldQueries = new ArrayList<>(queries.size());
                 boolean complete = true;
                 for (Query query : queries) {
                     Query restricted = restrictToField(query, field);
@@ -161,19 +161,19 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
                         complete = false;
                         break;
                     }
-                    perField.add(restricted);
+                    fieldQueries.add(restricted);
                 }
                 if (complete) {
-                    aligned.add((SpanQuery) buildSpanNear(perField, nearNode));
+                    alignedQueries.add((SpanQuery) buildSpanNear(fieldQueries, nearNode));
                 }
             }
 
-            if (!aligned.isEmpty()) {
-                if (aligned.size() == 1) {
-                    return aligned.get(0);
+            if (!alignedQueries.isEmpty()) {
+                if (alignedQueries.size() == 1) {
+                    return alignedQueries.get(0);
                 }
                 BooleanQuery.Builder disjunction = new BooleanQuery.Builder();
-                for (SpanQuery clause : aligned) {
+                for (SpanQuery clause : alignedQueries) {
                     disjunction.add(clause, BooleanClause.Occur.SHOULD);
                 }
                 return disjunction.build();
@@ -193,6 +193,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
         if (queries.size() == 1) {
             return queries.get(0);
         }
+
         SpanConverter converter = new SpanConverter();
         SpanQuery[] clauses = new SpanQuery[queries.size()];
         for (int i = 0; i < queries.size(); i++) {
@@ -228,6 +229,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
             builder.setSlop(nearNode.getSlop());
             return builder.build();
         }
+
         return new SpanNearQuery(clauses, nearNode.getSlop(), nearNode.getInOrder());
     }
 
@@ -239,6 +241,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
             }
             return fields;
         }
+
         query.visit(new QueryVisitor() {
             @Override
             public void consumeTerms(Query q, Term... terms) {
@@ -249,7 +252,7 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
 
             @Override
             public void consumeTermsMatching(Query q, String field,
-                                              Supplier<ByteRunAutomaton> automaton) {
+                                             Supplier<ByteRunAutomaton> automaton) {
                 fields.add(field);
             }
 
@@ -293,8 +296,8 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
         }
         if (query instanceof BooleanQuery booleanQuery) {
             BooleanQuery.Builder restricted = new BooleanQuery.Builder();
-            int retained = 0;
-            int retainedShould = 0;
+            int retainedClauseCount = 0;
+            int retainedShouldCount = 0;
             for (BooleanClause clause : booleanQuery.clauses()) {
                 Query selected = restrictToField(clause.getQuery(), field);
                 if (selected == null) {
@@ -306,13 +309,13 @@ public class AqpNearQueryNodeBuilder implements QueryBuilder {
                     continue;
                 }
                 restricted.add(selected, clause.getOccur());
-                retained++;
+                retainedClauseCount++;
                 if (clause.getOccur() == BooleanClause.Occur.SHOULD) {
-                    retainedShould++;
+                    retainedShouldCount++;
                 }
             }
-            if (retained == 0
-                    || booleanQuery.getMinimumNumberShouldMatch() > retainedShould) {
+            if (retainedClauseCount == 0
+                    || booleanQuery.getMinimumNumberShouldMatch() > retainedShouldCount) {
                 return null;
             }
             restricted.setMinimumNumberShouldMatch(

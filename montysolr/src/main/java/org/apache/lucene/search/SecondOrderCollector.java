@@ -27,12 +27,10 @@ public interface SecondOrderCollector {
 
 
     /**
-     * Returns the sorted list of ScoreDoc hits that belong only
-     * to this particular subreader. The range of subreaders is
-     * known to the collector because we have inspected the searcher
-     * before {@link SecondOrderCollector}
+     * Returns sorted collected hits with global document IDs in the range
+     * {@code [docBase, docBaseEnd)} for a particular subreader.
      *
-     * @return list of collectors
+     * @return collected hits, or {@code null} when no results are available
      */
     List<CollectorDoc> getSubReaderResults(int docBase, int docBaseEnd) throws IOException;
 
@@ -60,9 +58,11 @@ public interface SecondOrderCollector {
      * score (as an average of votes, maximum, minimum, etc...)
      */
     void setFinalValueType(FinalValueType type);
+
     FinalValueType getFinalValueType();
 
     ScoreMode scoreMode();
+
     /** A retained seed Weight may need scores even when collection itself does not. */
     default ScoreMode initializationScoreMode() {
         return scoreMode();

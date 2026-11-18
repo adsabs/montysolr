@@ -1,21 +1,22 @@
 package org.apache.solr.search;
 
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.queries.function.valuesource.ProductFloatFunction;
 import org.apache.lucene.queries.function.valuesource.QueryValueSource;
-import org.apache.lucene.queryparser.flexible.aqp.builders.AqpNearQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpAdsabsQueryTreeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.AqpQueryParser;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpAdsabsSubQueryProvider;
+import org.apache.lucene.queryparser.flexible.aqp.builders.AqpNearQueryNodeBuilder;
 import org.apache.lucene.queryparser.flexible.aqp.builders.AqpSolrFunctionProvider;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
-import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpNearQueryNode;
+import org.apache.lucene.queryparser.flexible.aqp.parser.AqpStandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.QueryNodeParseException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
@@ -23,7 +24,6 @@ import org.apache.lucene.queryparser.flexible.standard.config.PointsConfig;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.Operator;
 import org.apache.lucene.search.*;
-import org.apache.lucene.index.IndexOptions;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
@@ -45,7 +45,7 @@ import java.util.Map.Entry;
 /**
  * This is the MAIN solr entry point - this instantiates 'aqp' query
  * parser - it sets some default parameters from the config and prepares
- * ulr parameters.
+ * URL parameters.
  *
  * @see AdsQParserPlugin
  * @see AqpAdsabsQueryConfigHandler
@@ -116,11 +116,11 @@ public class AqpAdsabsQParser extends QParser {
                 }
             }
         }
+
         String queryFields = solrParams.get("qf");
         if (queryFields != null) {
             namedParams.put("aqp.unfielded.queryFields", queryFields);
         }
-
 
         qParser.setAnalyzer(schema.getQueryAnalyzer());
 
@@ -215,16 +215,17 @@ public class AqpAdsabsQParser extends QParser {
                 e.printStackTrace();
             }
         }
+
+        // Resolve positional support here, where the query builder has access to the schema.
         if (qParser.getQueryBuilder() instanceof AqpAdsabsQueryTreeBuilder treeBuilder) {
             treeBuilder.setBuilder(AqpNearQueryNode.class,
                     new AqpNearQueryNodeBuilder(field -> {
                         SchemaField schemaField = schema.getFieldOrNull(field);
                         return schemaField != null
                                 && schemaField.indexOptions().compareTo(
-                                IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) >= 0;
+                                        IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) >= 0;
                     }));
         }
-
 
         HashMap<String, PointsConfig> ncm = new HashMap<String, PointsConfig>();
         config.set(StandardQueryConfigHandler.ConfigurationKeys.POINTS_CONFIG_MAP, ncm);

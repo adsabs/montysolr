@@ -20,6 +20,7 @@ package org.apache.lucene.analysis.synonym;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.AcronymTokenFilter;
 import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.util.ResourceLoader;
@@ -340,16 +341,7 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
             return new NewSolrSynonymParser(true, true, analyzer) {
                 @Override
                 public void add(CharsRef input, CharsRef output, boolean includeOrig) {
-                    super.add(lowercase(input), replaceNulls(output), countWords(input) > 1 || inclOrig);
-                }
-
-                private CharsRef lowercase(CharsRef chars) {
-                    chars = CharsRef.deepCopyOf(chars);
-                    final int limit = chars.offset + chars.length;
-                    for (int i = chars.offset; i < limit; i++) {
-                        chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not be always correct (?)
-                    }
-                    return chars;
+                    super.add(lowercaseCopy(input), replaceNulls(output), countWords(input) > 1 || inclOrig);
                 }
             };
 
@@ -358,11 +350,12 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
 
 
     /*
-     * Multi-token inputs are matched case-insensitively unless their first
-     * token is an uppercase acronym. Acronym-leading phrases retain their
-     * source case so the query analyzer can preserve acronym sensitivity while
-     * still matching ordinary mixed-case phrases.
+     * Multi-token inputs are registered in lowercase. Acronym-leading phrases
+     * also retain a source-case mapping, and all multi-token mappings retain
+     * the original tokens.
      *
+     * Single-token inputs retain their source case; mixed-case acronyms also
+     * receive a lowercase mapping. Their original tokens follow inclOrig.
      */
     public static class BestEffortIgnoreCaseSelectively extends SynonymBuilderFactory {
         private final Map<String, String> args;
@@ -382,21 +375,23 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
         protected SynonymParser getParser(Analyzer analyzer) {
             return new NewSolrSynonymParser(true, true, analyzer) {
                 @Override
-                public void add(CharsRef input, CharsRef output, boolean includeOrig) { //is always false :(
-                    int count = countWords(input);
-                    boolean acronymPhrase = count > 1 && startsWithUppercaseAcronym(input);
-                    boolean addOriginal = count > 1 || inclOrig;
+                public void add(CharsRef input, CharsRef output, boolean includeOrig) {
+                    int wordCount = countWords(input);
+                    boolean acronymPhrase = wordCount > 1 && startsWithUppercaseAcronym(input);
+                    boolean addOriginal = wordCount > 1 || inclOrig;
                     CharsRef synonymOutput = replaceNulls(output);
-                    super.add(acronymPhrase ? input : (count > 1 ? lowercase(input) : input),
+
+                    super.add(acronymPhrase ? input : (wordCount > 1 ? lowercaseCopy(input) : input),
                             synonymOutput, addOriginal);
                     if (acronymPhrase) {
-                        super.add(lowercase(input), synonymOutput, addOriginal);
+                        super.add(lowercaseCopy(input), synonymOutput, addOriginal);
                     }
+
                     String source = input.toString();
-                    if (count == 1
-                            && org.apache.lucene.analysis.core.AcronymTokenFilter.termIsAcronym(source)
+                    if (wordCount == 1
+                            && AcronymTokenFilter.termIsAcronym(source)
                             && hasLowercase(source)) {
-                        super.add(lowercase(input), synonymOutput, addOriginal);
+                        super.add(lowercaseCopy(input), synonymOutput, addOriginal);
                     }
                 }
 
@@ -407,15 +402,6 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
                         }
                     }
                     return false;
-                }
-
-                private CharsRef lowercase(CharsRef chars) {
-                    chars = CharsRef.deepCopyOf(chars);
-                    final int limit = chars.offset + chars.length;
-                    for (int i = chars.offset; i < limit; i++) {
-                        chars.chars[i] = Character.toLowerCase(chars.chars[i]); // maybe not be always correct (?)
-                    }
-                    return chars;
                 }
 
                 private boolean startsWithUppercaseAcronym(CharsRef chars) {
@@ -441,6 +427,14 @@ public class NewSynonymFilterFactory extends TokenFilterFactory implements Resou
         }
     }
 
+    private static CharsRef lowercaseCopy(CharsRef chars) {
+        CharsRef lowercase = CharsRef.deepCopyOf(chars);
+        final int limit = lowercase.offset + lowercase.length;
+        for (int i = lowercase.offset; i < limit; i++) {
+            lowercase.chars[i] = Character.toLowerCase(lowercase.chars[i]);
+        }
+        return lowercase;
+    }
 
     public static int countWords(CharsRef chars) {
         int wordCount = 1;

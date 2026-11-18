@@ -19,9 +19,9 @@ package org.apache.solr.search;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenFilterFactory;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.StopFilterFactory;
-import org.apache.lucene.analysis.TokenFilterFactory;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.FunctionQuery;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
@@ -303,7 +303,7 @@ public class AqpExtendedDismaxQParser extends QParser {
 
         Query query = null;
         try {
-            up.setUnfieldedClauseModifiers(clauses);
+            up.setUnfieldedSimpleClauses(clauses);
             up.setRemoveStopFilter(!config.stopwords);
             up.exceptions = true;
             up.resetUnfieldedClauseCursor();
@@ -898,9 +898,11 @@ public class AqpExtendedDismaxQParser extends QParser {
 
         private Map<String, Analyzer> nonStopFilterAnalyzerPerField;
         private boolean removeStopFilter;
+
         // Keep modifiers attached to simple unfielded terms in source order.
         private List<Clause> unfieldedSimpleClauses = Collections.emptyList();
         private int unfieldedSimpleClauseCursor;
+
         String minShouldMatch; // for inner boolean queries produced from a single fieldQuery
 
         /**
@@ -932,14 +934,15 @@ public class AqpExtendedDismaxQParser extends QParser {
             removeStopFilter = remove;
         }
 
-        private void setUnfieldedClauseModifiers(List<Clause> clauses) {
+        private void setUnfieldedSimpleClauses(List<Clause> clauses) {
             List<Clause> simpleClauses = new ArrayList<>();
             for (Clause clause : clauses) {
                 if (clause.field == null && !clause.isPhrase && !clause.hasWhitespace
-                        && simpleUnfieldedValue(clause.val, true) != null) {
+                        && normalizeSimpleUnfieldedValue(clause.val, true) != null) {
                     simpleClauses.add(clause);
                 }
             }
+
             unfieldedSimpleClauses = simpleClauses;
             resetUnfieldedClauseCursor();
         }
@@ -948,15 +951,16 @@ public class AqpExtendedDismaxQParser extends QParser {
             unfieldedSimpleClauseCursor = 0;
         }
 
-        private String simpleUnfieldedValue(String value, boolean clauseValue) {
+        private String normalizeSimpleUnfieldedValue(String value, boolean stripEscapedClosingParens) {
             if (value == null) {
                 return null;
             }
-            if (clauseValue) {
+            if (stripEscapedClosingParens) {
                 while (value.endsWith("\\)")) {
                     value = value.substring(0, value.length() - 2);
                 }
             }
+
             if (value.isEmpty()) {
                 return null;
             }
@@ -965,6 +969,7 @@ public class AqpExtendedDismaxQParser extends QParser {
                     return null;
                 }
             }
+
             String normalized = value.toLowerCase(Locale.ROOT);
             if (normalized.equals("and") || normalized.equals("or")
                     || normalized.equals("not") || normalized.equals("to")) {
@@ -973,17 +978,19 @@ public class AqpExtendedDismaxQParser extends QParser {
             return normalized;
         }
 
-        private boolean consumeExplicitlySignedUnfieldedValue(String value) {
+        // Consume matching clauses even when unsigned, keeping repeated terms aligned.
+        private boolean consumeUnfieldedClauseSign(String value) {
             if (!IMPOSSIBLE_FIELD_NAME.equals(field) || type != QType.FIELD
                     || unfieldedSimpleClauseCursor >= unfieldedSimpleClauses.size()) {
                 return false;
             }
-            String normalized = simpleUnfieldedValue(value, false);
+            String normalized = normalizeSimpleUnfieldedValue(value, false);
             Clause clause = unfieldedSimpleClauses.get(unfieldedSimpleClauseCursor);
             if (normalized == null
-                    || !normalized.equals(simpleUnfieldedValue(clause.val, true))) {
+                    || !normalized.equals(normalizeSimpleUnfieldedValue(clause.val, true))) {
                 return false;
             }
+
             unfieldedSimpleClauseCursor++;
             return clause.must != 0;
         }
@@ -1142,10 +1149,11 @@ public class AqpExtendedDismaxQParser extends QParser {
                         && !removeStopFilter
                         && (localParams == null || !localParams.getBool("aqp.exact.search", false))
                         && !preserveUnfieldedStopwords()
-                        && !consumeExplicitlySignedUnfieldedValue(val)
-                        && !hasCanonicalTokens(val)) {
+                        && !consumeUnfieldedClauseSign(val)
+                        && !hasUnfieldedAnalysisTokens(val)) {
                     return null;
                 }
+
                 List<Query> lst = getQueries(a);
                 if (lst == null || lst.size() == 0)
                     return getQuery();
@@ -1192,21 +1200,23 @@ public class AqpExtendedDismaxQParser extends QParser {
             Alias a = aliases.get(field);
             this.validateCyclicAliasing(field);
             if (a != null) {
-                List<String> originalVals = vals;
-                boolean filterCanonicalValues = IMPOSSIBLE_FIELD_NAME.equals(field);
-                if (filterCanonicalValues) {
+                List<String> originalValues = vals;
+                boolean unfieldedAlias = IMPOSSIBLE_FIELD_NAME.equals(field);
+                if (unfieldedAlias) {
                     vals = filterUnfieldedQueryValues();
                     if (vals.isEmpty()) {
-                        vals = originalVals;
+                        vals = originalValues;
                         return null;
                     }
                 }
+
                 List<Query> lst;
                 try {
                     lst = getMultiTermQueries(a);
                 } finally {
-                    vals = originalVals;
+                    vals = originalValues;
                 }
+
                 if (lst == null || lst.size() == 0) {
                     return getQuery();
                 }
@@ -1372,16 +1382,19 @@ public class AqpExtendedDismaxQParser extends QParser {
                     || preserveUnfieldedStopwords()) {
                 return vals;
             }
-            List<String> filtered = new ArrayList<>(vals.size());
+
+            List<String> analyzedValues = new ArrayList<>(vals.size());
             for (String value : vals) {
-                if (hasCanonicalTokens(value)) {
-                    filtered.add(value);
+                if (hasUnfieldedAnalysisTokens(value)) {
+                    analyzedValues.add(value);
                 }
             }
-            if (filtered.isEmpty() && !vals.isEmpty()) {
+
+            // Preserve the all-stopword fallback rather than discarding every value.
+            if (analyzedValues.isEmpty() && !vals.isEmpty()) {
                 return vals;
             }
-            return filtered;
+            return analyzedValues;
         }
 
         private boolean preserveUnfieldedStopwords() {
@@ -1389,12 +1402,12 @@ public class AqpExtendedDismaxQParser extends QParser {
                     && localParams.getBool("aqp.preserve.unfielded.stopwords", false);
         }
 
-
-        private boolean hasCanonicalTokens(String text) {
+        private boolean hasUnfieldedAnalysisTokens(String text) {
             FieldType fieldType = schema.getFieldTypeNoEx(UNFIELDED_ANALYSIS_FIELD);
             if (fieldType == null || fieldType.getQueryAnalyzer() == null) {
                 return true;
             }
+
             try (TokenStream stream = fieldType.getQueryAnalyzer().tokenStream(
                     UNFIELDED_ANALYSIS_FIELD, text)) {
                 stream.reset();

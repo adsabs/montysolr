@@ -25,9 +25,9 @@ import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
-import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpRequestParams;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.config.QueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.core.nodes.*;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
@@ -39,20 +39,17 @@ import org.apache.lucene.queryparser.flexible.standard.processors.AnalyzerQueryN
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
 /**
- * This is an improved version of the {@link AnalyzerQueryNodeProcessor} it is
- * better because it keeps track of the position offset which is absolutely
- * indispensable for proper parsing of expanded queries. And also we save the
- * type attribute name with the node
- * <p>
- * TODO: send a patch and make them accept it
+ * Applies query analysis while retaining token offsets, types, and source
+ * metadata for {@link AqpPostAnalysisProcessor}'s synonym graph construction.
  * <p>
  * This processor verifies if {@link ConfigurationKeys#ANALYZER} is defined in
  * the {@link QueryConfigHandler}. If it is and the analyzer is not
@@ -64,9 +61,8 @@ import java.util.Map;
  * If the analyzer return only one term, the returned term is set to the
  * {@link FieldQueryNode} and it's returned.
  * <p>
- * If the analyzer return more than one term, a {@link TokenizedPhraseQueryNode}
- * or {@link MultiPhraseQueryNode} is created, whether there is one or more
- * terms at the same position, and it's returned.
+ * Multiple terms become a Boolean group or, for quoted text and punctuation
+ * identifiers, a {@link TokenizedPhraseQueryNode} or {@link MultiPhraseQueryNode}.
  * <p>
  * If no term is returned by the analyzer a {@link NoTokenFoundQueryNode} object
  * is returned.
@@ -89,6 +85,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
     public static final String SOURCE_INDEX_START = "source_index_start";
     public static final String SOURCE_INDEX_END = "source_index_end";
     public static final String RAW_INDEX_POSITION_DELTA = "raw_index_position_delta";
+
     private Analyzer analyzer;
     private final Map<String, List<IndexTokenPosition>> indexPositionCache =
             new HashMap<>();
@@ -96,19 +93,18 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
     private boolean positionIncrementsEnabled;
 
     private static final class IndexTokenPosition {
-        private final int start;
-        private final int end;
+        private final int startOffset;
+        private final int endOffset;
         private final int position;
         private final int positionEnd;
 
-        private IndexTokenPosition(int start, int end, int position, int positionEnd) {
-            this.start = start;
-            this.end = end;
+        private IndexTokenPosition(int startOffset, int endOffset, int position, int positionEnd) {
+            this.startOffset = startOffset;
+            this.endOffset = endOffset;
             this.position = position;
             this.positionEnd = positionEnd;
         }
     }
-
 
     @Override
     public QueryNode process(QueryNode queryTree) throws QueryNodeException {
@@ -188,13 +184,13 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                     }
                 }
 
-
                 // rewind the buffer stream
                 buffer.reset();
 
                 // close original stream - all tokens buffered
                 source.close();
                 source = null;
+
                 // Index and query analyzers may share reusable components.
                 // Capture source positions only after closing the query stream.
                 List<IndexTokenPosition> indexPositions =
@@ -205,7 +201,6 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                 if (!buffer.hasAttribute(CharTermAttribute.class)) {
                     return new NoTokenFoundQueryNode();
                 }
-
 
                 int offsetStart = -1;
                 int offsetEnd = -1;
@@ -219,6 +214,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                 boolean punctuationIdentifier = isPunctuationIdentifier(text);
                 boolean forcePhrase = node instanceof QuotedFieldQueryNode
                         || punctuationIdentifier;
+
                 if (numTokens == 0) {
                     return new NoTokenFoundQueryNode();
 
@@ -283,12 +279,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                                     offsetEnd, queryStart, text,
                                     typeAtt == null ? null : typeAtt.type()))
                                 fq.setTag(RAW_MULTI_TOKEN_ALIAS, true);
-                            String sourceValue = getSourceText(offsetStart, offsetEnd,
-                                    queryStart, text);
-                            if (sourceValue != null)
-                                fq.setTag(SOURCE_TEXT, sourceValue);
-                            fq.setTag(SOURCE_QUERY_TEXT, text);
-                            fq.setTag(SOURCE_QUERY_START, queryStart);
+                            setSourceTextTags(fq, offsetStart, offsetEnd, queryStart, text);
                             children.add(fq);
                         }
                         return new GroupQueryNode(new BooleanQueryNode(children));
@@ -329,17 +320,12 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                             }
 
                             if (positionIncrement > 0 && multiTerms.size() > 0) {
-                                for (FieldQueryNode termNode : multiTerms) {
-                                    if (preservePositionIncrements) {
-                                        termNode.setPositionIncrement(position);
-                                    } else {
-                                        termNode.setPositionIncrement(termGroupCount);
-                                    }
-                                    mpq.add(termNode);
-                                }
+                                addSynonymPosition(mpq, multiTerms, position,
+                                        termGroupCount, preservePositionIncrements);
                                 termGroupCount++;
                                 multiTerms.clear();
                             }
+
                             position += positionIncrement;
                             FieldQueryNode fq = new FieldQueryNode(field, term, offsetStart,
                                     offsetEnd);
@@ -352,27 +338,11 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                             if (isRawMultiTokenAlias(term, positionLength, offsetStart,
                                     offsetEnd, queryStart, text, tokenType))
                                 fq.setTag(RAW_MULTI_TOKEN_ALIAS, true);
-                            String sourceValue = getSourceText(offsetStart, offsetEnd,
-                                    queryStart, text);
-                            if (sourceValue != null)
-                                fq.setTag(SOURCE_TEXT, sourceValue);
-                            fq.setTag(SOURCE_QUERY_TEXT, text);
-                            fq.setTag(SOURCE_QUERY_START, queryStart);
+                            setSourceTextTags(fq, offsetStart, offsetEnd, queryStart, text);
                             multiTerms.add(fq);
-
                         }
-                        for (FieldQueryNode termNode : multiTerms) {
-
-                            if (preservePositionIncrements) {
-                                termNode.setPositionIncrement(position);
-
-                            } else {
-                                termNode.setPositionIncrement(termGroupCount);
-                            }
-
-                            mpq.add(termNode);
-
-                        }
+                        addSynonymPosition(mpq, multiTerms, position,
+                                termGroupCount, preservePositionIncrements);
 
                         appendOmittedSourceNodes(mpq, node, field, text, queryStart);
                         if (preservePositionIncrements && !this.positionIncrementsEnabled)
@@ -427,12 +397,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                                 offsetEnd, queryStart, text,
                                 typeAtt == null ? null : typeAtt.type()))
                             newFieldNode.setTag(RAW_MULTI_TOKEN_ALIAS, true);
-                        String sourceValue = getSourceText(offsetStart, offsetEnd,
-                                queryStart, text);
-                        if (sourceValue != null)
-                            newFieldNode.setTag(SOURCE_TEXT, sourceValue);
-                        newFieldNode.setTag(SOURCE_QUERY_TEXT, text);
-                        newFieldNode.setTag(SOURCE_QUERY_START, queryStart);
+                        setSourceTextTags(newFieldNode, offsetStart, offsetEnd, queryStart, text);
 
                         if (preservePositionIncrements) {
                             position += positionIncrement;
@@ -476,6 +441,29 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         return node;
 
     }
+
+    private void addSynonymPosition(MultiPhraseQueryNode phrase,
+            List<FieldQueryNode> alternatives, int position, int termGroupCount,
+            boolean preservePositionIncrements) {
+        for (FieldQueryNode termNode : alternatives) {
+            if (preservePositionIncrements) {
+                termNode.setPositionIncrement(position);
+            } else {
+                termNode.setPositionIncrement(termGroupCount);
+            }
+            phrase.add(termNode);
+        }
+    }
+
+    private void setSourceTextTags(FieldQueryNode node, int offsetStart,
+            int offsetEnd, int queryStart, String text) {
+        String sourceValue = getSourceText(offsetStart, offsetEnd, queryStart, text);
+        if (sourceValue != null)
+            node.setTag(SOURCE_TEXT, sourceValue);
+        node.setTag(SOURCE_QUERY_TEXT, text);
+        node.setTag(SOURCE_QUERY_START, queryStart);
+    }
+
     private List<IndexTokenPosition> getIndexTokenPositions(String field,
             String text) throws IOException {
         String key = field + "\u0000" + text;
@@ -519,7 +507,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         int first = Integer.MAX_VALUE;
         int last = Integer.MIN_VALUE;
         for (IndexTokenPosition candidate : positions) {
-            if (candidate.start < end && candidate.end > start) {
+            if (candidate.startOffset < end && candidate.endOffset > start) {
                 first = Math.min(first, candidate.position);
                 last = Math.max(last, candidate.positionEnd);
             }
@@ -529,7 +517,6 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             node.setTag(SOURCE_INDEX_END, last);
         }
     }
-
 
     private int getMultiTokenSize(String term, int positionLength, int offsetStart,
             int offsetEnd, int queryStart, String sourceText) {
@@ -569,6 +556,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         }
         return runs;
     }
+
     private boolean isRawMultiTokenAlias(String term, int positionLength,
             int offsetStart, int offsetEnd, int queryStart, String sourceText,
             String tokenType) {
@@ -599,6 +587,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         // Keep an index-normalized raw path for that equal-width case too.
         return sourceWordRuns > 0 && sourceWordRuns <= outputWordRuns;
     }
+
     private String getSourceText(int offsetStart, int offsetEnd, int queryStart,
             String sourceText) {
         if (offsetStart < queryStart || offsetEnd < offsetStart) {
@@ -626,6 +615,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             if (index >= text.length()) {
                 break;
             }
+
             int start = index;
             while (index < text.length() && isSourceWordChar(text.charAt(index))) {
                 index++;
@@ -633,6 +623,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             int end = index;
             int absoluteStart = queryStart + start;
             int absoluteEnd = queryStart + end;
+
             boolean covered = false;
             for (QueryNode child : existing) {
                 if (!(child instanceof FieldQueryNode)) {
@@ -645,10 +636,11 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
                     break;
                 }
             }
+
             if (!covered) {
                 omittedRanges.add(new int[]{absoluteStart, absoluteEnd});
                 String sourceWord = text.substring(start, end);
-                for (String term : sourceTerms(field, sourceWord)) {
+                for (String term : analyzeSourceWordWithCaseFallback(field, sourceWord)) {
                     FieldQueryNode omitted = new FieldQueryNode(field, term,
                             absoluteStart, absoluteEnd);
                     omitted.setPositionIncrement(wordPosition);
@@ -666,6 +658,7 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
             }
             wordPosition++;
         }
+
         if (!omittedRanges.isEmpty()) {
             for (QueryNode child : phrase.getChildren()) {
                 child.setTag(OMITTED_SOURCE_RANGES, omittedRanges);
@@ -673,7 +666,8 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
         }
     }
 
-    private List<String> sourceTerms(String field, String sourceWord) throws QueryNodeException {
+    private List<String> analyzeSourceWordWithCaseFallback(String field, String sourceWord)
+            throws QueryNodeException {
         List<String> terms = analyzeSourceWord(field, sourceWord);
         if (terms.isEmpty()) {
             terms = analyzeSourceWord(field, sourceWord.toUpperCase(Locale.ROOT));
@@ -715,7 +709,6 @@ public class AqpAnalyzerQueryNodeProcessor extends QueryNodeProcessorImpl {
     private boolean isSourceWordChar(char ch) {
         return Character.isLetterOrDigit(ch);
     }
-
 
     /**
      * Keep identifier-like values containing punctuation together.  The

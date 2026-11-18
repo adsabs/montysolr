@@ -67,40 +67,39 @@ public class LuceneCacheWrapper<T> implements CacheWrapper {
         Map<String, UninvertingReader.Type> mapping = new HashMap<String, UninvertingReader.Type>();
         mapping.put(fieldName, type);
         LeafReader uninvertingReader = UninvertingReader.wrap(reader, mapping::get);
-        NumericDocValues values = uninvertingReader.getNumericDocValues(fieldName);
+        NumericDocValues initialValues = uninvertingReader.getNumericDocValues(fieldName);
 
-        // this to get cache indexed by docid (total)
-        //NumericDocValues values = getNumericValues(reader, fieldName);
-        if (values == null)
-            values = DocValues.emptyNumeric();
+        if (initialValues == null)
+            initialValues = DocValues.emptyNumeric();
 
-        final String fName = fieldName;
-        LuceneCacheWrapper<NumericDocValues> newCache = new LuceneCacheWrapper<NumericDocValues>(new SoftReference<NumericDocValues>(values)) {
+        final String cachedFieldName = fieldName;
+        LuceneCacheWrapper<NumericDocValues> floatCache = new LuceneCacheWrapper<NumericDocValues>(new SoftReference<NumericDocValues>(initialValues)) {
             @Override
             public String internalToString() {
-                return "float[] " + fName;
+                return "float[] " + cachedFieldName;
             }
 
             @Override
             public synchronized float getFloat(int docid) throws IOException {
-                NumericDocValues ref = this.cache.get();
+                NumericDocValues docValues = this.cache.get();
+
                 // Reopen the forward-only iterator before accessing a lower doc id.
-                if (ref == null || docid < ref.docID()) {
-                    ref = uninvertingReader.getNumericDocValues(fName);
-                    if (ref == null) {
-                        ref = DocValues.emptyNumeric();
+                if (docValues == null || docid < docValues.docID()) {
+                    docValues = uninvertingReader.getNumericDocValues(cachedFieldName);
+                    if (docValues == null) {
+                        docValues = DocValues.emptyNumeric();
                     }
-                    this.cache = new SoftReference<>(ref);
+                    this.cache = new SoftReference<>(docValues);
                 }
-                if (ref.advanceExact(docid)) {
-                    return Float.intBitsToFloat((int) ref.longValue());
+
+                if (docValues.advanceExact(docid)) {
+                    return Float.intBitsToFloat((int) docValues.longValue());
                 }
                 return 0.0f;
             }
         };
 
-        return newCache;
-
+        return floatCache;
     }
 
     /**

@@ -30,6 +30,8 @@ import java.util.Stack;
  */
 public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
 
+    public static final int MAX_NAME_PARTS = 6;
+
     private final String tokenType;
 
     private final PayloadAttribute payloadAtt = addAttribute(PayloadAttribute.class);
@@ -38,7 +40,6 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
 
     private final boolean lookAtPayloadForOrigAuthor;
-    public static final int MAX_NAME_PARTS = 6;
     private final boolean plainSurname;
     private final int createVariations;
     private final boolean addWildcards;
@@ -86,14 +87,14 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
         if (origAuthorName == null)
             origAuthorName = termAtt.toString();
 
-        if ((tokenType == null || typeAtt.type().equals(tokenType)) && this.genVariations()) {
+        if ((tokenType == null || typeAtt.type().equals(tokenType)) && this.generateVariations()) {
             this.current = this.captureState();
         }
         // System.out.println("var:" + termAtt.toString());
         return true;
     }
 
-    private boolean genVariations() {
+    private boolean generateVariations() {
         String authorName = termAtt.toString();
 
         if (lookAtPayloadForOrigAuthor && payloadAtt.getPayload() != null) {
@@ -156,7 +157,7 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
                 for (int i = 0; i < idx.length; i++) {
                     idx[i] = ids.get(i);
                 }
-                List<int[]> combinations = comb(idx);
+                List<int[]> combinations = generateCombinations(idx);
                 for (int[] comb : combinations) {
                     String[] newParts = Arrays.copyOf(parts, parts.length);
                     for (int x : comb) {
@@ -218,13 +219,13 @@ public final class AuthorCreateQueryVariationsFilter extends TokenFilter {
         origAuthorName = null;
     }
 
-    private List<int[]> comb(int... items) {
-        ArrayList<int[]> comb = new ArrayList<int[]>();
+    private List<int[]> generateCombinations(int... items) {
+        ArrayList<int[]> combinations = new ArrayList<int[]>();
         Arrays.sort(items);
         for (int k = 1; k <= items.length; k++) {
-            kcomb(items, 0, k, new int[k], comb);
+            kcomb(items, 0, k, new int[k], combinations);
         }
-        return comb;
+        return combinations;
     }
 
     public void kcomb(int[] items, int n, int k, int[] arr, List<int[]> comb) {

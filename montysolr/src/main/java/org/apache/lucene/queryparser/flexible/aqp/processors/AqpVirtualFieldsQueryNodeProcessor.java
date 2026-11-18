@@ -63,10 +63,7 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
 
     @Override
     protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
-
-
         return node;
-
     }
 
     @Override
@@ -89,28 +86,28 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
         if (node instanceof AqpNearQueryNode) {
 
             List<QueryNode> children = node.getChildren();
-            String fldName = null;
-            boolean canPass = true;
+            String sharedField = null;
+            boolean allChildrenShareField = true;
 
             assert children.size() > 1;
 
             for (QueryNode child : children) {
                 if (!(child instanceof FieldableNode) || ((FieldableNode) child).getField() == null) {
-                    canPass = false;
+                    allChildrenShareField = false;
                     break;
                 }
-                if (fldName == null)
-                    fldName = (String) ((FieldableNode) child).getField();
+                if (sharedField == null)
+                    sharedField = (String) ((FieldableNode) child).getField();
 
-                if (!((FieldableNode) child).getField().equals(fldName))
-                    canPass = false;
+                if (!((FieldableNode) child).getField().equals(sharedField))
+                    allChildrenShareField = false;
             }
 
-            if (canPass) {
+            if (allChildrenShareField) {
                 fields = getFields();
                 LinkedList<QueryNode> proximityClauses = new LinkedList<QueryNode>();
-                if (fldName != null && fields.containsKey(fldName)) {
-                    Map<String, Float> realFields = fields.get(fldName);
+                if (sharedField != null && fields.containsKey(sharedField)) {
+                    Map<String, Float> realFields = fields.get(sharedField);
                     if (realFields != null && realFields.size() > 0) {
 
                         for (Entry<String, Float> en : realFields.entrySet()) {
@@ -137,10 +134,10 @@ public class AqpVirtualFieldsQueryNodeProcessor extends QueryNodeProcessorImpl {
                             proximityClauses.add(new AqpNearQueryNode(perFieldChildren, ((AqpNearQueryNode) node).getSlop()));
                         }
 
-                        GroupQueryNode n = new GroupQueryNode(new OrQueryNode(proximityClauses));
-                        n.setTag("virtual-field", fldName);
+                        GroupQueryNode expandedNode = new GroupQueryNode(new OrQueryNode(proximityClauses));
+                        expandedNode.setTag("virtual-field", sharedField);
                         this.processChildren = false;
-                        return n;
+                        return expandedNode;
                     }
                 }
             }

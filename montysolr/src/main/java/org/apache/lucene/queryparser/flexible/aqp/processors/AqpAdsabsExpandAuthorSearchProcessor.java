@@ -66,11 +66,10 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
         if (node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE) != null) {
             String origValue = (String) node.getTag(AqpAdsabsAnalyzerProcessor.ORIGINAL_VALUE);
 
-            //String normalized = AuthorUtils.normalizeAuthor(origValue);
             for (String normalized : normalizeAuthorName(origValue)) {
                 NameInfo nameInfo = new NameInfo(normalized);
-                int[] level = new int[]{0}; //ugly, ugly
-                node = expandNodes(node, nameInfo, level);
+                int[] visitedTextNodes = new int[]{0};
+                node = expandNodes(node, nameInfo, visitedTextNodes);
             }
 
         }
@@ -83,7 +82,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
         return children;
     }
 
-    private QueryNode expandNodes(QueryNode node, NameInfo origNameInfo, int[] level) throws QueryNodeException {
+    private QueryNode expandNodes(QueryNode node, NameInfo origNameInfo, int[] visitedTextNodes) throws QueryNodeException {
 
         ArrayList<QueryNode> collector = new ArrayList<QueryNode>();
 
@@ -91,12 +90,9 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
             List<QueryNode> children = node.getChildren();
             boolean changed = false;
             for (int i = 0; i < children.size(); i++) {
-                doExpansion(origNameInfo, children.get(i), collector, level);
+                doExpansion(origNameInfo, children.get(i), collector, visitedTextNodes);
 
-                // interlacing new values right behind the old values
-                // it looks stupid (and is dangerous, true...) but i do it
-                // to make the results more readable (to show expansion right
-                // after the source token)
+                // Insert expansions immediately after their source, then skip them.
 
                 if (collector.size() > 0) {
                     changed = true;
@@ -111,7 +107,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
 
         } else {
             // now expand the parent
-            doExpansion(origNameInfo, node, collector, level);
+            doExpansion(origNameInfo, node, collector, visitedTextNodes);
         }
 
 
@@ -123,18 +119,17 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
         return node;
     }
 
-    private void doExpansion(NameInfo origNameInfo, QueryNode node, List<QueryNode> parentChildren, int[] level)
+    private void doExpansion(NameInfo origNameInfo, QueryNode node, List<QueryNode> parentChildren, int[] visitedTextNodes)
             throws QueryNodeException {
 
         if (node instanceof TextableQueryNode) {
 
-            level[0] = level[0] + 1; // marker to tell us not to expand synonyms any more
+            visitedTextNodes[0] = visitedTextNodes[0] + 1; // Expand synonyms only at the first text node.
 
             if (node instanceof FuzzyQueryNode || node instanceof RegexpQueryNode
                     || node instanceof WildcardQueryNode) {
                 return;
             }
-
 
             FieldQueryNode fqn = ((FieldQueryNode) node);
             if (fields.containsKey(fqn.getFieldAsString())) {
@@ -146,7 +141,8 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
                 if (origNameInfo.noOfParts > AuthorCreateQueryVariationsFilter.MAX_NAME_PARTS) {
                     return;
                 }
-                if (level[0] == 1 && !isLongForm(origNameInfo.origName)) {
+
+                if (visitedTextNodes[0] == 1 && !isLongForm(origNameInfo.origName)) {
                     try {
                         String[] synonyms = getSynonyms(origNameInfo.origName);
                         if (synonyms != null) {
@@ -161,13 +157,6 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
 
                 String v = fqn.getTextAsString();
                 String[] nameParts = AuthorUtils.splitName(fqn.getTextAsString());
-        
-        /*
-        if (node instanceof WildcardQueryNode) { // only "kurtz, m*" cases are tolerated
-          if (nameParts[nameParts.length-1].length() > 1) return;
-          nameParts[nameParts.length-1] = nameParts[nameParts.length-1].replace("*", "").trim();
-        }
-        */
 
                 if (nameParts.length == 1) { // the new name is just surname
 
@@ -208,7 +197,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
 
                     // special regular expression cases, only happens if the new name and the original
                     // have initial somewhere in the middle (and both at the same position)
-                    if (regexIsPossible(nameParts, origNameInfo.parts)) {
+                    if (hasAlignedMiddleInitial(nameParts, origNameInfo.parts)) {
                         StringBuffer nn = new StringBuffer();
                         nn.append(nameParts[0]);
                         for (int i = 1; i < nameParts.length - 1 && i < origNameInfo.parts.length; i++) {
@@ -237,7 +226,7 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
             }
         }
 
-        if (!node.isLeaf()) expandNodes(node, origNameInfo, level);
+        if (!node.isLeaf()) expandNodes(node, origNameInfo, visitedTextNodes);
     }
 
     private boolean hasBoundedPrefixRewrite(String field) {
@@ -246,12 +235,14 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
         if (fieldMap != null && fieldMap.containsKey(field)) {
             field = fieldMap.get(field);
         }
-        String method = getConfigVal("aqp.qprefix.scoring." + field);
-        if (method != null && !method.isEmpty()) {
-            return "topterms".equals(method)
-                    || "topterms_blended".equals(method)
-                    || "topterms_boosted".equals(method);
+
+        String rewriteMethod = getConfigVal("aqp.qprefix.scoring." + field);
+        if (rewriteMethod != null && !rewriteMethod.isEmpty()) {
+            return "topterms".equals(rewriteMethod)
+                    || "topterms_blended".equals(rewriteMethod)
+                    || "topterms_boosted".equals(rewriteMethod);
         }
+
         return getQueryConfigHandler().get(ConfigurationKeys.MULTI_TERM_REWRITE_METHOD)
                 instanceof TopTermsRewrite<?>;
     }
@@ -263,17 +254,18 @@ public class AqpAdsabsExpandAuthorSearchProcessor extends AqpQueryNodeProcessorI
 
         String originalGivenName = origNameInfo.parts[1];
         String givenName = nameParts[1];
-        return originalGivenName.length() == 2
-                && Character.isLetter(originalGivenName.charAt(0))
-                && Character.isLetter(originalGivenName.charAt(1))
-                && givenName.length() == 2
-                && Character.isLetter(givenName.charAt(0))
-                && Character.isLetter(givenName.charAt(1));
+        return isTwoLetterName(originalGivenName) && isTwoLetterName(givenName);
     }
 
-    private boolean regexIsPossible(String[] orig, String[] newName) {
-        for (int i = 1; i < orig.length - 1 && i < newName.length; i++) {
-            if (orig[i].length() == 1 && newName[i].length() == 1 && i + 1 < newName.length) {
+    private boolean isTwoLetterName(String name) {
+        return name.length() == 2
+                && Character.isLetter(name.charAt(0))
+                && Character.isLetter(name.charAt(1));
+    }
+
+    private boolean hasAlignedMiddleInitial(String[] expandedParts, String[] originalParts) {
+        for (int i = 1; i < expandedParts.length - 1 && i < originalParts.length; i++) {
+            if (expandedParts[i].length() == 1 && originalParts[i].length() == 1 && i + 1 < originalParts.length) {
                 return true;
             }
         }

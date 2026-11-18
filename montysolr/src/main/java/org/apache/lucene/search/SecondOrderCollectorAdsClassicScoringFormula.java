@@ -50,38 +50,25 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
         this.boostCache = boostCache;
     }
 
-
     @Override
     public void collect(int doc) throws IOException {
-        float s = scorer.score();
+        float luceneScore = scorer.score();
 
-        // we must collect everything and then we can normalize
-        // (we could be collecting only the x-first top hits,
-        // but this is a toy example....)
+        // Collect all scores before normalizing them against the highest score.
+        if (luceneScore > highestLuceneScore)
+            highestLuceneScore = luceneScore;
 
-        if (s > highestLuceneScore)
-            highestLuceneScore = s;
-
-//			float cf = getClassicBoostFactor(doc+docBase);
-//			if (cf > highestClassicFactor)
-//			  highestClassicFactor = cf;
-
-
-        hits.add(new CollectorDoc(doc + docBase, s, -1));
-
+        hits.add(new CollectorDoc(doc + docBase, luceneScore, -1));
     }
 
     @Override
     public void doSetNextReader(LeafReaderContext context)
             throws IOException {
         this.docBase = context.docBase;
-
     }
-
 
     @Override
     public List<CollectorDoc> getSubReaderResults(int rangeStart, int rangeEnd) throws IOException {
-
         if (hits.size() == 0)
             return null;
 
@@ -97,7 +84,6 @@ public class SecondOrderCollectorAdsClassicScoringFormula extends AbstractSecond
         }
 
         return super.getSubReaderResults(rangeStart, rangeEnd);
-
     }
 
     private float getClassicBoostFactor(int doc) throws IOException {

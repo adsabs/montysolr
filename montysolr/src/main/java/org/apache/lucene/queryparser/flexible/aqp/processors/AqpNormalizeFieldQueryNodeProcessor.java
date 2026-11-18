@@ -11,17 +11,15 @@ import org.apache.lucene.queryparser.flexible.core.nodes.RangeQueryNode;
 import org.apache.lucene.queryparser.flexible.core.processors.QueryNodeProcessorImpl;
 import org.apache.lucene.queryparser.flexible.standard.config.StandardQueryConfigHandler.ConfigurationKeys;
 import org.apache.lucene.queryparser.flexible.standard.nodes.RegexpQueryNode;
-import org.apache.solr.schema.SchemaField;
-import org.apache.solr.schema.StrField;
 import org.apache.lucene.queryparser.flexible.standard.nodes.WildcardQueryNode;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.SchemaField;
+import org.apache.solr.schema.StrField;
 
 import java.util.List;
 
-
 public class AqpNormalizeFieldQueryNodeProcessor extends
         QueryNodeProcessorImpl {
-
 
     @Override
     protected QueryNode postProcessNode(QueryNode node) throws QueryNodeException {
@@ -32,19 +30,18 @@ public class AqpNormalizeFieldQueryNodeProcessor extends
                 || node instanceof FuzzyQueryNode
                 || (node instanceof FieldQueryNode && node.getParent() instanceof RangeQueryNode)
                 || node instanceof RegexpQueryNode) {
-
-
             String fieldName = ((FieldQueryNode) node).getFieldAsString();
             if (isStrField(fieldName)) {
                 return node;
             }
-            FieldQueryNode txtNode = (FieldQueryNode) node;
-            CharSequence text = txtNode.getText();
+
+            FieldQueryNode fieldNode = (FieldQueryNode) node;
+            CharSequence text = fieldNode.getText();
 
             Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
 
             if (analyzer != null) {
-                String field = txtNode.getFieldAsString();
+                String field = fieldNode.getFieldAsString();
                 if (hasAnalyzer(field + "_query_normalizer")) {
                     text = analyzer.normalize(field + "_query_normalizer", text.toString()).utf8ToString();
                 } else if (hasAnalyzer("query_normalizer")) {
@@ -52,7 +49,7 @@ public class AqpNormalizeFieldQueryNodeProcessor extends
                 } else {
                     text = analyzer.normalize(field, text.toString()).utf8ToString();
                 }
-                txtNode.setText(text);
+                fieldNode.setText(text);
             }
         }
 
