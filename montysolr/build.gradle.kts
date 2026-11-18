@@ -29,6 +29,9 @@ dependencies {
 	implementation("com.google.guava:guava:33.2.1-jre")
 	implementation("com.anyascii:anyascii:0.3.2")
 
+	// Match the Log4j modules supplied by Solr 9.6.1.
+	implementation("org.apache.logging.log4j:log4j-layout-template-json:2.21.0")
+
 	testImplementation("junit:junit:4.13.2")
 	testImplementation("org.antlr:stringtemplate:3.2.1")
 	testImplementation("org.apache.solr:solr-test-framework:9.6.1")
