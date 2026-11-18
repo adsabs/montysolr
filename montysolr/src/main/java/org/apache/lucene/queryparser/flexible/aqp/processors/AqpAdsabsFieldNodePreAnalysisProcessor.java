@@ -201,6 +201,18 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
         boolean dateGuessed = false;
 
         if (value.equals("*") && node.getParent() instanceof TermRangeQueryNode) {
+            /*
+             * An explicitly typed '*' is an unbounded endpoint.  The parser
+             * also creates a synthetic '*' endpoint for shorthand such as
+             * [2012]; that endpoint must continue to inherit the other bound
+             * so the shorthand retains its day/month/year semantics.
+             */
+            if (fieldNode.getBegin() > 0) {
+                fieldNode.setField(targetDateField.fieldname);
+                fieldNode.setValue("");
+                return new AqpNonAnalyzedQueryNode(fieldNode);
+            }
+
             QueryNode theOtherNode = null;
             for (QueryNode ch : node.getParent().getChildren()) {
                 if (ch != fieldNode) {
@@ -209,11 +221,11 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
                 }
             }
             if (theOtherNode != null) {
-                String theOtherValue = ((FieldQueryNode) theOtherNode).getTextAsString();
-                value = theOtherValue;
+                value = ((FieldQueryNode) theOtherNode).getTextAsString();
                 dateGuessed = true;
             }
         }
+
 
         Analyzer analyzer = getQueryConfigHandler().get(ConfigurationKeys.ANALYZER);
         TokenStream source = null;
