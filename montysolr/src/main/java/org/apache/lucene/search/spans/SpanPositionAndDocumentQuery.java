@@ -52,7 +52,18 @@ public abstract class SpanPositionAndDocumentQuery extends SpanQuery implements 
      * @see Spans#nextDoc()
      *
      */
-    protected abstract FilterSpans.AcceptStatus acceptPosition(Spans spans, Document currentDocument) throws IOException;
+    protected abstract FilterSpans.AcceptStatus acceptPosition(Spans spans, Document currentDocument,
+                                                               PositionState positionState) throws IOException;
+
+    /**
+     * State owned by one spans iterator. Implementations may cache document-local data here.
+     */
+    protected static class PositionState {
+    }
+
+    protected PositionState createPositionState() {
+        return new PositionState();
+    }
 
     @Override
     public SpanWeight createWeight(IndexSearcher searcher, ScoreMode scoreMode, float boost) throws IOException {
@@ -82,16 +93,25 @@ public abstract class SpanPositionAndDocumentQuery extends SpanQuery implements 
         @Override
         public Spans getSpans(final LeafReaderContext context, Postings requiredPostings) throws IOException {
             Spans matchSpans = matchWeight.getSpans(context, requiredPostings);
-            return (matchSpans == null) ? null : new FilterSpans(matchSpans) {
+            if (matchSpans == null) {
+                return null;
+            }
+            final PositionState positionState = createPositionState();
+            return new FilterSpans(matchSpans) {
+                private int currentDocId = -1;
+                private Document currentDocument;
+
                 @Override
                 protected AcceptStatus accept(Spans candidate) throws IOException {
-                    Document currentDocument = context.reader().document(candidate.docID());
-
-                    return acceptPosition(candidate, currentDocument);
+                    if (candidate.docID() != currentDocId) {
+                        currentDocId = candidate.docID();
+                        currentDocument = context.reader().document(currentDocId);
+                    }
+                    return acceptPosition(candidate, currentDocument, positionState);
                 }
             };
-        }
 
+        }
     }
 
     @Override
