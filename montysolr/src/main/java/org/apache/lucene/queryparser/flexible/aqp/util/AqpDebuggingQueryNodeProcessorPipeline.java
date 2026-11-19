@@ -24,11 +24,24 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
 
     EscapeQuerySyntax escaper = new EscapeQuerySyntaxImpl();
     private final Class<? extends QueryNodeProcessorPipeline> originalProcessorClass;
+    private final StringBuilder debugOutput;
 
     public AqpDebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig,
                                                   Class<? extends QueryNodeProcessorPipeline> originalClass) {
+        this(queryConfig, originalClass, new StringBuilder());
+    }
+
+    public AqpDebuggingQueryNodeProcessorPipeline(QueryConfigHandler queryConfig,
+                                                  Class<? extends QueryNodeProcessorPipeline> originalClass,
+                                                  StringBuilder debugOutput) {
         super(queryConfig);
         originalProcessorClass = originalClass;
+        this.debugOutput = debugOutput;
+    }
+
+    private void debug(String message) {
+        System.out.println(message);
+        debugOutput.append(message).append('\n');
     }
 
     public QueryNode process(QueryNode queryTree) throws QueryNodeException {
@@ -42,10 +55,10 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
         newMap = oldMap;
 
         int i = 1;
-        System.out.println(this.getClass().toGenericString());
-        System.out.println("     0. starting");
-        System.out.println("--------------------------------------------");
-        System.out.println(oldVal);
+        debug(this.getClass().toGenericString());
+        debug("     0. starting");
+        debug("--------------------------------------------");
+        debug(oldVal);
 
         Iterator<QueryNodeProcessor> it = this.iterator();
 
@@ -53,23 +66,23 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
         while (it.hasNext()) {
             processor = it.next();
 
-            System.out.println("     " + i + ". step "
+            debug("     " + i + ". step "
                     + processor.getClass().toString());
             queryTree = processor.process(queryTree);
             newVal = queryTree.toString();
             newMap = harvestTagMap(queryTree);
-            System.out.println("     Tree changed: "
+            debug("     Tree changed: "
                     + (newVal.equals(oldVal) ? "NO" : "YES"));
 
             if (!newMap.equals(oldMap)) {
-                System.out.println("     Tags changed: YES");
-                System.out.println("     -----------------");
-                System.out.println(newMap);
-                System.out.println("     -----------------");
+                debug("     Tags changed: YES");
+                debug("     -----------------");
+                debug(newMap);
+                debug("     -----------------");
             }
-            System.out.println(newVal.equals(oldVal) ? (newMap.equals(oldMap) ? "" : newVal) : newVal);
+            debug(newVal.equals(oldVal) ? (newMap.equals(oldMap) ? "" : newVal) : newVal);
 
-            System.out.println("--------------------------------------------");
+            debug("--------------------------------------------");
 
 
             oldVal = newVal;
@@ -77,10 +90,10 @@ public class AqpDebuggingQueryNodeProcessorPipeline extends
             i += 1;
         }
 
-        System.out.println();
-        System.out.println("final result:");
-        System.out.println("--------------------------------------------");
-        System.out.println(queryTree);
+        debug("");
+        debug("final result:");
+        debug("--------------------------------------------");
+        debug(queryTree.toString());
         return queryTree;
 
     }
