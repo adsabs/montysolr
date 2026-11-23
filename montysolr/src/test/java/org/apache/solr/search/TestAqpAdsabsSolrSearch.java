@@ -129,11 +129,13 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
             assertU(adoc("id", "7000", "bibcode", "year-lower-bound", "year", "0001"));
             assertU(adoc("id", "7001", "bibcode", "year-in-range", "year", "1976"));
             assertU(adoc("id", "7002", "bibcode", "year-upper-bound", "year", "2018"));
-            assertU(adoc("id", "7003", "bibcode", "year-out-of-range", "year", "2019"));
+            assertU(adoc("id", "7003", "bibcode", "year-after-2018", "year", "2019"));
             assertU(adoc("id", "7004", "bibcode", "volume-literal", "volume", "09-2012"));
             assertU(adoc("id", "7005", "bibcode", "volume-range-sentinel", "volume", "1500"));
             assertU(adoc("id", "7006", "bibcode", "doi-literal", "doi", "doi:09-2012"));
             assertU(adoc("id", "7007", "bibcode", "doi-sentinel", "doi", "doi:1500"));
+            assertU(adoc("id", "7008", "bibcode", "year-abbreviated-upper-bound", "year", "2020"));
+            assertU(adoc("id", "7009", "bibcode", "year-after-2020", "year", "2021"));
             assertU(commit("waitSearcher", "true"));
             assertQ(req("defType", "aqp", "q", "year:1-2018"),
                     "//*[@numFound='3']",
@@ -141,6 +143,14 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                     "//doc/str[@name='id'][.='7001']",
                     "//doc/str[@name='id'][.='7002']"
             );
+            assertQ(req("defType", "aqp", "q", "year:2018-20"),
+                    "//*[@numFound='3']",
+                    "//doc/str[@name='id'][.='7002']",
+                    "//doc/str[@name='id'][.='7003']",
+                    "//doc/str[@name='id'][.='7008']"
+            );
+            assertQEx("Descending shorthand must be a client error",
+                    req("defType", "aqp", "q", "year:1998-02"), 400);
             assertQ(req("defType", "aqp", "q", "volume:09-2012"),
                     "//*[@numFound='1']",
                     "//doc/str[@name='id'][.='7004']"
@@ -150,7 +160,7 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
                     "//doc/str[@name='id'][.='7006']"
             );
         } finally {
-            for (String id : new String[]{"7000", "7001", "7002", "7003", "7004", "7005", "7006", "7007"}) {
+            for (String id : new String[]{"7000", "7001", "7002", "7003", "7004", "7005", "7006", "7007", "7008", "7009"}) {
                 assertU(delI(id));
             }
             assertU(commit("waitSearcher", "true"));

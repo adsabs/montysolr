@@ -170,27 +170,35 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
             if (i == separator) {
                 continue;
             }
-            if (!Character.isDigit(value.charAt(i))) {
+            char c = value.charAt(i);
+            if (c < '0' || c > '9') {
                 return false;
             }
         }
         return true;
     }
 
-    private QueryNode rewriteShortYearRange(FieldQueryNode fieldNode) {
+    private QueryNode rewriteShortYearRange(FieldQueryNode fieldNode) throws QueryNodeException {
         String value = fieldNode.getTextAsString();
         int separator = value.indexOf('-');
-        String lower = canonicalYear(value.substring(0, separator));
-        String upper = canonicalYear(value.substring(separator + 1));
+        String lower = value.substring(0, separator);
+        String upper = value.substring(separator + 1);
+        if (separator < 4) {
+            lower = "0000".substring(separator) + lower;
+        } else {
+            // A short end supplies the trailing digits of the start's year.
+            upper = lower.substring(0, 4 - upper.length()) + upper;
+        }
+        if (upper.compareTo(lower) < 0) {
+            throw new QueryNodeException(new MessageImpl(
+                    "Year range end precedes start in year:" + value + "; specify both years with four digits."));
+        }
         int start = fieldNode.getBegin();
         FieldQueryNode lowerBound = new FieldQueryNode(fieldNode.getFieldAsString(), lower,
                 start, start + separator);
         FieldQueryNode upperBound = new FieldQueryNode(fieldNode.getFieldAsString(), upper,
                 start + separator + 1, fieldNode.getEnd());
         return new TermRangeQueryNode(lowerBound, upperBound, true, true);
-    }
-    private String canonicalYear(String value) {
-        return value.length() == 4 ? value : "0000".substring(value.length()) + value;
     }
 
     private QueryNode rewriteDateRange(QueryNode node, FieldQueryNode fieldNode, Map<String, TargetField> hFields,
