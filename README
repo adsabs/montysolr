@@ -92,7 +92,7 @@ order and placeholders; pre-analyzed fields and document-level operators are
 not supported. Broad author-prefix and `same()` queries still consume resources
 in proportion to their matching names or candidate documents.
 
-The integrated changes do not alter the schema, index analyzers, or synonym
+The beta changes do not alter the schema, index analyzers, or synonym
 files relative to main at 1fcccee883177b5d39ae348c3ed6782ed531dbb8. Existing
 indexes written with that configuration can be reopened without reindexing.
 Negative positional searches reconstruct value boundaries with the current
@@ -103,6 +103,16 @@ release.
 The optional citation-cache persistence now falls back to an in-memory graph
 when its directory is unavailable. Deployment dependencies include the JSON
 logging layout aligned with Solr 9.6.1's Log4j version.
+
+
+v96.7.0-gamma QUERY COMPATIBILITY
+================================
+
+Gamma adds changes to query analysis and export configuration. Uppercase
+acronym searches such as `full:SALT` no longer match ordinary words through
+the shared spelling. Boosted `pos()` affiliation phrases use the configured
+position gap. `/export` can return `bibcode` and `scix_id` from their existing
+doc values. Reload the collection to apply the schema changes.
 
 
 DEPLOYMENT
