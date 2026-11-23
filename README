@@ -26,6 +26,23 @@ they do not require a Python or Jython runtime.
   
 
 
+POSITIONAL FIELD MATCHING
+=========================
+
+Use `same(fieldA:query, fieldB:query[, slop])` to match two clauses against
+individual entries in stored multi-valued fields. Slop is a nonnegative
+integer, defaulting to `0`. For example, `same(author:Smith, aff:MIT)` requires
+the same array slot; `same(author:Smith, aff:MIT, 1)` also allows the matching
+affiliation one slot before or after the author.
+
+Each clause must resolve to a single searchable physical field whose indexed
+representation can be reconstructed from its stored value. Pre-analyzed fields
+are not supported, and clauses cannot use document-level operators such as
+`topn()`. Matching uses the stored value order, not token positions or the
+order of doc values, so ingestion must preserve array order and missing-value
+placeholders.
+
+
 BUILDING FROM SOURCE
 ====================
 
