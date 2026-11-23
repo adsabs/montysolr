@@ -705,6 +705,16 @@ public class AqpAdsabsSubQueryProvider implements
 
         /* @api.doc
          *
+         * same(fieldA:..., fieldB:...[, slop])
+         *
+         * Match two stored multi-valued fields at ordinals no more than slop
+         * apart in either direction. Slop defaults to zero (the same slot).
+         * The ordering is the stored value order, not Lucene token positions.
+         * Request-level boost, bq, and bf do not change slot membership.
+         */
+        parsers.put("same", new SameFieldSubQueryParser());
+        /* @api.doc
+         *
          * def classic_relevance(query, ratio=0.5):
          * 		"""
          *    Toy-implementation of the ADS Classic relevance score
