@@ -26,23 +26,6 @@ they do not require a Python or Jython runtime.
   
 
 
-ACRONYM SEARCH
-==============
-
-Ordinary uppercase acronym searches such as `full:SALT` and `full:"SALT"` keep
-acronym terms separate from ordinary-word synonyms: they do not match lowercase
-`salt` or `salts` through the shared spelling. Configured expanded names, such as
-Southern African Large Telescope, still match their acronym in either direction.
-Lowercase `full:salt` remains inclusive of ordinary word variants and acronyms.
-
-The `=` modifier has a different purpose: it suppresses synonym expansion, not
-case normalization. `=full:SALT` is therefore not an acronym-only search.
-
-Deploy the updated `ads_text` query analyzer and reload the collection. No
-synonym-file changes are required. Index analysis is unchanged, so an index built
-with the current acronym/synonym analyzers does not require reindexing.
-
-
 BUILDING FROM SOURCE
 ====================
 

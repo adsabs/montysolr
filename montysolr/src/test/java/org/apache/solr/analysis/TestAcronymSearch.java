@@ -36,9 +36,19 @@ public class TestAcronymSearch extends MontySolrQueryTestCase {
         assertU(commit());
     }
 
-    public void testUppercaseSearchExcludesOrdinaryWordSynonyms() throws Exception {
+    public void testUppercaseSearchMatchesAcronymAndExpandedName() throws Exception {
         for (String query : new String[]{"full:SALT", "+full:SALT", "full:\"SALT\""}) {
             assertMatches(query, "1", "4", "5", "6", "7", "8", "9", "14", "17");
+        }
+    }
+
+    public void testUppercaseSearchReturnsNoHitsForOrdinaryWords() {
+        // These records contain only ordinary salt or salts, across every full-text field.
+        String ordinaryWordRecords = "id:(2 OR 3 OR 10 OR 11 OR 12 OR 13 OR 15 OR 16)";
+        for (String query : new String[]{"full:SALT", "+full:SALT", "full:\"SALT\"",
+                "title:\"SALT astronomical spectra\""}) {
+            assertQ(req("defType", "aqp", "q", query, "fq", ordinaryWordRecords),
+                    "//result[@numFound='0']");
         }
     }
 
@@ -57,6 +67,8 @@ public class TestAcronymSearch extends MontySolrQueryTestCase {
 
     public void testExactSearchStillIgnoresCaseWithoutExpandingSynonyms() throws Exception {
         assertMatches("=full:SALT", "1", "2", "5", "6", "7", "8", "9", "11", "12", "14", "15");
+        assertQ(req("defType", "aqp", "q", "=full:SALT", "fq", "id:(3 OR 4 OR 17)"),
+                "//result[@numFound='0']");
     }
 
     private void index(int id, String field, String text) {
