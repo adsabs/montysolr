@@ -6,6 +6,7 @@ import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.pattern.PatternTokenizer;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
 import org.apache.lucene.queryparser.flexible.aqp.util.AqpQueryParserUtil;
+import org.apache.lucene.queryparser.flexible.core.QueryNodeException;
 import org.apache.lucene.queryparser.flexible.core.parser.EscapeQuerySyntax;
 import org.apache.lucene.queryparser.flexible.aqp.nodes.AqpANTLRNode;
 import org.apache.lucene.search.*;
@@ -197,13 +198,34 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
 
         assertQueryEquals("xf:2011-2012", null, "xf:[2011 TO 2012]");
         assertQueryEquals("year:1-2018", null, "year:[0001 TO 2018]");
+        assertQueryEquals("year:1-2020", null, "year:[0001 TO 2020]");
+        assertQueryEquals("year:99-2020", null, "year:[0099 TO 2020]");
+        assertQueryEquals("year:946-2020", null, "year:[0946 TO 2020]");
+        assertQueryEquals("year:1980-3", null, "year:[1980 TO 1983]");
+        assertQueryEquals("year:2018-20", null, "year:[2018 TO 2020]");
+        assertQueryEquals("year:1880-921", null, "year:[1880 TO 1921]");
+        assertQueryEquals("year:\"2001-03\"", null, "year:[2001 TO 2003]");
+        assertQueryEquals("year:2018-2020", null, "year:[2018 TO 2020]");
+        assertQueryEquals("year:18-20", wsa, "year:18-20");
+        assertQueryEquals("year:(2018-20)", null, "year:[2018 TO 2020]");
+        assertQueryEquals("09-2012:foo", wsa, "09-2012:foo");
+        assertQueryEquals("year:doi:\"1-2018\"", wsa, "year:1-2018");
+        assertQueryEquals("year:/1-2018/", wsa, "year:/1-2018/", RegexpQuery.class);
+        assertQueryEquals("year:1-2018~1", wsa, "year:1-2018~1", FuzzyQuery.class);
+        assertQueryEquals("year:1\\-2018", wsa, "year:1-2018");
+
+        QueryNodeException error = expectThrows(QueryNodeException.class,
+                () -> getQuery("year:1998-02", null));
+        assertTrue(error.getMessage(), error.getMessage().contains("specify both years with four digits"));
+        assertQueryNodeException("year:946-0900");
 
         assertQueryEquals("year:(1900-1950)", null, "year:[1900 TO 1950]");
         assertQueryEquals("title:(1900-1950)", null, "title:[1900 TO 1950]");
         assertTrue(getQuery("date:(1995-1996)", null) instanceof TermRangeQuery);
         assertTrue(getQuery("xf:(1995-1996)", null) instanceof TermRangeQuery);
 
-        assertTrue(getQuery("year:[1-2018 TO 2020]", null) instanceof TermRangeQuery);
+        assertQueryEquals("year:[1-2018 TO 2020]", null, "year:[1-2018 TO 2020]");
+        assertQueryEquals("one 2009-2012", null, "+one +year:[2009 TO 2012]");
         assertQueryEquals("notdate 09-12", wsa, "+notdate +09-12");
         assertQueryEquals("title:09-2012", wsa, "title:09-2012");
         assertQueryEquals("notdate 09-2012", wsa, "+notdate +09-2012");

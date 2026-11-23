@@ -26,6 +26,21 @@ they do not require a Python or Jython runtime.
   
 
 
+SEARCHING BY PUBLICATION YEAR
+=============================
+
+Year ranges are inclusive: `year:2018-2020` includes 2018 and 2020.
+In an explicit `year:` range, when one endpoint has four digits, the other
+can have one to three:
+
+  - A short start is a literal year: `year:1-2020` means `year:0001-2020`.
+  - A short end supplies the trailing digits: `year:2018-20` means
+    `year:2018-2020`, and `year:1880-921` means `year:1880-1921`.
+
+If the expanded end comes before the start, write both years with four
+digits: use `year:1998-2002`, not `year:1998-02`.
+
+
 BUILDING FROM SOURCE
 ====================
 
@@ -70,11 +85,12 @@ configured field aliases, and highlighting inside related-paper operators.
 Bracketed emission-line names such as `title:[O III]` are treated as literal
 search terms; explicit `/.../` regular expressions remain available.
 
-`same(author:Smith, aff:MIT)` requires the author and affiliation to match the
-same entry in their stored arrays. Those arrays must already preserve ingestion
-order and placeholders; the query cannot repair misaligned source data. Broad
-author-prefix and `same()` queries still consume resources in proportion to
-their matching names or candidate documents.
+`same(fieldA:query, fieldB:query[, slop])` compares entries in searchable, stored
+multi-valued fields. `same(author:Smith, aff:MIT)` requires the same entry;
+slop `1` allows one slot before or after. The fields must preserve ingestion
+order and placeholders; pre-analyzed fields and document-level operators are
+not supported. Broad author-prefix and `same()` queries still consume resources
+in proportion to their matching names or candidate documents.
 
 The integrated changes do not alter the schema, index analyzers, or synonym
 files relative to main at 1fcccee883177b5d39ae348c3ed6782ed531dbb8. Existing
