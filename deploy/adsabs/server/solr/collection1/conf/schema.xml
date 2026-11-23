@@ -523,11 +523,11 @@
 					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
 					ignoreCase="true" words="ads_text.kill" />
 
-				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
-					an acronym but do not change its type, if it was a SYNONYM, it is important 
-					information for query parsing -->
+				<!-- Uppercase originals and synonym aliases must stay in the acronym
+					namespace. Emitting an unprefixed uppercase synonym here would
+					become syn::salt and collide with ordinary salt/salts synonyms. -->
 				<filter class="solr.AcronymTokenFilterFactory"
-					emitBoth="false" allowTypes="SYNONYM" prefix="acr::"
+					emitBoth="false" prefix="acr::"
 					setType="ACRONYM" />
 
 				<!-- add a prefix to all synonyms -->
