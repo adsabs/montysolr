@@ -208,13 +208,19 @@ public class TestAqpAdsabs extends AqpTestAbstractCase {
         assertQueryEquals("year:\"2001-03\"", null, "year:[2001 TO 2003]");
         assertQueryEquals("year:2018-2020", null, "year:[2018 TO 2020]");
         assertQueryEquals("year:18-20", wsa, "year:18-20");
+        assertQueryEquals("year:(2018-20)", null, "year:[2018 TO 2020]");
+        assertQueryEquals("09-2012:foo", wsa, "09-2012:foo");
+        assertQueryEquals("year:doi:\"1-2018\"", wsa, "year:1-2018");
+        assertQueryEquals("year:/1-2018/", wsa, "year:/1-2018/", RegexpQuery.class);
+        assertQueryEquals("year:1-2018~1", wsa, "year:1-2018~1", FuzzyQuery.class);
+        assertQueryEquals("year:1\\-2018", wsa, "year:1-2018");
 
         QueryNodeException error = expectThrows(QueryNodeException.class,
                 () -> getQuery("year:1998-02", null));
         assertTrue(error.getMessage(), error.getMessage().contains("specify both years with four digits"));
         assertQueryNodeException("year:946-0900");
 
-        assertTrue(getQuery("year:[1-2018 TO 2020]", null) instanceof TermRangeQuery);
+        assertQueryEquals("year:[1-2018 TO 2020]", null, "year:[1-2018 TO 2020]");
         assertQueryEquals("one 2009-2012", null, "+one +date:[2009 TO 2012]");
         assertQueryEquals("notdate 09-12", wsa, "+notdate +09-12");
         assertQueryEquals("title:09-2012", wsa, "title:09-2012");

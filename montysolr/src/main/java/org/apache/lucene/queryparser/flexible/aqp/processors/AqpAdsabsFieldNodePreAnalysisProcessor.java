@@ -114,13 +114,6 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
             // we must detect pubdate:YYYY(-MM-DD) queries, and turn them into range
             // query if necessary
             // ie. rewrite (pub)date fieldquery into termrange query
-
-            // Explicit year ranges may have a one-to-three-digit endpoint. Keep this
-            // field-specific so identifiers such as title:09-2012 remain terms.
-            if (field.equals("year") && isShortYearRange(fieldNode.getTextAsString())
-                    && !(node.getParent() instanceof TermRangeQueryNode)) {
-                node = rewriteShortYearRange(fieldNode);
-            }
             if (humanizedDateFields.containsKey(field)) {
                 node = rewriteDateRange(node, fieldNode, humanizedDateFields, field);
             }
@@ -151,54 +144,6 @@ public class AqpAdsabsFieldNodePreAnalysisProcessor extends AqpQueryNodeProcesso
             }
         }
         return true;
-    }
-
-    private boolean isShortYearRange(String value) {
-        int separator = value.indexOf('-');
-        if (separator <= 0 || separator != value.lastIndexOf('-')) {
-            return false;
-        }
-
-        int lowerLength = separator;
-        int upperLength = value.length() - separator - 1;
-        if (!((lowerLength <= 3 && upperLength == 4)
-                || (lowerLength == 4 && upperLength >= 1 && upperLength <= 3))) {
-            return false;
-        }
-
-        for (int i = 0; i < value.length(); i++) {
-            if (i == separator) {
-                continue;
-            }
-            char c = value.charAt(i);
-            if (c < '0' || c > '9') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private QueryNode rewriteShortYearRange(FieldQueryNode fieldNode) throws QueryNodeException {
-        String value = fieldNode.getTextAsString();
-        int separator = value.indexOf('-');
-        String lower = value.substring(0, separator);
-        String upper = value.substring(separator + 1);
-        if (separator < 4) {
-            lower = "0000".substring(separator) + lower;
-        } else {
-            // A short end supplies the trailing digits of the start's year.
-            upper = lower.substring(0, 4 - upper.length()) + upper;
-        }
-        if (upper.compareTo(lower) < 0) {
-            throw new QueryNodeException(new MessageImpl(
-                    "Year range end precedes start in year:" + value + "; specify both years with four digits."));
-        }
-        int start = fieldNode.getBegin();
-        FieldQueryNode lowerBound = new FieldQueryNode(fieldNode.getFieldAsString(), lower,
-                start, start + separator);
-        FieldQueryNode upperBound = new FieldQueryNode(fieldNode.getFieldAsString(), upper,
-                start + separator + 1, fieldNode.getEnd());
-        return new TermRangeQueryNode(lowerBound, upperBound, true, true);
     }
 
     private QueryNode rewriteDateRange(QueryNode node, FieldQueryNode fieldNode, Map<String, TargetField> hFields,

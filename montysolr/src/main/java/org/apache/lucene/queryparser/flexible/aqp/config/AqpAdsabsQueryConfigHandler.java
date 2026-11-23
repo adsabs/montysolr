@@ -48,6 +48,8 @@ public class AqpAdsabsQueryConfigHandler extends AqpStandardQueryConfigHandler {
 
         final public static ConfigurationKey<Boolean> SOLR_READY = ConfigurationKey.newInstance();
 
+        public static final ConfigurationKey<Boolean> GENERATED_FIELD_QUERY = ConfigurationKey.newInstance();
+
         final public static ConfigurationKey<Map<String, int[]>> AUTHOR_FIELDS = ConfigurationKey.newInstance();
 
         final public static ConfigurationKey<String> UNFIELDED_SEARCH_FIELD = ConfigurationKey.newInstance();

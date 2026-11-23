@@ -1484,6 +1484,7 @@ public class AqpExtendedDismaxQParser extends QParser {
                     nl.add(CommonParams.Q, qs);
                     localReq = new LocalSolrQueryRequest(req.getCore(), nl);
                     QParser aqpParser = getParser(qs, "aqp", localReq);
+                    AqpAdsabsQParser.markGeneratedFieldQuery(aqpParser);
                     query = aqpParser.parse();
 
                     if (query instanceof MatchNoDocsQuery)

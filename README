@@ -30,7 +30,8 @@ SEARCHING BY PUBLICATION YEAR
 =============================
 
 Year ranges are inclusive: `year:2018-2020` includes 2018 and 2020.
-When one endpoint has four digits, the other can have one to three:
+In an explicit `year:` range, when one endpoint has four digits, the other
+can have one to three:
 
   - A short start is a literal year: `year:1-2020` means `year:0001-2020`.
   - A short end supplies the trailing digits: `year:2018-20` means
