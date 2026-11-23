@@ -124,6 +124,51 @@ public class TestAqpAdsabsSolrSearch extends MontySolrQueryTestCase {
         super.tearDown();
     }
 
+    public void testDateYearRangeQueries() throws Exception {
+        assertU(adoc("id", "7000", "bibcode", "year-lower-bound", "year", "0001"));
+        assertU(adoc("id", "7001", "bibcode", "year-in-range", "year", "1976"));
+        assertU(adoc("id", "7002", "bibcode", "year-upper-bound", "year", "2018", "title", "galaxy"));
+        assertU(adoc("id", "7003", "bibcode", "year-after-2018", "year", "2019"));
+        assertU(adoc("id", "7004", "bibcode", "volume-literal", "volume", "09-2012", "title", "09-2012"));
+        assertU(adoc("id", "7005", "bibcode", "volume-range-sentinel", "volume", "1500"));
+        assertU(adoc("id", "7006", "bibcode", "doi-literal", "doi", "doi:09-2012"));
+        assertU(adoc("id", "7007", "bibcode", "doi-sentinel", "doi", "doi:1500"));
+        assertU(adoc("id", "7008", "bibcode", "year-abbreviated-upper-bound", "year", "2020"));
+        assertU(adoc("id", "7009", "bibcode", "year-after-2020", "year", "2021", "title", "galaxy"));
+        assertU(commit("waitSearcher", "true"));
+
+        assertQ(req("defType", "aqp", "q", "year:1-2018"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='7000']",
+                "//doc/str[@name='id'][.='7001']",
+                "//doc/str[@name='id'][.='7002']");
+        assertQ(req("defType", "aqp", "q", "year:2018-20"),
+                "//*[@numFound='3']",
+                "//doc/str[@name='id'][.='7002']",
+                "//doc/str[@name='id'][.='7003']",
+                "//doc/str[@name='id'][.='7008']");
+        assertQEx("Descending shorthand must be a client error",
+                req("defType", "aqp", "q", "year:1998-02"), 400);
+        assertQ(req("defType", "aqp", "q", "volume:09-2012"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7004']");
+        assertQ(req("defType", "aqp", "q", "doi:09-2012"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7006']");
+        assertQ(req("defType", "aqp", "q", "\"09-2012\"", "qf", "year title"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7004']");
+        assertQ(req("defType", "aqp", "q", "09-2012", "df", "year"), "//*[@numFound='0']");
+        assertQ(req("defType", "aqp", "q", "edismax_always_aqp(09-2012)", "qf", "year volume",
+                        "aqp.constant_scoring", "author"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='7004']");
+
+        for (String query : new String[]{"year:2018-20 galaxy", "year:2018-2020 galaxy"}) {
+            assertQ(req("defType", "aqp", "q", query, "qf", "title",
+                            "aqp.unfielded.ignore.fields", "author", "aqp.unfielded.tokens.strategy", "join",
+                            "aqp.unfielded.tokens.new.type", "normal"),
+                    "//*[@numFound='1']", "//doc/str[@name='id'][.='7002']");
+        }
+    }
+
+
     public void testUnfieldedSearch() throws Exception {
         assertU(adoc("id", "2101", "bibcode", "2101test", "title", "netpune atmospheres"));
         assertU(adoc("id", "2102", "bibcode", "2102test", "title", "netpune exoplanet atmospheres"));

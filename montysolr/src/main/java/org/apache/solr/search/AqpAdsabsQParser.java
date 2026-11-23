@@ -420,6 +420,13 @@ public class AqpAdsabsQParser extends QParser {
         return qParser;
     }
 
+    /** Marks an internal AQP parse of a field clause assembled by another parser. */
+    public static void markGeneratedFieldQuery(QParser parser) {
+        if (parser instanceof AqpAdsabsQParser aqp) {
+            aqp.qParser.getQueryConfigHandler().set(ConfigurationKeys.GENERATED_FIELD_QUERY, true);
+        }
+    }
+
     /**
      * Parses all multiplicative boosts
      */

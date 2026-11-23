@@ -1042,6 +1042,7 @@ public class AqpAdsabsSubQueryProvider implements
                 boolean exactSearch = Boolean.TRUE.equals(getReParseContext());
                 String exactPrefix = exactSearch ? "=" : "";
                 QParser aqp = fParser.subQuery(exactPrefix + field + ":(" + getOriginalInput() + ")", "aqp");
+                AqpAdsabsQParser.markGeneratedFieldQuery(aqp);
                 Query q = aqp.getQuery();
                 if (boost != null && boost != 1.0f) {
                     q = new BoostQuery(q, boost);

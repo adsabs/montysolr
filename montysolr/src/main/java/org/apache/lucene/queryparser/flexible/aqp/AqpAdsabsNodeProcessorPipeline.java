@@ -29,6 +29,7 @@ public class AqpAdsabsNodeProcessorPipeline extends QueryNodeProcessorPipeline {
         add(new AqpAdsabsFixQPOSITIONProcessor()); // handles QPHRASE:"^some phrase$" and QNORMAL:word$
         add(new AqpAdsabsQPOSITIONProcessor()); // rewrites ^author$ into a functional form
         add(new AqpQFUNCProcessor()); // prepares function node (may decide which implementation to call)
+        add(new AqpShortYearRangeProcessor()); // preserve explicit range clauses before token grouping
 
 
         // find separate tokens and join them into one 'string'

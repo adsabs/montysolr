@@ -26,6 +26,21 @@ they do not require a Python or Jython runtime.
   
 
 
+SEARCHING BY PUBLICATION YEAR
+=============================
+
+Year ranges are inclusive: `year:2018-2020` includes 2018 and 2020.
+In an explicit `year:` range, when one endpoint has four digits, the other
+can have one to three:
+
+  - A short start is a literal year: `year:1-2020` means `year:0001-2020`.
+  - A short end supplies the trailing digits: `year:2018-20` means
+    `year:2018-2020`, and `year:1880-921` means `year:1880-1921`.
+
+If the expanded end comes before the start, write both years with four
+digits: use `year:1998-2002`, not `year:1998-02`.
+
+
 BUILDING FROM SOURCE
 ====================
 
