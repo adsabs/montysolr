@@ -63,6 +63,10 @@ public class TestNegativePositionQueries extends MontySolrQueryTestCase {
                 "title", "the",
                 "title", "omega"
         ));
+        assertU(adoc("id", "10", "bibcode", "boston-first", "general_final_boost", "2",
+                "aff", "Department of Astronomy, Boston University", "aff", "Harvard University"));
+        assertU(adoc("id", "11", "bibcode", "boston-second", "general_final_boost", "3",
+                "aff", "Harvard University", "aff", "Boston University"));
         assertU(commit("waitSearcher", "true"));
     }
 
@@ -90,6 +94,14 @@ public class TestNegativePositionQueries extends MontySolrQueryTestCase {
         assertQ(req("q", "pos(aff:\"aff3\", 0, -2)"),
                 "//*[@numFound='0']"
         );
+    }
+
+    @Test
+    public void testBoostedAffiliationPhraseSearch() {
+        assertQ(req("q", "pos(aff:\"Boston University\",1)", "boost", "general_final_boost", "fl", "id"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='10']");
+        assertQ(req("q", "pos(aff:\"Boston University\",2)", "boost", "general_final_boost", "fl", "id"),
+                "//*[@numFound='1']", "//doc/str[@name='id'][.='11']");
     }
 
     @Test
