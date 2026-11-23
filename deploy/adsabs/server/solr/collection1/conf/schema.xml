@@ -523,11 +523,11 @@
 					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
 					ignoreCase="true" words="ads_text.kill" />
 
-				<!-- if the original or synonym contains UPPERCASE variant, mark it as 
-					an acronym but do not change its type, if it was a SYNONYM, it is important 
-					information for query parsing -->
+				<!-- Keep recognized acronyms in a separate namespace, including those
+					produced by synonym expansion. This prevents them from matching
+					ordinary-word synonyms with the same spelling. -->
 				<filter class="solr.AcronymTokenFilterFactory"
-					emitBoth="false" allowTypes="SYNONYM" prefix="acr::"
+					emitBoth="false" prefix="acr::"
 					setType="ACRONYM" />
 
 				<!-- add a prefix to all synonyms -->
