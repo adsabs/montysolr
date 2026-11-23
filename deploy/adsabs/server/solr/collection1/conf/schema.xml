@@ -523,9 +523,9 @@
 					class="org.apache.lucene.analysis.core.AqpStopFilterFactory"
 					ignoreCase="true" words="ads_text.kill" />
 
-				<!-- Uppercase originals and synonym aliases must stay in the acronym
-					namespace. Emitting an unprefixed uppercase synonym here would
-					become syn::salt and collide with ordinary salt/salts synonyms. -->
+				<!-- Keep recognized acronyms in a separate namespace, including those
+					produced by synonym expansion. This prevents them from matching
+					ordinary-word synonyms with the same spelling. -->
 				<filter class="solr.AcronymTokenFilterFactory"
 					emitBoth="false" prefix="acr::"
 					setType="ACRONYM" />
