@@ -7,6 +7,7 @@ import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queries.mlt.MoreLikeThisQuery;
 import org.apache.lucene.queryparser.flexible.aqp.NestedParseException;
 import org.apache.lucene.queryparser.flexible.aqp.config.AqpAdsabsQueryConfigHandler;
@@ -394,6 +395,8 @@ public class AqpAdsabsSubQueryProvider implements
                     return getField(((BoostQuery) query).getQuery());
                 } else if (query instanceof ConstantScoreQuery) {
                     return getField(((ConstantScoreQuery) query).getQuery());
+                } else if (query instanceof FunctionScoreQuery functionScoreQuery) {
+                    return getField(functionScoreQuery.getWrappedQuery());
                 } else if (query instanceof MultiTermQuery) {
                     return ((MultiTermQuery) query).getField();
                 } else if (query instanceof DisjunctionMaxQuery) {
